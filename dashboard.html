@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="de" class="light">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dashboard – DeineFenster.de</title>
+<meta name="robots" content="noindex, nofollow"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script id="tailwind-config">
+tailwind.config = {
+  darkMode:"class",
+  theme:{extend:{
+    colors:{
+      "primary":"#225eaa","primary-container":"#76a9fa","on-primary":"#fff",
+      "primary-fixed":"#d6e3ff","surface":"#f9f9ff","surface-container":"#e8eeff",
+      "surface-container-low":"#f1f3ff","on-surface":"#161c27",
+      "on-surface-variant":"#424751","outline-variant":"#c2c6d3",
+      "secondary":"#7a5738","secondary-fixed":"#ffdcc1",
+    },
+    fontFamily:{"headline":["Plus Jakarta Sans"],"body":["Manrope"]},
+    borderRadius:{DEFAULT:"0.75rem",lg:"1rem",xl:"1.5rem",full:"9999px"},
+  }},
+}
+</script>
+<style>
+* { box-sizing: border-box; }
+body { font-family:'Manrope',sans-serif; background:#f1f3ff; }
+h1,h2,h3,h4 { font-family:'Plus Jakarta Sans',sans-serif; }
+.ms { font-family:'Material Symbols Outlined'; font-size:20px; line-height:1; vertical-align:middle; user-select:none; }
+
+/* LOGIN */
+#loginScreen { display:flex; min-height:100vh; align-items:center; justify-content:center; }
+#dashboardScreen { display:none; }
+
+/* KANBAN */
+.board-wrap { display:flex; gap:12px; overflow-x:auto; padding:0 20px 20px; min-height:calc(100vh - 160px); }
+.kol { flex:0 0 260px; display:flex; flex-direction:column; gap:8px; }
+.kol-head { border-radius:10px 10px 0 0; padding:10px 14px; font-size:13px; font-weight:700; display:flex; align-items:center; justify-content:space-between; }
+.kol-body { flex:1; min-height:80px; background:#e8eeff; border-radius:0 0 10px 10px; padding:8px; display:flex; flex-direction:column; gap:8px; transition:background .2s; }
+.kol-body.drag-over { background:#d6e3ff; outline:2px dashed #225eaa; }
+
+/* DEAL CARD */
+.deal-card { background:#fff; border-radius:10px; padding:12px; cursor:grab; box-shadow:0 1px 4px rgba(0,0,0,.07); transition:box-shadow .15s,transform .15s; position:relative; }
+.deal-card:hover { box-shadow:0 4px 16px rgba(34,94,170,.13); transform:translateY(-1px); }
+.deal-card.dragging { opacity:.45; transform:scale(.97); cursor:grabbing; }
+.deal-card .offer-badge { font-size:10px; font-weight:700; color:#225eaa; background:#d6e3ff; border-radius:4px; padding:2px 6px; display:inline-block; margin-bottom:6px; }
+.deal-card .deal-name { font-size:14px; font-weight:700; color:#161c27; margin-bottom:2px; }
+.deal-card .deal-sub  { font-size:12px; color:#424751; }
+.deal-card .deal-price{ font-size:15px; font-weight:800; color:#225eaa; margin-top:6px; }
+.deal-card .deal-date { font-size:11px; color:#9aa0b2; position:absolute; top:10px; right:10px; }
+
+/* STATUS COLORS */
+.col-new       .kol-head { background:#dbeafe; color:#1e3a5f; }
+.col-create    .kol-head { background:#e0f2fe; color:#0369a1; }
+.col-sent      .kol-head { background:#fef9c3; color:#713f12; }
+.col-waiting   .kol-head { background:#fed7aa; color:#7c2d12; }
+.col-confirmed .kol-head { background:#d1fae5; color:#065f46; }
+.col-paid      .kol-head { background:#a7f3d0; color:#064e3b; }
+.col-shipping  .kol-head { background:#e9d5ff; color:#4c1d95; }
+.col-completed .kol-head { background:#f0fdf4; color:#166534; border:1px solid #86efac; }
+
+/* MODAL */
+.modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:200; display:flex; align-items:center; justify-content:center; padding:20px; }
+.modal-box { background:#fff; border-radius:16px; width:100%; max-width:640px; max-height:90vh; overflow-y:auto; box-shadow:0 16px 48px rgba(0,0,0,.18); }
+.modal-box.wide { max-width:800px; }
+
+/* DETAIL ROWS */
+.detail-row { display:grid; grid-template-columns:140px 1fr; gap:6px; padding:7px 0; border-bottom:1px solid #e8eeff; font-size:13px; }
+.detail-row .label { color:#424751; font-weight:600; }
+.detail-row .val   { color:#161c27; }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width:6px; height:6px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:#c2c6d3; border-radius:3px; }
+
+/* FILTER BTN */
+.filter-btn { padding:5px 14px; border-radius:999px; font-size:13px; font-weight:600; cursor:pointer; transition:all .15s; border:2px solid transparent; background:#e8eeff; color:#424751; }
+.filter-btn.active { background:#225eaa; color:#fff; border-color:#225eaa; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════ LOGIN ═══════════════════════ -->
+<div id="loginScreen">
+  <div style="width:100%;max-width:400px;margin:0 auto;padding:24px">
+    <div style="background:#fff;border-radius:20px;padding:40px 36px;box-shadow:0 8px 32px rgba(34,94,170,.12)">
+      <div style="text-align:center;margin-bottom:32px">
+        <div style="font-size:26px;font-weight:800;color:#112455;font-family:'Plus Jakarta Sans',sans-serif">
+          DeineFenster<span style="color:#76a9fa">.de</span>
+        </div>
+        <div style="font-size:13px;color:#424751;margin-top:6px">Admin Dashboard</div>
+      </div>
+      <label style="display:block;font-size:13px;font-weight:700;color:#161c27;margin-bottom:6px">Passwort</label>
+      <input id="pwInput" type="password" placeholder="Passwort eingeben…"
+        style="width:100%;padding:12px 16px;border:2px solid #e0e4f0;border-radius:10px;font-size:15px;font-family:Manrope,sans-serif;outline:none"
+        onkeydown="if(event.key==='Enter')doLogin()"/>
+      <div id="loginErr" style="color:#dc2626;font-size:13px;margin-top:8px;display:none">Falsches Passwort.</div>
+      <button onclick="doLogin()"
+        style="width:100%;margin-top:16px;background:#225eaa;color:#fff;border:none;border-radius:10px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:Manrope,sans-serif">
+        Einloggen
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ DASHBOARD ═══════════════════════ -->
+<div id="dashboardScreen">
+
+  <!-- TOP BAR -->
+  <div style="background:#112455;padding:14px 20px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100">
+    <div style="font-size:18px;font-weight:800;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;white-space:nowrap">
+      DeineFenster<span style="color:#76a9fa">.de</span>
+      <span style="font-size:12px;font-weight:400;color:rgba(255,255,255,.5);margin-left:8px">CRM</span>
+    </div>
+    <div style="flex:1;max-width:400px">
+      <input id="searchInput" type="search" placeholder="Suchen (Name, E-Mail, ID)…"
+        oninput="renderBoard()"
+        style="width:100%;padding:8px 14px;border-radius:999px;border:none;font-size:13px;font-family:Manrope,sans-serif;background:rgba(255,255,255,.15);color:#fff;outline:none"
+        />
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="filter-btn active" data-f="all" onclick="setFilter('all',this)">Alle</button>
+      <button class="filter-btn" data-f="open" onclick="setFilter('open',this)">Offen</button>
+      <button class="filter-btn" data-f="paid" onclick="setFilter('paid',this)">Bezahlt</button>
+      <button class="filter-btn" data-f="done" onclick="setFilter('done',this)">Abgeschlossen</button>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:8px">
+      <button onclick="openNewDeal()"
+        style="background:#76a9fa;color:#112455;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:Manrope,sans-serif;white-space:nowrap">
+        + Neue Anfrage
+      </button>
+      <button onclick="doLogout()"
+        style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);border:none;border-radius:8px;padding:8px 14px;font-size:13px;cursor:pointer;font-family:Manrope,sans-serif">
+        Logout
+      </button>
+    </div>
+  </div>
+
+  <!-- STATS ROW -->
+  <div id="statsRow" style="display:flex;gap:12px;padding:16px 20px 4px;overflow-x:auto"></div>
+
+  <!-- KANBAN BOARD -->
+  <div class="board-wrap" id="boardWrap"></div>
+
+</div>
+
+<!-- ═══════════════════════ DETAIL MODAL ═══════════════════════ -->
+<div id="detailModal" class="modal-bg" style="display:none" onclick="if(event.target===this)closeDetail()">
+  <div class="modal-box wide">
+    <div style="background:#112455;border-radius:16px 16px 0 0;padding:20px 28px;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-size:18px;font-weight:800;color:#fff;font-family:'Plus Jakarta Sans',sans-serif" id="detailTitle">Anfrage Details</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.5)" id="detailSub"></div>
+      </div>
+      <button onclick="closeDetail()" style="background:rgba(255,255,255,.15);border:none;border-radius:8px;padding:8px 12px;color:#fff;cursor:pointer;font-size:13px">✕ Schließen</button>
+    </div>
+    <div style="padding:24px 28px" id="detailBody"></div>
+    <div style="padding:16px 28px 24px;display:flex;gap:10px;flex-wrap:wrap;border-top:1px solid #e8eeff" id="detailActions"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ NEW DEAL MODAL ═══════════════════════ -->
+<div id="newDealModal" class="modal-bg" style="display:none" onclick="if(event.target===this)closeNewDeal()">
+  <div class="modal-box">
+    <div style="background:#112455;border-radius:16px 16px 0 0;padding:20px 28px;display:flex;align-items:center;justify-content:space-between">
+      <div style="font-size:18px;font-weight:800;color:#fff;font-family:'Plus Jakarta Sans',sans-serif">Neue Anfrage manuell</div>
+      <button onclick="closeNewDeal()" style="background:rgba(255,255,255,.15);border:none;border-radius:8px;padding:8px 12px;color:#fff;cursor:pointer;font-size:13px">✕</button>
+    </div>
+    <div style="padding:24px 28px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div><label class="form-lbl">Name *</label><input class="form-inp" id="nd-name" placeholder="Max Mustermann"/></div>
+        <div><label class="form-lbl">E-Mail *</label><input class="form-inp" id="nd-email" type="email" placeholder="max@beispiel.de"/></div>
+        <div><label class="form-lbl">Telefon</label><input class="form-inp" id="nd-phone" placeholder="+49 ..."/></div>
+        <div><label class="form-lbl">Ort / PLZ</label><input class="form-inp" id="nd-ort" placeholder="12345 Berlin"/></div>
+        <div><label class="form-lbl">Produkt</label>
+          <select class="form-inp" id="nd-produkt">
+            <option>Fenster</option><option>Haustür</option><option>Balkontür</option><option>Hebe-Schiebe-Tür</option>
+          </select>
+        </div>
+        <div><label class="form-lbl">Maße (B×H mm)</label><input class="form-inp" id="nd-mass" placeholder="1000x1200"/></div>
+        <div><label class="form-lbl">Profil</label>
+          <select class="form-inp" id="nd-profil">
+            <option>Iglo 5 Classic</option><option>Iglo Energy</option><option>Iglo Energy Tür</option><option>Iglo-HS</option>
+          </select>
+        </div>
+        <div><label class="form-lbl">Gesamtpreis (€)</label><input class="form-inp" id="nd-price" type="number" placeholder="0"/></div>
+      </div>
+      <div style="margin-top:14px"><label class="form-lbl">Anmerkungen</label>
+        <textarea class="form-inp" id="nd-notes" rows="3" placeholder="Notizen…" style="resize:vertical"></textarea>
+      </div>
+      <div id="ndErr" style="color:#dc2626;font-size:13px;margin-top:8px;display:none"></div>
+      <button onclick="saveNewDeal()"
+        style="width:100%;margin-top:16px;background:#225eaa;color:#fff;border:none;border-radius:10px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:Manrope,sans-serif">
+        Anfrage speichern
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+.form-lbl { display:block; font-size:12px; font-weight:700; color:#161c27; margin-bottom:4px; }
+.form-inp { width:100%; padding:9px 12px; border:2px solid #e0e4f0; border-radius:8px; font-size:13px; font-family:Manrope,sans-serif; outline:none; background:#fff; color:#161c27; }
+.form-inp:focus { border-color:#225eaa; }
+</style>
+
+<script>
+// ═══════════════════════════════════════════
+//  COLUMNS CONFIG
+// ═══════════════════════════════════════════
+const COLS = [
+  { id:'new',       label:'Neue Anfrage',    icon:'inbox',         cls:'col-new'       },
+  { id:'create',    label:'Angebot erstellen',icon:'description',  cls:'col-create'    },
+  { id:'sent',      label:'Angebot gesendet', icon:'send',         cls:'col-sent'      },
+  { id:'waiting',   label:'Wartet auf Antwort',icon:'hourglass_empty',cls:'col-waiting'},
+  { id:'confirmed', label:'Bestätigt',        icon:'check_circle',  cls:'col-confirmed' },
+  { id:'paid',      label:'Bezahlt',          icon:'payments',      cls:'col-paid'      },
+  { id:'shipping',  label:'In Lieferung',     icon:'local_shipping',cls:'col-shipping'  },
+  { id:'completed', label:'Abgeschlossen',    icon:'done_all',      cls:'col-completed' },
+];
+
+const OPEN_FILTER_MAP = {
+  all:       ()=>true,
+  open:      d=>['new','create','sent','waiting'].includes(d.status),
+  paid:      d=>d.status==='paid',
+  done:      d=>['shipping','completed'].includes(d.status),
+};
+
+// ═══════════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════════
+let deals = [];
+let activeFilter = 'all';
+let dragId = null;
+
+function loadDeals() {
+  try { deals = JSON.parse(localStorage.getItem('df_deals')||'[]'); } catch(e){ deals=[]; }
+  // Seed demo data if empty
+  if(!deals.length) {
+    deals = [
+      {id:1,offer_id:'DF-100001',name:'Maria Meier',email:'maria@example.de',phone:'0151 234567',ort:'80333 München',strasse:'',
+       produkt:'Fenster',dimensions:'1200x1400',profile:'Iglo Energy',color:'Weiß / Weiß',farbe_aussen:'Weiß',farbe_innen:'Weiß',
+       dichtung:'Schwarz',glass:'3-Fach Wärme',opening:'Dreh-Kipp Links',sprossen:'Keine',griff:'Weiß Standard',
+       shutter:'Ohne',sicherheit:'WK2',anzahl:3,price:2890,preis_stueck:'879.00',preis_lieferung:'133.00',
+       date:'01.04.2026',notes:'Bitte vor 10 Uhr anrufen.',status:'new'},
+      {id:2,offer_id:'DF-100002',name:'Thomas Bauer',email:'t.bauer@web.de',phone:'0170 999888',ort:'10115 Berlin',strasse:'',
+       produkt:'Haustür',dimensions:'1000x2100',profile:'Iglo Energy Tür',color:'Anthrazit / Weiß',farbe_aussen:'Anthrazit',farbe_innen:'Weiß',
+       dichtung:'Schwarz',glass:'3-Fach Wärme+',opening:'Festfeld',sprossen:'Keine',griff:'Edelstahl Modern',
+       shutter:'Ohne',sicherheit:'WK3',anzahl:1,price:3450,preis_stueck:'3267.00',preis_lieferung:'183.00',
+       date:'31.03.2026',notes:'',status:'create'},
+      {id:3,offer_id:'DF-100003',name:'Anna Schmidt',email:'anna.s@gmail.com',phone:'0176 112233',ort:'20095 Hamburg',strasse:'',
+       produkt:'Fenster',dimensions:'900x1100',profile:'Iglo 5 Classic',color:'Weiß / Weiß',farbe_aussen:'Weiß',farbe_innen:'Weiß',
+       dichtung:'Grau',glass:'2-Fach Standard',opening:'Dreh Links',sprossen:'Sprossen 26mm',griff:'Weiß Standard',
+       shutter:'Raffrollo',sicherheit:'WK1',anzahl:5,price:1870,preis_stueck:'298.00',preis_lieferung:'183.00',
+       date:'29.03.2026',notes:'',status:'confirmed'},
+    ];
+    saveDeals();
+  }
+}
+
+function saveDeals() {
+  localStorage.setItem('df_deals', JSON.stringify(deals));
+}
+
+// ═══════════════════════════════════════════
+//  AUTH
+// ═══════════════════════════════════════════
+function doLogin() {
+  const pw = document.getElementById('pwInput').value;
+  if(pw === 'admin123') {
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('dashboardScreen').style.display='block';
+    sessionStorage.setItem('df_auth','1');
+    loadDeals();
+    renderBoard();
+    renderStats();
+  } else {
+    document.getElementById('loginErr').style.display='block';
+    document.getElementById('pwInput').focus();
+  }
+}
+
+function doLogout() {
+  sessionStorage.removeItem('df_auth');
+  document.getElementById('dashboardScreen').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('pwInput').value='';
+  document.getElementById('loginErr').style.display='none';
+}
+
+// ═══════════════════════════════════════════
+//  FILTER & SEARCH
+// ═══════════════════════════════════════════
+function setFilter(f, btn) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderBoard();
+}
+
+function getFilteredDeals() {
+  const q = (document.getElementById('searchInput')?.value||'').toLowerCase().trim();
+  const predicate = OPEN_FILTER_MAP[activeFilter]||OPEN_FILTER_MAP.all;
+  return deals.filter(d => {
+    if(!predicate(d)) return false;
+    if(!q) return true;
+    return (d.name||'').toLowerCase().includes(q)
+      ||(d.email||'').toLowerCase().includes(q)
+      ||(d.offer_id||'').toLowerCase().includes(q)
+      ||(d.phone||'').toLowerCase().includes(q);
+  });
+}
+
+// ═══════════════════════════════════════════
+//  RENDER BOARD
+// ═══════════════════════════════════════════
+function renderBoard() {
+  const wrap = document.getElementById('boardWrap');
+  wrap.innerHTML = '';
+  const filtered = getFilteredDeals();
+
+  COLS.forEach(col => {
+    const colDeals = filtered.filter(d=>d.status===col.id);
+    const kol = document.createElement('div');
+    kol.className = 'kol '+col.cls;
+    kol.innerHTML = `
+      <div class="kol-head">
+        <span><span class="ms">${col.icon}</span> ${col.label}</span>
+        <span style="background:rgba(0,0,0,.12);border-radius:999px;padding:2px 8px;font-size:12px">${colDeals.length}</span>
+      </div>
+      <div class="kol-body" id="col-${col.id}" ondragover="onDragOver(event,'${col.id}')" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${col.id}')">
+      </div>`;
+    wrap.appendChild(kol);
+    const body = kol.querySelector('.kol-body');
+    colDeals.forEach(d=>body.appendChild(createCard(d)));
+  });
+}
+
+function createCard(d) {
+  const card = document.createElement('div');
+  card.className = 'deal-card';
+  card.draggable = true;
+  card.dataset.id = d.id;
+  card.addEventListener('dragstart', e=>{ dragId=d.id; card.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; });
+  card.addEventListener('dragend', ()=>card.classList.remove('dragging'));
+  card.onclick = ()=>openDetail(d.id);
+  const prod = d.produkt||'Fenster';
+  const dim  = d.dimensions||'-';
+  const col  = d.farbe_aussen||d.color||'Weiß';
+  card.innerHTML = `
+    <div class="deal-date">${d.date||''}</div>
+    <div class="offer-badge">${d.offer_id||'DF-???'}</div>
+    <div class="deal-name">${escHtml(d.name)}</div>
+    <div class="deal-sub">${escHtml(prod)} · ${escHtml(dim)} mm</div>
+    <div class="deal-sub">${escHtml(col)} · ${d.anzahl||1} Stk.</div>
+    ${d.phone?`<div class="deal-sub" style="color:#225eaa;margin-top:2px">${escHtml(d.phone)}</div>`:''}
+    <div class="deal-price">${formatPrice(d.price)}</div>`;
+  return card;
+}
+
+// ═══════════════════════════════════════════
+//  DRAG & DROP
+// ═══════════════════════════════════════════
+function onDragOver(e, colId) {
+  e.preventDefault();
+  document.querySelectorAll('.kol-body').forEach(b=>b.classList.remove('drag-over'));
+  document.getElementById('col-'+colId)?.classList.add('drag-over');
+}
+function onDragLeave(e) {
+  e.currentTarget.classList.remove('drag-over');
+}
+function onDrop(e, colId) {
+  e.preventDefault();
+  document.querySelectorAll('.kol-body').forEach(b=>b.classList.remove('drag-over'));
+  if(dragId===null) return;
+  const deal = deals.find(d=>d.id==dragId);
+  if(deal) { deal.status=colId; saveDeals(); renderBoard(); renderStats(); }
+  dragId=null;
+}
+
+// ═══════════════════════════════════════════
+//  STATS
+// ═══════════════════════════════════════════
+function renderStats() {
+  const row = document.getElementById('statsRow');
+  const total = deals.length;
+  const open  = deals.filter(d=>['new','create','sent','waiting'].includes(d.status)).length;
+  const paid  = deals.filter(d=>d.status==='paid'||d.status==='shipping'||d.status==='completed').length;
+  const revenue = deals.filter(d=>d.status==='paid'||d.status==='shipping'||d.status==='completed')
+                       .reduce((s,d)=>s+(+d.price||0),0);
+  row.innerHTML = `
+    ${stat('Anfragen gesamt',total,'inbox','#225eaa')}
+    ${stat('Offen',open,'pending_actions','#f59e0b')}
+    ${stat('Bezahlt / Geliefert',paid,'payments','#10b981')}
+    ${stat('Umsatz (bezahlt)',formatPrice(revenue),'euro_symbol','#8b5cf6')}`;
+}
+
+function stat(label,val,icon,color) {
+  return `<div style="background:#fff;border-radius:10px;padding:12px 18px;min-width:160px;box-shadow:0 1px 4px rgba(0,0,0,.07);display:flex;align-items:center;gap:12px">
+    <span class="ms" style="color:${color};font-size:24px">${icon}</span>
+    <div><div style="font-size:18px;font-weight:800;color:#161c27;font-family:'Plus Jakarta Sans',sans-serif">${val}</div>
+    <div style="font-size:12px;color:#424751">${label}</div></div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════
+//  DETAIL MODAL
+// ═══════════════════════════════════════════
+function openDetail(id) {
+  const d = deals.find(x=>x.id==id);
+  if(!d) return;
+  document.getElementById('detailTitle').textContent = d.name + ' – ' + (d.produkt||'Fenster');
+  document.getElementById('detailSub').textContent   = (d.offer_id||'') + ' · ' + (d.date||'');
+
+  const rows = [
+    ['Angebots-Nr.',    d.offer_id||'-'],
+    ['Datum',           d.date||'-'],
+    ['━━ KUNDE ━━',    ''],
+    ['Name',            d.name||'-'],
+    ['E-Mail',          d.email ? `<a href="mailto:${d.email}" style="color:#225eaa">${escHtml(d.email)}</a>` : '-'],
+    ['Telefon',         d.phone ? `<a href="tel:${d.phone}" style="color:#225eaa">${escHtml(d.phone)}</a>` : '-'],
+    ['Ort',             d.ort||'-'],
+    ['Straße',          d.strasse||'-'],
+    ['━━ KONFIGURATION ━━',''],
+    ['Produkt',         d.produkt||'-'],
+    ['Maße (mm)',       d.dimensions||'-'],
+    ['Anzahl',          (d.anzahl||1)+' Stück'],
+    ['Profil',          d.profile||'-'],
+    ['Glasart',         d.glass||'-'],
+    ['Öffnungsart',     d.opening||'-'],
+    ['Farbe außen',     d.farbe_aussen||d.color||'-'],
+    ['Farbe innen',     d.farbe_innen||'-'],
+    ['Dichtungsfarbe',  d.dichtung||'-'],
+    ['Sprossen',        d.sprossen||'-'],
+    ['Griff',           d.griff||'-'],
+    ['Rolladen',        d.shutter||'-'],
+    ['Einbruchschutz',  d.sicherheit||'-'],
+    ['━━ PREIS ━━',    ''],
+    ['Stückpreis',      d.preis_stueck ? d.preis_stueck+' €' : '-'],
+    ['Lieferkosten',    d.preis_lieferung ? d.preis_lieferung+' €' : '-'],
+    ['Gesamtpreis',     `<strong style="color:#225eaa;font-size:16px">${formatPrice(d.price)}</strong>`],
+    ['━━ NOTIZEN ━━',  ''],
+    ['Anmerkungen',     escHtml(d.notes||'–')],
+  ];
+
+  let html = '';
+  rows.forEach(([l,v])=>{
+    if(l.startsWith('━━')) {
+      html += `<div style="font-size:11px;font-weight:800;color:#9aa0b2;letter-spacing:.08em;padding:12px 0 4px;border-top:2px solid #f1f3ff;margin-top:4px">${l}</div>`;
+    } else {
+      html += `<div class="detail-row"><div class="label">${l}</div><div class="val">${v}</div></div>`;
+    }
+  });
+
+  // Status change
+  html += `<div style="margin-top:16px">
+    <label style="font-size:12px;font-weight:700;color:#161c27;display:block;margin-bottom:6px">Status ändern:</label>
+    <select id="statusSel" onchange="changeStatus(${d.id},this.value)"
+      style="padding:8px 12px;border:2px solid #e0e4f0;border-radius:8px;font-size:13px;font-family:Manrope,sans-serif;width:100%;outline:none">
+      ${COLS.map(c=>`<option value="${c.id}" ${d.status===c.id?'selected':''}>${c.label}</option>`).join('')}
+    </select>
+  </div>`;
+
+  document.getElementById('detailBody').innerHTML = html;
+
+  // Actions
+  const actions = document.getElementById('detailActions');
+  actions.innerHTML = `
+    <a href="mailto:${d.email}?subject=Ihr Angebot von DeineFenster.de&body=Hallo ${encodeURIComponent(d.name)},"
+      style="background:#225eaa;color:#fff;border-radius:8px;padding:10px 18px;text-decoration:none;font-size:13px;font-weight:700;font-family:Manrope,sans-serif">
+      ✉️ E-Mail an Kunde
+    </a>
+    ${d.phone?`<a href="tel:${d.phone}" style="background:#e8eeff;color:#225eaa;border-radius:8px;padding:10px 18px;text-decoration:none;font-size:13px;font-weight:700;font-family:Manrope,sans-serif">📞 Anrufen</a>`:''}
+    <button onclick="deleteDeal(${d.id})"
+      style="background:#fee2e2;color:#991b1b;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:Manrope,sans-serif;margin-left:auto">
+      🗑️ Löschen
+    </button>`;
+
+  document.getElementById('detailModal').style.display='flex';
+}
+
+function closeDetail() { document.getElementById('detailModal').style.display='none'; }
+
+function changeStatus(id, newStatus) {
+  const d = deals.find(x=>x.id==id);
+  if(d){ d.status=newStatus; saveDeals(); renderBoard(); renderStats(); }
+}
+
+function deleteDeal(id) {
+  if(!confirm('Anfrage wirklich löschen?')) return;
+  deals = deals.filter(d=>d.id!=id);
+  saveDeals(); closeDetail(); renderBoard(); renderStats();
+}
+
+// ═══════════════════════════════════════════
+//  NEW DEAL MODAL
+// ═══════════════════════════════════════════
+function openNewDeal() { document.getElementById('newDealModal').style.display='flex'; }
+function closeNewDeal(){ document.getElementById('newDealModal').style.display='none'; }
+
+function saveNewDeal() {
+  const name  = document.getElementById('nd-name').value.trim();
+  const email = document.getElementById('nd-email').value.trim();
+  const errEl = document.getElementById('ndErr');
+  errEl.style.display='none';
+  if(!name||!email){ errEl.textContent='Name und E-Mail sind Pflichtfelder.'; errEl.style.display='block'; return; }
+
+  const price = parseFloat(document.getElementById('nd-price').value)||0;
+  const deal = {
+    id: Date.now(),
+    offer_id: 'DF-'+Date.now().toString().slice(-6),
+    name, email,
+    phone: document.getElementById('nd-phone').value.trim(),
+    ort:   document.getElementById('nd-ort').value.trim(),
+    strasse:'',
+    produkt: document.getElementById('nd-produkt').value,
+    dimensions: document.getElementById('nd-mass').value.trim()||'?',
+    profile: document.getElementById('nd-profil').value,
+    color:'Weiß / Weiß', farbe_aussen:'Weiß', farbe_innen:'Weiß',
+    glass:'-', opening:'-', sprossen:'-', griff:'-', shutter:'Ohne',
+    sicherheit:'-', dichtung:'-', anzahl:1,
+    price, preis_stueck:'0.00', preis_lieferung:'0.00',
+    date: new Date().toLocaleDateString('de-DE'),
+    notes: document.getElementById('nd-notes').value.trim(),
+    status:'new'
+  };
+  deals.push(deal);
+  saveDeals(); closeNewDeal(); renderBoard(); renderStats();
+  ['nd-name','nd-email','nd-phone','nd-ort','nd-mass','nd-price','nd-notes'].forEach(i=>{ const el=document.getElementById(i); if(el)el.value=''; });
+}
+
+// ═══════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════
+function formatPrice(p) {
+  const n = parseFloat(p)||0;
+  return n.toLocaleString('de-DE',{style:'currency',currency:'EUR'});
+}
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', ()=>{
+  // Check session
+  if(sessionStorage.getItem('df_auth')==='1') {
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('dashboardScreen').style.display='block';
+    loadDeals();
+    renderBoard();
+    renderStats();
+  }
+  // Enter key on login
+  document.getElementById('pwInput').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+
+  // Auto-refresh every 30s (pick up konfigurator submissions)
+  setInterval(()=>{
+    if(sessionStorage.getItem('df_auth')==='1'){
+      loadDeals(); renderBoard(); renderStats();
+    }
+  }, 30000);
+});
+</script>
+</body>
+</html>

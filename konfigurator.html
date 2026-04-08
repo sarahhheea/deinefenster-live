@@ -1,0 +1,2630 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fenster Konfigurator – Preis berechnen | DeineFenster.de</title>
+  <meta name="description" content="Fenster & Türen online konfigurieren: Maße in mm, alle Glasarten, Farben innen/außen, Sprossen, Rolladen. Live-Vorschau. Drutex-Qualität. Angebot in 24h.">
+  <meta name="keywords" content="Fenster Konfigurator, Fensterpreis berechnen, Kunststofffenster kaufen, Drutex Iglo, Haustür konfigurieren, Fenster online bestellen">
+  <link rel="canonical" href="https://www.deinefenster.de/konfigurator.html">
+  <meta name="robots" content="index, follow">
+  <meta property="og:title" content="Fenster Konfigurator | DeineFenster.de">
+  <meta property="og:description" content="Alle Schritte sichtbar. Farbe, Glas, Sprossen live sehen. Sofortpreis. Drutex-Qualität.">
+  <meta property="og:type" content="website">
+
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#225eaa", "primary-d": "#1a4a87",
+            "primary-light": "#d6e3ff", "primary-mid": "#76a9fa",
+            nav: "#112455",
+            surf: "#f1f3ff", "surf-hi": "#e8eeff",
+            "on-surf": "#161c27", "on-surf-v": "#424751",
+            border: "#c2c6d3",
+          },
+          fontFamily: { h: ["Plus Jakarta Sans"], b: ["Manrope"] },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    *{box-sizing:border-box}
+    body{font-family:'Manrope',sans-serif;background:#eef1fb;color:#161c27;font-size:16px}
+    h1,h2,h3,h4{font-family:'Plus Jakarta Sans',sans-serif}
+    .ms{font-family:'Material Symbols Outlined';font-size:22px;vertical-align:-5px;line-height:1;font-style:normal}
+    .ms.f{font-variation-settings:'FILL' 1}
+
+    /* NAV */
+    #navbar{background:rgba(17,36,85,.97);backdrop-filter:blur(12px)}
+
+    /* STEP CARD */
+    .sc{background:#fff;border-radius:14px;box-shadow:0 1px 6px rgba(34,94,170,.08);overflow:hidden;scroll-margin-top:120px}
+    .sc.open{box-shadow:0 6px 28px rgba(34,94,170,.14)}
+    .sh{display:flex;align-items:center;gap:14px;padding:18px 20px;cursor:pointer;user-select:none;transition:background .15s}
+    .sh:hover{background:#f7f8ff}
+    .sb{display:none;padding:0 20px 24px}
+    .sc.open .sb{display:block}
+    .badge{width:34px;height:34px;border-radius:50%;background:#e8eeff;color:#225eaa;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+    .sc.open .badge,.sc.done .badge{background:#225eaa;color:#fff}
+    .chev{margin-left:auto;transition:transform .25s;color:#727782}
+    .sc.open .chev{transform:rotate(180deg)}
+    .slabel{font-size:17px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif}
+    .sdesc{font-size:13px;color:#424751;margin-top:1px}
+
+    /* OPTION CARD (radio) */
+    .oc{display:flex;align-items:flex-start;gap:12px;border:2px solid #e0e4f0;border-radius:12px;padding:14px 16px;cursor:pointer;transition:border .15s,background .15s}
+    .oc:hover{border-color:#225eaa;background:#f4f7ff}
+    .oc.sel{border-color:#225eaa;background:#ebf0ff}
+    .ora{width:20px;height:20px;border-radius:50%;border:2px solid #c2c6d3;flex-shrink:0;margin-top:2px;transition:all .15s;display:flex;align-items:center;justify-content:center}
+    .oc.sel .ora{border-color:#225eaa;background:#225eaa}
+    .oc.sel .ora::after{content:'';width:7px;height:7px;background:#fff;border-radius:50%;display:block}
+    .olabel{font-size:15px;font-weight:600}
+    .osub{font-size:13px;color:#424751;margin-top:1px;line-height:1.4}
+    .oprice{font-size:13px;font-weight:700;margin-top:4px}
+    .p-inc{color:#225eaa}
+    .p-add{color:#d97706}
+    .p-sav{color:#16a34a}
+
+    /* PRODUCT CARD */
+    .pc{display:flex;flex-direction:column;align-items:center;text-align:center;border:2px solid #e0e4f0;border-radius:14px;padding:14px 10px;cursor:pointer;transition:all .15s;gap:8px}
+    .pc:hover{border-color:#225eaa;box-shadow:0 4px 18px rgba(34,94,170,.14)}
+    .pc.sel{border-color:#225eaa;background:#ebf0ff;box-shadow:0 4px 20px rgba(34,94,170,.2)}
+    .pc-name{font-size:15px;font-weight:700}
+    .pc-from{font-size:13px;color:#424751}
+    .pc-img{width:100%;height:100px;object-fit:contain;object-position:center bottom;display:block;border-radius:6px;background:#f5f7fa}
+
+    /* CHECKBOX CARD */
+    .cc{display:flex;align-items:flex-start;gap:12px;border:2px solid #e0e4f0;border-radius:12px;padding:14px 16px;cursor:pointer;transition:all .15s}
+    .cc:hover{border-color:#225eaa;background:#f4f7ff}
+    .cc.sel{border-color:#225eaa;background:#ebf0ff}
+    .cbox{width:20px;height:20px;border-radius:5px;border:2px solid #c2c6d3;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;transition:all .15s;background:transparent}
+    .cc.sel .cbox{background:#225eaa;border-color:#225eaa}
+
+    /* QTY */
+    .qbtn{width:44px;height:44px;border-radius:10px;border:2px solid #c2c6d3;background:#fff;cursor:pointer;font-size:20px;font-weight:700;display:flex;align-items:center;justify-content:center;transition:all .15s}
+    .qbtn:hover{border-color:#225eaa;background:#ebf0ff}
+    .qbtn:disabled{opacity:.35;cursor:default}
+
+    /* SIZE BUTTON */
+    .szb{font-size:14px;border:2px solid #c2c6d3;border-radius:8px;padding:6px 12px;cursor:pointer;background:#fff;transition:all .15s;font-family:'Manrope',sans-serif}
+    .szb:hover{border-color:#225eaa;background:#ebf0ff;color:#225eaa}
+
+    /* COLOR SWATCH */
+    .csw{width:32px;height:32px;border-radius:50%;border:3px solid transparent;cursor:pointer;transition:all .15s;flex-shrink:0}
+    .csw.sel{border-color:#225eaa;box-shadow:0 0 0 3px rgba(34,94,170,.25)}
+
+    /* INPUT */
+    .inp{border:2px solid #c2c6d3;border-radius:10px;padding:10px 14px;font-family:'Manrope',sans-serif;font-size:16px;width:100%;transition:border .15s;background:#fff}
+    .inp:focus{outline:none;border-color:#225eaa;box-shadow:0 0 0 3px rgba(34,94,170,.12)}
+    textarea.inp{resize:vertical}
+
+    /* INFO BOX */
+    .info{background:#f0f5ff;border-radius:10px;padding:10px 14px;font-size:14px;color:#424751;line-height:1.5;display:flex;gap:8px;align-items:flex-start}
+
+    /* PROGRESS */
+    #prog-fill{transition:width .35s ease}
+
+    /* SIDEBAR */
+    #sidebar{background:#fff;border-radius:14px;box-shadow:0 2px 20px rgba(34,94,170,.1)}
+    #sidebar-wrap{position:sticky;top:110px}
+
+    /* PREVIEW */
+    #prev-wrap{background:#f6f7f8;border-radius:12px;border:1px solid #e0e4ec;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;overflow:hidden}
+    .view-btn{padding:5px 14px;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid #d0d4e0;background:#fff;color:#424751;font-family:'Manrope',sans-serif;transition:all .15s}
+    .view-btn.active{background:#225eaa;color:#fff;border-color:#225eaa}
+
+    /* PRICE ROWS */
+    .pr{display:flex;justify-content:space-between;align-items:baseline;padding:3px 0;font-size:14px}
+    .pr.sub{color:#727782;font-size:13px}
+    .pr.bold{font-weight:700;font-size:15px;color:#161c27;border-top:2px solid #e8eeff;padding-top:8px;margin-top:6px}
+
+    /* SUMMARY TABLE */
+    .sr{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f0f3ff;font-size:14px}
+    .sr:last-child{border-bottom:none}
+
+    /* FORM */
+    label.fl{display:block;font-size:14px;font-weight:600;color:#424751;margin-bottom:6px}
+
+    /* SECTION TITLE inside step */
+    .sec-t{font-size:13px;font-weight:700;color:#424751;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;margin-top:20px}
+    .sec-t:first-child{margin-top:0}
+
+    /* FARBE PICKER */
+    .fp-grid{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    .fp-item{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer}
+    .fp-swatch{width:38px;height:38px;border-radius:50%;border:3px solid transparent;transition:all .15s}
+    .fp-swatch:hover{transform:scale(1.1)}
+    .fp-item.sel .fp-swatch{border-color:#225eaa;box-shadow:0 0 0 3px rgba(34,94,170,.2)}
+    .fp-name{font-size:11px;color:#424751;text-align:center;max-width:54px;line-height:1.2}
+
+    /* GRIFF VISUAL */
+    .griff-opt{display:flex;flex-direction:column;align-items:center;text-align:center;border:2px solid #e0e4f0;border-radius:12px;padding:14px 10px;cursor:pointer;transition:all .15s;gap:6px}
+    .griff-opt:hover{border-color:#225eaa;background:#f4f7ff}
+    .griff-opt.sel{border-color:#225eaa;background:#ebf0ff}
+
+    @media(max-width:1023px){#sidebar-wrap{position:static}}
+    @media(max-width:639px){.grid-prod{grid-template-columns:repeat(2,1fr)}}
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="navbar" class="fixed top-0 w-full z-50 border-b border-white/10">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+    <a href="index.html" class="flex items-center gap-2 text-white font-bold text-xl" style="font-family:'Plus Jakarta Sans',sans-serif">
+      <i class="ms f" style="color:#76a9fa">window</i>
+      DeineFenster<span style="color:#76a9fa">.de</span>
+    </a>
+    <div class="hidden md:flex items-center gap-6 text-sm font-medium text-white/85">
+      <a href="index.html"        class="hover:text-white transition-colors">Start</a>
+      <a href="produkte.html"     class="hover:text-white transition-colors">Produkte</a>
+      <a href="konfigurator.html" class="text-white border-b-2 border-white pb-0.5">Konfigurator</a>
+      <a href="ueber-uns.html"    class="hover:text-white transition-colors">Über uns</a>
+      <a href="kontakt.html"      class="hover:text-white transition-colors">Kontakt</a>
+    </div>
+    <button onclick="document.getElementById('mob').classList.toggle('hidden');this.querySelector('i').textContent=document.getElementById('mob').classList.contains('hidden')?'menu':'close'"
+      class="md:hidden text-white p-1" aria-label="Menü">
+      <i class="ms">menu</i>
+    </button>
+  </div>
+  <div id="mob" class="hidden md:hidden px-4 pb-4 space-y-1" style="background:rgba(17,36,85,.98)">
+    <a href="index.html"        class="block text-white/75 hover:text-white py-2">Start</a>
+    <a href="produkte.html"     class="block text-white/75 hover:text-white py-2">Produkte</a>
+    <a href="konfigurator.html" class="block text-white font-semibold py-2">Konfigurator</a>
+    <a href="ueber-uns.html"    class="block text-white/75 hover:text-white py-2">Über uns</a>
+    <a href="kontakt.html"      class="block text-white/75 hover:text-white py-2">Kontakt</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div style="background:#112455" class="pt-20 pb-7 px-4">
+  <div class="max-w-7xl mx-auto">
+    <div class="flex items-center gap-1.5 text-white/50 text-sm mb-3">
+      <a href="index.html" class="hover:text-white">Start</a>
+      <i class="ms" style="font-size:16px">chevron_right</i>
+      <span class="text-white/80">Konfigurator</span>
+    </div>
+    <h1 class="text-white font-bold text-2xl md:text-3xl mb-1">Fenster & Türen konfigurieren</h1>
+    <p class="text-white/60 text-base">Alle Schritte direkt bearbeitbar · Live-Vorschau · Sofortpreis</p>
+  </div>
+</div>
+
+<!-- PROGRESS (sticky) -->
+<div id="prog-bar" class="sticky z-40 bg-white border-b border-gray-200 px-4 py-3 shadow-sm" style="top:54px">
+  <div class="max-w-7xl mx-auto flex items-center gap-3">
+    <div class="flex-1 bg-gray-100 rounded-full h-2.5 overflow-hidden">
+      <div id="prog-fill" class="bg-primary h-full rounded-full" style="width:0%"></div>
+    </div>
+    <span id="prog-txt" class="text-sm text-on-surf-v whitespace-nowrap font-medium">0 / 12 Schritte</span>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="max-w-7xl mx-auto px-4 py-5 grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-5 items-start">
+
+<!-- ════ STEPS LEFT ════ -->
+<div class="space-y-3" id="steps">
+
+<!-- ── SCHRITT 1: PRODUKTTYP ──────────────────────── -->
+<div class="sc open" id="s1">
+  <div class="sh" onclick="tog(1)">
+    <div class="badge" id="b1">1</div>
+    <div class="flex-1">
+      <div class="slabel">Produkttyp</div>
+      <div class="sdesc" id="d1">Was möchten Sie konfigurieren?</div>
+    </div>
+    <i class="ms chev">expand_more</i>
+  </div>
+  <div class="sb">
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <!-- KUNSTSTOFFFENSTER -->
+      <div class="pc" data-p="kunststoff" onclick="pickProd(this)">
+        <img class="pc-img" src="https://www.drutex.eu/media/_upload/icons/menu/2024/okno.png"
+             alt="Kunststofffenster Drutex Iglo"
+             onerror="this.onerror=null;this.src='';this.style.display='none'"/>
+        <div class="pc-name">Kunststoff&shy;fenster</div>
+        <div class="pc-from">ab 99 €</div>
+      </div>
+
+      <!-- BALKONTÜR -->
+      <div class="pc" data-p="balkontuer" onclick="pickProd(this)">
+        <img class="pc-img" src="https://www.drutex.eu/media/_upload/produkty/iglo-edge/header/iglo_edge.png"
+             alt="Balkontür Drutex Iglo"
+             onerror="this.onerror=null;this.src='https://www.drutex.eu/media/_upload/icons/menu/2024/drutex-drzwi-menu.png';this.onerror=null"/>
+        <div class="pc-name">Balkontür</div>
+        <div class="pc-from">ab 179 €</div>
+      </div>
+
+      <!-- HAUSTÜR -->
+      <div class="pc" data-p="haustuere" onclick="pickProd(this)">
+        <img class="pc-img" src="https://www.drutex.eu/media/webp/80/L21lZGlhL191cGxvYWQvc2VjdGlvbnMvYW5pbWF0ZWQtc2xpZGVyL2dyYXBoaWMvZHJ6d2ktYXJ0LWxpbmUtMi13aGl0ZS1tLmpwZw==.webp"
+             alt="Haustür Drutex Art Line"
+             onerror="this.onerror=null;this.src='https://www.drutex.eu/media/_upload/icons/menu/2024/drutex-drzwi-menu.png';this.onerror=null"/>
+        <div class="pc-name">Haustür</div>
+        <div class="pc-from">ab 899 €</div>
+      </div>
+
+      <!-- HEBE-SCHIEBE-TÜR -->
+      <div class="pc" data-p="hst" onclick="pickProd(this)">
+        <img class="pc-img" src="https://www.drutex.eu/media/_upload/icons/menu/2024/drutex-hs-dark-menu.png"
+             alt="Hebe-Schiebe-Tür Drutex Iglo HS"
+             onerror="this.onerror=null;this.src='';this.style.display='none'"/>
+        <div class="pc-name">Hebe-Schiebe-Tür</div>
+        <div class="pc-from">ab 1.299 €</div>
+      </div>
+    </div>
+    <p class="text-sm text-on-surf-v mt-3">Alle Produkte von <strong>Drutex</strong> – Europas führendem Fensterhersteller.</p>
+  </div>
+</div>
+
+<!-- ── SCHRITT 2: PROFIL / SYSTEM ────────────────── -->
+<div class="sc" id="s2">
+  <div class="sh" onclick="tog(2)">
+    <div class="badge" id="b2">2</div>
+    <div class="flex-1">
+      <div class="slabel">Profil / Rahmensystem</div>
+      <div class="sdesc" id="d2">Welches Drutex-Profil?</div>
+    </div>
+    <i class="ms chev">expand_more</i>
+  </div>
+  <div class="sb">
+    <div id="profil-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+      <!-- filled by JS based on product -->
+    </div>
+    <div class="info mt-3">
+      <i class="ms f" style="color:#225eaa;font-size:20px;flex-shrink:0">eco</i>
+      <div>Höhere Kammerzahl = bessere Wärmedämmung. Für Neubauten nach GEG 2024 empfehlen wir <strong>Iglo Energy Klassik</strong>.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SCHRITT 3: FLÜGELAUFTEILUNG ───────────────── -->
+<div class="sc" id="s3">
+  <div class="sh" onclick="tog(3)">
+    <div class="badge" id="b3">3</div>
+    <div class="flex-1">
+      <div class="slabel">Flügelaufteilung</div>
+      <div class="sdesc" id="d3">Wie viele Flügel?</div>
+    </div>
+    <i class="ms chev">expand_more</i>
+  </div>
+  <div class="sb">
+    <div id="fluegel-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-2 mt-1">
+      <!-- filled by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ── SCHRITT 4: ÖFFNUNGSART ─────────────────────── -->
+<div class="sc" id="s4">
+  <div class="sh" onclick="tog(4)">
+    <div class="badge" id="b4">4</div>
+    <div class="flex-1">
+      <div class="slabel">Öffnungsart</div>
+      <div class="sdesc" id="d4">Öffnungsart pro Flügel wählen</div>
+    </div>
+    <i class="ms chev">expand_more</i>
+  </div>
+  <div class="sb">
+    <div id="oeff-sash-wrap">
+      <!-- filled dynamically by buildOeffSash() -->
+    </div>
+  </div>
+</div>
+
+<!-- ── SCHRITT 5: MASSE ───────────────────────────── -->
+<div class="sc" id="s5">
+  <div class="sh" onclick="tog(5)">
+    <div class="badge" id="b5">5</div>
+    <div class="flex-1">
+      <div class="slabel">Maße (Rohbaumaß in mm)</div>
+      <div class="sdesc" id="d5">Breite und Höhe angeben</div>
+    </div>
+    <i class="ms chev">expand_more</i>
+  </div>
+  <div class="sb">
+    <div class="grid grid-cols-2 gap-4 mt-1">
+      <div>
+        <label class="fl" for="ib">Breite (mm)</label>
+        <input class="inp" type="number" id="ib" min="300" max="4000" value="1000" placeholder="z.B. 1000">
+      </div>
+      <div>
+        <label class="fl" for="ih">Höhe (mm)</label>
+        <input class="inp" type="number" id="ih" min="300" max="3000" value="1200" placeholder="z.B. 1200">
+      </div>
+    </div>
+    <div class="info mt-3">
+      <i class="ms f" style="color:#225eaa;font-size:20px;flex-shrink:0">info</i>
+      <div><strong>Rohbaumaß</strong> = Mauerwerksöffnung. Das Fenstermaß wird ca. 10–20 mm kleiner geliefert. Min. 300×300 mm · Max. 4000×3000 mm.</div>
+    </div>
+    <div class="mt-4">
+      <div class="text-sm font-semibold text-on-surf-v mb-2">Schnellauswahl Standardmaße:</div>
+      <div class="flex flex-wrap gap-2">
+        <button class="szb" onclick="setSz(600,600)">600×600</button>
+        <button class="szb" onclick="setSz(800,1000)">800×1000</button>
+        <button class="szb" onclick="setSz(1000,1200)">1000×1200</button>
+        <button class="szb" onclick="setSz(1230,1480)">1230×1480</button>
+        <button class="szb" onclick="setSz(1500,1500)">1500×1500</button>
+        <button class="szb" onclick="setSz(2000,2100)">2000×2100</button>
+        <button class="szb" onclick="setSz(2500,2100)">2500×2100</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SCHRITT 6: FARBE ───────────────────────────── -->
+<div class="sc" id="s6">
+  <div class="sh" onclick="tog(6)">
+    <div class="badge" id="b6">6</div>
+    <div class="flex-1">
+      <div class="slabel">Farbe / Oberfläche</div>
+      <div class="sdesc" id="d6">Außen- & Innenfarbe wählen</div>
+    </div>
+    <i class="ms chev">expand_more</i>
+  </div>
+  <div class="sb">
+    <div class="sec-t">Außenfarbe</div>
+    <div class="fp-grid" id="fp-aussen"><!-- filled by JS --></div>
+    <div class="sec-t">Innenfarbe</div>
+    <div class="fp-grid" id="fp-innen"><!-- filled by JS --></div>
+    <div class="sec-t">Dichtungsfarbe</div>
+    <div class="fp-grid" id="fp-dicht"><!-- filled by JS --></div>
+    <p class="text-sm text-on-surf-v mt-3">Bei Sonderfarbe bitte gewünschten RAL-Code in den Anmerkungen angeben. Alle Farben als Folienbeschichtung auf weißem Basisrahmen.</p>
+  </div>
+</div>
+
+<!-- ── SCHRITT 7: VERGLASUNG & SCHALLSCHUTZ ──────── -->
+<div class="sc" id="s7">
+  <div class="sh" onclick="tog(7)">
+    <div class="badge" id="b7">7</div>
+    <div class="flex-1">
+      <div class="slabel">Verglasung & Schallschutz</div>
+      <div class="sdesc" id="d7">Welches Glas wünschen Sie?</div>
+    </div>
+    <i class="ms chev">expand_more</i>
+  </div>
+  <div class="sb">
+    <div class="sec-t">Wärmeschutz</div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+      <div class="oc" data-v="2fach" onclick="pick(this,'glas')">
+        <div class="ora"></div>
+        <div>
+          <div class="olabel">2-fach Wärmeschutz Ug 1,1</div>
+          <div class="osub">Ug 1,1 W/m²K · Standard · EnEV-konform</div>
+          <div class="oprice p-inc">inklusive</div>
+        </div>
+      </div>
+      <div class="oc" data-v="3fach-07" onclick="pick(this,'glas')">
+        <div class="ora"></div>
+        <div>
+          <div class="olabel">3-fach Wärmeschutz Ug 0,7</div>
+          <div class="osub">Ug 0,7 W/m²K · GEG 2024 konform</div>
+          <div class="oprice p-add">+ 55 €/Stück</div>
+        </div>
+      </div>
+      <div class="oc" data-v="3fach-06" onclick="pick(this,'glas')">
+        <div class="ora"></div>
+        <div>
+          <div class="olabel">3-fach Wärmeschutz Ug 0,6</div>
+          <div class="osub">Ug 0,6 W/m²K · Passivhaus · Premium</div>
+          <div class="oprice p-add">+ 75 €/Stück</div>
+        </div>
+      </div>
+      <div class="oc" data-v="3fach-05" onclick="pick(this,'glas')">
+        <div class="ora"></div>
+        <div>
+          <div class="olabel">3-fach Wärmeschutz Ug 0,5</div>
+          <div class="osub">Ug 0,5 W/m²K · Passivhaus · Top</div>
+          <div class="oprice p-add">+ 95 €/Stück</div>
+        </div>
+      </div>
+    </div>
+    <div class="sec-t">Schallschutz</div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+      <div class="oc" data-v="schall-33" onclick="pick(this,'glas')">
+        <div class="ora"></div>
+        <div>
+          <div class="olabel">3-fach Schallschutz 33 dB</div>
+          <div class="osub">Rw 33 dB · ruhige Wohnlagen</div>
+          <div class="oprice p-add">+ 60 €/Stück</div>
+        </div>
+      </div>
+      <div class="oc" data-v="schall-38" onclick="pick(this,'glas')">
+        <div class="ora"></div>
+        <div>
+          <div class="olabel">3-fach Schallschutz 38 dB</div>
+          <div class="osub">Rw 38 dB · Hauptstraße / Bahn</div>
+          <div class="oprice p-add">+ 95 €/Stück</div>
+        </div>
+      </div>
+      <div class="oc" data-v="schall-44" onclick="pick(this,'glas')">
+        <div class="ora"></div>
+        <div>
+          <div class="olabel">3-fach Schallschutz 44 dB</div>
+          <div class="osub">Rw 44 dB · Flughafen / Autobahn</div>
+          <div class="oprice p-add">+ 145 €/Stück</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SCHRITT 8: GLASDEKOR ───────────────────────── -->
+<div class="sc" id="s8">
+  <div class="sh" onclick="tog(8)">
+    <div class="badge" id="b8">8</div>
+    <div class="flex-1">
+      <div class="slabel">Glasdekor</div>
+      <div class="sdesc" id="d8">Ornamentglas oder Klarglas?</div>
+    </div>
+    <i class="ms chev">expand_more</i>
+  </div>
+  <div class="sb">
+    <div id="glasdekor-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+      <div class="oc sel" data-v="klar" onclick="pick(this,'glasdekor')">
+        <div class="ora"></div>
+        <div style="display:flex;align-items:flex-start;gap:10px;width:100%">
+          <div style="flex:1">
+            <div class="olabel">Klarglas</div>
+            <div class="osub">Klar · maximaler Lichteinfall · Standard</div>
+            <div class="oprice p-inc">inklusive</div>
+          </div>
+          <div style="width:32px;height:32px;border-radius:4px;border:1.5px solid #c0ccd8;background:linear-gradient(135deg,#d8eaf8 0%,#b0d0e8 100%);flex-shrink:0"></div>
+        </div>
+      </div>
+      <div class="oc" data-v="satinato" onclick="pick(this,'glasdekor')">
+        <div class="ora"></div>
+        <div style="display:flex;align-items:flex-start;gap:10px;width:100%">
+          <div style="flex:1">
+            <div class="olabel">Satinato</div>
+            <div class="osub">Milchig-weiß · gleichmäßig matt · Bad/WC</div>
+            <div class="oprice p-add">+ 35 €/Stück</div>
+          </div>
+          <div style="width:32px;height:32px;border-radius:4px;border:1.5px solid #c0ccd8;background:rgba(230,235,240,0.92);flex-shrink:0"></div>
+        </div>
+      </div>
+      <div class="oc" data-v="chinchilla" onclick="pick(this,'glasdekor')">
+        <div class="ora"></div>
+        <div style="display:flex;align-items:flex-start;gap:10px;width:100%">
+          <div style="flex:1">
+            <div class="olabel">Chinchilla</div>
+            <div class="osub">Gerippt · strukturiert · dekorativ</div>
+            <div class="oprice p-add">+ 35 €/Stück</div>
+          </div>
+          <div style="width:32px;height:32px;border-radius:4px;border:1.5px solid #c0ccd8;background:repeating-linear-gradient(90deg,#b8d0e0 0,#b8d0e0 3px,#d8eaf8 3px,#d8eaf8 7px);flex-shrink:0"></div>
+        </div>
+      </div>
+      <div class="oc" data-v="master-carre" onclick="pick(this,'glasdekor')">
+        <div class="ora"></div>
+        <div style="display:flex;align-items:flex-start;gap:10px;width:100%">
+          <div style="flex:1">
+            <div class="olabel">Master Carré</div>
+            <div class="osub">Quadratisches Muster · modern</div>
+            <div class="oprice p-add">+ 38 €/Stück</div>
+          </div>
+          <div style="width:32px;height:32px;border-radius:4px;border:1.5px solid #c0ccd8;background:repeating-conic-gradient(#b8d0e0 0% 25%,#d8eaf8 0% 50%) 0 0/8px 8px;flex-shrink:0"></div>
+        </div>
+      </div>
+      <div class="oc" data-v="master-liner" onclick="pick(this,'glasdekor')">
+        <div class="ora"></div>
+        <div style="display:flex;align-items:flex-start;gap:10px;width:100%">
+          <div style="flex:1">
+            <div class="olabel">Master Liner</div>
+            <div class="osub">Horizontale Linien · dezent</div>
+            <div class="oprice p-add">+ 38 €/Stück</div>
+          </div>
+          <div style="width:32px;height:32px;border-radius:4px;border:1.5px solid #c0ccd8;background:repeating-linear-gradient(0deg,#b8d0e0 0,#b8d0e0 2px,#d8eaf8 2px,#d8eaf8 6px);flex-shrink:0"></div>
+        </div>
+      </div>
+      <div class="oc" data-v="sporadik" onclick="pick(this,'glasdekor')">
+        <div class="ora"></div>
+        <div style="display:flex;align-items:flex-start;gap:10px;width:100%">
+          <div style="flex:1">
+            <div class="olabel">Sporadik</div>
+            <div class="osub">Unregelmäßiges Muster · interessant</div>
+            <div class="oprice p-add">+ 42 €/Stück</div>
+          </div>
+          <div style="width:32px;height:32px;border-radius:4px;border:1.5px solid #c0ccd8;background:#c8dae8;flex-shrink:0;position:relative;overflow:hidden"><div style="position:absolute;width:6px;height:6px;background:#a0bcd0;border-radius:50%;top:4px;left:6px"></div><div style="position:absolute;width:4px;height:4px;background:#a0bcd0;border-radius:50%;top:14px;left:18px"></div><div style="position:absolute;width:5px;height:5px;background:#a0bcd0;border-radius:50%;top:20px;left:5px"></div></div>
+        </div>
+      </div>
+      <div class="oc" data-v="nashiji" onclick="pick(this,'glasdekor')">
+        <div class="ora"></div>
+        <div style="display:flex;align-items:flex-start;gap:10px;width:100%">
+          <div style="flex:1">
+            <div class="olabel">Nashiji</div>
+            <div class="osub">Japanisches Reiskornmuster · edel</div>
+            <div class="oprice p-add">+ 42 €/Stück</div>
+          </div>
+          <div style="width:32px;height:32px;border-radius:4px;border:1.5px solid #c0ccd8;background:radial-gradient(ellipse 4px 6px at 6px 8px,#a0bcd0 60%,transparent 60%),radial-gradient(ellipse 4px 6px at 18px 20px,#a0bcd0 60%,transparent 60%),radial-gradient(ellipse 3px 5px at 26px 6px,#a0bcd0 60%,transparent 60%),#c8dae8;flex-shrink:0"></div>
+        </div>
+      </div>
+      <div class="oc" data-v="flora" onclick="pick(this,'glasdekor')">
+        <div class="ora"></div>
+        <div style="display:flex;align-items:flex-start;gap:10px;width:100%">
+          <div style="flex:1">
+            <div class="olabel">Flora</div>
+            <div class="osub">Florales Muster · romantisch</div>
+            <div class="oprice p-add">+ 45 €/Stück</div>
+          </div>
+          <div style="width:32px;height:32px;border-radius:4px;border:1.5px solid #c0ccd8;background:#c8dae8;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px;opacity:0.75">🌿</div>
+        </div>
+      </div>
+      <div class="oc" data-v="cotswold" onclick="pick(this,'glasdekor')">
+        <div class="ora"></div>
+        <div style="display:flex;align-items:flex-start;gap:10px;width:100%">
+          <div style="flex:1">
+            <div class="olabel">Cotswold</div>
+            <div class="osub">Leicht gewellt · dezent · vielseitig</div>
+            <div class="oprice p-add">+ 38 €/Stück</div>
+          </div>
+          <div style="width:32px;height:32px;border-radius:4px;border:1.5px solid #c0ccd8;background:repeating-linear-gradient(170deg,#b8d0e0 0,#b8d0e0 2px,#d8eaf8 2px,#d8eaf8 8px);flex-shrink:0"></div>
+        </div>
+      </div>
+      <div class="oc" data-v="kasha" onclick="pick(this,'glasdekor')">
+        <div class="ora"></div>
+        <div style="display:flex;align-items:flex-start;gap:10px;width:100%">
+          <div style="flex:1">
+            <div class="olabel">Kasha</div>
+            <div class="osub">Feines Webmuster · elegant</div>
+            <div class="oprice p-add">+ 42 €/Stück</div>
+          </div>
+          <div style="width:32px;height:32px;border-radius:4px;border:1.5px solid #c0ccd8;background:repeating-linear-gradient(45deg,#b8d0e0 0,#b8d0e0 2px,#d8eaf8 2px,#d8eaf8 5px),repeating-linear-gradient(-45deg,#b8d0e0 0,#b8d0e0 2px,#d8eaf8 2px,#d8eaf8 5px);flex-shrink:0"></div>
+        </div>
+      </div>
+      <div class="oc" data-v="autumn" onclick="pick(this,'glasdekor')">
+        <div class="ora"></div>
+        <div style="display:flex;align-items:flex-start;gap:10px;width:100%">
+          <div style="flex:1">
+            <div class="olabel">Autumn</div>
+            <div class="osub">Blättermuster · dekorativ · natürlich</div>
+            <div class="oprice p-add">+ 45 €/Stück</div>
+          </div>
+          <div style="width:32px;height:32px;border-radius:4px;border:1.5px solid #c0ccd8;background:#c8dae8;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px;opacity:0.75">🍂</div>
+        </div>
+      </div>
+    </div>
+    <p class="text-sm text-on-surf-v mt-3">Ornamentgläser bieten Sichtschutz bei hoher Lichtdurchlässigkeit. <strong>Drutex-Originalprodukte.</strong></p>
+  </div>
+</div>
+
+<!-- ── SCHRITT 9: GRIFFE ──────────────────────────── -->
+<div class="sc" id="s9">
+  <div class="sh" onclick="tog(9)">
+    <div class="badge" id="b9">9</div>
+    <div class="flex-1">
+      <div class="slabel">Griffe & Beschläge</div>
+      <div class="sdesc" id="d9">Welchen Griff wünschen Sie?</div>
+    </div>
+    <i class="ms chev">expand_more</i>
+  </div>
+  <div class="sb">
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+      <div class="griff-opt" data-v="std-weiss" onclick="pick(this,'griff')">
+        <img src="https://www.drutex.eu/media/webp/80/L21lZGlhL191cGxvYWQvZG9kYXRraS9rbGFta2ktb2tuYS9rbGFta2EtbWlzdHJhbC0zNW1tLWYxLnBuZw==.webp"
+             width="50" height="65" style="object-fit:contain;object-position:center;display:block"
+             alt="Standard Griff weiß" onerror="this.style.display='none'"/>
+        <div class="olabel">Standard Griff</div>
+        <div class="osub">Kunststoff weiß</div>
+        <div class="oprice p-inc">inklusive</div>
+      </div>
+      <div class="griff-opt" data-v="hoppe-es-matt" onclick="pick(this,'griff')">
+        <img src="https://www.drutex.eu/media/_upload/dodatki/klamki-okna/klamka-mistral-35mm-f9.png"
+             width="50" height="65" style="object-fit:contain;object-position:center;display:block"
+             onerror="this.onerror=null;this.src='https://www.drutex.eu/media/webp/80/L21lZGlhL191cGxvYWQvZG9kYXRraS9rbGFta2ktb2tuYS9rbGFta2EtbWlzdHJhbC0zNW1tLWYxLnBuZw==.webp';this.onerror=null"
+             alt="Hoppe Amsterdam Edelstahl matt"/>
+        <div class="olabel">Hoppe Amsterdam</div>
+        <div class="osub">Edelstahl matt</div>
+        <div class="oprice p-add">+ 18 €/Stück</div>
+      </div>
+      <div class="griff-opt" data-v="hoppe-es-pol" onclick="pick(this,'griff')">
+        <img src="https://www.drutex.eu/media/_upload/dodatki/klamki-okna/klamka-mistral-35mm-f2.png"
+             width="50" height="65" style="object-fit:contain;object-position:center;display:block"
+             onerror="this.onerror=null;this.src='https://www.drutex.eu/media/webp/80/L21lZGlhL191cGxvYWQvZG9kYXRraS9rbGFta2ktb2tuYS9rbGFta2EtbWlzdHJhbC0zNW1tLWYxLnBuZw==.webp';this.onerror=null"
+             alt="Hoppe Amsterdam Edelstahl poliert"/>
+        <div class="olabel">Hoppe Amsterdam</div>
+        <div class="osub">Edelstahl poliert</div>
+        <div class="oprice p-add">+ 22 €/Stück</div>
+      </div>
+      <div class="griff-opt" data-v="hoppe-gold" onclick="pick(this,'griff')">
+        <img src="https://www.drutex.eu/media/_upload/dodatki/klamki-okna/klamka-nevada-35mm-f5.png"
+             width="50" height="65" style="object-fit:contain;object-position:center;display:block"
+             onerror="this.onerror=null;this.src='https://www.drutex.eu/media/webp/80/L21lZGlhL191cGxvYWQvZG9kYXRraS9rbGFta2ktb2tuYS9rbGFta2EtbWlzdHJhbC0zNW1tLWYxLnBuZw==.webp';this.onerror=null"
+             alt="Hoppe Amsterdam Gold"/>
+        <div class="olabel">Hoppe Amsterdam</div>
+        <div class="osub">Gold (24 Karat)</div>
+        <div class="oprice p-add">+ 28 €/Stück</div>
+      </div>
+      <div class="griff-opt" data-v="fsb-es" onclick="pick(this,'griff')">
+        <img src="https://www.drutex.eu/media/webp/80/L21lZGlhL191cGxvYWQvZG9kYXRraS9rbGFta2ktb2tuYS9rd2FkcmF0L2tsYW1rYS1rd2FkcmF0LTM1bW0tZjEucG5n.webp"
+             width="50" height="65" style="object-fit:contain;object-position:center;display:block"
+             alt="FSB Edelstahl matt" onerror="this.style.display='none'"/>
+        <div class="olabel">FSB Edelstahl</div>
+        <div class="osub">Edelstahl matt, ergonomisch</div>
+        <div class="oprice p-add">+ 28 €/Stück</div>
+      </div>
+      <div class="griff-opt" data-v="pz-beid" onclick="pick(this,'griff')">
+        <img src="https://www.drutex.eu/media/webp/80/L21lZGlhL191cGxvYWQvZG9kYXRraS9rbGFta2ktb2tuYS9rbGFta2EtbmV2YWRhLWtsdWN6LTM1bW0tay03MDE2LnBuZw==.webp"
+             width="50" height="65" style="object-fit:contain;object-position:center;display:block"
+             alt="PZ beidseitig NEVADA" onerror="this.style.display='none'"/>
+        <div class="olabel">PZ beidseitig</div>
+        <div class="osub">Profilzylinder innen & außen</div>
+        <div class="oprice p-add">+ 55 €/Stück</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SCHRITT 10: EINBRUCHSCHUTZ ─────────────────── -->
+<div class="sc" id="s10">
+  <div class="sh" onclick="tog(10)">
+    <div class="badge" id="b10">10</div>
+    <div class="flex-1">
+      <div class="slabel">Einbruchschutz / Beschläge</div>
+      <div class="sdesc" id="d10">Widerstandsklasse wählen</div>
+    </div>
+    <i class="ms chev">expand_more</i>
+  </div>
+  <div class="sb">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+      <div class="oc" data-v="wk1" onclick="pick(this,'sicher')">
+        <div class="ora"></div>
+        <div>
+          <div class="olabel">WK1 — Standard</div>
+          <div class="osub">Umlaufende Verriegelung · für alle Wohnbereiche</div>
+          <div class="oprice p-inc">inklusive</div>
+        </div>
+      </div>
+      <div class="oc" data-v="rc2" onclick="pick(this,'sicher')">
+        <div class="ora"></div>
+        <div>
+          <div class="olabel">RC2 (WK2) — Einbruchschutz</div>
+          <div class="osub">Geprüft nach EN 1627 · Pilzkopfzapfen · Erdgeschoss</div>
+          <div class="oprice p-add">+ 165 €/Stück</div>
+        </div>
+      </div>
+      <div class="oc" data-v="rc3" onclick="pick(this,'sicher')">
+        <div class="ora"></div>
+        <div>
+          <div class="olabel">RC3 (WK3) — Hochsicherheit</div>
+          <div class="osub">Höchste Schutzklasse für PVC · erhöhte Anforderungen</div>
+          <div class="oprice p-add">+ 285 €/Stück</div>
+        </div>
+      </div>
+    </div>
+    <div class="info mt-3">
+      <i class="ms f" style="color:#225eaa;font-size:20px;flex-shrink:0">verified_user</i>
+      <div>RC2 wird von den meisten Versicherungen für Erdgeschoss-Fenster empfohlen und ist von vielen Versicherern anerkannt.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SCHRITT 11: ROLLADEN ───────────────────────── -->
+<div class="sc" id="s11">
+  <div class="sh" onclick="tog(11)">
+    <div class="badge" id="b11">11</div>
+    <div class="flex-1">
+      <div class="slabel">Rolladen</div>
+      <div class="sdesc" id="d11">Rolladen gewünscht?</div>
+    </div>
+    <i class="ms chev">expand_more</i>
+  </div>
+  <div class="sb">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+      <div class="oc" data-v="ohne" onclick="pick(this,'roll')">
+        <div class="ora"></div>
+        <div>
+          <div class="olabel">Kein Rolladen</div>
+          <div class="oprice p-inc">inklusive</div>
+        </div>
+      </div>
+      <div class="oc" data-v="gurt" onclick="pick(this,'roll')">
+        <div class="ora"></div>
+        <div>
+          <div class="olabel">Rolladen mit Gurtwickler</div>
+          <div class="osub">Manuell · Kunststoff-Gurtwickler</div>
+          <div class="oprice p-add">+ 115 €/Stück</div>
+        </div>
+      </div>
+      <div class="oc" data-v="manuell" onclick="pick(this,'roll')">
+        <div class="ora"></div>
+        <div>
+          <div class="olabel">Rolladen manuell</div>
+          <div class="osub">Drehstab oder Aufputz-Gurtwickler</div>
+          <div class="oprice p-add">+ 155 €/Stück</div>
+        </div>
+      </div>
+      <div class="oc" data-v="motor" onclick="pick(this,'roll')">
+        <div class="ora"></div>
+        <div>
+          <div class="olabel">Motorrolladen</div>
+          <div class="osub">Elektrisch · App/Schalter · Smart-Home-fähig</div>
+          <div class="oprice p-add">+ 295 €/Stück</div>
+        </div>
+      </div>
+    </div>
+    <div id="roll-seite" class="hidden">
+      <div class="sec-t">Gurt-Montageseite</div>
+      <div class="grid grid-cols-2 gap-2">
+        <div class="oc" data-v="links" onclick="pick(this,'rollSeite')">
+          <div class="ora"></div><div class="olabel">Gurt links</div>
+        </div>
+        <div class="oc" data-v="rechts" onclick="pick(this,'rollSeite')">
+          <div class="ora"></div><div class="olabel">Gurt rechts</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SCHRITT 12: SPROSSEN ───────────────────────── -->
+<div class="sc" id="s12">
+  <div class="sh" onclick="tog(12)">
+    <div class="badge" id="b12">12</div>
+    <div class="flex-1">
+      <div class="slabel">Sprossen</div>
+      <div class="sdesc" id="d12">Sprossen gewünscht?</div>
+    </div>
+    <i class="ms chev">expand_more</i>
+  </div>
+  <div class="sb">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+      <div class="oc" data-v="keine" onclick="pick(this,'sproTyp')">
+        <div class="ora"></div>
+        <div>
+          <div class="olabel">Ohne Sprossen</div>
+          <div class="osub">Klare Sicht, maximaler Lichteinfall</div>
+          <div class="oprice p-inc">inklusive</div>
+        </div>
+      </div>
+      <div class="oc" data-v="aufgeklebt" onclick="pick(this,'sproTyp')">
+        <div class="ora"></div>
+        <div>
+          <div class="olabel">Aufgeklebte Sprossen</div>
+          <div class="osub">Auf der Glasoberfläche befestigt</div>
+          <div class="oprice p-add">+ 32–38 €/Stück</div>
+        </div>
+      </div>
+      <div class="oc" data-v="innenliegend" onclick="pick(this,'sproTyp')">
+        <div class="ora"></div>
+        <div>
+          <div class="olabel">Innenliegende Sprossen</div>
+          <div class="osub">Im Scheibenzwischenraum, leicht zu reinigen</div>
+          <div class="oprice p-add">+ 45–52 €/Stück</div>
+        </div>
+      </div>
+    </div>
+    <div id="spro-dicke" class="hidden">
+      <div class="sec-t">Sprossendicke</div>
+      <div class="grid grid-cols-2 gap-2">
+        <div class="oc" data-v="18" onclick="pick(this,'sproDicke')">
+          <div class="ora"></div>
+          <div>
+            <div class="olabel">18 mm</div>
+            <div class="osub">Schmal, modern</div>
+            <div class="oprice p-add" id="p18">+ 32 €/Stück</div>
+          </div>
+        </div>
+        <div class="oc" data-v="26" onclick="pick(this,'sproDicke')">
+          <div class="ora"></div>
+          <div>
+            <div class="olabel">26 mm</div>
+            <div class="osub">Klassisch, kräftiger</div>
+            <div class="oprice p-add" id="p26">+ 38 €/Stück</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SCHRITT 13: ZUSAMMENFASSUNG & ANGEBOT ───────── -->
+<div class="sc" id="s13">
+  <div class="sh" onclick="tog(13)">
+    <div class="badge" id="b13"><i class="ms" style="font-size:16px">send</i></div>
+    <div class="flex-1">
+      <div class="slabel">Zusammenfassung & Angebot</div>
+      <div class="sdesc">Daten eingeben · Kostenloses Angebot anfordern</div>
+    </div>
+    <i class="ms chev">expand_more</i>
+  </div>
+  <div class="sb">
+
+    <!-- Konfiguration -->
+    <div class="bg-surf rounded-xl p-4 mb-4">
+      <div class="font-semibold text-base mb-3 flex items-center gap-2">
+        <i class="ms f" style="color:#225eaa;font-size:20px">checklist</i> Ihre Konfiguration
+      </div>
+      <div id="sum-rows"></div>
+    </div>
+
+    <!-- Preis -->
+    <div style="background:#dde8ff" class="rounded-xl p-4 mb-4">
+      <div class="font-semibold text-base mb-3 flex items-center gap-2">
+        <i class="ms f" style="color:#225eaa;font-size:20px">receipt_long</i> Preisaufschlüsselung
+      </div>
+      <div id="sum-price"></div>
+      <div class="flex justify-between items-center border-t-2 border-primary/20 pt-3 mt-3">
+        <span class="font-bold text-base">Gesamtpreis inkl. MwSt.</span>
+        <span class="font-bold text-primary text-2xl" id="sum-total" style="font-family:'Plus Jakarta Sans',sans-serif">–</span>
+      </div>
+    </div>
+
+
+    <!-- Formular -->
+    <form id="aform" onsubmit="submitForm(event)" novalidate>
+      <div class="font-semibold text-base mb-3 flex items-center gap-2">
+        <i class="ms f" style="color:#225eaa;font-size:20px">contact_mail</i> Kontakt & Lieferadresse
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+        <div><label class="fl" for="fn">Vor- und Nachname *</label><input class="inp" type="text" id="fn" required placeholder="Max Mustermann" autocomplete="name"></div>
+        <div><label class="fl" for="fe">E-Mail-Adresse *</label><input class="inp" type="email" id="fe" required placeholder="max@beispiel.de" autocomplete="email"></div>
+        <div><label class="fl" for="ft">Telefon</label><input class="inp" type="tel" id="ft" placeholder="+49 123 456 7890" autocomplete="tel"></div>
+        <div><label class="fl" for="fo">PLZ & Ort *</label><input class="inp" type="text" id="fo" required placeholder="12345 Berlin" autocomplete="postal-code"></div>
+      </div>
+      <div class="mb-3"><label class="fl" for="fst">Lieferadresse (Straße & Hausnummer)</label><input class="inp" type="text" id="fst" placeholder="Musterstraße 1" autocomplete="street-address"></div>
+      <div class="mb-4"><label class="fl" for="fno">Anmerkungen / Sonderwünsche</label><textarea class="inp" id="fno" rows="3" placeholder="z.B. gewünschter Liefertermin, RAL-Farbcode, Montageservice ..."></textarea></div>
+      <div class="flex items-start gap-3 mb-5">
+        <input type="checkbox" id="fdsgvo" required class="mt-0.5" style="width:20px;height:20px;flex-shrink:0;border:2px solid #c2c6d3;border-radius:4px;accent-color:#225eaa">
+        <label for="fdsgvo" class="text-sm text-on-surf-v leading-relaxed">Ich habe die <a href="datenschutz.html" class="text-primary underline" target="_blank">Datenschutzerklärung</a> gelesen und stimme der Verarbeitung meiner Daten zur Angebotserstellung zu. *</label>
+      </div>
+      <p id="ferr" class="hidden text-red-600 text-sm mb-3 font-medium"></p>
+      <button type="submit" id="fsub"
+        class="w-full flex items-center justify-center gap-2 text-white font-bold py-4 px-6 rounded-full transition-colors text-base"
+        style="background:#225eaa;font-family:'Plus Jakarta Sans',sans-serif">
+        <i class="ms">send</i>
+        <span id="fsubtxt">Kostenloses Angebot anfordern</span>
+      </button>
+      <p class="text-sm text-center text-on-surf-v mt-2">Kostenlos & unverbindlich · Antwort innerhalb 24 Stunden</p>
+    </form>
+
+  </div>
+</div>
+
+</div><!-- /steps -->
+
+<!-- ════ SIDEBAR RIGHT ════ -->
+<div id="sidebar-wrap">
+  <div id="sidebar" class="p-4">
+
+    <div class="font-bold text-base mb-3 flex items-center gap-2" style="font-family:'Plus Jakarta Sans',sans-serif">
+      <i class="ms f" style="color:#225eaa">window</i> Live-Vorschau
+    </div>
+
+    <!-- VIEW TOGGLE -->
+    <div style="display:flex;gap:6px;padding:8px 8px 0;width:100%">
+      <button id="view-btn-aus" class="view-btn active" onclick="setPreviewView('aus')">Außenansicht</button>
+      <button id="view-btn-inn" class="view-btn" onclick="setPreviewView('inn')">Innenansicht</button>
+    </div>
+    <!-- SVG PREVIEW -->
+    <div id="prev-wrap" class="w-full mb-0" style="padding:8px 8px 0">
+      <svg id="psvg" viewBox="0 0 320 360" style="width:100%;height:auto;display:block;border-radius:10px;background:#f5f6f8"></svg>
+      <!-- Color swatch strip -->
+      <div id="prev-color-strip" style="display:none;margin-top:6px;padding:8px 10px;background:#fff;border-radius:8px;border:1px solid #e0e4ec;display:flex;align-items:center;gap:8px">
+        <div id="prev-swatch-a" style="width:20px;height:20px;border-radius:4px;border:1.5px solid #ccc;flex-shrink:0"></div>
+        <div style="flex:1;min-width:0">
+          <div id="prev-color-a" style="font-size:12px;font-weight:700;font-family:'Manrope',sans-serif;color:#161c27"></div>
+          <div id="prev-color-i" style="font-size:11px;color:#727782;font-family:'Manrope',sans-serif"></div>
+        </div>
+        <div id="prev-swatch-i" style="width:16px;height:16px;border-radius:3px;border:1.5px solid #ccc;flex-shrink:0"></div>
+      </div>
+    </div>
+
+    <!-- CONFIG CHIPS -->
+    <div id="chips" class="flex flex-wrap gap-1.5 mb-3 min-h-[28px]"></div>
+
+    <hr style="border-color:#e0e4f0;margin-bottom:12px">
+
+    <!-- PRICE BREAKDOWN -->
+    <div id="sb-price" class="space-y-0 mb-3">
+      <div class="pr sub" style="color:#a0a8b8">Bitte Produkt & Maße wählen</div>
+    </div>
+
+    <!-- TOTAL BADGE -->
+    <div class="rounded-xl p-4 text-center mb-3" style="background:#225eaa">
+      <div style="color:rgba(255,255,255,.65);font-size:13px;margin-bottom:2px">Gesamtpreis inkl. MwSt.</div>
+      <div id="sb-total" class="font-bold text-white" style="font-size:28px;font-family:'Plus Jakarta Sans',sans-serif">–</div>
+      <div id="sb-unit" style="color:rgba(255,255,255,.5);font-size:13px;margin-top:2px"></div>
+    </div>
+
+    <!-- CTA -->
+    <button onclick="openS(13)" class="w-full flex items-center justify-center gap-2 font-bold py-3 rounded-full text-primary transition-colors text-sm" style="background:#d6e3ff;font-family:'Plus Jakarta Sans',sans-serif">
+      <i class="ms">send</i> Angebot anfordern
+    </button>
+
+    <!-- TRUST -->
+    <div class="mt-4 space-y-2">
+      <div class="flex items-center gap-2 text-sm text-on-surf-v"><i class="ms f" style="color:#16a34a;font-size:18px">verified</i> Drutex-zertifizierter Händler</div>
+      <div class="flex items-center gap-2 text-sm text-on-surf-v"><i class="ms f" style="color:#16a34a;font-size:18px">schedule</i> Angebot innerhalb 24 Stunden</div>
+      <div class="flex items-center gap-2 text-sm text-on-surf-v"><i class="ms f" style="color:#16a34a;font-size:18px">lock</i> Kostenlos & unverbindlich</div>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- /grid -->
+
+<!-- FOOTER -->
+<footer style="background:#0e1a38" class="text-white py-10 mt-8">
+  <div class="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
+    <div class="col-span-2 md:col-span-1">
+      <div class="font-bold text-lg mb-2" style="font-family:'Plus Jakarta Sans',sans-serif">DeineFenster<span style="color:#76a9fa">.de</span></div>
+      <p class="text-white/40 text-sm">Drutex-Fenster & Türen – Qualität direkt ab Werk.</p>
+    </div>
+    <div>
+      <div class="font-semibold mb-3" style="color:rgba(255,255,255,.6);font-size:12px;text-transform:uppercase;letter-spacing:.05em">Produkte</div>
+      <ul class="space-y-1.5 text-white/40 text-sm">
+        <li><a href="produkte.html" class="hover:text-white transition-colors">Kunststofffenster</a></li>
+        <li><a href="produkte.html" class="hover:text-white transition-colors">Haustüren</a></li>
+        <li><a href="produkte.html" class="hover:text-white transition-colors">Balkontüren</a></li>
+        <li><a href="produkte.html" class="hover:text-white transition-colors">HST-Türen</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="font-semibold mb-3" style="color:rgba(255,255,255,.6);font-size:12px;text-transform:uppercase;letter-spacing:.05em">Unternehmen</div>
+      <ul class="space-y-1.5 text-white/40 text-sm">
+        <li><a href="ueber-uns.html" class="hover:text-white transition-colors">Über uns</a></li>
+        <li><a href="kontakt.html" class="hover:text-white transition-colors">Kontakt</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="font-semibold mb-3" style="color:rgba(255,255,255,.6);font-size:12px;text-transform:uppercase;letter-spacing:.05em">Rechtliches</div>
+      <ul class="space-y-1.5 text-white/40 text-sm">
+        <li><a href="impressum.html" class="hover:text-white transition-colors">Impressum</a></li>
+        <li><a href="datenschutz.html" class="hover:text-white transition-colors">Datenschutz</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="max-w-7xl mx-auto px-4 mt-8 pt-6 border-t border-white/10 text-center text-white/25 text-xs">
+    © 2024 DeineFenster.de · Drutex-Fachhändler
+  </div>
+</footer>
+
+<!-- ══════════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════════ -->
+<script>
+'use strict';
+const WH = 'https://hook.eu1.make.com/so6vhvekae4ve7e3peh7vgcgqmv7cbrc';
+
+// ── PREISE ──────────────────────────────────────────
+const P = {
+  prod: {
+    kunststoff: { name:'Kunststofffenster', fix:89,   sqm:210, min:99    },
+    balkontuer: { name:'Balkontür',          fix:145,  sqm:215, min:179   },
+    haustuere:  { name:'Haustür',            fix:0,    sqm:0,   min:899   },
+    hst:        { name:'Hebe-Schiebe-Tür',   fix:580,  sqm:265, min:1299  },
+  },
+  glas: {
+    '2fach':         { name:'2-fach Wärmeschutz Ug 1,1',   add:0   },
+    '3fach-07':      { name:'3-fach Wärmeschutz Ug 0,7',   add:55  },
+    '3fach-06':      { name:'3-fach Wärmeschutz Ug 0,6',   add:75  },
+    '3fach-05':      { name:'3-fach Wärmeschutz Ug 0,5',   add:95  },
+    'schall-33':     { name:'3-fach Schallschutz 33 dB',    add:60  },
+    'schall-38':     { name:'3-fach Schallschutz 38 dB',    add:95  },
+    'schall-44':     { name:'3-fach Schallschutz 44 dB',    add:145 },
+    'ornament-sat':  { name:'Ornamentglas Satinato',        add:35  },
+    'ornament-chin': { name:'Ornamentglas Chinchilla',      add:35  },
+    'milch':         { name:'Milchglas / Sandstrahlung',    add:45  },
+    'vsg-p2a':       { name:'Sicherheitsglas VSG P2A',      add:110 },
+  },
+  oeff: {
+    // Fenster + Balkontür
+    'fest':          { name:'Festverglasung',              add:-15,  prods:['kunststoff','balkontuer'] },
+    'dreh-l':        { name:'Dreh links',                  add:0,    prods:['kunststoff','balkontuer','haustuere'] },
+    'dreh-r':        { name:'Dreh rechts',                 add:0,    prods:['kunststoff','balkontuer','haustuere'] },
+    'kipp':          { name:'Kipp',                        add:15,   prods:['kunststoff','balkontuer'] },
+    'dk-l':          { name:'Dreh-Kipp links',             add:35,   prods:['kunststoff','balkontuer'] },
+    'dk-r':          { name:'Dreh-Kipp rechts',            add:35,   prods:['kunststoff','balkontuer'] },
+    'zweifl-stulp':  { name:'Zweiflügelig mit Stulp',     add:125,  prods:['kunststoff','balkontuer'] },
+    'zweifl-pfosten':{ name:'Zweiflügelig mit Pfosten',   add:145,  prods:['kunststoff','balkontuer'] },
+    'hst-slide':     { name:'Hebe-Schiebe',               add:0,    prods:['hst'] },
+  },
+  profil: {
+    'iglo5':         { name:'Iglo 5 Classic · 5-Kammer · 70 mm · Uw 0,83',  add:0,   prods:['kunststoff','balkontuer'] },
+    'iglo-energy':   { name:'Iglo Energy · 7-Kammer · 82 mm · Uw 0,71',     add:48,  prods:['kunststoff','balkontuer'] },
+    'iglo5-tuer':    { name:'Iglo 5 Tür · 5-Kammer · Ud 1,0',               add:0,   prods:['haustuere'] },
+    'iglo-e-tuer':   { name:'Iglo Energy Tür · 7-Kammer · 82 mm · Ud 0,8',  add:85,  prods:['haustuere'] },
+    'iglo-hs':       { name:'Iglo-HS · 7-Kammer · 194 mm · Uw 0,71',        add:0,   prods:['hst'] },
+  },
+  fa: { // Außenfarbe
+    'weiss':     { name:'Weiß RAL 9016',         add:0,   hex:'#f4f4ef', border:'#d0d0c8' },
+    'anthrazit': { name:'Anthrazitgrau RAL 7016', add:62,  hex:'#373d3f', border:'#2a2e30' },
+    'schwarzgr': { name:'Schwarzgrau RAL 7021',   add:78,  hex:'#2b2d2f', border:'#1a1c1e' },
+    'braun':     { name:'Mahagoni',               add:55,  hex:'#6b3a2a', border:'#522c1e' },
+    'golden-oak':{ name:'Golden Oak',             add:52,  hex:'#9b6840', border:'#7a5030' },
+    'db703':     { name:'DB 703 Eisenglimmer',    add:68,  hex:'#4a4a4a', border:'#333' },
+    'champagner':{ name:'Champagner RAL 1019',    add:45,  hex:'#c8b898', border:'#a89878' },
+    'sonder':    { name:'Sonderfarbe (RAL)',      add:135, hex:'#8899aa', border:'#667788' },
+  },
+  fi: { // Innenfarbe
+    'weiss':     { name:'Weiß RAL 9016',  add:0,   hex:'#f4f4ef', border:'#d0d0c8' },
+    'golden-oak':{ name:'Golden Oak',     add:48,  hex:'#9b6840', border:'#7a5030' },
+    'mahagoni':  { name:'Mahagoni',       add:52,  hex:'#6b3a2a', border:'#522c1e' },
+    'anthrazit': { name:'Anthrazitgrau',  add:62,  hex:'#373d3f', border:'#2a2e30' },
+  },
+  fd: { // Dichtungsfarbe
+    'schwarz':{ name:'Schwarz (Standard)', add:0, hex:'#1a1a1a' },
+    'grau':   { name:'Grau RAL 7037',     add:8, hex:'#7d7d7d'  },
+    'weiss':  { name:'Weiß',             add:8, hex:'#e8e8e8'  },
+    'braun':  { name:'Braun',             add:8, hex:'#5c3a1e'  },
+  },
+  fluegel: {
+    '1-fluegel':    { name:'1 Flügel',                       add:0   },
+    '2-fluegel':    { name:'2 Flügel',                       add:85  },
+    '3-fluegel':    { name:'3 Flügel',                       add:165 },
+    '1-oberlicht':  { name:'1 Flügel + Oberlicht',           add:95  },
+    '2-oberlicht':  { name:'2 Flügel + Oberlicht',           add:180 },
+    '3-oberlicht':  { name:'3 Flügel + Oberlicht',           add:260 },
+    '1-unterlicht': { name:'1 Flügel + Unterlicht',          add:95  },
+    '2-unterlicht': { name:'2 Flügel + Unterlicht',          add:180 },
+    '3-unterlicht': { name:'3 Flügel + Unterlicht',          add:260 },
+    '1-ober-unter': { name:'1 Flügel + Ober- & Unterlicht', add:175 },
+    '2-ober-unter': { name:'2 Flügel + Ober- & Unterlicht', add:260 },
+    '3-ober-unter': { name:'3 Flügel + Ober- & Unterlicht', add:340 },
+  },
+  oeff_sash: {
+    'fest':   { name:'Festverglasung',   add:-15 },
+    'kipp':   { name:'Kipp',             add:15  },
+    'dreh-l': { name:'Dreh links',       add:0   },
+    'dreh-r': { name:'Dreh rechts',      add:0   },
+    'dk-l':   { name:'Dreh-Kipp links',  add:35  },
+    'dk-r':   { name:'Dreh-Kipp rechts', add:35  },
+  },
+  glasdekor: {
+    'klar':         { name:'Klarglas',       add:0  },
+    'satinato':     { name:'Satinato',       add:35 },
+    'chinchilla':   { name:'Chinchilla',     add:35 },
+    'master-carre': { name:'Master Carré',   add:38 },
+    'master-liner': { name:'Master Liner',   add:38 },
+    'sporadik':     { name:'Sporadik',       add:42 },
+    'nashiji':      { name:'Nashiji',        add:42 },
+    'flora':        { name:'Flora',          add:45 },
+    'cotswold':     { name:'Cotswold',       add:38 },
+    'kasha':        { name:'Kasha',          add:42 },
+    'autumn':       { name:'Autumn',         add:45 },
+  },
+  sproAdd: { // Sprossen Aufpreis: [aufgeklebt_add, innenliegend_add]
+    '18': [32, 45],
+    '26': [38, 52],
+  },
+  griff: {
+    'std-weiss':    { name:'Standard Griff Weiß',          add:0,  col:'#e0e4ef' },
+    'hoppe-es-matt':{ name:'Hoppe Amsterdam Edelstahl matt',add:18, col:'#b0b4bc' },
+    'hoppe-es-pol': { name:'Hoppe Amsterdam Edelst. poliert',add:22,col:'#d4d8e0' },
+    'hoppe-gold':   { name:'Hoppe Amsterdam Gold',          add:28, col:'#c8a020' },
+    'fsb-es':       { name:'FSB Edelstahl matt',            add:28, col:'#b0b4bc' },
+    'pz-beid':      { name:'PZ-Beschlag beidseitig',       add:55, col:'#b0b4bc' },
+  },
+  roll: {
+    'ohne':   { name:'Kein Rolladen',          add:0   },
+    'gurt':   { name:'Rolladen mit Gurtwickler',add:115 },
+    'manuell':{ name:'Rolladen manuell',        add:155 },
+    'motor':  { name:'Motorrolladen',           add:295 },
+  },
+  sicher: {
+    'wk1': { name:'WK1 Standard',           add:0   },
+    'rc2': { name:'RC2 Einbruchschutz WK2', add:165 },
+    'rc3': { name:'RC3 Einbruchschutz WK3', add:285 },
+  },
+};
+
+function deliv(qty, prod) {
+  if (prod==='hst')      return 149;
+  if (prod==='haustuere')return 89;
+  if (qty>=10)           return 99;
+  if (qty>=5)            return 79;
+  return 49;
+}
+
+// ── ZUSTAND ─────────────────────────────────────────
+const S = {
+  prod:null, qty:1, bMm:1000, hMm:1200,
+  glas:'2fach', profil:null,
+  fluegel:'1-fluegel',
+  oeff1:null, oeff2:null, oeff3:null,
+  glasdekor:'klar',
+  fa:'weiss', fi:'weiss', fd:'schwarz',
+  sproTyp:'keine', sproDicke:'18',
+  griff:'std-weiss',
+  roll:'ohne', rollSeite:'rechts',
+  sicher:'wk1',
+};
+let done = new Set();
+
+// ── FORTSCHRITT ──────────────────────────────────────
+function upProg() {
+  const n = done.size, tot = 12;
+  document.getElementById('prog-fill').style.width = (n/tot*100)+'%';
+  document.getElementById('prog-txt').textContent  = n+' / '+tot+' Schritte';
+}
+function mkDone(n) {
+  done.add(n);
+  const b = document.getElementById('b'+n);
+  if (b) b.innerHTML = '<i class="ms f" style="font-size:16px">check</i>';
+  document.getElementById('s'+n)?.classList.add('done');
+  upProg();
+}
+
+// ── STEP OPEN/CLOSE ──────────────────────────────────
+function tog(n) {
+  const c = document.getElementById('s'+n);
+  c.classList.toggle('open');
+}
+function openS(n) {
+  const c = document.getElementById('s'+n);
+  if (!c.classList.contains('open')) c.classList.add('open');
+  setTimeout(()=>c.scrollIntoView({behavior:'smooth',block:'nearest'}),80);
+}
+
+// ── PRODUKT WÄHLEN ───────────────────────────────────
+function pickProd(el) {
+  document.querySelectorAll('.pc').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+  S.prod = el.dataset.p;
+  S.profil = null; S.fluegel = null; S.oeff1 = null; S.oeff2 = null; S.oeff3 = null;
+  document.getElementById('d1').textContent = P.prod[S.prod].name;
+  mkDone(1);
+  // Auto-setup for special products
+  if (S.prod === 'hst') {
+    S.profil = 'iglo-hs'; S.fluegel = '2-fluegel';
+    document.getElementById('d2').textContent = 'Iglo-HS';
+    document.getElementById('d3').textContent = P.fluegel['2-fluegel'].name;
+    mkDone(2); mkDone(3); mkDone(4);
+  }
+  if (S.prod === 'haustuere') {
+    S.fluegel = '1-fluegel';
+    document.getElementById('d3').textContent = P.fluegel['1-fluegel'].name;
+    mkDone(3);
+  }
+  buildProfil();
+  buildFluegel();
+  buildOeffSash();
+  drawPrev(); upSidebar();
+  setTimeout(()=>openS(2),200);
+}
+
+// ── GENERIC RADIO PICK ───────────────────────────────
+function pick(el, key) {
+  // find sibling options in nearest grid/container
+  el.closest('.grid, [id$="-grid"], #spro-dicke .grid, #roll-seite .grid')
+    ?.querySelectorAll('.oc,.griff-opt').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+  const v = el.dataset.v;
+  S[key] = v;
+
+  // Side effects
+  if (key==='glas')     { document.getElementById('d7').textContent = P.glas[v]?.name || v; mkDone(7); setTimeout(()=>openS(8),200); }
+  if (key==='glasdekor'){ document.getElementById('d8').textContent = P.glasdekor[v]?.name || v; mkDone(8); setTimeout(()=>openS(9),200); }
+  if (key==='profil')   { document.getElementById('d2').textContent = P.profil[v]?.name.split('·')[0].trim()||v; mkDone(2); setTimeout(()=>openS(3),200); }
+  if (key==='griff')    { document.getElementById('d9').textContent = P.griff[v]?.name||v; mkDone(9); setTimeout(()=>openS(10),200); }
+  if (key==='roll')  {
+    document.getElementById('d11').textContent = P.roll[v]?.name||v; mkDone(11);
+    document.getElementById('roll-seite').classList.toggle('hidden', v==='ohne'||v==='motor');
+    setTimeout(()=>openS(12),200);
+  }
+  if (key==='sicher'){ document.getElementById('d10').textContent = P.sicher[v]?.name||v; mkDone(10); setTimeout(()=>openS(11),200); }
+  if (key==='sproTyp'){
+    document.getElementById('d12').textContent = v==='keine'?'Ohne Sprossen':v==='aufgeklebt'?'Aufgeklebte Sprossen':'Innenliegende Sprossen';
+    mkDone(12);
+    const show = v!=='keine';
+    document.getElementById('spro-dicke').classList.toggle('hidden',!show);
+    if (show) {
+      document.getElementById('p18').textContent = '+ '+(v==='aufgeklebt'?32:45)+' €/Stück';
+      document.getElementById('p26').textContent = '+ '+(v==='aufgeklebt'?38:52)+' €/Stück';
+    }
+    if (v==='keine') setTimeout(()=>openS(13),200);
+  }
+  if (key==='sproDicke') mkDone(12);
+  if (key==='fa') { document.getElementById('d6').textContent = 'Außen: '+(P.fa[v]?.name||v); mkDone(6); }
+  if (key==='fi') { document.getElementById('d6').textContent = 'A: '+(P.fa[S.fa]?.name||S.fa)+' / I: '+(P.fi[v]?.name||v); }
+  if (key==='fd') {}
+
+  drawPrev(); upSidebar();
+}
+
+// ── QTY ──────────────────────────────────────────────
+function chQty(d) {
+  S.qty = Math.max(1, Math.min(99, S.qty+d));
+  document.getElementById('qv').textContent = S.qty;
+  document.getElementById('qm').disabled = S.qty<=1;
+  document.getElementById('d2').textContent = S.qty+' Stück';
+  mkDone(2); upSidebar();
+}
+
+// ── MASSE ────────────────────────────────────────────
+function onMass() {
+  const b = parseInt(document.getElementById('ib').value)||0;
+  const h = parseInt(document.getElementById('ih').value)||0;
+  if (b>=300 && h>=300 && b<=4000 && h<=3000) {
+    S.bMm=b; S.hMm=h;
+    document.getElementById('d5').textContent = b+' × '+h+' mm';
+    mkDone(5);
+  }
+  drawPrev(); upSidebar();
+}
+function setSz(b,h) {
+  document.getElementById('ib').value=b;
+  document.getElementById('ih').value=h;
+  S.bMm=b; S.hMm=h;
+  document.getElementById('d5').textContent = b+' × '+h+' mm';
+  mkDone(5); drawPrev(); upSidebar();
+}
+
+// ── FLÜGELAUFTEILUNG & ÖFFNUNGSART ────────────────────
+function getSashCount() {
+  const f = S.fluegel || '1-fluegel';
+  if (f.startsWith('3-')) return 3;
+  if (f.startsWith('2-')) return 2;
+  return 1;
+}
+
+function fluegelSVG(n, ol, ul) {
+  const W=80, H=70, M=5, FW=70, FH=60, olH=13, ulH=13;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="80" height="70" style="display:block">`;
+  s+=`<rect width="${W}" height="${H}" fill="white"/>`;
+  s+=`<rect x="${M}" y="${M}" width="${FW}" height="${FH}" fill="#eef3ff" stroke="#555" stroke-width="2"/>`;
+  let mainY=M, mainH=FH;
+  if (ol) {
+    s+=`<rect x="${M}" y="${M}" width="${FW}" height="${olH}" fill="#d0dcf4" stroke="none"/>`;
+    s+=`<line x1="${M}" y1="${M+olH}" x2="${M+FW}" y2="${M+olH}" stroke="#555" stroke-width="1.5"/>`;
+    mainY=M+olH; mainH-=olH;
+  }
+  if (ul) {
+    s+=`<rect x="${M}" y="${M+FH-ulH}" width="${FW}" height="${ulH}" fill="#d0dcf4" stroke="none"/>`;
+    s+=`<line x1="${M}" y1="${M+FH-ulH}" x2="${M+FW}" y2="${M+FH-ulH}" stroke="#555" stroke-width="1.5"/>`;
+    mainH-=ulH;
+  }
+  const pW=FW/n;
+  for(let i=1;i<n;i++) s+=`<line x1="${M+i*pW}" y1="${mainY}" x2="${M+i*pW}" y2="${mainY+mainH}" stroke="#555" stroke-width="1.5"/>`;
+  s+='</svg>';
+  return s;
+}
+
+function buildFluegel() {
+  const grid = document.getElementById('fluegel-grid');
+  if (!grid) return;
+  const opts = [
+    {v:'1-fluegel',    n:1,ol:false,ul:false,add:0  },
+    {v:'2-fluegel',    n:2,ol:false,ul:false,add:85 },
+    {v:'3-fluegel',    n:3,ol:false,ul:false,add:165},
+    {v:'1-oberlicht',  n:1,ol:true, ul:false,add:95 },
+    {v:'2-oberlicht',  n:2,ol:true, ul:false,add:180},
+    {v:'3-oberlicht',  n:3,ol:true, ul:false,add:260},
+    {v:'1-unterlicht', n:1,ol:false,ul:true, add:95 },
+    {v:'2-unterlicht', n:2,ol:false,ul:true, add:180},
+    {v:'3-unterlicht', n:3,ol:false,ul:true, add:260},
+    {v:'1-ober-unter', n:1,ol:true, ul:true, add:175},
+    {v:'2-ober-unter', n:2,ol:true, ul:true, add:260},
+    {v:'3-ober-unter', n:3,ol:true, ul:true, add:340},
+  ];
+  grid.innerHTML = opts.map(o=>`
+    <div class="oc flex-col items-center text-center p-2 gap-1${S.fluegel===o.v?' sel':''}" style="flex-direction:column;align-items:center;padding:10px 6px;" data-v="${o.v}" onclick="pickFluegel(this)">
+      ${fluegelSVG(o.n,o.ol,o.ul)}
+      <div class="olabel" style="font-size:12px;margin-top:4px">${P.fluegel[o.v].name}</div>
+      <div class="oprice ${o.add===0?'p-inc':'p-add'}" style="font-size:11px">${o.add===0?'inkl.':'+ '+o.add+' €'}</div>
+    </div>`).join('');
+}
+
+function pickFluegel(el) {
+  document.querySelectorAll('#fluegel-grid .oc').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+  S.fluegel = el.dataset.v;
+  const newCount = getSashCount();
+  if (newCount < 3) S.oeff3 = null;
+  if (newCount < 2) S.oeff2 = null;
+  document.getElementById('d3').textContent = P.fluegel[S.fluegel]?.name || S.fluegel;
+  mkDone(3);
+  buildOeffSash();
+  setTimeout(()=>openS(4), 200);
+  drawPrev(); upSidebar();
+}
+
+function oeffSVG(typ) {
+  const W=60, H=60, M=5, FW=50, FH=50;
+  const L=M, R=M+FW, T=M, B=M+FH, CX=W/2, CY=H/2;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="52" height="52" style="display:block">`;
+  s+=`<rect width="${W}" height="${H}" fill="white"/>`;
+  s+=`<rect x="${M}" y="${M}" width="${FW}" height="${FH}" fill="#eef3ff" stroke="#444" stroke-width="1.5"/>`;
+  const sl=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#225eaa" stroke-width="2.8" stroke-linecap="round"/>`;
+  const dl=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#225eaa" stroke-width="1.4" stroke-linecap="round" stroke-dasharray="4,3"/>`;
+  if (typ==='fest') {
+    s+=`<line x1="${L+2}" y1="${T+2}" x2="${R-2}" y2="${B-2}" stroke="#aaa" stroke-width="1.5"/>`;
+    s+=`<line x1="${R-2}" y1="${T+2}" x2="${L+2}" y2="${B-2}" stroke="#aaa" stroke-width="1.5"/>`;
+  } else if (typ==='kipp') {
+    s+=sl(L,B,R,B);
+    s+=dl(L,B,CX,T); s+=dl(R,B,CX,T);
+    s+=`<polygon points="${CX},${T-1} ${CX-4},${T+8} ${CX+4},${T+8}" fill="#225eaa"/>`;
+  } else if (typ==='dreh-l') {
+    s+=sl(L,T,L,B);
+    s+=dl(L,T,R,CY); s+=dl(L,B,R,CY);
+    s+=`<polygon points="${R+1},${CY} ${R-8},${CY-4} ${R-8},${CY+4}" fill="#225eaa"/>`;
+  } else if (typ==='dreh-r') {
+    s+=sl(R,T,R,B);
+    s+=dl(R,T,L,CY); s+=dl(R,B,L,CY);
+    s+=`<polygon points="${L-1},${CY} ${L+8},${CY-4} ${L+8},${CY+4}" fill="#225eaa"/>`;
+  } else if (typ==='dk-l') {
+    s+=sl(L,T,L,B);
+    s+=dl(L,T,R,CY); s+=dl(L,B,R,CY);
+    s+=dl(L,B,CX,T); s+=dl(R,B,CX,T);
+    s+=`<polygon points="${CX},${T-1} ${CX-4},${T+8} ${CX+4},${T+8}" fill="#225eaa"/>`;
+  } else if (typ==='dk-r') {
+    s+=sl(R,T,R,B);
+    s+=dl(R,T,L,CY); s+=dl(R,B,L,CY);
+    s+=dl(L,B,CX,T); s+=dl(R,B,CX,T);
+    s+=`<polygon points="${CX},${T-1} ${CX-4},${T+8} ${CX+4},${T+8}" fill="#225eaa"/>`;
+  }
+  s+='</svg>';
+  return s;
+}
+
+function buildOeffSash() {
+  const wrap = document.getElementById('oeff-sash-wrap');
+  if (!wrap) return;
+  if (!S.prod || S.prod === 'hst') {
+    wrap.innerHTML = S.prod==='hst' ? '<div class="info"><i class="ms f" style="color:#225eaa;font-size:20px;flex-shrink:0">info</i><div>Hebe-Schiebe-Tür: Öffnung erfolgt durch Gleiten.</div></div>' : '<div style="color:#aaa;font-size:14px;padding:8px 0">Bitte zuerst Produkt und Flügelaufteilung wählen.</div>';
+    return;
+  }
+  const sashCount = getSashCount();
+  const sashLabels = sashCount===1 ? ['Flügel'] : sashCount===2 ? ['Flügel links','Flügel rechts'] : ['Flügel links','Flügel Mitte','Flügel rechts'];
+  const sashOpts = [
+    {v:'fest',   name:'Festverglasung',   sub:'Nicht öffenbar',           pTxt:'− 15 €', pcls:'p-sav'},
+    {v:'kipp',   name:'Kipp',             sub:'Nur Kippfunktion',          pTxt:'+ 15 €', pcls:'p-add'},
+    {v:'dreh-l', name:'Dreh links',       sub:'Scharnier links',           pTxt:'inkl.',  pcls:'p-inc'},
+    {v:'dreh-r', name:'Dreh rechts',      sub:'Scharnier rechts',          pTxt:'inkl.',  pcls:'p-inc'},
+    {v:'dk-l',   name:'Dreh-Kipp links',  sub:'Dreh & Kipp links',         pTxt:'+ 35 €', pcls:'p-add'},
+    {v:'dk-r',   name:'Dreh-Kipp rechts', sub:'Dreh & Kipp rechts',        pTxt:'+ 35 €', pcls:'p-add'},
+  ];
+  let html='';
+  for(let i=0;i<sashCount;i++){
+    const sk='oeff'+(i+1);
+    if(sashCount>1) html+=`<div class="sec-t">${sashLabels[i]}</div>`;
+    html+=`<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-3" id="oeff-grid-${i+1}">`;
+    sashOpts.forEach(opt=>{
+      const sel = S[sk]===opt.v;
+      html+=`<div class="oc${sel?' sel':''}" data-v="${opt.v}" data-sash="${i+1}" onclick="pickOeff(this,${i+1})" style="flex-direction:column;align-items:center;text-align:center;padding:10px 6px;gap:4px">
+        ${oeffSVG(opt.v)}
+        <div class="olabel" style="font-size:12px">${opt.name}</div>
+        <div class="osub" style="font-size:11px">${opt.sub}</div>
+        <div class="oprice ${opt.pcls}" style="font-size:11px">${opt.pTxt}</div>
+      </div>`;
+    });
+    html+='</div>';
+  }
+  const hasOl=(S.fluegel||'').includes('oberlicht')||(S.fluegel||'').includes('ober-unter');
+  const hasUl=(S.fluegel||'').includes('unterlicht')||(S.fluegel||'').includes('ober-unter');
+  if(hasOl||hasUl) {
+    html+=`<div class="info mt-1"><i class="ms f" style="color:#225eaa;font-size:18px;flex-shrink:0">info</i><div style="font-size:13px">`;
+    if(hasOl) html+=`<strong>Oberlicht</strong> ist immer Festverglasung. `;
+    if(hasUl) html+=`<strong>Unterlicht</strong> ist immer Festverglasung.`;
+    html+='</div></div>';
+  }
+  wrap.innerHTML = html;
+}
+
+function pickOeff(el, sashNum) {
+  const grid = document.getElementById('oeff-grid-'+sashNum);
+  if(grid) grid.querySelectorAll('.oc').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+  S['oeff'+sashNum] = el.dataset.v;
+  const cnt = getSashCount();
+  const allDone = S.oeff1 && (cnt<2||S.oeff2) && (cnt<3||S.oeff3);
+  if(allDone) {
+    const parts=[];
+    if(S.oeff1) parts.push(cnt>1?'L: '+(P.oeff_sash[S.oeff1]?.name||S.oeff1):P.oeff_sash[S.oeff1]?.name||S.oeff1);
+    if(cnt>1&&S.oeff2) parts.push('R: '+(P.oeff_sash[S.oeff2]?.name||S.oeff2));
+    if(cnt>2&&S.oeff3) parts.push('M: '+(P.oeff_sash[S.oeff3]?.name||S.oeff3));
+    document.getElementById('d4').textContent = parts.join(' · ');
+    mkDone(4);
+    setTimeout(()=>openS(5),200);
+  }
+  drawPrev(); upSidebar();
+}
+
+// ── PROFIL (dynamisch) ───────────────────────────────
+function pvProfileSVG(key) {
+  // Echte Drutex Profilquerschnitt-Fotos (von drutex.eu bestätigt)
+  const profilePhotos = {
+    'iglo5':      'https://www.drutex.eu/media/_upload/produkty/iglo5_classic/iglo5_classic_-_pr.png',
+    'iglo-energy':'https://www.drutex.eu/media/_upload/produkty/IGLO_ENERGY_CLASSIC/iglo_energy_classic_-_pr.png',
+    'iglo5-tuer': 'https://www.drutex.eu/media/_upload/produkty/iglo5_classic/iglo5_classic_-_pr.png',
+    'iglo-e-tuer':'https://www.drutex.eu/media/_upload/produkty/IGLO_ENERGY_CLASSIC/iglo_energy_classic_-_pr.png',
+    'iglo-hs':    'https://www.drutex.eu/media/_upload/produkty/iglo-hs/iglo-hs-profil-sq.jpg',
+  };
+  const photoUrl = profilePhotos[key] || profilePhotos['iglo5'];
+  const photoHtml = `<img src="${photoUrl}" alt="Profilquerschnitt ${key}"
+    style="width:100%;height:80px;object-fit:contain;object-position:center;display:block;border-radius:6px;background:#f4f5f8;margin-bottom:6px"
+    onerror="this.style.display='none'"/>`;
+
+  // Cross-section diagram for each profile type (fallback / supplemental)
+  const W=170, H=72;
+  const profiles = {
+    'iglo5': {chambers:5, width:60, label:'70 mm · 5 Kammer', uw:'Uw 0,83'},
+    'iglo-energy': {chambers:7, width:70, label:'82 mm · 7 Kammer', uw:'Uw 0,71'},
+    'iglo5-tuer': {chambers:5, width:60, label:'70 mm · 5 Kammer', uw:'Ud 1,0'},
+    'iglo-e-tuer': {chambers:7, width:70, label:'82 mm · 7 Kammer', uw:'Ud 0,8'},
+    'iglo-hs': {chambers:7, width:88, label:'194 mm · 7 Kammer', uw:'Uw 0,71'},
+  };
+  const p = profiles[key] || profiles['iglo5'];
+  const pw = p.width, ph = 44, py = (H-ph)/2;
+  const chamberW = (pw-8) / p.chambers;
+  let s = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:44px;display:block;margin-bottom:4px">`;
+  s += `<rect width="${W}" height="${H}" fill="#f4f5f8" rx="4"/>`;
+  // Profile body
+  s += `<rect x="10" y="${py}" width="${pw}" height="${ph}" fill="#e8e8e4" stroke="#b8b8b0" stroke-width="1.2" rx="1"/>`;
+  // Outer highlight
+  s += `<line x1="11" y1="${py+1}" x2="${10+pw-1}" y2="${py+1}" stroke="rgba(255,255,255,0.8)" stroke-width="1"/>`;
+  s += `<line x1="11" y1="${py+1}" x2="11" y2="${py+ph-1}" stroke="rgba(255,255,255,0.65)" stroke-width="1"/>`;
+  // Chambers
+  for(let i=0;i<p.chambers;i++) {
+    const cx = 10+4+i*chamberW, cw=chamberW-3, cy=py+6, ch=ph-12;
+    s += `<rect x="${cx}" y="${cy}" width="${cw}" height="${ch}" fill="#ffffff" stroke="#b0b0a8" stroke-width="0.8" rx="0.5"/>`;
+    // Steel reinforcement in 2nd chamber
+    if(i===1) {
+      s += `<rect x="${cx+2}" y="${cy+2}" width="${cw-4}" height="${ch-4}" fill="#4a4a52" rx="0.5"/>`;
+      s += `<line x1="${cx+3}" y1="${cy+3}" x2="${cx+cw-3}" y2="${cy+3}" stroke="rgba(255,255,255,0.15)" stroke-width="0.8"/>`;
+    }
+  }
+  // Seal strip (right of profile)
+  const sx = 10+pw;
+  s += `<rect x="${sx}" y="${py+4}" width="4" height="${ph-8}" fill="#1e1e1e" rx="0.5"/>`;
+  // Glass (2-fach or 3-fach based on chambers)
+  const gx = sx+4, gw = p.chambers>=7 ? 22 : 18, gy = py+2, gh = ph-4;
+  const gap = p.chambers>=7 ? 6 : 5;
+  // Pane 1
+  s += `<rect x="${gx}" y="${gy}" width="5" height="${gh}" fill="#9ec8de" stroke="#78a8c0" stroke-width="0.5"/>`;
+  s += `<rect x="${gx+2}" y="${gy+2}" width="2" height="${gh/3}" fill="white" opacity="0.3"/>`;
+  // Gas gap
+  s += `<rect x="${gx+5}" y="${gy}" width="${gap}" height="${gh}" fill="#e4f0f8" opacity="0.7"/>`;
+  // Pane 2
+  s += `<rect x="${gx+5+gap}" y="${gy}" width="5" height="${gh}" fill="#9ec8de" stroke="#78a8c0" stroke-width="0.5"/>`;
+  if(p.chambers>=7) {
+    // 3-fach: extra gas gap + pane 3
+    const p3x = gx+5+gap+5;
+    s += `<rect x="${p3x}" y="${gy}" width="${gap}" height="${gh}" fill="#e4f0f8" opacity="0.7"/>`;
+    s += `<rect x="${p3x+gap}" y="${gy}" width="5" height="${gh}" fill="#9ec8de" stroke="#78a8c0" stroke-width="0.5"/>`;
+  }
+  // Inner seal
+  const isealX = p.chambers>=7 ? gx+5+gap+5+gap+5 : gx+5+gap+5;
+  s += `<rect x="${isealX}" y="${py+4}" width="4" height="${ph-8}" fill="#1e1e1e" rx="0.5"/>`;
+  // Right side of frame
+  s += `<rect x="${isealX+4}" y="${py}" width="8" height="${ph}" fill="#e8e8e4" stroke="#b8b8b0" stroke-width="1.2" rx="0.5"/>`;
+  s += `<line x1="${isealX+5}" y1="${py+1}" x2="${isealX+5}" y2="${py+ph-1}" stroke="rgba(255,255,255,0.65)" stroke-width="1"/>`;
+  // Labels
+  s += `<text x="${10+pw/2}" y="${py+ph+12}" text-anchor="middle" font-size="9" font-family="Manrope,sans-serif" fill="#424751" font-weight="700">${p.label}</text>`;
+  s += `<text x="${W-8}" y="${py+ph+12}" text-anchor="end" font-size="9" font-family="Manrope,sans-serif" fill="#225eaa" font-weight="700">${p.uw}</text>`;
+  s += '</svg>';
+  return photoHtml + s;
+}
+
+function buildProfil() {
+  const grid = document.getElementById('profil-grid');
+  const pList = Object.entries(P.profil).filter(([k,v])=>v.prods.includes(S.prod));
+  const nameMap = {'iglo5':'Iglo 5 Classic','iglo-energy':'Iglo Energy','iglo5-tuer':'Iglo 5 Classic Tür','iglo-e-tuer':'Iglo Energy Tür','iglo-hs':'Iglo-HS'};
+  grid.innerHTML = pList.map(([k,v])=>`
+    <div class="oc" data-v="${k}" onclick="pick(this,'profil')" style="flex-direction:column;gap:6px;padding:12px">
+      ${pvProfileSVG(k)}
+      <div>
+        <div class="olabel">${nameMap[k]||k}</div>
+        <div class="osub">${v.name.split('·').slice(1).join('·').trim()}</div>
+        <div class="oprice ${v.add===0?'p-inc':'p-add'}">${v.add===0?'inklusive':'+ '+v.add+' €/Stück'}</div>
+      </div>
+    </div>`).join('');
+  if (S.prod==='hst') { const el=grid.querySelector('[data-v="iglo-hs"]'); if(el){el.classList.add('sel');S.profil='iglo-hs';mkDone(2);} }
+}
+
+// ── FARB-PICKER BAUEN ────────────────────────────────
+function buildFarbePicker() {
+  ['fa','fi','fd'].forEach(key => {
+    const table = P[key], grid = document.getElementById('fp-'+{fa:'aussen',fi:'innen',fd:'dicht'}[key]);
+    if (!grid) return;
+    grid.innerHTML = Object.entries(table).map(([k,v])=>`
+      <div class="fp-item ${S[key]===k?'sel':''}" data-v="${k}" onclick="pickColor(this,'${key}')">
+        <div class="fp-swatch" style="background:${v.hex};border-color:${S[key]===k?'#225eaa':'transparent'};box-shadow:${S[key]===k?'0 0 0 3px rgba(34,94,170,.2)':'none'};border:3px solid ${S[key]===k?'#225eaa':v.border||'#ccc'}"></div>
+        <div class="fp-name">${v.name}</div>
+        ${v.add>0?`<div style="font-size:11px;color:#d97706;font-weight:700">+${v.add}€</div>`:`<div style="font-size:11px;color:#225eaa;font-weight:700">inkl.</div>`}
+      </div>`).join('');
+  });
+}
+
+function pickColor(el, key) {
+  const grid = el.parentElement;
+  grid.querySelectorAll('.fp-item').forEach(c=>{
+    c.classList.remove('sel');
+    c.querySelector('.fp-swatch').style.borderColor = P[key][c.dataset.v]?.border||'#ccc';
+    c.querySelector('.fp-swatch').style.boxShadow = 'none';
+  });
+  el.classList.add('sel');
+  el.querySelector('.fp-swatch').style.borderColor = '#225eaa';
+  el.querySelector('.fp-swatch').style.boxShadow = '0 0 0 3px rgba(34,94,170,.2)';
+  S[key] = el.dataset.v;
+  pick({dataset:{v:el.dataset.v},closest:()=>null,classList:{add:()=>{},remove:()=>{},toggle:()=>{}}}, key);
+  // Override the broken closest() call by calling side effects manually
+  if (key==='fa') { document.getElementById('d6').textContent='A: '+(P.fa[S.fa]?.name||S.fa)+' / I: '+(P.fi[S.fi]?.name||S.fi); mkDone(6); }
+  if (key==='fi') { document.getElementById('d6').textContent='A: '+(P.fa[S.fa]?.name||S.fa)+' / I: '+(P.fi[S.fi]?.name||S.fi); }
+  drawPrev(); upSidebar();
+}
+
+// ── PREIS BERECHNEN ──────────────────────────────────
+function calcUnit() {
+  if (!S.prod) return 0;
+  const pr = P.prod[S.prod];
+  const sqm = (S.bMm/1000)*(S.hMm/1000);
+  let price = pr.sqm>0 ? Math.max(pr.min, pr.fix + sqm*pr.sqm) : pr.min;
+  if (S.glas    && P.glas[S.glas])       price += P.glas[S.glas].add;
+  if (S.profil  && P.profil[S.profil])   price += P.profil[S.profil].add;
+  if (S.fluegel && P.fluegel[S.fluegel]) price += P.fluegel[S.fluegel].add;
+  // Per-sash opening costs
+  const cnt = getSashCount();
+  if (cnt>=1 && S.oeff1 && P.oeff_sash[S.oeff1]) price += P.oeff_sash[S.oeff1].add;
+  if (cnt>=2 && S.oeff2 && P.oeff_sash[S.oeff2]) price += P.oeff_sash[S.oeff2].add;
+  if (cnt>=3 && S.oeff3 && P.oeff_sash[S.oeff3]) price += P.oeff_sash[S.oeff3].add;
+  if (S.glasdekor && P.glasdekor[S.glasdekor] && S.glasdekor!=='klar') price += P.glasdekor[S.glasdekor].add;
+  if (S.fa && P.fa[S.fa])           price += P.fa[S.fa].add;
+  if (S.fi && P.fi[S.fi])           price += P.fi[S.fi].add;
+  if (S.fd && P.fd[S.fd])           price += P.fd[S.fd].add;
+  if (S.sproTyp !== 'keine' && S.sproDicke) {
+    const idx = S.sproTyp==='aufgeklebt' ? 0 : 1;
+    price += P.sproAdd[S.sproDicke][idx];
+  }
+  if (S.griff  && P.griff[S.griff])   price += P.griff[S.griff].add;
+  if (S.roll   && P.roll[S.roll])     price += P.roll[S.roll].add;
+  if (S.sicher && P.sicher[S.sicher]) price += P.sicher[S.sicher].add;
+  return Math.round(price*100)/100;
+}
+
+function fmt(n) { return n.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+'\u00a0€'; }
+
+// ── SIDEBAR UPDATE ────────────────────────────────────
+function upSidebar() {
+  if (!S.prod) return;
+  const unit = calcUnit(), ship = deliv(S.qty, S.prod);
+  const sub  = unit*S.qty, tot = sub+ship;
+  const pr   = P.prod[S.prod];
+  const sqm  = (S.bMm/1000)*(S.hMm/1000);
+  const base = pr.sqm>0 ? Math.max(pr.min, pr.fix+sqm*pr.sqm) : pr.min;
+
+  let rows=[{l:pr.name+' '+S.bMm+'×'+S.hMm+' mm', v:fmt(base)}];
+  const adds=[
+    ['glas','profil'].map(k=>{
+      const tbl = P[k]; if(!S[k]||!tbl[S[k]]||tbl[S[k]].add===0) return null;
+      const a=tbl[S[k]].add; return {l:tbl[S[k]].name,v:(a>0?'+ ':'− ')+fmt(Math.abs(a)),sub:true};
+    }),
+    (()=>{
+      if(!S.fluegel||!P.fluegel[S.fluegel]||P.fluegel[S.fluegel].add===0) return [];
+      return [{l:P.fluegel[S.fluegel].name,v:'+ '+fmt(P.fluegel[S.fluegel].add),sub:true}];
+    })(),
+    (()=>{
+      const cnt=getSashCount(); const parts=[];
+      ['oeff1','oeff2','oeff3'].slice(0,cnt).forEach(k=>{
+        if(S[k]&&P.oeff_sash[S[k]]&&P.oeff_sash[S[k]].add!==0) {
+          const a=P.oeff_sash[S[k]].add;
+          parts.push({l:P.oeff_sash[S[k]].name,v:(a>0?'+ ':'− ')+fmt(Math.abs(a)),sub:true});
+        }
+      });
+      return parts;
+    })(),
+    (()=>{
+      if(!S.glasdekor||S.glasdekor==='klar'||!P.glasdekor[S.glasdekor]) return [];
+      return [{l:P.glasdekor[S.glasdekor].name,v:'+ '+fmt(P.glasdekor[S.glasdekor].add),sub:true}];
+    })(),
+    ['fa','fi','fd'].map(k=>{
+      const tbl=P[k]; if(!S[k]||!tbl[S[k]]||tbl[S[k]].add===0) return null;
+      return {l:tbl[S[k]].name,v:'+ '+fmt(tbl[S[k]].add),sub:true};
+    }),
+    (()=>{
+      if(S.sproTyp==='keine') return [];
+      const idx=S.sproTyp==='aufgeklebt'?0:1;
+      const a=P.sproAdd[S.sproDicke||'18'][idx];
+      return [{l:(S.sproTyp==='aufgeklebt'?'Aufgekl.':'Innenlieg.')+' Sprossen '+S.sproDicke+'mm',v:'+ '+fmt(a),sub:true}];
+    })(),
+    ['griff','roll','sicher'].map(k=>{
+      const tbl=P[k]; if(!S[k]||!tbl[S[k]]||tbl[S[k]].add===0) return null;
+      return {l:tbl[S[k]].name,v:'+ '+fmt(tbl[S[k]].add),sub:true};
+    }),
+  ].flat().filter(Boolean);
+  rows=[...rows,...adds,{l:'× '+S.qty+' Stück',v:fmt(sub),bold:true},{l:'Lieferkosten',v:fmt(ship),sub:true}];
+
+  document.getElementById('sb-price').innerHTML = rows.map(r=>
+    `<div class="pr${r.bold?' bold':r.sub?' sub':''}"><span>${r.l}</span><span>${r.v}</span></div>`
+  ).join('');
+  document.getElementById('sb-total').textContent = fmt(tot);
+  document.getElementById('sb-unit').textContent  = S.qty>1?fmt(unit)+'/Stück':'';
+
+  // Chips
+  const chips=[];
+  if(S.prod)           chips.push(P.prod[S.prod].name);
+  if(S.fluegel&&S.fluegel!=='1-fluegel') chips.push(P.fluegel[S.fluegel]?.name||S.fluegel);
+  if(S.bMm&&S.hMm)    chips.push(S.bMm+'×'+S.hMm+' mm');
+  if(S.oeff1&&S.oeff1!=='dreh-l') chips.push(P.oeff_sash[S.oeff1]?.name||S.oeff1);
+  if(S.fa&&S.fa!=='weiss') chips.push(P.fa[S.fa]?.name||S.fa);
+  if(S.glasdekor&&S.glasdekor!=='klar') chips.push(P.glasdekor[S.glasdekor]?.name||S.glasdekor);
+  if(S.roll&&S.roll!=='ohne') chips.push(P.roll[S.roll]?.name||S.roll);
+  document.getElementById('chips').innerHTML = chips.map(c=>
+    `<span style="background:#d6e3ff;color:#225eaa;font-size:12px;font-weight:600;padding:3px 8px;border-radius:999px;display:inline-flex;align-items:center;gap:4px">
+      <i class="ms f" style="font-size:14px;color:#225eaa">check_circle</i>${c}</span>`
+  ).join('');
+
+  upFinalSum(rows,tot);
+}
+
+function upFinalSum(rows,tot) {
+  const cnt=getSashCount();
+  const oeffStr = S.oeff1 ? (cnt===1 ? P.oeff_sash[S.oeff1]?.name||S.oeff1 : 'L:'+( P.oeff_sash[S.oeff1]?.name||S.oeff1)+(S.oeff2?' / R:'+(P.oeff_sash[S.oeff2]?.name||S.oeff2):'')+(S.oeff3?' / M:'+(P.oeff_sash[S.oeff3]?.name||S.oeff3):'')) : '–';
+  const items=[
+    ['Produkt', S.prod?P.prod[S.prod].name:'–'],
+    ['Profil', S.profil?P.profil[S.profil]?.name.split('·')[0].trim()||S.profil:'–'],
+    ['Flügelaufteilung', S.fluegel?P.fluegel[S.fluegel]?.name||S.fluegel:'–'],
+    ['Öffnungsart', oeffStr],
+    ['Maße (Rohbau)', S.bMm+' × '+S.hMm+' mm'],
+    ['Verglasung', S.glas?P.glas[S.glas]?.name||S.glas:'–'],
+    ['Glasdekor', S.glasdekor?P.glasdekor[S.glasdekor]?.name||S.glasdekor:'Klarglas'],
+    ['Außenfarbe', S.fa?P.fa[S.fa]?.name||S.fa:'–'],
+    ['Innenfarbe', S.fi?P.fi[S.fi]?.name||S.fi:'–'],
+    ['Dichtung', S.fd?P.fd[S.fd]?.name||S.fd:'–'],
+    ['Griff', S.griff?P.griff[S.griff]?.name||S.griff:'–'],
+    ['Einbruchschutz', S.sicher?P.sicher[S.sicher]?.name||S.sicher:'–'],
+    ['Rolladen', S.roll?P.roll[S.roll]?.name||S.roll:'–'],
+    ['Sprossen', S.sproTyp==='keine'?'Ohne':S.sproTyp+' '+S.sproDicke+' mm'],
+  ];
+  document.getElementById('sum-rows').innerHTML = items.map(([k,v])=>
+    `<div class="sr"><span style="color:#424751">${k}</span><span style="font-weight:600;text-align:right">${v}</span></div>`
+  ).join('');
+  document.getElementById('sum-price').innerHTML = rows.map(r=>
+    `<div class="pr${r.bold?' bold':r.sub?' sub':''}"><span>${r.l}</span><span>${r.v}</span></div>`
+  ).join('');
+  document.getElementById('sum-total').textContent = fmt(tot);
+}
+
+// ── SVG PREVIEW (Realistic) ──────────────────────────
+function hexAdj(hex, n) {
+  const h = (hex||'#f4f4ef').replace('#','').padEnd(6,'0');
+  return '#'+[0,2,4].map(i=>Math.min(255,Math.max(0,parseInt(h.slice(i,i+2),16)+n))
+    .toString(16).padStart(2,'0')).join('');
+}
+
+// ── VIEW TOGGLE ──────────────────────────────────────
+let previewView = 'aus'; // 'aus' = Außenansicht, 'inn' = Innenansicht
+function setPreviewView(v) {
+  previewView = v;
+  document.getElementById('view-btn-aus').classList.toggle('active', v==='aus');
+  document.getElementById('view-btn-inn').classList.toggle('active', v==='inn');
+  drawPrev();
+}
+
+// ── SVG LIVE-VORSCHAU ─────────────────────────────────
+
+function _updateColorStrip() {
+  const cs = document.getElementById('prev-color-strip');
+  if (!cs) return;
+  if (!S.prod) { cs.style.display = 'none'; return; }
+  const faData = P.fa[S.fa] || P.fa.weiss;
+  const fiData = P.fi[S.fi] || P.fi.weiss;
+  document.getElementById('prev-swatch-a').style.background = faData.hex;
+  document.getElementById('prev-swatch-a').style.borderColor = faData.border || '#ccc';
+  document.getElementById('prev-swatch-i').style.background = fiData.hex;
+  document.getElementById('prev-swatch-i').style.borderColor = fiData.border || '#ccc';
+  document.getElementById('prev-color-a').textContent = 'A: ' + faData.name;
+  document.getElementById('prev-color-i').textContent = 'I: ' + fiData.name;
+  cs.style.display = 'flex';
+}
+
+function _drawSash(x, y, w, h, t, fc, op) {
+  const opa = (op !== undefined && op < 1) ? ` opacity="${op}"` : '';
+  let s = `<g${opa}>`;
+  s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${fc.f}" rx="1"/>`;
+  s += `<polygon points="${x},${y} ${x+w},${y} ${x+w-t},${y+t} ${x+t},${y+t}" fill="${fc.h}" opacity="0.38"/>`;
+  s += `<polygon points="${x},${y} ${x+t},${y+t} ${x+t},${y+h-t} ${x},${y+h}" fill="${fc.h}" opacity="0.28"/>`;
+  s += `<polygon points="${x},${y+h} ${x+w},${y+h} ${x+w-t},${y+h-t} ${x+t},${y+h-t}" fill="${fc.s}" opacity="0.45"/>`;
+  s += `<polygon points="${x+w},${y} ${x+w},${y+h} ${x+w-t},${y+h-t} ${x+w-t},${y+t}" fill="${fc.s}" opacity="0.38"/>`;
+  s += `<line x1="${x+1}" y1="${y+1}" x2="${x+w-1}" y2="${y+1}" stroke="rgba(255,255,255,0.45)" stroke-width="1.2"/>`;
+  s += `<line x1="${x+1}" y1="${y+1}" x2="${x+1}" y2="${y+h-1}" stroke="rgba(255,255,255,0.35)" stroke-width="1.2"/>`;
+  s += '</g>';
+  return s;
+}
+
+function _drawGlass(x, y, w, h, ornament, rid) {
+  let s = '';
+  s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="url(#glGrad${rid})"/>`;
+  if (!ornament) {
+    s += `<polygon points="${x+3},${y+3} ${x+w*0.35},${y+3} ${x+w*0.18},${y+h*0.50} ${x+3},${y+h*0.50}" fill="white" opacity="0.14"/>`;
+    s += `<polygon points="${x+w*0.40},${y+3} ${x+w*0.55},${y+3} ${x+w*0.50},${y+h*0.25} ${x+w*0.38},${y+h*0.25}" fill="white" opacity="0.08"/>`;
+  } else {
+    for (let i = 0; i < 5; i++) s += `<line x1="${x}" y1="${y+i*h/5}" x2="${x+w}" y2="${y+i*h/5}" stroke="rgba(180,200,215,0.5)" stroke-width="0.8"/>`;
+    s += `<text x="${x+w/2}" y="${y+h/2+4}" text-anchor="middle" fill="#7a9ab0" font-size="9" font-family="Manrope,sans-serif" opacity="0.7">Ornament</text>`;
+  }
+  s += `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="none" stroke="rgba(0,0,0,0.10)" stroke-width="2"/>`;
+  return s;
+}
+
+function _drawSprossen(x, y, w, h, sw, fc, typ) {
+  const isInn = typ === 'innenliegend';
+  const col = isInn ? '#6aa0bc' : fc.f;
+  const hi  = isInn ? '#8ac0dc' : fc.h;
+  const cx = x + w / 2, cy = y + h / 2;
+  let s = '';
+  s += `<rect x="${cx-sw/2}" y="${y}" width="${sw}" height="${h}" fill="${col}"/>`;
+  s += `<line x1="${cx-sw/2+1}" y1="${y}" x2="${cx-sw/2+1}" y2="${y+h}" stroke="${hi}" stroke-width="1" opacity="0.5"/>`;
+  s += `<rect x="${x}" y="${cy-sw/2}" width="${w}" height="${sw}" fill="${col}"/>`;
+  s += `<line x1="${x}" y1="${cy-sw/2+1}" x2="${x+w}" y2="${cy-sw/2+1}" stroke="${hi}" stroke-width="1" opacity="0.5"/>`;
+  return s;
+}
+
+function _drawArrows(oeff, gx, gy, gw, gh) {
+  if (!oeff || oeff === 'fest' || oeff === 'hst-slide') return '';
+  const col = '#1a4a8a', op = 0.42, sw = 1.6, dash = '5,4';
+  const L=gx+3, R=gx+gw-3, T=gy+3, B=gy+gh-3, CX=gx+gw/2, CY=gy+gh/2;
+  const sl = (x1,y1,x2,y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="2.8" opacity="${op+0.1}" stroke-linecap="round"/>`;
+  const dl = (x1,y1,x2,y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="${sw}" opacity="${op}" stroke-linecap="round" stroke-dasharray="${dash}"/>`;
+  if (oeff==='dreh-l')  return sl(L,T,L,B)+dl(L,T,R,CY)+dl(L,B,R,CY);
+  if (oeff==='dreh-r')  return sl(R,T,R,B)+dl(R,T,L,CY)+dl(R,B,L,CY);
+  if (oeff==='kipp')    return sl(L,B,R,B)+dl(L,B,CX,T)+dl(R,B,CX,T);
+  if (oeff==='dk-l')    return sl(L,T,L,B)+dl(L,T,R,CY)+dl(L,B,R,CY)+dl(L,B,CX,T)+dl(R,B,CX,T);
+  if (oeff==='dk-r')    return sl(R,T,R,B)+dl(R,T,L,CY)+dl(R,B,L,CY)+dl(L,B,CX,T)+dl(R,B,CX,T);
+  return '';
+}
+
+function _drawHandle(oeff, sx, sy, sw, sh, t, gc) {
+  const onRight = ['dreh-l','dk-l','kipp'].includes(oeff);
+  const hx = onRight ? sx+sw-t-2 : sx+t+2;
+  const hy = sy + sh * 0.50;
+  const dir = onRight ? -1 : 1;
+  let s = '';
+  s += `<rect x="${hx-5}" y="${hy-18}" width="10" height="36" rx="5" fill="${gc.f}" stroke="${gc.s}" stroke-width="0.8"/>`;
+  s += `<line x1="${hx-3}" y1="${hy-13}" x2="${hx+3}" y2="${hy-13}" stroke="${gc.h}" stroke-width="0.8" opacity="0.5"/>`;
+  s += `<line x1="${hx-3}" y1="${hy+13}" x2="${hx+3}" y2="${hy+13}" stroke="${gc.h}" stroke-width="0.8" opacity="0.5"/>`;
+  s += `<rect x="${hx-4}" y="${hy-12}" width="8" height="24" rx="4" fill="${gc.f}" stroke="${gc.s}" stroke-width="0.8"/>`;
+  s += `<line x1="${hx-2}" y1="${hy-8}" x2="${hx-2}" y2="${hy+8}" stroke="${gc.h}" stroke-width="1.2" opacity="0.4"/>`;
+  const lLen = 20;
+  const lx1 = hx, lx2 = hx + dir * lLen;
+  const lxMin = Math.min(lx1, lx2), lxMax = Math.max(lx1, lx2);
+  s += `<rect x="${lxMin-3}" y="${hy-4}" width="${lLen+6}" height="8" rx="4" fill="${gc.f}" stroke="${gc.s}" stroke-width="0.8"/>`;
+  s += `<line x1="${lxMin}" y1="${hy-2}" x2="${lxMax+3}" y2="${hy-2}" stroke="${gc.h}" stroke-width="1" opacity="0.35"/>`;
+  s += `<circle cx="${lx2}" cy="${hy}" r="5" fill="${gc.f}" stroke="${gc.s}" stroke-width="0.8"/>`;
+  return s;
+}
+
+function drawPrev() {
+  const svg = document.getElementById('psvg');
+  if (!svg) return;
+  _updateColorStrip();
+
+  if (!S.prod) {
+    svg.innerHTML = `<rect width="320" height="360" fill="#f5f6f8"/>
+      <text x="160" y="168" text-anchor="middle" fill="#c0c8d8" font-size="16" font-family="Manrope,sans-serif">Produkt wählen →</text>
+      <text x="160" y="190" text-anchor="middle" fill="#d0d8e8" font-size="12" font-family="Manrope,sans-serif">← Schritt 1</text>`;
+    return;
+  }
+
+  const FCOLS = {
+    weiss:        {f:'#f0f0ec', h:'#ffffff', s:'#c8c8c0', wood:false},
+    anthrazit:    {f:'#3a3d3f', h:'#585c5f', s:'#1a1d1f', wood:false},
+    schwarzgr:    {f:'#28292b', h:'#404244', s:'#101112', wood:false},
+    braun:        {f:'#6b3a2a', h:'#8b5a4a', s:'#4b1a0a', wood:true },
+    'golden-oak': {f:'#9b6840', h:'#bb8860', s:'#7b4820', wood:true },
+    db703:        {f:'#4a4a4a', h:'#6a6a6a', s:'#2a2a2a', wood:false},
+    champagner:   {f:'#c8b898', h:'#e8d8b8', s:'#a89878', wood:false},
+    sonder:       {f:'#889aaa', h:'#a8bacc', s:'#667888', wood:false},
+  };
+  const GCOLS = {
+    'std-weiss':     {f:'#e8e8e8', s:'#c0c0c0', h:'#ffffff'},
+    'hoppe-es-matt': {f:'#b0b4b8', s:'#888c90', h:'#d8dce0'},
+    'hoppe-es-pol':  {f:'#d0d4d8', s:'#a0a4a8', h:'#f0f4f8'},
+    'hoppe-gold':    {f:'#c8a020', s:'#9a7810', h:'#e8c040'},
+    'fsb-es':        {f:'#b0b4b8', s:'#888c90', h:'#d8dce0'},
+    'pz-beid':       {f:'#b0b4b8', s:'#888c90', h:'#d8dce0'},
+  };
+
+  const ocKey  = previewView === 'inn' ? (S.fi || 'weiss') : (S.fa || 'weiss');
+  const fc = FCOLS[ocKey] || FCOLS.weiss;
+  const dc = P.fd[S.fd]?.hex || '#1a1a1a';
+  const gc = GCOLS[S.griff] || GCOLS['std-weiss'];
+
+  const isHST      = S.prod === 'hst';
+  const isTuer     = S.prod === 'haustuere';
+  const sashCnt    = isHST ? 2 : (isTuer ? 1 : getSashCount());
+  const isZwei     = !isHST && !isTuer && sashCnt === 2;
+  const isDrei     = !isHST && !isTuer && sashCnt === 3;
+  const hasOl      = !isHST && !isTuer && ((S.fluegel||'').includes('oberlicht') || (S.fluegel||'').includes('ober-unter'));
+  const hasUl      = !isHST && !isTuer && ((S.fluegel||'').includes('unterlicht') || (S.fluegel||'').includes('ober-unter'));
+  const isOrn      = S.glasdekor && S.glasdekor !== 'klar';
+  const hasRoll    = S.roll && S.roll !== 'ohne';
+
+  const rid = Math.floor(Math.random() * 99999);
+
+  // Window proportions
+  const ratio = (S.bMm || 1000) / (S.hMm || 1200);
+  const MAXW = isHST ? 280 : 240;
+  const MAXH = hasRoll ? 230 : (isTuer ? 285 : 260);
+  const effRatio = isHST ? Math.max(1.7, ratio) : (isTuer ? Math.min(ratio, 0.65) : ratio);
+  let FW, FH;
+  if (effRatio >= MAXW / MAXH) { FW = MAXW; FH = Math.round(FW / effRatio); }
+  else { FH = MAXH; FW = Math.round(FH * effRatio); }
+  FW = Math.max(120, FW); FH = Math.max(120, FH);
+  const OX = Math.round((320 - FW) / 2);
+  const OY = hasRoll ? 50 : Math.max(22, Math.round((295 - FH) / 2));
+
+  const BT = 16, ST = 11, SEA = 3, GI = BT + SEA + ST;
+  const GX = OX+GI, GY = OY+GI, GW = FW-GI*2, GH = FH-GI*2;
+
+  const defs = `<defs>
+    <filter id="fshadow${rid}" x="-18%" y="-12%" width="145%" height="135%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="rgba(0,0,0,0.18)"/>
+    </filter>
+    <linearGradient id="glGrad${rid}" x1="5%" y1="0%" x2="95%" y2="100%">
+      <stop offset="0%" stop-color="${isOrn?'#dde8ee':'#cde4f0'}"/>
+      <stop offset="45%" stop-color="${isOrn?'#c8d8e2':'#b0cfe0'}"/>
+      <stop offset="100%" stop-color="${isOrn?'#b8ccd8':'#88b8d0'}"/>
+    </linearGradient>
+    <linearGradient id="gcGrad${rid}" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="${gc.h}" stop-opacity="0.85"/>
+      <stop offset="50%" stop-color="${gc.f}"/>
+      <stop offset="100%" stop-color="${gc.s}"/>
+    </linearGradient>
+  </defs>`;
+
+  let o = '<rect width="320" height="360" fill="#f5f6f8"/>';
+
+  // Ground shadow
+  const floorY = OY + FH + 20;
+  o += `<ellipse cx="160" cy="${floorY}" rx="${FW*0.55}" ry="5" fill="rgba(0,0,0,0.07)"/>`;
+
+  // Rolladen box
+  if (hasRoll) {
+    const rbH = 28, rbY = OY - rbH - 2;
+    o += `<rect x="${OX}" y="${rbY}" width="${FW}" height="${rbH}" fill="${hexAdj(fc.f,-14)}" rx="2" filter="url(#fshadow${rid})"/>`;
+    for (let i = 1; i < 6; i++) o += `<line x1="${OX+4}" y1="${rbY+i*5}" x2="${OX+FW-4}" y2="${rbY+i*5}" stroke="${hexAdj(fc.f,-28)}" stroke-width="0.9" opacity="0.55"/>`;
+    const gkx = S.rollSeite==='links' ? OX+12 : OX+FW-12;
+    o += `<rect x="${gkx-5}" y="${OY-4}" width="10" height="16" rx="3" fill="${hexAdj(fc.f,-22)}" stroke="${hexAdj(fc.s,-10)}" stroke-width="0.8"/>`;
+  }
+
+  // Outer frame with shadow
+  o += `<rect x="${OX}" y="${OY}" width="${FW}" height="${FH}" fill="${fc.f}" rx="2" filter="url(#fshadow${rid})"/>`;
+
+  // Wood grain
+  if (fc.wood) {
+    for (let i = 0; i < 9; i++) {
+      const wy = OY + i * (FH / 9) + 4;
+      o += `<line x1="${OX+3}" y1="${wy}" x2="${OX+FW-3}" y2="${wy+2}" stroke="${fc.h}" stroke-width="1" opacity="0.13"/>`;
+    }
+  }
+
+  // 3D bevel
+  o += `<polygon points="${OX},${OY} ${OX+FW},${OY} ${OX+FW-BT},${OY+BT} ${OX+BT},${OY+BT}" fill="${fc.h}" opacity="0.35"/>`;
+  o += `<polygon points="${OX},${OY} ${OX+BT},${OY+BT} ${OX+BT},${OY+FH-BT} ${OX},${OY+FH}" fill="${fc.h}" opacity="0.25"/>`;
+  o += `<polygon points="${OX},${OY+FH} ${OX+FW},${OY+FH} ${OX+FW-BT},${OY+FH-BT} ${OX+BT},${OY+FH-BT}" fill="${fc.s}" opacity="0.50"/>`;
+  o += `<polygon points="${OX+FW},${OY} ${OX+FW},${OY+FH} ${OX+FW-BT},${OY+FH-BT} ${OX+FW-BT},${OY+BT}" fill="${fc.s}" opacity="0.42"/>`;
+  o += `<rect x="${OX}" y="${OY}" width="${FW}" height="${FH}" fill="none" stroke="${fc.h}" stroke-width="1.5" opacity="0.5" rx="2"/>`;
+
+  // Seal strip
+  o += `<rect x="${OX+BT}" y="${OY+BT}" width="${FW-BT*2}" height="${FH-BT*2}" fill="${dc}"/>`;
+
+  // Oberlicht / Unterlicht strips
+  const olH = hasOl ? Math.round(FH*0.18) : 0;
+  const ulH = hasUl ? Math.round(FH*0.18) : 0;
+  const sashY = OY+BT+SEA + olH;
+  const sashH = FH-BT*2-SEA*2 - olH - ulH;
+
+  if (hasOl) {
+    o += _drawSash(OX+BT+SEA, OY+BT+SEA, FW-BT*2-SEA*2, olH-2, 6, fc);
+    o += _drawGlass(OX+BT+SEA+6, OY+BT+SEA+6, FW-BT*2-SEA*2-12, olH-14, false, rid);
+    o += `<line x1="${OX+BT}" y1="${sashY}" x2="${OX+FW-BT}" y2="${sashY}" stroke="${fc.s}" stroke-width="2" opacity="0.5"/>`;
+  }
+  if (hasUl) {
+    const ulY = OY+FH-BT-SEA-ulH;
+    o += `<line x1="${OX+BT}" y1="${ulY}" x2="${OX+FW-BT}" y2="${ulY}" stroke="${fc.s}" stroke-width="2" opacity="0.5"/>`;
+    o += _drawSash(OX+BT+SEA, ulY+2, FW-BT*2-SEA*2, ulH-2, 6, fc);
+    o += _drawGlass(OX+BT+SEA+6, ulY+8, FW-BT*2-SEA*2-12, ulH-14, false, rid);
+  }
+
+  // Sash frame(s)
+  if (isHST) {
+    const mid = OX + FW/2;
+    const panW = FW/2 - BT - SEA;
+    o += _drawSash(OX+BT+SEA, OY+BT+SEA, panW-2, FH-BT*2-SEA*2, ST, fc);
+    o += _drawSash(mid+SEA, OY+BT+SEA, panW-2, FH-BT*2-SEA*2, ST, fc, 0.82);
+    o += `<rect x="${mid-5}" y="${OY+BT}" width="10" height="${FH-BT*2}" fill="${fc.f}"/>`;
+    o += `<line x1="${mid-5}" y1="${OY+BT}" x2="${mid-5}" y2="${OY+FH-BT}" stroke="${fc.h}" stroke-width="1" opacity="0.4"/>`;
+    o += `<line x1="${mid+5}" y1="${OY+BT}" x2="${mid+5}" y2="${OY+FH-BT}" stroke="${fc.s}" stroke-width="1" opacity="0.38"/>`;
+  } else if (isDrei) {
+    const thirdW = Math.floor((FW-BT*2-SEA*2)/3);
+    for(let i=0;i<3;i++) o += _drawSash(OX+BT+SEA+i*thirdW, sashY, thirdW, sashH, ST, fc);
+    o += `<line x1="${OX+BT+SEA+thirdW}" y1="${sashY}" x2="${OX+BT+SEA+thirdW}" y2="${sashY+sashH}" stroke="${hexAdj(fc.f,-12)}" stroke-width="2"/>`;
+    o += `<line x1="${OX+BT+SEA+thirdW*2}" y1="${sashY}" x2="${OX+BT+SEA+thirdW*2}" y2="${sashY+sashH}" stroke="${hexAdj(fc.f,-12)}" stroke-width="2"/>`;
+  } else if (isZwei) {
+    const halfW = Math.floor((FW-BT*2-SEA*2)/2);
+    o += _drawSash(OX+BT+SEA, sashY, halfW, sashH, ST, fc);
+    o += _drawSash(OX+BT+SEA+halfW, sashY, halfW, sashH, ST, fc);
+    o += `<line x1="${OX+BT+SEA+halfW}" y1="${sashY}" x2="${OX+BT+SEA+halfW}" y2="${sashY+sashH}" stroke="${hexAdj(fc.f,-12)}" stroke-width="2"/>`;
+  } else {
+    o += _drawSash(OX+BT+SEA, sashY, FW-BT*2-SEA*2, sashH, ST, fc);
+  }
+
+  // Glass and door-specific content
+  const sw_s = S.sproDicke === '26' ? 5 : 3;
+  if (isTuer) {
+    const glasH = Math.round(GH * 0.42);
+    const panH  = GH - glasH - 4;
+    o += _drawGlass(GX, GY, GW, glasH, isOrn, rid);
+    o += `<rect x="${GX}" y="${GY+glasH+4}" width="${GW}" height="${panH}" fill="${fc.f}"/>`;
+    if (fc.wood) {
+      for (let i = 0; i < 7; i++) {
+        const wy = GY+glasH+10+i*(panH/7);
+        o += `<line x1="${GX+4}" y1="${wy}" x2="${GX+GW-4}" y2="${wy+1}" stroke="${fc.h}" stroke-width="0.8" opacity="0.13"/>`;
+      }
+    }
+    o += `<rect x="${GX+8}" y="${GY+glasH+14}" width="${GW-16}" height="${panH-26}" rx="3" fill="${hexAdj(fc.f,-8)}" stroke="${hexAdj(fc.f,-20)}" stroke-width="0.8"/>`;
+    o += `<rect x="${GX+13}" y="${GY+glasH+19}" width="${GW-26}" height="${panH-36}" rx="2" fill="${hexAdj(fc.f,-4)}" stroke="${hexAdj(fc.f,-15)}" stroke-width="0.5" opacity="0.6"/>`;
+    const bkY = GY + glasH + panH - 14;
+    o += `<rect x="${GX+GW/2-18}" y="${bkY}" width="36" height="6" rx="2" fill="${hexAdj(fc.f,-28)}" stroke="${hexAdj(fc.s,-10)}" stroke-width="0.6"/>`;
+    if (S.oeff1 && S.oeff1 !== 'fest') {
+      const onRight = ['dreh-l','dk-l'].includes(S.oeff1);
+      const khx = onRight ? GX+GW-10 : GX+10;
+      const khy = OY + FH*0.58;
+      o += `<rect x="${khx-4}" y="${khy-22}" width="8" height="44" rx="4" fill="${gc.f}" stroke="${gc.s}" stroke-width="0.8"/>`;
+      o += `<line x1="${khx-2}" y1="${khy-16}" x2="${khx-2}" y2="${khy+16}" stroke="${gc.h}" stroke-width="1.2" opacity="0.4"/>`;
+    }
+  } else if (isHST) {
+    const mid = OX + FW/2;
+    const panW = FW/2 - BT - SEA;
+    const lgx = OX+BT+SEA+ST, lgy = OY+BT+SEA+ST;
+    const lgw = panW-ST*2-2, lgh = FH-BT*2-SEA*2-ST*2;
+    const rgx = mid+SEA+ST;
+    o += _drawGlass(lgx, lgy, lgw, lgh, isOrn, rid);
+    o += _drawGlass(rgx, lgy, lgw, lgh, isOrn, rid);
+    if (S.sproTyp && S.sproTyp !== 'keine') {
+      o += _drawSprossen(lgx, lgy, lgw, lgh, sw_s, fc, S.sproTyp);
+      o += _drawSprossen(rgx, lgy, lgw, lgh, sw_s, fc, S.sproTyp);
+    }
+    const ay = OY + FH/2;
+    o += `<path d="M${mid-10},${ay} L${mid-26},${ay-9} M${mid-10},${ay} L${mid-26},${ay+9}" stroke="#1a4a8a" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.55"/>`;
+    o += `<path d="M${mid+10},${ay} L${mid+26},${ay-9} M${mid+10},${ay} L${mid+26},${ay+9}" stroke="#1a4a8a" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.35"/>`;
+    const hx = mid - FW/4 + 5;
+    o += `<rect x="${hx-5}" y="${OY+FH/2-20}" width="10" height="40" rx="5" fill="url(#gcGrad${rid})" stroke="${gc.s}" stroke-width="0.8"/>`;
+    o += `<rect x="${OX+BT}" y="${OY+FH-BT+1}" width="${FW-BT*2}" height="6" rx="2" fill="${hexAdj(fc.f,-18)}" stroke="${hexAdj(fc.s,-8)}" stroke-width="0.8"/>`;
+  } else if (isDrei) {
+    const thirdW = Math.floor((FW-BT*2-SEA*2)/3);
+    const gly = sashY+ST, glh = sashH-ST*2;
+    for(let i=0;i<3;i++) {
+      const glx = OX+BT+SEA+i*thirdW+ST, glw = thirdW-ST*2;
+      const oi = S['oeff'+(i+1)];
+      o += _drawGlass(glx, gly, glw, glh, isOrn, rid);
+      if (S.sproTyp && S.sproTyp !== 'keine') o += _drawSprossen(glx, gly, glw, glh, sw_s, fc, S.sproTyp);
+      if (oi && oi !== 'fest') o += _drawArrows(oi, glx, gly, glw, glh);
+      if (oi && oi !== 'fest') o += _drawHandle(oi, OX+BT+SEA+i*thirdW, sashY, thirdW, sashH, ST, gc);
+    }
+  } else if (isZwei) {
+    const halfW = Math.floor((FW-BT*2-SEA*2)/2);
+    const lx = OX+BT+SEA+ST, rx = OX+BT+SEA+halfW+ST;
+    const gly = sashY+ST, gw2 = halfW-ST*2, glh = sashH-ST*2;
+    o += _drawGlass(lx, gly, gw2, glh, isOrn, rid);
+    o += _drawGlass(rx, gly, gw2, glh, isOrn, rid);
+    if (S.sproTyp && S.sproTyp !== 'keine') {
+      o += _drawSprossen(lx, gly, gw2, glh, sw_s, fc, S.sproTyp);
+      o += _drawSprossen(rx, gly, gw2, glh, sw_s, fc, S.sproTyp);
+    }
+    if (S.oeff1 && S.oeff1 !== 'fest') o += _drawArrows(S.oeff1, lx, gly, gw2, glh);
+    if (S.oeff2 && S.oeff2 !== 'fest') o += _drawArrows(S.oeff2, rx, gly, gw2, glh);
+    if (S.oeff1 && S.oeff1 !== 'fest') o += _drawHandle(S.oeff1, OX+BT+SEA, sashY, halfW, sashH, ST, gc);
+    if (S.oeff2 && S.oeff2 !== 'fest') o += _drawHandle(S.oeff2, OX+BT+SEA+halfW, sashY, halfW, sashH, ST, gc);
+  } else {
+    // Single pane
+    const gx1 = OX+BT+SEA+ST, gly = sashY+ST, gw1 = FW-BT*2-SEA*2-ST*2, glh = sashH-ST*2;
+    o += _drawGlass(gx1, gly, gw1, glh, isOrn, rid);
+    if (S.sproTyp && S.sproTyp !== 'keine') o += _drawSprossen(gx1, gly, gw1, glh, sw_s, fc, S.sproTyp);
+    if (S.oeff1 && S.oeff1 !== 'fest' && !isTuer) o += _drawArrows(S.oeff1, gx1, gly, gw1, glh);
+    if (S.oeff1 && S.oeff1 !== 'fest') o += _drawHandle(S.oeff1, OX+BT+SEA, sashY, FW-BT*2-SEA*2, sashH, ST, gc);
+    if (S.griff === 'pz-beid' && !isHST) {
+      const onRight2 = ['dreh-l','dk-l'].includes(S.oeff1);
+      const khx = onRight2 ? OX+FW-BT-SEA-ST-8 : OX+BT+SEA+ST+8;
+      const khy = sashY + sashH*0.42;
+      o += `<circle cx="${khx}" cy="${khy}" r="5" fill="${gc.f}" stroke="${gc.s}" stroke-width="0.8"/>`;
+      o += `<circle cx="${khx}" cy="${khy}" r="2" fill="${gc.s}"/>`;
+      o += `<rect x="${khx-1.5}" y="${khy}" width="3" height="5" rx="1" fill="${gc.s}"/>`;
+    }
+  }
+
+  // Dimension + product label
+  const lblY = Math.min(OY + FH + 24, 340);
+  o += `<text x="160" y="${lblY}" text-anchor="middle" fill="#6a7a8a" font-size="12" font-weight="700" font-family="Manrope,sans-serif">${S.bMm} × ${S.hMm} mm</text>`;
+  o += `<text x="160" y="${lblY+15}" text-anchor="middle" fill="#9aaabb" font-size="10" font-family="Manrope,sans-serif">${P.prod[S.prod]?.name||''} · ${P.profil[S.profil]?.name?.split('·')[0]?.trim()||'Profil wählen'}</text>`;
+
+  svg.innerHTML = defs + o;
+}
+
+// ── DEAD CODE (replaced by photo preview) ─────────────
+function drawPrev_OLD() {
+  const svg = document.getElementById('psvg');
+  svg.setAttribute('viewBox','0 0 300 340');
+
+  if (!S.prod) {
+    svg.innerHTML = `<rect width="300" height="340" fill="#eef0f8" rx="8"/>
+      <text x="150" y="168" text-anchor="middle" fill="#b0bdd0" font-size="14" font-family="Manrope,sans-serif">Produkt wählen →</text>`;
+    return;
+  }
+
+  // Außen vs. Innen view: swap face/inner colors
+  const _oc = P.fa[S.fa]?.hex    || '#f4f4ef';
+  const _ic = P.fi[S.fi]?.hex    || '#f4f4ef';
+  const oc  = previewView==='inn' ? _ic : _oc;
+  const ic  = previewView==='inn' ? _oc : _ic;
+  const dc  = P.fd[S.fd]?.hex    || '#1e1e1e';
+  const gcl = P.griff[S.griff]?.col || '#c0c4cc';
+  const ocL = hexAdj(oc, 55); const ocD = hexAdj(oc,-55); const ocM = hexAdj(oc,-25);
+  const icL = hexAdj(ic, 40); const icD = hexAdj(ic,-35);
+
+  const hasRoll = S.roll && S.roll!=='ohne';
+  const ratio   = S.bMm / S.hMm;
+  const maxW=226, maxH = hasRoll ? 224 : 264;
+  let FW,FH;
+  if (ratio >= maxW/maxH) { FW=maxW; FH=Math.round(FW/ratio); }
+  else { FH=maxH; FW=Math.round(FH*ratio); }
+  const X=Math.round((300-FW)/2), Y=hasRoll?72:Math.round((300-FH)/2)+8;
+
+  const BT=15, ST=11, GAP=3;              // Blendrahmen, Sash, Seal gap
+  const GI=BT+GAP+ST;                     // total inset to glass
+  const GX=X+GI, GY=Y+GI, GW=FW-GI*2, GH=FH-GI*2;
+  const isOrn = S.glas&&(S.glas.includes('ornament')||S.glas==='milch');
+  const isPfosten = S.oeff==='zweifl-pfosten';
+  const isStulp   = S.oeff==='zweifl-stulp';
+  const isZwei    = isPfosten||isStulp;
+  const isHST     = S.prod==='hst';
+  const isTuer    = S.prod==='haustuere';
+
+  /* ── DEFS ─────────────────────────────────────────── */
+  const defs=`<defs>
+  <linearGradient id="wBG" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#d8dce6"/><stop offset="100%" stop-color="#c4c8d4"/></linearGradient>
+  <linearGradient id="floorGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+    <stop offset="0%" stop-color="rgba(0,0,0,0)"/><stop offset="100%" stop-color="rgba(0,0,0,0.15)"/></linearGradient>
+  <linearGradient id="gGrad" x1="8%" y1="5%" x2="92%" y2="95%">
+    <stop offset="0%" stop-color="#cce7f5"/>
+    <stop offset="38%" stop-color="#a2ccdf"/>
+    <stop offset="100%" stop-color="#78aec6"/></linearGradient>
+  <linearGradient id="gOrn" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#dce8ef"/>
+    <stop offset="100%" stop-color="#b8ccd8"/></linearGradient>
+  <linearGradient id="rollGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+    <stop offset="0%" stop-color="${hexAdj(oc,-10)}"/>
+    <stop offset="100%" stop-color="${hexAdj(oc,-55)}"/></linearGradient>
+  <linearGradient id="hGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="${hexAdj(gcl,55)}"/>
+    <stop offset="50%" stop-color="${gcl}"/>
+    <stop offset="100%" stop-color="${hexAdj(gcl,-45)}"/></linearGradient>
+  <filter id="wShadow" x="-12%" y="-8%" width="128%" height="124%">
+    <feDropShadow dx="2" dy="5" stdDeviation="7" flood-color="rgba(0,0,0,0.28)"/></filter>
+  </defs>`;
+
+  let o='';
+
+  /* ── BACKGROUND (white studio look) ───────────────── */
+  o+=`<rect width="300" height="340" fill="#f7f8fa"/>`;
+  // subtle vignette / floor line
+  o+=`<rect width="300" height="340" fill="url(#wBG)" opacity="0.35"/>`;
+  // floor shadow gradient at bottom
+  o+=`<rect x="0" y="280" width="300" height="60" fill="url(#floorGrad)" opacity="0.18"/>`;
+
+  /* ── ROLLADEN ─────────────────────────────────────── */
+  if (hasRoll) {
+    const rbH=36, rbY=Y-rbH-2;
+    o+=`<rect x="${X}" y="${rbY}" width="${FW}" height="${rbH}" fill="url(#rollGrad)" rx="3"/>`;
+    o+=`<rect x="${X}" y="${rbY}" width="${FW}" height="${rbH}" fill="none" stroke="${ocD}" stroke-width="1" rx="3"/>`;
+    for(let i=1;i<7;i++) o+=`<line x1="${X+3}" y1="${rbY+i*5}" x2="${X+FW-3}" y2="${rbY+i*5}" stroke="${ocD}" stroke-width="0.9" opacity="0.45"/>`;
+    o+=`<text x="${X+FW/2}" y="${rbY+rbH/2+4}" text-anchor="middle" font-size="9" font-family="Manrope,sans-serif" fill="${hexAdj(ocL,-10)}" opacity="0.65" letter-spacing="1">ROLLADEN</text>`;
+    const gx2 = S.rollSeite==='links'?X+12:X+FW-12;
+    o+=`<rect x="${gx2-4}" y="${Y-2}" width="8" height="14" rx="3" fill="${ocM}" opacity="0.55"/>`;
+  }
+
+  /* ── WINDOW SHADOW ────────────────────────────────── */
+  o+=`<rect x="${X+4}" y="${Y+6}" width="${FW}" height="${FH}" fill="rgba(0,0,0,0.18)" rx="2"/>`;
+
+  /* ── BLENDRAHMEN (outer fixed frame) ─────────────── */
+  // Face fill
+  o+=`<rect x="${X}" y="${Y}" width="${FW}" height="${FH}" fill="${oc}" rx="1" filter="url(#wShadow)"/>`;
+  // 3D bevel polygons
+  o+=`<polygon points="${X},${Y} ${X+FW},${Y} ${X+FW-BT},${Y+BT} ${X+BT},${Y+BT}" fill="${ocL}" opacity="0.45"/>`;
+  o+=`<polygon points="${X},${Y} ${X+BT},${Y+BT} ${X+BT},${Y+FH-BT} ${X},${Y+FH}" fill="${ocL}" opacity="0.35"/>`;
+  o+=`<polygon points="${X+FW},${Y+FH} ${X},${Y+FH} ${X+BT},${Y+FH-BT} ${X+FW-BT},${Y+FH-BT}" fill="${ocD}" opacity="0.35"/>`;
+  o+=`<polygon points="${X+FW},${Y} ${X+FW},${Y+FH} ${X+FW-BT},${Y+FH-BT} ${X+FW-BT},${Y+BT}" fill="${ocD}" opacity="0.3"/>`;
+  // Sharp highlight lines
+  o+=`<line x1="${X+1}" y1="${Y+1}" x2="${X+FW-1}" y2="${Y+1}" stroke="rgba(255,255,255,0.55)" stroke-width="1.5"/>`;
+  o+=`<line x1="${X+1}" y1="${Y+1}" x2="${X+1}" y2="${Y+FH-1}" stroke="rgba(255,255,255,0.45)" stroke-width="1.5"/>`;
+  // Bottom/right shadow lines
+  o+=`<line x1="${X+1}" y1="${Y+FH-1}" x2="${X+FW-1}" y2="${Y+FH-1}" stroke="rgba(0,0,0,0.3)" stroke-width="1.5"/>`;
+  o+=`<line x1="${X+FW-1}" y1="${Y+1}" x2="${X+FW-1}" y2="${Y+FH-1}" stroke="rgba(0,0,0,0.25)" stroke-width="1.5"/>`;
+
+  /* ── DICHTUNG / SEAL GAP ──────────────────────────── */
+  // Visible as colored strip between Blend and Sash
+  const sX=X+BT, sY=Y+BT, sW=FW-BT*2, sH=FH-BT*2;
+  o+=`<rect x="${sX}" y="${sY}" width="${sW}" height="${sH}" fill="${dc}"/>`;
+
+  /* ── SASH FRAME(S) ────────────────────────────────── */
+  const fX=sX+GAP, fY=sY+GAP, fW=sW-GAP*2, fH=sH-GAP*2;
+  const scL=hexAdj(oc,42), scD=hexAdj(oc,-38);
+
+  if (isZwei) {
+    // Two sashes
+    const postW = isPfosten ? 14 : 0;
+    const halfW = Math.floor((fW - postW) / 2);
+    // Left sash
+    o+=pvSash(fX,          fY, halfW,    fH, ST, oc, scL, scD);
+    // Right sash
+    o+=pvSash(fX+halfW+postW, fY, halfW, fH, ST, oc, scL, scD);
+    // Center post or stulp overlap
+    if (isPfosten) {
+      o+=`<rect x="${fX+halfW}" y="${Y}" width="${postW}" height="${FH}" fill="${oc}"/>`;
+      o+=`<polygon points="${fX+halfW},${Y} ${fX+halfW+postW},${Y} ${fX+halfW+postW-4},${Y+6} ${fX+halfW+4},${Y+6}" fill="${scL}" opacity="0.4"/>`;
+      o+=`<polygon points="${fX+halfW},${Y+FH} ${fX+halfW+postW},${Y+FH} ${fX+halfW+postW-4},${Y+FH-6} ${fX+halfW+4},${Y+FH-6}" fill="${scD}" opacity="0.35"/>`;
+    } else {
+      // Stulp: left sash overlaps slightly on right edge
+      o+=`<rect x="${fX+halfW-4}" y="${fY}" width="8" height="${fH}" fill="${ocM}" opacity="0.6"/>`;
+    }
+  } else if (isHST) {
+    // HST: two sliding panels, no sash frame drawn (panels slide)
+    const mid = fX+fW/2;
+    o+=`<rect x="${fX}" y="${fY}" width="${fW/2-1}" height="${fH}" fill="${oc}"/>`;
+    o+=`<rect x="${mid+1}" y="${fY}" width="${fW/2-1}" height="${fH}" fill="${oc}"/>`;
+    // Rail / post
+    o+=`<rect x="${mid-5}" y="${Y}" width="10" height="${FH}" fill="${oc}"/>`;
+    o+=`<polygon points="${mid-5},${Y} ${mid+5},${Y} ${mid+3},${Y+8} ${mid-3},${Y+8}" fill="${scL}" opacity="0.5"/>`;
+    o+=`<polygon points="${mid-5},${Y+FH} ${mid+5},${Y+FH} ${mid+3},${Y+FH-8} ${mid-3},${Y+FH-8}" fill="${scD}" opacity="0.45"/>`;
+    o+=`<line x1="${mid}" y1="${Y+2}" x2="${mid}" y2="${Y+FH-2}" stroke="${scD}" stroke-width="0.8" opacity="0.5"/>`;
+  } else {
+    // Single sash
+    o+=pvSash(fX, fY, fW, fH, ST, oc, scL, scD);
+  }
+
+  /* ── GLASS ────────────────────────────────────────── */
+  if (isZwei) {
+    const postW = isPfosten?14:0;
+    const halfW = Math.floor((fW-postW)/2);
+    const LGX=GX, LGY=GY, LGW=halfW-ST, LGH=GH;
+    const RGX=GX+halfW+postW, RGY=GY, RGW=halfW-ST, RGH=GH;
+    o+=pvGlass(LGX,LGY,LGW,LGH,isOrn);
+    o+=pvGlass(RGX,RGY,RGW,RGH,isOrn);
+    // Sprossen
+    if (S.sproTyp&&S.sproTyp!=='keine') {
+      o+=pvSprossen(LGX,LGY,LGW,LGH,S.sproTyp,S.sproDicke,oc,scL,scD);
+      o+=pvSprossen(RGX,RGY,RGW,RGH,S.sproTyp,S.sproDicke,oc,scL,scD);
+    }
+    // Opening arrows - left opens dreh-r, right opens dreh-l
+    o+=pvArrows('dreh-r', LGX,LGY,LGW,LGH);
+    o+=pvArrows('dreh-l', RGX,RGY,RGW,RGH);
+    // Handles
+    const hcl = P.griff[S.griff]?.col||'#c0c4cc';
+    o+=pvHandle('dreh-r', fX,      fY, halfW,          fH, ST, hcl, S.griff);
+    o+=pvHandle('dreh-l', fX+halfW+postW, fY, halfW,   fH, ST, hcl, S.griff);
+  } else if (isHST) {
+    const mid = fX+fW/2;
+    const LGX=GX, RGX=GX+fW/2+3;
+    const LGW=fW/2-ST-3, RGW=fW/2-ST-3;
+    o+=pvGlass(LGX,GY,LGW,GH,isOrn);
+    o+=pvGlass(RGX,GY,RGW,GH,isOrn);
+    if (S.sproTyp&&S.sproTyp!=='keine') {
+      o+=pvSprossen(LGX,GY,LGW,GH,S.sproTyp,S.sproDicke,oc,scL,scD);
+      o+=pvSprossen(RGX,GY,RGW,GH,S.sproTyp,S.sproDicke,oc,scL,scD);
+    }
+    // HST slide arrow
+    const ay=Y+FH*.5;
+    o+=`<path d="M${mid-6},${ay} L${mid-20},${ay-9} M${mid-6},${ay} L${mid-20},${ay+9}" stroke="#225eaa" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.7"/>`;
+    o+=`<path d="M${mid+6},${ay} L${mid+20},${ay-9} M${mid+6},${ay} L${mid+20},${ay+9}" stroke="#225eaa" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.45"/>`;
+  } else if (isTuer) {
+    // Door: glass in upper 45%, panel below
+    const gH1=Math.round(GH*.44);
+    o+=pvGlass(GX,GY,GW,gH1,isOrn);
+    // Lower panel (solid with inset decoration)
+    o+=`<rect x="${GX}" y="${GY+gH1+4}" width="${GW}" height="${GH-gH1-4}" fill="${oc}"/>`;
+    o+=`<rect x="${GX+6}" y="${GY+gH1+10}" width="${GW-12}" height="${GH-gH1-20}" rx="3"
+          fill="${hexAdj(oc,-8)}" stroke="${ocM}" stroke-width="0.8"/>`;
+    // Door knob
+    const kx=X+FW-BT-GAP-ST-14, ky=Y+FH*.62;
+    o+=`<rect x="${kx-4}" y="${ky-22}" width="8" height="44" rx="4" fill="${hexAdj(gcl,-10)}" stroke="${hexAdj(gcl,-50)}" stroke-width="0.8"/>`;
+    o+=`<circle cx="${kx}" cy="${ky}" r="5" fill="url(#hGrad)" stroke="${hexAdj(gcl,-50)}" stroke-width="0.8"/>`;
+    o+=`<circle cx="${kx}" cy="${ky-2}" r="1.8" fill="${hexAdj(gcl,-60)}"/>`;
+    o+=`<rect x="${kx-2}" y="${ky}" width="4" height="5" rx="1.5" fill="${hexAdj(gcl,-60)}"/>`;
+  } else {
+    // Single pane
+    o+=pvGlass(GX,GY,GW,GH,isOrn);
+    if (S.sproTyp&&S.sproTyp!=='keine') o+=pvSprossen(GX,GY,GW,GH,S.sproTyp,S.sproDicke,oc,scL,scD);
+    if (S.oeff&&S.oeff!=='fest') o+=pvArrows(S.oeff,GX,GY,GW,GH);
+    if (S.oeff&&S.oeff!=='fest'&&S.oeff!=='hst-slide') {
+      o+=pvHandle(S.oeff,fX,fY,fW,fH,ST,P.griff[S.griff]?.col||'#c0c4cc',S.griff);
+    }
+  }
+
+  /* ── INNER COLOUR STRIP ───────────────────────────── */
+  if (ic !== oc) {
+    const fs=3.5;
+    o+=`<rect x="${GX}" y="${GY-fs}" width="${GW}" height="${fs}" fill="${ic}" opacity="0.75"/>`;
+    o+=`<rect x="${GX}" y="${GY+GH}" width="${GW}" height="${fs}" fill="${ic}" opacity="0.75"/>`;
+    o+=`<rect x="${GX-fs}" y="${GY}" width="${fs}" height="${GH}" fill="${ic}" opacity="0.75"/>`;
+    o+=`<rect x="${GX+GW}" y="${GY}" width="${fs}" height="${GH}" fill="${ic}" opacity="0.75"/>`;
+  }
+
+  /* ── LABELS ───────────────────────────────────────── */
+  const dimY=Y+FH+20;
+  o+=`<text x="150" y="${dimY}" text-anchor="middle" fill="#7a8ba0" font-size="12" font-family="Manrope,sans-serif" font-weight="700">${S.bMm} × ${S.hMm} mm</text>`;
+  o+=`<text x="150" y="${dimY+15}" text-anchor="middle" fill="#aab5c4" font-size="10" font-family="Manrope,sans-serif">${P.prod[S.prod]?.name||''} · ${P.profil[S.profil]?.name||'Profil wählen'}</text>`;
+
+  svg.innerHTML = defs+o;
+}
+// END drawPrev_OLD
+
+/* ── HELPERS ──────────────────────────────────────────── */
+
+// Sash frame with 3D bevel
+function pvSash(x,y,w,h,t,fc,lcol,dcol) {
+  let s='';
+  s+=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${fc}"/>`;
+  s+=`<polygon points="${x},${y} ${x+w},${y} ${x+w-t},${y+t} ${x+t},${y+t}" fill="${lcol}" opacity="0.42"/>`;
+  s+=`<polygon points="${x},${y} ${x+t},${y+t} ${x+t},${y+h-t} ${x},${y+h}" fill="${lcol}" opacity="0.32"/>`;
+  s+=`<polygon points="${x+w},${y+h} ${x},${y+h} ${x+t},${y+h-t} ${x+w-t},${y+h-t}" fill="${dcol}" opacity="0.32"/>`;
+  s+=`<polygon points="${x+w},${y} ${x+w},${y+h} ${x+w-t},${y+h-t} ${x+w-t},${y+t}" fill="${dcol}" opacity="0.28"/>`;
+  s+=`<line x1="${x+1}" y1="${y+1}" x2="${x+w-1}" y2="${y+1}" stroke="rgba(255,255,255,0.4)" stroke-width="1.2"/>`;
+  s+=`<line x1="${x+1}" y1="${y+1}" x2="${x+1}" y2="${y+h-1}" stroke="rgba(255,255,255,0.3)" stroke-width="1.2"/>`;
+  return s;
+}
+
+// Glass pane with realistic gradient + reflections
+function pvGlass(x,y,w,h,ornament) {
+  let s='';
+  s+=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${ornament?'url(#gOrn)':'url(#gGrad)'}"/>`;
+  if (!ornament) {
+    // Main diagonal reflection
+    s+=`<polygon points="${x+3},${y+3} ${x+w*.38},${y+3} ${x+w*.22},${y+h*.52} ${x+3},${y+h*.52}"
+          fill="white" opacity="0.11"/>`;
+    // Second thin reflection
+    s+=`<polygon points="${x+w*.42},${y+3} ${x+w*.58},${y+3} ${x+w*.52},${y+h*.28} ${x+w*.4},${y+h*.28}"
+          fill="white" opacity="0.07"/>`;
+  } else {
+    // Frosted horizontal bands
+    for(let i=0;i<3;i++) s+=`<rect x="${x}" y="${y+i*h/3}" width="${w}" height="${h/3}" fill="white" opacity="${0.04+i*0.015}"/>`;
+    s+=`<text x="${x+w/2}" y="${y+h/2+4}" text-anchor="middle" fill="#7a9aaa" font-size="9"
+          font-family="sans-serif" opacity="0.65">Ornament</text>`;
+  }
+  // Edge inner shadow
+  s+=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="none" stroke="rgba(0,0,0,0.08)" stroke-width="2"/>`;
+  return s;
+}
+
+// Sprossen with 3D bevel
+function pvSprossen(gx,gy,gw,gh,typ,dicke,fc,lcol,dcol) {
+  const sw  = dicke==='26' ? 5.5 : 3.5;
+  const isI = typ==='innenliegend';
+  const col = isI ? '#7aa8c2' : fc;
+  const cl  = isI ? '#9ac2da' : lcol;
+  const cd  = isI ? '#5888a2' : dcol;
+  const cx  = gx+gw/2, cy = gy+gh/2;
+  let s='';
+  // Vertical
+  s+=`<line x1="${cx}" y1="${gy}" x2="${cx}" y2="${gy+gh}" stroke="${col}" stroke-width="${sw}"/>`;
+  s+=`<line x1="${cx-sw/2+0.5}" y1="${gy}" x2="${cx-sw/2+0.5}" y2="${gy+gh}" stroke="${cl}" stroke-width="1" opacity="0.55"/>`;
+  s+=`<line x1="${cx+sw/2-0.5}" y1="${gy}" x2="${cx+sw/2-0.5}" y2="${gy+gh}" stroke="${cd}" stroke-width="1" opacity="0.45"/>`;
+  // Horizontal
+  s+=`<line x1="${gx}" y1="${cy}" x2="${gx+gw}" y2="${cy}" stroke="${col}" stroke-width="${sw}"/>`;
+  s+=`<line x1="${gx}" y1="${cy-sw/2+0.5}" x2="${gx+gw}" y2="${cy-sw/2+0.5}" stroke="${cl}" stroke-width="1" opacity="0.55"/>`;
+  s+=`<line x1="${gx}" y1="${cy+sw/2-0.5}" x2="${gx+gw}" y2="${cy+sw/2-0.5}" stroke="${cd}" stroke-width="1" opacity="0.45"/>`;
+  return s;
+}
+
+// Opening arrows (DIN-style: solid hinge line + dashed diagonals)
+function pvArrows(oeff,gx,gy,gw,gh) {
+  if (!oeff||oeff==='fest'||oeff==='hst-slide') return '';
+  const col='#1a4a8a', op=0.55, sw=1.8, dash='6,4';
+  const L=gx+3,R=gx+gw-3,T=gy+3,B=gy+gh-3,CX=gx+gw/2,CY=gy+gh/2;
+  const sl=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"
+    stroke="${col}" stroke-width="3" opacity="${op+0.1}" stroke-linecap="round"/>`;
+  const dl=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"
+    stroke="${col}" stroke-width="${sw}" opacity="${op}" stroke-linecap="round" stroke-dasharray="${dash}"/>`;
+  if (oeff==='dreh-l')  return sl(L,T,L,B)+dl(L,T,R,CY)+dl(L,B,R,CY);
+  if (oeff==='dreh-r')  return sl(R,T,R,B)+dl(R,T,L,CY)+dl(R,B,L,CY);
+  if (oeff==='kipp')    return sl(L,B,R,B)+dl(L,B,CX,T)+dl(R,B,CX,T);
+  if (oeff==='dk-l')    return sl(L,T,L,B)+dl(L,T,R,CY)+dl(L,B,R,CY)+dl(L,B,CX,T)+dl(R,B,CX,T);
+  if (oeff==='dk-r')    return sl(R,T,R,B)+dl(R,T,L,CY)+dl(R,B,L,CY)+dl(L,B,CX,T)+dl(R,B,CX,T);
+  return '';
+}
+
+// Realistic L-handle
+function pvHandle(oeff,sx,sy,sw_f,sh,ST,gcl,griffKey) {
+  const onRight = ['dreh-l','dk-l','kipp'].includes(oeff);
+  const hx = onRight ? sx+sw_f-ST-1 : sx+ST+1;
+  const hy = sy + sh*0.52;
+  const dir= onRight ? -1 : 1;
+  const leverLen=24;
+  const stemH=30;
+  const gcD=hexAdj(gcl,-50), gcL=hexAdj(gcl,55);
+  let s='';
+  // Rosette plate
+  s+=`<rect x="${hx-6}" y="${hy-stemH/2-5}" width="12" height="${stemH+10}" rx="6"
+        fill="${hexAdj(gcl,-12)}" stroke="${gcD}" stroke-width="0.9"/>`;
+  s+=`<line x1="${hx-4}" y1="${hy-stemH/2}" x2="${hx+4}" y2="${hy-stemH/2}" stroke="${gcD}" stroke-width="0.6" opacity="0.5"/>`;
+  s+=`<line x1="${hx-4}" y1="${hy+stemH/2}" x2="${hx+4}" y2="${hy+stemH/2}" stroke="${gcD}" stroke-width="0.6" opacity="0.5"/>`;
+  // Stem
+  s+=`<rect x="${hx-4}" y="${hy-stemH/2}" width="8" height="${stemH}" rx="4"
+        fill="url(#hGrad)" stroke="${gcD}" stroke-width="0.9"/>`;
+  s+=`<line x1="${hx-2.5}" y1="${hy-stemH/2+4}" x2="${hx-2.5}" y2="${hy+stemH/2-4}" stroke="${gcL}" stroke-width="1.5" opacity="0.4"/>`;
+  // Lever (horizontal arm)
+  const lx1=hx, lx2=hx+dir*leverLen;
+  const lxMin=Math.min(lx1,lx2), lWidth=leverLen;
+  s+=`<rect x="${lxMin-3}" y="${hy-4}" width="${lWidth+6}" height="8" rx="4"
+        fill="url(#hGrad)" stroke="${gcD}" stroke-width="0.9"/>`;
+  s+=`<line x1="${lxMin-1}" y1="${hy-2.5}" x2="${lxMin+lWidth+1}" y2="${hy-2.5}" stroke="${gcL}" stroke-width="1.5" opacity="0.35"/>`;
+  s+=`<circle cx="${lx2}" cy="${hy}" r="5.5" fill="url(#hGrad)" stroke="${gcD}" stroke-width="0.9"/>`;
+  // PZ keyhole
+  if (griffKey==='pz-beid') {
+    s+=`<circle cx="${hx}" cy="${hy-20}" r="4.5" fill="${hexAdj(gcl,-15)}" stroke="${gcD}" stroke-width="0.8"/>`;
+    s+=`<circle cx="${hx}" cy="${hy-20}" r="2" fill="${gcD}"/>`;
+    s+=`<rect x="${hx-1.5}" y="${hy-18}" width="3" height="5" rx="1" fill="${gcD}"/>`;
+  }
+  return s;
+}
+
+// ── FORMULAR SENDEN ──────────────────────────────────
+async function submitForm(e) {
+  e.preventDefault();
+  const errEl=document.getElementById('ferr');
+  const name=document.getElementById('fn').value.trim();
+  const email=document.getElementById('fe').value.trim();
+  const ort=document.getElementById('fo').value.trim();
+  const dsgvo=document.getElementById('fdsgvo').checked;
+  errEl.classList.add('hidden');
+  if (!name||!email||!ort||!dsgvo) {
+    errEl.textContent='Bitte füllen Sie alle Pflichtfelder aus (*).';
+    errEl.classList.remove('hidden'); return;
+  }
+  if (!S.prod) {
+    errEl.textContent='Bitte wählen Sie zuerst ein Produkt (Schritt 1).';
+    errEl.classList.remove('hidden'); return;
+  }
+
+  const btn=document.getElementById('fsub');
+  btn.disabled=true;
+  document.getElementById('fsubtxt').textContent='Wird gesendet …';
+
+  const unit=calcUnit(), ship=deliv(S.qty,S.prod), tot=(unit*S.qty+ship).toFixed(2);
+  const tel   = document.getElementById('ft').value.trim();
+  const str   = document.getElementById('fst').value.trim();
+  const notiz = document.getElementById('fno').value.trim();
+  const datum = new Date().toLocaleDateString('de-DE');
+  const prodName   = P.prod[S.prod]?.name||S.prod;
+  const profilName = P.profil[S.profil]?.name||S.profil;
+  const glasName   = P.glas[S.glas]?.name||S.glas;
+  const oeffName   = P.oeff[S.oeff]?.name||S.oeff;
+  const faName     = P.fa[S.fa]?.name||S.fa;
+  const fiName     = P.fi[S.fi]?.name||S.fi;
+  const fdName     = P.fd[S.fd]?.name||S.fd;
+  const griffName  = P.griff[S.griff]?.name||S.griff;
+  const rollName   = P.roll[S.roll]?.name||S.roll;
+  const sicherName = P.sicher[S.sicher]?.name||S.sicher;
+  const sproStr    = S.sproTyp==='keine'?'Ohne':S.sproTyp+' '+S.sproDicke+' mm';
+
+  // ── Save to dashboard localStorage ──────────────────────────────
+  const offerId = 'DF-'+Date.now().toString().slice(-6);
+  const deal = {
+    id:          Date.now(),
+    offer_id:    offerId,
+    name,  email,
+    phone:       tel,
+    ort,
+    strasse:     str,
+    produkt:     prodName,
+    dimensions:  S.bMm+'x'+S.hMm,
+    profile:     profilName,
+    glass:       glasName,
+    opening:     oeffName,
+    color:       faName+' / '+fiName,
+    farbe_aussen:faName,
+    farbe_innen: fiName,
+    dichtung:    fdName,
+    sprossen:    sproStr,
+    griff:       griffName,
+    shutter:     rollName,
+    sicherheit:  sicherName,
+    anzahl:      S.qty,
+    price:       parseFloat((unit*S.qty+parseFloat(ship)).toFixed(2)),
+    preis_stueck:unit.toFixed(2),
+    preis_lieferung:parseFloat(ship).toFixed(2),
+    date:        datum,
+    notes:       notiz,
+    status:      'new',
+  };
+  try {
+    const existing = JSON.parse(localStorage.getItem('df_deals')||'[]');
+    existing.unshift(deal);
+    localStorage.setItem('df_deals', JSON.stringify(existing));
+  } catch(e){ console.warn('localStorage write failed', e); }
+
+  // ── E-Mails direkt über Resend API senden ───────────────────────
+  // ⚠️ Nur für lokalen Test – API Key nicht in Produktion in HTML-Dateien!
+  const RESEND_KEY = 're_5o5JYMky_MXfQoo7vAZoaNMn4KzLrNyht';
+  const FROM_ADDR  = 'DeineFenster.de <onboarding@resend.dev>'; // bis Domain verifiziert
+
+  const konfRow = (label, val) =>
+    `<tr><td style="padding:5px 0;border-bottom:1px solid #e0e4f0;font-size:14px;color:#424751;width:40%">${label}</td>
+         <td style="padding:5px 0;border-bottom:1px solid #e0e4f0;font-size:14px;font-weight:700;color:#161c27">${val}</td></tr>`;
+
+  const sarahHtml = `<!DOCTYPE html><html lang="de"><body style="margin:0;padding:0;background:#f1f3ff;font-family:'Segoe UI',Arial,sans-serif">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f3ff;padding:32px 16px"><tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%">
+  <tr><td style="background:#112455;border-radius:16px 16px 0 0;padding:28px 36px">
+    <div style="font-size:22px;font-weight:800;color:#fff">DeineFenster<span style="color:#76a9fa">.de</span>
+    <span style="font-size:14px;font-weight:400;color:rgba(255,255,255,.5);margin-left:12px">Neue Anfrage</span></div>
+  </td></tr>
+  <tr><td style="background:#fff;padding:28px 36px 0">
+    <div style="background:#fef3c7;border:2px solid #f59e0b;border-radius:12px;padding:16px 20px;margin-bottom:24px">
+      <div style="font-size:17px;font-weight:700;color:#92400e">🔔 Neue Anfrage eingegangen!</div>
+      <div style="font-size:14px;color:#78350f;margin-top:4px">${offerId} · ${datum} · Sofort bearbeiten empfohlen</div>
+    </div>
+  </td></tr>
+  <tr><td style="background:#fff;padding:0 36px">
+    <div style="font-size:15px;font-weight:700;color:#161c27;margin-bottom:12px">👤 Kundendaten</div>
+    <div style="background:#f1f3ff;border-radius:12px;padding:18px 22px;margin-bottom:20px">
+    <table width="100%" cellpadding="0" cellspacing="0">
+      ${konfRow('Name', name)}
+      ${konfRow('E-Mail', `<a href="mailto:${email}" style="color:#225eaa">${email}</a>`)}
+      ${konfRow('Telefon', tel||'–')}
+      ${konfRow('Ort / PLZ', ort)}
+      ${konfRow('Straße', str||'–')}
+      <tr><td style="padding:5px 0;font-size:14px;color:#424751">Anmerkungen</td>
+          <td style="padding:5px 0;font-size:14px;color:#161c27">${notiz||'–'}</td></tr>
+    </table></div>
+  </td></tr>
+  <tr><td style="background:#fff;padding:0 36px">
+    <div style="font-size:15px;font-weight:700;color:#161c27;margin-bottom:12px">🪟 Konfiguration</div>
+    <div style="background:#f1f3ff;border-radius:12px;padding:18px 22px;margin-bottom:20px">
+    <table width="100%" cellpadding="0" cellspacing="0">
+      ${konfRow('Produkt', prodName)}
+      ${konfRow('Anzahl', S.qty+' Stück')}
+      ${konfRow('Maße (Rohbau)', S.bMm+' × '+S.hMm+' mm')}
+      ${konfRow('Profil', profilName)}
+      ${konfRow('Glasart', glasName)}
+      ${konfRow('Öffnungsart', oeffName)}
+      ${konfRow('Farbe außen', faName)}
+      ${konfRow('Farbe innen', fiName)}
+      ${konfRow('Dichtungsfarbe', fdName)}
+      ${konfRow('Sprossen', sproStr)}
+      ${konfRow('Griff', griffName)}
+      ${konfRow('Rolladen', rollName)}
+      ${konfRow('Einbruchschutz', sicherName)}
+    </table></div>
+  </td></tr>
+  <tr><td style="background:#fff;padding:0 36px 28px">
+    <div style="background:#112455;border-radius:12px;padding:20px 24px">
+    <table width="100%" cellpadding="0" cellspacing="0"><tr>
+      <td style="font-size:14px;color:rgba(255,255,255,.6)">Gesamtpreis (kalkuliert)</td>
+      <td style="text-align:right;font-size:28px;font-weight:800;color:#fff">${tot} €</td>
+    </tr><tr>
+      <td colspan="2" style="font-size:12px;color:rgba(255,255,255,.4)">${S.qty} Stück à ${unit.toFixed(2)} € + Lieferkosten ${parseFloat(ship).toFixed(2)} €</td>
+    </tr></table></div>
+  </td></tr>
+  <tr><td style="background:#fff;padding:0 36px 36px">
+    <table width="100%" cellpadding="0" cellspacing="0"><tr>
+      <td style="padding-right:8px;width:50%">
+        <a href="mailto:${email}?subject=Ihr Angebot von DeineFenster.de&body=Hallo ${encodeURIComponent(name)},"
+           style="display:block;background:#225eaa;color:#fff;text-align:center;font-size:14px;font-weight:700;padding:13px;border-radius:10px;text-decoration:none">✉️ Antwort an Kunde</a>
+      </td>
+      <td style="padding-left:8px;width:50%">
+        <a href="http://localhost:8080/dashboard.html"
+           style="display:block;background:#f1f3ff;color:#225eaa;text-align:center;font-size:14px;font-weight:700;padding:13px;border-radius:10px;text-decoration:none;border:2px solid #d6e3ff">📊 Dashboard öffnen</a>
+      </td>
+    </tr></table>
+  </td></tr>
+  <tr><td style="background:#0e1a38;border-radius:0 0 16px 16px;padding:20px 36px;text-align:center">
+    <div style="font-size:13px;color:rgba(255,255,255,.35)">DeineFenster.de · Automatische Benachrichtigung</div>
+  </td></tr>
+</table></td></tr></table></body></html>`;
+
+  const kundeHtml = `<!DOCTYPE html><html lang="de"><body style="margin:0;padding:0;background:#f1f3ff;font-family:'Segoe UI',Arial,sans-serif">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f3ff;padding:32px 16px"><tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%">
+  <tr><td style="background:#112455;border-radius:16px 16px 0 0;padding:28px 36px;text-align:center">
+    <div style="font-size:22px;font-weight:800;color:#fff">DeineFenster<span style="color:#76a9fa">.de</span></div>
+    <div style="color:rgba(255,255,255,.55);font-size:13px;margin-top:4px">Drutex-Fachhändler · Qualität direkt ab Werk</div>
+  </td></tr>
+  <tr><td style="background:#fff;padding:36px 36px 0">
+    <div style="font-size:26px;font-weight:700;color:#161c27;margin-bottom:8px">✅ Anfrage erhalten!</div>
+    <p style="font-size:16px;color:#424751;line-height:1.6;margin:0 0 20px">
+      Hallo <strong>${name}</strong>,<br><br>
+      vielen Dank für Ihre Anfrage bei DeineFenster.de. Wir haben Ihre Konfiguration erhalten
+      und melden uns innerhalb von <strong style="color:#225eaa">24 Stunden</strong> mit einem persönlichen Angebot bei Ihnen.
+    </p>
+  </td></tr>
+  <tr><td style="background:#fff;padding:0 36px">
+    <div style="background:#f1f3ff;border-radius:12px;padding:20px 24px;margin-bottom:24px">
+      <div style="font-size:13px;font-weight:700;color:#424751;text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px">Ihre Konfiguration · ${offerId}</div>
+      <table width="100%" cellpadding="0" cellspacing="0">
+        ${konfRow('Produkt', prodName)}
+        ${konfRow('Anzahl', S.qty+' Stück')}
+        ${konfRow('Maße (Rohbau)', S.bMm+' × '+S.hMm+' mm')}
+        ${konfRow('Profil', profilName)}
+        ${konfRow('Glasart', glasName)}
+        ${konfRow('Öffnungsart', oeffName)}
+        ${konfRow('Farbe außen', faName)}
+        ${konfRow('Farbe innen', fiName)}
+        ${konfRow('Rolladen', rollName)}
+        ${konfRow('Einbruchschutz', sicherName)}
+        ${konfRow('Lieferadresse', ort)}
+      </table>
+    </div>
+  </td></tr>
+  <tr><td style="background:#fff;padding:0 36px 24px">
+    <div style="background:#112455;border-radius:12px;padding:20px 24px;text-align:center">
+      <div style="font-size:13px;color:rgba(255,255,255,.6);margin-bottom:6px">Ihr Richtpreis inkl. MwSt.</div>
+      <div style="font-size:32px;font-weight:800;color:#fff">${tot} €</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.45);margin-top:4px">inkl. Lieferkosten ${parseFloat(ship).toFixed(2)} € · ${S.qty} Stück à ${unit.toFixed(2)} €</div>
+    </div>
+  </td></tr>
+  <tr><td style="background:#0e1a38;border-radius:0 0 16px 16px;padding:24px 36px;text-align:center">
+    <div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:6px">DeineFenster<span style="color:#76a9fa">.de</span></div>
+    <div style="font-size:13px;color:rgba(255,255,255,.4)">Drutex-Fachhändler · info@deinefenster.de</div>
+  </td></tr>
+</table></td></tr></table></body></html>`;
+
+  const sendMail = async (to, subject, html, replyTo) => {
+    const res = await fetch('/api/send-email', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ from:FROM_ADDR, to:[to], reply_to:replyTo, subject, html })
+    });
+    if(!res.ok){ const t=await res.text(); console.warn('Resend error ('+to+'):', t); }
+    return res;
+  };
+
+  try {
+    await Promise.all([
+      sendMail('sarahchrist@aol.com',
+        '🔔 Neue Anfrage '+offerId+': '+prodName+' – '+name,
+        sarahHtml, email),
+      sendMail(email,
+        'Ihre Anfrage bei DeineFenster.de – '+prodName,
+        kundeHtml, 'sarahchrist@aol.com'),
+    ]);
+  } catch(err){ console.warn('E-Mail Fehler:', err); }
+
+  // ── Make.com Webhook (optional, als Backup) ──────────────────────
+  try {
+    await fetch(WH,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      formular_typ:'Konfigurator-Anfrage', datum, angebots_nr:offerId,
+      kunde_name:name, kunde_email:email, kunde_telefon:tel, kunde_ort:ort,
+      produkt:prodName, breite_mm:S.bMm, hoehe_mm:S.hMm, anzahl:S.qty,
+      preis_gesamt:tot+' €'
+    })});
+  } catch(err){ console.warn('Webhook error:', err); }
+
+  window.location.href='danke.html?prod='+encodeURIComponent(prodName);
+}
+
+// ── INIT ─────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', ()=>{
+  // Build farbe pickers
+  buildFarbePicker();
+
+  // Mass inputs
+  document.getElementById('ib').addEventListener('input',onMass);
+  document.getElementById('ih').addEventListener('input',onMass);
+
+  // Pre-select defaults (silent)
+  // Glas: 2fach (step 7)
+  const g2=document.querySelector('#s7 [data-v="2fach"]'); if(g2)g2.classList.add('sel');
+  // Sprossen: keine (step 12)
+  const sk=document.querySelector('#s12 [data-v="keine"]'); if(sk)sk.classList.add('sel');
+  // Griff: std (step 9)
+  const gh=document.querySelector('#s9 [data-v="std-weiss"]'); if(gh)gh.classList.add('sel');
+  // Rolladen: ohne (step 11)
+  const ro=document.querySelector('#s11 [data-v="ohne"]'); if(ro)ro.classList.add('sel');
+  // Sicher: wk1 (step 10)
+  const si=document.querySelector('#s10 [data-v="wk1"]'); if(si)si.classList.add('sel');
+
+  upProg();
+  drawPrev();
+});
+</script>
+</body>
+</html>
