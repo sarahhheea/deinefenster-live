@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="de" class="light">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link rel="icon" type="image/svg+xml" href="img/logo/deinefenster-mark.svg"/>
+<link rel="apple-touch-icon" href="img/logo/deinefenster-mark.svg"/>
+<link rel="manifest" href="manifest.webmanifest"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="DeineFenster"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<title>Inserieren · DeineFenster</title>
+<meta name="robots" content="noindex,nofollow"/>
+<meta name="theme-color" content="#225eaa"/>
+
+<!-- PWA: damit "Zum Home-Bildschirm" wie eine richtige App aussieht -->
+<link rel="manifest" href="manifest.webmanifest"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Inserieren"/>
+<meta name="application-name" content="Inserieren"/>
+<link rel="apple-touch-icon" href="img/logo/deinefenster-mark.svg"/>
+
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "primary": "#225eaa",
+        "primary-d": "#1e3a8a",
+        "primary-container": "#76a9fa",
+        "primary-fixed": "#d6e3ff",
+        "primary-fixed-dim": "#a9c7ff",
+        "on-primary": "#ffffff",
+        "on-primary-fixed": "#001b3d",
+        "surface": "#f9f9ff",
+        "surface-container": "#e8eeff",
+        "surface-container-low": "#f1f3ff",
+        "surface-variant": "#dde2f3",
+        "on-surface": "#161c27",
+        "on-surface-variant": "#424751",
+        "outline": "#727782",
+        "outline-variant": "#c2c6d3",
+        "error": "#ba1a1a",
+        "success": "#0a8a3a",
+        "warning": "#b87f00",
+        "gold": "#c9a84c"
+      },
+      fontFamily: {"headline": ["Plus Jakarta Sans"], "body": ["Manrope"]},
+      borderRadius: {"DEFAULT": "0.5rem", "lg": "0.75rem", "xl": "1rem", "2xl": "1.25rem", "full": "9999px"}
+    }
+  }
+}
+</script>
+
+<style>
+  body { font-family: 'Manrope', sans-serif; background: #f9f9ff; }
+  h1, h2, h3, h4 { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+  .glass-nav { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+  #navbar {
+    background: rgba(14, 30, 58, 0.75);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+
+  /* Stepper */
+  .step-circle {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 14px;
+    background: #dde2f3; color: #424751;
+    transition: all 0.2s;
+  }
+  .step-circle.active { background: #225eaa; color: white; }
+  .step-circle.done { background: #0a8a3a; color: white; }
+  .step-line {
+    flex: 1; height: 2px; background: #dde2f3;
+    margin: 0 8px; transition: background 0.2s;
+  }
+  .step-line.done { background: #0a8a3a; }
+
+  /* Kategorie-Karten */
+  .kat-karte {
+    background: white;
+    border: 2px solid #dde2f3;
+    border-radius: 16px;
+    padding: 20px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+  .kat-karte:hover {
+    border-color: #76a9fa;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(34,94,170,0.12);
+  }
+  .kat-karte.selected {
+    border-color: #225eaa;
+    background: #f1f3ff;
+    box-shadow: 0 8px 24px rgba(34,94,170,0.18);
+  }
+  .kat-karte .icon-wrap {
+    width: 56px; height: 56px; border-radius: 16px;
+    background: linear-gradient(135deg, #d6e3ff, #a9c7ff);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 12px;
+    transition: all 0.2s;
+  }
+  .kat-karte.selected .icon-wrap {
+    background: linear-gradient(135deg, #225eaa, #1e3a8a);
+  }
+  .kat-karte.selected .icon-wrap span { color: white !important; }
+  .kat-karte .icon-wrap span { color: #225eaa; font-size: 28px; }
+
+  /* Custom Checkbox */
+  .filter-check {
+    appearance: none; -webkit-appearance: none;
+    width: 18px; height: 18px;
+    border: 1.5px solid #c2c6d3; border-radius: 4px;
+    cursor: pointer; position: relative; flex-shrink: 0;
+  }
+  .filter-check:checked { background: #225eaa; border-color: #225eaa; }
+  .filter-check:checked::after {
+    content: ''; position: absolute; top: 2px; left: 5px;
+    width: 5px; height: 9px; border: solid white;
+    border-width: 0 2px 2px 0; transform: rotate(45deg);
+  }
+
+  /* Drop-Zone */
+  .drop-zone {
+    border: 2px dashed #c2c6d3;
+    border-radius: 16px;
+    padding: 32px 20px;
+    text-align: center;
+    background: #f9f9ff;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .drop-zone:hover, .drop-zone.dragover {
+    border-color: #225eaa;
+    background: #f1f3ff;
+  }
+
+  /* Live-Vorschau */
+  .vorschau-sticky { position: sticky; top: 88px; }
+
+  /* Snackbar */
+  .snackbar {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(120%);
+    background: #161c27; color: white;
+    padding: 14px 24px; border-radius: 999px;
+    font-size: 14px; font-weight: 600;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.18);
+    z-index: 200; transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .snackbar.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body class="bg-surface text-on-surface">
+
+<!-- Navigation -->
+<nav id="navbar" class="fixed top-0 w-full z-50 glass-nav">
+  <div class="flex justify-between items-center px-6 md:px-12 py-4 max-w-[1440px] mx-auto">
+    <a href="index.html" class="text-xl md:text-2xl font-bold tracking-tighter text-white">DeineFenster<span class="text-primary-container">.de</span></a>
+    <div class="hidden md:flex items-center gap-x-8">
+      <a href="produkte.html" class="text-white/80 hover:text-white text-sm font-medium tracking-tight">Produkte</a>
+      <a href="konfigurator.html" class="text-white/80 hover:text-white text-sm font-medium tracking-tight">Konfigurator</a>
+      <a href="shop.html" class="text-white/80 hover:text-white text-sm font-medium tracking-tight">Shop</a>
+      <a href="ueber-uns.html" class="text-white/80 hover:text-white text-sm font-medium tracking-tight">Über uns</a>
+      <a href="kontakt.html" class="text-white/80 hover:text-white text-sm font-medium tracking-tight">Kontakt</a>
+    </div>
+    <div class="flex items-center gap-2">
+      <span id="userBadge" class="hidden md:inline-flex items-center gap-1.5 text-white/80 text-xs font-semibold px-3 py-1.5">
+        <span class="material-symbols-outlined" style="font-size:14px">account_circle</span>
+        <span id="userEmail">—</span>
+      </span>
+      <button id="logoutBtn" class="hidden md:inline-flex items-center gap-1 text-white/70 hover:text-white text-xs font-semibold px-2 py-1.5 rounded-full hover:bg-white/10" title="Logout">
+        <span class="material-symbols-outlined" style="font-size:16px">logout</span>
+      </button>
+      <a href="shop-drucken.html" class="hidden md:inline-flex items-center gap-1.5 text-white/80 hover:text-white text-xs font-semibold border border-white/20 px-3 py-1.5 rounded-full" title="Lager-Schilder drucken">
+        <span class="material-symbols-outlined" style="font-size:16px">print</span>
+        Schilder
+      </a>
+      <a href="shop.html" class="inline-flex items-center gap-1.5 text-white/80 hover:text-white text-xs font-semibold border border-white/20 px-3 py-1.5 rounded-full">
+        <span class="material-symbols-outlined" style="font-size:16px">arrow_back</span>
+        Zum Shop
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- Header -->
+<header class="pt-24 pb-8 bg-gradient-to-b from-[#0e1e3a] to-surface text-white">
+  <div class="max-w-[1200px] mx-auto px-6 md:px-12">
+    <span class="inline-block bg-white/10 text-white/90 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-2">Intern · Inserat-Verwaltung</span>
+    <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">Lagerware einstellen</h1>
+    <p class="text-white/70 text-sm mt-2 max-w-2xl">Einfach Kategorie wählen, Bilder dazu, Maße eingeben — fertig. Das System erkennt Maße automatisch wenn du sie im Titel schreibst (z.B. „1200×800").</p>
+  </div>
+</header>
+
+<!-- Stepper -->
+<div class="max-w-[1200px] mx-auto px-6 md:px-12 -mt-2 pb-8">
+  <div class="bg-white rounded-full px-6 py-3 flex items-center shadow-sm border border-outline-variant max-w-md mx-auto">
+    <div id="stepCircle1" class="step-circle active">1</div>
+    <div class="text-xs font-semibold ml-2">Kategorie</div>
+    <div id="stepLine1" class="step-line"></div>
+    <div id="stepCircle2" class="step-circle">2</div>
+    <div class="text-xs font-semibold ml-2">Details</div>
+  </div>
+</div>
+
+<!-- ── SCHRITT 1: ZUSTAND + KATEGORIE (Sarah-Polish 30.04.2026 v2: ordentlich, klar gegliedert) ── -->
+<section id="step1" class="max-w-[1200px] mx-auto px-6 md:px-12 pb-16">
+
+  <!-- ─── Block 1: Zustand ─── -->
+  <div class="bg-white rounded-2xl border border-outline-variant p-6 md:p-8 mb-6">
+    <div class="flex items-center gap-3 mb-1">
+      <div class="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white font-bold text-sm">1</div>
+      <h2 class="text-xl md:text-2xl font-extrabold">Neu oder Gebraucht?</h2>
+    </div>
+    <p class="text-sm text-on-surface-variant mb-5 ml-11">Wähl zuerst den Zustand. Bei Gebrauchtware wird das Drutex-System nicht abgefragt.</p>
+
+    <div class="grid grid-cols-2 gap-3 max-w-md ml-11">
+      <button type="button" id="zustandNeu" class="kat-karte" data-zustand="neu" style="padding:18px 14px">
+        <div class="icon-wrap" style="width:44px;height:44px;border-radius:12px"><span class="material-symbols-outlined" style="font-size:24px">auto_awesome</span></div>
+        <h3 class="text-base font-bold leading-tight">Neu</h3>
+        <p class="text-[11px] text-on-surface-variant mt-0.5">Drutex-Originalware</p>
+      </button>
+      <button type="button" id="zustandGebraucht" class="kat-karte" data-zustand="gebraucht" style="padding:18px 14px">
+        <div class="icon-wrap" style="width:44px;height:44px;border-radius:12px"><span class="material-symbols-outlined" style="font-size:24px">recycling</span></div>
+        <h3 class="text-base font-bold leading-tight">Gebraucht</h3>
+        <p class="text-[11px] text-on-surface-variant mt-0.5">Hersteller egal</p>
+      </button>
+    </div>
+  </div>
+
+  <!-- ─── Block 2: Kategorie ─── -->
+  <div class="bg-white rounded-2xl border border-outline-variant p-6 md:p-8 mb-6">
+    <div class="flex items-center gap-3 mb-1">
+      <div class="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white font-bold text-sm">2</div>
+      <h2 class="text-xl md:text-2xl font-extrabold">Welche Kategorie?</h2>
+    </div>
+    <p class="text-sm text-on-surface-variant mb-5 ml-11">Hauptkategorie wählen. Eigenschaften & Maße kommen im nächsten Schritt.</p>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 ml-11" id="kategorieGrid">
+      <!-- Befüllt von JS -->
+    </div>
+  </div>
+
+  <!-- ─── Action ─── -->
+  <div class="flex justify-end">
+    <button id="weiterZuStep2" disabled class="bg-primary text-white px-6 py-3 rounded-full font-bold text-sm hover:bg-primary-d transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2">
+      Weiter zu den Details
+      <span class="material-symbols-outlined" style="font-size:18px">arrow_forward</span>
+    </button>
+  </div>
+</section>
+
+<!-- ── SCHRITT 2: DETAILS ── -->
+<section id="step2" class="max-w-[1200px] mx-auto px-6 md:px-12 pb-16 hidden">
+  <div class="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-8">
+
+    <!-- Linke Spalte: Formular -->
+    <div class="space-y-6">
+
+      <!-- Gewählte Kategorie + Wechseln -->
+      <div class="bg-primary-fixed rounded-2xl px-5 py-4 flex items-center justify-between">
+        <div>
+          <span class="text-[11px] font-semibold text-on-primary-fixed/70 uppercase tracking-wider">Kategorie</span>
+          <h3 id="gewaehlteKategorie" class="text-lg font-extrabold text-on-primary-fixed">—</h3>
+        </div>
+        <button id="kategorieWechseln" class="text-xs font-semibold text-primary hover:underline">Ändern</button>
+      </div>
+
+      <!-- Titel -->
+      <div class="bg-white rounded-2xl border border-outline-variant p-5">
+        <label class="block">
+          <span class="block text-sm font-bold mb-2">Überschrift <span class="text-error">*</span></span>
+          <input
+            id="formTitel"
+            type="text"
+            placeholder="z.B. 'Drutex Kunststofffenster 1200×800 mm Weiß IGLO 5'"
+            class="w-full px-4 py-3 rounded-xl bg-surface-container-low border border-outline-variant focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-fixed text-sm"
+          />
+          <p id="autoErkanntHinweis" class="hidden mt-2 text-xs text-primary font-semibold">
+            <span class="material-symbols-outlined align-bottom" style="font-size:14px">auto_awesome</span>
+            Maße automatisch erkannt: <span id="autoMaseAnzeige"></span> — Maß-Felder unten ausgefüllt.
+          </p>
+        </label>
+      </div>
+
+      <!-- Fotos — Schnell-Modus für Mobile -->
+      <div class="bg-white rounded-2xl border border-outline-variant p-5">
+        <div class="flex items-baseline justify-between mb-3">
+          <h4 class="text-sm font-bold">Fotos</h4>
+          <span id="bildAnzahl" class="text-xs text-on-surface-variant">0 / 20</span>
+        </div>
+
+        <!-- Zwei große Buttons: Kamera + Galerie -->
+        <div class="grid grid-cols-2 gap-3 mb-3">
+          <button type="button" id="fotoMachenBtn" class="flex flex-col items-center justify-center gap-1.5 py-5 rounded-2xl bg-primary text-white font-bold text-sm hover:bg-primary-d active:scale-[0.98] transition-all">
+            <span class="material-symbols-outlined" style="font-size:32px">photo_camera</span>
+            Foto machen
+          </button>
+          <button type="button" id="fotoGalerieBtn" class="flex flex-col items-center justify-center gap-1.5 py-5 rounded-2xl bg-surface-container-low border-2 border-outline-variant text-primary font-bold text-sm hover:bg-primary-fixed active:scale-[0.98] transition-all">
+            <span class="material-symbols-outlined" style="font-size:32px">photo_library</span>
+            Aus Galerie
+          </button>
+        </div>
+
+        <!-- Versteckte Inputs: Kamera einzeln, Galerie mehrfach -->
+        <input id="bildInputCam" type="file" accept="image/*" capture="environment" class="hidden"/>
+        <input id="bildInput" type="file" accept="image/*" multiple class="hidden"/>
+
+        <!-- Drop-Zone nur auf Desktop für Drag&Drop sichtbar -->
+        <div id="dropZone" class="drop-zone hidden md:block" style="padding:18px;background:#fafafc;border-style:dashed;cursor:pointer">
+          <p class="text-[11px] text-on-surface-variant text-center">oder Bilder hierher ziehen (JPG/PNG · max. 20 · empfohlen 1200×900 px)</p>
+        </div>
+
+        <!-- Foto-Reihe — alle Fotos in Reihenfolge, mit X zum Löschen -->
+        <div id="bildVorschauWrap" class="hidden mt-4 grid grid-cols-3 sm:grid-cols-4 gap-2"></div>
+        <p id="fotoTipp" class="hidden text-[11px] text-primary mt-3 text-center font-medium">
+          <span class="material-symbols-outlined align-bottom" style="font-size:14px">touch_app</span>
+          Tipp: nach dem Foto direkt nochmal „Foto machen" tippen für das nächste
+        </p>
+      </div>
+
+      <!-- Maße + Preis -->
+      <div class="bg-white rounded-2xl border border-outline-variant p-5">
+        <h4 class="text-sm font-bold mb-3">Maße &amp; Preis</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <label class="block">
+            <span class="block text-xs font-semibold text-on-surface-variant mb-1">Breite (mm) <span class="text-error">*</span></span>
+            <input id="formBreite" type="number" min="0" max="6500" placeholder="1200" class="w-full px-3 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-fixed text-sm">
+          </label>
+          <label class="block">
+            <span class="block text-xs font-semibold text-on-surface-variant mb-1">Höhe (mm) <span class="text-error">*</span></span>
+            <input id="formHoehe" type="number" min="0" max="3000" placeholder="800" class="w-full px-3 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-fixed text-sm">
+          </label>
+          <label class="block">
+            <span class="block text-xs font-semibold text-on-surface-variant mb-1">Preis (€) <span class="text-error">*</span></span>
+            <input id="formPreis" type="number" min="0" step="1" placeholder="299" class="w-full px-3 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-fixed text-sm">
+          </label>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+          <label class="block">
+            <span class="block text-xs font-semibold text-on-surface-variant mb-1">Lagerbestand (Stück)</span>
+            <input id="formLager" type="number" min="0" value="1" class="w-full px-3 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-fixed text-sm">
+          </label>
+          <label class="block">
+            <span class="block text-xs font-semibold text-on-surface-variant mb-1">Standnummer / Lagerplatz <span class="text-error">*</span></span>
+            <input id="formStandnummer" type="text" maxlength="20" required placeholder="z.B. A-12 oder 47" class="w-full px-3 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-fixed text-sm">
+          </label>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+          <label class="flex items-center gap-3 cursor-pointer bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2.5 hover:border-primary">
+            <input id="formSonderpreis" type="checkbox" class="filter-check"/>
+            <div>
+              <span class="text-sm font-semibold text-on-surface">Als Sonderpreis markieren *</span>
+              <span class="block text-[11px] text-on-surface-variant">Preis bekommt Sternchen + Pille im Shop</span>
+            </div>
+          </label>
+          <label class="flex items-center gap-3 cursor-pointer bg-surface-container-low border border-outline-variant rounded-xl px-4 py-2.5 hover:border-primary">
+            <input id="formExport" type="checkbox" class="filter-check"/>
+            <div>
+              <span class="text-sm font-semibold text-on-surface">Als Export markieren *</span>
+              <span class="block text-[11px] text-on-surface-variant">Restposten / sehr günstige Ware</span>
+            </div>
+          </label>
+        </div>
+
+        <!-- Größen-Klasse — wird per JS nur eingeblendet bei den passenden Kategorien -->
+        <div id="groesseKlasseWrap" class="hidden mt-3">
+          <label class="block">
+            <span class="block text-xs font-semibold text-on-surface-variant mb-1">Größen-Klasse — wird automatisch vorgeschlagen, kannst du ändern</span>
+            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
+              <button type="button" class="groesse-btn px-3 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant text-sm font-semibold hover:border-primary" data-groesse="">– keine –</button>
+              <button type="button" class="groesse-btn px-3 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant text-sm font-semibold hover:border-primary" data-groesse="klein">Klein</button>
+              <button type="button" class="groesse-btn px-3 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant text-sm font-semibold hover:border-primary" data-groesse="schmal">Schmal</button>
+              <button type="button" class="groesse-btn px-3 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant text-sm font-semibold hover:border-primary" data-groesse="normal">Normal</button>
+              <button type="button" class="groesse-btn px-3 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant text-sm font-semibold hover:border-primary" data-groesse="hoch">Hoch</button>
+              <button type="button" class="groesse-btn px-3 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant text-sm font-semibold hover:border-primary" data-groesse="gross">Groß</button>
+            </div>
+            <p id="groesseHinweis" class="hidden mt-2 text-[12px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2"></p>
+          </label>
+        </div>
+      </div>
+
+      <!-- Öffnungsart -->
+      <div class="bg-white rounded-2xl border border-outline-variant p-5">
+        <h4 class="text-sm font-bold mb-3">Öffnungsart</h4>
+        <select id="formOeffnungsart" class="w-full px-3 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant focus:border-primary focus:outline-none text-sm">
+          <option value="dreh-kipp-rechts">Dreh-Kipp Rechts (Griff links)</option>
+          <option value="dreh-kipp-links">Dreh-Kipp Links (Griff rechts)</option>
+          <option value="dreh-rechts">Dreh Rechts (Griff links)</option>
+          <option value="dreh-links">Dreh Links (Griff rechts)</option>
+          <option value="kipp">Nur Kipp</option>
+          <option value="fest">Festverglasung</option>
+          <option value="stulp">Stulp (zweiflüglig, ohne Pfosten)</option>
+          <option value="pfosten">Pfosten (zweiflüglig, mit Mittelpfosten)</option>
+          <option value="psk">Parallel-Schiebe-Kipp (PSK)</option>
+          <option value="hebe-schiebe">Hebe-Schiebe</option>
+          <option value="drehfluegel">Drehflügel (Haustür)</option>
+        </select>
+      </div>
+
+      <!-- System + Farbe + Verglasung -->
+      <div class="bg-white rounded-2xl border border-outline-variant p-5">
+        <h4 class="text-sm font-bold mb-3">System &amp; Aussehen</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <!-- Drutex-System: nur bei NEUWARE sichtbar (siehe shop-einstellen.js) -->
+          <label id="formSystemWrap" class="block">
+            <span class="block text-xs font-semibold text-on-surface-variant mb-1">Drutex-System</span>
+            <select id="formSystem" class="w-full px-3 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant focus:border-primary focus:outline-none text-sm">
+              <option value="IGLO 5 Classic">IGLO 5 Classic</option>
+              <option value="IGLO Energy">IGLO Energy</option>
+              <option value="IGLO Light">IGLO Light</option>
+              <option value="IGLO EXT">IGLO EXT</option>
+              <option value="IGLO EDGE">IGLO EDGE</option>
+              <option value="IGLO 5 Classic Tür">IGLO 5 Classic Tür</option>
+              <option value="IGLO Energy Tür">IGLO Energy Tür</option>
+              <option value="IGLO 5 Classic PSK">IGLO 5 Classic PSK</option>
+              <option value="IGLO Energy PSK">IGLO Energy PSK</option>
+              <option value="IGLO Slide">IGLO Slide</option>
+              <option value="IGLO-HS">IGLO-HS</option>
+            </select>
+          </label>
+          <label class="block">
+            <span class="block text-xs font-semibold text-on-surface-variant mb-1">Farbe</span>
+            <select id="formFarbe" class="w-full px-3 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant focus:border-primary focus:outline-none text-sm">
+              <option value="weiss">Weiß</option>
+              <option value="anthrazit">Anthrazit</option>
+              <option value="golden-oak">Golden Oak</option>
+              <option value="nussbaum">Nussbaum</option>
+              <option value="schwarz">Schwarz</option>
+              <option value="dunkelgruen">Dunkelgrün</option>
+            </select>
+          </label>
+          <label class="block">
+            <span class="block text-xs font-semibold text-on-surface-variant mb-1">Verglasung</span>
+            <select id="formVerglasung" class="w-full px-3 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant focus:border-primary focus:outline-none text-sm">
+              <option value="2-fach">2-fach</option>
+              <option value="3-fach">3-fach</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <!-- Eigenschaften (optional) -->
+      <div class="bg-white rounded-2xl border border-outline-variant p-5">
+        <h4 class="text-sm font-bold mb-3">Eigenschaften (optional)</h4>
+        <div id="eigenschaftenWrap" class="text-sm"></div>
+      </div>
+
+      <!-- Beschreibung -->
+      <div class="bg-white rounded-2xl border border-outline-variant p-5">
+        <label class="block">
+          <span class="block text-sm font-bold mb-2">Beschreibung (optional)</span>
+          <textarea id="formBeschreibung" rows="4" placeholder="Was ist besonders an diesem Fenster? Z.B. 'Sofort lieferbar', 'Restposten aus Großauftrag', 'Top-Zustand'…" class="w-full px-4 py-3 rounded-xl bg-surface-container-low border border-outline-variant focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-fixed text-sm resize-none"></textarea>
+        </label>
+      </div>
+
+      <!-- Aktionen -->
+      <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-end">
+        <button id="zurueckZuStep1" class="px-5 py-2.5 rounded-full text-sm font-semibold text-on-surface-variant hover:text-on-surface">
+          ← Zurück
+        </button>
+        <button id="vorschauBtn" class="px-5 py-2.5 rounded-full text-sm font-semibold border border-outline-variant hover:bg-surface-container-low">
+          Live-Vorschau aktualisieren
+        </button>
+        <button id="veroeffentlichenBtn" class="bg-primary text-white px-6 py-3 rounded-full font-bold text-sm hover:bg-primary-d transition-colors flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined" style="font-size:18px">publish</span>
+          Inserat veröffentlichen
+        </button>
+      </div>
+    </div>
+
+    <!-- Rechte Spalte: Live-Vorschau -->
+    <aside class="vorschau-sticky">
+      <h4 class="text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-2 flex items-center gap-1.5">
+        <span class="material-symbols-outlined" style="font-size:14px">visibility</span>
+        Live-Vorschau im Shop
+      </h4>
+      <div id="vorschauKarte" class="bg-white rounded-2xl border border-outline-variant overflow-hidden">
+        <!-- Befüllt von JS -->
+      </div>
+      <p class="text-[11px] text-on-surface-variant mt-3 leading-relaxed">
+        So sehen Kunden dein Inserat im Shop. Änderungen oben werden hier sofort übernommen.
+      </p>
+    </aside>
+  </div>
+</section>
+
+<!-- Snackbar -->
+<div id="snackbar" class="snackbar"></div>
+
+<!-- Erfolg-Modal -->
+<div id="publishOverlay" class="fixed inset-0 bg-black/50 z-[150] hidden items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+    <div class="flex items-center gap-3 mb-3">
+      <span class="material-symbols-outlined text-success" style="font-size:36px">check_circle</span>
+      <div>
+        <h3 class="text-xl font-extrabold">Inserat veröffentlicht</h3>
+        <p class="text-xs text-on-surface-variant">Im Shop sofort sichtbar.</p>
+      </div>
+    </div>
+    <div class="flex flex-col sm:flex-row gap-2 mt-4">
+      <a href="shop.html" class="flex-1 text-center bg-primary text-white px-4 py-2.5 rounded-full text-sm font-bold hover:bg-primary-d transition-colors">Im Shop ansehen</a>
+      <button id="publishCloseBtn" class="flex-1 px-4 py-2.5 rounded-full text-sm font-semibold border border-outline-variant hover:bg-surface-container-low">Nächstes Inserat</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+<script src="js/supabase-config.js" defer></script>
+<script src="js/shop-einstellen.js" defer></script>
+</body>
+</html>
