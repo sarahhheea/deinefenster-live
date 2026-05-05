@@ -147,7 +147,7 @@
     /* Aktive Sektion: linker 3px Akzent-Border in Brand-Hellblau (DeineFenster-eigene Markierung) */
     .sc.open .sh{background:var(--c-header-bg-open);padding-left:25px;box-shadow:inset 3px 0 0 var(--c-header-accent)}
     /* Sektion-Body: weiß, dezente Trennlinie zum Header */
-    .sb{display:none;padding:20px 22px 24px;background:var(--c-bg);color:var(--c-text);border-top:2px solid var(--c-header-accent)}
+    .sb{display:none;padding:20px 22px 24px;background:var(--c-bg);color:var(--c-text);border-top:2px solid var(--c-header-accent)} /* Sarah-Wunsch 05.05.2026: Section-Padding wieder auf Standard (Sarah sagte: weiße Abstände im Container sind ok, nur die Bild-Container hatten Whitespace) */
     .sc.open .sb{display:block;animation:sb-fade .35s var(--ease)}
     @keyframes sb-fade{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
     /* Sarah-Fix 02.05.2026: Accessibility — Animationen respektieren reduzierte Bewegung */
@@ -220,20 +220,29 @@
     .pc-name{font-size:16px;font-weight:700;color:var(--c-text);font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:-.01em;margin-top:0;line-height:1.2}
     .pc-from{font-size:12.5px;color:var(--c-text-soft);font-weight:500;margin-top:-2px}
     /* Produktbild — zentriert, kein negativer Margin (Sarah v4: etwas Atemraum zum Text) */
+    /* Sarah-Update 05.05.2026: aspect-ratio:4/5 reicht — keine min-/max-height, sonst entsteht Whitespace im Container um das Bild herum (Bilder sind 4:5 portrait, passen exakt) */
     .pc-img{width:100%;aspect-ratio:4/5;height:auto;object-fit:contain;object-position:center;display:block;background:transparent;transition:transform var(--t-norm) var(--ease);filter:none}
-    @media(min-width:640px){.pc-img{min-height:280px;max-height:340px}}
-    @media(min-width:1024px){.pc-img{min-height:320px;max-height:380px}}
     /* HST hat jetzt 4:5 portrait Canvas mit weißem Padding (Sarah-Fix 28.04.2026: kein transform-Hack mehr) */
     /* Live-Vorschau cleanen — Overlays im Bild raus, sieht aus wie Produktkarte (Sarah-Wunsch 28.04.2026) */
     #prev-color-strip{display:none !important}
     #prev-dim-label{display:none !important}
     /* Haustür-Bilder: Drutex-Katalog-Vollbilder mit weißem Eigen-Hintergrund.
-       Keine Karte/Rahmen — Tür sitzt direkt im Layout (Sarah-Wunsch 02.05.2026). */
-    #s-tm .pc-img{height:240px;background:transparent;padding:0;border:none}
-    @media(min-width:1024px){#s-tm .pc-img{height:300px}}
-    #s-tm .pc{padding:8px 4px 12px}
+       Keine Karte/Rahmen — Tür sitzt direkt im Layout (Sarah-Wunsch 02.05.2026).
+       Sarah-Update 05.05.2026: deutlich größer + minimaler Whitespace. */
+    #s-tm .pc-img{height:320px;background:transparent;padding:0;border:none}
+    @media(min-width:1024px){#s-tm .pc-img{height:400px}}
+    #s-tm .pc{padding:0 4px 4px}
     /* Selected: subtiler Glow um die Tür ohne Rahmen */
     #s-tm .pc.sel .pc-img{outline:none;box-shadow:0 0 0 3px var(--c-primary), 0 8px 24px rgba(34,94,170,.18);border-radius:8px}
+
+    /* FLÜGEL IMAGE CARD (.fk) — kompakte Bild-Auswahl für Flügelaufteilung */
+    .fk{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:0;border:1.5px solid var(--c-border);border-radius:10px;padding:6px 4px 8px;cursor:pointer;background:var(--c-bg);transition:border-color var(--t-fast) var(--ease),background var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease);text-align:center;min-width:0}
+    .fk:hover{border-color:var(--c-primary);background:var(--c-primary-tint)}
+    .fk.sel{border-color:var(--c-primary);background:var(--c-primary-tint);box-shadow:0 0 0 2px var(--c-ring)}
+    .fk.sel::after{content:'check_circle';position:absolute;top:4px;right:4px;font-family:'Material Symbols Outlined';font-variation-settings:'FILL' 1;font-size:15px;color:var(--c-primary);background:#fff;border-radius:50%;line-height:1;z-index:2}
+    .fk-img{width:100%;aspect-ratio:4/5;object-fit:contain;display:block;border-radius:6px}
+    .fk-label{font-size:10px;font-weight:600;color:var(--c-text);line-height:1.3;margin-top:5px;letter-spacing:-.01em}
+    .fk-price{font-size:10px;font-weight:700;margin-top:2px}
 
     /* CHECKBOX CARD */
     .cc{position:relative;display:flex;align-items:flex-start;gap:12px;border:1px solid var(--c-border);border-radius:var(--r-md);padding:16px 18px;cursor:pointer;background:var(--c-bg);transition:border-color var(--t-fast) var(--ease),background var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease)}
@@ -365,44 +374,49 @@
 </head>
 <body>
 
-<!-- NAV -->
-<nav id="navbar" class="fixed top-0 w-full z-50 border-b border-white/10">
-  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-    <a href="index.html" class="flex items-center gap-2 text-white font-bold text-xl" style="font-family:'Plus Jakarta Sans',sans-serif">
-      <i class="ms f" style="color:#76a9fa">window</i>
-      DeineFenster<span style="color:#76a9fa">.de</span>
-    </a>
-    <div class="hidden md:flex items-center gap-6 text-sm font-medium text-white/85">
-      <a href="index.html"        class="hover:text-white transition-colors">Start</a>
-      <a href="produkte.html"     class="hover:text-white transition-colors">Produkte</a>
-      <a href="konfigurator.html" class="text-white border-b-2 border-white pb-0.5">Konfigurator</a>
-      <a href="ueber-uns.html"    class="hover:text-white transition-colors">Über uns</a>
-      <a href="kontakt.html"      class="hover:text-white transition-colors">Kontakt</a>
+<!-- Navigation -->
+<nav id="navbar" class="fixed top-0 w-full z-50 glass-nav border-b border-white/10">
+  <div class="flex justify-between items-center px-6 md:px-12 py-4 max-w-[1440px] mx-auto">
+    <a href="index.html" class="text-xl md:text-2xl font-bold tracking-tighter text-white">DeineFenster<span style="color:#76a9fa">.de</span></a>
+    <div class="hidden md:flex items-center gap-x-8">
+      <a href="produkte.html" class="text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Produkte</a>
+      <a href="konfigurator.html" class="text-white font-semibold border-b-2 border-white pb-1 text-sm tracking-tight">Konfigurator</a>
+      <a href="shop.html" class="text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight inline-flex items-center gap-1.5">Shop <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none" style="background:#76a9fa;color:#001b3d">NEU</span></a>
+      <a href="ueber-drutex.html" class="text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Über Drutex</a>
+      <a href="ueber-uns.html" class="text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Über uns</a>
+      <a href="kontakt.html" class="text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Kontakt</a>
     </div>
-    <div class="flex items-center gap-3">
-      <!-- Sarah-Wunsch 21.04.2026: Warenkorb-Button als Switch zur Bestellübersicht -->
-      <a id="nav-cart-btn" href="bestelluebersicht.html" onclick="saveCurrentBeforeOverview()"
-        class="hidden relative items-center gap-2 px-4 py-2 rounded-full font-semibold text-sm transition-all"
-        style="background:#f59e0b;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;box-shadow:0 2px 8px rgba(245,158,11,0.35)"
-        title="Zur Bestellübersicht">
-        <i class="ms f" style="font-size:18px">shopping_cart</i>
-        <span class="hidden sm:inline">Warenkorb</span>
-        <span id="nav-cart-count" style="background:#fff;color:#f59e0b;border-radius:999px;min-width:22px;height:22px;padding:0 6px;display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:12px">0</span>
-      </a>
-      <button onclick="document.getElementById('mob').classList.toggle('hidden');this.querySelector('i').textContent=document.getElementById('mob').classList.contains('hidden')?'menu':'close'"
-        class="md:hidden text-white p-1" aria-label="Menü">
-        <i class="ms">menu</i>
+    <div class="flex items-center gap-3 md:gap-6">
+      <a href="konfigurator.html" class="hidden md:block px-6 py-3 rounded-full font-bold text-sm transition-all duration-300" style="background:#ffffff !important; color:#225eaa !important; text-decoration:none;" onmouseover="this.style.background='#d6e3ff'" onmouseout="this.style.background='#ffffff'">Angebot anfordern</a>
+      <button id="menuBtn" class="md:hidden text-white p-1" aria-label="Menü öffnen">
+        <span class="material-symbols-outlined text-3xl" id="menuIcon">menu</span>
       </button>
     </div>
   </div>
-  <div id="mob" class="hidden md:hidden px-4 pb-4 space-y-1" style="background:rgba(17,36,85,.98)">
-    <a href="index.html"        class="block text-white/75 hover:text-white py-2">Start</a>
-    <a href="produkte.html"     class="block text-white/75 hover:text-white py-2">Produkte</a>
-    <a href="konfigurator.html" class="block text-white font-semibold py-2">Konfigurator</a>
-    <a href="ueber-uns.html"    class="block text-white/75 hover:text-white py-2">Über uns</a>
-    <a href="kontakt.html"      class="block text-white/75 hover:text-white py-2">Kontakt</a>
+  <div id="mobileMenu" class="hidden md:hidden px-6 py-6 border-t border-white/10">
+    <div class="flex flex-col gap-4">
+      <a href="produkte.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Produkte</a>
+      <a href="konfigurator.html" class="text-white font-bold text-lg py-2 border-b border-white/10">Konfigurator</a>
+      <a href="shop.html" class="text-white font-semibold text-lg py-2 border-b border-white/10 flex items-center gap-2">Shop <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style="background:#76a9fa;color:#001b3d">NEU</span></a>
+      <a href="ueber-drutex.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Über Drutex</a>
+      <a href="ueber-uns.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Über uns</a>
+      <a href="kontakt.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Kontakt</a>
+      <a href="konfigurator.html" class="mt-2 bg-white text-primary px-6 py-4 rounded-full font-bold text-center text-sm">Angebot anfordern</a>
+    </div>
   </div>
 </nav>
+
+<style>
+  .glass-nav { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+</style>
+
+<script>
+  document.getElementById('menuBtn').addEventListener('click', () => {
+    const m = document.getElementById('mobileMenu');
+    m.classList.toggle('hidden');
+    document.getElementById('menuIcon').textContent = m.classList.contains('hidden') ? 'menu' : 'close';
+  });
+</script>
 
 <!-- HERO — Sarah-Update 02.05.2026 Stufe-1: Visuell entfernt, h1 nur für SEO/Screenreader sichtbar.
      Spart ~80-100px Höhe damit der Konfigurator direkt nach Navbar startet (wie meinfenster24). -->
@@ -449,12 +463,11 @@
   </div>
 </div>
 
-<!-- MAIN — Sarah-Update 02.05.2026 v7: 50/50 Aufteilung (Auswahl links, Vorschau rechts gleich breit) -->
-<div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-4 md:py-5 grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-6 items-start">
+<!-- MAIN — Sarah-Update 05.05.2026 v10: 60/40 statt 50/50 — Schritte-Bereich bekommt mehr Platz, Bilder ~22% größer ohne Layout-Bruch -->
+<div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-4 md:py-5 grid grid-cols-1 lg:grid-cols-5 gap-5 lg:gap-6 items-start">
 
-<!-- ════ STEPS LEFT ════ -->
-<!-- Sarah-Update 02.05.2026 v6: eigenständige Brand-Identität — sanfter Rahmen + Brand-Schatten -->
-<div id="steps" style="border-radius:6px;overflow:hidden;box-shadow:0 4px 24px rgba(26,41,66,0.10),0 1px 3px rgba(26,41,66,0.06);border:1px solid rgba(26,41,66,0.08)">
+<!-- ════ STEPS LEFT (60% = col-span-3) ════ -->
+<div id="steps" class="lg:col-span-3" style="border-radius:6px;overflow:hidden;box-shadow:0 4px 24px rgba(26,41,66,0.10),0 1px 3px rgba(26,41,66,0.06);border:1px solid rgba(26,41,66,0.08)">
 
 <!-- ── SCHRITT 1: PRODUKTTYP ──────────────────────── -->
 <div class="sc open" id="s1">
@@ -467,6 +480,7 @@
     <i class="ms chev">expand_more</i>
   </div>
   <div class="sb">
+    <!-- 4 Karten in einer Reihe (Desktop), 2×2 auf Tablet, gestapelt auf Mobile -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
       <!-- KUNSTSTOFFFENSTER — Kategorie-Bild (konsistent zur Produkte-Seite, Sarah-Refactor 28.04.2026) -->
       <div class="pc" data-p="kunststoff" onclick="pickProd(this)">
@@ -474,32 +488,38 @@
         <img class="pc-img"
              src="img/fenster_standard_v3.png"
              width="1280" height="714"
+             loading="lazy"
              decoding="async"
              alt="Drutex IGLO 5 Classic Kunststofffenster in Weiß, einflüglig Dreh-Kipp – Vorschau für Online-Konfigurator"/>
         <div class="pc-name">Kunststoff&shy;fenster</div>
         <div class="pc-from">ab 99 €</div>
       </div>
 
-      <!-- BALKONTÜR — Kategorie-Bild -->
+      <!-- BALKONTÜR — Kategorie-Bild (Sarah-Update 05.05.2026: tauscht alte standard.png gegen v3 — gleiche Bilddatei wie Live-Preview, Logik-Konsistenz) -->
       <div class="pc" data-p="balkontuer" onclick="pickProd(this)">
         <span class="pc-badge" aria-label="KI-generiertes Symbolfoto">Symbolfoto</span>
         <img class="pc-img"
-             src="img/balkontuer_standard.png"
-             width="1280" height="714"
+             src="img/balkontuer_standard_v3.png"
+             width="1024" height="1280"
+             loading="lazy"
              decoding="async"
-             alt="Drutex IGLO Balkontür in Weiß, zweiflüglig mit zentralem Griff – Vorschau für Online-Konfigurator"/>
+             alt="Drutex IGLO Balkontür in Weiß, einflüglig Dreh-Kipp – Vorschau für Online-Konfigurator"/>
         <div class="pc-name">Balkontür</div>
         <div class="pc-from">ab 179 €</div>
       </div>
 
-      <!-- HAUSTÜR — Kategorie-Bild -->
+      <!-- HAUSTÜR — Kategorie-Bild (Sarah-Update 05.05.2026 v5: Drutex IGLO Energy Montana in Weiß FX,
+           Außenansicht mit Stoßgriff (CLAUDE.md Regel 4a). Durch process-master-image.py gepipelined
+           für 4:5 Konsistenz. Konsistent mit der Anthrazit-Variante die im Live-Preview bei Farbwahl
+           geladen wird → kein visueller Bruch beim Klick auf "Anthrazitgrau" o.ä. -->
       <div class="pc" data-p="haustuere" onclick="pickProd(this)">
         <span class="pc-badge" aria-label="KI-generiertes Symbolfoto">Symbolfoto</span>
         <img class="pc-img"
-             src="img/haustuer_standard_v3.png"
-             width="1280" height="714"
+             src="img/haustuer_iglo_energy_montana_weiss.png"
+             width="1024" height="1280"
+             loading="lazy"
              decoding="async"
-             alt="Drutex Iglo Haustür in Weiß mit vertikalem Edelstahl-Stoßgriff und Glaseinsatz – Vorschau für Online-Konfigurator"/>
+             alt="Drutex IGLO Energy Montana Haustür in Weiß FX – einflüglig mit vertikalem Glaseinsatz und Stoßgriff – Außenansicht für Online-Konfigurator"/>
         <div class="pc-name">Haustür</div>
         <div class="pc-from">ab 899 €</div>
       </div>
@@ -571,7 +591,7 @@
         <strong>Drutex-Richtwerte:</strong> 1 Flügel bis ca. 1400 mm Breite · 2 Flügel 1200–2400 mm · 3 Flügel 1800–3000 mm. Pro Flügel maximal ca. 2,5 m² Glasfläche. Ober-/Unterlicht typisch ab Raumhöhe 2300 mm sinnvoll. Sondermaße auf Anfrage.
       </div>
     </div>
-    <div id="fluegel-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-2 mt-1">
+    <div id="fluegel-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-1 mt-1">
       <!-- filled by JS -->
     </div>
   </div>
@@ -1845,8 +1865,8 @@
 
 </div><!-- /steps -->
 
-<!-- ════ SIDEBAR RIGHT ════ -->
-<div id="sidebar-wrap">
+<!-- ════ SIDEBAR RIGHT (40% = col-span-2) ════ -->
+<div id="sidebar-wrap" class="lg:col-span-2">
   <div id="sidebar" class="p-3">
 
     <!-- VIEW TOGGLE — Sarah-Klarstellung 02.05.2026 v7: heller Container, Active-Button im Sektion-Header-Blauton -->
@@ -2719,6 +2739,15 @@ function pickProd(el) {
   document.getElementById('d1').textContent = P.prod[S.prod].name;
   mkDone(1);
 
+  // Sarah-Plan 05.05.2026: Bei Haustür direkt Außenansicht aktivieren —
+  // Default-Bild ist das IGLO Energy Montana in Weiß FX mit Stoßgriff (= Außenansicht).
+  // Beim Klick auf Anthrazitgrau o.ä. wechselt das Live-Preview nahtlos auf die
+  // entsprechende Drutex-Farb-Variante (HAUSTUER_FARB_FRAMES). Die Innenansicht
+  // (Klinke + 3 Scharniere) wird vom User selbst über den View-Toggle aktiviert.
+  if (S.prod === 'haustuere') {
+    setPreviewView('aus');
+  }
+
   // Sarah-Fix 22.04.2026 (v3): Schritt 2 SOFORT öffnen & scrollen — BEVOR die build*-Funktionen
   // laufen. Damit ist der Sprung garantiert, selbst wenn irgendwo später eine Exception auftritt.
   // (Schritt 1 zu, Schritt 2 auf, manueller Scroll mit Offset — in dieser Reihenfolge.)
@@ -3434,45 +3463,43 @@ function buildFluegel() {
     return;
   }
   // Sarah-Update 02.05.2026: Balkontür nur 1- und 2-flügelig (Branchen-Standard).
-  // 3-Flügel + Oberlicht/Unterlicht-Varianten sind bei Balkontüren unüblich und werden
-  // ausgeblendet damit User nicht ungültige Konfigurationen wählt.
   if (S.prod === 'balkontuer') {
     opts = [
-      {v:'1-fluegel', n:1, ol:false, ul:false, add:0  },
-      {v:'2-fluegel', n:2, ol:false, ul:false, add:85 },
+      {v:'1-fluegel', add:0  },
+      {v:'2-fluegel', add:85 },
     ];
     grid.innerHTML = opts.map(o=>`
-      <div class="oc flex-col items-center text-center p-2 gap-1${S.fluegel===o.v?' sel':''}" style="flex-direction:column;align-items:center;padding:10px 6px;" data-v="${o.v}" onclick="pickFluegel(this)">
-        ${fluegelSVG(o.n,o.ol,o.ul)}
-        <div class="olabel" style="font-size:12px;margin-top:4px">${P.fluegel[o.v].name}</div>
-        <div class="oprice ${o.add===0?'p-inc':'p-add'}" style="font-size:11px">${o.add===0?'inkl.':'+ '+o.add+' €'}</div>
+      <div class="fk${S.fluegel===o.v?' sel':''}" data-v="${o.v}" onclick="pickFluegel(this)">
+        <img class="fk-img" src="${getMasterImage('balkontuer','innen',o.v)}" loading="lazy" alt="${P.fluegel[o.v].name}">
+        <div class="fk-label">${P.fluegel[o.v].name}</div>
+        <div class="fk-price ${o.add===0?'p-inc':'p-add'}">${o.add===0?'inkl.':'+ '+o.add+' €'}</div>
       </div>`).join('');
     return;
   }
   opts = [
-    {v:'1-fluegel',    n:1,ol:false,ul:false,add:0  },
-    {v:'2-fluegel',    n:2,ol:false,ul:false,add:85 },
-    {v:'3-fluegel',    n:3,ol:false,ul:false,add:165},
-    {v:'1-oberlicht',  n:1,ol:true, ul:false,add:95 },
-    {v:'2-oberlicht',  n:2,ol:true, ul:false,add:180},
-    {v:'3-oberlicht',  n:3,ol:true, ul:false,add:260},
-    {v:'1-unterlicht', n:1,ol:false,ul:true, add:95 },
-    {v:'2-unterlicht', n:2,ol:false,ul:true, add:180},
-    {v:'3-unterlicht', n:3,ol:false,ul:true, add:260},
-    {v:'1-ober-unter', n:1,ol:true, ul:true, add:175},
-    {v:'2-ober-unter', n:2,ol:true, ul:true, add:260},
-    {v:'3-ober-unter', n:3,ol:true, ul:true, add:340},
+    {v:'1-fluegel'   ,add:0  },
+    {v:'2-fluegel'   ,add:85 },
+    {v:'3-fluegel'   ,add:165},
+    {v:'1-oberlicht' ,add:95 },
+    {v:'2-oberlicht' ,add:180},
+    {v:'3-oberlicht' ,add:260},
+    {v:'1-unterlicht',add:95 },
+    {v:'2-unterlicht',add:180},
+    {v:'3-unterlicht',add:260},
+    {v:'1-ober-unter',add:175},
+    {v:'2-ober-unter',add:260},
+    {v:'3-ober-unter',add:340},
   ];
   grid.innerHTML = opts.map(o=>`
-    <div class="oc flex-col items-center text-center p-2 gap-1${S.fluegel===o.v?' sel':''}" style="flex-direction:column;align-items:center;padding:10px 6px;" data-v="${o.v}" onclick="pickFluegel(this)">
-      ${fluegelSVG(o.n,o.ol,o.ul)}
-      <div class="olabel" style="font-size:12px;margin-top:4px">${P.fluegel[o.v].name}</div>
-      <div class="oprice ${o.add===0?'p-inc':'p-add'}" style="font-size:11px">${o.add===0?'inkl.':'+ '+o.add+' €'}</div>
+    <div class="fk${S.fluegel===o.v?' sel':''}" data-v="${o.v}" onclick="pickFluegel(this)">
+      <img class="fk-img" src="${getMasterImage('kunststoff','innen',o.v)}" loading="lazy" alt="${P.fluegel[o.v].name}">
+      <div class="fk-label">${P.fluegel[o.v].name}</div>
+      <div class="fk-price ${o.add===0?'p-inc':'p-add'}">${o.add===0?'inkl.':'+ '+o.add+' €'}</div>
     </div>`).join('');
 }
 
 function pickFluegel(el) {
-  document.querySelectorAll('#fluegel-grid .oc').forEach(c=>c.classList.remove('sel'));
+  document.querySelectorAll('#fluegel-grid .fk, #fluegel-grid .oc').forEach(c=>c.classList.remove('sel'));
   el.classList.add('sel');
   S.fluegel = el.dataset.v;
   previewState.fluegel = parseInt(S.fluegel.charAt(0)) || 1;
@@ -3988,14 +4015,22 @@ function upSidebar() {
 
   let rows=[{l:pr.name+' '+S.bMm+'×'+S.hMm+' mm', v:fmt(base)}];
   const adds=[
+    // Glas + Profil
     ['glas','profil'].map(k=>{
       const tbl = P[k]; if(!S[k]||!tbl[S[k]]||tbl[S[k]].add===0) return null;
       const a=tbl[S[k]].add; return {l:tbl[S[k]].name,v:(a>0?'+ ':'− ')+fmt(Math.abs(a)),sub:true};
     }),
+    // Schallschutz + Sicherheitsglas (werden in calcUnit berechnet, fehlten bisher in Sidebar)
+    ['schall','sicherGlas'].map(k=>{
+      const tbl=P[k]; if(!S[k]||!tbl[S[k]]||tbl[S[k]].add===0) return null;
+      return {l:tbl[S[k]].name,v:'+ '+fmt(tbl[S[k]].add),sub:true};
+    }),
+    // Flügelzahl
     (()=>{
       if(!S.fluegel||!P.fluegel[S.fluegel]||P.fluegel[S.fluegel].add===0) return [];
       return [{l:P.fluegel[S.fluegel].name,v:'+ '+fmt(P.fluegel[S.fluegel].add),sub:true}];
     })(),
+    // Per-sash Öffnungsart
     (()=>{
       const cnt=getSashCount(); const parts=[];
       ['oeff1','oeff2','oeff3'].slice(0,cnt).forEach(k=>{
@@ -4006,26 +4041,72 @@ function upSidebar() {
       });
       return parts;
     })(),
+    // Glasdekor
     (()=>{
       if(!S.glasdekor||S.glasdekor==='klar'||!P.glasdekor[S.glasdekor]) return [];
       return [{l:P.glasdekor[S.glasdekor].name,v:'+ '+fmt(P.glasdekor[S.glasdekor].add),sub:true}];
     })(),
+    // Farben
     ['fa','fi','fd'].map(k=>{
       const tbl=P[k]; if(!S[k]||!tbl[S[k]]||tbl[S[k]].add===0) return null;
       return {l:tbl[S[k]].name,v:'+ '+fmt(tbl[S[k]].add),sub:true};
     }),
+    // Sprossen
     (()=>{
       if(S.sproTyp==='keine') return [];
-      // Sarah-bestätigt 21.04.2026: neue Sprossen-Struktur
       const a = P.sproAdd[S.sproTyp]?.[S.sproDicke] || 0;
       if (a === 0) return [];
       const typLabel = S.sproTyp==='aufgeklebt'?'Aufgeklebt':'SZR';
       return [{l:`${typLabel} Sprossen ${S.sproDicke} mm`, v:'+ '+fmt(a), sub:true}];
     })(),
-    ['griff','roll','sicher'].map(k=>{
-      const tbl=P[k]; if(!S[k]||!tbl[S[k]]||tbl[S[k]].add===0) return null;
-      return {l:tbl[S[k]].name,v:'+ '+fmt(tbl[S[k]].add),sub:true};
-    }),
+    // Griff — produkt-abhängig
+    (()=>{
+      if (S.prod === 'haustuere') {
+        const parts = [];
+        const ai = P.tuerGriffInnen[S.tuerGriffInnen]?.add || 0;
+        if (ai) parts.push({l:'Griff innen: '+P.tuerGriffInnen[S.tuerGriffInnen].name, v:'+ '+fmt(ai), sub:true});
+        const aa = P.tuerGriffAussen[S.tuerGriffAussen]?.add || 0;
+        if (aa) parts.push({l:'Griff außen: '+P.tuerGriffAussen[S.tuerGriffAussen].name, v:'+ '+fmt(aa), sub:true});
+        return parts;
+      }
+      if (S.prod === 'hst') {
+        if (!S.hstGriff||!P.hstGriff[S.hstGriff]||!P.hstGriff[S.hstGriff].add) return [];
+        return [{l:P.hstGriff[S.hstGriff].name, v:'+ '+fmt(P.hstGriff[S.hstGriff].add), sub:true}];
+      }
+      if (!S.griff||!P.griff[S.griff]||P.griff[S.griff].add===0) return [];
+      return [{l:P.griff[S.griff].name,v:'+ '+fmt(P.griff[S.griff].add),sub:true}];
+    })(),
+    // Rolladen + Kastenhöhe
+    (()=>{
+      const parts = [];
+      if (S.roll && P.roll[S.roll] && P.roll[S.roll].add !== 0)
+        parts.push({l:P.roll[S.roll].name, v:'+ '+fmt(P.roll[S.roll].add), sub:true});
+      if (S.roll !== 'ohne' && P.rollKasten[S.rollKasten]?.add)
+        parts.push({l:P.rollKasten[S.rollKasten].name, v:'+ '+fmt(P.rollKasten[S.rollKasten].add), sub:true});
+      return parts;
+    })(),
+    // Sicherheit
+    (()=>{
+      if (!S.sicher||!P.sicher[S.sicher]||P.sicher[S.sicher].add===0) return [];
+      return [{l:P.sicher[S.sicher].name, v:'+ '+fmt(P.sicher[S.sicher].add), sub:true}];
+    })(),
+    // Balkontür-Schwelle (fehlte bisher in Sidebar)
+    (()=>{
+      if (S.prod !== 'balkontuer') return [];
+      const a = P.balkonSchwelle[S.balkonSchwelle]?.add || 0;
+      if (!a) return [];
+      return [{l:P.balkonSchwelle[S.balkonSchwelle].name, v:(a>0?'+ ':'− ')+fmt(Math.abs(a)), sub:true}];
+    })(),
+    // HST-Optionen: Schwelle + Teilung (Lauf hat add:0, nicht relevant)
+    (()=>{
+      if (S.prod !== 'hst') return [];
+      const parts = [];
+      const hs = P.hstSchwelle[S.hstSchwelle]?.add || 0;
+      if (hs) parts.push({l:P.hstSchwelle[S.hstSchwelle].name, v:'+ '+fmt(hs), sub:true});
+      const ht = P.hstTeilung[S.hstTeilung]?.add || 0;
+      if (ht) parts.push({l:P.hstTeilung[S.hstTeilung].name, v:'+ '+fmt(ht), sub:true});
+      return parts;
+    })(),
   ].flat().filter(Boolean);
   rows=[...rows,...adds,{l:'× '+S.qty+' Stück',v:fmt(sub),bold:true},{l:'Lieferkosten',v:fmt(ship),sub:true}];
 
@@ -4320,7 +4401,7 @@ function renderCart() {
 const PROD_IMGS = {
   kunststoff: 'img/fenster_standard_v3.png',
   balkontuer: 'img/balkontuer_standard_v3.png',
-  haustuere:  'img/haustuer_standard_v3.png',
+  haustuere:  'img/haustuer_innen_weiss_v4.png', // Sarah-Update 05.05.2026: neues v4-Innenbild mit korrekten Scharnieren
   hst:        'img/hst_standard.png',
 };
 
@@ -4371,8 +4452,12 @@ const PROD_IMGS_VIEW = {
     aussen: { '1-fluegel': 'img/balkontuer_aussen_v3.png' },
   },
   haustuere: {
-    innen:  { '1-fluegel': 'img/haustuer_standard_v3.png' },
-    aussen: { '1-fluegel': 'img/haustuer_aussen_v3.png' },
+    // Sarah-Update 05.05.2026 v5: Außenansicht jetzt das Drutex IGLO Energy Montana Weiß FX
+    // mit Stoßgriff (CLAUDE.md Regel 4a) — passt zu den 41 Drutex-Farb-Frames die im Live-Preview
+    // bei Farbwahl gezeigt werden. Kein visueller Bruch beim Wechsel weiß ↔ anthrazit.
+    // Innen: weiterhin v4 mit Klinke + 3 Scharnieren links (Innenansicht hat KEINEN Stoßgriff).
+    innen:  { '1-fluegel': 'img/haustuer_innen_weiss_v4.png' },
+    aussen: { '1-fluegel': 'img/haustuer_iglo_energy_montana_weiss.png' },
   },
   hst: {
     innen:  { '1-fluegel': 'img/hst_standard.png' },
@@ -4448,6 +4533,63 @@ function getVariantImage(prod, farbKey) {
   if (!suffix || !prefix) return null;
   return `img/varianten/${prefix}_${suffix}.png`;
 }
+
+// Sarah-Plan 05.05.2026: Drutex IGLO Energy "Montana" Haustür-Frames in 41 Farben.
+// Quelle: produkte/haustueren/iglo-energy.html (data-frame-url Attribute).
+// Wird im Konfigurator als Live-Preview gezeigt wenn Haustür gewählt + Farbe gewählt
+// + Außenansicht aktiv + noch kein konkretes Modell ausgewählt.
+// Außenansicht = IMMER Stoßgriff (CLAUDE.md Regel 4a).
+//
+// Drutex hat zwei URL-Schemas im 2026er Katalog: 9 helle Farben mit "montana-" Infix,
+// 32 weitere ohne Infix (direkt iglo-energy-FARBE.jpg). Die zweite Variante kam mit dem
+// 2026-Update. Wir geben pro Farbe den passenden Filename direkt rein.
+const _hauFB = (file) =>
+  `https://www.drutex.de/media/webp/80/${btoa('/media/_upload/produkty/drzwi-iglo-energy/kolory/wypelnienia-2026/' + file + '.jpg')}.webp`;
+
+const HAUSTUER_FARB_FRAMES = {
+  // Weiß / Crème — Drutex-URL-Schema mit "montana-" Infix
+  'weiss':       _hauFB('iglo-energy-montana-bialy-fx'),
+  'cremeweiss':  _hauFB('iglo-energy-montana-kremowy'),
+  'weiss-fx':    _hauFB('iglo-energy-montana-bialy-fx'),
+  'crown-plat':  _hauFB('iglo-energy-montana-crow-platinium'),
+  'lichtgrau':   _hauFB('iglo-energy-montana-jasny-szary'),
+  'sheffield':   _hauFB('iglo-energy-montana-dab-bielony'),
+  'eiche-hell':  _hauFB('iglo-energy-montana-dab-bielony'),
+  'eiche-nat':   _hauFB('iglo-energy-montana-dab-naturalny'),
+  // Grau-Reihe — ohne "montana-"
+  'betongrau':   _hauFB('iglo-energy-betonowy-szary'),
+  'quarzgr-sa':  _hauFB('iglo-energy-betonowy-szary-kwarcytowy'),
+  'quarzgr-gl':  _hauFB('iglo-energy-betonowy-szary-kwarcytowy-gladki'),
+  'basaltgr-sa': _hauFB('iglo-energy-betonowy-bazaltowy-szary'),
+  'basaltgr-gl': _hauFB('iglo-energy-bazaltowy-szary-gladki'),
+  'eisengl':     _hauFB('iglo-energy-lupkowy'),
+  'schiefgr-gl': _hauFB('iglo-energy-lupkowy-szary-gladki'),
+  'schiefgr-sa': _hauFB('iglo-energy-lupkowy'),
+  // Anthrazit / Schwarz — ohne "montana-"
+  'anthrazit':   _hauFB('iglo-energy-antracyt'),
+  'anthraz-gl':  _hauFB('iglo-energy-antracyt-gladki'),
+  'anthraz-um':  _hauFB('iglo-energy-antracyt-ulti-matt'),
+  'schwarz-um':  _hauFB('iglo-energy-czarny-ulti-matt'),
+  // Holzdekore — ohne "montana-"
+  'golden-oak':  _hauFB('iglo-energy-zloty-dab'),
+  'winchester':  _hauFB('iglo-energy-winchester'),
+  'oregon':      _hauFB('iglo-energy-oregon'),
+  'douglasie':   _hauFB('iglo-energy-daglezja'),
+  'nussbaum':    _hauFB('iglo-energy-orzech'),
+  'mooreiche':   _hauFB('iglo-energy-ciemny-dab'),
+  'dunkleiche':  _hauFB('iglo-energy-ciemny-dab'),
+  'schwarzbr':   _hauFB('iglo-energy-palisander'),
+  'macore':      _hauFB('iglo-energy-macore'),
+  'mahagoni':    _hauFB('iglo-energy-mahon'),
+  'schoko-br':   _hauFB('iglo-energy-braz-czekoladowy'),
+  'braun-mar':   _hauFB('iglo-energy-palisander'),
+  // Bunte — ohne "montana-"
+  'moosgruen':   _hauFB('iglo-energy-zielen-mchu'),
+  'dunkelgr':    _hauFB('iglo-energy-ciemno-zielony'),
+  'dunkelrot':   _hauFB('iglo-energy-ciemny-czerwony'),
+  'brillblau':   _hauFB('iglo-energy-brylantowo-niebieski'),
+  'stahlblau':   _hauFB('iglo-energy-stalowy-niebieski'),
+};
 
 // Sarah-Update 02.05.2026: Echte Drutex-Katalog-Vollbilder (drutex.de/produkte/addons/type/141)
 // 87 Modelle: 40 IGLO Energy + 47 DX-Linie, je Klassisch + Inox-Variante.
@@ -5013,45 +5155,128 @@ function vorschauAktualisieren() {
     && S.prod === 'kunststoff'
     && flKey === '1-fluegel'
     && (S.oeff1 === 'dreh-r' || S.oeff1 === 'dk-r');
-  if (useGriffLinks) {
+
+  const grauDichtung = S.fd === 'grau';
+
+  // Griff-Links + schwarze Dichtung → fenster_standard_v3_links.png
+  // Griff-Links + graue Dichtung   → fenster_standard_v3_rechts.png
+  if (useGriffLinks && grauDichtung) {
     masterSrc = 'img/fenster_standard_v3_rechts.png';
+  } else if (useGriffLinks) {
+    masterSrc = 'img/fenster_standard_v3_links.png';
   }
 
-  // 2a) Weiß → Master direkt laden (außer: Kunststoff Außen 1-Flügel → AI-Bild)
+  // Hilfsfunktion: Farb-Bild laden, bei 404 auf masterSrc fallen
+  function tryFarbenImg(path, fallback) {
+    const probe = new Image();
+    probe.onload  = () => { img.src = path; };
+    probe.onerror = () => { img.src = fallback; };
+    probe.src = path;
+  }
+
+  // 2a) Weiß → Master direkt laden (mit Dichtungs-Variante)
   img.style.filter = 'none';
-  if (isWeiss && !(S.prod === 'kunststoff' && fl === 1 && !istInnen)) {
-    img.src = masterSrc;
-    return;
-  }
-
-  // 2b) Kunststofffenster: KEIN CSS-Filter — nur AI-generierte Bilder verwenden
-  //     Innen 1-Flügel: AI-Farbbild (img/farben/fenster_1fl_<key>.png)
-  //     Außen 1-Flügel: AI-Außenfarbbild (img/farben/fenster_1fl_aussen_<key>.png)
-  //     Alles andere (2-Flügel, Griff-Links): Master-Bild ohne Filter
-  if (S.prod === 'kunststoff') {
-    if (fl === 1 && istInnen && !useGriffLinks) {
-      const variantPath = getVariantImage(S.prod, farbeKey);
-      if (variantPath) {
-        img.src = variantPath;
-        return;
+  if (isWeiss) {
+    // Kunststoff 2-Fl: auch bei hellen Tönen (cremeweiss, weiss-fx) Farbbild versuchen
+    if (S.prod === 'kunststoff' && fl === 2 && farbeKey && farbeKey !== 'weiss' && farbeKey !== 'sonder') {
+      if (istInnen) {
+        tryFarbenImg(`img/farben/fenster_2fl_${farbeKey}.png`, masterSrc); return;
+      } else {
+        tryFarbenImg(`img/farben/fenster_2fl_aussen_${farbeKey}.png`, masterSrc); return;
       }
     }
-    if (fl === 1 && !istInnen && farbeKey && farbeKey !== 'sonder') {
-      img.src = `img/farben/fenster_1fl_aussen_${farbeKey}.png`;
-      return;
+    // Kunststoff 1-Fl Außen → immer AI-Außenbild (kein handle, egal ob grau/schwarz)
+    if (S.prod === 'kunststoff' && fl === 1 && !istInnen) { /* weiter unten */ }
+    // Kunststoff 1-Fl Innen: Griff-Links + Grau → fenster_standard_v3_rechts.png
+    else if (S.prod === 'kunststoff' && fl === 1 && istInnen && useGriffLinks && grauDichtung) {
+      img.src = 'img/fenster_standard_v3_rechts.png'; return;
     }
-    // 2-Flügel, Sonderfarbe oder Fallback: Master-Bild zeigen
-    img.src = masterSrc;
+    // Kunststoff 1-Fl Innen: Griff-Links + Schwarz → fenster_standard_v3_links.png
+    else if (S.prod === 'kunststoff' && fl === 1 && istInnen && useGriffLinks) {
+      img.src = 'img/fenster_standard_v3_links.png'; return;
+    }
+    // Kunststoff 1-Fl Innen: Griff-Rechts + Grau → fenster_standard_v3_grau.png
+    else if (S.prod === 'kunststoff' && fl === 1 && istInnen && grauDichtung) {
+      tryFarbenImg('img/fenster_standard_v3_grau.png', masterSrc); return;
+    }
+    else {
+      img.src = masterSrc; return;
+    }
+  }
+
+  // 2b) Kunststofffenster — AI-generierte Farb-Bilder, kein CSS-Filter
+  //   1-Fl Innen Griff-Rechts schwarz:  img/farben/fenster_1fl_<key>.png         ✅ fertig
+  //   1-Fl Innen Griff-Rechts grau:     img/farben/fenster_1fl_grau_<key>.png    ← noch generieren
+  //   1-Fl Innen Griff-Links schwarz:   img/farben/fenster_1fl_rechts_<key>.png  ← noch generieren
+  //   1-Fl Innen Griff-Links grau:      img/farben/fenster_1fl_rechts_grau_<key>.png ← noch generieren
+  //   1-Fl Außen:                        img/farben/fenster_1fl_aussen_<key>.png  ✅ fertig
+  //   2-Fl Innen/Außen:                  img/farben/fenster_2fl[_aussen]_<key>.png ← Phase 1
+  if (S.prod === 'kunststoff') {
+    if (farbeKey && farbeKey !== 'sonder') {
+      if (fl === 1 && istInnen) {
+        if (useGriffLinks && grauDichtung) {
+          tryFarbenImg(`img/farben/fenster_1fl_rechts_grau_${farbeKey}.png`, masterSrc); return;
+        }
+        if (useGriffLinks) {
+          tryFarbenImg(`img/farben/fenster_1fl_rechts_${farbeKey}.png`, masterSrc); return;
+        }
+        if (grauDichtung) {
+          tryFarbenImg(`img/farben/fenster_1fl_grau_${farbeKey}.png`, masterSrc); return;
+        }
+        // Standard: Griff rechts, schwarze Dichtung
+        const variantPath = getVariantImage(S.prod, farbeKey);
+        if (variantPath) { img.src = variantPath; return; }
+      }
+      if (fl === 1 && !istInnen) {
+        img.src = `img/farben/fenster_1fl_aussen_${farbeKey}.png`; return;
+      }
+      if (fl === 2 && istInnen) {
+        tryFarbenImg(`img/farben/fenster_2fl_${farbeKey}.png`, masterSrc); return;
+      }
+      if (fl === 2 && !istInnen) {
+        tryFarbenImg(`img/farben/fenster_2fl_aussen_${farbeKey}.png`, masterSrc); return;
+      }
+    }
+    img.src = masterSrc; return;
+  }
+
+  // 2c) Balkontür — AI-generierte Farb-Bilder (Phase 1)
+  //   Innen: img/farben/balkontuer_1fl_<key>.png
+  //   Außen: img/farben/balkontuer_1fl_aussen_<key>.png
+  if (S.prod === 'balkontuer' && farbeKey && farbeKey !== 'sonder') {
+    if (istInnen) {
+      tryFarbenImg(`img/farben/balkontuer_1fl_${farbeKey}.png`, masterSrc);
+    } else {
+      tryFarbenImg(`img/farben/balkontuer_1fl_aussen_${farbeKey}.png`, masterSrc);
+    }
     return;
   }
 
-  // 2c) Andere Produkte (Balkontür, HST etc.): JS-Recoloring oder CSS-Filter als Fallback
-  if (location.protocol === 'file:') {
-    img.src = masterSrc;
-    img.style.filter = computeFenstefarbeFilter(farbe);
+  // 2d) HST — AI-generierte Farb-Bilder (Phase 1)
+  //   Innen: img/farben/hst_1fl_<key>.png
+  //   Außen: img/farben/hst_1fl_aussen_<key>.png
+  if (S.prod === 'hst' && farbeKey && farbeKey !== 'sonder') {
+    if (istInnen) {
+      tryFarbenImg(`img/farben/hst_1fl_${farbeKey}.png`, masterSrc);
+    } else {
+      tryFarbenImg(`img/farben/hst_1fl_aussen_${farbeKey}.png`, masterSrc);
+    }
     return;
   }
-  rahmenFaerben(masterSrc, farbe, function(dataUrl) { img.src = dataUrl; }, istInnen);
+
+  // 2e) Haustür Außenansicht — Iglo Energy Montana Frames mit Stoßgriff
+  //   Sarah-Plan 05.05.2026: Wenn Kunde Farbe gewählt hat aber noch kein konkretes Modell,
+  //   zeigen wir die Drutex-CDN-Frames vom Iglo Energy Montana (Außenansicht mit Stoßgriff).
+  //   Außenansicht = IMMER Stoßgriff (CLAUDE.md Regel 4a). Innen oder fehlende Map-Eintrag
+  //   → Master-Bild als Fallback. Modell-Auswahl überschreibt das (Block 1 oben hat Vorrang).
+  if (S.prod === 'haustuere' && !istInnen && farbeKey && HAUSTUER_FARB_FRAMES[farbeKey]) {
+    tryFarbenImg(HAUSTUER_FARB_FRAMES[farbeKey], masterSrc);
+    return;
+  }
+
+  // 2f) Haustür Innenansicht / restliche Fälle: Master-Bild
+  //   (Innenansicht in Farbe wird später per Google Flow generiert — Sarah 05.05.2026)
+  img.src = masterSrc;
 }
 
 function setPreviewView(v) {

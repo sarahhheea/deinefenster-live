@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="de" class="light">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link rel="icon" type="image/svg+xml" href="img/logo/deinefenster-mark.svg"/>
+<title>Login · DeineFenster</title>
+<meta name="robots" content="noindex,nofollow"/>
+<meta name="theme-color" content="#225eaa"/>
+
+<!-- PWA: damit nach Login direkt App-Feeling weiterläuft -->
+<link rel="manifest" href="manifest.webmanifest"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Inserieren"/>
+<meta name="application-name" content="Inserieren"/>
+<link rel="apple-touch-icon" href="img/logo/deinefenster-mark.svg"/>
+
+<link rel="stylesheet" href="css/tailwind.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+<style>
+  body { font-family: 'Manrope', sans-serif; background: #f5f5f7; color: #1d1d1f; min-height: 100vh; display: flex; flex-direction: column; }
+  h1, h2, h3 { font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: -0.01em; }
+
+  .input-clean {
+    background: #ffffff;
+    border: 1px solid rgba(0,0,0,.14);
+    color: #1d1d1f;
+    border-radius: 12px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    font-size: 15px;
+    width: 100%;
+    padding: 14px 16px;
+  }
+  .input-clean:focus {
+    outline: none;
+    border-color: #225eaa;
+    box-shadow: 0 0 0 3px rgba(34,94,170,0.12);
+  }
+
+  .btn-primary {
+    background: #225eaa;
+    color: white;
+    padding: 14px 24px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 15px;
+    transition: all 0.18s;
+    width: 100%;
+  }
+  .btn-primary:hover:not(:disabled) { background: #1e3a8a; }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+</style>
+</head>
+<body>
+
+<!-- Mini-Header -->
+<header class="px-6 md:px-12 py-5 border-b border-black/5 bg-white">
+  <a href="index.html" class="text-xl font-bold tracking-tighter">DeineFenster<span style="color:#225eaa">.de</span></a>
+</header>
+
+<!-- Login Card zentriert -->
+<main class="flex-1 flex items-center justify-center px-6 py-12">
+  <div class="w-full max-w-md bg-white rounded-2xl border border-black/5 shadow-sm p-8 md:p-10">
+    <div class="text-center mb-7">
+      <div class="w-14 h-14 mx-auto mb-4 rounded-2xl flex items-center justify-center" style="background:rgba(34,94,170,0.08)">
+        <span class="material-symbols-outlined" style="color:#225eaa;font-size:28px">lock</span>
+      </div>
+      <h1 class="text-2xl font-extrabold">Login</h1>
+      <p class="text-sm text-[#6e6e73] mt-1">Zum Inserate-Verwalten</p>
+    </div>
+
+    <form id="loginForm" class="space-y-4" autocomplete="on">
+      <label class="block">
+        <span class="block text-xs font-semibold text-[#6e6e73] mb-1.5 ml-1">E-Mail</span>
+        <input id="email" type="email" required autocomplete="email" placeholder="deine@email.de" class="input-clean"/>
+      </label>
+      <label class="block">
+        <span class="block text-xs font-semibold text-[#6e6e73] mb-1.5 ml-1">Passwort</span>
+        <input id="passwort" type="password" required autocomplete="current-password" minlength="6" class="input-clean"/>
+      </label>
+
+      <div id="loginError" class="hidden text-xs text-[#ba1a1a] bg-[#ba1a1a]/10 border border-[#ba1a1a]/20 rounded-lg px-3 py-2"></div>
+
+      <button id="loginBtn" type="submit" class="btn-primary flex items-center justify-center gap-2">
+        <span id="loginBtnText">Einloggen</span>
+        <span id="loginSpinner" class="hidden material-symbols-outlined animate-spin" style="font-size:18px">progress_activity</span>
+      </button>
+    </form>
+
+    <p class="text-[11px] text-center text-[#86868b] mt-6 leading-relaxed">
+      Login nur für autorisierte Mitarbeiter. Das Passwort wird über Supabase verifiziert und nie gespeichert.
+    </p>
+  </div>
+</main>
+
+<footer class="text-center text-[11px] text-[#86868b] py-6">
+  © 2026 Türen und Fensterhandel Christ · <a href="index.html" class="hover:underline">zurück zur Startseite</a>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script>
+(async () => {
+  // Wenn schon eingeloggt → direkt weiterleiten
+  if (supabaseClient) {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session) {
+      const next = new URLSearchParams(location.search).get('next') || 'shop-einstellen.html';
+      location.href = next;
+      return;
+    }
+  }
+})();
+
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('email').value.trim();
+  const passwort = document.getElementById('passwort').value;
+  const errEl = document.getElementById('loginError');
+  const btn = document.getElementById('loginBtn');
+  const btnText = document.getElementById('loginBtnText');
+  const spinner = document.getElementById('loginSpinner');
+
+  errEl.classList.add('hidden');
+  btn.disabled = true;
+  btnText.textContent = 'Logge ein…';
+  spinner.classList.remove('hidden');
+
+  if (!supabaseClient) {
+    errEl.textContent = 'Verbindung zur Datenbank fehlgeschlagen. Lade die Seite neu.';
+    errEl.classList.remove('hidden');
+    btn.disabled = false; btnText.textContent = 'Einloggen'; spinner.classList.add('hidden');
+    return;
+  }
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: passwort });
+
+  if (error) {
+    errEl.textContent = (error.message || '').includes('Invalid login')
+      ? 'E-Mail oder Passwort falsch.'
+      : 'Login fehlgeschlagen: ' + (error.message || 'unbekannter Fehler');
+    errEl.classList.remove('hidden');
+    btn.disabled = false; btnText.textContent = 'Einloggen'; spinner.classList.add('hidden');
+    return;
+  }
+
+  // Erfolg → weiterleiten
+  const next = new URLSearchParams(location.search).get('next') || 'shop-einstellen.html';
+  location.href = next;
+});
+</script>
+</body>
+</html>

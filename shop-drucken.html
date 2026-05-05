@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="de" class="light">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link rel="icon" type="image/svg+xml" href="img/logo/deinefenster-mark.svg"/>
+<title>Lager-Schilder drucken · DeineFenster</title>
+<meta name="robots" content="noindex,nofollow"/>
+<meta name="theme-color" content="#225eaa"/>
+
+<link rel="stylesheet" href="css/tailwind.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+<style>
+  body { font-family: 'Manrope', sans-serif; background: #f5f5f7; color: #1d1d1f; }
+  h1, h2, h3, h4 { font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: -0.01em; }
+
+  .glass-nav {
+    background: rgba(14, 30, 58, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .check {
+    appearance: none; -webkit-appearance: none;
+    width: 22px; height: 22px;
+    border: 1.5px solid rgba(0,0,0,.20);
+    border-radius: 6px;
+    cursor: pointer; position: relative; flex-shrink: 0;
+    background: white;
+  }
+  .check:checked { background: #225eaa; border-color: #225eaa; }
+  .check:checked::after {
+    content: ''; position: absolute; top: 3px; left: 7px;
+    width: 6px; height: 11px; border: solid white;
+    border-width: 0 2px 2px 0; transform: rotate(45deg);
+  }
+
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: white;
+    border: 1px solid rgba(0,0,0,.08);
+    border-radius: 12px;
+    padding: 12px 16px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .row:hover { border-color: rgba(0,0,0,.16); }
+  .row.is-selected { border-color: #225eaa; background: rgba(34,94,170,0.04); }
+  .row-bild {
+    width: 56px; height: 56px;
+    object-fit: contain;
+    background: #f5f5f7;
+    border-radius: 8px;
+    flex-shrink: 0;
+  }
+
+  /* ─── DRUCK-LAYOUT — Vollformat-A4-Preisschild im Baumarkt-Stil ─── */
+  .schild-wrap {
+    display: none;
+  }
+  .schild-vorschau-zeigen .schild-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    margin-top: 24px;
+  }
+  .schild {
+    background: white;
+    border: 4px solid #1d1d1f;
+    border-radius: 8px;
+    padding: 14mm 16mm;
+    page-break-after: always;
+    break-after: page;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    width: 210mm;
+    height: 297mm;
+    max-width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    position: relative;
+    overflow: hidden;
+  }
+  .schild:last-child { page-break-after: auto; break-after: auto; }
+
+  /* Top: Standnummer-Plakette + Zustand */
+  .schild-top {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 6mm;
+    gap: 8mm;
+  }
+  .schild-stand-plakette {
+    background: #225eaa;
+    color: white;
+    border-radius: 14px;
+    padding: 10px 22px 12px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 900;
+    font-size: 110px;
+    line-height: 0.95;
+    letter-spacing: -0.025em;
+    box-shadow: 0 6px 18px rgba(34,94,170,0.35);
+  }
+  .schild-stand-plakette small {
+    display: block;
+    font-size: 14px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    opacity: 0.9;
+    margin-bottom: 3px;
+  }
+  .schild-stand-kein .schild-stand-plakette {
+    background: #f5f5f7;
+    color: #86868b;
+    box-shadow: none;
+  }
+  .schild-zustand-tag {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 10px 20px;
+    border-radius: 999px;
+    border: 3px solid #1d1d1f;
+    align-self: flex-start;
+    margin-top: 12px;
+  }
+  .schild-zustand-tag.is-gebraucht { background: #b87f00; color: white; border-color: #b87f00; }
+  .schild-zustand-tag.is-neu { background: #225eaa; color: white; border-color: #225eaa; }
+
+  /* Mitte: Bild + Beschreibung */
+  .schild-mitte {
+    display: flex; flex-direction: column; gap: 4mm;
+    align-items: center;
+    text-align: center;
+    overflow: hidden;
+  }
+  .schild-bild-wrap {
+    width: 100%;
+    max-width: 110mm;
+    height: 80mm;
+    background: #f5f5f7;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid #e5e5ea;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .schild-bild {
+    width: 100%; height: 100%;
+    object-fit: contain;
+  }
+  .schild-kategorie {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 48px;
+    font-weight: 900;
+    line-height: 1;
+    color: #1d1d1f;
+    letter-spacing: -0.025em;
+    text-transform: uppercase;
+    margin-top: 3mm;
+  }
+  .schild-masse {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 56px;
+    font-weight: 900;
+    line-height: 0.95;
+    color: #225eaa;
+    letter-spacing: -0.025em;
+    margin-top: 2mm;
+  }
+  .schild-masse-einheit {
+    font-size: 28px;
+    font-weight: 700;
+    color: #6e6e73;
+    margin-left: 6px;
+  }
+  .schild-meta-zeile {
+    font-family: 'Manrope', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: #6e6e73;
+    margin-top: 2mm;
+    line-height: 1.4;
+  }
+  .schild-beschr {
+    font-family: 'Manrope', sans-serif;
+    font-size: 12px;
+    color: #1d1d1f;
+    line-height: 1.4;
+    margin-top: 3mm;
+    max-width: 150mm;
+    /* Wenn Beschreibung zu lang: clippen damit Schild nicht überläuft */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Unten: Preis + Lagerbestand + Footer */
+  .schild-unten {
+    margin-top: 4mm;
+    border-top: 4px solid #1d1d1f;
+    padding-top: 4mm;
+    display: flex; justify-content: space-between; align-items: flex-end;
+  }
+  .schild-preis-block { text-align: left; }
+  .schild-preis-label {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    color: #6e6e73;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 1mm;
+  }
+  .schild-preis {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 90px;
+    font-weight: 900;
+    line-height: 0.9;
+    color: #225eaa;
+    letter-spacing: -0.03em;
+  }
+  .schild-info-block { text-align: right; padding-bottom: 6mm; }
+  .schild-lager {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    color: #1d1d1f;
+  }
+  .schild-brand {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: #86868b;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-top: 4mm;
+  }
+  .schild-brand b { color: #225eaa; }
+
+  /* PRINT — exakt 1 Schild pro A4-Seite (Sarah-Fix 27.04.) */
+  @media print {
+    html, body { background: white; margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .no-print { display: none !important; }
+    .schild-wrap {
+      display: flex !important;
+      flex-direction: column;
+      gap: 0;
+      margin: 0;
+      padding: 0;
+    }
+    .schild {
+      border: 3pt solid #000;
+      page-break-after: always;
+      break-after: page;
+      width: 210mm;
+      height: 297mm;
+      max-width: 210mm;
+      max-height: 297mm;
+      margin: 0;
+      padding: 12mm 14mm;
+      box-shadow: none;
+      border-radius: 0;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+    .schild:last-child { page-break-after: auto; break-after: auto; }
+    .schild-bild-wrap { height: 75mm; max-width: 100mm; }
+    .schild-stand-plakette { font-size: 96px; padding: 6px 18px 8px; }
+    .schild-kategorie { font-size: 42px; }
+    .schild-masse { font-size: 50px; }
+    .schild-preis { font-size: 80px; }
+    @page { size: A4 portrait; margin: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ─────────────────────────── NAV ─────────────────────────── -->
+<nav class="glass-nav fixed top-0 w-full z-50 no-print">
+  <div class="flex justify-between items-center px-6 md:px-12 py-4 max-w-[1440px] mx-auto">
+    <a href="index.html" class="text-xl md:text-2xl font-bold tracking-tighter text-white">DeineFenster<span style="color:#76a9fa">.de</span></a>
+    <div class="hidden md:flex items-center gap-x-8">
+      <a href="shop.html" class="text-white/80 hover:text-white text-sm font-medium tracking-tight">Shop</a>
+      <a href="shop-einstellen.html" class="text-white/80 hover:text-white text-sm font-medium tracking-tight">Inserieren</a>
+      <a href="shop-drucken.html" class="text-white font-semibold border-b-2 border-white pb-0.5 text-sm tracking-tight">Schilder drucken</a>
+    </div>
+    <div class="flex items-center gap-2">
+      <span id="userBadge" class="hidden md:inline-flex items-center gap-1.5 text-white/80 text-xs font-semibold px-3 py-1.5">
+        <span class="material-symbols-outlined" style="font-size:14px">account_circle</span>
+        <span id="userEmail">—</span>
+      </span>
+      <button id="logoutBtn" class="hidden md:inline-flex items-center gap-1 text-white/70 hover:text-white text-xs font-semibold px-2 py-1.5 rounded-full hover:bg-white/10" title="Logout">
+        <span class="material-symbols-outlined" style="font-size:16px">logout</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- ─────────────────────────── HEADER ─────────────────────────── -->
+<header class="pt-24 pb-6 bg-white border-b border-black/5 no-print">
+  <div class="max-w-[1440px] mx-auto px-6 md:px-12">
+    <div class="flex flex-wrap items-end justify-between gap-3">
+      <div>
+        <span class="inline-block bg-[rgba(34,94,170,0.08)] text-[#225eaa] text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-2">Intern · Mitarbeiter-Bereich</span>
+        <h1 class="text-2xl md:text-3xl font-extrabold leading-tight">Lager-Schilder drucken</h1>
+        <p class="text-sm text-[#6e6e73] mt-1">Produkte auswählen → „Drucken" → 2 Schilder pro A4-Seite mit Standnummer + Preis groß und Beschreibung drunter.</p>
+      </div>
+      <div class="text-sm text-[#6e6e73]">
+        <span id="auswahlAnzahl" class="font-bold text-[#1d1d1f]">0</span> ausgewählt von <span id="produktAnzahl" class="font-bold text-[#1d1d1f]">–</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ─────────────────────────── TOOLBAR ─────────────────────────── -->
+<div class="sticky top-[64px] z-40 bg-white/92 backdrop-blur border-b border-black/5 no-print">
+  <div class="max-w-[1440px] mx-auto px-6 md:px-12 py-3 flex flex-wrap gap-3 items-center">
+    <input id="sucheInput" type="text" placeholder="Produkte suchen…" class="flex-1 min-w-[200px] px-4 py-2.5 rounded-full bg-white border border-black/14 text-sm focus:outline-none focus:border-primary"/>
+    <button id="alleAuswaehlen" class="px-4 py-2.5 rounded-full text-sm font-semibold border border-black/14 hover:bg-[#f5f5f7]">Alle auswählen</button>
+    <button id="auswahlLeeren" class="px-4 py-2.5 rounded-full text-sm font-semibold border border-black/14 hover:bg-[#f5f5f7]">Auswahl leeren</button>
+    <button id="vorschauBtn" class="px-4 py-2.5 rounded-full text-sm font-semibold bg-[#f5f5f7] border border-black/14 hover:bg-[#e8e8ea] flex items-center gap-1.5">
+      <span class="material-symbols-outlined" style="font-size:16px">visibility</span>
+      Vorschau
+    </button>
+    <button id="druckenBtn" class="px-5 py-2.5 rounded-full text-sm font-bold text-white bg-[#225eaa] hover:bg-[#1e3a8a] flex items-center gap-1.5">
+      <span class="material-symbols-outlined" style="font-size:18px">print</span>
+      Drucken
+    </button>
+  </div>
+</div>
+
+<!-- ─────────────────────────── PRODUKT-LISTE ─────────────────────────── -->
+<main class="max-w-[1440px] mx-auto px-6 md:px-12 py-6 no-print">
+  <div id="produktListe" class="flex flex-col gap-2"></div>
+
+  <div id="emptyState" class="hidden text-center py-16 text-[#6e6e73]">
+    <span class="material-symbols-outlined" style="font-size:56px">inventory_2</span>
+    <h3 class="text-xl font-extrabold text-[#1d1d1f] mt-3">Keine Produkte vorhanden</h3>
+    <p class="text-sm mt-1.5 max-w-md mx-auto">Geh zu <a href="shop-einstellen.html" class="text-[#225eaa] font-semibold underline">Inserieren</a> und stell zuerst Produkte ein, dann kannst du Schilder dafür drucken.</p>
+  </div>
+</main>
+
+<!-- ─────────────────────────── DRUCK-VORSCHAU ─────────────────────────── -->
+<div id="schildContainer" class="schild-wrap max-w-[1440px] mx-auto px-6 md:px-12 mt-8"></div>
+
+<!-- ─────────────────────────── PRINT-ANLEITUNG ─────────────────────────── -->
+<div id="printHinweis" class="no-print hidden bg-[#fff4dc] border border-[#b87f00]/30 text-[#1d1d1f] text-sm rounded-xl px-4 py-3 max-w-[1440px] mx-auto mx-6 md:mx-12 mt-4 mb-12">
+  <strong class="text-[#b87f00]">Druck-Tipp:</strong> Im Druck-Dialog „Hintergrundgrafiken drucken" aktivieren (sonst fehlen Farbe und Rahmen). Format A4 Hochformat, 1 Schild pro Seite.
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase-config.js"></script>
+<script>
+const STATE = {
+  produkte: [],
+  kategorien: {},   // key → label
+  ausgewaehlt: new Set(),
+  suche: ''
+};
+
+const OEFFNUNGSART_LABEL = {
+  'dreh-kipp-rechts': 'Dreh-Kipp Rechts',
+  'dreh-kipp-links': 'Dreh-Kipp Links',
+  'dreh-rechts': 'Dreh Rechts',
+  'dreh-links': 'Dreh Links',
+  'kipp': 'Nur Kipp',
+  'fest': 'Festverglasung',
+  'stulp': 'Stulp',
+  'pfosten': 'Pfosten',
+  'psk': 'PSK Schiebetür',
+  'hebe-schiebe': 'Hebe-Schiebe',
+  'drehfluegel': 'Drehflügel',
+  'dreh-kipp': 'Dreh-Kipp'
+};
+
+// Kurz-Label fürs Druck-Schild — Sarah-Wunsch 27.04.: Zahl + „Flügel" statt ausgeschrieben
+const KATEGORIE_DRUCK_LABEL = {
+  'fenster-1fluegel': '1 Flügel',
+  'fenster-2fluegel': '2 Flügel',
+  'fenster-3fluegel': '3 Flügel',
+  'fenster-4fluegel': '4 Flügel',
+  'festelement': 'Festelement',
+  'kellerfenster': 'Kellerfenster',
+  'haustuer': 'Haustür',
+  'balkontuer-1fluegel': 'Balkontür · 1 Flügel',
+  'balkontuer-2fluegel': 'Balkontür · 2 Flügel',
+  'balkontuer-rollo': 'Balkontür mit Rollladen',
+  'schiebetuer-psk': 'PSK Schiebetür',
+  'schiebetuer-hst': 'Hebe-Schiebetür',
+  'fenster-oberlicht': 'Fenster mit Oberlicht',
+  'fenster-sprossen': 'Sprossenfenster'
+};
+
+document.addEventListener('DOMContentLoaded', async () => {
+  if (typeof supabaseClient === 'undefined' || !supabaseClient) {
+    showError('Datenbank-Verbindung fehlgeschlagen. Lade die Seite neu.');
+    return;
+  }
+
+  // Auth-Check
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (!session) {
+    location.href = `shop-login.html?next=${encodeURIComponent('shop-drucken.html')}`;
+    return;
+  }
+
+  // User-Info
+  document.getElementById('userEmail').textContent = session.user.email || 'eingeloggt';
+  document.getElementById('userBadge').classList.remove('hidden');
+  document.getElementById('logoutBtn').classList.remove('hidden');
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
+    await supabaseClient.auth.signOut();
+    location.href = 'shop-login.html';
+  });
+
+  // Kategorien laden für Klartext-Labels
+  const { data: katData } = await supabaseClient
+    .from('kategorien')
+    .select('key, label')
+    .eq('aktiv', true);
+  (katData || []).forEach(k => { STATE.kategorien[k.key] = k.label; });
+
+  // Produkte laden
+  const { data, error } = await supabaseClient
+    .from('produkte')
+    .select('*')
+    .eq('aktiv', true)
+    .order('standnummer', { ascending: true, nullsLast: true });
+  if (error) { showError('Fehler beim Laden: ' + error.message); return; }
+  STATE.produkte = data || [];
+
+  // URL-Parameter ?id=ABC → dieses Produkt vorausgewählt zum direkten Drucken
+  const params = new URLSearchParams(location.search);
+  const directId = params.get('id');
+  if (directId && STATE.produkte.some(p => p.id === directId)) {
+    STATE.ausgewaehlt.add(directId);
+  }
+  // Mehrere IDs ?ids=ABC,DEF
+  const directIds = params.get('ids');
+  if (directIds) {
+    directIds.split(',').forEach(id => {
+      if (STATE.produkte.some(p => p.id === id.trim())) STATE.ausgewaehlt.add(id.trim());
+    });
+  }
+
+  rendere();
+  bindeHandler();
+
+  // Wenn ID per URL: Vorschau direkt zeigen
+  if (STATE.ausgewaehlt.size > 0 && (directId || directIds)) {
+    document.body.classList.add('schild-vorschau-zeigen');
+    document.getElementById('printHinweis').classList.remove('hidden');
+    setTimeout(() => {
+      document.getElementById('schildContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 200);
+  }
+});
+
+function rendere() {
+  const liste = document.getElementById('produktListe');
+  const empty = document.getElementById('emptyState');
+  const filtered = STATE.produkte.filter(p => {
+    if (!STATE.suche) return true;
+    const s = STATE.suche.toLowerCase();
+    return (p.titel || '').toLowerCase().includes(s)
+        || (p.standnummer || '').toLowerCase().includes(s)
+        || `${p.breite_mm}x${p.hoehe_mm}`.includes(s.replace(/\s/g, ''));
+  });
+
+  if (STATE.produkte.length === 0) {
+    empty.classList.remove('hidden');
+    liste.innerHTML = '';
+  } else {
+    empty.classList.add('hidden');
+    liste.innerHTML = filtered.map(p => `
+      <label class="row ${STATE.ausgewaehlt.has(p.id) ? 'is-selected' : ''}" data-id="${p.id}">
+        <input type="checkbox" class="check sel-check" data-id="${p.id}" ${STATE.ausgewaehlt.has(p.id) ? 'checked' : ''}/>
+        <img src="${escape((p.bilder && p.bilder[0]) || 'img/fenster_standard.png')}" alt="" class="row-bild" onerror="this.src='img/fenster_standard.png'"/>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2 text-[11px] mb-0.5">
+            <span class="font-bold text-[#225eaa]">${p.standnummer ? escape(p.standnummer) : '<span style="color:#86868b">— ohne Standnr.</span>'}</span>
+            ${p.zustand === 'gebraucht' ? '<span style="background:#fff4dc;color:#b87f00;padding:1px 6px;border-radius:999px;font-weight:700">GEBRAUCHT</span>' : ''}
+            <span class="text-[#86868b]">${p.breite_mm} × ${p.hoehe_mm} mm</span>
+          </div>
+          <h3 class="text-sm font-bold leading-tight text-[#1d1d1f]">${escape(p.titel)}</h3>
+        </div>
+        <span class="font-extrabold text-[#225eaa] text-base shrink-0">${formatPreis(p.preis_eur)}</span>
+      </label>
+    `).join('');
+  }
+
+  document.getElementById('produktAnzahl').textContent = STATE.produkte.length;
+  document.getElementById('auswahlAnzahl').textContent = STATE.ausgewaehlt.size;
+  rendereSchilder();
+}
+
+function rendereSchilder() {
+  const container = document.getElementById('schildContainer');
+  const ids = Array.from(STATE.ausgewaehlt);
+  const ausg = STATE.produkte.filter(p => ids.includes(p.id));
+  container.innerHTML = ausg.map(p => {
+    const kategorieLabel = KATEGORIE_DRUCK_LABEL[p.kategorie_key] || STATE.kategorien[p.kategorie_key] || p.kategorie_key || 'Produkt';
+    const oeffnungLabel = OEFFNUNGSART_LABEL[p.oeffnungsart] || '';
+    const metaTeile = [];
+    if (oeffnungLabel) metaTeile.push(oeffnungLabel);
+    if (p.zustand === 'neu' && p.system) metaTeile.push(escape(p.system));
+    if (p.verglasung) metaTeile.push(p.verglasung + '-Verglasung');
+    if (p.rc_klasse) metaTeile.push(p.rc_klasse);
+    if (p.farbe) metaTeile.push(farbeAnzeige(p.farbe));
+    const bild = (p.bilder && p.bilder[0]) || 'img/fenster_standard.png';
+    const standnrKlasse = !p.standnummer ? 'schild-stand-kein' : '';
+    return `
+    <div class="schild ${standnrKlasse}">
+      <div class="schild-top">
+        <div class="schild-stand-plakette">
+          <small>Stand</small>
+          ${p.standnummer ? escape(p.standnummer) : '—'}
+        </div>
+        <div class="schild-zustand-tag ${p.zustand === 'gebraucht' ? 'is-gebraucht' : 'is-neu'}">
+          ${p.zustand === 'gebraucht' ? 'Gebraucht' : 'Neuware'}
+        </div>
+      </div>
+
+      <div class="schild-mitte">
+        <div class="schild-bild-wrap">
+          <img class="schild-bild" src="${escape(bild)}" alt="${escape(p.titel)}" onerror="this.src='img/fenster_standard.png'"/>
+        </div>
+        <div class="schild-kategorie">${escape(kategorieLabel)}</div>
+        <div class="schild-masse">${p.breite_mm} × ${p.hoehe_mm}<span class="schild-masse-einheit">mm</span></div>
+        ${metaTeile.length ? `<div class="schild-meta-zeile">${metaTeile.join(' · ')}</div>` : ''}
+        ${p.beschreibung ? `<div class="schild-beschr">${escape(p.beschreibung)}</div>` : ''}
+      </div>
+
+      <div class="schild-unten">
+        <div class="schild-preis-block">
+          <div class="schild-preis-label">${p.sonderpreis_eur ? 'Sonderpreis *' : (p.export_modell ? 'Export *' : 'Preis ab Lager')}</div>
+          <div class="schild-preis">${formatPreis(p.preis_eur)}${(p.sonderpreis_eur || p.export_modell) ? '<span style="font-size:60%;vertical-align:top">*</span>' : ''}</div>
+        </div>
+        <div class="schild-info-block">
+          <div class="schild-lager">${p.lagerbestand || 1} Stück verfügbar</div>
+          <div class="schild-brand"><b>DeineFenster</b>.de · Fensterhandel Christ</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function farbeAnzeige(code) {
+  const map = {'weiss':'Weiß','anthrazit':'Anthrazit','golden-oak':'Golden Oak','nussbaum':'Nussbaum','schwarz':'Schwarz','dunkelgruen':'Dunkelgrün'};
+  return map[code] || code;
+}
+
+function bindeHandler() {
+  document.getElementById('produktListe').addEventListener('change', e => {
+    if (!e.target.classList.contains('sel-check')) return;
+    const id = e.target.dataset.id;
+    if (e.target.checked) STATE.ausgewaehlt.add(id);
+    else STATE.ausgewaehlt.delete(id);
+    rendere();
+  });
+
+  document.getElementById('alleAuswaehlen').addEventListener('click', () => {
+    STATE.produkte.forEach(p => STATE.ausgewaehlt.add(p.id));
+    rendere();
+  });
+  document.getElementById('auswahlLeeren').addEventListener('click', () => {
+    STATE.ausgewaehlt.clear();
+    rendere();
+  });
+
+  document.getElementById('vorschauBtn').addEventListener('click', () => {
+    if (STATE.ausgewaehlt.size === 0) { alert('Wähl erst Produkte aus.'); return; }
+    document.body.classList.toggle('schild-vorschau-zeigen');
+    document.getElementById('printHinweis').classList.toggle('hidden');
+    if (document.body.classList.contains('schild-vorschau-zeigen')) {
+      document.getElementById('schildContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+
+  document.getElementById('druckenBtn').addEventListener('click', () => {
+    if (STATE.ausgewaehlt.size === 0) { alert('Wähl erst Produkte aus.'); return; }
+    document.body.classList.add('schild-vorschau-zeigen');
+    document.getElementById('printHinweis').classList.remove('hidden');
+    // Bilder kurz Zeit zum Laden geben, dann Druck-Dialog
+    setTimeout(() => window.print(), 500);
+  });
+
+  document.getElementById('sucheInput').addEventListener('input', e => {
+    STATE.suche = e.target.value.trim();
+    rendere();
+  });
+}
+
+function showError(msg) {
+  document.getElementById('produktListe').innerHTML = `<div class="bg-red-50 border border-red-200 text-red-800 rounded-xl p-4 text-sm">${escape(msg)}</div>`;
+}
+
+function formatPreis(n) {
+  return new Intl.NumberFormat('de-DE', {style: 'currency', currency: 'EUR', maximumFractionDigits: 0}).format(n || 0);
+}
+
+function escape(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+</script>
+</body>
+</html>
