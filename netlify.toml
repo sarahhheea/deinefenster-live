@@ -1,0 +1,34 @@
+[build]
+  # Kein Build-Schritt nötig — CSS ist vorgebaut in css/tailwind.css
+  publish = "."
+  ignore = "exit 0"
+
+[[headers]]
+  for = "/css/tailwind.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+[[headers]]
+  for = "/img/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800, stale-while-revalidate=86400"
+
+[[redirects]]
+  from = "/index.html"
+  to = "/"
+  status = 301
+
+# Fehlerseiten
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 404

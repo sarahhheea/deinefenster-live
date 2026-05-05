@@ -47,14 +47,51 @@
 
 ---
 
+## SCOPE (Stand 21.04.2026)
+
+**DeineFenster.de bietet AUSSCHLIESSLICH Drutex-Kunststoff-Produkte an.**
+Kein Aluminium, kein Holz-Alu, kein Vollholz, keine anderen Hersteller.
+Sarah ist Kunststoff-Händler — das ist bewusste Geschäftsentscheidung, keine Lücke.
+
+Die Produktpalette besteht aus 4 Kunststoff-Linien:
+- Kunststofffenster (Drutex Iglo 5, Iglo Energy)
+- Balkontür (Drutex Iglo 5, Iglo Energy)
+- Haustür (Drutex Iglo 5 Tür, Iglo Energy Tür — Kunststoff-Haustüren)
+- **Schiebetür-System** mit 3 Varianten (Sarah-bestätigt 21.04.2026):
+  - Iglo-HS (klassische Hebe-Schiebe-Tür)
+  - Iglo-PSK (Parallel-Schiebe-Kipp, schmalere Öffnungen)
+  - Iglo-Slide (schlanke Drutex-Eigenentwicklung)
+
+Wenn Alu-/Holz-Alu-Fragen kommen: freundlich ablehnen, nicht anbieten.
+
+### KONFIGURATOR-LOGIK-LEITLINIE
+
+Der Konfigurator folgt **der gleichen Logik wie meinfenster24.de** (Analyse in
+`KONFIGURATOR-RESEARCH.md`) — mit exakt zwei Unterschieden:
+
+1. **Subtraktiv:** Nur Drutex-Produkte. Kein Alu, kein Holz.
+2. **Weniger Hersteller-Auswahl:** kein "Wähle Aluplast/Salamander/Schüco" —
+   direkt Drutex.
+
+Ansonsten: gleiche Schritte, gleiche Optionen, gleiche Fachtiefe wie
+meinfenster24. Wenn etwas dort vorhanden ist und bei uns fehlt, ist es
+eine echte Lücke die geschlossen werden soll (z.B. Sicherheitsglas als
+separater Schritt, Warme Kante, Schallschutz getrennt von Wärmeschutz).
+
+---
+
 ## KONFIGURATOR – PREISMODELL
 
-### Grundpreise pro m²
-| Material | Preis/m² | Minimum |
+> ⚠️ **Preisangaben in diesem Dokument sind nicht synchron mit konfigurator.html.**
+> Die Zahlen hier stammen aus der Frühphase (Dez 2024). Tatsächlich gelten die
+> Werte im `P`-Objekt in konfigurator.html (ab Zeile 1296). Die Angleichung
+> erfolgt im letzten Sprint nach Sarahs Entscheidung (siehe KONFIGURATOR-AUDIT.md
+> Punkte W5, W6, K5).
+
+### Grundpreise pro m² (geplant — noch nicht gelebt)
+| Produkt | Preis/m² | Minimum |
 |---|---|---|
-| Kunststoff | 220 € | 180 € |
-| Aluminium | 380 € | 280 € |
-| Holz-Alu | 520 € | 400 € |
+| Kunststofffenster | 220 € | 180 € |
 
 ### Verglasung Aufschlag
 | Verglasung | Multiplikator |

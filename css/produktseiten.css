@@ -1,0 +1,260 @@
+/* ============================================================
+   DeineFenster.de — Produktdetailseiten
+   Ergänzt Tailwind-Klassen. Keine Überschreibung globaler Stile.
+   ============================================================ */
+
+/* ── Breadcrumb ── */
+.breadcrumb-nav a { transition: color 0.2s; }
+.breadcrumb-nav a:hover { color: #225eaa; }
+.breadcrumb-sep { color: #c2c6d3; margin: 0 6px; user-select: none; }
+
+/* ── Hero Produkt ── */
+.hero-produkt { background: linear-gradient(135deg, #0e1e3a 0%, #1e3a8a 60%, #225eaa 100%); }
+.hero-produkt-img {
+  filter: drop-shadow(0 24px 48px rgba(0,0,0,0.35));
+  transition: transform 0.6s cubic-bezier(0.22,0.61,0.36,1);
+}
+.hero-produkt-img:hover { transform: scale(1.03) translateY(-4px); }
+
+/* ── Key Facts Bar ── */
+.key-fact {
+  opacity: 0;
+  transform: translateY(20px);
+}
+.key-fact.visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+/* ── Feature Items ── */
+.feature-item {
+  opacity: 0;
+  transform: translateX(-16px);
+}
+.feature-item.visible {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+/* ── Galerie ── */
+.galerie-img {
+  cursor: zoom-in;
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.galerie-img:hover {
+  transform: scale(1.03);
+  box-shadow: 0 16px 40px rgba(34,94,170,0.2);
+}
+
+/* Lightbox overlay */
+#lightbox {
+  display: none;
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(0,0,0,0.88);
+  align-items: center; justify-content: center;
+  cursor: zoom-out;
+}
+#lightbox.open { display: flex; }
+#lightbox img { max-width: 90vw; max-height: 90vh; border-radius: 8px; }
+
+/* ── CTA Sektion ── */
+.cta-produkt {
+  background: linear-gradient(135deg, #0e1e3a 0%, #1e3a8a 100%);
+  position: relative; overflow: hidden;
+}
+.cta-produkt::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 70% 50%, rgba(34,94,170,0.35) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* ── Nav on light background ── */
+.nav-light-page #navbar {
+  background: rgba(14, 30, 58, 0.92) !important;
+}
+
+/* ── Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .key-fact, .feature-item { opacity: 1 !important; transform: none !important; transition: none !important; }
+  .hero-produkt-img { transition: none !important; }
+  .galerie-img { transition: none !important; }
+}
+
+/* ── Beschreibungs-Sektion ── */
+.beschreibung-section { background: #f9f9ff; }
+.beschreibung-text { line-height: 1.8; color: #374151; }
+
+/* ── Technische Daten Tabelle ── */
+.tech-table tr { border-bottom: 1px solid #e3e8f9; }
+.tech-table tr:last-child { border-bottom: none; }
+.tech-table td:first-child { color: #5c5f61; font-weight: 600; }
+.tech-table td:last-child { color: #161c27; font-weight: 700; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PROFIL-FARBEN – Interaktive Farb-Vorschau
+   Sarah-Wunsch 24.04.2026 nachmittags: Hover über Farbe → Fenster ändert Farbe
+   ═══════════════════════════════════════════════════════════════════════ */
+.pf-section { padding: 72px 0; background: linear-gradient(180deg, #f9f9ff 0%, #f1f3ff 100%); }
+.pf-inner { max-width: 1440px; margin: 0 auto; padding: 0 24px; }
+@media (min-width: 768px) { .pf-inner { padding: 0 48px; } }
+.pf-header { text-align: center; max-width: 640px; margin: 0 auto 40px; }
+.pf-eyebrow { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px;
+              background: #fff; color: #225eaa; border-radius: 999px;
+              font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 12px; }
+.pf-title { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800;
+            font-size: clamp(1.6rem, 3vw, 2.4rem); color: #1e3a8a; line-height: 1.15; margin: 0 0 12px; }
+.pf-subtitle { font-size: 1rem; color: #424751; line-height: 1.55; margin: 0; }
+
+/* Layout jetzt vertikal: grosses Produktfoto oben, kompaktes Swatch-Grid darunter */
+.pf-stack { display: flex; flex-direction: column; align-items: center; gap: 28px; }
+
+/* Produkt-Foto-Vorschau (echte Drutex-Bilder, Hover-Swap) */
+.pf-preview {
+  width: 100%;
+  max-width: 900px;
+  background: #fff;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 18px 42px rgba(14, 30, 58, 0.12);
+  position: relative;
+  aspect-ratio: 16 / 10;
+  min-height: 320px;
+}
+.pf-main-img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: contain;
+  object-position: center;
+  padding: 20px;
+  display: block;
+  transition: opacity 0.25s ease;
+  background: linear-gradient(180deg, #f7f9ff 0%, #e8eeff 100%);
+}
+.pf-main-img.is-loading { opacity: 0.6; }
+.pf-spinner {
+  position: absolute; top: 50%; left: 50%;
+  width: 32px; height: 32px; margin: -16px 0 0 -16px;
+  border: 3px solid rgba(255,255,255,0.3); border-top-color: #fff;
+  border-radius: 50%; animation: pf-spin 0.8s linear infinite;
+  pointer-events: none; opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 1;
+}
+.pf-spinner.visible { opacity: 1; }
+@keyframes pf-spin { to { transform: rotate(360deg); } }
+.pf-label {
+  position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+  background: rgba(14, 30, 58, 0.88); color: #fff;
+  font-size: 13px; font-weight: 600; letter-spacing: 0.02em;
+  padding: 7px 16px; border-radius: 999px;
+  backdrop-filter: blur(8px);
+  white-space: nowrap;
+  z-index: 2;
+}
+
+/* Farb-Swatches — kompaktes Grid, Quadrate mit Textur-Bild */
+.pf-swatches-wrap { width: 100%; max-width: 1100px; }
+.pf-swatches-hint { font-size: 13px; color: #727782; margin-bottom: 14px; text-align: center; }
+.pf-swatches {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+@media (min-width: 600px) { .pf-swatches { grid-template-columns: repeat(10, 1fr); } }
+@media (min-width: 900px) { .pf-swatches { grid-template-columns: repeat(14, 1fr); } }
+@media (min-width: 1200px) { .pf-swatches { grid-template-columns: repeat(15, 1fr); gap: 7px; } }
+
+.pf-swatch {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: 6px;
+  border: 2px solid transparent;
+  padding: 0;
+  cursor: pointer;
+  transition: border-color 0.16s, transform 0.16s, box-shadow 0.16s;
+  overflow: hidden;
+  background: #f4f6fb;
+}
+.pf-swatch:hover, .pf-swatch:focus-visible {
+  border-color: #225eaa;
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(34, 94, 170, 0.25);
+  outline: none;
+  z-index: 2;
+}
+.pf-swatch.is-active {
+  border-color: #c9a84c;
+  box-shadow: 0 0 0 2px #c9a84c, 0 4px 12px rgba(201, 168, 76, 0.3);
+}
+.pf-swatch-circle {
+  position: absolute; inset: 0;
+  background-color: var(--swatch-color, #fff);
+  background-size: cover;
+  background-position: center;
+  display: block;
+}
+/* Tooltip mit Farbname beim Hover */
+.pf-swatch-name {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(14, 30, 58, 0.92);
+  color: #fff;
+  font-size: 11px; font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.15s;
+  z-index: 3;
+}
+.pf-swatch:hover .pf-swatch-name,
+.pf-swatch:focus-visible .pf-swatch-name { opacity: 1; }
+
+.pf-cta-row { margin-top: 28px; text-align: center; }
+@media (min-width: 900px) { .pf-cta-row { text-align: left; } }
+.pf-cta-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 24px; border-radius: 999px;
+  background: #225eaa; color: #fff;
+  font-weight: 700; font-size: 14px; text-decoration: none;
+  transition: background 0.2s, transform 0.2s;
+  box-shadow: 0 8px 20px rgba(34, 94, 170, 0.3);
+}
+.pf-cta-btn:hover { background: #1e3a8a; transform: translateY(-2px); }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   QUERSCHNITT – Profil-Aufbau visualisieren (nur Premium-Seiten)
+   Sarah-Wunsch 24.04.2026: Laien sollen "7 Kammern" visuell verstehen
+   ═══════════════════════════════════════════════════════════════════════ */
+.qs-section { padding: 72px 0; background: #ffffff; border-top: 1px solid #e3e8f9; }
+.qs-inner { max-width: 1440px; margin: 0 auto; padding: 0 24px; }
+@media (min-width: 768px) { .qs-inner { padding: 0 48px; } }
+.qs-header { text-align: center; max-width: 640px; margin: 0 auto 48px; }
+.qs-title { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800;
+            font-size: clamp(1.6rem, 3vw, 2.4rem); color: #1e3a8a; line-height: 1.15; margin: 0 0 12px; }
+.qs-subtitle { font-size: 1rem; color: #424751; line-height: 1.55; }
+
+.qs-grid { display: grid; grid-template-columns: 1fr; gap: 40px; align-items: center; }
+@media (min-width: 900px) { .qs-grid { grid-template-columns: 1.1fr 0.9fr; gap: 64px; } }
+
+.qs-svg-wrap { background: linear-gradient(180deg, #f9f9ff 0%, #e8eeff 100%);
+               border-radius: 20px; padding: 40px 28px;
+               box-shadow: 0 20px 48px rgba(34,94,170,0.14); }
+.qs-svg { width: 100%; height: auto; max-width: 440px; margin: 0 auto; display: block; }
+
+.qs-facts { display: flex; flex-direction: column; gap: 18px; }
+.qs-fact { display: flex; gap: 16px; padding: 16px 20px; border-radius: 14px;
+           background: #f4f6fb; border-left: 4px solid #225eaa; }
+.qs-fact-icon { flex-shrink: 0; width: 40px; height: 40px; border-radius: 10px;
+                background: #fff; display: flex; align-items: center; justify-content: center;
+                box-shadow: 0 2px 6px rgba(34,94,170,0.1); color: #225eaa; }
+.qs-fact-body h4 { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700;
+                   font-size: 1rem; color: #1e3a8a; margin: 0 0 4px; }
+.qs-fact-body p { font-size: 13px; color: #424751; line-height: 1.45; margin: 0; }
