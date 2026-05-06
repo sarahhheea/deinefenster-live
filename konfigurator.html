@@ -19,9 +19,9 @@
 
   <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.bunny.net"/>
+  <link href="https://fonts.bunny.net/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.bunny.net/css2?family=Material+Symbols+Outlined&display=swap" rel="stylesheet">
 
   <script>
     tailwind.config = {
@@ -3666,39 +3666,28 @@ function buildOeffSash() {
     const olHoeheApprox = Math.round(S.hMm * 0.21);
     html += `<div class="info mb-3" style="background:#fff7ed;border-left:4px solid #f97316"><i class="ms f" style="color:#ea580c;font-size:20px;flex-shrink:0">info</i><div style="font-size:13px"><strong>Oberlicht ca. ${olHoeheApprox} mm — grenzwertig.</strong> Drutex-Richtwert: Oberlicht typisch max. 600 mm. Bei so großen Oberlichtern wird der Hauptflügel verhältnismäßig niedrig. Erwägen Sie Einzel-Festverglasung oberhalb statt integriertes Oberlicht.</div></div>`;
   }
-  // ── Schnell-Auswahl: 2-Flügel Kombinationen ────────────────────────────────
+  // ── Schnell-Auswahl: 2-Flügel Kombinationen (alle 7 immer sichtbar) ─────────
   if (sashCount === 2 && S.prod !== 'haustuere') {
-    const flType = S.fluegel || '';
-    const isStulp   = flType.includes('stulp');
-    const isPfosten = flType.includes('pfosten');
+    // Pfosten zuerst (Griffe in der Mitte), dann Stulp, dann einfache Kombinationen
     const allCombos = [
-      // Symmetrie-Paare (einfache Kombinationen — immer sichtbar)
-      { v1:'fest',   v2:'dk-r',   name:'Fest · Dreh-Kipp rechts',              sub:'Links fest, rechts Dreh-Kipp',        showFor:'both'    },
-      { v1:'dk-l',   v2:'fest',   name:'Dreh-Kipp links · Fest',               sub:'Links Dreh-Kipp, rechts fest',        showFor:'both'    },
-      // Stulp-Varianten
-      { v1:'dreh-l', v2:'dk-r',   name:'Dreh links · Stulp · Dreh-Kipp rechts', sub:'Stulp, links Dreh + rechts Dreh-Kipp', showFor:'stulp'   },
-      { v1:'dk-l',   v2:'dreh-r', name:'Dreh-Kipp links · Stulp · Dreh rechts', sub:'Stulp, links Dreh-Kipp + rechts Dreh', showFor:'stulp'   },
-      // Pfosten-Varianten (gespiegelt + beidseitig DK)
-      { v1:'dreh-l', v2:'dk-r',   name:'Dreh links · Pfosten · Dreh-Kipp rechts', sub:'Pfosten, links Dreh + rechts Dreh-Kipp', showFor:'pfosten' },
-      { v1:'dk-l',   v2:'dreh-r', name:'Dreh-Kipp links · Pfosten · Dreh rechts', sub:'Pfosten, links Dreh-Kipp + rechts Dreh', showFor:'pfosten' },
-      { v1:'dk-l',   v2:'dk-r',   name:'Dreh-Kipp links · Pfosten · Dreh-Kipp rechts', sub:'Pfosten, beidseitig Dreh-Kipp',   showFor:'pfosten' },
-    ];
-    const visibleCombos = allCombos.filter(c => {
-      if (c.showFor === 'stulp'   && !isStulp)   return false;
-      if (c.showFor === 'pfosten' && !isPfosten)  return false;
-      if (dkZuBreit && (c.v1.startsWith('dk') || c.v2.startsWith('dk'))) return false;
-      return true;
-    });
-    if (visibleCombos.length > 0) {
-      html += `<div class="sec-t" style="margin-top:0">Schnell-Auswahl Kombination</div>`;
+      { v1:'dreh-l', v2:'dk-r',  type:'pfosten', name:'DrehLinks-Pfosten-DrehKippRechts',     sub:'Pfosten · L Dreh, R Dreh-Kipp'    },
+      { v1:'dk-l',   v2:'dreh-r',type:'pfosten', name:'DrehKippLinks-Pfosten-DrehRechts',     sub:'Pfosten · L Dreh-Kipp, R Dreh'    },
+      { v1:'dk-l',   v2:'dk-r',  type:'pfosten', name:'DrehKippLinks-Pfosten-DrehKippRechts', sub:'Pfosten · beidseitig Dreh-Kipp'   },
+      { v1:'dreh-l', v2:'dk-r',  type:'stulp',   name:'DrehLinks-Stulp-DrehKippRechts',       sub:'Stulp · L Dreh, R Dreh-Kipp'      },
+      { v1:'dk-l',   v2:'dreh-r',type:'stulp',   name:'DrehKippLinks-Stulp-DrehRechts',       sub:'Stulp · L Dreh-Kipp, R Dreh'      },
+      { v1:'fest',   v2:'dk-r',  type:'',        name:'Fest-DrehKippRechts',                  sub:'Links fest, rechts Dreh-Kipp'     },
+      { v1:'dk-l',   v2:'fest',  type:'',        name:'DrehKippLinks-Fest',                   sub:'Links Dreh-Kipp, rechts fest'     },
+    ].filter(c => !dkZuBreit || (!c.v1.startsWith('dk') && !c.v2.startsWith('dk')));
+
+    if (allCombos.length > 0) {
+      html += `<div class="sec-t" style="margin-top:0">Öffnungsart wählen</div>`;
       html += `<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">`;
-      visibleCombos.forEach(c => {
-        const isSel = S.oeff1 === c.v1 && S.oeff2 === c.v2;
-        const dkInCombo = c.v1.startsWith('dk') || c.v2.startsWith('dk');
+      allCombos.forEach(c => {
+        const isSel = S.oeff1 === c.v1 && S.oeff2 === c.v2 && (S.zweiteilung||'') === c.type;
         const priceDelta = (P.oeff_sash[c.v1]?.add||0) + (P.oeff_sash[c.v2]?.add||0);
         const priceTxt = priceDelta === 0 ? 'inkl.' : (priceDelta > 0 ? `+ ${priceDelta} €` : `− ${Math.abs(priceDelta)} €`);
         const priceCls = priceDelta === 0 ? 'p-inc' : (priceDelta > 0 ? 'p-add' : 'p-sav');
-        html += `<div class="oc${isSel?' sel':''}" data-v1="${c.v1}" data-v2="${c.v2}" onclick="pickOeffCombo(this)" style="flex-direction:column;align-items:center;text-align:center;padding:10px 6px;gap:3px">
+        html += `<div class="oc${isSel?' sel':''}" data-v1="${c.v1}" data-v2="${c.v2}" data-type="${c.type}" onclick="pickOeffCombo(this)" style="flex-direction:column;align-items:center;text-align:center;padding:10px 6px;gap:3px">
           <div style="display:flex;gap:3px;justify-content:center">${oeffSVG(c.v1)}${oeffSVG(c.v2)}</div>
           <div class="olabel" style="font-size:11px;line-height:1.3">${c.name}</div>
           <div class="osub" style="font-size:10px">${c.sub}</div>
@@ -3706,27 +3695,61 @@ function buildOeffSash() {
         </div>`;
       });
       html += `</div>`;
-      html += `<div class="sec-t">Einzeln konfigurieren</div>`;
     }
   }
-  // ── Ende Schnell-Auswahl ─────────────────────────────────────────────────────
+  // ── Ende 2-Flügel Schnell-Auswahl ───────────────────────────────────────────
 
-  for(let i=0;i<sashCount;i++){
-    const sk='oeff'+(i+1);
-    if(sashCount>1) html+=`<div class="sec-t">${sashLabels[i]}</div>`;
-    html+=`<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-3" id="oeff-grid-${i+1}">`;
-    sashOpts.forEach(opt=>{
-      const sel = S[sk]===opt.v && !opt.disabled;
-      const disabledStyle = opt.disabled ? ';opacity:0.45;pointer-events:none;cursor:not-allowed' : '';
-      const onClickAttr = opt.disabled ? '' : `onclick="pickOeff(this,${i+1})"`;
-      html+=`<div class="oc${sel?' sel':''}" data-v="${opt.v}" data-sash="${i+1}" ${onClickAttr} style="flex-direction:column;align-items:center;text-align:center;padding:10px 6px;gap:4px${disabledStyle}">
-        ${oeffSVG(opt.v)}
-        <div class="olabel" style="font-size:12px">${opt.name}</div>
-        <div class="osub" style="font-size:11px">${opt.sub}</div>
-        <div class="oprice ${opt.pcls}" style="font-size:11px">${opt.pTxt}</div>
-      </div>`;
-    });
-    html+='</div>';
+  // ── Schnell-Auswahl: 3-Flügel Kombinationen ─────────────────────────────────
+  if (sashCount === 3 && S.prod !== 'haustuere') {
+    // Pfosten-schwer zuerst, gemischt danach, einfach zuletzt
+    const combos3 = [
+      { v1:'dk-l', v2:'dreh-r', v3:'dk-r', t:'pfosten-pfosten', name:'DrehKippLinks-Pfosten-DrehRechts-Pfosten-DrehKippRechts',   sub:'Pfosten·Pfosten · DK, Dreh-R, DK'   },
+      { v1:'dk-l', v2:'dreh-l', v3:'dk-r', t:'pfosten-pfosten', name:'DrehKippLinks-Pfosten-DrehLinks-Pfosten-DrehKippRechts',    sub:'Pfosten·Pfosten · DK, Dreh-L, DK'   },
+      { v1:'dk-l', v2:'dreh-l', v3:'dk-r', t:'pfosten-stulp',   name:'DrehKippLinks-Pfosten-DrehLinks-Stulp-DrehKippRechts',     sub:'Pfosten·Stulp · DK, Dreh-L, DK'     },
+      { v1:'dk-l', v2:'dreh-r', v3:'dk-r', t:'stulp-pfosten',   name:'DrehKippLinks-Stulp-DrehRechts-Pfosten-DrehKippRechts',    sub:'Stulp·Pfosten · DK, Dreh-R, DK'     },
+      { v1:'dk-l', v2:'fest',   v3:'dk-r', t:'',                name:'DrehKippLinks-Fest-DrehKippRechts',                        sub:'Links DK, Mitte fest, rechts DK'     },
+    ].filter(c => !dkZuBreit || (!c.v1.startsWith('dk') && !c.v3.startsWith('dk')));
+
+    if (combos3.length > 0) {
+      html += `<div class="sec-t" style="margin-top:0">Öffnungsart wählen</div>`;
+      html += `<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">`;
+      combos3.forEach(c => {
+        const isSel = S.oeff1===c.v1 && S.oeff2===c.v2 && S.oeff3===c.v3 && (S.dreiteilung||'')===c.t;
+        const pd = (P.oeff_sash[c.v1]?.add||0) + (P.oeff_sash[c.v2]?.add||0) + (P.oeff_sash[c.v3]?.add||0);
+        const pTxt = pd===0?'inkl.':(pd>0?`+ ${pd} €`:`− ${Math.abs(pd)} €`);
+        const pCls = pd===0?'p-inc':(pd>0?'p-add':'p-sav');
+        html += `<div class="oc${isSel?' sel':''}" data-v1="${c.v1}" data-v2="${c.v2}" data-v3="${c.v3}" data-type3="${c.t}" onclick="pickOeffCombo(this)" style="flex-direction:column;align-items:center;text-align:center;padding:10px 6px;gap:3px">
+          <div style="display:flex;gap:2px;justify-content:center">${oeffSVG(c.v1)}${oeffSVG(c.v2)}${oeffSVG(c.v3)}</div>
+          <div class="olabel" style="font-size:10px;line-height:1.3">${c.name}</div>
+          <div class="osub" style="font-size:10px">${c.sub}</div>
+          <div class="oprice ${pCls}" style="font-size:11px">${pTxt}</div>
+        </div>`;
+      });
+      html += `</div>`;
+    }
+  }
+  // ── Ende 3-Flügel Schnell-Auswahl ───────────────────────────────────────────
+
+  // Einzel-Picker nur für 1-Flügel und Haustür (2+3 Flügel werden durch Kombi-Karten abgedeckt)
+  const useComboOnly = (sashCount >= 2) && S.prod !== 'haustuere';
+  if (!useComboOnly) {
+    for(let i=0;i<sashCount;i++){
+      const sk='oeff'+(i+1);
+      if(sashCount>1) html+=`<div class="sec-t">${sashLabels[i]}</div>`;
+      html+=`<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-3" id="oeff-grid-${i+1}">`;
+      sashOpts.forEach(opt=>{
+        const sel = S[sk]===opt.v && !opt.disabled;
+        const disabledStyle = opt.disabled ? ';opacity:0.45;pointer-events:none;cursor:not-allowed' : '';
+        const onClickAttr = opt.disabled ? '' : `onclick="pickOeff(this,${i+1})"`;
+        html+=`<div class="oc${sel?' sel':''}" data-v="${opt.v}" data-sash="${i+1}" ${onClickAttr} style="flex-direction:column;align-items:center;text-align:center;padding:10px 6px;gap:4px${disabledStyle}">
+          ${oeffSVG(opt.v)}
+          <div class="olabel" style="font-size:12px">${opt.name}</div>
+          <div class="osub" style="font-size:11px">${opt.sub}</div>
+          <div class="oprice ${opt.pcls}" style="font-size:11px">${opt.pTxt}</div>
+        </div>`;
+      });
+      html+='</div>';
+    }
   }
   const hasOl=(S.fluegel||'').includes('oberlicht')||(S.fluegel||'').includes('ober-unter');
   const hasUl=(S.fluegel||'').includes('unterlicht')||(S.fluegel||'').includes('ober-unter');
@@ -3798,18 +3821,18 @@ function pickOeffCombo(el) {
   el.classList.add('sel');
   S.oeff1 = el.dataset.v1;
   S.oeff2 = el.dataset.v2;
-  // Einzel-Grids ebenfalls synchronisieren (falls sichtbar)
-  ['1','2'].forEach(n => {
-    const grid = document.getElementById('oeff-grid-'+n);
-    if (grid) {
-      grid.querySelectorAll('.oc').forEach(c => c.classList.remove('sel'));
-      const match = grid.querySelector(`[data-v="${S['oeff'+n]}"]`);
-      if (match) match.classList.add('sel');
-    }
-  });
+  S.oeff3 = el.dataset.v3 || null;
+  S.zweiteilung = el.dataset.type  || '';   // 2-Flügel: stulp/pfosten
+  S.dreiteilung = el.dataset.type3 || '';   // 3-Flügel: sep12-sep23
+  const cnt = getSashCount();
   const n1 = P.oeff_sash[S.oeff1]?.name || S.oeff1;
   const n2 = P.oeff_sash[S.oeff2]?.name || S.oeff2;
-  document.getElementById('d4').textContent = `L: ${n1} · R: ${n2}`;
+  const n3 = cnt >= 3 && S.oeff3 ? (P.oeff_sash[S.oeff3]?.name || S.oeff3) : null;
+  const typeLbl = S.zweiteilung
+    ? (S.zweiteilung === 'pfosten' ? 'Pfosten' : 'Stulp')
+    : (S.dreiteilung ? S.dreiteilung.replace('-', ' / ') : '');
+  const parts = n3 ? [`L: ${n1}`, `M: ${n2}`, `R: ${n3}`] : [`L: ${n1}`, `R: ${n2}`];
+  document.getElementById('d4').textContent = (typeLbl ? typeLbl + ' · ' : '') + parts.join(' · ');
   mkDone(4);
   setTimeout(() => openS(5), 200);
   drawPrev(); upSidebar();
