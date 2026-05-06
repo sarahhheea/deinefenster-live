@@ -517,7 +517,7 @@
       <div class="pc" data-p="haustuere" onclick="pickProd(this)">
         <span class="pc-badge" aria-label="KI-generiertes Symbolfoto">Symbolfoto</span>
         <img class="pc-img"
-             src="img/haustuer_iglo_energy_montana_weiss.png?v=20260506-2"
+             src="img/haustuer_iglo_energy_montana_weiss.png?v=20260506-5"
              width="1024" height="1280"
              loading="lazy"
              decoding="async"
@@ -4405,7 +4405,7 @@ function renderCart() {
 const PROD_IMGS = {
   kunststoff: 'img/fenster_standard_v3.png',
   balkontuer: 'img/balkontuer_standard_v3.png',
-  haustuere:  'img/haustuer_iglo_energy_montana_innen_weiss.png?v=20260506-2', // Sarah-Update 05.05.2026 v5: Iglo Energy Montana Innenansicht — Klinke rechts, 3 Scharniere links, Glas mittig (Google-Flow generiert, Pipeline). ?v= = Cache-Buster.
+  haustuere:  'img/haustuer_iglo_energy_montana_innen_weiss.png?v=20260506-5', // Sarah-Update 06.05.2026: Iglo Energy Montana Innenansicht spiegelverkehrt — Klinke LINKS, 3 Scharniere RECHTS (DIN-Konsistenz mit Außen Stoßgriff rechts → CLAUDE.md Regel 5). Google-Flow generiert via Image-to-Image-Mirror, Pipeline. ?v= = Cache-Buster.
   hst:        'img/hst_standard.png',
 };
 
@@ -4461,8 +4461,8 @@ const PROD_IMGS_VIEW = {
     // Innen:  Google-Flow generiert — Klinke rechts + 3 silberne Bandscharniere links + Glaseinsatz
     //         mittig zentriert. Pipeline-konform 1024×1280 (4:5 portrait). Konsistente Innen↔Außen-
     //         Wahrnehmung beim View-Toggle, beide passen zur 41-Farben-Live-Preview-Welt.
-    innen:  { '1-fluegel': 'img/haustuer_iglo_energy_montana_innen_weiss.png?v=20260506-2' },
-    aussen: { '1-fluegel': 'img/haustuer_iglo_energy_montana_weiss.png?v=20260506-2' },
+    innen:  { '1-fluegel': 'img/haustuer_iglo_energy_montana_innen_weiss.png?v=20260506-5' },
+    aussen: { '1-fluegel': 'img/haustuer_iglo_energy_montana_weiss.png?v=20260506-5' },
   },
   hst: {
     innen:  { '1-fluegel': 'img/hst_standard.png' },
@@ -5190,6 +5190,10 @@ function vorschauAktualisieren() {
         tryFarbenImg(`img/farben/fenster_2fl_aussen_${farbeKey}.png`, masterSrc); return;
       }
     }
+    // Kunststoff 3-Fl Innen: auch bei hellen Tönen Farbbild versuchen
+    if (S.prod === 'kunststoff' && fl === 3 && istInnen && farbeKey && farbeKey !== 'weiss' && farbeKey !== 'sonder') {
+      tryFarbenImg(`img/farben/fenster_3fl_${farbeKey}.png`, masterSrc); return;
+    }
     // Kunststoff 1-Fl Außen → immer AI-Außenbild (kein handle, egal ob grau/schwarz)
     if (S.prod === 'kunststoff' && fl === 1 && !istInnen) { /* weiter unten */ }
     // Kunststoff 1-Fl Innen: Griff-Links + Grau → fenster_standard_v3_rechts.png
@@ -5240,6 +5244,9 @@ function vorschauAktualisieren() {
       }
       if (fl === 2 && !istInnen) {
         tryFarbenImg(`img/farben/fenster_2fl_aussen_${farbeKey}.png`, masterSrc); return;
+      }
+      if (fl === 3 && istInnen) {
+        tryFarbenImg(`img/farben/fenster_3fl_${farbeKey}.png`, masterSrc); return;
       }
     }
     img.src = masterSrc; return;
