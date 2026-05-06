@@ -20,10 +20,25 @@ Bei JEDEM generierten oder eingebauten Tür-Bild für DeineFenster.de gelten die
 - Scharniere sind außen IMMER vom Rahmen verdeckt — werden also NICHT abgebildet
 - Negative-Prompt für jede Außen-Generierung: `no hinges visible, no door hinges`
 
-### Regel 3 — Innenansicht = IMMER 3 silberne Bandscharniere links
+### Regel 3 — Innenansicht = 3 silberne Bandscharniere (DIN-Seite beachten!)
 - L-förmige Bandscharniere mit zwei sichtbaren Plättchen
 - Vertikale Position: ~7% (oben), ~50% (mitte), ~90% (unten) der Türhöhe
 - Material: gebürstetes Edelstahl
+- **Seite hängt von DIN-Anschlag ab — siehe Regel 5 unten**
+
+### Regel 5 — DIN-Konsistenz Außen↔Innen (Sarah-Regel 06.05.2026 — HART)
+Innen- und Außenansicht müssen physisch dieselbe Tür zeigen, gespiegelt:
+- **Außen Stoßgriff RECHTS** (= DIN links, Bänder physisch links/verdeckt) →
+  **Innen Klinke LINKS, Scharniere RECHTS**
+- **Außen Stoßgriff LINKS** (= DIN rechts, Bänder physisch rechts/verdeckt) →
+  **Innen Klinke RECHTS, Scharniere LINKS**
+
+Stoßgriff/Schloss und Klinke sind IMMER auf der gegenüberliegenden Seite der Bänder
+(sonst geht die Tür physisch nicht auf). Beim Wechsel der Ansicht spiegelt sich alles.
+
+Aktueller Stand `haustuer_iglo_energy_montana_*` (Sarah-Confirm 06.05.2026):
+- Außen: Stoßgriff rechts, Schloss-Zylinder rechts unter Stoßgriff → DIN links
+- Innen muss: Klinke links, 3 Scharniere rechts, Glas mittig (gleicher vertikaler Schlitz)
 
 ### Regel 4 — Beschlag-Logik nach Bildklasse
 | Bildklasse | Außen | Innen |
