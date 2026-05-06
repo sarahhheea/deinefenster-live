@@ -133,49 +133,36 @@ const DRAFT_KEY = 'deinefenster_inserat_draft_v1';
 let KATEGORIEN_LIVE = [...KATEGORIEN]; // wird aus DB überschrieben falls verfügbar
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // Auth-Check + Kategorien aus DB laden
-  if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+  // Auth-Check via localStorage-Token
+  if (!isShopLoggedIn()) {
+    location.href = `shop-login.html?next=${encodeURIComponent('shop-einstellen.html')}`;
+    return;
+  }
+
+  // User-Badge anzeigen
+  const ub   = document.getElementById('userBadge');
+  const ueml = document.getElementById('userEmail');
+  const lb   = document.getElementById('logoutBtn');
+  if (ueml) ueml.textContent = localStorage.getItem('df_shop_email') || 'eingeloggt';
+  if (ub)   ub.classList.remove('hidden');
+  if (lb) {
+    lb.classList.remove('hidden');
+    lb.addEventListener('click', () => {
+      clearShopToken();
+      location.href = 'shop-login.html';
+    });
+  }
+
+  // Edit-Mode: ?edit=PRODUKT_ID
+  const editParam = new URLSearchParams(location.search).get('edit');
+  if (editParam) {
+    STATE.editMode = true;
+    STATE.editId   = editParam;
     try {
-      const { data: { session } } = await supabaseClient.auth.getSession();
-      if (!session) {
-        // nicht eingeloggt → zur Login-Seite
-        location.href = `shop-login.html?next=${encodeURIComponent('shop-einstellen.html')}`;
-        return;
-      }
-      STATE.user = session.user;
-      const ub = document.getElementById('userBadge');
-      const ueml = document.getElementById('userEmail');
-      const lb = document.getElementById('logoutBtn');
-      if (ueml) ueml.textContent = session.user.email || 'eingeloggt';
-      if (ub) ub.classList.remove('hidden');
-      if (lb) {
-        lb.classList.remove('hidden');
-        lb.addEventListener('click', async () => {
-          await supabaseClient.auth.signOut();
-          location.href = 'shop-login.html';
-        });
-      }
-
-      // Live-Kategorien aus DB
-      const { data: katData } = await supabaseClient
-        .from('kategorien')
-        .select('*')
-        .eq('aktiv', true)
-        .order('reihenfolge', { ascending: true });
-      if (katData && katData.length) {
-        KATEGORIEN_LIVE = katData.map(k => ({ key: k.key, label: k.label, icon: k.icon || 'window' }));
-      }
-
-      // Edit-Mode: ?edit=PRODUKT_ID
-      const editParam = new URLSearchParams(location.search).get('edit');
-      if (editParam) {
-        STATE.editMode = true;
-        STATE.editId = editParam;
-        const { data: prod } = await supabaseClient.from('produkte').select('*').eq('id', editParam).maybeSingle();
-        if (prod) await ladeProduktInsFormular(prod);
-      }
-    } catch (e) {
-      console.warn('Auth/DB-Init fehlgeschlagen, verwende Standard-Kategorien:', e);
+      const res = await sheetsGet('produkt', { id: editParam });
+      if (res.produkt) await ladeProduktInsFormular(res.produkt);
+    } catch(e) {
+      console.warn('Produkt laden fehlgeschlagen:', e);
     }
   }
 
@@ -672,15 +659,15 @@ function rendereVorschau() {
   document.getElementById('vorschauKarte').innerHTML = html;
 }
 
-/* ─── Veröffentlichen → in Supabase speichern ─── */
+/* ─── Veröffentlichen → in Google Sheets speichern ─── */
 async function veroeffentlichen() {
-  const titel = document.getElementById('formTitel').value.trim();
-  const breite = parseInt(document.getElementById('formBreite').value, 10);
-  const hoehe = parseInt(document.getElementById('formHoehe').value, 10);
-  const preis = parseInt(document.getElementById('formPreis').value, 10);
-  const standnummer = document.getElementById('formStandnummer')?.value.trim() || '';
+  const titel      = document.getElementById('formTitel').value.trim();
+  const breite     = parseInt(document.getElementById('formBreite').value, 10);
+  const hoehe      = parseInt(document.getElementById('formHoehe').value, 10);
+  const preis      = parseInt(document.getElementById('formPreis').value, 10);
+  const standnummer     = document.getElementById('formStandnummer')?.value.trim() || '';
   const sonderpreisAktiv = !!document.getElementById('formSonderpreis')?.checked;
-  const exportModell = !!document.getElementById('formExport')?.checked;
+  const exportModell    = !!document.getElementById('formExport')?.checked;
 
   if (!STATE.kategorie || !titel || !breite || !hoehe || !preis) {
     showSnackbar('Bitte Pflichtfelder ausfüllen: Kategorie, Titel, Maße, Preis', 'error');
@@ -689,10 +676,6 @@ async function veroeffentlichen() {
   if (!standnummer) {
     showSnackbar('Standnummer ist Pflicht — bitte eintragen (z.B. A-12)', 'error');
     document.getElementById('formStandnummer')?.focus();
-    return;
-  }
-  if (typeof supabaseClient === 'undefined' || !supabaseClient) {
-    showSnackbar('Keine Datenbank-Verbindung. Lade die Seite neu.', 'error');
     return;
   }
 
@@ -707,35 +690,35 @@ async function veroeffentlichen() {
     const verglasung = document.getElementById('formVerglasung').value;
     if (verglasung === '2-fach') eigArr.push('2-fach-verglasung');
     if (verglasung === '3-fach') eigArr.push('3-fach-verglasung');
-    // RC-Klasse + U-Wert wurden auf Sarah-Wunsch 27.04. aus dem Formular entfernt
     const rc = null;
 
-    // Bilder hochladen
+    // Bilder zu Google Drive hochladen
     btn.innerHTML = '<span class="material-symbols-outlined animate-spin" style="font-size:18px">progress_activity</span> Lade Bilder hoch…';
     const bildUrls = [];
     for (let i = 0; i < STATE.bilder.length; i++) {
-      const dataUrl = STATE.bilder[i];
-      const blob = dataURLToBlob(dataUrl);
-      const ext = (blob.type.split('/')[1] || 'jpg').replace('jpeg', 'jpg');
+      const dataUrl  = STATE.bilder[i];
+      const parts    = dataUrl.split(',');
+      const mimeType = parts[0].match(/:(.*?);/)[1];
+      const base64   = parts[1];
+      const ext      = mimeType.split('/')[1].replace('jpeg', 'jpg');
       const fileName = `${Date.now()}-${Math.random().toString(36).slice(2,8)}-${i}.${ext}`;
-      const { error: upErr } = await supabaseClient.storage
-        .from(SUPABASE_STORAGE_BUCKET || 'produkt-bilder')
-        .upload(fileName, blob, { contentType: blob.type, upsert: false });
-      if (upErr) {
-        throw new Error('Bild-Upload fehlgeschlagen: ' + upErr.message);
-      }
-      const { data: urlData } = supabaseClient.storage
-        .from(SUPABASE_STORAGE_BUCKET || 'produkt-bilder')
-        .getPublicUrl(fileName);
-      bildUrls.push(urlData.publicUrl);
+
+      const res = await sheetsPost({
+        action: 'upload_image',
+        imageBase64: base64,
+        mimeType,
+        fileName
+      });
+      if (res.error) throw new Error('Bild-Upload fehlgeschlagen: ' + res.error);
+      bildUrls.push(res.url);
     }
+
     // Bilder zusammenführen: bestehende (beim Bearbeiten) + neu hochgeladene
     const alleBilder = [...STATE.bilderBestand, ...bildUrls];
     if (alleBilder.length === 0) alleBilder.push('img/fenster_standard.png');
 
     btn.innerHTML = '<span class="material-symbols-outlined animate-spin" style="font-size:18px">progress_activity</span> Speichere Inserat…';
 
-    // In produkte-Tabelle einfügen / aktualisieren
     const eintrag = {
       titel,
       kategorie_key: STATE.kategorie,
@@ -754,21 +737,19 @@ async function veroeffentlichen() {
       rc_klasse: rc,
       eigenschaften: Array.from(new Set(eigArr)),
       lagerbestand: parseInt(document.getElementById('formLager').value, 10) || 1,
-      standnummer: standnummer,
+      standnummer,
       bilder: alleBilder,
       beschreibung: document.getElementById('formBeschreibung').value.trim() || '',
       aktiv: true
     };
 
-    let dbErr;
+    let res;
     if (STATE.editMode && STATE.editId) {
-      const { error } = await supabaseClient.from('produkte').update(eintrag).eq('id', STATE.editId);
-      dbErr = error;
+      res = await sheetsPost({ action: 'update', id: STATE.editId, data: eintrag });
     } else {
-      const { error } = await supabaseClient.from('produkte').insert(eintrag);
-      dbErr = error;
+      res = await sheetsPost({ action: 'insert', data: eintrag });
     }
-    if (dbErr) throw new Error('Speichern fehlgeschlagen: ' + dbErr.message);
+    if (res.error) throw new Error('Speichern fehlgeschlagen: ' + res.error);
 
     // Erfolg → Modal anzeigen, Draft löschen
     try { localStorage.removeItem(DRAFT_KEY); } catch (e) {}

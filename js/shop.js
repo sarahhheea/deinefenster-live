@@ -46,13 +46,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function checkAuth() {
-  if (typeof supabaseClient === 'undefined' || !supabaseClient) return;
-  try {
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    STATE.loggedIn = !!session;
-    STATE.user = session?.user || null;
-    if (session) setupLoggedInUI();
-  } catch (e) { STATE.loggedIn = false; }
+  if (!isShopLoggedIn()) { STATE.loggedIn = false; return; }
+  STATE.loggedIn = true;
+  STATE.user = { email: localStorage.getItem('df_shop_email') || 'Mitarbeiter' };
+  setupLoggedInUI();
 }
 
 function setupLoggedInUI() {
@@ -63,70 +60,52 @@ function setupLoggedInUI() {
   if (eml && STATE.user) eml.textContent = STATE.user.email;
   const logout = document.getElementById('logoutShopBtn');
   if (logout) {
-    logout.addEventListener('click', async () => {
-      await supabaseClient.auth.signOut();
+    logout.addEventListener('click', () => {
+      clearShopToken();
       location.reload();
     });
   }
 }
 
-/* ─── Daten laden (aus Supabase) ─── */
+/* ─── Daten laden (aus Google Sheets) ─── */
 async function loadProdukte() {
-  if (typeof supabaseClient === 'undefined' || !supabaseClient) {
-    console.warn('Supabase nicht verfügbar — fallback auf JSON');
-    return loadProdukteFromJson();
-  }
   try {
-    // Kategorien laden (geordnet nach reihenfolge)
-    const { data: katData, error: katErr } = await supabaseClient
-      .from('kategorien')
-      .select('*')
-      .eq('aktiv', true)
-      .order('reihenfolge', { ascending: true });
-    if (katErr) throw katErr;
+    const data = await sheetsGet('produkte');
 
-    STATE.kategorien = {};
-    (katData || []).forEach(k => { STATE.kategorien[k.key] = k.label; });
-    STATE.kategorienListe = katData || [];
+    STATE.kategorien = data.kategorien || {};
+    STATE.kategorienListe = Object.entries(data.kategorien || {})
+      .map(([key, label]) => ({ key, label }));
 
-    // Produkte laden
-    const { data: prodData, error: prodErr } = await supabaseClient
-      .from('produkte')
-      .select('*')
-      .eq('aktiv', true)
-      .order('created_at', { ascending: false });
-    if (prodErr) throw prodErr;
-
-    // Auf bestehende JSON-Form mappen (damit der Render-Code unverändert bleibt)
-    STATE.produkte = (prodData || []).map(p => ({
-      id: p.id,
-      titel: p.titel,
-      kategorie: p.kategorie_key,
+    STATE.produkte = (data.produkte || []).map(p => ({
+      id: String(p.id),
+      titel: p.titel || '',
+      kategorie: p.kategorie_key || '',
       system: p.system || '',
       zustand: p.zustand || 'neu',
-      breite_mm: p.breite_mm,
-      hoehe_mm: p.hoehe_mm,
-      preis_eur: p.preis_eur,
-      sonderpreis_eur: p.sonderpreis_eur || null,
+      breite_mm: Number(p.breite_mm) || 0,
+      hoehe_mm: Number(p.hoehe_mm) || 0,
+      preis_eur: Number(p.preis_eur) || 0,
+      sonderpreis_eur: p.sonderpreis_eur ? Number(p.sonderpreis_eur) : null,
       groesse_klasse: p.groesse_klasse || null,
       export_modell: !!p.export_modell,
       standnummer: p.standnummer || null,
       farbe: p.farbe || 'weiss',
       verglasung: p.verglasung || '2-fach',
-      u_wert: p.u_wert,
+      u_wert: p.u_wert || null,
       oeffnungsart: p.oeffnungsart || 'dreh-kipp',
-      rc_klasse: p.rc_klasse,
+      rc_klasse: p.rc_klasse || null,
       eigenschaften: Array.isArray(p.eigenschaften) ? p.eigenschaften : [],
-      lagerbestand: p.lagerbestand || 1,
+      lagerbestand: Number(p.lagerbestand) || 1,
       bild: (Array.isArray(p.bilder) && p.bilder[0]) || 'img/fenster_standard.png',
-      bilder: (Array.isArray(p.bilder) && p.bilder.length > 0) ? p.bilder : [],
+      bilder: Array.isArray(p.bilder) ? p.bilder : [],
       beschreibung: p.beschreibung || ''
     }));
 
     STATE.metadaten = berechneMetadaten(STATE.produkte);
   } catch (err) {
-    console.error('Supabase-Fehler — fallback auf JSON:', err);
-    return loadProdukteFromJson();
+    console.error('Sheets-Fehler beim Laden:', err);
+    STATE.produkte = [];
+    STATE.metadaten = berechneMetadaten([]);
   }
 }
 
@@ -620,17 +599,17 @@ function oeffneAktionsMenu(id, anchor) {
 }
 
 async function archiviereProdukt(id) {
-  if (!confirm('Inserat archivieren? Es verschwindet aus dem Shop, kann aber später in Supabase wiederhergestellt werden (aktiv=true setzen).')) return;
-  const { error } = await supabaseClient.from('produkte').update({ aktiv: false }).eq('id', id);
-  if (error) { alert('Fehler beim Archivieren: ' + error.message); return; }
+  if (!confirm('Inserat archivieren? Es verschwindet aus dem Shop (kann im Google Sheet wiederhergestellt werden: Spalte aktiv = TRUE).')) return;
+  const res = await sheetsPost({ action: 'archive', id });
+  if (res.error) { alert('Fehler beim Archivieren: ' + res.error); return; }
   await loadProdukte();
   rendere();
 }
 
 async function loescheProdukt(id) {
   if (!confirm('Inserat KOMPLETT LÖSCHEN?\n\nDie Aktion ist endgültig — Produkt + alle Daten weg.\n\nWenn du nur „aufräumen" willst, nimm lieber „Archivieren".')) return;
-  const { error } = await supabaseClient.from('produkte').delete().eq('id', id);
-  if (error) { alert('Fehler beim Löschen: ' + error.message); return; }
+  const res = await sheetsPost({ action: 'delete', id });
+  if (res.error) { alert('Fehler beim Löschen: ' + res.error); return; }
   await loadProdukte();
   rendere();
 }

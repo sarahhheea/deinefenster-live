@@ -92,7 +92,7 @@
     </form>
 
     <p class="text-[11px] text-center text-[#86868b] mt-6 leading-relaxed">
-      Login nur für autorisierte Mitarbeiter. Das Passwort wird über Supabase verifiziert und nie gespeichert.
+      Login nur für autorisierte Mitarbeiter. Das Passwort wird sicher übertragen und nie im Browser gespeichert.
     </p>
   </div>
 </main>
@@ -101,27 +101,20 @@
   © 2026 Türen und Fensterhandel Christ · <a href="index.html" class="hover:underline">zurück zur Startseite</a>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase-config.js"></script>
+<script src="js/sheets-config.js"></script>
 <script>
-(async () => {
-  // Wenn schon eingeloggt → direkt weiterleiten
-  if (supabaseClient) {
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (session) {
-      const next = new URLSearchParams(location.search).get('next') || 'shop-einstellen.html';
-      location.href = next;
-      return;
-    }
-  }
-})();
+// Wenn schon eingeloggt → direkt weiterleiten
+if (isShopLoggedIn()) {
+  const next = new URLSearchParams(location.search).get('next') || 'shop-einstellen.html';
+  location.href = next;
+}
 
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
-  const email = document.getElementById('email').value.trim();
+  const email   = document.getElementById('email').value.trim();
   const passwort = document.getElementById('passwort').value;
-  const errEl = document.getElementById('loginError');
-  const btn = document.getElementById('loginBtn');
+  const errEl   = document.getElementById('loginError');
+  const btn     = document.getElementById('loginBtn');
   const btnText = document.getElementById('loginBtnText');
   const spinner = document.getElementById('loginSpinner');
 
@@ -130,23 +123,19 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
   btnText.textContent = 'Logge ein…';
   spinner.classList.remove('hidden');
 
-  if (!supabaseClient) {
-    errEl.textContent = 'Verbindung zur Datenbank fehlgeschlagen. Lade die Seite neu.';
+  const result = await shopLogin(passwort);
+
+  if (!result.ok) {
+    errEl.textContent = result.error || 'Passwort falsch.';
     errEl.classList.remove('hidden');
-    btn.disabled = false; btnText.textContent = 'Einloggen'; spinner.classList.add('hidden');
+    btn.disabled = false;
+    btnText.textContent = 'Einloggen';
+    spinner.classList.add('hidden');
     return;
   }
 
-  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: passwort });
-
-  if (error) {
-    errEl.textContent = (error.message || '').includes('Invalid login')
-      ? 'E-Mail oder Passwort falsch.'
-      : 'Login fehlgeschlagen: ' + (error.message || 'unbekannter Fehler');
-    errEl.classList.remove('hidden');
-    btn.disabled = false; btnText.textContent = 'Einloggen'; spinner.classList.add('hidden');
-    return;
-  }
+  // E-Mail für Anzeige im Shop speichern (optional, nur Anzeige)
+  if (email) localStorage.setItem('df_shop_email', email);
 
   // Erfolg → weiterleiten
   const next = new URLSearchParams(location.search).get('next') || 'shop-einstellen.html';
