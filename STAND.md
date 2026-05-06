@@ -83,7 +83,12 @@ Datei: `robots.txt`
 
 ### Konfigurator
 - [ ] `konfigurator.html` — Sarah sagt Bescheid wann fertig
-- [ ] Haustür-Farbframes für Live-Preview (HAUSTUER_FARB_FRAMES Map)
+- [x] Haustür-Farbframes für Live-Preview — fertig 06.05.2026
+  - 37 Drutex-CDN-Frames gemappt (Iglo Energy Montana, Außenansicht mit Stoßgriff)
+  - 8 Farben ohne Drutex-Pendant (Achatgrau, Signalgrau, Alux DB, Alu gebürstet, Siena Noce/Rosso, Bergkiefer, Teak) bei Haustür ausgeblendet via `HAUSTUER_FARB_BLOCKLIST` — beim Fenster bleiben sie sichtbar
+  - Innenansicht in Farbe weiterhin offen (Sarah-Plan: später per Google Flow)
+- [ ] Balkontür Farbbilder (innen + außen, 0/46 generiert)
+- [ ] HST Farbbilder (innen + außen, 0/46 generiert)
 
 ---
 

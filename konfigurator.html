@@ -2820,6 +2820,14 @@ function pickProd(el) {
   if (S.prod === 'haustuere') buildTuerGriff();  // Sarah-Wunsch 21.04.2026
   if (S.prod === 'hst') buildHstGriff();         // Sarah-Wunsch 21.04.2026
   if (S.prod === 'balkontuer') buildBalkonSchwelle();  // Sarah-Wunsch 21.04.2026
+
+  // Sarah-Regel 06.05.2026: Bei Haustür die 8 Drutex-losen Farben aus dem Picker filtern.
+  // Wenn vorher (z.B. beim Fenster) eine geblockte Farbe gewählt war, auf weiss zurücksetzen.
+  if (S.prod === 'haustuere' && typeof HAUSTUER_FARB_BLOCKLIST !== 'undefined') {
+    if (HAUSTUER_FARB_BLOCKLIST.has(S.fa)) S.fa = 'weiss';
+    if (HAUSTUER_FARB_BLOCKLIST.has(S.fi)) S.fi = 'weiss';
+  }
+  buildFarbePicker();  // Re-render mit produkt-spezifischem Filter
   enforceGlasRule();  // Sarah-Vorgabe 21.04.2026: HST nur 3-fach
   buildRollKastenOptions();  // Sarah-Vorgabe 21.04.2026: HST nur 225er Kasten
   drawPrev(); upSidebar();
@@ -3658,6 +3666,51 @@ function buildOeffSash() {
     const olHoeheApprox = Math.round(S.hMm * 0.21);
     html += `<div class="info mb-3" style="background:#fff7ed;border-left:4px solid #f97316"><i class="ms f" style="color:#ea580c;font-size:20px;flex-shrink:0">info</i><div style="font-size:13px"><strong>Oberlicht ca. ${olHoeheApprox} mm — grenzwertig.</strong> Drutex-Richtwert: Oberlicht typisch max. 600 mm. Bei so großen Oberlichtern wird der Hauptflügel verhältnismäßig niedrig. Erwägen Sie Einzel-Festverglasung oberhalb statt integriertes Oberlicht.</div></div>`;
   }
+  // ── Schnell-Auswahl: 2-Flügel Kombinationen ────────────────────────────────
+  if (sashCount === 2 && S.prod !== 'haustuere') {
+    const flType = S.fluegel || '';
+    const isStulp   = flType.includes('stulp');
+    const isPfosten = flType.includes('pfosten');
+    const allCombos = [
+      // Symmetrie-Paare (einfache Kombinationen — immer sichtbar)
+      { v1:'fest',   v2:'dk-r',   name:'Fest · Dreh-Kipp rechts',              sub:'Links fest, rechts Dreh-Kipp',        showFor:'both'    },
+      { v1:'dk-l',   v2:'fest',   name:'Dreh-Kipp links · Fest',               sub:'Links Dreh-Kipp, rechts fest',        showFor:'both'    },
+      // Stulp-Varianten
+      { v1:'dreh-l', v2:'dk-r',   name:'Dreh links · Stulp · Dreh-Kipp rechts', sub:'Stulp, links Dreh + rechts Dreh-Kipp', showFor:'stulp'   },
+      { v1:'dk-l',   v2:'dreh-r', name:'Dreh-Kipp links · Stulp · Dreh rechts', sub:'Stulp, links Dreh-Kipp + rechts Dreh', showFor:'stulp'   },
+      // Pfosten-Varianten (gespiegelt + beidseitig DK)
+      { v1:'dreh-l', v2:'dk-r',   name:'Dreh links · Pfosten · Dreh-Kipp rechts', sub:'Pfosten, links Dreh + rechts Dreh-Kipp', showFor:'pfosten' },
+      { v1:'dk-l',   v2:'dreh-r', name:'Dreh-Kipp links · Pfosten · Dreh rechts', sub:'Pfosten, links Dreh-Kipp + rechts Dreh', showFor:'pfosten' },
+      { v1:'dk-l',   v2:'dk-r',   name:'Dreh-Kipp links · Pfosten · Dreh-Kipp rechts', sub:'Pfosten, beidseitig Dreh-Kipp',   showFor:'pfosten' },
+    ];
+    const visibleCombos = allCombos.filter(c => {
+      if (c.showFor === 'stulp'   && !isStulp)   return false;
+      if (c.showFor === 'pfosten' && !isPfosten)  return false;
+      if (dkZuBreit && (c.v1.startsWith('dk') || c.v2.startsWith('dk'))) return false;
+      return true;
+    });
+    if (visibleCombos.length > 0) {
+      html += `<div class="sec-t" style="margin-top:0">Schnell-Auswahl Kombination</div>`;
+      html += `<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">`;
+      visibleCombos.forEach(c => {
+        const isSel = S.oeff1 === c.v1 && S.oeff2 === c.v2;
+        const dkInCombo = c.v1.startsWith('dk') || c.v2.startsWith('dk');
+        const priceDelta = (P.oeff_sash[c.v1]?.add||0) + (P.oeff_sash[c.v2]?.add||0);
+        const priceTxt = priceDelta === 0 ? 'inkl.' : (priceDelta > 0 ? `+ ${priceDelta} €` : `− ${Math.abs(priceDelta)} €`);
+        const priceCls = priceDelta === 0 ? 'p-inc' : (priceDelta > 0 ? 'p-add' : 'p-sav');
+        html += `<div class="oc${isSel?' sel':''}" data-v1="${c.v1}" data-v2="${c.v2}" onclick="pickOeffCombo(this)" style="flex-direction:column;align-items:center;text-align:center;padding:10px 6px;gap:3px">
+          <div style="display:flex;gap:3px;justify-content:center">${oeffSVG(c.v1)}${oeffSVG(c.v2)}</div>
+          <div class="olabel" style="font-size:11px;line-height:1.3">${c.name}</div>
+          <div class="osub" style="font-size:10px">${c.sub}</div>
+          <div class="oprice ${priceCls}" style="font-size:11px">${priceTxt}</div>
+        </div>`;
+      });
+      html += `</div>`;
+      html += `<div class="sec-t">Einzeln konfigurieren</div>`;
+    }
+  }
+  // ── Ende Schnell-Auswahl ─────────────────────────────────────────────────────
+
   for(let i=0;i<sashCount;i++){
     const sk='oeff'+(i+1);
     if(sashCount>1) html+=`<div class="sec-t">${sashLabels[i]}</div>`;
@@ -3736,6 +3789,29 @@ function pickOeff(el, sashNum) {
     mkDone(4);
     setTimeout(()=>openS(5),200);
   }
+  drawPrev(); upSidebar();
+}
+
+// Setzt beide Flügel einer 2-Flügel-Kombination auf einmal
+function pickOeffCombo(el) {
+  el.parentElement.querySelectorAll('.oc').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+  S.oeff1 = el.dataset.v1;
+  S.oeff2 = el.dataset.v2;
+  // Einzel-Grids ebenfalls synchronisieren (falls sichtbar)
+  ['1','2'].forEach(n => {
+    const grid = document.getElementById('oeff-grid-'+n);
+    if (grid) {
+      grid.querySelectorAll('.oc').forEach(c => c.classList.remove('sel'));
+      const match = grid.querySelector(`[data-v="${S['oeff'+n]}"]`);
+      if (match) match.classList.add('sel');
+    }
+  });
+  const n1 = P.oeff_sash[S.oeff1]?.name || S.oeff1;
+  const n2 = P.oeff_sash[S.oeff2]?.name || S.oeff2;
+  document.getElementById('d4').textContent = `L: ${n1} · R: ${n2}`;
+  mkDone(4);
+  setTimeout(() => openS(5), 200);
   drawPrev(); upSidebar();
 }
 
@@ -3869,18 +3945,22 @@ function shortFarbName(v) {
 }
 
 function buildFarbePicker() {
+  // Sarah-Regel 06.05.2026: Bei Haustür die 8 Farben rausfiltern für die Drutex
+  // keine Iglo-Energy-Frames hat (sonst würde der Klick still auf Master fallen).
+  const istHaustuer = (S.prod === 'haustuere');
+  const istBlocked = (k) => istHaustuer && HAUSTUER_FARB_BLOCKLIST.has(k);
   ['fa','fi','fd'].forEach(key => {
     const table = P[key], grid = document.getElementById('fp-'+{fa:'aussen',fi:'innen',fd:'dicht'}[key]);
     if (!grid) return;
-    // Dichtungsfarbe hat nur 2 Optionen — flach
+    // Dichtungsfarbe hat nur 2 Optionen — flach (kein Filter — Dichtungs-Farben sind eh nur weiss/schwarz)
     if (key === 'fd') {
       grid.innerHTML = Object.entries(table).map(([k,v])=>farbItemHtml(k,v,key)).join('');
       return;
     }
     // fa/fi: Beliebteste-Block + aufklappbare Gruppen (Sarah-Wunsch 21.04.2026: Akkordeon zurück, war übersichtlicher)
     let html = '';
-    // Beliebteste-Zeile oben — immer offen
-    const beliebtItems = FARB_BELIEBTESTE.filter(k => table[k]).map(k => farbItemHtml(k, table[k], key)).join('');
+    // Beliebteste-Zeile oben — immer offen (Blockliste filtert bei Haustür)
+    const beliebtItems = FARB_BELIEBTESTE.filter(k => table[k] && !istBlocked(k)).map(k => farbItemHtml(k, table[k], key)).join('');
     html += `<div style="background:linear-gradient(135deg,#fffbeb 0%,#fef3c7 100%);border:1px solid #fde68a;border-radius:12px;padding:16px 18px;margin-bottom:20px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
         <i class="ms f" style="color:#f59e0b;font-size:20px">star</i>
@@ -3888,9 +3968,9 @@ function buildFarbePicker() {
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:14px">${beliebtItems}</div>
     </div>`;
-    // 4 aufklappbare Gruppen darunter — initial alle zu
+    // 4 aufklappbare Gruppen darunter — initial alle zu (Blockliste filtert bei Haustür)
     Object.entries(FARB_GRUPPEN).forEach(([grpName, grpKeys]) => {
-      const items = grpKeys.filter(k => table[k]).map(k => farbItemHtml(k, table[k], key)).join('');
+      const items = grpKeys.filter(k => table[k] && !istBlocked(k)).map(k => farbItemHtml(k, table[k], key)).join('');
       if (!items) return;
       html += `<div class="farb-gruppe" style="margin-bottom:10px;border:1px solid #e0e4f0;border-radius:10px;overflow:hidden;background:#fff">
         <div onclick="toggleFarbGruppe(this)" style="padding:12px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none;transition:background .15s" onmouseover="this.style.background='#f7f8ff'" onmouseout="this.style.background=''">
@@ -4605,6 +4685,22 @@ const HAUSTUER_FARB_FRAMES = {
   'brillblau':   _hauFB('iglo-energy-brylantowo-niebieski'),
   'stahlblau':   _hauFB('iglo-energy-stalowy-niebieski'),
 };
+
+// Sarah-Regel 06.05.2026: Farben die im Drutex Iglo-Energy-Haustür-Katalog NICHT existieren.
+// Bei Haustür-Produkt werden diese aus dem Farb-Picker (außen UND innen) ausgeblendet,
+// damit jeder Klick im Konfigurator ein passendes Drutex-Bild zeigt — kein stiller
+// Master-Fallback, der für den Kunden wie ein Bug aussieht.
+// Beim Fenster/Balkontür/HST bleiben diese Farben sichtbar (Fenster hat lokal alle 45 Bilder).
+const HAUSTUER_FARB_BLOCKLIST = new Set([
+  'achatgrau',   // RAL 7038 — Drutex hat kein 1:1
+  'signalgrau',  // RAL 7004 — Drutex hat „Grau" ohne RAL-Code
+  'alux-db',     // DB 703 — Drutex-Iglo-Energy hat keine DB-Codes
+  'alu-gebr',    // Aluminium gebürstet — Drutex hat keinen
+  'siena-noce',  // Drutex hat keinen Siena-Noce
+  'siena-ross',  // Drutex hat keinen Siena-Rosso
+  'bergkiefer',  // Drutex hat keinen Bergkiefer
+  'teak',        // Drutex hat keinen Teak
+]);
 
 // Sarah-Update 02.05.2026: Echte Drutex-Katalog-Vollbilder (drutex.de/produkte/addons/type/141)
 // 87 Modelle: 40 IGLO Energy + 47 DX-Linie, je Klassisch + Inox-Variante.
