@@ -5,6 +5,17 @@ Online-Shop für Drutex Fenster und Türen.
 Ziel: Beste Fenster-Website Deutschland – besser als meinfenster24.de
 NUR Drutex Produkte. Alle Details in PROJEKT.md
 
+## 🔗 AKTUELLE URLs (Stand 06.05.2026 — IMMER DIESE NUTZEN)
+
+| Was | URL |
+|-----|-----|
+| **Live-Vorschau** (GitHub Pages, aktuell) | `https://sarahhheea.github.io/deinefenster-live/` |
+| **Quellcode** (wo wir arbeiten) | `https://github.com/sarahhheea/template-deinefenster` |
+| **Ziel-Domain** (noch nicht umgestellt) | `https://www.deinefenster.de` |
+
+⚠️ Die alte Netlify-URL (`fluffy-sunburst-d0520c.netlify.app`) ist OFFLINE — nie mehr nutzen.
+⚠️ Die echte Domain `deinefenster.de` zeigt noch die alte WordPress-Seite — NICHT anfassen.
+
 ## 🚪 TÜR-BILDER GRUND-REGELN (Sarah-Regel 05.05.2026 — HART, nicht abweichen)
 
 Bei JEDEM generierten oder eingebauten Tür-Bild für DeineFenster.de gelten diese Regeln. Volldetails in `docs/drutex-bildstil-analyse.md`.
