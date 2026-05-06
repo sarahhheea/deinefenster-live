@@ -21,7 +21,7 @@
 
   <link rel="preconnect" href="https://fonts.bunny.net"/>
   <link href="https://fonts.bunny.net/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.bunny.net/css2?family=Material+Symbols+Outlined&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
 
   <script>
     tailwind.config = {
@@ -3531,9 +3531,102 @@ function pickFluegel(el) {
   document.getElementById('d3').textContent = P.fluegel[S.fluegel]?.name || S.fluegel;
   mkDone(3);
   buildOeffSash();
+  // Sarah-Regel 06.05.2026: Bei 2-Flügel-Fenster die 8 Drutex-losen Farben filtern.
+  // Wenn vorher (1-Flügel) eine geblockte Farbe gewählt war → auf weiss zurücksetzen.
+  if (S.prod === 'kunststoff' && S.fluegel === '2-fluegel'
+      && typeof FENSTER_FARB_BLOCKLIST !== 'undefined') {
+    if (FENSTER_FARB_BLOCKLIST.has(S.fa)) S.fa = 'weiss';
+    if (FENSTER_FARB_BLOCKLIST.has(S.fi)) S.fi = 'weiss';
+  }
+  buildFarbePicker();  // Re-render mit flügelspezifischem Filter
   setTimeout(()=>openS(4), 200);
   vorschauAktualisieren();
   drawPrev(); upSidebar();
+}
+
+// Kombiniertes SVG für 2-Flügel + Oberlicht Kombi-Karten
+function ol2ComboSVG(olTyp, oeff1, oeff2, sepType) {
+  const W=62, H=74, M=3;
+  const olH=13, sep1Y=M+olH;
+  const mT=sep1Y+2, mB=H-M, mMid=W/2, CY=(mT+mB)/2;
+  const L1=M+2, R1=mMid-1, L2=mMid+1, R2=W-M-2;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="62" height="74" style="display:block">`;
+  s+=`<rect width="${W}" height="${H}" fill="white"/>`;
+  s+=`<rect x="${M}" y="${M}" width="${W-2*M}" height="${H-2*M}" fill="#eef3ff" stroke="#444" stroke-width="1.5"/>`;
+  s+=`<line x1="${M}" y1="${sep1Y}" x2="${W-M}" y2="${sep1Y}" stroke="#444" stroke-width="1.5"/>`;
+  const olT=M+1,olBi=sep1Y-1,olCX=W/2,olL=M+2,olR=W-M-2;
+  if(olTyp==='kipp'){
+    s+=`<line x1="${olL}" y1="${olBi}" x2="${olCX}" y2="${olT+1}" stroke="#225eaa" stroke-width="1.4" stroke-linecap="round"/>`;
+    s+=`<line x1="${olR}" y1="${olBi}" x2="${olCX}" y2="${olT+1}" stroke="#225eaa" stroke-width="1.4" stroke-linecap="round"/>`;
+    s+=`<polygon points="${olCX},${olT} ${olCX-3},${olT+6} ${olCX+3},${olT+6}" fill="#225eaa"/>`;
+  } else {
+    s+=`<line x1="${olL}" y1="${olT}" x2="${olR}" y2="${olBi}" stroke="#aaa" stroke-width="1.2"/>`;
+    s+=`<line x1="${olR}" y1="${olT}" x2="${olL}" y2="${olBi}" stroke="#aaa" stroke-width="1.2"/>`;
+  }
+  const sepColor=sepType==='stulp'?'#225eaa':'#555';
+  const sepW=sepType==='stulp'?2.5:1.5;
+  s+=`<line x1="${mMid}" y1="${mT-1}" x2="${mMid}" y2="${mB}" stroke="${sepColor}" stroke-width="${sepW}"/>`;
+  const drawS=(v,lx,rx)=>{
+    const cx=(lx+rx)/2;
+    const sl=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#225eaa" stroke-width="2" stroke-linecap="round"/>`;
+    const dl=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#225eaa" stroke-width="1.1" stroke-linecap="round" stroke-dasharray="3,2"/>`;
+    if(v==='fest') return `<line x1="${lx}" y1="${mT}" x2="${rx}" y2="${mB}" stroke="#aaa" stroke-width="1.1"/><line x1="${rx}" y1="${mT}" x2="${lx}" y2="${mB}" stroke="#aaa" stroke-width="1.1"/>`;
+    if(v==='kipp') return sl(lx,mB,cx,mT)+sl(rx,mB,cx,mT)+dl(lx,mT,rx,mT)+`<polygon points="${cx},${mT-1} ${cx-3},${mT+5} ${cx+3},${mT+5}" fill="#225eaa"/>`;
+    if(v==='dreh-l') return sl(lx,mT,lx,mB)+dl(lx,mT,rx,CY)+dl(lx,mB,rx,CY);
+    if(v==='dreh-r') return sl(rx,mT,rx,mB)+dl(rx,mT,lx,CY)+dl(rx,mB,lx,CY);
+    if(v==='dk-l') return sl(lx,mT,lx,mB)+dl(lx,mT,rx,CY)+dl(lx,mB,rx,CY)+dl(rx,mB,cx,mT)+dl(lx,mB,cx,mT)+`<polygon points="${cx},${mT-1} ${cx-3},${mT+5} ${cx+3},${mT+5}" fill="#225eaa"/>`;
+    if(v==='dk-r') return sl(rx,mT,rx,mB)+dl(rx,mT,lx,CY)+dl(rx,mB,lx,CY)+dl(lx,mB,cx,mT)+dl(rx,mB,cx,mT)+`<polygon points="${cx},${mT-1} ${cx-3},${mT+5} ${cx+3},${mT+5}" fill="#225eaa"/>`;
+    return '';
+  };
+  s+=drawS(oeff1,L1,R1);
+  s+=drawS(oeff2,L2,R2);
+  s+='</svg>';
+  return s;
+}
+
+// Kombiniertes SVG für 1-Flügel + Oberlicht Kombi-Karten
+function olComboSVG(olTyp, mainTyp) {
+  const W=44, H=66, M=3;
+  const olH=14, sep=M+olH;
+  const mT=sep+2, mB=H-M, mL=M+2, mR=W-M-2, mCX=W/2, mCY=(mT+mB)/2;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="44" height="66" style="display:block">`;
+  s+=`<rect width="${W}" height="${H}" fill="white"/>`;
+  s+=`<rect x="${M}" y="${M}" width="${W-2*M}" height="${H-2*M}" fill="#eef3ff" stroke="#444" stroke-width="1.5"/>`;
+  s+=`<line x1="${M}" y1="${sep}" x2="${W-M}" y2="${sep}" stroke="#444" stroke-width="1.5"/>`;
+  // Oberlicht Indikator
+  const olT=M+1,olBi=sep-1,olL=M+2,olR=W-M-2,olCX=W/2;
+  if(olTyp==='kipp'){
+    s+=`<line x1="${olL}" y1="${olBi}" x2="${olCX}" y2="${olT+1}" stroke="#225eaa" stroke-width="1.4" stroke-linecap="round"/>`;
+    s+=`<line x1="${olR}" y1="${olBi}" x2="${olCX}" y2="${olT+1}" stroke="#225eaa" stroke-width="1.4" stroke-linecap="round"/>`;
+    s+=`<polygon points="${olCX},${olT} ${olCX-3},${olT+6} ${olCX+3},${olT+6}" fill="#225eaa"/>`;
+  } else {
+    s+=`<line x1="${olL}" y1="${olT}" x2="${olR}" y2="${olBi}" stroke="#aaa" stroke-width="1.2"/>`;
+    s+=`<line x1="${olR}" y1="${olT}" x2="${olL}" y2="${olBi}" stroke="#aaa" stroke-width="1.2"/>`;
+  }
+  // Hauptflügel Indikator
+  const sl=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#225eaa" stroke-width="2.2" stroke-linecap="round"/>`;
+  const dl=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#225eaa" stroke-width="1.2" stroke-linecap="round" stroke-dasharray="3,2"/>`;
+  if(mainTyp==='fest'){
+    s+=`<line x1="${mL}" y1="${mT}" x2="${mR}" y2="${mB}" stroke="#aaa" stroke-width="1.2"/>`;
+    s+=`<line x1="${mR}" y1="${mT}" x2="${mL}" y2="${mB}" stroke="#aaa" stroke-width="1.2"/>`;
+  }else if(mainTyp==='kipp'){
+    s+=sl(mL,mB,mCX,mT);s+=sl(mR,mB,mCX,mT);s+=dl(mL,mT,mR,mT);
+    s+=`<polygon points="${mCX},${mT-1} ${mCX-3},${mT+5} ${mCX+3},${mT+5}" fill="#225eaa"/>`;
+  }else if(mainTyp==='dreh-l'){
+    s+=sl(mL,mT,mL,mB);s+=dl(mL,mT,mR,mCY);s+=dl(mL,mB,mR,mCY);
+  }else if(mainTyp==='dreh-r'){
+    s+=sl(mR,mT,mR,mB);s+=dl(mR,mT,mL,mCY);s+=dl(mR,mB,mL,mCY);
+  }else if(mainTyp==='dk-l'){
+    s+=sl(mL,mT,mL,mB);s+=dl(mL,mT,mR,mCY);s+=dl(mL,mB,mR,mCY);
+    s+=dl(mR,mB,mCX,mT);s+=dl(mL,mB,mCX,mT);
+    s+=`<polygon points="${mCX},${mT-1} ${mCX-3},${mT+5} ${mCX+3},${mT+5}" fill="#225eaa"/>`;
+  }else if(mainTyp==='dk-r'){
+    s+=sl(mR,mT,mR,mB);s+=dl(mR,mT,mL,mCY);s+=dl(mR,mB,mL,mCY);
+    s+=dl(mL,mB,mCX,mT);s+=dl(mR,mB,mCX,mT);
+    s+=`<polygon points="${mCX},${mT-1} ${mCX-3},${mT+5} ${mCX+3},${mT+5}" fill="#225eaa"/>`;
+  }
+  s+='</svg>';
+  return s;
 }
 
 function oeffSVG(typ) {
@@ -3666,8 +3759,11 @@ function buildOeffSash() {
     const olHoeheApprox = Math.round(S.hMm * 0.21);
     html += `<div class="info mb-3" style="background:#fff7ed;border-left:4px solid #f97316"><i class="ms f" style="color:#ea580c;font-size:20px;flex-shrink:0">info</i><div style="font-size:13px"><strong>Oberlicht ca. ${olHoeheApprox} mm — grenzwertig.</strong> Drutex-Richtwert: Oberlicht typisch max. 600 mm. Bei so großen Oberlichtern wird der Hauptflügel verhältnismäßig niedrig. Erwägen Sie Einzel-Festverglasung oberhalb statt integriertes Oberlicht.</div></div>`;
   }
+  // Oberlicht-Flags (für bedingte Sektionen und Info-Hinweis)
+  const is2Ol = sashCount===2 && (S.fluegel||'').includes('2-oberlicht');
+
   // ── Schnell-Auswahl: 2-Flügel Kombinationen (alle 7 immer sichtbar) ─────────
-  if (sashCount === 2 && S.prod !== 'haustuere') {
+  if (sashCount === 2 && S.prod !== 'haustuere' && !is2Ol) {
     // Pfosten zuerst (Griffe in der Mitte), dann Stulp, dann einfache Kombinationen
     const allCombos = [
       { v1:'dreh-l', v2:'dk-r',  type:'pfosten', name:'DrehLinks-Pfosten-DrehKippRechts',     sub:'Pfosten · L Dreh, R Dreh-Kipp'    },
@@ -3730,8 +3826,78 @@ function buildOeffSash() {
   }
   // ── Ende 3-Flügel Schnell-Auswahl ───────────────────────────────────────────
 
-  // Einzel-Picker nur für 1-Flügel und Haustür (2+3 Flügel werden durch Kombi-Karten abgedeckt)
-  const useComboOnly = (sashCount >= 2) && S.prod !== 'haustuere';
+  // ── Schnell-Auswahl: 2-Flügel + Oberlicht (14 Kombis: 7 × Fest/Kipp) ────────
+  if (is2Ol && S.prod !== 'haustuere') {
+    const base7 = [
+      {v1:'dreh-l', v2:'dk-r',   sep:'pfosten', suf:'DrehLinks-Pfosten-DrehKippRechts'       },
+      {v1:'dk-l',   v2:'dreh-r', sep:'pfosten', suf:'DrehKippLinks-Pfosten-DrehRechts'       },
+      {v1:'dk-l',   v2:'dk-r',   sep:'pfosten', suf:'DrehKippLinks-Pfosten-DrehKippRechts'   },
+      {v1:'dreh-l', v2:'dk-r',   sep:'stulp',   suf:'DrehLinks-Stulp-DrehKippRechts'         },
+      {v1:'dk-l',   v2:'dreh-r', sep:'stulp',   suf:'DrehKippLinks-Stulp-DrehRechts'         },
+      {v1:'fest',   v2:'dk-r',   sep:'',        suf:'Fest-DrehKippRechts'                    },
+      {v1:'dk-l',   v2:'fest',   sep:'',        suf:'DrehKippLinks-Fest'                     },
+    ];
+    const combos2ol = [];
+    ['fest','kipp'].forEach(ol => {
+      base7.forEach(b => {
+        const hasDk = b.v1.startsWith('dk') || b.v2.startsWith('dk');
+        if (dkZuBreit && hasDk) return;
+        const olPfx = ol==='kipp' ? 'OberlichtKipp' : 'OberlichtFest';
+        combos2ol.push({ol, v1:b.v1, v2:b.v2, sep:b.sep, name:`${olPfx}+${b.suf}`});
+      });
+    });
+    if (combos2ol.length > 0) {
+      html += `<div class="sec-t" style="margin-top:0">Öffnungsart wählen</div>`;
+      html += `<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">`;
+      combos2ol.forEach(c => {
+        const isSel = S.oeff1===c.v1 && S.oeff2===c.v2 && (S.zweiteilung||'')===c.sep && (S.oberlichtOeff||'fest')===c.ol;
+        const pd = (P.oeff_sash[c.v1]?.add||0) + (P.oeff_sash[c.v2]?.add||0);
+        const pTxt = pd===0?'inkl.':(pd>0?`+ ${pd} €`:`− ${Math.abs(pd)} €`);
+        const pCls = pd===0?'p-inc':(pd>0?'p-add':'p-sav');
+        html += `<div class="oc${isSel?' sel':''}" data-v1="${c.v1}" data-v2="${c.v2}" data-type="${c.sep}" data-ol="${c.ol}" onclick="pickOeffCombo(this)" style="flex-direction:column;align-items:center;text-align:center;padding:8px 4px;gap:2px">
+          ${ol2ComboSVG(c.ol,c.v1,c.v2,c.sep)}
+          <div class="olabel" style="font-size:10px;line-height:1.2;font-weight:600">${c.name.split('+')[0]}</div>
+          <div class="osub" style="font-size:10px">+${c.name.split('+')[1]}</div>
+          <div class="oprice ${pCls}" style="font-size:10px">${pTxt}</div>
+        </div>`;
+      });
+      html += `</div>`;
+    }
+  }
+  // ── Ende 2-Flügel + Oberlicht ─────────────────────────────────────────────────
+
+  // ── Schnell-Auswahl: 1-Flügel + Oberlicht (Fest oder Kipp) × Hauptflügel ───
+  const is1Ol = sashCount===1 && (S.fluegel||'').includes('1-oberlicht');
+  if (is1Ol && S.prod !== 'haustuere') {
+    const mainOpts = [
+      {v:'fest',   name:'Fest',             add:-15, pCls:'p-sav'},
+      {v:'kipp',   name:'Kipp',             add:15,  pCls:'p-add'},
+      {v:'dreh-r', name:'Dreh rechts',      add:0,   pCls:'p-inc'},
+      {v:'dreh-l', name:'Dreh links',       add:0,   pCls:'p-inc'},
+      {v:'dk-r',   name:'Dreh-Kipp rechts', add:35,  pCls:'p-add', disabled:dkZuBreit},
+      {v:'dk-l',   name:'Dreh-Kipp links',  add:35,  pCls:'p-add', disabled:dkZuBreit},
+    ];
+    html += `<div class="sec-t" style="margin-top:0">Öffnungsart wählen</div>`;
+    html += `<div class="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-4">`;
+    ['fest','kipp'].forEach(ol => {
+      mainOpts.filter(m=>!m.disabled).forEach(m => {
+        const isSel = S.oeff1===m.v && (S.oberlichtOeff||'fest')===ol;
+        const pTxt = m.add===0?'inkl.':(m.add>0?`+ ${m.add} €`:`− ${Math.abs(m.add)} €`);
+        const olLabel = ol==='kipp' ? 'OberlichtKipp' : 'OberlichtFest';
+        html += `<div class="oc${isSel?' sel':''}" data-v1="${m.v}" data-ol="${ol}" onclick="pickOeffCombo(this)" style="flex-direction:column;align-items:center;text-align:center;padding:8px 4px;gap:2px">
+          ${olComboSVG(ol,m.v)}
+          <div class="olabel" style="font-size:10px;line-height:1.2;font-weight:700">${olLabel}</div>
+          <div class="osub" style="font-size:10px">+${m.name}</div>
+          <div class="oprice ${m.pCls}" style="font-size:10px">${pTxt}</div>
+        </div>`;
+      });
+    });
+    html += `</div>`;
+  }
+  // ── Ende 1-Flügel + Oberlicht ────────────────────────────────────────────────
+
+  // Einzel-Picker nur für 1-Flügel (ohne Oberlicht) und Haustür
+  const useComboOnly = ((sashCount >= 2) || is1Ol) && S.prod !== 'haustuere';
   if (!useComboOnly) {
     for(let i=0;i<sashCount;i++){
       const sk='oeff'+(i+1);
@@ -3755,7 +3921,7 @@ function buildOeffSash() {
   const hasUl=(S.fluegel||'').includes('unterlicht')||(S.fluegel||'').includes('ober-unter');
   if(hasOl||hasUl) {
     html+=`<div class="info mt-1"><i class="ms f" style="color:#225eaa;font-size:18px;flex-shrink:0">info</i><div style="font-size:13px">`;
-    if(hasOl) html+=`<strong>Oberlicht</strong> ist immer Festverglasung. `;
+    if(hasOl && !is1Ol && !is2Ol) html+=`<strong>Oberlicht</strong> ist immer Festverglasung. `;
     if(hasUl) html+=`<strong>Unterlicht</strong> ist immer Festverglasung.`;
     html+='</div></div>';
   }
@@ -3815,24 +3981,40 @@ function pickOeff(el, sashNum) {
   drawPrev(); upSidebar();
 }
 
-// Setzt beide Flügel einer 2-Flügel-Kombination auf einmal
+// Setzt Öffnungsart-Kombination auf einmal (2-Fl, 3-Fl, 1-Fl+Oberlicht)
 function pickOeffCombo(el) {
   el.parentElement.querySelectorAll('.oc').forEach(c => c.classList.remove('sel'));
   el.classList.add('sel');
-  S.oeff1 = el.dataset.v1;
-  S.oeff2 = el.dataset.v2;
-  S.oeff3 = el.dataset.v3 || null;
-  S.zweiteilung = el.dataset.type  || '';   // 2-Flügel: stulp/pfosten
-  S.dreiteilung = el.dataset.type3 || '';   // 3-Flügel: sep12-sep23
+  S.oeff1       = el.dataset.v1   || null;
+  S.oeff2       = el.dataset.v2   || null;
+  S.oeff3       = el.dataset.v3   || null;
+  S.zweiteilung = el.dataset.type  || '';
+  S.dreiteilung = el.dataset.type3 || '';
+  S.oberlichtOeff = el.dataset.ol || null;
   const cnt = getSashCount();
   const n1 = P.oeff_sash[S.oeff1]?.name || S.oeff1;
-  const n2 = P.oeff_sash[S.oeff2]?.name || S.oeff2;
-  const n3 = cnt >= 3 && S.oeff3 ? (P.oeff_sash[S.oeff3]?.name || S.oeff3) : null;
-  const typeLbl = S.zweiteilung
-    ? (S.zweiteilung === 'pfosten' ? 'Pfosten' : 'Stulp')
-    : (S.dreiteilung ? S.dreiteilung.replace('-', ' / ') : '');
-  const parts = n3 ? [`L: ${n1}`, `M: ${n2}`, `R: ${n3}`] : [`L: ${n1}`, `R: ${n2}`];
-  document.getElementById('d4').textContent = (typeLbl ? typeLbl + ' · ' : '') + parts.join(' · ');
+  let d4txt;
+  if (S.oberlichtOeff) {
+    const olLbl = S.oberlichtOeff === 'kipp' ? 'OL-Kipp' : 'OL-Fest';
+    if (S.oeff2) {
+      // 2-Flügel + Oberlicht
+      const n2 = P.oeff_sash[S.oeff2]?.name || S.oeff2;
+      const typeLbl = S.zweiteilung === 'pfosten' ? 'Pfosten' : S.zweiteilung === 'stulp' ? 'Stulp' : '';
+      d4txt = `${olLbl} · ${typeLbl ? typeLbl + ' · ' : ''}L: ${n1} · R: ${n2}`;
+    } else {
+      // 1-Flügel + Oberlicht
+      d4txt = `${olLbl} + ${n1}`;
+    }
+  } else {
+    const n2 = S.oeff2 ? (P.oeff_sash[S.oeff2]?.name || S.oeff2) : null;
+    const n3 = cnt >= 3 && S.oeff3 ? (P.oeff_sash[S.oeff3]?.name || S.oeff3) : null;
+    const typeLbl = S.zweiteilung
+      ? (S.zweiteilung === 'pfosten' ? 'Pfosten' : 'Stulp')
+      : (S.dreiteilung ? S.dreiteilung.replace('-', ' / ') : '');
+    const parts = n3 ? [`L: ${n1}`, `M: ${n2}`, `R: ${n3}`] : n2 ? [`L: ${n1}`, `R: ${n2}`] : [n1];
+    d4txt = (typeLbl ? typeLbl + ' · ' : '') + parts.join(' · ');
+  }
+  document.getElementById('d4').textContent = d4txt;
   mkDone(4);
   setTimeout(() => openS(5), 200);
   drawPrev(); upSidebar();
@@ -3970,8 +4152,13 @@ function shortFarbName(v) {
 function buildFarbePicker() {
   // Sarah-Regel 06.05.2026: Bei Haustür die 8 Farben rausfiltern für die Drutex
   // keine Iglo-Energy-Frames hat (sonst würde der Klick still auf Master fallen).
+  // Bei 2-Flügel-Fenster die gleiche Logik (Drutex-Iglo-Edge-Map hat 8 Lücken).
+  // 1-Flügel-Fenster behält alle 46 Farben (lokale Bilder existieren bereits).
   const istHaustuer = (S.prod === 'haustuere');
-  const istBlocked = (k) => istHaustuer && HAUSTUER_FARB_BLOCKLIST.has(k);
+  const istFenster2fl = (S.prod === 'kunststoff' && S.fluegel === '2-fluegel');
+  const istBlocked = (k) =>
+    (istHaustuer && HAUSTUER_FARB_BLOCKLIST.has(k)) ||
+    (istFenster2fl && FENSTER_FARB_BLOCKLIST.has(k));
   ['fa','fi','fd'].forEach(key => {
     const table = P[key], grid = document.getElementById('fp-'+{fa:'aussen',fi:'innen',fd:'dicht'}[key]);
     if (!grid) return;
@@ -4725,6 +4912,68 @@ const HAUSTUER_FARB_BLOCKLIST = new Set([
   'teak',        // Drutex hat keinen Teak
 ]);
 
+// Sarah-Plan 06.05.2026: Drutex „Iglo Edge" 2-Flügel-Frames als Innenansicht-Vorschau
+// für 2-Flügel-Fenster im Konfigurator. Quelle: produkte/kunststofffenster/iglo-energy.html
+// (data-frame-url Attribute, 41 Farb-Swatches). URLs sind base64-encoded jpg-Pfade,
+// dynamisch aus dem polnischen Datei-Slug gebaut.
+// Bei 1-Flügel-Fenster bleiben die lokalen img/farben/fenster_1fl_*.png Bilder aktiv.
+const _fenFB = (file, ext) =>
+  `https://www.drutex.de/media/webp/80/${btoa('/media/_upload/produkty/iglo-edge/kolory/' + file + '.' + (ext||'png'))}.webp`;
+
+const FENSTER_FARB_FRAMES = {
+  // Weiß / Crème
+  'weiss':       _fenFB('bialy-fx'),
+  'cremeweiss':  _fenFB('lupkowy-kremowy'),
+  'weiss-fx':    _fenFB('bialy-fx'),
+  'crown-plat':  _fenFB('crowplatinium'),
+  'lichtgrau':   _fenFB('jasny-szary'),
+  'sheffield':   _fenFB('dab-bielony'),
+  'eiche-hell':  _fenFB('dab-bielony'),
+  'eiche-nat':   _fenFB('dab-naturalny'),
+  // Grau-Reihe
+  'betongrau':   _fenFB('betonowy-szary'),
+  'quarzgr-sa':  _fenFB('szary-kwarcytowy'),
+  'quarzgr-gl':  _fenFB('szary-kwarcytowy-gladki'),
+  'basaltgr-sa': _fenFB('bazaltowy-szary'),
+  'basaltgr-gl': _fenFB('bazaltowy_szary_gadki'),  // sic — Drutex-URL hat 'gadki' (Tippfehler vom Hersteller)
+  'eisengl':     _fenFB('lupkowy-db703'),
+  'schiefgr-gl': _fenFB('lupkowy-szary-gladki'),
+  'schiefgr-sa': _fenFB('lupkowy-db703'),
+  // Anthrazit / Schwarz
+  'anthrazit':   _fenFB('antracyt'),
+  'anthraz-gl':  _fenFB('antracyt-gladki'),
+  'anthraz-um':  _fenFB('antracyt-ultimatt'),
+  'schwarz-um':  _fenFB('czarnyultimatt'),
+  // Holzdekore
+  'golden-oak':  _fenFB('zloty-dab'),
+  'winchester':  _fenFB('winchester'),
+  'oregon':      _fenFB('oregon'),
+  'douglasie':   _fenFB('daglezja'),
+  'nussbaum':    _fenFB('orzech'),
+  'mooreiche':   _fenFB('ciemny_dab'),
+  'dunkleiche':  _fenFB('ciemny_dab'),
+  'schwarzbr':   _fenFB('palisander_9quuyEW'),
+  'macore':      _fenFB('lupkowy-macore'),
+  'mahagoni':    _fenFB('lupkowy-machon'),
+  'schoko-br':   _fenFB('braz-czekoladowy'),
+  'braun-mar':   _fenFB('palisander_9quuyEW'),
+  // Bunte
+  'moosgruen':   _fenFB('zielen-mchu'),
+  'dunkelgr':    _fenFB('ciemny-zielony'),
+  'dunkelrot':   _fenFB('ciemny-czerwony'),
+  'brillblau':   _fenFB('brylant_niebieski'),
+  'stahlblau':   _fenFB('stalowy_niebieski', 'jpg'),  // Drutex-CDN-Inkonsistenz: Stahlblau ist .jpg, nicht .png
+};
+
+// Gleiche Logik wie bei der Haustür: 8 Konfigurator-Farben für die Drutex
+// kein Iglo-Edge-Frame hat → bei 2-Flügel-Fenster ausblenden, damit jeder
+// Klick ein passendes Bild zeigt. Bei 1-Flügel-Fenster bleiben sie sichtbar
+// (dort haben wir die lokal gerenderten img/farben/fenster_1fl_*.png Bilder).
+const FENSTER_FARB_BLOCKLIST = new Set([
+  'achatgrau', 'signalgrau', 'alux-db', 'alu-gebr',
+  'siena-noce', 'siena-ross', 'bergkiefer', 'teak',
+]);
+
 // Sarah-Update 02.05.2026: Echte Drutex-Katalog-Vollbilder (drutex.de/produkte/addons/type/141)
 // 87 Modelle: 40 IGLO Energy + 47 DX-Linie, je Klassisch + Inox-Variante.
 const TUER_IMGS = {
@@ -5314,6 +5563,10 @@ function vorschauAktualisieren() {
     // Kunststoff 2-Fl: auch bei hellen Tönen (cremeweiss, weiss-fx) Farbbild versuchen
     if (S.prod === 'kunststoff' && fl === 2 && farbeKey && farbeKey !== 'weiss' && farbeKey !== 'sonder') {
       if (istInnen) {
+        // Sarah-Plan 06.05.2026 (v2): Auch hier Drutex-Frame zuerst (sonst kämen die alten
+        // lokalen 2fl-Bilder bei cremeweiss/weiss-fx). Lokale Bilder werden ignoriert.
+        const drutexUrl = FENSTER_FARB_FRAMES[farbeKey];
+        if (drutexUrl) { tryFarbenImg(drutexUrl, masterSrc); return; }
         tryFarbenImg(`img/farben/fenster_2fl_${farbeKey}.png`, masterSrc); return;
       } else {
         tryFarbenImg(`img/farben/fenster_2fl_aussen_${farbeKey}.png`, masterSrc); return;
@@ -5369,6 +5622,16 @@ function vorschauAktualisieren() {
         img.src = `img/farben/fenster_1fl_aussen_${farbeKey}.png`; return;
       }
       if (fl === 2 && istInnen) {
+        // Sarah-Plan 06.05.2026 (v2): Drutex-Iglo-Edge-Frames ÜBERSCHREIBEN die alten
+        // lokalen img/farben/fenster_2fl_*.png Bilder. Sarah-Feedback: „bei 2 Flügel
+        // sehe ich noch die alten" → Drutex-Frame muss zuerst greifen, lokale Bilder
+        // werden ignoriert. Nur wenn Farbe nicht in der Drutex-Map ist (sollte durch
+        // FENSTER_FARB_BLOCKLIST eigentlich nie passieren), fällt sie auf das alte
+        // lokale Bild zurück → Master.
+        const drutexUrl = FENSTER_FARB_FRAMES[farbeKey];
+        if (drutexUrl) {
+          tryFarbenImg(drutexUrl, masterSrc); return;
+        }
         tryFarbenImg(`img/farben/fenster_2fl_${farbeKey}.png`, masterSrc); return;
       }
       if (fl === 2 && !istInnen) {
