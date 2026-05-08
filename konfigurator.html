@@ -67,7 +67,7 @@
 
       /* Neutrals — Dark Page, helle Sektion-Bodies (Bilder passen nahtlos rein) */
       --c-bg: #ffffff;                   /* Sektion-Bodies, Inputs, Sidebar: weiß → Bilder sitzen nahtlos */
-      --c-page-bg: #060e1e;              /* Body-Hintergrund: dunkelblau */
+      --c-page-bg: #0a1530;              /* Body-Hintergrund: dunkelblau (wie index.html) */
       --c-bg-soft: #f5f5f7;              /* Info-Boxen, Hover */
       --c-border: rgba(0,0,0,.10);
       --c-border-hover: rgba(34,94,170,.35);
@@ -197,16 +197,16 @@
        ───────────────────────────────────────────────── */
 
     /* OPTION CARD (radio) */
-    .oc{position:relative;display:flex;align-items:flex-start;gap:12px;border:1px solid var(--c-border);border-radius:var(--r-md);padding:16px 18px;cursor:pointer;background:var(--c-bg);transition:border-color var(--t-fast) var(--ease),background var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease)}
+    .oc{position:relative;display:flex;align-items:flex-start;gap:10px;border:1px solid var(--c-border);border-radius:var(--r-md);padding:11px 14px;cursor:pointer;background:var(--c-bg);transition:border-color var(--t-fast) var(--ease),background var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease)}
     .oc:hover{border-color:var(--c-border-hover);background:var(--c-primary-tint)}
     .oc.sel{border-color:var(--c-primary);background:var(--c-bg);box-shadow:0 0 0 2px var(--c-ring)}
     /* Radio-Indikator (Apple-Stil: Punkt im Kreis, kein Doppelsignal) */
     .ora{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--c-border);flex-shrink:0;margin-top:1px;transition:all var(--t-fast) var(--ease);display:flex;align-items:center;justify-content:center;background:var(--c-bg)}
     .oc.sel .ora{border-color:var(--c-primary);background:var(--c-primary)}
     .oc.sel .ora::after{content:'';width:8px;height:8px;background:#fff;border-radius:50%;display:block}
-    .olabel{font-size:15px;font-weight:600;color:var(--c-text)}
-    .osub{font-size:13px;color:var(--c-text-soft);margin-top:2px;line-height:1.4}
-    .oprice{font-size:13px;font-weight:700;margin-top:4px}
+    .olabel{font-size:14px;font-weight:600;color:var(--c-text)}
+    .osub{font-size:12px;color:var(--c-text-soft);margin-top:2px;line-height:1.4}
+    .oprice{font-size:12px;font-weight:700;margin-top:3px}
     .p-inc{color:var(--c-primary)}
     .p-add{color:#d97706}
     .p-sav{color:#16a34a}
@@ -234,8 +234,8 @@
     /* Haustür-Bilder: Drutex-Katalog-Vollbilder mit weißem Eigen-Hintergrund.
        Keine Karte/Rahmen — Tür sitzt direkt im Layout (Sarah-Wunsch 02.05.2026).
        Sarah-Update 05.05.2026: deutlich größer + minimaler Whitespace. */
-    #s-tm .pc-img{height:320px;background:transparent;padding:0;border:none}
-    @media(min-width:1024px){#s-tm .pc-img{height:400px}}
+    #s-tm .pc-img{height:145px;background:transparent;padding:0;border:none;object-fit:cover;object-position:center 10%}
+    @media(min-width:1024px){#s-tm .pc-img{height:175px}}
     #s-tm .pc{padding:0 4px 4px}
     /* Selected: subtiler Glow um die Tür ohne Rahmen */
     #s-tm .pc.sel .pc-img{outline:none;box-shadow:0 0 0 3px var(--c-primary), 0 8px 24px rgba(34,94,170,.18);border-radius:8px}
@@ -295,6 +295,9 @@
     #sidebar{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px}
     /* Auswahl-Liste: großzügig (zeigt 8-10 Eigenschaften ohne Scroll), darüber scrollt intern */
     #chips > div{max-height:240px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#d2d2d7 transparent}
+    /* Highlight-Animation wenn sich eine Zeile ändert (Sarah 06.05.2026) */
+    @keyframes spec-flash{0%{background:rgba(34,94,170,.13)}60%{background:rgba(34,94,170,.07)}100%{background:transparent}}
+    .spec-row-changed{animation:spec-flash 1.4s ease-out forwards}
     #sidebar-wrap::-webkit-scrollbar{width:6px}
     #sidebar-wrap::-webkit-scrollbar-thumb{background:#d2d2d7;border-radius:3px}
     #sidebar-wrap::-webkit-scrollbar-thumb:hover{background:var(--c-text-muted)}
@@ -383,12 +386,13 @@
 <nav id="navbar" class="fixed top-0 w-full z-50 glass-nav border-b border-white/10">
   <div class="flex justify-between items-center px-6 md:px-12 py-4 max-w-[1440px] mx-auto">
     <a href="index.html" class="text-xl md:text-2xl font-bold tracking-tighter text-white">DeineFenster<span style="color:#76a9fa">.de</span></a>
-    <div class="hidden md:flex items-center gap-x-8">
+    <div class="hidden md:flex items-center gap-x-5">
       <a href="produkte.html" class="text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Produkte</a>
-      <a href="kunststofffenster-kaufen.html" class="text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Neue Fenster</a>
-      <a href="gebrauchte-fenster-kaufen.html" class="text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Gebraucht</a>
-      <a href="konfigurator.html" class="text-white font-semibold border-b-2 border-white pb-1 text-sm tracking-tight">Konfigurator</a>
+      <a href="ueber-drutex.html" class="text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Hersteller</a>
+      <a href="konfigurator.html" class="text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Konfigurator</a>
       <a href="shop.html" class="text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight inline-flex items-center gap-1.5">Shop <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none" style="background:#76a9fa;color:#001b3d">NEU</span></a>
+      <a href="faq.html" class="text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">FAQ</a>
+      <a href="glossar.html" class="text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Glossar</a>
       <a href="ueber-uns.html" class="text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Über uns</a>
       <a href="kontakt.html" class="text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Kontakt</a>
     </div>
@@ -402,10 +406,11 @@
   <div id="mobileMenu" class="hidden md:hidden px-6 py-6 border-t border-white/10">
     <div class="flex flex-col gap-4">
       <a href="produkte.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Produkte</a>
-      <a href="kunststofffenster-kaufen.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Neue Fenster</a>
-      <a href="gebrauchte-fenster-kaufen.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Gebraucht</a>
-      <a href="konfigurator.html" class="text-white font-bold text-lg py-2 border-b border-white/10">Konfigurator</a>
+      <a href="ueber-drutex.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Hersteller</a>
+      <a href="konfigurator.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Konfigurator</a>
       <a href="shop.html" class="text-white font-semibold text-lg py-2 border-b border-white/10 flex items-center gap-2">Shop <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style="background:#76a9fa;color:#001b3d">NEU</span></a>
+      <a href="faq.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">FAQ</a>
+      <a href="glossar.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Glossar</a>
       <a href="ueber-uns.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Über uns</a>
       <a href="kontakt.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Kontakt</a>
       <a href="konfigurator.html" class="mt-2 bg-white text-primary px-6 py-4 rounded-full font-bold text-center text-sm">Angebot anfordern</a>
@@ -517,38 +522,32 @@
         <div class="pc-from">ab 179 €</div>
       </div>
 
-      <!-- HAUSTÜR — Kategorie-Bild (Sarah-Update 05.05.2026 v5: Drutex IGLO Energy Montana in Weiß FX,
-           Außenansicht mit Stoßgriff (CLAUDE.md Regel 4a). Durch process-master-image.py gepipelined
-           für 4:5 Konsistenz. Konsistent mit der Anthrazit-Variante die im Live-Preview bei Farbwahl
-           geladen wird → kein visueller Bruch beim Klick auf "Anthrazitgrau" o.ä. -->
       <div class="pc" data-p="haustuere" onclick="pickProd(this)">
-        <span class="pc-badge" aria-label="KI-generiertes Symbolfoto">Symbolfoto</span>
         <img class="pc-img"
-             src="img/haustuer_iglo_energy_montana_weiss.png?v=20260506-5"
-             width="1024" height="1280"
+             src="https://www.drutex.de/media/webp/80/L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktbW9udGFuYS1iaWFseS1meC5qcGc=.webp"
+             width="1200" height="900"
              loading="eager"
              fetchpriority="high"
              decoding="sync"
-             alt="Drutex IGLO Energy Montana Haustür in Weiß FX – einflüglig mit vertikalem Glaseinsatz und Stoßgriff – Außenansicht für Online-Konfigurator"/>
+             alt="Drutex IGLO Energy Haustür in Weiß FX – Außenansicht mit Stoßgriff"/>
         <div class="pc-name">Haustür</div>
         <div class="pc-from">ab 899 €</div>
       </div>
 
       <!-- HEBE-SCHIEBE-TÜR — Kategorie-Bild -->
       <div class="pc" data-p="hst" onclick="pickProd(this)">
-        <span class="pc-badge" aria-label="KI-generiertes Symbolfoto">Symbolfoto</span>
         <img class="pc-img"
-             src="img/hst_standard.png"
-             width="1280" height="714"
+             src="https://www.drutex.de/media/webp/80/L21lZGlhL191cGxvYWQvcHJvZHVrdHkvaWdsby1ocy9rb2xvcnkvYmlheV9meC5wbmc=.webp"
+             width="1200" height="900"
              loading="eager"
              fetchpriority="high"
              decoding="sync"
-             alt="Drutex IGLO HS Hebe-Schiebetür in Weiß, zweiflüglig mit niedriger Schwelle – Vorschau für Online-Konfigurator"/>
+             alt="Drutex IGLO-HS Hebe-Schiebetür in Weiß – Produktfoto"/>
         <div class="pc-name">Schiebetüren</div>
         <div class="pc-from">ab 1.299 €</div>
       </div>
     </div>
-    <p class="text-[13px] mt-4" style="color:var(--c-text-soft)">Alle Produkte von <strong style="color:var(--c-text)">Drutex</strong> – Europas führendem Fensterhersteller. Produktbilder sind KI-generierte Symboldarstellungen, Lieferung erfolgt in Drutex-Originalspezifikation.</p>
+    <p class="text-[13px] mt-4" style="color:var(--c-text-soft)">Alle Produkte von <strong style="color:var(--c-text)">Drutex</strong> – Europas führendem Fensterhersteller. Fenster- und Balkontür-Vorschaubilder sind KI-generierte Symboldarstellungen; Schiebetür- und Haustür-Bilder stammen direkt aus dem Drutex-Katalog. Lieferung in Drutex-Originalspezifikation.</p>
   </div>
 </div>
 
@@ -688,8 +687,92 @@
     <!-- Sarah-Wunsch 21.04.2026: expliziter "Weiter"-Button statt Auto-Scroll nach jedem +/- Klick -->
     <button type="button" onclick="finishAnzahl()" class="w-full mt-4 flex items-center justify-center gap-2 font-bold py-3 rounded-full text-white text-sm"
       style="background:var(--c-primary);font-family:'Plus Jakarta Sans',sans-serif">
-      <i class="ms">check</i> Anzahl bestätigen — weiter zur Farbe
+      <i class="ms">check</i> Anzahl bestätigen — weiter
     </button>
+  </div>
+</div>
+
+<!-- ── SCHRITT 6b: TÜRMODELL (nur Haustür) ────────── -->
+<div class="sc" id="s-tm" style="display:none">
+  <div class="sh" onclick="tog('-tm')">
+    <div class="badge" id="b-tm"><i class="ms" style="font-size:16px">door_front</i></div>
+    <div class="flex-1">
+      <div class="slabel">Türmodell</div>
+      <div class="sdesc" id="d-tm">Modell wählen</div>
+    </div>
+    <i class="ms chev">expand_more</i>
+  </div>
+  <div class="sb">
+    <!-- Sarah-Update 02.05.2026: Echte Drutex-Vollbilder vom offiziellen Katalog
+         (drutex.de/de/produkte/addons/type/141 → PVC-Türfüllungen).
+         87 Modelle: 40 IGLO Energy (Czarny+Inox) + 47 DX-Modelle (Czarny+Inox).
+         Gegenüber vorher (39 Panel-Samples vom Türvisualisierer) sind das jetzt echte
+         Vollbilder mit Rahmen, Griff, Beschlägen — wie im Drutex-Katalog. -->
+
+    <div class="sec-t">IGLO Energy · Mit Edelstahl-Deko (Inox)</div>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div class="pc" data-m="florida-lr-inox" onclick="pickTuerModell(this)">
+        <img class="pc-img" src="img/drutex-tueren/florida-inox-lr_antracyt.jpg" alt="Florida (L/R) · Inox" style="object-fit:contain" loading="lazy"/>
+        <div class="pc-name">Florida (L/R) · Inox</div><div class="pc-from">inklusive</div>
+      </div>
+      <div class="pc" data-m="montana-2-lr-inox" onclick="pickTuerModell(this)">
+        <img class="pc-img" src="img/drutex-tueren/montana-inox-2-lr_antracyt.jpg" alt="Montana 2 L/R · Inox" style="object-fit:contain" loading="lazy"/>
+        <div class="pc-name">Montana 2 L/R · Inox</div><div class="pc-from">inklusive</div>
+      </div>
+      <div class="pc" data-m="montana-3-lr-inox" onclick="pickTuerModell(this)">
+        <img class="pc-img" src="img/drutex-tueren/montana-inox-3-lr_antracyt.jpg" alt="Montana 3 L/R · Inox" style="object-fit:contain" loading="lazy"/>
+        <div class="pc-name">Montana 3 L/R · Inox</div><div class="pc-from">inklusive</div>
+      </div>
+      <div class="pc" data-m="ohio-inox" onclick="pickTuerModell(this)">
+        <img class="pc-img" src="img/drutex-tueren/ohio-inox_antracyt.jpg" alt="Ohio · Inox" style="object-fit:contain" loading="lazy"/>
+        <div class="pc-name">Ohio · Inox</div><div class="pc-from">inklusive</div>
+      </div>
+      <div class="pc" data-m="colorado-inox" onclick="pickTuerModell(this)">
+        <img class="pc-img" src="img/drutex-tueren/colorado-inox_antracyt.jpg" alt="Colorado · Inox" style="object-fit:contain" loading="lazy"/>
+        <div class="pc-name">Colorado · Inox</div><div class="pc-from">inklusive</div>
+      </div>
+      <div class="pc" data-m="alaska-2-inox" onclick="pickTuerModell(this)">
+        <img class="pc-img" src="img/drutex-tueren/alaska-inox-2_antracyt.jpg" alt="Alaska 2 · Inox" style="object-fit:contain" loading="lazy"/>
+        <div class="pc-name">Alaska 2 · Inox</div><div class="pc-from">inklusive</div>
+      </div>
+      <div class="pc" data-m="alaska-1-inox" onclick="pickTuerModell(this)">
+        <img class="pc-img" src="img/drutex-tueren/alaska-inox-1_antracyt.jpg" alt="Alaska 1 · Inox" style="object-fit:contain" loading="lazy"/>
+        <div class="pc-name">Alaska 1 · Inox</div><div class="pc-from">inklusive</div>
+      </div>
+      <div class="pc" data-m="montana-1-inox" onclick="pickTuerModell(this)">
+        <img class="pc-img" src="img/drutex-tueren/montana-inox-1_antracyt.jpg" alt="Montana 1 · Inox" style="object-fit:contain" loading="lazy"/>
+        <div class="pc-name">Montana 1 · Inox</div><div class="pc-from">inklusive</div>
+      </div>
+      <div class="pc" data-m="nebraska-lcr-inox" onclick="pickTuerModell(this)">
+        <img class="pc-img" src="img/drutex-tueren/nebraska-inox-lcr_antracyt.jpg" alt="Nebraska (L/C/R) · Inox" style="object-fit:contain" loading="lazy"/>
+        <div class="pc-name">Nebraska (L/C/R) · Inox</div><div class="pc-from">inklusive</div>
+      </div>
+      <div class="pc" data-m="pennsylvania-1-inox" onclick="pickTuerModell(this)">
+        <img class="pc-img" src="img/drutex-tueren/pennsylvania-inox-1_antracyt.jpg" alt="Pennsylvania 1 · Inox" style="object-fit:contain" loading="lazy"/>
+        <div class="pc-name">Pennsylvania 1 · Inox</div><div class="pc-from">inklusive</div>
+      </div>
+      <div class="pc" data-m="texas-c-inox" onclick="pickTuerModell(this)">
+        <img class="pc-img" src="img/drutex-tueren/texas-inox-c_antracyt.jpg" alt="Texas (Mittig) · Inox" style="object-fit:contain" loading="lazy"/>
+        <div class="pc-name">Texas (Mittig) · Inox</div><div class="pc-from">inklusive</div>
+      </div>
+      <div class="pc" data-m="texas-lr-inox" onclick="pickTuerModell(this)">
+        <img class="pc-img" src="img/drutex-tueren/texas-inox-lr_antracyt.jpg" alt="Texas (L/R) · Inox" style="object-fit:contain" loading="lazy"/>
+        <div class="pc-name">Texas (L/R) · Inox</div><div class="pc-from">inklusive</div>
+      </div>
+      <div class="pc" data-m="pennsylvania-2-lr-inox" onclick="pickTuerModell(this)">
+        <img class="pc-img" src="img/drutex-tueren/pennsylvania-inox-2-lr_antracyt.jpg" alt="Pennsylvania 2 L/R · Inox" style="object-fit:contain" loading="lazy"/>
+        <div class="pc-name">Pennsylvania 2 L/R · Inox</div><div class="pc-from">inklusive</div>
+      </div>
+      <div class="pc" data-m="pennsylvania-3-lr-inox" onclick="pickTuerModell(this)">
+        <img class="pc-img" src="img/drutex-tueren/pennsylvania-inox-3-lr_antracyt.jpg" alt="Pennsylvania 3 L/R · Inox" style="object-fit:contain" loading="lazy"/>
+        <div class="pc-name">Pennsylvania 3 L/R · Inox</div><div class="pc-from">inklusive</div>
+      </div>
+      <a href="kontakt.html" class="pc" style="text-decoration:none;border:2px dashed rgba(34,94,170,0.35);background:rgba(34,94,170,0.04);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:120px;">
+        <span class="material-symbols-outlined" style="font-size:32px;color:#225eaa;">add_circle</span>
+        <div class="pc-name" style="color:#225eaa;text-align:center;">Anderes Modell anfragen</div>
+        <div class="pc-from" style="color:#225eaa;opacity:0.7;text-align:center;">Alle Drutex-Türen verfügbar</div>
+      </a>
+    </div>
   </div>
 </div>
 
@@ -735,389 +818,6 @@
       <i class="ms">check</i> Farben bestätigen — weiter zur Verglasung
       <i class="ms" style="font-size:18px">arrow_forward</i>
     </button>
-  </div>
-</div>
-
-<!-- ── SCHRITT 6b: TÜRMODELL (nur Haustür) ────────── -->
-<div class="sc" id="s-tm" style="display:none">
-  <div class="sh" onclick="tog('-tm')">
-    <div class="badge" id="b-tm"><i class="ms" style="font-size:16px">door_front</i></div>
-    <div class="flex-1">
-      <div class="slabel">Türmodell</div>
-      <div class="sdesc" id="d-tm">Modell wählen</div>
-    </div>
-    <i class="ms chev">expand_more</i>
-  </div>
-  <div class="sb">
-    <!-- Sarah-Update 02.05.2026: Echte Drutex-Vollbilder vom offiziellen Katalog
-         (drutex.de/de/produkte/addons/type/141 → PVC-Türfüllungen).
-         87 Modelle: 40 IGLO Energy (Czarny+Inox) + 47 DX-Modelle (Czarny+Inox).
-         Gegenüber vorher (39 Panel-Samples vom Türvisualisierer) sind das jetzt echte
-         Vollbilder mit Rahmen, Griff, Beschlägen — wie im Drutex-Katalog. -->
-
-    <div class="sec-t">IGLO Energy · Klassisch (schwarze Dekorblende)</div>
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-      <div class="pc" data-m="alaska-1" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/alaska-czarny-1_antracyt.jpg" alt="Alaska 1" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">Alaska 1</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="alaska-2" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/alaska-czarny-2_antracyt.jpg" alt="Alaska 2" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">Alaska 2</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="arizona-1" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/arizona-czarny-1_antracyt.jpg" alt="Arizona 1" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">Arizona 1</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="arizona-2" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/arizona-czarny-2_antracyt.jpg" alt="Arizona 2" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">Arizona 2</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="california-1-c" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/california-czarny-1-c_antracyt.jpg" alt="California 1 Mittig" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">California 1 Mittig</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="california-1-lr" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/california-czarny-1-lr_antracyt.jpg" alt="California 1 L/R" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">California 1 L/R</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="colorado" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/colorado-czarny_antracyt.jpg" alt="Colorado" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">Colorado</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="florida-lr" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/florida-czarny-lr_antracyt.jpg" alt="Florida (L/R)" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">Florida (L/R)</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="hawaii-2" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/hawaii-czarny-2_antracyt.jpg" alt="Hawaii 2" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">Hawaii 2</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="hawaii-3" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/hawaii-czarny-3_antracyt.jpg" alt="Hawaii 3" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">Hawaii 3</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="montana-1" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/montana-czarny-1_antracyt.jpg" alt="Montana 1" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">Montana 1</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="montana-2-lr" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/montana-czarny-2-lr_antracyt.jpg" alt="Montana 2 L/R" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">Montana 2 L/R</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="montana-3-lr" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/montana-czarny-3-lr_antracyt.jpg" alt="Montana 3 L/R" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">Montana 3 L/R</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="nebraska-lcr" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/nebraska-czarny-lcr_antracyt.jpg" alt="Nebraska (L/C/R)" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">Nebraska (L/C/R)</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="ohio" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/ohio-czarny_antracyt.jpg" alt="Ohio" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">Ohio</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="pennsylvania-1" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pennsylvania-czarny-1_antracyt.jpg" alt="Pennsylvania 1" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">Pennsylvania 1</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="pennsylvania-2-lr" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pennsylvania-czarny-2-lr_antracyt.jpg" alt="Pennsylvania 2 L/R" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">Pennsylvania 2 L/R</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="pennsylvania-3-lr" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pennsylvania-czarny-3-lr_antracyt.jpg" alt="Pennsylvania 3 L/R" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">Pennsylvania 3 L/R</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="texas-c" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/texas-czarny-c_antracyt.jpg" alt="Texas (Mittig)" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">Texas (Mittig)</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="texas-lr" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/texas-czarny-lr_antracyt.jpg" alt="Texas (L/R)" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">Texas (L/R)</div><div class="pc-from">inklusive</div>
-      </div>
-    </div>
-
-    <div class="sec-t">IGLO Energy · Mit Edelstahl-Deko (Inox)</div>
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-      <div class="pc" data-m="alaska-1-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/alaska-inox-1_antracyt.jpg" alt="Alaska 1 · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">Alaska 1 · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="alaska-2-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/alaska-inox-2_antracyt.jpg" alt="Alaska 2 · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">Alaska 2 · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="arizona-1-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/arizona-inox-1_antracyt.jpg" alt="Arizona 1 · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">Arizona 1 · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="arizona-2-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/arizona-inox-2_antracyt.jpg" alt="Arizona 2 · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">Arizona 2 · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="california-1-c-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/california-inox-1-c_antracyt.jpg" alt="California 1 Mittig · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">California 1 Mittig · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="california-1-lr-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/california-inox-1-lr_antracyt.jpg" alt="California 1 L/R · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">California 1 L/R · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="colorado-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/colorado-inox_antracyt.jpg" alt="Colorado · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">Colorado · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="florida-lr-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/florida-inox-lr_antracyt.jpg" alt="Florida (L/R) · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">Florida (L/R) · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="hawaii-2-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/hawaii-inox-2_antracyt.jpg" alt="Hawaii 2 · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">Hawaii 2 · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="hawaii-3-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/hawaii-inox-3_antracyt.jpg" alt="Hawaii 3 · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">Hawaii 3 · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="montana-1-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/montana-inox-1_antracyt.jpg" alt="Montana 1 · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">Montana 1 · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="montana-2-lr-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/montana-inox-2-lr_antracyt.jpg" alt="Montana 2 L/R · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">Montana 2 L/R · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="montana-3-lr-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/montana-inox-3-lr_antracyt.jpg" alt="Montana 3 L/R · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">Montana 3 L/R · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="nebraska-lcr-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/nebraska-inox-lcr_antracyt.jpg" alt="Nebraska (L/C/R) · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">Nebraska (L/C/R) · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="ohio-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/ohio-inox_antracyt.jpg" alt="Ohio · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">Ohio · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="pennsylvania-1-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pennsylvania-inox-1_antracyt.jpg" alt="Pennsylvania 1 · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">Pennsylvania 1 · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="pennsylvania-2-lr-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pennsylvania-inox-2-lr_antracyt.jpg" alt="Pennsylvania 2 L/R · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">Pennsylvania 2 L/R · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="pennsylvania-3-lr-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pennsylvania-inox-3-lr_antracyt.jpg" alt="Pennsylvania 3 L/R · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">Pennsylvania 3 L/R · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="texas-c-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/texas-inox-c_antracyt.jpg" alt="Texas (Mittig) · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">Texas (Mittig) · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="texas-lr-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/texas-inox-lr_antracyt.jpg" alt="Texas (L/R) · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">Texas (L/R) · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-    </div>
-
-    <div class="sec-t">DX-Linie · Klassisch</div>
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-      <div class="pc" data-m="dx-01" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pvc_dx-01.jpg" alt="DX-01" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-01</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-02" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pvc_dx-02.jpg" alt="DX-02" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-02</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-03" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pvc_dx-03.jpg" alt="DX-03" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-03</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-04" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pvc_dx-04.jpg" alt="DX-04" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-04</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-05" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pvc_dx-05.jpg" alt="DX-05" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-05</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-07" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pvc_dx-07.jpg" alt="DX-07" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-07</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-08" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pvc_dx-08.jpg" alt="DX-08" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-08</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-11" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pvc_dx-11.jpg" alt="DX-11" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-11</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-12" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pvc_dx-12.jpg" alt="DX-12" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-12</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-13" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pvc_dx-13.jpg" alt="DX-13" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-13</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-14" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pvc_dx-14.jpg" alt="DX-14" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-14</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-18" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pvc_dx-18.jpg" alt="DX-18" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-18</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-19" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pvc_dx-19.jpg" alt="DX-19" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-19</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-23" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/dx_23.jpg" alt="DX-23" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-23</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-25" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/dx_25-as.jpg" alt="DX-25" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-25</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-26" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/dx_26.jpg" alt="DX-26" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-26</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-27" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/dx_27.jpg" alt="DX-27" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-27</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-28" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/dx_28.jpg" alt="DX-28" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-28</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-29" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/dx_29.jpg" alt="DX-29" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-29</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-30" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/dx_30.jpg" alt="DX-30" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-30</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-31" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/dx_31.jpg" alt="DX-31" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-31</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-36" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/dx_36.jpg" alt="DX-36" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-36</div><div class="pc-from">inklusive</div>
-      </div>
-    </div>
-
-    <div class="sec-t">DX-Linie · Mit Edelstahl-Deko (Inox)</div>
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-      <div class="pc" data-m="dx-01-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pvc_dx-01as.jpg" alt="DX-01 · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-01 · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-02-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pvc_dx-02as.jpg" alt="DX-02 · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-02 · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-03-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pvc_dx-03as.jpg" alt="DX-03 · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-03 · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-04-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pvc_dx-04as.jpg" alt="DX-04 · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-04 · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-06-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pvc_dx-06as.jpg" alt="DX-06 · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-06 · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-07-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pvc_dx-07as.jpg" alt="DX-07 · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-07 · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-09-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pvc_dx-09as.jpg" alt="DX-09 · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-09 · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-10-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pvc_dx-10as.jpg" alt="DX-10 · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-10 · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-11-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pvc_dx-11as.jpg" alt="DX-11 · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-11 · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-12-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pvc_dx-12as.jpg" alt="DX-12 · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-12 · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-13-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pvc_dx-13as.jpg" alt="DX-13 · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-13 · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-14-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pvc_dx-14as.jpg" alt="DX-14 · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-14 · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-15-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pvc_dx-15as.jpg" alt="DX-15 · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-15 · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-16-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pvc_dx-16as.jpg" alt="DX-16 · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-16 · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-17-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pvc_dx-17as.jpg" alt="DX-17 · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-17 · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-18-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pvc_dx-18as.jpg" alt="DX-18 · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-18 · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-19-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pvc_dx-19as.jpg" alt="DX-19 · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-19 · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-23-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/dx_23-as-inox.jpg" alt="DX-23 · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-23 · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-25-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/dx_25-as-inox.jpg" alt="DX-25 · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-25 · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-26-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/dx_26-as-inox.jpg" alt="DX-26 · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-26 · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-27-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/dx_27-as-inox.jpg" alt="DX-27 · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-27 · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-28-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/dx_28-as-inox.jpg" alt="DX-28 · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-28 · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-29-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/dx_29-as-inox.jpg" alt="DX-29 · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-29 · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-30-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/dx_30-as-inox.jpg" alt="DX-30 · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-30 · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-      <div class="pc" data-m="dx-31-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/dx_31-as-inox.jpg" alt="DX-31 · Inox" style="object-fit:contain" loading="lazy"/>
-        <div class="pc-name">DX-31 · Inox</div><div class="pc-from">inklusive</div>
-      </div>
-    </div>
   </div>
 </div>
 
@@ -1881,11 +1581,15 @@
 <div id="sidebar-wrap" class="lg:col-span-2">
   <div id="sidebar" class="p-3">
 
-    <!-- VIEW TOGGLE — Sarah-Klarstellung 02.05.2026 v7: heller Container, Active-Button im Sektion-Header-Blauton -->
+    <!-- VIEW TOGGLE -->
     <div style="display:flex;gap:4px;margin-bottom:6px;width:100%;background:#f0f2f5;padding:3px;border-radius:8px">
       <button id="view-btn-inn" class="view-btn active" style="flex:1;padding:7px 10px;font-size:13px;font-weight:600;border-radius:6px" onclick="setPreviewView('inn')">Innen</button>
       <button id="view-btn-aus" class="view-btn" style="flex:1;padding:7px 10px;font-size:13px;font-weight:600;border-radius:6px" onclick="setPreviewView('aus')">Außen</button>
     </div>
+    <!-- DIN-ANSCHLAG TOGGLE — ausgeblendet per Sarah 06.05.2026 -->
+    <div id="din-toggle-wrap" style="display:none"></div>
+    <div id="din-btn-links" style="display:none"></div>
+    <div id="din-btn-rechts" style="display:none"></div>
     <!-- BILD-VORSCHAU (Sarah-Update 02.05.2026 v8: Höhe reduziert damit Eigenschaften unten sichtbar bleiben) -->
     <div id="prev-wrap" class="w-full" style="position:relative;height:420px;width:100%;border-radius:var(--r-md);background:#ffffff;border:none;padding:2px;flex-shrink:0">
       <div id="vorschau-container" style="position:relative;width:100%;height:100%">
@@ -2761,6 +2465,7 @@ function pickProd(el) {
   if (S.prod === 'haustuere') {
     setPreviewView('aus');
   }
+  _updateDinToggle();
 
   // Sarah-Fix 22.04.2026 (v3): Schritt 2 SOFORT öffnen & scrollen — BEVOR die build*-Funktionen
   // laufen. Damit ist der Sprung garantiert, selbst wenn irgendwo später eine Exception auftritt.
@@ -2783,6 +2488,8 @@ function pickProd(el) {
     // Sarah-Korrektur 21.04.2026: 3 Schiebetür-Systeme (IGLO-HS / PSK / IGLO-Slide)
     // → Kunde soll aktiv in Schritt 2 wählen, nicht mehr auto-iglo-hs.
     // Flügelaufteilung bleibt vorbelegt (2-Flügel ist bei allen 3 Systemen Standard).
+    // 06.05.2026: Außenansicht aktivieren damit CDN-Frame direkt sichtbar ist (wie bei Haustür).
+    setPreviewView('aus');
     S.profil = null; S.fluegel = '2-fluegel';
     document.getElementById('d3').textContent = P.fluegel['2-fluegel'].name;
     mkDone(3);
@@ -3047,7 +2754,9 @@ function pickTuerModell(el) {
   const b = document.getElementById('b-tm');
   if (b) b.innerHTML = '<i class="ms f" style="font-size:16px">check</i>';
   document.getElementById('s-tm')?.classList.add('done');
-  setTimeout(()=>openS(7), 200);
+  setPreviewView('aus');
+  upSidebar();
+  setTimeout(()=>openS(6), 200);
 }
 
 // ── GENERIC RADIO PICK ───────────────────────────────
@@ -3209,7 +2918,10 @@ function chQty(d) {
 function finishAnzahl() {
   const ba = document.getElementById('b-anzahl');
   if (ba) ba.innerHTML = '<i class="ms f" style="font-size:16px">check</i>';
-  setTimeout(() => openS(6), 150);
+  setTimeout(() => {
+    if (S.prod === 'haustuere') openS('-tm');
+    else openS(6);
+  }, 150);
 }
 
 // ── MASSE ────────────────────────────────────────────
@@ -3544,6 +3256,46 @@ function pickFluegel(el) {
   drawPrev(); upSidebar();
 }
 
+// Kombiniertes SVG für 3-Flügel + Oberlicht Kombi-Karten
+function ol3ComboSVG(olTyp, oeff1, oeff2, oeff3, sep12, sep23) {
+  const W=84, H=68, M=3;
+  const olH=11, sep1Y=M+olH;
+  const mT=sep1Y+2, mB=H-M, CY=(mT+mB)/2;
+  const iW=W-2*M, third=Math.round(iW/3);
+  const s1L=M+2, s1R=M+third-1, s2L=M+third+1, s2R=M+2*third-1, s3L=M+2*third+1, s3R=W-M-2;
+  const x12=M+third, x23=M+2*third;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="84" height="68" style="display:block">`;
+  s+=`<rect width="${W}" height="${H}" fill="white"/>`;
+  s+=`<rect x="${M}" y="${M}" width="${W-2*M}" height="${H-2*M}" fill="#eef3ff" stroke="#444" stroke-width="1.5"/>`;
+  s+=`<line x1="${M}" y1="${sep1Y}" x2="${W-M}" y2="${sep1Y}" stroke="#444" stroke-width="1.5"/>`;
+  const olT=M+1,olBi=sep1Y-1,olCX=W/2,olL=M+2,olR=W-M-2;
+  if(olTyp==='kipp'){
+    s+=`<line x1="${olL}" y1="${olBi}" x2="${olCX}" y2="${olT+1}" stroke="#225eaa" stroke-width="1.3" stroke-linecap="round"/>`;
+    s+=`<line x1="${olR}" y1="${olBi}" x2="${olCX}" y2="${olT+1}" stroke="#225eaa" stroke-width="1.3" stroke-linecap="round"/>`;
+    s+=`<polygon points="${olCX},${olT} ${olCX-3},${olT+5} ${olCX+3},${olT+5}" fill="#225eaa"/>`;
+  } else {
+    s+=`<line x1="${olL}" y1="${olT}" x2="${olR}" y2="${olBi}" stroke="#aaa" stroke-width="1.1"/>`;
+    s+=`<line x1="${olR}" y1="${olT}" x2="${olL}" y2="${olBi}" stroke="#aaa" stroke-width="1.1"/>`;
+  }
+  const sepLine=(x,t)=>`<line x1="${x}" y1="${mT-1}" x2="${x}" y2="${mB}" stroke="${t==='stulp'?'#225eaa':'#555'}" stroke-width="${t==='stulp'?2.5:1.5}"/>`;
+  s+=sepLine(x12,sep12); s+=sepLine(x23,sep23);
+  const dS=(v,lx,rx)=>{
+    const cx=(lx+rx)/2;
+    const sl=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#225eaa" stroke-width="1.7" stroke-linecap="round"/>`;
+    const dl=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#225eaa" stroke-width="1.0" stroke-linecap="round" stroke-dasharray="2.5,2"/>`;
+    if(v==='fest') return `<line x1="${lx}" y1="${mT}" x2="${rx}" y2="${mB}" stroke="#aaa" stroke-width="1.0"/><line x1="${rx}" y1="${mT}" x2="${lx}" y2="${mB}" stroke="#aaa" stroke-width="1.0"/>`;
+    if(v==='kipp') return sl(lx,mB,cx,mT)+sl(rx,mB,cx,mT)+dl(lx,mT,rx,mT)+`<polygon points="${cx},${mT-1} ${cx-3},${mT+4} ${cx+3},${mT+4}" fill="#225eaa"/>`;
+    if(v==='dreh-l') return sl(lx,mT,lx,mB)+dl(lx,mT,rx,CY)+dl(lx,mB,rx,CY);
+    if(v==='dreh-r') return sl(rx,mT,rx,mB)+dl(rx,mT,lx,CY)+dl(rx,mB,lx,CY);
+    if(v==='dk-l') return sl(lx,mT,lx,mB)+dl(lx,mT,rx,CY)+dl(lx,mB,rx,CY)+dl(rx,mB,cx,mT)+dl(lx,mB,cx,mT)+`<polygon points="${cx},${mT-1} ${cx-3},${mT+4} ${cx+3},${mT+4}" fill="#225eaa"/>`;
+    if(v==='dk-r') return sl(rx,mT,rx,mB)+dl(rx,mT,lx,CY)+dl(rx,mB,lx,CY)+dl(lx,mB,cx,mT)+dl(rx,mB,cx,mT)+`<polygon points="${cx},${mT-1} ${cx-3},${mT+4} ${cx+3},${mT+4}" fill="#225eaa"/>`;
+    return '';
+  };
+  s+=dS(oeff1,s1L,s1R); s+=dS(oeff2,s2L,s2R); s+=dS(oeff3,s3L,s3R);
+  s+='</svg>';
+  return s;
+}
+
 // Kombiniertes SVG für 2-Flügel + Oberlicht Kombi-Karten
 function ol2ComboSVG(olTyp, oeff1, oeff2, sepType) {
   const W=62, H=74, M=3;
@@ -3580,6 +3332,307 @@ function ol2ComboSVG(olTyp, oeff1, oeff2, sepType) {
   };
   s+=drawS(oeff1,L1,R1);
   s+=drawS(oeff2,L2,R2);
+  s+='</svg>';
+  return s;
+}
+
+// Kombiniertes SVG für 3-Flügel + Unterlicht Kombi-Karten
+function ul3ComboSVG(oeff1, oeff2, oeff3, sep12, sep23, ulTyp) {
+  const W=84, H=72, M=3;
+  const ulH=11, sep2Y=H-M-ulH;
+  const mT=M+2, mB=sep2Y-2, CY=(mT+mB)/2;
+  const iW=W-2*M, third=Math.round(iW/3);
+  const s1L=M+2, s1R=M+third-1, s2L=M+third+1, s2R=M+2*third-1, s3L=M+2*third+1, s3R=W-M-2;
+  const x12=M+third, x23=M+2*third;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="84" height="72" style="display:block">`;
+  s+=`<rect width="${W}" height="${H}" fill="white"/>`;
+  s+=`<rect x="${M}" y="${M}" width="${W-2*M}" height="${H-2*M}" fill="#eef3ff" stroke="#444" stroke-width="1.5"/>`;
+  // Vertikale Trenner (Stulp/Pfosten)
+  const sepLine=(x,t)=>t?`<line x1="${x}" y1="${mT-1}" x2="${x}" y2="${mB}" stroke="${t==='stulp'?'#225eaa':'#555'}" stroke-width="${t==='stulp'?2.5:1.5}"/>`:'';
+  s+=sepLine(x12,sep12); s+=sepLine(x23,sep23);
+  // UL-Trenner (horizontal)
+  s+=`<line x1="${M}" y1="${sep2Y}" x2="${W-M}" y2="${sep2Y}" stroke="#444" stroke-width="1.5"/>`;
+  const dS=(v,lx,rx)=>{
+    const cx=(lx+rx)/2;
+    const sl=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#225eaa" stroke-width="1.7" stroke-linecap="round"/>`;
+    const dl=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#225eaa" stroke-width="1.0" stroke-linecap="round" stroke-dasharray="2.5,2"/>`;
+    if(v==='fest') return `<line x1="${lx}" y1="${mT}" x2="${rx}" y2="${mB}" stroke="#aaa" stroke-width="1.0"/><line x1="${rx}" y1="${mT}" x2="${lx}" y2="${mB}" stroke="#aaa" stroke-width="1.0"/>`;
+    if(v==='kipp') return sl(lx,mB,cx,mT)+sl(rx,mB,cx,mT)+dl(lx,mT,rx,mT)+`<polygon points="${cx},${mT-1} ${cx-3},${mT+4} ${cx+3},${mT+4}" fill="#225eaa"/>`;
+    if(v==='dreh-l') return sl(lx,mT,lx,mB)+dl(lx,mT,rx,CY)+dl(lx,mB,rx,CY);
+    if(v==='dreh-r') return sl(rx,mT,rx,mB)+dl(rx,mT,lx,CY)+dl(rx,mB,lx,CY);
+    if(v==='dk-l') return sl(lx,mT,lx,mB)+dl(lx,mT,rx,CY)+dl(lx,mB,rx,CY)+dl(rx,mB,cx,mT)+dl(lx,mB,cx,mT)+`<polygon points="${cx},${mT-1} ${cx-3},${mT+4} ${cx+3},${mT+4}" fill="#225eaa"/>`;
+    if(v==='dk-r') return sl(rx,mT,rx,mB)+dl(rx,mT,lx,CY)+dl(rx,mB,lx,CY)+dl(lx,mB,cx,mT)+dl(rx,mB,cx,mT)+`<polygon points="${cx},${mT-1} ${cx-3},${mT+4} ${cx+3},${mT+4}" fill="#225eaa"/>`;
+    return '';
+  };
+  s+=dS(oeff1,s1L,s1R); s+=dS(oeff2,s2L,s2R); s+=dS(oeff3,s3L,s3R);
+  // UL Indikator
+  const ulT=sep2Y+2, ulBi=H-M-2, zL=M+2, zR=W-M-2, zCX=W/2;
+  if(ulTyp==='kipp'){
+    s+=`<line x1="${zL}" y1="${ulBi}" x2="${zCX}" y2="${ulT+1}" stroke="#225eaa" stroke-width="1.4" stroke-linecap="round"/>`;
+    s+=`<line x1="${zR}" y1="${ulBi}" x2="${zCX}" y2="${ulT+1}" stroke="#225eaa" stroke-width="1.4" stroke-linecap="round"/>`;
+    s+=`<polygon points="${zCX},${ulT} ${zCX-3},${ulT+5} ${zCX+3},${ulT+5}" fill="#225eaa"/>`;
+  } else {
+    s+=`<line x1="${zL}" y1="${ulT}" x2="${zR}" y2="${ulBi}" stroke="#aaa" stroke-width="1.2"/>`;
+    s+=`<line x1="${zR}" y1="${ulT}" x2="${zL}" y2="${ulBi}" stroke="#aaa" stroke-width="1.2"/>`;
+  }
+  s+='</svg>';
+  return s;
+}
+
+// Kombiniertes SVG für 2-Flügel + Unterlicht Kombi-Karten
+function ul2ComboSVG(oeff1, oeff2, sepType, ulTyp) {
+  const W=62, H=74, M=3;
+  const ulH=13, sep2Y=H-M-ulH;
+  const mT=M+2, mB=sep2Y-2, mMid=W/2, CY=(mT+mB)/2;
+  const L1=M+2, R1=mMid-1, L2=mMid+1, R2=W-M-2;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="62" height="74" style="display:block">`;
+  s+=`<rect width="${W}" height="${H}" fill="white"/>`;
+  s+=`<rect x="${M}" y="${M}" width="${W-2*M}" height="${H-2*M}" fill="#eef3ff" stroke="#444" stroke-width="1.5"/>`;
+  // Vertikaler Stulp/Pfosten-Trenner
+  const sepColor=sepType==='stulp'?'#225eaa':'#555';
+  const sepW=sepType==='stulp'?2.5:1.5;
+  if(sepType) s+=`<line x1="${mMid}" y1="${mT-1}" x2="${mMid}" y2="${mB}" stroke="${sepColor}" stroke-width="${sepW}"/>`;
+  // UL-Trenner (horizontal)
+  s+=`<line x1="${M}" y1="${sep2Y}" x2="${W-M}" y2="${sep2Y}" stroke="#444" stroke-width="1.5"/>`;
+  const drawS=(v,lx,rx)=>{
+    const cx=(lx+rx)/2;
+    const sl=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#225eaa" stroke-width="2" stroke-linecap="round"/>`;
+    const dl=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#225eaa" stroke-width="1.1" stroke-linecap="round" stroke-dasharray="3,2"/>`;
+    if(v==='fest') return `<line x1="${lx}" y1="${mT}" x2="${rx}" y2="${mB}" stroke="#aaa" stroke-width="1.1"/><line x1="${rx}" y1="${mT}" x2="${lx}" y2="${mB}" stroke="#aaa" stroke-width="1.1"/>`;
+    if(v==='kipp') return sl(lx,mB,cx,mT)+sl(rx,mB,cx,mT)+dl(lx,mT,rx,mT)+`<polygon points="${cx},${mT-1} ${cx-3},${mT+5} ${cx+3},${mT+5}" fill="#225eaa"/>`;
+    if(v==='dreh-l') return sl(lx,mT,lx,mB)+dl(lx,mT,rx,CY)+dl(lx,mB,rx,CY);
+    if(v==='dreh-r') return sl(rx,mT,rx,mB)+dl(rx,mT,lx,CY)+dl(rx,mB,lx,CY);
+    if(v==='dk-l') return sl(lx,mT,lx,mB)+dl(lx,mT,rx,CY)+dl(lx,mB,rx,CY)+dl(rx,mB,cx,mT)+dl(lx,mB,cx,mT)+`<polygon points="${cx},${mT-1} ${cx-3},${mT+5} ${cx+3},${mT+5}" fill="#225eaa"/>`;
+    if(v==='dk-r') return sl(rx,mT,rx,mB)+dl(rx,mT,lx,CY)+dl(rx,mB,lx,CY)+dl(lx,mB,cx,mT)+dl(rx,mB,cx,mT)+`<polygon points="${cx},${mT-1} ${cx-3},${mT+5} ${cx+3},${mT+5}" fill="#225eaa"/>`;
+    return '';
+  };
+  s+=drawS(oeff1,L1,R1); s+=drawS(oeff2,L2,R2);
+  // UL Indikator
+  const ulT=sep2Y+2, ulBi=H-M-2, zL=M+2, zR=W-M-2, zCX=W/2;
+  if(ulTyp==='kipp'){
+    s+=`<line x1="${zL}" y1="${ulBi}" x2="${zCX}" y2="${ulT+1}" stroke="#225eaa" stroke-width="1.4" stroke-linecap="round"/>`;
+    s+=`<line x1="${zR}" y1="${ulBi}" x2="${zCX}" y2="${ulT+1}" stroke="#225eaa" stroke-width="1.4" stroke-linecap="round"/>`;
+    s+=`<polygon points="${zCX},${ulT} ${zCX-3},${ulT+5} ${zCX+3},${ulT+5}" fill="#225eaa"/>`;
+  } else {
+    s+=`<line x1="${zL}" y1="${ulT}" x2="${zR}" y2="${ulBi}" stroke="#aaa" stroke-width="1.2"/>`;
+    s+=`<line x1="${zR}" y1="${ulT}" x2="${zL}" y2="${ulBi}" stroke="#aaa" stroke-width="1.2"/>`;
+  }
+  s+='</svg>';
+  return s;
+}
+
+// Kombiniertes SVG für 1-Flügel + Unterlicht Kombi-Karten
+function ulComboSVG(mainTyp, ulTyp) {
+  const W=44, H=66, M=3;
+  const ulH=14, sepY=H-M-ulH;
+  const mT=M+2, mB=sepY-2, mL=M+2, mR=W-M-2, mCX=W/2, mCY=(mT+mB)/2;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="44" height="66" style="display:block">`;
+  s+=`<rect width="${W}" height="${H}" fill="white"/>`;
+  s+=`<rect x="${M}" y="${M}" width="${W-2*M}" height="${H-2*M}" fill="#eef3ff" stroke="#444" stroke-width="1.5"/>`;
+  s+=`<line x1="${M}" y1="${sepY}" x2="${W-M}" y2="${sepY}" stroke="#444" stroke-width="1.5"/>`;
+  // Hauptflügel Indikator
+  const sl=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#225eaa" stroke-width="2.2" stroke-linecap="round"/>`;
+  const dl=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#225eaa" stroke-width="1.2" stroke-linecap="round" stroke-dasharray="3,2"/>`;
+  if(mainTyp==='fest'){
+    s+=`<line x1="${mL}" y1="${mT}" x2="${mR}" y2="${mB}" stroke="#aaa" stroke-width="1.2"/>`;
+    s+=`<line x1="${mR}" y1="${mT}" x2="${mL}" y2="${mB}" stroke="#aaa" stroke-width="1.2"/>`;
+  }else if(mainTyp==='kipp'){
+    s+=sl(mL,mB,mCX,mT)+sl(mR,mB,mCX,mT)+dl(mL,mT,mR,mT);
+    s+=`<polygon points="${mCX},${mT-1} ${mCX-3},${mT+5} ${mCX+3},${mT+5}" fill="#225eaa"/>`;
+  }else if(mainTyp==='dreh-l'){
+    s+=sl(mL,mT,mL,mB)+dl(mL,mT,mR,mCY)+dl(mL,mB,mR,mCY);
+  }else if(mainTyp==='dreh-r'){
+    s+=sl(mR,mT,mR,mB)+dl(mR,mT,mL,mCY)+dl(mR,mB,mL,mCY);
+  }else if(mainTyp==='dk-l'){
+    s+=sl(mL,mT,mL,mB)+dl(mL,mT,mR,mCY)+dl(mL,mB,mR,mCY);
+    s+=dl(mR,mB,mCX,mT)+dl(mL,mB,mCX,mT);
+    s+=`<polygon points="${mCX},${mT-1} ${mCX-3},${mT+5} ${mCX+3},${mT+5}" fill="#225eaa"/>`;
+  }else if(mainTyp==='dk-r'){
+    s+=sl(mR,mT,mR,mB)+dl(mR,mT,mL,mCY)+dl(mR,mB,mL,mCY);
+    s+=dl(mL,mB,mCX,mT)+dl(mR,mB,mCX,mT);
+    s+=`<polygon points="${mCX},${mT-1} ${mCX-3},${mT+5} ${mCX+3},${mT+5}" fill="#225eaa"/>`;
+  }
+  // UL Indikator
+  const ulT=sepY+2, ulBi=H-M-2, zL=M+2, zR=W-M-2, zCX=W/2;
+  if(ulTyp==='kipp'){
+    s+=`<line x1="${zL}" y1="${ulBi}" x2="${zCX}" y2="${ulT+1}" stroke="#225eaa" stroke-width="1.4" stroke-linecap="round"/>`;
+    s+=`<line x1="${zR}" y1="${ulBi}" x2="${zCX}" y2="${ulT+1}" stroke="#225eaa" stroke-width="1.4" stroke-linecap="round"/>`;
+    s+=`<polygon points="${zCX},${ulT} ${zCX-3},${ulT+5} ${zCX+3},${ulT+5}" fill="#225eaa"/>`;
+  } else {
+    s+=`<line x1="${zL}" y1="${ulT}" x2="${zR}" y2="${ulBi}" stroke="#aaa" stroke-width="1.2"/>`;
+    s+=`<line x1="${zR}" y1="${ulT}" x2="${zL}" y2="${ulBi}" stroke="#aaa" stroke-width="1.2"/>`;
+  }
+  s+='</svg>';
+  return s;
+}
+
+// Kombiniertes SVG für 3-Flügel + Ober- & Unterlicht Kombi-Karten
+function ou3ComboSVG(olTyp, oeff1, oeff2, oeff3, sep12, sep23, ulTyp) {
+  const W=84, H=78, M=3;
+  const olH=11, ulH=11;
+  const sep1Y=M+olH, sep2Y=H-M-ulH;
+  const mT=sep1Y+2, mB=sep2Y-2, CY=(mT+mB)/2;
+  const iW=W-2*M, third=Math.round(iW/3);
+  const s1L=M+2, s1R=M+third-1, s2L=M+third+1, s2R=M+2*third-1, s3L=M+2*third+1, s3R=W-M-2;
+  const x12=M+third, x23=M+2*third;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="84" height="78" style="display:block">`;
+  s+=`<rect width="${W}" height="${H}" fill="white"/>`;
+  s+=`<rect x="${M}" y="${M}" width="${W-2*M}" height="${H-2*M}" fill="#eef3ff" stroke="#444" stroke-width="1.5"/>`;
+  // OL-Trenner (horizontal oben)
+  s+=`<line x1="${M}" y1="${sep1Y}" x2="${W-M}" y2="${sep1Y}" stroke="#444" stroke-width="1.5"/>`;
+  // UL-Trenner (horizontal unten)
+  s+=`<line x1="${M}" y1="${sep2Y}" x2="${W-M}" y2="${sep2Y}" stroke="#444" stroke-width="1.5"/>`;
+  // OL Indikator
+  const olT=M+1, olBi=sep1Y-1, zL=M+2, zR=W-M-2, zCX=W/2;
+  if(olTyp==='kipp'){
+    s+=`<line x1="${zL}" y1="${olBi}" x2="${zCX}" y2="${olT+1}" stroke="#225eaa" stroke-width="1.3" stroke-linecap="round"/>`;
+    s+=`<line x1="${zR}" y1="${olBi}" x2="${zCX}" y2="${olT+1}" stroke="#225eaa" stroke-width="1.3" stroke-linecap="round"/>`;
+    s+=`<polygon points="${zCX},${olT} ${zCX-3},${olT+4} ${zCX+3},${olT+4}" fill="#225eaa"/>`;
+  } else {
+    s+=`<line x1="${zL}" y1="${olT}" x2="${zR}" y2="${olBi}" stroke="#aaa" stroke-width="1.1"/>`;
+    s+=`<line x1="${zR}" y1="${olT}" x2="${zL}" y2="${olBi}" stroke="#aaa" stroke-width="1.1"/>`;
+  }
+  // Vertikale Trenner (Stulp/Pfosten, nur im Hauptflügel-Bereich)
+  const sepLine=(x,t)=>t?`<line x1="${x}" y1="${mT-1}" x2="${x}" y2="${mB}" stroke="${t==='stulp'?'#225eaa':'#555'}" stroke-width="${t==='stulp'?2.5:1.5}"/>`:'';
+  s+=sepLine(x12,sep12); s+=sepLine(x23,sep23);
+  // Hauptflügel-Indikatoren
+  const dS=(v,lx,rx)=>{
+    const cx=(lx+rx)/2;
+    const sl=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#225eaa" stroke-width="1.7" stroke-linecap="round"/>`;
+    const dl=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#225eaa" stroke-width="1.0" stroke-linecap="round" stroke-dasharray="2.5,2"/>`;
+    if(v==='fest') return `<line x1="${lx}" y1="${mT}" x2="${rx}" y2="${mB}" stroke="#aaa" stroke-width="1.0"/><line x1="${rx}" y1="${mT}" x2="${lx}" y2="${mB}" stroke="#aaa" stroke-width="1.0"/>`;
+    if(v==='kipp') return sl(lx,mB,cx,mT)+sl(rx,mB,cx,mT)+dl(lx,mT,rx,mT)+`<polygon points="${cx},${mT-1} ${cx-3},${mT+4} ${cx+3},${mT+4}" fill="#225eaa"/>`;
+    if(v==='dreh-l') return sl(lx,mT,lx,mB)+dl(lx,mT,rx,CY)+dl(lx,mB,rx,CY);
+    if(v==='dreh-r') return sl(rx,mT,rx,mB)+dl(rx,mT,lx,CY)+dl(rx,mB,lx,CY);
+    if(v==='dk-l') return sl(lx,mT,lx,mB)+dl(lx,mT,rx,CY)+dl(lx,mB,rx,CY)+dl(rx,mB,cx,mT)+dl(lx,mB,cx,mT)+`<polygon points="${cx},${mT-1} ${cx-3},${mT+4} ${cx+3},${mT+4}" fill="#225eaa"/>`;
+    if(v==='dk-r') return sl(rx,mT,rx,mB)+dl(rx,mT,lx,CY)+dl(rx,mB,lx,CY)+dl(lx,mB,cx,mT)+dl(rx,mB,cx,mT)+`<polygon points="${cx},${mT-1} ${cx-3},${mT+4} ${cx+3},${mT+4}" fill="#225eaa"/>`;
+    return '';
+  };
+  s+=dS(oeff1,s1L,s1R); s+=dS(oeff2,s2L,s2R); s+=dS(oeff3,s3L,s3R);
+  // UL Indikator
+  const ulT=sep2Y+2, ulBi=H-M-2;
+  if(ulTyp==='kipp'){
+    s+=`<line x1="${zL}" y1="${ulBi}" x2="${zCX}" y2="${ulT+1}" stroke="#225eaa" stroke-width="1.3" stroke-linecap="round"/>`;
+    s+=`<line x1="${zR}" y1="${ulBi}" x2="${zCX}" y2="${ulT+1}" stroke="#225eaa" stroke-width="1.3" stroke-linecap="round"/>`;
+    s+=`<polygon points="${zCX},${ulT} ${zCX-3},${ulT+4} ${zCX+3},${ulT+4}" fill="#225eaa"/>`;
+  } else {
+    s+=`<line x1="${zL}" y1="${ulT}" x2="${zR}" y2="${ulBi}" stroke="#aaa" stroke-width="1.1"/>`;
+    s+=`<line x1="${zR}" y1="${ulT}" x2="${zL}" y2="${ulBi}" stroke="#aaa" stroke-width="1.1"/>`;
+  }
+  s+='</svg>';
+  return s;
+}
+
+// Kombiniertes SVG für 2-Flügel + Ober- & Unterlicht Kombi-Karten
+function ou2ComboSVG(olTyp, oeff1, oeff2, sepType, ulTyp) {
+  const W=62, H=86, M=3;
+  const olH=12, ulH=12;
+  const sep1Y=M+olH, sep2Y=H-M-ulH;
+  const mT=sep1Y+2, mB=sep2Y-2, mMid=W/2, CY=(mT+mB)/2;
+  const L1=M+2, R1=mMid-1, L2=mMid+1, R2=W-M-2;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="62" height="86" style="display:block">`;
+  s+=`<rect width="${W}" height="${H}" fill="white"/>`;
+  s+=`<rect x="${M}" y="${M}" width="${W-2*M}" height="${H-2*M}" fill="#eef3ff" stroke="#444" stroke-width="1.5"/>`;
+  // OL-Trenner (horizontal oben)
+  s+=`<line x1="${M}" y1="${sep1Y}" x2="${W-M}" y2="${sep1Y}" stroke="#444" stroke-width="1.5"/>`;
+  // UL-Trenner (horizontal unten)
+  s+=`<line x1="${M}" y1="${sep2Y}" x2="${W-M}" y2="${sep2Y}" stroke="#444" stroke-width="1.5"/>`;
+  // OL Indikator
+  const olT=M+1, olBi=sep1Y-1, zL=M+2, zR=W-M-2, zCX=W/2;
+  if(olTyp==='kipp'){
+    s+=`<line x1="${zL}" y1="${olBi}" x2="${zCX}" y2="${olT+1}" stroke="#225eaa" stroke-width="1.4" stroke-linecap="round"/>`;
+    s+=`<line x1="${zR}" y1="${olBi}" x2="${zCX}" y2="${olT+1}" stroke="#225eaa" stroke-width="1.4" stroke-linecap="round"/>`;
+    s+=`<polygon points="${zCX},${olT} ${zCX-3},${olT+5} ${zCX+3},${olT+5}" fill="#225eaa"/>`;
+  } else {
+    s+=`<line x1="${zL}" y1="${olT}" x2="${zR}" y2="${olBi}" stroke="#aaa" stroke-width="1.2"/>`;
+    s+=`<line x1="${zR}" y1="${olT}" x2="${zL}" y2="${olBi}" stroke="#aaa" stroke-width="1.2"/>`;
+  }
+  // Vertikaler Stulp/Pfosten-Trenner (nur im Hauptflügel-Bereich)
+  const sepColor=sepType==='stulp'?'#225eaa':'#555';
+  const sepW=sepType==='stulp'?2.5:1.5;
+  if(sepType) s+=`<line x1="${mMid}" y1="${mT-1}" x2="${mMid}" y2="${mB}" stroke="${sepColor}" stroke-width="${sepW}"/>`;
+  // Hauptflügel-Indikatoren
+  const drawS=(v,lx,rx)=>{
+    const cx=(lx+rx)/2;
+    const sl=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#225eaa" stroke-width="2" stroke-linecap="round"/>`;
+    const dl=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#225eaa" stroke-width="1.1" stroke-linecap="round" stroke-dasharray="3,2"/>`;
+    if(v==='fest') return `<line x1="${lx}" y1="${mT}" x2="${rx}" y2="${mB}" stroke="#aaa" stroke-width="1.1"/><line x1="${rx}" y1="${mT}" x2="${lx}" y2="${mB}" stroke="#aaa" stroke-width="1.1"/>`;
+    if(v==='kipp') return sl(lx,mB,cx,mT)+sl(rx,mB,cx,mT)+dl(lx,mT,rx,mT)+`<polygon points="${cx},${mT-1} ${cx-3},${mT+5} ${cx+3},${mT+5}" fill="#225eaa"/>`;
+    if(v==='dreh-l') return sl(lx,mT,lx,mB)+dl(lx,mT,rx,CY)+dl(lx,mB,rx,CY);
+    if(v==='dreh-r') return sl(rx,mT,rx,mB)+dl(rx,mT,lx,CY)+dl(rx,mB,lx,CY);
+    if(v==='dk-l') return sl(lx,mT,lx,mB)+dl(lx,mT,rx,CY)+dl(lx,mB,rx,CY)+dl(rx,mB,cx,mT)+dl(lx,mB,cx,mT)+`<polygon points="${cx},${mT-1} ${cx-3},${mT+5} ${cx+3},${mT+5}" fill="#225eaa"/>`;
+    if(v==='dk-r') return sl(rx,mT,rx,mB)+dl(rx,mT,lx,CY)+dl(rx,mB,lx,CY)+dl(lx,mB,cx,mT)+dl(rx,mB,cx,mT)+`<polygon points="${cx},${mT-1} ${cx-3},${mT+5} ${cx+3},${mT+5}" fill="#225eaa"/>`;
+    return '';
+  };
+  s+=drawS(oeff1,L1,R1); s+=drawS(oeff2,L2,R2);
+  // UL Indikator
+  const ulT=sep2Y+2, ulBi=H-M-2;
+  if(ulTyp==='kipp'){
+    s+=`<line x1="${zL}" y1="${ulBi}" x2="${zCX}" y2="${ulT+1}" stroke="#225eaa" stroke-width="1.4" stroke-linecap="round"/>`;
+    s+=`<line x1="${zR}" y1="${ulBi}" x2="${zCX}" y2="${ulT+1}" stroke="#225eaa" stroke-width="1.4" stroke-linecap="round"/>`;
+    s+=`<polygon points="${zCX},${ulT} ${zCX-3},${ulT+5} ${zCX+3},${ulT+5}" fill="#225eaa"/>`;
+  } else {
+    s+=`<line x1="${zL}" y1="${ulT}" x2="${zR}" y2="${ulBi}" stroke="#aaa" stroke-width="1.2"/>`;
+    s+=`<line x1="${zR}" y1="${ulT}" x2="${zL}" y2="${ulBi}" stroke="#aaa" stroke-width="1.2"/>`;
+  }
+  s+='</svg>';
+  return s;
+}
+
+// Kombiniertes SVG für 1-Flügel + Ober- & Unterlicht Kombi-Karten
+function ouComboSVG(olTyp, mainTyp, ulTyp) {
+  const W=44, H=74, M=3;
+  const olH=12, ulH=12;
+  const sep1Y=M+olH, sep2Y=H-M-ulH;
+  const mT=sep1Y+2, mB=sep2Y-2;
+  const mL=M+2, mR=W-M-2, mCX=W/2, mCY=(mT+mB)/2;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="44" height="74" style="display:block">`;
+  s+=`<rect width="${W}" height="${H}" fill="white"/>`;
+  s+=`<rect x="${M}" y="${M}" width="${W-2*M}" height="${H-2*M}" fill="#eef3ff" stroke="#444" stroke-width="1.5"/>`;
+  s+=`<line x1="${M}" y1="${sep1Y}" x2="${W-M}" y2="${sep1Y}" stroke="#444" stroke-width="1.5"/>`;
+  s+=`<line x1="${M}" y1="${sep2Y}" x2="${W-M}" y2="${sep2Y}" stroke="#444" stroke-width="1.5"/>`;
+  // OL Indikator
+  const olT=M+1, olBi=sep1Y-1, zL=M+2, zR=W-M-2, zCX=W/2;
+  if(olTyp==='kipp'){
+    s+=`<line x1="${zL}" y1="${olBi}" x2="${zCX}" y2="${olT+1}" stroke="#225eaa" stroke-width="1.4" stroke-linecap="round"/>`;
+    s+=`<line x1="${zR}" y1="${olBi}" x2="${zCX}" y2="${olT+1}" stroke="#225eaa" stroke-width="1.4" stroke-linecap="round"/>`;
+    s+=`<polygon points="${zCX},${olT} ${zCX-3},${olT+5} ${zCX+3},${olT+5}" fill="#225eaa"/>`;
+  } else {
+    s+=`<line x1="${zL}" y1="${olT}" x2="${zR}" y2="${olBi}" stroke="#aaa" stroke-width="1.2"/>`;
+    s+=`<line x1="${zR}" y1="${olT}" x2="${zL}" y2="${olBi}" stroke="#aaa" stroke-width="1.2"/>`;
+  }
+  // Hauptflügel Indikator
+  const sl=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#225eaa" stroke-width="2.2" stroke-linecap="round"/>`;
+  const dl=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#225eaa" stroke-width="1.2" stroke-linecap="round" stroke-dasharray="3,2"/>`;
+  if(mainTyp==='fest'){
+    s+=`<line x1="${mL}" y1="${mT}" x2="${mR}" y2="${mB}" stroke="#aaa" stroke-width="1.2"/>`;
+    s+=`<line x1="${mR}" y1="${mT}" x2="${mL}" y2="${mB}" stroke="#aaa" stroke-width="1.2"/>`;
+  }else if(mainTyp==='kipp'){
+    s+=sl(mL,mB,mCX,mT)+sl(mR,mB,mCX,mT)+dl(mL,mT,mR,mT);
+    s+=`<polygon points="${mCX},${mT-1} ${mCX-3},${mT+5} ${mCX+3},${mT+5}" fill="#225eaa"/>`;
+  }else if(mainTyp==='dreh-l'){
+    s+=sl(mL,mT,mL,mB)+dl(mL,mT,mR,mCY)+dl(mL,mB,mR,mCY);
+  }else if(mainTyp==='dreh-r'){
+    s+=sl(mR,mT,mR,mB)+dl(mR,mT,mL,mCY)+dl(mR,mB,mL,mCY);
+  }else if(mainTyp==='dk-l'){
+    s+=sl(mL,mT,mL,mB)+dl(mL,mT,mR,mCY)+dl(mL,mB,mR,mCY);
+    s+=dl(mR,mB,mCX,mT)+dl(mL,mB,mCX,mT);
+    s+=`<polygon points="${mCX},${mT-1} ${mCX-3},${mT+5} ${mCX+3},${mT+5}" fill="#225eaa"/>`;
+  }else if(mainTyp==='dk-r'){
+    s+=sl(mR,mT,mR,mB)+dl(mR,mT,mL,mCY)+dl(mR,mB,mL,mCY);
+    s+=dl(mL,mB,mCX,mT)+dl(mR,mB,mCX,mT);
+    s+=`<polygon points="${mCX},${mT-1} ${mCX-3},${mT+5} ${mCX+3},${mT+5}" fill="#225eaa"/>`;
+  }
+  // UL Indikator (gleiche Optik wie OL)
+  const ulT=sep2Y+2, ulBi=H-M-2;
+  if(ulTyp==='kipp'){
+    s+=`<line x1="${zL}" y1="${ulBi}" x2="${zCX}" y2="${ulT+1}" stroke="#225eaa" stroke-width="1.4" stroke-linecap="round"/>`;
+    s+=`<line x1="${zR}" y1="${ulBi}" x2="${zCX}" y2="${ulT+1}" stroke="#225eaa" stroke-width="1.4" stroke-linecap="round"/>`;
+    s+=`<polygon points="${zCX},${ulT} ${zCX-3},${ulT+5} ${zCX+3},${ulT+5}" fill="#225eaa"/>`;
+  } else {
+    s+=`<line x1="${zL}" y1="${ulT}" x2="${zR}" y2="${ulBi}" stroke="#aaa" stroke-width="1.2"/>`;
+    s+=`<line x1="${zR}" y1="${ulT}" x2="${zL}" y2="${ulBi}" stroke="#aaa" stroke-width="1.2"/>`;
+  }
   s+='</svg>';
   return s;
 }
@@ -3759,11 +3812,16 @@ function buildOeffSash() {
     const olHoeheApprox = Math.round(S.hMm * 0.21);
     html += `<div class="info mb-3" style="background:#fff7ed;border-left:4px solid #f97316"><i class="ms f" style="color:#ea580c;font-size:20px;flex-shrink:0">info</i><div style="font-size:13px"><strong>Oberlicht ca. ${olHoeheApprox} mm — grenzwertig.</strong> Drutex-Richtwert: Oberlicht typisch max. 600 mm. Bei so großen Oberlichtern wird der Hauptflügel verhältnismäßig niedrig. Erwägen Sie Einzel-Festverglasung oberhalb statt integriertes Oberlicht.</div></div>`;
   }
-  // Oberlicht-Flags (für bedingte Sektionen und Info-Hinweis)
+  // Oberlicht- und Unterlicht-Flags (für bedingte Sektionen und Info-Hinweis)
   const is2Ol = sashCount===2 && (S.fluegel||'').includes('2-oberlicht');
+  const is3Ol = sashCount===3 && (S.fluegel||'').includes('3-oberlicht');
+  const is2Ul = sashCount===2 && (S.fluegel||'').includes('2-unterlicht');
+  const is3Ul = sashCount===3 && (S.fluegel||'').includes('3-unterlicht');
+  const is2OberUnter = sashCount===2 && (S.fluegel||'').includes('2-ober-unter');
+  const is3OberUnter = sashCount===3 && (S.fluegel||'').includes('3-ober-unter');
 
   // ── Schnell-Auswahl: 2-Flügel Kombinationen (alle 7 immer sichtbar) ─────────
-  if (sashCount === 2 && S.prod !== 'haustuere' && !is2Ol) {
+  if (sashCount === 2 && S.prod !== 'haustuere' && S.prod !== 'balkontuer' && !is2Ol && !is2Ul && !is2OberUnter) {
     // Pfosten zuerst (Griffe in der Mitte), dann Stulp, dann einfache Kombinationen
     const allCombos = [
       { v1:'dreh-l', v2:'dk-r',  type:'pfosten', name:'DrehLinks-Pfosten-DrehKippRechts',     sub:'Pfosten · L Dreh, R Dreh-Kipp'    },
@@ -3795,8 +3853,37 @@ function buildOeffSash() {
   }
   // ── Ende 2-Flügel Schnell-Auswahl ───────────────────────────────────────────
 
+  // ── Schnell-Auswahl: Balkontür 2-flügelig (4 Kombis: nur Pfosten/Stulp, kein Fest) ───
+  if (sashCount === 2 && S.prod === 'balkontuer' && !is2Ol && !is2Ul && !is2OberUnter) {
+    const btCombos = [
+      { v1:'dreh-l', v2:'dk-r',   type:'pfosten', name:'DrehLinks-Pfosten-DrehKippRechts',   sub:'Pfosten · L Dreh, R Dreh-Kipp'   },
+      { v1:'dk-l',   v2:'dreh-r', type:'pfosten', name:'DrehKippLinks-Pfosten-DrehRechts',   sub:'Pfosten · L Dreh-Kipp, R Dreh'   },
+      { v1:'dreh-l', v2:'dk-r',   type:'stulp',   name:'DrehLinks-Stulp-DrehKippRechts',     sub:'Stulp · L Dreh, R Dreh-Kipp'     },
+      { v1:'dk-l',   v2:'dreh-r', type:'stulp',   name:'DrehKippLinks-Stulp-DrehRechts',     sub:'Stulp · L Dreh-Kipp, R Dreh'     },
+    ].filter(c => !dkZuBreit || (!c.v1.startsWith('dk') && !c.v2.startsWith('dk')));
+
+    if (btCombos.length > 0) {
+      html += `<div class="sec-t" style="margin-top:0">Öffnungsart wählen</div>`;
+      html += `<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">`;
+      btCombos.forEach(c => {
+        const isSel = S.oeff1 === c.v1 && S.oeff2 === c.v2 && (S.zweiteilung||'') === c.type;
+        const priceDelta = (P.oeff_sash[c.v1]?.add||0) + (P.oeff_sash[c.v2]?.add||0);
+        const priceTxt = priceDelta === 0 ? 'inkl.' : (priceDelta > 0 ? `+ ${priceDelta} €` : `− ${Math.abs(priceDelta)} €`);
+        const priceCls = priceDelta === 0 ? 'p-inc' : (priceDelta > 0 ? 'p-add' : 'p-sav');
+        html += `<div class="oc${isSel?' sel':''}" data-v1="${c.v1}" data-v2="${c.v2}" data-type="${c.type}" onclick="pickOeffCombo(this)" style="flex-direction:column;align-items:center;text-align:center;padding:10px 6px;gap:3px">
+          <div style="display:flex;gap:3px;justify-content:center">${oeffSVG(c.v1)}${oeffSVG(c.v2)}</div>
+          <div class="olabel" style="font-size:11px;line-height:1.3">${c.name}</div>
+          <div class="osub" style="font-size:10px">${c.sub}</div>
+          <div class="oprice ${priceCls}" style="font-size:11px">${priceTxt}</div>
+        </div>`;
+      });
+      html += `</div>`;
+    }
+  }
+  // ── Ende Balkontür 2-flügelig Schnell-Auswahl ────────────────────────────────
+
   // ── Schnell-Auswahl: 3-Flügel Kombinationen ─────────────────────────────────
-  if (sashCount === 3 && S.prod !== 'haustuere') {
+  if (sashCount === 3 && S.prod !== 'haustuere' && !is3Ol && !is3Ul && !is3OberUnter) {
     // Pfosten-schwer zuerst, gemischt danach, einfach zuletzt
     const combos3 = [
       { v1:'dk-l', v2:'dreh-r', v3:'dk-r', t:'pfosten-pfosten', name:'DrehKippLinks-Pfosten-DrehRechts-Pfosten-DrehKippRechts',   sub:'Pfosten·Pfosten · DK, Dreh-R, DK'   },
@@ -3866,6 +3953,165 @@ function buildOeffSash() {
   }
   // ── Ende 2-Flügel + Oberlicht ─────────────────────────────────────────────────
 
+  // ── Schnell-Auswahl: 3-Flügel + Oberlicht (10 Kombis: 5 × Fest/Kipp) ─────────
+  if (is3Ol && S.prod !== 'haustuere') {
+    // Eigene Reihenfolge: Pfosten-Pfosten zuerst (häufigste Konstruktion), dann gemischt, dann einfach
+    const base3 = [
+      {v1:'dk-l', v2:'dreh-r', v3:'dk-r', sep12:'pfosten', sep23:'pfosten', suf:'DrehKippLinks-Pfosten-DrehRechts-Pfosten-DrehKippRechts'  },
+      {v1:'dk-l', v2:'dreh-l', v3:'dk-r', sep12:'pfosten', sep23:'pfosten', suf:'DrehKippLinks-Pfosten-DrehLinks-Pfosten-DrehKippRechts'   },
+      {v1:'dk-l', v2:'dreh-l', v3:'dk-r', sep12:'pfosten', sep23:'stulp',   suf:'DrehKippLinks-Pfosten-DrehLinks-Stulp-DrehKippRechts'    },
+      {v1:'dk-l', v2:'dreh-r', v3:'dk-r', sep12:'stulp',   sep23:'pfosten', suf:'DrehKippLinks-Stulp-DrehRechts-Pfosten-DrehKippRechts'   },
+      {v1:'dk-l', v2:'fest',   v3:'dk-r', sep12:'',        sep23:'',        suf:'DrehKippLinks-Fest-DrehKippRechts'                       },
+    ];
+    const combos3ol = [];
+    ['fest','kipp'].forEach(ol => {
+      base3.forEach(b => {
+        if (dkZuBreit) return; // DK an beiden Außenflügeln → DK-Beschlag nötig
+        const olPfx = ol==='kipp' ? 'OberlichtKipp' : 'OberlichtFest';
+        combos3ol.push({ol, ...b, name:`${olPfx}+${b.suf}`});
+      });
+    });
+    if (combos3ol.length > 0) {
+      html += `<div class="sec-t" style="margin-top:0">Öffnungsart wählen</div>`;
+      html += `<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">`;
+      combos3ol.forEach(c => {
+        const t3 = `${c.sep12}-${c.sep23}`.replace(/^-|-$/g,'') || '';
+        const isSel = S.oeff1===c.v1 && S.oeff2===c.v2 && S.oeff3===c.v3
+          && (S.dreiteilung||'')===t3 && (S.oberlichtOeff||'fest')===c.ol;
+        const pd = (P.oeff_sash[c.v1]?.add||0)+(P.oeff_sash[c.v2]?.add||0)+(P.oeff_sash[c.v3]?.add||0);
+        const pTxt = pd===0?'inkl.':(pd>0?`+ ${pd} €`:`− ${Math.abs(pd)} €`);
+        const pCls = pd===0?'p-inc':(pd>0?'p-add':'p-sav');
+        html += `<div class="oc${isSel?' sel':''}" data-v1="${c.v1}" data-v2="${c.v2}" data-v3="${c.v3}" data-type3="${t3}" data-ol="${c.ol}" onclick="pickOeffCombo(this)" style="flex-direction:column;align-items:center;text-align:center;padding:8px 4px;gap:2px">
+          ${ol3ComboSVG(c.ol,c.v1,c.v2,c.v3,c.sep12,c.sep23)}
+          <div class="olabel" style="font-size:10px;line-height:1.2;font-weight:600">${c.name.split('+')[0]}</div>
+          <div class="osub" style="font-size:10px">+${c.name.split('+')[1]}</div>
+          <div class="oprice ${pCls}" style="font-size:10px">${pTxt}</div>
+        </div>`;
+      });
+      html += `</div>`;
+    }
+  }
+  // ── Ende 3-Flügel + Oberlicht ─────────────────────────────────────────────────
+
+  // ── Schnell-Auswahl: 2-Flügel + Ober- & Unterlicht (7 × 2 × 2 = 28 Kombis) ─
+  if (is2OberUnter && S.prod !== 'haustuere') {
+    const base7 = [
+      {v1:'dreh-l', v2:'dk-r',   sep:'pfosten', suf:'DrehLinks-Pfosten-DrehKippRechts'},
+      {v1:'dk-l',   v2:'dreh-r', sep:'pfosten', suf:'DrehKippLinks-Pfosten-DrehRechts'},
+      {v1:'dk-l',   v2:'dk-r',   sep:'pfosten', suf:'DrehKippLinks-Pfosten-DrehKippRechts'},
+      {v1:'dreh-l', v2:'dk-r',   sep:'stulp',   suf:'DrehLinks-Stulp-DrehKippRechts'},
+      {v1:'dk-l',   v2:'dreh-r', sep:'stulp',   suf:'DrehKippLinks-Stulp-DrehRechts'},
+      {v1:'fest',   v2:'dk-r',   sep:'',        suf:'Fest-DrehKippRechts'},
+      {v1:'dk-l',   v2:'fest',   sep:'',        suf:'DrehKippLinks-Fest'},
+    ];
+    html += `<div class="sec-t" style="margin-top:0">Öffnungsart wählen</div>`;
+    html += `<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">`;
+    ['fest','kipp'].forEach(ol => {
+      ['fest','kipp'].forEach(ul => {
+        base7.forEach(c => {
+          const isSel = S.oeff1===c.v1 && S.oeff2===c.v2 && S.zweiteilung===c.sep && (S.oberlichtOeff||'fest')===ol && (S.unterlichtOeff||'fest')===ul;
+          const olLbl = ol==='kipp' ? 'OL-Kipp' : 'OL-Fest';
+          const ulLbl = ul==='kipp' ? 'UL-Kipp' : 'UL-Fest';
+          html += `<div class="oc${isSel?' sel':''}" data-v1="${c.v1}" data-v2="${c.v2}" data-type="${c.sep}" data-ol="${ol}" data-ul="${ul}" onclick="pickOeffCombo(this)" style="flex-direction:column;align-items:center;text-align:center;padding:8px 4px;gap:2px">
+            ${ou2ComboSVG(ol,c.v1,c.v2,c.sep,ul)}
+            <div class="olabel" style="font-size:10px;line-height:1.2;font-weight:700">${olLbl}</div>
+            <div class="osub" style="font-size:10px">${c.suf.replace(/-/g,'\u200B-')}</div>
+            <div class="osub" style="font-size:10px">${ulLbl}</div>
+          </div>`;
+        });
+      });
+    });
+    html += `</div>`;
+  }
+  // ── Ende 2-Flügel + Ober- & Unterlicht ────────────────────────────────────────
+
+  // ── Schnell-Auswahl: 3-Flügel + Ober- & Unterlicht (5 × 2 × 2 = 20 Kombis) ─
+  if (is3OberUnter && S.prod !== 'haustuere') {
+    const base5 = [
+      {v1:'dk-l', v2:'dreh-r', v3:'dk-r', sep12:'pfosten', sep23:'pfosten', suf:'DrehKippLinks-Pfosten-DrehRechts-Pfosten-DrehKippRechts'},
+      {v1:'dk-l', v2:'dreh-l', v3:'dk-r', sep12:'pfosten', sep23:'pfosten', suf:'DrehKippLinks-Pfosten-DrehLinks-Pfosten-DrehKippRechts'},
+      {v1:'dk-l', v2:'dreh-l', v3:'dk-r', sep12:'pfosten', sep23:'stulp',   suf:'DrehKippLinks-Pfosten-DrehLinks-Stulp-DrehKippRechts'},
+      {v1:'dk-l', v2:'dreh-r', v3:'dk-r', sep12:'stulp',   sep23:'pfosten', suf:'DrehKippLinks-Stulp-DrehRechts-Pfosten-DrehKippRechts'},
+      {v1:'dk-l', v2:'fest',   v3:'dk-r', sep12:'',        sep23:'',        suf:'DrehKippLinks-Fest-DrehKippRechts'},
+    ];
+    html += `<div class="sec-t" style="margin-top:0">Öffnungsart wählen</div>`;
+    html += `<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">`;
+    ['fest','kipp'].forEach(ol => {
+      ['fest','kipp'].forEach(ul => {
+        base5.forEach(c => {
+          const t3 = `${c.sep12}-${c.sep23}`.replace(/^-|-$/g,'');
+          const isSel = S.oeff1===c.v1 && S.oeff2===c.v2 && S.oeff3===c.v3 && S.dreiteilung===t3 && (S.oberlichtOeff||'fest')===ol && (S.unterlichtOeff||'fest')===ul;
+          const olLbl = ol==='kipp' ? 'OL-Kipp' : 'OL-Fest';
+          const ulLbl = ul==='kipp' ? 'UL-Kipp' : 'UL-Fest';
+          html += `<div class="oc${isSel?' sel':''}" data-v1="${c.v1}" data-v2="${c.v2}" data-v3="${c.v3}" data-type3="${t3}" data-ol="${ol}" data-ul="${ul}" onclick="pickOeffCombo(this)" style="flex-direction:column;align-items:center;text-align:center;padding:8px 4px;gap:2px">
+            ${ou3ComboSVG(ol,c.v1,c.v2,c.v3,c.sep12,c.sep23,ul)}
+            <div class="olabel" style="font-size:10px;line-height:1.2;font-weight:700">${olLbl}</div>
+            <div class="osub" style="font-size:10px">${c.suf.replace(/-/g,'\u200B-')}</div>
+            <div class="osub" style="font-size:10px">${ulLbl}</div>
+          </div>`;
+        });
+      });
+    });
+    html += `</div>`;
+  }
+  // ── Ende 3-Flügel + Ober- & Unterlicht ────────────────────────────────────────
+
+  // ── Schnell-Auswahl: 2-Flügel + Unterlicht (7 Basis × 2 UL = 14 Kombis) ────
+  if (is2Ul && S.prod !== 'haustuere') {
+    const base7 = [
+      {v1:'dreh-l', v2:'dk-r',   sep:'pfosten', suf:'DrehLinks-Pfosten-DrehKippRechts'},
+      {v1:'dk-l',   v2:'dreh-r', sep:'pfosten', suf:'DrehKippLinks-Pfosten-DrehRechts'},
+      {v1:'dk-l',   v2:'dk-r',   sep:'pfosten', suf:'DrehKippLinks-Pfosten-DrehKippRechts'},
+      {v1:'dreh-l', v2:'dk-r',   sep:'stulp',   suf:'DrehLinks-Stulp-DrehKippRechts'},
+      {v1:'dk-l',   v2:'dreh-r', sep:'stulp',   suf:'DrehKippLinks-Stulp-DrehRechts'},
+      {v1:'fest',   v2:'dk-r',   sep:'',        suf:'Fest-DrehKippRechts'},
+      {v1:'dk-l',   v2:'fest',   sep:'',        suf:'DrehKippLinks-Fest'},
+    ];
+    html += `<div class="sec-t" style="margin-top:0">Öffnungsart wählen</div>`;
+    html += `<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">`;
+    ['fest','kipp'].forEach(ul => {
+      base7.forEach(c => {
+        const isSel = S.oeff1===c.v1 && S.oeff2===c.v2 && S.zweiteilung===c.sep && (S.unterlichtOeff||'fest')===ul;
+        const ulLbl = ul==='kipp' ? 'UL-Kipp' : 'UL-Fest';
+        const name = `${c.suf}+${ulLbl}`;
+        html += `<div class="oc${isSel?' sel':''}" data-v1="${c.v1}" data-v2="${c.v2}" data-type="${c.sep}" data-ul="${ul}" onclick="pickOeffCombo(this)" style="flex-direction:column;align-items:center;text-align:center;padding:8px 4px;gap:2px">
+          ${ul2ComboSVG(c.v1,c.v2,c.sep,ul)}
+          <div class="olabel" style="font-size:10px;line-height:1.2;font-weight:700">${c.suf.replace(/-/g,'\u200B-')}</div>
+          <div class="osub" style="font-size:10px">${ulLbl}</div>
+        </div>`;
+      });
+    });
+    html += `</div>`;
+  }
+  // ── Ende 2-Flügel + Unterlicht ────────────────────────────────────────────────
+
+  // ── Schnell-Auswahl: 3-Flügel + Unterlicht (5 Basis × 2 UL = 10 Kombis) ────
+  if (is3Ul && S.prod !== 'haustuere') {
+    const base5 = [
+      {v1:'dk-l', v2:'dreh-r', v3:'dk-r', sep12:'pfosten', sep23:'pfosten', suf:'DrehKippLinks-Pfosten-DrehRechts-Pfosten-DrehKippRechts'},
+      {v1:'dk-l', v2:'dreh-l', v3:'dk-r', sep12:'pfosten', sep23:'pfosten', suf:'DrehKippLinks-Pfosten-DrehLinks-Pfosten-DrehKippRechts'},
+      {v1:'dk-l', v2:'dreh-l', v3:'dk-r', sep12:'pfosten', sep23:'stulp',   suf:'DrehKippLinks-Pfosten-DrehLinks-Stulp-DrehKippRechts'},
+      {v1:'dk-l', v2:'dreh-r', v3:'dk-r', sep12:'stulp',   sep23:'pfosten', suf:'DrehKippLinks-Stulp-DrehRechts-Pfosten-DrehKippRechts'},
+      {v1:'dk-l', v2:'fest',   v3:'dk-r', sep12:'',        sep23:'',        suf:'DrehKippLinks-Fest-DrehKippRechts'},
+    ];
+    html += `<div class="sec-t" style="margin-top:0">Öffnungsart wählen</div>`;
+    html += `<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">`;
+    ['fest','kipp'].forEach(ul => {
+      base5.forEach(c => {
+        const t3 = `${c.sep12}-${c.sep23}`.replace(/^-|-$/g,'');
+        const isSel = S.oeff1===c.v1 && S.oeff2===c.v2 && S.oeff3===c.v3 && S.dreiteilung===t3 && (S.unterlichtOeff||'fest')===ul;
+        const ulLbl = ul==='kipp' ? 'UL-Kipp' : 'UL-Fest';
+        html += `<div class="oc${isSel?' sel':''}" data-v1="${c.v1}" data-v2="${c.v2}" data-v3="${c.v3}" data-type3="${t3}" data-ul="${ul}" onclick="pickOeffCombo(this)" style="flex-direction:column;align-items:center;text-align:center;padding:8px 4px;gap:2px">
+          ${ul3ComboSVG(c.v1,c.v2,c.v3,c.sep12,c.sep23,ul)}
+          <div class="olabel" style="font-size:10px;line-height:1.2;font-weight:700">${c.suf.replace(/-/g,'\u200B-')}</div>
+          <div class="osub" style="font-size:10px">${ulLbl}</div>
+        </div>`;
+      });
+    });
+    html += `</div>`;
+  }
+  // ── Ende 3-Flügel + Unterlicht ────────────────────────────────────────────────
+
   // ── Schnell-Auswahl: 1-Flügel + Oberlicht (Fest oder Kipp) × Hauptflügel ───
   const is1Ol = sashCount===1 && (S.fluegel||'').includes('1-oberlicht');
   if (is1Ol && S.prod !== 'haustuere') {
@@ -3896,8 +4142,97 @@ function buildOeffSash() {
   }
   // ── Ende 1-Flügel + Oberlicht ────────────────────────────────────────────────
 
+  // ── Schnell-Auswahl: 1-Flügel + Ober- & Unterlicht (2×2×6 = 24 Combos) ─────
+  const is1OberUnter = sashCount===1 && (S.fluegel||'').includes('1-ober-unter');
+  if (is1OberUnter && S.prod !== 'haustuere') {
+    const mainOpts = [
+      {v:'fest',   name:'Fest',            add:-15},
+      {v:'kipp',   name:'Kipp',            add:15},
+      {v:'dreh-r', name:'Dreh rechts',     add:0},
+      {v:'dreh-l', name:'Dreh links',      add:0},
+      {v:'dk-r',   name:'DrehKipp rechts', add:35, disabled:dkZuBreit},
+      {v:'dk-l',   name:'DrehKipp links',  add:35, disabled:dkZuBreit},
+    ];
+    html += `<div class="sec-t" style="margin-top:0">Öffnungsart wählen</div>`;
+    html += `<div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">`;
+    ['fest','kipp'].forEach(ol => {
+      ['fest','kipp'].forEach(ul => {
+        mainOpts.filter(m=>!m.disabled).forEach(m => {
+          const isSel = S.oeff1===m.v && (S.oberlichtOeff||'fest')===ol && (S.unterlichtOeff||'fest')===ul;
+          const pAdd = m.add===0?'inkl.':(m.add>0?`+ ${m.add} €`:`− ${Math.abs(m.add)} €`);
+          const olLbl = ol==='kipp' ? 'OL-Kipp' : 'OL-Fest';
+          const ulLbl = ul==='kipp' ? 'UL-Kipp' : 'UL-Fest';
+          html += `<div class="oc${isSel?' sel':''}" data-v1="${m.v}" data-ol="${ol}" data-ul="${ul}" onclick="pickOeffCombo(this)" style="flex-direction:column;align-items:center;text-align:center;padding:8px 4px;gap:2px">
+            ${ouComboSVG(ol,m.v,ul)}
+            <div class="olabel" style="font-size:10px;line-height:1.2;font-weight:700">${olLbl}</div>
+            <div class="osub" style="font-size:10px">${m.name}</div>
+            <div class="osub" style="font-size:10px">${ulLbl}</div>
+            <div class="oprice p-inc" style="font-size:10px">${pAdd}</div>
+          </div>`;
+        });
+      });
+    });
+    html += `</div>`;
+  }
+  // ── Ende 1-Flügel + Ober- & Unterlicht ───────────────────────────────────────
+
+  // ── Schnell-Auswahl: 1-Flügel + Unterlicht (6 Haupt × 2 UL = 12 Combos) ────
+  const is1Ul = sashCount===1 && (S.fluegel||'').includes('1-unterlicht');
+  if (is1Ul && S.prod !== 'haustuere') {
+    const mainOpts = [
+      {v:'fest',   name:'Fest',            add:-15},
+      {v:'kipp',   name:'Kipp',            add:15},
+      {v:'dreh-r', name:'Dreh rechts',     add:0},
+      {v:'dreh-l', name:'Dreh links',      add:0},
+      {v:'dk-r',   name:'DrehKipp rechts', add:35, disabled:dkZuBreit},
+      {v:'dk-l',   name:'DrehKipp links',  add:35, disabled:dkZuBreit},
+    ];
+    html += `<div class="sec-t" style="margin-top:0">Öffnungsart wählen</div>`;
+    html += `<div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">`;
+    ['fest','kipp'].forEach(ul => {
+      mainOpts.filter(m=>!m.disabled).forEach(m => {
+        const isSel = S.oeff1===m.v && (S.unterlichtOeff||'fest')===ul;
+        const pAdd = m.add===0?'inkl.':(m.add>0?`+ ${m.add} €`:`− ${Math.abs(m.add)} €`);
+        const ulLbl = ul==='kipp' ? 'UL-Kipp' : 'UL-Fest';
+        html += `<div class="oc${isSel?' sel':''}" data-v1="${m.v}" data-ul="${ul}" onclick="pickOeffCombo(this)" style="flex-direction:column;align-items:center;text-align:center;padding:8px 4px;gap:2px">
+          ${ulComboSVG(m.v,ul)}
+          <div class="olabel" style="font-size:10px;line-height:1.2;font-weight:700">${m.name}</div>
+          <div class="osub" style="font-size:10px">${ulLbl}</div>
+          <div class="oprice p-inc" style="font-size:10px">${pAdd}</div>
+        </div>`;
+      });
+    });
+    html += `</div>`;
+  }
+  // ── Ende 1-Flügel + Unterlicht ───────────────────────────────────────────────
+
+  // ── Schnell-Auswahl: Balkontür 1-flügelig (4 Optionen: DK-L, DK-R, Dreh-L, Dreh-R) ──
+  if (sashCount === 1 && S.prod === 'balkontuer' && !is1Ol && !is1OberUnter && !is1Ul) {
+    const btOpts = [
+      {v:'dk-l',   name:'DrehKippLinks',  sub:'Dreh & Kipp links',  pTxt:'+ 35 €', pcls:'p-add', disabled: dkZuBreit},
+      {v:'dk-r',   name:'DrehKippRechts', sub:'Dreh & Kipp rechts', pTxt:'+ 35 €', pcls:'p-add', disabled: dkZuBreit},
+      {v:'dreh-l', name:'DrehLinks',      sub:'Scharnier links',    pTxt:'inkl.',  pcls:'p-inc'},
+      {v:'dreh-r', name:'DrehRechts',     sub:'Scharnier rechts',   pTxt:'inkl.',  pcls:'p-inc'},
+    ].filter(o => !o.disabled);
+    if (btOpts.length > 0) {
+      html += `<div class="sec-t" style="margin-top:0">Öffnungsart wählen</div>`;
+      html += `<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-3" id="oeff-grid-1">`;
+      btOpts.forEach(opt => {
+        const sel = S.oeff1 === opt.v;
+        html += `<div class="oc${sel?' sel':''}" data-v="${opt.v}" data-sash="1" onclick="pickOeff(this,1)" style="flex-direction:column;align-items:center;text-align:center;padding:10px 6px;gap:4px">
+          ${oeffSVG(opt.v)}
+          <div class="olabel" style="font-size:12px">${opt.name}</div>
+          <div class="osub" style="font-size:11px">${opt.sub}</div>
+          <div class="oprice ${opt.pcls}" style="font-size:11px">${opt.pTxt}</div>
+        </div>`;
+      });
+      html += '</div>';
+    }
+  }
+  // ── Ende Balkontür 1-flügelig ─────────────────────────────────────────────────
+
   // Einzel-Picker nur für 1-Flügel (ohne Oberlicht) und Haustür
-  const useComboOnly = ((sashCount >= 2) || is1Ol) && S.prod !== 'haustuere';
+  const useComboOnly = ((sashCount >= 2) || is1Ol || is1OberUnter || is1Ul || (sashCount === 1 && S.prod === 'balkontuer')) && S.prod !== 'haustuere';
   if (!useComboOnly) {
     for(let i=0;i<sashCount;i++){
       const sk='oeff'+(i+1);
@@ -3921,8 +4256,8 @@ function buildOeffSash() {
   const hasUl=(S.fluegel||'').includes('unterlicht')||(S.fluegel||'').includes('ober-unter');
   if(hasOl||hasUl) {
     html+=`<div class="info mt-1"><i class="ms f" style="color:#225eaa;font-size:18px;flex-shrink:0">info</i><div style="font-size:13px">`;
-    if(hasOl && !is1Ol && !is2Ol) html+=`<strong>Oberlicht</strong> ist immer Festverglasung. `;
-    if(hasUl) html+=`<strong>Unterlicht</strong> ist immer Festverglasung.`;
+    if(hasOl && !is1Ol && !is2Ol && !is3Ol && !is1OberUnter && !is2OberUnter && !is3OberUnter) html+=`<strong>Oberlicht</strong> ist immer Festverglasung. `;
+    if(hasUl && !is1OberUnter && !is1Ul && !is2Ul && !is3Ul && !is2OberUnter && !is3OberUnter) html+=`<strong>Unterlicht</strong> ist immer Festverglasung.`;
     html+='</div></div>';
   }
   wrap.innerHTML = html;
@@ -3990,13 +4325,38 @@ function pickOeffCombo(el) {
   S.oeff3       = el.dataset.v3   || null;
   S.zweiteilung = el.dataset.type  || '';
   S.dreiteilung = el.dataset.type3 || '';
-  S.oberlichtOeff = el.dataset.ol || null;
+  S.oberlichtOeff  = el.dataset.ol || null;
+  S.unterlichtOeff = el.dataset.ul || null;
   const cnt = getSashCount();
   const n1 = P.oeff_sash[S.oeff1]?.name || S.oeff1;
   let d4txt;
-  if (S.oberlichtOeff) {
+  if (S.oberlichtOeff && S.unterlichtOeff) {
     const olLbl = S.oberlichtOeff === 'kipp' ? 'OL-Kipp' : 'OL-Fest';
-    if (S.oeff2) {
+    const ulLbl = S.unterlichtOeff === 'kipp' ? 'UL-Kipp' : 'UL-Fest';
+    if (S.oeff3) {
+      // 3-Flügel + Ober- & Unterlicht
+      const n2 = P.oeff_sash[S.oeff2]?.name || S.oeff2;
+      const n3 = P.oeff_sash[S.oeff3]?.name || S.oeff3;
+      const typeLbl = S.dreiteilung ? S.dreiteilung.replace('-', ' / ') : '';
+      d4txt = `${olLbl} · ${typeLbl ? typeLbl + ' · ' : ''}L: ${n1} · M: ${n2} · R: ${n3} · ${ulLbl}`;
+    } else if (S.oeff2) {
+      // 2-Flügel + Ober- & Unterlicht
+      const n2 = P.oeff_sash[S.oeff2]?.name || S.oeff2;
+      const typeLbl = S.zweiteilung === 'pfosten' ? 'Pfosten' : S.zweiteilung === 'stulp' ? 'Stulp' : '';
+      d4txt = `${olLbl} · ${typeLbl ? typeLbl + ' · ' : ''}L: ${n1} · R: ${n2} · ${ulLbl}`;
+    } else {
+      // 1-Flügel + Ober- & Unterlicht
+      d4txt = `${olLbl} · ${n1} · ${ulLbl}`;
+    }
+  } else if (S.oberlichtOeff) {
+    const olLbl = S.oberlichtOeff === 'kipp' ? 'OL-Kipp' : 'OL-Fest';
+    if (S.oeff3) {
+      // 3-Flügel + Oberlicht
+      const n2 = P.oeff_sash[S.oeff2]?.name || S.oeff2;
+      const n3 = P.oeff_sash[S.oeff3]?.name || S.oeff3;
+      const typeLbl = S.dreiteilung ? S.dreiteilung.replace('-', ' / ') : '';
+      d4txt = `${olLbl} · ${typeLbl ? typeLbl + ' · ' : ''}L: ${n1} · M: ${n2} · R: ${n3}`;
+    } else if (S.oeff2) {
       // 2-Flügel + Oberlicht
       const n2 = P.oeff_sash[S.oeff2]?.name || S.oeff2;
       const typeLbl = S.zweiteilung === 'pfosten' ? 'Pfosten' : S.zweiteilung === 'stulp' ? 'Stulp' : '';
@@ -4004,6 +4364,23 @@ function pickOeffCombo(el) {
     } else {
       // 1-Flügel + Oberlicht
       d4txt = `${olLbl} + ${n1}`;
+    }
+  } else if (S.unterlichtOeff) {
+    const ulLbl = S.unterlichtOeff === 'kipp' ? 'UL-Kipp' : 'UL-Fest';
+    if (S.oeff3) {
+      // 3-Flügel + Unterlicht
+      const n2 = P.oeff_sash[S.oeff2]?.name || S.oeff2;
+      const n3 = P.oeff_sash[S.oeff3]?.name || S.oeff3;
+      const typeLbl = S.dreiteilung ? S.dreiteilung.replace('-', ' / ') : '';
+      d4txt = `${typeLbl ? typeLbl + ' · ' : ''}L: ${n1} · M: ${n2} · R: ${n3} · ${ulLbl}`;
+    } else if (S.oeff2) {
+      // 2-Flügel + Unterlicht
+      const n2 = P.oeff_sash[S.oeff2]?.name || S.oeff2;
+      const typeLbl = S.zweiteilung === 'pfosten' ? 'Pfosten' : S.zweiteilung === 'stulp' ? 'Stulp' : '';
+      d4txt = `${typeLbl ? typeLbl + ' · ' : ''}L: ${n1} · R: ${n2} · ${ulLbl}`;
+    } else {
+      // 1-Flügel + Unterlicht
+      d4txt = `${n1} · ${ulLbl}`;
     }
   } else {
     const n2 = S.oeff2 ? (P.oeff_sash[S.oeff2]?.name || S.oeff2) : null;
@@ -4171,23 +4548,23 @@ function buildFarbePicker() {
     let html = '';
     // Beliebteste-Zeile oben — immer offen (Blockliste filtert bei Haustür)
     const beliebtItems = FARB_BELIEBTESTE.filter(k => table[k] && !istBlocked(k)).map(k => farbItemHtml(k, table[k], key)).join('');
-    html += `<div style="background:linear-gradient(135deg,#fffbeb 0%,#fef3c7 100%);border:1px solid #fde68a;border-radius:12px;padding:16px 18px;margin-bottom:20px">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-        <i class="ms f" style="color:#f59e0b;font-size:20px">star</i>
-        <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:800;color:#78350f">Beliebteste Farben</span>
+    html += `<div style="margin-bottom:18px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--c-border)">
+        <i class="ms f" style="color:var(--c-primary);font-size:15px">star</i>
+        <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.06em">Beliebteste</span>
       </div>
-      <div style="display:flex;flex-wrap:wrap;gap:14px">${beliebtItems}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:12px">${beliebtItems}</div>
     </div>`;
     // 4 aufklappbare Gruppen darunter — initial alle zu (Blockliste filtert bei Haustür)
     Object.entries(FARB_GRUPPEN).forEach(([grpName, grpKeys]) => {
       const items = grpKeys.filter(k => table[k] && !istBlocked(k)).map(k => farbItemHtml(k, table[k], key)).join('');
       if (!items) return;
-      html += `<div class="farb-gruppe" style="margin-bottom:10px;border:1px solid #e0e4f0;border-radius:10px;overflow:hidden;background:#fff">
-        <div onclick="toggleFarbGruppe(this)" style="padding:12px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none;transition:background .15s" onmouseover="this.style.background='#f7f8ff'" onmouseout="this.style.background=''">
-          <span style="font-size:13px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;color:#161c27">${grpName}</span>
-          <span class="farb-grp-arrow" style="transition:transform .2s;color:#727782"><i class="ms">expand_more</i></span>
+      html += `<div class="farb-gruppe" style="margin-bottom:8px;border:1px solid var(--c-border);border-radius:8px;overflow:hidden;background:var(--c-bg)">
+        <div onclick="toggleFarbGruppe(this)" style="padding:10px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none;transition:background .15s" onmouseover="this.style.background='var(--c-primary-tint)'" onmouseout="this.style.background=''">
+          <span style="font-size:12px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;color:var(--c-text)">${grpName}</span>
+          <span class="farb-grp-arrow" style="transition:transform .2s;color:var(--c-text-soft)"><i class="ms">expand_more</i></span>
         </div>
-        <div class="farb-grp-content" style="padding:0 16px;display:none;flex-wrap:wrap;gap:14px;align-items:flex-start">${items}</div>
+        <div class="farb-grp-content" style="padding:0 14px;display:none;flex-wrap:wrap;gap:12px;align-items:flex-start">${items}</div>
       </div>`;
     });
     grid.innerHTML = html;
@@ -4467,16 +4844,29 @@ function upSidebar() {
   }
   // Stück-Anzahl IMMER ganz oben anzeigen (Sarah-Wunsch v8 30.04.2026)
   if(S.prod && S.qty) rowsList.unshift(['Stückzahl', S.qty + '×']);
-  // Sarah-Klarstellung 02.05.2026 v7: Chips wieder im hellen Stil (Sidebar bleibt weiß)
+  // Konfigurationsübersicht unter dem Vorschaubild (Sarah 06.05.2026)
+  // Geänderte Zeilen kurz aufleuchten lassen
+  if (!upSidebar._prev) upSidebar._prev = {};
+  const prevVals = upSidebar._prev;
+  const newVals = Object.fromEntries(rowsList);
   document.getElementById('chips').innerHTML = rowsList.length === 0
     ? '<div style="color:#a0a8b8;font-size:12px;font-style:italic;padding:4px 0">Bitte Produkt wählen</div>'
-    : '<div style="background:#f5f7fa;border-radius:8px;padding:8px 10px;font-size:11.5px;font-family:Manrope,sans-serif">'
-      + rowsList.map(([label,value]) =>
-        `<div style="display:flex;justify-content:space-between;gap:8px;padding:2px 0;border-bottom:1px solid rgba(0,0,0,.04);line-height:1.35">
-          <span style="color:#6b7280;font-weight:500;flex-shrink:0">${label}</span>
-          <span style="color:#161c27;font-weight:600;text-align:right">${value}</span>
-        </div>`).join('')
-      + '</div>';
+    : `<div style="border:1px solid var(--c-border);border-radius:10px;overflow:hidden;font-family:Manrope,sans-serif;font-size:12px">
+        <div style="background:#f0f3fa;padding:6px 12px;border-bottom:1px solid var(--c-border);display:flex;align-items:center;gap:6px">
+          <i class="ms" style="font-size:14px;color:var(--c-primary)">tune</i>
+          <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.05em">Ihre Konfiguration</span>
+        </div>
+        <div style="padding:4px 12px 6px">
+        ${rowsList.map(([label,value]) => {
+          const changed = prevVals[label] !== undefined && prevVals[label] !== value;
+          return `<div class="${changed?'spec-row-changed':''}" style="display:flex;justify-content:space-between;gap:8px;padding:3px 0;border-bottom:1px solid rgba(0,0,0,.04);line-height:1.35;border-radius:3px">
+            <span style="color:#6b7280;font-weight:500;flex-shrink:0">${label}</span>
+            <span style="color:${changed?'var(--c-primary)':'#161c27'};font-weight:${changed?'700':'600'};text-align:right">${value}</span>
+          </div>`;
+        }).join('')}
+        </div>
+      </div>`;
+  upSidebar._prev = newVals;
 
   upFinalSum(rows,tot);
 }
@@ -4752,8 +5142,8 @@ const PROD_IMGS_VIEW = {
     },
   },
   balkontuer: {
-    innen:  { '1-fluegel': 'img/balkontuer_standard_v3.png' },
-    aussen: { '1-fluegel': 'img/balkontuer_aussen_v3.png' },
+    innen:  { '1-fluegel': 'img/balkontuer_standard_v3.png', '2-fluegel': 'img/balkontuer_2fl_v4.png' },
+    aussen: { '1-fluegel': 'img/balkontuer_aussen_v3.png', '2-fluegel': 'img/balkontuer_2fl_aussen_v4.png' },
   },
   haustuere: {
     // Sarah-Update 05.05.2026 v5: Beide Ansichten zeigen jetzt das Drutex IGLO Energy Montana
@@ -4770,10 +5160,61 @@ const PROD_IMGS_VIEW = {
   },
 };
 
+// Rolladen-Varianten: gleiche Keys wie PROD_IMGS_VIEW, aber mit Rolladen-Kasten
+const PROD_IMGS_ROLLADEN = {
+  kunststoff: {
+    innen: {
+      '1-fluegel':   'img/fenster_standard_rolladen_v4.png',
+      '2-fluegel':   'img/fenster_2fluegel_rolladen_v4.png',
+      '3-fluegel':   'img/fenster_3fluegel_rolladen_v4.png',
+      '4-fluegel':   'img/fenster_4fluegel_rolladen_v4.png',
+      '1-oberlicht': 'img/fenster_oberlicht_rolladen_v4.png',
+      '2-oberlicht': 'img/fenster_2fluegel_oberlicht_rolladen_v4.png',
+      '3-oberlicht': 'img/fenster_3fluegel_oberlicht_rolladen_v4.png',
+      '1-unterlicht': 'img/fenster_unterlicht_rolladen_v4.png',
+      '2-unterlicht': 'img/fenster_2fluegel_unterlicht_rolladen_v4.png',
+      '3-unterlicht': 'img/fenster_3fluegel_unterlicht_rolladen_v4.png',
+      '1-ober-unter': 'img/fenster_ober_unter_rolladen_v4.png',
+      '2-ober-unter': 'img/fenster_2fluegel_ober_unter_rolladen_v4.png',
+      '3-ober-unter': 'img/fenster_3fluegel_ober_unter_rolladen_v4.png',
+    },
+    aussen: {
+      '1-fluegel':   'img/fenster_aussen_rolladen_v4.png',
+      '2-fluegel':   'img/fenster_2fluegel_aussen_rolladen_v4.png',
+      '3-fluegel':   'img/fenster_3fluegel_aussen_rolladen_v4.png',
+      '4-fluegel':   'img/fenster_4fluegel_aussen_rolladen_v4.png',
+      '1-oberlicht': 'img/fenster_oberlicht_aussen_rolladen_v4.png',
+      '2-oberlicht': 'img/fenster_2fluegel_oberlicht_aussen_rolladen_v4.png',
+      '3-oberlicht': 'img/fenster_3fluegel_oberlicht_aussen_rolladen_v4.png',
+      '1-unterlicht': 'img/fenster_unterlicht_aussen_rolladen_v4.png',
+      '2-unterlicht': 'img/fenster_2fluegel_unterlicht_aussen_rolladen_v4.png',
+      '3-unterlicht': 'img/fenster_3fluegel_unterlicht_aussen_rolladen_v4.png',
+      '1-ober-unter': 'img/fenster_ober_unter_aussen_rolladen_v4.png',
+      '2-ober-unter': 'img/fenster_2fluegel_ober_unter_aussen_rolladen_v4.png',
+      '3-ober-unter': 'img/fenster_3fluegel_ober_unter_aussen_rolladen_v4.png',
+    },
+  },
+  balkontuer: {
+    innen:  { '1-fluegel': 'img/balkontuer_standard_rolladen_v4.png', '2-fluegel': 'img/balkontuer_2fl_rolladen_v4.png' },
+    aussen: { '1-fluegel': 'img/balkontuer_aussen_rolladen_v4.png', '2-fluegel': 'img/balkontuer_2fl_aussen_rolladen_v4.png' },
+  },
+  hst: {
+    innen:  { '1-fluegel': 'img/hst_hs_innen_rolladen_v4.png' },
+    aussen: { '1-fluegel': 'img/hst_hs_aussen_rolladen_v4.png' },
+  },
+};
+
 // Lookup: Master-Bild für Produkt × Ansicht × Flügel-Key
 // Sucht nach exakter Übereinstimmung (z.B. '2-fluegel', '1-oberlicht'),
 // dann Fallback auf den 1-Flügel-Master.
-function getMasterImage(prod, ansicht, fluegelKey) {
+function getMasterImage(prod, ansicht, fluegelKey, rolladen) {
+  // If rolladen active and rolladen map exists, try rolladen version first
+  if (rolladen && PROD_IMGS_ROLLADEN[prod]) {
+    const rollMap = PROD_IMGS_ROLLADEN[prod][ansicht];
+    if (rollMap && rollMap[fluegelKey]) {
+      return rollMap[fluegelKey];
+    }
+  }
   const prodMap = PROD_IMGS_VIEW[prod];
   if (!prodMap) return null;
   const viewMap = prodMap[ansicht] || prodMap.innen;
@@ -4973,6 +5414,69 @@ const FENSTER_FARB_BLOCKLIST = new Set([
   'achatgrau', 'signalgrau', 'alux-db', 'alu-gebr',
   'siena-noce', 'siena-ross', 'bergkiefer', 'teak',
 ]);
+
+// ══════════════════════════════════════════════════════════════════
+// HST / SCHIEBETÜR-FRAMES — Drutex-CDN (entdeckt 06.05.2026)
+// Alle drei Systeme: PSK, IGLO-HS, IGLO-Slide — je 41 Farben
+// Slugs: Unterstriche statt Bindestriche (neueres CDN-Schema)
+// ══════════════════════════════════════════════════════════════════
+
+const _pskFB   = s => `https://www.drutex.de/media/webp/80/${btoa('/media/_upload/produkty/iglo_energy_psk/kolory/'+s+'.png')}.webp`;
+const _hsFB    = s => `https://www.drutex.de/media/webp/80/${btoa('/media/_upload/produkty/iglo-hs/kolory/'+s+'.png')}.webp`;
+const _slideFB = s => `https://www.drutex.de/media/webp/80/${btoa('/media/_upload/produkty/iglo-slide/kolory/'+s+'.png')}.webp`;
+
+// Gemeinsame Farb-Map für PSK + HS (gleiche Slugs)
+const _hstColors = (fn) => ({
+  'weiss':       fn('biay_fx'),
+  'weiss-fx':    fn('biay_fx'),
+  'cremeweiss':  fn('kremowy'),
+  'crown-plat':  fn('crown_platinum'),
+  'lichtgrau':   fn('jasny_szary'),
+  'sheffield':   fn('dab_bielony'),
+  'eiche-hell':  fn('dab_bielony'),
+  'eiche-nat':   fn('dab_naturalny'),
+  'betongrau':   fn('betonowy_szary'),
+  'quarzgr-sa':  fn('kwarcytowy_szary'),
+  'quarzgr-gl':  fn('kwarcytowy_szary_gladki'),
+  'basaltgr-sa': fn('bazaltowy_szary'),
+  'basaltgr-gl': fn('bazaltowy_szary_gladki'),
+  'schiefgr-sa': fn('lupkowy'),
+  'schiefgr-gl': fn('lupkowy_szary_gladki'),
+  'eisengl':     fn('lupkowy'),
+  'anthrazit':   fn('antracyt'),
+  'anthraz-gl':  fn('antracyt_gladki'),
+  'anthraz-um':  fn('antracyt_ulti_matt'),
+  'schwarz-um':  fn('czarny_ulti_matt'),
+  'golden-oak':  fn('zloty_dab'),
+  'winchester':  fn('winchester'),
+  'oregon':      fn('oregon'),
+  'douglasie':   fn('daglezja'),
+  'nussbaum':    fn('orzech'),
+  'mooreiche':   fn('ciemny_dab'),
+  'dunkleiche':  fn('ciemny_dab'),
+  'schwarzbr':   fn('palisander'),
+  'macore':      fn('macore'),
+  'mahagoni':    fn('mahon'),
+  'schoko-br':   fn('braz_czekoladowy'),
+  'moosgruen':   fn('zielen_mchu'),
+  'dunkelgr':    fn('ciemno_zielony'),
+  'dunkelrot':   fn('ciemno_czerwony'),
+  'brillblau':   fn('brylantowo_niebieski'),
+  'stahlblau':   fn('stalowy_niebieski'),
+  'piryt':       fn('piryt'),
+  'jet-black':   fn('jet_black'),
+  'deep-bronze': fn('deep_bronze'),
+  'grafitgr':    fn('grafitowy_piaskowy'),
+});
+
+const PSK_FARB_FRAMES   = _hstColors(_pskFB);
+const HST_FARB_FRAMES   = _hstColors(_hsFB);
+// IGLO-Slide hat minimale Slug-Abweichungen (bialy statt biay, white_sand)
+const SLIDE_FARB_FRAMES = {
+  ..._hstColors(_slideFB),
+  'weiss':    _slideFB('bialy_fx'),
+  'weiss-fx': _slideFB('bialy_fx'),
+};
 
 // Sarah-Update 02.05.2026: Echte Drutex-Katalog-Vollbilder (drutex.de/produkte/addons/type/141)
 // 87 Modelle: 40 IGLO Energy + 47 DX-Linie, je Klassisch + Inox-Variante.
@@ -5507,15 +6011,41 @@ function vorschauAktualisieren() {
   const weissTöne = ['#F4F4F0','#FDF4E3','#F0F0EC'];
   const isWeiss = weissTöne.includes(farbe) || farbeKey === 'weiss';
 
-  // 1) HAUSTÜR-MODELL (Drutex DX/USA-Staaten) → TUER_IMGS, kein Recoloring
+  // 1) HAUSTÜR-MODELL (IGLO Energy / DX) → Katalog- oder Farbbild
+  //   Priorität: Modell+Farbe+Außen → haustuer_aussen_<model>_<farbe>.png (Pillow-generiert)
+  //              Modell+Farbe+Innen  → haustuer_innen_<farbe>.png (Block 2f, alle Modelle gleich)
+  //              Modell+keineFarbe+Außen → TUER_IMGS Katalogbild (Anthrazit-Original)
   if (S.prod === 'haustuere' && S.tuerModell && TUER_IMGS[S.tuerModell]) {
-    img.src = TUER_IMGS[S.tuerModell];
-    img.style.filter = 'none';
-    return;
+    if (!istInnen && farbeKey && farbeKey !== 'sonder' && farbeKey !== 'weiss') {
+      // Außen + Farbe + Modell → Pillow-generiertes Bild für dieses spezifische Modell
+      const _aussenModellSrc = `img/farben/haustuer_aussen_${S.tuerModell}_${farbeKey}.png`;
+      img.style.filter = 'none';
+      tryFarbenImg(_aussenModellSrc, TUER_IMGS[S.tuerModell]);
+      return;
+    }
+    if (!istInnen && (!farbeKey || farbeKey === 'sonder' || farbeKey === 'weiss')) {
+      // Außen, keine Farbe / Sonder / Weiß → Katalogbild (Anthrazit-Original zeigt Modell-Design)
+      img.src = TUER_IMGS[S.tuerModell];
+      img.style.filter = 'none';
+      return;
+    }
+    // Innen: weiter durch Block 2f (alle Modelle haben gleiche Innen-Ansicht)
   }
 
   // 2) Master-Bild für Produkt × Ansicht × Flügel-Key (inkl. '-oberlicht' Varianten)
-  let masterSrc = getMasterImage(S.prod, ansicht, flKey);
+  const hasRolladen = S.roll && S.roll !== 'ohne';
+  let masterSrc = getMasterImage(S.prod, ansicht, flKey, hasRolladen);
+
+  // 2.1) HST-Außen: System-spezifisches CDN-Weiß-Frame als Standard (statt generischer img/hst_aussen.png)
+  //   → Immer CDN-Bild: bei gesetztem Profil das passende System, sonst HS als Standard.
+  //   img/hst_aussen.png hat weißen Rahmen auf weißem Hintergrund — nicht sichtbar.
+  if (S.prod === 'hst' && !istInnen) {
+    const _defMap =
+      S.profil === 'iglo-psk'   ? PSK_FARB_FRAMES :
+      S.profil === 'iglo-slide' ? SLIDE_FARB_FRAMES :
+      HST_FARB_FRAMES; // Default: HS (= Produktkarte + häufigster Fall)
+    if (_defMap && _defMap['weiss']) masterSrc = _defMap['weiss'];
+  }
 
   // 2.4) ÖFFNUNGSART KIPP / FEST (Sarah-Logik 29.04.2026, abends):
   //   Bei 1-Flügel + Kipp = Kellerfenster-Optik (breit, Griff oben)
@@ -5563,10 +6093,6 @@ function vorschauAktualisieren() {
     // Kunststoff 2-Fl: auch bei hellen Tönen (cremeweiss, weiss-fx) Farbbild versuchen
     if (S.prod === 'kunststoff' && fl === 2 && farbeKey && farbeKey !== 'weiss' && farbeKey !== 'sonder') {
       if (istInnen) {
-        // Sarah-Plan 06.05.2026 (v2): Auch hier Drutex-Frame zuerst (sonst kämen die alten
-        // lokalen 2fl-Bilder bei cremeweiss/weiss-fx). Lokale Bilder werden ignoriert.
-        const drutexUrl = FENSTER_FARB_FRAMES[farbeKey];
-        if (drutexUrl) { tryFarbenImg(drutexUrl, masterSrc); return; }
         tryFarbenImg(`img/farben/fenster_2fl_${farbeKey}.png`, masterSrc); return;
       } else {
         tryFarbenImg(`img/farben/fenster_2fl_aussen_${farbeKey}.png`, masterSrc); return;
@@ -5614,24 +6140,13 @@ function vorschauAktualisieren() {
         if (grauDichtung) {
           tryFarbenImg(`img/farben/fenster_1fl_grau_${farbeKey}.png`, masterSrc); return;
         }
-        // Standard: Griff rechts, schwarze Dichtung
-        const variantPath = getVariantImage(S.prod, farbeKey);
-        if (variantPath) { img.src = variantPath; return; }
+        // Standard: Griff rechts, schwarze Dichtung → lokale Higgsfield/Google-Flow Bilder
+        tryFarbenImg(`img/farben/fenster_1fl_${farbeKey}.png`, masterSrc); return;
       }
       if (fl === 1 && !istInnen) {
         img.src = `img/farben/fenster_1fl_aussen_${farbeKey}.png`; return;
       }
       if (fl === 2 && istInnen) {
-        // Sarah-Plan 06.05.2026 (v2): Drutex-Iglo-Edge-Frames ÜBERSCHREIBEN die alten
-        // lokalen img/farben/fenster_2fl_*.png Bilder. Sarah-Feedback: „bei 2 Flügel
-        // sehe ich noch die alten" → Drutex-Frame muss zuerst greifen, lokale Bilder
-        // werden ignoriert. Nur wenn Farbe nicht in der Drutex-Map ist (sollte durch
-        // FENSTER_FARB_BLOCKLIST eigentlich nie passieren), fällt sie auf das alte
-        // lokale Bild zurück → Master.
-        const drutexUrl = FENSTER_FARB_FRAMES[farbeKey];
-        if (drutexUrl) {
-          tryFarbenImg(drutexUrl, masterSrc); return;
-        }
         tryFarbenImg(`img/farben/fenster_2fl_${farbeKey}.png`, masterSrc); return;
       }
       if (fl === 2 && !istInnen) {
@@ -5656,30 +6171,49 @@ function vorschauAktualisieren() {
     return;
   }
 
-  // 2d) HST — AI-generierte Farb-Bilder (Phase 1)
-  //   Innen: img/farben/hst_1fl_<key>.png
-  //   Außen: img/farben/hst_1fl_aussen_<key>.png
+  // 2d) HST — Drutex-CDN-Frames (PSK / HS / Slide) — BEIDE Ansichten
+  //   Schiebetüren sehen innen & außen praktisch gleich aus (Glas + Profil + Farbe).
+  //   Wir nutzen denselben CDN-Frame für Innen + Außen. Spart Bild-Generierung und ist
+  //   konsistent mit den Produktseiten (die auch nur eine Ansicht je Farbe zeigen).
   if (S.prod === 'hst' && farbeKey && farbeKey !== 'sonder') {
-    if (istInnen) {
-      tryFarbenImg(`img/farben/hst_1fl_${farbeKey}.png`, masterSrc);
-    } else {
-      tryFarbenImg(`img/farben/hst_1fl_aussen_${farbeKey}.png`, masterSrc);
+    let hstFrameMap = null;
+    if (S.profil === 'iglo-psk')   hstFrameMap = PSK_FARB_FRAMES;
+    else if (S.profil === 'iglo-hs')    hstFrameMap = HST_FARB_FRAMES;
+    else if (S.profil === 'iglo-slide') hstFrameMap = SLIDE_FARB_FRAMES;
+
+    if (hstFrameMap && hstFrameMap[farbeKey]) {
+      tryFarbenImg(hstFrameMap[farbeKey], masterSrc);
+      return;
     }
-    return;
+    // Kein CDN-Frame für diese Farbe → Master als Fallback
+    img.src = masterSrc; return;
   }
 
-  // 2e) Haustür Außenansicht — Iglo Energy Montana Frames mit Stoßgriff
-  //   Sarah-Plan 05.05.2026: Wenn Kunde Farbe gewählt hat aber noch kein konkretes Modell,
-  //   zeigen wir die Drutex-CDN-Frames vom Iglo Energy Montana (Außenansicht mit Stoßgriff).
-  //   Außenansicht = IMMER Stoßgriff (CLAUDE.md Regel 4a). Innen oder fehlende Map-Eintrag
-  //   → Master-Bild als Fallback. Modell-Auswahl überschreibt das (Block 1 oben hat Vorrang).
+  // 2e) Haustür Außenansicht — Iglo Energy Montana CDN-Frames (Fallback wenn kein Modell gewählt)
+  //   Wenn Kunde Farbe gewählt hat aber KEIN konkretes Modell → Drutex-CDN-Frame Montana.
+  //   Wenn Modell gewählt: Block 1 hat bereits Priorität (haustuer_aussen_<model>_<farbe>.png).
+  //   Außenansicht = IMMER Stoßgriff (CLAUDE.md Regel 4a).
   if (S.prod === 'haustuere' && !istInnen && farbeKey && HAUSTUER_FARB_FRAMES[farbeKey]) {
     tryFarbenImg(HAUSTUER_FARB_FRAMES[farbeKey], masterSrc);
     return;
   }
 
-  // 2f) Haustür Innenansicht / restliche Fälle: Master-Bild
-  //   (Innenansicht in Farbe wird später per Google Flow generiert — Sarah 05.05.2026)
+  // 2f) Haustür Innenansicht — Pillow-generierte Farb-Bilder
+  //   39 Farbvarianten via scripts/haustuer-innen-farben.py aus dem weißen Master erzeugt.
+  //   Glas + Hardware bleiben original, nur PVC-Rahmen wird umgefärbt. Pixel-Detection via
+  //   Hardware-Bounding-Box + Glas-Flood-Fill. Datei: img/farben/haustuer_innen_<key>.png
+  //   DIN-Richtung: CSS scaleX(-1) wenn Anschlag 'rechts' → kein extra Bild nötig.
+  if (S.prod === 'haustuere' && istInnen && farbeKey && farbeKey !== 'weiss' && farbeKey !== 'sonder') {
+    const _innerSrc = `img/farben/haustuer_innen_${farbeKey}.png`;
+    img.style.filter = 'none';
+    tryFarbenImg(_innerSrc, masterSrc);
+    return;
+  }
+  // [2f-REMOVED CSS-Filter-Fallback — kept here as reference for emergencies]
+  // if (S.prod === 'haustuere' && istInnen ...) { const _hFilter = {
+  //   'lichtgrau': 'saturate(0.15) brightness(0.88)',
+  //   ... (39 entries) ...
+  // }; img.style.filter = _hFilter[farbeKey] || 'none'; return; }
   img.src = masterSrc;
 }
 
@@ -5690,6 +6224,26 @@ function setPreviewView(v) {
   document.getElementById('view-btn-inn').classList.toggle('active', v==='inn');
   vorschauAktualisieren();
   drawPrev();
+}
+
+// DIN-Anschlag: 'links' = Standard (Klinke links, Scharniere rechts)
+//               'rechts' = gespiegelt (Klinke rechts, Scharniere links) → CSS scaleX(-1)
+let _dinAnschlag = 'links';
+function setDinAnschlag(v) {
+  _dinAnschlag = v;
+  document.getElementById('din-btn-links').classList.toggle('active', v==='links');
+  document.getElementById('din-btn-rechts').classList.toggle('active', v==='rechts');
+  // Apply mirror transform to preview image
+  const img = document.getElementById('vorschau-bild');
+  if (img) img.style.transform = v === 'rechts' ? 'scaleX(-1)' : '';
+}
+
+function _updateDinToggle() {
+  const wrap = document.getElementById('din-toggle-wrap');
+  if (!wrap) return;
+  const show = S.prod === 'haustuere';
+  wrap.style.display = show ? 'flex' : 'none';
+  if (!show && _dinAnschlag !== 'links') setDinAnschlag('links');
 }
 
 function _updateColorStrip() {
@@ -5752,13 +6306,8 @@ function drawPrev() {
     imgEl.style.transformOrigin = 'right center';
   }
 
-  // 4. Dimension-based scale (Sarah-Fix 28.04.2026: NIE >1.0, sonst wird Bild größer als Container & durch overflow:hidden abgeschnitten = "abgehakt")
-  // Bei Default 1000×1200mm → ~0.95×0.95 (fast voll). Bei großen Maßen → 1.0 (gecappt). Bei kleinen Maßen → schrumpft (zeigt Größe visuell).
-  const scaleX = Math.min(1.0, Math.max(0.75, 0.6 + 0.4 * (S.bMm / 1200)));
-  const scaleY = Math.min(1.0, Math.max(0.75, 0.6 + 0.4 * (S.hMm / 1400)));
-  const scaleTx = `scaleX(${scaleX.toFixed(2)}) scaleY(${scaleY.toFixed(2)})`;
-
-  imgEl.style.transform = [openTx, scaleTx].filter(Boolean).join(' ') || 'none';
+  // 4. Kein dimensions-basiertes Scaling — Bild bleibt statisch (Sarah 06.05.2026: Bild soll nicht beim Maß-Ändern springen)
+  imgEl.style.transform = openTx || 'none';
 
   // 5. SVG overlays
   const zones = GLASS_ZONE[S.prod] || GLASS_ZONE.kunststoff;
@@ -6210,6 +6759,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
   buildFarbePicker();
   // Fix J: initial Schnellauswahl-Buttons (Fallback Kunststoff-Maße)
   buildSzButtons();
+  // DIN toggle: initially hidden (no product selected yet)
+  _updateDinToggle();
 
   // Mass inputs
   document.getElementById('ib').addEventListener('input',onMass);
@@ -6272,9 +6823,46 @@ document.addEventListener('DOMContentLoaded', ()=>{
   upProg();
   drawPrev();
 
-  // Vorauswahl per URL-Parameter: ?profil=iglo5 etc.
-  const _urlProfil = new URLSearchParams(location.search).get('profil');
-  if (_urlProfil) { const _el = document.querySelector(`[data-v="${_urlProfil}"]`); if (_el) _el.click(); }
+  // ── URL-Parameter Vorauswahl (Produktseite → Konfigurator Direkteinstieg) ──
+  // ?prod=hst&profil=iglo-psk  → Schiebetür + PSK vorgewählt, direkt zu Schritt 3
+  // ?prod=hst&profil=iglo-hs   → Schiebetür + IGLO-HS vorgewählt
+  // ?prod=hst&profil=iglo-slide → Schiebetür + IGLO Slide vorgewählt
+  // ?prod=haustuere             → Haustür vorgewählt
+  // ?prod=kunststoff            → Kunststofffenster vorgewählt
+  // ?profil=iglo5              → nur Profil (Legacy-Kompatibilität)
+  (function() {
+    const p = new URLSearchParams(location.search);
+    const urlProd   = p.get('prod');
+    const urlProfil = p.get('profil');
+
+    // Produkt vorwählen (Produkt-Cards nutzen data-p, nicht data-v)
+    if (urlProd) {
+      const prodEl = document.querySelector(`#s1 [data-p="${urlProd}"]`);
+      if (prodEl) {
+        prodEl.click();
+        // Schritt 1 als fertig markieren
+        setTimeout(() => {
+          // Profil vorwählen (Schritt 2)
+          if (urlProfil) {
+            const profEl = document.querySelector(`#s2 [data-v="${urlProfil}"]`);
+            if (profEl) {
+              profEl.click();
+              // Zu Schritt 3 (Flügel/Maße) springen
+              setTimeout(() => openS(3), 350);
+            } else {
+              setTimeout(() => openS(2), 200);
+            }
+          } else {
+            setTimeout(() => openS(2), 200);
+          }
+        }, 200);
+      }
+    } else if (urlProfil) {
+      // Legacy: nur ?profil= ohne ?prod=
+      const profEl = document.querySelector(`[data-v="${urlProfil}"]`);
+      if (profEl) profEl.click();
+    }
+  })();
 });
 </script>
 
