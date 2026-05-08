@@ -6003,6 +6003,11 @@ function vorschauAktualisieren() {
   const img = document.getElementById('vorschau-bild');
   if(!img) return;
 
+  // Reset CSS flip from previous Haustür selection
+  if (S.prod !== 'haustuere') {
+    img.style.transform = 'none';
+  }
+
   // Welche Ansicht & Farbe ist gerade aktiv?
   const istInnen = previewState.ansicht === 'innen';
   const ansicht  = istInnen ? 'innen' : 'aussen';
@@ -6030,6 +6035,13 @@ function vorschauAktualisieren() {
       return;
     }
     // Innen: weiter durch Block 2f (alle Modelle haben gleiche Innen-Ansicht)
+  }
+
+  // Haustür DIN-Richtung: DIN-Rechts = horizontaler Flip von DIN-Links (CSS)
+  // Spart ~1.260 Bilddateien. Flip ist korrekt weil DIN-Wechsel die gesamte Tür spiegelt.
+  if (S.prod === 'haustuere') {
+    const dinRechts = S.oeff1 === 'dreh-r';
+    img.style.transform = dinRechts ? 'scaleX(-1)' : 'none';
   }
 
   // 2) Master-Bild für Produkt × Ansicht × Flügel-Key (inkl. '-oberlicht' Varianten)
