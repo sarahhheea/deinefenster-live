@@ -43,8 +43,7 @@
   };
   const GLASDEKOR_NAMES = {
     'klar':'Klarglas','satinato':'Satinato','chinchilla':'Chinchilla',
-    'master-carre':'Master Carré','master-liner':'Master Liner','sporadik':'Sporadik',
-    'nashiji':'Nashiji','flora':'Flora','cotswold':'Cotswold','kasha':'Kasha','autumn':'Autumn',
+    'master-carre':'Master Carré',
   };
   const SICHER_NAMES = { 'wk1':'WK1 Standard','rc2':'RC2 Einbruchschutz WK2','rc3':'RC3 Einbruchschutz WK3' };
   const ROLL_NAMES = { 'ohne':'Kein Rolladen','gurt':'Rolladen mit Gurtwickler','motor':'Motorrolladen' };
