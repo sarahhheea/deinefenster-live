@@ -200,8 +200,23 @@
   .card-interactive { transition: all 0.35s cubic-bezier(0.4,0,0.2,1); }
   .card-interactive:hover { border-color: rgba(34,94,170,0.35) !important; background: rgba(15,28,48,0.9) !important; }
 
+  /* ── FAQ-Artikel Hover ── */
+  .faq-hover { border-left: 3px solid transparent; padding-left: 16px; transition: border-color 0.3s ease, background 0.3s ease; }
+  .faq-hover:hover { border-left-color: #225eaa; background: rgba(34,94,170,0.06); }
+
+  /* ── CTA Glow Pulse ── */
+  .cta-glow { position: relative; overflow: hidden; }
+  .cta-glow::after { content: ''; position: absolute; inset: -2px; border-radius: inherit; background: linear-gradient(135deg, rgba(34,94,170,0.4), rgba(118,169,250,0.2)); opacity: 0; transition: opacity 0.4s ease; z-index: -1; }
+  .cta-glow:hover::after { opacity: 1; }
+
+  /* ── Link-Pfeil Animation ── */
+  .arrow-slide { display: inline-block; transition: transform 0.3s ease; }
+  .hover-lift:hover .arrow-slide, .faq-hover:hover .arrow-slide { transform: translateX(4px); }
+
   @media (prefers-reduced-motion: reduce) {
-    .hover-lift:hover, .hover-glow:hover, .hover-tag:hover { transform: none !important; }
+    .hover-lift:hover, .hover-glow:hover, .hover-tag:hover, .faq-hover:hover { transform: none !important; }
+    .arrow-slide { transition: none !important; }
+    .cta-glow::after { display: none; }
   }
 </style>
 </head>
@@ -556,7 +571,7 @@
       <!-- CTAs -->
       <div class="hero-btns hero-anim flex flex-col sm:flex-row gap-3" data-hero="4">
         <a href="konfigurator.html"
-           class="text-center font-bold text-base py-4 px-9 rounded-full text-white transition-all duration-200 hover:scale-[1.03] hover:brightness-110"
+           class="cta-glow text-center font-bold text-base py-4 px-9 rounded-full text-white transition-all duration-200 hover:scale-[1.03] hover:brightness-110"
            style="background:#225eaa;box-shadow:0 8px 32px rgba(34,94,170,0.45)">
           Jetzt Preis berechnen
         </a>
@@ -1246,11 +1261,11 @@
         <p class="text-sm leading-relaxed mb-4" style="color:rgba(232,238,255,0.65)">
           Der bewährte Allrounder. Beste Wahl für die <strong class="text-white">Standard-Sanierung im Altbau</strong>, Mietwohnungen oder als Vermieter mit knapper Kalkulation. 5-Kammer-Technik seit 20 Jahren bewährt.
         </p>
-        <a href="produkte/kunststofffenster/iglo-5-classic.html" class="text-primary font-bold text-sm hover:underline">Details &amp; Preis →</a>
+        <a href="produkte/kunststofffenster/iglo-5-classic.html" class="text-primary font-bold text-sm hover:underline">Details &amp; Preis <span class="arrow-slide">→</span></a>
       </div>
 
       <!-- IGLO Energy — für Neubau / KfW -->
-      <div class="rounded-2xl p-6 relative" style="background:linear-gradient(135deg,rgba(34,94,170,0.3),rgba(30,58,138,0.3));border:2px solid #76a9fa;">
+      <div class="rounded-2xl p-6 relative hover-lift" style="background:linear-gradient(135deg,rgba(34,94,170,0.3),rgba(30,58,138,0.3));border:2px solid #76a9fa;">
         <div class="absolute -top-3 left-5 bg-primary text-white px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">Empfehlung</div>
         <div class="inline-flex items-center gap-2 text-xs font-bold text-primary uppercase tracking-wider mb-3">
           <span class="material-symbols-outlined" style="font-size:18px">eco</span>
@@ -1265,7 +1280,7 @@
         <p class="text-sm leading-relaxed mb-4" style="color:rgba(232,238,255,0.75)">
           <strong class="text-white">KfW-förderfähig</strong> (BEG-Effizienzhaus 40/55). Beste Wahl für den Neubau mit hohem Energiestandard, oder für Sanierungen mit Fokus auf <strong class="text-white">Heizkosten-Senkung</strong>. 25 % besseres Uw als IGLO 5 Classic.
         </p>
-        <a href="produkte/kunststofffenster/iglo-energy.html" class="text-primary font-bold text-sm hover:underline">Details &amp; Preis →</a>
+        <a href="produkte/kunststofffenster/iglo-energy.html" class="text-primary font-bold text-sm hover:underline">Details &amp; Preis <span class="arrow-slide">→</span></a>
       </div>
 
       <!-- IGLO Edge — für Passivhaus -->
@@ -1283,7 +1298,7 @@
         <p class="text-sm leading-relaxed mb-4" style="color:rgba(232,238,255,0.65)">
           Drutex' technologischer Spitzenwert. Beste Wahl für <strong class="text-white">Passivhaus-Standard</strong>, KfW-Effizienzhaus 40 Plus, oder wenn Sie maximale Wärmedämmung wollen. Premium-Profil-Klasse A.
         </p>
-        <a href="produkte/kunststofffenster/iglo-edge.html" class="text-primary font-bold text-sm hover:underline">Details &amp; Preis →</a>
+        <a href="produkte/kunststofffenster/iglo-edge.html" class="text-primary font-bold text-sm hover:underline">Details &amp; Preis <span class="arrow-slide">→</span></a>
       </div>
 
       <!-- IGLO Light — für mehr Lichteinfall -->
@@ -1301,7 +1316,7 @@
         <p class="text-sm leading-relaxed mb-4" style="color:rgba(232,238,255,0.65)">
           Schlanke Profile für <strong class="text-white">mehr Lichteinfall</strong>. Beste Wahl wenn Glasfläche wichtiger ist als maximale Dämmung — kleine Räume, Studios, lichtarme Ausrichtung.
         </p>
-        <a href="produkte/kunststofffenster/iglo-light.html" class="text-primary font-bold text-sm hover:underline">Details &amp; Preis →</a>
+        <a href="produkte/kunststofffenster/iglo-light.html" class="text-primary font-bold text-sm hover:underline">Details &amp; Preis <span class="arrow-slide">→</span></a>
       </div>
 
     </div>
@@ -1325,56 +1340,56 @@
 
     <div class="space-y-7">
 
-      <article>
+      <article class="faq-hover rounded-lg">
         <h3 class="text-xl md:text-2xl font-extrabold mb-2" style="color:#e8eeff;">Was bedeutet der Uw-Wert beim Fenster?</h3>
         <p class="text-base leading-relaxed" style="color:rgba(232,238,255,0.75);">
           Der <strong>Uw-Wert</strong> ist das wichtigste Energiekriterium beim Fenster-Kauf — er gibt an, wie viel Wärme das gesamte Fenster (Glas plus Rahmen) pro Quadratmeter und Grad Temperaturunterschied verliert. Je niedriger der Uw, desto besser die Wärmedämmung. Drutex IGLO Energy hat Uw 0,71 W/(m²K) und ist damit Passivhaus-tauglich. IGLO 5 Classic liegt bei 0,83. Mehr im <a href="glossar.html#uw-wert" class="text-primary underline">Glossar</a>.
         </p>
       </article>
 
-      <article>
+      <article class="faq-hover rounded-lg">
         <h3 class="text-xl md:text-2xl font-extrabold mb-2" style="color:#e8eeff;">Wer haftet beim Aufmaß — ich oder der Händler?</h3>
         <p class="text-base leading-relaxed" style="color:rgba(232,238,255,0.75);">
           Bei selbst gemessenem Aufmaß tragen <strong>Sie das Risiko</strong> für falsche Maße — die Drutex-Fenster werden millimetergenau nach Auftrag gefertigt. Wir empfehlen daher: zweimal messen (oben/unten und links/rechts — das kleinere Maß zählt). Oder: nutzen Sie unser <strong>kostenloses Aufmaß-Angebot</strong> per WhatsApp. Bei Auftrag durch uns übernehmen wir die Aufmaß-Haftung. Wichtig: Sie messen das <strong>Rohbaumaß</strong> (Maueröffnung ohne Putz), das Fenster wird 10–20 mm kleiner gefertigt.
         </p>
       </article>
 
-      <article>
+      <article class="faq-hover rounded-lg">
         <h3 class="text-xl md:text-2xl font-extrabold mb-2" style="color:#e8eeff;">Selbst einbauen oder Handwerker beauftragen?</h3>
         <p class="text-base leading-relaxed" style="color:rgba(232,238,255,0.75);">
           Der <strong>Einbau</strong> erfordert handwerkliche Erfahrung — Justierung, Fugendichtung, Anschlüsse und Verquellschäumen müssen fachgerecht erfolgen. Bei nicht-fachgerechter <strong>Montage erlischt die Drutex-Gewährleistung</strong>. Wir empfehlen: erfahrene Tischler oder Fenstermonteure beauftragen. Auf Wunsch vermitteln wir Montage-Partner in Ihrer Region — Kosten typisch 80–150 € pro Fenster.
         </p>
       </article>
 
-      <article>
+      <article class="faq-hover rounded-lg">
         <h3 class="text-xl md:text-2xl font-extrabold mb-2" style="color:#e8eeff;">Welche Drutex-Fenster sind KfW-förderfähig?</h3>
         <p class="text-base leading-relaxed" style="color:rgba(232,238,255,0.75);">
           Die <strong>KfW-Förderung</strong> (Bundesförderung effiziente Gebäude, BEG) bezuschusst energetische Sanierung mit bis zu 20 %. Bedingung für Fenster: Uw maximal 0,95 W/(m²K). Förderfähig: <strong>IGLO Energy</strong> (Uw 0,71), <strong>IGLO Edge</strong> (Uw 0,66), IGLO Energy Classic. Nicht förderfähig: IGLO 5 Classic (Uw 0,83), IGLO Light (Uw 0,88). Wichtig: Antrag <strong>vor</strong> Auftragsvergabe stellen. <a href="kfw-foerderung.html" class="text-blue-700 font-bold hover:underline">→ Vollständiger Förder-Ratgeber 2026</a>
         </p>
       </article>
 
-      <article>
+      <article class="faq-hover rounded-lg">
         <h3 class="text-xl md:text-2xl font-extrabold mb-2" style="color:#e8eeff;">Wie viel Heizkosten spare ich mit neuen Drutex-Fenstern?</h3>
         <p class="text-base leading-relaxed" style="color:rgba(232,238,255,0.75);">
           Bei einem typischen Einfamilienhaus mit alten Fenstern (Uw &gt; 2,5) auf IGLO Energy (Uw 0,71) sparen Sie ca. 20–35 % der Heizkosten pro Jahr. Konkret: Bei 100 m² Fensterfläche und 2.500 € Jahres-Heizkosten sind das 500–875 € pro Jahr. Über 15 Jahre amortisiert sich der Mehrpreis von IGLO Energy gegenüber IGLO 5 Classic in der Regel komplett — plus KfW-Förderung.
         </p>
       </article>
 
-      <article>
+      <article class="faq-hover rounded-lg">
         <h3 class="text-xl md:text-2xl font-extrabold mb-2" style="color:#e8eeff;">Was bedeutet 10 Jahre Drutex-Gewährleistung konkret?</h3>
         <p class="text-base leading-relaxed" style="color:rgba(232,238,255,0.75);">
           Die <strong>Drutex-Herstellergarantie</strong> umfasst 10 Jahre auf das Profil (Vergilbung, Verzug, Versprödung) und 5 Jahre auf den Beschlag (Mechanik). Plus 2 Jahre gesetzliche <strong>Gewährleistung</strong> auf Material- und Verarbeitungsfehler. Nicht abgedeckt: Transportschäden (sofort bei Anlieferung melden), Schäden durch unfachgemäße Montage, Kratzer durch Bauarbeiten.
         </p>
       </article>
 
-      <article>
+      <article class="faq-hover rounded-lg">
         <h3 class="text-xl md:text-2xl font-extrabold mb-2" style="color:#e8eeff;">Wie lange dauert die Lieferung von Drutex-Fenstern nach Maß?</h3>
         <p class="text-base leading-relaxed" style="color:rgba(232,238,255,0.75);">
           Maßgefertigte Drutex-Fenster: <strong>2–4 Wochen</strong> ab Auftragsbestätigung. Bei größeren Bestellungen (10+ Fenster) bis 5 Wochen. Versand erfolgt deutschlandweit per Spedition bis zur Bordsteinkante. Im Großraum Brandenburg/Berlin/Potsdam liefern wir oft mit eigenem Fahrzeug. Wenn Sie es eilig haben: schauen Sie in unseren <a href="shop.html" class="text-primary underline">Lager-Shop</a> — dort sind Standard-Drutex-Fenster sofort lieferbar in 3–7 Werktagen.
         </p>
       </article>
 
-      <article>
+      <article class="faq-hover rounded-lg">
         <h3 class="text-xl md:text-2xl font-extrabold mb-2" style="color:#e8eeff;">Brauche ich neue Fenster für Passivhaus-Standard?</h3>
         <p class="text-base leading-relaxed" style="color:rgba(232,238,255,0.75);">
           <strong>Passivhaus-Standard</strong> verlangt extrem dichte Gebäudehülle und Uw-Werte unter 0,80 W/(m²K) bei Fenstern. Drutex IGLO Energy (Uw 0,71) und IGLO Edge (Uw 0,66) erfüllen diesen Standard. Wichtig: 3-fach Verglasung mit Argon-Füllung, Warme-Kante-Abstandhalter und fachgerechter Einbau mit luftdichter Anbindung sind Pflicht. Für Neubau-Projekte mit Passivhaus-Anspruch ist IGLO Edge die sicherste Wahl.
