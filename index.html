@@ -186,6 +186,16 @@
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js" defer></script>
 <script src="js/scroll-animations.js" defer></script>
 <style>
+  /* ── Stepper Glow Animation ── */
+  @keyframes stepGlow { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+  .step-card { position: relative; }
+  .step-card::before { content:''; position:absolute; inset:-1px; border-radius:inherit; background:linear-gradient(135deg,rgba(34,94,170,0),rgba(118,169,250,0)); opacity:0; transition:opacity 0.4s ease; z-index:0; pointer-events:none; }
+  .step-card.step-active::before { background:linear-gradient(135deg,rgba(34,94,170,0.15),rgba(118,169,250,0.08)); opacity:1; }
+  .step-circle { transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.4s ease !important; }
+  .step-circle.circle-active { transform: scale(1.25) !important; box-shadow: 0 0 24px rgba(34,94,170,0.7), 0 0 48px rgba(118,169,250,0.2) !important; }
+  .step-card .step-icon { transition: transform 0.3s ease, color 0.3s ease; }
+  .step-card.step-active .step-icon { transform: scale(1.1); color: #76a9fa !important; }
+
   /* ── Interaktive Hover-Effekte ── */
   .hover-lift { transition: transform 0.3s cubic-bezier(0.4,0,0.2,1), box-shadow 0.3s ease, border-color 0.3s ease; }
   .hover-lift:hover { transform: translateY(-6px); box-shadow: 0 20px 40px rgba(0,0,0,0.3); border-color: rgba(34,94,170,0.4) !important; }
@@ -200,9 +210,13 @@
   .card-interactive { transition: all 0.35s cubic-bezier(0.4,0,0.2,1); }
   .card-interactive:hover { border-color: rgba(34,94,170,0.35) !important; background: rgba(15,28,48,0.9) !important; }
 
-  /* ── FAQ-Artikel Hover ── */
-  .faq-hover { border-left: 3px solid transparent; padding-left: 16px; transition: border-color 0.3s ease, background 0.3s ease; }
-  .faq-hover:hover { border-left-color: #225eaa; background: rgba(34,94,170,0.06); }
+  /* ── FAQ Akkordeon ── */
+  .faq-item { transition: border-color 0.3s ease, background 0.3s ease; }
+  .faq-item:hover { border-color: rgba(34,94,170,0.3) !important; background: rgba(34,94,170,0.04) !important; }
+  .faq-item[open] { border-color: rgba(34,94,170,0.25) !important; background: rgba(34,94,170,0.06) !important; }
+  .faq-item summary::-webkit-details-marker { display: none; }
+  .faq-item[open] .faq-chevron { transform: rotate(180deg); }
+  .faq-item summary:focus-visible { outline: 2px solid #225eaa; outline-offset: 2px; border-radius: 12px; }
 
   /* ── CTA Glow Pulse ── */
   .cta-glow { position: relative; overflow: hidden; }
@@ -214,7 +228,7 @@
   .hover-lift:hover .arrow-slide, .faq-hover:hover .arrow-slide { transform: translateX(4px); }
 
   @media (prefers-reduced-motion: reduce) {
-    .hover-lift:hover, .hover-glow:hover, .hover-tag:hover, .faq-hover:hover { transform: none !important; }
+    .hover-lift:hover, .hover-glow:hover, .hover-tag:hover { transform: none !important; }
     .arrow-slide { transition: none !important; }
     .cta-glow::after { display: none; }
   }
@@ -933,14 +947,15 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6 relative" id="stepCards">
       <!-- Fortschritts-Linie (nur Desktop, verbindet die Kreise) -->
-      <div id="stepLineTrack" class="hidden lg:block absolute pointer-events-none" style="height:3px;border-radius:2px;background:rgba(255,255,255,0.1);z-index:5"></div>
-      <div id="stepLineFill" class="hidden lg:block absolute pointer-events-none" style="height:3px;border-radius:2px;background:#225eaa;z-index:6;width:0;transition:width 0.5s cubic-bezier(0.4,0,0.2,1)"></div>
+      <div id="stepLineTrack" class="hidden lg:block absolute pointer-events-none" style="height:3px;border-radius:99px;background:rgba(255,255,255,0.06);z-index:5"></div>
+      <div id="stepLineFill" class="hidden lg:block absolute pointer-events-none" style="height:3px;border-radius:99px;background:linear-gradient(90deg,#225eaa,#76a9fa,#225eaa);background-size:200% 100%;z-index:6;width:0;transition:width 0.6s cubic-bezier(0.34,1.56,0.64,1);animation:stepGlow 2s ease-in-out infinite paused"></div>
+      <div id="stepLineGlow" class="hidden lg:block absolute pointer-events-none" style="height:12px;border-radius:99px;background:linear-gradient(90deg,transparent,rgba(118,169,250,0.4),transparent);z-index:5;width:0;filter:blur(6px);transition:width 0.6s cubic-bezier(0.34,1.56,0.64,1);opacity:0;transform:translateY(-4px)"></div>
 
       <!-- Schritt 1 -->
       <a href="konfigurator.html" class="step-card relative rounded-2xl p-7 block no-underline" style="background:#0a1225;border:1px solid rgba(255,255,255,0.08);transition:border-color 0.3s,box-shadow 0.3s" data-step="1">
         <div class="step-circle absolute -top-4 left-6 w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-extrabold text-lg" style="font-family:'Archivo',sans-serif;transition:transform 0.3s,box-shadow 0.3s;z-index:10">1</div>
         <div class="mt-4">
-          <span class="material-symbols-outlined text-primary mb-4 block" style="font-size:40px;font-variation-settings:'FILL' 1">settings</span>
+          <span class="material-symbols-outlined text-primary mb-4 block step-icon" style="font-size:40px;font-variation-settings:'FILL' 1">settings</span>
           <h3 class="font-extrabold text-xl text-white mb-2">Konfigurieren</h3>
           <p class="text-sm leading-relaxed" style="color:rgba(232,238,255,0.65)">Wählen Sie Profil, Maße, Farbe, Verglasung und Zubehör in unserem Online-Konfigurator. Live-Preis sofort sichtbar.</p>
         </div>
@@ -949,7 +964,7 @@
       <a href="kontakt.html" class="step-card relative rounded-2xl p-7 block no-underline" style="background:#0a1225;border:1px solid rgba(255,255,255,0.08);transition:border-color 0.3s,box-shadow 0.3s" data-step="2">
         <div class="step-circle absolute -top-4 left-6 w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-extrabold text-lg" style="font-family:'Archivo',sans-serif;transition:transform 0.3s,box-shadow 0.3s;z-index:10">2</div>
         <div class="mt-4">
-          <span class="material-symbols-outlined text-primary mb-4 block" style="font-size:40px;font-variation-settings:'FILL' 1">mail</span>
+          <span class="material-symbols-outlined text-primary mb-4 block step-icon" style="font-size:40px;font-variation-settings:'FILL' 1">mail</span>
           <h3 class="font-extrabold text-xl text-white mb-2">Angebot per E-Mail</h3>
           <p class="text-sm leading-relaxed" style="color:rgba(232,238,255,0.65)">Wir prüfen Ihre Konfiguration, kalkulieren Versand &amp; Details und senden Ihnen ein schriftliches, unverbindliches Angebot zu.</p>
         </div>
@@ -958,7 +973,7 @@
       <a href="faq.html" class="step-card relative rounded-2xl p-7 block no-underline" style="background:#0a1225;border:1px solid rgba(255,255,255,0.08);transition:border-color 0.3s,box-shadow 0.3s" data-step="3">
         <div class="step-circle absolute -top-4 left-6 w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-extrabold text-lg" style="font-family:'Archivo',sans-serif;transition:transform 0.3s,box-shadow 0.3s;z-index:10">3</div>
         <div class="mt-4">
-          <span class="material-symbols-outlined text-primary mb-4 block" style="font-size:40px;font-variation-settings:'FILL' 1">check_circle</span>
+          <span class="material-symbols-outlined text-primary mb-4 block step-icon" style="font-size:40px;font-variation-settings:'FILL' 1">check_circle</span>
           <h3 class="font-extrabold text-xl text-white mb-2">Bestätigen</h3>
           <p class="text-sm leading-relaxed" style="color:rgba(232,238,255,0.65)">Sie bestätigen das Angebot, überweisen 40 % Anzahlung — ab dann beginnt Drutex mit der Fertigung Ihrer Maßanfertigung.</p>
         </div>
@@ -967,7 +982,7 @@
       <a href="faq.html" class="step-card relative rounded-2xl p-7 block no-underline" style="background:#0a1225;border:1px solid rgba(255,255,255,0.08);transition:border-color 0.3s,box-shadow 0.3s" data-step="4">
         <div class="step-circle absolute -top-4 left-6 w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-extrabold text-lg" style="font-family:'Archivo',sans-serif;transition:transform 0.3s,box-shadow 0.3s;z-index:10">4</div>
         <div class="mt-4">
-          <span class="material-symbols-outlined text-primary mb-4 block" style="font-size:40px;font-variation-settings:'FILL' 1">local_shipping</span>
+          <span class="material-symbols-outlined text-primary mb-4 block step-icon" style="font-size:40px;font-variation-settings:'FILL' 1">local_shipping</span>
           <h3 class="font-extrabold text-xl text-white mb-2">Lieferung</h3>
           <p class="text-sm leading-relaxed" style="color:rgba(232,238,255,0.65)">Ab 4.000 € oder 10 Stück <strong class="text-white">versandkostenfrei</strong>. Lieferung deutschlandweit per Spedition auf Einwegpalette — LKW mit eigenem Stapler.</p>
         </div>
@@ -985,7 +1000,7 @@
      LIEFERGEBIETE + LIEFERBEDINGUNGEN — SEO-optimiert
      Alle 16 Bundesländer + Top-Städte für "Fenster bestellen [Stadt]"
      ════════════════════════════════════════════════════════════════ -->
-<section class="py-20 md:py-28" style="background:#0f1c30;">
+<section id="liefergebiete" class="py-20 md:py-28" style="background:#0f1c30;">
   <div class="max-w-[1440px] mx-auto px-6 md:px-12">
 
     <!-- Oberer Bereich: Icon + Text + Lieferbedingungen -->
@@ -1194,31 +1209,31 @@
   <div class="max-w-[1440px] mx-auto px-6 md:px-12">
     <div class="text-center text-xs font-bold uppercase tracking-[0.2em] mb-6" style="color:rgba(255,255,255,0.4)">Vertrauen, das sich belegen lässt</div>
     <div class="grid grid-cols-2 md:grid-cols-5 gap-6 md:gap-8 items-stretch">
-      <div class="flex flex-col items-center text-center gap-2 p-4 rounded-xl hover-glow" style="background:#0f1c30;border:1px solid rgba(255,255,255,0.08)">
+      <a href="ueber-drutex.html" class="flex flex-col items-center text-center gap-2 p-4 rounded-xl hover-glow no-underline" style="background:#0f1c30;border:1px solid rgba(255,255,255,0.08)">
         <span class="material-symbols-outlined" style="font-size:34px;font-variation-settings:'FILL' 1;color:#76a9fa">verified</span>
         <div class="text-xs font-bold text-white">Drutex-zertifizierter</div>
         <div class="text-xs" style="color:rgba(232,238,255,0.55)">Fachhandelspartner</div>
-      </div>
-      <div class="flex flex-col items-center text-center gap-2 p-4 rounded-xl hover-glow" style="background:#0f1c30;border:1px solid rgba(255,255,255,0.08)">
+      </a>
+      <a href="glossar.html#geg" class="flex flex-col items-center text-center gap-2 p-4 rounded-xl hover-glow no-underline" style="background:#0f1c30;border:1px solid rgba(255,255,255,0.08)">
         <span class="material-symbols-outlined" style="font-size:34px;font-variation-settings:'FILL' 1;color:#76a9fa">eco</span>
         <div class="text-xs font-bold text-white">GEG 2024</div>
         <div class="text-xs" style="color:rgba(232,238,255,0.55)">konform produziert</div>
-      </div>
-      <div class="flex flex-col items-center text-center gap-2 p-4 rounded-xl hover-glow" style="background:#0f1c30;border:1px solid rgba(255,255,255,0.08)">
+      </a>
+      <a href="datenschutz.html" class="flex flex-col items-center text-center gap-2 p-4 rounded-xl hover-glow no-underline" style="background:#0f1c30;border:1px solid rgba(255,255,255,0.08)">
         <span class="material-symbols-outlined" style="font-size:34px;font-variation-settings:'FILL' 1;color:#76a9fa">shield_lock</span>
         <div class="text-xs font-bold text-white">DSGVO</div>
         <div class="text-xs" style="color:rgba(232,238,255,0.55)">100 % datenschutzkonform</div>
-      </div>
-      <div class="flex flex-col items-center text-center gap-2 p-4 rounded-xl hover-glow" style="background:#0f1c30;border:1px solid rgba(255,255,255,0.08)">
+      </a>
+      <a href="ueber-drutex.html#qualitaet" class="flex flex-col items-center text-center gap-2 p-4 rounded-xl hover-glow no-underline" style="background:#0f1c30;border:1px solid rgba(255,255,255,0.08)">
         <span class="material-symbols-outlined" style="font-size:34px;font-variation-settings:'FILL' 1;color:#76a9fa">handshake</span>
         <div class="text-xs font-bold text-white">RAL-Gütegemeinschaft</div>
         <div class="text-xs" style="color:rgba(232,238,255,0.55)">anerkannte Qualität</div>
-      </div>
-      <div class="flex flex-col items-center text-center gap-2 p-4 rounded-xl hover-glow" style="background:#0f1c30;border:1px solid rgba(255,255,255,0.08)">
+      </a>
+      <a href="#liefergebiete" class="flex flex-col items-center text-center gap-2 p-4 rounded-xl hover-glow no-underline" style="background:#0f1c30;border:1px solid rgba(255,255,255,0.08)">
         <span class="material-symbols-outlined" style="font-size:34px;font-variation-settings:'FILL' 1;color:#76a9fa">local_shipping</span>
         <div class="text-xs font-bold text-white">Deutschlandweit</div>
         <div class="text-xs" style="color:rgba(232,238,255,0.55)">Direkt-Lieferung ab Werk</div>
-      </div>
+      </a>
     </div>
   </div>
 </section>
@@ -1247,7 +1262,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
 
       <!-- IGLO 5 Classic — für Sanierung -->
-      <div class="rounded-2xl p-6 hover-lift" style="background:#0f1c30;border:1px solid rgba(255,255,255,0.08);">
+      <a href="produkte/kunststofffenster/iglo-5-classic.html" class="rounded-2xl p-6 hover-lift block no-underline cursor-pointer group" style="background:#0f1c30;border:1px solid rgba(255,255,255,0.08);">
         <div class="inline-flex items-center gap-2 text-xs font-bold text-primary uppercase tracking-wider mb-3">
           <span class="material-symbols-outlined" style="font-size:18px">home</span>
           Sanierung Bestandsbau
@@ -1261,11 +1276,11 @@
         <p class="text-sm leading-relaxed mb-4" style="color:rgba(232,238,255,0.65)">
           Der bewährte Allrounder. Beste Wahl für die <strong class="text-white">Standard-Sanierung im Altbau</strong>, Mietwohnungen oder als Vermieter mit knapper Kalkulation. 5-Kammer-Technik seit 20 Jahren bewährt.
         </p>
-        <a href="produkte/kunststofffenster/iglo-5-classic.html" class="text-primary font-bold text-sm hover:underline">Details &amp; Preis <span class="arrow-slide">→</span></a>
-      </div>
+        <span class="text-primary font-bold text-sm group-hover:underline">Details &amp; Preis <span class="arrow-slide">→</span></span>
+      </a>
 
       <!-- IGLO Energy — für Neubau / KfW -->
-      <div class="rounded-2xl p-6 relative hover-lift" style="background:linear-gradient(135deg,rgba(34,94,170,0.3),rgba(30,58,138,0.3));border:2px solid #76a9fa;">
+      <a href="produkte/kunststofffenster/iglo-energy.html" class="rounded-2xl p-6 relative hover-lift block no-underline cursor-pointer group" style="background:linear-gradient(135deg,rgba(34,94,170,0.3),rgba(30,58,138,0.3));border:2px solid #76a9fa;">
         <div class="absolute -top-3 left-5 bg-primary text-white px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">Empfehlung</div>
         <div class="inline-flex items-center gap-2 text-xs font-bold text-primary uppercase tracking-wider mb-3">
           <span class="material-symbols-outlined" style="font-size:18px">eco</span>
@@ -1280,11 +1295,11 @@
         <p class="text-sm leading-relaxed mb-4" style="color:rgba(232,238,255,0.75)">
           <strong class="text-white">KfW-förderfähig</strong> (BEG-Effizienzhaus 40/55). Beste Wahl für den Neubau mit hohem Energiestandard, oder für Sanierungen mit Fokus auf <strong class="text-white">Heizkosten-Senkung</strong>. 25 % besseres Uw als IGLO 5 Classic.
         </p>
-        <a href="produkte/kunststofffenster/iglo-energy.html" class="text-primary font-bold text-sm hover:underline">Details &amp; Preis <span class="arrow-slide">→</span></a>
-      </div>
+        <span class="text-primary font-bold text-sm group-hover:underline">Details &amp; Preis <span class="arrow-slide">→</span></span>
+      </a>
 
       <!-- IGLO Edge — für Passivhaus -->
-      <div class="rounded-2xl p-6 hover-lift" style="background:#0f1c30;border:1px solid rgba(255,255,255,0.08);">
+      <a href="produkte/kunststofffenster/iglo-edge.html" class="rounded-2xl p-6 hover-lift block no-underline cursor-pointer group" style="background:#0f1c30;border:1px solid rgba(255,255,255,0.08);">
         <div class="inline-flex items-center gap-2 text-xs font-bold text-primary uppercase tracking-wider mb-3">
           <span class="material-symbols-outlined" style="font-size:18px">diamond</span>
           Passivhaus · Premium
@@ -1298,11 +1313,11 @@
         <p class="text-sm leading-relaxed mb-4" style="color:rgba(232,238,255,0.65)">
           Drutex' technologischer Spitzenwert. Beste Wahl für <strong class="text-white">Passivhaus-Standard</strong>, KfW-Effizienzhaus 40 Plus, oder wenn Sie maximale Wärmedämmung wollen. Premium-Profil-Klasse A.
         </p>
-        <a href="produkte/kunststofffenster/iglo-edge.html" class="text-primary font-bold text-sm hover:underline">Details &amp; Preis <span class="arrow-slide">→</span></a>
-      </div>
+        <span class="text-primary font-bold text-sm group-hover:underline">Details &amp; Preis <span class="arrow-slide">→</span></span>
+      </a>
 
       <!-- IGLO Light — für mehr Lichteinfall -->
-      <div class="rounded-2xl p-6 hover-lift" style="background:#0f1c30;border:1px solid rgba(255,255,255,0.08);">
+      <a href="produkte/kunststofffenster/iglo-light.html" class="rounded-2xl p-6 hover-lift block no-underline cursor-pointer group" style="background:#0f1c30;border:1px solid rgba(255,255,255,0.08);">
         <div class="inline-flex items-center gap-2 text-xs font-bold text-primary uppercase tracking-wider mb-3">
           <span class="material-symbols-outlined" style="font-size:18px">wb_sunny</span>
           Mehr Licht · Schlanke Profile
@@ -1316,8 +1331,8 @@
         <p class="text-sm leading-relaxed mb-4" style="color:rgba(232,238,255,0.65)">
           Schlanke Profile für <strong class="text-white">mehr Lichteinfall</strong>. Beste Wahl wenn Glasfläche wichtiger ist als maximale Dämmung — kleine Räume, Studios, lichtarme Ausrichtung.
         </p>
-        <a href="produkte/kunststofffenster/iglo-light.html" class="text-primary font-bold text-sm hover:underline">Details &amp; Preis <span class="arrow-slide">→</span></a>
-      </div>
+        <span class="text-primary font-bold text-sm group-hover:underline">Details &amp; Preis <span class="arrow-slide">→</span></span>
+      </a>
 
     </div>
 
@@ -1338,63 +1353,103 @@
       </p>
     </div>
 
-    <div class="space-y-7">
+    <div class="space-y-3" id="faqAccordion">
 
-      <article class="faq-hover rounded-lg">
-        <h3 class="text-xl md:text-2xl font-extrabold mb-2" style="color:#e8eeff;">Was bedeutet der Uw-Wert beim Fenster?</h3>
-        <p class="text-base leading-relaxed" style="color:rgba(232,238,255,0.75);">
-          Der <strong>Uw-Wert</strong> ist das wichtigste Energiekriterium beim Fenster-Kauf — er gibt an, wie viel Wärme das gesamte Fenster (Glas plus Rahmen) pro Quadratmeter und Grad Temperaturunterschied verliert. Je niedriger der Uw, desto besser die Wärmedämmung. Drutex IGLO Energy hat Uw 0,71 W/(m²K) und ist damit Passivhaus-tauglich. IGLO 5 Classic liegt bei 0,83. Mehr im <a href="glossar.html#uw-wert" class="text-primary underline">Glossar</a>.
-        </p>
-      </article>
+      <details class="faq-item rounded-xl group" open style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08)">
+        <summary class="flex items-center justify-between cursor-pointer p-5 md:p-6 select-none list-none">
+          <h3 class="text-lg md:text-xl font-extrabold pr-4" style="color:#e8eeff;">Was bedeutet der Uw-Wert beim Fenster?</h3>
+          <span class="material-symbols-outlined faq-chevron flex-shrink-0 text-primary transition-transform duration-300" style="font-size:24px">expand_more</span>
+        </summary>
+        <div class="px-5 md:px-6 pb-5 md:pb-6 pt-0">
+          <p class="text-base leading-relaxed" style="color:rgba(232,238,255,0.75);">
+            Der <strong>Uw-Wert</strong> ist das wichtigste Energiekriterium beim Fenster-Kauf — er gibt an, wie viel Wärme das gesamte Fenster (Glas plus Rahmen) pro Quadratmeter und Grad Temperaturunterschied verliert. Je niedriger der Uw, desto besser die Wärmedämmung. Drutex IGLO Energy hat Uw 0,71 W/(m²K) und ist damit Passivhaus-tauglich. IGLO 5 Classic liegt bei 0,83. Mehr im <a href="glossar.html#uw-wert" class="text-primary underline">Glossar</a>.
+          </p>
+        </div>
+      </details>
 
-      <article class="faq-hover rounded-lg">
-        <h3 class="text-xl md:text-2xl font-extrabold mb-2" style="color:#e8eeff;">Wer haftet beim Aufmaß — ich oder der Händler?</h3>
-        <p class="text-base leading-relaxed" style="color:rgba(232,238,255,0.75);">
-          Bei selbst gemessenem Aufmaß tragen <strong>Sie das Risiko</strong> für falsche Maße — die Drutex-Fenster werden millimetergenau nach Auftrag gefertigt. Wir empfehlen daher: zweimal messen (oben/unten und links/rechts — das kleinere Maß zählt). Oder: nutzen Sie unser <strong>kostenloses Aufmaß-Angebot</strong> per WhatsApp. Bei Auftrag durch uns übernehmen wir die Aufmaß-Haftung. Wichtig: Sie messen das <strong>Rohbaumaß</strong> (Maueröffnung ohne Putz), das Fenster wird 10–20 mm kleiner gefertigt.
-        </p>
-      </article>
+      <details class="faq-item rounded-xl group" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08)">
+        <summary class="flex items-center justify-between cursor-pointer p-5 md:p-6 select-none list-none">
+          <h3 class="text-lg md:text-xl font-extrabold pr-4" style="color:#e8eeff;">Wer haftet beim Aufmaß — ich oder der Händler?</h3>
+          <span class="material-symbols-outlined faq-chevron flex-shrink-0 text-primary transition-transform duration-300" style="font-size:24px">expand_more</span>
+        </summary>
+        <div class="px-5 md:px-6 pb-5 md:pb-6 pt-0">
+          <p class="text-base leading-relaxed" style="color:rgba(232,238,255,0.75);">
+            Bei selbst gemessenem Aufmaß tragen <strong>Sie das Risiko</strong> für falsche Maße — die Drutex-Fenster werden millimetergenau nach Auftrag gefertigt. Wir empfehlen daher: zweimal messen (oben/unten und links/rechts — das kleinere Maß zählt). Oder: nutzen Sie unser <strong>kostenloses Aufmaß-Angebot</strong> per WhatsApp. Bei Auftrag durch uns übernehmen wir die Aufmaß-Haftung. Wichtig: Sie messen das <strong>Rohbaumaß</strong> (Maueröffnung ohne Putz), das Fenster wird 10–20 mm kleiner gefertigt.
+          </p>
+        </div>
+      </details>
 
-      <article class="faq-hover rounded-lg">
-        <h3 class="text-xl md:text-2xl font-extrabold mb-2" style="color:#e8eeff;">Selbst einbauen oder Handwerker beauftragen?</h3>
-        <p class="text-base leading-relaxed" style="color:rgba(232,238,255,0.75);">
-          Der <strong>Einbau</strong> erfordert handwerkliche Erfahrung — Justierung, Fugendichtung, Anschlüsse und Verquellschäumen müssen fachgerecht erfolgen. Bei nicht-fachgerechter <strong>Montage erlischt die Drutex-Gewährleistung</strong>. Wir empfehlen: erfahrene Tischler oder Fenstermonteure beauftragen. Auf Wunsch vermitteln wir Montage-Partner in Ihrer Region — Kosten typisch 80–150 € pro Fenster.
-        </p>
-      </article>
+      <details class="faq-item rounded-xl group" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08)">
+        <summary class="flex items-center justify-between cursor-pointer p-5 md:p-6 select-none list-none">
+          <h3 class="text-lg md:text-xl font-extrabold pr-4" style="color:#e8eeff;">Selbst einbauen oder Handwerker beauftragen?</h3>
+          <span class="material-symbols-outlined faq-chevron flex-shrink-0 text-primary transition-transform duration-300" style="font-size:24px">expand_more</span>
+        </summary>
+        <div class="px-5 md:px-6 pb-5 md:pb-6 pt-0">
+          <p class="text-base leading-relaxed" style="color:rgba(232,238,255,0.75);">
+            Der <strong>Einbau</strong> erfordert handwerkliche Erfahrung — Justierung, Fugendichtung, Anschlüsse und Verquellschäumen müssen fachgerecht erfolgen. Bei nicht-fachgerechter <strong>Montage erlischt die Drutex-Gewährleistung</strong>. Wir empfehlen: erfahrene Tischler oder Fenstermonteure beauftragen. Auf Wunsch vermitteln wir Montage-Partner in Ihrer Region — Kosten typisch 80–150 € pro Fenster.
+          </p>
+        </div>
+      </details>
 
-      <article class="faq-hover rounded-lg">
-        <h3 class="text-xl md:text-2xl font-extrabold mb-2" style="color:#e8eeff;">Welche Drutex-Fenster sind KfW-förderfähig?</h3>
-        <p class="text-base leading-relaxed" style="color:rgba(232,238,255,0.75);">
-          Die <strong>KfW-Förderung</strong> (Bundesförderung effiziente Gebäude, BEG) bezuschusst energetische Sanierung mit bis zu 20 %. Bedingung für Fenster: Uw maximal 0,95 W/(m²K). Förderfähig: <strong>IGLO Energy</strong> (Uw 0,71), <strong>IGLO Edge</strong> (Uw 0,66), IGLO Energy Classic. Nicht förderfähig: IGLO 5 Classic (Uw 0,83), IGLO Light (Uw 0,88). Wichtig: Antrag <strong>vor</strong> Auftragsvergabe stellen. <a href="kfw-foerderung.html" class="text-blue-700 font-bold hover:underline">→ Vollständiger Förder-Ratgeber 2026</a>
-        </p>
-      </article>
+      <details class="faq-item rounded-xl group" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08)">
+        <summary class="flex items-center justify-between cursor-pointer p-5 md:p-6 select-none list-none">
+          <h3 class="text-lg md:text-xl font-extrabold pr-4" style="color:#e8eeff;">Welche Drutex-Fenster sind KfW-förderfähig?</h3>
+          <span class="material-symbols-outlined faq-chevron flex-shrink-0 text-primary transition-transform duration-300" style="font-size:24px">expand_more</span>
+        </summary>
+        <div class="px-5 md:px-6 pb-5 md:pb-6 pt-0">
+          <p class="text-base leading-relaxed" style="color:rgba(232,238,255,0.75);">
+            Die <strong>KfW-Förderung</strong> (Bundesförderung effiziente Gebäude, BEG) bezuschusst energetische Sanierung mit bis zu 20 %. Bedingung für Fenster: Uw maximal 0,95 W/(m²K). Förderfähig: <strong>IGLO Energy</strong> (Uw 0,71), <strong>IGLO Edge</strong> (Uw 0,66), IGLO Energy Classic. Nicht förderfähig: IGLO 5 Classic (Uw 0,83), IGLO Light (Uw 0,88). Wichtig: Antrag <strong>vor</strong> Auftragsvergabe stellen. <a href="kfw-foerderung.html" class="text-primary font-bold hover:underline">Vollständiger Förder-Ratgeber 2026 →</a>
+          </p>
+        </div>
+      </details>
 
-      <article class="faq-hover rounded-lg">
-        <h3 class="text-xl md:text-2xl font-extrabold mb-2" style="color:#e8eeff;">Wie viel Heizkosten spare ich mit neuen Drutex-Fenstern?</h3>
-        <p class="text-base leading-relaxed" style="color:rgba(232,238,255,0.75);">
-          Bei einem typischen Einfamilienhaus mit alten Fenstern (Uw &gt; 2,5) auf IGLO Energy (Uw 0,71) sparen Sie ca. 20–35 % der Heizkosten pro Jahr. Konkret: Bei 100 m² Fensterfläche und 2.500 € Jahres-Heizkosten sind das 500–875 € pro Jahr. Über 15 Jahre amortisiert sich der Mehrpreis von IGLO Energy gegenüber IGLO 5 Classic in der Regel komplett — plus KfW-Förderung.
-        </p>
-      </article>
+      <details class="faq-item rounded-xl group" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08)">
+        <summary class="flex items-center justify-between cursor-pointer p-5 md:p-6 select-none list-none">
+          <h3 class="text-lg md:text-xl font-extrabold pr-4" style="color:#e8eeff;">Wie viel Heizkosten spare ich mit neuen Drutex-Fenstern?</h3>
+          <span class="material-symbols-outlined faq-chevron flex-shrink-0 text-primary transition-transform duration-300" style="font-size:24px">expand_more</span>
+        </summary>
+        <div class="px-5 md:px-6 pb-5 md:pb-6 pt-0">
+          <p class="text-base leading-relaxed" style="color:rgba(232,238,255,0.75);">
+            Bei einem typischen Einfamilienhaus mit alten Fenstern (Uw &gt; 2,5) auf IGLO Energy (Uw 0,71) sparen Sie ca. 20–35 % der Heizkosten pro Jahr. Konkret: Bei 100 m² Fensterfläche und 2.500 € Jahres-Heizkosten sind das 500–875 € pro Jahr. Über 15 Jahre amortisiert sich der Mehrpreis von IGLO Energy gegenüber IGLO 5 Classic in der Regel komplett — plus KfW-Förderung.
+          </p>
+        </div>
+      </details>
 
-      <article class="faq-hover rounded-lg">
-        <h3 class="text-xl md:text-2xl font-extrabold mb-2" style="color:#e8eeff;">Was bedeutet 10 Jahre Drutex-Gewährleistung konkret?</h3>
-        <p class="text-base leading-relaxed" style="color:rgba(232,238,255,0.75);">
-          Die <strong>Drutex-Herstellergarantie</strong> umfasst 10 Jahre auf das Profil (Vergilbung, Verzug, Versprödung) und 5 Jahre auf den Beschlag (Mechanik). Plus 2 Jahre gesetzliche <strong>Gewährleistung</strong> auf Material- und Verarbeitungsfehler. Nicht abgedeckt: Transportschäden (sofort bei Anlieferung melden), Schäden durch unfachgemäße Montage, Kratzer durch Bauarbeiten.
-        </p>
-      </article>
+      <details class="faq-item rounded-xl group" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08)">
+        <summary class="flex items-center justify-between cursor-pointer p-5 md:p-6 select-none list-none">
+          <h3 class="text-lg md:text-xl font-extrabold pr-4" style="color:#e8eeff;">Was bedeutet 10 Jahre Drutex-Gewährleistung konkret?</h3>
+          <span class="material-symbols-outlined faq-chevron flex-shrink-0 text-primary transition-transform duration-300" style="font-size:24px">expand_more</span>
+        </summary>
+        <div class="px-5 md:px-6 pb-5 md:pb-6 pt-0">
+          <p class="text-base leading-relaxed" style="color:rgba(232,238,255,0.75);">
+            Die <strong>Drutex-Herstellergarantie</strong> umfasst 10 Jahre auf das Profil (Vergilbung, Verzug, Versprödung) und 5 Jahre auf den Beschlag (Mechanik). Plus 2 Jahre gesetzliche <strong>Gewährleistung</strong> auf Material- und Verarbeitungsfehler. Nicht abgedeckt: Transportschäden (sofort bei Anlieferung melden), Schäden durch unfachgemäße Montage, Kratzer durch Bauarbeiten.
+          </p>
+        </div>
+      </details>
 
-      <article class="faq-hover rounded-lg">
-        <h3 class="text-xl md:text-2xl font-extrabold mb-2" style="color:#e8eeff;">Wie lange dauert die Lieferung von Drutex-Fenstern nach Maß?</h3>
-        <p class="text-base leading-relaxed" style="color:rgba(232,238,255,0.75);">
-          Maßgefertigte Drutex-Fenster: <strong>2–4 Wochen</strong> ab Auftragsbestätigung. Bei größeren Bestellungen (10+ Fenster) bis 5 Wochen. Versand erfolgt deutschlandweit per Spedition bis zur Bordsteinkante. Im Großraum Brandenburg/Berlin/Potsdam liefern wir oft mit eigenem Fahrzeug. Wenn Sie es eilig haben: schauen Sie in unseren <a href="shop.html" class="text-primary underline">Lager-Shop</a> — dort sind Standard-Drutex-Fenster sofort lieferbar in 3–7 Werktagen.
-        </p>
-      </article>
+      <details class="faq-item rounded-xl group" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08)">
+        <summary class="flex items-center justify-between cursor-pointer p-5 md:p-6 select-none list-none">
+          <h3 class="text-lg md:text-xl font-extrabold pr-4" style="color:#e8eeff;">Wie lange dauert die Lieferung von Drutex-Fenstern nach Maß?</h3>
+          <span class="material-symbols-outlined faq-chevron flex-shrink-0 text-primary transition-transform duration-300" style="font-size:24px">expand_more</span>
+        </summary>
+        <div class="px-5 md:px-6 pb-5 md:pb-6 pt-0">
+          <p class="text-base leading-relaxed" style="color:rgba(232,238,255,0.75);">
+            Maßgefertigte Drutex-Fenster: <strong>2–4 Wochen</strong> ab Auftragsbestätigung. Bei größeren Bestellungen (10+ Fenster) bis 5 Wochen. Versand erfolgt deutschlandweit per Spedition bis zur Bordsteinkante. Im Großraum Brandenburg/Berlin/Potsdam liefern wir oft mit eigenem Fahrzeug. Wenn Sie es eilig haben: schauen Sie in unseren <a href="shop.html" class="text-primary underline">Lager-Shop</a> — dort sind Standard-Drutex-Fenster sofort lieferbar in 3–7 Werktagen.
+          </p>
+        </div>
+      </details>
 
-      <article class="faq-hover rounded-lg">
-        <h3 class="text-xl md:text-2xl font-extrabold mb-2" style="color:#e8eeff;">Brauche ich neue Fenster für Passivhaus-Standard?</h3>
-        <p class="text-base leading-relaxed" style="color:rgba(232,238,255,0.75);">
-          <strong>Passivhaus-Standard</strong> verlangt extrem dichte Gebäudehülle und Uw-Werte unter 0,80 W/(m²K) bei Fenstern. Drutex IGLO Energy (Uw 0,71) und IGLO Edge (Uw 0,66) erfüllen diesen Standard. Wichtig: 3-fach Verglasung mit Argon-Füllung, Warme-Kante-Abstandhalter und fachgerechter Einbau mit luftdichter Anbindung sind Pflicht. Für Neubau-Projekte mit Passivhaus-Anspruch ist IGLO Edge die sicherste Wahl.
-        </p>
-      </article>
+      <details class="faq-item rounded-xl group" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08)">
+        <summary class="flex items-center justify-between cursor-pointer p-5 md:p-6 select-none list-none">
+          <h3 class="text-lg md:text-xl font-extrabold pr-4" style="color:#e8eeff;">Brauche ich neue Fenster für Passivhaus-Standard?</h3>
+          <span class="material-symbols-outlined faq-chevron flex-shrink-0 text-primary transition-transform duration-300" style="font-size:24px">expand_more</span>
+        </summary>
+        <div class="px-5 md:px-6 pb-5 md:pb-6 pt-0">
+          <p class="text-base leading-relaxed" style="color:rgba(232,238,255,0.75);">
+            <strong>Passivhaus-Standard</strong> verlangt extrem dichte Gebäudehülle und Uw-Werte unter 0,80 W/(m²K) bei Fenstern. Drutex IGLO Energy (Uw 0,71) und IGLO Edge (Uw 0,66) erfüllen diesen Standard. Wichtig: 3-fach Verglasung mit Argon-Füllung, Warme-Kante-Abstandhalter und fachgerechter Einbau mit luftdichter Anbindung sind Pflicht. Für Neubau-Projekte mit Passivhaus-Anspruch ist IGLO Edge die sicherste Wahl.
+          </p>
+        </div>
+      </details>
 
     </div>
   </div>
@@ -1892,24 +1947,26 @@
     const container = document.getElementById('stepCards');
     const track = document.getElementById('stepLineTrack');
     const fill = document.getElementById('stepLineFill');
+    const glow = document.getElementById('stepLineGlow');
     if (!container || !track || !fill) return;
 
     const cards = container.querySelectorAll('.step-card');
     const circles = container.querySelectorAll('.step-circle');
 
     function positionLine() {
-      if (window.innerWidth < 1024) { track.style.display = 'none'; fill.style.display = 'none'; return; }
+      if (window.innerWidth < 1024) { track.style.display='none'; fill.style.display='none'; if(glow) glow.style.display='none'; return; }
       if (circles.length < 2) return;
       const cRect = container.getBoundingClientRect();
       const first = circles[0].getBoundingClientRect();
-      const last = circles[circles.length - 1].getBoundingClientRect();
-      const startX = first.left + first.width / 2 - cRect.left;
-      const endX = last.left + last.width / 2 - cRect.left;
-      const topY = first.top + first.height / 2 - cRect.top;
+      const last = circles[circles.length-1].getBoundingClientRect();
+      const startX = first.left + first.width/2 - cRect.left;
+      const endX = last.left + last.width/2 - cRect.left;
+      const topY = first.top + first.height/2 - cRect.top;
       const lineWidth = endX - startX;
-      const css = 'left:' + startX + 'px;top:' + topY + 'px;width:' + lineWidth + 'px;';
-      track.style.cssText += ';display:block;' + css;
-      fill.style.cssText += ';display:block;' + css;
+      const pos = 'left:'+startX+'px;top:'+topY+'px;';
+      track.style.cssText += ';display:block;'+pos+'width:'+lineWidth+'px;';
+      fill.style.cssText += ';display:block;'+pos+'width:0px;';
+      if(glow) glow.style.cssText += ';display:block;'+pos+'width:0px;';
       fill.dataset.fullWidth = lineWidth;
     }
 
@@ -1921,25 +1978,23 @@
         const step = parseInt(this.dataset.step);
         const fullW = parseFloat(fill.dataset.fullWidth) || 1;
         const pct = ((step - 1) / (cards.length - 1)) * 100;
-        fill.style.width = (fullW * pct / 100) + 'px';
+        const w = (fullW * pct / 100) + 'px';
+        fill.style.width = w;
+        fill.style.animationPlayState = 'running';
+        if(glow) { glow.style.width = w; glow.style.opacity = pct > 0 ? '1' : '0'; }
 
-        // Kreise bis zum aktiven Schritt hervorheben
         circles.forEach((c, i) => {
-          if (i < step) {
-            c.style.transform = 'scale(1.2)';
-            c.style.boxShadow = '0 0 20px rgba(34,94,170,0.6)';
-          } else {
-            c.style.transform = 'scale(1)';
-            c.style.boxShadow = 'none';
-          }
+          if (i < step) { c.classList.add('circle-active'); }
+          else { c.classList.remove('circle-active'); }
         });
 
-        // Aktive Card hervorheben
         cards.forEach((cc, i) => {
           if (i < step) {
-            cc.style.borderColor = 'rgba(34,94,170,0.4)';
-            cc.style.boxShadow = '0 0 30px rgba(34,94,170,0.15)';
+            cc.classList.add('step-active');
+            cc.style.borderColor = 'rgba(34,94,170,0.5)';
+            cc.style.boxShadow = '0 4px 30px rgba(34,94,170,0.2), inset 0 1px 0 rgba(118,169,250,0.1)';
           } else {
+            cc.classList.remove('step-active');
             cc.style.borderColor = 'rgba(255,255,255,0.08)';
             cc.style.boxShadow = 'none';
           }
@@ -1949,8 +2004,10 @@
 
     container.addEventListener('mouseleave', function() {
       fill.style.width = '0px';
-      circles.forEach(c => { c.style.transform = 'scale(1)'; c.style.boxShadow = 'none'; });
-      cards.forEach(c => { c.style.borderColor = 'rgba(255,255,255,0.08)'; c.style.boxShadow = 'none'; });
+      fill.style.animationPlayState = 'paused';
+      if(glow) { glow.style.width = '0px'; glow.style.opacity = '0'; }
+      circles.forEach(c => c.classList.remove('circle-active'));
+      cards.forEach(c => { c.classList.remove('step-active'); c.style.borderColor='rgba(255,255,255,0.08)'; c.style.boxShadow='none'; });
     });
   })();
 </script>
