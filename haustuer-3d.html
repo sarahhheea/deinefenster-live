@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Haustür 3D — Colorado</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #e8e8e8; overflow: hidden; }
+
+  .header {
+    background: #1e3a8a; color: white;
+    height: 40px; padding: 0 20px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .header h1 { font-size: 15px; font-weight: 600; letter-spacing: 0.3px; }
+  .header .model-tag {
+    background: rgba(255,255,255,0.18); border-radius: 4px;
+    padding: 2px 9px; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  .layout { display: flex; height: calc(100vh - 40px); }
+
+  /* ── Reference panel ── */
+  .ref-panel {
+    width: 290px; min-width: 290px;
+    background: #f4f4f4;
+    border-right: 1px solid #d8d8d8;
+    display: flex; flex-direction: column;
+    align-items: center;
+    padding: 10px 8px 8px;
+    gap: 6px;
+  }
+  .ref-label {
+    font-size: 9px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1.2px;
+    color: #94a3b8;
+  }
+  .ref-panel img {
+    max-height: calc(100vh - 80px);
+    max-width: 100%;
+    object-fit: contain;
+    border-radius: 3px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+  }
+
+  /* ── Three.js canvas ── */
+  #threeCanvas { flex: 1; display: block; cursor: grab; }
+  #threeCanvas:active { cursor: grabbing; }
+
+  /* ── Controls panel ── */
+  .controls {
+    width: 252px; min-width: 252px;
+    padding: 10px 10px 20px;
+    overflow-y: auto;
+    background: white;
+    box-shadow: -2px 0 12px rgba(0,0,0,0.07);
+  }
+  .current-label {
+    font-size: 13px; font-weight: 700; color: #1e3a8a;
+    text-align: center; padding: 7px 4px 9px;
+    border-bottom: 1px solid #e8edf5;
+    margin-bottom: 8px;
+  }
+  .section-title {
+    font-size: 9px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1.1px;
+    color: #94a3b8; margin: 10px 0 5px;
+  }
+  .section-title:first-of-type { margin-top: 0; }
+  .colors { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
+  .color-swatch {
+    width: 100%; aspect-ratio: 1; border-radius: 4px;
+    cursor: pointer; border: 2px solid transparent;
+    transition: all 0.1s; position: relative;
+  }
+  .color-swatch:hover { transform: scale(1.18); z-index: 1; }
+  .color-swatch.active {
+    border-color: #1e3a8a;
+    box-shadow: 0 0 0 2px #1e3a8a;
+  }
+  .tooltip {
+    display: none; position: absolute;
+    bottom: 115%; left: 50%; transform: translateX(-50%);
+    background: #1a1a1a; color: white;
+    padding: 3px 7px; border-radius: 4px;
+    font-size: 10px; white-space: nowrap;
+    z-index: 20; pointer-events: none;
+  }
+  .color-swatch:hover .tooltip { display: block; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Haustür 3D Konfigurator</h1>
+  <span class="model-tag">Colorado</span>
+</div>
+
+<div class="layout">
+
+  <!-- Referenzfoto links -->
+  <div class="ref-panel">
+    <div class="ref-label">Referenz</div>
+    <img src="img/referenz-colorado.jpeg" alt="Colorado Referenz">
+  </div>
+
+  <!-- 3D Modell Mitte -->
+  <canvas id="threeCanvas"></canvas>
+
+  <!-- Farbsteuerung rechts -->
+  <div class="controls">
+    <div class="current-label" id="currentLabel">Anthrazit</div>
+    <div class="section-title">Grautöne</div>
+    <div class="colors" id="grays"></div>
+    <div class="section-title">Farben</div>
+    <div class="colors" id="colorGroup"></div>
+    <div class="section-title">Holzdekore</div>
+    <div class="colors" id="woods"></div>
+  </div>
+
+</div>
+
+<script type="importmap">
+{ "imports": {
+    "three":         "https://cdn.jsdelivr.net/npm/three@0.162.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.162.0/examples/jsm/"
+} }
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ══════════════════════════════════════════════
+// RENDERER
+// ══════════════════════════════════════════════
+const canvasEl = document.getElementById('threeCanvas');
+const renderer = new THREE.WebGLRenderer({ canvas: canvasEl, antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xf5f5f5);  // heller Hintergrund wie Katalogfoto
+
+const camera = new THREE.PerspectiveCamera(20, 1, 0.1, 50);
+camera.position.set(0, 1.05, 7.5);  // weit genug zurück um ganze Tür zu sehen
+
+const orb = new OrbitControls(camera, canvasEl);
+orb.target.set(0, 1.05, 0);
+orb.enablePan = false;
+orb.minDistance = 4.0;
+orb.maxDistance = 12.0;
+orb.maxPolarAngle = Math.PI * 0.54;   // kaum vertikale Drehung
+orb.minPolarAngle = Math.PI * 0.46;
+orb.minAzimuthAngle = -0.22;           // max ~12° horizontal
+orb.maxAzimuthAngle =  0.22;
+orb.update();
+
+// ══════════════════════════════════════════════
+// ENVIRONMENT — hell für Chrome-Reflexionen
+// ══════════════════════════════════════════════
+const pmremGen = new THREE.PMREMGenerator(renderer);
+pmremGen.compileEquirectangularShader();
+const envSc = new THREE.Scene();
+envSc.add(new THREE.AmbientLight(0xffffff, 4.0));
+const eL1 = new THREE.DirectionalLight(0xffffff, 4.0);
+eL1.position.set(1, 2, 3); envSc.add(eL1);
+const eL2 = new THREE.DirectionalLight(0xffffff, 3.0);
+eL2.position.set(-2, 1, 3); envSc.add(eL2);
+const envTex = pmremGen.fromScene(envSc, 0.04).texture;
+scene.environment = envTex;
+
+// ── Szenen-Beleuchtung ──────────────────────────────
+// Nur SO VIEL Ambient dass Anthrazit als dunkelgrau sichtbar ist
+scene.add(new THREE.AmbientLight(0xffffff, 0.42));
+
+// Key-Licht von oben-rechts-leicht-vorne (klassische Produktfoto-Beleuchtung)
+const key = new THREE.DirectionalLight(0xffffff, 1.6);
+key.position.set(2, 4, 5);
+key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+key.shadow.camera.near = 1; key.shadow.camera.far = 12;
+key.shadow.camera.left = -1.5; key.shadow.camera.right = 1.5;
+key.shadow.camera.top = 3; key.shadow.camera.bottom = -0.5;
+key.shadow.bias = -0.001;
+scene.add(key);
+
+// Fill-Licht von links (Schatten aufhellen)
+const fill = new THREE.DirectionalLight(0xddeeff, 0.5);
+fill.position.set(-3, 2.5, 3); scene.add(fill);
+
+// Sehr schwaches Frontlicht — verhindert pure-black bei Anthrazit
+const front = new THREE.DirectionalLight(0xffffff, 0.25);
+front.position.set(0, 1, 10); scene.add(front);
+
+// ── SpotLight für Stoßgriff ──────────────────────────
+// Zielt genau auf Bar-Mitte in Weltkoordinaten: X=-0.38, Y=1.24, Z=0.11
+// Erzeugt das silberne Highlight auf dem Chrome-Stab
+const chromeLight = new THREE.SpotLight(0xffffff, 10.0, 12, Math.PI / 8, 0.15);
+chromeLight.position.set(-1.6, 2.5, 5);
+chromeLight.target.position.set(-0.385, 1.21, 0.10);
+scene.add(chromeLight); scene.add(chromeLight.target);
+
+const chromeLight2 = new THREE.SpotLight(0xffffff, 6.0, 10, Math.PI / 7, 0.2);
+chromeLight2.position.set(0.4, 1.8, 5);
+chromeLight2.target.position.set(-0.385, 1.21, 0.10);
+scene.add(chromeLight2); scene.add(chromeLight2.target);
+
+// Boden-Schatten
+const gnd = new THREE.Mesh(
+  new THREE.PlaneGeometry(8, 8),
+  new THREE.ShadowMaterial({ opacity: 0.10 })
+);
+gnd.rotation.x = -Math.PI / 2;
+gnd.receiveShadow = true;
+scene.add(gnd);
+
+// ══════════════════════════════════════════════
+// MATERIALIEN
+// ══════════════════════════════════════════════
+const doorMat   = new THREE.MeshStandardMaterial({ color: 0x232729, roughness: 0.36, metalness: 0.02 });
+const frameMat  = new THREE.MeshStandardMaterial({ color: 0x232729, roughness: 0.36, metalness: 0.02 });
+const grooveMat = new THREE.MeshStandardMaterial({ color: 0x181b1d, roughness: 0.68 });
+// Chrome/Edelstahl: leicht breiteres Highlight (roughness 0.18) damit Stab als
+// SILBER sichtbar ist, nicht als dunkler Spiegel. Metalness 0.92 = Minimalanteil Diffus.
+const chromeMat    = new THREE.MeshStandardMaterial({ color: 0xd8dde0, roughness: 0.18, metalness: 0.92, envMapIntensity: 2.5 });
+// Bracket-Kopf: heller Silber/Chrome, gut sichtbar vor dunkler Tür
+const bracketMat   = new THREE.MeshStandardMaterial({ color: 0xe0e6ea, roughness: 0.22, metalness: 0.65, envMapIntensity: 3.0 });
+const glFrameMat= new THREE.MeshStandardMaterial({ color: 0xf2f4f5, roughness: 0.30, metalness: 0.10 });  // Weißer Alu-Rahmen wie Referenz
+const glassMat  = new THREE.MeshPhysicalMaterial({
+  color: 0xeef4f8, metalness: 0, roughness: 0.03,
+  transmission: 0.93, thickness: 0.02, ior: 1.5, transparent: true,
+});
+
+// ══════════════════════════════════════════════
+// COLORADO — 1:1 vom Referenzfoto gemessen
+//
+// Maßstab: 1 unit = 1 m
+// Tür:     1000 mm × 2100 mm × 70 mm
+//
+// Glas:    zentriert, 180 mm breit, 1220 mm hoch
+//          Unterkante bei 440 mm
+//
+// Griff:   Bar-Griff links, X = 148 mm
+//          Untere Halterung: 820 mm
+//          Obere Halterung:  1670 mm
+//
+// Schloss: X = 215 mm, Y = 1010 mm
+// ══════════════════════════════════════════════
+
+const DW = 1.000;   // Türbreite
+const DH = 2.100;   // Türhöhe
+const DD = 0.070;   // Türtiefe
+
+// Glas — Referenz: ca. 220mm breit, Mitte bei ~43% Türbreite
+const GW = 0.220;
+const GH = 1.240;
+const GX = 0.320;   // linke Glaskante bei 320mm
+const GY = 0.445;   // Glasunterkante
+
+const doorGroup = new THREE.Group();
+
+// ── Hilfsfunktion: Rechteck-Strip ──────────────────
+function strip(x, y, w, h, d, mat) {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat || frameMat);
+  m.position.set(x + w/2, y + h/2, DD + d/2);
+  m.castShadow = true;
+  m.receiveShadow = true;
+  return m;
+}
+
+// ── Zarge (3-stufig wie Referenz) ──────────────────
+
+// Stufe 1 — dicker Außenrahmen
+const z1w = 0.043, z1d = 0.032;
+doorGroup.add(strip(0,        DH - z1w,  DW,           z1w, z1d));  // oben
+doorGroup.add(strip(0,        0,         DW,           z1w, z1d));  // unten
+doorGroup.add(strip(0,        z1w,       z1w,  DH - 2*z1w, z1d));  // links
+doorGroup.add(strip(DW - z1w, z1w,       z1w,  DH - 2*z1w, z1d));  // rechts
+
+// Stufe 2 — mittlerer Übergang
+const z2off = z1w + 0.009, z2w = 0.021, z2d = 0.018;
+doorGroup.add(strip(z2off,          DH - z2off - z2w, DW - 2*z2off, z2w, z2d));
+doorGroup.add(strip(z2off,          z2off,             DW - 2*z2off, z2w, z2d));
+doorGroup.add(strip(z2off,          z2off + z2w,       z2w, DH - 2*(z2off + z2w), z2d));
+doorGroup.add(strip(DW - z2off - z2w, z2off + z2w,    z2w, DH - 2*(z2off + z2w), z2d));
+
+// Stufe 3 — dünne innere Lippe
+const z3off = z2off + z2w + 0.006, z3w = 0.009, z3d = 0.007;
+doorGroup.add(strip(z3off,           DH - z3off - z3w, DW - 2*z3off, z3w, z3d));
+doorGroup.add(strip(z3off,           z3off,             DW - 2*z3off, z3w, z3d));
+doorGroup.add(strip(z3off,           z3off + z3w,       z3w, DH - 2*(z3off + z3w), z3d));
+doorGroup.add(strip(DW - z3off - z3w, z3off + z3w,     z3w, DH - 2*(z3off + z3w), z3d));
+
+// ── Türblatt mit Glasausschnitt ─────────────────────
+{
+  const s = new THREE.Shape();
+  s.moveTo(0, 0); s.lineTo(DW, 0); s.lineTo(DW, DH); s.lineTo(0, DH); s.closePath();
+
+  const hole = new THREE.Path();
+  hole.moveTo(GX, GY);
+  hole.lineTo(GX + GW, GY);
+  hole.lineTo(GX + GW, GY + GH);
+  hole.lineTo(GX,      GY + GH);
+  hole.closePath();
+  s.holes.push(hole);
+
+  const body = new THREE.Mesh(
+    new THREE.ExtrudeGeometry(s, {
+      depth: DD,
+      bevelEnabled: true, bevelThickness: 0.003, bevelSize: 0.002, bevelSegments: 2
+    }),
+    doorMat
+  );
+  body.castShadow = true; body.receiveShadow = true;
+  doorGroup.add(body);
+}
+
+// ── Profilnut (eingelassene Nut-Linie als Umlaufrahmen) ─
+const NUT = 0.095; // Abstand vom Türblattrand
+function nut(x1, y1, x2, y2) {
+  const dx = x2 - x1, dy = y2 - y1;
+  const len = Math.sqrt(dx*dx + dy*dy);
+  const isH = Math.abs(dx) > Math.abs(dy);
+  const gw = 0.0052, gd = 0.0042;
+  const m = new THREE.Mesh(
+    new THREE.BoxGeometry(isH ? len : gw, isH ? gw : len, gd),
+    grooveMat
+  );
+  m.position.set((x1 + x2) / 2, (y1 + y2) / 2, DD + 0.0008);
+  m.receiveShadow = true;
+  return m;
+}
+doorGroup.add(nut(NUT,      NUT,      DW - NUT, NUT));        // unten
+doorGroup.add(nut(NUT,      DH - NUT, DW - NUT, DH - NUT));  // oben
+doorGroup.add(nut(NUT,      NUT,      NUT,      DH - NUT));  // links
+doorGroup.add(nut(DW - NUT, NUT,      DW - NUT, DH - NUT));  // rechts
+
+// ── Glas (transparent) ──────────────────────────────
+const glass = new THREE.Mesh(
+  new THREE.PlaneGeometry(GW - 0.008, GH - 0.008),
+  glassMat
+);
+glass.position.set(GX + GW/2, GY + GH/2, DD/2);
+doorGroup.add(glass);
+
+// ── Glasrahmen (silber/weiß Aluminium-Profil) ────────
+const GFW = 0.022;                        // Rahmenbreite
+const GFD = DD + 0.010;                   // Tiefe (durch die Tür)
+function gfPiece(x, y, w, h) {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, GFD), glFrameMat);
+  m.position.set(x, y, GFD / 2);
+  m.castShadow = true; m.receiveShadow = true;
+  return m;
+}
+doorGroup.add(gfPiece(GX + GW/2,         GY + GH + GFW/2, GW + GFW*2, GFW));  // oben
+doorGroup.add(gfPiece(GX + GW/2,         GY - GFW/2,      GW + GFW*2, GFW));  // unten
+doorGroup.add(gfPiece(GX - GFW/2,        GY + GH/2,       GFW,        GH));   // links
+doorGroup.add(gfPiece(GX + GW + GFW/2,   GY + GH/2,       GFW,        GH));   // rechts
+
+// ══════════════════════════════════════════════════════
+// STOESSGRIFF (Drutex-Typ P45/Z1)
+//
+// Aufbau eines echten Drutex-Stoßgriffs:
+//   1. Befestigungsplatte (Rosette) direkt auf Türfläche
+//   2. Konsolen-Arm (L-förmig): horizontal von Tür weg
+//   3. Runder Stab verbindet beide Konsolen
+//   4. Flache Abschlussplatten oben + unten am Stab
+//
+// Griff ist IMMER Silber (Edelstahl/Chrom), egal welche Türfarbe.
+//
+// Maße vom Referenzfoto:
+//   X = 120mm vom linken Türrand
+//   Stab von Y=830mm bis Y=1650mm
+//   Standoff (Abstand Tür→Stab) = 38mm
+//   Stabdurchmesser = 14mm
+// ══════════════════════════════════════════════════════
+
+// ══════════════════════════════════════════════════════
+// STOESSGRIFF — ECKIG (rechteckiger Querschnitt, nicht rund)
+// BAR_W = sichtbare Breite von vorne
+// BAR_D = Tiefe (Abstand Tür → Stabvorderseite)
+// ══════════════════════════════════════════════════════
+const HX    = 0.115;   // 115mm vom linken Türrand
+const BAR_W = 0.026;   // 26mm breit (eckig, deutlich sichtbar von vorne)
+const BAR_D = 0.040;   // 40mm tief (Abstand von Türfläche)
+const BAR_B = 0.800;   // untere Halterung Y
+const BAR_T = 1.620;   // obere Halterung Y
+const BAR_L = BAR_T - BAR_B;
+
+// ── ECKIGER Stab (BoxGeometry) ────────────────────────
+const bar = new THREE.Mesh(
+  new THREE.BoxGeometry(BAR_W, BAR_L, BAR_D),
+  chromeMat
+);
+bar.position.set(HX, BAR_B + BAR_L / 2, DD + BAR_D / 2);
+bar.castShadow = true;
+doorGroup.add(bar);
+
+// ── Halterungen: flache Chrome-Köpfe an jedem Stabende ─
+function makeConsole(centerY) {
+  // Bracket-Kopf: breiter als Stab, gleiche Tiefe
+  const HW = 0.058, HH = 0.014, HD = BAR_D + 0.005;
+  const head = new THREE.Mesh(new THREE.BoxGeometry(HW, HH, HD), bracketMat);
+  head.position.set(HX, centerY, DD + HD / 2);
+  head.castShadow = true;
+  doorGroup.add(head);
+}
+
+// Obere + untere Halterung
+makeConsole(BAR_T + 0.007);
+makeConsole(BAR_B - 0.007);
+
+// ══════════════════════════════════════════════════════
+// SCHLOSS — Langschild + Profilzylinder
+//
+// Auf Drutex Colorado: Das Schloss sitzt RECHTS vom Griff,
+// auf etwa 47% der Türhöhe (ca. 990mm vom Boden).
+// Es ist ein separates Teil (Langschild + eingelassener Zylinder).
+// ══════════════════════════════════════════════════════
+
+// ══════════════════════════════════════════════════════
+// SCHLOSS — ovales Langschild (Kapsel-Form wie Referenz)
+// ══════════════════════════════════════════════════════
+const LX  = 0.162;   // 162mm vom linken Rand (dicht am Stab)
+const LY  = 0.940;   // 940mm vom Boden (44% der Türhöhe, wie Referenz)
+
+// Ovales Langschild mit gerundeten Ecken (Rounded-Rect via ExtrudeGeometry)
+function roundedRectShape(w, h, r) {
+  const s = new THREE.Shape();
+  s.moveTo(-w/2 + r, -h/2);
+  s.lineTo( w/2 - r, -h/2);
+  s.absarc( w/2 - r, -h/2 + r, r, -Math.PI/2, 0, false);
+  s.lineTo( w/2,      h/2 - r);
+  s.absarc( w/2 - r,  h/2 - r, r, 0, Math.PI/2, false);
+  s.lineTo(-w/2 + r,  h/2);
+  s.absarc(-w/2 + r,  h/2 - r, r, Math.PI/2, Math.PI, false);
+  s.lineTo(-w/2,     -h/2 + r);
+  s.absarc(-w/2 + r, -h/2 + r, r, Math.PI, Math.PI * 1.5, false);
+  return s;
+}
+
+const lsShape = roundedRectShape(0.018, 0.050, 0.009);
+const lsGeom  = new THREE.ExtrudeGeometry(lsShape, { depth: 0.006, bevelEnabled: false });
+const lsPlate = new THREE.Mesh(lsGeom, chromeMat);
+lsPlate.position.set(LX, LY, DD + 0.001);
+lsPlate.castShadow = true;
+doorGroup.add(lsPlate);
+
+// Profilzylinder (kleiner Kreis im Schild)
+const keyCyl = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.006, 0.006, 0.008, 16), chromeMat
+);
+keyCyl.rotation.x = Math.PI / 2;
+keyCyl.position.set(LX, LY + 0.010, DD + 0.009);
+keyCyl.castShadow = true;
+doorGroup.add(keyCyl);
+
+// Schlüsselloch
+const darkMat = new THREE.MeshStandardMaterial({ color: 0x080808, roughness: 0.95 });
+const slot = new THREE.Mesh(new THREE.BoxGeometry(0.003, 0.008, 0.002), darkMat);
+slot.position.set(LX, LY + 0.010, DD + 0.012);
+doorGroup.add(slot);
+
+// Türgruppe zentrieren
+doorGroup.position.set(-DW/2, 0, 0);
+scene.add(doorGroup);
+
+// ══════════════════════════════════════════════
+// FARBEN
+// ══════════════════════════════════════════════
+const FARBEN = {
+  grays: [
+    { key: 'weiss',       hex: '#ffffff',  name: 'Weiß' },
+    { key: 'weiss-fx',    hex: '#f4f4f0',  name: 'Weiß FX' },
+    { key: 'cremeweiss',  hex: '#fdf6e3',  name: 'Cremeweiß' },
+    { key: 'crown-plat',  hex: '#dddbd6',  name: 'Crown Platin' },
+    { key: 'lichtgrau',   hex: '#c5c6be',  name: 'Lichtgrau' },
+    { key: 'betongrau',   hex: '#7c7f79',  name: 'Betongrau' },
+    { key: 'quarzgr-sa',  hex: '#6c6f66',  name: 'Quarzgrau SA' },
+    { key: 'quarzgr-gl',  hex: '#6c6f66',  name: 'Quarzgrau GL' },
+    { key: 'basaltgr-sa', hex: '#4f5458',  name: 'Basaltgrau SA' },
+    { key: 'basaltgr-gl', hex: '#4f5458',  name: 'Basaltgrau GL' },
+    { key: 'grafitgr',    hex: '#4a4c46',  name: 'Grafitgrau' },
+    { key: 'schiefgr-sa', hex: '#3e454c',  name: 'Schiefergrau SA' },
+    { key: 'schiefgr-gl', hex: '#3e454c',  name: 'Schiefergrau GL' },
+    { key: 'eisengl',     hex: '#3c3e42',  name: 'Eisenglimmer' },
+    { key: 'anthrazit',   hex: '#232729',  name: 'Anthrazit' },
+    { key: 'anthraz-gl',  hex: '#373d3f',  name: 'Anthrazit GL' },
+    { key: 'anthraz-um',  hex: '#2e3235',  name: 'Anthrazit Ultimatt' },
+    { key: 'schwarz-um',  hex: '#1a1c1e',  name: 'Schwarz Ultimatt' },
+    { key: 'jet-black',   hex: '#101214',  name: 'Jet Black' },
+  ],
+  colors: [
+    { key: 'brillblau',   hex: '#1c5080',  name: 'Brillantblau' },
+    { key: 'stahlblau',   hex: '#1c4c6c',  name: 'Stahlblau' },
+    { key: 'moosgruen',   hex: '#2d4a30',  name: 'Moosgrün' },
+    { key: 'dunkelgr',    hex: '#1e3828',  name: 'Dunkelgrün' },
+    { key: 'dunkelrot',   hex: '#6c1c1c',  name: 'Dunkelrot' },
+    { key: 'braun-mar',   hex: '#6b4226',  name: 'Braun Marrone' },
+    { key: 'schoko-br',   hex: '#4a2820',  name: 'Schokobraun' },
+    { key: 'schwarzbr',   hex: '#26211e',  name: 'Schwarzbraun' },
+    { key: 'piryt',       hex: '#6a5a30',  name: 'Pyrit' },
+    { key: 'deep-bronze', hex: '#6b6040',  name: 'Deep Bronze' },
+  ],
+  woods: [
+    { key: 'golden-oak',  hex: '#af7d3c',  name: 'Golden Oak' },
+    { key: 'sheffield',   hex: '#b4a58c',  name: 'Sheffield Oak' },
+    { key: 'eiche-hell',  hex: '#b9a582',  name: 'Eiche Hell' },
+    { key: 'eiche-nat',   hex: '#aa8e55',  name: 'Eiche Natur' },
+    { key: 'winchester',  hex: '#8c5f37',  name: 'Winchester' },
+    { key: 'oregon',      hex: '#9b6c3c',  name: 'Oregon' },
+    { key: 'douglasie',   hex: '#916234',  name: 'Douglasie' },
+    { key: 'nussbaum',    hex: '#6e4626',  name: 'Nussbaum' },
+    { key: 'mooreiche',   hex: '#4b3726',  name: 'Mooreiche' },
+    { key: 'dunkleiche',  hex: '#3c2d20',  name: 'Dunkle Eiche' },
+    { key: 'macore',      hex: '#783e2d',  name: 'Macoré' },
+    { key: 'mahagoni',    hex: '#693726',  name: 'Mahagoni' },
+  ]
+};
+
+function setColor(hex) {
+  const c = new THREE.Color(hex);
+  doorMat.color.copy(c);
+  frameMat.color.copy(c);
+  grooveMat.color.copy(c).multiplyScalar(0.62);
+  const lum = c.r * 0.299 + c.g * 0.587 + c.b * 0.114;
+  doorMat.roughness = frameMat.roughness = 0.24 + lum * 0.15;
+}
+
+function buildSwatches(id, list) {
+  const el = document.getElementById(id);
+  list.forEach(c => {
+    const s = document.createElement('div');
+    s.className = 'color-swatch' + (c.key === 'anthrazit' ? ' active' : '');
+    s.style.background = c.hex;
+    if (c.hex === '#ffffff') s.style.border = '2px solid #ccc';
+    s.innerHTML = `<span class="tooltip">${c.name}</span>`;
+    s.onclick = () => {
+      document.querySelectorAll('.color-swatch').forEach(x => x.classList.remove('active'));
+      s.classList.add('active');
+      setColor(c.hex);
+      document.getElementById('currentLabel').textContent = c.name;
+    };
+    el.appendChild(s);
+  });
+}
+buildSwatches('grays',      FARBEN.grays);
+buildSwatches('colorGroup', FARBEN.colors);
+buildSwatches('woods',      FARBEN.woods);
+
+// ══════════════════════════════════════════════
+// RESIZE + RENDER LOOP
+// ══════════════════════════════════════════════
+function resize() {
+  const w = window.innerWidth  - 290 - 252;   // ref-panel + controls
+  const h = window.innerHeight - 40;           // header
+  renderer.setSize(w, h);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize);
+resize();
+
+(function animate() {
+  requestAnimationFrame(animate);
+  orb.update();
+  renderer.render(scene, camera);
+})();
+</script>
+</body>
+</html>
