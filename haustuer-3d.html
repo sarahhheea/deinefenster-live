@@ -402,19 +402,27 @@ bar.position.set(HX, BAR_B + BAR_L / 2, DD + BAR_D / 2);
 bar.castShadow = true;
 doorGroup.add(bar);
 
-// ── Halterungen: flache Chrome-Köpfe an jedem Stabende ─
-function makeConsole(centerY) {
-  // Bracket-Kopf: breiter als Stab, gleiche Tiefe
-  const HW = 0.058, HH = 0.014, HD = BAR_D + 0.005;
-  const head = new THREE.Mesh(new THREE.BoxGeometry(HW, HH, HD), bracketMat);
-  head.position.set(HX, centerY, DD + HD / 2);
-  head.castShadow = true;
-  doorGroup.add(head);
+// ── Halterungen: Konsolenarm + Rosette an jedem Stabende ──
+// Aufbau: Rosettenplatte (auf Türfläche) + Arm (greift Stabende)
+function makeConsole(barEndY) {
+  // Konsolenarm: klemmt um Stabende, etwas breiter + tiefer als Stab
+  const AW = BAR_W + 0.008, AH = 0.024, AD = BAR_D + 0.014;
+  const arm = new THREE.Mesh(new THREE.BoxGeometry(AW, AH, AD), bracketMat);
+  arm.position.set(HX, barEndY, DD + AD / 2);
+  arm.castShadow = true;
+  doorGroup.add(arm);
+
+  // Rosettenplatte: flache Montageplatte direkt auf Türoberfläche
+  const RW = 0.046, RH = 0.030, RD = 0.010;
+  const ros = new THREE.Mesh(new THREE.BoxGeometry(RW, RH, RD), bracketMat);
+  ros.position.set(HX, barEndY, DD + RD / 2);
+  ros.castShadow = true;
+  doorGroup.add(ros);
 }
 
-// Obere + untere Halterung
-makeConsole(BAR_T + 0.007);
-makeConsole(BAR_B - 0.007);
+// Obere + untere Halterung — zentriert am jeweiligen Stabende (kein Schweben)
+makeConsole(BAR_T);
+makeConsole(BAR_B);
 
 // ══════════════════════════════════════════════════════
 // SCHLOSS — Langschild + Profilzylinder
@@ -445,26 +453,26 @@ function roundedRectShape(w, h, r) {
   return s;
 }
 
-const lsShape = roundedRectShape(0.018, 0.050, 0.009);
-const lsGeom  = new THREE.ExtrudeGeometry(lsShape, { depth: 0.006, bevelEnabled: false });
+const lsShape = roundedRectShape(0.024, 0.072, 0.012);
+const lsGeom  = new THREE.ExtrudeGeometry(lsShape, { depth: 0.007, bevelEnabled: false });
 const lsPlate = new THREE.Mesh(lsGeom, chromeMat);
 lsPlate.position.set(LX, LY, DD + 0.001);
 lsPlate.castShadow = true;
 doorGroup.add(lsPlate);
 
-// Profilzylinder (kleiner Kreis im Schild)
+// Profilzylinder (zentriert im Schild, oberes Drittel)
 const keyCyl = new THREE.Mesh(
-  new THREE.CylinderGeometry(0.006, 0.006, 0.008, 16), chromeMat
+  new THREE.CylinderGeometry(0.007, 0.007, 0.009, 20), chromeMat
 );
 keyCyl.rotation.x = Math.PI / 2;
-keyCyl.position.set(LX, LY + 0.010, DD + 0.009);
+keyCyl.position.set(LX, LY + 0.014, DD + 0.010);
 keyCyl.castShadow = true;
 doorGroup.add(keyCyl);
 
 // Schlüsselloch
 const darkMat = new THREE.MeshStandardMaterial({ color: 0x080808, roughness: 0.95 });
-const slot = new THREE.Mesh(new THREE.BoxGeometry(0.003, 0.008, 0.002), darkMat);
-slot.position.set(LX, LY + 0.010, DD + 0.012);
+const slot = new THREE.Mesh(new THREE.BoxGeometry(0.004, 0.009, 0.002), darkMat);
+slot.position.set(LX, LY + 0.014, DD + 0.014);
 doorGroup.add(slot);
 
 // Türgruppe zentrieren
