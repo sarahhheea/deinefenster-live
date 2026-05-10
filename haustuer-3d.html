@@ -89,6 +89,19 @@
     z-index: 20; pointer-events: none;
   }
   .color-swatch:hover .tooltip { display: block; }
+
+  /* ── Glasarten ── */
+  .glass-btns { display: flex; gap: 4px; margin-top: 3px; flex-wrap: wrap; }
+  .glass-btn {
+    flex: 1; min-width: 0;
+    padding: 6px 2px; border-radius: 5px;
+    border: 2px solid #e0e8f4; background: white;
+    cursor: pointer; font-size: 9px; font-weight: 700;
+    color: #64748b; text-align: center; line-height: 1.2;
+    transition: all 0.1s; letter-spacing: 0.2px;
+  }
+  .glass-btn.active { border-color: #1e3a8a; color: #1e3a8a; background: #f0f5ff; }
+  .glass-btn:hover { border-color: #93a8d4; }
 </style>
 </head>
 <body>
@@ -118,6 +131,8 @@
     <div class="colors" id="colorGroup"></div>
     <div class="section-title">Holzdekore</div>
     <div class="colors" id="woods"></div>
+    <div class="section-title">Verglasung</div>
+    <div class="glass-btns" id="glassBtns"></div>
   </div>
 
 </div>
@@ -526,16 +541,135 @@ const FARBEN = {
   ]
 };
 
+// ══════════════════════════════════════════════
+// HOLZDEKORE — Canvas prozedurale Texturen
+// Renolit EXOFOL Folien: Maserung immer VERTIKAL
+// ══════════════════════════════════════════════
+const WOOD_PARAMS = {
+  'golden-oak': { base:'#C07C35', grain:'#7A4A1A', contrast:0.55, gw:1.5, sp:7 },
+  'sheffield':  { base:'#D8C49A', grain:'#B09A6E', contrast:0.22, gw:1.0, sp:9 },
+  'eiche-hell': { base:'#CBA86B', grain:'#A07840', contrast:0.28, gw:1.2, sp:8 },
+  'eiche-nat':  { base:'#B08040', grain:'#7A5020', contrast:0.45, gw:1.5, sp:7 },
+  'winchester': { base:'#C4905A', grain:'#7A4E22', contrast:0.50, gw:1.5, sp:7 },
+  'oregon':     { base:'#B87830', grain:'#7A4E18', contrast:0.45, gw:1.5, sp:6 },
+  'douglasie':  { base:'#C08040', grain:'#8A4E20', contrast:0.45, gw:2.0, sp:7, stripes:true },
+  'nussbaum':   { base:'#7A4A22', grain:'#3A2010', contrast:0.65, gw:1.5, sp:6 },
+  'mooreiche':  { base:'#4A2E18', grain:'#2A1808', contrast:0.38, gw:1.2, sp:7 },
+  'dunkleiche': { base:'#3C2D20', grain:'#201408', contrast:0.32, gw:1.2, sp:7 },
+  'macore':     { base:'#A05040', grain:'#6A2A20', contrast:0.50, gw:2.0, sp:8, wavy:true },
+  'mahagoni':   { base:'#8B3A2A', grain:'#5A1E12', contrast:0.55, gw:1.5, sp:7 },
+};
+
+function seededRnd(seed) {
+  let s = seed;
+  return () => { s = (s * 1664525 + 1013904223) & 0xffffffff; return (s >>> 0) / 0xffffffff; };
+}
+
+function generateWoodCanvas(key) {
+  const p = WOOD_PARAMS[key]; if (!p) return null;
+  const W = 512, H = 1024;
+  const cvs = document.createElement('canvas'); cvs.width = W; cvs.height = H;
+  const ctx = cvs.getContext('2d');
+  const rnd = seededRnd(key.split('').reduce((a,c) => a + c.charCodeAt(0), 0));
+
+  ctx.fillStyle = p.base; ctx.fillRect(0, 0, W, H);
+
+  if (p.stripes) {
+    // Douglasie: breite alternierende Streifen
+    let x = 0;
+    while (x < W) {
+      const sw = 20 + rnd() * 28;
+      ctx.globalAlpha = p.contrast * (0.18 + rnd() * 0.32);
+      ctx.fillStyle = p.grain; ctx.fillRect(x, 0, sw, H);
+      x += sw + 18 + rnd() * 22;
+    }
+  } else {
+    // Feine Maserungslinien (vertikal, leichte Wellenbewegung)
+    ctx.strokeStyle = p.grain;
+    let x = rnd() * p.sp;
+    while (x < W) {
+      ctx.globalAlpha = p.contrast * (0.12 + rnd() * 0.50);
+      ctx.lineWidth = p.gw * (0.4 + rnd() * 0.9);
+      ctx.beginPath();
+      let cx = x + (rnd() - 0.5) * 2;
+      ctx.moveTo(cx, 0);
+      for (let y = 20; y <= H; y += 20) {
+        const wx = p.wavy
+          ? cx + Math.sin(y * 0.04 + rnd() * 6) * 4   // Macoré: wellige Maserung
+          : cx + (rnd() - 0.5) * 1.5;
+        ctx.lineTo(wx, y);
+      }
+      ctx.stroke();
+      x += p.sp * (0.4 + rnd() * 1.2);
+    }
+  }
+  ctx.globalAlpha = 1;
+
+  // Subtile Licht-Variation (natürliche Tiefenwirkung)
+  const g = ctx.createLinearGradient(0, 0, W, 0);
+  g.addColorStop(0, 'rgba(255,255,255,0.05)');
+  g.addColorStop(0.5, 'rgba(0,0,0,0.03)');
+  g.addColorStop(1, 'rgba(255,255,255,0.05)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+
+  return cvs;
+}
+
+// ── Farbe setzen (Unifarbe — entfernt Holztextur) ──
 function setColor(hex) {
+  if (doorMat.map) { doorMat.map.dispose(); doorMat.map = null; }
+  frameMat.map = null;
   const c = new THREE.Color(hex);
-  doorMat.color.copy(c);
-  frameMat.color.copy(c);
+  doorMat.color.copy(c); frameMat.color.copy(c);
   grooveMat.color.copy(c).multiplyScalar(0.62);
   const lum = c.r * 0.299 + c.g * 0.587 + c.b * 0.114;
   doorMat.roughness = frameMat.roughness = 0.24 + lum * 0.15;
+  doorMat.metalness = frameMat.metalness = 0.02;
+  doorMat.needsUpdate = true; frameMat.needsUpdate = true;
 }
 
-function buildSwatches(id, list) {
+// ── Holzdekor setzen (Canvas-Textur auf Türblatt) ──
+function setWood(key) {
+  const p = WOOD_PARAMS[key]; if (!p) return;
+  const canvas = generateWoodCanvas(key);
+  if (doorMat.map) doorMat.map.dispose();
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  // Türblatt: Textur (1:2 Canvas ~ 1:2.1 Tür — minimalste Streckung)
+  doorMat.map = tex; doorMat.color.set(0xffffff);
+  doorMat.roughness = 0.68; doorMat.metalness = 0;
+  doorMat.needsUpdate = true;
+  // Zarge: Vollton (Grundfarbe des Dekors, BoxGeometry-UV ungeeignet für Maserung)
+  frameMat.map = null; frameMat.color.set(p.base);
+  frameMat.roughness = 0.65; frameMat.metalness = 0;
+  frameMat.needsUpdate = true;
+  // Profilnuten: Maserungsfarbe
+  grooveMat.color.set(p.grain); grooveMat.needsUpdate = true;
+}
+
+// ══════════════════════════════════════════════
+// GLASARTEN — 4 Typen (Klar, Satinato, Ornament, Getönt)
+// ══════════════════════════════════════════════
+const GLASS_TYPES = [
+  { key:'klar',     name:'Klar',      color:0xeef4f8, transmission:0.93, roughness:0.03 },
+  { key:'satinato', name:'Satinato',  color:0xf4f4f4, transmission:0.28, roughness:0.68 },
+  { key:'ornament', name:'Ornament',  color:0xf0f2ee, transmission:0.55, roughness:0.40 },
+  { key:'getoent',  name:'Getönt',    color:0x8faabb, transmission:0.72, roughness:0.05 },
+];
+
+function setGlass(key) {
+  const g = GLASS_TYPES.find(t => t.key === key); if (!g) return;
+  glassMat.color.set(g.color);
+  glassMat.transmission = g.transmission;
+  glassMat.roughness = g.roughness;
+  glassMat.needsUpdate = true;
+  document.querySelectorAll('.glass-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.key === key)
+  );
+}
+
+// ── Swatches ──
+function buildSwatches(id, list, onSelect) {
   const el = document.getElementById(id);
   list.forEach(c => {
     const s = document.createElement('div');
@@ -546,15 +680,28 @@ function buildSwatches(id, list) {
     s.onclick = () => {
       document.querySelectorAll('.color-swatch').forEach(x => x.classList.remove('active'));
       s.classList.add('active');
-      setColor(c.hex);
+      onSelect(c);
       document.getElementById('currentLabel').textContent = c.name;
     };
     el.appendChild(s);
   });
 }
-buildSwatches('grays',      FARBEN.grays);
-buildSwatches('colorGroup', FARBEN.colors);
-buildSwatches('woods',      FARBEN.woods);
+buildSwatches('grays',      FARBEN.grays,   c => setColor(c.hex));
+buildSwatches('colorGroup', FARBEN.colors,  c => setColor(c.hex));
+buildSwatches('woods',      FARBEN.woods,   c => setWood(c.key));
+
+// ── Glasarten-Buttons ──
+(function buildGlassBtns() {
+  const el = document.getElementById('glassBtns');
+  GLASS_TYPES.forEach(g => {
+    const b = document.createElement('button');
+    b.className = 'glass-btn' + (g.key === 'klar' ? ' active' : '');
+    b.dataset.key = g.key;
+    b.textContent = g.name;
+    b.onclick = () => setGlass(g.key);
+    el.appendChild(b);
+  });
+})();
 
 // ══════════════════════════════════════════════
 // RESIZE + RENDER LOOP
