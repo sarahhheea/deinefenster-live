@@ -492,6 +492,63 @@ doorGroup.position.set(-DW/2, 0, 0);
 scene.add(doorGroup);
 
 // ══════════════════════════════════════════════
+// DOOR_PHOTOS — echte Drutex-Türfotos pro Farbe
+// Direkt von produkte/haustueren/iglo-energy.html (data-frame-url)
+// ══════════════════════════════════════════════
+const CDN_P = 'https://www.drutex.de/media/webp/80/';
+const DOOR_PHOTOS = {
+  'weiss-fx':      CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktbW9udGFuYS1iaWFseS1meC5qcGc=.webp',
+  'white-sand':    CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktbW9udGFuYS13aGl0ZS1zYW5kLmpwZw==.webp',
+  'crown-plat':    CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktbW9udGFuYS1jcm93LXBsYXRpbml1bS5qcGc=.webp',
+  'cremeweiss':    CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktbW9udGFuYS1rcmVtb3d5LmpwZw==.webp',
+  'lichtgrau':     CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktbW9udGFuYS1qYXNueS1zemFyeS5qcGc=.webp',
+  'grau':          CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktbW9udGFuYS1zemFyeS5qcGc=.webp',
+  'betongrau':     CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktYmV0b25vd3ktc3phcnkuanBn.webp',
+  'quarzgrau':     CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktYmV0b25vd3ktc3phcnkta3dhcmN5dG93eS5qcGc=.webp',
+  'quarzgrau-gl':  CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktYmV0b25vd3ktc3phcnkta3dhcmN5dG93eS1nbGFka2kuanBn.webp',
+  'basaltgrau':    CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktYmV0b25vd3ktYmF6YWx0b3d5LXN6YXJ5LmpwZw==.webp',
+  'basaltgrau-gl': CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktYmF6YWx0b3d5LXN6YXJ5LWdsYWRraS5qcGc=.webp',
+  'eisengl':       CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktbHVwa293eS5qcGc=.webp',
+  'schiefgrau-gl': CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktbHVwa293eS1zemFyeS1nbGFka2kuanBn.webp',
+  'graphit-sand':  CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktbGdyYWZpdG93eS1waWFza293eS5qcGc=.webp',
+  'anthrazitgrau': CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktYW50cmFjeXQuanBn.webp',
+  'anthrazit-gl':  CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktYW50cmFjeXQtZ2xhZGtpLmpwZw==.webp',
+  'anthrazit-um':  CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktYW50cmFjeXQtdWx0aS1tYXR0LmpwZw==.webp',
+  'jet-black':     CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktamV0LWJsYWNrLmpwZw==.webp',
+  'schwarz-um':    CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktY3phcm55LXVsdGktbWF0dC5qcGc=.webp',
+  'pyrit':         CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktbW9udGFuYS1waXJ5dC5qcGc=.webp',
+  'deep-bronze':   CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktZGVlcC1icmF6ZS5qcGc=.webp',
+  'moosgruen':     CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktemllbGVuLW1jaHUuanBn.webp',
+  'dunkelgruen':   CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktY2llbW5vLXppZWxvbnkuanBn.webp',
+  'dunkelrot':     CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktY2llbW55LWN6ZXJ3b255LmpwZw==.webp',
+  'brillblau':     CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktYnJ5bGFudG93by1uaWViaWVza2kuanBn.webp',
+  'stahlblau':     CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktc3RhbG93eS1uaWViaWVza2kuanBn.webp',
+  'schoko-br':     CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktYnJhei1jemVrb2xhZG93eS5qcGc=.webp',
+  'golden-oak':    CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktemxvdHktZGFiLmpwZw==.webp',
+  'sheffield':     CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktZGFiLWJpZWxvbnkuanBn.webp',
+  'turner-oak':    CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktdHVybmVyLW9hay5qcGc=.webp',
+  'turner-toffee': CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktdHVybmVyLW9hay10b2ZmZWUuanBn.webp',
+  'turner-walnut': CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktdHVybmVyLW9hay13YWxudXQuanBn.webp',
+  'eiche-nat':     CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktZGFiLW5hdHVyYWxueS5qcGc=.webp',
+  'winchester':    CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktd2luY2hlc3Rlci5qcGc=.webp',
+  'oregon':        CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktb3JlZ29uLmpwZw==.webp',
+  'douglasie':     CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktZGFnbGV6amEuanBn.webp',
+  'nussbaum':      CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktb3J6ZWNoLmpwZw==.webp',
+  'eiche-dunkel':  CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktY2llbW55LWRhYi5qcGc=.webp',
+  'schwarzbraun':  CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktcGFsaXNhbmRlci5qcGc=.webp',
+  'macore':        CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktbWFjb3JlLmpwZw==.webp',
+  'mahagoni':      CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktbWFob24uanBn.webp',
+};
+
+// Referenzfoto updaten wenn Farbe/Holz gewählt
+function setRefPhoto(key) {
+  const url = DOOR_PHOTOS[key];
+  if (!url) return;
+  const img = document.querySelector('.ref-panel img');
+  if (img) { img.src = url; img.alt = key; }
+}
+
+// ══════════════════════════════════════════════
 // FARBEN — alle 41 echten Drutex-Dekore
 // Identisch mit deinefenster.de/produkte/haustueren/iglo-energy.html
 // swatchUrl = Original Drutex-Swatch-Foto (für UI-Buttons)
@@ -797,13 +854,14 @@ function buildSwatches(id, list, onSelect, defaultKey) {
     el.appendChild(s);
   });
 }
-buildSwatches('whites',     FARBEN.whites,  c => setColor(c.key));
-buildSwatches('grays',      FARBEN.grays,   c => setColor(c.key), 'anthrazitgrau');
-buildSwatches('colorGroup', FARBEN.colors,  c => setColor(c.key));
-buildSwatches('woods',      FARBEN.woods,   c => setWood(c.key));
+buildSwatches('whites',     FARBEN.whites,  c => { setColor(c.key); setRefPhoto(c.key); });
+buildSwatches('grays',      FARBEN.grays,   c => { setColor(c.key); setRefPhoto(c.key); }, 'anthrazitgrau');
+buildSwatches('colorGroup', FARBEN.colors,  c => { setColor(c.key); setRefPhoto(c.key); });
+buildSwatches('woods',      FARBEN.woods,   c => { setWood(c.key);  setRefPhoto(c.key); });
 
-// Startzustand: Anthrazitgrau-Textur laden (nicht nur Hex)
+// Startzustand: Anthrazitgrau
 setColor('anthrazitgrau');
+setRefPhoto('anthrazitgrau');
 
 // ── Glasarten-Buttons ──
 (function buildGlassBtns() {
