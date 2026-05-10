@@ -940,5 +940,28 @@
   gsap.registerPlugin(ScrollTrigger);
 </script>
 <script src="../../js/profil-farben.js" defer></script>
+
+<script>
+// Farb-Vorschau: Hover zeigt Produktfoto in dieser Farbe, Klick fixiert
+(function(){
+  var mainImg = document.querySelector('.pf-main-img');
+  if (!mainImg) return;
+  var fixedSrc = mainImg.src;
+  var swatches = document.querySelectorAll('.pf-swatch');
+  swatches.forEach(function(btn){
+    var url = btn.dataset.frameUrl;
+    if (!url) return;
+    btn.addEventListener('mouseenter', function(){ mainImg.src = url; });
+    btn.addEventListener('mouseleave', function(){ mainImg.src = fixedSrc; });
+    btn.addEventListener('click', function(){
+      fixedSrc = url;
+      mainImg.src = url;
+      swatches.forEach(function(b){ b.classList.remove('is-active'); });
+      btn.classList.add('is-active');
+      if (btn.dataset.name) mainImg.alt = btn.dataset.name;
+    });
+  });
+})();
+</script>
 </body>
 </html>
