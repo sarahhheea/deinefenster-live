@@ -238,6 +238,7 @@ scene.add(gnd);
 // ══════════════════════════════════════════════
 // MATERIALIEN
 // ══════════════════════════════════════════════
+const texLoader = new THREE.TextureLoader();
 const doorMat   = new THREE.MeshStandardMaterial({ color: 0x232729, roughness: 0.36, metalness: 0.02 });
 const frameMat  = new THREE.MeshStandardMaterial({ color: 0x232729, roughness: 0.36, metalness: 0.02 });
 const grooveMat = new THREE.MeshStandardMaterial({ color: 0x181b1d, roughness: 0.68 });
@@ -562,115 +563,26 @@ const WOOD_PARAMS = {
   'mahagoni':   { base:'#3A2820', grain:'#1C0E0A', light:'#524030', contrast:0.48, sp:5 },
 };
 
-function seededRnd(seed) {
-  let s = seed;
-  return () => { s = (s * 1664525 + 1013904223) & 0xffffffff; return (s >>> 0) / 0xffffffff; };
-}
-
-function generateWoodCanvas(key) {
-  const p = WOOD_PARAMS[key]; if (!p) return null;
-  const W = 512, H = 1024;
-  const cvs = document.createElement('canvas'); cvs.width = W; cvs.height = H;
-  const ctx = cvs.getContext('2d');
-  const rnd = seededRnd(key.split('').reduce((a,c) => a + c.charCodeAt(0), 0));
-
-  // Basis
-  ctx.fillStyle = p.base; ctx.fillRect(0, 0, W, H);
-
-  // ── Jahrringe: Frühholz (hell, breit) + Spätholz (dunkel, schmal) ──────────
-  // Das ist das wichtigste visuelle Merkmal von echtem Holz.
-  // Frühholz: lockeres Zellwachstum → heller, 15-55px breit
-  // Spätholz: dichtes Zellwachstum → dunkler, 2-8px breit
-  {
-    let x = 0;
-    while (x < W) {
-      // Frühholz-Bereich (hell, breit)
-      const ewW = 15 + rnd() * 45;
-      ctx.globalAlpha = 0.18 + rnd() * 0.28;
-      ctx.fillStyle = p.light;
-      ctx.fillRect(x, 0, ewW, H);
-      x += ewW;
-      if (x >= W) break;
-      // Spätholz-Streifen (dunkel, schmal) — der eigentliche "Jahrringsstreifen"
-      const lwW = 1.5 + rnd() * 6.5;
-      ctx.globalAlpha = 0.45 + rnd() * p.contrast * 0.6;
-      ctx.fillStyle = p.grain;
-      ctx.fillRect(x, 0, lwW, H);
-      x += lwW;
-    }
-    ctx.globalAlpha = 1;
-  }
-
-  // ── Douglasie: zusätzliche breite Kontraständer ───────────────────────────
-  if (p.stripes) {
-    let x = rnd() * 40;
-    while (x < W) {
-      const sw = 5 + rnd() * 14;
-      ctx.globalAlpha = 0.40 + rnd() * 0.35;
-      ctx.fillStyle = p.grain;
-      ctx.fillRect(x, 0, sw, H);
-      x += sw + 22 + rnd() * 28;
-    }
-    ctx.globalAlpha = 1;
-  }
-
-  // ── Maserungslinien: feine vertikale Fasern ───────────────────────────────
-  // Laufen exakt zwischen/über den Jahrringen, erzeugen Holzfaser-Textur
-  ctx.strokeStyle = p.grain;
-  {
-    let x = rnd() * p.sp;
-    while (x < W) {
-      ctx.globalAlpha = p.contrast * (0.35 + rnd() * 0.50);
-      ctx.lineWidth = 0.3 + rnd() * 0.7;
-      ctx.beginPath();
-      let cx = x;
-      ctx.moveTo(cx, 0);
-      for (let y = 8; y <= H; y += 8) {
-        const wx = p.wavy
-          ? cx + Math.sin(y * 0.028 + rnd() * 4.5) * 6
-          : cx + (rnd() - 0.5) * 1.4;
-        ctx.lineTo(wx, y);
-      }
-      ctx.stroke();
-      x += p.sp * (0.4 + rnd() * 0.9);
-    }
-  }
-  ctx.globalAlpha = 1;
-
-  // ── Akzentlinien: vereinzelt dickere Jahrrings-Grenzen ────────────────────
-  {
-    let x = rnd() * 25;
-    while (x < W) {
-      ctx.globalAlpha = p.contrast * (0.55 + rnd() * 0.40);
-      ctx.lineWidth = 0.7 + rnd() * 1.5;
-      ctx.beginPath();
-      let cx = x;
-      ctx.moveTo(cx, 0);
-      for (let y = 10; y <= H; y += 10) {
-        const wx = p.wavy
-          ? cx + Math.sin(y * 0.022 + rnd() * 5) * 7
-          : cx + (rnd() - 0.5) * 1.8;
-        ctx.lineTo(wx, y);
-      }
-      ctx.stroke();
-      x += 20 + rnd() * 38;
-    }
-  }
-  ctx.globalAlpha = 1;
-
-  // ── Glanz-Schimmer ────────────────────────────────────────────────────────
-  const g = ctx.createLinearGradient(0, 0, W, 0);
-  g.addColorStop(0,   'rgba(255,255,255,0.08)');
-  g.addColorStop(0.35,'rgba(0,0,0,0.03)');
-  g.addColorStop(1,   'rgba(255,255,255,0.08)');
-  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-
-  return cvs;
-}
+// ── Holzdekor: echte Drutex-Furniertexturen (aus CDN-Swatch-Bildern zugeschnitten) ──
+const WOOD_TEX_MAP = {
+  'golden-oak': 'img/holz/golden_oak.jpg',
+  'sheffield':  'img/holz/sheffield.jpg',
+  'eiche-hell': 'img/holz/sheffield.jpg',    // hellste verfügbare Eiche
+  'eiche-nat':  'img/holz/eiche_natur.jpg',
+  'winchester': 'img/holz/winchester.jpg',
+  'oregon':     'img/holz/oregon.jpg',
+  'douglasie':  'img/holz/douglasie.jpg',
+  'nussbaum':   'img/holz/nussbaum.jpg',
+  'mooreiche':  'img/holz/eiche_dunkel.jpg', // dunkelste verfügbare Eiche
+  'dunkleiche': 'img/holz/eiche_dunkel.jpg',
+  'macore':     'img/holz/macore.jpg',
+  'mahagoni':   'img/holz/mahagoni.jpg',
+};
 
 // ── Farbe setzen (Unifarbe — entfernt Holztextur) ──
 function setColor(hex) {
   if (doorMat.map) { doorMat.map.dispose(); doorMat.map = null; }
+  if (doorMat.roughnessMap) { doorMat.roughnessMap.dispose(); doorMat.roughnessMap = null; }
   frameMat.map = null;
   const c = new THREE.Color(hex);
   doorMat.color.copy(c); frameMat.color.copy(c);
@@ -681,22 +593,28 @@ function setColor(hex) {
   doorMat.needsUpdate = true; frameMat.needsUpdate = true;
 }
 
-// ── Holzdekor setzen (Canvas-Textur auf Türblatt) ──
+// ── Holzdekor setzen (echte Furnierfoto-Textur) ──────────────────────────────
 function setWood(key) {
-  const p = WOOD_PARAMS[key]; if (!p) return;
-  const canvas = generateWoodCanvas(key);
-  if (doorMat.map) doorMat.map.dispose();
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-  // Türblatt: Textur (1:2 Canvas ~ 1:2.1 Tür — minimalste Streckung)
-  doorMat.map = tex; doorMat.color.set(0xffffff);
-  doorMat.roughness = 0.68; doorMat.metalness = 0;
-  doorMat.needsUpdate = true;
-  // Zarge: Vollton (Grundfarbe des Dekors, BoxGeometry-UV ungeeignet für Maserung)
+  const p = WOOD_PARAMS[key];
+  const texPath = WOOD_TEX_MAP[key];
+  if (!p || !texPath) return;
+
+  if (doorMat.map) { doorMat.map.dispose(); doorMat.map = null; }
+  if (doorMat.roughnessMap) { doorMat.roughnessMap.dispose(); doorMat.roughnessMap = null; }
+
+  texLoader.load(texPath, (tex) => {
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(2, 1);  // 2× quer → Maserungsdichte entspricht realem Furnier
+    doorMat.map = tex;
+    doorMat.color.set(0xffffff);  // Volle Photofarbe — kein Tinting
+    doorMat.roughness = 0.72;
+    doorMat.metalness = 0;
+    doorMat.needsUpdate = true;
+  });
+
+  // Zarge: Basisfarbe (kein Furnierfoto, BoxGeometry-UVs würden strecken)
   frameMat.map = null; frameMat.color.set(p.base);
-  frameMat.roughness = 0.65; frameMat.metalness = 0;
-  frameMat.needsUpdate = true;
-  // Profilnuten: Maserungsfarbe
+  frameMat.roughness = 0.68; frameMat.metalness = 0; frameMat.needsUpdate = true;
   grooveMat.color.set(p.grain); grooveMat.needsUpdate = true;
 }
 
