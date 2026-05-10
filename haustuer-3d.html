@@ -660,48 +660,28 @@ function findColor(key) {
 function setColor(key) {
   clearWoodMaps();
   frameMat.map = null;
+  doorMat.map = null;
 
   const colorObj = findColor(key);
   const hex = colorObj?.hex || '#888888';
-  const frameColor = new THREE.Color(hex);
+  const c = new THREE.Color(hex);
 
-  // Zarge: Vollton aus gesampeltem Hex (sieht auf BoxGeometry besser aus als Textur)
-  frameMat.color.copy(frameColor);
-  grooveMat.color.copy(frameColor).multiplyScalar(0.62);
-  frameMat.roughness = 0.72;
-  frameMat.metalness = 0;
+  // Exakter Drutex-Farbwert direkt auf Tür + Zarge
+  doorMat.color.copy(c);
+  frameMat.color.copy(c);
+  grooveMat.color.copy(c).multiplyScalar(0.62);
+
+  // Finish-Eigenschaften
+  const isGlatt    = key.endsWith('-gl');
+  const isUltiMatt = key.endsWith('-um');
+  const roughness  = isUltiMatt ? 0.97 : isGlatt ? 0.20 : 0.74;
+  const envInt     = isUltiMatt ? 0.02 : isGlatt ? 0.85 : 0.08;
+
+  doorMat.roughness  = frameMat.roughness  = roughness;
+  doorMat.metalness  = frameMat.metalness  = 0;
+  doorMat.envMapIntensity = envInt;
+  doorMat.needsUpdate = true;
   frameMat.needsUpdate = true;
-
-  // Oberflächen-Finish aus key ableiten
-  const isGlatt   = key.endsWith('-gl');
-  const isUltiMatt= key.endsWith('-um');
-  const isTexture = key === 'graphit-sand' || key === 'eisengl';
-  const roughness = isUltiMatt ? 0.96 : isGlatt ? 0.22 : isTexture ? 0.68 : 0.74;
-  const envInt    = isUltiMatt ? 0.03 : isGlatt ? 0.90 : isTexture ? 0.20 : 0.10;
-
-  // Echte Drutex-Swatch-Textur laden (lokal, kein CORS)
-  const texPath = 'img/swatches/' + key + '.webp';
-  texLoader.load(texPath, (tex) => {
-    tex.colorSpace = THREE.SRGBColorSpace;
-    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-    // 2×4 Kacheln: Oberflächentextur sichtbar, kein Streckungseffekt
-    tex.repeat.set(2, 4);
-    tex.needsUpdate = true;
-    doorMat.map = tex;
-    doorMat.color.set(0xffffff);
-    doorMat.roughness = roughness;
-    doorMat.metalness = 0;
-    doorMat.envMapIntensity = envInt;
-    doorMat.needsUpdate = true;
-  }, undefined, () => {
-    // Fallback: kein Bild → Vollton aus hex
-    doorMat.map = null;
-    doorMat.color.copy(frameColor);
-    doorMat.roughness = roughness;
-    doorMat.metalness = 0;
-    doorMat.envMapIntensity = envInt;
-    doorMat.needsUpdate = true;
-  });
 }
 
 // ── Holzdekor setzen (echte Furnierfoto-Textur) ──────────────────────────────
