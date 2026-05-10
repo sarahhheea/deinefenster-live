@@ -580,9 +580,14 @@ const WOOD_TEX_MAP = {
 };
 
 // ── Farbe setzen (Unifarbe — entfernt Holztextur) ──
+function clearWoodMaps() {
+  ['map','bumpMap','roughnessMap'].forEach(k => {
+    if (doorMat[k]) { doorMat[k].dispose(); doorMat[k] = null; }
+  });
+}
+
 function setColor(hex) {
-  if (doorMat.map) { doorMat.map.dispose(); doorMat.map = null; }
-  if (doorMat.roughnessMap) { doorMat.roughnessMap.dispose(); doorMat.roughnessMap = null; }
+  clearWoodMaps();
   frameMat.map = null;
   const c = new THREE.Color(hex);
   doorMat.color.copy(c); frameMat.color.copy(c);
@@ -599,16 +604,27 @@ function setWood(key) {
   const texPath = WOOD_TEX_MAP[key];
   if (!p || !texPath) return;
 
-  if (doorMat.map) { doorMat.map.dispose(); doorMat.map = null; }
-  if (doorMat.roughnessMap) { doorMat.roughnessMap.dispose(); doorMat.roughnessMap = null; }
+  clearWoodMaps();
 
   texLoader.load(texPath, (tex) => {
     tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(2, 1);  // 2× quer → Maserungsdichte entspricht realem Furnier
+    tex.repeat.set(2, 1);
+
+    // colorMap: echte Drutex-Furnier-Farbe
     doorMat.map = tex;
-    doorMat.color.set(0xffffff);  // Volle Photofarbe — kein Tinting
-    doorMat.roughness = 0.72;
+    doorMat.color.set(0xffffff);
+
+    // bumpMap: gleiche Textur → dunkle Maserungslinien wirken eingesunken
+    // → Holz bekommt spürbare Oberflächenstruktur statt flachem Anstrich
+    doorMat.bumpMap = tex;
+    doorMat.bumpScale = 0.028;
+
+    // roughnessMap: dunkle Linien = matter, helles Frühholz = etwas glänzender
+    // → typischer Wechsel zwischen Glanz und Matt bei echtem Holz
+    doorMat.roughnessMap = tex;
+    doorMat.roughness = 0.52;   // Basiswert: Licht kann reflektieren
     doorMat.metalness = 0;
+    doorMat.envMapIntensity = 0.6;
     doorMat.needsUpdate = true;
   });
 
