@@ -124,8 +124,10 @@
 
   <!-- Farbsteuerung rechts -->
   <div class="controls">
-    <div class="current-label" id="currentLabel">Anthrazit</div>
-    <div class="section-title">Grautöne</div>
+    <div class="current-label" id="currentLabel">Anthrazitgrau</div>
+    <div class="section-title">Weißtöne</div>
+    <div class="colors" id="whites"></div>
+    <div class="section-title">Grautöne & Schwarz</div>
     <div class="colors" id="grays"></div>
     <div class="section-title">Farben</div>
     <div class="colors" id="colorGroup"></div>
@@ -490,93 +492,99 @@ doorGroup.position.set(-DW/2, 0, 0);
 scene.add(doorGroup);
 
 // ══════════════════════════════════════════════
-// FARBEN
+// FARBEN — alle 41 echten Drutex-Dekore
+// Identisch mit deinefenster.de/produkte/haustueren/iglo-energy.html
+// swatchUrl = Original Drutex-Swatch-Foto (für UI-Buttons)
+// hex       = Näherungshex für 3D-Material (Volltonfarben)
 // ══════════════════════════════════════════════
+const CDN = 'https://www.drutex.de/media/webp/80/';
 const FARBEN = {
+  whites: [
+    { key:'weiss-fx',      name:'Weiß FX',            hex:'#f5f5f4', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvYmlhbHktZnguanBn.webp' },
+    { key:'white-sand',    name:'White Sand U-Matt',   hex:'#e4ddd0', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L3doaXRlX3NhbmQtdS1tYXR0LmpwZw==.webp' },
+    { key:'crown-plat',    name:'Crown Platin',        hex:'#d5d2cc', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5LzIwMTcvY3Jvdml1X3BsYXR5bml1bS1uLmpwZw==.webp' },
+    { key:'cremeweiss',    name:'Cremeweiß',           hex:'#faefd8', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkva3JlbW93eS5qcGc=.webp' },
+  ],
   grays: [
-    { key: 'weiss',       hex: '#ffffff',  name: 'Weiß' },
-    { key: 'weiss-fx',    hex: '#f4f4f0',  name: 'Weiß FX' },
-    { key: 'cremeweiss',  hex: '#fdf6e3',  name: 'Cremeweiß' },
-    { key: 'crown-plat',  hex: '#dddbd6',  name: 'Crown Platin' },
-    { key: 'lichtgrau',   hex: '#c5c6be',  name: 'Lichtgrau' },
-    { key: 'betongrau',   hex: '#7c7f79',  name: 'Betongrau' },
-    { key: 'quarzgr-sa',  hex: '#6c6f66',  name: 'Quarzgrau SA' },
-    { key: 'quarzgr-gl',  hex: '#6c6f66',  name: 'Quarzgrau GL' },
-    { key: 'basaltgr-sa', hex: '#4f5458',  name: 'Basaltgrau SA' },
-    { key: 'basaltgr-gl', hex: '#4f5458',  name: 'Basaltgrau GL' },
-    { key: 'grafitgr',    hex: '#4a4c46',  name: 'Grafitgrau' },
-    { key: 'schiefgr-sa', hex: '#3e454c',  name: 'Schiefergrau SA' },
-    { key: 'schiefgr-gl', hex: '#3e454c',  name: 'Schiefergrau GL' },
-    { key: 'eisengl',     hex: '#3c3e42',  name: 'Eisenglimmer' },
-    { key: 'anthrazit',   hex: '#232729',  name: 'Anthrazit' },
-    { key: 'anthraz-gl',  hex: '#373d3f',  name: 'Anthrazit GL' },
-    { key: 'anthraz-um',  hex: '#2e3235',  name: 'Anthrazit Ultimatt' },
-    { key: 'schwarz-um',  hex: '#1a1c1e',  name: 'Schwarz Ultimatt' },
-    { key: 'jet-black',   hex: '#101214',  name: 'Jet Black' },
+    { key:'lichtgrau',     name:'Lichtgrau',           hex:'#c2c3bc', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5LzIwMTcvamFzbnlfc3phcnktbi5qcGc=.webp' },
+    { key:'grau',          name:'Grau',                hex:'#9a9b96', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvc3phcnkuanBn.webp' },
+    { key:'betongrau',     name:'Betongrau',           hex:'#7c7e78', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvYmV0b25vd3ktc3phcnkuanBn.webp' },
+    { key:'quarzgrau',     name:'Quarzgrau',           hex:'#6b6e67', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvc3phcnkta3dhcmN5dG93eS5qcGc=.webp' },
+    { key:'quarzgrau-gl',  name:'Quarzgrau Glatt',     hex:'#6b6e67', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvc3phcnkta3dhcmN5dG93eS1nbGFka2kuanBn.webp' },
+    { key:'basaltgrau',    name:'Basaltgrau',          hex:'#51555a', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvYmF6YWx0b3d5X3N6YXJ5LmpwZw==.webp' },
+    { key:'basaltgrau-gl', name:'Basaltgrau Glatt',    hex:'#51555a', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvYmF6YWx0b3d5LXN6YXJ5LWdhZGtpLmpwZw==.webp' },
+    { key:'eisengl',       name:'Eisenglimmer Schiefer',hex:'#3c3e42',swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5LzIwMTcvbHVwa293eS1uLmpwZw==.webp' },
+    { key:'schiefgrau-gl', name:'Schiefergrau Glatt',  hex:'#3e454c', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5LzIwMTcvbHVwa293eS1nbGFka2ktbi5qcGc=.webp' },
+    { key:'graphit-sand',  name:'Graphit-Sandfarben',  hex:'#595b51', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvZ3JhZml0b3d5X3BpYXNrb3dhbnkuanBn.webp' },
+    { key:'anthrazitgrau', name:'Anthrazitgrau',       hex:'#2e3030', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvYW50cmFjeXQuanBn.webp' },
+    { key:'anthrazit-gl',  name:'Anthrazit Glatt',     hex:'#373d3f', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvYW50cnljeXQwZ2xhZGtpLmpwZw==.webp' },
+    { key:'anthrazit-um',  name:'Anthrazit Ulti-Matt', hex:'#2a2c2e', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvYW50cmFjdXRfdWx0aS1tYXR0X3d3dy5qcGc=.webp' },
+    { key:'jet-black',     name:'Jet Black',           hex:'#121416', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L2pldC1ibGFjay5qcGc=.webp' },
+    { key:'schwarz-um',    name:'Schwarz Ulti-Matt',   hex:'#1c1e20', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvY3phcm55X3VsdGktbWF0dF93d3cuanBn.webp' },
   ],
   colors: [
-    { key: 'brillblau',   hex: '#1c5080',  name: 'Brillantblau' },
-    { key: 'stahlblau',   hex: '#1c4c6c',  name: 'Stahlblau' },
-    { key: 'moosgruen',   hex: '#2d4a30',  name: 'Moosgrün' },
-    { key: 'dunkelgr',    hex: '#1e3828',  name: 'Dunkelgrün' },
-    { key: 'dunkelrot',   hex: '#6c1c1c',  name: 'Dunkelrot' },
-    { key: 'braun-mar',   hex: '#6b4226',  name: 'Braun Marrone' },
-    { key: 'schoko-br',   hex: '#4a2820',  name: 'Schokobraun' },
-    { key: 'schwarzbr',   hex: '#26211e',  name: 'Schwarzbraun' },
-    { key: 'piryt',       hex: '#6a5a30',  name: 'Pyrit' },
-    { key: 'deep-bronze', hex: '#6b6040',  name: 'Deep Bronze' },
+    { key:'pyrit',         name:'Pyrit',               hex:'#766b3a', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L3Bpcnl0LmpwZw==.webp' },
+    { key:'deep-bronze',   name:'Shine Deep Bronze',   hex:'#6b6040', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvZGVlcF9icm9uemUuanBn.webp' },
+    { key:'moosgruen',     name:'Moosgrün',            hex:'#2d4a30', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvemllbGVuLW1jaHUuanBn.webp' },
+    { key:'dunkelgruen',   name:'Dunkelgrün',          hex:'#1e3828', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvY2llbW5vLXppZWxvbnkuanBn.webp' },
+    { key:'dunkelrot',     name:'Dunkelrot',           hex:'#6c1c1c', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvY2llbW55LWN6ZXJ3b255LmpwZw==.webp' },
+    { key:'brillblau',     name:'Brillantblau',        hex:'#1c5080', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L2JyeWxhbnRvd28tbmllYmllc2tpLmpwZw==.webp' },
+    { key:'stahlblau',     name:'Stahlblau',           hex:'#1c4c6c', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvc3RhbG93eS1uaWViaWVza2lfTjJpbVdJUy5qcGc=.webp' },
+    { key:'schoko-br',     name:'Schokobraun',         hex:'#4a2820', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvYnJhei1jemVrb2xhZG93eS5qcGc=.webp' },
   ],
   woods: [
-    { key: 'golden-oak',  hex: '#9A5C2A',  name: 'Golden Oak' },
-    { key: 'sheffield',   hex: '#D2BCA8',  name: 'Sheffield Oak' },
-    { key: 'eiche-hell',  hex: '#C8B08A',  name: 'Eiche Hell' },
-    { key: 'eiche-nat',   hex: '#B68B55',  name: 'Eiche Natur' },
-    { key: 'winchester',  hex: '#8C6136',  name: 'Winchester' },
-    { key: 'oregon',      hex: '#D37D26',  name: 'Oregon' },
-    { key: 'douglasie',   hex: '#8B5523',  name: 'Douglasie' },
-    { key: 'nussbaum',    hex: '#5A3E28',  name: 'Nussbaum' },
-    { key: 'mooreiche',   hex: '#3C2E22',  name: 'Mooreiche' },
-    { key: 'dunkleiche',  hex: '#3A2A20',  name: 'Dunkle Eiche' },
-    { key: 'macore',      hex: '#5A2C1C',  name: 'Macoré' },
-    { key: 'mahagoni',    hex: '#3A2820',  name: 'Mahagoni' },
+    { key:'golden-oak',    name:'Golden Oak',          swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvemFvdHktZGFiX2trLmpwZw==.webp' },
+    { key:'sheffield',     name:'Sheffield Oak Light', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvZGFiLWJpZWxvbnkuanBn.webp' },
+    { key:'turner-oak',    name:'Turner Oak',          swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L3R1cm5lci1vYWstMjAyMy5qcGc=.webp' },
+    { key:'turner-toffee', name:'Turner Oak Toffee',   swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L3R1cm5lcl9vYWtfdG9mZmVlXzQ3MC0zMDA0LmpwZw==.webp' },
+    { key:'turner-walnut', name:'Turner Oak Walnut',   swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L3R1cm5lcl9vYWtfd2FsbnV0XzQ3MC0zMDA0LmpwZw==.webp' },
+    { key:'eiche-nat',     name:'Eiche Natur',         swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvZGFiLW5hdHVyYWxueS5qcGc=.webp' },
+    { key:'winchester',    name:'Winchester',          swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvd2luY2hlc3Rlcl9ray5qcGc=.webp' },
+    { key:'oregon',        name:'Oregon',              swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvb3JlZ29uX2trLmpwZw==.webp' },
+    { key:'douglasie',     name:'Streifen Douglasie',  swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvZGFnbGV6amFfa2suanBn.webp' },
+    { key:'nussbaum',      name:'Nussbaum',            swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L3dvb2Qvb3J6ZWNoLWEuanBn.webp' },
+    { key:'eiche-dunkel',  name:'Eiche Dunkel',        swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvY2llbW55LWRhYl9ray5qcGc=.webp' },
+    { key:'schwarzbraun',  name:'Schwarzbraun',        swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvcGFsaXNhbmRlci5qcGc=.webp' },
+    { key:'macore',        name:'Macoré',              swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvbWFjb3JlX2trLmpwZw==.webp' },
+    { key:'mahagoni',      name:'Mahagoni',            swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvbWFjaG9hX2trLmpwZw==.webp' },
   ]
 };
 
 // ══════════════════════════════════════════════
-// HOLZDEKORE — Canvas prozedurale Texturen
-// Renolit EXOFOL Folien: Maserung immer VERTIKAL
+// HOLZDEKORE — lokale Furniertexturen + Zarge-Farben
 // ══════════════════════════════════════════════
-// Farben aus echten Drutex CDN-Swatch-Bildern gesampelt (10.05.2026)
-// sp = Abstand zwischen Maserungslinien (px) — kleiner = dichter/deutlicher Holzcharakter
 const WOOD_PARAMS = {
-  'golden-oak': { base:'#9A5C2A', grain:'#5E3410', light:'#C27A42', contrast:0.72, sp:4 },
-  'sheffield':  { base:'#D2BCA8', grain:'#A09070', light:'#EAD8C0', contrast:0.22, sp:8 },
-  'eiche-hell': { base:'#C8B08A', grain:'#907A58', light:'#DFCA9A', contrast:0.30, sp:7 },
-  'eiche-nat':  { base:'#B68B55', grain:'#7A5A2E', light:'#D8A868', contrast:0.48, sp:5 },
-  'winchester': { base:'#8C6136', grain:'#52341A', light:'#B47E50', contrast:0.55, sp:4 },
-  'oregon':     { base:'#D37D26', grain:'#8C4E08', light:'#ECA040', contrast:0.62, sp:4 },
-  'douglasie':  { base:'#8B5523', grain:'#503008', light:'#AC7240', contrast:0.52, sp:5, stripes:true },
-  'nussbaum':   { base:'#5A3E28', grain:'#281A08', light:'#7E5438', contrast:0.68, sp:4 },
-  'mooreiche':  { base:'#3C2E22', grain:'#20160A', light:'#524038', contrast:0.40, sp:5 },
-  'dunkleiche': { base:'#3A2A20', grain:'#1C1008', light:'#503C2E', contrast:0.35, sp:5 },
-  'macore':     { base:'#5A2C1C', grain:'#30100A', light:'#7E4030', contrast:0.55, sp:5, wavy:true },
-  'mahagoni':   { base:'#3A2820', grain:'#1C0E0A', light:'#524030', contrast:0.48, sp:5 },
+  'golden-oak':    { base:'#9A5C2A', grain:'#5E3410' },
+  'sheffield':     { base:'#D2BCA8', grain:'#A09070' },
+  'turner-oak':    { base:'#C0A882', grain:'#8A7050' },  // mittlere Eiche
+  'turner-toffee': { base:'#B68B55', grain:'#7A5A2E' },  // warm orange-braun
+  'turner-walnut': { base:'#5A3E28', grain:'#281A08' },  // dunkel wie Nussbaum
+  'eiche-nat':     { base:'#B68B55', grain:'#7A5A2E' },
+  'winchester':    { base:'#8C6136', grain:'#52341A' },
+  'oregon':        { base:'#D37D26', grain:'#8C4E08' },
+  'douglasie':     { base:'#8B5523', grain:'#503008' },
+  'nussbaum':      { base:'#5A3E28', grain:'#281A08' },
+  'eiche-dunkel':  { base:'#3A2A20', grain:'#1C1008' },
+  'schwarzbraun':  { base:'#26211e', grain:'#120E08' },  // Palisander
+  'macore':        { base:'#5A2C1C', grain:'#30100A' },
+  'mahagoni':      { base:'#3A2820', grain:'#1C0E0A' },
 };
 
-// ── Holzdekor: echte Drutex-Furniertexturen (aus CDN-Swatch-Bildern zugeschnitten) ──
 const WOOD_TEX_MAP = {
-  'golden-oak': 'img/holz/golden_oak.jpg',
-  'sheffield':  'img/holz/sheffield.jpg',
-  'eiche-hell': 'img/holz/sheffield.jpg',    // hellste verfügbare Eiche
-  'eiche-nat':  'img/holz/eiche_natur.jpg',
-  'winchester': 'img/holz/winchester.jpg',
-  'oregon':     'img/holz/oregon.jpg',
-  'douglasie':  'img/holz/douglasie.jpg',
-  'nussbaum':   'img/holz/nussbaum.jpg',
-  'mooreiche':  'img/holz/eiche_dunkel.jpg', // dunkelste verfügbare Eiche
-  'dunkleiche': 'img/holz/eiche_dunkel.jpg',
-  'macore':     'img/holz/macore.jpg',
-  'mahagoni':   'img/holz/mahagoni.jpg',
+  'golden-oak':    'img/holz/golden_oak.jpg',
+  'sheffield':     'img/holz/sheffield.jpg',
+  'turner-oak':    'img/holz/sheffield.jpg',     // naheste Textur
+  'turner-toffee': 'img/holz/eiche_natur.jpg',
+  'turner-walnut': 'img/holz/nussbaum.jpg',
+  'eiche-nat':     'img/holz/eiche_natur.jpg',
+  'winchester':    'img/holz/winchester.jpg',
+  'oregon':        'img/holz/oregon.jpg',
+  'douglasie':     'img/holz/douglasie.jpg',
+  'nussbaum':      'img/holz/nussbaum.jpg',
+  'eiche-dunkel':  'img/holz/eiche_dunkel.jpg',
+  'schwarzbraun':  'img/holz/mahagoni.jpg',      // naheste Textur
+  'macore':        'img/holz/macore.jpg',
+  'mahagoni':      'img/holz/mahagoni.jpg',
 };
 
 // ── Farbe setzen (Unifarbe — entfernt Holztextur) ──
@@ -724,14 +732,20 @@ function setGlass(key) {
   );
 }
 
-// ── Swatches ──
-function buildSwatches(id, list, onSelect) {
+// ── Swatches — echte Drutex-Swatch-Bilder als UI-Buttons ──
+function buildSwatches(id, list, onSelect, defaultKey) {
   const el = document.getElementById(id);
   list.forEach(c => {
     const s = document.createElement('div');
-    s.className = 'color-swatch' + (c.key === 'anthrazit' ? ' active' : '');
-    s.style.background = c.hex;
-    if (c.hex === '#ffffff') s.style.border = '2px solid #ccc';
+    s.className = 'color-swatch' + (c.key === defaultKey ? ' active' : '');
+    if (c.swatchUrl) {
+      // Echtes Drutex-Swatch-Foto: Farbe/Holzmaserung sichtbar im Button
+      s.style.backgroundImage = `url(${c.swatchUrl})`;
+      s.style.backgroundSize = 'cover';
+      s.style.backgroundPosition = 'center';
+    } else {
+      s.style.background = c.hex || '#888';
+    }
     s.innerHTML = `<span class="tooltip">${c.name}</span>`;
     s.onclick = () => {
       document.querySelectorAll('.color-swatch').forEach(x => x.classList.remove('active'));
@@ -742,7 +756,8 @@ function buildSwatches(id, list, onSelect) {
     el.appendChild(s);
   });
 }
-buildSwatches('grays',      FARBEN.grays,   c => setColor(c.hex));
+buildSwatches('whites',     FARBEN.whites,  c => setColor(c.hex));
+buildSwatches('grays',      FARBEN.grays,   c => setColor(c.hex), 'anthrazitgrau');
 buildSwatches('colorGroup', FARBEN.colors,  c => setColor(c.hex));
 buildSwatches('woods',      FARBEN.woods,   c => setWood(c.key));
 
