@@ -546,19 +546,20 @@ const FARBEN = {
 // Renolit EXOFOL Folien: Maserung immer VERTIKAL
 // ══════════════════════════════════════════════
 // Farben aus echten Drutex CDN-Swatch-Bildern gesampelt (10.05.2026)
+// sp = Abstand zwischen Maserungslinien (px) — kleiner = dichter/deutlicher Holzcharakter
 const WOOD_PARAMS = {
-  'golden-oak': { base:'#9A5C2A', grain:'#6A3A12', light:'#C07840', contrast:0.62, sp:5 },
-  'sheffield':  { base:'#D2BCA8', grain:'#A89080', light:'#E8D4BC', contrast:0.20, sp:10 },
-  'eiche-hell': { base:'#C8B08A', grain:'#9A7E58', light:'#DEC89A', contrast:0.26, sp:9 },
-  'eiche-nat':  { base:'#B68B55', grain:'#886338', light:'#D4A870', contrast:0.40, sp:7 },
-  'winchester': { base:'#8C6136', grain:'#5E3F1E', light:'#B07E50', contrast:0.48, sp:6 },
-  'oregon':     { base:'#D37D26', grain:'#9A5C0C', light:'#E89838', contrast:0.55, sp:5 },
-  'douglasie':  { base:'#8B5523', grain:'#603810', light:'#A87040', contrast:0.45, sp:6, stripes:true },
-  'nussbaum':   { base:'#5A3E28', grain:'#30220E', light:'#7A5438', contrast:0.60, sp:5 },
-  'mooreiche':  { base:'#3C2E22', grain:'#241A12', light:'#503E2E', contrast:0.35, sp:6 },
-  'dunkleiche': { base:'#3A2A20', grain:'#201408', light:'#4E3A2C', contrast:0.30, sp:6 },
-  'macore':     { base:'#5A2C1C', grain:'#381810', light:'#7A4030', contrast:0.48, sp:6, wavy:true },
-  'mahagoni':   { base:'#3A2820', grain:'#20140E', light:'#503A2E', contrast:0.42, sp:5 },
+  'golden-oak': { base:'#9A5C2A', grain:'#5E3410', light:'#C27A42', contrast:0.72, sp:4 },
+  'sheffield':  { base:'#D2BCA8', grain:'#A09070', light:'#EAD8C0', contrast:0.22, sp:8 },
+  'eiche-hell': { base:'#C8B08A', grain:'#907A58', light:'#DFCA9A', contrast:0.30, sp:7 },
+  'eiche-nat':  { base:'#B68B55', grain:'#7A5A2E', light:'#D8A868', contrast:0.48, sp:5 },
+  'winchester': { base:'#8C6136', grain:'#52341A', light:'#B47E50', contrast:0.55, sp:4 },
+  'oregon':     { base:'#D37D26', grain:'#8C4E08', light:'#ECA040', contrast:0.62, sp:4 },
+  'douglasie':  { base:'#8B5523', grain:'#503008', light:'#AC7240', contrast:0.52, sp:5, stripes:true },
+  'nussbaum':   { base:'#5A3E28', grain:'#281A08', light:'#7E5438', contrast:0.68, sp:4 },
+  'mooreiche':  { base:'#3C2E22', grain:'#20160A', light:'#524038', contrast:0.40, sp:5 },
+  'dunkleiche': { base:'#3A2A20', grain:'#1C1008', light:'#503C2E', contrast:0.35, sp:5 },
+  'macore':     { base:'#5A2C1C', grain:'#30100A', light:'#7E4030', contrast:0.55, sp:5, wavy:true },
+  'mahagoni':   { base:'#3A2820', grain:'#1C0E0A', light:'#524030', contrast:0.48, sp:5 },
 };
 
 function seededRnd(seed) {
@@ -573,72 +574,95 @@ function generateWoodCanvas(key) {
   const ctx = cvs.getContext('2d');
   const rnd = seededRnd(key.split('').reduce((a,c) => a + c.charCodeAt(0), 0));
 
-  // Phase 1: Grundfarbe
+  // Basis
   ctx.fillStyle = p.base; ctx.fillRect(0, 0, W, H);
 
-  // Phase 2: Breite Holzbänder (Jahrringabschnitte wie echter Bretterquerschnitt)
-  // 22-67px breite vertikale Bänder, abwechselnd heller/dunkler
+  // ── Jahrringe: Frühholz (hell, breit) + Spätholz (dunkel, schmal) ──────────
+  // Das ist das wichtigste visuelle Merkmal von echtem Holz.
+  // Frühholz: lockeres Zellwachstum → heller, 15-55px breit
+  // Spätholz: dichtes Zellwachstum → dunkler, 2-8px breit
   {
     let x = 0;
     while (x < W) {
-      const bw = 22 + rnd() * 45;
-      ctx.globalAlpha = 0.10 + rnd() * 0.22;
-      ctx.fillStyle = rnd() > 0.55 ? p.light : p.grain;
-      ctx.fillRect(x, 0, bw, H);
-      x += bw + rnd() * 10;
+      // Frühholz-Bereich (hell, breit)
+      const ewW = 15 + rnd() * 45;
+      ctx.globalAlpha = 0.18 + rnd() * 0.28;
+      ctx.fillStyle = p.light;
+      ctx.fillRect(x, 0, ewW, H);
+      x += ewW;
+      if (x >= W) break;
+      // Spätholz-Streifen (dunkel, schmal) — der eigentliche "Jahrringsstreifen"
+      const lwW = 1.5 + rnd() * 6.5;
+      ctx.globalAlpha = 0.45 + rnd() * p.contrast * 0.6;
+      ctx.fillStyle = p.grain;
+      ctx.fillRect(x, 0, lwW, H);
+      x += lwW;
     }
     ctx.globalAlpha = 1;
   }
 
+  // ── Douglasie: zusätzliche breite Kontraständer ───────────────────────────
   if (p.stripes) {
-    // Douglasie: extra breite dunkle Akzentstreifen
-    let x = rnd() * 30;
+    let x = rnd() * 40;
     while (x < W) {
-      const sw = 12 + rnd() * 22;
-      ctx.globalAlpha = p.contrast * (0.25 + rnd() * 0.40);
-      ctx.fillStyle = p.grain; ctx.fillRect(x, 0, sw, H);
-      x += sw + 25 + rnd() * 30;
+      const sw = 5 + rnd() * 14;
+      ctx.globalAlpha = 0.40 + rnd() * 0.35;
+      ctx.fillStyle = p.grain;
+      ctx.fillRect(x, 0, sw, H);
+      x += sw + 22 + rnd() * 28;
     }
     ctx.globalAlpha = 1;
   }
 
-  // Phase 3: Feine Maserungslinien über den Bändern
+  // ── Maserungslinien: feine vertikale Fasern ───────────────────────────────
+  // Laufen exakt zwischen/über den Jahrringen, erzeugen Holzfaser-Textur
   ctx.strokeStyle = p.grain;
   {
     let x = rnd() * p.sp;
     while (x < W) {
-      ctx.globalAlpha = p.contrast * (0.18 + rnd() * 0.45);
-      ctx.lineWidth = 0.5 + rnd() * 1.1;
+      ctx.globalAlpha = p.contrast * (0.35 + rnd() * 0.50);
+      ctx.lineWidth = 0.3 + rnd() * 0.7;
       ctx.beginPath();
       let cx = x;
       ctx.moveTo(cx, 0);
-      for (let y = 16; y <= H; y += 16) {
+      for (let y = 8; y <= H; y += 8) {
         const wx = p.wavy
-          ? cx + Math.sin(y * 0.035 + rnd() * 5) * 5
-          : cx + (rnd() - 0.5) * 1.8;
+          ? cx + Math.sin(y * 0.028 + rnd() * 4.5) * 6
+          : cx + (rnd() - 0.5) * 1.4;
         ctx.lineTo(wx, y);
       }
       ctx.stroke();
-      x += p.sp * (0.4 + rnd() * 1.2);
+      x += p.sp * (0.4 + rnd() * 0.9);
     }
   }
   ctx.globalAlpha = 1;
 
-  // Phase 4: Markstrahlen (Medullary Rays) — kurze horizontale Lichtstreifen
-  for (let i = 0; i < 6; i++) {
-    const ry = rnd() * H;
-    const rh = 2 + rnd() * 7;
-    ctx.globalAlpha = 0.04 + rnd() * 0.07;
-    ctx.fillStyle = p.light;
-    ctx.fillRect(0, ry, W, rh);
+  // ── Akzentlinien: vereinzelt dickere Jahrrings-Grenzen ────────────────────
+  {
+    let x = rnd() * 25;
+    while (x < W) {
+      ctx.globalAlpha = p.contrast * (0.55 + rnd() * 0.40);
+      ctx.lineWidth = 0.7 + rnd() * 1.5;
+      ctx.beginPath();
+      let cx = x;
+      ctx.moveTo(cx, 0);
+      for (let y = 10; y <= H; y += 10) {
+        const wx = p.wavy
+          ? cx + Math.sin(y * 0.022 + rnd() * 5) * 7
+          : cx + (rnd() - 0.5) * 1.8;
+        ctx.lineTo(wx, y);
+      }
+      ctx.stroke();
+      x += 20 + rnd() * 38;
+    }
   }
   ctx.globalAlpha = 1;
 
-  // Phase 5: Schimmer links→rechts (natürliche Licht-Tiefe)
+  // ── Glanz-Schimmer ────────────────────────────────────────────────────────
   const g = ctx.createLinearGradient(0, 0, W, 0);
-  g.addColorStop(0,   'rgba(255,255,255,0.07)');
-  g.addColorStop(0.4, 'rgba(0,0,0,0.02)');
-  g.addColorStop(1,   'rgba(255,255,255,0.07)');
+  g.addColorStop(0,   'rgba(255,255,255,0.08)');
+  g.addColorStop(0.35,'rgba(0,0,0,0.03)');
+  g.addColorStop(1,   'rgba(255,255,255,0.08)');
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
 
   return cvs;
