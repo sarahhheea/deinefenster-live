@@ -594,16 +594,57 @@ function clearWoodMaps() {
   });
 }
 
-function setColor(hex) {
+// Findet Farbobjekt aus FARBEN anhand key
+function findColor(key) {
+  const all = [...FARBEN.whites, ...FARBEN.grays, ...FARBEN.colors];
+  return all.find(c => c.key === key);
+}
+
+function setColor(key) {
   clearWoodMaps();
   frameMat.map = null;
-  const c = new THREE.Color(hex);
-  doorMat.color.copy(c); frameMat.color.copy(c);
-  grooveMat.color.copy(c).multiplyScalar(0.62);
-  const lum = c.r * 0.299 + c.g * 0.587 + c.b * 0.114;
-  doorMat.roughness = frameMat.roughness = 0.24 + lum * 0.15;
-  doorMat.metalness = frameMat.metalness = 0.02;
-  doorMat.needsUpdate = true; frameMat.needsUpdate = true;
+
+  const colorObj = findColor(key);
+  const hex = colorObj?.hex || '#888888';
+  const frameColor = new THREE.Color(hex);
+
+  // Zarge: Vollton aus gesampeltem Hex (sieht auf BoxGeometry besser aus als Textur)
+  frameMat.color.copy(frameColor);
+  grooveMat.color.copy(frameColor).multiplyScalar(0.62);
+  frameMat.roughness = 0.72;
+  frameMat.metalness = 0;
+  frameMat.needsUpdate = true;
+
+  // Oberflächen-Finish aus key ableiten
+  const isGlatt   = key.endsWith('-gl');
+  const isUltiMatt= key.endsWith('-um');
+  const isTexture = key === 'graphit-sand' || key === 'eisengl';
+  const roughness = isUltiMatt ? 0.96 : isGlatt ? 0.22 : isTexture ? 0.68 : 0.74;
+  const envInt    = isUltiMatt ? 0.03 : isGlatt ? 0.90 : isTexture ? 0.20 : 0.10;
+
+  // Echte Drutex-Swatch-Textur laden (lokal, kein CORS)
+  const texPath = 'img/swatches/' + key + '.webp';
+  texLoader.load(texPath, (tex) => {
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    // 2×4 Kacheln: Oberflächentextur sichtbar, kein Streckungseffekt
+    tex.repeat.set(2, 4);
+    tex.needsUpdate = true;
+    doorMat.map = tex;
+    doorMat.color.set(0xffffff);
+    doorMat.roughness = roughness;
+    doorMat.metalness = 0;
+    doorMat.envMapIntensity = envInt;
+    doorMat.needsUpdate = true;
+  }, undefined, () => {
+    // Fallback: kein Bild → Vollton aus hex
+    doorMat.map = null;
+    doorMat.color.copy(frameColor);
+    doorMat.roughness = roughness;
+    doorMat.metalness = 0;
+    doorMat.envMapIntensity = envInt;
+    doorMat.needsUpdate = true;
+  });
 }
 
 // ── Holzdekor setzen (echte Furnierfoto-Textur) ──────────────────────────────
@@ -756,10 +797,13 @@ function buildSwatches(id, list, onSelect, defaultKey) {
     el.appendChild(s);
   });
 }
-buildSwatches('whites',     FARBEN.whites,  c => setColor(c.hex));
-buildSwatches('grays',      FARBEN.grays,   c => setColor(c.hex), 'anthrazitgrau');
-buildSwatches('colorGroup', FARBEN.colors,  c => setColor(c.hex));
+buildSwatches('whites',     FARBEN.whites,  c => setColor(c.key));
+buildSwatches('grays',      FARBEN.grays,   c => setColor(c.key), 'anthrazitgrau');
+buildSwatches('colorGroup', FARBEN.colors,  c => setColor(c.key));
 buildSwatches('woods',      FARBEN.woods,   c => setWood(c.key));
+
+// Startzustand: Anthrazitgrau-Textur laden (nicht nur Hex)
+setColor('anthrazitgrau');
 
 // ── Glasarten-Buttons ──
 (function buildGlassBtns() {
