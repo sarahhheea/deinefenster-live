@@ -402,25 +402,19 @@ bar.position.set(HX, BAR_B + BAR_L / 2, DD + BAR_D / 2);
 bar.castShadow = true;
 doorGroup.add(bar);
 
-// ── Halterungen: Konsolenarm + Rosette an jedem Stabende ──
-// Aufbau: Rosettenplatte (auf Türfläche) + Arm (greift Stabende)
+// ── Halterungen: schmaler Arm am linken Stabrand (wie Referenz) ──
+// Der Arm sitzt LINKS vom Stab: verbindet Türfläche mit linker Stabflanke
 function makeConsole(barEndY) {
-  // Konsolenarm: klemmt um Stabende, etwas breiter + tiefer als Stab
-  const AW = BAR_W + 0.008, AH = 0.024, AD = BAR_D + 0.014;
+  const AW = 0.016, AH = 0.015, AD = BAR_D + 0.003;
+  // Arm-Mitte: direkt links neben Stabkante (Stab-linke-Flanke = HX - BAR_W/2)
+  const AX = HX - BAR_W / 2 - AW / 2;
   const arm = new THREE.Mesh(new THREE.BoxGeometry(AW, AH, AD), bracketMat);
-  arm.position.set(HX, barEndY, DD + AD / 2);
+  arm.position.set(AX, barEndY, DD + AD / 2);
   arm.castShadow = true;
   doorGroup.add(arm);
-
-  // Rosettenplatte: flache Montageplatte direkt auf Türoberfläche
-  const RW = 0.046, RH = 0.030, RD = 0.010;
-  const ros = new THREE.Mesh(new THREE.BoxGeometry(RW, RH, RD), bracketMat);
-  ros.position.set(HX, barEndY, DD + RD / 2);
-  ros.castShadow = true;
-  doorGroup.add(ros);
 }
 
-// Obere + untere Halterung — zentriert am jeweiligen Stabende (kein Schweben)
+// Obere + untere Halterung — zentriert am Stabende
 makeConsole(BAR_T);
 makeConsole(BAR_B);
 
@@ -434,9 +428,10 @@ makeConsole(BAR_B);
 
 // ══════════════════════════════════════════════════════
 // SCHLOSS — ovales Langschild (Kapsel-Form wie Referenz)
+// Referenz: LINKS vom Stab, zwischen Zarge-Innenrand (88mm) und Stab (102mm)
 // ══════════════════════════════════════════════════════
-const LX  = 0.162;   // 162mm vom linken Rand (dicht am Stab)
-const LY  = 0.940;   // 940mm vom Boden (44% der Türhöhe, wie Referenz)
+const LX  = 0.082;   // 82mm vom linken Rand — LINKS vom Stab (war: 162mm rechts)
+const LY  = 0.940;   // 940mm vom Boden
 
 // Ovales Langschild mit gerundeten Ecken (Rounded-Rect via ExtrudeGeometry)
 function roundedRectShape(w, h, r) {
@@ -456,7 +451,8 @@ function roundedRectShape(w, h, r) {
 const lsShape = roundedRectShape(0.024, 0.072, 0.012);
 const lsGeom  = new THREE.ExtrudeGeometry(lsShape, { depth: 0.007, bevelEnabled: false });
 const lsPlate = new THREE.Mesh(lsGeom, chromeMat);
-lsPlate.position.set(LX, LY, DD + 0.001);
+// Z-Basis über Zarge-Level (z2-Vorderkante bei DD+0.018), damit Schloss sichtbar bleibt
+lsPlate.position.set(LX, LY, DD + 0.020);
 lsPlate.castShadow = true;
 doorGroup.add(lsPlate);
 
@@ -465,14 +461,14 @@ const keyCyl = new THREE.Mesh(
   new THREE.CylinderGeometry(0.007, 0.007, 0.009, 20), chromeMat
 );
 keyCyl.rotation.x = Math.PI / 2;
-keyCyl.position.set(LX, LY + 0.014, DD + 0.010);
+keyCyl.position.set(LX, LY + 0.014, DD + 0.029);
 keyCyl.castShadow = true;
 doorGroup.add(keyCyl);
 
 // Schlüsselloch
 const darkMat = new THREE.MeshStandardMaterial({ color: 0x080808, roughness: 0.95 });
 const slot = new THREE.Mesh(new THREE.BoxGeometry(0.004, 0.009, 0.002), darkMat);
-slot.position.set(LX, LY + 0.014, DD + 0.014);
+slot.position.set(LX, LY + 0.014, DD + 0.033);
 doorGroup.add(slot);
 
 // Türgruppe zentrieren
