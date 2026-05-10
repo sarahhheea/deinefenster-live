@@ -331,7 +331,7 @@ doorGroup.add(strip(DW - z3off - z3w, z3off + z3w,     z3w, DH - 2*(z3off + z3w)
       depth: DD,
       bevelEnabled: true, bevelThickness: 0.003, bevelSize: 0.002, bevelSegments: 2
     }),
-    [frameMat, doorMat]  // index 0 = Seitenwände (frameMat Vollton), index 1 = Kapflächen (doorMat Textur)
+    [doorMat, frameMat]  // index 0 = Vorderfläche (doorMat — bekommt Holztextur), index 1 = Seitenwände (frameMat Vollton)
   );
   body.castShadow = true; body.receiveShadow = true;
   doorGroup.add(body);
@@ -607,31 +607,40 @@ function setWood(key) {
   clearWoodMaps();
 
   texLoader.load(texPath, (tex) => {
+    // Korrekte Farbdarstellung (sRGB-Farbraum für Fotos)
+    tex.colorSpace = THREE.SRGBColorSpace;
     tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(2, 1);
+    // 1 × 2 Kacheln: 1 Wiederholung quer, 2 hoch — minimale sichtbare Naht,
+    // kein Grid-Muster, Maserung fließt natürlich über die ganze Türbreite
+    tex.repeat.set(1, 2);
+    tex.needsUpdate = true;
 
-    // colorMap: echte Drutex-Furnier-Farbe
+    // colorMap — echte Furnier-Farbe
     doorMat.map = tex;
-    doorMat.color.set(0xffffff);
+    doorMat.color.set(0xffffff);  // kein Farb-Tint, Textur zeigt Original
 
-    // bumpMap: gleiche Textur → dunkle Maserungslinien wirken eingesunken
-    // → Holz bekommt spürbare Oberflächenstruktur statt flachem Anstrich
+    // bumpMap — Maserungsrillen wirken eingesunken (dunkle Linien tiefer)
     doorMat.bumpMap = tex;
-    doorMat.bumpScale = 0.028;
+    doorMat.bumpScale = 0.038;
 
-    // roughnessMap: dunkle Linien = matter, helles Frühholz = etwas glänzender
-    // → typischer Wechsel zwischen Glanz und Matt bei echtem Holz
-    doorMat.roughnessMap = tex;
-    doorMat.roughness = 0.52;   // Basiswert: Licht kann reflektieren
+    // KEIN roughnessMap: die Farbtextur als roughnessMap würde helle Stellen
+    // (Frühholz) als roughness≈0 = Spiegel behandeln → großer Highlight-Blob.
+    // Renolit EXOFOL ist gleichmäßig matt mit minimaler Folienreflexion.
+    doorMat.roughnessMap = null;
+    doorMat.roughness = 0.82;        // matt, wie echte Holzfolie
     doorMat.metalness = 0;
-    doorMat.envMapIntensity = 0.6;
+    doorMat.envMapIntensity = 0.12;  // minimale Folie-Reflexion
     doorMat.needsUpdate = true;
   });
 
-  // Zarge: Basisfarbe (kein Furnierfoto, BoxGeometry-UVs würden strecken)
-  frameMat.map = null; frameMat.color.set(p.base);
-  frameMat.roughness = 0.68; frameMat.metalness = 0; frameMat.needsUpdate = true;
-  grooveMat.color.set(p.grain); grooveMat.needsUpdate = true;
+  // Zarge: Basisfarbe (BoxGeometry-UVs würden strecken — Vollton passt besser)
+  frameMat.map = null;
+  frameMat.color.set(p.base);
+  frameMat.roughness = 0.62;
+  frameMat.metalness = 0;
+  frameMat.needsUpdate = true;
+  grooveMat.color.set(p.grain);
+  grooveMat.needsUpdate = true;
 }
 
 // ══════════════════════════════════════════════
