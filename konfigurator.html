@@ -6288,15 +6288,19 @@ function drawPrev() {
   const isHaus = S.prod === 'haustuere';
   if (haus3dWrap) {
     if (isHaus) {
-      // Iframe laden/neu-laden wenn Modell wechselt
-      const _mdl = S.tuerModell || 'colorado-inox';
-      const _needsLoad = !haus3dFrame.src.includes('haustuer-3d') || !haus3dFrame.src.includes('model=' + _mdl);
+      // Iframe laden/neu-laden wenn Modell oder Seite wechselt
+      const _mdl  = S.tuerModell || 'colorado-inox';
+      const _side = (S.oeff1 === 'dreh-l') ? 'l' : 'r';
+      const _needsLoad = !haus3dFrame.src.includes('haustuer-3d') || !haus3dFrame.src.includes('model=' + _mdl) || !haus3dFrame.src.includes('side=' + _side);
       if (haus3dFrame && _needsLoad) {
-        haus3dFrame.src = `haustuer-3d.html?embed&model=${_mdl}`;
+        haus3dFrame.src = `haustuer-3d.html?embed&model=${_mdl}&side=${_side}`;
         haus3dFrame.onload = () => {
           sendHaus3dColor(S.fa);
           haus3dFrame.contentWindow.postMessage({ type:'setGlass', key: S.glasdekor||'klar' }, '*');
         };
+      } else if (haus3dFrame.contentWindow) {
+        // Nur Seite live updaten (Modell gleich, Öffnungsart geändert)
+        haus3dFrame.contentWindow.postMessage({ type:'setSide', key: _side }, '*');
       }
       haus3dWrap.style.display = 'block';
       if (prevWrap) prevWrap.style.height = '560px';
@@ -6601,7 +6605,8 @@ async function submitForm(e) {
   <tr><td style="background:#0e1a38;border-radius:0 0 16px 16px;padding:20px 36px;text-align:center">
     <div style="font-size:13px;color:rgba(255,255,255,.35)">DeineFenster.de · Automatische Benachrichtigung</div>
   </td></tr>
-</table></td></tr></table></body></html>`;
+</table></td></tr></table><script src="js/chatbot.js" defer></script>
+</body></html>`;
 
   const kundeHtml = `<!DOCTYPE html><html lang="de"><body style="margin:0;padding:0;background:#f1f3ff;font-family:'Segoe UI',Arial,sans-serif">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f3ff;padding:32px 16px"><tr><td align="center">
@@ -6651,7 +6656,8 @@ async function submitForm(e) {
     <div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:6px">DeineFenster<span style="color:#76a9fa">.de</span></div>
     <div style="font-size:13px;color:rgba(255,255,255,.4)">Drutex-Fachhändler · info@deinefenster.de</div>
   </td></tr>
-</table></td></tr></table></body></html>`;
+</table></td></tr></table><script src="js/chatbot.js" defer></script>
+</body></html>`;
 
   const sendMail = async (to, subject, html, replyTo) => {
     const res = await fetch('/api/send-email', {
@@ -7111,7 +7117,8 @@ async function submitSkizze(e) {
         <h2 style="color:#161c27">Angehängte Bilder</h2>
         <p>${skizzeImages.length} Datei(en): ${bildListe}</p>
         <p style="font-size:12px;color:#475569">Bild-Daten sind im Webhook-Payload.</p>
-      </div></body></html>`;
+      </div><script src="js/chatbot.js" defer></script>
+</body></html>`;
 
     await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -7141,5 +7148,6 @@ async function submitSkizze(e) {
 }
 </script>
 
+<script src="js/chatbot.js" defer></script>
 </body>
 </html>

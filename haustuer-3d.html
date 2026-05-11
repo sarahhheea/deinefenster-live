@@ -649,11 +649,25 @@ const MODEL_PHOTOS = {
   'pennsylvania-3-lr-inox': 'img/drutex-tueren/pennsylvania-inox-3-lr_antracyt.jpg',
 };
 
-// Startup: Modell aus URL-Param oder Standard Colorado
+// Startup: Modell + Seite aus URL-Param
 const _urlModel = new URLSearchParams(location.search).get('model') || 'florida-lr-inox';
+const _urlSide  = new URLSearchParams(location.search).get('side')  || 'r';
 buildDoor(_urlModel);
-doorGroup.position.set(-DW/2, 0, 0);
 scene.add(doorGroup);
+
+// setSide: 'r' = Dreh-rechts (Griff links, Standard), 'l' = Dreh-links (gespiegelt)
+function setSide(s) {
+  if (s === 'l') {
+    doorGroup.scale.x    =  -1;
+    doorGroup.position.x =  DW / 2;
+  } else {
+    doorGroup.scale.x    =  1;
+    doorGroup.position.x = -DW / 2;
+  }
+  doorGroup.position.y = 0;
+  doorGroup.position.z = 0;
+}
+setSide(_urlSide);
 
 
 // ══════════════════════════════════════════════
@@ -1205,6 +1219,7 @@ window.addEventListener('message', (e) => {
   if (d.type === 'setWood')  setWood(d.key);
   if (d.type === 'setGlass') setGlass(d.key);
   if (d.type === 'setModel') setModel(d.key);
+  if (d.type === 'setSide')  setSide(d.key);
 });
 
 (function animate() {
@@ -1213,5 +1228,6 @@ window.addEventListener('message', (e) => {
   renderer.render(scene, camera);
 })();
 </script>
+<script src="js/chatbot.js" defer></script>
 </body>
 </html>
