@@ -386,10 +386,12 @@ const MODELLE = {
     panels: [{x:0.400, y:0.320, w:0.185, h:1.460}]
   },
   'montana-2-lr-inox': {
-    // Analyse Referenzbild: linker Strip Mitte ~28%, Glas zentriert ~49%, rechter Strip Mitte ~70%
-    // GFW=0.035 → Glasrahmen reicht von x=0.350 bis x=0.630, Abstand Strip zu Rahmen ~50mm
-    panels: [{x:0.385, y:0.220, w:0.210, h:1.660}],
-    strips: [{x:0.275, y:0.220, w:0.025, h:1.660}, {x:0.680, y:0.220, w:0.025, h:1.660}]
+    // Pixelgenau gemessen: Strip 256-297mm (w=41mm), Glasrahmen 365-635mm, Gap=68mm
+    // Strips von y=359–1935mm (h=1576mm), Glaseinheit y=359–1712mm (h=1353mm)
+    // Strips 223mm HÖHER als Glasfeld — so im Original-Design
+    // GFW=0.040 → Glas-Loch: x=0.405 (=0.365+0.040), w=0.190 (=0.595-0.405)
+    panels: [{x:0.405, y:0.399, w:0.190, h:1.273}],
+    strips: [{x:0.256, y:0.359, w:0.041, h:1.576}, {x:0.704, y:0.359, w:0.040, h:1.576}]
   },
   'montana-3-lr-inox': {
     panels: [
@@ -532,7 +534,7 @@ function buildDoor(modelKey) {
   doorGroup.add(nut(DW - NUT, NUT,      DW - NUT, DH - NUT));
 
   // ── Glas + Glasrahmen pro Panel ───────────────────
-  const GFW = 0.035;
+  const GFW = 0.040;  // gemessen: 40-42mm Glasrahmen-Breite im Referenzfoto
   const GFD = DD + 0.010;
   const glBackMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 });
   panels.forEach(p => {
