@@ -234,7 +234,7 @@ scene.add(backLight);
 // Chrome-Spotlight auf Griff (Weltkoord: WG.x=-0.45, Griff HX=0.81 → Welt ~0.36)
 const chromeLight = new THREE.SpotLight(0xffffff, 10.0, 10, Math.PI / 6, 0.25);
 chromeLight.position.set(0.8, 1.4, 5);
-chromeLight.target.position.set(0.36, 0.565, 0.122);
+chromeLight.target.position.set(0.34, 0.588, 0.118);
 scene.add(chromeLight); scene.add(chromeLight.target);
 
 // ══════════════════════════════════════════════
@@ -328,9 +328,9 @@ function buildWindow() {
   // sashZ muss VOR der Blendrahmen-Vorderkante liegen (BR_D + BR_FACE = 0.082)
   const sashZ = BR_D + BR_FACE + 0.015;   // Flügelrahmen sitzt 15mm vor Blendrahmen (erzeugt sichtbaren Schattensprung)
 
-  // Griff-Position: rechtes Stilo, leicht unter Mitte
-  const HX = WW - SX0f - FWf / 2;
-  const HY = WH * 0.48;
+  // Griff-Position: rechtes Stilo, leicht unterhalb Mitte
+  const HX = WW - SX0f - FWf * 0.55;
+  const HY = WH * 0.490;
 
   // ────────────────────────────────────────────
   // 1. WEISSE BACKING-PLANE (simuliert Tageslicht)
@@ -415,7 +415,7 @@ function buildWindow() {
   const sealMat = new THREE.MeshStandardMaterial({
     color: 0x111111, roughness: 0.95, metalness: 0
   });
-  const SW = 0.008;  // Dichtungsbreite — 8mm wie im Referenzbild
+  const SW = 0.012;  // Dichtungsbreite — 12mm (prominent schwarz wie im Referenzbild)
   const SD = 0.008;  // Dichtungstiefe (leicht erhaben)
   const seZ = sashZ + 0.001;
 
@@ -443,63 +443,48 @@ function buildWindow() {
   glassObjects.push(gm);
 
   // ────────────────────────────────────────────
-  // 6. FENSTEROLIVE — echte DRUTEX/MACO Fensterolive
-  //    Oval-Rosette (40×46mm) → Vierkantstift → Olive-Körper hängt UNTEN (6-Uhr = geschlossen)
-  //    Quelle: DRUTEX Zubehör, MACO MULTI-MATIC KS, Fensterolive-Standard
+  // 6. BÜGELGRIFF — exakt wie Referenzbild
+  //    Zwei kleine Montageköpfe oben + unten, D-förmiger Bogen dazwischen.
+  //    Bogen öffnet sich nach links (zur Glasseite hin).
+  //    Keine Olive, kein langer Hebel — reiner Bogenbügelgriff.
   // ────────────────────────────────────────────
-  const HZ = sashZ + 0.005;
+  const HZ = sashZ + 0.004;
+  const bSpan  = 0.054;   // halbe Spannweite oben/unten → 108mm gesamt (~9% von WH)
+  const bLeft  = 0.017;   // Bogen ragt 17mm nach links (sichtbar von vorne)
+  const bFwd   = 0.016;   // Bogen ragt 16mm zum Betrachter hin
 
-  // 6a. Rosette — ovale flache Montageplatte (40mm × 46mm, 5mm dick)
-  const rosette = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.020, 0.020, 0.005, 28),
+  // Bogenpfad — 5-Punkte CatmullRom für geschmeidigte D-Form
+  const bPath = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(HX,          HY + bSpan,           HZ),
+    new THREE.Vector3(HX - bLeft * 0.55, HY + bSpan * 0.45, HZ + bFwd * 0.55),
+    new THREE.Vector3(HX - bLeft,  HY,                    HZ + bFwd),
+    new THREE.Vector3(HX - bLeft * 0.55, HY - bSpan * 0.45, HZ + bFwd * 0.55),
+    new THREE.Vector3(HX,          HY - bSpan,           HZ),
+  ]);
+  const bow = new THREE.Mesh(
+    new THREE.TubeGeometry(bPath, 32, 0.0048, 12, false),
     chromeMat
   );
-  rosette.rotation.x = Math.PI / 2;
-  rosette.scale.set(1.00, 1.15, 1.0); // 40mm breit × 46mm hoch (oval)
-  rosette.position.set(HX, HY, HZ + 0.0025);
-  rosette.castShadow = true;
-  windowGroup.add(rosette);
+  bow.castShadow = true;
+  windowGroup.add(bow);
 
-  // Rosetten-Rand (flacher Ring für Tiefenwirkung)
-  const rosetteRing = new THREE.Mesh(
-    new THREE.TorusGeometry(0.017, 0.0025, 8, 28),
+  // Oberer Montagekopf (flache Scheibe, liegt am Rahmen)
+  const capGeo = new THREE.CylinderGeometry(0.0085, 0.0090, 0.009, 16);
+  const topCap = new THREE.Mesh(capGeo, chromeMat);
+  topCap.rotation.x = Math.PI / 2;
+  topCap.position.set(HX, HY + bSpan, HZ + 0.005);
+  topCap.castShadow = true;
+  windowGroup.add(topCap);
+
+  // Unterer Montagekopf
+  const botCap = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.0085, 0.0090, 0.009, 16),
     chromeMat
   );
-  rosetteRing.rotation.x = Math.PI / 2;
-  rosetteRing.scale.set(1.00, 1.15, 1.0);
-  rosetteRing.position.set(HX, HY, HZ + 0.005);
-  rosetteRing.castShadow = true;
-  windowGroup.add(rosetteRing);
-
-  // 6b. Vierkantstift (7×7mm sichtbar, 10mm lang — Verbindung zum Schloss)
-  const stift = new THREE.Mesh(
-    new THREE.BoxGeometry(0.007, 0.007, 0.010),
-    chromeMat
-  );
-  stift.position.set(HX, HY, HZ + 0.010);
-  stift.castShadow = true;
-  windowGroup.add(stift);
-
-  // 6c. Olive-Körper — das eigentliche Griffelement, hängt nach UNTEN bei "geschlossen"
-  //     Ellipsoid: 21mm breit × 33mm hoch × 15mm tief
-  //     Sitzt mit Oberkante bei ca. HY (Stift-Zentrum), hängt 32mm nach unten
-  const olive = new THREE.Mesh(
-    new THREE.SphereGeometry(0.016, 20, 12),
-    chromeMat
-  );
-  olive.scale.set(0.66, 1.03, 0.47);  // 21mm × 33mm × 15mm
-  olive.position.set(HX, HY - 0.016, HZ + 0.018);
-  olive.castShadow = true;
-  windowGroup.add(olive);
-
-  // 6d. Hals (kurzer Zylinder Rosette → Olive)
-  const neck = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.004, 0.005, 0.016, 10),
-    chromeMat
-  );
-  neck.position.set(HX, HY - 0.006, HZ + 0.014);
-  neck.castShadow = true;
-  windowGroup.add(neck);
+  botCap.rotation.x = Math.PI / 2;
+  botCap.position.set(HX, HY - bSpan, HZ + 0.005);
+  botCap.castShadow = true;
+  windowGroup.add(botCap);
 
   // ────────────────────────────────────────────
   // 7. SCHARNIERE — MACO MULTI-MATIC KS, 2 Stück Bandseite links
@@ -514,49 +499,66 @@ function buildWindow() {
 
   // Ecklager unten (Y=0.15×WH ≈ 180mm vom Boden) — kompakte Abdeckkappe 19×22mm
   // Scherenlager oben (Y=0.83×WH ≈ 200mm von Oberkante) — flache Platte 16×42mm
+  // Positionen: aus Referenzbild gemessen (13% und 85% von unten)
   const hingeSpecs = [
-    { hy: WH * 0.15, outerH: 0.022, outerW: 0.016, innerH: 0.020, innerW: 0.014 }, // Ecklager unten
-    { hy: WH * 0.83, outerH: 0.042, outerW: 0.018, innerH: 0.038, innerW: 0.015 }, // Scherenlager oben
+    // Ecklager unten — kompakte Abdeckkappe, MACO 41743 (67×17mm → vereinfacht)
+    { hy: WH * 0.13, outerH: 0.018, outerW: 0.015, innerH: 0.022, innerW: 0.016 },
+    // Scherenlager oben — längere Platte, Arm sichtbar
+    { hy: WH * 0.85, outerH: 0.038, outerW: 0.018, innerH: 0.042, innerW: 0.016 },
   ];
 
-  hingeSpecs.forEach(({ hy, outerH, outerW, innerH, innerW }) => {
-    // Abdeckkappe auf Blendrahmen (Außenteil — tiefer liegend im Falz)
+  hingeSpecs.forEach(({ hy, outerH, outerW, innerH, innerW }, idx) => {
+    // Scharnierkörper auf Flügelrahmen-Stilo (gut sichtbar von vorne)
+    const innerPlate = new THREE.Mesh(
+      new THREE.BoxGeometry(innerW, innerH, 0.009),
+      chromeMat
+    );
+    innerPlate.position.set(hingeXinner, hy, sashZ + 0.006);
+    innerPlate.castShadow = true;
+    windowGroup.add(innerPlate);
+
+    // Abdeckkappe auf Blendrahmen (tiefer, etwas schmaler)
     const outerPlate = new THREE.Mesh(
       new THREE.BoxGeometry(outerW, outerH, 0.007),
       chromeMat
     );
-    outerPlate.position.set(hingeXouter, hy, BR_D + 0.005);
+    outerPlate.position.set(hingeXouter, hy, BR_D + 0.006);
     outerPlate.castShadow = true;
     windowGroup.add(outerPlate);
 
-    // Scharnierkörper auf Flügelrahmen (Innenteil — auf Sash-Ebene)
-    const innerPlate = new THREE.Mesh(
-      new THREE.BoxGeometry(innerW, innerH, 0.008),
-      chromeMat
-    );
-    innerPlate.position.set(hingeXinner, hy, sashZ + 0.005);
-    innerPlate.castShadow = true;
-    windowGroup.add(innerPlate);
-
-    // Verbindungsachse (Scharnierstift horizontal)
+    // Verbindungsachse im Falz
+    const pinLen = Math.abs(hingeXinner - hingeXouter) + 0.010;
     const hingePin = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.0035, 0.0035, Math.abs(hingeXinner - hingeXouter) + 0.012, 8),
+      new THREE.CylinderGeometry(0.003, 0.003, pinLen, 8),
       chromeMat
     );
     hingePin.rotation.z = Math.PI / 2;
-    hingePin.position.set((hingeXouter + hingeXinner) / 2, hy, sashZ - 0.005);
+    hingePin.position.set((hingeXouter + hingeXinner) / 2, hy, sashZ - 0.004);
     windowGroup.add(hingePin);
 
-    // Schraubenköpfe (auf Innenteil, sichtbar von vorne)
-    [-innerH * 0.28, innerH * 0.28].forEach(dy => {
-      const screw = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.0028, 0.0028, 0.003, 8),
+    // Schraubenköpfe (oben + unten auf innerPlate, sichtbar von vorne)
+    const screwOffset = innerH * 0.30;
+    [-screwOffset, screwOffset].forEach(dy => {
+      const sc = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.0026, 0.0026, 0.003, 8),
         chromeMat
       );
-      screw.rotation.x = Math.PI / 2;
-      screw.position.set(hingeXinner, hy + dy, sashZ + 0.010);
-      windowGroup.add(screw);
+      sc.rotation.x = Math.PI / 2;
+      sc.position.set(hingeXinner, hy + dy, sashZ + 0.012);
+      windowGroup.add(sc);
     });
+
+    // Scherenlager oben: zusätzlicher diagonaler Arm (sichtbar in Referenzbild)
+    if (idx === 1) {
+      const arm = new THREE.Mesh(
+        new THREE.BoxGeometry(0.008, 0.032, 0.006),
+        chromeMat
+      );
+      arm.rotation.z = Math.PI * 0.18; // leicht diagonal
+      arm.position.set(hingeXouter + 0.005, hy + 0.010, BR_D + 0.008);
+      arm.castShadow = true;
+      windowGroup.add(arm);
+    }
   });
 }
 
