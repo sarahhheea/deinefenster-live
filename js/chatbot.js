@@ -20,7 +20,7 @@ const RULES = [
 
   // ── Lieferkosten ────────────────────────────────────────────────────────────
   {
-    keys: ['lieferkosten','versandkosten','versand kostet','porto','wie viel kostet die lieferung'],
+    keys: ['lieferkosten','versandkosten','versand kostet','porto','kostet die lieferung','kostet versand','kostet lieferung','lieferung kostet','versand kostet'],
     answer: 'Lieferung deutschlandweit per Spedition (mit eigenem Stapler). <strong>Kostenlos</strong> ab 4.000 € Bestellwert oder ab 10 Fensterelementen. Bei 5–9 Elementen: <strong>200 € Versandpauschale</strong>. Einzelne Hebeschiebetür: 300 €. Lagerware und Gebrauchtware: <strong>nur Selbstabholung</strong> in Brandenburg.'
   },
 
@@ -32,7 +32,7 @@ const RULES = [
 
   // ── Einbau ──────────────────────────────────────────────────────────────────
   {
-    keys: ['einbau','montage','montieren','einbauen','installieren','wer baut','monteur','handwerker'],
+    keys: ['einbau','montage','montieren','einbauen','installieren','wer baut','monteur','handwerker','baut ihr','baut ihr auch','montiert ihr'],
     answer: 'Wir liefern und verkaufen — <strong>Einbau bieten wir selbst nicht an</strong>. Du beauftragst einen Handwerker deiner Wahl. Auf Wunsch können wir Montage-Partner in deiner Region vermitteln — einfach per <a href="https://wa.me/491717263776" target="_blank">WhatsApp 0171 7263776</a> anfragen. Wichtig: Nicht-fachgerechte Montage lässt die Garantie erlöschen.'
   },
 
@@ -169,10 +169,13 @@ const RULES = [
   },
 ];
 
+function normalize(str) {
+  return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
 function ruleBasedAnswer(text) {
-  const lower = text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const lower = normalize(text);
   for (const rule of RULES) {
-    if (rule.keys.some(k => lower.includes(k))) return rule.answer;
+    if (rule.keys.some(k => lower.includes(normalize(k)))) return rule.answer;
   }
   return null;
 }
