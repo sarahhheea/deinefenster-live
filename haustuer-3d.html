@@ -491,6 +491,12 @@ doorGroup.add(slot);
 doorGroup.position.set(-DW/2, 0, 0);
 scene.add(doorGroup);
 
+// Dunkle Innenraum-Fläche hinter der Tür — macht Glas-Transmission sichtbar
+const interiorMat = new THREE.MeshStandardMaterial({ color: 0x2a2e32, roughness: 1, metalness: 0 });
+const interior = new THREE.Mesh(new THREE.PlaneGeometry(DW * 2.2, DH * 1.4), interiorMat);
+interior.position.set(0, DH/2, -DD/2 - 0.002);
+scene.add(interior);
+
 // ══════════════════════════════════════════════
 // DOOR_PHOTOS — echte Drutex-Türfotos pro Farbe
 // Direkt von produkte/haustueren/iglo-energy.html (data-frame-url)
@@ -779,37 +785,50 @@ function seededRnd(seed) {
   return () => { s = (s * 1664525 + 1013904223) & 0xffffffff; return (s >>> 0) / 0xffffffff; };
 }
 
-// Patterned glass: MeshStandardMaterial — zeigt map direkt ohne Physical-Rendering-Quirks
-let patternGlassMat = null;
-
-function buildPatternMat(canvasFn, repeatX, repeatY) {
-  if (patternGlassMat) patternGlassMat.dispose();
-  const tex = new THREE.CanvasTexture(canvasFn());
-  tex.colorSpace = THREE.SRGBColorSpace;
-  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-  tex.repeat.set(repeatX, repeatY);
-  patternGlassMat = new THREE.MeshStandardMaterial({
-    map: tex, transparent: true, opacity: 0.93, roughness: 0.90, metalness: 0,
-    side: THREE.FrontSide
-  });
-  return patternGlassMat;
+// ── Glas-Normalmap: Heightmap → Normalmap via Sobel ──────────────────────────
+// Weiß = Erhöhung (Glaserhebung), Schwarz = flach → erzeugt echten 3D-Schliff
+function heightToNormal(heightCanvas, strength) {
+  const W = heightCanvas.width, H = heightCanvas.height;
+  const hData = heightCanvas.getContext('2d').getImageData(0, 0, W, H).data;
+  const out = document.createElement('canvas'); out.width = W; out.height = H;
+  const nCtx = out.getContext('2d');
+  const nImg = nCtx.createImageData(W, H);
+  function h(x, y) {
+    x = Math.max(0, Math.min(W-1, x)); y = Math.max(0, Math.min(H-1, y));
+    return hData[(y * W + x) * 4] / 255.0;
+  }
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      const dX = (h(x-1,y-1) - h(x+1,y-1)) + 2*(h(x-1,y) - h(x+1,y)) + (h(x-1,y+1) - h(x+1,y+1));
+      const dY = (h(x-1,y-1) - h(x-1,y+1)) + 2*(h(x,y-1) - h(x,y+1)) + (h(x+1,y-1) - h(x+1,y+1));
+      const nx = dX * strength, ny = dY * strength, nz = 1.0;
+      const len = Math.sqrt(nx*nx + ny*ny + nz*nz);
+      const i = (y * W + x) * 4;
+      nImg.data[i]   = (nx/len * 0.5 + 0.5) * 255;
+      nImg.data[i+1] = (ny/len * 0.5 + 0.5) * 255;
+      nImg.data[i+2] = (nz/len * 0.5 + 0.5) * 255;
+      nImg.data[i+3] = 255;
+    }
+  }
+  nCtx.putImageData(nImg, 0, 0);
+  return out;
 }
 
-// Chinchilla: unregelmäßige Pebble-Blobs (echtes Ornamentglas-Muster)
-function generateChinchillaMap() {
+// Chinchilla Heightmap: unregelmäßige Pebble-Hügel wie echter Chinchilla-Schliff
+function chinchillaHeight() {
   const W = 512, H = 512;
   const cvs = document.createElement('canvas'); cvs.width = W; cvs.height = H;
   const ctx = cvs.getContext('2d');
   const rnd = seededRnd(4217);
-  ctx.fillStyle = '#6e8090'; ctx.fillRect(0, 0, W, H);  // dunkles Blaugrau = Grund
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
   for (let i = 0; i < 300; i++) {
     const x = rnd() * W, y = rnd() * H;
-    const r = 20 + rnd() * 32;
-    const rx = r * (0.6 + rnd() * 0.8), ry = r * (0.6 + rnd() * 0.8);
+    const r = 18 + rnd() * 28;
+    const rx = r * (0.65 + rnd() * 0.7), ry = r * (0.65 + rnd() * 0.7);
     const grad = ctx.createRadialGradient(x, y, 0, x, y, Math.max(rx, ry));
-    grad.addColorStop(0,    'rgba(230,242,244,1.0)');   // heller Blob-Kern
-    grad.addColorStop(0.5,  'rgba(180,205,212,0.65)');
-    grad.addColorStop(1,    'rgba(80,105,118,0)');
+    grad.addColorStop(0,   'rgba(255,255,255,1)');  // Hügelkuppe = weiß
+    grad.addColorStop(0.6, 'rgba(128,128,128,0.5)');
+    grad.addColorStop(1,   'rgba(0,0,0,0)');
     ctx.fillStyle = grad;
     ctx.beginPath();
     ctx.ellipse(x, y, rx, ry, rnd() * Math.PI, 0, Math.PI * 2);
@@ -818,43 +837,75 @@ function generateChinchillaMap() {
   return cvs;
 }
 
-// Master Carré: regelmäßiges Quadratgitter (Ornamentglas-Raster)
-function generateMasterCarreMap() {
-  const W = 128, H = 128;
+// Master Carré Heightmap: erhabene Gitterlinien wie echter Glas-Raster
+function masterCarreHeight() {
+  const W = 256, H = 256;
   const cvs = document.createElement('canvas'); cvs.width = W; cvs.height = H;
   const ctx = cvs.getContext('2d');
-  const STEP = 32, LINE = 7;
-  ctx.fillStyle = '#7a9aae'; ctx.fillRect(0, 0, W, H);  // dunkles Blaugrau = Quadrate
-  ctx.fillStyle = '#d8eaf0';                              // helle Gitterlinien
-  for (let x = 0; x <= W; x += STEP) ctx.fillRect(x - LINE/2, 0, LINE, H);
-  for (let y = 0; y <= H; y += STEP) ctx.fillRect(0, y - LINE/2, W, LINE);
+  const STEP = 32, LINE = 8;
+  ctx.fillStyle = '#111'; ctx.fillRect(0, 0, W, H);   // Quadratflächen = tief
+  // Erhabene Linien mit weichem Rand (wie Glas-Riffel)
+  for (let pos = 0; pos <= W; pos += STEP) {
+    const grad = ctx.createLinearGradient(pos - LINE, 0, pos + LINE, 0);
+    grad.addColorStop(0, 'rgba(0,0,0,0)');
+    grad.addColorStop(0.5, 'rgba(255,255,255,1)');
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grad; ctx.fillRect(pos - LINE, 0, LINE*2, H);
+  }
+  for (let pos = 0; pos <= H; pos += STEP) {
+    const grad = ctx.createLinearGradient(0, pos - LINE, 0, pos + LINE);
+    grad.addColorStop(0, 'rgba(0,0,0,0)');
+    grad.addColorStop(0.5, 'rgba(255,255,255,1)');
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grad; ctx.fillRect(0, pos - LINE, W, LINE*2);
+  }
   return cvs;
+}
+
+function buildNormalTex(heightFn, strength, repeatX, repeatY) {
+  const tex = new THREE.CanvasTexture(heightToNormal(heightFn(), strength));
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(repeatX, repeatY);
+  return tex;
+}
+
+function cleanGlassMaps() {
+  ['map','roughnessMap','normalMap'].forEach(k => {
+    if (glassMat[k]) { glassMat[k].dispose(); glassMat[k] = null; }
+  });
 }
 
 function setGlass(key) {
   const g = GLASS_TYPES.find(t => t.key === key); if (!g) return;
 
-  if (glassMat.map)          { glassMat.map.dispose();          glassMat.map = null; }
-  if (glassMat.roughnessMap) { glassMat.roughnessMap.dispose(); glassMat.roughnessMap = null; }
+  cleanGlassMaps();
+  glass.material = glassMat;   // immer zurück zum physischen Material
 
   if (key === 'klar') {
-    // Klar: physisch transparent — originalem glassMat zurückgeben
-    glass.material = glassMat;
-    glassMat.transmission = 0.90;
-    glassMat.roughness     = 0.03;
-    glassMat.color.set(0xc8dff0);
-    glassMat.needsUpdate   = true;
+    // Klar: sauber transparent, leicht blaues Glas-Tint
+    glassMat.transmission  = 0.92;
+    glassMat.roughness     = 0.02;
+    glassMat.normalScale?.set(0, 0);
+    glassMat.color.set(0xd0e8f4);
   } else if (key === 'satinato') {
-    // Satinato: gleichmäßig milchig-weiß — MeshStandard, kein Muster
-    if (patternGlassMat) patternGlassMat.dispose();
-    patternGlassMat = new THREE.MeshStandardMaterial({
-      color: 0xd8eaea, transparent: true, opacity: 0.93, roughness: 0.96, metalness: 0
-    });
-    glass.material = patternGlassMat;
+    // Satinato: uniform milchig-weiß — hohe Streuung, kein Muster
+    glassMat.transmission  = 0.35;
+    glassMat.roughness     = 0.96;
+    glassMat.color.set(0xe8eeee);
   } else if (key === 'chinchilla') {
-    glass.material = buildPatternMat(generateChinchillaMap, 4, 14);
+    // Chinchilla: Normalmap aus Pebble-Hügeln → echter 3D-Schliff
+    glassMat.transmission  = 0.65;
+    glassMat.roughness     = 0.12;
+    glassMat.color.set(0xd4e8f0);
+    glassMat.normalMap     = buildNormalTex(chinchillaHeight, 4.5, 5, 16);
+    glassMat.normalScale   = new THREE.Vector2(1.8, 1.8);
   } else if (key === 'master-carre') {
-    glass.material = buildPatternMat(generateMasterCarreMap, 3, 11);
+    // Master Carré: Normalmap aus Gitterlinen → echte Glas-Riffeln
+    glassMat.transmission  = 0.72;
+    glassMat.roughness     = 0.08;
+    glassMat.color.set(0xd4eaf4);
+    glassMat.normalMap     = buildNormalTex(masterCarreHeight, 6.0, 3, 11);
+    glassMat.normalScale   = new THREE.Vector2(2.5, 2.5);
   }
 
   glassMat.needsUpdate = true;
