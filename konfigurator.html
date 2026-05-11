@@ -2679,9 +2679,6 @@ function pickTuerModell(el) {
   document.querySelectorAll('#s-tm .pc').forEach(c => c.classList.remove('sel'));
   el.classList.add('sel');
   S.tuerModell = el.dataset.m;
-  const _f3d = document.getElementById('haus3d-frame');
-  if (_f3d && _f3d.src && _f3d.src.includes('haustuer-3d') && _f3d.contentWindow)
-    _f3d.contentWindow.postMessage({ type: 'setModel', key: S.tuerModell }, '*');
   const name = el.querySelector('.pc-name').textContent.trim();
   document.getElementById('d-tm').textContent = name;
   const b = document.getElementById('b-tm');
@@ -6286,9 +6283,11 @@ function drawPrev() {
   const isHaus = S.prod === 'haustuere';
   if (haus3dWrap) {
     if (isHaus) {
-      // Iframe nur einmal laden — beim ersten Load aktuellen Zustand senden
-      if (haus3dFrame && !haus3dFrame.src.includes('haustuer-3d')) {
-        haus3dFrame.src = `haustuer-3d.html?embed&model=${S.tuerModell||'colorado-inox'}`;
+      // Iframe laden/neu-laden wenn Modell wechselt
+      const _mdl = S.tuerModell || 'colorado-inox';
+      const _needsLoad = !haus3dFrame.src.includes('haustuer-3d') || !haus3dFrame.src.includes('model=' + _mdl);
+      if (haus3dFrame && _needsLoad) {
+        haus3dFrame.src = `haustuer-3d.html?embed&model=${_mdl}`;
         haus3dFrame.onload = () => {
           sendHaus3dColor(S.fa);
           haus3dFrame.contentWindow.postMessage({ type:'setGlass', key: S.glasdekor||'klar' }, '*');
