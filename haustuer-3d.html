@@ -8,6 +8,11 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: 'Segoe UI', system-ui, sans-serif; background: #e8e8e8; overflow: hidden; }
 
+  /* ── Embed-Modus (iframe im Konfigurator) ── */
+  body.embed .header   { display: none; }
+  body.embed .layout   { height: 100vh; }
+  body.embed .ref-panel { display: none; }
+
   .header {
     background: #1e3a8a; color: white;
     height: 40px; padding: 0 20px;
@@ -972,6 +977,11 @@ resize();
   requestAnimationFrame(animate);
   orb.update();
   renderer.render(scene, camera);
+
+  // Embed-Modus: ?embed in URL → Header + Referenz-Panel ausblenden
+  if (new URLSearchParams(location.search).has('embed')) {
+    document.body.classList.add('embed');
+  }
 })();
 </script>
 </body>
