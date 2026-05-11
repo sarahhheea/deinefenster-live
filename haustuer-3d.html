@@ -321,11 +321,11 @@ const MODELLE = {
     panels: [{x:0.285, y:0.430, w:0.220, h:1.340}]
   },
   'montana-1-inox': {
-    panels: [{x:0.390, y:0.370, w:0.200, h:1.310}]
+    panels: [{x:0.400, y:0.320, w:0.185, h:1.460}]
   },
   'montana-2-lr-inox': {
-    panels: [{x:0.390, y:0.370, w:0.200, h:1.310}],
-    strips: [{x:0.238, y:0.370, w:0.036, h:1.310}, {x:0.626, y:0.370, w:0.036, h:1.310}]
+    panels: [{x:0.352, y:0.335, w:0.176, h:1.460}],
+    strips: [{x:0.290, y:0.270, w:0.036, h:1.580}, {x:0.550, y:0.270, w:0.036, h:1.580}]
   },
   'montana-3-lr-inox': {
     panels: [
@@ -1009,9 +1009,10 @@ buildSwatches('grays',      FARBEN.grays,   c => { setColor(c.key); setRefPhoto(
 buildSwatches('colorGroup', FARBEN.colors,  c => { setColor(c.key); setRefPhoto(c.key); });
 buildSwatches('woods',      FARBEN.woods,   c => { setWood(c.key);  setRefPhoto(c.key); });
 
-// Startzustand: Anthrazitgrau
-setColor('anthrazitgrau');
-setRefPhoto('anthrazitgrau');
+// Startzustand: URL-Param ?color= oder Anthrazitgrau
+const _urlColor = new URLSearchParams(location.search).get('color');
+if (_urlColor) { setColor(_urlColor); setRefPhoto(_urlColor); }
+else { setColor('anthrazitgrau'); setRefPhoto('anthrazitgrau'); }
 
 // ── Glasarten-Buttons ──
 (function buildGlassBtns() {
