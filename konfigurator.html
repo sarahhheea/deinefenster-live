@@ -13,7 +13,7 @@
   <meta property="og:type" content="website">
 
   <link rel="preload" as="image" href="img/fenster_standard_v3.png">
-  <link rel="preload" as="image" href="img/balkontuer_standard_v3.png">
+  <link rel="preload" as="image" href="img/balkontuer_standard_v3.png?v=20260510">
   <link rel="preload" as="image" href="img/haustuer_iglo_energy_montana_weiss.png?v=20260506-5">
   <link rel="preload" as="image" href="img/hst_standard.png">
 
@@ -512,7 +512,7 @@
       <div class="pc" data-p="balkontuer" onclick="pickProd(this)">
         <span class="pc-badge" aria-label="KI-generiertes Symbolfoto">Symbolfoto</span>
         <img class="pc-img"
-             src="img/balkontuer_standard_v3.png"
+             src="img/balkontuer_standard_v3.png?v=20260510"
              width="1024" height="1280"
              loading="eager"
              fetchpriority="high"
@@ -1513,8 +1513,12 @@
     <div id="din-toggle-wrap" style="display:none"></div>
     <div id="din-btn-links" style="display:none"></div>
     <div id="din-btn-rechts" style="display:none"></div>
-    <!-- BILD-VORSCHAU (Sarah-Update 02.05.2026 v8: Höhe reduziert damit Eigenschaften unten sichtbar bleiben) -->
+    <!-- BILD-VORSCHAU -->
     <div id="prev-wrap" class="w-full" style="position:relative;height:420px;width:100%;border-radius:var(--r-md);background:#ffffff;border:none;padding:2px;flex-shrink:0">
+      <!-- 3D-Vorschau für Haustür (iframe, embed-Modus) -->
+      <div id="haus3d-wrap" style="display:none;position:absolute;inset:0;border-radius:var(--r-md);overflow:hidden">
+        <iframe id="haus3d-frame" src="" style="width:100%;height:100%;border:none;display:block" allowfullscreen></iframe>
+      </div>
       <div id="vorschau-container" style="position:relative;width:100%;height:100%">
         <div id="prev-placeholder" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#86868b;text-align:center;padding:24px">
           <div style="width:88px;height:88px;border-radius:50%;background:rgba(26,41,66,.06);display:flex;align-items:center;justify-content:center;margin-bottom:14px">
@@ -2373,6 +2377,10 @@ function pickProd(el) {
   document.getElementById('d1').textContent = P.prod[S.prod].name;
   mkDone(1);
 
+  // Haustür → View-Toggle ausblenden (3D übernimmt Vorschau)
+  const vToggle = document.querySelector('#sidebar [style*="display:flex"][style*="gap:4px"]');
+  if (vToggle) vToggle.style.display = S.prod === 'haustuere' ? 'none' : 'flex';
+
   // Sarah-Plan 05.05.2026: Bei Haustür direkt Außenansicht aktivieren —
   // Default-Bild ist das IGLO Energy Montana in Weiß FX mit Stoßgriff (= Außenansicht).
   // Beim Klick auf Anthrazitgrau o.ä. wechselt das Live-Preview nahtlos auf die
@@ -2380,6 +2388,8 @@ function pickProd(el) {
   // (Klinke + 3 Scharniere) wird vom User selbst über den View-Toggle aktiviert.
   if (S.prod === 'haustuere') {
     setPreviewView('aus');
+  } else if (S.prod === 'balkontuer') {
+    setPreviewView('inn');
   }
   _updateDinToggle();
 
@@ -5010,7 +5020,7 @@ function renderCart() {
 // PROD_IMGS bleibt für Code-Rückwärtskompatibilität (nur Innen-Default)
 const PROD_IMGS = {
   kunststoff: 'img/fenster_standard_v3.png',
-  balkontuer: 'img/balkontuer_standard_v3.png',
+  balkontuer: 'img/balkontuer_standard_v3.png?v=20260510',
   haustuere:  'img/haustuer_iglo_energy_montana_innen_weiss.png?v=20260506-5', // Sarah-Update 06.05.2026: Iglo Energy Montana Innenansicht spiegelverkehrt — Klinke LINKS, 3 Scharniere RECHTS (DIN-Konsistenz mit Außen Stoßgriff rechts → CLAUDE.md Regel 5). Google-Flow generiert via Image-to-Image-Mirror, Pipeline. ?v= = Cache-Buster.
   hst:        'img/hst_standard.png',
 };
@@ -5058,8 +5068,8 @@ const PROD_IMGS_VIEW = {
     },
   },
   balkontuer: {
-    innen:  { '1-fluegel': 'img/balkontuer_standard_v3.png', '2-fluegel': 'img/balkontuer_2fl_v4.png' },
-    aussen: { '1-fluegel': 'img/balkontuer_aussen_v3.png', '2-fluegel': 'img/balkontuer_2fl_aussen_v4.png' },
+    innen:  { '1-fluegel': 'img/balkontuer_standard_v3.png?v=20260510', '2-fluegel': 'img/balkontuer_2fl_v4.png' },
+    aussen: { '1-fluegel': 'img/balkontuer_aussen_v3.png?v=20260510', '2-fluegel': 'img/balkontuer_2fl_aussen_v4.png' },
   },
   haustuere: {
     // Sarah-Update 05.05.2026 v5: Beide Ansichten zeigen jetzt das Drutex IGLO Energy Montana
@@ -6007,6 +6017,12 @@ function vorschauAktualisieren() {
     masterSrc = 'img/fenster_standard_v3_links.png';
   }
 
+  // 2.6) BALKONTÜR ANSCHLAGRICHTUNG (rechte Tür = gespiegeltes Bild)
+  if (istInnen && S.prod === 'balkontuer' && flKey === '1-fluegel'
+      && (S.oeff1 === 'dreh-r' || S.oeff1 === 'dk-r')) {
+    masterSrc = 'img/balkontuer_standard_v3_rechts.png';
+  }
+
   // Hilfsfunktion: Farb-Bild laden, bei 404 auf masterSrc fallen
   function tryFarbenImg(path, fallback) {
     const probe = new Image();
@@ -6210,11 +6226,31 @@ function drawPrev() {
 
   _updateColorStrip();
 
+  // 3D-iframe für Haustür
+  const haus3dWrap  = document.getElementById('haus3d-wrap');
+  const haus3dFrame = document.getElementById('haus3d-frame');
+  const prevWrap    = document.getElementById('prev-wrap');
+  const isHaus = S.prod === 'haustuere';
+  if (haus3dWrap) {
+    if (isHaus) {
+      // Iframe nur einmal laden
+      if (haus3dFrame && !haus3dFrame.src.includes('haustuer-3d')) {
+        haus3dFrame.src = 'haustuer-3d.html?embed';
+      }
+      haus3dWrap.style.display = 'block';
+      if (prevWrap) prevWrap.style.height = '560px';
+    } else {
+      haus3dWrap.style.display = 'none';
+      if (prevWrap) prevWrap.style.height = '420px';
+    }
+  }
+
   if (!S.prod) {
     if (wrap) wrap.style.display = 'none';
     if (ph)   ph.style.display   = 'flex';
     return;
   }
+  if (isHaus) return;   // 3D übernimmt, normale Bild-Logik überspringen
   if (ph)   ph.style.display   = 'none';
   if (wrap) wrap.style.display = 'block';
 
