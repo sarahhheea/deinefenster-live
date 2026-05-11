@@ -1,113 +1,168 @@
-# DeineFenster.de — Projektstand
+# STAND — DeineFenster.de (Stand 07.05.2026)
 
-**Letzte Aktualisierung:** 05.05.2026
-
----
-
-## ✅ FERTIG — Bereit für Go-Live
-
-### Design & Dark Theme
-- **Alle Seiten** außer `shop.html` und `konfigurator.html` sind im dunklen Design umgesetzt
-- Farbpalette: `#0a1530` (main), `#060e1e` (footer/body), `#0f1c30` (cards), `#0a1225` (alternating)
-- CTA-Buttons: `background:#225eaa;color:#fff` überall einheitlich
-- **14 Produkt-Unterseiten** (`produkte/**/*.html`) — vollständig dark
-
-### Performance
-- **Tailwind CSS lokal gebündelt** — `css/tailwind.css` (74KB minified)
-  - Vorher: CDN-Script mit 7.9s render-block
-  - Jetzt: Lokale CSS-Datei, kein render-block
-  - Rebuild: `npm run build:css`
-- Google Fonts preconnect auf allen Seiten
-
-### SEO
-- Title-Tags: alle unter 60 Zeichen
-- Meta-Descriptions: alle unter 160 Zeichen
-- Heading-Hierarchie: h1→h2→h3 überall korrekt
-- Sitemap: `sitemap.xml` mit 27 URLs, lastmod 2026-05-05
-- Schema.org: LocalBusiness, FAQPage, Article, BreadcrumbList
-- robots.txt: BLOCK-MODUS (Disallow: /) — vor Go-Live umstellen!
-
-### Seiten-Status
-| Seite | Status | Notizen |
-|-------|--------|---------|
-| index.html | ✅ fertig | Hero-Slideshow, KI-Bilder, Wissens-Sektion |
-| produkte.html | ✅ fertig | Kategorie-Nav, Video-Heroes, Listenzeilen |
-| ueber-drutex.html | ✅ fertig | Videos, Timeline, Produktion, Awards, Bento-Grid |
-| ueber-uns.html | ✅ fertig | Team, Öffnungszeiten, Kontakt-Schnellkarte |
-| kontakt.html | ✅ fertig | Große Tel-Nr, Maps-Embed, Team-Zeilen, Anfahrt |
-| faq.html | ✅ fertig | 12 FAQs, FAQPage-Schema, dark |
-| glossar.html | ✅ fertig | A–Z Glossar, Anchor-Links |
-| kfw-foerderung.html | ✅ fertig | KfW-Inhalte, dark |
-| impressum.html | ✅ fertig | |
-| datenschutz.html | ✅ fertig | |
-| agb.html | ✅ fertig | |
-| danke.html | ✅ fertig | |
-| shop.html | 🔄 eigenständig | Shop-System, CDN Tailwind bleibt |
-| konfigurator.html | 🔄 nicht anfassen | Noch in Bearbeitung |
-| produkte/kunststofffenster/*.html | ✅ fertig | 4 Seiten |
-| produkte/balkontueren/*.html | ✅ fertig | 2 Seiten |
-| produkte/haustueren/*.html | ✅ fertig | 2 Seiten |
-| produkte/hebe-schiebetueren/*.html | ✅ fertig | 4 Seiten |
-| produkte/rollladen/*.html | ✅ fertig | 1 Seite |
+## OFFEN: shop-einstellen.html Login fixen
+Apps Script muss neu deployed werden mit dem hardcodierten Passwort `Fenster2026`.
+Sarah muss das einmal selbst im Google Apps Script Console machen (scripts/apps-script.js ist bereits aktualisiert).
 
 ---
 
-## 🚨 VOR GO-LIVE (muss Sarah machen)
+## IN ARBEIT: Haustür Farben via Google Flow
 
-### 1. robots.txt umstellen
-Datei: `robots.txt`
-- Aktuell: `Disallow: /` (Block-Modus für Preview-URL)
-- Bei Go-Live: Die ersten 2 Zeilen (`User-agent: *` + `Disallow: /`) löschen
-- Die auskommentierte Produktions-Version aktivieren (Kommentare entfernen)
+### Status
+| Modell | Status |
+|--------|--------|
+| alaska-1-inox | ✅ fertig (41 Farben) |
+| florida-lr-inox | ✅ fertig (41 Farben) |
+| montana-2-lr-inox | ✅ fertig (41 Farben) |
+| montana-3-lr-inox | ⬜ offen |
+| ohio-inox | ⬜ offen |
+| colorado-inox | ⬜ offen |
+| alaska-2-inox | ⬜ offen |
+| montana-1-inox | ⬜ offen |
+| nebraska-lcr-inox | ⬜ offen |
+| pennsylvania-1-inox | ⬜ offen |
+| texas-c-inox | ⬜ offen |
+| texas-lr-inox | ⬜ offen |
+| pennsylvania-2-lr-inox | ⬜ offen |
+| pennsylvania-3-lr-inox | ⬜ offen |
 
-### 2. img/masters/sarah/ NICHT deployen
-- Ordner enthält KI-Master-Bilder (bis 4.9 MB pro Stück, ~197 MB gesamt)
-- Bereits in `.gitignore` eingetragen → wird nicht committet → nicht deployed ✓
+### Dateiname-Schema
+`haustuer_aussen_{modell}_{farbe}.png`
+Ablage: `img/farben/`
 
-### 3. Google Search Console einrichten
-- Domain verifizieren nach Go-Live
-- Sitemap `https://www.deinefenster.de/sitemap.xml` einreichen
-
----
-
-## 📋 OFFEN — Post Go-Live Backlog
-
-### Performance
-- [ ] Produktbilder → WebP konvertieren (2,990 KB Einsparung laut Lighthouse)
-- [ ] LCP verbessern: Erstes Hero-Bild/Video `<link rel="preload">` hinzufügen
-- [ ] Accessibility Score: Aktuell 88/100, Ziel 95+ (kleiner Kontrast-Tweaks)
-
-### Content
-- [ ] Produkt-Seiten: Echte Kundenfotos sobald vorhanden
-- [ ] Blog/Ratgeber-Sektion (Long-Tail SEO) — Sarah-Entscheidung ausstehend
-
-### Konfigurator
-- [ ] `konfigurator.html` — Sarah sagt Bescheid wann fertig
-- [x] Haustür-Farbframes für Live-Preview — fertig 06.05.2026
-  - 37 Drutex-CDN-Frames gemappt (Iglo Energy Montana, Außenansicht mit Stoßgriff)
-  - 8 Farben ohne Drutex-Pendant (Achatgrau, Signalgrau, Alux DB, Alu gebürstet, Siena Noce/Rosso, Bergkiefer, Teak) bei Haustür ausgeblendet via `HAUSTUER_FARB_BLOCKLIST` — beim Fenster bleiben sie sichtbar
-  - Innenansicht in Farbe weiterhin offen (Sarah-Plan: später per Google Flow)
-- [ ] Balkontür Farbbilder (innen + außen, 0/46 generiert)
-- [ ] HST Farbbilder (innen + außen, 0/46 generiert)
+### Referenzbilder (für Google Flow Upload)
+| Modell | Referenzbild |
+|--------|-------------|
+| florida-lr-inox | img/drutex-tueren/florida-inox-lr_antracyt.jpg |
+| colorado-inox | img/drutex-tueren/colorado-inox_antracyt.jpg |
+| alle anderen | img/drutex-tueren/ → nachschauen |
 
 ---
 
-## 🛠️ TECH-STACK
+## GOOGLE FLOW PROMPTS — MASTER VORLAGE
 
-- **Frontend:** HTML + Tailwind CSS v4 (lokal gebündelt) + JavaScript
-- **Fonts:** Plus Jakarta Sans + Manrope + Fraunces (Google Fonts)
-- **Icons:** Material Symbols Outlined (Google)
-- **Animationen:** GSAP 3.12 + ScrollTrigger
-- **Slider:** Swiper 11
-- **Deployment:** Netlify (Static, kein Build-Step nötig — CSS vorgebaut)
-- **Videos:** Drutex CDN direkt verlinkt
+Ersetze `{MODELL}` mit dem jeweiligen Modellnamen (z.B. "Florida LR Inox").
+Lade immer das Referenzbild des Modells in Anthrazit als Basis hoch.
 
-## 🎨 DESIGN-TOKENS
-
+### Runde 1 — anthraz-gl · anthraz-um · anthrazit · basaltgr-gl
 ```
-Hintergründe:  #060e1e (body)  #0a1530 (main)  #0f1c30 (cards)  #0a1225 (alt)
-Text:          #e8eeff (primary)  rgba(232,238,255,0.75) (secondary)  rgba(232,238,255,0.45) (muted)
-Akzente:       #76a9fa (blue)  #c9a84c (gold)
-CTA:           background:#225eaa  color:#fff
-Borders:       rgba(255,255,255,0.08)  rgba(118,169,250,0.2) (blue-tinted)
+Recolor this exact door model "{MODELL}" keeping all shapes, glass, handle, frame and proportions identical. Show 4 color variants in a 2×2 grid:
+Top-left: Anthracite glossy (RAL 7016, high-gloss finish)
+Top-right: Anthracite dual-color (RAL 7016 outside, white inside — only outside visible)
+Bottom-left: Anthracite matte (RAL 7016, smooth matte finish)
+Bottom-right: Basalt grey glossy (RAL 7012, dark grey, high-gloss)
+White background, frontal view, photorealistic, no shadows.
 ```
+Dateinamen: `..._anthraz-gl.png` · `..._anthraz-um.png` · `..._anthrazit.png` · `..._basaltgr-gl.png`
+
+### Runde 2 — basaltgr-sa · betongrau · braun-mar · brillblau
+```
+Recolor this exact door model "{MODELL}", 4 variants 2×2 grid:
+Top-left: Basalt grey satin (RAL 7012, satin finish)
+Top-right: Concrete grey (warm medium grey, smooth matte)
+Bottom-left: Brown marbled (dark brown with subtle marble texture)
+Bottom-right: Brilliant blue (deep royal blue, smooth matte)
+White background, frontal view, photorealistic, no shadows.
+```
+Dateinamen: `..._basaltgr-sa.png` · `..._betongrau.png` · `..._braun-mar.png` · `..._brillblau.png`
+
+### Runde 3 — cremeweiss · crown-plat · deep-bronze · douglasie
+```
+Recolor this exact door model "{MODELL}", 4 variants 2×2 grid:
+Top-left: Cream white (warm off-white, slightly warm tone, smooth)
+Top-right: Crown platinum (silver-platinum metallic finish)
+Bottom-left: Deep bronze (dark bronze metallic)
+Bottom-right: Douglas fir (natural pine wood grain, warm honey tones)
+White background, frontal view, photorealistic, no shadows.
+```
+Dateinamen: `..._cremeweiss.png` · `..._crown-plat.png` · `..._deep-bronze.png` · `..._douglasie.png`
+
+### Runde 4 — dunkelgr · dunkelrot · dunkleiche · eiche-hell
+```
+Recolor this exact door model "{MODELL}", 4 variants 2×2 grid:
+Top-left: Dark grey (RAL 7043, traffic grey, matte)
+Top-right: Dark red (deep burgundy red, RAL 3005, matte)
+Bottom-left: Dark oak (dark brown oak wood grain)
+Bottom-right: Light oak (pale golden oak wood texture)
+White background, frontal view, photorealistic, no shadows.
+```
+Dateinamen: `..._dunkelgr.png` · `..._dunkelrot.png` · `..._dunkleiche.png` · `..._eiche-hell.png`
+
+### Runde 5 — eiche-nat · eisengl · golden-oak · grafitgr
+```
+Recolor this exact door model "{MODELL}", 4 variants 2×2 grid:
+Top-left: Natural oak (medium natural oak wood grain)
+Top-right: Iron mica (very dark grey-black with sparkling metallic mica particles)
+Bottom-left: Golden oak (warm golden-yellow oak wood grain)
+Bottom-right: Graphite grey (RAL 7024, dark graphite, matte)
+White background, frontal view, photorealistic, no shadows.
+```
+Dateinamen: `..._eiche-nat.png` · `..._eisengl.png` · `..._golden-oak.png` · `..._grafitgr.png`
+
+### Runde 6 — jet-black · lichtgrau · macore · mahagoni
+```
+Recolor this exact door model "{MODELL}", 4 variants 2×2 grid:
+Top-left: Jet black (pure black, ultra-smooth matte, RAL 9005)
+Top-right: Light grey (RAL 7035, light cool grey, matte)
+Bottom-left: Macore (exotic African hardwood, reddish-brown with fine grain)
+Bottom-right: Mahogany (classic mahogany reddish-brown wood grain)
+White background, frontal view, photorealistic, no shadows.
+```
+Dateinamen: `..._jet-black.png` · `..._lichtgrau.png` · `..._macore.png` · `..._mahagoni.png`
+
+### Runde 7 — mooreiche · moosgruen · nussbaum · oregon
+```
+Recolor this exact door model "{MODELL}", 4 variants 2×2 grid:
+Top-left: Bog oak (very dark almost black aged oak wood grain)
+Top-right: Moss green (RAL 6005, deep forest green, matte)
+Bottom-left: Walnut (warm dark walnut wood grain)
+Bottom-right: Oregon pine (light pine wood, bright natural grain)
+White background, frontal view, photorealistic, no shadows.
+```
+Dateinamen: `..._mooreiche.png` · `..._moosgruen.png` · `..._nussbaum.png` · `..._oregon.png`
+
+### Runde 8 — piryt · quarzgr-gl · quarzgr-sa · schiefgr-gl
+```
+Recolor this exact door model "{MODELL}", 4 variants 2×2 grid:
+Top-left: Pyrite (dark olive-metallic with golden-grey shimmer)
+Top-right: Quartz grey glossy (RAL 7039, medium grey, high-gloss)
+Bottom-left: Quartz grey satin (RAL 7039, medium grey, satin finish)
+Bottom-right: Slate grey glossy (RAL 7015, blue-grey, high-gloss)
+White background, frontal view, photorealistic, no shadows.
+```
+Dateinamen: `..._piryt.png` · `..._quarzgr-gl.png` · `..._quarzgr-sa.png` · `..._schiefgr-gl.png`
+
+### Runde 9 — schiefgr-sa · schoko-br · schwarz-um · schwarzbr
+```
+Recolor this exact door model "{MODELL}", 4 variants 2×2 grid:
+Top-left: Slate grey satin (RAL 7015, blue-grey, satin finish)
+Top-right: Chocolate brown (RAL 8017, warm dark chocolate brown)
+Bottom-left: Black dual-color (RAL 9005 outside, white inside — only outside visible)
+Bottom-right: Black-brown (very dark brown almost black, RAL 8022)
+White background, frontal view, photorealistic, no shadows.
+```
+Dateinamen: `..._schiefgr-sa.png` · `..._schoko-br.png` · `..._schwarz-um.png` · `..._schwarzbr.png`
+
+### Runde 10 — sheffield · stahlblau · weiss-fx · weiss
+```
+Recolor this exact door model "{MODELL}", 4 variants 2×2 grid:
+Oben links: Sheffield Oak Light (helles cremiges Eichenholz-Dekor, warme beige-blonde Holzmaserung, sehr hell)
+Top-right: Steel blue (muted blue-grey, RAL 5011, steel tone)
+Bottom-left: White FX (pure white with subtle surface texture effect)
+Bottom-right: White (RAL 9016, pure smooth white, matte)
+White background, frontal view, photorealistic, no shadows.
+```
+Dateinamen: `..._sheffield.png` · `..._stahlblau.png` · `..._weiss-fx.png` · `..._weiss.png`
+
+### Runde 11 — winchester (einzeln)
+```
+Recolor this exact door model "{MODELL}" in one color:
+Winchester (warm medium-brown wood grain with reddish undertone, classic English oak look)
+White background, frontal view, photorealistic, no shadows.
+```
+Dateiname: `..._winchester.png`
+
+---
+
+## OFFEN: Innenseite Haustür
+Innenansicht mit Klinke + Scharnieren, in allen Farben — nach den Außenansichten.
