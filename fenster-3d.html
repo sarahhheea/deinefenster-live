@@ -444,54 +444,57 @@ function buildWindow() {
   const HY = HY_local;
   const HZ = sashZ + 0.001;  // direkt auf Sash-Fläche
 
-  // Rosette — runde Platte flach am Rahmen
+  // Rosette — ovale Platte flach am Rahmen (etwas elongiert vertikal)
   const rosette = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.016, 0.015, 0.009, 24),
+    new THREE.CylinderGeometry(0.014, 0.013, 0.010, 20),
     chromeMat
   );
   rosette.rotation.x = Math.PI / 2;
-  rosette.position.set(HX, HY, HZ + 0.0045);
+  // Skalierung: etwas höher als breit (oval)
+  rosette.scale.set(1.0, 1.5, 1.0);
+  rosette.position.set(HX, HY, HZ + 0.005);
   rosette.castShadow = true;
   windowGroup.add(rosette);
 
   // Rosetten-Ring (Rand-Torus)
   const rosetteRing = new THREE.Mesh(
-    new THREE.TorusGeometry(0.015, 0.0025, 8, 24),
+    new THREE.TorusGeometry(0.014, 0.003, 8, 20),
     chromeMat
   );
   rosetteRing.rotation.x = Math.PI / 2;
-  rosetteRing.position.set(HX, HY, HZ + 0.008);
+  rosetteRing.scale.set(1.0, 1.5, 1.0);
+  rosetteRing.position.set(HX, HY, HZ + 0.009);
   rosetteRing.castShadow = true;
   windowGroup.add(rosetteRing);
 
   // Griffhebel — senkrechter Stab nach UNTEN (Dreh-Kipp Geschlossen-Position)
   // Im Referenzbild zeigt der Griff nach UNTEN
-  const leverLen = 0.110;
+  const leverLen = 0.115;
   const lever = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.007, 0.007, leverLen, 12),
+    new THREE.CylinderGeometry(0.0085, 0.0085, leverLen, 14),
     chromeMat
   );
   // Senkrecht = keine Rotation nötig (CylinderGeometry ist schon vertikal)
-  lever.position.set(HX, HY - leverLen / 2 - 0.008, HZ + 0.022);
+  lever.position.set(HX, HY - leverLen / 2 - 0.010, HZ + 0.024);
   lever.castShadow = true;
   windowGroup.add(lever);
 
   // Griffkopf-Verbindung (Übergang Rosette → Griffstab, kleiner Zylinder)
-  const connLen = 0.018;
+  const connLen = 0.020;
   const conn = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.0085, 0.0085, connLen, 12),
+    new THREE.CylinderGeometry(0.010, 0.009, connLen, 12),
     chromeMat
   );
-  conn.position.set(HX, HY - connLen / 2 + 0.002, HZ + 0.022);
+  conn.position.set(HX, HY - connLen / 2 + 0.002, HZ + 0.024);
   conn.castShadow = true;
   windowGroup.add(conn);
 
   // Griffende — abgerundete Kappe unten
   const capEnd = new THREE.Mesh(
-    new THREE.SphereGeometry(0.008, 10, 8),
+    new THREE.SphereGeometry(0.0095, 12, 8),
     chromeMat
   );
-  capEnd.position.set(HX, HY - leverLen - 0.008, HZ + 0.022);
+  capEnd.position.set(HX, HY - leverLen - 0.010, HZ + 0.024);
   capEnd.castShadow = true;
   windowGroup.add(capEnd);
 
