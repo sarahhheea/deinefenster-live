@@ -49,12 +49,13 @@ function doPost(e) {
   }
 }
 
+// Passwort direkt im Code — kein Property-Setup nötig
+var SHOP_PASSWORD = 'Fenster2026';
+
 function handleLogin(password) {
-  var stored = PropertiesService.getScriptProperties().getProperty('SHOP_PASSWORD');
-  if (!stored) return {error:'Passwort nicht konfiguriert.'};
-  if (password !== stored) return {error:'Falsches Passwort',code:401};
+  if (password !== SHOP_PASSWORD) return {error:'Falsches Passwort',code:401};
   var token = Utilities.getUuid();
-  var expiry = Date.now() + 7 * 24 * 60 * 60 * 1000;
+  var expiry = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 Tage
   var sessions = JSON.parse(PropertiesService.getScriptProperties().getProperty('SESSIONS') || '{}');
   sessions[token] = expiry;
   Object.keys(sessions).forEach(function(t) { if (sessions[t] < Date.now()) delete sessions[t]; });
