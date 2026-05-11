@@ -9,8 +9,8 @@
   <link rel="canonical" href="https://www.deinefenster.de/kunststofffenster-kaufen.html"/>
   <link rel="stylesheet" href="css/tailwind.css"/>
   <link rel="preconnect" href="https://fonts.bunny.net"/>
-  
   <link href="https://fonts.bunny.net/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
 
   <script type="application/ld+json">
   {
@@ -40,7 +40,7 @@
           "@type": "LocalBusiness",
           "name": "Fensterhandel Christ",
           "address": {"@type":"PostalAddress","streetAddress":"Fohrder Landstraße 13","addressLocality":"Brandenburg an der Havel","postalCode":"14772","addressCountry":"DE"},
-          "telephone": "+493381XXXXXX"
+          "telephone": "+493381214837"
         }
       }
     },
@@ -101,16 +101,258 @@
   </script>
 
   <style>
-    body { background: #060e1e; color: #e8eeff; font-family: 'Manrope', sans-serif; }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { background: #060e1e; color: #e8eeff; font-family: 'Manrope', sans-serif; overflow-x: hidden; }
     h1,h2,h3 { font-family: 'Plus Jakarta Sans', sans-serif; }
-    .glass { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; }
-    .btn-primary { background: #225eaa; color: #fff; padding: 14px 28px; border-radius: 10px; font-weight: 700; display: inline-block; text-decoration: none; transition: background 0.2s; }
-    .btn-primary:hover { background: #1a4d8f; }
-    .badge { background: rgba(118,169,250,0.15); color: #76a9fa; border: 1px solid rgba(118,169,250,0.3); border-radius: 999px; padding: 4px 14px; font-size: 13px; font-weight: 600; display: inline-block; }
+
+    /* Glass morphism */
+    .glass {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+    }
+    .glass:hover {
+      border-color: rgba(118,169,250,0.2);
+      background: rgba(255,255,255,0.055);
+      box-shadow: 0 8px 32px rgba(34,94,170,0.12);
+    }
+    .glass-nav {
+      background: rgba(6,14,30,0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    /* Buttons */
+    .btn-primary {
+      background: linear-gradient(135deg, #225eaa 0%, #1e4fa0 100%);
+      color: #fff;
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-weight: 700;
+      display: inline-block;
+      text-decoration: none;
+      transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+      box-shadow: 0 4px 24px rgba(34,94,170,0.35);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 40px rgba(34,94,170,0.55);
+      background: linear-gradient(135deg, #2a70cc 0%, #225eaa 100%);
+    }
+    .btn-secondary {
+      background: rgba(255,255,255,0.07);
+      color: #e8eeff;
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-weight: 700;
+      text-decoration: none;
+      border: 1px solid rgba(255,255,255,0.12);
+      display: inline-block;
+      transition: all 0.3s ease;
+    }
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(255,255,255,0.2);
+    }
+
+    /* Badges */
+    .badge {
+      background: rgba(118,169,250,0.12);
+      color: #76a9fa;
+      border: 1px solid rgba(118,169,250,0.28);
+      border-radius: 999px;
+      padding: 5px 14px;
+      font-size: 12.5px;
+      font-weight: 600;
+      display: inline-block;
+      letter-spacing: 0.02em;
+    }
+    .badge-gold {
+      background: rgba(201,168,76,0.12);
+      color: #c9a84c;
+      border: 1px solid rgba(201,168,76,0.28);
+      border-radius: 999px;
+      padding: 5px 14px;
+      font-size: 12.5px;
+      font-weight: 600;
+      display: inline-block;
+      letter-spacing: 0.02em;
+    }
     .gold { color: #c9a84c; }
     .blue { color: #76a9fa; }
-    details summary { cursor: pointer; list-style: none; }
-    details summary::-webkit-details-marker { display: none; }
+
+    /* Stat glow */
+    .stat-num { text-shadow: 0 0 30px rgba(201,168,76,0.45); }
+
+    /* Scroll reveal */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1);
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal-d1 { transition-delay: 0.1s; }
+    .reveal-d2 { transition-delay: 0.2s; }
+    .reveal-d3 { transition-delay: 0.3s; }
+    .reveal-d4 { transition-delay: 0.4s; }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes blob-move {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(30px, -20px) scale(1.05); }
+      66% { transform: translate(-20px, 15px) scale(0.97); }
+    }
+
+    /* Hero */
+    .hero-section { position: relative; overflow: hidden; }
+    .hero-blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+    }
+    .hero-blob-1 {
+      width: 500px; height: 500px;
+      background: rgba(34,94,170,0.2);
+      top: -120px; right: -60px;
+      animation: blob-move 12s ease-in-out infinite;
+    }
+    .hero-blob-2 {
+      width: 350px; height: 350px;
+      background: rgba(201,168,76,0.1);
+      bottom: -80px; left: 40%;
+      animation: blob-move 15s ease-in-out infinite reverse;
+    }
+    .hero-blob-3 {
+      width: 280px; height: 280px;
+      background: rgba(34,94,170,0.13);
+      top: 40%; left: -80px;
+      animation: blob-move 11s ease-in-out infinite 2s;
+    }
+    .hero-grid {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(118,169,250,0.032) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(118,169,250,0.032) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+    }
+
+    /* Hero text animations */
+    .hero-t1 { animation: fadeInUp 0.7s ease both 0.05s; }
+    .hero-t2 { animation: fadeInUp 0.7s ease both 0.2s; }
+    .hero-t3 { animation: fadeInUp 0.7s ease both 0.35s; }
+    .hero-t4 { animation: fadeInUp 0.7s ease both 0.5s; }
+    .hero-cta { animation: fadeInUp 0.7s ease both 0.65s; }
+
+    /* Product tier cards */
+    .tier-card {
+      padding: 32px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(12px);
+      transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+    }
+    .tier-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 16px 48px rgba(34,94,170,0.18);
+    }
+    .tier-card-premium {
+      border-color: rgba(118,169,250,0.22);
+      background: rgba(118,169,250,0.04);
+    }
+    .tier-card-premium:hover {
+      border-color: rgba(118,169,250,0.35);
+      box-shadow: 0 16px 48px rgba(34,94,170,0.25);
+    }
+
+    /* Feature grid */
+    .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; }
+    .feature-item { font-size: 14px; color: rgba(232,238,255,0.75); display: flex; align-items: center; gap: 6px; }
+    .feature-item::before { content: '✓'; color: #76a9fa; font-weight: 700; flex-shrink: 0; }
+
+    /* Why cards */
+    .why-card {
+      padding: 28px 24px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(12px);
+      transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+    }
+    .why-card:hover {
+      border-color: rgba(118,169,250,0.2);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(34,94,170,0.15);
+    }
+    .why-icon {
+      width: 52px; height: 52px;
+      background: linear-gradient(135deg, rgba(34,94,170,0.25), rgba(34,94,170,0.08));
+      border: 1px solid rgba(118,169,250,0.25);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; margin-bottom: 16px;
+    }
+
+    /* FAQ */
+    .faq-details { border-radius: 12px; overflow: hidden; }
+    .faq-summary {
+      cursor: pointer; list-style: none;
+      display: flex; justify-content: space-between; align-items: center;
+      font-weight: 700; font-size: 16.5px;
+      padding: 22px 24px; gap: 12px;
+    }
+    .faq-summary::-webkit-details-marker { display: none; }
+    .faq-icon {
+      color: #76a9fa; font-size: 22px; font-weight: 400;
+      transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
+      flex-shrink: 0; line-height: 1;
+    }
+    .faq-details[open] .faq-icon { transform: rotate(45deg); }
+    .faq-body { padding: 0 24px 22px; color: rgba(232,238,255,0.75); line-height: 1.75; }
+
+    /* Glow divider */
+    .glow-line {
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, rgba(118,169,250,0.25) 40%, rgba(118,169,250,0.25) 60%, transparent 100%);
+    }
+
+    /* CTA highlight section */
+    .cta-glow {
+      background: linear-gradient(135deg, #0a1225 0%, #0d1f3c 50%, #0a1225 100%);
+      position: relative; overflow: hidden;
+    }
+    .cta-glow::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 600px; height: 300px;
+      background: radial-gradient(ellipse, rgba(34,94,170,0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* KfW highlight */
+    .kfw-box {
+      background: linear-gradient(135deg, rgba(74,222,128,0.06), rgba(74,222,128,0.02));
+      border: 1px solid rgba(74,222,128,0.18);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex; align-items: center; gap: 12px;
+      margin-top: 16px;
+    }
+
+    /* Breadcrumb */
+    .breadcrumb a { color: rgba(118,169,250,0.7); text-decoration: none; }
+    .breadcrumb a:hover { color: #76a9fa; }
   </style>
 </head>
 <body>
@@ -155,104 +397,132 @@
   </div>
 </nav>
 
+<!-- BREADCRUMB -->
+<div class="breadcrumb max-w-[1200px] mx-auto px-6 text-xs" style="padding-top:88px;padding-bottom:8px;color:rgba(232,238,255,0.4);">
+  <a href="index.html">Startseite</a>
+  <span class="mx-2">›</span>
+  <span style="color:rgba(232,238,255,0.7);">Kunststofffenster kaufen</span>
+</div>
+
 <!-- HERO -->
-<section style="background:linear-gradient(135deg,#0a1530 0%,#0d1f3c 50%,#0a1225 100%);padding:80px 24px 60px;">
-  <div class="max-w-[1200px] mx-auto">
-    <div style="max-width:720px;">
-      <div class="flex gap-3 mb-6 flex-wrap">
+<section class="hero-section" style="background:linear-gradient(135deg,#0a1530 0%,#0d1f3c 50%,#0a1225 100%);padding:48px 24px 72px;">
+  <div class="hero-grid"></div>
+  <div class="hero-blob hero-blob-1"></div>
+  <div class="hero-blob hero-blob-2"></div>
+  <div class="hero-blob hero-blob-3"></div>
+  <div class="max-w-[1200px] mx-auto" style="position:relative;z-index:1;">
+    <div style="max-width:740px;">
+      <div class="flex gap-3 mb-6 flex-wrap hero-t1">
         <span class="badge">Drutex Premium-Partner</span>
-        <span class="badge">✓ 14 Tage Lieferzeit</span>
-        <span class="badge">✓ Maßanfertigung</span>
+        <span class="badge">14 Tage Lieferzeit</span>
+        <span class="badge">Maßanfertigung</span>
       </div>
-      <h1 class="text-4xl md:text-5xl font-extrabold mb-6 leading-tight speakable-answer">
+      <h1 class="text-4xl md:text-5xl font-extrabold mb-6 leading-tight hero-t2 speakable-answer">
         Kunststofffenster kaufen —<br/>
         <span style="color:#76a9fa;">direkt vom Fachbetrieb</span>
       </h1>
-      <!-- GEO-optimiert: erste 200 Wörter beantworten die Hauptfrage direkt -->
-      <p class="text-lg mb-4 speakable-answer" style="color:rgba(232,238,255,0.85);max-width:640px;">
+      <p class="text-lg mb-4 hero-t3 speakable-answer" style="color:rgba(232,238,255,0.85);max-width:640px;">
         Kunststofffenster kaufen Sie bei uns direkt vom Fachbetrieb — ohne Zwischenhändler, ohne versteckte Kosten. Als autorisierter Drutex-Partner liefern wir maßgefertigte Kunststofffenster (IGLO 5 Classic, IGLO Energy) ab <strong style="color:#c9a84c;">99 €</strong> mit 14 Tagen Lieferzeit deutschlandweit.
       </p>
-      <p class="mb-8" style="color:rgba(232,238,255,0.65);max-width:600px;">
+      <p class="mb-8 hero-t4" style="color:rgba(232,238,255,0.6);max-width:600px;">
         Unser Live-Konfigurator berechnet Ihren Preis in Echtzeit. Maße eingeben → Optionen wählen → Angebot erhalten. Fertig. Kein Außendienstbesuch, kein Warten.
       </p>
-      <div class="flex flex-wrap gap-4">
+      <div class="flex flex-wrap gap-4 hero-cta">
         <a href="konfigurator.html" class="btn-primary">Jetzt online konfigurieren →</a>
-        <a href="tel:+493381XXXXXX" style="background:rgba(255,255,255,0.07);color:#e8eeff;padding:14px 28px;border-radius:10px;font-weight:700;text-decoration:none;border:1px solid rgba(255,255,255,0.12);">📞 Beratung anrufen</a>
+        <a href="tel:+493381214837" class="btn-secondary">Beratung anrufen</a>
       </div>
     </div>
   </div>
 </section>
 
-<!-- VERTRAUEN -->
-<section style="background:#060e1e;padding:32px 24px;border-bottom:1px solid rgba(255,255,255,0.07);">
-  <div class="max-w-[1200px] mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-    <div><div class="text-3xl font-extrabold gold">99 €</div><div class="text-sm mt-1" style="color:rgba(232,238,255,0.6);">ab Preis Fenster</div></div>
-    <div><div class="text-3xl font-extrabold gold">14 Tage</div><div class="text-sm mt-1" style="color:rgba(232,238,255,0.6);">Lieferzeit</div></div>
-    <div><div class="text-3xl font-extrabold gold">seit 2002</div><div class="text-sm mt-1" style="color:rgba(232,238,255,0.6);">Familienbetrieb</div></div>
-    <div><div class="text-3xl font-extrabold gold">Uw 0,65</div><div class="text-sm mt-1" style="color:rgba(232,238,255,0.6);">beste Dämmung</div></div>
+<!-- STATS -->
+<div class="glow-line"></div>
+<section style="background:#060e1e;padding:28px 24px;border-bottom:1px solid rgba(255,255,255,0.07);" class="reveal">
+  <div class="max-w-[1200px] mx-auto flex flex-wrap md:flex-nowrap items-center justify-center gap-y-6 gap-x-0 md:divide-x divide-white/[0.07]">
+    <div class="text-center flex-1 min-w-[120px] px-6">
+      <div class="text-3xl font-extrabold gold stat-num" data-target="99" data-suffix=" €">99 €</div>
+      <div class="text-sm mt-1" style="color:rgba(232,238,255,0.55);">ab Preis Fenster</div>
+    </div>
+    <div class="text-center flex-1 min-w-[120px] px-6">
+      <div class="text-3xl font-extrabold gold stat-num">14 Tage</div>
+      <div class="text-sm mt-1" style="color:rgba(232,238,255,0.55);">Lieferzeit</div>
+    </div>
+    <div class="text-center flex-1 min-w-[120px] px-6">
+      <div class="text-3xl font-extrabold gold stat-num">seit 2002</div>
+      <div class="text-sm mt-1" style="color:rgba(232,238,255,0.55);">Familienbetrieb</div>
+    </div>
+    <div class="text-center flex-1 min-w-[120px] px-6">
+      <div class="text-3xl font-extrabold gold stat-num">Uw 0,65</div>
+      <div class="text-sm mt-1" style="color:rgba(232,238,255,0.55);">beste Dämmung</div>
+    </div>
   </div>
 </section>
+<div class="glow-line"></div>
 
 <!-- PRODUKTE -->
 <section style="padding:80px 24px;background:#0a1530;">
   <div class="max-w-[1200px] mx-auto">
-    <div class="text-center mb-12">
+    <div class="text-center mb-12 reveal">
       <h2 class="text-3xl md:text-4xl font-extrabold mb-4">Unsere Kunststofffenster</h2>
-      <p style="color:rgba(232,238,255,0.65);">Beide Systeme werden maßgefertigt — jedes Maß, jede Farbe, jede Öffnungsart.</p>
+      <p style="color:rgba(232,238,255,0.6);">Beide Systeme werden maßgefertigt — jedes Maß, jede Farbe, jede Öffnungsart.</p>
     </div>
     <div class="grid md:grid-cols-2 gap-8">
 
       <!-- IGLO 5 Classic -->
-      <div class="glass p-8">
-        <div class="flex justify-between items-start mb-4">
+      <div class="tier-card reveal reveal-d1">
+        <div class="flex justify-between items-start mb-5">
           <div>
             <span class="badge mb-3">Bestseller</span>
-            <h3 class="text-2xl font-bold">IGLO 5 Classic</h3>
+            <h3 class="text-2xl font-bold mt-2">IGLO 5 Classic</h3>
             <p class="text-sm mt-1 blue">5-Kammer-Profil · 70 mm Bautiefe</p>
           </div>
           <div class="text-right">
             <div class="text-2xl font-extrabold gold">ab 99 €</div>
-            <div class="text-xs" style="color:rgba(232,238,255,0.5);">inkl. MwSt.</div>
+            <div class="text-xs mt-1" style="color:rgba(232,238,255,0.45);">inkl. MwSt.</div>
           </div>
         </div>
-        <div class="grid grid-cols-2 gap-3 mb-6 text-sm" style="color:rgba(232,238,255,0.75);">
-          <div>✓ Uw bis 0,77 W/(m²K)</div>
-          <div>✓ 3-fach Verglasung möglich</div>
-          <div>✓ RC 2 einbruchsicher</div>
-          <div>✓ 28 Farben & Dekore</div>
-          <div>✓ KfW-förderfähig</div>
-          <div>✓ Schallschutz 44 dB</div>
+        <div class="feature-grid mb-6">
+          <div class="feature-item">Uw bis 0,77 W/(m²K)</div>
+          <div class="feature-item">3-fach Verglasung möglich</div>
+          <div class="feature-item">RC 2 einbruchsicher</div>
+          <div class="feature-item">28 Farben &amp; Dekore</div>
+          <div class="feature-item">KfW-förderfähig</div>
+          <div class="feature-item">Schallschutz 44 dB</div>
         </div>
-        <a href="produkte/kunststofffenster/iglo-5-classic.html" style="color:#76a9fa;font-weight:600;text-decoration:none;">Details & Technische Daten →</a>
+        <a href="produkte/kunststofffenster/iglo-5-classic.html" style="color:#76a9fa;font-weight:600;text-decoration:none;font-size:14px;">Details &amp; Technische Daten →</a>
       </div>
 
       <!-- IGLO Energy -->
-      <div class="glass p-8" style="border-color:rgba(118,169,250,0.25);">
-        <div class="flex justify-between items-start mb-4">
+      <div class="tier-card tier-card-premium reveal reveal-d2">
+        <div class="flex justify-between items-start mb-5">
           <div>
-            <span class="badge mb-3" style="background:rgba(201,168,76,0.15);color:#c9a84c;border-color:rgba(201,168,76,0.3);">Premium · Passivhaus</span>
-            <h3 class="text-2xl font-bold">IGLO Energy</h3>
+            <span class="badge-gold mb-3">Premium · Passivhaus</span>
+            <h3 class="text-2xl font-bold mt-2">IGLO Energy</h3>
             <p class="text-sm mt-1 blue">7-Kammer-Profil · 82 mm Bautiefe</p>
           </div>
           <div class="text-right">
             <div class="text-2xl font-extrabold gold">ab 149 €</div>
-            <div class="text-xs" style="color:rgba(232,238,255,0.5);">inkl. MwSt.</div>
+            <div class="text-xs mt-1" style="color:rgba(232,238,255,0.45);">inkl. MwSt.</div>
           </div>
         </div>
-        <div class="grid grid-cols-2 gap-3 mb-6 text-sm" style="color:rgba(232,238,255,0.75);">
-          <div>✓ Uw bis 0,65 W/(m²K)</div>
-          <div>✓ Passivhaus-Standard</div>
-          <div>✓ RC 3 einbruchsicher</div>
-          <div>✓ 41 Farben & Dekore</div>
-          <div>✓ KfW BEG-förderfähig</div>
-          <div>✓ Schallschutz 47 dB</div>
+        <div class="feature-grid mb-6">
+          <div class="feature-item">Uw bis 0,65 W/(m²K)</div>
+          <div class="feature-item">Passivhaus-Standard</div>
+          <div class="feature-item">RC 3 einbruchsicher</div>
+          <div class="feature-item">41 Farben &amp; Dekore</div>
+          <div class="feature-item">KfW BEG-förderfähig</div>
+          <div class="feature-item">Schallschutz 47 dB</div>
         </div>
-        <a href="produkte/kunststofffenster/iglo-energy.html" style="color:#76a9fa;font-weight:600;text-decoration:none;">Details & Technische Daten →</a>
+        <div class="kfw-box">
+          <span style="color:#4ade80;font-size:18px;">💶</span>
+          <p style="color:rgba(74,222,128,0.9);font-size:13px;font-weight:600;">KfW BEG Nr. 458 — bis zu 15 % Zuschuss möglich</p>
+        </div>
+        <a href="produkte/kunststofffenster/iglo-energy.html" style="color:#76a9fa;font-weight:600;text-decoration:none;font-size:14px;display:block;margin-top:16px;">Details &amp; Technische Daten →</a>
       </div>
-    </div>
 
-    <div class="text-center mt-10">
-      <a href="konfigurator.html" class="btn-primary text-lg">Preis berechnen — kostenlos & sofort</a>
+    </div>
+    <div class="text-center mt-10 reveal">
+      <a href="konfigurator.html" class="btn-primary text-lg">Preis berechnen — kostenlos &amp; sofort</a>
     </div>
   </div>
 </section>
@@ -260,135 +530,135 @@
 <!-- WARUM WIR -->
 <section style="padding:80px 24px;background:#060e1e;">
   <div class="max-w-[1200px] mx-auto">
-    <h2 class="text-3xl font-extrabold mb-12 text-center">Warum Kunden bei uns kaufen</h2>
+    <h2 class="text-3xl font-extrabold mb-12 text-center reveal">Warum Kunden bei uns kaufen</h2>
     <div class="grid md:grid-cols-3 gap-6">
-      <div class="glass p-6">
-        <div class="text-3xl mb-4">🏭</div>
+      <div class="why-card reveal reveal-d1">
+        <div class="why-icon">🏭</div>
         <h3 class="text-lg font-bold mb-2">Direkt vom Partner</h3>
-        <p style="color:rgba(232,238,255,0.65);font-size:15px;">Kein Makler, kein Großhändler. Wir kaufen direkt bei Drutex — und geben den Vorteil an Sie weiter.</p>
+        <p style="color:rgba(232,238,255,0.65);font-size:15px;line-height:1.65;">Kein Makler, kein Großhändler. Wir kaufen direkt bei Drutex — und geben den Vorteil an Sie weiter.</p>
       </div>
-      <div class="glass p-6">
-        <div class="text-3xl mb-4">📐</div>
+      <div class="why-card reveal reveal-d2">
+        <div class="why-icon">📐</div>
         <h3 class="text-lg font-bold mb-2">Jedes Maß möglich</h3>
-        <p style="color:rgba(232,238,255,0.65);font-size:15px;">Vom kleinen Kellerfenster bis zur raumhohen Glasfront. Unser Konfigurator rechnet alles in Echtzeit.</p>
+        <p style="color:rgba(232,238,255,0.65);font-size:15px;line-height:1.65;">Vom kleinen Kellerfenster bis zur raumhohen Glasfront. Unser Konfigurator rechnet alles in Echtzeit.</p>
       </div>
-      <div class="glass p-6">
-        <div class="text-3xl mb-4">🚚</div>
+      <div class="why-card reveal reveal-d3">
+        <div class="why-icon">🚚</div>
         <h3 class="text-lg font-bold mb-2">14 Tage, deutschlandweit</h3>
-        <p style="color:rgba(232,238,255,0.65);font-size:15px;">Produktion in Polen (Drutex-Werk), Lieferung direkt zu Ihnen. Auch Selbstabholung in Brandenburg möglich.</p>
+        <p style="color:rgba(232,238,255,0.65);font-size:15px;line-height:1.65;">Produktion in Polen (Drutex-Werk), Lieferung direkt zu Ihnen. Auch Selbstabholung in Brandenburg möglich.</p>
       </div>
-      <div class="glass p-6">
-        <div class="text-3xl mb-4">💶</div>
+      <div class="why-card reveal reveal-d1">
+        <div class="why-icon">💶</div>
         <h3 class="text-lg font-bold mb-2">KfW-Förderung nutzbar</h3>
-        <p style="color:rgba(232,238,255,0.65);font-size:15px;">IGLO 5 Classic (Uw 0,77) und IGLO Energy (Uw 0,65) sind beide KfW-BEG-förderfähig. Bis zu 15 % Zuschuss möglich.</p>
+        <p style="color:rgba(232,238,255,0.65);font-size:15px;line-height:1.65;">IGLO 5 Classic (Uw 0,77) und IGLO Energy (Uw 0,65) sind beide KfW-BEG-förderfähig. Bis zu 15 % Zuschuss möglich.</p>
       </div>
-      <div class="glass p-6">
-        <div class="text-3xl mb-4">👨‍👩‍👧</div>
+      <div class="why-card reveal reveal-d2">
+        <div class="why-icon">👨‍👩‍👧</div>
         <h3 class="text-lg font-bold mb-2">Familienbetrieb seit 2002</h3>
-        <p style="color:rgba(232,238,255,0.65);font-size:15px;">Fensterhandel Christ, Brandenburg an der Havel. Echte Menschen, echte Beratung — kein Call-Center.</p>
+        <p style="color:rgba(232,238,255,0.65);font-size:15px;line-height:1.65;">Fensterhandel Christ, Brandenburg an der Havel. Echte Menschen, echte Beratung — kein Call-Center.</p>
       </div>
-      <div class="glass p-6">
-        <div class="text-3xl mb-4">🔒</div>
+      <div class="why-card reveal reveal-d3">
+        <div class="why-icon">🔒</div>
         <h3 class="text-lg font-bold mb-2">Einbruchschutz inklusive</h3>
-        <p style="color:rgba(232,238,255,0.65);font-size:15px;">MACO-Mehrfachverriegelung serienmäßig. RC 2 (IGLO 5) und RC 3 (IGLO Energy) auf Wunsch — Versicherungsrabatt möglich.</p>
+        <p style="color:rgba(232,238,255,0.65);font-size:15px;line-height:1.65;">MACO-Mehrfachverriegelung serienmäßig. RC 2 (IGLO 5) und RC 3 (IGLO Energy) auf Wunsch — Versicherungsrabatt möglich.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- FAQ (GEO-OPTIMIERT) -->
+<!-- FAQ -->
 <section style="padding:80px 24px;background:#0a1530;">
   <div class="max-w-[800px] mx-auto">
-    <h2 class="text-3xl font-extrabold mb-4 text-center">Häufige Fragen zu Kunststofffenstern</h2>
-    <p class="text-center mb-12" style="color:rgba(232,238,255,0.6);">Direkte Antworten — keine Marketing-Floskeln.</p>
+    <div class="text-center mb-12 reveal">
+      <h2 class="text-3xl font-extrabold mb-4">Häufige Fragen zu Kunststofffenstern</h2>
+      <p style="color:rgba(232,238,255,0.55);">Direkte Antworten — keine Marketing-Floskeln.</p>
+    </div>
+    <div class="flex flex-col gap-3">
 
-    <div class="flex flex-col gap-4">
-
-      <details class="glass p-6 faq-answer" open>
-        <summary class="flex justify-between items-center font-bold text-lg">
+      <details class="glass faq-details faq-answer reveal" open>
+        <summary class="faq-summary">
           Was kosten Kunststofffenster?
-          <span style="color:#76a9fa;font-size:20px;">+</span>
+          <span class="faq-icon">+</span>
         </summary>
-        <p class="mt-4" style="color:rgba(232,238,255,0.75);">
+        <p class="faq-body">
           Kunststofffenster kosten bei uns ab <strong>99 €</strong> für ein Standardfenster (60×60 cm, 2-fach Verglasung). Ein typisches Wohnzimmerfenster (100×120 cm, Dreh-Kipp, 3-fach) liegt zwischen <strong>180 € und 280 €</strong>. Der Preis hängt von Maß, Verglasung, Farbe und Öffnungsart ab — unser Konfigurator berechnet ihn sofort.
         </p>
       </details>
 
-      <details class="glass p-6 faq-answer">
-        <summary class="flex justify-between items-center font-bold text-lg">
+      <details class="glass faq-details faq-answer reveal reveal-d1">
+        <summary class="faq-summary">
           Wie lange hält ein Kunststofffenster?
-          <span style="color:#76a9fa;font-size:20px;">+</span>
+          <span class="faq-icon">+</span>
         </summary>
-        <p class="mt-4" style="color:rgba(232,238,255,0.75);">
+        <p class="faq-body">
           Hochwertige Kunststofffenster halten <strong>30–50 Jahre</strong>. Drutex-Profile sind UV-stabilisiert und vergilben nicht. Die Dichtungen sollten alle 10–15 Jahre erneuert werden, die Beschläge einmal jährlich abgefettet. Dann funktionieren die Fenster problemlos ein Leben lang.
         </p>
       </details>
 
-      <details class="glass p-6 faq-answer">
-        <summary class="flex justify-between items-center font-bold text-lg">
+      <details class="glass faq-details faq-answer reveal reveal-d1">
+        <summary class="faq-summary">
           Kunststoff oder Aluminium — was ist besser?
-          <span style="color:#76a9fa;font-size:20px;">+</span>
+          <span class="faq-icon">+</span>
         </summary>
-        <p class="mt-4" style="color:rgba(232,238,255,0.75);">
+        <p class="faq-body">
           Für Privathäuser ist <strong>Kunststoff die bessere Wahl</strong>: günstiger (30–50 % billiger), bessere Wärmedämmung, kein Kondenswasser am Rahmen, kein Rost. Aluminium lohnt sich nur für Sondergrößen über 2,5 m Breite oder bei speziellen Designanforderungen.
         </p>
       </details>
 
-      <details class="glass p-6 faq-answer">
-        <summary class="flex justify-between items-center font-bold text-lg">
+      <details class="glass faq-details faq-answer reveal reveal-d2">
+        <summary class="faq-summary">
           Welcher Uw-Wert ist für Kunststofffenster gut?
-          <span style="color:#76a9fa;font-size:20px;">+</span>
+          <span class="faq-icon">+</span>
         </summary>
-        <p class="mt-4" style="color:rgba(232,238,255,0.75);">
+        <p class="faq-body">
           <strong>Uw 1,0 oder besser</strong> ist für Neubauten und Sanierungen empfohlen. KfW-Förderung gibt es ab <strong>Uw 0,95</strong>. Unsere IGLO 5 Classic erreicht Uw 0,77 — deutlich über dem Mindeststandard. Die IGLO Energy schafft Uw 0,65 und eignet sich für Passivhäuser.
         </p>
       </details>
 
-      <details class="glass p-6 faq-answer">
-        <summary class="flex justify-between items-center font-bold text-lg">
+      <details class="glass faq-details faq-answer reveal reveal-d2">
+        <summary class="faq-summary">
           Kann ich online bestellen und selbst einbauen?
-          <span style="color:#76a9fa;font-size:20px;">+</span>
+          <span class="faq-icon">+</span>
         </summary>
-        <p class="mt-4" style="color:rgba(232,238,255,0.75);">
+        <p class="faq-body">
           Ja — Sie konfigurieren online, wir produzieren und liefern. Der Selbsteinbau ist mit handwerklichem Geschick gut machbar. Wir liefern eine Montageanleitung mit. Wer einen Handwerker braucht: Wir vermitteln auf Wunsch lokale Monteure.
         </p>
       </details>
 
-      <details class="glass p-6 faq-answer">
-        <summary class="flex justify-between items-center font-bold text-lg">
+      <details class="glass faq-details faq-answer reveal reveal-d3">
+        <summary class="faq-summary">
           Gibt es KfW-Förderung für Kunststofffenster?
-          <span style="color:#76a9fa;font-size:20px;">+</span>
+          <span class="faq-icon">+</span>
         </summary>
-        <p class="mt-4" style="color:rgba(232,238,255,0.75);">
+        <p class="faq-body">
           Ja — über das <strong>KfW BEG-Programm (Nr. 458)</strong> gibt es bis zu 15 % Zuschuss auf energieeffiziente Fenster. Voraussetzung: Uw ≤ 0,95. Beide Drutex-Systeme erfüllen das. Beantragen Sie die Förderung vor dem Kauf beim BAFA oder über einen Energieberater.
         </p>
       </details>
 
     </div>
-
-    <div class="text-center mt-12">
-      <a href="faq.html" style="color:#76a9fa;font-weight:600;">Alle FAQ ansehen →</a>
+    <div class="text-center mt-12 reveal">
+      <a href="faq.html" style="color:#76a9fa;font-weight:600;text-decoration:none;">Alle FAQ ansehen →</a>
     </div>
   </div>
 </section>
 
 <!-- CTA FINAL -->
-<section style="padding:80px 24px;background:linear-gradient(135deg,#0a1225,#0d1f3c);">
-  <div class="max-w-[700px] mx-auto text-center">
-    <h2 class="text-3xl md:text-4xl font-extrabold mb-6">Preis berechnen — kostenlos, sofort, ohne Anmeldung</h2>
-    <p class="mb-8 text-lg" style="color:rgba(232,238,255,0.7);">Maße eingeben · Optionen wählen · Preis sehen. In 2 Minuten.</p>
-    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+<section class="cta-glow" style="padding:80px 24px;">
+  <div class="max-w-[700px] mx-auto text-center" style="position:relative;z-index:1;">
+    <h2 class="text-3xl md:text-4xl font-extrabold mb-6 reveal">Preis berechnen — kostenlos, sofort, ohne Anmeldung</h2>
+    <p class="mb-8 text-lg reveal" style="color:rgba(232,238,255,0.7);">Maße eingeben · Optionen wählen · Preis sehen. In 2 Minuten.</p>
+    <div class="flex flex-col sm:flex-row gap-4 justify-center reveal">
       <a href="konfigurator.html" class="btn-primary text-lg">Fenster konfigurieren →</a>
-      <a href="kontakt.html" style="background:rgba(255,255,255,0.07);color:#e8eeff;padding:14px 28px;border-radius:10px;font-weight:700;text-decoration:none;border:1px solid rgba(255,255,255,0.12);">Persönlich beraten lassen</a>
+      <a href="kontakt.html" class="btn-secondary text-lg">Persönlich beraten lassen</a>
     </div>
-    <p class="mt-6 text-sm" style="color:rgba(232,238,255,0.4);">Fensterhandel Christ · Fohrder Landstraße 13 · 14772 Brandenburg an der Havel · Familienbetrieb seit 2002</p>
+    <p class="mt-6 text-sm reveal" style="color:rgba(232,238,255,0.35);">Fensterhandel Christ · Fohrder Landstraße 13 · 14772 Brandenburg an der Havel · Familienbetrieb seit 2002</p>
   </div>
 </section>
 
 <!-- Querlink zu gebrauchten Fenstern -->
 <section style="padding:32px 24px;background:#07111f;border-top:1px solid rgba(255,255,255,0.06);">
   <div class="max-w-[700px] mx-auto text-center">
-    <p style="color:rgba(232,238,255,0.55);font-size:14px;">Kein Budget für Neufenster?</p>
+    <p style="color:rgba(232,238,255,0.5);font-size:14px;">Kein Budget für Neufenster?</p>
     <a href="gebrauchte-fenster-kaufen.html" style="color:#76a9fa;font-weight:700;font-size:15px;text-decoration:none;">→ Gebrauchte Kunststofffenster ab 85 € ansehen</a>
   </div>
 </section>
@@ -406,5 +676,51 @@
   </div>
 </footer>
 
+<script>
+  // Mobile menu
+  const menuBtn = document.getElementById('menuBtn');
+  const mobileMenu = document.getElementById('mobileMenu');
+  const menuIcon = document.getElementById('menuIcon');
+  menuBtn.addEventListener('click', () => {
+    const open = !mobileMenu.classList.contains('hidden');
+    mobileMenu.classList.toggle('hidden');
+    menuIcon.textContent = open ? 'menu' : 'close';
+  });
+
+  // Scroll reveal
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        revealObserver.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+  // Animated counter
+  function countUp(el, target, suffix) {
+    const duration = 1400;
+    const start = performance.now();
+    const update = (now) => {
+      const p = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(target * ease) + (suffix || '');
+      if (p < 1) requestAnimationFrame(update);
+    };
+    requestAnimationFrame(update);
+  }
+  const counterObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        counterObserver.unobserve(e.target);
+        const target = parseInt(e.target.dataset.target);
+        const suffix = e.target.dataset.suffix || '';
+        if (!isNaN(target)) countUp(e.target, target, suffix);
+      }
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('.stat-num[data-target]').forEach(el => counterObserver.observe(el));
+</script>
 </body>
 </html>
