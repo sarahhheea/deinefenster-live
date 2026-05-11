@@ -41,9 +41,27 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadProdukte();
   baueFilterSidebar();
   bindeEventHandler();
+  applyUrlFilter();
   rendere();
   updateCartUI();
 });
+
+/* ─── URL-Parameter Filter (z.B. shop.html?zustand=gebraucht) ─── */
+function applyUrlFilter() {
+  const params = new URLSearchParams(window.location.search);
+  const zustand = params.get('zustand');
+  if (zustand === 'gebraucht' || zustand === 'neu') {
+    STATE.filter.zustand.add(zustand);
+    // Checkbox visuell anpassen
+    const cb = document.querySelector(`.filter-zustand[value="${zustand}"]`);
+    if (cb) cb.checked = true;
+    // Scroll sanft zur Produktliste
+    setTimeout(() => {
+      const grid = document.getElementById('produktGrid');
+      if (grid) grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 300);
+  }
+}
 
 async function checkAuth() {
   if (!isShopLoggedIn()) { STATE.loggedIn = false; return; }
@@ -76,10 +94,10 @@ async function loadProdukte() {
     STATE.kategorienListe = Object.entries(data.kategorien || {})
       .map(([key, label]) => ({ key, label }));
 
-    STATE.produkte = (data.produkte || []).map(p => ({
+    const sheetsProdukte = (data.produkte || []).map(p => ({
       id: String(p.id),
       titel: p.titel || '',
-      kategorie: p.kategorie_key || '',
+      kategorie: p.kategorie || p.kategorie_key || '',
       system: p.system || '',
       zustand: p.zustand || 'neu',
       breite_mm: Number(p.breite_mm) || 0,
@@ -101,11 +119,16 @@ async function loadProdukte() {
       beschreibung: p.beschreibung || ''
     }));
 
+    // Wenn Sheets leer → JSON-Fallback damit der Shop nie blank ist
+    if (sheetsProdukte.length === 0) {
+      return loadProdukteFromJson();
+    }
+
+    STATE.produkte = sheetsProdukte;
     STATE.metadaten = berechneMetadaten(STATE.produkte);
   } catch (err) {
-    console.error('Sheets-Fehler beim Laden:', err);
-    STATE.produkte = [];
-    STATE.metadaten = berechneMetadaten([]);
+    console.error('Sheets-Fehler beim Laden — Fallback auf JSON:', err);
+    return loadProdukteFromJson();
   }
 }
 
@@ -195,6 +218,7 @@ function baueFilterSidebar() {
   // Counts für Verglasung, RC, Zustand, Größe, Sonderpreis, Export (statisch im HTML)
   setCountAttr('zustand-neu', STATE.produkte.filter(p => (p.zustand || 'neu') === 'neu').length);
   setCountAttr('zustand-gebraucht', STATE.produkte.filter(p => p.zustand === 'gebraucht').length);
+  setCountAttr('zustand-vermessen', STATE.produkte.filter(p => (p.eigenschaften || []).includes('vermessen')).length);
   setCountAttr('verglasung-2-fach', STATE.produkte.filter(p => p.verglasung === '2-fach').length);
   setCountAttr('verglasung-3-fach', STATE.produkte.filter(p => p.verglasung === '3-fach').length);
   setCountAttr('rc-RC2', STATE.produkte.filter(p => p.rc_klasse === 'RC2').length);
@@ -242,7 +266,13 @@ function bindeEventHandler() {
     if (!t.matches('input[type="checkbox"]')) return;
     const wert = t.value;
     let setRef;
-    if (t.classList.contains('filter-zustand')) setRef = STATE.filter.zustand;
+    if (t.classList.contains('filter-zustand')) {
+      // Gegenseitiger Ausschluss — nur einer aktiv
+      STATE.filter.zustand.clear();
+      document.querySelectorAll('.filter-zustand').forEach(cb => { if (cb !== t) cb.checked = false; });
+      if (t.checked) STATE.filter.zustand.add(wert);
+      rendere(); return;
+    }
     else if (t.classList.contains('filter-kategorie')) setRef = STATE.filter.kategorien;
     else if (t.classList.contains('filter-farbe')) setRef = STATE.filter.farben;
     else if (t.classList.contains('filter-verglasung')) setRef = STATE.filter.verglasung;
@@ -359,8 +389,14 @@ function gefilterteProdukte() {
   const f = STATE.filter;
 
   let result = STATE.produkte.filter(p => {
-    // Zustand (neu/gebraucht)
-    if (f.zustand.size && !f.zustand.has(p.zustand || 'neu')) return false;
+    // Zustand (neu / gebraucht / vermessen — exklusiv)
+    if (f.zustand.size) {
+      if (f.zustand.has('vermessen')) {
+        if (!(p.eigenschaften || []).includes('vermessen')) return false;
+      } else {
+        if (!f.zustand.has(p.zustand || 'neu')) return false;
+      }
+    }
     // Kategorie
     if (f.kategorien.size && !f.kategorien.has(p.kategorie)) return false;
     // Größen-Klasse
@@ -446,10 +482,48 @@ function gefilterteProdukte() {
   return result;
 }
 
+/* ─── Shop-Header dynamisch je nach Zustand-Filter ─── */
+const SHOP_HEADERS = {
+  default: {
+    label: 'Direkt vor Ort · Brandenburg an der Havel',
+    title: 'Unser Lagerbestand — Drutex Neuware direkt zum Mitnehmen',
+    desc: 'Originale <strong>Drutex-Kunststofffenster, Balkontüren und Haustüren</strong> in gängigen Maßen — neu, ungeöffnet, ab Lager. Kein Warten, keine Lieferzeit. Direkt vor Ort in Brandenburg an der Havel abholen. <strong>Bitte Helfer und Transporter mitbringen. Öffnungszeiten beachten.</strong>'
+  },
+  neu: {
+    label: 'Lagerbestand · Brandenburg an der Havel',
+    title: 'Unser Lagerbestand — Drutex Neuware direkt zum Mitnehmen',
+    desc: 'Originale <strong>Drutex-Kunststofffenster, Balkontüren und Haustüren</strong> in gängigen Maßen — neu, ungeöffnet, ab Lager. Direkt vor Ort in Brandenburg an der Havel abholen. Lieferung nur auf Anfrage. <strong>Bitte Öffnungszeiten beachten.</strong>'
+  },
+  gebraucht: {
+    label: 'Direkt vor Ort · Brandenburg an der Havel',
+    title: 'Unsere Gebrauchtwaren direkt vor Ort in Brandenburg an der Havel',
+    desc: 'Gebrauchte <strong>Fenster, Balkontüren und Haustüren</strong> verschiedener Hersteller — geprüft, funktional und zu fairen Preisen. Nachhaltig kaufen: Gut erhaltene Fenster weiterverwenden schont Ressourcen und schützt die Umwelt. Zum Mitnehmen direkt vor Ort. <strong>Bitte beachten Sie unsere Öffnungszeiten.</strong>'
+  },
+  vermessen: {
+    label: 'Neuware · Bis zu 50 % unter Neupreis · Brandenburg an der Havel',
+    title: 'Falsch vermessen — Ihr Gewinn. Neue Fenster zum halben Preis.',
+    desc: 'Maßgefertigte <strong>Neuware</strong> — unbenutzt, einwandfreie Qualität — die durch einen Aufmaßfehler beim Einbau nicht gepasst hat und nicht zurückgenommen werden konnte. Für Sie bedeutet das: <strong>ein fabrikneues Fenster für ca. 50 % unter Neupreis.</strong> Kein Kompromiss bei Qualität, nur bei Ihrem Portemonnaie. Direkt vor Ort in Brandenburg an der Havel abholen. <strong>Bitte Helfer und Transporter mitbringen. Öffnungszeiten beachten.</strong>'
+  }
+};
+
+function aktualisiereShopHeader() {
+  const zustand = STATE.filter.zustand.size ? [...STATE.filter.zustand][0] : 'default';
+  const h = SHOP_HEADERS[zustand] || SHOP_HEADERS.default;
+  const label = document.getElementById('shopHeaderLabel');
+  const title = document.getElementById('shopHeaderTitle');
+  const desc  = document.getElementById('shopHeaderDesc');
+  if (label) label.textContent = h.label;
+  if (title) title.textContent = h.title;
+  if (desc)  desc.innerHTML = h.desc;
+  const hinweis = document.getElementById('gebrauchtHinweis');
+  if (hinweis) hinweis.classList.remove('hidden');
+}
+
 /* ─── Render-Pipeline ─── */
 function rendere() {
   const result = gefilterteProdukte();
   document.getElementById('produktAnzahl').textContent = result.length;
+  aktualisiereShopHeader();
   rendereSchemaOrg(result);
 
   // Aktive Chips
