@@ -491,11 +491,6 @@ doorGroup.add(slot);
 doorGroup.position.set(-DW/2, 0, 0);
 scene.add(doorGroup);
 
-// Dunkle Innenraum-Fläche hinter der Tür — macht Glas-Transmission sichtbar
-const interiorMat = new THREE.MeshStandardMaterial({ color: 0x2a2e32, roughness: 1, metalness: 0 });
-const interior = new THREE.Mesh(new THREE.PlaneGeometry(DW * 2.2, DH * 1.4), interiorMat);
-interior.position.set(0, DH/2, -DD/2 - 0.002);
-scene.add(interior);
 
 // ══════════════════════════════════════════════
 // DOOR_PHOTOS — echte Drutex-Türfotos pro Farbe
@@ -900,12 +895,12 @@ function setGlass(key) {
     glassMat.normalMap     = buildNormalTex(chinchillaHeight, 4.5, 5, 16);
     glassMat.normalScale   = new THREE.Vector2(1.8, 1.8);
   } else if (key === 'master-carre') {
-    // Master Carré: Normalmap aus Gitterlinen → echte Glas-Riffeln
-    glassMat.transmission  = 0.72;
-    glassMat.roughness     = 0.08;
+    // Master Carré: subtile Gitterlinien — normalScale niedrig für echten Glaserschliff
+    glassMat.transmission  = 0.78;
+    glassMat.roughness     = 0.06;
     glassMat.color.set(0xd4eaf4);
-    glassMat.normalMap     = buildNormalTex(masterCarreHeight, 6.0, 3, 11);
-    glassMat.normalScale   = new THREE.Vector2(2.5, 2.5);
+    glassMat.normalMap     = buildNormalTex(masterCarreHeight, 2.5, 3, 11);
+    glassMat.normalScale   = new THREE.Vector2(0.8, 0.8);
   }
 
   glassMat.needsUpdate = true;
