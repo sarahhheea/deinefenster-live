@@ -38,7 +38,7 @@ const RULES = [
 
   // ── Lieferzeit ──────────────────────────────────────────────────────────────
   {
-    keys: ['lieferzeit','wann kommt','wann liefert','geliefert','lieferung','liefern','zustellung','wann fertig','bestellung geliefert'],
+    keys: ['lieferzeit','wann kommt','wann liefert','geliefert','lieferung','liefern','zustellung','wann fertig','bestellung geliefert','dauert die lieferung','wie lange dauert'],
     answer: 'Drutex-Fenster werden nach Maß gefertigt — Lieferzeit in der Regel <strong>2–4 Wochen</strong> ab Auftragsbestätigung. Versand per Spedition deutschlandweit (LKW mit eigenem Stapler). Lagerware aus unserem Shop: <strong>nur Selbstabholung</strong> in Brandenburg a.d.H.'
   },
 
@@ -48,22 +48,16 @@ const RULES = [
     answer: 'Wir liefern und verkaufen — <strong>Einbau bieten wir selbst nicht an</strong>. Du beauftragst einen Handwerker deiner Wahl. Auf Wunsch können wir Montage-Partner in deiner Region vermitteln — einfach per <a href="https://wa.me/491717263776" target="_blank">WhatsApp 0171 7263776</a> anfragen. Wichtig: Nicht-fachgerechte Montage lässt die Garantie erlöschen.'
   },
 
-  // ── Aufmaß / Messen ─────────────────────────────────────────────────────────
+  // ── Fehlmessung / Haftung (VOR Ausmessen — "messen" würde sonst zuerst matchen) ─
   {
-    keys: ['maß','messen','ausmessen','rohbaumaß','breite','höhe','aufmaß','wie messe','mauer','öffnung'],
-    answer: 'Du misst das <strong>Rohbaumaß</strong> — die freie Maueröffnung ohne Putz. An 3 Stellen (oben/Mitte/unten) messen, den kleinsten Wert nehmen. Fenster werden 10–20 mm kleiner gefertigt. Bei Unsicherheit: kostenloses Aufmaß-Angebot per <a href="https://wa.me/491717263776" target="_blank">WhatsApp 0171 7263776</a>. Du trägst das Risiko bei selbst gemessenem Aufmaß — daher lieber einmal mehr nachmessen!'
-  },
-
-  // ── Fehlmessung / Haftung ───────────────────────────────────────────────────
-  {
-    keys: ['falsch gemessen','fehlmessung','haftet','haftung','falsches maß','wer haftet'],
+    keys: ['falsch gemessen','fehlmessung','haftet','haftung','falsches maß','wer haftet','passiert wenn','falsch gemessen','was passiert'],
     answer: 'Bei selbst gemessenem Aufmaß liegt das Risiko bei dir — Fenster werden mm-genau nach deinen Angaben gefertigt. Deshalb: zweimal messen (oben/unten und links/rechts), kleineres Maß nehmen. Für größere Projekte empfehlen wir ein <strong>kostenloses Aufmaß-Angebot</strong> per <a href="https://wa.me/491717263776" target="_blank">WhatsApp 0171 7263776</a>.'
   },
 
   // ── Zahlung ─────────────────────────────────────────────────────────────────
   {
-    keys: ['zahlen','zahlung','bezahlen','zahlungsart','überweisung','paypal','kreditkarte','anzahlung','ratenzahlung','rate'],
-    answer: 'Online-Bestellung: <strong>100% Anzahlung</strong> nach Auftragsbestätigung (erst dann Produktionsfreigabe). Zahlungsarten: Banküberweisung, PayPal, Kreditkarte (Visa/Mastercard), bar vor Ort. <strong>Ratenzahlung ist nicht möglich.</strong> Vor-Ort-Abholung: Zahlung vor oder bei Abholung.'
+    keys: ['zahlen','zahlung','bezahlen','zahlungsart','zahlungsmöglichkeit','zahlungsweise','wie kann ich bezahlen','wie bezahle','wie zahle','wie zahlt','vor ort bezahlen','barzahlung','bar zahlen','kann ich bar','bar bezahlen','überweisung','anzahlung','ratenzahlung','rate','auf rechnung','per rechnung','rechnung','vorkasse','welche zahlungsmittel','welche zahlungsarten'],
+    answer: '💳 <strong>Zahlungsablauf:</strong><br>• <strong>40 % Anzahlung</strong> nach Auftragsbestätigung (Produktionsstart bei Drutex)<br>• <strong>60 % Restzahlung</strong> nach Lieferung<br><br>📋 <strong>Zahlungsarten:</strong><br>• <strong>Banküberweisung</strong> (Standard)<br>• <strong>Bar bei Abholung</strong> möglich<br><br>❌ <strong>Keine Ratenzahlung.</strong> Keine Zahlung per Rechnung oder PayPal.<br><br>Bei Fragen zur Zahlung: <a href="tel:+493381214837">03381 / 214 83 73</a>'
   },
 
   // ── Gebrauchte kaufen ───────────────────────────────────────────────────────
