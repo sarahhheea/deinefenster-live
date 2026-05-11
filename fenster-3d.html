@@ -444,80 +444,66 @@ function buildWindow() {
   glassObjects.push(gm);
 
   // ────────────────────────────────────────────
-  // 6. BÜGELGRIFF — gebürstetes Edelstahl, D-Form
-  //    Referenz: zwei runde Anschraubplatten oben+unten,
-  //    dicker D-Bogen dazwischen, Bogen öffnet nach links.
+  // 6. BÜGELGRIFF — D-Form, gebürstetes Edelstahl
+  //    Gemessen im Referenzbild: 120mm hoch, 40mm Ausladung
   // ────────────────────────────────────────────
-  const HZ     = sashZ + 0.002;
-  const bHalfH = 0.055;   // 55mm vom Mittelpunkt = 110mm Gesamthöhe
-  const bReach = 0.040;   // Bogen ragt 40mm nach links (gut sichtbar)
-  const bFwd   = 0.026;   // Bogen ragt 26mm zum Betrachter
+  const HZ      = sashZ + 0.003;
+  const hHalfH  = 0.060;   // ±60mm → 120mm Gesamthöhe
+  const hReach  = 0.042;   // 42mm Ausladung nach links
+  const hFwd    = 0.030;   // 30mm zum Betrachter
+  const hRad    = 0.0090;  // 9mm Rohrradius — gut sichtbar
 
-  // Runde Anschraubplatten (Escutcheons) oben + unten
-  [HY + bHalfH, HY - bHalfH].forEach(ey => {
-    // Flache Scheibe, liegt am Rahmen
-    const disc = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.012, 0.012, 0.005, 20),
-      brushedMat
-    );
-    disc.rotation.x = Math.PI / 2;
-    disc.position.set(HX, ey, HZ + 0.003);
-    disc.castShadow = true;
-    windowGroup.add(disc);
-
-    // Kleiner erhöhter Zapfen (verbindet Scheibe mit Bogen)
-    const pin = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.006, 0.008, 0.008, 12),
-      brushedMat
-    );
-    pin.rotation.x = Math.PI / 2;
-    pin.position.set(HX, ey, HZ + 0.009);
-    windowGroup.add(pin);
-  });
-
-  // D-Bogen — 7-Punkte CatmullRom für saubere D-Form
-  const bPath = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(HX,              HY + bHalfH,       HZ + 0.005),
-    new THREE.Vector3(HX - bReach*0.5, HY + bHalfH*0.75, HZ + bFwd*0.55),
-    new THREE.Vector3(HX - bReach,     HY + bHalfH*0.35,  HZ + bFwd),
-    new THREE.Vector3(HX - bReach,     HY,                HZ + bFwd),
-    new THREE.Vector3(HX - bReach,     HY - bHalfH*0.35,  HZ + bFwd),
-    new THREE.Vector3(HX - bReach*0.5, HY - bHalfH*0.75, HZ + bFwd*0.55),
-    new THREE.Vector3(HX,              HY - bHalfH,       HZ + 0.005),
-  ]);
-  const bow = new THREE.Mesh(
-    new THREE.TubeGeometry(bPath, 48, 0.0062, 14, false),
+  // Parametrischer D-Bogen (26 Punkte, halbe Ellipse)
+  const arcPts = [];
+  for (let i = 0; i <= 26; i++) {
+    const t = (i / 26) * Math.PI;
+    arcPts.push(new THREE.Vector3(
+      HX - hReach * Math.sin(t),
+      HY + hHalfH * Math.cos(t),
+      HZ + hFwd   * Math.sin(t)
+    ));
+  }
+  const bowMesh = new THREE.Mesh(
+    new THREE.TubeGeometry(new THREE.CatmullRomCurve3(arcPts), 48, hRad, 14, false),
     brushedMat
   );
-  bow.castShadow = true;
-  windowGroup.add(bow);
+  bowMesh.castShadow = true;
+  windowGroup.add(bowMesh);
+
+  // Montage-Escutcheons (runde Scheiben oben + unten)
+  [HY + hHalfH, HY - hHalfH].forEach(ey => {
+    const esc = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.015, 0.015, 0.006, 20),
+      brushedMat
+    );
+    esc.rotation.x = Math.PI / 2;
+    esc.position.set(HX, ey, HZ + 0.004);
+    esc.castShadow = true;
+    windowGroup.add(esc);
+  });
 
   // ────────────────────────────────────────────
-  // 7. SCHARNIERE — links, 2 einfache Edelstahlplatten
-  //    Referenz: flache silberne Rechtecke an der Blendrahmen/Flügel-Kante
-  //    Unten = Ecklager (kleiner), Oben = Scherenlager (größer)
+  // 7. SCHARNIERE — links, 2 flache Rechteckplatten
+  //    Oben = Scherenlager (~85%), Unten = Ecklager (~12%)
   // ────────────────────────────────────────────
-  const hingeX = SX0f * 0.45 + BR_W * 0.35;  // ~0.053 — im Falzbereich links
+  const hingeX = SX0f + 0.008;  // 8mm innerhalb der Sash-Außenkante
 
-  const hingeSpecs = [
-    { hy: WH * 0.12, w: 0.028, h: 0.028 },  // Ecklager unten
-    { hy: WH * 0.85, w: 0.028, h: 0.036 },  // Scherenlager oben (höher)
-  ];
-
-  hingeSpecs.forEach(({ hy, w, h }) => {
-    // Hauptplatte — sichtbar von vorne als flaches Silberstück
+  [
+    { hy: WH * 0.12, hw: 0.030, hh: 0.030 },  // Ecklager
+    { hy: WH * 0.85, hw: 0.030, hh: 0.040 },  // Scherenlager (höher)
+  ].forEach(({ hy, hw, hh }) => {
     const plate = new THREE.Mesh(
-      new THREE.BoxGeometry(w, h, 0.007),
+      new THREE.BoxGeometry(hw, hh, 0.007),
       brushedMat
     );
     plate.position.set(hingeX, hy, sashZ + 0.004);
     plate.castShadow = true;
     windowGroup.add(plate);
 
-    // Zwei Schraubenköpfe
-    [-h * 0.28, h * 0.28].forEach(dy => {
+    // 2 Schraubenköpfe
+    [-hh * 0.28, hh * 0.28].forEach(dy => {
       const sc = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.0028, 0.0028, 0.003, 8),
+        new THREE.CylinderGeometry(0.003, 0.003, 0.003, 8),
         brushedMat
       );
       sc.rotation.x = Math.PI / 2;
