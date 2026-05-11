@@ -196,6 +196,23 @@ const QUICK_CHIPS = [
       border-right: none; border-left-color: rgba(118,169,250,0.25);
     }
     #df-chat-tooltip.df-visible { opacity: 1; transform: translateX(0); }
+    #df-chat-label {
+      position: fixed; bottom: 34px; right: 92px; z-index: 9997;
+      background: #0f1c30; color: #fff; font-size: 13px; font-weight: 700;
+      padding: 7px 14px 7px 12px; border-radius: 30px;
+      border: 1px solid rgba(118,169,250,0.3);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+      display: flex; align-items: center; gap: 7px;
+      cursor: pointer; white-space: nowrap;
+      font-family: 'Plus Jakarta Sans', 'Manrope', system-ui, sans-serif;
+      animation: df-label-in 0.4s 1.5s both;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    #df-chat-label:hover { background: #172a4a; border-color: rgba(118,169,250,0.55); }
+    #df-chat-label.df-hidden { opacity: 0; pointer-events: none; transform: translateX(6px); }
+    #df-chat-label-dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; flex-shrink: 0; }
+    @keyframes df-label-in { from { opacity:0; transform:translateX(10px); } to { opacity:1; transform:translateX(0); } }
+    @media (max-width: 480px) { #df-chat-label { bottom: 28px; right: 84px; font-size: 12px; padding: 6px 12px 6px 10px; } }
 
     #df-chat-window {
       position: fixed; bottom: 96px; right: 24px; z-index: 9999;
@@ -325,6 +342,9 @@ const QUICK_CHIPS = [
 // ─── HTML ──────────────────────────────────────────────────────────────────────
 (function injectHTML() {
   document.body.insertAdjacentHTML('beforeend', `
+    <div id="df-chat-label" role="button" tabindex="0" aria-label="Chat öffnen">
+      <span id="df-chat-label-dot"></span>Fragen? Ich helfe!
+    </div>
     <button id="df-chat-btn" aria-label="Chat öffnen" title="Fragen? Ich helfe gerne!">
       <svg class="df-icon-chat" width="26" height="26" fill="none" viewBox="0 0 24 24">
         <path d="M8 10h8M8 14h5M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12c0 1.6.377 3.114 1.047 4.453L2 22l5.547-1.047A9.953 9.953 0 0012 22z" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -392,6 +412,7 @@ const QUICK_CHIPS = [
 
 // ─── Logic ─────────────────────────────────────────────────────────────────────
 (function init() {
+  const label    = document.getElementById('df-chat-label');
   const btn      = document.getElementById('df-chat-btn');
   const win      = document.getElementById('df-chat-window');
   const closeBtn = document.getElementById('df-chat-close-btn');
@@ -436,11 +457,14 @@ const QUICK_CHIPS = [
     win.classList.toggle('df-visible', isOpen);
     badge.style.display = 'none';
     tooltip.classList.remove('df-visible');
+    label.classList.toggle('df-hidden', isOpen);
     if (isOpen) setTimeout(() => input.focus(), 300);
     btn.setAttribute('aria-label', isOpen ? 'Chat schließen' : 'Chat öffnen');
   }
 
   btn.addEventListener('click', toggleChat);
+  label.addEventListener('click', toggleChat);
+  label.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') toggleChat(); });
   closeBtn.addEventListener('click', toggleChat);
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && isOpen) toggleChat(); });
 
