@@ -2824,6 +2824,13 @@ function pick(el, key) {
   if (key==='fi') { document.getElementById('d6').textContent = 'A: '+(P.fa[S.fa]?.name||S.fa)+' / I: '+(P.fi[v]?.name||v); }
   if (key==='fd') {}
 
+  // Haustür 3D: Farb-/Glasänderungen sofort an iframe senden
+  if (key === 'fa' && S.prod === 'haustuere') sendHaus3dColor(v);
+  if (key === 'glasdekor' && S.prod === 'haustuere') {
+    const frame = document.getElementById('haus3d-frame');
+    if (frame && frame.contentWindow) frame.contentWindow.postMessage({ type:'setGlass', key: v }, '*');
+  }
+
   drawPrev(); upSidebar();
 }
 
@@ -6217,6 +6224,45 @@ function toggleOpen() {
   drawPrev();
 }
 
+// ── Haustür 3D postMessage Bridge ─────────────────────────────
+// Mappt konfigurator P.fa-Keys → haustuer-3d.html FARBEN-Keys
+const HAUS3D_COLOR_MAP = {
+  'weiss':'weiss-fx','cremeweiss':'cremeweiss','weiss-fx':'weiss-fx',
+  'achatgrau':'lichtgrau','lichtgrau':'lichtgrau','signalgrau':'grau',
+  'betongrau':'betongrau','quarzgr-gl':'quarzgrau-gl','quarzgr-sa':'quarzgrau',
+  'basaltgr-gl':'basaltgrau-gl','basaltgr-sa':'basaltgrau',
+  'schiefgr-gl':'schiefergrau-gl','schiefgr-sa':'eisengl',
+  'eisengl':'eisengl','crown-plat':'crown-plat',
+  'anthrazit':'anthrazitgrau','anthraz-gl':'anthrazit-gl','anthraz-um':'anthrazit-um',
+  'schwarz-um':'schwarz-um',
+  'alux-db':'deep-bronze','alu-gebr':'crown-plat',
+  'schoko-br':'schoko-br','braun-mar':'schoko-br',
+  'moosgruen':'moosgruen','dunkelgr':'dunkelgruen',
+  'stahlblau':'stahlblau','brillblau':'brillblau','dunkelrot':'dunkelrot',
+  // Woods
+  'schwarzbr':'schwarzbraun','sheffield':'sheffield','winchester':'winchester',
+  'eiche-hell':'sheffield','eiche-nat':'eiche-nat','golden-oak':'golden-oak',
+  'nussbaum':'nussbaum','mooreiche':'eiche-dunkel','dunkleiche':'eiche-dunkel',
+  'siena-noce':'turner-toffee','siena-ross':'mahagoni',
+  'mahagoni':'mahagoni','macore':'macore','oregon':'oregon',
+  'douglasie':'douglasie','bergkiefer':'sheffield','teak':'nussbaum',
+  'sonder':'anthrazitgrau'
+};
+const HAUS3D_WOOD_KEYS = new Set([
+  'golden-oak','sheffield','turner-oak','turner-toffee','turner-walnut',
+  'eiche-nat','winchester','oregon','douglasie','nussbaum','eiche-dunkel',
+  'schwarzbraun','macore','mahagoni'
+]);
+function sendHaus3dColor(faKey) {
+  const frame = document.getElementById('haus3d-frame');
+  if (!frame || !frame.contentWindow) return;
+  const k = HAUS3D_COLOR_MAP[faKey] || 'anthrazitgrau';
+  frame.contentWindow.postMessage(
+    { type: HAUS3D_WOOD_KEYS.has(k) ? 'setWood' : 'setColor', key: k }, '*'
+  );
+}
+// ─────────────────────────────────────────────────────────────
+
 function drawPrev() {
   const imgEl = document.getElementById('vorschau-bild');
   const svgEl = document.getElementById('overlay-svg');
@@ -6233,9 +6279,13 @@ function drawPrev() {
   const isHaus = S.prod === 'haustuere';
   if (haus3dWrap) {
     if (isHaus) {
-      // Iframe nur einmal laden
+      // Iframe nur einmal laden — beim ersten Load aktuellen Zustand senden
       if (haus3dFrame && !haus3dFrame.src.includes('haustuer-3d')) {
         haus3dFrame.src = 'haustuer-3d.html?embed';
+        haus3dFrame.onload = () => {
+          sendHaus3dColor(S.fa);
+          haus3dFrame.contentWindow.postMessage({ type:'setGlass', key: S.glasdekor||'klar' }, '*');
+        };
       }
       haus3dWrap.style.display = 'block';
       if (prevWrap) prevWrap.style.height = '560px';

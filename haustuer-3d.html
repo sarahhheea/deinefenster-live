@@ -9,9 +9,11 @@
   body { font-family: 'Segoe UI', system-ui, sans-serif; background: #e8e8e8; overflow: hidden; }
 
   /* ── Embed-Modus (iframe im Konfigurator) ── */
-  body.embed .header   { display: none; }
-  body.embed .layout   { height: 100vh; }
+  body.embed .header    { display: none; }
+  body.embed .layout    { height: 100vh; }
   body.embed .ref-panel { display: none; }
+  body.embed .controls  { display: none; }
+  body.embed #threeCanvas { width: 100% !important; }
 
   .header {
     background: #1e3a8a; color: white;
@@ -973,15 +975,24 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
+// Embed-Modus: ?embed in URL → Header + Referenz-Panel + Controls ausblenden
+if (new URLSearchParams(location.search).has('embed')) {
+  document.body.classList.add('embed');
+}
+
+// postMessage-Bridge: Konfigurator schickt Farb/Holz/Glas-Änderungen
+window.addEventListener('message', (e) => {
+  const d = e.data;
+  if (!d || !d.type) return;
+  if (d.type === 'setColor') setColor(d.key);
+  if (d.type === 'setWood')  setWood(d.key);
+  if (d.type === 'setGlass') setGlass(d.key);
+});
+
 (function animate() {
   requestAnimationFrame(animate);
   orb.update();
   renderer.render(scene, camera);
-
-  // Embed-Modus: ?embed in URL → Header + Referenz-Panel ausblenden
-  if (new URLSearchParams(location.search).has('embed')) {
-    document.body.classList.add('embed');
-  }
 })();
 </script>
 </body>
