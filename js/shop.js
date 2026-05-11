@@ -83,6 +83,9 @@ function setupLoggedInUI() {
       location.reload();
     });
   }
+  // Admin-FAB (+ Inserat anlegen) nur für eingeloggte Mitarbeiter
+  const adminFab = document.getElementById('admin-fab');
+  if (adminFab) adminFab.style.display = 'flex';
 }
 
 /* ─── Daten laden (aus Google Sheets) ─── */
