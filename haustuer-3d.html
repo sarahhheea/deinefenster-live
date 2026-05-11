@@ -608,23 +608,42 @@ const FARBEN = {
 };
 
 // ══════════════════════════════════════════════
-// HOLZDEKORE — lokale Furniertexturen + Zarge-Farben
+// HOLZDEKORE — Drutex-Swatch-Texturen + Zarge-Farben
 // ══════════════════════════════════════════════
+
+// Textur-Wiederholung pro Holzart [repeatX, repeatY]
+const WOOD_REPEAT = {
+  'golden-oak':    [1.5, 1],
+  'sheffield':     [1.5, 1],
+  'turner-oak':    [1.5, 1],
+  'turner-toffee': [1.5, 1],
+  'turner-walnut': [1.5, 1],
+  'eiche-nat':     [1.5, 1],
+  'winchester':    [1.5, 1],
+  'oregon':        [1,   1],   // Jahresringe — weniger Wiederholung
+  'douglasie':     [1.5, 1],
+  'nussbaum':      [1.5, 1],
+  'eiche-dunkel':  [1.5, 1],
+  'schwarzbraun':  [1,   1],   // wird als Vollton behandelt
+  'macore':        [2,   1],   // feine Streifen — dichter
+  'mahagoni':      [2,   1],   // feine Streifen — dichter
+};
+
 const WOOD_PARAMS = {
-  'golden-oak':    { base:'#9A5C2A', grain:'#5E3410' },
-  'sheffield':     { base:'#D2BCA8', grain:'#A09070' },
-  'turner-oak':    { base:'#C0A882', grain:'#8A7050' },  // mittlere Eiche
-  'turner-toffee': { base:'#B68B55', grain:'#7A5A2E' },  // warm orange-braun
-  'turner-walnut': { base:'#5A3E28', grain:'#281A08' },  // dunkel wie Nussbaum
-  'eiche-nat':     { base:'#B68B55', grain:'#7A5A2E' },
+  'golden-oak':    { base:'#C8883A', grain:'#7A4A18' },
+  'sheffield':     { base:'#C8BDB0', grain:'#A0958A' },
+  'turner-oak':    { base:'#D4B878', grain:'#9A7840' },
+  'turner-toffee': { base:'#4A3020', grain:'#241408' },
+  'turner-walnut': { base:'#6A4A30', grain:'#341808' },
+  'eiche-nat':     { base:'#C8963C', grain:'#8A6020' },
   'winchester':    { base:'#8C6136', grain:'#52341A' },
-  'oregon':        { base:'#D37D26', grain:'#8C4E08' },
-  'douglasie':     { base:'#8B5523', grain:'#503008' },
-  'nussbaum':      { base:'#5A3E28', grain:'#281A08' },
-  'eiche-dunkel':  { base:'#3A2A20', grain:'#1C1008' },
-  'schwarzbraun':  { base:'#26211e', grain:'#120E08' },  // Palisander
-  'macore':        { base:'#5A2C1C', grain:'#30100A' },
-  'mahagoni':      { base:'#3A2820', grain:'#1C0E0A' },
+  'oregon':        { base:'#E8A030', grain:'#A06010' },
+  'douglasie':     { base:'#A06530', grain:'#603A10' },
+  'nussbaum':      { base:'#3C1E18', grain:'#180A08' },
+  'eiche-dunkel':  { base:'#4A3025', grain:'#201008' },
+  'schwarzbraun':  { base:'#1C1810', grain:'#100C08' },
+  'macore':        { base:'#6A3824', grain:'#381408' },
+  'mahagoni':      { base:'#2A1A14', grain:'#140A08' },
 };
 
 const WOOD_TEX_MAP = {
@@ -649,6 +668,7 @@ function clearWoodMaps() {
   ['map','bumpMap','roughnessMap'].forEach(k => {
     if (doorMat[k]) { doorMat[k].dispose(); doorMat[k] = null; }
   });
+  if (frameMat.map) { frameMat.map.dispose(); frameMat.map = null; }
 }
 
 // Findet Farbobjekt aus FARBEN anhand key
@@ -691,28 +711,51 @@ function setWood(key) {
 
   clearWoodMaps();
 
-  // Echtes Drutex-Holzswatch laden (gleicher Ordner wie Volltonfarben)
+  // Schwarzbraun = fast kein Holzmuster sichtbar → Vollton
+  if (key === 'schwarzbraun') {
+    doorMat.map = null;
+    doorMat.color.set(p.base);
+    doorMat.roughness = 0.88;
+    doorMat.metalness = 0;
+    doorMat.envMapIntensity = 0.04;
+    doorMat.needsUpdate = true;
+    frameMat.color.set(p.base);
+    frameMat.roughness = 0.88;
+    frameMat.metalness = 0;
+    frameMat.needsUpdate = true;
+    grooveMat.color.set(p.grain);
+    grooveMat.needsUpdate = true;
+    return;
+  }
+
+  const [rx, ry] = WOOD_REPEAT[key] ?? [1.5, 1];
+
+  // Echtes Drutex-Holzswatch laden — Maserung läuft vertikal (rotation 90°)
   texLoader.load('img/swatches/' + key + '.webp', (tex) => {
     tex.colorSpace = THREE.SRGBColorSpace;
     tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(1, 2);  // 1× breit, 2× hoch — Maserung natürlich
+    tex.rotation = Math.PI / 2;     // Maserung vertikal (hoch statt quer)
+    tex.center.set(0.5, 0.5);
+    tex.repeat.set(rx, ry);
     tex.needsUpdate = true;
+
+    // Türblatt + Zarge bekommen dieselbe Holztextur
     doorMat.map = tex;
     doorMat.color.set(0xffffff);
     doorMat.bumpMap = tex;
-    doorMat.bumpScale = 0.03;
-    doorMat.roughnessMap = null;
+    doorMat.bumpScale = 0.025;
     doorMat.roughness = 0.82;
     doorMat.metalness = 0;
     doorMat.envMapIntensity = 0.10;
     doorMat.needsUpdate = true;
+
+    frameMat.map = tex;
+    frameMat.color.set(0xffffff);
+    frameMat.roughness = 0.78;
+    frameMat.metalness = 0;
+    frameMat.needsUpdate = true;
   });
 
-  frameMat.map = null;
-  frameMat.color.set(p.base);
-  frameMat.roughness = 0.72;
-  frameMat.metalness = 0;
-  frameMat.needsUpdate = true;
   grooveMat.color.set(p.grain);
   grooveMat.needsUpdate = true;
 }
