@@ -172,7 +172,7 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.0;
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xd8dce0);
+scene.background = new THREE.Color(0xe8e8e8);
 
 const camera = new THREE.PerspectiveCamera(20, 1, 0.1, 50);
 camera.position.set(0, 0.60, 6.0);
@@ -220,10 +220,15 @@ fill.position.set(-3, 2.5, 3); scene.add(fill);
 const front = new THREE.DirectionalLight(0xffffff, 0.25);
 front.position.set(0, 1, 10); scene.add(front);
 
-// Spotlight auf Griff: Weltkoord = -WW/2 + HX_local = -0.450 + 0.820 = 0.370
+// Backlight hinter dem Fenster — simuliert Tageslicht durch Glas (ref zeigt helles, weißes Glas)
+const backLight = new THREE.DirectionalLight(0xffffff, 3.0);
+backLight.position.set(0, 0.6, -5);
+scene.add(backLight);
+
+// Spotlight auf Griff: Weltkoord = -WW/2 + HX_local
 const chromeLight = new THREE.SpotLight(0xffffff, 8.0, 10, Math.PI / 8, 0.15);
 chromeLight.position.set(0.9, 1.8, 5);
-chromeLight.target.position.set(0.370, 0.60, 0.10);
+chromeLight.target.position.set(0.260, 0.60, 0.10);
 scene.add(chromeLight); scene.add(chromeLight.target);
 
 // Boden-Schatten
@@ -247,8 +252,9 @@ const frameMat   = new THREE.MeshStandardMaterial({ color: 0xfcfcfc, roughness: 
 const glFrameMat = new THREE.MeshStandardMaterial({ color: 0xfcfcfc, roughness: 0.74, metalness: 0 });
 const chromeMat  = new THREE.MeshStandardMaterial({ color: 0xd8dde0, roughness: 0.18, metalness: 0.92, envMapIntensity: 2.5 });
 const glassMat   = new THREE.MeshPhysicalMaterial({
-  color: 0xc8dff0, metalness: 0, roughness: 0.03,
-  transmission: 0.90, thickness: 0.02, ior: 1.5, transparent: true,
+  color: 0xdcecf8, metalness: 0, roughness: 0.02,
+  transmission: 0.94, thickness: 0.018, ior: 1.5, transparent: true,
+  reflectivity: 0.3,
 });
 
 // ══════════════════════════════════════════════
@@ -257,25 +263,25 @@ const glassMat   = new THREE.MeshPhysicalMaterial({
 // ══════════════════════════════════════════════
 const WW = 0.900;   // Fensterbreite
 const WH = 1.200;   // Fensterhöhe
-const WD = 0.070;   // Profiltiefe
+const WD = 0.068;   // Profiltiefe
 
-// Blendrahmen-Streifen (wie Türzarge: IN FRONT des Flügelrahmens)
-const z1w = 0.062, z1d = 0.022;                              // Stufe 1
-const z2off = z1w + 0.006, z2w = 0.009, z2d = 0.012;       // Stufe 2 (Falz-Absatz)
+// Blendrahmen: sichtbare Breite ~45mm, 2 Stufen
+const z1w = 0.048, z1d = 0.020;                              // Stufe 1 — breiter Hauptstreifen
+const z2off = z1w + 0.004, z2w = 0.007, z2d = 0.010;       // Stufe 2 — Falz-Absatz
 
 // Flügelrahmen + Glasfeld
-const OVL  = 0.016;              // Überschlag: Sash überlappt Blendrahmen
-const SX0  = z1w - OVL;         // = 0.046 — Sash-Startpunkt X
-const SY0  = z1w - OVL;         // = 0.046 — Sash-Startpunkt Y
-const FW   = 0.068;              // Flügelrahmen-Profilbreite (jede Seite)
-const GX   = SX0 + FW;          // = 0.114 — Glasfeld-Beginn X
-const GY   = SY0 + FW;          // = 0.114 — Glasfeld-Beginn Y
-const GW   = WW - 2 * GX;       // = 0.672 — Glasfeld-Breite
-const GH   = WH - 2 * GY;       // = 0.972 — Glasfeld-Höhe
+const OVL  = 0.014;              // Überschlag: Sash überlappt Blendrahmen
+const SX0  = z1w - OVL;         // = 0.034 — Sash-Startpunkt X
+const SY0  = z1w - OVL;         // = 0.034 — Sash-Startpunkt Y
+const FW   = 0.062;              // Flügelrahmen-Profilbreite (jede Seite)
+const GX   = SX0 + FW;          // Glasfeld-Beginn X
+const GY   = SY0 + FW;          // Glasfeld-Beginn Y
+const GW   = WW - 2 * GX;       // Glasfeld-Breite
+const GH   = WH - 2 * GY;       // Glasfeld-Höhe
 
 // Handle-Position (Innenansicht: rechts, Mitte)
-const HX_local = WW - SX0 - FW / 2;  // = 0.820 (Mitte rechtes Stilo)
-const HY_local = WH / 2;             // = 0.600
+const HX_local = WW - SX0 - FW / 2;  // Mitte rechtes Stilo
+const HY_local = WH * 0.50;          // Mitte Höhe
 
 const windowGroup = new THREE.Group();
 let glassObjects = [];
@@ -303,19 +309,46 @@ function buildWindow() {
   }
   glassObjects = [];
 
-  // ── Blendrahmen (2-stufig, wie Türzarge) ──
+  // ── Hintergrundplatte (weiße Wand hinter dem Fenster — simuliert hellen Hintergrund) ──
+  const bgPlate = new THREE.Mesh(
+    new THREE.PlaneGeometry(WW * 1.6, WH * 1.5),
+    new THREE.MeshStandardMaterial({ color: 0xf0f0f0, roughness: 1.0, metalness: 0 })
+  );
+  bgPlate.position.set(WW / 2, WH / 2, -0.005);
+  bgPlate.receiveShadow = true;
+  windowGroup.add(bgPlate);
+
+  // ── Blendrahmen — 4 massive weiße Streifen (Hauptrahmen-Körper) ──
+  // Jeder Streifen hat die volle Profiltiefe WD
+  const BRW = z1w;   // Blendrahmen-Breite sichtbar
+  const BRD = WD;    // Blendrahmen-Tiefe
+  const blendFn = (x, y, w, h) => {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, BRD), frameMat);
+    m.position.set(x + w/2, y + h/2, BRD / 2);
+    m.castShadow = true;
+    m.receiveShadow = true;
+    return m;
+  };
+  windowGroup.add(blendFn(0,        WH - BRW, WW,           BRW));  // oben
+  windowGroup.add(blendFn(0,        0,         WW,           BRW));  // unten
+  windowGroup.add(blendFn(0,        BRW,       BRW, WH - 2*BRW));   // links
+  windowGroup.add(blendFn(WW - BRW, BRW,       BRW, WH - 2*BRW));  // rechts
+
+  // ── Blendrahmen Vorderkante — Profil-Stufenabsatz (Stufe 1) ──
   windowGroup.add(strip(0,        WH - z1w, WW,           z1w, z1d));  // oben
   windowGroup.add(strip(0,        0,         WW,           z1w, z1d));  // unten
   windowGroup.add(strip(0,        z1w,       z1w, WH - 2*z1w, z1d));   // links
   windowGroup.add(strip(WW - z1w, z1w,       z1w, WH - 2*z1w, z1d));  // rechts
 
-  // Falz-Absatz (Stufe 2)
-  windowGroup.add(strip(z2off,             WH - z2off - z2w, WW - 2*z2off,            z2w, z2d));
-  windowGroup.add(strip(z2off,             z2off,             WW - 2*z2off,            z2w, z2d));
-  windowGroup.add(strip(z2off,             z2off + z2w,       z2w, WH - 2*(z2off+z2w), z2d));
-  windowGroup.add(strip(WW - z2off - z2w,  z2off + z2w,       z2w, WH - 2*(z2off+z2w), z2d));
+  // Falz-Absatz (Stufe 2 — innere Kante des Blendrahmens)
+  windowGroup.add(strip(z2off,             WH - z2off - z2w, WW - 2*z2off,             z2w, z2d));
+  windowGroup.add(strip(z2off,             z2off,             WW - 2*z2off,             z2w, z2d));
+  windowGroup.add(strip(z2off,             z2off + z2w,       z2w, WH - 2*(z2off+z2w),  z2d));
+  windowGroup.add(strip(WW - z2off - z2w,  z2off + z2w,       z2w, WH - 2*(z2off+z2w),  z2d));
 
   // ── Flügelrahmen (Sash) als ExtrudeGeometry mit Glasloch ──
+  // Sash sitzt etwas vor dem Blendrahmen-Body (Falzebene)
+  const sashZ = WD - 0.010;  // Sash-Oberfläche leicht vor Blendrahmen
   {
     const s = new THREE.Shape();
     s.moveTo(SX0,       SY0);
@@ -332,90 +365,170 @@ function buildWindow() {
     hole.closePath();
     s.holes.push(hole);
 
+    const sashDepth = 0.060;
     const body = new THREE.Mesh(
       new THREE.ExtrudeGeometry(s, {
-        depth: WD,
-        bevelEnabled: true, bevelThickness: 0.003, bevelSize: 0.002, bevelSegments: 2
+        depth: sashDepth,
+        bevelEnabled: true,
+        bevelThickness: 0.003,
+        bevelSize: 0.002,
+        bevelSegments: 2
       }),
       [doorMat, frameMat]
     );
-    body.castShadow = true; body.receiveShadow = true;
+    body.position.z = sashZ - sashDepth;
+    body.castShadow = true;
+    body.receiveShadow = true;
     windowGroup.add(body);
   }
 
+  // ── Dunkle Dichtungslippe / Falzspalt zwischen Blendrahmen und Sash ──
+  const sealMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.9, metalness: 0 });
+  const SEAL = 0.006;
+  // Schwarze Dichtungslinie um den Flügelrahmen (sitzt in der Falzebene)
+  const sealZ = sashZ - 0.002;
+  const sealFn = (x, y, w, h) => {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.004), sealMat);
+    m.position.set(x + w/2, y + h/2, sealZ);
+    return m;
+  };
+  windowGroup.add(sealFn(SX0,                WH - SY0 - SEAL, WW - 2*SX0, SEAL));   // oben
+  windowGroup.add(sealFn(SX0,                SY0,              WW - 2*SX0, SEAL));   // unten
+  windowGroup.add(sealFn(SX0,                SY0 + SEAL,       SEAL, WH - 2*SY0 - 2*SEAL)); // links
+  windowGroup.add(sealFn(WW - SX0 - SEAL,   SY0 + SEAL,       SEAL, WH - 2*SY0 - 2*SEAL)); // rechts
+
+  // ── Glasleiste (schwarze Dichtung um Glasscheibe — Referenzbild zeigt klar schwarze Linie) ──
+  const beadMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.85, metalness: 0 });
+  const BW = 0.010;  // Glasleisten-Breite
+  const BD = 0.008;
+  const beadZ = sashZ + 0.001;
+  const bf = (x, y, w, h) => {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, BD), beadMat);
+    m.position.set(x + w/2, y + h/2, beadZ);
+    m.castShadow = true;
+    return m;
+  };
+  windowGroup.add(bf(GX,           GY + GH,           GW,           BW));   // oben
+  windowGroup.add(bf(GX,           GY - BW,           GW,           BW));   // unten
+  windowGroup.add(bf(GX - BW,      GY,                BW,           GH));   // links
+  windowGroup.add(bf(GX + GW,      GY,                BW,           GH));   // rechts
+
+  // ── Helles Glas-Backing: leuchtendes Weiß direkt hinter der Glasscheibe ──
+  // Simuliert Tageslicht / Himmel — wie im Referenzbild (fast weißes Glas)
+  const glassBacking = new THREE.Mesh(
+    new THREE.PlaneGeometry(GW + 0.002, GH + 0.002),
+    new THREE.MeshStandardMaterial({
+      color: 0xffffff,
+      emissive: 0xffffff,
+      emissiveIntensity: 0.85,
+      roughness: 1.0,
+      metalness: 0,
+    })
+  );
+  glassBacking.position.set(GX + GW / 2, GY + GH / 2, sashZ - 0.028);
+  windowGroup.add(glassBacking);
+
   // ── Glasscheibe ──
   const gm = new THREE.Mesh(
-    new THREE.PlaneGeometry(GW - 0.006, GH - 0.006),
+    new THREE.PlaneGeometry(GW - 0.002, GH - 0.002),
     glassMat
   );
-  gm.position.set(GX + GW / 2, GY + GH / 2, WD * 0.42);
+  gm.position.set(GX + GW / 2, GY + GH / 2, sashZ - 0.020);
   windowGroup.add(gm);
   glassObjects.push(gm);
 
-  // ── Glasleiste (Beading um die Scheibe) ──
-  const GFW = 0.016, GFD = WD + 0.008;
-  const gf = (x, y, w, h) => {
-    const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, GFD), glFrameMat);
-    m.position.set(x, y, GFD / 2);
-    m.castShadow = true; m.receiveShadow = true;
-    return m;
-  };
-  windowGroup.add(gf(GX + GW / 2,       GY + GH + GFW / 2, GW + GFW * 2, GFW));  // oben
-  windowGroup.add(gf(GX + GW / 2,       GY - GFW / 2,      GW + GFW * 2, GFW));  // unten
-  windowGroup.add(gf(GX - GFW / 2,      GY + GH / 2,       GFW,          GH));   // links
-  windowGroup.add(gf(GX + GW + GFW / 2, GY + GH / 2,       GFW,          GH));   // rechts
-
-  // ── Dreh-Kipp Griff (rechts, Mitte — Innenansicht) ──
+  // ── Dreh-Kipp Griff — realistisch mit CylinderGeometry ──
+  // Referenzbild: Griff sitzt auf rechtem Stilo, Mitte Höhe
+  // Griff hängt senkrecht NACH UNTEN (geschlossene Position)
   const HX = HX_local;
   const HY = HY_local;
-  const HZ = WD + 0.004;
+  const HZ = sashZ + 0.001;  // direkt auf Sash-Fläche
 
-  // Rosette (Befestigungsplatte)
+  // Rosette — runde Platte flach am Rahmen
   const rosette = new THREE.Mesh(
-    new THREE.BoxGeometry(0.021, 0.046, 0.007),
+    new THREE.CylinderGeometry(0.016, 0.015, 0.009, 24),
     chromeMat
   );
-  rosette.position.set(HX, HY, HZ + 0.0035);
+  rosette.rotation.x = Math.PI / 2;
+  rosette.position.set(HX, HY, HZ + 0.0045);
   rosette.castShadow = true;
   windowGroup.add(rosette);
 
-  // Vierkantstift-Stub (Stift durch Rosette)
-  const shaft = new THREE.Mesh(
-    new THREE.BoxGeometry(0.011, 0.011, 0.022),
+  // Rosetten-Ring (Rand-Torus)
+  const rosetteRing = new THREE.Mesh(
+    new THREE.TorusGeometry(0.015, 0.0025, 8, 24),
     chromeMat
   );
-  shaft.position.set(HX, HY, HZ + 0.014);
-  shaft.castShadow = true;
-  windowGroup.add(shaft);
+  rosetteRing.rotation.x = Math.PI / 2;
+  rosetteRing.position.set(HX, HY, HZ + 0.008);
+  rosetteRing.castShadow = true;
+  windowGroup.add(rosetteRing);
 
-  // Hebelarm (horizontal = Dreh-Position)
+  // Griffhebel — senkrechter Stab nach UNTEN (Dreh-Kipp Geschlossen-Position)
+  // Im Referenzbild zeigt der Griff nach UNTEN
+  const leverLen = 0.110;
   const lever = new THREE.Mesh(
-    new THREE.BoxGeometry(0.092, 0.017, 0.017),
+    new THREE.CylinderGeometry(0.007, 0.007, leverLen, 12),
     chromeMat
   );
-  lever.position.set(HX - 0.048, HY + 0.005, HZ + 0.022);
+  // Senkrecht = keine Rotation nötig (CylinderGeometry ist schon vertikal)
+  lever.position.set(HX, HY - leverLen / 2 - 0.008, HZ + 0.022);
   lever.castShadow = true;
   windowGroup.add(lever);
 
-  // Griffknauf (Endstück des Hebels)
-  const knob = new THREE.Mesh(
-    new THREE.BoxGeometry(0.021, 0.024, 0.024),
+  // Griffkopf-Verbindung (Übergang Rosette → Griffstab, kleiner Zylinder)
+  const connLen = 0.018;
+  const conn = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.0085, 0.0085, connLen, 12),
     chromeMat
   );
-  knob.position.set(HX - 0.089, HY + 0.005, HZ + 0.022);
-  knob.castShadow = true;
-  windowGroup.add(knob);
+  conn.position.set(HX, HY - connLen / 2 + 0.002, HZ + 0.022);
+  conn.castShadow = true;
+  windowGroup.add(conn);
+
+  // Griffende — abgerundete Kappe unten
+  const capEnd = new THREE.Mesh(
+    new THREE.SphereGeometry(0.008, 10, 8),
+    chromeMat
+  );
+  capEnd.position.set(HX, HY - leverLen - 0.008, HZ + 0.022);
+  capEnd.castShadow = true;
+  windowGroup.add(capEnd);
 
   // ── Scharniere / Bänder (links, 2 Stück) ──
-  const LX = SX0 + FW * 0.38;  // Mitte des linken Stilos
-  [WH * 0.18, WH * 0.82].forEach(hy => {
-    const hinge = new THREE.Mesh(
-      new THREE.BoxGeometry(0.018, 0.058, 0.011),
+  // Referenzbild: Scharniere sind deutliche rechteckige Platten auf der linken Seite
+  // Sie sitzen auf dem Flügelrahmen (linkes Stilo), leicht erhaben
+  const hingeX = SX0 + FW * 0.42;  // leicht links von Stilo-Mitte
+  [WH * 0.17, WH * 0.83].forEach(hy => {
+    // Hauptplatte des Scharniers — größer für bessere Sichtbarkeit
+    const hingePlate = new THREE.Mesh(
+      new THREE.BoxGeometry(0.022, 0.055, 0.007),
       chromeMat
     );
-    hinge.position.set(LX, hy, WD + 0.007);
-    hinge.castShadow = true;
-    windowGroup.add(hinge);
+    hingePlate.position.set(hingeX, hy, sashZ + 0.0045);
+    hingePlate.castShadow = true;
+    windowGroup.add(hingePlate);
+
+    // Abgerundete Ecken simulieren (kleine Zylinder an den Enden der Platte)
+    [-0.023, 0.023].forEach(dy => {
+      const boltCap = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.005, 0.005, 0.008, 10),
+        chromeMat
+      );
+      boltCap.rotation.x = Math.PI / 2;
+      boltCap.position.set(hingeX, hy + dy, sashZ + 0.008);
+      boltCap.castShadow = true;
+      windowGroup.add(boltCap);
+    });
+
+    // Scharnierstift (horizontaler Zylinder in der Mitte der Platte)
+    const hingePin = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.003, 0.003, 0.026, 8),
+      chromeMat
+    );
+    hingePin.position.set(hingeX, hy, sashZ + 0.010);
+    hingePin.castShadow = true;
+    windowGroup.add(hingePin);
   });
 }
 
@@ -723,10 +836,10 @@ function setGlass(key) {
   cleanGlassMaps();
 
   if (key === 'klar') {
-    glassMat.transmission  = 0.92;
+    glassMat.transmission  = 0.94;
     glassMat.roughness     = 0.02;
     glassMat.normalScale?.set(0, 0);
-    glassMat.color.set(0xd0e8f4);
+    glassMat.color.set(0xdcecf8);
   } else if (key === 'satinato') {
     glassMat.transmission  = 0.35;
     glassMat.roughness     = 0.96;
