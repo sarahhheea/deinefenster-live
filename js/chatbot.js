@@ -57,7 +57,7 @@ const RULES = [
   // ── Zahlung ─────────────────────────────────────────────────────────────────
   {
     keys: ['zahlen','zahlung','bezahlen','zahlungsart','zahlungsmöglichkeit','zahlungsweise','wie kann ich bezahlen','wie bezahle','wie zahle','wie zahlt','vor ort bezahlen','barzahlung','bar zahlen','kann ich bar','bar bezahlen','überweisung','anzahlung','ratenzahlung','rate','auf rechnung','per rechnung','rechnung','vorkasse','welche zahlungsmittel','welche zahlungsarten'],
-    answer: '💳 <strong>Zahlungsablauf:</strong><br>• <strong>40 % Anzahlung</strong> nach Auftragsbestätigung (Produktionsstart bei Drutex)<br>• <strong>60 % Restzahlung</strong> nach Lieferung<br><br>📋 <strong>Zahlungsarten:</strong><br>• <strong>Banküberweisung</strong> (Standard)<br>• <strong>Bar bei Abholung</strong> möglich<br><br>❌ <strong>Keine Ratenzahlung.</strong> Keine Zahlung per Rechnung oder PayPal.<br><br>Bei Fragen zur Zahlung: <a href="tel:+493381214837">03381 / 214 83 73</a>'
+    answer: '💳 <strong>So läuft die Zahlung:</strong><br><br>📦 <strong>Online-Bestellung (Konfigurator):</strong><br>Du konfigurierst → wir schicken dir ein individuelles Angebot per E-Mail → du überweist den Betrag → dann bestellen wir bei Drutex.<br><br>🏪 <strong>Vor-Ort-Kauf (Hofverkauf freitags):</strong><br>Zahlung nach der Abholung — <strong>Bar, Karte oder PayPal</strong> möglich.<br><br>❌ Keine Ratenzahlung.'
   },
 
   // ── Gebrauchte kaufen ───────────────────────────────────────────────────────
