@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fenster 3D — 1-Flügel Dreh-Kipp</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #e8e8e8; overflow: hidden; }
+
+  /* ── Embed-Modus (iframe im Konfigurator) ── */
+  body.embed .header    { display: none; }
+  body.embed .layout    { height: 100vh; }
+  body.embed .ref-panel { display: none; }
+  body.embed .controls  { display: none; }
+  body.embed #threeCanvas { width: 100% !important; }
+
+  .header {
+    background: #1e3a8a; color: white;
+    height: 40px; padding: 0 20px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .header h1 { font-size: 15px; font-weight: 600; letter-spacing: 0.3px; }
+
+  .layout { display: flex; height: calc(100vh - 40px); }
+
+  /* ── Reference panel ── */
+  .ref-panel {
+    width: 290px; min-width: 290px;
+    background: #f4f4f4;
+    border-right: 1px solid #d8d8d8;
+    display: flex; flex-direction: column;
+    align-items: center;
+    padding: 10px 8px 8px;
+    gap: 6px;
+  }
+  .ref-label {
+    font-size: 9px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1.2px;
+    color: #94a3b8;
+  }
+  .ref-panel img {
+    max-height: calc(100vh - 80px);
+    max-width: 100%;
+    object-fit: contain;
+    border-radius: 3px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+    background: white;
+  }
+
+  /* ── Three.js canvas ── */
+  #threeCanvas { flex: 1; display: block; cursor: grab; }
+  #threeCanvas:active { cursor: grabbing; }
+
+  /* ── Controls panel ── */
+  .controls {
+    width: 252px; min-width: 252px;
+    padding: 10px 10px 20px;
+    overflow-y: auto;
+    background: white;
+    box-shadow: -2px 0 12px rgba(0,0,0,0.07);
+  }
+  .current-label {
+    font-size: 13px; font-weight: 700; color: #1e3a8a;
+    text-align: center; padding: 7px 4px 9px;
+    border-bottom: 1px solid #e8edf5;
+    margin-bottom: 8px;
+  }
+  .section-title {
+    font-size: 9px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1.1px;
+    color: #94a3b8; margin: 10px 0 5px;
+  }
+  .section-title:first-of-type { margin-top: 0; }
+  .colors { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
+  .color-swatch {
+    width: 100%; aspect-ratio: 1; border-radius: 4px;
+    cursor: pointer; border: 2px solid transparent;
+    transition: all 0.1s; position: relative;
+  }
+  .color-swatch:hover { transform: scale(1.18); z-index: 1; }
+  .color-swatch.active {
+    border-color: #1e3a8a;
+    box-shadow: 0 0 0 2px #1e3a8a;
+  }
+  .tooltip {
+    display: none; position: absolute;
+    bottom: 115%; left: 50%; transform: translateX(-50%);
+    background: #1a1a1a; color: white;
+    padding: 3px 7px; border-radius: 4px;
+    font-size: 10px; white-space: nowrap;
+    z-index: 20; pointer-events: none;
+  }
+  .color-swatch:hover .tooltip { display: block; }
+
+  /* ── Glasarten + Seite-Toggle ── */
+  .glass-btns, .side-btns { display: flex; gap: 4px; margin-top: 3px; flex-wrap: wrap; }
+  .glass-btn, .side-btn {
+    flex: 1; min-width: 0;
+    padding: 6px 2px; border-radius: 5px;
+    border: 2px solid #e0e8f4; background: white;
+    cursor: pointer; font-size: 9px; font-weight: 700;
+    color: #64748b; text-align: center; line-height: 1.2;
+    transition: all 0.1s; letter-spacing: 0.2px;
+  }
+  .glass-btn.active, .side-btn.active { border-color: #1e3a8a; color: #1e3a8a; background: #f0f5ff; }
+  .glass-btn:hover, .side-btn:hover { border-color: #93a8d4; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Fenster 3D Konfigurator</h1>
+  <select id="modelSelect" style="background:#2a4fa0;color:white;border:1px solid rgba(255,255,255,0.3);border-radius:4px;padding:3px 8px;font-size:12px;font-weight:600;cursor:pointer;">
+    <option value="1fluegel-drehkipp">1-Flügel Dreh-Kipp</option>
+  </select>
+</div>
+
+<div class="layout">
+
+  <!-- Referenzfoto links -->
+  <div class="ref-panel">
+    <div class="ref-label">Referenz</div>
+    <img id="refImg" src="img/fenster-1fluegel-aussen.png" alt="Referenz 1-Flügel Dreh-Kipp">
+  </div>
+  <script>
+  (function() {
+    var photos = {
+      '1fluegel-drehkipp': 'img/fenster-1fluegel-aussen.png',
+    };
+    var m = new URLSearchParams(location.search).get('model');
+    if (m && photos[m]) {
+      document.getElementById('refImg').src = photos[m];
+      document.getElementById('refImg').alt = m;
+    }
+  })();
+  </script>
+
+  <!-- 3D Modell Mitte -->
+  <canvas id="threeCanvas"></canvas>
+
+  <!-- Farbsteuerung rechts -->
+  <div class="controls">
+    <div class="current-label" id="currentLabel">Weiß FX</div>
+
+    <div class="section-title">DIN-Anschlag</div>
+    <div class="side-btns" id="sideBtns">
+      <button class="side-btn active" data-side="rechts">DIN-Rechts (Griff links)</button>
+      <button class="side-btn" data-side="links">DIN-Links (Griff rechts)</button>
+    </div>
+
+    <div class="section-title">Weißtöne</div>
+    <div class="colors" id="whites"></div>
+    <div class="section-title">Grautöne &amp; Schwarz</div>
+    <div class="colors" id="grays"></div>
+    <div class="section-title">Farben</div>
+    <div class="colors" id="colorGroup"></div>
+    <div class="section-title">Holzdekore</div>
+    <div class="colors" id="woods"></div>
+    <div class="section-title">Verglasung</div>
+    <div class="glass-btns" id="glassBtns"></div>
+  </div>
+
+</div>
+
+<script type="importmap">
+{ "imports": {
+    "three":         "https://cdn.jsdelivr.net/npm/three@0.162.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.162.0/examples/jsm/"
+} }
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ══════════════════════════════════════════════
+// RENDERER
+// ══════════════════════════════════════════════
+const canvasEl = document.getElementById('threeCanvas');
+const renderer = new THREE.WebGLRenderer({ canvas: canvasEl, antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xd8dce0);
+
+const camera = new THREE.PerspectiveCamera(22, 1, 0.1, 50);
+camera.position.set(0, 0.65, 4.6);
+
+const orb = new OrbitControls(camera, canvasEl);
+orb.target.set(0, 0.60, 0);
+orb.enablePan = false;
+orb.minDistance = 2.6;
+orb.maxDistance = 8.0;
+orb.maxPolarAngle = Math.PI * 0.62;
+orb.minPolarAngle = Math.PI * 0.38;
+orb.minAzimuthAngle = -0.30;
+orb.maxAzimuthAngle =  0.30;
+orb.update();
+
+// ══════════════════════════════════════════════
+// ENVIRONMENT — hell für Glasreflexionen
+// ══════════════════════════════════════════════
+const pmremGen = new THREE.PMREMGenerator(renderer);
+pmremGen.compileEquirectangularShader();
+const envSc = new THREE.Scene();
+envSc.add(new THREE.AmbientLight(0xffffff, 4.0));
+const eL1 = new THREE.DirectionalLight(0xffffff, 4.0);
+eL1.position.set(1, 2, 3); envSc.add(eL1);
+const eL2 = new THREE.DirectionalLight(0xffffff, 3.0);
+eL2.position.set(-2, 1, 3); envSc.add(eL2);
+const envTex = pmremGen.fromScene(envSc, 0.04).texture;
+scene.environment = envTex;
+
+// ── Szenen-Beleuchtung ──────────────────────────────
+scene.add(new THREE.AmbientLight(0xffffff, 0.50));
+
+const key = new THREE.DirectionalLight(0xffffff, 1.5);
+key.position.set(2, 4, 5);
+key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+key.shadow.camera.near = 1; key.shadow.camera.far = 12;
+key.shadow.camera.left = -1.5; key.shadow.camera.right = 1.5;
+key.shadow.camera.top = 2; key.shadow.camera.bottom = -1;
+key.shadow.bias = -0.001;
+scene.add(key);
+
+const fill = new THREE.DirectionalLight(0xddeeff, 0.5);
+fill.position.set(-3, 2.5, 3); scene.add(fill);
+
+const front = new THREE.DirectionalLight(0xffffff, 0.30);
+front.position.set(0, 1, 10); scene.add(front);
+
+// ══════════════════════════════════════════════
+// MATERIALIEN
+// ══════════════════════════════════════════════
+// Kunststoff-Profil (Iglo Energy weiß, leicht satiniert)
+const frameMat = new THREE.MeshStandardMaterial({ color: 0xfafafa, roughness: 0.42, metalness: 0.02 });
+const sashMat  = new THREE.MeshStandardMaterial({ color: 0xfafafa, roughness: 0.42, metalness: 0.02 });
+
+// Dichtung (schwarze EPDM-Gummi-Nut zwischen Rahmen und Flügel)
+const sealMat  = new THREE.MeshStandardMaterial({ color: 0x141414, roughness: 0.90 });
+
+// Olivengriff: meist farblich passend zum Rahmen, leicht glänzender
+const handleMat = new THREE.MeshStandardMaterial({ color: 0xf4f4f4, roughness: 0.32, metalness: 0.10 });
+// Griff-Rosette/Schraube — silbrig
+const handleBoltMat = new THREE.MeshStandardMaterial({ color: 0xb8bcc0, roughness: 0.30, metalness: 0.70, envMapIntensity: 1.8 });
+
+// Glas — 3-fach Verglasung, leicht bläuliche Tönung
+const glassMat = new THREE.MeshPhysicalMaterial({
+  color: 0xc8dff0, metalness: 0, roughness: 0.03,
+  transmission: 0.90, thickness: 0.02, ior: 1.5, transparent: true,
+});
+
+// ══════════════════════════════════════════════
+// FENSTER-KONSTANTEN — 1:1 Drutex Iglo Energy
+// Maßstab: 1 unit = 1 m · Fenster 1000×1200 mm, Bautiefe 82.5 mm
+// ══════════════════════════════════════════════
+const WW = 1.000;     // Fensterbreite
+const WH = 1.200;     // Fensterhöhe
+const WD = 0.082;     // Bautiefe (Iglo Energy 82,5 mm)
+
+const FRAME_W = 0.058;   // Blendrahmen sichtbare Breite (außen)
+const SASH_W  = 0.078;   // Flügel sichtbare Breite (überdeckt Blendrahmen)
+const SASH_GAP = 0.004;  // Spalt zwischen Blendrahmen-Innenkante und Flügelaußen
+const SASH_Z_OFFSET = 0.012; // Flügel ragt 12 mm vor Blendrahmen (typisch flush-Iglo)
+
+const fensterGroup = new THREE.Group();
+
+// ── Hilfsfunktion: Rechteck-Profil (BoxGeometry) ──
+function profile(x, y, w, h, d, z, mat) {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+  m.position.set(x + w/2, y + h/2, z + d/2);
+  m.castShadow = true;
+  m.receiveShadow = true;
+  return m;
+}
+
+// ══════════════════════════════════════════════
+// MODELLE
+// ══════════════════════════════════════════════
+const MODELLE = {
+  '1fluegel-drehkipp': {
+    label: '1-Flügel Dreh-Kipp',
+    type: 'drehkipp',
+    flügel: 1,
+  },
+};
+
+let glassObjects = [];
+let _curColor = 'weiss-fx';
+let _curWood  = null;
+let _curGlass = 'klar';
+let _curSide  = 'rechts';   // DIN-Rechts: Anschlag rechts → Griff links
+let _curModel = '1fluegel-drehkipp';
+
+// ══════════════════════════════════════════════
+// buildWindow — baut Fenstergeometrie für gewähltes Modell
+// ══════════════════════════════════════════════
+function buildWindow(modelKey) {
+  while (fensterGroup.children.length > 0) {
+    const c = fensterGroup.children[0];
+    if (c.geometry) c.geometry.dispose();
+    fensterGroup.remove(c);
+  }
+  glassObjects = [];
+
+  const model = MODELLE[modelKey] || MODELLE['1fluegel-drehkipp'];
+
+  // ── Blendrahmen (4 Profile rundum) ─────────────────────────
+  // Liegt hinten in Z (0 bis WD-SASH_Z_OFFSET)
+  const fz = 0;
+  const fd = WD;
+  // Oben
+  fensterGroup.add(profile(0,              WH - FRAME_W, WW,             FRAME_W,         fd, fz, frameMat));
+  // Unten
+  fensterGroup.add(profile(0,              0,            WW,             FRAME_W,         fd, fz, frameMat));
+  // Links
+  fensterGroup.add(profile(0,              FRAME_W,      FRAME_W,        WH - 2*FRAME_W,  fd, fz, frameMat));
+  // Rechts
+  fensterGroup.add(profile(WW - FRAME_W,   FRAME_W,      FRAME_W,        WH - 2*FRAME_W,  fd, fz, frameMat));
+
+  // ── Dichtungsnut (schmaler schwarzer Streifen Blendrahmen-Innenkante) ──
+  const seW = 0.006;
+  const seD = 0.010;
+  const seZ = WD - seD - 0.001;
+  // Oben
+  fensterGroup.add(profile(FRAME_W - seW,            WH - FRAME_W,       WW - 2*(FRAME_W - seW), seW, seD, seZ, sealMat));
+  // Unten
+  fensterGroup.add(profile(FRAME_W - seW,            FRAME_W - seW,      WW - 2*(FRAME_W - seW), seW, seD, seZ, sealMat));
+  // Links
+  fensterGroup.add(profile(FRAME_W - seW,            FRAME_W,            seW, WH - 2*FRAME_W,    seD, seZ, sealMat));
+  // Rechts
+  fensterGroup.add(profile(WW - FRAME_W,             FRAME_W,            seW, WH - 2*FRAME_W,    seD, seZ, sealMat));
+
+  // ── Flügelrahmen (4 Profile rundum, vor Blendrahmen) ──────
+  // Flügel beginnt SASH_GAP innen vom Blendrahmen, ragt SASH_Z_OFFSET nach vorn
+  const sx0 = FRAME_W + SASH_GAP;
+  const sy0 = FRAME_W + SASH_GAP;
+  const sx1 = WW - FRAME_W - SASH_GAP;
+  const sy1 = WH - FRAME_W - SASH_GAP;
+  const sW  = sx1 - sx0;            // Flügel-Außenbreite
+  const sH  = sy1 - sy0;            // Flügel-Außenhöhe
+  const sd  = WD - 0.020;           // Flügel etwas dünner als Blendrahmen-Bautiefe
+  const sz  = SASH_Z_OFFSET;        // Flügel sitzt vorgesetzt
+
+  // Oben
+  fensterGroup.add(profile(sx0,             sy1 - SASH_W,  sW,              SASH_W,         sd, sz, sashMat));
+  // Unten
+  fensterGroup.add(profile(sx0,             sy0,           sW,              SASH_W,         sd, sz, sashMat));
+  // Links
+  fensterGroup.add(profile(sx0,             sy0 + SASH_W,  SASH_W,          sH - 2*SASH_W,  sd, sz, sashMat));
+  // Rechts
+  fensterGroup.add(profile(sx1 - SASH_W,    sy0 + SASH_W,  SASH_W,          sH - 2*SASH_W,  sd, sz, sashMat));
+
+  // ── Glasleiste (schmale Erhöhung innen am Flügel, hält das Glas) ──
+  const glW = 0.012;
+  const glD = 0.008;
+  const glZ = sz + sd;
+  const gx0 = sx0 + SASH_W;
+  const gy0 = sy0 + SASH_W;
+  const gx1 = sx1 - SASH_W;
+  const gy1 = sy1 - SASH_W;
+  fensterGroup.add(profile(gx0 - glW,       gy1,           gx1 - gx0 + 2*glW, glW,           glD, glZ, sashMat));
+  fensterGroup.add(profile(gx0 - glW,       gy0 - glW,     gx1 - gx0 + 2*glW, glW,           glD, glZ, sashMat));
+  fensterGroup.add(profile(gx0 - glW,       gy0,           glW,               gy1 - gy0,     glD, glZ, sashMat));
+  fensterGroup.add(profile(gx1,             gy0,           glW,               gy1 - gy0,     glD, glZ, sashMat));
+
+  // ── Glas (3-fach Verglasung, dargestellt als eine Scheibe) ──
+  const gw = gx1 - gx0;
+  const gh = gy1 - gy0;
+  const glass = new THREE.Mesh(
+    new THREE.PlaneGeometry(gw - 0.004, gh - 0.004),
+    glassMat
+  );
+  glass.position.set(gx0 + gw/2, gy0 + gh/2, sz + sd/2);
+  fensterGroup.add(glass);
+  glassObjects.push(glass);
+
+  // ── Olivengriff (Dreh-Kipp) ────────────────────────────────
+  // DIN-Rechts (Anschlag rechts) → Griff sitzt LINKS auf Flügel
+  // DIN-Links  (Anschlag links)  → Griff sitzt RECHTS auf Flügel
+  const handleOnRight = (_curSide === 'links');
+  const hY = sy0 + sH * 0.50;    // Mittlere Höhe Flügel
+  // Rosette (Sockel) am Flügelprofil, vorn auf Z
+  const ROSETTE_W = 0.034;
+  const ROSETTE_H = 0.060;
+  const ROSETTE_D = 0.010;
+  const hRosX = handleOnRight
+    ? (sx1 - SASH_W/2 - ROSETTE_W/2)   // Mitte des rechten Flügelprofils
+    : (sx0 + SASH_W/2 - ROSETTE_W/2);  // Mitte des linken Flügelprofils
+  const rosetteZ = sz + sd;
+  const rosette = new THREE.Mesh(
+    new THREE.BoxGeometry(ROSETTE_W, ROSETTE_H, ROSETTE_D),
+    handleMat
+  );
+  rosette.position.set(hRosX + ROSETTE_W/2, hY, rosetteZ + ROSETTE_D/2);
+  rosette.castShadow = true;
+  fensterGroup.add(rosette);
+
+  // Olive-Hebel: horizontal nach innen zeigend (geschlossen → waagerecht)
+  // Länge ca. 90 mm
+  const LEVER_L = 0.090;
+  const LEVER_W = 0.018;
+  const LEVER_D = 0.018;
+  const leverZ  = rosetteZ + ROSETTE_D;
+  // Hebel zeigt zur Fenstermitte (vom Griff weg in Richtung Glas)
+  const leverDir = handleOnRight ? -1 : 1;  // links: nach rechts, rechts: nach links
+  const leverStartX = hRosX + ROSETTE_W/2;  // Mitte Rosette
+  const leverX = leverDir > 0
+    ? leverStartX
+    : leverStartX - LEVER_L;
+  const lever = new THREE.Mesh(
+    new THREE.BoxGeometry(LEVER_L, LEVER_W, LEVER_D),
+    handleMat
+  );
+  lever.position.set(leverX + LEVER_L/2, hY, leverZ + LEVER_D/2);
+  lever.castShadow = true;
+  fensterGroup.add(lever);
+
+  // Verbindungs-Zylinder Hebel↔Rosette
+  const hub = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.010, 0.010, ROSETTE_D + 0.006, 20),
+    handleBoltMat
+  );
+  hub.rotation.x = Math.PI / 2;
+  hub.position.set(leverStartX, hY, rosetteZ + ROSETTE_D/2 + 0.001);
+  hub.castShadow = true;
+  fensterGroup.add(hub);
+
+  // ── Bänder/Scharniere (außen sichtbar = nur kleine Akzente) ──
+  // Bei Drutex Iglo Energy sind die Bänder von außen kaum sichtbar — nur eine
+  // schmale Andeutung an Anschlagseite oben/unten
+  const hingeOnLeft = (_curSide === 'rechts');  // DIN-Rechts → Bänder links
+  const hSide = hingeOnLeft ? (sx0 + SASH_W/2) : (sx1 - SASH_W/2);
+  const HG_W = 0.022, HG_H = 0.024, HG_D = 0.006;
+  [sy0 + 0.18, sy1 - 0.18].forEach(hgY => {
+    const m = new THREE.Mesh(
+      new THREE.BoxGeometry(HG_W, HG_H, HG_D),
+      handleBoltMat
+    );
+    m.position.set(hSide, hgY, sz + sd + HG_D/2);
+    m.castShadow = true;
+    fensterGroup.add(m);
+  });
+
+  setModelRefPhoto(modelKey);
+}
+
+function setModel(key) {
+  _curModel = key;
+  buildWindow(key);
+  if (_curWood)  setWood(_curWood);
+  else           setColor(_curColor || 'weiss-fx');
+  setGlass(_curGlass || 'klar');
+}
+
+function setSide(side) {
+  _curSide = side;
+  document.querySelectorAll('.side-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.side === side)
+  );
+  // Geometrie neu bauen (Griff- und Bandseite ändern sich)
+  buildWindow(_curModel);
+  if (_curWood)  setWood(_curWood);
+  else           setColor(_curColor || 'weiss-fx');
+  setGlass(_curGlass || 'klar');
+}
+
+// ── Modell-spezifische Referenzfotos ──
+const MODEL_PHOTOS = {
+  '1fluegel-drehkipp': 'img/fenster-1fluegel-aussen.png',
+};
+
+function setModelRefPhoto(modelKey) {
+  const url = MODEL_PHOTOS[modelKey];
+  if (!url) return;
+  const img = document.querySelector('.ref-panel img');
+  if (img) { img.src = url; img.alt = modelKey; }
+}
+
+// Startup: Modell aus URL-Param oder Standard
+const _urlModel = new URLSearchParams(location.search).get('model') || '1fluegel-drehkipp';
+_curModel = _urlModel;
+
+// DIN-Anschlag aus URL (optional)
+const _urlSide = new URLSearchParams(location.search).get('seite');
+if (_urlSide === 'links' || _urlSide === 'rechts') _curSide = _urlSide;
+
+buildWindow(_curModel);
+fensterGroup.position.set(-WW/2, 0, 0);
+scene.add(fensterGroup);
+
+// ══════════════════════════════════════════════
+// FARBEN — identisch zur Haustür (Drutex-Palette)
+// ══════════════════════════════════════════════
+const CDN = 'https://www.drutex.de/media/webp/80/';
+const FARBEN = {
+  whites: [
+    { key:'weiss-fx',      name:'Weiß FX',            hex:'#fcfcfc', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvYmlhbHktZnguanBn.webp' },
+    { key:'white-sand',    name:'White Sand U-Matt',   hex:'#e5e2d7', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L3doaXRlX3NhbmQtdS1tYXR0LmpwZw==.webp' },
+    { key:'crown-plat',    name:'Crown Platin',        hex:'#343134', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5LzIwMTcvY3Jvdml1X3BsYXR5bml1bS1uLmpwZw==.webp' },
+    { key:'cremeweiss',    name:'Cremeweiß',           hex:'#f0ebcf', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkva3JlbW93eS5qcGc=.webp' },
+  ],
+  grays: [
+    { key:'lichtgrau',     name:'Lichtgrau',           hex:'#c5c7c6', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5LzIwMTcvamFzbnlfc3phcnktbi5qcGc=.webp' },
+    { key:'grau',          name:'Grau',                hex:'#949899', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvc3phcnkuanBn.webp' },
+    { key:'betongrau',     name:'Betongrau',           hex:'#6c6962', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvYmV0b25vd3ktc3phcnkuanBn.webp' },
+    { key:'quarzgrau',     name:'Quarzgrau',           hex:'#42403c', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvc3phcnkta3dhcmN5dG93eS5qcGc=.webp' },
+    { key:'quarzgrau-gl',  name:'Quarzgrau Glatt',     hex:'#43413d', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvc3phcnkta3dhcmN5dG93eS1nbGFka2kuanBn.webp' },
+    { key:'basaltgrau',    name:'Basaltgrau',          hex:'#535d5c', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvYmF6YWx0b3d5X3N6YXJ5LmpwZw==.webp' },
+    { key:'basaltgrau-gl', name:'Basaltgrau Glatt',    hex:'#605f56', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvYmF6YWx0b3d5LXN6YXJ5LWdhZGtpLmpwZw==.webp' },
+    { key:'eisengl',       name:'Eisenglimmer Schiefer',hex:'#424949',swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5LzIwMTcvbHVwa293eS1uLmpwZw==.webp' },
+    { key:'schiefgrau-gl', name:'Schiefergrau Glatt',  hex:'#404747', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5LzIwMTcvbHVwa293eS1nbGFka2ktbi5qcGc=.webp' },
+    { key:'graphit-sand',  name:'Graphit-Sandfarben',  hex:'#595b51', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvZ3JhZml0b3d5X3BpYXNrb3dhbnkuanBn.webp' },
+    { key:'anthrazitgrau', name:'Anthrazitgrau',       hex:'#242426', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvYW50cmFjeXQuanBn.webp' },
+    { key:'anthrazit-gl',  name:'Anthrazit Glatt',     hex:'#252527', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvYW50cnljeXQwZ2xhZGtpLmpwZw==.webp' },
+    { key:'anthrazit-um',  name:'Anthrazit Ulti-Matt', hex:'#2f3231', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvYW50cmFjdXRfdWx0aS1tYXR0X3d3dy5qcGc=.webp' },
+    { key:'jet-black',     name:'Jet Black',           hex:'#262829', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L2pldC1ibGFjay5qcGc=.webp' },
+    { key:'schwarz-um',    name:'Schwarz Ulti-Matt',   hex:'#060606', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvY3phcm55X3VsdGktbWF0dF93d3cuanBn.webp' },
+  ],
+  colors: [
+    { key:'pyrit',         name:'Pyrit',               hex:'#6c6046', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L3Bpcnl0LmpwZw==.webp' },
+    { key:'deep-bronze',   name:'Shine Deep Bronze',   hex:'#564b36', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvZGVlcF9icm9uemUuanBn.webp' },
+    { key:'moosgruen',     name:'Moosgrün',            hex:'#2a412e', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvemllbGVuLW1jaHUuanBn.webp' },
+    { key:'dunkelgruen',   name:'Dunkelgrün',          hex:'#152610', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvY2llbW5vLXppZWxvbnkuanBn.webp' },
+    { key:'dunkelrot',     name:'Dunkelrot',           hex:'#690b16', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvY2llbW55LWN6ZXJ3b255LmpwZw==.webp' },
+    { key:'brillblau',     name:'Brillantblau',        hex:'#366885', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L2JyeWxhbnRvd28tbmllYmllc2tpLmpwZw==.webp' },
+    { key:'stahlblau',     name:'Stahlblau',           hex:'#13203e', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvc3RhbG93eS1uaWViaWVza2lfTjJpbVdJUy5qcGc=.webp' },
+    { key:'schoko-br',     name:'Schokobraun',         hex:'#2f201a', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvYnJhei1jemVrb2xhZG93eS5qcGc=.webp' },
+  ],
+  woods: [
+    { key:'golden-oak',    name:'Golden Oak',          swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvemFvdHktZGFiX2trLmpwZw==.webp' },
+    { key:'sheffield',     name:'Sheffield Oak Light', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvZGFiLWJpZWxvbnkuanBn.webp' },
+    { key:'turner-oak',    name:'Turner Oak',          swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L3R1cm5lci1vYWstMjAyMy5qcGc=.webp' },
+    { key:'turner-toffee', name:'Turner Oak Toffee',   swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L3R1cm5lcl9vYWtfdG9mZmVlXzQ3MC0zMDA0LmpwZw==.webp' },
+    { key:'turner-walnut', name:'Turner Oak Walnut',   swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L3R1cm5lcl9vYWtfd2FsbnV0XzQ3MC0zMDA0LmpwZw==.webp' },
+    { key:'eiche-nat',     name:'Eiche Natur',         swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvZGFiLW5hdHVyYWxueS5qcGc=.webp' },
+    { key:'winchester',    name:'Winchester',          swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvd2luY2hlc3Rlcl9ray5qcGc=.webp' },
+    { key:'oregon',        name:'Oregon',              swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvb3JlZ29uX2trLmpwZw==.webp' },
+    { key:'douglasie',     name:'Streifen Douglasie',  swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvZGFnbGV6amFfa2suanBn.webp' },
+    { key:'nussbaum',      name:'Nussbaum',            swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L3dvb2Qvb3J6ZWNoLWEuanBn.webp' },
+    { key:'eiche-dunkel',  name:'Eiche Dunkel',        swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvY2llbW55LWRhYl9ray5qcGc=.webp' },
+    { key:'schwarzbraun',  name:'Schwarzbraun',        swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvcGFsaXNhbmRlci5qcGc=.webp' },
+    { key:'macore',        name:'Macoré',              swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvbWFjb3JlX2trLmpwZw==.webp' },
+    { key:'mahagoni',      name:'Mahagoni',            swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvbWFjaG9hX2trLmpwZw==.webp' },
+  ]
+};
+
+// ══════════════════════════════════════════════
+// HOLZDEKORE — Texturen aus img/swatches
+// ══════════════════════════════════════════════
+const WOOD_REPEAT = {
+  'golden-oak':[1.5,1], 'sheffield':[1.5,1], 'turner-oak':[1.5,1],
+  'turner-toffee':[1.5,1], 'turner-walnut':[1.5,1], 'eiche-nat':[1.5,1],
+  'winchester':[1.5,1], 'oregon':[1,1], 'douglasie':[1.5,1],
+  'nussbaum':[1.5,1], 'eiche-dunkel':[1.5,1], 'schwarzbraun':[1,1],
+  'macore':[2,1], 'mahagoni':[2,1],
+};
+const WOOD_PARAMS = {
+  'golden-oak':    { base:'#C8883A', grain:'#7A4A18' },
+  'sheffield':     { base:'#C8BDB0', grain:'#A0958A' },
+  'turner-oak':    { base:'#D4B878', grain:'#9A7840' },
+  'turner-toffee': { base:'#4A3020', grain:'#241408' },
+  'turner-walnut': { base:'#6A4A30', grain:'#341808' },
+  'eiche-nat':     { base:'#C8963C', grain:'#8A6020' },
+  'winchester':    { base:'#8C6136', grain:'#52341A' },
+  'oregon':        { base:'#E8A030', grain:'#A06010' },
+  'douglasie':     { base:'#A06530', grain:'#603A10' },
+  'nussbaum':      { base:'#3C1E18', grain:'#180A08' },
+  'eiche-dunkel':  { base:'#4A3025', grain:'#201008' },
+  'schwarzbraun':  { base:'#1C1810', grain:'#100C08' },
+  'macore':        { base:'#6A3824', grain:'#381408' },
+  'mahagoni':      { base:'#2A1A14', grain:'#140A08' },
+};
+
+const texLoader = new THREE.TextureLoader();
+
+function clearWoodMaps() {
+  [frameMat, sashMat].forEach(mat => {
+    ['map','bumpMap','roughnessMap'].forEach(k => {
+      if (mat[k]) { mat[k].dispose(); mat[k] = null; }
+    });
+  });
+}
+
+function findColor(key) {
+  const all = [...FARBEN.whites, ...FARBEN.grays, ...FARBEN.colors];
+  return all.find(c => c.key === key);
+}
+
+function setColor(key) {
+  _curColor = key; _curWood = null;
+  clearWoodMaps();
+
+  const colorObj = findColor(key);
+  const hex = colorObj?.hex || '#fafafa';
+  const c = new THREE.Color(hex);
+
+  frameMat.color.copy(c);
+  sashMat.color.copy(c);
+
+  // Finish-Eigenschaften (Kunststoff: leicht satiniert; -gl = glatt/glänzend; -um = ultramatt)
+  const isGlatt    = key.endsWith('-gl');
+  const isUltiMatt = key.endsWith('-um');
+  const roughness  = isUltiMatt ? 0.95 : isGlatt ? 0.22 : 0.45;
+  const envInt     = isUltiMatt ? 0.04 : isGlatt ? 0.85 : 0.15;
+
+  [frameMat, sashMat].forEach(mat => {
+    mat.roughness  = roughness;
+    mat.metalness  = 0;
+    mat.envMapIntensity = envInt;
+    mat.needsUpdate = true;
+  });
+}
+
+function setWood(key) {
+  _curWood = key; _curColor = null;
+  const p = WOOD_PARAMS[key];
+  if (!p) return;
+
+  clearWoodMaps();
+
+  if (key === 'schwarzbraun') {
+    [frameMat, sashMat].forEach(mat => {
+      mat.map = null;
+      mat.color.set(p.base);
+      mat.roughness = 0.88;
+      mat.metalness = 0;
+      mat.envMapIntensity = 0.04;
+      mat.needsUpdate = true;
+    });
+    return;
+  }
+
+  const [rx, ry] = WOOD_REPEAT[key] ?? [1.5, 1];
+
+  texLoader.load('img/swatches/' + key + '.webp', (tex) => {
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.rotation = Math.PI / 2;
+    tex.center.set(0.5, 0.5);
+    tex.repeat.set(rx, ry);
+    tex.needsUpdate = true;
+
+    [frameMat, sashMat].forEach(mat => {
+      mat.map = tex;
+      mat.color.set(0xffffff);
+      mat.bumpMap = tex;
+      mat.bumpScale = 0.020;
+      mat.roughness = 0.80;
+      mat.metalness = 0;
+      mat.envMapIntensity = 0.10;
+      mat.needsUpdate = true;
+    });
+  });
+}
+
+// ══════════════════════════════════════════════
+// GLASARTEN — identisch zur Haustür (4 Typen)
+// ══════════════════════════════════════════════
+const GLASS_TYPES = [
+  { key:'klar',         name:'Klar' },
+  { key:'satinato',     name:'Satinato' },
+  { key:'chinchilla',   name:'Chinchilla' },
+  { key:'master-carre', name:'Master Carré' },
+];
+
+function seededRnd(seed) {
+  let s = seed;
+  return () => { s = (s * 1664525 + 1013904223) & 0xffffffff; return (s >>> 0) / 0xffffffff; };
+}
+
+function heightToNormal(heightCanvas, strength) {
+  const W = heightCanvas.width, H = heightCanvas.height;
+  const hData = heightCanvas.getContext('2d').getImageData(0, 0, W, H).data;
+  const out = document.createElement('canvas'); out.width = W; out.height = H;
+  const nCtx = out.getContext('2d');
+  const nImg = nCtx.createImageData(W, H);
+  function h(x, y) {
+    x = Math.max(0, Math.min(W-1, x)); y = Math.max(0, Math.min(H-1, y));
+    return hData[(y * W + x) * 4] / 255.0;
+  }
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      const dX = (h(x-1,y-1) - h(x+1,y-1)) + 2*(h(x-1,y) - h(x+1,y)) + (h(x-1,y+1) - h(x+1,y+1));
+      const dY = (h(x-1,y-1) - h(x-1,y+1)) + 2*(h(x,y-1) - h(x,y+1)) + (h(x+1,y-1) - h(x+1,y+1));
+      const nx = dX * strength, ny = dY * strength, nz = 1.0;
+      const len = Math.sqrt(nx*nx + ny*ny + nz*nz);
+      const i = (y * W + x) * 4;
+      nImg.data[i]   = (nx/len * 0.5 + 0.5) * 255;
+      nImg.data[i+1] = (ny/len * 0.5 + 0.5) * 255;
+      nImg.data[i+2] = (nz/len * 0.5 + 0.5) * 255;
+      nImg.data[i+3] = 255;
+    }
+  }
+  nCtx.putImageData(nImg, 0, 0);
+  return out;
+}
+
+function chinchillaHeight() {
+  const W = 512, H = 512;
+  const cvs = document.createElement('canvas'); cvs.width = W; cvs.height = H;
+  const ctx = cvs.getContext('2d');
+  const rnd = seededRnd(4217);
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+  for (let i = 0; i < 300; i++) {
+    const x = rnd() * W, y = rnd() * H;
+    const r = 18 + rnd() * 28;
+    const rx = r * (0.65 + rnd() * 0.7), ry = r * (0.65 + rnd() * 0.7);
+    const grad = ctx.createRadialGradient(x, y, 0, x, y, Math.max(rx, ry));
+    grad.addColorStop(0,   'rgba(255,255,255,1)');
+    grad.addColorStop(0.6, 'rgba(128,128,128,0.5)');
+    grad.addColorStop(1,   'rgba(0,0,0,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.ellipse(x, y, rx, ry, rnd() * Math.PI, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  return cvs;
+}
+
+function masterCarreHeight() {
+  const W = 256, H = 256;
+  const cvs = document.createElement('canvas'); cvs.width = W; cvs.height = H;
+  const ctx = cvs.getContext('2d');
+  const STEP = 32, LINE = 8;
+  ctx.fillStyle = '#111'; ctx.fillRect(0, 0, W, H);
+  for (let pos = 0; pos <= W; pos += STEP) {
+    const grad = ctx.createLinearGradient(pos - LINE, 0, pos + LINE, 0);
+    grad.addColorStop(0, 'rgba(0,0,0,0)');
+    grad.addColorStop(0.5, 'rgba(255,255,255,1)');
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grad; ctx.fillRect(pos - LINE, 0, LINE*2, H);
+  }
+  for (let pos = 0; pos <= H; pos += STEP) {
+    const grad = ctx.createLinearGradient(0, pos - LINE, 0, pos + LINE);
+    grad.addColorStop(0, 'rgba(0,0,0,0)');
+    grad.addColorStop(0.5, 'rgba(255,255,255,1)');
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grad; ctx.fillRect(0, pos - LINE, W, LINE*2);
+  }
+  return cvs;
+}
+
+function buildNormalTex(heightFn, strength, repeatX, repeatY) {
+  const tex = new THREE.CanvasTexture(heightToNormal(heightFn(), strength));
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(repeatX, repeatY);
+  return tex;
+}
+
+function cleanGlassMaps() {
+  ['map','roughnessMap','normalMap'].forEach(k => {
+    if (glassMat[k]) { glassMat[k].dispose(); glassMat[k] = null; }
+  });
+}
+
+function setGlass(key) {
+  _curGlass = key;
+  const g = GLASS_TYPES.find(t => t.key === key); if (!g) return;
+
+  cleanGlassMaps();
+
+  if (key === 'klar') {
+    glassMat.transmission  = 0.92;
+    glassMat.roughness     = 0.02;
+    glassMat.normalScale?.set(0, 0);
+    glassMat.color.set(0xd0e8f4);
+  } else if (key === 'satinato') {
+    glassMat.transmission  = 0.35;
+    glassMat.roughness     = 0.96;
+    glassMat.color.set(0xe8eeee);
+  } else if (key === 'chinchilla') {
+    glassMat.transmission  = 0.65;
+    glassMat.roughness     = 0.12;
+    glassMat.color.set(0xd4e8f0);
+    glassMat.normalMap     = buildNormalTex(chinchillaHeight, 4.5, 4, 8);
+    glassMat.normalScale   = new THREE.Vector2(1.8, 1.8);
+  } else if (key === 'master-carre') {
+    glassMat.transmission  = 0.78;
+    glassMat.roughness     = 0.06;
+    glassMat.color.set(0xd4eaf4);
+    glassMat.normalMap     = buildNormalTex(masterCarreHeight, 4.0, 3, 6);
+    glassMat.normalScale   = new THREE.Vector2(1.5, 1.5);
+  }
+
+  glassMat.needsUpdate = true;
+  document.querySelectorAll('.glass-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.key === key)
+  );
+}
+
+// ── UI: Swatches ──
+function buildSwatches(id, list, onSelect, defaultKey) {
+  const el = document.getElementById(id);
+  list.forEach(c => {
+    const s = document.createElement('div');
+    s.className = 'color-swatch' + (c.key === defaultKey ? ' active' : '');
+    if (c.swatchUrl) {
+      s.style.backgroundImage = `url(${c.swatchUrl})`;
+      s.style.backgroundSize = 'cover';
+      s.style.backgroundPosition = 'center';
+    } else {
+      s.style.background = c.hex || '#888';
+    }
+    s.innerHTML = `<span class="tooltip">${c.name}</span>`;
+    s.onclick = () => {
+      document.querySelectorAll('.color-swatch').forEach(x => x.classList.remove('active'));
+      s.classList.add('active');
+      onSelect(c);
+      document.getElementById('currentLabel').textContent = c.name;
+    };
+    el.appendChild(s);
+  });
+}
+buildSwatches('whites',     FARBEN.whites,  c => setColor(c.key), 'weiss-fx');
+buildSwatches('grays',      FARBEN.grays,   c => setColor(c.key));
+buildSwatches('colorGroup', FARBEN.colors,  c => setColor(c.key));
+buildSwatches('woods',      FARBEN.woods,   c => setWood(c.key));
+
+// Startzustand: URL-Param ?color= oder Standard Weiß FX
+const _urlColor = new URLSearchParams(location.search).get('color');
+if (_urlColor) setColor(_urlColor);
+else setColor('weiss-fx');
+
+// ── Glasarten-Buttons ──
+(function buildGlassBtns() {
+  const el = document.getElementById('glassBtns');
+  GLASS_TYPES.forEach(g => {
+    const b = document.createElement('button');
+    b.className = 'glass-btn' + (g.key === 'klar' ? ' active' : '');
+    b.dataset.key = g.key;
+    b.textContent = g.name;
+    b.onclick = () => setGlass(g.key);
+    el.appendChild(b);
+  });
+})();
+
+// ── DIN-Anschlag-Buttons ──
+document.querySelectorAll('.side-btn').forEach(b => {
+  b.onclick = () => setSide(b.dataset.side);
+});
+// Initial-Sync (für ?seite=… aus URL)
+document.querySelectorAll('.side-btn').forEach(b =>
+  b.classList.toggle('active', b.dataset.side === _curSide)
+);
+
+// ══════════════════════════════════════════════
+// RESIZE + RENDER LOOP
+// ══════════════════════════════════════════════
+function resize() {
+  const embed = new URLSearchParams(location.search).has('embed');
+  const w = embed ? window.innerWidth  : window.innerWidth  - 290 - 252;
+  const h = embed ? window.innerHeight : window.innerHeight - 40;
+  renderer.setSize(w, h);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize);
+resize();
+
+if (new URLSearchParams(location.search).has('embed')) {
+  document.body.classList.add('embed');
+}
+
+// Modell-Dropdown verdrahten
+const _modelSel = document.getElementById('modelSelect');
+if (_modelSel) {
+  _modelSel.value = _urlModel;
+  _modelSel.addEventListener('change', () => {
+    const k = _modelSel.value;
+    setModel(k);
+    setModelRefPhoto(k);
+    history.replaceState(null, '', '?model=' + k);
+  });
+}
+
+// postMessage-Bridge: Konfigurator schickt Änderungen
+window.addEventListener('message', (e) => {
+  const d = e.data;
+  if (!d || !d.type) return;
+  if (d.type === 'setColor') setColor(d.key);
+  if (d.type === 'setWood')  setWood(d.key);
+  if (d.type === 'setGlass') setGlass(d.key);
+  if (d.type === 'setModel') setModel(d.key);
+  if (d.type === 'setSide')  setSide(d.key);
+});
+
+(function animate() {
+  requestAnimationFrame(animate);
+  orb.update();
+  renderer.render(scene, camera);
+})();
+</script>
+</body>
+</html>
