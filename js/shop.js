@@ -486,23 +486,23 @@ function gefilterteProdukte() {
 const SHOP_HEADERS = {
   default: {
     label: 'Direkt vor Ort · Brandenburg an der Havel',
-    title: 'Unser Lagerbestand — Drutex Neuware direkt zum Mitnehmen',
-    desc: 'Originale <strong>Drutex-Kunststofffenster, Balkontüren und Haustüren</strong> in gängigen Maßen — neu, ungeöffnet, ab Lager. Kein Warten, keine Lieferzeit. Direkt vor Ort in Brandenburg an der Havel abholen. <strong>Bitte Helfer und Transporter mitbringen. Öffnungszeiten beachten.</strong>'
+    title: 'Unser Lagerbestand — Drutex Ware direkt zum Mitnehmen',
+    desc: 'Originale <strong>Drutex-Kunststofffenster, Balkontüren und Haustüren</strong> in gängigen Maßen — neu, gebraucht und falsch vermessen. Alles zur Selbstabholung vor Ort in Brandenburg an der Havel. <strong>Bitte Helfer und Transporter mitbringen. Öffnungszeiten beachten.</strong>'
   },
   neu: {
-    label: 'Lagerbestand · Brandenburg an der Havel',
-    title: 'Unser Lagerbestand — Drutex Neuware direkt zum Mitnehmen',
-    desc: 'Originale <strong>Drutex-Kunststofffenster, Balkontüren und Haustüren</strong> in gängigen Maßen — neu, ungeöffnet, ab Lager. Direkt vor Ort in Brandenburg an der Havel abholen. Lieferung nur auf Anfrage. <strong>Bitte Öffnungszeiten beachten.</strong>'
+    label: 'Neuware · Brandenburg an der Havel',
+    title: 'Drutex Neuware ab Lager — ungeöffnet, direkt zum Mitnehmen',
+    desc: 'Originale <strong>Drutex-Kunststofffenster, Balkontüren und Haustüren</strong> in gängigen Maßen — neu, ungeöffnet, ab Lager. Zur Selbstabholung vor Ort in Brandenburg an der Havel. <strong>Bitte Öffnungszeiten beachten.</strong>'
   },
   gebraucht: {
-    label: 'Direkt vor Ort · Brandenburg an der Havel',
-    title: 'Unsere Gebrauchtwaren direkt vor Ort in Brandenburg an der Havel',
-    desc: 'Gebrauchte <strong>Fenster, Balkontüren und Haustüren</strong> verschiedener Hersteller — geprüft, funktional und zu fairen Preisen. Nachhaltig kaufen: Gut erhaltene Fenster weiterverwenden schont Ressourcen und schützt die Umwelt. Zum Mitnehmen direkt vor Ort. <strong>Bitte beachten Sie unsere Öffnungszeiten.</strong>'
+    label: 'Gebrauchtware · Brandenburg an der Havel',
+    title: 'Gebrauchte Fenster & Türen direkt vor Ort abholen',
+    desc: 'Gebrauchte <strong>Fenster, Balkontüren und Haustüren</strong> — geprüft, funktional und zu fairen Preisen. Nachhaltig kaufen: Gut erhaltene Fenster weiterverwenden schont Ressourcen und schützt die Umwelt. Zur Selbstabholung vor Ort. <strong>Bitte Helfer und Transporter mitbringen. Öffnungszeiten beachten.</strong>'
   },
   vermessen: {
-    label: 'Neuware · Bis zu 50 % unter Neupreis · Brandenburg an der Havel',
-    title: 'Falsch vermessen — Ihr Gewinn. Neue Fenster zum halben Preis.',
-    desc: 'Maßgefertigte <strong>Neuware</strong> — unbenutzt, einwandfreie Qualität — die durch einen Aufmaßfehler beim Einbau nicht gepasst hat und nicht zurückgenommen werden konnte. Für Sie bedeutet das: <strong>ein fabrikneues Fenster für ca. 50 % unter Neupreis.</strong> Kein Kompromiss bei Qualität, nur bei Ihrem Portemonnaie. Direkt vor Ort in Brandenburg an der Havel abholen. <strong>Bitte Helfer und Transporter mitbringen. Öffnungszeiten beachten.</strong>'
+    label: 'Falsch vermessen · Bis zu 50 % unter Neupreis · Brandenburg',
+    title: 'Falsch vermessen — Ihr Gewinn. Neuware zum halben Preis.',
+    desc: 'Maßgefertigte <strong>Neuware</strong> — unbenutzt, einwandfreie Qualität — die durch einen Aufmaßfehler nicht gepasst hat. Für Sie bedeutet das: <strong>ein fabrikneues Fenster für ca. 50 % unter Neupreis.</strong> Kein Kompromiss bei Qualität. Zur Selbstabholung vor Ort in Brandenburg an der Havel. <strong>Bitte Helfer und Transporter mitbringen. Öffnungszeiten beachten.</strong>'
   }
 };
 
