@@ -57,7 +57,7 @@ const RULES = [
   // ── Zahlung ─────────────────────────────────────────────────────────────────
   {
     keys: ['zahlen','zahlung','bezahlen','zahlungsart','zahlungsmöglichkeit','zahlungsweise','wie kann ich bezahlen','wie bezahle','wie zahle','wie zahlt','vor ort bezahlen','barzahlung','bar zahlen','kann ich bar','bar bezahlen','überweisung','anzahlung','ratenzahlung','rate','auf rechnung','per rechnung','rechnung','vorkasse','welche zahlungsmittel','welche zahlungsarten'],
-    answer: '💳 <strong>So läuft die Zahlung:</strong><br><br>📦 <strong>Online-Bestellung (Konfigurator):</strong><br>Du konfigurierst → wir schicken dir ein individuelles Angebot per E-Mail → du überweist den Betrag → dann bestellen wir bei Drutex.<br><br>🏪 <strong>Vor-Ort-Kauf (Hofverkauf freitags):</strong><br>Zahlung nach der Abholung — <strong>Bar, Karte oder PayPal</strong> möglich.<br><br>❌ Keine Ratenzahlung.'
+    answer: '💳 <strong>So läuft die Zahlung:</strong><br><br>📦 <strong>Online-Bestellung (Konfigurator):</strong><br>Du konfigurierst → wir schicken dir ein individuelles Angebot per E-Mail → du überweist den Betrag → dann bestellen wir bei Drutex.<br><br>🏪 <strong>Vor-Ort-Kauf (Hofverkauf freitags):</strong><br>Bar, Karte oder PayPal — Zahlung nach der Abholung ist möglich.<br><br>❌ Keine Ratenzahlung.'
   },
 
   // ── Gebrauchte kaufen ───────────────────────────────────────────────────────
