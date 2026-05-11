@@ -45,11 +45,26 @@
     color: #94a3b8;
   }
   .ref-panel img {
-    max-height: calc(100vh - 80px);
+    max-height: calc(100vh - 140px);
     max-width: 100%;
     object-fit: contain;
     border-radius: 3px;
     box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+  }
+  .ref-nav {
+    display: flex; gap: 6px; width: 100%; margin-top: 4px;
+  }
+  .ref-nav button {
+    flex: 1; padding: 7px 4px; border-radius: 5px;
+    border: none; background: #1e3a8a; color: white;
+    font-size: 11px; font-weight: 700; cursor: pointer;
+    letter-spacing: 0.3px;
+  }
+  .ref-nav button:hover { background: #225eaa; }
+  .ref-model-name {
+    font-size: 10px; font-weight: 700; color: #1e3a8a;
+    text-align: center; padding: 3px 0;
+    letter-spacing: 0.3px;
   }
 
   /* ── Three.js canvas ── */
@@ -137,8 +152,13 @@
 
   <!-- Referenzfoto links -->
   <div class="ref-panel">
-    <div class="ref-label">Referenz</div>
+    <div class="ref-label">Referenz — Drutex Original</div>
+    <div class="ref-model-name" id="refModelName">Colorado</div>
     <img id="refImg" src="img/drutex-tueren/colorado-inox_antracyt.jpg" alt="Referenz">
+    <div class="ref-nav">
+      <button onclick="navModel(-1)">← Zurück</button>
+      <button onclick="navModel(+1)">Weiter →</button>
+    </div>
   </div>
   <script>
   // Sync (non-module): setzt das richtige Referenzfoto sofort beim HTML-Parsing,
@@ -1114,6 +1134,42 @@ resize();
 if (new URLSearchParams(location.search).has('embed')) {
   document.body.classList.add('embed');
 }
+
+// ── Konfigurator-Reihenfolge (genau wie im Konfigurator)
+const MODEL_ORDER = [
+  { key:'florida-lr-inox',        label:'Florida LR' },
+  { key:'montana-2-lr-inox',      label:'Montana 2 LR' },
+  { key:'montana-3-lr-inox',      label:'Montana 3 LR' },
+  { key:'ohio-inox',              label:'Ohio' },
+  { key:'colorado-inox',          label:'Colorado' },
+  { key:'alaska-2-inox',          label:'Alaska 2' },
+  { key:'alaska-1-inox',          label:'Alaska 1' },
+  { key:'montana-1-inox',         label:'Montana 1' },
+  { key:'nebraska-lcr-inox',      label:'Nebraska LCR' },
+  { key:'pennsylvania-1-inox',    label:'Pennsylvania 1' },
+  { key:'texas-c-inox',           label:'Texas C' },
+  { key:'texas-lr-inox',          label:'Texas LR' },
+  { key:'pennsylvania-2-lr-inox', label:'Pennsylvania 2 LR' },
+  { key:'pennsylvania-3-lr-inox', label:'Pennsylvania 3 LR' },
+];
+let _curModelIdx = MODEL_ORDER.findIndex(m => m.key === _urlModel);
+if (_curModelIdx < 0) _curModelIdx = 0;
+
+function navModel(dir) {
+  _curModelIdx = (_curModelIdx + dir + MODEL_ORDER.length) % MODEL_ORDER.length;
+  const { key, label } = MODEL_ORDER[_curModelIdx];
+  setModel(key);
+  setModelRefPhoto(key);
+  const nm = document.getElementById('refModelName');
+  if (nm) nm.textContent = label + ' (' + (_curModelIdx + 1) + '/14)';
+  history.replaceState(null, '', '?model=' + key);
+}
+// Startanzeige
+(function() {
+  const nm = document.getElementById('refModelName');
+  if (nm) nm.textContent = (MODEL_ORDER[_curModelIdx]?.label || 'Colorado') + ' (' + (_curModelIdx + 1) + '/14)';
+})();
+window.navModel = navModel;
 
 // Modell-Dropdown in Header verdrahten
 const _modelSel = document.getElementById('modelSelect');
