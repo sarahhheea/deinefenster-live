@@ -120,18 +120,25 @@
 
   <!-- Referenzfoto links -->
   <div class="ref-panel">
-    <div class="ref-label">Referenz</div>
-    <img id="refImg" src="img/fenster-1fluegel-aussen.png" alt="Referenz 1-Flügel Dreh-Kipp">
+    <div class="ref-label">Referenz · Konfigurator-Master</div>
+    <img id="refImg" src="img/fenster_standard_v3.png" alt="1-Flügel Innen Dreh-Kipp Links">
   </div>
   <script>
+  // Sync (non-module): Innen/Außen + Modell sofort vor Three.js-Load
   (function() {
     var photos = {
-      '1fluegel-drehkipp': 'img/fenster-1fluegel-aussen.png',
+      // [modell][ansicht]
+      '1fluegel-drehkipp': {
+        innen:  'img/fenster_standard_v3.png',
+        aussen: 'img/fenster_aussen_v3.png',
+      },
     };
-    var m = new URLSearchParams(location.search).get('model');
-    if (m && photos[m]) {
-      document.getElementById('refImg').src = photos[m];
-      document.getElementById('refImg').alt = m;
+    var qs = new URLSearchParams(location.search);
+    var m = qs.get('model') || '1fluegel-drehkipp';
+    var a = qs.get('ansicht') === 'aussen' ? 'aussen' : 'innen';
+    if (photos[m] && photos[m][a]) {
+      document.getElementById('refImg').src = photos[m][a];
+      document.getElementById('refImg').alt = m + ' ' + a;
     }
   })();
   </script>
@@ -143,10 +150,16 @@
   <div class="controls">
     <div class="current-label" id="currentLabel">Weiß FX</div>
 
+    <div class="section-title">Ansicht</div>
+    <div class="side-btns" id="ansichtBtns">
+      <button class="side-btn active" data-ansicht="innen">Innen</button>
+      <button class="side-btn" data-ansicht="aussen">Außen</button>
+    </div>
+
     <div class="section-title">DIN-Anschlag</div>
     <div class="side-btns" id="sideBtns">
-      <button class="side-btn active" data-side="rechts">DIN-Rechts (Griff links)</button>
-      <button class="side-btn" data-side="links">DIN-Links (Griff rechts)</button>
+      <button class="side-btn active" data-side="links">DIN-Links (Griff rechts)</button>
+      <button class="side-btn" data-side="rechts">DIN-Rechts (Griff links)</button>
     </div>
 
     <div class="section-title">Weißtöne</div>
@@ -295,7 +308,8 @@ let glassObjects = [];
 let _curColor = 'weiss-fx';
 let _curWood  = null;
 let _curGlass = 'klar';
-let _curSide  = 'rechts';   // DIN-Rechts: Anschlag rechts → Griff links
+let _curSide  = 'links';    // DIN-Links: Anschlag links → Griff rechts (passt zu fenster_standard_v3.png)
+let _curAnsicht = 'innen';  // Innen = mit Beschlägen, Außen = glatter Rahmen ohne Griff/Bänder
 let _curModel = '1fluegel-drehkipp';
 
 // ══════════════════════════════════════════════
@@ -338,15 +352,16 @@ function buildWindow(modelKey) {
   fensterGroup.add(profile(WW - FRAME_W,             FRAME_W,            seW, WH - 2*FRAME_W,    seD, seZ, sealMat));
 
   // ── Flügelrahmen (4 Profile rundum, vor Blendrahmen) ──────
-  // Flügel beginnt SASH_GAP innen vom Blendrahmen, ragt SASH_Z_OFFSET nach vorn
+  // Innen: Flügel ragt deutlich vor (SASH_Z_OFFSET). Außen: nahezu bündig.
+  const isInnen = (_curAnsicht === 'innen');
   const sx0 = FRAME_W + SASH_GAP;
   const sy0 = FRAME_W + SASH_GAP;
   const sx1 = WW - FRAME_W - SASH_GAP;
   const sy1 = WH - FRAME_W - SASH_GAP;
-  const sW  = sx1 - sx0;            // Flügel-Außenbreite
-  const sH  = sy1 - sy0;            // Flügel-Außenhöhe
-  const sd  = WD - 0.020;           // Flügel etwas dünner als Blendrahmen-Bautiefe
-  const sz  = SASH_Z_OFFSET;        // Flügel sitzt vorgesetzt
+  const sW  = sx1 - sx0;
+  const sH  = sy1 - sy0;
+  const sd  = WD - 0.020;
+  const sz  = isInnen ? SASH_Z_OFFSET : 0.002;
 
   // Oben
   fensterGroup.add(profile(sx0,             sy1 - SASH_W,  sW,              SASH_W,         sd, sz, sashMat));
@@ -370,6 +385,16 @@ function buildWindow(modelKey) {
   fensterGroup.add(profile(gx0 - glW,       gy0,           glW,               gy1 - gy0,     glD, glZ, sashMat));
   fensterGroup.add(profile(gx1,             gy0,           glW,               gy1 - gy0,     glD, glZ, sashMat));
 
+  // ── Dichtungsnut zwischen Glasleiste und Glas (schwarze EPDM-Linie) ──
+  // Das ist die sichtbarste schwarze Linie im Konfigurator-Foto: rund ums Glas.
+  const gsW = 0.004;  // 4 mm sichtbare Nut
+  const gsD = 0.006;
+  const gsZ = glZ + glD - gsD - 0.0005;
+  fensterGroup.add(profile(gx0,       gy1 - gsW,  gx1 - gx0,  gsW,        gsD, gsZ, sealMat));
+  fensterGroup.add(profile(gx0,       gy0,        gx1 - gx0,  gsW,        gsD, gsZ, sealMat));
+  fensterGroup.add(profile(gx0,       gy0,        gsW,        gy1 - gy0,  gsD, gsZ, sealMat));
+  fensterGroup.add(profile(gx1 - gsW, gy0,        gsW,        gy1 - gy0,  gsD, gsZ, sealMat));
+
   // ── Glas (3-fach Verglasung, dargestellt als eine Scheibe) ──
   const gw = gx1 - gx0;
   const gh = gy1 - gy0;
@@ -381,72 +406,87 @@ function buildWindow(modelKey) {
   fensterGroup.add(glass);
   glassObjects.push(glass);
 
-  // ── Olivengriff (Dreh-Kipp) ────────────────────────────────
-  // DIN-Rechts (Anschlag rechts) → Griff sitzt LINKS auf Flügel
-  // DIN-Links  (Anschlag links)  → Griff sitzt RECHTS auf Flügel
-  const handleOnRight = (_curSide === 'links');
-  const hY = sy0 + sH * 0.50;    // Mittlere Höhe Flügel
-  // Rosette (Sockel) am Flügelprofil, vorn auf Z
-  const ROSETTE_W = 0.034;
-  const ROSETTE_H = 0.060;
-  const ROSETTE_D = 0.010;
-  const hRosX = handleOnRight
-    ? (sx1 - SASH_W/2 - ROSETTE_W/2)   // Mitte des rechten Flügelprofils
-    : (sx0 + SASH_W/2 - ROSETTE_W/2);  // Mitte des linken Flügelprofils
-  const rosetteZ = sz + sd;
-  const rosette = new THREE.Mesh(
-    new THREE.BoxGeometry(ROSETTE_W, ROSETTE_H, ROSETTE_D),
-    handleMat
-  );
-  rosette.position.set(hRosX + ROSETTE_W/2, hY, rosetteZ + ROSETTE_D/2);
-  rosette.castShadow = true;
-  fensterGroup.add(rosette);
+  // ── Beschläge (nur in Innen-Ansicht sichtbar) ──────────────
+  if (isInnen) {
+    // DIN-Links  (Anschlag links)  → Griff RECHTS, Bänder LINKS
+    // DIN-Rechts (Anschlag rechts) → Griff LINKS,  Bänder RECHTS
+    const handleOnRight = (_curSide === 'links');
+    const hingeOnLeft   = (_curSide === 'links');
 
-  // Olive-Hebel: horizontal nach innen zeigend (geschlossen → waagerecht)
-  // Länge ca. 90 mm
-  const LEVER_L = 0.090;
-  const LEVER_W = 0.018;
-  const LEVER_D = 0.018;
-  const leverZ  = rosetteZ + ROSETTE_D;
-  // Hebel zeigt zur Fenstermitte (vom Griff weg in Richtung Glas)
-  const leverDir = handleOnRight ? -1 : 1;  // links: nach rechts, rechts: nach links
-  const leverStartX = hRosX + ROSETTE_W/2;  // Mitte Rosette
-  const leverX = leverDir > 0
-    ? leverStartX
-    : leverStartX - LEVER_L;
-  const lever = new THREE.Mesh(
-    new THREE.BoxGeometry(LEVER_L, LEVER_W, LEVER_D),
-    handleMat
-  );
-  lever.position.set(leverX + LEVER_L/2, hY, leverZ + LEVER_D/2);
-  lever.castShadow = true;
-  fensterGroup.add(lever);
+    // ── Olivengriff ──
+    const hY = sy0 + sH * 0.50;
+    const ROSETTE_W = 0.034;
+    const ROSETTE_H = 0.060;
+    const ROSETTE_D = 0.010;
+    const hRosX = handleOnRight
+      ? (sx1 - SASH_W/2 - ROSETTE_W/2)
+      : (sx0 + SASH_W/2 - ROSETTE_W/2);
+    const rosetteZ = sz + sd;
+    const rosette = new THREE.Mesh(
+      new THREE.BoxGeometry(ROSETTE_W, ROSETTE_H, ROSETTE_D),
+      handleMat
+    );
+    rosette.position.set(hRosX + ROSETTE_W/2, hY, rosetteZ + ROSETTE_D/2);
+    rosette.castShadow = true;
+    fensterGroup.add(rosette);
 
-  // Verbindungs-Zylinder Hebel↔Rosette
-  const hub = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.010, 0.010, ROSETTE_D + 0.006, 20),
-    handleBoltMat
-  );
-  hub.rotation.x = Math.PI / 2;
-  hub.position.set(leverStartX, hY, rosetteZ + ROSETTE_D/2 + 0.001);
-  hub.castShadow = true;
-  fensterGroup.add(hub);
+    // Olive-Hebel: horizontal nach innen zeigend (geschlossen → waagerecht)
+    const LEVER_L = 0.090;
+    const LEVER_W = 0.018;
+    const LEVER_D = 0.018;
+    const leverZ  = rosetteZ + ROSETTE_D;
+    const leverDir = handleOnRight ? -1 : 1;
+    const leverStartX = hRosX + ROSETTE_W/2;
+    const leverX = leverDir > 0 ? leverStartX : leverStartX - LEVER_L;
+    const lever = new THREE.Mesh(
+      new THREE.BoxGeometry(LEVER_L, LEVER_W, LEVER_D),
+      handleMat
+    );
+    lever.position.set(leverX + LEVER_L/2, hY, leverZ + LEVER_D/2);
+    lever.castShadow = true;
+    fensterGroup.add(lever);
 
-  // ── Bänder/Scharniere (außen sichtbar = nur kleine Akzente) ──
-  // Bei Drutex Iglo Energy sind die Bänder von außen kaum sichtbar — nur eine
-  // schmale Andeutung an Anschlagseite oben/unten
-  const hingeOnLeft = (_curSide === 'rechts');  // DIN-Rechts → Bänder links
-  const hSide = hingeOnLeft ? (sx0 + SASH_W/2) : (sx1 - SASH_W/2);
-  const HG_W = 0.022, HG_H = 0.024, HG_D = 0.006;
-  [sy0 + 0.18, sy1 - 0.18].forEach(hgY => {
-    const m = new THREE.Mesh(
-      new THREE.BoxGeometry(HG_W, HG_H, HG_D),
+    // Verbindungs-Hub (Zylinder Hebel↔Rosette)
+    const hub = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.010, 0.010, ROSETTE_D + 0.006, 20),
       handleBoltMat
     );
-    m.position.set(hSide, hgY, sz + sd + HG_D/2);
-    m.castShadow = true;
-    fensterGroup.add(m);
-  });
+    hub.rotation.x = Math.PI / 2;
+    hub.position.set(leverStartX, hY, rosetteZ + ROSETTE_D/2 + 0.001);
+    hub.castShadow = true;
+    fensterGroup.add(hub);
+
+    // ── Topfscharniere (2 Stück, oben + unten an Anschlagseite) ──
+    // Bei Drutex Iglo Energy von innen: dunkle Zylinder-Töpfe am Übergang
+    // Flügel↔Blendrahmen, in dem schmalen Spalt sichtbar.
+    const hSide = hingeOnLeft
+      ? (FRAME_W + SASH_GAP/2)              // im Spalt links
+      : (WW - FRAME_W - SASH_GAP/2);        // im Spalt rechts
+    const hingePositions = [sy0 + 0.16, sy1 - 0.16];
+    const hingeBodyMat = new THREE.MeshStandardMaterial({
+      color: 0x1a1a1a, roughness: 0.55, metalness: 0.35
+    });
+    hingePositions.forEach(hgY => {
+      // Topf (dunkler Zylinder, liegend, Achse entlang X)
+      const topf = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.012, 0.012, 0.036, 24),
+        hingeBodyMat
+      );
+      topf.rotation.z = Math.PI / 2;
+      topf.position.set(hSide, hgY, sz + sd - 0.008);
+      topf.castShadow = true;
+      fensterGroup.add(topf);
+
+      // Silberner Stift (kleiner heller Zapfen vorn auf dem Topf)
+      const stift = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.005, 0.005, 0.008, 16),
+        handleBoltMat
+      );
+      stift.rotation.x = Math.PI / 2;
+      stift.position.set(hSide, hgY, sz + sd + 0.004);
+      fensterGroup.add(stift);
+    });
+  }
 
   setModelRefPhoto(modelKey);
 }
@@ -461,26 +501,43 @@ function setModel(key) {
 
 function setSide(side) {
   _curSide = side;
-  document.querySelectorAll('.side-btn').forEach(b =>
+  document.querySelectorAll('#sideBtns .side-btn').forEach(b =>
     b.classList.toggle('active', b.dataset.side === side)
   );
-  // Geometrie neu bauen (Griff- und Bandseite ändern sich)
   buildWindow(_curModel);
   if (_curWood)  setWood(_curWood);
   else           setColor(_curColor || 'weiss-fx');
   setGlass(_curGlass || 'klar');
 }
 
-// ── Modell-spezifische Referenzfotos ──
+function setAnsicht(ansicht) {
+  _curAnsicht = (ansicht === 'aussen') ? 'aussen' : 'innen';
+  document.querySelectorAll('#ansichtBtns .side-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.ansicht === _curAnsicht)
+  );
+  // Bei Außen: Beschläge weg, Flügel bündig — Geometrie neu bauen
+  buildWindow(_curModel);
+  if (_curWood)  setWood(_curWood);
+  else           setColor(_curColor || 'weiss-fx');
+  setGlass(_curGlass || 'klar');
+  setModelRefPhoto(_curModel);
+}
+
+// ── Modell-spezifische Referenzfotos pro Ansicht ──
+// Quelle: Konfigurator (PROD_IMGS_VIEW.kunststoff) — exakt dieselben Master-PNGs
 const MODEL_PHOTOS = {
-  '1fluegel-drehkipp': 'img/fenster-1fluegel-aussen.png',
+  '1fluegel-drehkipp': {
+    innen:  'img/fenster_standard_v3.png',
+    aussen: 'img/fenster_aussen_v3.png',
+  },
 };
 
 function setModelRefPhoto(modelKey) {
-  const url = MODEL_PHOTOS[modelKey];
-  if (!url) return;
+  const m = MODEL_PHOTOS[modelKey];
+  if (!m) return;
+  const url = m[_curAnsicht] || m.innen;
   const img = document.querySelector('.ref-panel img');
-  if (img) { img.src = url; img.alt = modelKey; }
+  if (img) { img.src = url; img.alt = modelKey + ' ' + _curAnsicht; }
 }
 
 // Startup: Modell aus URL-Param oder Standard
@@ -490,6 +547,10 @@ _curModel = _urlModel;
 // DIN-Anschlag aus URL (optional)
 const _urlSide = new URLSearchParams(location.search).get('seite');
 if (_urlSide === 'links' || _urlSide === 'rechts') _curSide = _urlSide;
+
+// Ansicht aus URL (optional)
+const _urlAnsicht = new URLSearchParams(location.search).get('ansicht');
+if (_urlAnsicht === 'aussen' || _urlAnsicht === 'innen') _curAnsicht = _urlAnsicht;
 
 buildWindow(_curModel);
 fensterGroup.position.set(-WW/2, 0, 0);
@@ -842,13 +903,18 @@ else setColor('weiss-fx');
 })();
 
 // ── DIN-Anschlag-Buttons ──
-document.querySelectorAll('.side-btn').forEach(b => {
+document.querySelectorAll('#sideBtns .side-btn').forEach(b => {
   b.onclick = () => setSide(b.dataset.side);
+  b.classList.toggle('active', b.dataset.side === _curSide);
 });
-// Initial-Sync (für ?seite=… aus URL)
-document.querySelectorAll('.side-btn').forEach(b =>
-  b.classList.toggle('active', b.dataset.side === _curSide)
-);
+
+// ── Innen/Außen-Buttons ──
+document.querySelectorAll('#ansichtBtns .side-btn').forEach(b => {
+  b.onclick = () => setAnsicht(b.dataset.ansicht);
+  b.classList.toggle('active', b.dataset.ansicht === _curAnsicht);
+});
+// Initial: Referenzbild auf korrekte Ansicht setzen
+setModelRefPhoto(_curModel);
 
 // ══════════════════════════════════════════════
 // RESIZE + RENDER LOOP
@@ -887,8 +953,9 @@ window.addEventListener('message', (e) => {
   if (d.type === 'setColor') setColor(d.key);
   if (d.type === 'setWood')  setWood(d.key);
   if (d.type === 'setGlass') setGlass(d.key);
-  if (d.type === 'setModel') setModel(d.key);
-  if (d.type === 'setSide')  setSide(d.key);
+  if (d.type === 'setModel')   setModel(d.key);
+  if (d.type === 'setSide')    setSide(d.key);
+  if (d.type === 'setAnsicht') setAnsicht(d.key);
 });
 
 (function animate() {
