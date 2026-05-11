@@ -1220,6 +1220,14 @@ window.addEventListener('message', (e) => {
   if (d.type === 'setGlass') setGlass(d.key);
   if (d.type === 'setModel') setModel(d.key);
   if (d.type === 'setSide')  setSide(d.key);
+  if (d.type === 'update') {
+    // Atomare Aktualisierung: alles in einem Tick → kein Zwischenframe
+    buildDoor(d.model);
+    setSide(d.side || 'r');
+    if (d.wood)  setWood(d.wood);
+    else         setColor(d.color || 'anthrazitgrau');
+    setGlass(d.glass || 'klar');
+  }
 });
 
 (function animate() {
