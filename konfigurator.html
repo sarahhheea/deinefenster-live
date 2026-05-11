@@ -6288,19 +6288,25 @@ function drawPrev() {
   const isHaus = S.prod === 'haustuere';
   if (haus3dWrap) {
     if (isHaus) {
-      // Iframe laden/neu-laden wenn Modell oder Seite wechselt
-      const _mdl  = S.tuerModell || 'colorado-inox';
+      // Iframe NUR beim ersten Mal laden — danach alles per postMessage (kein Reload-Blitz)
+      const _mdl  = S.tuerModell || 'florida-lr-inox';
       const _side = (S.oeff1 === 'dreh-l') ? 'l' : 'r';
-      const _needsLoad = !haus3dFrame.src.includes('haustuer-3d') || !haus3dFrame.src.includes('model=' + _mdl) || !haus3dFrame.src.includes('side=' + _side);
-      if (haus3dFrame && _needsLoad) {
+      const _isLoaded = haus3dFrame.src.includes('haustuer-3d');
+      if (!_isLoaded) {
         haus3dFrame.src = `haustuer-3d.html?embed&model=${_mdl}&side=${_side}`;
         haus3dFrame.onload = () => {
           sendHaus3dColor(S.fa);
           haus3dFrame.contentWindow.postMessage({ type:'setGlass', key: S.glasdekor||'klar' }, '*');
         };
-      } else if (haus3dFrame.contentWindow) {
-        // Nur Seite live updaten (Modell gleich, Öffnungsart geändert)
-        haus3dFrame.contentWindow.postMessage({ type:'setSide', key: _side }, '*');
+      } else {
+        // Sofort per postMessage updaten — kein Reload, kein Blitz
+        const cw = haus3dFrame.contentWindow;
+        if (cw) {
+          cw.postMessage({ type:'setModel', key: _mdl  }, '*');
+          cw.postMessage({ type:'setSide',  key: _side }, '*');
+          sendHaus3dColor(S.fa);
+          cw.postMessage({ type:'setGlass', key: S.glasdekor||'klar' }, '*');
+        }
       }
       haus3dWrap.style.display = 'block';
       if (prevWrap) prevWrap.style.height = '560px';
