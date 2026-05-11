@@ -251,8 +251,8 @@ const chromeMat    = new THREE.MeshStandardMaterial({ color: 0xd8dde0, roughness
 const bracketMat   = new THREE.MeshStandardMaterial({ color: 0xe0e6ea, roughness: 0.22, metalness: 0.65, envMapIntensity: 3.0 });
 const glFrameMat= new THREE.MeshStandardMaterial({ color: 0xf2f4f5, roughness: 0.30, metalness: 0.10 });  // Weißer Alu-Rahmen wie Referenz
 const glassMat  = new THREE.MeshPhysicalMaterial({
-  color: 0xeef4f8, metalness: 0, roughness: 0.03,
-  transmission: 0.93, thickness: 0.02, ior: 1.5, transparent: true,
+  color: 0xc8dff0, metalness: 0, roughness: 0.03,
+  transmission: 0.90, thickness: 0.02, ior: 1.5, transparent: true,
 });
 
 // ══════════════════════════════════════════════
@@ -767,28 +767,49 @@ function setWood(key) {
 // Diese Map multipliziert mit glassMat.roughness → erzeugt SICHTBARE Muster
 // ══════════════════════════════════════════════
 const GLASS_TYPES = [
-  { key:'klar',         name:'Klar',         color:0xd4ecf8, transmission:0.92, roughness:0.02 },
-  { key:'satinato',     name:'Satinato',      color:0xf6f5f3, transmission:0.50, roughness:0.82 },
-  { key:'chinchilla',   name:'Chinchilla',    color:0xf0f3ef, transmission:0.65, roughness:0.92 },
-  { key:'master-carre', name:'Master Carré',  color:0xedf2f5, transmission:0.72, roughness:0.92 },
+  { key:'klar',         name:'Klar',         color:0xc8dff0, transmission:0.90, roughness:0.03 },
+  { key:'satinato',     name:'Satinato',      color:0xe8eced, transmission:0.18, roughness:0.96 },
+  { key:'chinchilla',   name:'Chinchilla',    color:0xffffff, transmission:0.22, roughness:0.88 },
+  { key:'master-carre', name:'Master Carré',  color:0xffffff, transmission:0.28, roughness:0.72 },
 ];
 
-// Chinchilla roughnessMap: dichte Noppen-Blobs
-// weiß = Noppenkern (matt/gestreut), schwarz = klarer Grund zwischen Noppen
+// Deterministischer Pseudozufallsgenerator (Seed → reproduzierbare Muster)
+function seededRnd(seed) {
+  let s = seed;
+  return () => { s = (s * 1664525 + 1013904223) & 0xffffffff; return (s >>> 0) / 0xffffffff; };
+}
+
+// Patterned glass: MeshStandardMaterial — zeigt map direkt ohne Physical-Rendering-Quirks
+let patternGlassMat = null;
+
+function buildPatternMat(canvasFn, repeatX, repeatY) {
+  if (patternGlassMat) patternGlassMat.dispose();
+  const tex = new THREE.CanvasTexture(canvasFn());
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(repeatX, repeatY);
+  patternGlassMat = new THREE.MeshStandardMaterial({
+    map: tex, transparent: true, opacity: 0.93, roughness: 0.90, metalness: 0,
+    side: THREE.FrontSide
+  });
+  return patternGlassMat;
+}
+
+// Chinchilla: unregelmäßige Pebble-Blobs (echtes Ornamentglas-Muster)
 function generateChinchillaMap() {
-  const W = 256, H = 256;
+  const W = 512, H = 512;
   const cvs = document.createElement('canvas'); cvs.width = W; cvs.height = H;
   const ctx = cvs.getContext('2d');
   const rnd = seededRnd(4217);
-  ctx.fillStyle = '#060606'; ctx.fillRect(0, 0, W, H);
-  for (let i = 0; i < 320; i++) {
+  ctx.fillStyle = '#6e8090'; ctx.fillRect(0, 0, W, H);  // dunkles Blaugrau = Grund
+  for (let i = 0; i < 300; i++) {
     const x = rnd() * W, y = rnd() * H;
-    const r = 8 + rnd() * 18;
-    const rx = r, ry = r * (0.55 + rnd() * 0.45);
+    const r = 20 + rnd() * 32;
+    const rx = r * (0.6 + rnd() * 0.8), ry = r * (0.6 + rnd() * 0.8);
     const grad = ctx.createRadialGradient(x, y, 0, x, y, Math.max(rx, ry));
-    grad.addColorStop(0,    'rgba(255,255,255,1.0)');
-    grad.addColorStop(0.50, 'rgba(190,190,190,0.70)');
-    grad.addColorStop(1,    'rgba(0,0,0,0)');
+    grad.addColorStop(0,    'rgba(230,242,244,1.0)');   // heller Blob-Kern
+    grad.addColorStop(0.5,  'rgba(180,205,212,0.65)');
+    grad.addColorStop(1,    'rgba(80,105,118,0)');
     ctx.fillStyle = grad;
     ctx.beginPath();
     ctx.ellipse(x, y, rx, ry, rnd() * Math.PI, 0, Math.PI * 2);
@@ -797,42 +818,43 @@ function generateChinchillaMap() {
   return cvs;
 }
 
-// Master Carré roughnessMap: regelmäßiges Quadratgitter
-// helle Linien = matte Gitterstreifen, dunkle Flächen = klare Quadrate
+// Master Carré: regelmäßiges Quadratgitter (Ornamentglas-Raster)
 function generateMasterCarreMap() {
   const W = 128, H = 128;
   const cvs = document.createElement('canvas'); cvs.width = W; cvs.height = H;
   const ctx = cvs.getContext('2d');
-  ctx.fillStyle = '#070707'; ctx.fillRect(0, 0, W, H);
-  const STEP = 32;
-  ctx.strokeStyle = 'rgba(255,255,255,0.96)';
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  for (let x = 0; x <= W; x += STEP) { ctx.moveTo(x, 0); ctx.lineTo(x, H); }
-  for (let y = 0; y <= H; y += STEP) { ctx.moveTo(0, y); ctx.lineTo(W, y); }
-  ctx.stroke();
+  const STEP = 32, LINE = 7;
+  ctx.fillStyle = '#7a9aae'; ctx.fillRect(0, 0, W, H);  // dunkles Blaugrau = Quadrate
+  ctx.fillStyle = '#d8eaf0';                              // helle Gitterlinien
+  for (let x = 0; x <= W; x += STEP) ctx.fillRect(x - LINE/2, 0, LINE, H);
+  for (let y = 0; y <= H; y += STEP) ctx.fillRect(0, y - LINE/2, W, LINE);
   return cvs;
 }
 
 function setGlass(key) {
   const g = GLASS_TYPES.find(t => t.key === key); if (!g) return;
-  glassMat.color.set(g.color);
-  glassMat.transmission = g.transmission;
-  glassMat.roughness = g.roughness;
 
   if (glassMat.map)          { glassMat.map.dispose();          glassMat.map = null; }
   if (glassMat.roughnessMap) { glassMat.roughnessMap.dispose(); glassMat.roughnessMap = null; }
 
-  if (key === 'chinchilla') {
-    const t = new THREE.CanvasTexture(generateChinchillaMap());
-    t.wrapS = t.wrapT = THREE.RepeatWrapping;
-    t.repeat.set(6, 18);  // ~dichte Noppen-Abdeckung auf 22×134cm Glas
-    glassMat.roughnessMap = t;
+  if (key === 'klar') {
+    // Klar: physisch transparent — originalem glassMat zurückgeben
+    glass.material = glassMat;
+    glassMat.transmission = 0.90;
+    glassMat.roughness     = 0.03;
+    glassMat.color.set(0xc8dff0);
+    glassMat.needsUpdate   = true;
+  } else if (key === 'satinato') {
+    // Satinato: gleichmäßig milchig-weiß — MeshStandard, kein Muster
+    if (patternGlassMat) patternGlassMat.dispose();
+    patternGlassMat = new THREE.MeshStandardMaterial({
+      color: 0xd8eaea, transparent: true, opacity: 0.93, roughness: 0.96, metalness: 0
+    });
+    glass.material = patternGlassMat;
+  } else if (key === 'chinchilla') {
+    glass.material = buildPatternMat(generateChinchillaMap, 4, 14);
   } else if (key === 'master-carre') {
-    const t = new THREE.CanvasTexture(generateMasterCarreMap());
-    t.wrapS = t.wrapT = THREE.RepeatWrapping;
-    t.repeat.set(5, 30);  // ~5×4=20 Reihen Quadrate, ca. 15mm Quadratgröße
-    glassMat.roughnessMap = t;
+    glass.material = buildPatternMat(generateMasterCarreMap, 3, 11);
   }
 
   glassMat.needsUpdate = true;
