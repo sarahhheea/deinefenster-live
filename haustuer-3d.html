@@ -115,7 +115,22 @@
 
 <div class="header">
   <h1>Haustür 3D Konfigurator</h1>
-  <span class="model-tag">Colorado</span>
+  <select id="modelSelect" style="background:#2a4fa0;color:white;border:1px solid rgba(255,255,255,0.3);border-radius:4px;padding:3px 8px;font-size:12px;font-weight:600;cursor:pointer;">
+    <option value="colorado-inox">Colorado</option>
+    <option value="montana-1-inox">Montana 1</option>
+    <option value="montana-2-lr-inox">Montana 2 LR</option>
+    <option value="montana-3-lr-inox">Montana 3 LR</option>
+    <option value="florida-lr-inox">Florida LR</option>
+    <option value="ohio-inox">Ohio</option>
+    <option value="alaska-1-inox">Alaska 1</option>
+    <option value="alaska-2-inox">Alaska 2</option>
+    <option value="nebraska-lcr-inox">Nebraska LCR</option>
+    <option value="pennsylvania-1-inox">Pennsylvania 1</option>
+    <option value="pennsylvania-2-lr-inox">Pennsylvania 2 LR</option>
+    <option value="pennsylvania-3-lr-inox">Pennsylvania 3 LR</option>
+    <option value="texas-c-inox">Texas C</option>
+    <option value="texas-lr-inox">Texas LR</option>
+  </select>
 </div>
 
 <div class="layout">
@@ -1098,6 +1113,20 @@ resize();
 // Embed-Modus: ?embed in URL → Header + Referenz-Panel + Controls ausblenden
 if (new URLSearchParams(location.search).has('embed')) {
   document.body.classList.add('embed');
+}
+
+// Modell-Dropdown in Header verdrahten
+const _modelSel = document.getElementById('modelSelect');
+if (_modelSel) {
+  // Startwert auf aktuelles Modell setzen
+  _modelSel.value = _urlModel;
+  _modelSel.addEventListener('change', () => {
+    const key = _modelSel.value;
+    setModel(key);
+    setModelRefPhoto(key);
+    // URL aktualisieren ohne Reload
+    history.replaceState(null, '', '?model=' + key);
+  });
 }
 
 // postMessage-Bridge: Konfigurator schickt Farb/Holz/Glas-Änderungen
