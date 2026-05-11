@@ -263,30 +263,12 @@ const glassMat  = new THREE.MeshPhysicalMaterial({
 });
 
 // ══════════════════════════════════════════════
-// COLORADO — 1:1 vom Referenzfoto gemessen
-//
-// Maßstab: 1 unit = 1 m
-// Tür:     1000 mm × 2100 mm × 70 mm
-//
-// Glas:    zentriert, 180 mm breit, 1220 mm hoch
-//          Unterkante bei 440 mm
-//
-// Griff:   Bar-Griff links, X = 148 mm
-//          Untere Halterung: 820 mm
-//          Obere Halterung:  1670 mm
-//
-// Schloss: X = 215 mm, Y = 1010 mm
+// DOOR CONSTANTS — 1:1 vom Referenzfoto
+// Maßstab: 1 unit = 1 m · Tür 1000×2100×70 mm
 // ══════════════════════════════════════════════
-
 const DW = 1.000;   // Türbreite
 const DH = 2.100;   // Türhöhe
 const DD = 0.070;   // Türtiefe
-
-// Glas — Referenz: ca. 220mm breit, etwas links von Mitte, hoch
-const GW = 0.220;
-const GH = 1.340;   // war 1.240 — 10cm länger
-const GX = 0.285;   // war 0.320 — 3.5cm weiter links
-const GY = 0.430;   // war 0.445 — leicht tiefer damit Glas nach unten wächst
 
 const doorGroup = new THREE.Group();
 
@@ -299,55 +281,7 @@ function strip(x, y, w, h, d, mat) {
   return m;
 }
 
-// ── Zarge (3-stufig wie Referenz) ──────────────────
-
-// Stufe 1 — dicker Außenrahmen
-const z1w = 0.043, z1d = 0.032;
-doorGroup.add(strip(0,        DH - z1w,  DW,           z1w, z1d));  // oben
-doorGroup.add(strip(0,        0,         DW,           z1w, z1d));  // unten
-doorGroup.add(strip(0,        z1w,       z1w,  DH - 2*z1w, z1d));  // links
-doorGroup.add(strip(DW - z1w, z1w,       z1w,  DH - 2*z1w, z1d));  // rechts
-
-// Stufe 2 — mittlerer Übergang
-const z2off = z1w + 0.009, z2w = 0.021, z2d = 0.018;
-doorGroup.add(strip(z2off,          DH - z2off - z2w, DW - 2*z2off, z2w, z2d));
-doorGroup.add(strip(z2off,          z2off,             DW - 2*z2off, z2w, z2d));
-doorGroup.add(strip(z2off,          z2off + z2w,       z2w, DH - 2*(z2off + z2w), z2d));
-doorGroup.add(strip(DW - z2off - z2w, z2off + z2w,    z2w, DH - 2*(z2off + z2w), z2d));
-
-// Stufe 3 — dünne innere Lippe
-const z3off = z2off + z2w + 0.006, z3w = 0.009, z3d = 0.007;
-doorGroup.add(strip(z3off,           DH - z3off - z3w, DW - 2*z3off, z3w, z3d));
-doorGroup.add(strip(z3off,           z3off,             DW - 2*z3off, z3w, z3d));
-doorGroup.add(strip(z3off,           z3off + z3w,       z3w, DH - 2*(z3off + z3w), z3d));
-doorGroup.add(strip(DW - z3off - z3w, z3off + z3w,     z3w, DH - 2*(z3off + z3w), z3d));
-
-// ── Türblatt mit Glasausschnitt ─────────────────────
-{
-  const s = new THREE.Shape();
-  s.moveTo(0, 0); s.lineTo(DW, 0); s.lineTo(DW, DH); s.lineTo(0, DH); s.closePath();
-
-  const hole = new THREE.Path();
-  hole.moveTo(GX, GY);
-  hole.lineTo(GX + GW, GY);
-  hole.lineTo(GX + GW, GY + GH);
-  hole.lineTo(GX,      GY + GH);
-  hole.closePath();
-  s.holes.push(hole);
-
-  const body = new THREE.Mesh(
-    new THREE.ExtrudeGeometry(s, {
-      depth: DD,
-      bevelEnabled: true, bevelThickness: 0.003, bevelSize: 0.002, bevelSegments: 2
-    }),
-    [doorMat, frameMat]  // index 0 = Vorderfläche (doorMat — bekommt Holztextur), index 1 = Seitenwände (frameMat Vollton)
-  );
-  body.castShadow = true; body.receiveShadow = true;
-  doorGroup.add(body);
-}
-
-// ── Profilnut (eingelassene Nut-Linie als Umlaufrahmen) ─
-const NUT = 0.095; // Abstand vom Türblattrand
+// ── Hilfsfunktion: Profilnut ──────────────────────
 function nut(x1, y1, x2, y2) {
   const dx = x2 - x1, dy = y2 - y1;
   const len = Math.sqrt(dx*dx + dy*dy);
@@ -361,102 +295,8 @@ function nut(x1, y1, x2, y2) {
   m.receiveShadow = true;
   return m;
 }
-doorGroup.add(nut(NUT,      NUT,      DW - NUT, NUT));        // unten
-doorGroup.add(nut(NUT,      DH - NUT, DW - NUT, DH - NUT));  // oben
-doorGroup.add(nut(NUT,      NUT,      NUT,      DH - NUT));  // links
-doorGroup.add(nut(DW - NUT, NUT,      DW - NUT, DH - NUT));  // rechts
 
-// ── Glas (transparent) ──────────────────────────────
-const glass = new THREE.Mesh(
-  new THREE.PlaneGeometry(GW - 0.008, GH - 0.008),
-  glassMat
-);
-glass.position.set(GX + GW/2, GY + GH/2, DD/2);
-doorGroup.add(glass);
-
-// ── Glasrahmen (silber/weiß Aluminium-Profil) ────────
-const GFW = 0.022;                        // Rahmenbreite
-const GFD = DD + 0.010;                   // Tiefe (durch die Tür)
-function gfPiece(x, y, w, h) {
-  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, GFD), glFrameMat);
-  m.position.set(x, y, GFD / 2);
-  m.castShadow = true; m.receiveShadow = true;
-  return m;
-}
-doorGroup.add(gfPiece(GX + GW/2,         GY + GH + GFW/2, GW + GFW*2, GFW));  // oben
-doorGroup.add(gfPiece(GX + GW/2,         GY - GFW/2,      GW + GFW*2, GFW));  // unten
-doorGroup.add(gfPiece(GX - GFW/2,        GY + GH/2,       GFW,        GH));   // links
-doorGroup.add(gfPiece(GX + GW + GFW/2,   GY + GH/2,       GFW,        GH));   // rechts
-
-// ══════════════════════════════════════════════════════
-// STOESSGRIFF (Drutex-Typ P45/Z1)
-//
-// Aufbau eines echten Drutex-Stoßgriffs:
-//   1. Befestigungsplatte (Rosette) direkt auf Türfläche
-//   2. Konsolen-Arm (L-förmig): horizontal von Tür weg
-//   3. Runder Stab verbindet beide Konsolen
-//   4. Flache Abschlussplatten oben + unten am Stab
-//
-// Griff ist IMMER Silber (Edelstahl/Chrom), egal welche Türfarbe.
-//
-// Maße vom Referenzfoto:
-//   X = 120mm vom linken Türrand
-//   Stab von Y=830mm bis Y=1650mm
-//   Standoff (Abstand Tür→Stab) = 38mm
-//   Stabdurchmesser = 14mm
-// ══════════════════════════════════════════════════════
-
-// ══════════════════════════════════════════════════════
-// STOESSGRIFF — ECKIG (rechteckiger Querschnitt, nicht rund)
-// BAR_W = sichtbare Breite von vorne
-// BAR_D = Tiefe (Abstand Tür → Stabvorderseite)
-// ══════════════════════════════════════════════════════
-const HX    = 0.115;   // 115mm vom linken Türrand
-const BAR_W = 0.026;   // 26mm breit (eckig, deutlich sichtbar von vorne)
-const BAR_D = 0.040;   // 40mm tief (Abstand von Türfläche)
-const BAR_B = 0.670;   // untere Halterung Y — tiefer wie Referenz
-const BAR_T = 1.740;   // obere Halterung Y — höher wie Referenz
-const BAR_L = BAR_T - BAR_B;  // 1070mm (war 820mm)
-
-// ── ECKIGER Stab (BoxGeometry) ────────────────────────
-const bar = new THREE.Mesh(
-  new THREE.BoxGeometry(BAR_W, BAR_L, BAR_D),
-  chromeMat
-);
-bar.position.set(HX, BAR_B + BAR_L / 2, DD + BAR_D / 2);
-bar.castShadow = true;
-doorGroup.add(bar);
-
-// ── Halterungen: einfacher flacher Arm links vom Stab (kein Noppe, keine Platte) ──
-function makeConsole(bracketY) {
-  const AW = 0.016, AH = 0.014, AD = BAR_D + 0.002;
-  const AX = HX - BAR_W / 2 - AW / 2;
-  const arm = new THREE.Mesh(new THREE.BoxGeometry(AW, AH, AD), bracketMat);
-  arm.position.set(AX, bracketY, DD + AD / 2);
-  arm.castShadow = true;
-  doorGroup.add(arm);
-}
-
-// 110mm einwärts vom jeweiligen Stabende — wie Referenzfoto
-makeConsole(BAR_T - 0.110);
-makeConsole(BAR_B + 0.110);
-
-// ══════════════════════════════════════════════════════
-// SCHLOSS — Langschild + Profilzylinder
-//
-// Auf Drutex Colorado: Das Schloss sitzt RECHTS vom Griff,
-// auf etwa 47% der Türhöhe (ca. 990mm vom Boden).
-// Es ist ein separates Teil (Langschild + eingelassener Zylinder).
-// ══════════════════════════════════════════════════════
-
-// ══════════════════════════════════════════════════════
-// SCHLOSS — ovales Langschild (Kapsel-Form wie Referenz)
-// Referenz: LINKS vom Stab, zwischen Zarge-Innenrand (88mm) und Stab (102mm)
-// ══════════════════════════════════════════════════════
-const LX  = 0.082;   // 82mm vom linken Rand — LINKS vom Stab
-const LY  = 1.110;   // 1110mm vom Boden (53% Türhöhe, wie Referenz — war: 940mm)
-
-// Ovales Langschild mit gerundeten Ecken (Rounded-Rect via ExtrudeGeometry)
+// ── Hilfsfunktion: Ovale Schloss-Form ─────────────
 function roundedRectShape(w, h, r) {
   const s = new THREE.Shape();
   s.moveTo(-w/2 + r, -h/2);
@@ -471,30 +311,252 @@ function roundedRectShape(w, h, r) {
   return s;
 }
 
-const lsShape = roundedRectShape(0.024, 0.072, 0.012);
-const lsGeom  = new THREE.ExtrudeGeometry(lsShape, { depth: 0.007, bevelEnabled: false });
-const lsPlate = new THREE.Mesh(lsGeom, chromeMat);
-// Z-Basis über Zarge-Level (z2-Vorderkante bei DD+0.018), damit Schloss sichtbar bleibt
-lsPlate.position.set(LX, LY, DD + 0.020);
-lsPlate.castShadow = true;
-doorGroup.add(lsPlate);
+// ══════════════════════════════════════════════
+// MODELLE — Glaspanel-Definitionen aller 14 Türen
+// x/y = Unterkante-links in Meter · w/h = Breite/Höhe
+// strips = sichtbare Edelstahl-Dekor-Stäbe
+// ══════════════════════════════════════════════
+const MODELLE = {
+  'colorado-inox': {
+    panels: [{x:0.285, y:0.430, w:0.220, h:1.340}]
+  },
+  'montana-1-inox': {
+    panels: [{x:0.390, y:0.370, w:0.200, h:1.310}]
+  },
+  'montana-2-lr-inox': {
+    panels: [{x:0.390, y:0.370, w:0.200, h:1.310}],
+    strips: [{x:0.238, y:0.370, w:0.036, h:1.310}, {x:0.626, y:0.370, w:0.036, h:1.310}]
+  },
+  'montana-3-lr-inox': {
+    panels: [
+      {x:0.275, y:0.250, w:0.200, h:1.560},
+      {x:0.595, y:1.590, w:0.138, h:0.110},
+      {x:0.595, y:1.440, w:0.138, h:0.110},
+      {x:0.595, y:1.290, w:0.138, h:0.110},
+      {x:0.595, y:1.140, w:0.138, h:0.110},
+      {x:0.595, y:0.990, w:0.138, h:0.110},
+    ]
+  },
+  'florida-lr-inox': {
+    panels: [{x:0.390, y:0.165, w:0.200, h:1.750}]
+  },
+  'ohio-inox': {
+    panels: [
+      {x:0.385, y:1.590, w:0.230, h:0.198},
+      {x:0.385, y:1.245, w:0.230, h:0.198},
+      {x:0.385, y:0.900, w:0.230, h:0.198},
+    ],
+    strips: [{x:0.270, y:0.880, w:0.050, h:1.130}, {x:0.680, y:0.880, w:0.050, h:1.130}]
+  },
+  'alaska-1-inox': {
+    panels: [
+      {x:0.390, y:1.640, w:0.220, h:0.210},
+      {x:0.390, y:1.270, w:0.220, h:0.210},
+      {x:0.390, y:0.900, w:0.220, h:0.210},
+    ]
+  },
+  'alaska-2-inox': {
+    panels: [
+      {x:0.390, y:1.750, w:0.220, h:0.195},
+      {x:0.390, y:1.480, w:0.220, h:0.195},
+      {x:0.390, y:1.210, w:0.220, h:0.195},
+      {x:0.390, y:0.940, w:0.220, h:0.195},
+      {x:0.390, y:0.670, w:0.220, h:0.195},
+    ]
+  },
+  'nebraska-lcr-inox': {
+    panels: [
+      {x:0.360, y:1.720, w:0.220, h:0.195},
+      {x:0.360, y:1.490, w:0.220, h:0.195},
+      {x:0.360, y:1.260, w:0.220, h:0.195},
+      {x:0.360, y:1.030, w:0.220, h:0.195},
+      {x:0.360, y:0.800, w:0.220, h:0.195},
+    ],
+    strips: [{x:0.150, y:0.780, w:0.075, h:1.160}]
+  },
+  'pennsylvania-1-inox': {
+    panels: [
+      {x:0.230, y:1.635, w:0.540, h:0.185},
+      {x:0.230, y:0.360, w:0.215, h:1.235},
+      {x:0.555, y:0.360, w:0.215, h:1.235},
+    ]
+  },
+  'pennsylvania-2-lr-inox': {
+    panels: [
+      {x:0.375, y:1.580, w:0.175, h:0.170},
+      {x:0.400, y:1.355, w:0.175, h:0.170},
+      {x:0.370, y:1.130, w:0.175, h:0.170},
+      {x:0.400, y:0.905, w:0.175, h:0.170},
+      {x:0.370, y:0.680, w:0.175, h:0.170},
+    ]
+  },
+  'pennsylvania-3-lr-inox': {
+    panels: [{x:0.230, y:0.200, w:0.385, h:1.710}]
+  },
+  'texas-c-inox':  {panels: [{x:0.413, y:0.235, w:0.175, h:1.580}]},
+  'texas-lr-inox': {panels: [{x:0.413, y:0.235, w:0.175, h:1.580}]},
+};
 
-// Profilzylinder (zentriert im Schild, oberes Drittel)
-const keyCyl = new THREE.Mesh(
-  new THREE.CylinderGeometry(0.007, 0.007, 0.009, 20), chromeMat
-);
-keyCyl.rotation.x = Math.PI / 2;
-keyCyl.position.set(LX, LY + 0.014, DD + 0.029);
-keyCyl.castShadow = true;
-doorGroup.add(keyCyl);
+let glassObjects = [];
+let _curColor = 'anthrazitgrau';
+let _curWood  = null;
+let _curGlass = 'klar';
 
-// Schlüsselloch
-const darkMat = new THREE.MeshStandardMaterial({ color: 0x080808, roughness: 0.95 });
-const slot = new THREE.Mesh(new THREE.BoxGeometry(0.004, 0.009, 0.002), darkMat);
-slot.position.set(LX, LY + 0.014, DD + 0.033);
-doorGroup.add(slot);
+// ══════════════════════════════════════════════
+// buildDoor — baut Türgeometrie für gewähltes Modell
+// ══════════════════════════════════════════════
+function buildDoor(modelKey) {
+  while (doorGroup.children.length > 0) {
+    const c = doorGroup.children[0];
+    if (c.geometry) c.geometry.dispose();
+    doorGroup.remove(c);
+  }
+  glassObjects = [];
 
-// Türgruppe zentrieren
+  const model = MODELLE[modelKey] || MODELLE['colorado-inox'];
+  const panels = model.panels || [];
+  const modelStrips = model.strips || [];
+
+  // ── Zarge (3-stufig) ──────────────────────────────
+  const z1w = 0.043, z1d = 0.032;
+  doorGroup.add(strip(0,             DH - z1w,  DW,           z1w, z1d));
+  doorGroup.add(strip(0,             0,         DW,           z1w, z1d));
+  doorGroup.add(strip(0,             z1w,       z1w,  DH - 2*z1w, z1d));
+  doorGroup.add(strip(DW - z1w,      z1w,       z1w,  DH - 2*z1w, z1d));
+
+  const z2off = z1w + 0.009, z2w = 0.021, z2d = 0.018;
+  doorGroup.add(strip(z2off,             DH - z2off - z2w, DW - 2*z2off,            z2w, z2d));
+  doorGroup.add(strip(z2off,             z2off,             DW - 2*z2off,            z2w, z2d));
+  doorGroup.add(strip(z2off,             z2off + z2w,       z2w, DH - 2*(z2off+z2w), z2d));
+  doorGroup.add(strip(DW - z2off - z2w,  z2off + z2w,       z2w, DH - 2*(z2off+z2w), z2d));
+
+  const z3off = z2off + z2w + 0.006, z3w = 0.009, z3d = 0.007;
+  doorGroup.add(strip(z3off,             DH - z3off - z3w, DW - 2*z3off,            z3w, z3d));
+  doorGroup.add(strip(z3off,             z3off,             DW - 2*z3off,            z3w, z3d));
+  doorGroup.add(strip(z3off,             z3off + z3w,       z3w, DH - 2*(z3off+z3w), z3d));
+  doorGroup.add(strip(DW - z3off - z3w,  z3off + z3w,       z3w, DH - 2*(z3off+z3w), z3d));
+
+  // ── Türblatt mit Glasausschnitten ──────────────────
+  {
+    const s = new THREE.Shape();
+    s.moveTo(0, 0); s.lineTo(DW, 0); s.lineTo(DW, DH); s.lineTo(0, DH); s.closePath();
+    panels.forEach(p => {
+      const hole = new THREE.Path();
+      hole.moveTo(p.x, p.y);
+      hole.lineTo(p.x + p.w, p.y);
+      hole.lineTo(p.x + p.w, p.y + p.h);
+      hole.lineTo(p.x,       p.y + p.h);
+      hole.closePath();
+      s.holes.push(hole);
+    });
+    const body = new THREE.Mesh(
+      new THREE.ExtrudeGeometry(s, {
+        depth: DD,
+        bevelEnabled: true, bevelThickness: 0.003, bevelSize: 0.002, bevelSegments: 2
+      }),
+      [doorMat, frameMat]
+    );
+    body.castShadow = true; body.receiveShadow = true;
+    doorGroup.add(body);
+  }
+
+  // ── Profilnut ─────────────────────────────────────
+  const NUT = 0.095;
+  doorGroup.add(nut(NUT,      NUT,      DW - NUT, NUT));
+  doorGroup.add(nut(NUT,      DH - NUT, DW - NUT, DH - NUT));
+  doorGroup.add(nut(NUT,      NUT,      NUT,      DH - NUT));
+  doorGroup.add(nut(DW - NUT, NUT,      DW - NUT, DH - NUT));
+
+  // ── Glas + Glasrahmen pro Panel ───────────────────
+  const GFW = 0.022;
+  const GFD = DD + 0.010;
+  panels.forEach(p => {
+    const gm = new THREE.Mesh(
+      new THREE.PlaneGeometry(p.w - 0.008, p.h - 0.008),
+      glassMat
+    );
+    gm.position.set(p.x + p.w/2, p.y + p.h/2, DD/2);
+    doorGroup.add(gm);
+    glassObjects.push(gm);
+
+    const gf = (x, y, w, h) => {
+      const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, GFD), glFrameMat);
+      m.position.set(x, y, GFD / 2);
+      m.castShadow = true; m.receiveShadow = true;
+      return m;
+    };
+    doorGroup.add(gf(p.x + p.w/2,         p.y + p.h + GFW/2, p.w + GFW*2, GFW));
+    doorGroup.add(gf(p.x + p.w/2,         p.y - GFW/2,       p.w + GFW*2, GFW));
+    doorGroup.add(gf(p.x - GFW/2,         p.y + p.h/2,       GFW,         p.h));
+    doorGroup.add(gf(p.x + p.w + GFW/2,   p.y + p.h/2,       GFW,         p.h));
+  });
+
+  // ── Dekorative Edelstahl-Strips ───────────────────
+  modelStrips.forEach(st => {
+    const m = new THREE.Mesh(
+      new THREE.BoxGeometry(st.w, st.h, 0.008),
+      chromeMat
+    );
+    m.position.set(st.x + st.w/2, st.y + st.h/2, DD + 0.004);
+    m.castShadow = true;
+    doorGroup.add(m);
+  });
+
+  // ── Stoßgriff ────────────────────────────────────
+  const HX    = 0.115;
+  const BAR_W = 0.026;
+  const BAR_D = 0.040;
+  const BAR_B = 0.670;
+  const BAR_T = 1.740;
+  const BAR_L = BAR_T - BAR_B;
+
+  const bar = new THREE.Mesh(new THREE.BoxGeometry(BAR_W, BAR_L, BAR_D), chromeMat);
+  bar.position.set(HX, BAR_B + BAR_L / 2, DD + BAR_D / 2);
+  bar.castShadow = true;
+  doorGroup.add(bar);
+
+  const AW = 0.016, AH = 0.014, AD = BAR_D + 0.002;
+  const AX = HX - BAR_W / 2 - AW / 2;
+  [BAR_T - 0.110, BAR_B + 0.110].forEach(bracketY => {
+    const arm = new THREE.Mesh(new THREE.BoxGeometry(AW, AH, AD), bracketMat);
+    arm.position.set(AX, bracketY, DD + AD / 2);
+    arm.castShadow = true;
+    doorGroup.add(arm);
+  });
+
+  // ── Schloss ──────────────────────────────────────
+  const LX = 0.082, LY = 1.110;
+  const lsShape = roundedRectShape(0.024, 0.072, 0.012);
+  const lsGeom  = new THREE.ExtrudeGeometry(lsShape, { depth: 0.007, bevelEnabled: false });
+  const lsPlate = new THREE.Mesh(lsGeom, chromeMat);
+  lsPlate.position.set(LX, LY, DD + 0.020);
+  lsPlate.castShadow = true;
+  doorGroup.add(lsPlate);
+
+  const keyCyl = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.007, 0.007, 0.009, 20), chromeMat
+  );
+  keyCyl.rotation.x = Math.PI / 2;
+  keyCyl.position.set(LX, LY + 0.014, DD + 0.029);
+  keyCyl.castShadow = true;
+  doorGroup.add(keyCyl);
+
+  const darkM = new THREE.MeshStandardMaterial({ color: 0x080808, roughness: 0.95 });
+  const slot = new THREE.Mesh(new THREE.BoxGeometry(0.004, 0.009, 0.002), darkM);
+  slot.position.set(LX, LY + 0.014, DD + 0.033);
+  doorGroup.add(slot);
+}
+
+function setModel(key) {
+  buildDoor(key);
+  if (_curWood)  setWood(_curWood);
+  else           setColor(_curColor || 'anthrazitgrau');
+  setGlass(_curGlass || 'klar');
+}
+
+// Startup: Modell aus URL-Param oder Standard Colorado
+const _urlModel = new URLSearchParams(location.search).get('model') || 'colorado-inox';
+buildDoor(_urlModel);
 doorGroup.position.set(-DW/2, 0, 0);
 scene.add(doorGroup);
 
@@ -686,6 +748,7 @@ function findColor(key) {
 }
 
 function setColor(key) {
+  _curColor = key; _curWood = null;
   clearWoodMaps();
   frameMat.map = null;
   doorMat.map = null;
@@ -714,6 +777,7 @@ function setColor(key) {
 
 // ── Holzdekor setzen — echtes Drutex-Swatch-Foto (img/swatches/{key}.webp) ──
 function setWood(key) {
+  _curWood = key; _curColor = null;
   const p = WOOD_PARAMS[key];
   if (!p) return;
 
@@ -878,10 +942,10 @@ function cleanGlassMaps() {
 }
 
 function setGlass(key) {
+  _curGlass = key;
   const g = GLASS_TYPES.find(t => t.key === key); if (!g) return;
 
   cleanGlassMaps();
-  glass.material = glassMat;   // immer zurück zum physischen Material
 
   if (key === 'klar') {
     // Klar: sauber transparent, leicht blaues Glas-Tint
@@ -988,6 +1052,7 @@ window.addEventListener('message', (e) => {
   if (d.type === 'setColor') setColor(d.key);
   if (d.type === 'setWood')  setWood(d.key);
   if (d.type === 'setGlass') setGlass(d.key);
+  if (d.type === 'setModel') setModel(d.key);
 });
 
 (function animate() {
