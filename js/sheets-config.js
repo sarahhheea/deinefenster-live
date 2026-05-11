@@ -3,7 +3,7 @@
    Ersetzt Google Apps Script komplett.
    Daten:  data/shop-produkte.json  (im GitHub-Repo)
    Bilder: img/shop/               (im GitHub-Repo → GitHub Pages CDN)
-   Stand:  06.05.2026
+   Stand:  11.05.2026 — SHA-Retry + localStorage-Backup
    ───────────────────────────────────────────────────────────────────── */
 
 const _GH_REPO = 'sarahhheea/deinefenster-live';
@@ -11,6 +11,7 @@ const _GH_TOK  = ['gho_FVoOt','E1NYndlH2','8C7IADxVO','LqTV0i21P','sFYB'].join('
 const _SHOP_PW = 'Fenster2026';
 const _GH_API  = 'https://api.github.com';
 const _PAGES   = 'https://sarahhheea.github.io/deinefenster-live';
+const _JSON_PATH = 'data/shop-produkte.json';
 
 /* ─── Session ─────────────────────────────────────────────────────────── */
 
@@ -49,7 +50,8 @@ async function _ghGet(path) {
   return res.json();
 }
 
-async function _ghPut(path, content64, sha, message) {
+/* Gibt { ok: true } oder { ok: false, status, message } zurück */
+async function _ghPutRaw(path, content64, sha, message) {
   const body = { message, content: content64 };
   if (sha) body.sha = sha;
   const res = await fetch(`${_GH_API}/repos/${_GH_REPO}/contents/${path}`, {
@@ -61,11 +63,9 @@ async function _ghPut(path, content64, sha, message) {
     },
     body: JSON.stringify(body)
   });
-  if (!res.ok) {
-    const txt = await res.text();
-    throw new Error('GitHub Schreibfehler: ' + txt);
-  }
-  return res.json();
+  if (res.ok) return { ok: true, data: await res.json() };
+  const txt = await res.text();
+  return { ok: false, status: res.status, message: txt };
 }
 
 /* ─── JSON encode/decode (UTF-8 sicher für Umlaute) ──────────────────── */
@@ -82,6 +82,50 @@ function _jsonToBase64(obj) {
   let binary   = '';
   bytes.forEach(b => (binary += String.fromCharCode(b)));
   return btoa(binary);
+}
+
+/* ─── localStorage-Backup (Sicherheitsnetz bei GitHub-Fehlern) ───────── */
+
+function _saveBackup(json) {
+  try { localStorage.setItem('df_shop_backup', JSON.stringify(json)); } catch (e) { /* kein Platz */ }
+}
+
+function _loadBackup() {
+  try {
+    const s = localStorage.getItem('df_shop_backup');
+    return s ? JSON.parse(s) : null;
+  } catch (e) { return null; }
+}
+
+/* ─── Kernfunktion: JSON modifizieren + schreiben mit SHA-Retry ───────── */
+/*
+   modifier(json) verändert das JSON-Objekt in-place.
+   Bei 409-Konflikt (SHA veraltet): frischen SHA holen + nochmal versuchen.
+   Bis zu maxRetries Versuche, mit kurzem Warten zwischen den Versuchen.
+*/
+async function _writeJSON(modifier, message, maxRetries = 3) {
+  let lastError = null;
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    if (attempt > 0) {
+      // Kurz warten bevor Retry (200ms, 400ms, ...)
+      await new Promise(r => setTimeout(r, 200 * attempt));
+    }
+    const file = await _ghGet(_JSON_PATH);
+    const json = _base64ToJson(file.content);
+    // Backup vor dem Schreiben
+    _saveBackup(json);
+    // Modifier anwenden
+    modifier(json);
+    const result = await _ghPutRaw(_JSON_PATH, _jsonToBase64(json), file.sha, message);
+    if (result.ok) return json; // Erfolg
+    if (result.status === 409) {
+      // SHA-Konflikt — frischer Versuch mit aktuellem SHA
+      lastError = 'SHA-Konflikt (gleichzeitiger Schreibvorgang), Retry ' + (attempt + 1);
+      continue;
+    }
+    throw new Error('GitHub Schreibfehler: ' + result.message);
+  }
+  throw new Error('Schreibvorgang nach ' + maxRetries + ' Versuchen gescheitert. ' + lastError);
 }
 
 /* ─── Produktdaten lesen ──────────────────────────────────────────────── */
@@ -122,7 +166,8 @@ async function _uploadBild(body) {
   try {
     const fileName = body.fileName || `${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;
     const path     = `img/shop/${fileName}`;
-    await _ghPut(path, body.imageBase64, null, `Bild: ${fileName}`);
+    const result   = await _ghPutRaw(path, body.imageBase64, null, `Bild: ${fileName}`);
+    if (!result.ok) throw new Error(result.message);
     return { url: `${_PAGES}/${path}` };
   } catch (err) {
     return { error: err.message };
@@ -133,13 +178,11 @@ async function _uploadBild(body) {
 
 async function _insertProdukt(eintrag) {
   try {
-    const file = await _ghGet('data/shop-produkte.json');
-    const json = _base64ToJson(file.content);
-    json.produkte = json.produkte || [];
     const id = 'p_' + Date.now();
-    json.produkte.unshift({ id, ...eintrag });
-    await _ghPut('data/shop-produkte.json', _jsonToBase64(json), file.sha,
-      `Neues Inserat: ${eintrag.titel || id}`);
+    await _writeJSON(json => {
+      json.produkte = json.produkte || [];
+      json.produkte.unshift({ id, ...eintrag });
+    }, `Neues Inserat: ${eintrag.titel || id}`);
     return { ok: true, id };
   } catch (err) {
     return { ok: false, error: err.message };
@@ -150,13 +193,12 @@ async function _insertProdukt(eintrag) {
 
 async function _updateProdukt(id, eintrag) {
   try {
-    const file = await _ghGet('data/shop-produkte.json');
-    const json = _base64ToJson(file.content);
-    const idx  = (json.produkte || []).findIndex(p => String(p.id) === String(id));
-    if (idx < 0) return { ok: false, error: 'Produkt nicht gefunden: ' + id };
-    json.produkte[idx] = { id, ...eintrag };
-    await _ghPut('data/shop-produkte.json', _jsonToBase64(json), file.sha,
-      `Inserat aktualisiert: ${eintrag.titel || id}`);
+    let found = false;
+    await _writeJSON(json => {
+      const idx = (json.produkte || []).findIndex(p => String(p.id) === String(id));
+      if (idx >= 0) { json.produkte[idx] = { id, ...eintrag }; found = true; }
+    }, `Inserat aktualisiert: ${eintrag.titel || id}`);
+    if (!found) return { ok: false, error: 'Produkt nicht gefunden: ' + id };
     return { ok: true };
   } catch (err) {
     return { ok: false, error: err.message };
@@ -167,13 +209,12 @@ async function _updateProdukt(id, eintrag) {
 
 async function _deleteProdukt(id) {
   try {
-    const file = await _ghGet('data/shop-produkte.json');
-    const json = _base64ToJson(file.content);
-    const p    = (json.produkte || []).find(x => String(x.id) === String(id));
-    if (!p) return { ok: false, error: 'Produkt nicht gefunden: ' + id };
-    p.aktiv = false;
-    await _ghPut('data/shop-produkte.json', _jsonToBase64(json), file.sha,
-      `Inserat deaktiviert: ${id}`);
+    let found = false;
+    await _writeJSON(json => {
+      const p = (json.produkte || []).find(x => String(x.id) === String(id));
+      if (p) { p.aktiv = false; found = true; }
+    }, `Inserat deaktiviert: ${id}`);
+    if (!found) return { ok: false, error: 'Produkt nicht gefunden: ' + id };
     return { ok: true };
   } catch (err) {
     return { ok: false, error: err.message };
