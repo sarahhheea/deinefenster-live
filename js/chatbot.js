@@ -435,6 +435,24 @@ const QUICK_CHIPS = [
 
   let isOpen = false, isLoading = false, history = [], tooltipShown = false;
 
+  // ── Seiten mit FAB unten-rechts → Chatbot nach links verschieben ──────────
+  const path = window.location.pathname;
+  const conflictPages = ['gebrauchte-fenster-kaufen', 'konfigurator', 'shop'];
+  const moveLeft = conflictPages.some(p => path.includes(p));
+  if (moveLeft) {
+    btn.style.cssText   += ';right:auto;left:16px;';
+    label.style.cssText += ';right:auto;left:84px;';
+    win.style.cssText   += ';right:auto;left:16px;';
+    // Tooltip-Pfeil für links anpassen
+    const styleEl = document.createElement('style');
+    styleEl.textContent = `
+      #df-chat-tooltip{right:auto;left:72px;}
+      #df-chat-tooltip::after{right:auto;left:-6px;border-left:none;border-right-color:rgba(118,169,250,0.25);}
+      @media(max-width:480px){#df-chat-window{right:auto;left:0;border-radius:20px 20px 0 0;}}
+    `;
+    document.head.appendChild(styleEl);
+  }
+
   setTimeout(() => {
     if (!isOpen && !tooltipShown) {
       tooltip.classList.add('df-visible');
