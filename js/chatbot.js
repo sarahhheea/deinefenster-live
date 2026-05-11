@@ -8,8 +8,26 @@ const WORKER_URL = ''; // Leer = regelbasierter Modus. Worker-URL eintragen für
 // ─── Regelwerk (aus echten Website-Inhalten) ───────────────────────────────────
 const RULES = [
   {
-    keys: ['hallo','hi','hey','guten tag','moin','guten morgen','guten abend','servus'],
+    keys: ['hallo','hey','guten tag','moin','guten morgen','guten abend','servus'],
     answer: 'Hallo! Schön, dass du da bist. 👋 Ich bin der KI-Assistent von DeineFenster.de und helfe dir bei Fragen zu Fenstern, Preisen, Lieferung oder unserem Hofverkauf. Was möchtest du wissen?'
+  },
+
+  // ── Lieferkosten (VOR Preis — sonst matcht "wie viel" in Preis zuerst) ────────
+  {
+    keys: ['lieferkosten','versandkosten','versand kostet','porto','kostet die lieferung','kostet versand','kostet lieferung','lieferung kostet','kostet der versand','was kostet versand','was kostet lieferung'],
+    answer: 'Lieferung deutschlandweit per Spedition (mit eigenem Stapler). <strong>Kostenlos</strong> ab 4.000 € Bestellwert oder ab 10 Fensterelementen. Bei 5–9 Elementen: <strong>200 € Versandpauschale</strong>. Einzelne Hebeschiebetür: 300 €. Lagerware und Gebrauchtware: <strong>nur Selbstabholung</strong> in Brandenburg.'
+  },
+
+  // ── Förderung (VOR Preis — sonst matcht "wie viel zuschuss" in Preis) ─────────
+  {
+    keys: ['förderung','fördermittel','bafa','kfw','zuschuss','staatlich','subvention','beg','förderfähig'],
+    answer: 'Ja! Für <strong>IGLO Energy (Uw 0,71)</strong> und <strong>IGLO Edge (Uw 0,66)</strong> gibt es <strong>BAFA BEG EM</strong> — bis zu 15% Zuschuss. Wichtig: Antrag <strong>vor</strong> der Bestellung stellen auf bafa.de. KfW Nr. 458 gilt <strong>nicht mehr</strong> für Einzelfenster. IGLO 5 Classic (Uw 0,83) ist lt. aktueller Richtlinie nicht förderfähig. Angaben ohne Gewähr — bitte bafa.de prüfen.'
+  },
+
+  // ── Haustüren (VOR Ankauf — sonst matcht "verkauft ihr" in Ankauf) ────────────
+  {
+    keys: ['haustür','haustüren','eingangstür','außentür','neue tür','neue türen'],
+    answer: 'Ja, wir führen auch <strong>Drutex-Haustüren</strong> — verschiedene Modelle und Farben (inkl. RAL-Farben und Holzdekore). Im <a href="haustuer-3d.html">Haustür-3D-Konfigurator</a> kannst du Modell und Farbe direkt visualisieren. Für ein Angebot: <a href="https://wa.me/491717263776" target="_blank">WhatsApp 0171 7263776</a>.'
   },
 
   // ── Preise ──────────────────────────────────────────────────────────────────
@@ -18,15 +36,9 @@ const RULES = [
     answer: 'Ein Drutex-Standardfenster (1-flügelig, ca. 1000×1200 mm, weiß, 2-fach) startet <strong>ab ca. 99 €</strong>. Das IGLO Energy mit 3-fach Verglasung liegt bei <strong>220–280 €</strong>. Den genauen Preis berechnet der <a href="konfigurator.html">Konfigurator live</a> — abhängig von Maßen, Profil, Farbe und Extras. Angaben ohne Gewähr.'
   },
 
-  // ── Lieferkosten ────────────────────────────────────────────────────────────
-  {
-    keys: ['lieferkosten','versandkosten','versand kostet','porto','kostet die lieferung','kostet versand','kostet lieferung','lieferung kostet','versand kostet'],
-    answer: 'Lieferung deutschlandweit per Spedition (mit eigenem Stapler). <strong>Kostenlos</strong> ab 4.000 € Bestellwert oder ab 10 Fensterelementen. Bei 5–9 Elementen: <strong>200 € Versandpauschale</strong>. Einzelne Hebeschiebetür: 300 €. Lagerware und Gebrauchtware: <strong>nur Selbstabholung</strong> in Brandenburg.'
-  },
-
   // ── Lieferzeit ──────────────────────────────────────────────────────────────
   {
-    keys: ['lieferzeit','wann kommt','wann liefert','wie lange','lieferung','liefern','versand','zustellung','wann fertig'],
+    keys: ['lieferzeit','wann kommt','wann liefert','geliefert','lieferung','liefern','zustellung','wann fertig','bestellung geliefert'],
     answer: 'Drutex-Fenster werden nach Maß gefertigt — Lieferzeit in der Regel <strong>2–4 Wochen</strong> ab Auftragsbestätigung. Versand per Spedition deutschlandweit (LKW mit eigenem Stapler). Lagerware aus unserem Shop: <strong>nur Selbstabholung</strong> in Brandenburg a.d.H.'
   },
 
@@ -62,20 +74,14 @@ const RULES = [
 
   // ── Gebrauchte verkaufen ────────────────────────────────────────────────────
   {
-    keys: ['verkaufen','ankaufen','kauft ihr','nehmt ihr','loswerden','alte fenster abgeben','alte fenster'],
+    keys: ['fenster abgeben','fenster loswerden','alte fenster','ankaufen','nehmt ihr an','nehmt ihr','ihr kauft','fenster verkaufen','gebraucht verkaufen'],
     answer: 'Wir kaufen <strong>keine</strong> gebrauchten Fenster an. Für die Entsorgung ist der örtliche Wertstoffhof zuständig — PVC-Fenster können dort kostenlos abgegeben werden.'
-  },
-
-  // ── Förderung / BAFA / KfW ──────────────────────────────────────────────────
-  {
-    keys: ['förderung','fördermittel','bafa','kfw','zuschuss','staatlich','subvention','beg','förderfähig'],
-    answer: 'Ja! Für <strong>IGLO Energy (Uw 0,71)</strong> und <strong>IGLO Edge (Uw 0,66)</strong> gibt es <strong>BAFA BEG EM</strong> — bis zu 15% Zuschuss. Wichtig: Antrag <strong>vor</strong> der Bestellung stellen auf bafa.de. KfW Nr. 458 gilt <strong>nicht mehr</strong> für Einzelfenster. IGLO 5 Classic (Uw 0,83) ist lt. aktueller Richtlinie nicht förderfähig. Angaben ohne Gewähr — bitte bafa.de prüfen.'
   },
 
   // ── Öffnungszeiten ──────────────────────────────────────────────────────────
   {
-    keys: ['öffnungszeit','geöffnet','wann offen','wann da','freitag','öffnen','besuch','kommen wann','wann kann'],
-    answer: 'Unser <strong>Hofverkauf</strong> ist jeden Freitag von <strong>10 bis 17 Uhr</strong> geöffnet (Fohrder Landstraße 13, Brandenburg). Bis 20 Uhr nach telefonischer Voranmeldung: <a href="tel:+493381214837">03381 / 214 83 73</a>. Mo–Do und Sa–So kein Hofverkauf. <strong>Sommerferien 2026: 01.08.–31.08. geschlossen.</strong>'
+    keys: ['öffnungszeit','geöffnet','wann offen','wann da','freitag','wann auf','kommen','vorbeikommen','wann habt','besuch'],
+    answer: 'Unser <strong>Hofverkauf</strong> ist jeden <strong>Freitag 10–17 Uhr</strong> geöffnet (Fohrder Landstraße 13, Brandenburg). Bis 20 Uhr möglich nach tel. Voranmeldung: <a href="tel:+493381214837">03381 / 214 83 73</a>. Mo–Do und Sa–So kein Hofverkauf.<br><br>⚠️ <strong>Achtung Ferien & Urlaub:</strong> In den Sommerferien und zu Feiertagen kann es abweichende Zeiten geben — bitte vorher kurz anrufen!<br><br><a href="kontakt.html" style="display:inline-block;margin-top:6px;padding:7px 14px;background:rgba(118,169,250,0.15);border:1px solid rgba(118,169,250,0.3);border-radius:8px;color:#76a9fa;text-decoration:none;font-weight:700;font-size:12px;">→ Öffnungszeiten auf der Kontaktseite</a>'
   },
 
   // ── IGLO Energy / Produktmodelle ────────────────────────────────────────────
@@ -98,13 +104,13 @@ const RULES = [
 
   // ── Garantie ────────────────────────────────────────────────────────────────
   {
-    keys: ['garantie','gewährleistung','reklamation','defekt','kaputt','mangel','versicherung'],
+    keys: ['garantie','gewährleistung','reklamation','defekt','kaputt','mangel','wie lange gilt','jahre garantie'],
     answer: 'Drutex-Herstellergarantie: <strong>10 Jahre Profil</strong> (Verzug, Vergilbung, Versprödung) + <strong>5 Jahre Beschlag</strong> (Mechanik) + 2 Jahre gesetzliche Gewährleistung. Nicht abgedeckt: Schäden durch unfachgemäße Montage, Transportschäden (sofort bei Anlieferung melden!), Kratzer durch Bauarbeiten.'
   },
 
   // ── Deutschlandweite Lieferung ──────────────────────────────────────────────
   {
-    keys: ['deutschlandweit','ganz deutschland','bundesweit','liefert ihr nach','wohnort','entfernung'],
+    keys: ['deutschlandweit','ganz deutschland','bundesweit','liefert ihr nach','liefert ihr auch','wohnort','entfernung'],
     answer: 'Ja, wir liefern <strong>deutschlandweit</strong> per Spedition (Neubestellungen/Maßware). Lagerware und Gebrauchtware: nur Selbstabholung in Brandenburg an der Havel. Lieferkosten: kostenlos ab 4.000 € oder 10 Elementen, sonst 200 € Versandpauschale.'
   },
 
@@ -120,9 +126,9 @@ const RULES = [
     answer: '<strong>Drutex</strong> ist Europas größter PVC-Fenster-Hersteller mit eigenem Glaswerk und Profil-Extrusion in Bytów/Polen. Alle Profile Klasse A nach EN 12608 — das höchste Qualitätsniveau. Direktlieferung vom Werk = 20–30% günstiger als marktüblich. Wir sind autorisierter Drutex-Händler.'
   },
 
-  // ── Haustüren ───────────────────────────────────────────────────────────────
+  // ── Haustüren (Duplikat unten entfernt, oben priorisiert) ──────────────────
   {
-    keys: ['haustür','haustüren','eingangstür','tür ','türen','außentür'],
+    keys: ['tür ','türen','türmodell','türfarbe'],
     answer: 'Ja, wir führen auch <strong>Drutex-Haustüren</strong> — verschiedene Modelle und Farben (inkl. RAL-Farben und Holzdekore). Im <a href="haustuer-3d.html">Haustür-3D-Konfigurator</a> kannst du Modell und Farbe direkt visualisieren. Für ein Angebot: <a href="https://wa.me/491717263776" target="_blank">WhatsApp 0171 7263776</a>.'
   },
 
@@ -146,13 +152,13 @@ const RULES = [
 
   // ── Kontakt / Erreichbarkeit ────────────────────────────────────────────────
   {
-    keys: ['kontakt','telefon','anrufen','whatsapp','mail','email','erreichbar','wie kann ich','wann erreichbar'],
+    keys: ['kontakt','telefon','anrufen','whatsapp','mail','email','erreichbar','wie kann ich','wann erreichbar','wie erreiche','erreichen','telefonnummer','rufnummer'],
     answer: '📞 <a href="tel:+493381214837"><strong>03381 / 214 83 73</strong></a> — Festnetz, Mo–Fr 10–18 Uhr<br>💬 <a href="https://wa.me/491717263776" target="_blank"><strong>WhatsApp 0171 7263776</strong></a> — nur schreiben (kein Anruf)<br>📧 info@baustoffchrist.de — Antwort i.d.R. innerhalb 24h'
   },
 
   // ── Adresse / Anfahrt ───────────────────────────────────────────────────────
   {
-    keys: ['adresse','standort','wo seid','wo sind','wo befindet','anfahrt','wie komme','navigation','google maps','hinfahren'],
+    keys: ['adresse','standort','wo seid','wo sind','wo befindet','anfahrt','wie komme','navigation','google maps','hinfahren','wo findet','findet man euch','wo kann ich','wo kaufen'],
     answer: '<strong>Fohrder Landstraße 13, 14772 Brandenburg an der Havel.</strong> Google Maps: "Fensterhandel Christ Brandenburg" eingeben. Hofverkauf freitags 10–17 Uhr — kein Termin nötig.'
   },
 
