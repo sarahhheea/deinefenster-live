@@ -6299,13 +6299,18 @@ function drawPrev() {
           haus3dFrame.contentWindow.postMessage({ type:'setGlass', key: S.glasdekor||'klar' }, '*');
         };
       } else {
-        // Sofort per postMessage updaten — kein Reload, kein Blitz
+        // EINE atomare Message — kein Zwischenframe, kein Flackern
         const cw = haus3dFrame.contentWindow;
         if (cw) {
-          cw.postMessage({ type:'setModel', key: _mdl  }, '*');
-          cw.postMessage({ type:'setSide',  key: _side }, '*');
-          sendHaus3dColor(S.fa);
-          cw.postMessage({ type:'setGlass', key: S.glasdekor||'klar' }, '*');
+          const _ck = HAUS3D_COLOR_MAP[S.fa] || 'anthrazitgrau';
+          cw.postMessage({
+            type:  'update',
+            model: _mdl,
+            side:  _side,
+            color: HAUS3D_WOOD_KEYS.has(_ck) ? null : _ck,
+            wood:  HAUS3D_WOOD_KEYS.has(_ck) ? _ck  : null,
+            glass: S.glasdekor || 'klar'
+          }, '*');
         }
       }
       haus3dWrap.style.display = 'block';
