@@ -545,6 +545,9 @@ function buildDoor(modelKey) {
   const slot = new THREE.Mesh(new THREE.BoxGeometry(0.004, 0.009, 0.002), darkM);
   slot.position.set(LX, LY + 0.014, DD + 0.033);
   doorGroup.add(slot);
+
+  // Ref-Panel zeigt korrektes Modell-Foto für direkten Vergleich
+  setModelRefPhoto(modelKey);
 }
 
 function setModel(key) {
@@ -610,12 +613,36 @@ const DOOR_PHOTOS = {
   'mahagoni':      CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktbWFob24uanBn.webp',
 };
 
-// Referenzfoto updaten wenn Farbe/Holz gewählt
+// Modell-spezifische Referenzfotos (lokale Türfotos für Ref-Panel)
+const MODEL_PHOTOS = {
+  'colorado-inox':          'img/drutex-tueren/colorado-inox_antracyt.jpg',
+  'montana-1-inox':         'img/drutex-tueren/montana-inox-1_antracyt.jpg',
+  'montana-2-lr-inox':      'img/drutex-tueren/montana-inox-2-lr_antracyt.jpg',
+  'montana-3-lr-inox':      'img/drutex-tueren/montana-inox-3-lr_antracyt.jpg',
+  'florida-lr-inox':        'img/drutex-tueren/florida-inox-lr_antracyt.jpg',
+  'ohio-inox':              'img/drutex-tueren/ohio-inox_antracyt.jpg',
+  'alaska-1-inox':          'img/drutex-tueren/alaska-inox-1_antracyt.jpg',
+  'alaska-2-inox':          'img/drutex-tueren/alaska-inox-2_antracyt.jpg',
+  'nebraska-lcr-inox':      'img/drutex-tueren/nebraska-inox-lcr_antracyt.jpg',
+  'pennsylvania-1-inox':    'img/drutex-tueren/pennsylvania-inox-1_antracyt.jpg',
+  'pennsylvania-2-lr-inox': 'img/drutex-tueren/pennsylvania-inox-2-lr_antracyt.jpg',
+  'pennsylvania-3-lr-inox': 'img/drutex-tueren/pennsylvania-inox-3-lr_antracyt.jpg',
+  'texas-c-inox':           'img/drutex-tueren/texas-inox-c_antracyt.jpg',
+  'texas-lr-inox':          'img/drutex-tueren/texas-inox-lr_antracyt.jpg',
+};
+
+// Referenzfoto: Modell-Foto hat Vorrang (für Vergleich 3D vs. Original)
 function setRefPhoto(key) {
   const url = DOOR_PHOTOS[key];
   if (!url) return;
   const img = document.querySelector('.ref-panel img');
   if (img) { img.src = url; img.alt = key; }
+}
+function setModelRefPhoto(modelKey) {
+  const url = MODEL_PHOTOS[modelKey];
+  if (!url) return;
+  const img = document.querySelector('.ref-panel img');
+  if (img) { img.src = url; img.alt = modelKey; }
 }
 
 // ══════════════════════════════════════════════
