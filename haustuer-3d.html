@@ -123,8 +123,35 @@
   <!-- Referenzfoto links -->
   <div class="ref-panel">
     <div class="ref-label">Referenz</div>
-    <img src="img/referenz-colorado.jpeg" alt="Colorado Referenz">
+    <img id="refImg" src="img/drutex-tueren/colorado-inox_antracyt.jpg" alt="Referenz">
   </div>
+  <script>
+  // Sync (non-module): setzt das richtige Referenzfoto sofort beim HTML-Parsing,
+  // BEVOR Three.js überhaupt lädt — funktioniert auch ohne JS-Modul
+  (function() {
+    var photos = {
+      'colorado-inox':          'img/drutex-tueren/colorado-inox_antracyt.jpg',
+      'montana-1-inox':         'img/drutex-tueren/montana-inox-1_antracyt.jpg',
+      'montana-2-lr-inox':      'img/drutex-tueren/montana-inox-2-lr_antracyt.jpg',
+      'montana-3-lr-inox':      'img/drutex-tueren/montana-inox-3-lr_antracyt.jpg',
+      'florida-lr-inox':        'img/drutex-tueren/florida-inox-lr_antracyt.jpg',
+      'ohio-inox':              'img/drutex-tueren/ohio-inox_antracyt.jpg',
+      'alaska-1-inox':          'img/drutex-tueren/alaska-inox-1_antracyt.jpg',
+      'alaska-2-inox':          'img/drutex-tueren/alaska-inox-2_antracyt.jpg',
+      'nebraska-lcr-inox':      'img/drutex-tueren/nebraska-inox-lcr_antracyt.jpg',
+      'pennsylvania-1-inox':    'img/drutex-tueren/pennsylvania-inox-1_antracyt.jpg',
+      'pennsylvania-2-lr-inox': 'img/drutex-tueren/pennsylvania-inox-2-lr_antracyt.jpg',
+      'pennsylvania-3-lr-inox': 'img/drutex-tueren/pennsylvania-inox-3-lr_antracyt.jpg',
+      'texas-c-inox':           'img/drutex-tueren/texas-inox-c_antracyt.jpg',
+      'texas-lr-inox':          'img/drutex-tueren/texas-inox-lr_antracyt.jpg',
+    };
+    var m = new URLSearchParams(location.search).get('model');
+    if (m && photos[m]) {
+      document.getElementById('refImg').src = photos[m];
+      document.getElementById('refImg').alt = m;
+    }
+  })();
+  </script>
 
   <!-- 3D Modell Mitte -->
   <canvas id="threeCanvas"></canvas>
