@@ -684,45 +684,33 @@ function setColor(key) {
   frameMat.needsUpdate = true;
 }
 
-// ── Holzdekor setzen (echte Furnierfoto-Textur) ──────────────────────────────
+// ── Holzdekor setzen — echtes Drutex-Swatch-Foto (img/swatches/{key}.webp) ──
 function setWood(key) {
   const p = WOOD_PARAMS[key];
-  const texPath = WOOD_TEX_MAP[key];
-  if (!p || !texPath) return;
+  if (!p) return;
 
   clearWoodMaps();
 
-  texLoader.load(texPath, (tex) => {
-    // Korrekte Farbdarstellung (sRGB-Farbraum für Fotos)
+  // Echtes Drutex-Holzswatch laden (gleicher Ordner wie Volltonfarben)
+  texLoader.load('img/swatches/' + key + '.webp', (tex) => {
     tex.colorSpace = THREE.SRGBColorSpace;
     tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-    // 1 × 2 Kacheln: 1 Wiederholung quer, 2 hoch — minimale sichtbare Naht,
-    // kein Grid-Muster, Maserung fließt natürlich über die ganze Türbreite
-    tex.repeat.set(1, 2);
+    tex.repeat.set(1, 2);  // 1× breit, 2× hoch — Maserung natürlich
     tex.needsUpdate = true;
-
-    // colorMap — echte Furnier-Farbe
     doorMat.map = tex;
-    doorMat.color.set(0xffffff);  // kein Farb-Tint, Textur zeigt Original
-
-    // bumpMap — Maserungsrillen wirken eingesunken (dunkle Linien tiefer)
+    doorMat.color.set(0xffffff);
     doorMat.bumpMap = tex;
-    doorMat.bumpScale = 0.038;
-
-    // KEIN roughnessMap: die Farbtextur als roughnessMap würde helle Stellen
-    // (Frühholz) als roughness≈0 = Spiegel behandeln → großer Highlight-Blob.
-    // Renolit EXOFOL ist gleichmäßig matt mit minimaler Folienreflexion.
+    doorMat.bumpScale = 0.03;
     doorMat.roughnessMap = null;
-    doorMat.roughness = 0.82;        // matt, wie echte Holzfolie
+    doorMat.roughness = 0.82;
     doorMat.metalness = 0;
-    doorMat.envMapIntensity = 0.12;  // minimale Folie-Reflexion
+    doorMat.envMapIntensity = 0.10;
     doorMat.needsUpdate = true;
   });
 
-  // Zarge: Basisfarbe (BoxGeometry-UVs würden strecken — Vollton passt besser)
   frameMat.map = null;
   frameMat.color.set(p.base);
-  frameMat.roughness = 0.62;
+  frameMat.roughness = 0.72;
   frameMat.metalness = 0;
   frameMat.needsUpdate = true;
   grooveMat.color.set(p.grain);
