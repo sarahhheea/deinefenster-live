@@ -458,8 +458,16 @@ function bindeFormHandler() {
   if (camBtn) camBtn.addEventListener('click', () => camInput.click());
   if (galBtn) galBtn.addEventListener('click', () => galInput.click());
   if (camInput) camInput.addEventListener('change', e => {
+    if (!e.target.files.length) return;
+    const vorher    = STATE.bilderBestand.length + STATE.bilder.length;
+    const neuAnzahl = e.target.files.length; // vor Reset merken
     handleFiles(e.target.files);
-    e.target.value = ''; // Reset damit das gleiche Foto nochmal nachladbar ist
+    e.target.value = ''; // Reset damit dasselbe Foto nochmal ladbar ist
+    // Kamera automatisch wieder öffnen → mehrere Fotos hintereinander schießen
+    // Stoppt wenn Nutzer in der Kamera-App auf "Abbrechen" drückt (kein change-Event)
+    if (vorher + neuAnzahl < 20) {
+      setTimeout(() => camInput.click(), 350);
+    }
   });
   if (galInput) galInput.addEventListener('change', e => {
     handleFiles(e.target.files);
