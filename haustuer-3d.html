@@ -386,8 +386,8 @@ const MODELLE = {
     panels: [{x:0.400, y:0.320, w:0.185, h:1.460}]
   },
   'montana-2-lr-inox': {
-    panels: [{x:0.370, y:0.315, w:0.180, h:1.490}],
-    strips: [{x:0.310, y:0.315, w:0.038, h:1.490}, {x:0.572, y:0.315, w:0.038, h:1.490}]
+    panels: [{x:0.390, y:0.210, w:0.220, h:1.690}],
+    strips: [{x:0.254, y:0.210, w:0.020, h:1.690}, {x:0.726, y:0.210, w:0.020, h:1.690}]
   },
   'montana-3-lr-inox': {
     panels: [
@@ -530,9 +530,15 @@ function buildDoor(modelKey) {
   doorGroup.add(nut(DW - NUT, NUT,      DW - NUT, DH - NUT));
 
   // ── Glas + Glasrahmen pro Panel ───────────────────
-  const GFW = 0.022;
+  const GFW = 0.035;
   const GFD = DD + 0.010;
+  const glBackMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 });
   panels.forEach(p => {
+    // Weißer Hintergrund hinter Glas (simulates interior light)
+    const backing = new THREE.Mesh(new THREE.PlaneGeometry(p.w, p.h), glBackMat);
+    backing.position.set(p.x + p.w/2, p.y + p.h/2, 0.002);
+    doorGroup.add(backing);
+
     const gm = new THREE.Mesh(
       new THREE.PlaneGeometry(p.w - 0.008, p.h - 0.008),
       glassMat
