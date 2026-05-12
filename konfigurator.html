@@ -1722,7 +1722,7 @@
         <i class="ms faq-chev">expand_more</i>
       </summary>
       <div class="faq-body">
-        Sobald Ihre Anzahlung (40 %) bei uns eingegangen ist und wir Ihre Produktionsdaten an Drutex übergeben haben, dauert die Herstellung und Lieferung <strong>in der Regel ca. 14 Tage</strong>. Bei Sonderfarben, besonderer Ausstattung oder hoher Auftragslage kann es etwas länger dauern — den genauen Termin nennen wir Ihnen im verbindlichen Angebot.
+        Sobald Ihre <strong>Vollüberweisung</strong> bei uns eingegangen ist und wir Ihre Produktionsdaten an Drutex übergeben haben, dauert die Herstellung und Lieferung <strong>in der Regel ca. 2–3 Wochen</strong>. Bei Sonderfarben, besonderer Ausstattung oder hoher Auftragslage kann es etwas länger dauern — den genauen Termin nennen wir Ihnen im verbindlichen Angebot.
       </div>
     </details>
 
@@ -1772,7 +1772,7 @@
         <i class="ms faq-chev">expand_more</i>
       </summary>
       <div class="faq-body">
-        Üblich ist eine <strong>Anzahlung von 40 %</strong> per Überweisung nach Auftragsbestätigung (finanziert die Produktion), die <strong>Restzahlung von 60 %</strong> nach Lieferung per Überweisung oder Barzahlung. Ratenzahlung / Finanzierung kann in Einzelfällen über unseren Partner vermittelt werden — fragen Sie uns gerne an.
+        Nach Auftragsbestätigung erfolgt die <strong>Vollüberweisung des Gesamtbetrags</strong>. Nach Zahlungseingang geben wir die Produktion bei Drutex frei. Ratenzahlung kann in Einzelfällen über unseren Partner vermittelt werden — fragen Sie uns an.
       </div>
     </details>
 
@@ -7676,48 +7676,36 @@ async function submitSkizze(e) {
     if (hasRoll) svg+=rolladenKasten(0,0,bMm,rollH,S.rollSeite,S.roll);
     if (hasST_L) svg+=drawSeitenteil(0,dY,ST_W,hMm,S,fCol,fBorder);
     if (hasST_R) svg+=drawSeitenteil(bMm-ST_W,dY,ST_W,hMm,S,fCol,fBorder);
-    svg+='<g filter="url(#door-sh)">'
-      +'<rect x="'+doorX+'" y="'+dY+'" width="'+doorW+'" height="'+hMm+'" fill="'+fCol+'" rx="3"/>'
-      +'<rect x="'+doorX+'" y="'+dY+'" width="'+doorW+'" height="'+hMm+'" fill="url(#frameLum)" opacity="0.88" rx="3"/>'
+    svg+='<rect x="'+doorX+'" y="'+dY+'" width="'+doorW+'" height="'+hMm+'" fill="'+fCol+'" rx="3"/>'
       +'<rect x="'+doorX+'" y="'+dY+'" width="'+doorW+'" height="'+hMm+'" fill="none" stroke="'+fBorder+'" stroke-width="3" rx="3"/>'
-      +'</g>'
-      +frameBevel(doorX, dY, doorW, hMm, 7)
       +'<rect x="'+(doorX+fi2)+'" y="'+(dY+fi2)+'" width="'+(doorW-2*fi2)+'" height="'+(hMm-fi2*1.3)+'" fill="'+fCol+'" stroke="'+fBorder+'" stroke-width="2.5" rx="2"/>';
     const modelDef=HD_PANELS[S.tuerModell||'florida-lr-inox']||HD_PANELS['florida-lr-inox'];
     for (const p of modelDef.panels) svg+=glassRect(doorX+p.x*scX,dY+p.y*scY,p.w*scX,p.h*scY,S.glasdekor);
     if (modelDef.strips) for (const st of modelDef.strips) {
       const sx=doorX+st.x*scX,sy=dY+st.y*scY,sw=st.w*scX,sh=st.h*scY;
-      svg+='<rect x="'+sx+'" y="'+sy+'" width="'+sw+'" height="'+sh+'" fill="url(#frameLum)" opacity="0.85" rx="2"/>'
-        +'<rect x="'+sx+'" y="'+sy+'" width="'+sw+'" height="'+sh+'" fill="#b8c0c8" stroke="#909aa4" stroke-width="1.5" rx="2" opacity="0.88"/>'
-        +'<rect x="'+(sx+sw*0.18)+'" y="'+sy+'" width="'+(sw*0.30)+'" height="'+sh+'" fill="white" opacity="0.14"/>'
-        +'<rect x="'+sx+'" y="'+sy+'" width="'+sw+'" height="5" fill="rgba(255,255,255,0.28)" rx="2"/>';
+      svg+='<rect x="'+sx+'" y="'+sy+'" width="'+sw+'" height="'+sh+'" fill="#c4ccd4" stroke="#a0a8b0" stroke-width="1.5" rx="2" opacity="0.92"/>'
+        +'<rect x="'+(sx+sw*0.18)+'" y="'+sy+'" width="'+(sw*0.28)+'" height="'+sh+'" fill="white" opacity="0.13"/>';
     }
     const hingeX=(hingeSide==='r')?doorX+doorW-fi2+4:doorX+fi2-22;
     for (let i=0;i<3;i++) {
       const hy=dY+hMm*(0.18+i*0.32);
-      svg+='<rect x="'+hingeX+'" y="'+(hy-24)+'" width="18" height="48" rx="4" fill="#a8b2bc" stroke="#7a8290" stroke-width="1.5"/>'
-        +'<rect x="'+hingeX+'" y="'+(hy-24)+'" width="18" height="8" fill="rgba(255,255,255,0.22)" rx="4"/>'
-        +'<circle cx="'+(hingeX+9)+'" cy="'+hy+'" r="5.5" fill="#888" stroke="#606870" stroke-width="1.2"/>'
-        +'<circle cx="'+(hingeX+9)+'" cy="'+hy+'" r="2.2" fill="#555"/>';
+      svg+='<rect x="'+hingeX+'" y="'+(hy-22)+'" width="17" height="44" rx="3.5" fill="#a0aab4" stroke="#808890" stroke-width="1.5"/>'
+        +'<circle cx="'+(hingeX+8.5)+'" cy="'+hy+'" r="5" fill="#888" stroke="#666" stroke-width="1"/>';
     }
     const lockX=(hingeSide==='r')?doorX+OFR+50:doorX+doorW-OFR-50;
-    svg+='<ellipse cx="'+lockX+'" cy="'+(dY+hMm*0.52)+'" rx="15" ry="21" fill="#8a9098" stroke="#606870" stroke-width="2"/>'
-      +'<ellipse cx="'+(lockX-2)+'" cy="'+(dY+hMm*0.52-4)+'" rx="7" ry="5" fill="rgba(255,255,255,0.14)"/>'
-      +'<rect x="'+(lockX-5)+'" y="'+(dY+hMm*0.52-4)+'" width="10" height="9" rx="2" fill="#505860"/>';
-    svg+='<rect x="'+doorX+'" y="'+(dY+hMm-14)+'" width="'+doorW+'" height="16" fill="#7a8290" rx="3" stroke="#5a6270" stroke-width="1.5"/>'
-      +'<rect x="'+doorX+'" y="'+(dY+hMm-14)+'" width="'+doorW+'" height="5" fill="rgba(255,255,255,0.14)" rx="3"/>';
+    svg+='<ellipse cx="'+lockX+'" cy="'+(dY+hMm*0.52)+'" rx="14" ry="20" fill="#8a9098" stroke="#606870" stroke-width="2"/>'
+      +'<rect x="'+(lockX-5)+'" y="'+(dY+hMm*0.52-4)+'" width="10" height="8" rx="1.5" fill="#505860"/>';
     svg+=isAussen?stossgriff(gripX,dY+hMm*0.44,hMm*0.22,S.tuerGriffAussen):klinke(gripX,dY+hMm*0.52,S.tuerGriffInnen,fCol,isDark);
     svg+=massLabel(bMm/2,totalH-16,bMm,hMm,isDark)+'</svg>';
     return svg;
   }
 
   function drawSeitenteil(x,y,w,h,S,fCol,fBorder) {
-    const fr=Math.min(36,w*0.22);
+    const fr=Math.min(36,w*0.22); // Rahmenbreite proportional zur Seitenteil-Breite
     const gx=x+fr,gy=y+fr,gw=w-2*fr,gh=h-fr*1.4;
     let s='<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fCol+'" rx="2"/>'
-      +'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="url(#frameLum)" opacity="0.88" rx="2"/>'
-      +'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="none" stroke="'+fBorder+'" stroke-width="2.5" rx="2"/>'
-      +frameBevel(x, y, w, h, 5);
+      +'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="none" stroke="'+fBorder+'" stroke-width="2.5" rx="2"/>';
+    // Innerer Falz (wie Türblatt)
     s+='<rect x="'+(x+12)+'" y="'+(y+12)+'" width="'+(w-24)+'" height="'+(h-18)+'" fill="'+fCol+'" stroke="'+fBorder+'" stroke-width="1.8" rx="1.5" opacity="0.75"/>';
     if (gw>0&&gh>0) s+=glassRect(gx,gy,gw,gh,S.glasdekor);
     return s;
@@ -7749,24 +7737,16 @@ async function submitSkizze(e) {
       +svgDefs(S.glasdekor)+'<rect width="'+bMm+'" height="'+totalH+'" fill="url(#wallGrad)"/>'
       +'<rect width="'+bMm+'" height="'+totalH+'" fill="url(#floorGrad)"/>';
     if (hasRoll) svg+=rolladenKasten(0,0,bMm,rollH,S.rollSeite,S.roll);
-    svg+='<g filter="url(#winGlow)">'
-      +'<rect x="0" y="'+wY+'" width="'+bMm+'" height="'+hMm+'" fill="'+fCol+'" rx="3"/>'
-      +'<rect x="0" y="'+wY+'" width="'+bMm+'" height="'+hMm+'" fill="url(#frameLum)" opacity="0.88" rx="3"/>'
-      +'<rect x="0" y="'+wY+'" width="'+bMm+'" height="'+hMm+'" fill="none" stroke="'+fBorder+'" stroke-width="3" rx="3"/>'
-      +'</g>'
-      +frameBevel(0, wY, bMm, hMm, 8);
-    svg+='<rect x="0" y="'+wY+'" width="'+bMm+'" height="20" fill="#626a78" rx="3"/>'
-      +'<rect x="0" y="'+wY+'" width="'+bMm+'" height="6" fill="rgba(255,255,255,0.18)" rx="3"/>'
-      +'<rect x="0" y="'+(wY+hMm-20)+'" width="'+bMm+'" height="22" fill="#5e6676" rx="2"/>'
-      +'<rect x="0" y="'+(wY+hMm-20)+'" width="'+bMm+'" height="5" fill="rgba(255,255,255,0.12)"/>';
+    svg+='<rect x="0" y="'+wY+'" width="'+bMm+'" height="'+hMm+'" fill="'+fCol+'" rx="3"/>'
+      +'<rect x="0" y="'+wY+'" width="'+bMm+'" height="'+hMm+'" fill="none" stroke="'+fBorder+'" stroke-width="3" rx="3"/>';
     for (let i=0;i<n;i++) {
       const isSchieber=(lauf==='rechts')?(i===0):(i===n-1);
       svg+=drawHSTPanel(OFR+i*panW,wY+OFR,panW,hMm-OFR*2,isSchieber,S,fCol,fBorder,view);
     }
     const arY=wY+hMm*0.5, arDir=lauf==='rechts'?-1:1, arX=lauf==='rechts'?OFR+panW*0.5:OFR+panW*(n-0.5);
-    const ac='rgba(118,169,250,0.80)';
-    svg+='<polygon points="'+(arX+arDir*48)+','+(arY-22)+' '+(arX+arDir*14)+','+arY+' '+(arX+arDir*48)+','+(arY+22)+'" fill="'+ac+'" opacity="0.85"/>'
-      +'<line x1="'+(arX+arDir*14)+'" y1="'+arY+'" x2="'+(arX+arDir*panW*0.52)+'" y2="'+arY+'" stroke="'+ac+'" stroke-width="7" stroke-linecap="round"/>';
+    const ac='rgba(118,169,250,0.72)';
+    svg+='<polyline points="'+(arX+arDir*36)+','+(arY-18)+' '+(arX+arDir*12)+','+arY+' '+(arX+arDir*36)+','+(arY+18)+'" fill="none" stroke="'+ac+'" stroke-width="9" stroke-linejoin="round" stroke-linecap="round"/>'
+      +'<line x1="'+(arX+arDir*12)+'" y1="'+arY+'" x2="'+(arX+arDir*panW*0.55)+'" y2="'+arY+'" stroke="'+ac+'" stroke-width="6" stroke-linecap="round"/>';
     svg+=massLabel(bMm/2,totalH-14,bMm,hMm,false)+'</svg>';
     return svg;
   }
@@ -7774,15 +7754,11 @@ async function submitSkizze(e) {
   function drawHSTPanel(x,y,w,h,isSchieber,S,fCol,fBorder,view) {
     const gx=x+SFR*0.7,gy=y+SFR*0.7,gw=w-SFR*1.4,gh=h-SFR*1.4;
     const shadow=isSchieber?'filter="url(#sash-sh)"':'';
-    let s='<g '+shadow+'>'
-      +'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fCol+'" opacity="'+(isSchieber?1:0.82)+'" rx="2"/>'
-      +'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="url(#frameLum)" opacity="0.85" rx="2"/>'
-      +'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="none" stroke="'+fBorder+'" stroke-width="2.5" rx="2"/>'
-      +'</g>'
-      +frameBevel(x, y, w, h, 5);
+    let s='<g '+shadow+'><rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fCol+'" opacity="'+(isSchieber?1:0.82)+'" rx="2"/>'
+      +'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="none" stroke="'+fBorder+'" stroke-width="2.5" rx="2"/>';
     if (gw>0&&gh>0) { s+=glassRect(gx,gy,gw,gh,S.glasdekor); s+=sprosse(gx,gy,gw,gh,S.sproTyp,S.sproDicke); }
-    if (isSchieber&&view==='inn') s+='<rect x="'+(x+w*0.5-10)+'" y="'+(y+h*0.5-55)+'" width="20" height="110" rx="10" fill="'+fCol+'" stroke="#8a9098" stroke-width="2" opacity="0.92"/>'
-      +'<rect x="'+(x+w*0.5-10)+'" y="'+(y+h*0.5-55)+'" width="20" height="16" fill="rgba(255,255,255,0.20)" rx="10"/>';
+    if (isSchieber&&view==='inn') s+='<rect x="'+(x+w*0.5-10)+'" y="'+(y+h*0.5-50)+'" width="20" height="100" rx="10" fill="'+fCol+'" stroke="#8a9098" stroke-width="2" opacity="0.9"/>';
+    s+='</g>';
     return s;
   }
 
