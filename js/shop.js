@@ -348,6 +348,10 @@ function bindeEventHandler() {
   document.getElementById('cartOverlay').addEventListener('click', schliesseCart);
   document.getElementById('cartLeerenBtn').addEventListener('click', leereCart);
   document.getElementById('cartAnfrageBtn').addEventListener('click', stelleCartAnfrage);
+  document.getElementById('cartWhatsappBtn').addEventListener('click', e => {
+    e.preventDefault();
+    stelleCartAnfrageWhatsApp();
+  });
 
   // Detail-Modal
   document.getElementById('detailCloseBtn').addEventListener('click', schliesseDetail);
@@ -518,7 +522,7 @@ function aktualisiereShopHeader() {
   if (title) title.textContent = h.title;
   if (desc)  desc.innerHTML = h.desc;
   const hinweis = document.getElementById('gebrauchtHinweis');
-  if (hinweis) hinweis.classList.remove('hidden');
+  if (hinweis) hinweis.classList.toggle('hidden', zustand !== 'gebraucht' && zustand !== 'vermessen' && zustand !== 'default');
 }
 
 /* ─── Render-Pipeline ─── */
@@ -956,6 +960,21 @@ function stelleCartAnfrage() {
   window.location.href = `mailto:info@baustoffchrist.de?subject=${subject}&body=${body}`;
 }
 
+function stelleCartAnfrageWhatsApp() {
+  if (STATE.warenkorb.length === 0) return;
+  const items = STATE.warenkorb.map(e => {
+    const p = STATE.produkte.find(x => x.id === e.id);
+    if (!p) return '';
+    return `${e.menge}× ${p.titel} (${p.breite_mm}×${p.hoehe_mm}mm) – ${formatPreis(p.preis_eur * e.menge)}`;
+  }).filter(Boolean).join('\n');
+  const subtotal = STATE.warenkorb.reduce((s, e) => {
+    const p = STATE.produkte.find(x => x.id === e.id);
+    return s + (p ? p.preis_eur * e.menge : 0);
+  }, 0);
+  const text = encodeURIComponent(`Hallo, ich interessiere mich für folgende Lagerware:\n\n${items}\n\nGesamt: ${formatPreis(subtotal)}\n\nBitte um Rückmeldung. Danke!`);
+  window.open(`https://wa.me/491717263776?text=${text}`, '_blank');
+}
+
 /* ─── Detail-Modal ─── */
 function oeffneDetail(id) {
   const p = STATE.produkte.find(x => x.id === id);
@@ -1106,7 +1125,7 @@ function rendereSchemaOrg(produkte) {
       '@type': 'Product',
       'name': p.titel,
       'description': p.beschreibung || `${STATE.kategorien[p.kategorie] || 'Fenster'} ${p.breite_mm}×${p.hoehe_mm} mm`,
-      'image': p.bild ? `https://iridescent-chebakia-1796b0.netlify.app/${p.bild}` : undefined,
+      'image': p.bild ? `https://sarahhheea.github.io/deinefenster-live/${p.bild}` : undefined,
       'category': STATE.kategorien[p.kategorie] || 'Fenster und Türen',
       'brand': { '@type': 'Brand', 'name': p.system ? p.system.split(' ')[0] : 'Drutex' },
       'width':  { '@type': 'QuantitativeValue', 'value': p.breite_mm, 'unitCode': 'MMT' },
@@ -1117,11 +1136,11 @@ function rendereSchemaOrg(produkte) {
         'price': p.preis_eur,
         'priceCurrency': 'EUR',
         'availability': p.lagerbestand > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-        'url': `https://iridescent-chebakia-1796b0.netlify.app/shop.html#${p.id}`,
+        'url': `https://sarahhheea.github.io/deinefenster-live/shop.html#${p.id}`,
         'seller': {
           '@type': 'Organization',
           'name': 'Türen und Fensterhandel Christ',
-          'url': 'https://iridescent-chebakia-1796b0.netlify.app/'
+          'url': 'https://sarahhheea.github.io/deinefenster-live/'
         }
       }
     }
