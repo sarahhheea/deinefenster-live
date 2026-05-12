@@ -131,9 +131,17 @@ async function _writeJSON(modifier, message, maxRetries = 3) {
 /* ─── Produktdaten lesen ──────────────────────────────────────────────── */
 
 async function _ladeJSON() {
-  const res = await fetch(`data/shop-produkte.json?t=${Date.now()}`);
-  if (!res.ok) throw new Error('Produkte konnten nicht geladen werden.');
-  return res.json();
+  // Kein Cache-Buster — Browser-Cache erlaubt, GitHub Pages liefert nach Push automatisch frisch
+  // Timeout nach 8 Sekunden damit der Shop nie ewig hängt
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 8000);
+  try {
+    const res = await fetch('data/shop-produkte.json', { signal: controller.signal });
+    if (!res.ok) throw new Error('Produkte konnten nicht geladen werden: ' + res.status);
+    return res.json();
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 /* ─── Öffentliche API (kompatibel mit shop.js + shop-einstellen.js) ──── */
