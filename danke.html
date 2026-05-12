@@ -1,153 +1,202 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" class="light">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Anfrage erfolgreich gesendet | DeineFenster.de</title>
-  <meta name="robots" content="noindex, nofollow">
-  <link rel="stylesheet" href="css/tailwind.css"/>
-<link rel="preconnect" href="https://fonts.bunny.net"/>
-
-  <link href="https://fonts.bunny.net/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
-  <style>
-    body{font-family:'Manrope',sans-serif;background:#0a1530;color:#e8eeff;min-height:100vh;display:flex;flex-direction:column}
-    h1,h2{font-family:'Plus Jakarta Sans',sans-serif}
-    .ms{font-family:'Material Symbols Outlined';font-size:22px;vertical-align:-5px;line-height:1;font-style:normal}
-    .ms.f{font-variation-settings:'FILL' 1}
-    #navbar{background:rgba(14, 30, 58, 0.95);backdrop-filter:blur(12px)}
-  </style>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js" defer></script>
-<script src="js/scroll-animations.js" defer></script>
-</head>
-<body data-auto-anim="true">
-
-<!-- NAV -->
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Anfrage erfolgreich gesendet | DeineFenster.de</title>
+<meta name="robots" content="noindex, nofollow"/>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23225eaa'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='sans-serif' font-weight='700' font-size='16' fill='white'%3EDF%3C/text%3E%3C/svg%3E"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "secondary": "#7a5738", "on-secondary": "#ffffff", "surface-container-lowest": "#ffffff",
+        "primary-container": "#76a9fa", "on-error": "#ffffff", "on-surface-variant": "#424751",
+        "secondary-container": "#fecea7", "surface-container-low": "#f1f3ff",
+        "primary-fixed": "#d6e3ff", "surface-container-highest": "#dde2f3",
+        "on-primary": "#ffffff", "on-primary-container": "#003c79", "surface-container-high": "#e3e8f9",
+        "secondary-fixed": "#ffdcc1", "outline-variant": "#c2c6d3", "on-surface": "#161c27",
+        "background": "#f9f9ff", "primary": "#225eaa",
+        "on-secondary-container": "#795637", "outline": "#727782", "surface": "#f9f9ff",
+        "tertiary": "#5c5f61", "on-primary-fixed": "#001b3d", "surface-container": "#e8eeff",
+        "on-secondary-fixed": "#2e1500"
+      },
+      fontFamily: { "headline": ["Plus Jakarta Sans"], "body": ["Manrope"] },
+      borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+    },
+  },
+}
+</script>
 <style>
-/* ── Nav Underline Hover ── */
-.nav-link { position: relative; }
-.nav-link::after { content:''; position:absolute; bottom:-5px; left:0; width:0; height:2px; background:#76a9fa; border-radius:1px; transition:width 0.22s ease; }
-.nav-link:hover::after { width:100%; }
+  body { font-family: 'Manrope', sans-serif; }
+  h1, h2, h3, h4 { font-family: 'Plus Jakarta Sans', sans-serif; }
+  .glass-nav { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+  #navbar { transition: background 0.3s ease; background: rgba(17, 36, 85, 0.97); }
+  #mobileMenu { background: rgba(17, 36, 85, 0.98); }
 </style>
-<nav id="navbar" class="fixed top-0 w-full z-50 border-b border-white/10">
-  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-    <a href="index.html" class="flex items-center gap-2 text-white font-bold text-xl" style="font-family:'Archivo',sans-serif">
-      <i class="ms f" style="color:#76a9fa">window</i>
-      DeineFenster<span style="color:#76a9fa">.de</span>
-    </a>
-    <a href="konfigurator.html" class="hidden md:inline-flex items-center gap-1.5 font-semibold text-sm px-4 py-2 rounded-full transition-colors" style="background:#d6e3ff;color:#225eaa;font-family:'Archivo',sans-serif">
-      <i class="ms" style="font-size:18px">settings</i> Konfigurator
-    </a>
+</head>
+<body class="bg-surface text-on-surface">
+
+<!-- Navigation -->
+<nav id="navbar" class="fixed top-0 w-full z-50 glass-nav border-b border-white/10">
+  <div class="flex justify-between items-center px-6 md:px-12 py-4 max-w-[1440px] mx-auto">
+    <a href="index.html" class="text-xl md:text-2xl font-bold tracking-tighter text-white">DeineFenster<span class="text-primary-container">.de</span></a>
+    <div class="hidden md:flex items-center gap-x-8">
+      <a href="produkte.html" class="text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Produkte</a>
+      <a href="konfigurator.html" class="text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Konfigurator</a>
+      <a href="ueber-uns.html" class="text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Über uns</a>
+      <a href="kontakt.html" class="text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Kontakt</a>
+    </div>
+    <div class="flex items-center gap-3 md:gap-6">
+      <a href="konfigurator.html" class="hidden md:block bg-white text-primary px-6 py-3 rounded-full font-bold text-sm hover:bg-primary-fixed transition-all duration-300">Angebot anfordern</a>
+      <button id="menuBtn" class="md:hidden text-white p-1" aria-label="Menü öffnen">
+        <span class="material-symbols-outlined text-3xl" id="menuIcon">menu</span>
+      </button>
+    </div>
+  </div>
+  <div id="mobileMenu" class="hidden md:hidden px-6 py-6 border-t border-white/10">
+    <div class="flex flex-col gap-4">
+      <a href="produkte.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Produkte</a>
+      <a href="konfigurator.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Konfigurator</a>
+      <a href="ueber-uns.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Über uns</a>
+      <a href="kontakt.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Kontakt</a>
+      <a href="konfigurator.html" class="mt-2 bg-white text-primary px-6 py-4 rounded-full font-bold text-center text-sm">Angebot anfordern</a>
+    </div>
   </div>
 </nav>
 
-<!-- MAIN -->
-<main class="flex-1 flex items-center justify-center px-4 pt-24 pb-12">
-  <div class="rounded-3xl p-8 md:p-12 max-w-lg w-full text-center" style="background:#0f1c30;border:1px solid rgba(255,255,255,0.1);box-shadow:0 32px 80px rgba(0,0,0,0.5);">
+<main class="min-h-screen flex items-center justify-center px-6 pt-28 pb-16">
+  <div class="w-full max-w-lg">
 
-    <!-- Icon -->
-    <div class="flex items-center justify-center w-24 h-24 rounded-full mx-auto mb-6" style="background:rgba(5,150,105,0.15);border:2px solid rgba(5,150,105,0.3);">
-      <i class="ms f" style="font-size:52px;color:#34d399">check_circle</i>
-    </div>
+    <!-- Success Card -->
+    <div class="bg-white rounded-xl shadow-lg p-8 md:p-12 text-center border border-outline-variant/10">
 
-    <!-- Headline -->
-    <h1 class="text-2xl md:text-3xl font-bold mb-3 text-white">
-      Anfrage erfolgreich gesendet!
-    </h1>
+      <!-- Icon -->
+      <div class="w-24 h-24 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
+        <span class="material-symbols-outlined text-green-600 text-6xl" style='font-variation-settings: "FILL" 1;'>check_circle</span>
+      </div>
 
-    <!-- Product name -->
-    <p class="text-base font-semibold mb-5" style="color:#76a9fa" id="prodname"></p>
+      <!-- Headline -->
+      <h1 class="text-2xl md:text-3xl font-extrabold text-blue-900 mb-3 tracking-tight">
+        Anfrage erfolgreich gesendet!
+      </h1>
 
-    <!-- Message -->
-    <p class="text-base leading-relaxed mb-5 text-white/70">
-      Vielen Dank für Ihre Anfrage! Wir melden uns <strong class="text-white">zeitnah</strong>
-      mit einem persönlichen Angebot bei Ihnen.
-      Bitte prüfen Sie auch Ihren <strong class="text-white">Spam-Ordner</strong>.
-    </p>
+      <!-- Product name (from URL param) -->
+      <p class="text-primary font-semibold text-base mb-5" id="prodname"></p>
 
-    <!-- Bild-Upload-Bestätigung (nur wenn Fotos mitgeschickt wurden) -->
-    <div id="bildBestaetigung" class="hidden mb-6 p-4 rounded-xl" style="background:rgba(118,169,250,0.1);border:1px solid rgba(118,169,250,0.25)">
-      <div class="flex items-center gap-3">
-        <i class="ms f" style="color:#76a9fa;font-size:24px;flex-shrink:0">attach_file</i>
-        <div class="text-left">
-          <div class="text-sm font-bold text-white">Ihre Bilder sind angekommen</div>
-          <div class="text-sm text-white/65" id="bildBestaetigungText">Wir haben Ihre Fotos erhalten und beziehen sie in das Angebot ein.</div>
+      <!-- Message -->
+      <p class="text-on-surface-variant text-base leading-relaxed mb-8">
+        Vielen Dank für Ihre Anfrage! Wir melden uns innerhalb von
+        <strong class="text-on-surface">24 Stunden</strong> mit einem persönlichen Angebot bei Ihnen.
+        Bitte prüfen Sie auch Ihren <strong class="text-on-surface">Spam-Ordner</strong>.
+      </p>
+
+      <!-- Next steps -->
+      <div class="text-left space-y-4 mb-8 p-6 bg-surface-container-low rounded-xl">
+        <div class="text-sm font-bold text-on-surface mb-1">Was passiert als nächstes?</div>
+        <div class="flex items-start gap-3">
+          <div class="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">1</div>
+          <div class="text-sm text-on-surface-variant">Sie erhalten eine <strong class="text-on-surface">Bestätigungs-E-Mail</strong> mit Ihrer Konfiguration</div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">2</div>
+          <div class="text-sm text-on-surface-variant">Unser Team prüft Ihre Anfrage und erstellt ein <strong class="text-on-surface">persönliches Angebot</strong></div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5">3</div>
+          <div class="text-sm text-on-surface-variant">Wir liefern Ihre <strong class="text-on-surface">Drutex-Fenster</strong> direkt zu Ihnen nach Hause</div>
         </div>
       </div>
-    </div>
 
-    <!-- Steps what happens next -->
-    <div class="text-left space-y-3 mb-8 p-5 rounded-2xl" style="background:#0a1225;">
-      <div class="text-sm font-bold mb-2 text-white">Was passiert als nächstes?</div>
-      <div class="flex items-start gap-3">
-        <div class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5" style="background:#225eaa">1</div>
-        <div class="text-sm text-white/70">Sie erhalten eine <strong class="text-white">Bestätigungs-E-Mail</strong> mit Ihrer Konfiguration</div>
+      <!-- Buttons -->
+      <div class="flex flex-col sm:flex-row gap-3 mb-8">
+        <a href="konfigurator.html" class="flex-1 flex items-center justify-center gap-2 bg-primary text-white font-bold py-4 px-6 rounded-full text-sm hover:bg-blue-800 transition-colors">
+          <span class="material-symbols-outlined text-lg">settings</span>
+          Weiteres Fenster konfigurieren
+        </a>
+        <a href="index.html" class="flex-1 flex items-center justify-center gap-2 bg-primary-fixed text-on-primary-fixed font-bold py-4 px-6 rounded-full text-sm hover:bg-primary-container/50 transition-colors">
+          <span class="material-symbols-outlined text-lg">home</span>
+          Zurück zur Startseite
+        </a>
       </div>
-      <div class="flex items-start gap-3">
-        <div class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5" style="background:#225eaa">2</div>
-        <div class="text-sm text-white/70">Unser Team prüft Ihre Anfrage und erstellt ein <strong class="text-white">persönliches Angebot</strong></div>
-      </div>
-      <div class="flex items-start gap-3">
-        <div class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5" style="background:#225eaa">3</div>
-        <div class="text-sm text-white/70">Nach Ihrer Zusage liefern wir Ihre <strong class="text-white">Drutex-Produkte</strong> direkt zu Ihnen nach Hause</div>
-      </div>
+
+      <!-- Contact hint -->
+      <p class="text-sm text-outline">
+        Fragen? Rufen Sie uns an:
+        <a href="tel:+498000000000" class="font-semibold text-primary hover:underline">+49 800 000 0000</a>
+        oder schreiben Sie an
+        <a href="mailto:info@deinefenster.de" class="font-semibold text-primary hover:underline">info@deinefenster.de</a>
+      </p>
+
     </div>
-
-    <!-- Buttons -->
-    <div class="flex flex-col sm:flex-row gap-3">
-      <a href="konfigurator.html"
-        class="flex-1 flex items-center justify-center gap-2 font-bold py-4 rounded-full text-base transition-colors"
-        style="background:#225eaa;color:#fff;">
-        <i class="ms">settings</i>
-        Weiteres Element konfigurieren
-      </a>
-      <a href="index.html"
-        class="flex-1 flex items-center justify-center gap-2 font-bold py-4 rounded-full text-base transition-colors"
-        style="background:rgba(255,255,255,0.08);color:#e8eeff;border:1px solid rgba(255,255,255,0.15);">
-        <i class="ms">home</i>
-        Zurück zur Startseite
-      </a>
-    </div>
-
-    <!-- Contact hint -->
-    <p class="text-sm mt-6 text-white/50">
-      Fragen? Rufen Sie uns an:
-      <a href="tel:+4933812148373" class="font-semibold" style="color:#76a9fa;">03381 / 2148373</a>
-      oder schreiben Sie an
-      <a href="mailto:info@baustoffchrist.de" class="font-semibold" style="color:#76a9fa;">info@baustoffchrist.de</a>
-    </p>
-
   </div>
 </main>
 
-<!-- FOOTER mini -->
-<footer style="background:#0e1a38" class="text-white py-5 text-center text-xs" style="color:rgba(255,255,255,.35)">
-  <span style="color:rgba(255,255,255,.3)">© 2026 DeineFenster.de · Fensterhandel Christ · <a href="impressum.html" style="color:rgba(255,255,255,.4)" class="hover:text-white transition-colors">Impressum</a> · <a href="datenschutz.html" style="color:rgba(255,255,255,.4)" class="hover:text-white transition-colors">Datenschutz</a> · <a href="agb.html" style="color:rgba(255,255,255,.4)" class="hover:text-white transition-colors">AGB</a></span>
-
-  <div style="text-align:center;padding:8px 0 4px;"><a href="shop-einstellen.html" style="color:rgba(255,255,255,0.15);font-size:11px;text-decoration:none;">Mitarbeiter</a></div>
+<!-- Footer -->
+<footer class="bg-slate-100 pt-16 md:pt-20 px-6 md:px-12 pb-8">
+  <div class="max-w-[1440px] mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 md:gap-12 mb-12">
+    <div>
+      <div class="text-lg font-bold text-blue-900 mb-4 md:mb-6">DeineFenster.de</div>
+      <p class="text-slate-500 text-sm leading-relaxed mb-6">Ihr Online-Experte für Drutex PVC-Fenster & Türen. Offizieller Premium-Partner mit Lieferung deutschlandweit.</p>
+      <div class="flex gap-4">
+        <span class="material-symbols-outlined text-slate-400 hover:text-primary transition-colors cursor-pointer">public</span>
+        <span class="material-symbols-outlined text-slate-400 hover:text-primary transition-colors cursor-pointer">mail</span>
+        <span class="material-symbols-outlined text-slate-400 hover:text-primary transition-colors cursor-pointer">phone</span>
+      </div>
+    </div>
+    <div class="flex flex-col gap-3">
+      <h4 class="text-blue-800 text-xs tracking-wide uppercase font-bold mb-2">Produkte</h4>
+      <a class="text-slate-500 hover:text-blue-600 text-sm font-semibold transition-colors" href="produkte.html#kunststoff">Kunststofffenster</a>
+      <a class="text-slate-500 hover:text-blue-600 text-sm font-semibold transition-colors" href="produkte.html#balkontuer">Balkontüren</a>
+      <a class="text-slate-500 hover:text-blue-600 text-sm font-semibold transition-colors" href="produkte.html#haustueren">Haustüren</a>
+      <a class="text-slate-500 hover:text-blue-600 text-sm font-semibold transition-colors" href="produkte.html#hst">Hebe-Schiebetüren</a>
+    </div>
+    <div class="flex flex-col gap-3">
+      <h4 class="text-blue-800 text-xs tracking-wide uppercase font-bold mb-2">Service</h4>
+      <a class="text-slate-500 hover:text-blue-600 text-sm font-semibold transition-colors" href="konfigurator.html">Konfigurator</a>
+      <a class="text-slate-500 hover:text-blue-600 text-sm font-semibold transition-colors" href="kontakt.html">Beratung anfordern</a>
+      <a class="text-slate-500 hover:text-blue-600 text-sm font-semibold transition-colors" href="ueber-uns.html">Über uns</a>
+      <a class="text-slate-500 hover:text-blue-600 text-sm font-semibold transition-colors" href="kontakt.html">Kontakt</a>
+    </div>
+    <div class="flex flex-col gap-3">
+      <h4 class="text-blue-800 text-xs tracking-wide uppercase font-bold mb-2">Rechtliches</h4>
+      <a class="text-slate-500 hover:text-blue-600 text-sm font-semibold transition-colors" href="impressum.html">Impressum</a>
+      <a class="text-slate-500 hover:text-blue-600 text-sm font-semibold transition-colors" href="datenschutz.html">Datenschutz</a>
+      <a class="text-slate-500 hover:text-blue-600 text-sm font-semibold transition-colors" href="#">AGB</a>
+      <a class="text-slate-500 hover:text-blue-600 text-sm font-semibold transition-colors" href="#">Widerrufsrecht</a>
+    </div>
+  </div>
+  <div class="max-w-[1440px] mx-auto pt-6 md:pt-8 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4">
+    <p class="text-slate-500 text-xs tracking-wide font-semibold">© 2025 DeineFenster.de. Alle Rechte vorbehalten. Offizieller Partner von Drutex.</p>
+    <div class="flex gap-6">
+      <a href="impressum.html" class="text-slate-400 hover:text-primary text-xs font-semibold transition-colors">Impressum</a>
+      <a href="datenschutz.html" class="text-slate-400 hover:text-primary text-xs font-semibold transition-colors">Datenschutz</a>
+      <a href="#" class="text-slate-400 hover:text-primary text-xs font-semibold transition-colors">AGB</a>
+    </div>
+  </div>
 </footer>
 
 <script>
+  const menuBtn = document.getElementById('menuBtn');
+  const mobileMenu = document.getElementById('mobileMenu');
+  const menuIcon = document.getElementById('menuIcon');
+  menuBtn.addEventListener('click', () => {
+    mobileMenu.classList.toggle('hidden');
+    menuIcon.textContent = mobileMenu.classList.contains('hidden') ? 'menu' : 'close';
+  });
+
   // Show product name from URL param
   const params = new URLSearchParams(window.location.search);
   const prod = params.get('prod');
   if (prod) {
     document.getElementById('prodname').textContent = 'Ihre Anfrage: ' + prod;
-  }
-  // Bild-Upload-Bestätigung (Sarah-Wunsch 21.04.2026)
-  const imgCount = parseInt(params.get('imgs')) || parseInt(localStorage.getItem('df_last_img_count') || '0');
-  if (imgCount > 0) {
-    const el = document.getElementById('bildBestaetigung');
-    const txt = document.getElementById('bildBestaetigungText');
-    if (el) el.classList.remove('hidden');
-    if (txt) {
-      txt.innerHTML = imgCount === 1
-        ? 'Wir haben <strong>1 Foto</strong> erhalten und beziehen es in das Angebot ein.'
-        : `Wir haben <strong>${imgCount} Fotos</strong> erhalten und beziehen sie in das Angebot ein.`;
-    }
-    // localStorage aufräumen nach Anzeige
-    localStorage.removeItem('df_last_img_count');
   }
 </script>
 </body>
