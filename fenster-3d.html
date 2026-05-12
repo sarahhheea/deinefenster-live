@@ -243,7 +243,7 @@ const doorMat    = new THREE.MeshStandardMaterial({ color: 0xfcfcfc, roughness: 
 const frameMat   = new THREE.MeshStandardMaterial({ color: 0xeaeaea, roughness: 0.80, metalness: 0 });
 const glFrameMat = new THREE.MeshStandardMaterial({ color: 0xfafafa, roughness: 0.72, metalness: 0 });
 const chromeMat  = new THREE.MeshStandardMaterial({ color: 0xb8bec2, roughness: 0.22, metalness: 0.95, envMapIntensity: 4.0 });
-const brushedMat = new THREE.MeshStandardMaterial({ color: 0xb2b8bc, roughness: 0.30, metalness: 0.82, envMapIntensity: 2.0 });
+const brushedMat = new THREE.MeshStandardMaterial({ color: 0xc4c8ca, roughness: 0.25, metalness: 0.88, envMapIntensity: 3.0 });
 const glassMat   = new THREE.MeshPhysicalMaterial({
   color: 0xffffff, metalness: 0, roughness: 0.0,
   transmission: 0.05, thickness: 0.018, ior: 1.5, transparent: true,
@@ -433,43 +433,54 @@ function buildWindow() {
   glassObjects.push(glassBacking);
 
   // ────────────────────────────────────────────
-  // 6. BÜGELGRIFF — D-Form, gebürstetes Edelstahl
-  //    Gemessen im Referenzbild: 120mm hoch, 40mm Ausladung
+  // 6. BÜGELGRIFF — Standard PVC-Fensterbeschlag
+  //    Referenz: schmaler D-Bügel, 2 flache Rosettenplatten
   // ────────────────────────────────────────────
-  const HZ      = sashZ + 0.003;
-  const hHalfH  = 0.060;   // ±60mm → 120mm Gesamthöhe
-  const hReach  = 0.042;   // 42mm Ausladung nach links
-  const hFwd    = 0.030;   // 30mm zum Betrachter
-  const hRad    = 0.0090;  // 9mm Rohrradius — gut sichtbar
+  {
+    const HZ     = sashZ + 0.002;
+    const halfH  = 0.046;   // ±46mm → 92mm Gesamthöhe
+    const reach  = 0.024;   // 24mm Ausladung nach links (Mitte des Bogens)
+    const fwd    = 0.038;   // 38mm zum Betrachter (gibt 3D-Tiefe)
+    const rad    = 0.0115;  // 11.5mm Rohrradius — sichtbarer, matter Edelstahl-Rohr
 
-  // Parametrischer D-Bogen (26 Punkte, halbe Ellipse)
-  const arcPts = [];
-  for (let i = 0; i <= 26; i++) {
-    const t = (i / 26) * Math.PI;
-    arcPts.push(new THREE.Vector3(
-      HX - hReach * Math.sin(t),
-      HY + hHalfH * Math.cos(t),
-      HZ + hFwd   * Math.sin(t)
-    ));
-  }
-  const bowMesh = new THREE.Mesh(
-    new THREE.TubeGeometry(new THREE.CatmullRomCurve3(arcPts), 48, hRad, 14, false),
-    brushedMat
-  );
-  bowMesh.castShadow = true;
-  windowGroup.add(bowMesh);
-
-  // Montage-Escutcheons (runde Scheiben oben + unten)
-  [HY + hHalfH, HY - hHalfH].forEach(ey => {
-    const esc = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.015, 0.015, 0.006, 20),
+    // D-Bogen: semi-ellipse, vertikal, Bogen nach links+vorn
+    const arcPts = [];
+    for (let i = 0; i <= 32; i++) {
+      const t = (i / 32) * Math.PI;
+      arcPts.push(new THREE.Vector3(
+        HX - reach * Math.sin(t),
+        HY + halfH * Math.cos(t),
+        HZ + fwd   * Math.sin(t)
+      ));
+    }
+    const bow = new THREE.Mesh(
+      new THREE.TubeGeometry(new THREE.CatmullRomCurve3(arcPts), 64, rad, 16, false),
       brushedMat
     );
-    esc.rotation.x = Math.PI / 2;
-    esc.position.set(HX, ey, HZ + 0.004);
-    esc.castShadow = true;
-    windowGroup.add(esc);
-  });
+    bow.castShadow = true;
+    windowGroup.add(bow);
+
+    // Rosettenplatten: flache Rechtecke (wie im Referenzbild — nicht rund)
+    [HY + halfH, HY - halfH].forEach(ey => {
+      // Basisplatte (flach, direkt auf Rahmen)
+      const base = new THREE.Mesh(
+        new THREE.BoxGeometry(0.028, 0.022, 0.005),
+        brushedMat
+      );
+      base.position.set(HX, ey, HZ + 0.0025);
+      base.castShadow = true;
+      windowGroup.add(base);
+
+      // Zentraler Rohrübergang (kleiner Zylinder wo Bügel ansetzt)
+      const nub = new THREE.Mesh(
+        new THREE.CylinderGeometry(rad + 0.002, rad + 0.002, 0.010, 16),
+        brushedMat
+      );
+      nub.rotation.x = Math.PI / 2;
+      nub.position.set(HX, ey, HZ + 0.007);
+      windowGroup.add(nub);
+    });
+  }
 
   // ────────────────────────────────────────────
   // 7. SCHARNIERE — links, 2 flache Rechteckplatten
