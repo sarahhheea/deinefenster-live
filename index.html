@@ -1006,119 +1006,156 @@
   </div>
 </section>
 <!-- ════════════════════════════════════════════════════════════════
-     LIEFERREGIONEN — 4 Regionen interaktiv
-     Zwischen 4-Schritte und Lieferbedingungen
+     LIEFERGEBIET — Typografische Stadt-Konstellation
      ════════════════════════════════════════════════════════════════ -->
-<section id="lieferregionen" class="py-20 md:py-24" style="background:#0f1c30;">
+<section id="lieferregionen" class="py-20 md:py-24 relative overflow-hidden" style="background:#060d1a;">
 <style>
-.lr-card{background:rgba(255,255,255,0.03);border:1px solid rgba(118,169,250,0.12);border-radius:20px;padding:24px 22px;transition:border-color 0.25s,transform 0.25s,background 0.25s;}
-.lr-card:hover{background:rgba(34,94,170,0.09);border-color:rgba(118,169,250,0.38);transform:translateY(-4px);}
-.lr-abbr{font-size:44px;font-weight:900;letter-spacing:-0.04em;font-family:'Plus Jakarta Sans',sans-serif;line-height:1;margin-bottom:2px;background:linear-gradient(125deg,#76a9fa 0%,#4a8fe8 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.lr-pill{display:inline-flex;align-items:center;padding:4px 10px;border-radius:99px;font-size:11px;font-weight:700;background:rgba(34,94,170,0.14);border:1px solid rgba(34,94,170,0.28);color:rgba(232,238,255,0.72);text-decoration:none;font-family:'Manrope',sans-serif;transition:background 0.14s,color 0.14s,border-color 0.14s;}
-.lr-pill:hover{background:rgba(34,94,170,0.38);color:#e8eeff;border-color:rgba(118,169,250,0.5);}
-.lr-more{background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.1);color:rgba(232,238,255,0.28);pointer-events:none;}
+#stadtcloud { display:flex;flex-wrap:wrap;align-items:baseline;gap:0; }
+.sc-city {
+  display:inline;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-weight:800;
+  text-decoration:none;
+  padding:3px 10px;
+  border-radius:6px;
+  white-space:nowrap;
+  transition:color 0.18s ease,background 0.2s ease,transform 0.18s ease;
+  opacity:0;
+  transform:translateY(10px);
+  display:inline-block;
+}
+.sc-city.vis {
+  opacity:1 !important;
+  transform:translateY(0) !important;
+}
+.sc-city:hover {
+  background:rgba(34,94,170,0.18) !important;
+  color:#ffffff !important;
+  transform:translateY(-2px) !important;
+  text-shadow:0 0 24px rgba(118,169,250,0.45);
+}
+.sc-dot { display:inline;color:rgba(118,169,250,0.13);padding:0 2px;font-size:0.55em;vertical-align:middle;line-height:1; }
 </style>
-  <div class="max-w-[1440px] mx-auto px-6 md:px-12">
 
-    <div class="flex flex-col md:flex-row md:items-end justify-between gap-5 mb-10 reveal">
-      <div>
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full mb-3" style="background:rgba(34,94,170,0.15);border:1px solid rgba(34,94,170,0.3)">
-          <span class="material-symbols-outlined text-primary" style="font-size:14px;font-variation-settings:'FILL' 1">map</span>
-          <span class="text-[10px] font-extrabold uppercase tracking-[0.22em]" style="color:#76a9fa">Liefergebiet</span>
-        </div>
-        <h2 class="text-3xl md:text-4xl font-extrabold tracking-tighter text-white leading-tight">
-          Fenster in jede Region —<br/><span style="color:#76a9fa">deutschlandweit per Spedition</span>
-        </h2>
+  <!-- Ambient radial pulse -->
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse 90% 55% at 48% 60%,rgba(34,94,170,0.07) 0%,transparent 72%);pointer-events:none;"></div>
+  <div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 0%,rgba(118,169,250,0.18) 50%,transparent 100%);"></div>
+  <div style="position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 0%,rgba(118,169,250,0.09) 50%,transparent 100%);"></div>
+
+  <div class="max-w-[1440px] mx-auto px-6 md:px-12 relative" style="z-index:1">
+
+    <!-- Header -->
+    <div class="mb-10 reveal">
+      <div class="flex items-center gap-3 mb-3">
+        <span style="display:inline-block;width:28px;height:1.5px;background:#76a9fa;opacity:0.5;border-radius:2px"></span>
+        <span style="font-size:10px;font-weight:900;letter-spacing:0.3em;text-transform:uppercase;color:#76a9fa;font-family:'Manrope',sans-serif;">Liefergebiet</span>
+        <span style="display:inline-block;width:28px;height:1.5px;background:#76a9fa;opacity:0.5;border-radius:2px"></span>
       </div>
-      <p class="text-sm max-w-xs" style="color:rgba(232,238,255,0.4)">Ab Werk auf Einwegpalette — der LKW hat einen eigenen Stapler dabei. Kein Aufpreis für entlegene Regionen.</p>
+      <h2 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(2rem,4.5vw,3.8rem);font-weight:900;letter-spacing:-0.03em;line-height:1.05;color:#ffffff">
+        Fenster f&uuml;r<br/><span style="background:linear-gradient(110deg,#a8c8ff 0%,#76a9fa 40%,#4a8fe8 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">ganz Deutschland.</span>
+      </h2>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- City constellation -->
+    <div id="stadtcloud"></div>
 
-      <!-- NORD -->
-      <div class="lr-card reveal">
-        <div class="lr-abbr">N</div>
-        <div class="font-extrabold text-white text-xl mb-0.5 tracking-tight">Nord</div>
-        <div class="text-[10px] font-bold uppercase tracking-widest mb-5" style="color:rgba(118,169,250,0.4)">HH &middot; SH &middot; MV &middot; HB &middot; NI</div>
-        <div class="flex flex-wrap gap-1.5">
-          <a href="staedte/fenster-hamburg.html" class="lr-pill">Hamburg</a>
-          <a href="staedte/fenster-bremen.html" class="lr-pill">Bremen</a>
-          <a href="staedte/fenster-kiel.html" class="lr-pill">Kiel</a>
-          <a href="staedte/fenster-luebeck.html" class="lr-pill">L&uuml;beck</a>
-          <a href="staedte/fenster-rostock.html" class="lr-pill">Rostock</a>
-          <a href="staedte/fenster-hannover.html" class="lr-pill">Hannover</a>
-          <a href="staedte/fenster-braunschweig.html" class="lr-pill">Braunschweig</a>
-          <a href="staedte/fenster-schwerin.html" class="lr-pill">Schwerin</a>
-          <span class="lr-pill lr-more">+12 weitere</span>
-        </div>
-      </div>
-
-      <!-- OST -->
-      <div class="lr-card reveal" style="transition-delay:.07s">
-        <div class="lr-abbr">O</div>
-        <div class="font-extrabold text-white text-xl mb-0.5 tracking-tight">Ost</div>
-        <div class="text-[10px] font-bold uppercase tracking-widest mb-5" style="color:rgba(118,169,250,0.4)">BE &middot; BB &middot; SN &middot; ST &middot; TH</div>
-        <div class="flex flex-wrap gap-1.5">
-          <a href="staedte/fenster-berlin.html" class="lr-pill">Berlin</a>
-          <a href="staedte/fenster-potsdam.html" class="lr-pill">Potsdam</a>
-          <a href="staedte/fenster-brandenburg-an-der-havel.html" class="lr-pill">Brandenburg a.d.H.</a>
-          <a href="staedte/fenster-dresden.html" class="lr-pill">Dresden</a>
-          <a href="staedte/fenster-leipzig.html" class="lr-pill">Leipzig</a>
-          <a href="staedte/fenster-erfurt.html" class="lr-pill">Erfurt</a>
-          <a href="staedte/fenster-magdeburg.html" class="lr-pill">Magdeburg</a>
-          <a href="staedte/fenster-cottbus.html" class="lr-pill">Cottbus</a>
-          <span class="lr-pill lr-more">+14 weitere</span>
-        </div>
-      </div>
-
-      <!-- WEST -->
-      <div class="lr-card reveal" style="transition-delay:.14s">
-        <div class="lr-abbr">W</div>
-        <div class="font-extrabold text-white text-xl mb-0.5 tracking-tight">West</div>
-        <div class="text-[10px] font-bold uppercase tracking-widest mb-5" style="color:rgba(118,169,250,0.4)">NW &middot; HE &middot; RP &middot; SL</div>
-        <div class="flex flex-wrap gap-1.5">
-          <a href="staedte/fenster-koeln.html" class="lr-pill">K&ouml;ln</a>
-          <a href="staedte/fenster-duesseldorf.html" class="lr-pill">D&uuml;sseldorf</a>
-          <a href="staedte/fenster-dortmund.html" class="lr-pill">Dortmund</a>
-          <a href="staedte/fenster-frankfurt-am-main.html" class="lr-pill">Frankfurt a.M.</a>
-          <a href="staedte/fenster-bonn.html" class="lr-pill">Bonn</a>
-          <a href="staedte/fenster-aachen.html" class="lr-pill">Aachen</a>
-          <a href="staedte/fenster-muenster.html" class="lr-pill">M&uuml;nster</a>
-          <a href="staedte/fenster-essen.html" class="lr-pill">Essen</a>
-          <span class="lr-pill lr-more">+22 weitere</span>
-        </div>
-      </div>
-
-      <!-- SÜD -->
-      <div class="lr-card reveal" style="transition-delay:.21s">
-        <div class="lr-abbr">S</div>
-        <div class="font-extrabold text-white text-xl mb-0.5 tracking-tight">S&uuml;d</div>
-        <div class="text-[10px] font-bold uppercase tracking-widest mb-5" style="color:rgba(118,169,250,0.4)">BY &middot; BW &middot; RP &middot; SL</div>
-        <div class="flex flex-wrap gap-1.5">
-          <a href="staedte/fenster-muenchen.html" class="lr-pill">M&uuml;nchen</a>
-          <a href="staedte/fenster-stuttgart.html" class="lr-pill">Stuttgart</a>
-          <a href="staedte/fenster-nuernberg.html" class="lr-pill">N&uuml;rnberg</a>
-          <a href="staedte/fenster-augsburg.html" class="lr-pill">Augsburg</a>
-          <a href="staedte/fenster-karlsruhe.html" class="lr-pill">Karlsruhe</a>
-          <a href="staedte/fenster-freiburg-im-breisgau.html" class="lr-pill">Freiburg</a>
-          <a href="staedte/fenster-wuerzburg.html" class="lr-pill">W&uuml;rzburg</a>
-          <a href="staedte/fenster-regensburg.html" class="lr-pill">Regensburg</a>
-          <span class="lr-pill lr-more">+16 weitere</span>
-        </div>
-      </div>
-
-    </div>
-
-    <div class="mt-7 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl px-6 py-4 reveal" style="background:rgba(34,94,170,0.07);border:1px solid rgba(34,94,170,0.2)">
-      <p class="text-sm" style="color:rgba(232,238,255,0.45)">Ihre Stadt nicht dabei? Wir liefern <strong class="text-white">bundesweit</strong> — fragen Sie einfach an.</p>
-      <a href="mailto:info@baustoffchrist.de" class="inline-flex items-center gap-2 text-xs font-bold px-5 py-2.5 rounded-full flex-shrink-0 transition-all hover:brightness-110" style="background:rgba(34,94,170,0.22);border:1px solid rgba(118,169,250,0.35);color:#76a9fa">
-        <span class="material-symbols-outlined" style="font-size:14px;font-variation-settings:'FILL' 1">mail</span>
+    <!-- Bottom -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-14 pt-7 reveal" style="border-top:1px solid rgba(255,255,255,0.05)">
+      <p style="font-size:12px;color:rgba(232,238,255,0.28);font-family:'Manrope',sans-serif;">
+        Nicht alle Lieferorte aufgef&uuml;hrt — wir liefern wirklich &uuml;berall hin.
+      </p>
+      <a href="mailto:info@baustoffchrist.de"
+         style="display:inline-flex;align-items:center;gap:8px;background:rgba(34,94,170,0.18);border:1px solid rgba(118,169,250,0.28);color:#76a9fa;font-size:12px;font-weight:800;font-family:'Manrope',sans-serif;padding:9px 18px;border-radius:99px;text-decoration:none;transition:filter 0.18s;"
+         onmouseover="this.style.filter='brightness(1.18)'" onmouseout="this.style.filter='brightness(1)'">
+        <span class="material-symbols-outlined" style="font-size:15px;font-variation-settings:'FILL' 1">mail</span>
         Jetzt anfragen
       </a>
     </div>
-
   </div>
+
+  <script>
+  (function(){
+    var cities = [
+      {n:'Berlin',          href:'staedte/fenster-berlin.html',                   s:'2.0rem',  c:'rgba(232,238,255,0.88)'},
+      {n:'Hamburg',         href:'staedte/fenster-hamburg.html',                  s:'1.75rem', c:'rgba(232,238,255,0.82)'},
+      {n:'München',    href:'staedte/fenster-muenchen.html',                 s:'1.8rem',  c:'rgba(232,238,255,0.84)'},
+      {n:'Köln',       href:'staedte/fenster-koeln.html',                    s:'1.6rem',  c:'rgba(232,238,255,0.78)'},
+      {n:'Frankfurt a.M.',  href:'staedte/fenster-frankfurt-am-main.html',        s:'1.45rem', c:'rgba(232,238,255,0.72)'},
+      {n:'Stuttgart',       href:'staedte/fenster-stuttgart.html',                s:'1.3rem',  c:'rgba(232,238,255,0.64)'},
+      {n:'Düsseldorf', href:'staedte/fenster-duesseldorf.html',              s:'1.35rem', c:'rgba(232,238,255,0.66)'},
+      {n:'Leipzig',         href:'staedte/fenster-leipzig.html',                  s:'1.25rem', c:'rgba(232,238,255,0.62)'},
+      {n:'Dortmund',        href:'staedte/fenster-dortmund.html',                 s:'1.2rem',  c:'rgba(232,238,255,0.6)'},
+      {n:'Dresden',         href:'staedte/fenster-dresden.html',                  s:'1.25rem', c:'rgba(232,238,255,0.62)'},
+      {n:'Hannover',        href:'staedte/fenster-hannover.html',                 s:'1.2rem',  c:'rgba(232,238,255,0.6)'},
+      {n:'Nürnberg',   href:'staedte/fenster-nuernberg.html',                s:'1.2rem',  c:'rgba(232,238,255,0.58)'},
+      {n:'Essen',           href:'staedte/fenster-essen.html',                    s:'1.1rem',  c:'rgba(232,238,255,0.55)'},
+      {n:'Potsdam',         href:'staedte/fenster-potsdam.html',                  s:'1.05rem', c:'rgba(232,238,255,0.54)'},
+      {n:'Brandenburg a.d.H.', href:'staedte/fenster-brandenburg-an-der-havel.html', s:'1.15rem', c:'rgba(118,169,250,0.82)'},
+      {n:'Bremen',          href:'staedte/fenster-bremen.html',                   s:'1.05rem', c:'rgba(232,238,255,0.52)'},
+      {n:'Münster',    href:'staedte/fenster-muenster.html',                 s:'1.0rem',  c:'rgba(232,238,255,0.5)'},
+      {n:'Mannheim',        href:'staedte/fenster-mannheim.html',                 s:'1.0rem',  c:'rgba(232,238,255,0.5)'},
+      {n:'Bielefeld',       href:'staedte/fenster-bielefeld.html',                s:'0.95rem', c:'rgba(232,238,255,0.45)'},
+      {n:'Bonn',            href:'staedte/fenster-bonn.html',                     s:'0.95rem', c:'rgba(232,238,255,0.45)'},
+      {n:'Kiel',            href:'staedte/fenster-kiel.html',                     s:'0.9rem',  c:'rgba(232,238,255,0.42)'},
+      {n:'Karlsruhe',       href:'staedte/fenster-karlsruhe.html',                s:'0.9rem',  c:'rgba(232,238,255,0.42)'},
+      {n:'Erfurt',          href:'staedte/fenster-erfurt.html',                   s:'0.9rem',  c:'rgba(232,238,255,0.42)'},
+      {n:'Augsburg',        href:'staedte/fenster-augsburg.html',                 s:'0.9rem',  c:'rgba(232,238,255,0.4)'},
+      {n:'Rostock',         href:'staedte/fenster-rostock.html',                  s:'0.88rem', c:'rgba(232,238,255,0.4)'},
+      {n:'Magdeburg',       href:'staedte/fenster-magdeburg.html',                s:'0.88rem', c:'rgba(232,238,255,0.4)'},
+      {n:'Aachen',          href:'staedte/fenster-aachen.html',                   s:'0.88rem', c:'rgba(232,238,255,0.39)'},
+      {n:'Wiesbaden',       href:'staedte/fenster-wiesbaden.html',                s:'0.85rem', c:'rgba(232,238,255,0.38)'},
+      {n:'Lübeck',     href:'staedte/fenster-luebeck.html',                  s:'0.85rem', c:'rgba(232,238,255,0.38)'},
+      {n:'Chemnitz',        href:'staedte/fenster-chemnitz.html',                 s:'0.85rem', c:'rgba(232,238,255,0.37)'},
+      {n:'Braunschweig',    href:'staedte/fenster-braunschweig.html',             s:'0.85rem', c:'rgba(232,238,255,0.37)'},
+      {n:'Duisburg',        href:'staedte/fenster-duisburg.html',                 s:'0.82rem', c:'rgba(232,238,255,0.36)'},
+      {n:'Cottbus',         href:'staedte/fenster-cottbus.html',                  s:'0.82rem', c:'rgba(232,238,255,0.36)'},
+      {n:'Freiburg',        href:'staedte/fenster-freiburg-im-breisgau.html',     s:'0.82rem', c:'rgba(232,238,255,0.36)'},
+      {n:'Mainz',           href:'staedte/fenster-mainz.html',                    s:'0.82rem', c:'rgba(232,238,255,0.35)'},
+      {n:'Kassel',          href:'staedte/fenster-kassel.html',                   s:'0.8rem',  c:'rgba(232,238,255,0.34)'},
+      {n:'Saarbrücken',href:'staedte/fenster-saarbruecken.html',             s:'0.8rem',  c:'rgba(232,238,255,0.34)'},
+      {n:'Oldenburg',       href:'staedte/fenster-oldenburg.html',                s:'0.8rem',  c:'rgba(232,238,255,0.33)'},
+      {n:'Osnabrück',  href:'staedte/fenster-osnabrueck.html',               s:'0.78rem', c:'rgba(232,238,255,0.32)'},
+      {n:'Würzburg',   href:'staedte/fenster-wuerzburg.html',                s:'0.78rem', c:'rgba(232,238,255,0.32)'},
+      {n:'Regensburg',      href:'staedte/fenster-regensburg.html',               s:'0.78rem', c:'rgba(232,238,255,0.32)'},
+      {n:'Schwerin',        href:'staedte/fenster-schwerin.html',                 s:'0.75rem', c:'rgba(232,238,255,0.3)'},
+      {n:'Halle (Saale)',   href:'staedte/fenster-halle-saale.html',              s:'0.75rem', c:'rgba(232,238,255,0.3)'},
+    ];
+
+    var cloud = document.getElementById('stadtcloud');
+    if (!cloud) return;
+
+    cities.forEach(function(c, i) {
+      var a = document.createElement('a');
+      a.className = 'sc-city';
+      a.href = c.href;
+      a.textContent = c.n;
+      a.style.fontSize = c.s;
+      a.style.color = c.c;
+      a.style.transitionDelay = (i * 0.028) + 's';
+      cloud.appendChild(a);
+
+      if (i < cities.length - 1) {
+        var dot = document.createElement('span');
+        dot.className = 'sc-dot';
+        dot.innerHTML = '&middot;';
+        cloud.appendChild(dot);
+      }
+    });
+
+    var io2 = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) {
+        if (e.isIntersecting) {
+          e.target.querySelectorAll('.sc-city').forEach(function(el) { el.classList.add('vis'); });
+          io2.unobserve(e.target);
+        }
+      });
+    }, {threshold: 0.04});
+    io2.observe(cloud);
+  })();
+  </script>
 </section>
+
+
 
 <!-- ════════════════════════════════════════════════════════════════
      LIEFERGEBIETE + LIEFERBEDINGUNGEN — SEO-optimiert
