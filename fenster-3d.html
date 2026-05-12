@@ -202,38 +202,33 @@ eL3.position.set(1, -1, 4); envSc.add(eL3);
 const envTex = pmremGen.fromScene(envSc, 0.04).texture;
 scene.environment = envTex;
 
-// Ambient: niedrig damit weiße Rahmen Schatten haben und vom Hintergrund abheben
-scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+// Ambient niedrig → Schatten werden sichtbar
+scene.add(new THREE.AmbientLight(0xffffff, 0.30));
 
-// Key-Licht von oben-links — klassische Produktfoto-Beleuchtung, erzeugt Rahmenschatten
-const keyLight = new THREE.DirectionalLight(0xffffff, 1.9);
-keyLight.position.set(-3, 5, 5);
+// Key-Licht oben-links — Hauptlicht, erzeugt Rahmenschatten
+const keyLight = new THREE.DirectionalLight(0xffffff, 2.4);
+keyLight.position.set(-2.5, 4, 6);
 keyLight.castShadow = true;
 keyLight.shadow.mapSize.set(2048, 2048);
-keyLight.shadow.camera.near = 1; keyLight.shadow.camera.far = 15;
+keyLight.shadow.camera.near = 0.5; keyLight.shadow.camera.far = 20;
 keyLight.shadow.camera.left = -1.5; keyLight.shadow.camera.right = 1.5;
-keyLight.shadow.camera.top = 2.0; keyLight.shadow.camera.bottom = -0.5;
-keyLight.shadow.bias = -0.001;
+keyLight.shadow.camera.top = 2.5; keyLight.shadow.camera.bottom = -0.5;
+keyLight.shadow.bias = -0.0005;
 scene.add(keyLight);
 
-// Fill-Licht rechts — beleuchtet rechten Außenrand des Blendrahmens
-const fillRight = new THREE.DirectionalLight(0xffffff, 0.50);
-fillRight.position.set(4, 0.6, 5);
+// Fill von rechts oben — weicher Gegenlichter
+const fillRight = new THREE.DirectionalLight(0xffffff, 0.60);
+fillRight.position.set(3, 2, 4);
 scene.add(fillRight);
 
-// Fill-Licht unten — beleuchtet unteren Außenrand des Blendrahmens
-const fillBottom = new THREE.DirectionalLight(0xffffff, 0.40);
-fillBottom.position.set(0, -4, 5);
+// Fill von unten — verhindert zu dunkle untere Kante
+const fillBottom = new THREE.DirectionalLight(0xffffff, 0.25);
+fillBottom.position.set(0, -3, 5);
 scene.add(fillBottom);
 
-// Backlight hinter dem Fenster — simuliert Tageslicht durch Glas
-const backLight = new THREE.DirectionalLight(0xffffff, 5.0);
-backLight.position.set(0, 0.6, -5);
-scene.add(backLight);
-
-// Spotlight auf Griff — brushedMat braucht weniger Intensität als Hochglanz
-const chromeLight = new THREE.SpotLight(0xffffff, 5.0, 10, Math.PI / 5, 0.35);
-chromeLight.position.set(0.6, 1.2, 5);
+// Spotlight auf Griff — brushedMat Reflexionen
+const chromeLight = new THREE.SpotLight(0xffffff, 6.0, 10, Math.PI / 6, 0.3);
+chromeLight.position.set(0.5, 1.0, 5);
 chromeLight.target.position.set(0.36, 0.60, 0.12);
 scene.add(chromeLight); scene.add(chromeLight.target);
 
@@ -244,8 +239,8 @@ const texLoader = new THREE.TextureLoader();
 
 // doorMat = Flügelrahmen-Fläche, frameMat = Blendrahmen-Streifen, glFrameMat = Glasleiste
 // Alle drei bekommen dieselbe Farbe/Holztextur (Fenster ist einheitlich)
-const doorMat    = new THREE.MeshStandardMaterial({ color: 0xfafafa, roughness: 0.72, metalness: 0 });
-const frameMat   = new THREE.MeshStandardMaterial({ color: 0xe8e8e8, roughness: 0.76, metalness: 0 });
+const doorMat    = new THREE.MeshStandardMaterial({ color: 0xfcfcfc, roughness: 0.68, metalness: 0 });
+const frameMat   = new THREE.MeshStandardMaterial({ color: 0xd8d8d8, roughness: 0.80, metalness: 0 });
 const glFrameMat = new THREE.MeshStandardMaterial({ color: 0xfafafa, roughness: 0.72, metalness: 0 });
 const chromeMat  = new THREE.MeshStandardMaterial({ color: 0xb8bec2, roughness: 0.22, metalness: 0.95, envMapIntensity: 4.0 });
 const brushedMat = new THREE.MeshStandardMaterial({ color: 0xb2b8bc, roughness: 0.30, metalness: 0.82, envMapIntensity: 2.0 });
@@ -480,28 +475,29 @@ function buildWindow() {
   // 7. SCHARNIERE — links, 2 flache Rechteckplatten
   //    Oben = Scherenlager (~85%), Unten = Ecklager (~12%)
   // ────────────────────────────────────────────
-  const hingeX = SX0f + 0.008;  // 8mm innerhalb der Sash-Außenkante
+  // Scharniere sitzen am Übergang Blendrahmen/Flügelrahmen (linke Kante Überschlag)
+  const hingeX = BR_W * 0.55;  // ~43mm vom linken Rand = Mitte des Überschlag-Bereichs
 
   [
-    { hy: WH * 0.12, hw: 0.034, hh: 0.034 },  // Ecklager
-    { hy: WH * 0.85, hw: 0.034, hh: 0.046 },  // Scherenlager (höher)
+    { hy: WH * 0.115, hw: 0.038, hh: 0.038 },  // Ecklager unten
+    { hy: WH * 0.845, hw: 0.038, hh: 0.052 },  // Scherenlager oben (höher)
   ].forEach(({ hy, hw, hh }) => {
     const plate = new THREE.Mesh(
-      new THREE.BoxGeometry(hw, hh, 0.007),
+      new THREE.BoxGeometry(hw, hh, 0.008),
       brushedMat
     );
-    plate.position.set(hingeX, hy, sashZ + 0.004);
+    plate.position.set(hingeX, hy, sashZ + 0.005);
     plate.castShadow = true;
     windowGroup.add(plate);
 
     // 2 Schraubenköpfe
     [-hh * 0.28, hh * 0.28].forEach(dy => {
       const sc = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.003, 0.003, 0.003, 8),
-        brushedMat
+        new THREE.CylinderGeometry(0.0035, 0.0035, 0.004, 10),
+        chromeMat
       );
       sc.rotation.x = Math.PI / 2;
-      sc.position.set(hingeX, hy + dy, sashZ + 0.009);
+      sc.position.set(hingeX, hy + dy, sashZ + 0.011);
       windowGroup.add(sc);
     });
   });
