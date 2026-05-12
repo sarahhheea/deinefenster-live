@@ -433,20 +433,20 @@ function buildWindow() {
   glassObjects.push(glassBacking);
 
   // ────────────────────────────────────────────
-  // 6. BÜGELGRIFF — Standard PVC-Fensterbeschlag
-  //    Referenz: schmaler D-Bügel, 2 flache Rosettenplatten
+  // 6. BÜGELGRIFF — DIN 18267 Maße
+  //    Rohr: ⌀17mm, Rosette: oval ~32×50mm, Ausladung: 38mm
   // ────────────────────────────────────────────
   {
-    const HZ     = sashZ + 0.002;
-    const halfH  = 0.046;   // ±46mm → 92mm Gesamthöhe
-    const reach  = 0.024;   // 24mm Ausladung nach links (Mitte des Bogens)
-    const fwd    = 0.038;   // 38mm zum Betrachter (gibt 3D-Tiefe)
-    const rad    = 0.0115;  // 11.5mm Rohrradius — sichtbarer, matter Edelstahl-Rohr
+    const HZ    = sashZ + 0.001;
+    const halfH = 0.048;   // ±48mm → 96mm Gesamthöhe (Achsmaß Rosette-Rosette)
+    const reach = 0.020;   // 20mm seitliche Ausladung (leichte D-Kurve)
+    const fwd   = 0.040;   // 40mm Ausladung zum Betrachter (DIN: 30-45mm)
+    const rad   = 0.0085;  // 8.5mm Radius = 17mm Durchmesser (DIN: 16-18mm)
 
-    // D-Bogen: semi-ellipse, vertikal, Bogen nach links+vorn
+    // D-Bogen (semi-ellipse, vertikal)
     const arcPts = [];
-    for (let i = 0; i <= 32; i++) {
-      const t = (i / 32) * Math.PI;
+    for (let i = 0; i <= 40; i++) {
+      const t = (i / 40) * Math.PI;
       arcPts.push(new THREE.Vector3(
         HX - reach * Math.sin(t),
         HY + halfH * Math.cos(t),
@@ -454,31 +454,33 @@ function buildWindow() {
       ));
     }
     const bow = new THREE.Mesh(
-      new THREE.TubeGeometry(new THREE.CatmullRomCurve3(arcPts), 64, rad, 16, false),
+      new THREE.TubeGeometry(new THREE.CatmullRomCurve3(arcPts), 64, rad, 12, false),
       brushedMat
     );
     bow.castShadow = true;
     windowGroup.add(bow);
 
-    // Rosettenplatten: flache Rechtecke (wie im Referenzbild — nicht rund)
+    // Ovale Rosettenplatten (DIN: ~32×50mm oval)
     [HY + halfH, HY - halfH].forEach(ey => {
-      // Basisplatte (flach, direkt auf Rahmen)
-      const base = new THREE.Mesh(
-        new THREE.BoxGeometry(0.028, 0.022, 0.005),
+      // Ovale Platte: CylinderGeometry mit Y-Scale → Oval
+      const rosette = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.016, 0.016, 0.007, 24),
         brushedMat
       );
-      base.position.set(HX, ey, HZ + 0.0025);
-      base.castShadow = true;
-      windowGroup.add(base);
+      rosette.rotation.x = Math.PI / 2;
+      rosette.scale.y = 1.8;  // Kreis → Oval (32mm breit × 58mm hoch)
+      rosette.position.set(HX, ey, HZ + 0.004);
+      rosette.castShadow = true;
+      windowGroup.add(rosette);
 
-      // Zentraler Rohrübergang (kleiner Zylinder wo Bügel ansetzt)
-      const nub = new THREE.Mesh(
-        new THREE.CylinderGeometry(rad + 0.002, rad + 0.002, 0.010, 16),
+      // Halskragen (wo Rohr in Rosette mündet) — kleiner Zylinder
+      const collar = new THREE.Mesh(
+        new THREE.CylinderGeometry(rad + 0.003, rad + 0.003, 0.008, 14),
         brushedMat
       );
-      nub.rotation.x = Math.PI / 2;
-      nub.position.set(HX, ey, HZ + 0.007);
-      windowGroup.add(nub);
+      collar.rotation.x = Math.PI / 2;
+      collar.position.set(HX, ey, HZ + 0.010);
+      windowGroup.add(collar);
     });
   }
 
