@@ -39,7 +39,7 @@ const RULES = [
   // ── Lieferzeit ──────────────────────────────────────────────────────────────
   {
     keys: ['lieferzeit','wann kommt','wann liefert','geliefert','lieferung','liefern','zustellung','wann fertig','bestellung geliefert','dauert die lieferung','wie lange dauert','abholen','selbst abholen','abholung','lager abholen'],
-    answer: '📦 <strong>Neuware (Drutex Maßfenster):</strong> 4–6 Wochen nach Zahlungseingang — wir bestellen erst dann beim Werk. Lieferung per Spedition deutschlandweit, <strong>versandkostenfrei</strong> ab 4.000 € oder 10 Elementen (sonst 200 €).<br><br>🚗 <strong>Selbstabholung möglich:</strong> Du kannst deine Bestellung auch ins Lager liefern lassen und selbst abholen — praktisch wenn Spedition nicht passt.<br><br>❌ <strong>Gebrauchtware & Lagerware</strong> liefern wir grundsätzlich nicht — nur Selbstabholung in Brandenburg a.d.H. (Hofverkauf freitags).'
+    answer: '📦 <strong>Neuware (Drutex Maßfenster):</strong> Nach deiner Zahlung bestellen wir beim Werk — ab dann ca. <strong>2 Wochen</strong> bis zur Lieferung. Versand per Spedition deutschlandweit, <strong>versandkostenfrei</strong> ab 4.000 € oder 10 Elementen (sonst 200 €).<br><br>🚗 <strong>Selbstabholung möglich:</strong> Du kannst deine Bestellung auch ins Lager liefern lassen und selbst abholen — praktisch wenn Spedition nicht passt.<br><br>❌ <strong>Gebrauchtware & Lagerware</strong> liefern wir grundsätzlich nicht — nur Selbstabholung in Brandenburg a.d.H. (Hofverkauf freitags).'
   },
 
   // ── Einbau ──────────────────────────────────────────────────────────────────
@@ -158,8 +158,8 @@ const RULES = [
 
   // ── Konfigurator / Bestellung ───────────────────────────────────────────────
   {
-    keys: ['konfigurator','online bestellen','bestellen','konfigurieren','zusammenstellen','online kaufen'],
-    answer: 'Im <a href="konfigurator.html">Online-Konfigurator</a> Maße eingeben, Farbe und Verglasung wählen — Preis erscheint live. Danach kommt eine Anfrage zu uns, wir schicken dir ein <strong>individuelles Angebot per E-Mail</strong>. Nach deiner Überweisung bestellen wir die Fenster beim Werk — Lieferzeit dann 4–6 Wochen.'
+    keys: ['konfigurator','online bestellen','bestellen','konfigurieren','zusammenstellen','online kaufen','wie bestelle','wie kann ich bestellen','wie kaufe ich','ablauf','bestellvorgang','bestellprozess','wie funktioniert','wie läuft das','wie geht das','wie geht eine bestellung'],
+    answer: '🪟 <strong>So bestellst du bei uns:</strong><br><br><strong>1. Konfigurator öffnen</strong> → Maße eingeben, Profil, Farbe und Verglasung wählen — der Preis erscheint live. Du kannst mehrere Fenster in einer Anfrage zusammenstellen.<br><br><strong>2. Anfrage absenden</strong> → du gibst deine Kontaktdaten ein, wir bekommen eine E-Mail mit deiner Konfiguration.<br><br><strong>3. Angebot von uns</strong> → wir melden uns mit einem individuellen Angebot — inklusive genauem Preis und Lieferbedingungen.<br><br><strong>4. Zahlung</strong> → nach deiner Überweisung bestellen wir die Fenster direkt beim Hersteller Drutex.<br><br><strong>5. Lieferung</strong> → ab unserem Bestelldatum ca. <strong>2 Wochen</strong> bis zur Lieferung zu dir.<br><br><a href="konfigurator.html" style="display:inline-block;margin-top:6px;padding:7px 14px;background:rgba(118,169,250,0.15);border:1px solid rgba(118,169,250,0.3);border-radius:8px;color:#76a9fa;text-decoration:none;font-weight:700;font-size:12px;">→ Jetzt im Konfigurator starten</a>'
   },
 
   // ── Kontakt / Erreichbarkeit ────────────────────────────────────────────────
