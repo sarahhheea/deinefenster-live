@@ -1,85 +1,427 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
-<meta charset="UTF-8">
-<title>Farben-Vorschau 1-Flügel</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link rel="icon" type="image/svg+xml" href="img/logo/deinefenster-mark.svg"/>
+<title>Fensterfarben & Holzdekore — 45 Oberflächen | DeineFenster.de</title>
+<meta name="description" content="45 Drutex-Fensterfarben & Holzdekore: Anthrazit, Weiß, Grau, Buntfarben und natürliche Holzoptiken. Jede Farbe einzeln konfigurierbar. Direkt ab Werk Brandenburg."/>
+<link rel="canonical" href="https://www.deinefenster.de/farben-vorschau.html"/>
+<link rel="stylesheet" href="css/tailwind.css"/>
+<link rel="preconnect" href="https://fonts.bunny.net"/>
+<link href="https://fonts.bunny.net/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
 <style>
-body { font-family: sans-serif; background: #f0f0f0; padding: 20px; }
-h2 { margin: 20px 0 5px; color: #333; }
-.grid { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 30px; }
-.item { text-align: center; background: white; padding: 8px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-.item img { width: 120px; height: 150px; object-fit: contain; }
-.item p { font-size: 10px; margin: 4px 0 0; color: #555; max-width: 120px; word-break: break-word; }
-.item .key { font-size: 9px; color: #999; }
+  *, *::before, *::after { box-sizing: border-box; }
+  body { font-family: 'Manrope', sans-serif; background: #0a1530; color: #e8eeff; margin: 0; }
+  h1,h2,h3,h4 { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+  /* Nav */
+  #navbar { transition: background 0.3s ease; background: rgba(6,14,30,0.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+  #navbar.scrolled { background: rgba(6,14,30,0.98); box-shadow: 0 2px 24px rgba(0,0,0,0.4); }
+  .nav-link { position: relative; }
+  .nav-link::after { content:''; position:absolute; bottom:-5px; left:0; width:0; height:2px; background:#76a9fa; border-radius:1px; transition:width 0.22s ease; }
+  .nav-link:hover::after { width:100%; }
+
+  /* Hero */
+  .hero-gradient { background: linear-gradient(135deg, #0d1f42 0%, #0a1530 50%, #080e24 100%); }
+
+  /* Filter tabs */
+  .filter-tab { padding: 8px 18px; border-radius: 50px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; border: 1.5px solid rgba(255,255,255,0.12); color: rgba(232,238,255,0.65); background: rgba(255,255,255,0.04); white-space: nowrap; }
+  .filter-tab:hover { border-color: rgba(118,169,250,0.4); color: #e8eeff; background: rgba(34,94,170,0.12); }
+  .filter-tab.active { background: #225eaa; border-color: #225eaa; color: #fff; box-shadow: 0 4px 16px rgba(34,94,170,0.4); }
+
+  /* Color cards */
+  .farb-karte { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; overflow: hidden; cursor: pointer; transition: transform 0.25s cubic-bezier(0.4,0,0.2,1), box-shadow 0.25s ease, border-color 0.25s ease; display: flex; flex-direction: column; }
+  .farb-karte:hover { transform: translateY(-5px); box-shadow: 0 16px 40px rgba(0,0,0,0.35), 0 0 0 1px rgba(118,169,250,0.2); border-color: rgba(118,169,250,0.25); }
+  .farb-karte .img-wrap { background: rgba(255,255,255,0.03); overflow: hidden; position: relative; flex-shrink: 0; }
+  .farb-karte img { width: 100%; height: 100%; object-fit: contain; display: block; transition: transform 0.3s ease; }
+  .farb-karte:hover img { transform: scale(1.04); }
+  .farb-karte .info { padding: 12px 14px 14px; display: flex; align-items: center; gap: 10px; flex: 1; }
+  .swatch { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; border: 2px solid rgba(255,255,255,0.15); box-shadow: inset 0 1px 2px rgba(0,0,0,0.3); }
+  .farb-name { font-size: 12px; font-weight: 700; color: #e8eeff; line-height: 1.3; }
+  .farb-ral { font-size: 10px; color: rgba(232,238,255,0.45); font-weight: 500; margin-top: 1px; }
+
+  /* Hidden for filter */
+  .farb-karte.hidden-filter { display: none; }
+
+  /* Section heading line */
+  .section-line::before { content:''; display:inline-block; width:3px; height:1.2em; background:#225eaa; border-radius:2px; margin-right:10px; vertical-align:middle; }
+
+  /* CTA */
+  .cta-card { background: linear-gradient(135deg, rgba(34,94,170,0.25) 0%, rgba(15,28,48,0.8) 100%); border: 1px solid rgba(34,94,170,0.3); border-radius: 24px; }
+
+  /* Scroll progress */
+  #scroll-progress { position:fixed; top:0; left:0; height:3px; z-index:100; background:linear-gradient(90deg,#225eaa,#76a9fa); width:0%; transition:width 0.1s linear; }
+
+  @media (prefers-reduced-motion: reduce) { .farb-karte, .farb-karte img { transition: none !important; } }
 </style>
 </head>
 <body>
-<h1>Farb-Varianten — 1-Flügel Innen</h1>
 
-<h2>Weiß-Töne (weißer Griff)</h2>
-<div class="grid">
-  <div class="item"><img src="img/farben/fenster_1fl_weiss.png"><p>Weiß RAL 9016</p><p class="key">weiss</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_cremeweiss.png"><p>Cremeweiß RAL 9001</p><p class="key">cremeweiss</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_weiss-fx.png"><p>Weiß FX RAL 9016</p><p class="key">weiss-fx</p></div>
-</div>
+<div id="scroll-progress"></div>
 
-<h2>Grautöne (silberner Griff)</h2>
-<div class="grid">
-  <div class="item"><img src="img/farben/fenster_1fl_lichtgrau.png"><p>Lichtgrau RAL 7035</p><p class="key">lichtgrau</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_achatgrau.png"><p>Achatgrau RAL 7038</p><p class="key">achatgrau</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_crown-plat.png"><p>Crown Platin</p><p class="key">crown-plat</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_alu-gebr.png"><p>Aluminium gebürstet</p><p class="key">alu-gebr</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_alux-db.png"><p>Alux DB RAL 7048</p><p class="key">alux-db</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_signalgrau.png"><p>Signalgrau RAL 7004</p><p class="key">signalgrau</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_betongrau.png"><p>Betongrau RAL 7023</p><p class="key">betongrau</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_quarzgr-gl.png"><p>Quarzgrau Glatt</p><p class="key">quarzgr-gl</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_quarzgr-sa.png"><p>Quarzgrau Sand</p><p class="key">quarzgr-sa</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_basaltgr-gl.png"><p>Basaltgrau Glatt</p><p class="key">basaltgr-gl</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_basaltgr-sa.png"><p>Basaltgrau Sand</p><p class="key">basaltgr-sa</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_schiefgr-gl.png"><p>Schiefergrau Glatt</p><p class="key">schiefgr-gl</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_schiefgr-sa.png"><p>Schiefergrau Sand</p><p class="key">schiefgr-sa</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_eisengl.png"><p>Eisenglimmer</p><p class="key">eisengl</p></div>
-</div>
+<!-- Nav -->
+<nav id="navbar" class="fixed top-0 w-full z-50 border-b border-white/10">
+  <div class="flex justify-between items-center px-6 md:px-12 py-4 max-w-[1440px] mx-auto">
+    <a href="index.html" class="text-xl md:text-2xl font-bold tracking-tighter text-white">DeineFenster<span style="color:#76a9fa">.de</span></a>
+    <div class="hidden md:flex items-center gap-x-5">
+      <a href="produkte.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Produkte</a>
+      <a href="ueber-drutex.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Hersteller</a>
+      <a href="kunststofffenster-kaufen.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Neue Fenster</a>
+      <a href="gebrauchte-fenster-kaufen.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Gebraucht</a>
+      <a href="konfigurator.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Konfigurator</a>
+      <a href="shop.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight inline-flex items-center gap-1.5">Shop <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none" style="background:#76a9fa;color:#001b3d">NEU</span></a>
+      <a href="kontakt.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Kontakt</a>
+    </div>
+    <div class="flex items-center gap-3 md:gap-6">
+      <a href="konfigurator.html" class="hidden md:block px-6 py-3 rounded-full font-bold text-sm transition-all duration-300" style="background:#225eaa;color:#fff;">Jetzt konfigurieren</a>
+      <button id="menuBtn" class="md:hidden text-white p-1" aria-label="Menü öffnen">
+        <span class="material-symbols-outlined text-3xl" id="menuIcon">menu</span>
+      </button>
+    </div>
+  </div>
+  <!-- Mobile -->
+  <div id="mobileMenu" class="hidden md:hidden px-6 py-6 border-t border-white/10" style="background:rgba(6,14,30,0.98);">
+    <div class="flex flex-col gap-2">
+      <a href="produkte.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Produkte</a>
+      <a href="ueber-drutex.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Hersteller</a>
+      <a href="kunststofffenster-kaufen.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Neue Fenster</a>
+      <a href="gebrauchte-fenster-kaufen.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Gebraucht</a>
+      <a href="konfigurator.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Konfigurator</a>
+      <a href="shop.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Shop</a>
+      <a href="kontakt.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Kontakt</a>
+      <a href="konfigurator.html" class="mt-4 w-full text-center px-6 py-3 rounded-full font-bold text-sm" style="background:#225eaa;color:#fff;">Jetzt konfigurieren</a>
+    </div>
+  </div>
+</nav>
 
-<h2>Anthrazit (standard Griff)</h2>
-<div class="grid">
-  <div class="item"><img src="img/farben/fenster_1fl_anthrazit.png"><p>Anthrazit RAL 7016</p><p class="key">anthrazit</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_anthraz-gl.png"><p>Anthrazit Glatt</p><p class="key">anthraz-gl</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_anthraz-um.png"><p>Anthrazit Ulti-Matt</p><p class="key">anthraz-um</p></div>
-</div>
+<!-- Hero -->
+<section class="hero-gradient pt-32 pb-16 md:pt-44 md:pb-20 px-6 md:px-12 max-w-[1440px] mx-auto">
+  <div class="max-w-3xl">
+    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-6 text-xs font-bold uppercase tracking-widest" style="background:rgba(34,94,170,0.18);border:1px solid rgba(34,94,170,0.3);color:#76a9fa;">
+      <span class="material-symbols-outlined" style="font-size:14px">palette</span>
+      Drutex Oberflächen
+    </div>
+    <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.05] mb-5" style="color:#e8eeff;">
+      Ihr Fenster.<br/>
+      <span style="background:linear-gradient(120deg,#76a9fa 0%,#a9c7ff 60%,#e8eeff 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;">Ihre Farbe.</span>
+    </h1>
+    <p class="text-base md:text-lg leading-relaxed mb-8 max-w-xl" style="color:rgba(232,238,255,0.7);">
+      45 Oberflächen — von klassisch Weiß bis eleganter Holzoptik. Drutex fertigt jede Farbe in Bytów direkt am Profil. Keine Folie, kein Aufkleber — die Farbe ist im Material.
+    </p>
+    <div class="flex flex-wrap gap-6">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary" style="font-size:20px;color:#76a9fa;">check_circle</span>
+        <span class="text-sm font-medium" style="color:rgba(232,238,255,0.75);">UV-beständig & wartungsfrei</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined" style="font-size:20px;color:#76a9fa;">check_circle</span>
+        <span class="text-sm font-medium" style="color:rgba(232,238,255,0.75);">Innen & außen separat wählbar</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined" style="font-size:20px;color:#76a9fa;">check_circle</span>
+        <span class="text-sm font-medium" style="color:rgba(232,238,255,0.75);">Ab Werk Brandenburg</span>
+      </div>
+    </div>
+  </div>
+</section>
 
-<h2>Dunkel (silberner Griff)</h2>
-<div class="grid">
-  <div class="item"><img src="img/farben/fenster_1fl_schwarz-um.png"><p>Schwarz Ulti-Matt</p><p class="key">schwarz-um</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_schwarzbr.png"><p>Schwarzbraun RAL 8022</p><p class="key">schwarzbr</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_moosgruen.png"><p>Moosgrün RAL 6005</p><p class="key">moosgruen</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_dunkelgr.png"><p>Dunkelgrün RAL 6125</p><p class="key">dunkelgr</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_stahlblau.png"><p>Stahlblau RAL 5150</p><p class="key">stahlblau</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_brillblau.png"><p>Brilliantblau RAL 5007</p><p class="key">brillblau</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_dunkelrot.png"><p>Dunkelrot RAL 3081</p><p class="key">dunkelrot</p></div>
-</div>
+<!-- Filter + Grid -->
+<section class="px-4 md:px-12 pb-24 max-w-[1440px] mx-auto">
 
-<h2>Holzdekore (silberner Griff)</h2>
-<div class="grid">
-  <div class="item"><img src="img/farben/fenster_1fl_sheffield.png"><p>Sheffield Oak Light</p><p class="key">sheffield</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_eiche-hell.png"><p>Eiche Hell</p><p class="key">eiche-hell</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_eiche-nat.png"><p>Eiche Natur</p><p class="key">eiche-nat</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_golden-oak.png"><p>Golden Oak</p><p class="key">golden-oak</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_oregon.png"><p>Oregon</p><p class="key">oregon</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_bergkiefer.png"><p>Bergkiefer</p><p class="key">bergkiefer</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_douglasie.png"><p>Streifen-Douglasie</p><p class="key">douglasie</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_winchester.png"><p>Winchester</p><p class="key">winchester</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_siena-noce.png"><p>Siena Noce</p><p class="key">siena-noce</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_teak.png"><p>Teak</p><p class="key">teak</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_nussbaum.png"><p>Nussbaum</p><p class="key">nussbaum</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_siena-ross.png"><p>Siena Rosso</p><p class="key">siena-ross</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_mahagoni.png"><p>Mahagoni</p><p class="key">mahagoni</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_macore.png"><p>Macoré</p><p class="key">macore</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_braun-mar.png"><p>Braun Maron</p><p class="key">braun-mar</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_schoko-br.png"><p>Schokoladenbraun</p><p class="key">schoko-br</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_mooreiche.png"><p>Mooreiche</p><p class="key">mooreiche</p></div>
-  <div class="item"><img src="img/farben/fenster_1fl_dunkleiche.png"><p>Dunkleiche</p><p class="key">dunkleiche</p></div>
-</div>
+  <!-- Filter Tabs -->
+  <div class="flex gap-2 overflow-x-auto pb-3 mb-8 scrollbar-none" style="scrollbar-width:none;-ms-overflow-style:none;">
+    <button class="filter-tab active" data-filter="alle">Alle <span class="opacity-60 font-normal ml-1">45</span></button>
+    <button class="filter-tab" data-filter="weiss">Weiß-Töne <span class="opacity-60 font-normal ml-1">3</span></button>
+    <button class="filter-tab" data-filter="grau">Grautöne <span class="opacity-60 font-normal ml-1">14</span></button>
+    <button class="filter-tab" data-filter="anthrazit">Anthrazit <span class="opacity-60 font-normal ml-1">3</span></button>
+    <button class="filter-tab" data-filter="bunt">Buntfarben <span class="opacity-60 font-normal ml-1">7</span></button>
+    <button class="filter-tab" data-filter="holz">Holzdekore <span class="opacity-60 font-normal ml-1">18</span></button>
+  </div>
 
+  <!-- Grid -->
+  <div id="farbenGrid" class="grid gap-4" style="grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));">
+
+    <!-- WEISS-TÖNE -->
+    <article class="farb-karte" data-cat="weiss" title="Weiß RAL 9016 — Konfigurator öffnen" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_weiss.png" alt="Fenster Weiß RAL 9016" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#f0f0ec;"></div><div><div class="farb-name">Weiß</div><div class="farb-ral">RAL 9016</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="weiss" title="Cremeweiß RAL 9001" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_cremeweiss.png" alt="Fenster Cremeweiß RAL 9001" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#f4edde;"></div><div><div class="farb-name">Cremeweiß</div><div class="farb-ral">RAL 9001</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="weiss" title="Weiß FX RAL 9016" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_weiss-fx.png" alt="Fenster Weiß FX" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#eeeef0;border-color:rgba(180,180,200,0.4);"></div><div><div class="farb-name">Weiß FX</div><div class="farb-ral">RAL 9016</div></div></div>
+    </article>
+
+    <!-- GRAUTÖNE -->
+    <article class="farb-karte" data-cat="grau" title="Lichtgrau RAL 7035" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_lichtgrau.png" alt="Fenster Lichtgrau RAL 7035" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#d0cdc5;"></div><div><div class="farb-name">Lichtgrau</div><div class="farb-ral">RAL 7035</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="grau" title="Achatgrau RAL 7038" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_achatgrau.png" alt="Fenster Achatgrau RAL 7038" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#b4b0a6;"></div><div><div class="farb-name">Achatgrau</div><div class="farb-ral">RAL 7038</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="grau" title="Crown Platin" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_crown-plat.png" alt="Fenster Crown Platin" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#c8c4bc;"></div><div><div class="farb-name">Crown Platin</div><div class="farb-ral">Metallic</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="grau" title="Aluminium gebürstet" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_alu-gebr.png" alt="Fenster Aluminium gebürstet" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#a8a8a0;"></div><div><div class="farb-name">Alu gebürstet</div><div class="farb-ral">Metallic</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="grau" title="Alux DB RAL 7048" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_alux-db.png" alt="Fenster Alux DB RAL 7048" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#8c8880;"></div><div><div class="farb-name">Alux DB</div><div class="farb-ral">RAL 7048</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="grau" title="Signalgrau RAL 7004" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_signalgrau.png" alt="Fenster Signalgrau RAL 7004" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#9a9694;"></div><div><div class="farb-name">Signalgrau</div><div class="farb-ral">RAL 7004</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="grau" title="Betongrau RAL 7023" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_betongrau.png" alt="Fenster Betongrau RAL 7023" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#7c7870;"></div><div><div class="farb-name">Betongrau</div><div class="farb-ral">RAL 7023</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="grau" title="Quarzgrau Glatt" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_quarzgr-gl.png" alt="Fenster Quarzgrau Glatt" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#8a877e;"></div><div><div class="farb-name">Quarzgrau Glatt</div><div class="farb-ral">Struktur</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="grau" title="Quarzgrau Sand" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_quarzgr-sa.png" alt="Fenster Quarzgrau Sand" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#8a8870;"></div><div><div class="farb-name">Quarzgrau Sand</div><div class="farb-ral">Struktur</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="grau" title="Basaltgrau Glatt" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_basaltgr-gl.png" alt="Fenster Basaltgrau Glatt" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#606060;"></div><div><div class="farb-name">Basaltgrau Glatt</div><div class="farb-ral">Struktur</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="grau" title="Basaltgrau Sand" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_basaltgr-sa.png" alt="Fenster Basaltgrau Sand" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#5e5e50;"></div><div><div class="farb-name">Basaltgrau Sand</div><div class="farb-ral">Struktur</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="grau" title="Schiefergrau Glatt" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_schiefgr-gl.png" alt="Fenster Schiefergrau Glatt" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#4a4a50;"></div><div><div class="farb-name">Schiefergrau Gl.</div><div class="farb-ral">Struktur</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="grau" title="Schiefergrau Sand" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_schiefgr-sa.png" alt="Fenster Schiefergrau Sand" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#484848;"></div><div><div class="farb-name">Schiefergrau Sa.</div><div class="farb-ral">Struktur</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="grau" title="Eisenglimmer" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_eisengl.png" alt="Fenster Eisenglimmer" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#484850;"></div><div><div class="farb-name">Eisenglimmer</div><div class="farb-ral">Metallic</div></div></div>
+    </article>
+
+    <!-- ANTHRAZIT -->
+    <article class="farb-karte" data-cat="anthrazit" title="Anthrazit RAL 7016" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_anthrazit.png" alt="Fenster Anthrazit RAL 7016" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#383e42;"></div><div><div class="farb-name">Anthrazit</div><div class="farb-ral">RAL 7016</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="anthrazit" title="Anthrazit Glatt" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_anthraz-gl.png" alt="Fenster Anthrazit Glatt" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#3c3c40;"></div><div><div class="farb-name">Anthrazit Glatt</div><div class="farb-ral">Struktur</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="anthrazit" title="Anthrazit Ulti-Matt" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_anthraz-um.png" alt="Fenster Anthrazit Ulti-Matt" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#38383c;"></div><div><div class="farb-name">Anthrazit UM</div><div class="farb-ral">Ulti-Matt</div></div></div>
+    </article>
+
+    <!-- BUNTFARBEN -->
+    <article class="farb-karte" data-cat="bunt" title="Schwarz Ulti-Matt" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_schwarz-um.png" alt="Fenster Schwarz Ulti-Matt" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#252525;"></div><div><div class="farb-name">Schwarz UM</div><div class="farb-ral">Ulti-Matt</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="bunt" title="Schwarzbraun RAL 8022" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_schwarzbr.png" alt="Fenster Schwarzbraun RAL 8022" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#1c1611;"></div><div><div class="farb-name">Schwarzbraun</div><div class="farb-ral">RAL 8022</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="bunt" title="Moosgrün RAL 6005" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_moosgruen.png" alt="Fenster Moosgrün RAL 6005" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#214730;"></div><div><div class="farb-name">Moosgrün</div><div class="farb-ral">RAL 6005</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="bunt" title="Dunkelgrün RAL 6125" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_dunkelgr.png" alt="Fenster Dunkelgrün RAL 6125" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#2d5030;"></div><div><div class="farb-name">Dunkelgrün</div><div class="farb-ral">RAL 6125</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="bunt" title="Stahlblau RAL 5150" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_stahlblau.png" alt="Fenster Stahlblau RAL 5150" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#255080;"></div><div><div class="farb-name">Stahlblau</div><div class="farb-ral">RAL 5150</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="bunt" title="Brilliantblau RAL 5007" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_brillblau.png" alt="Fenster Brilliantblau RAL 5007" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#3b6fa0;"></div><div><div class="farb-name">Brilliantblau</div><div class="farb-ral">RAL 5007</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="bunt" title="Dunkelrot RAL 3081" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_dunkelrot.png" alt="Fenster Dunkelrot RAL 3081" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#6e1e1e;"></div><div><div class="farb-name">Dunkelrot</div><div class="farb-ral">RAL 3081</div></div></div>
+    </article>
+
+    <!-- HOLZDEKORE -->
+    <article class="farb-karte" data-cat="holz" title="Sheffield Oak Light" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_sheffield.png" alt="Fenster Sheffield Oak Light" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#c8a878;"></div><div><div class="farb-name">Sheffield Oak</div><div class="farb-ral">Hell</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="holz" title="Eiche Hell" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_eiche-hell.png" alt="Fenster Eiche Hell" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#c0946a;"></div><div><div class="farb-name">Eiche Hell</div><div class="farb-ral">Holzdekor</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="holz" title="Eiche Natur" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_eiche-nat.png" alt="Fenster Eiche Natur" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#b87c58;"></div><div><div class="farb-name">Eiche Natur</div><div class="farb-ral">Holzdekor</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="holz" title="Golden Oak" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_golden-oak.png" alt="Fenster Golden Oak" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#b87040;"></div><div><div class="farb-name">Golden Oak</div><div class="farb-ral">Holzdekor</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="holz" title="Oregon" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_oregon.png" alt="Fenster Oregon" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#a06040;"></div><div><div class="farb-name">Oregon</div><div class="farb-ral">Holzdekor</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="holz" title="Bergkiefer" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_bergkiefer.png" alt="Fenster Bergkiefer" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#c89a5a;"></div><div><div class="farb-name">Bergkiefer</div><div class="farb-ral">Holzdekor</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="holz" title="Streifen-Douglasie" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_douglasie.png" alt="Fenster Streifen-Douglasie" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#a07050;"></div><div><div class="farb-name">Douglasie</div><div class="farb-ral">Holzdekor</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="holz" title="Winchester" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_winchester.png" alt="Fenster Winchester" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#8c6040;"></div><div><div class="farb-name">Winchester</div><div class="farb-ral">Holzdekor</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="holz" title="Siena Noce" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_siena-noce.png" alt="Fenster Siena Noce" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#7c5038;"></div><div><div class="farb-name">Siena Noce</div><div class="farb-ral">Holzdekor</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="holz" title="Teak" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_teak.png" alt="Fenster Teak" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#8c6030;"></div><div><div class="farb-name">Teak</div><div class="farb-ral">Holzdekor</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="holz" title="Nussbaum" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_nussbaum.png" alt="Fenster Nussbaum" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#685030;"></div><div><div class="farb-name">Nussbaum</div><div class="farb-ral">Holzdekor</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="holz" title="Siena Rosso" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_siena-ross.png" alt="Fenster Siena Rosso" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#8c4838;"></div><div><div class="farb-name">Siena Rosso</div><div class="farb-ral">Holzdekor</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="holz" title="Mahagoni" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_mahagoni.png" alt="Fenster Mahagoni" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#7c3830;"></div><div><div class="farb-name">Mahagoni</div><div class="farb-ral">Holzdekor</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="holz" title="Macoré" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_macore.png" alt="Fenster Macoré" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#7c4848;"></div><div><div class="farb-name">Macoré</div><div class="farb-ral">Holzdekor</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="holz" title="Braun Maron" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_braun-mar.png" alt="Fenster Braun Maron" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#6c4830;"></div><div><div class="farb-name">Braun Maron</div><div class="farb-ral">Holzdekor</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="holz" title="Schokoladenbraun" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_schoko-br.png" alt="Fenster Schokoladenbraun" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#4c2c1c;"></div><div><div class="farb-name">Schokobraun</div><div class="farb-ral">Holzdekor</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="holz" title="Mooreiche" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_mooreiche.png" alt="Fenster Mooreiche" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#504838;"></div><div><div class="farb-name">Mooreiche</div><div class="farb-ral">Holzdekor</div></div></div>
+    </article>
+    <article class="farb-karte" data-cat="holz" title="Dunkleiche" onclick="window.location='konfigurator.html'">
+      <div class="img-wrap" style="aspect-ratio:3/4;"><img src="img/farben/fenster_1fl_aussen_dunkleiche.png" alt="Fenster Dunkleiche" loading="lazy" decoding="async"/></div>
+      <div class="info"><div class="swatch" style="background:#403830;"></div><div><div class="farb-name">Dunkleiche</div><div class="farb-ral">Holzdekor</div></div></div>
+    </article>
+
+  </div><!-- /farbenGrid -->
+
+  <!-- Info-Kasten Holzdekore -->
+  <div class="mt-10 p-6 md:p-8 rounded-2xl flex flex-col md:flex-row gap-5 items-start" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);">
+    <span class="material-symbols-outlined text-4xl flex-shrink-0" style="color:#76a9fa;font-variation-settings:'FILL' 1;">info</span>
+    <div>
+      <h3 class="text-base font-bold mb-2" style="color:#e8eeff;">Holzdekore: Echtholzoptik ohne Pflege</h3>
+      <p class="text-sm leading-relaxed" style="color:rgba(232,238,255,0.65);">
+        Alle Holzdekore sind hochwertige PVC-Folien, die die Maserung echten Holzes täuschend echt imitieren — ohne Streichen, Schleifen oder Ölen. UV-beständig für mindestens 10 Jahre. Außen- und Innenfarbe können frei kombiniert werden: z.B. außen Anthrazit, innen Golden Oak.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA-Sektion -->
+<section class="px-6 md:px-12 pb-24 max-w-[1440px] mx-auto">
+  <div class="cta-card p-10 md:p-16 text-center">
+    <span class="material-symbols-outlined text-5xl mb-4 block" style="color:#76a9fa;font-variation-settings:'FILL' 1;">design_services</span>
+    <h2 class="text-2xl md:text-4xl font-extrabold mb-4 tracking-tight" style="color:#e8eeff;">Wunschfarbe gefunden?</h2>
+    <p class="text-sm md:text-base mb-8 max-w-lg mx-auto" style="color:rgba(232,238,255,0.65);">
+      Im Konfigurator wählen Sie Farbe, Größe, Öffnungsart und Verglasung — und erhalten sofort ein Angebot direkt aus Brandenburg.
+    </p>
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <a href="konfigurator.html" class="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full font-bold text-base transition-all duration-300 hover:opacity-90" style="background:#225eaa;color:#fff;box-shadow:0 8px 24px rgba(34,94,170,0.4);">
+        <span class="material-symbols-outlined" style="font-size:20px">build</span>
+        Jetzt konfigurieren
+      </a>
+      <a href="kontakt.html" class="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full font-bold text-base transition-all duration-300 hover:bg-white/10" style="border:1.5px solid rgba(255,255,255,0.2);color:#e8eeff;">
+        <span class="material-symbols-outlined" style="font-size:20px">phone</span>
+        Persönlich beraten lassen
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="border-t border-white/10 px-6 md:px-12 py-10 max-w-[1440px] mx-auto">
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+    <div>
+      <a href="index.html" class="text-xl font-bold tracking-tighter text-white">DeineFenster<span style="color:#76a9fa">.de</span></a>
+      <p class="text-xs mt-1" style="color:rgba(232,238,255,0.4);">Offizieller Drutex-Partner · Brandenburg · Fenster Christ</p>
+    </div>
+    <div class="flex flex-wrap gap-5 text-xs" style="color:rgba(232,238,255,0.5);">
+      <a href="impressum.html" class="hover:text-white transition-colors">Impressum</a>
+      <a href="datenschutz.html" class="hover:text-white transition-colors">Datenschutz</a>
+      <a href="agb.html" class="hover:text-white transition-colors">AGB</a>
+      <a href="kontakt.html" class="hover:text-white transition-colors">Kontakt</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Scroll progress
+const prog = document.getElementById('scroll-progress');
+const nav  = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  if (prog) prog.style.width = (window.scrollY / h * 100) + '%';
+  if (nav) nav.classList.toggle('scrolled', window.scrollY > 60);
+}, { passive: true });
+
+// Mobile menu
+const menuBtn  = document.getElementById('menuBtn');
+const mobileMenu = document.getElementById('mobileMenu');
+const menuIcon = document.getElementById('menuIcon');
+if (menuBtn) {
+  menuBtn.addEventListener('click', () => {
+    const open = mobileMenu.classList.toggle('hidden');
+    menuIcon.textContent = open ? 'menu' : 'close';
+  });
+}
+
+// Filter tabs
+const tabs  = document.querySelectorAll('.filter-tab');
+const cards = document.querySelectorAll('.farb-karte');
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    tabs.forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const f = tab.dataset.filter;
+    cards.forEach(c => {
+      if (f === 'alle' || c.dataset.cat === f) {
+        c.classList.remove('hidden-filter');
+      } else {
+        c.classList.add('hidden-filter');
+      }
+    });
+  });
+});
+</script>
 </body>
 </html>
