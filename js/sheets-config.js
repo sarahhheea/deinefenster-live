@@ -10,7 +10,7 @@ const _GH_REPO = 'sarahhheea/deinefenster-live';
 const _GH_TOK  = ['gho_FVoOt','E1NYndlH2','8C7IADxVO','LqTV0i21P','sFYB'].join('');
 const _SHOP_PW = 'Fenster2026';
 const _GH_API  = 'https://api.github.com';
-const _PAGES   = 'https://www.deinefenster.de';
+const _PAGES   = 'https://sarahhheea.github.io/deinefenster-live';
 const _JSON_PATH = 'data/shop-produkte.json';
 
 /* ─── Session ─────────────────────────────────────────────────────────── */
