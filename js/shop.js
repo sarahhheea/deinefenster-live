@@ -604,7 +604,7 @@ function karteHtml(p) {
   return `
     <article class="karte" data-action="detail" data-id="${p.id}">
       <div class="karte-bild-wrap">
-        <img src="${escapeHtml(p.bild)}" alt="${escapeHtml(p.titel)}" class="karte-bild w-full" loading="lazy" onerror="this.src='img/fenster_standard.png'"/>
+        <img src="${escapeHtml(p.bild)}" alt="${escapeHtml(p.titel)}" class="karte-bild w-full" loading="lazy" decoding="async" onerror="this.src='img/fenster_standard.png'"/>
         <span class="symbolbild-mini">Symbolbild</span>
         ${druckIcon}
         ${aktionMenu}
