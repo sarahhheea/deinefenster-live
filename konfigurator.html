@@ -4538,8 +4538,11 @@ function toggleFarbGruppe(header) {
 function switchFarbTab(tab) {
   document.querySelectorAll('.farb-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
   document.querySelectorAll('.farb-tab-content').forEach(c => c.classList.toggle('active', c.dataset.tabContent === tab));
-  if (tab === 'fa') setPreviewView('aus');
-  if (tab === 'fi') setPreviewView('inn');
+  // Haustür: Toggle bleibt konstant — User steuert Innen/Außen selbst
+  if (S.prod !== 'haustuere') {
+    if (tab === 'fa') setPreviewView('aus');
+    if (tab === 'fi') setPreviewView('inn');
+  }
 }
 
 // Sarah-Wunsch 21.04.2026: expliziter "Weiter zur Verglasung"-Button am Ende von Schritt 6
@@ -6324,6 +6327,9 @@ function drawPrev() {
       if (prevWrap) prevWrap.style.height = '420px';
     }
   }
+  // Symbolfoto-Badge: nur bei KI-Bildern (Fenster/Balkontür), nicht bei Haustür-Bildern
+  const symBadge = document.getElementById('prev-symbolfoto');
+  if (symBadge) symBadge.style.display = isHaus ? 'none' : '';
 
   if (!S.prod) {
     if (wrap) wrap.style.display = 'none';
