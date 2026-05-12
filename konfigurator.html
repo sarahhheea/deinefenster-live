@@ -7309,12 +7309,75 @@ async function submitSkizze(e) {
     return s;
   }
 
+  // Fenstergriff (Kunststofffenster) — Rosette + Hebel zeigt nach unten (geschlossen)
   function fensterGriff(x, y, w, h, oeff, griffKey) {
     const isLinks = (oeff==='dreh-l'||oeff==='dk-l');
-    const gx = isLinks ? x+38 : x+w-38, gy = y+h*0.52;
-    const gc = (window.P&&window.P.griff&&window.P.griff[griffKey]) ? window.P.griff[griffKey].col||'#c8cad4' : '#c8cad4';
-    return '<rect x="'+(gx-9)+'" y="'+(gy-28)+'" width="18" height="56" rx="9" fill="'+gc+'" stroke="#707888" stroke-width="2" opacity="0.92"/>'
-      +'<rect x="'+(gx-14)+'" y="'+(gy-6)+'" width="28" height="12" rx="6" fill="'+gc+'" stroke="#707888" stroke-width="2" opacity="0.92"/>';
+    const gx = isLinks ? x+46 : x+w-46;
+    const gy = y + h*0.44;
+    const gc = (window.P&&window.P.griff&&window.P.griff[griffKey]) ? window.P.griff[griffKey].col||'#b8bcc8' : '#b8bcc8';
+    const dk = '#606878';
+    // Rosette (ovale Basisplatte)
+    let s = '<rect x="'+(gx-14)+'" y="'+(gy-26)+'" width="28" height="52" rx="14" fill="'+gc+'" stroke="'+dk+'" stroke-width="1.8"/>';
+    // Highlight auf Rosette
+    s += '<rect x="'+(gx-8)+'" y="'+(gy-22)+'" width="8" height="20" rx="4" fill="white" opacity="0.22"/>';
+    // Schrauben-Punkte
+    s += '<circle cx="'+gx+'" cy="'+(gy-16)+'" r="2.4" fill="'+dk+'" opacity="0.55"/>';
+    s += '<circle cx="'+gx+'" cy="'+(gy+16)+'" r="2.4" fill="'+dk+'" opacity="0.55"/>';
+    // Griff-Hebel (zeigt nach unten = Position geschlossen)
+    s += '<rect x="'+(gx-9)+'" y="'+(gy+16)+'" width="18" height="40" rx="9" fill="'+gc+'" stroke="'+dk+'" stroke-width="1.8"/>';
+    s += '<rect x="'+(gx-6)+'" y="'+(gy+18)+'" width="6" height="16" rx="3" fill="white" opacity="0.18"/>';
+    // Griffmuschel (Oval an Hebelspitze)
+    s += '<ellipse cx="'+gx+'" cy="'+(gy+56)+'" rx="9" ry="5" fill="'+gc+'" stroke="'+dk+'" stroke-width="1.5"/>';
+    return s;
+  }
+
+  // Balkontür-Griff (Drückergarnitur — Hebelgriff)
+  function balkontuerGriff(x, y, w, h, oeff, griffKey) {
+    const isLinks = (oeff==='dreh-l'||oeff==='dk-l');
+    const gx = isLinks ? x+44 : x+w-44;
+    const gy = y + h*0.52;
+    const gc = (window.P&&window.P.griff&&window.P.griff[griffKey]) ? window.P.griff[griffKey].col||'#b8bcc8' : '#b8bcc8';
+    const dk = '#606878';
+    // Langschild
+    let s = '<rect x="'+(gx-12)+'" y="'+(gy-55)+'" width="24" height="110" rx="12" fill="'+gc+'" stroke="'+dk+'" stroke-width="1.8"/>';
+    s += '<rect x="'+(gx-7)+'" y="'+(gy-50)+'" width="7" height="28" rx="3.5" fill="white" opacity="0.18"/>';
+    // Drücker (Hebel, horizontal)
+    const dir = isLinks ? 1 : -1;
+    s += '<rect x="'+(gx-8)+'" y="'+(gy-8)+'" width="8" height="16" rx="4" fill="'+gc+'" stroke="'+dk+'" stroke-width="1.5"/>';
+    s += '<rect x="'+(gx + (dir>0?0:-42))+'" y="'+(gy-5)+'" width="42" height="10" rx="5" fill="'+gc+'" stroke="'+dk+'" stroke-width="1.5"/>';
+    // Schlüsselloch
+    s += '<circle cx="'+gx+'" cy="'+(gy+30)+'" r="5" fill="'+dk+'" opacity="0.5"/>';
+    s += '<rect x="'+(gx-2)+'" y="'+(gy+32)+'" width="4" height="8" rx="1" fill="'+dk+'" opacity="0.5"/>';
+    return s;
+  }
+
+  // Scharniere am Flügelrahmen (Kunststofffenster)
+  function fensterScharniere(x, y, w, h, oeff) {
+    const isLinks = (oeff==='dreh-l'||oeff==='dk-l');
+    // Scharniere gegenüber Griff
+    const hx = isLinks ? x+w-18 : x+2;
+    const y1 = y + h*0.16, y2 = y + h*0.72;
+    let s = '';
+    for (const hy of [y1, y2]) {
+      // Scharnier-Körper
+      s += '<rect x="'+hx+'" y="'+(hy-20)+'" width="16" height="40" rx="2.5" fill="#a8b0bc" stroke="#7a8290" stroke-width="1.5"/>';
+      // Scharnier-Achse (Punkt in der Mitte)
+      s += '<circle cx="'+(hx+8)+'" cy="'+hy+'" r="4.5" fill="#888" stroke="#666" stroke-width="1.2"/>';
+      s += '<circle cx="'+(hx+8)+'" cy="'+hy+'" r="1.8" fill="#555"/>';
+      // Befestigungsschrauben
+      s += '<circle cx="'+(hx+8)+'" cy="'+(hy-12)+'" r="2" fill="#909aa4" stroke="#6a7480" stroke-width="1"/>';
+      s += '<circle cx="'+(hx+8)+'" cy="'+(hy+12)+'" r="2" fill="#909aa4" stroke="#6a7480" stroke-width="1"/>';
+    }
+    return s;
+  }
+
+  // Fensterbank (nur Kunststofffenster)
+  function fensterbank(bMm, wY, hMm) {
+    const sbY = wY + hMm - 2;
+    const sbH = 44;
+    return '<rect x="-18" y="'+sbY+'" width="'+(bMm+36)+'" height="'+sbH+'" fill="#cdd2d8" rx="3"/>'
+      +'<rect x="-18" y="'+sbY+'" width="'+(bMm+36)+'" height="8" fill="white" opacity="0.22" rx="3"/>'
+      +'<rect x="-18" y="'+sbY+'" width="'+(bMm+36)+'" height="'+sbH+'" fill="none" stroke="rgba(0,0,0,0.10)" stroke-width="1.5" rx="3"/>';
   }
 
   function rolladenKasten(x, y, w, h, rollSeite, rollTyp) {
@@ -7353,14 +7416,22 @@ async function submitSkizze(e) {
       s += glassRect(gx,gy,gw,gh,S.glasdekor);
       s += sprosse(gx,gy,gw,gh,S.sproTyp,S.sproDicke);
       if (!isFixed) s += oeffSymbol(gx,gy,gw,gh,oeff);
-      if (view==='inn'&&!isFixed&&S.prod!=='haustuere') s += fensterGriff(gx,gy,gw,gh,oeff,S.griff);
+      if (view==='inn'&&!isFixed&&S.prod!=='haustuere') {
+        if (S.prod==='balkontuer') s += balkontuerGriff(x,y,w,h,oeff,S.griff);
+        else                       s += fensterGriff(x,y,w,h,oeff,S.griff);
+      }
+      // Scharniere am Flügelrahmen (nur Kunststofffenster, bewegliche Flügel)
+      if (!isFixed && S.prod==='kunststoff') s += fensterScharniere(x,y,w,h,oeff);
     }
     return s;
   }
 
   function drawFenster(S, view) {
     const bMm=S.bMm||1000, hMm=S.hMm||1200, fl=S.fluegel||'1-fluegel';
-    const hasRoll=S.roll&&S.roll!=='ohne', rollH=hasRoll?ROLLO_H:0, totalH=hMm+rollH;
+    const isFenster = S.prod==='kunststoff';
+    const hasRoll=S.roll&&S.roll!=='ohne', rollH=hasRoll?ROLLO_H:0;
+    const sbH = isFenster ? 46 : 0;  // Fensterbank nur bei Kunststofffenster
+    const totalH = hMm + rollH + sbH;
     const fCol=colorOf(view==='aus'?S.fa:S.fi,view==='aus'?'fa':'fi')||'#f4f4f0';
     const fBorder=(fCol==='#f4f4f0'||fCol==='#fdf6e3')?'#c8c8c0':'rgba(0,0,0,0.16)';
     const hasOL=fl.includes('oberlicht')||fl.includes('ober-unter');
@@ -7369,9 +7440,11 @@ async function submitSkizze(e) {
     const OL_H=hasOL?Math.round(hMm*0.20):0, UL_H=hasUL?Math.round(hMm*0.17):0;
     const MAIN_H=hMm-OL_H-UL_H, wY=rollH;
 
-    let svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+bMm+' '+totalH+'" style="width:100%;height:100%;display:block" preserveAspectRatio="xMidYMid meet">'
+    // viewBox mit 18px seitlichem Überhang der Fensterbank kompensieren
+    const vbX = isFenster ? -18 : 0, vbW = bMm + (isFenster ? 36 : 0);
+    let svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+vbX+' 0 '+vbW+' '+totalH+'" style="width:100%;height:100%;display:block" preserveAspectRatio="xMidYMid meet">'
       +svgDefs(S.glasdekor)
-      +'<rect width="'+bMm+'" height="'+totalH+'" fill="#cdd4dd"/>';
+      +'<rect x="'+vbX+'" width="'+vbW+'" height="'+totalH+'" fill="#cdd4dd"/>';
     if (hasRoll) svg+=rolladenKasten(0,0,bMm,rollH,S.rollSeite,S.roll);
     svg+='<rect x="0" y="'+wY+'" width="'+bMm+'" height="'+hMm+'" fill="'+fCol+'" rx="3"/>'
       +'<rect x="0" y="'+wY+'" width="'+bMm+'" height="'+hMm+'" fill="none" stroke="'+fBorder+'" stroke-width="3" rx="3"/>';
@@ -7392,7 +7465,9 @@ async function submitSkizze(e) {
       svg+=drawSash(sx,mainY,sashW,mainH2,oeff,S,view,fCol);
       if (i>0) svg+='<rect x="'+(sx-6)+'" y="'+mainY+'" width="12" height="'+mainH2+'" fill="'+fCol+'" opacity="0.9"/>';
     }
-    svg+=massLabel(bMm/2,totalH-14,bMm,hMm,false)+'</svg>';
+    // Fensterbank (Kunststofffenster)
+    if (isFenster) svg += fensterbank(bMm, wY, hMm);
+    svg+=massLabel(bMm/2,totalH-10,bMm,hMm,false)+'</svg>';
     return svg;
   }
 
