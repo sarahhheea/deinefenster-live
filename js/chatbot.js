@@ -38,14 +38,14 @@ const RULES = [
 
   // ── Lieferzeit ──────────────────────────────────────────────────────────────
   {
-    keys: ['lieferzeit','wann kommt','wann liefert','geliefert','lieferung','liefern','zustellung','wann fertig','bestellung geliefert','dauert die lieferung','wie lange dauert'],
-    answer: 'Drutex-Fenster werden nach Maß gefertigt — Lieferzeit in der Regel <strong>2–4 Wochen</strong> ab Auftragsbestätigung. Versand per Spedition deutschlandweit (LKW mit eigenem Stapler). Lagerware aus unserem Shop: <strong>nur Selbstabholung</strong> in Brandenburg a.d.H.'
+    keys: ['lieferzeit','wann kommt','wann liefert','geliefert','lieferung','liefern','zustellung','wann fertig','bestellung geliefert','dauert die lieferung','wie lange dauert','abholen','selbst abholen','abholung','lager abholen'],
+    answer: '📦 <strong>Neuware (Drutex Maßfenster):</strong> 4–6 Wochen nach Zahlungseingang — wir bestellen erst dann beim Werk. Lieferung per Spedition deutschlandweit, <strong>versandkostenfrei</strong> ab 4.000 € oder 10 Elementen (sonst 200 €).<br><br>🚗 <strong>Selbstabholung möglich:</strong> Du kannst deine Bestellung auch ins Lager liefern lassen und selbst abholen — praktisch wenn Spedition nicht passt.<br><br>❌ <strong>Gebrauchtware & Lagerware</strong> liefern wir grundsätzlich nicht — nur Selbstabholung in Brandenburg a.d.H. (Hofverkauf freitags).'
   },
 
   // ── Einbau ──────────────────────────────────────────────────────────────────
   {
     keys: ['einbau','montage','montieren','einbauen','installieren','wer baut','monteur','handwerker','baut ihr','baut ihr auch','montiert ihr'],
-    answer: 'Wir liefern und verkaufen — <strong>Einbau bieten wir selbst nicht an</strong>. Du beauftragst einen Handwerker deiner Wahl. Auf Wunsch können wir Montage-Partner in deiner Region vermitteln — einfach per <a href="https://wa.me/491717263776" target="_blank">WhatsApp 0171 7263776</a> anfragen. Wichtig: Nicht-fachgerechte Montage lässt die Garantie erlöschen.'
+    answer: 'Wir <strong>liefern</strong> — den Einbau übernehmen wir selbst nicht. Du beauftragst einen Handwerker deiner Wahl. Tipp: Frag beim Liefertermin nach, ob dein Monteur vor Ort sein kann — die meisten Fensterbauer nehmen die Lieferung direkt entgegen. Wichtig: Nicht-fachgerechte Montage lässt die Garantie erlöschen.'
   },
 
   // ── Fehlmessung / Haftung (VOR Ausmessen — "messen" würde sonst zuerst matchen) ─
@@ -120,7 +120,25 @@ const RULES = [
     answer: '<strong>Drutex</strong> ist Europas größter PVC-Fenster-Hersteller mit eigenem Glaswerk und Profil-Extrusion in Bytów/Polen. Alle Profile Klasse A nach EN 12608 — das höchste Qualitätsniveau. Direktlieferung vom Werk = 20–30% günstiger als marktüblich. Wir sind autorisierter Drutex-Händler.'
   },
 
-  // ── Haustüren (Duplikat unten entfernt, oben priorisiert) ──────────────────
+  // ── Produktübersicht ────────────────────────────────────────────────────────
+  {
+    keys: ['was habt ihr','welche produkte','was verkauft ihr','sortiment','was führt ihr','was bietet ihr','euer angebot','was für produkte','euer sortiment','was gibt es','was kann ich bestellen','was kann man kaufen'],
+    answer: 'Unser <strong>Drutex-Sortiment:</strong><br><br>🪟 <strong>Kunststofffenster</strong> — Dreh, Kipp, Dreh-Kipp, alle Größen und Farben<br>🚪 <strong>Balkontüren & Terrassentüren</strong> — passend zu jedem Fenster<br>🏠 <strong>Haustüren</strong> — viele Modelle, RAL-Farben und Holzdekore<br>⬅️ <strong>Hebe-Schiebetüren</strong> — bis 6.500 mm Breite, ideal für große Terrassenöffnungen<br>🔄 <strong>Rollladen</strong> — passend zu Drutex-Fenstern<br>♻️ <strong>Gebrauchte Fenster</strong> — wechselnder Bestand, nur Hofverkauf freitags<br><br>Alles individuell maßgefertigt. <a href="produkte.html">→ Alle Produkte ansehen</a>'
+  },
+
+  // ── Schiebetüren ────────────────────────────────────────────────────────────
+  {
+    keys: ['schiebetür','schiebtür','hebe-schiebe','hebeschiebe','hebe schiebe','psk','panoramatür','panorama tür','sliding','terrassenschiebe','große öffnung'],
+    answer: 'Ja! Wir fertigen <strong>Drutex Hebe-Schiebetüren</strong> an — bis zu <strong>6.500 mm Breite</strong> möglich. Ideal für große Terrassenöffnungen und Panoramaansichten. Profile: IGLO HS, IGLO Energy PSK, IGLO 5 Classic PSK und IGLO Slide. Lieferung nach Maß, deutschlandweit per Spedition. Für ein Angebot: <a href="https://wa.me/491717263776" target="_blank">WhatsApp 0171 7263776</a>.'
+  },
+
+  // ── Balkontüren / Terrassentüren ────────────────────────────────────────────
+  {
+    keys: ['balkontür','balkontüren','balkon','terrassentür','terrassentüren','terrasse','terrassenausgang','balkonausgang'],
+    answer: 'Ja, wir fertigen <strong>Drutex-Balkontüren und Terrassentüren</strong> an — in allen IGLO-Profilen (5 Classic und Energy), maßgefertigt nach deinen Angaben. Einfach- oder Doppeltür möglich. Für ein Angebot: <a href="https://wa.me/491717263776" target="_blank">WhatsApp 0171 7263776</a> oder direkt im <a href="konfigurator.html">Konfigurator</a> konfigurieren.'
+  },
+
+  // ── Haustüren (generischer Türen-Catch) ────────────────────────────────────
   {
     keys: ['tür ','türen','türmodell','türfarbe'],
     answer: 'Ja, wir führen auch <strong>Drutex-Haustüren</strong> — verschiedene Modelle und Farben (inkl. RAL-Farben und Holzdekore). Im <a href="haustuer-3d.html">Haustür-3D-Konfigurator</a> kannst du Modell und Farbe direkt visualisieren. Für ein Angebot: <a href="https://wa.me/491717263776" target="_blank">WhatsApp 0171 7263776</a>.'
@@ -141,7 +159,7 @@ const RULES = [
   // ── Konfigurator / Bestellung ───────────────────────────────────────────────
   {
     keys: ['konfigurator','online bestellen','bestellen','konfigurieren','zusammenstellen','online kaufen'],
-    answer: 'Im <a href="konfigurator.html">Online-Konfigurator</a> Maße eingeben, Farbe und Verglasung wählen — Preis erscheint live. Danach kommt eine unverbindliche Anfrage zu uns, wir bestätigen und du bekommst die Zahlungsaufforderung. <strong>Produktion startet erst nach 100% Anzahlung.</strong>'
+    answer: 'Im <a href="konfigurator.html">Online-Konfigurator</a> Maße eingeben, Farbe und Verglasung wählen — Preis erscheint live. Danach kommt eine Anfrage zu uns, wir schicken dir ein <strong>individuelles Angebot per E-Mail</strong>. Nach deiner Überweisung bestellen wir die Fenster beim Werk — Lieferzeit dann 4–6 Wochen.'
   },
 
   // ── Kontakt / Erreichbarkeit ────────────────────────────────────────────────
