@@ -554,6 +554,23 @@ function goToStep1() {
 }
 
 /* ─── Bild-Upload ─── */
+function compressImage(dataUrl, maxPx = 1200, quality = 0.85) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, maxPx / Math.max(img.width, img.height));
+      const w = Math.round(img.width * scale);
+      const h = Math.round(img.height * scale);
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.src = dataUrl;
+  });
+}
+
 function handleFiles(files) {
   const total = STATE.bilderBestand.length + STATE.bilder.length;
   const arr = Array.from(files).slice(0, 20 - total);
@@ -564,8 +581,9 @@ function handleFiles(files) {
   arr.forEach(file => {
     if (!file.type.startsWith('image/')) return;
     const reader = new FileReader();
-    reader.onload = e => {
-      STATE.bilder.push(e.target.result);
+    reader.onload = async e => {
+      const compressed = await compressImage(e.target.result);
+      STATE.bilder.push(compressed);
       rendereBildVorschau();
       rendereVorschau();
     };
