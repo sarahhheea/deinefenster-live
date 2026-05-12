@@ -433,55 +433,60 @@ function buildWindow() {
   glassObjects.push(glassBacking);
 
   // ────────────────────────────────────────────
-  // 6. BÜGELGRIFF — DIN 18267 Maße
-  //    Rohr: ⌀17mm, Rosette: oval ~32×50mm, Ausladung: 38mm
+  // 6. FENSTERGRIFF — Standard Dreh-Kipp-Hebel
+  //    Ovale Rosette + gerader Hebelarm nach links
   // ────────────────────────────────────────────
   {
-    const HZ    = sashZ + 0.001;
-    const halfH = 0.048;   // ±48mm → 96mm Gesamthöhe (Achsmaß Rosette-Rosette)
-    const reach = 0.020;   // 20mm seitliche Ausladung (leichte D-Kurve)
-    const fwd   = 0.040;   // 40mm Ausladung zum Betrachter (DIN: 30-45mm)
-    const rad   = 0.0085;  // 8.5mm Radius = 17mm Durchmesser (DIN: 16-18mm)
+    const GZ = sashZ + 0.002;  // liegt auf Sash-Fläche
 
-    // D-Bogen (semi-ellipse, vertikal)
-    const arcPts = [];
-    for (let i = 0; i <= 40; i++) {
-      const t = (i / 40) * Math.PI;
-      arcPts.push(new THREE.Vector3(
-        HX - reach * Math.sin(t),
-        HY + halfH * Math.cos(t),
-        HZ + fwd   * Math.sin(t)
-      ));
-    }
-    const bow = new THREE.Mesh(
-      new THREE.TubeGeometry(new THREE.CatmullRomCurve3(arcPts), 64, rad, 12, false),
+    // --- Ovale Basisrosette (flach auf dem Rahmen) ---
+    // ~38mm breit, ~55mm hoch, 7mm tief
+    const rosette = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.019, 0.019, 0.007, 32),
       brushedMat
     );
-    bow.castShadow = true;
-    windowGroup.add(bow);
+    rosette.rotation.x = Math.PI / 2;
+    rosette.scale.y = 1.45;          // Kreis → Oval
+    rosette.position.set(HX, HY, GZ + 0.0035);
+    rosette.castShadow = true;
+    windowGroup.add(rosette);
 
-    // Ovale Rosettenplatten (DIN: ~32×50mm oval)
-    [HY + halfH, HY - halfH].forEach(ey => {
-      // Ovale Platte: CylinderGeometry mit Y-Scale → Oval
-      const rosette = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.016, 0.016, 0.007, 24),
-        brushedMat
-      );
-      rosette.rotation.x = Math.PI / 2;
-      rosette.scale.y = 1.8;  // Kreis → Oval (32mm breit × 58mm hoch)
-      rosette.position.set(HX, ey, HZ + 0.004);
-      rosette.castShadow = true;
-      windowGroup.add(rosette);
+    // --- Vierkantnabe (Spindle, wo Hebel sitzt) ---
+    const spindle = new THREE.Mesh(
+      new THREE.BoxGeometry(0.010, 0.010, 0.016),
+      brushedMat
+    );
+    spindle.position.set(HX, HY, GZ + 0.012);
+    windowGroup.add(spindle);
 
-      // Halskragen (wo Rohr in Rosette mündet) — kleiner Zylinder
-      const collar = new THREE.Mesh(
-        new THREE.CylinderGeometry(rad + 0.003, rad + 0.003, 0.008, 14),
-        brushedMat
-      );
-      collar.rotation.x = Math.PI / 2;
-      collar.position.set(HX, ey, HZ + 0.010);
-      windowGroup.add(collar);
-    });
+    // --- Hebelarm: gerader Zylinder nach links (Richtung Glas) ---
+    // 105mm lang, 13mm Durchmesser, leicht schräg nach vorne
+    const leverLen = 0.105;
+    const lever = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.0065, 0.0065, leverLen, 16),
+      brushedMat
+    );
+    lever.rotation.z = Math.PI / 2;   // vertikal → horizontal
+    lever.position.set(HX - leverLen / 2, HY, GZ + 0.018);
+    lever.castShadow = true;
+    windowGroup.add(lever);
+
+    // --- Griffende (leicht verdickt, ergonomisch) ---
+    const tip = new THREE.Mesh(
+      new THREE.SphereGeometry(0.0085, 12, 8),
+      brushedMat
+    );
+    tip.position.set(HX - leverLen, HY, GZ + 0.018);
+    windowGroup.add(tip);
+
+    // --- Übergangs-Kragen (wo Hebel aus Rosette kommt) ---
+    const collar = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.010, 0.010, 0.012, 16),
+      brushedMat
+    );
+    collar.rotation.x = Math.PI / 2;
+    collar.position.set(HX, HY, GZ + 0.013);
+    windowGroup.add(collar);
   }
 
   // ────────────────────────────────────────────
