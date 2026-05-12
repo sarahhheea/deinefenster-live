@@ -19,6 +19,14 @@
 
   <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
 
+  <script type="importmap">
+  { "imports": {
+      "three":         "https://cdn.jsdelivr.net/npm/three@0.162.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.162.0/examples/jsm/"
+  } }
+  </script>
+  <script type="module" src="js/konfigurator-3d.js"></script>
+
   <link rel="preconnect" href="https://fonts.bunny.net"/>
   <link href="https://fonts.bunny.net/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
@@ -2591,6 +2599,8 @@ function pickProd(el) {
     setPreviewView('aus');
   } else if (S.prod === 'balkontuer') {
     setPreviewView('inn');
+    // Sinnvolle Standard-Maße für Balkontür (verhindert nicht-tür-ähnliche Vorschau)
+    if (S.hMm / S.bMm < 1.5) { S.hMm = 2200; S.bMm = 900; }
   }
   _updateDinToggle();
 
@@ -6492,6 +6502,7 @@ function drawPrev() {
     if (h3w)  h3w.style.display  = 'none';
     svgWrap.style.display = 'block';
     if (prevWrap) prevWrap.style.height = (S.prod === 'haustuere') ? '500px' : '440px';
+    window._kS = S; window._kP = P;
     renderSVGPrev('svg-prev', previewView);
     return;
   }
