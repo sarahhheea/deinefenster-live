@@ -522,7 +522,7 @@ function aktualisiereShopHeader() {
   if (title) title.textContent = h.title;
   if (desc)  desc.innerHTML = h.desc;
   const hinweis = document.getElementById('gebrauchtHinweis');
-  if (hinweis) hinweis.classList.toggle('hidden', zustand !== 'gebraucht' && zustand !== 'vermessen' && zustand !== 'default');
+  if (hinweis) hinweis.classList.remove('hidden');
 }
 
 /* ─── Render-Pipeline ─── */
