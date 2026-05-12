@@ -33,7 +33,7 @@ const RULES = [
   // ── Preise ──────────────────────────────────────────────────────────────────
   {
     keys: ['preis','kosten','kostet','wie viel','wieviel','teuer','günstig','angebot','budget','ab welchem'],
-    answer: 'Ein Drutex-Standardfenster (1-flügelig, ca. 1000×1200 mm, weiß, 2-fach) startet <strong>ab ca. 99 €</strong>. Das IGLO Energy mit 3-fach Verglasung liegt bei <strong>220–280 €</strong>. Den genauen Preis berechnet der <a href="konfigurator.html">Konfigurator live</a> — abhängig von Maßen, Profil, Farbe und Extras. Angaben ohne Gewähr.'
+    answer: 'Der Preis hängt von Maßen, Profil, Farbe und Verglasung ab — daher machen wir für jede Anfrage ein individuelles Angebot.<br><br>📩 <strong>Schreib uns einfach direkt, was du haben möchtest</strong> — Maße, Fenstertyp, gewünschte Farbe — und wir melden uns mit einem konkreten Preis:<br><br><a href="https://wa.me/491717263776" target="_blank" style="display:inline-block;margin-top:4px;padding:7px 14px;background:rgba(118,169,250,0.15);border:1px solid rgba(118,169,250,0.3);border-radius:8px;color:#76a9fa;text-decoration:none;font-weight:700;font-size:12px;">💬 WhatsApp 0171 7263776</a>'
   },
 
   // ── Lieferzeit ──────────────────────────────────────────────────────────────
@@ -201,11 +201,11 @@ function ruleBasedAnswer(text) {
 // ─── System-Prompt für echte KI ────────────────────────────────────────────────
 const SYSTEM_PROMPT = `Du bist der KI-Assistent von DeineFenster.de (Fensterhandel Christ, Brandenburg). Antworte auf Deutsch, kurz (max. 4 Sätze), freundlich und kompetent.
 
-REGELN: Keine genauen Preisversprechen außer Richtwerten (ab 99€ Standard, 220-280€ IGLO Energy). Keine genauen Lieferdaten. Nur Fenster/Türen-Themen. Bei Unsicherheit: Telefon oder WhatsApp empfehlen.
+REGELN: Niemals konkrete Preise nennen — bei jeder Preisfrage den Kunden bitten, direkt per WhatsApp anzufragen (Maße, Typ, Farbe). Keine genauen Lieferdaten. Nur Fenster/Türen-Themen. Bei Unsicherheit: Telefon oder WhatsApp empfehlen.
 
-FIRMA: Fohrder Landstraße 13, 14772 Brandenburg a.d.H. | Tel: 03381/214837 (Mo-Fr 10-18h) | WhatsApp: 0171 7263776 (nur schreiben) | Hofverkauf: Freitag 10-17h | Sommerferien 2026: 01.08-31.08 zu
+FIRMA: Fohrder Landstraße 13, 14772 Brandenburg a.d.H. | Tel: 03381/214837 (Mo-Fr 10-18h) | WhatsApp: 0171 7263776 (nur schreiben) | Hofverkauf: Freitag 10-17h
 
-PRODUKTE: Nur Drutex PVC-Fenster (neu+Maß) + Gebrauchtware (nur Freitag vor Ort). IGLO Energy (7-Kammer, Uw 0,71, BAFA-förderfähig), IGLO Edge (Uw 0,66), IGLO 5 Classic (Uw 0,83, nicht BAFA). 10J Profil-Garantie + 5J Beschlag. Kein Einbau. Kein Ankauf gebraucht. RC2/RC3 als Option. Deutschlandweit liefern (kostenlos ab 4000€ oder 10 Elemente). 100% Anzahlung online. BAFA BEG EM bis 15%, Antrag VOR Bestellung.`;
+PRODUKTE: Nur Drutex PVC-Fenster (neu+Maß) + Gebrauchtware (nur Freitag vor Ort). IGLO Energy (7-Kammer, Uw 0,71, BAFA-förderfähig), IGLO Edge (Uw 0,66), IGLO 5 Classic (Uw 0,83, nicht BAFA). 10J Profil-Garantie + 5J Beschlag. Kein Einbau. Kein Ankauf gebraucht. RC2/RC3 als Option. Deutschlandweit liefern (kostenlos ab 4000€ oder 10 Elemente). Zahlung: Überweisung nach Angebotserhalt. BAFA BEG EM bis 15%, Antrag VOR Bestellung.`;
 
 const QUICK_CHIPS = [
   { text: 'Preis & Angebot',   q: 'Was kostet ein Fenster ungefähr?' },
