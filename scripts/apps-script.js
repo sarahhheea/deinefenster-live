@@ -4,20 +4,26 @@ var BILD_ORDNER_NAME = 'DeineFenster Produktbilder';
 var PRODUKTE_HEADERS = ['id','titel','kategorie_key','zustand','system','breite_mm','hoehe_mm','preis_eur','sonderpreis_eur','groesse_klasse','export_modell','farbe','verglasung','u_wert','oeffnungsart','rc_klasse','eigenschaften','lagerbestand','standnummer','bilder','beschreibung','aktiv','created_at'];
 
 var KATEGORIEN_DATEN = [
-  {key:'fenster-1fluegel',label:'Einflügelig',icon:'window',reihenfolge:1},
-  {key:'fenster-2fluegel',label:'Zweiflügelig',icon:'border_outer',reihenfolge:2},
-  {key:'fenster-3fluegel',label:'Dreiflügelig',icon:'view_column',reihenfolge:3},
-  {key:'fenster-4fluegel',label:'Vierflügelig',icon:'grid_view',reihenfolge:4},
-  {key:'festelement',label:'Festverglasung',icon:'crop_free',reihenfolge:5},
-  {key:'kellerfenster',label:'Kellerfenster',icon:'crop_landscape',reihenfolge:6},
-  {key:'haustuer',label:'Haustür',icon:'door_front',reihenfolge:7},
-  {key:'balkontuer-1fluegel',label:'Balkontür einflüglig',icon:'deck',reihenfolge:8},
-  {key:'balkontuer-2fluegel',label:'Balkontür zweiflüglig',icon:'fence',reihenfolge:9},
-  {key:'balkontuer-rollo',label:'Balkontür mit Rollo',icon:'roller_shades',reihenfolge:10},
-  {key:'schiebetuer-psk',label:'Schiebetür PSK',icon:'meeting_room',reihenfolge:11},
-  {key:'schiebetuer-hst',label:'Hebe-Schiebetür',icon:'door_sliding',reihenfolge:12},
-  {key:'fenster-oberlicht',label:'Fenster mit Oberlicht',icon:'space_dashboard',reihenfolge:13},
-  {key:'fenster-sprossen',label:'Fenster mit Sprossen',icon:'window_open',reihenfolge:14}
+  {key:'fenster-1fluegel',          label:'Einflügelig',                     icon:'window',          reihenfolge:1},
+  {key:'fenster-1fluegel-rollo',    label:'Einflügelig mit Rollo',           icon:'roller_shades',   reihenfolge:2},
+  {key:'fenster-2fluegel',          label:'Zweiflügelig',                    icon:'border_outer',    reihenfolge:3},
+  {key:'fenster-2fluegel-rollo',    label:'Zweiflügelig mit Rollo',          icon:'roller_shades',   reihenfolge:4},
+  {key:'fenster-3fluegel',          label:'Dreiflügelig',                    icon:'view_column',     reihenfolge:5},
+  {key:'fenster-3fluegel-rollo',    label:'Dreiflügelig mit Rollo',          icon:'roller_shades',   reihenfolge:6},
+  {key:'fenster-4fluegel',          label:'Vierflügelig',                    icon:'grid_view',       reihenfolge:7},
+  {key:'festelement',               label:'Festverglasung',                  icon:'crop_free',       reihenfolge:8},
+  {key:'kellerfenster',             label:'Kellerfenster',                   icon:'crop_landscape',  reihenfolge:9},
+  {key:'rundfenster',               label:'Rundfenster',                     icon:'circle',          reihenfolge:10},
+  {key:'haustuer',                  label:'Haustür',                         icon:'door_front',      reihenfolge:11},
+  {key:'balkontuer-1fluegel',       label:'Balkontür einflüglig',            icon:'deck',            reihenfolge:12},
+  {key:'balkontuer-1fluegel-rollo', label:'Balkontür einflüglig mit Rollo',  icon:'roller_shades',   reihenfolge:13},
+  {key:'balkontuer-2fluegel',       label:'Balkontür zweiflüglig',           icon:'fence',           reihenfolge:14},
+  {key:'balkontuer-2fluegel-rollo', label:'Balkontür zweiflüglig mit Rollo', icon:'roller_shades',   reihenfolge:15},
+  {key:'schiebetuer-psk',           label:'Schiebetür PSK',                  icon:'meeting_room',    reihenfolge:16},
+  {key:'schiebetuer-hst',           label:'Hebe-Schiebetür',                 icon:'door_sliding',    reihenfolge:17},
+  {key:'schiebetuer-rollo',         label:'Schiebetür mit Rollo',            icon:'roller_shades',   reihenfolge:18},
+  {key:'fenster-oberlicht',         label:'Fenster mit Oberlicht',           icon:'space_dashboard', reihenfolge:19},
+  {key:'fenster-sprossen',          label:'Fenster mit Sprossen',            icon:'window_open',     reihenfolge:20}
 ];
 
 function doGet(e) {
@@ -247,6 +253,26 @@ function setup() {
   }
 
   Logger.log('Setup fertig!');
+}
+
+// ── Einmalig ausführen um neue Kategorien ins Sheet zu schreiben ──
+function addMissingKategorien() {
+  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  var kSheet = ss.getSheetByName('Kategorien');
+  if (!kSheet) { Logger.log('Kategorien-Sheet nicht gefunden'); return; }
+
+  var data = kSheet.getDataRange().getValues();
+  var existingKeys = data.slice(1).map(function(r) { return r[1]; });
+  var lastId = data.length - 1;
+
+  KATEGORIEN_DATEN.forEach(function(k) {
+    if (existingKeys.indexOf(k.key) === -1) {
+      lastId++;
+      kSheet.appendRow([lastId, k.key, k.label, k.icon, true, k.reihenfolge]);
+      Logger.log('Hinzugefügt: ' + k.key);
+    }
+  });
+  Logger.log('Fertig. Neue Kategorien im Sheet eingetragen.');
 }
 
 function ok(data) {
