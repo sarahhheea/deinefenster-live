@@ -853,6 +853,34 @@
     </div>
 
     <!-- Counter-Grid: 4 Zahlen gross — jede Kachel verlinkt -->
+    <style>
+      .farben-strip-row {
+        position: relative; overflow: hidden; border-radius: 10px;
+        height: 72px; margin: 14px -4px 10px;
+        mask-image: linear-gradient(to right, transparent 0, #000 18%, #000 82%, transparent 100%);
+        -webkit-mask-image: linear-gradient(to right, transparent 0, #000 18%, #000 82%, transparent 100%);
+      }
+      .farben-strip-track {
+        display: flex; gap: 5px; width: max-content; height: 100%;
+        animation: farbenScroll 32s linear infinite;
+      }
+      .farben-stat-card:hover .farben-strip-track { animation-play-state: paused; }
+      .farben-strip-img {
+        height: 72px; width: auto; border-radius: 7px;
+        object-fit: cover; flex-shrink: 0; display: block;
+        opacity: 0.75; transition: opacity 0.35s, transform 0.35s;
+        filter: brightness(0.9);
+      }
+      .farben-stat-card:hover .farben-strip-img { opacity: 1; filter: brightness(1.08); }
+      @keyframes farbenScroll {
+        from { transform: translateX(0); }
+        to   { transform: translateX(-50%); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .farben-strip-track { animation-duration: 0s !important; }
+        .farben-strip-row { overflow-x: auto; }
+      }
+    </style>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-white/10 rounded-xl overflow-hidden mb-20">
       <a href="ueber-uns.html" class="bg-slate-900 p-8 md:p-10 hover:bg-slate-800 transition-colors group block no-underline">
         <div class="flex items-start justify-between mb-5">
@@ -874,13 +902,59 @@
         </div>
         <div class="text-white/70 text-sm leading-relaxed">aus 110 echten Google-Bewertungen — durchschnittlich zufrieden.</div>
       </a>
-      <a href="farben-vorschau.html" class="bg-slate-900 p-8 md:p-10 hover:bg-slate-800 transition-colors group block no-underline">
+      <a href="farben-vorschau.html" class="farben-stat-card bg-slate-900 p-8 md:p-10 hover:bg-slate-800 transition-colors group block no-underline overflow-hidden">
         <div class="flex items-start justify-between mb-5">
           <div class="text-xs font-bold text-primary-container uppercase tracking-widest">03 · Auswahl</div>
           <span class="material-symbols-outlined text-primary-container/60 text-base group-hover:text-primary-container group-hover:translate-x-1 transition-all" style='font-variation-settings: "FILL" 1;'>arrow_forward</span>
         </div>
         <div class="font-extrabold text-6xl md:text-7xl tracking-tighter leading-none mb-1">
           <span class="counter" data-counter-target="41" data-counter-suffix="">0</span>
+        </div>
+        <!-- Scrollende Fenster-Farbauswahl (nur Innenansicht: Griff + Scharniere) -->
+        <div class="farben-strip-row">
+          <div class="farben-strip-track">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_weiss.png" alt="Weiß" loading="lazy">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_anthrazit.png" alt="Anthrazit" loading="lazy">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_nussbaum.png" alt="Nussbaum" loading="lazy">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_douglasie.png" alt="Douglasie" loading="lazy">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_brillblau.png" alt="Brillantblau" loading="lazy">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_moosgruen.png" alt="Moosgrün" loading="lazy">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_dunkelrot.png" alt="Dunkelrot" loading="lazy">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_stahlblau.png" alt="Stahlblau" loading="lazy">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_golden-oak.png" alt="Golden Oak" loading="lazy">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_schwarz-um.png" alt="Schwarz" loading="lazy">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_cremeweiss.png" alt="Cremeweiß" loading="lazy">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_bergkiefer.png" alt="Bergkiefer" loading="lazy">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_lichtgrau.png" alt="Lichtgrau" loading="lazy">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_basaltgr-gl.png" alt="Basaltgrau" loading="lazy">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_eiche-nat.png" alt="Eiche Natur" loading="lazy">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_dunkelgr.png" alt="Dunkelgrün" loading="lazy">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_braun-mar.png" alt="Braun" loading="lazy">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_eisengl.png" alt="Eisenglimmer" loading="lazy">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_quarzgr-gl.png" alt="Quarzgrau" loading="lazy">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_crown-plat.png" alt="Crown Platin" loading="lazy">
+            <!-- Duplikat für nahtlose Endlosschleife -->
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_weiss.png" alt="" loading="lazy" aria-hidden="true">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_anthrazit.png" alt="" loading="lazy" aria-hidden="true">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_nussbaum.png" alt="" loading="lazy" aria-hidden="true">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_douglasie.png" alt="" loading="lazy" aria-hidden="true">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_brillblau.png" alt="" loading="lazy" aria-hidden="true">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_moosgruen.png" alt="" loading="lazy" aria-hidden="true">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_dunkelrot.png" alt="" loading="lazy" aria-hidden="true">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_stahlblau.png" alt="" loading="lazy" aria-hidden="true">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_golden-oak.png" alt="" loading="lazy" aria-hidden="true">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_schwarz-um.png" alt="" loading="lazy" aria-hidden="true">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_cremeweiss.png" alt="" loading="lazy" aria-hidden="true">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_bergkiefer.png" alt="" loading="lazy" aria-hidden="true">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_lichtgrau.png" alt="" loading="lazy" aria-hidden="true">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_basaltgr-gl.png" alt="" loading="lazy" aria-hidden="true">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_eiche-nat.png" alt="" loading="lazy" aria-hidden="true">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_dunkelgr.png" alt="" loading="lazy" aria-hidden="true">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_braun-mar.png" alt="" loading="lazy" aria-hidden="true">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_eisengl.png" alt="" loading="lazy" aria-hidden="true">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_quarzgr-gl.png" alt="" loading="lazy" aria-hidden="true">
+            <img class="farben-strip-img" src="img/farben/fenster_1fl_crown-plat.png" alt="" loading="lazy" aria-hidden="true">
+          </div>
         </div>
         <div class="text-white/70 text-sm leading-relaxed">Drutex-Dekorfarben &amp; Holzoptiken — von RAL 9016 bis Nussbaum.</div>
       </a>
