@@ -5,20 +5,26 @@
    ───────────────────────────────────────────────────────────────────── */
 
 const KATEGORIEN = [
-  { key: 'fenster-1fluegel',     label: 'Einflügelig',           icon: 'window' },
-  { key: 'fenster-2fluegel',     label: 'Zweiflügelig',          icon: 'border_outer' },
-  { key: 'fenster-3fluegel',     label: 'Dreiflügelig',          icon: 'view_column' },
-  { key: 'fenster-4fluegel',     label: 'Vierflügelig',          icon: 'grid_view' },
-  { key: 'festelement',          label: 'Festverglasung',        icon: 'crop_free' },
-  { key: 'kellerfenster',        label: 'Kellerfenster',         icon: 'crop_landscape' },
-  { key: 'haustuer',             label: 'Haustür',               icon: 'door_front' },
-  { key: 'balkontuer-1fluegel',  label: 'Balkontür einflüglig',  icon: 'deck' },
-  { key: 'balkontuer-2fluegel',  label: 'Balkontür zweiflüglig', icon: 'fence' },
-  { key: 'balkontuer-rollo',     label: 'Balkontür mit Rollo',   icon: 'roller_shades' },
-  { key: 'schiebetuer-psk',      label: 'Schiebetür PSK',        icon: 'meeting_room' },
-  { key: 'schiebetuer-hst',      label: 'Hebe-Schiebetür',       icon: 'door_sliding' },
-  { key: 'fenster-oberlicht',    label: 'Fenster mit Oberlicht', icon: 'space_dashboard' },
-  { key: 'fenster-sprossen',     label: 'Fenster mit Sprossen',  icon: 'window_open' }
+  { key: 'fenster-1fluegel',           label: 'Einflügelig',                      icon: 'window' },
+  { key: 'fenster-1fluegel-rollo',     label: 'Einflügelig mit Rollo',            icon: 'roller_shades' },
+  { key: 'fenster-2fluegel',           label: 'Zweiflügelig',                     icon: 'border_outer' },
+  { key: 'fenster-2fluegel-rollo',     label: 'Zweiflügelig mit Rollo',           icon: 'roller_shades' },
+  { key: 'fenster-3fluegel',           label: 'Dreiflügelig',                     icon: 'view_column' },
+  { key: 'fenster-3fluegel-rollo',     label: 'Dreiflügelig mit Rollo',           icon: 'roller_shades' },
+  { key: 'fenster-4fluegel',           label: 'Vierflügelig',                     icon: 'grid_view' },
+  { key: 'festelement',                label: 'Festverglasung',                   icon: 'crop_free' },
+  { key: 'kellerfenster',              label: 'Kellerfenster',                    icon: 'crop_landscape' },
+  { key: 'rundfenster',                label: 'Rundfenster',                      icon: 'circle' },
+  { key: 'haustuer',                   label: 'Haustür',                          icon: 'door_front' },
+  { key: 'balkontuer-1fluegel',        label: 'Balkontür einflüglig',             icon: 'deck' },
+  { key: 'balkontuer-1fluegel-rollo',  label: 'Balkontür einflüglig mit Rollo',   icon: 'roller_shades' },
+  { key: 'balkontuer-2fluegel',        label: 'Balkontür zweiflüglig',            icon: 'fence' },
+  { key: 'balkontuer-2fluegel-rollo',  label: 'Balkontür zweiflüglig mit Rollo',  icon: 'roller_shades' },
+  { key: 'schiebetuer-psk',            label: 'Schiebetür PSK',                   icon: 'meeting_room' },
+  { key: 'schiebetuer-hst',            label: 'Hebe-Schiebetür',                  icon: 'door_sliding' },
+  { key: 'schiebetuer-rollo',          label: 'Schiebetür mit Rollo',             icon: 'roller_shades' },
+  { key: 'fenster-oberlicht',          label: 'Fenster mit Oberlicht',            icon: 'space_dashboard' },
+  { key: 'fenster-sprossen',           label: 'Fenster mit Sprossen',             icon: 'window_open' }
 ];
 
 // Sarah-Update 30.04.2026 v2: Gruppierte Eigenschaften für übersichtlichere Auswahl
