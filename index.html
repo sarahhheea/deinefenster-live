@@ -287,6 +287,17 @@
   .nav-chev { font-size: 16px !important; transition: transform .2s; }
   .nav-item:hover .nav-chev { transform: rotate(180deg); }
   @media (max-width: 767px) { .mega-menu { display: none; } }
+
+  /* ── Nav Underline Hover ── */
+  .nav-link { position: relative; }
+  .nav-link::after { content:''; position:absolute; bottom:-5px; left:0; width:0; height:2px; background:#76a9fa; border-radius:1px; transition:width 0.22s ease; }
+  .nav-link:hover::after { width:100%; }
+
+  /* ── Stadt-Pillen Scroll-Animation ── */
+  @keyframes pillIn { from{opacity:0;transform:translateY(10px) scale(0.92)} to{opacity:1;transform:translateY(0) scale(1)} }
+  #stadtpillen.anim-pending .stadt-pill { opacity:0; }
+  #stadtpillen.anim-go .stadt-pill { animation:pillIn 0.35s ease forwards; }
+  a.hover-tag { cursor:pointer; }
 </style>
 
 <nav id="navbar" class="fixed top-0 w-full z-50 bg-white/10 glass-nav border-b border-white/10">
@@ -480,15 +491,15 @@
           </div>
         </div>
       </div>
-      <a href="ueber-drutex.html" class="text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Hersteller</a>
-      <a href="kunststofffenster-kaufen.html" class="text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Neue Fenster</a>
-      <a href="gebrauchte-fenster-kaufen.html" class="text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Gebraucht</a>
-      <a href="konfigurator.html" class="text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Konfigurator</a>
-      <a href="shop.html" class="text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight inline-flex items-center gap-1.5">
+      <a href="ueber-drutex.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Hersteller</a>
+      <a href="kunststofffenster-kaufen.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Neue Fenster</a>
+      <a href="gebrauchte-fenster-kaufen.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Gebraucht</a>
+      <a href="konfigurator.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Konfigurator</a>
+      <a href="shop.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight inline-flex items-center gap-1.5">
         Shop
         <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none" style="background:#76a9fa;color:#001b3d">NEU</span>
       </a>
-      <a href="faq.html" class="text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">FAQ</a>
+      <a href="faq.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">FAQ</a>
       <a href="glossar.html" class="text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Glossar</a>
       <a href="ueber-uns.html" class="text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Über uns</a>
       <a href="kontakt.html" class="text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Kontakt</a>
@@ -578,7 +589,7 @@
 
       <!-- Subtext -->
       <p class="hero-sub hero-anim text-white/85 font-medium leading-relaxed mb-10 max-w-lg" data-hero="3" style="font-size:clamp(1rem,1.6vw,1.18rem);text-shadow:0 2px 20px rgba(0,0,0,0.5)">
-        Maßgefertigte Drutex-Fenster online konfigurieren &amp; bestellen. Höchste Energieeffizienz, zeitloses Design — unverbindliches Angebot per E-Mail.
+        Maßgefertigte Drutex-Fenster online konfigurieren &amp; bestellen. Höchste Energieeffizienz, zeitloses Design — unverbindliches Angebot per <a href="mailto:info@baustoffchrist.de" class="text-primary-container hover:text-white transition-colors" style="text-decoration:underline;">E-Mail</a>.
       </p>
 
       <!-- CTAs -->
@@ -617,6 +628,10 @@
         <a href="https://wa.me/491717263776" target="_blank" rel="noopener" class="flex items-center gap-1.5 text-white/85 text-sm font-semibold transition-colors hover:text-white" style="text-shadow:0 2px 20px rgba(0,0,0,0.5)">
           <span class="material-symbols-outlined" style="font-size:16px;font-variation-settings:'FILL' 1;color:#25D366">chat</span>
           WhatsApp-Beratung kostenlos
+        </a>
+        <a href="shop.html" class="flex items-center gap-1.5 text-white/85 text-sm font-semibold transition-colors hover:text-white" style="text-shadow:0 2px 20px rgba(0,0,0,0.5)">
+          <span class="material-symbols-outlined" style="font-size:16px;font-variation-settings:'FILL' 1;color:#76a9fa">storefront</span>
+          500+ Gebrauchte · ab 80&thinsp;€
         </a>
       </div>
     </div>
@@ -1040,87 +1055,87 @@
       </div>
     </div>
 
-    <!-- Alle 16 Bundesländer + Top-Städte -->
-    <div class="flex flex-wrap gap-2">
+    <!-- Alle 16 Bundesländer + Top-Städte (animiert, verlinkt) -->
+    <div id="stadtpillen" class="flex flex-wrap gap-2">
       <!-- Brandenburg (Heimat) -->
-      <span class="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold hover-tag" style="background:rgba(34,94,170,0.2);border:1px solid rgba(34,94,170,0.4);color:#76a9fa"><span class="material-symbols-outlined" style="font-size:14px">location_on</span>Brandenburg</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Brandenburg an der Havel</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Potsdam</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Cottbus</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Frankfurt (Oder)</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Oranienburg</span>
+      <span class="stadt-pill inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold hover-tag" style="background:rgba(34,94,170,0.2);border:1px solid rgba(34,94,170,0.4);color:#76a9fa"><span class="material-symbols-outlined" style="font-size:14px">location_on</span>Brandenburg</span>
+      <a href="staedte/fenster-brandenburg-an-der-havel.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Brandenburg an der Havel</a>
+      <a href="staedte/fenster-potsdam.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Potsdam</a>
+      <a href="staedte/fenster-cottbus.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Cottbus</a>
+      <a href="staedte/fenster-frankfurt-oder.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Frankfurt (Oder)</a>
+      <span class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Oranienburg</span>
       <!-- Berlin -->
-      <span class="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold hover-tag" style="background:rgba(34,94,170,0.2);border:1px solid rgba(34,94,170,0.4);color:#76a9fa"><span class="material-symbols-outlined" style="font-size:14px">location_on</span>Berlin</span>
+      <a href="staedte/fenster-berlin.html" class="stadt-pill inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold hover-tag" style="background:rgba(34,94,170,0.2);border:1px solid rgba(34,94,170,0.4);color:#76a9fa;text-decoration:none;"><span class="material-symbols-outlined" style="font-size:14px">location_on</span>Berlin</a>
       <!-- Hamburg -->
-      <span class="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold hover-tag" style="background:rgba(34,94,170,0.2);border:1px solid rgba(34,94,170,0.4);color:#76a9fa"><span class="material-symbols-outlined" style="font-size:14px">location_on</span>Hamburg</span>
+      <a href="staedte/fenster-hamburg.html" class="stadt-pill inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold hover-tag" style="background:rgba(34,94,170,0.2);border:1px solid rgba(34,94,170,0.4);color:#76a9fa;text-decoration:none;"><span class="material-symbols-outlined" style="font-size:14px">location_on</span>Hamburg</a>
       <!-- Bremen -->
-      <span class="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold hover-tag" style="background:rgba(34,94,170,0.2);border:1px solid rgba(34,94,170,0.4);color:#76a9fa"><span class="material-symbols-outlined" style="font-size:14px">location_on</span>Bremen</span>
+      <a href="staedte/fenster-bremen.html" class="stadt-pill inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold hover-tag" style="background:rgba(34,94,170,0.2);border:1px solid rgba(34,94,170,0.4);color:#76a9fa;text-decoration:none;"><span class="material-symbols-outlined" style="font-size:14px">location_on</span>Bremen</a>
       <!-- Schleswig-Holstein -->
-      <span class="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold hover-tag" style="background:rgba(34,94,170,0.2);border:1px solid rgba(34,94,170,0.4);color:#76a9fa"><span class="material-symbols-outlined" style="font-size:14px">location_on</span>Schleswig-Holstein</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Kiel</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Lübeck</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Flensburg</span>
+      <span class="stadt-pill inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold hover-tag" style="background:rgba(34,94,170,0.2);border:1px solid rgba(34,94,170,0.4);color:#76a9fa"><span class="material-symbols-outlined" style="font-size:14px">location_on</span>Schleswig-Holstein</span>
+      <a href="staedte/fenster-kiel.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Kiel</a>
+      <a href="staedte/fenster-luebeck.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Lübeck</a>
+      <span class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Flensburg</span>
       <!-- Mecklenburg-Vorpommern -->
-      <span class="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold hover-tag" style="background:rgba(34,94,170,0.2);border:1px solid rgba(34,94,170,0.4);color:#76a9fa"><span class="material-symbols-outlined" style="font-size:14px">location_on</span>Mecklenburg-Vorpommern</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Rostock</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Schwerin</span>
+      <span class="stadt-pill inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold hover-tag" style="background:rgba(34,94,170,0.2);border:1px solid rgba(34,94,170,0.4);color:#76a9fa"><span class="material-symbols-outlined" style="font-size:14px">location_on</span>Mecklenburg-Vorpommern</span>
+      <a href="staedte/fenster-rostock.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Rostock</a>
+      <a href="staedte/fenster-schwerin.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Schwerin</a>
       <!-- Niedersachsen -->
-      <span class="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold hover-tag" style="background:rgba(34,94,170,0.2);border:1px solid rgba(34,94,170,0.4);color:#76a9fa"><span class="material-symbols-outlined" style="font-size:14px">location_on</span>Niedersachsen</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Hannover</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Braunschweig</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Oldenburg</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Osnabrück</span>
+      <span class="stadt-pill inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold hover-tag" style="background:rgba(34,94,170,0.2);border:1px solid rgba(34,94,170,0.4);color:#76a9fa"><span class="material-symbols-outlined" style="font-size:14px">location_on</span>Niedersachsen</span>
+      <a href="staedte/fenster-hannover.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Hannover</a>
+      <a href="staedte/fenster-braunschweig.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Braunschweig</a>
+      <a href="staedte/fenster-oldenburg.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Oldenburg</a>
+      <a href="staedte/fenster-osnabrueck.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Osnabrück</a>
       <!-- Nordrhein-Westfalen -->
-      <span class="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold hover-tag" style="background:rgba(34,94,170,0.2);border:1px solid rgba(34,94,170,0.4);color:#76a9fa"><span class="material-symbols-outlined" style="font-size:14px">location_on</span>Nordrhein-Westfalen</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Köln</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Düsseldorf</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Dortmund</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Essen</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Duisburg</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Münster</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Bielefeld</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Bonn</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Aachen</span>
+      <span class="stadt-pill inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold hover-tag" style="background:rgba(34,94,170,0.2);border:1px solid rgba(34,94,170,0.4);color:#76a9fa"><span class="material-symbols-outlined" style="font-size:14px">location_on</span>Nordrhein-Westfalen</span>
+      <a href="staedte/fenster-koeln.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Köln</a>
+      <a href="staedte/fenster-duesseldorf.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Düsseldorf</a>
+      <a href="staedte/fenster-dortmund.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Dortmund</a>
+      <a href="staedte/fenster-essen.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Essen</a>
+      <a href="staedte/fenster-duisburg.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Duisburg</a>
+      <a href="staedte/fenster-muenster.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Münster</a>
+      <a href="staedte/fenster-bielefeld.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Bielefeld</a>
+      <a href="staedte/fenster-bonn.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Bonn</a>
+      <a href="staedte/fenster-aachen.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Aachen</a>
       <!-- Sachsen -->
-      <span class="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold hover-tag" style="background:rgba(34,94,170,0.2);border:1px solid rgba(34,94,170,0.4);color:#76a9fa"><span class="material-symbols-outlined" style="font-size:14px">location_on</span>Sachsen</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Dresden</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Leipzig</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Chemnitz</span>
+      <span class="stadt-pill inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold hover-tag" style="background:rgba(34,94,170,0.2);border:1px solid rgba(34,94,170,0.4);color:#76a9fa"><span class="material-symbols-outlined" style="font-size:14px">location_on</span>Sachsen</span>
+      <a href="staedte/fenster-dresden.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Dresden</a>
+      <a href="staedte/fenster-leipzig.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Leipzig</a>
+      <a href="staedte/fenster-chemnitz.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Chemnitz</a>
       <!-- Sachsen-Anhalt -->
-      <span class="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold hover-tag" style="background:rgba(34,94,170,0.2);border:1px solid rgba(34,94,170,0.4);color:#76a9fa"><span class="material-symbols-outlined" style="font-size:14px">location_on</span>Sachsen-Anhalt</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Magdeburg</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Halle (Saale)</span>
+      <span class="stadt-pill inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold hover-tag" style="background:rgba(34,94,170,0.2);border:1px solid rgba(34,94,170,0.4);color:#76a9fa"><span class="material-symbols-outlined" style="font-size:14px">location_on</span>Sachsen-Anhalt</span>
+      <a href="staedte/fenster-magdeburg.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Magdeburg</a>
+      <a href="staedte/fenster-halle-saale.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Halle (Saale)</a>
       <!-- Thüringen -->
-      <span class="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold hover-tag" style="background:rgba(34,94,170,0.2);border:1px solid rgba(34,94,170,0.4);color:#76a9fa"><span class="material-symbols-outlined" style="font-size:14px">location_on</span>Thüringen</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Erfurt</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Jena</span>
+      <span class="stadt-pill inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold hover-tag" style="background:rgba(34,94,170,0.2);border:1px solid rgba(34,94,170,0.4);color:#76a9fa"><span class="material-symbols-outlined" style="font-size:14px">location_on</span>Thüringen</span>
+      <a href="staedte/fenster-erfurt.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Erfurt</a>
+      <a href="staedte/fenster-jena.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Jena</a>
       <!-- Hessen -->
-      <span class="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold hover-tag" style="background:rgba(34,94,170,0.2);border:1px solid rgba(34,94,170,0.4);color:#76a9fa"><span class="material-symbols-outlined" style="font-size:14px">location_on</span>Hessen</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Frankfurt am Main</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Wiesbaden</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Kassel</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Darmstadt</span>
+      <span class="stadt-pill inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold hover-tag" style="background:rgba(34,94,170,0.2);border:1px solid rgba(34,94,170,0.4);color:#76a9fa"><span class="material-symbols-outlined" style="font-size:14px">location_on</span>Hessen</span>
+      <a href="staedte/fenster-frankfurt-am-main.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Frankfurt am Main</a>
+      <a href="staedte/fenster-wiesbaden.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Wiesbaden</a>
+      <a href="staedte/fenster-kassel.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Kassel</a>
+      <a href="staedte/fenster-darmstadt.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Darmstadt</a>
       <!-- Rheinland-Pfalz -->
-      <span class="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold hover-tag" style="background:rgba(34,94,170,0.2);border:1px solid rgba(34,94,170,0.4);color:#76a9fa"><span class="material-symbols-outlined" style="font-size:14px">location_on</span>Rheinland-Pfalz</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Mainz</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Koblenz</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Trier</span>
+      <span class="stadt-pill inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold hover-tag" style="background:rgba(34,94,170,0.2);border:1px solid rgba(34,94,170,0.4);color:#76a9fa"><span class="material-symbols-outlined" style="font-size:14px">location_on</span>Rheinland-Pfalz</span>
+      <a href="staedte/fenster-mainz.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Mainz</a>
+      <a href="staedte/fenster-koblenz.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Koblenz</a>
+      <a href="staedte/fenster-trier.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Trier</a>
       <!-- Saarland -->
-      <span class="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold hover-tag" style="background:rgba(34,94,170,0.2);border:1px solid rgba(34,94,170,0.4);color:#76a9fa"><span class="material-symbols-outlined" style="font-size:14px">location_on</span>Saarland</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Saarbrücken</span>
+      <span class="stadt-pill inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold hover-tag" style="background:rgba(34,94,170,0.2);border:1px solid rgba(34,94,170,0.4);color:#76a9fa"><span class="material-symbols-outlined" style="font-size:14px">location_on</span>Saarland</span>
+      <a href="staedte/fenster-saarbruecken.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Saarbrücken</a>
       <!-- Baden-Württemberg -->
-      <span class="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold hover-tag" style="background:rgba(34,94,170,0.2);border:1px solid rgba(34,94,170,0.4);color:#76a9fa"><span class="material-symbols-outlined" style="font-size:14px">location_on</span>Baden-Württemberg</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Stuttgart</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Karlsruhe</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Mannheim</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Freiburg</span>
+      <span class="stadt-pill inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold hover-tag" style="background:rgba(34,94,170,0.2);border:1px solid rgba(34,94,170,0.4);color:#76a9fa"><span class="material-symbols-outlined" style="font-size:14px">location_on</span>Baden-Württemberg</span>
+      <a href="staedte/fenster-stuttgart.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Stuttgart</a>
+      <a href="staedte/fenster-karlsruhe.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Karlsruhe</a>
+      <a href="staedte/fenster-mannheim.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Mannheim</a>
+      <a href="staedte/fenster-freiburg-im-breisgau.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Freiburg</a>
       <!-- Bayern -->
-      <span class="inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold hover-tag" style="background:rgba(34,94,170,0.2);border:1px solid rgba(34,94,170,0.4);color:#76a9fa"><span class="material-symbols-outlined" style="font-size:14px">location_on</span>Bayern</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">München</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Nürnberg</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Augsburg</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Regensburg</span>
-      <span class="inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75)">Würzburg</span>
+      <span class="stadt-pill inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold hover-tag" style="background:rgba(34,94,170,0.2);border:1px solid rgba(34,94,170,0.4);color:#76a9fa"><span class="material-symbols-outlined" style="font-size:14px">location_on</span>Bayern</span>
+      <a href="staedte/fenster-muenchen.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">München</a>
+      <a href="staedte/fenster-nuernberg.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Nürnberg</a>
+      <a href="staedte/fenster-augsburg.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Augsburg</a>
+      <a href="staedte/fenster-regensburg.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Regensburg</a>
+      <a href="staedte/fenster-wuerzburg.html" class="stadt-pill inline-flex rounded-full px-3 py-1.5 text-xs font-semibold hover-tag" style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);color:rgba(232,238,255,0.75);text-decoration:none;">Würzburg</a>
     </div>
 
     <!-- SEO-Text: verbindet "Fenster/Türen kaufen/bestellen" mit jeder Stadt + jedem Bundesland -->
@@ -1135,6 +1150,18 @@
       <p>
         Auch in <strong style="color:rgba(232,238,255,0.65)">Bayern</strong> (Nürnberg, Augsburg, Regensburg, Würzburg), <strong style="color:rgba(232,238,255,0.65)">Baden-Württemberg</strong> (Karlsruhe, Mannheim, Freiburg), <strong style="color:rgba(232,238,255,0.65)">Schleswig-Holstein</strong> (Kiel, Lübeck, Flensburg), <strong style="color:rgba(232,238,255,0.65)">Mecklenburg-Vorpommern</strong> (Rostock, Schwerin), <strong style="color:rgba(232,238,255,0.65)">Sachsen-Anhalt</strong> (Magdeburg, Halle), <strong style="color:rgba(232,238,255,0.65)">Thüringen</strong> (Erfurt, Jena), <strong style="color:rgba(232,238,255,0.65)">Rheinland-Pfalz</strong> (Mainz, Koblenz, Trier), <strong style="color:rgba(232,238,255,0.65)">Saarland</strong> (Saarbrücken), <strong style="color:rgba(232,238,255,0.65)">Bremen</strong> und <strong style="color:rgba(232,238,255,0.65)">Hamburg</strong> — Fenster, Haustüren und Hebeschiebetüren von Drutex auf Einwegpalette per Spedition. Kostenfreie Lieferung ab 4.000 € oder ab 10 Elementen.
       </p>
+    </div>
+
+    <!-- E-Mail CTA Liefergebiete -->
+    <div class="mt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-2xl px-6 py-5" style="background:rgba(34,94,170,0.1);border:1px solid rgba(34,94,170,0.3);">
+      <div>
+        <div class="text-sm font-bold text-white mb-1">Fragen zur Lieferung in Ihre Stadt?</div>
+        <div class="text-sm" style="color:rgba(232,238,255,0.6);">Schreiben Sie uns — wir antworten innerhalb von 24 Stunden werktags.</div>
+      </div>
+      <a href="mailto:info@baustoffchrist.de" class="inline-flex items-center gap-2 text-sm font-bold px-5 py-2.5 rounded-full text-white transition-all hover:brightness-110 flex-shrink-0" style="background:#225eaa;">
+        <span class="material-symbols-outlined" style="font-size:16px;font-variation-settings:'FILL' 1">mail</span>
+        info@baustoffchrist.de
+      </a>
     </div>
 
   </div>
@@ -2011,5 +2038,36 @@
   })();
 </script>
 <script src="js/chatbot.js" defer></script>
+
+<!-- Gebrauchte Fenster — Floating Shop Card -->
+<div id="gebraucht-fab" style="position:fixed;bottom:24px;right:24px;z-index:99;background:linear-gradient(145deg,#0f1c30,#0a1225);border:1px solid rgba(118,169,250,0.45);border-radius:20px;padding:16px 20px;max-width:230px;box-shadow:0 16px 56px rgba(0,0,0,0.65),0 0 0 1px rgba(118,169,250,0.08) inset;">
+  <button onclick="document.getElementById('gebraucht-fab').style.display='none'" aria-label="Schließen" style="position:absolute;top:10px;right:12px;background:none;border:none;color:rgba(255,255,255,0.35);cursor:pointer;font-size:20px;line-height:1;padding:0;">×</button>
+  <div style="font-size:10px;font-weight:800;letter-spacing:0.18em;text-transform:uppercase;color:#76a9fa;margin-bottom:6px;">Lager-Shop</div>
+  <div style="font-size:13px;font-weight:700;color:#fff;line-height:1.35;margin-bottom:4px;">500+ gebrauchte Fenster</div>
+  <div style="font-size:12px;color:rgba(232,238,255,0.6);margin-bottom:12px;">direkt vor Ort · ab 80&thinsp;€ / Stück</div>
+  <a href="shop.html" style="display:flex;align-items:center;justify-content:center;gap:6px;background:#225eaa;color:#fff;font-weight:800;font-size:12px;font-family:'Manrope',sans-serif;padding:9px 16px;border-radius:99px;text-decoration:none;">
+    <span class="material-symbols-outlined" style="font-size:14px;font-variation-settings:'FILL' 1;">storefront</span>
+    Zum Shop →
+  </a>
+</div>
+
+<script>
+// Stadt-Pillen stagger animation
+(function(){
+  var w = document.getElementById('stadtpillen');
+  if (!w || !window.IntersectionObserver) return;
+  var pills = w.querySelectorAll('.stadt-pill');
+  w.classList.add('anim-pending');
+  var ob = new IntersectionObserver(function(e){
+    if (e[0].isIntersecting) {
+      pills.forEach(function(p,i){ p.style.animationDelay = (i*16)+'ms'; });
+      w.classList.remove('anim-pending');
+      w.classList.add('anim-go');
+      ob.disconnect();
+    }
+  }, {threshold:0.05});
+  ob.observe(w);
+})();
+</script>
 </body>
 </html>
