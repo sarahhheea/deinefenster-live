@@ -7361,42 +7361,73 @@ async function submitSkizze(e) {
 
   function glassRect(x, y, w, h, dekor) {
     const gf = glassFill(dekor), go = glassStyle(dekor).op;
-    return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+gf+'" opacity="'+go+'"/>'
-      +'<rect x="'+x+'" y="'+y+'" width="'+(w*0.38)+'" height="'+h+'" fill="white" opacity="0.06"/>'
-      +'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+(h*0.18)+'" fill="white" opacity="0.06"/>'
-      +'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="none" stroke="rgba(0,0,0,0.13)" stroke-width="2.5"/>';
+    let s = '';
+    s += '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+gf+'" opacity="'+go+'"/>';
+    s += '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="url(#glBase)"/>';
+    s += '<polygon points="'+x+','+y+' '+(x+w*0.50)+','+y+' '+(x+w*0.26)+','+(y+h)+' '+x+','+(y+h)+'" fill="white" opacity="0.058"/>';
+    s += '<polygon points="'+(x+w*0.53)+','+y+' '+(x+w*0.61)+','+y+' '+(x+w*0.39)+','+(y+h)+' '+(x+w*0.33)+','+(y+h)+'" fill="white" opacity="0.038"/>';
+    s += '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+(h*0.27)+'" fill="rgba(190,225,255,0.06)"/>';
+    s += '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="3" fill="rgba(255,255,255,0.26)"/>';
+    s += '<rect x="'+x+'" y="'+y+'" width="2.5" height="'+h+'" fill="rgba(255,255,255,0.16)"/>';
+    s += '<rect x="'+x+'" y="'+(y+h*0.82)+'" width="'+w+'" height="'+(h*0.18)+'" fill="rgba(10,20,50,0.10)"/>';
+    s += '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="none" stroke="rgba(0,20,60,0.30)" stroke-width="5"/>';
+    return s;
   }
 
   function sprosse(x, y, w, h, typ, dicke) {
     if (!typ || typ === 'keine') return '';
     const inn = (typ === 'szr');
     const d = parseInt(dicke) || 18;
-    const sw = inn ? 3.5 : (d >= 45 ? 11 : d >= 26 ? 7.5 : 5);
-    const col = inn ? 'rgba(148,192,220,0.72)' : '#e6e2d8';
+    const sw = inn ? 3.5 : (d >= 45 ? 12 : d >= 26 ? 8 : 5.5);
+    const col = inn ? 'rgba(148,192,220,0.72)' : '#dedad2';
+    const hi  = inn ? 'rgba(200,230,255,0.55)' : 'rgba(255,255,255,0.50)';
+    const sh  = inn ? 'rgba(80,130,170,0.30)'  : 'rgba(0,0,0,0.28)';
     const flt = inn ? '' : 'filter="url(#spr-sh)"';
     const cx = x + w/2, cy = y + h/2;
-    return '<line x1="'+cx+'" y1="'+(y+sw)+'" x2="'+cx+'" y2="'+(y+h-sw)+'" stroke="'+col+'" stroke-width="'+sw+'" stroke-linecap="round" '+flt+'/>'
-      +'<line x1="'+(x+sw)+'" y1="'+cy+'" x2="'+(x+w-sw)+'" y2="'+cy+'" stroke="'+col+'" stroke-width="'+sw+'" stroke-linecap="round" '+flt+'/>';
+    let s = '';
+    s += '<line x1="'+cx+'" y1="'+(y+sw)+'" x2="'+cx+'" y2="'+(y+h-sw)+'" stroke="'+col+'" stroke-width="'+sw+'" stroke-linecap="round" '+flt+'/>';
+    s += '<line x1="'+(x+sw)+'" y1="'+cy+'" x2="'+(x+w-sw)+'" y2="'+cy+'" stroke="'+col+'" stroke-width="'+sw+'" stroke-linecap="round" '+flt+'/>';
+    if (!inn && sw >= 5) {
+      const hw = sw * 0.35;
+      s += '<line x1="'+cx+'" y1="'+(y+sw)+'" x2="'+cx+'" y2="'+(y+h-sw)+'" stroke="'+hi+'" stroke-width="'+hw+'" stroke-linecap="round"/>';
+      s += '<line x1="'+(x+sw)+'" y1="'+cy+'" x2="'+(x+w-sw)+'" y2="'+cy+'" stroke="'+hi+'" stroke-width="'+hw+'" stroke-linecap="round"/>';
+    }
+    return s;
   }
 
   function oeffSymbol(x, y, w, h, oeff) {
     if (!oeff || oeff === 'fest' || oeff === 'hst-slide') return '';
-    const cx = x+w/2, cy = y+h/2, col = 'rgba(118,169,250,0.82)', sw = 5;
-    let s = '';
+    const col = 'rgba(118,169,250,0.85)', colF = 'rgba(118,169,250,0.10)', sw = 2.2;
     const isL = oeff==='dreh-l'||oeff==='dk-l', isR = oeff==='dreh-r'||oeff==='dk-r';
     const isK = oeff==='kipp'||oeff==='dk-l'||oeff==='dk-r';
+    const pad = Math.min(w,h) * 0.07;
+    const cx = x+w/2, cy = y+h/2;
+    let s = '';
     if (isL) {
-      s += '<line x1="'+(x+w-22)+'" y1="'+(y+20)+'" x2="'+(x+w-22)+'" y2="'+(y+h-20)+'" stroke="'+col+'" stroke-width="'+sw+'" stroke-linecap="round" opacity="0.6"/>';
-      s += '<line x1="'+cx+'" y1="'+cy+'" x2="'+(x+w-22)+'" y2="'+(y+20)+'" stroke="'+col+'" stroke-width="'+(sw-1)+'" stroke-linecap="round" opacity="0.5"/>';
-      s += '<polyline points="'+(x+w-42)+','+(y+36)+' '+(x+w-22)+','+(y+20)+' '+(x+w-6)+','+(y+36)+'" fill="none" stroke="'+col+'" stroke-width="'+sw+'" stroke-linejoin="round"/>';
+      const hx=x+w-pad, ty=y+pad, by=y+h-pad;
+      s += '<polygon points="'+cx+','+cy+' '+hx+','+ty+' '+hx+','+by+'" fill="'+colF+'"/>';
+      s += '<line x1="'+hx+'" y1="'+ty+'" x2="'+hx+'" y2="'+by+'" stroke="'+col+'" stroke-width="'+(sw+1.2)+'" stroke-linecap="round"/>';
+      s += '<line x1="'+cx+'" y1="'+cy+'" x2="'+hx+'" y2="'+ty+'" stroke="'+col+'" stroke-width="'+sw+'" stroke-linecap="round"/>';
+      s += '<line x1="'+cx+'" y1="'+cy+'" x2="'+hx+'" y2="'+by+'" stroke="'+col+'" stroke-width="'+sw+'" stroke-linecap="round"/>';
+      const ax=cx-16, ay=cy;
+      s += '<polygon points="'+(ax)+','+(ay-6)+' '+(ax-11)+','+ay+' '+ax+','+(ay+6)+'" fill="'+col+'"/>';
     }
     if (isR) {
-      s += '<line x1="'+(x+22)+'" y1="'+(y+20)+'" x2="'+(x+22)+'" y2="'+(y+h-20)+'" stroke="'+col+'" stroke-width="'+sw+'" stroke-linecap="round" opacity="0.6"/>';
-      s += '<line x1="'+cx+'" y1="'+cy+'" x2="'+(x+22)+'" y2="'+(y+20)+'" stroke="'+col+'" stroke-width="'+(sw-1)+'" stroke-linecap="round" opacity="0.5"/>';
-      s += '<polyline points="'+(x+6)+','+(y+36)+' '+(x+22)+','+(y+20)+' '+(x+42)+','+(y+36)+'" fill="none" stroke="'+col+'" stroke-width="'+sw+'" stroke-linejoin="round"/>';
+      const hx=x+pad, ty=y+pad, by=y+h-pad;
+      s += '<polygon points="'+cx+','+cy+' '+hx+','+ty+' '+hx+','+by+'" fill="'+colF+'"/>';
+      s += '<line x1="'+hx+'" y1="'+ty+'" x2="'+hx+'" y2="'+by+'" stroke="'+col+'" stroke-width="'+(sw+1.2)+'" stroke-linecap="round"/>';
+      s += '<line x1="'+cx+'" y1="'+cy+'" x2="'+hx+'" y2="'+ty+'" stroke="'+col+'" stroke-width="'+sw+'" stroke-linecap="round"/>';
+      s += '<line x1="'+cx+'" y1="'+cy+'" x2="'+hx+'" y2="'+by+'" stroke="'+col+'" stroke-width="'+sw+'" stroke-linecap="round"/>';
+      const ax=cx+16, ay=cy;
+      s += '<polygon points="'+ax+','+(ay-6)+' '+(ax+11)+','+ay+' '+ax+','+(ay+6)+'" fill="'+col+'"/>';
     }
     if (isK) {
-      s += '<polyline points="'+(cx-24)+','+(y+h-36)+' '+cx+','+(y+h-20)+' '+(cx+24)+','+(y+h-36)+'" fill="none" stroke="'+col+'" stroke-width="'+sw+'" stroke-linejoin="round" opacity="0.65"/>';
+      const hby=y+h-pad, hbx1=x+pad, hbx2=x+w-pad, ty=y+pad;
+      s += '<polygon points="'+cx+','+ty+' '+hbx1+','+hby+' '+hbx2+','+hby+'" fill="'+colF+'"/>';
+      s += '<line x1="'+hbx1+'" y1="'+hby+'" x2="'+hbx2+'" y2="'+hby+'" stroke="'+col+'" stroke-width="'+(sw+1.2)+'" stroke-linecap="round"/>';
+      s += '<line x1="'+cx+'" y1="'+ty+'" x2="'+hbx1+'" y2="'+hby+'" stroke="'+col+'" stroke-width="'+sw+'" stroke-linecap="round"/>';
+      s += '<line x1="'+cx+'" y1="'+ty+'" x2="'+hbx2+'" y2="'+hby+'" stroke="'+col+'" stroke-width="'+sw+'" stroke-linecap="round"/>';
+      s += '<polygon points="'+(cx-6)+','+(ty+14)+' '+cx+','+ty+' '+(cx+6)+','+(ty+14)+'" fill="'+col+'"/>';
     }
     return s;
   }
@@ -7486,10 +7517,14 @@ async function submitSkizze(e) {
   // Fensterbank (nur Kunststofffenster)
   function fensterbank(bMm, wY, hMm) {
     const sbY = wY + hMm - 2;
-    const sbH = 44;
-    return '<rect x="-18" y="'+sbY+'" width="'+(bMm+36)+'" height="'+sbH+'" fill="#cdd2d8" rx="3"/>'
-      +'<rect x="-18" y="'+sbY+'" width="'+(bMm+36)+'" height="8" fill="white" opacity="0.22" rx="3"/>'
-      +'<rect x="-18" y="'+sbY+'" width="'+(bMm+36)+'" height="'+sbH+'" fill="none" stroke="rgba(0,0,0,0.10)" stroke-width="1.5" rx="3"/>';
+    const sbH = 44, sbW = bMm+36, sbX = -18;
+    let s = '';
+    s += '<rect x="'+sbX+'" y="'+sbY+'" width="'+sbW+'" height="'+sbH+'" fill="#c0c6cc" rx="4"/>';
+    s += '<rect x="'+sbX+'" y="'+sbY+'" width="'+sbW+'" height="'+sbH+'" fill="url(#frameLum)" opacity="0.80" rx="4"/>';
+    s += '<rect x="'+sbX+'" y="'+sbY+'" width="'+sbW+'" height="7" fill="rgba(255,255,255,0.36)" rx="4"/>';
+    s += '<rect x="'+sbX+'" y="'+(sbY+sbH-10)+'" width="'+sbW+'" height="10" fill="rgba(0,0,0,0.22)" rx="2"/>';
+    s += '<rect x="'+sbX+'" y="'+sbY+'" width="'+sbW+'" height="'+sbH+'" fill="none" stroke="rgba(0,0,0,0.12)" stroke-width="1.5" rx="4"/>';
+    return s;
   }
 
   function rolladenKasten(x, y, w, h, rollSeite, rollTyp) {
@@ -7528,10 +7563,21 @@ async function submitSkizze(e) {
     return '<defs>'+patternDefs(dekor)
       +'<linearGradient id="wallGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#141f38"/><stop offset="100%" stop-color="#07101e"/></linearGradient>'
       +'<radialGradient id="floorGrad" cx="50%" cy="100%" r="60%"><stop offset="0%" stop-color="rgba(118,169,250,0.05)"/><stop offset="100%" stop-color="rgba(0,0,0,0)"/></radialGradient>'
-      +'<filter id="winGlow" x="-8%" y="-5%" width="116%" height="110%"><feDropShadow dx="0" dy="4" stdDeviation="22" flood-color="rgba(118,169,250,0.14)"/></filter>'
-      +'<filter id="spr-sh" x="-25%" y="-25%" width="150%" height="150%"><feDropShadow dx="0" dy="0.8" stdDeviation="1.8" flood-color="rgba(0,0,0,0.5)"/></filter>'
-      +'<filter id="sash-sh" x="-5%" y="-5%" width="110%" height="110%"><feDropShadow dx="2" dy="3" stdDeviation="7" flood-color="rgba(0,0,0,0.45)"/></filter>'
+      +'<linearGradient id="glBase" x1="0%" y1="0%" x2="0%" y2="100%" gradientUnits="objectBoundingBox"><stop offset="0%" stop-color="#a8d4f0" stop-opacity="0.30"/><stop offset="38%" stop-color="#78b8d8" stop-opacity="0.07"/><stop offset="100%" stop-color="#2858a0" stop-opacity="0.20"/></linearGradient>'
+      +'<linearGradient id="frameLum" x1="0%" y1="0%" x2="100%" y2="100%" gradientUnits="objectBoundingBox"><stop offset="0%" stop-color="rgba(255,255,255,0.22)"/><stop offset="45%" stop-color="rgba(255,255,255,0.02)"/><stop offset="100%" stop-color="rgba(0,0,0,0.28)"/></linearGradient>'
+      +'<filter id="winGlow" x="-8%" y="-5%" width="116%" height="110%"><feDropShadow dx="0" dy="6" stdDeviation="28" flood-color="rgba(80,140,220,0.20)"/></filter>'
+      +'<filter id="spr-sh" x="-25%" y="-25%" width="150%" height="150%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="rgba(0,0,0,0.55)"/></filter>'
+      +'<filter id="sash-sh" x="-5%" y="-5%" width="110%" height="110%"><feDropShadow dx="3" dy="4" stdDeviation="9" flood-color="rgba(0,0,0,0.52)"/></filter>'
+      +'<filter id="door-sh" x="-6%" y="-3%" width="112%" height="106%"><feDropShadow dx="4" dy="6" stdDeviation="14" flood-color="rgba(0,0,0,0.58)"/></filter>'
       +'</defs>';
+  }
+
+  function frameBevel(x, y, w, h, t) {
+    t = t || 5;
+    return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+t+'" fill="rgba(255,255,255,0.22)" rx="2"/>'
+      +'<rect x="'+x+'" y="'+(y+t)+'" width="'+t+'" height="'+(h-2*t)+'" fill="rgba(255,255,255,0.13)"/>'
+      +'<rect x="'+x+'" y="'+(y+h-t)+'" width="'+w+'" height="'+t+'" fill="rgba(0,0,0,0.30)" rx="1"/>'
+      +'<rect x="'+(x+w-t)+'" y="'+(y+t)+'" width="'+t+'" height="'+(h-2*t)+'" fill="rgba(0,0,0,0.18)"/>';
   }
 
   function drawSash(x, y, w, h, oeff, S, view, fCol) {
@@ -7540,8 +7586,10 @@ async function submitSkizze(e) {
     const isFixed=(oeff==='fest'||!oeff), dicht=colorOf(S.fd,'fd')||'#1a1a1a';
     let s = '<g filter="url(#sash-sh)">'
       +'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fCol+'" opacity="'+(isFixed?0.82:1)+'" rx="2"/>'
-      +'<rect x="'+(x+DCT)+'" y="'+(y+DCT)+'" width="'+(w-DCT*2)+'" height="'+(h-DCT*2)+'" fill="none" stroke="'+dicht+'" stroke-width="'+(DCT*0.65)+'" opacity="0.55" rx="1"/>'
-      +'</g>';
+      +'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="url(#frameLum)" opacity="0.90" rx="2"/>'
+      +'<rect x="'+(x+DCT)+'" y="'+(y+DCT)+'" width="'+(w-DCT*2)+'" height="'+(h-DCT*2)+'" fill="none" stroke="'+dicht+'" stroke-width="'+(DCT*0.65)+'" opacity="0.60" rx="1"/>'
+      +'</g>'
+      +frameBevel(x, y, w, h, 5);
     if (gw>10&&gh>10) {
       s += glassRect(gx,gy,gw,gh,S.glasdekor);
       s += sprosse(gx,gy,gw,gh,S.sproTyp,S.sproDicke);
@@ -7577,8 +7625,12 @@ async function submitSkizze(e) {
       +'<rect x="'+vbX+'" width="'+vbW+'" height="'+totalH+'" fill="url(#wallGrad)"/>'
       +'<rect x="'+vbX+'" width="'+vbW+'" height="'+totalH+'" fill="url(#floorGrad)"/>';
     if (hasRoll) svg+=rolladenKasten(0,0,bMm,rollH,S.rollSeite,S.roll);
-    svg+='<rect x="0" y="'+wY+'" width="'+bMm+'" height="'+hMm+'" fill="'+fCol+'" rx="3"/>'
-      +'<rect x="0" y="'+wY+'" width="'+bMm+'" height="'+hMm+'" fill="none" stroke="'+fBorder+'" stroke-width="3" rx="3"/>';
+    svg+='<g filter="url(#winGlow)">'
+      +'<rect x="0" y="'+wY+'" width="'+bMm+'" height="'+hMm+'" fill="'+fCol+'" rx="3"/>'
+      +'<rect x="0" y="'+wY+'" width="'+bMm+'" height="'+hMm+'" fill="url(#frameLum)" opacity="0.88" rx="3"/>'
+      +'<rect x="0" y="'+wY+'" width="'+bMm+'" height="'+hMm+'" fill="none" stroke="'+fBorder+'" stroke-width="3" rx="3"/>'
+      +'</g>'
+      +frameBevel(0, wY, bMm, hMm, 7);
     if (hasOL) {
       const olX=OFR,olY=wY+OFR,olW=bMm-2*OFR,olH2=OL_H-OFR;
       svg+=glassRect(olX,olY,olW,olH2,S.glasdekor)+sprosse(olX,olY,olW,olH2,S.sproTyp,S.sproDicke);
@@ -7624,36 +7676,48 @@ async function submitSkizze(e) {
     if (hasRoll) svg+=rolladenKasten(0,0,bMm,rollH,S.rollSeite,S.roll);
     if (hasST_L) svg+=drawSeitenteil(0,dY,ST_W,hMm,S,fCol,fBorder);
     if (hasST_R) svg+=drawSeitenteil(bMm-ST_W,dY,ST_W,hMm,S,fCol,fBorder);
-    svg+='<rect x="'+doorX+'" y="'+dY+'" width="'+doorW+'" height="'+hMm+'" fill="'+fCol+'" rx="3"/>'
+    svg+='<g filter="url(#door-sh)">'
+      +'<rect x="'+doorX+'" y="'+dY+'" width="'+doorW+'" height="'+hMm+'" fill="'+fCol+'" rx="3"/>'
+      +'<rect x="'+doorX+'" y="'+dY+'" width="'+doorW+'" height="'+hMm+'" fill="url(#frameLum)" opacity="0.88" rx="3"/>'
       +'<rect x="'+doorX+'" y="'+dY+'" width="'+doorW+'" height="'+hMm+'" fill="none" stroke="'+fBorder+'" stroke-width="3" rx="3"/>'
+      +'</g>'
+      +frameBevel(doorX, dY, doorW, hMm, 7)
       +'<rect x="'+(doorX+fi2)+'" y="'+(dY+fi2)+'" width="'+(doorW-2*fi2)+'" height="'+(hMm-fi2*1.3)+'" fill="'+fCol+'" stroke="'+fBorder+'" stroke-width="2.5" rx="2"/>';
     const modelDef=HD_PANELS[S.tuerModell||'florida-lr-inox']||HD_PANELS['florida-lr-inox'];
     for (const p of modelDef.panels) svg+=glassRect(doorX+p.x*scX,dY+p.y*scY,p.w*scX,p.h*scY,S.glasdekor);
     if (modelDef.strips) for (const st of modelDef.strips) {
       const sx=doorX+st.x*scX,sy=dY+st.y*scY,sw=st.w*scX,sh=st.h*scY;
-      svg+='<rect x="'+sx+'" y="'+sy+'" width="'+sw+'" height="'+sh+'" fill="#c4ccd4" stroke="#a0a8b0" stroke-width="1.5" rx="2" opacity="0.92"/>'
-        +'<rect x="'+(sx+sw*0.18)+'" y="'+sy+'" width="'+(sw*0.28)+'" height="'+sh+'" fill="white" opacity="0.13"/>';
+      svg+='<rect x="'+sx+'" y="'+sy+'" width="'+sw+'" height="'+sh+'" fill="url(#frameLum)" opacity="0.85" rx="2"/>'
+        +'<rect x="'+sx+'" y="'+sy+'" width="'+sw+'" height="'+sh+'" fill="#b8c0c8" stroke="#909aa4" stroke-width="1.5" rx="2" opacity="0.88"/>'
+        +'<rect x="'+(sx+sw*0.18)+'" y="'+sy+'" width="'+(sw*0.30)+'" height="'+sh+'" fill="white" opacity="0.14"/>'
+        +'<rect x="'+sx+'" y="'+sy+'" width="'+sw+'" height="5" fill="rgba(255,255,255,0.28)" rx="2"/>';
     }
     const hingeX=(hingeSide==='r')?doorX+doorW-fi2+4:doorX+fi2-22;
     for (let i=0;i<3;i++) {
       const hy=dY+hMm*(0.18+i*0.32);
-      svg+='<rect x="'+hingeX+'" y="'+(hy-22)+'" width="17" height="44" rx="3.5" fill="#a0aab4" stroke="#808890" stroke-width="1.5"/>'
-        +'<circle cx="'+(hingeX+8.5)+'" cy="'+hy+'" r="5" fill="#888" stroke="#666" stroke-width="1"/>';
+      svg+='<rect x="'+hingeX+'" y="'+(hy-24)+'" width="18" height="48" rx="4" fill="#a8b2bc" stroke="#7a8290" stroke-width="1.5"/>'
+        +'<rect x="'+hingeX+'" y="'+(hy-24)+'" width="18" height="8" fill="rgba(255,255,255,0.22)" rx="4"/>'
+        +'<circle cx="'+(hingeX+9)+'" cy="'+hy+'" r="5.5" fill="#888" stroke="#606870" stroke-width="1.2"/>'
+        +'<circle cx="'+(hingeX+9)+'" cy="'+hy+'" r="2.2" fill="#555"/>';
     }
     const lockX=(hingeSide==='r')?doorX+OFR+50:doorX+doorW-OFR-50;
-    svg+='<ellipse cx="'+lockX+'" cy="'+(dY+hMm*0.52)+'" rx="14" ry="20" fill="#8a9098" stroke="#606870" stroke-width="2"/>'
-      +'<rect x="'+(lockX-5)+'" y="'+(dY+hMm*0.52-4)+'" width="10" height="8" rx="1.5" fill="#505860"/>';
+    svg+='<ellipse cx="'+lockX+'" cy="'+(dY+hMm*0.52)+'" rx="15" ry="21" fill="#8a9098" stroke="#606870" stroke-width="2"/>'
+      +'<ellipse cx="'+(lockX-2)+'" cy="'+(dY+hMm*0.52-4)+'" rx="7" ry="5" fill="rgba(255,255,255,0.14)"/>'
+      +'<rect x="'+(lockX-5)+'" y="'+(dY+hMm*0.52-4)+'" width="10" height="9" rx="2" fill="#505860"/>';
+    svg+='<rect x="'+doorX+'" y="'+(dY+hMm-14)+'" width="'+doorW+'" height="16" fill="#7a8290" rx="3" stroke="#5a6270" stroke-width="1.5"/>'
+      +'<rect x="'+doorX+'" y="'+(dY+hMm-14)+'" width="'+doorW+'" height="5" fill="rgba(255,255,255,0.14)" rx="3"/>';
     svg+=isAussen?stossgriff(gripX,dY+hMm*0.44,hMm*0.22,S.tuerGriffAussen):klinke(gripX,dY+hMm*0.52,S.tuerGriffInnen,fCol,isDark);
     svg+=massLabel(bMm/2,totalH-16,bMm,hMm,isDark)+'</svg>';
     return svg;
   }
 
   function drawSeitenteil(x,y,w,h,S,fCol,fBorder) {
-    const fr=Math.min(36,w*0.22); // Rahmenbreite proportional zur Seitenteil-Breite
+    const fr=Math.min(36,w*0.22);
     const gx=x+fr,gy=y+fr,gw=w-2*fr,gh=h-fr*1.4;
     let s='<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fCol+'" rx="2"/>'
-      +'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="none" stroke="'+fBorder+'" stroke-width="2.5" rx="2"/>';
-    // Innerer Falz (wie Türblatt)
+      +'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="url(#frameLum)" opacity="0.88" rx="2"/>'
+      +'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="none" stroke="'+fBorder+'" stroke-width="2.5" rx="2"/>'
+      +frameBevel(x, y, w, h, 5);
     s+='<rect x="'+(x+12)+'" y="'+(y+12)+'" width="'+(w-24)+'" height="'+(h-18)+'" fill="'+fCol+'" stroke="'+fBorder+'" stroke-width="1.8" rx="1.5" opacity="0.75"/>';
     if (gw>0&&gh>0) s+=glassRect(gx,gy,gw,gh,S.glasdekor);
     return s;
@@ -7685,16 +7749,24 @@ async function submitSkizze(e) {
       +svgDefs(S.glasdekor)+'<rect width="'+bMm+'" height="'+totalH+'" fill="url(#wallGrad)"/>'
       +'<rect width="'+bMm+'" height="'+totalH+'" fill="url(#floorGrad)"/>';
     if (hasRoll) svg+=rolladenKasten(0,0,bMm,rollH,S.rollSeite,S.roll);
-    svg+='<rect x="0" y="'+wY+'" width="'+bMm+'" height="'+hMm+'" fill="'+fCol+'" rx="3"/>'
-      +'<rect x="0" y="'+wY+'" width="'+bMm+'" height="'+hMm+'" fill="none" stroke="'+fBorder+'" stroke-width="3" rx="3"/>';
+    svg+='<g filter="url(#winGlow)">'
+      +'<rect x="0" y="'+wY+'" width="'+bMm+'" height="'+hMm+'" fill="'+fCol+'" rx="3"/>'
+      +'<rect x="0" y="'+wY+'" width="'+bMm+'" height="'+hMm+'" fill="url(#frameLum)" opacity="0.88" rx="3"/>'
+      +'<rect x="0" y="'+wY+'" width="'+bMm+'" height="'+hMm+'" fill="none" stroke="'+fBorder+'" stroke-width="3" rx="3"/>'
+      +'</g>'
+      +frameBevel(0, wY, bMm, hMm, 8);
+    svg+='<rect x="0" y="'+wY+'" width="'+bMm+'" height="20" fill="#626a78" rx="3"/>'
+      +'<rect x="0" y="'+wY+'" width="'+bMm+'" height="6" fill="rgba(255,255,255,0.18)" rx="3"/>'
+      +'<rect x="0" y="'+(wY+hMm-20)+'" width="'+bMm+'" height="22" fill="#5e6676" rx="2"/>'
+      +'<rect x="0" y="'+(wY+hMm-20)+'" width="'+bMm+'" height="5" fill="rgba(255,255,255,0.12)"/>';
     for (let i=0;i<n;i++) {
       const isSchieber=(lauf==='rechts')?(i===0):(i===n-1);
       svg+=drawHSTPanel(OFR+i*panW,wY+OFR,panW,hMm-OFR*2,isSchieber,S,fCol,fBorder,view);
     }
     const arY=wY+hMm*0.5, arDir=lauf==='rechts'?-1:1, arX=lauf==='rechts'?OFR+panW*0.5:OFR+panW*(n-0.5);
-    const ac='rgba(118,169,250,0.72)';
-    svg+='<polyline points="'+(arX+arDir*36)+','+(arY-18)+' '+(arX+arDir*12)+','+arY+' '+(arX+arDir*36)+','+(arY+18)+'" fill="none" stroke="'+ac+'" stroke-width="9" stroke-linejoin="round" stroke-linecap="round"/>'
-      +'<line x1="'+(arX+arDir*12)+'" y1="'+arY+'" x2="'+(arX+arDir*panW*0.55)+'" y2="'+arY+'" stroke="'+ac+'" stroke-width="6" stroke-linecap="round"/>';
+    const ac='rgba(118,169,250,0.80)';
+    svg+='<polygon points="'+(arX+arDir*48)+','+(arY-22)+' '+(arX+arDir*14)+','+arY+' '+(arX+arDir*48)+','+(arY+22)+'" fill="'+ac+'" opacity="0.85"/>'
+      +'<line x1="'+(arX+arDir*14)+'" y1="'+arY+'" x2="'+(arX+arDir*panW*0.52)+'" y2="'+arY+'" stroke="'+ac+'" stroke-width="7" stroke-linecap="round"/>';
     svg+=massLabel(bMm/2,totalH-14,bMm,hMm,false)+'</svg>';
     return svg;
   }
@@ -7702,11 +7774,15 @@ async function submitSkizze(e) {
   function drawHSTPanel(x,y,w,h,isSchieber,S,fCol,fBorder,view) {
     const gx=x+SFR*0.7,gy=y+SFR*0.7,gw=w-SFR*1.4,gh=h-SFR*1.4;
     const shadow=isSchieber?'filter="url(#sash-sh)"':'';
-    let s='<g '+shadow+'><rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fCol+'" opacity="'+(isSchieber?1:0.82)+'" rx="2"/>'
-      +'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="none" stroke="'+fBorder+'" stroke-width="2.5" rx="2"/>';
+    let s='<g '+shadow+'>'
+      +'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fCol+'" opacity="'+(isSchieber?1:0.82)+'" rx="2"/>'
+      +'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="url(#frameLum)" opacity="0.85" rx="2"/>'
+      +'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="none" stroke="'+fBorder+'" stroke-width="2.5" rx="2"/>'
+      +'</g>'
+      +frameBevel(x, y, w, h, 5);
     if (gw>0&&gh>0) { s+=glassRect(gx,gy,gw,gh,S.glasdekor); s+=sprosse(gx,gy,gw,gh,S.sproTyp,S.sproDicke); }
-    if (isSchieber&&view==='inn') s+='<rect x="'+(x+w*0.5-10)+'" y="'+(y+h*0.5-50)+'" width="20" height="100" rx="10" fill="'+fCol+'" stroke="#8a9098" stroke-width="2" opacity="0.9"/>';
-    s+='</g>';
+    if (isSchieber&&view==='inn') s+='<rect x="'+(x+w*0.5-10)+'" y="'+(y+h*0.5-55)+'" width="20" height="110" rx="10" fill="'+fCol+'" stroke="#8a9098" stroke-width="2" opacity="0.92"/>'
+      +'<rect x="'+(x+w*0.5-10)+'" y="'+(y+h*0.5-55)+'" width="20" height="16" fill="rgba(255,255,255,0.20)" rx="10"/>';
     return s;
   }
 
