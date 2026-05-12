@@ -182,11 +182,10 @@ function baueFilterSidebar() {
   const katWrap = document.getElementById('filterKategorien');
   katWrap.innerHTML = Object.entries(STATE.kategorien).map(([key, label]) => {
     const count = STATE.produkte.filter(p => p.kategorie === key).length;
-    if (count === 0) return '';
     return `
       <label class="filter-option">
         <span class="flex items-center gap-2"><input type="checkbox" class="check filter-kategorie" value="${key}"/><span>${escapeHtml(label)}</span></span>
-        <span class="count">${count}</span>
+        ${count > 0 ? `<span class="count">${count}</span>` : ''}
       </label>`;
   }).join('');
 
