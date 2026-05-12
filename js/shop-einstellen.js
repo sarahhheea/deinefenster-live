@@ -229,9 +229,7 @@ function setEditModeUI() {
   if (!STATE.editMode) return;
   const btn = document.getElementById('veroeffentlichenBtn');
   if (btn) btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px">save</span> Änderungen speichern';
-  // Kategorie-Wechsel deaktivieren beim Bearbeiten (Kategorie ändert nichts wesentliches, aber hindert Verwirrung)
-  const wechseln = document.getElementById('kategorieWechseln');
-  if (wechseln) wechseln.style.display = 'none';
+  // Kategorie-Wechsel bleibt im Edit-Mode aktiv (Sarah: Kategorie nachträglich korrigierbar)
 }
 
 /* ─── Größen-Klasse ─── */
