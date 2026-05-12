@@ -164,7 +164,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 // RENDERER
 // ══════════════════════════════════════════════
 const canvasEl = document.getElementById('threeCanvas');
-const renderer = new THREE.WebGLRenderer({ canvas: canvasEl, antialias: true, alpha: true });
+const renderer = new THREE.WebGLRenderer({ canvas: canvasEl, antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -172,7 +172,7 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 0.85;
 
 const scene = new THREE.Scene();
-// Kein scene.background → transparenter Canvas, Hintergrundfarbe über CSS
+scene.background = new THREE.Color(0xf0f0f0);  // Solider Hintergrund — fix für Glass-Transmission
 
 const camera = new THREE.OrthographicCamera(-0.75, 0.75, 0.75, -0.75, 0.1, 50);
 camera.position.set(0, 0.60, 5.5);
@@ -244,15 +244,16 @@ const texLoader = new THREE.TextureLoader();
 
 // doorMat = Flügelrahmen-Fläche, frameMat = Blendrahmen-Streifen, glFrameMat = Glasleiste
 // Alle drei bekommen dieselbe Farbe/Holztextur (Fenster ist einheitlich)
-const doorMat    = new THREE.MeshStandardMaterial({ color: 0xfcfcfc, roughness: 0.74, metalness: 0 });
-const frameMat   = new THREE.MeshStandardMaterial({ color: 0xfcfcfc, roughness: 0.74, metalness: 0 });
-const glFrameMat = new THREE.MeshStandardMaterial({ color: 0xfcfcfc, roughness: 0.74, metalness: 0 });
+const doorMat    = new THREE.MeshStandardMaterial({ color: 0xfafafa, roughness: 0.72, metalness: 0 });
+const frameMat   = new THREE.MeshStandardMaterial({ color: 0xe8e8e8, roughness: 0.76, metalness: 0 });
+const glFrameMat = new THREE.MeshStandardMaterial({ color: 0xfafafa, roughness: 0.72, metalness: 0 });
 const chromeMat  = new THREE.MeshStandardMaterial({ color: 0xb8bec2, roughness: 0.22, metalness: 0.95, envMapIntensity: 4.0 });
 const brushedMat = new THREE.MeshStandardMaterial({ color: 0xb2b8bc, roughness: 0.30, metalness: 0.82, envMapIntensity: 2.0 });
 const glassMat   = new THREE.MeshPhysicalMaterial({
   color: 0xffffff, metalness: 0, roughness: 0.0,
   transmission: 0.05, thickness: 0.018, ior: 1.5, transparent: true,
   reflectivity: 0.08,
+  depthWrite: false,  // blockiert sonst glassBacking dahinter
 });
 
 // ══════════════════════════════════════════════
@@ -335,13 +336,14 @@ function buildWindow() {
 
   // ────────────────────────────────────────────
   // 1. WEISSE BACKING-PLANE (simuliert Tageslicht)
-  //    Direkt hinter dem Glas, leuchtendes Weiß
+  //    Liegt auf Sash-Vorderfläche — garantiert sichtbar
   // ────────────────────────────────────────────
   const glassBacking = new THREE.Mesh(
-    new THREE.PlaneGeometry(GWf + 0.004, GHf + 0.004),
-    new THREE.MeshBasicMaterial({ color: 0xffffff })
+    new THREE.PlaneGeometry(GWf, GHf),
+    new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false })
   );
-  glassBacking.position.set(GXf + GWf / 2, GYf + GHf / 2, sashZ - 0.040);
+  glassBacking.position.set(GXf + GWf / 2, GYf + GHf / 2, sashZ + 0.001);
+  glassBacking.renderOrder = 1;
   windowGroup.add(glassBacking);
 
   // ────────────────────────────────────────────
@@ -432,16 +434,8 @@ function buildWindow() {
   windowGroup.add(dichtFn(GXf - SW,      GYf,            SW,            GHf)); // links
   windowGroup.add(dichtFn(GXf + GWf,     GYf,            SW,            GHf)); // rechts
 
-  // ────────────────────────────────────────────
-  // 5. GLASSCHEIBE — weiß/hell wie Tageslicht
-  // ────────────────────────────────────────────
-  const gm = new THREE.Mesh(
-    new THREE.PlaneGeometry(GWf, GHf),
-    glassMat
-  );
-  gm.position.set(GXf + GWf / 2, GYf + GHf / 2, sashZ - 0.020);
-  windowGroup.add(gm);
-  glassObjects.push(gm);
+  // Glas: nur MeshBasicMaterial-Backing (glassBacking oben, Section 1)
+  glassObjects.push(glassBacking);
 
   // ────────────────────────────────────────────
   // 6. BÜGELGRIFF — D-Form, gebürstetes Edelstahl
@@ -489,8 +483,8 @@ function buildWindow() {
   const hingeX = SX0f + 0.008;  // 8mm innerhalb der Sash-Außenkante
 
   [
-    { hy: WH * 0.12, hw: 0.030, hh: 0.030 },  // Ecklager
-    { hy: WH * 0.85, hw: 0.030, hh: 0.040 },  // Scherenlager (höher)
+    { hy: WH * 0.12, hw: 0.034, hh: 0.034 },  // Ecklager
+    { hy: WH * 0.85, hw: 0.034, hh: 0.046 },  // Scherenlager (höher)
   ].forEach(({ hy, hw, hh }) => {
     const plate = new THREE.Mesh(
       new THREE.BoxGeometry(hw, hh, 0.007),
