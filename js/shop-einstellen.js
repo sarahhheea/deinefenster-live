@@ -397,7 +397,7 @@ function rendereEigenschaften() {
   wrap.innerHTML = EIGENSCHAFTEN_GRUPPEN.map(g => `
     <div class="eig-gruppe" style="margin-bottom:18px">
       <div class="flex items-center gap-1.5 mb-2 pb-1.5 border-b" style="border-color:rgba(0,0,0,0.08)">
-        <i class="ms" style="font-size:16px;color:#225eaa">${g.icon || 'tune'}</i>
+        <span class="material-symbols-outlined" style="font-size:16px;color:#225eaa">${g.icon || 'tune'}</span>
         <span class="text-[12px] font-bold uppercase tracking-wider" style="color:#225eaa;letter-spacing:0.05em">${g.titel}</span>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5">
