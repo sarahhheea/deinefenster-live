@@ -2386,9 +2386,9 @@ function pickProd(el) {
   document.getElementById('d1').textContent = P.prod[S.prod].name;
   mkDone(1);
 
-  // Haustür → View-Toggle ausblenden (3D übernimmt Vorschau)
+  // View-Toggle immer zeigen (Haustür: Außen=3D, Innen=Pillow-Bild)
   const vToggle = document.querySelector('#sidebar [style*="display:flex"][style*="gap:4px"]');
-  if (vToggle) vToggle.style.display = S.prod === 'haustuere' ? 'none' : 'flex';
+  if (vToggle) vToggle.style.display = 'flex';
 
   // Sarah-Plan 05.05.2026: Bei Haustür direkt Außenansicht aktivieren —
   // Default-Bild ist das IGLO Energy Montana in Weiß FX mit Stoßgriff (= Außenansicht).
@@ -6286,9 +6286,11 @@ function drawPrev() {
   const haus3dFrame = document.getElementById('haus3d-frame');
   const prevWrap    = document.getElementById('prev-wrap');
   const isHaus = S.prod === 'haustuere';
+  const isHausAussen = isHaus && previewView === 'aus';
+  const isHausInnen  = isHaus && previewView === 'inn';
   if (haus3dWrap) {
-    if (isHaus) {
-      // Iframe NUR beim ersten Mal laden — danach alles per postMessage (kein Reload-Blitz)
+    if (isHausAussen) {
+      // Außen-Ansicht: 3D-Iframe laden und anzeigen
       const _mdl  = S.tuerModell || 'florida-lr-inox';
       const _side = (S.oeff1 === 'dreh-l') ? 'l' : 'r';
       const _isLoaded = haus3dFrame.src.includes('haustuer-3d');
@@ -6299,7 +6301,6 @@ function drawPrev() {
           haus3dFrame.contentWindow.postMessage({ type:'setGlass', key: S.glasdekor||'klar' }, '*');
         };
       } else {
-        // EINE atomare Message — kein Zwischenframe, kein Flackern
         const cw = haus3dFrame.contentWindow;
         if (cw) {
           const _ck = HAUS3D_COLOR_MAP[S.fa] || 'anthrazitgrau';
@@ -6315,10 +6316,10 @@ function drawPrev() {
       }
       haus3dWrap.style.display = 'block';
       if (prevWrap) prevWrap.style.height = '560px';
-      // Platzhalter + Bild ausblenden wenn 3D aktiv
       if (ph)   ph.style.display   = 'none';
       if (wrap) wrap.style.display = 'none';
     } else {
+      // Innen-Ansicht oder kein Haustür: 3D ausblenden
       haus3dWrap.style.display = 'none';
       if (prevWrap) prevWrap.style.height = '420px';
     }
@@ -6329,7 +6330,7 @@ function drawPrev() {
     if (ph)   ph.style.display   = 'flex';
     return;
   }
-  if (isHaus) return;   // 3D übernimmt, normale Bild-Logik überspringen
+  if (isHausAussen) return;   // 3D übernimmt Außen-Ansicht
   if (ph)   ph.style.display   = 'none';
   if (wrap) wrap.style.display = 'block';
 
