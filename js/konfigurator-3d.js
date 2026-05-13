@@ -349,7 +349,7 @@ function addFensterGriff(g,cx,cy,z){
     envMapIntensity:1.8
   });
 
-  const sD=0.014;      // 14mm Tiefe — wirft deutlichen Schatten
+  const sD=0.020;      // 20mm Tiefe — wirft deutlichen Schatten
   const pivotY=cy;     // Pivot (Achse) auf Höhe cy
 
   // Kurzschild — 26mm breit, 48mm hoch, Unterseite liegt auf pivotY
@@ -369,11 +369,11 @@ function addFensterGriff(g,cx,cy,z){
   const axle=new THREE.Mesh(new THREE.CylinderGeometry(0.008,0.008,0.018,14),hMat);
   axle.rotation.x=Math.PI/2;axle.position.set(cx,pivotY,z+sD+0.009);axle.castShadow=true;g.add(axle);
 
-  // Kreuzolive — 105mm × 24mm, hängt klar UNTER dem Pivot (Schließstellung)
-  const grR=0.012, grLen=0.105;
+  // Kreuzolive — 115mm × 26mm, hängt klar UNTER dem Pivot (Schließstellung)
+  const grR=0.013, grLen=0.115;
   const olive=new THREE.Mesh(new THREE.SphereGeometry(grR,22,16),hMat);
-  olive.scale.y=grLen/(2*grR);  // → 4.375× gestreckt = klar erkennbares Oval
-  olive.position.set(cx, pivotY-grLen*0.5, z+sD+0.022);
+  olive.scale.y=grLen/(2*grR);
+  olive.position.set(cx, pivotY-grLen*0.5, z+sD+0.026);
   olive.castShadow=true;g.add(olive);
 }
 
@@ -418,20 +418,32 @@ function addBalkontuerGriff(g,cx,cy,z,isLinks){
   addBox(g,cx-0.004,cy-sH*0.25,z+0.001,0.008,0.014,0.006,grooveMat);
 }
 
-// MACO Scharnier — silber/alu, klar sichtbar gegen weißen Rahmen
+// MACO Abdeckkappe — weiße PVC-Abdeckung + Stahlbolzen (realistisch)
 function addFensterScharnier(g,cx,cy,z){
-  const sMat=new THREE.MeshStandardMaterial({color:0xa8b0b8,roughness:0.28,metalness:0.78,envMapIntensity:3.0});
-  const pinMat=new THREE.MeshStandardMaterial({color:0x90989e,roughness:0.20,metalness:0.85,envMapIntensity:3.5});
-  // Hauptplatte 34×48×8mm — groß genug um klar erkennbar zu sein
-  addBox(g,cx-0.017,cy-0.024,z,0.034,0.048,0.008,sMat);
-  // Scharnier-Achse (zentraler Bolzen)
-  const pin=new THREE.Mesh(new THREE.CylinderGeometry(0.005,0.005,0.012,12),pinMat);
-  pin.rotation.x=Math.PI/2;pin.position.set(cx,cy,z+0.010);pin.castShadow=true;g.add(pin);
-  // 4 Schraubenköpfe (Eck-Punkte) — markante Punkte
-  [cy-0.016,cy+0.016].forEach(sy=>{
-    const scr=new THREE.Mesh(new THREE.CylinderGeometry(0.004,0.0035,0.005,10),pinMat);
-    scr.rotation.x=Math.PI/2;scr.position.set(cx,sy,z+0.009);scr.castShadow=true;g.add(scr);
+  const capMat=new THREE.MeshPhysicalMaterial({
+    color:0xF0EFEB, roughness:0.15, metalness:0.0,
+    clearcoat:0.75, clearcoatRoughness:0.06, envMapIntensity:1.5
   });
+  const pinMat=new THREE.MeshStandardMaterial({
+    color:0x8890a0, roughness:0.22, metalness:0.82, envMapIntensity:3.0
+  });
+  // Weiße Abdeckkappe: 20mm breit × 46mm hoch × 8mm tief (MACO-Maß 18×45mm)
+  const cW=0.020,cH=0.046,cD=0.008,cR=0.004;
+  const cShape=new THREE.Shape();
+  cShape.moveTo(-cW/2+cR,0);
+  cShape.lineTo(cW/2-cR,0);cShape.absarc(cW/2-cR,cR,cR,-Math.PI/2,0,false);
+  cShape.lineTo(cW/2,cH-cR);cShape.absarc(cW/2-cR,cH-cR,cR,0,Math.PI/2,false);
+  cShape.lineTo(-cW/2+cR,cH);cShape.absarc(-cW/2+cR,cH-cR,cR,Math.PI/2,Math.PI,false);
+  cShape.lineTo(-cW/2,cR);cShape.absarc(-cW/2+cR,cR,cR,Math.PI,Math.PI*1.5,false);
+  const cGeo=new THREE.ExtrudeGeometry(cShape,{depth:cD,bevelEnabled:true,bevelSize:0.002,bevelThickness:0.002,bevelSegments:2});
+  const cap=new THREE.Mesh(cGeo,capMat);
+  cap.position.set(cx-cW/2, cy-cH/2, z);
+  cap.castShadow=true; g.add(cap);
+  // Scharnier-Stahlbolzen — sichtbares silbernes Metallelement in der Mitte
+  const pin=new THREE.Mesh(new THREE.CylinderGeometry(0.006,0.006,0.014,12),pinMat);
+  pin.rotation.x=Math.PI/2;
+  pin.position.set(cx, cy, z+cD+0.007);
+  pin.castShadow=true; g.add(pin);
 }
 
 // Bandscharniere für Haustür (3-fach)
@@ -922,8 +934,8 @@ function initScene(container){
   const key=new THREE.RectAreaLight(0xfffdf0,4.0,3.0,3.5);
   key.position.set(-2.5,5.0,4.0);key.lookAt(0,0,0);scene.add(key);
 
-  // Shadow-Caster: separates DirectionalLight nur für Schatten (RectAreaLight wirft keine)
-  const shadowCaster=new THREE.DirectionalLight(0xffffff,0.001);
+  // Shadow-Caster: Schatten für weiße Hardware sichtbar machen (RectAreaLight wirft keine Schatten)
+  const shadowCaster=new THREE.DirectionalLight(0xffffff,0.42);
   shadowCaster.position.set(-3,8,5);shadowCaster.castShadow=true;
   shadowCaster.shadow.mapSize.set(2048,2048);
   shadowCaster.shadow.camera.near=1;shadowCaster.shadow.camera.far=20;

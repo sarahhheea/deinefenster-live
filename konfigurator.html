@@ -25,7 +25,7 @@
       "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.162.0/examples/jsm/"
   } }
   </script>
-  <script type="module" src="js/konfigurator-3d.js?v=17"></script>
+  <script type="module" src="js/konfigurator-3d.js?v=18"></script>
 
   <link rel="preconnect" href="https://fonts.bunny.net"/>
   <link href="https://fonts.bunny.net/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -552,35 +552,146 @@
     #s1 .pc-from{font-size:11px;font-weight:600;color:rgba(118,169,250,0.90);letter-spacing:0.01em}
   </style>
 
-  <!-- VISUAL POLISH — 13.05.2026 -->
+  <!-- VISUAL POLISH — 13.05.2026 v2 -->
   <style>
-    /* 1. Product image cards: tall 4:5 ratio + gradient overlay */
-    #s1 .pc-img{aspect-ratio:4/5!important;object-fit:cover!important;border-radius:10px 10px 0 0!important;}
-    #s1 .s1-info{margin-top:-68px;background:linear-gradient(to bottom,rgba(4,8,22,0) 0%,rgba(4,8,22,0.68) 20%,rgba(4,8,22,0.96) 50%,rgba(4,8,22,1) 100%)!important;border-top:none!important;backdrop-filter:none!important;padding:68px 16px 20px!important;}
-    #s1 .pc-name{font-size:17px!important;letter-spacing:-0.03em!important;}
-    /* 2. Product grid tighter padding */
+    /* ── Step bodies: refined dark gradient ── */
+    .sb{background:linear-gradient(160deg,#0c1a2e 0%,#112038 60%,#0d1928 100%)!important;}
     #s1 .sb{padding:10px!important;background:var(--c-page-bg)!important;}
     #s1 .sb>.grid{gap:10px!important;}
-    /* 3. Step bodies: subtle gradient */
-    .sb{background:linear-gradient(150deg,#0b1826 0%,#152238 55%,#0e1c30 100%)!important;}
-    /* 4. Open step header stronger accent line */
+
+    /* ── Product cards (Step 1) ── */
+    #s1 .pc-img{aspect-ratio:4/5!important;object-fit:cover!important;}
+    #s1 .pc-name{font-size:17px!important;letter-spacing:-0.03em!important;}
+
+    /* ── Open step: stronger accent bar ── */
     .sc.open .sh{box-shadow:inset 5px 0 0 #76a9fa,0 1px 0 rgba(118,169,250,0.12)!important;}
-    /* 5. Step badge */
-    .badge{width:28px!important;height:28px!important;box-shadow:0 2px 8px rgba(0,0,0,0.35)!important;}
-    /* 6. Progress bar glow */
+
+    /* ── Badge ── */
+    .badge{width:28px!important;height:28px!important;font-size:12px!important;box-shadow:0 2px 8px rgba(0,0,0,0.35)!important;}
+    .slabel{font-size:15px!important;}
+
+    /* ── Progress bar glow ── */
     #prog-fill{background:linear-gradient(90deg,#1a4d8a 0%,#225eaa 45%,#5d97e8 80%,#76a9fa 100%)!important;box-shadow:0 0 14px rgba(118,169,250,0.55)!important;}
-    /* 7. Hover lifts on option + feature cards */
+
+    /* ── Hover lifts ── */
     .sb .oc:hover{transform:translateY(-1px)!important;}
     .sb .fk:hover{transform:translateY(-2px)!important;}
-    /* 8. Vignette on SVG preview */
+
+    /* ── Vignette on SVG preview ── */
     #prev-wrap{position:relative!important;overflow:hidden!important;}
     #prev-wrap::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 52%,rgba(0,0,0,0.22) 100%);pointer-events:none;z-index:1;}
-    /* 9. Info boxes glass */
-    .sb .info{background:rgba(255,255,255,0.04)!important;border:1px solid rgba(255,255,255,0.09)!important;border-radius:10px!important;}
-    /* 10. Section titles brand blue */
-    .sb .sec-t{color:rgba(118,169,250,0.72)!important;letter-spacing:0.08em!important;}
-    /* 11. Trust strip icon glow */
+
+    /* ── Section titles: elegant uppercase micro-labels ── */
+    .sb .sec-t{
+      color:rgba(118,169,250,0.65)!important;
+      font-size:10.5px!important;
+      letter-spacing:0.12em!important;
+      font-weight:700!important;
+      padding-top:18px!important;
+      margin-top:18px!important;
+      border-top:1px solid rgba(255,255,255,0.06)!important;
+    }
+    .sb .sec-t:first-child{border-top:none!important;padding-top:0!important;margin-top:0!important;}
+    .sb [style*="margin-top:0"].sec-t{border-top:none!important;padding-top:0!important;margin-top:0!important;}
+
+    /* ── Info boxes: dark glass with colored accent ── */
+    .sb .info{
+      background:rgba(118,169,250,0.07)!important;
+      border:1px solid rgba(118,169,250,0.16)!important;
+      border-radius:10px!important;
+      color:rgba(220,235,255,0.72)!important;
+    }
+    .sb .info strong{color:rgba(255,255,255,0.88)!important;}
+    /* Override helle inline-Farben für Info-Boxen */
+    .sb .info[style*="background:#eff6ff"]{background:rgba(34,94,170,0.12)!important;border-left:3px solid rgba(118,169,250,0.55)!important;}
+    .sb .info[style*="background:#fef2f2"]{background:rgba(220,38,38,0.12)!important;border-left:3px solid rgba(248,113,113,0.55)!important;}
+    .sb .info[style*="background:#ecfdf5"]{background:rgba(16,185,129,0.10)!important;border-left:3px solid rgba(52,211,153,0.55)!important;}
+    .sb .info[style*="color:#7f1d1d"]{color:rgba(252,165,165,0.80)!important;}
+
+    /* ── Farb-Tabs: sichtbar auf dunklem Body ── */
+    .sb .farb-tab{color:rgba(255,255,255,0.40)!important;border-bottom-color:transparent!important;}
+    .sb .farb-tab:hover{color:rgba(255,255,255,0.80)!important;}
+    .sb .farb-tab.active{color:#76a9fa!important;border-bottom-color:#76a9fa!important;}
+    .sb [style*="border-bottom:1px solid rgba(0,0,0"]{border-bottom-color:rgba(255,255,255,0.10)!important;}
+
+    /* ── Farb-Picker Namen ── */
+    .sb .fp-name{color:rgba(255,255,255,0.72)!important;}
+    .sb .fp-item.sel .fp-name{color:#76a9fa!important;font-weight:700!important;}
+    .sb .fp-item:hover{background:rgba(255,255,255,0.05)!important;}
+
+    /* ── Griff-Optionen: dark glass ── */
+    .sb .griff-opt{
+      background:rgba(255,255,255,0.05)!important;
+      border-color:rgba(255,255,255,0.12)!important;
+    }
+    .sb .griff-opt:hover{background:rgba(255,255,255,0.09)!important;border-color:rgba(255,255,255,0.25)!important;}
+    .sb .griff-opt.sel{background:rgba(34,94,170,0.22)!important;border-color:#76a9fa!important;}
+
+    /* ── Rolladen/Sprossen Bild-Container: hell → dunkel ── */
+    .sb .oc > div[style*="background:#f4f6fb"]{background:rgba(255,255,255,0.06)!important;border-radius:8px!important;}
+    .sb .oc > img[style*="background:#f4f6fb"]{background:rgba(255,255,255,0.06)!important;}
+
+    /* ── Schnellauswahl-Label & sonstige helle Texte ── */
+    .sb .text-sm.font-semibold{color:rgba(255,255,255,0.55)!important;}
+    .sb .text-sm.text-on-surf-v{color:rgba(255,255,255,0.50)!important;}
+    .sb > p, .sb p{color:rgba(255,255,255,0.50)!important;}
+    .sb p strong{color:rgba(255,255,255,0.78)!important;}
+
+    /* ── Größen-Buttons (Schnellauswahl Maße) ── */
+    .sb .szb{
+      background:rgba(255,255,255,0.06)!important;
+      border-color:rgba(255,255,255,0.14)!important;
+      color:rgba(255,255,255,0.78)!important;
+    }
+    .sb .szb:hover{border-color:#76a9fa!important;background:rgba(118,169,250,0.12)!important;color:#76a9fa!important;}
+
+    /* ── Anzahl-Zahl: heller blauer Akzent ── */
+    #qv{color:#76a9fa!important;}
+
+    /* ── Türmodell-Karten im dunklen Body ── */
+    #s-tm .pc{
+      background:rgba(255,255,255,0.04)!important;
+      border:1px solid rgba(255,255,255,0.10)!important;
+      border-radius:12px!important;
+      padding:0 0 10px!important;
+      overflow:hidden!important;
+      gap:6px!important;
+    }
+    #s-tm .pc:hover{border-color:rgba(118,169,250,0.45)!important;background:rgba(255,255,255,0.07)!important;}
+    #s-tm .pc.sel{border-color:#76a9fa!important;background:rgba(34,94,170,0.18)!important;}
+    #s-tm .pc-name{font-size:12px!important;color:rgba(255,255,255,0.92)!important;padding:0 8px!important;}
+    #s-tm .pc-from{font-size:10.5px!important;color:rgba(118,169,250,0.70)!important;padding:0 8px!important;}
+    #s-tm .pc-img{border-radius:0!important;}
+
+    /* ── Weiter/Bestätigen-Buttons: premium CTA ── */
+    .sb button[onclick*="finish"]{
+      background:linear-gradient(135deg,#2267bb 0%,#1a4d8a 100%)!important;
+      box-shadow:0 4px 20px rgba(34,94,170,0.40),0 1px 4px rgba(0,0,0,0.30)!important;
+      letter-spacing:0.03em!important;
+      transition:all 0.2s ease!important;
+    }
+    .sb button[onclick*="finish"]:hover{
+      box-shadow:0 6px 28px rgba(34,94,170,0.58),0 2px 8px rgba(0,0,0,0.30)!important;
+      transform:translateY(-2px)!important;
+    }
+
+    /* ── Farbe-Step: untere Hinweis-Zeile ── */
+    .sb [style*="border-top:1px solid #eef1fb"]{border-top-color:rgba(255,255,255,0.08)!important;}
+
+    /* ── Türmodell: "Anderes Modell anfragen" Card ── */
+    #s-tm .pc[href]{border:2px dashed rgba(118,169,250,0.30)!important;background:rgba(118,169,250,0.04)!important;}
+    #s-tm .pc[href] .pc-name{color:#76a9fa!important;}
+    #s-tm .pc[href] .pc-from{color:rgba(118,169,250,0.60)!important;}
+
+    /* ── Balkontür Set-Info ── */
+    #balk-set-info{color:rgba(200,255,225,0.78)!important;}
+    #balk-set-info strong{color:#34d399!important;}
+
+    /* ── Trust strip ── */
     #trust-strip .ms.f{filter:drop-shadow(0 0 5px currentColor);opacity:0.88;}
+
+    /* ── Zusammenfassung: sr rows ── */
+    .sb .sr{border-bottom-color:rgba(255,255,255,0.07)!important;color:rgba(255,255,255,0.72)!important;}
   </style>
 </head>
 <body>
