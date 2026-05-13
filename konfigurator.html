@@ -6799,46 +6799,53 @@ async function submitForm(e) {
   };
   try { sessionStorage.setItem('df_anfrage', JSON.stringify(anfrageSummary)); } catch(e) {}
 
-  // ── Automatische E-Mail an info@baustoffchrist.de ──
-  fetch('https://formsubmit.co/ajax/info@baustoffchrist.de', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify({
-      _subject: '[DeineFenster.de] Neue Anfrage ' + offerId + ': ' + prodName,
-      _replyto: email,
-      _template: 'table',
-      _captcha: 'false',
-      'Angebots-Nr':        offerId,
-      'Kunde':              name,
-      'E-Mail':             email,
-      'Telefon':            tel || '–',
-      'Lieferort':          ort + (str ? ', ' + str : ''),
-      'Produkt':            prodName,
-      'Anzahl':             S.qty + ' Stück',
-      'Maße (Rohbau)':      S.bMm + ' × ' + S.hMm + ' mm',
-      'Profil':             profilName,
-      'Glasart':            glasName,
-      'Öffnungsart':        oeffName,
-      'Außenfarbe':         faName,
-      'Innenfarbe':         fiName,
-      'Sprossen':           sproStr,
-      'Rolladen':           rollName,
-      'Einbruchschutz':     sicherName,
-      'Richtpreis (Stück)': unit.toFixed(2) + ' €',
-      'Lieferkosten':       parseFloat(ship).toFixed(2) + ' €',
-      'Datum':              datum,
-      ...(notiz               ? { 'Anmerkungen':         notiz               } : {}),
-      ...(wunschLiefertermin  ? { 'Wunsch-Liefertermin': wunschLiefertermin  } : {}),
-      ...(tuerModellName      ? { 'Türmodell':           tuerModellName      } : {}),
-    })
-  }).catch(() => {}); // fire-and-forget — Fehler blockieren die Navigation nicht
+  // ── E-Mail-Client öffnen mit allen Daten vorausgefüllt ──
+  const _betreff = '[DeineFenster.de] Anfrage ' + offerId + ': ' + prodName;
+  const _body = [
+    'Neue Fensteranfrage über DeineFenster.de',
+    '══════════════════════════════════════════',
+    '',
+    'KONTAKTDATEN',
+    'Name:        ' + name,
+    'Telefon:     ' + (tel || '–'),
+    'E-Mail:      ' + email,
+    'Lieferort:   ' + ort + (str ? ', ' + str : ''),
+    '',
+    'KONFIGURATION',
+    'Angebots-Nr: ' + offerId,
+    'Produkt:     ' + prodName,
+    'Anzahl:      ' + S.qty + ' Stück',
+    'Maße:        ' + S.bMm + ' × ' + S.hMm + ' mm (Rohbaumaß)',
+    'Profil:      ' + profilName,
+    'Glasart:     ' + glasName,
+    'Öffnungsart: ' + oeffName,
+    'Außenfarbe:  ' + faName,
+    'Innenfarbe:  ' + fiName,
+    'Sprossen:    ' + sproStr,
+    'Rolladen:    ' + rollName,
+    'Sicherheit:  ' + sicherName,
+    ...(tuerModellName ? ['Türmodell:   ' + tuerModellName] : []),
+    '',
+    'PREIS (RICHTPREIS)',
+    'Pro Stück:   ' + unit.toFixed(2) + ' €',
+    'Lieferung:   ' + parseFloat(ship).toFixed(2) + ' €',
+    'Datum:       ' + datum,
+    ...(notiz ? ['', 'Anmerkungen: ' + notiz] : []),
+    ...(wunschLiefertermin ? ['Wunschtermin:' + wunschLiefertermin] : []),
+  ].join('\n');
+
+  window.location.href = 'mailto:info@baustoffchrist.de'
+    + '?subject=' + encodeURIComponent(_betreff)
+    + '&body='    + encodeURIComponent(_body);
 
   // Sarah-Wunsch 21.04.2026: Bild-Anzahl für Danke-Seite merken, dann Warenkorb + Bilder leeren
   const finalImgCount = uploadedImages.length;
   try { localStorage.setItem('df_last_img_count', String(finalImgCount)); } catch(e) {}
   cart = []; saveCart();
   uploadedImages = [];
-  window.location.href = 'danke.html?prod=' + encodeURIComponent(prodName) + '&imgs=' + finalImgCount;
+  setTimeout(() => {
+    window.location.href = 'danke.html?prod=' + encodeURIComponent(prodName) + '&imgs=' + finalImgCount;
+  }, 500);
 }
 
 // ── SEKTION-LABELS (Sarah-Update 02.05.2026) ──────────
