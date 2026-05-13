@@ -924,14 +924,63 @@
     background: rgba(93,151,232,0.15);
   }
 
-  /* ── Sidebar-Chips: kompakter ── */
-  #chips .sr {
-    font-size: 12px !important;
-    padding: 4px 0 !important;
+  /* ── Sidebar-Chips: alle Eigenschaften sichtbar, kein Cutoff ── */
+  #chips > div { max-height: none !important; overflow: visible !important; }
+  #chips { margin-top: 8px; }
+
+  /* ── Sidebar: Apple-Dark überarbeitet ── */
+  #sidebar-wrap { scrollbar-width: thin !important; scrollbar-color: rgba(255,255,255,0.10) transparent !important; }
+  #sidebar-wrap::-webkit-scrollbar { width: 4px !important; }
+  #sidebar-wrap::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12) !important; border-radius: 2px !important; }
+
+  /* View Toggle: iOS segmented control */
+  #sidebar > div:first-child {
+    background: rgba(255,255,255,0.06) !important;
+    border-radius: 10px !important;
+    padding: 3px !important;
+    gap: 2px !important;
+    margin-bottom: 10px !important;
   }
-  #chips .sr span:first-child { color: rgba(255,255,255,0.40) !important; font-size: 11px !important; }
-  #chips .sr span:last-child { color: rgba(255,255,255,0.80) !important; font-size: 11px !important; }
-  #chips > div { max-height: 180px !important; }
+  .view-btn {
+    border-radius: 8px !important;
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    padding: 6px 10px !important;
+    border: none !important;
+    transition: all 0.2s ease !important;
+    letter-spacing: 0.01em !important;
+  }
+  .view-btn.active {
+    background: rgba(93,151,232,0.22) !important;
+    color: #a8c8ff !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.30) !important;
+  }
+
+  /* Price box: clean dark card */
+  #conf-price-box {
+    background: rgba(255,255,255,0.04) !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    border-radius: 12px !important;
+    padding: 12px 14px !important;
+    margin-top: 10px !important;
+  }
+
+  /* CTA button: Apple blue */
+  #sidebar > button:last-child {
+    background: #1d4ed8 !important;
+    border-radius: 12px !important;
+    padding: 12px !important;
+    font-size: 14px !important;
+    letter-spacing: 0.01em !important;
+    box-shadow: 0 4px 16px rgba(29,78,216,0.40) !important;
+    margin-top: 8px !important;
+    transition: background 0.2s, box-shadow 0.2s !important;
+  }
+  #sidebar > button:last-child:hover {
+    background: #2563eb !important;
+    box-shadow: 0 6px 20px rgba(29,78,216,0.55) !important;
+  }
 
   /* ── Produktkarten: nur Bild + Name, kein Schnickschnack ── */
   #s1 .s1-info { padding: 10px 12px 12px !important; gap: 3px !important; }
@@ -2087,15 +2136,15 @@
     <div id="sb-price" style="display:none"></div>
 
     <!-- TOTAL BADGE — Preis-Box -->
-    <div id="conf-price-box" class="rounded-xl text-center" style="background:#1a2942;padding:10px 12px;flex-shrink:0">
-      <div style="color:rgba(255,255,255,.65);font-size:11px;margin-bottom:1px;display:flex;align-items:center;justify-content:center;gap:6px">
+    <div id="conf-price-box" class="rounded-xl text-center" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:12px 14px;flex-shrink:0;margin-top:10px">
+      <div style="color:rgba(255,255,255,.40);font-size:10.5px;margin-bottom:3px;display:flex;align-items:center;justify-content:center;gap:6px;font-family:Manrope,sans-serif;text-transform:uppercase;letter-spacing:.07em">
         <span>Persönliches Angebot</span>
-        <span id="sb-qty-badge" style="display:none;background:rgba(255,255,255,.18);padding:1px 7px;border-radius:8px;font-weight:700;color:#fff"></span>
+        <span id="sb-qty-badge" style="display:none;background:rgba(255,255,255,.15);padding:1px 7px;border-radius:8px;font-weight:700;color:rgba(255,255,255,0.80)"></span>
       </div>
-      <div id="sb-total" class="font-bold text-white" style="font-size:13px;font-family:'Plus Jakarta Sans',sans-serif;line-height:1.4;padding:2px 0">Preise folgen in Kürze</div>
-      <div style="color:rgba(255,255,255,.55);font-size:10px;margin-top:2px">Konfigurieren → Anfrage senden → wir melden uns</div>
-      <div id="sb-unit" style="color:rgba(255,255,255,.65);font-size:11px;margin-top:1px"></div>
-      <div id="sb-shipping" style="color:rgba(255,255,255,.55);font-size:10.5px;margin-top:3px;border-top:1px solid rgba(255,255,255,.15);padding-top:4px;display:none"></div>
+      <div id="sb-total" class="font-bold text-white" style="font-size:13.5px;font-family:'Plus Jakarta Sans',sans-serif;line-height:1.4;padding:2px 0;color:rgba(255,255,255,0.92)">Preise folgen in Kürze</div>
+      <div style="color:rgba(255,255,255,.35);font-size:10px;margin-top:3px;font-family:Manrope,sans-serif">Konfigurieren → Anfrage senden → wir melden uns</div>
+      <div id="sb-unit" style="color:rgba(255,255,255,.50);font-size:11px;margin-top:1px;font-family:Manrope,sans-serif"></div>
+      <div id="sb-shipping" style="color:rgba(255,255,255,.40);font-size:10.5px;margin-top:4px;border-top:1px solid rgba(255,255,255,.08);padding-top:4px;display:none;font-family:Manrope,sans-serif"></div>
     </div>
 
     <!-- Fenster öffnen Button — versteckt -->
@@ -2105,8 +2154,8 @@
       </span>
     </button>
 
-    <!-- CTA — Sarah-Update 02.05.2026 v8: Brand-Anthrazit-Blau wie Sektion-Header (visuelle Konsistenz) -->
-    <button onclick="openS(13)" class="w-full flex items-center justify-center gap-2 font-bold rounded-full transition-colors" style="background:#1a2942;color:#ffffff;font-family:'Plus Jakarta Sans',sans-serif;padding:11px;font-size:13.5px;flex-shrink:0;border:none;box-shadow:0 4px 12px rgba(26,41,66,0.30)">
+    <!-- CTA -->
+    <button onclick="openS(13)" class="w-full flex items-center justify-center gap-2 font-bold transition-all" style="background:#1d4ed8;color:#ffffff;font-family:'Plus Jakarta Sans',sans-serif;padding:12px;font-size:14px;flex-shrink:0;border:none;border-radius:12px;box-shadow:0 4px 16px rgba(29,78,216,0.40);margin-top:8px;letter-spacing:0.01em;cursor:pointer">
       <i class="ms" style="font-size:18px">send</i> Angebot anfordern
     </button>
 
@@ -5344,18 +5393,19 @@ function upSidebar() {
   const prevVals = upSidebar._prev;
   const newVals = Object.fromEntries(rowsList);
   document.getElementById('chips').innerHTML = rowsList.length === 0
-    ? '<div style="color:#a0a8b8;font-size:12px;font-style:italic;padding:4px 0">Bitte Produkt wählen</div>'
-    : `<div style="border:1px solid var(--c-border);border-radius:10px;overflow:hidden;font-family:Manrope,sans-serif;font-size:12px">
-        <div style="background:#f0f3fa;padding:6px 12px;border-bottom:1px solid var(--c-border);display:flex;align-items:center;gap:6px">
-          <i class="ms" style="font-size:14px;color:var(--c-primary)">tune</i>
-          <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.05em">Ihre Konfiguration</span>
+    ? '<div style="color:rgba(255,255,255,0.28);font-size:12px;font-style:italic;padding:10px 2px;font-family:Manrope,sans-serif">Produkt wählen …</div>'
+    : `<div style="border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03)">
+        <div style="padding:6px 12px 5px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;gap:5px">
+          <i class="ms" style="font-size:13px;color:rgba(93,151,232,0.70)">tune</i>
+          <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:10px;font-weight:700;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.10em">Konfiguration</span>
         </div>
-        <div style="padding:4px 12px 6px">
-        ${rowsList.map(([label,value]) => {
+        <div>
+        ${rowsList.map(([label,value], idx) => {
           const changed = prevVals[label] !== undefined && prevVals[label] !== value;
-          return `<div class="${changed?'spec-row-changed':''}" style="display:flex;justify-content:space-between;gap:8px;padding:3px 0;border-bottom:1px solid rgba(0,0,0,.04);line-height:1.35;border-radius:3px">
-            <span style="color:#6b7280;font-weight:500;flex-shrink:0">${label}</span>
-            <span style="color:${changed?'var(--c-primary)':'#161c27'};font-weight:${changed?'700':'600'};text-align:right">${value}</span>
+          const notLast = idx < rowsList.length - 1;
+          return `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 12px;${notLast?'border-bottom:1px solid rgba(255,255,255,0.05)':''};${changed?'background:rgba(93,151,232,0.08)':''}">
+            <span style="color:rgba(255,255,255,0.38);font-weight:500;font-size:11.5px;font-family:Manrope,sans-serif;flex-shrink:0;min-width:72px">${label}</span>
+            <span style="color:${changed?'#a8c8ff':'rgba(255,255,255,0.88)'};font-weight:${changed?'700':'600'};font-size:11.5px;font-family:Manrope,sans-serif;text-align:right;line-height:1.3">${value}</span>
           </div>`;
         }).join('')}
         </div>
