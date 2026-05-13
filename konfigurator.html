@@ -25,7 +25,7 @@
       "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.162.0/examples/jsm/"
   } }
   </script>
-  <script type="module" src="js/konfigurator-3d.js?v=15"></script>
+  <script type="module" src="js/konfigurator-3d.js?v=16"></script>
 
   <link rel="preconnect" href="https://fonts.bunny.net"/>
   <link href="https://fonts.bunny.net/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -1968,7 +1968,7 @@
 ══════════════════════════════════════════════ -->
 <script>
 'use strict';
-const WH = 'https://hook.eu1.make.com/so6vhvekae4ve7e3peh7vgcgqmv7cbrc';
+// Kein externer Webhook mehr — Anfragen laufen über mailto/WhatsApp
 
 // ── PREISE ──────────────────────────────────────────
 const P = {
@@ -6758,192 +6758,15 @@ async function submitForm(e) {
     localStorage.setItem('df_deals', JSON.stringify(existing));
   } catch(e){ console.warn('localStorage write failed', e); }
 
-  // ── E-Mails direkt über Resend API senden ───────────────────────
-  // ⚠️ Nur für lokalen Test – API Key nicht in Produktion in HTML-Dateien!
-  const RESEND_KEY = 're_5o5JYMky_MXfQoo7vAZoaNMn4KzLrNyht';
-  const FROM_ADDR  = 'DeineFenster.de <onboarding@resend.dev>'; // bis Domain verifiziert
-
-  const konfRow = (label, val) =>
-    `<tr><td style="padding:5px 0;border-bottom:1px solid #e0e4f0;font-size:14px;color:#424751;width:40%">${label}</td>
-         <td style="padding:5px 0;border-bottom:1px solid #e0e4f0;font-size:14px;font-weight:700;color:#161c27">${val}</td></tr>`;
-
-  const sarahHtml = `<!DOCTYPE html><html lang="de"><body style="margin:0;padding:0;background:#f1f3ff;font-family:'Segoe UI',Arial,sans-serif">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f3ff;padding:32px 16px"><tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%">
-  <tr><td style="background:#112455;border-radius:16px 16px 0 0;padding:28px 36px">
-    <div style="font-size:22px;font-weight:800;color:#fff">DeineFenster<span style="color:#76a9fa">.de</span>
-    <span style="font-size:14px;font-weight:400;color:rgba(255,255,255,.5);margin-left:12px">Neue Anfrage</span></div>
-  </td></tr>
-  <tr><td style="background:#fff;padding:28px 36px 0">
-    <div style="background:#fef3c7;border:2px solid #f59e0b;border-radius:12px;padding:16px 20px;margin-bottom:24px">
-      <div style="font-size:17px;font-weight:700;color:#92400e">🔔 Neue Anfrage eingegangen!</div>
-      <div style="font-size:14px;color:#78350f;margin-top:4px">${offerId} · ${datum} · Sofort bearbeiten empfohlen</div>
-    </div>
-  </td></tr>
-  <tr><td style="background:#fff;padding:0 36px">
-    <div style="font-size:15px;font-weight:700;color:#161c27;margin-bottom:12px">👤 Kundendaten</div>
-    <div style="background:#f1f3ff;border-radius:12px;padding:18px 22px;margin-bottom:20px">
-    <table width="100%" cellpadding="0" cellspacing="0">
-      ${konfRow('Name', name)}
-      ${konfRow('E-Mail', `<a href="mailto:${email}" style="color:#225eaa">${email}</a>`)}
-      ${konfRow('Telefon', tel||'–')}
-      ${konfRow('Ort / PLZ', ort)}
-      ${konfRow('Straße', str||'–')}
-      ${konfRow('Wunsch-Liefertermin', wunschLiefertermin ? new Date(wunschLiefertermin).toLocaleDateString('de-DE') : '– (schnellstmöglich, ca. 14 Tage)')}
-      <tr><td style="padding:5px 0;font-size:14px;color:#424751">Anmerkungen</td>
-          <td style="padding:5px 0;font-size:14px;color:#161c27">${notiz||'–'}</td></tr>
-    </table></div>
-  </td></tr>
-  ${uploadedImages.length > 0 ? `<tr><td style="background:#fff;padding:0 36px">
-    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:14px 18px;margin-bottom:20px">
-      <div style="font-size:14px;font-weight:700;color:#1e3a8a">📎 ${uploadedImages.length} Foto/Skizze vom Kunden mitgeschickt</div>
-      <div style="font-size:12px;color:#1e3a8a;margin-top:4px">Dateinamen: ${uploadedImages.map(i=>i.name).join(' · ')}</div>
-      <div style="font-size:11px;color:#475569;margin-top:4px">Bilddaten sind im Webhook-Payload (Base64) — im Dashboard abrufbar.</div>
-    </div>
-  </td></tr>` : ''}
-  ${cart.length > 0 ? `<tr><td style="background:#fff;padding:0 36px">
-    <div style="font-size:15px;font-weight:700;color:#161c27;margin-bottom:12px">🛒 Warenkorb (${cart.length} weitere Elemente)</div>
-    <div style="background:#fefce8;border:1px solid #fde68a;border-radius:12px;padding:14px 18px;margin-bottom:20px">
-      ${cart.map((item, idx) => `<div style="padding:8px 0;border-bottom:${idx<cart.length-1?'1px solid #fde68a':'none'}">
-        <div style="font-size:14px;font-weight:700;color:#161c27">Element ${idx+1}: ${item.summary}</div>
-        <div style="font-size:13px;color:#78350f;margin-top:2px">${item.qty}× à ${fmt(item.unitPrice)} = ${fmt(item.subtotal)}</div>
-      </div>`).join('')}
-    </div>
-  </td></tr>` : ''}
-  <tr><td style="background:#fff;padding:0 36px">
-    <div style="font-size:15px;font-weight:700;color:#161c27;margin-bottom:12px">🪟 ${cart.length > 0 ? 'Aktuelles Element' : 'Konfiguration'}</div>
-    <div style="background:#f1f3ff;border-radius:12px;padding:18px 22px;margin-bottom:20px">
-    <table width="100%" cellpadding="0" cellspacing="0">
-      ${konfRow('Produkt', prodName)}
-      ${konfRow('Anzahl', S.qty+' Stück')}
-      ${konfRow('Maße (Rohbau)', S.bMm+' × '+S.hMm+' mm')}
-      ${konfRow('Profil', profilName)}
-      ${konfRow('Flügelaufteilung', fluegelName)}
-      ${konfRow('Öffnungsart', oeffName)}
-      ${tuerModellName ? konfRow('Türmodell', tuerModellName) : ''}
-      ${balkonSchwelleName ? konfRow('Balkontür-Schwelle', balkonSchwelleName) : ''}
-      ${balkonSetName ? konfRow('Balkontür-Set', balkonSetName) : ''}
-      ${konfRow('Verglasung', glasName)}
-      ${konfRow('Schallschutz', schallName)}
-      ${konfRow('Sicherheitsglas', sicherGlasName)}
-      ${konfRow('Glasdekor', glasdekorName)}
-      ${konfRow('Farbe außen', faName)}
-      ${konfRow('Farbe innen', fiName)}
-      ${konfRow('Dichtungsfarbe', fdName)}
-      ${S.prod!=='haustuere' ? konfRow('Sprossen', sproStr) : ''}
-      ${konfRow(S.prod==='haustuere'?'Türgriff':(S.prod==='hst'?'Schiebetür-Griff':'Griff'), griffName)}
-      ${(S.prod!=='haustuere' && S.prod!=='hst') ? konfRow('Rolladen', rollName) : ''}
-      ${konfRow('Einbruchschutz', sicherName)}
-    </table></div>
-  </td></tr>
-  <tr><td style="background:#fff;padding:0 36px 28px">
-    <div style="background:#112455;border-radius:12px;padding:20px 24px">
-    <table width="100%" cellpadding="0" cellspacing="0"><tr>
-      <td style="font-size:14px;color:rgba(255,255,255,.6)">Gesamtpreis (kalkuliert)</td>
-      <td style="text-align:right;font-size:28px;font-weight:800;color:#fff">${tot} €</td>
-    </tr><tr>
-      <td colspan="2" style="font-size:12px;color:rgba(255,255,255,.4)">${S.qty} Stück à ${unit.toFixed(2)} € + Lieferkosten ${parseFloat(ship).toFixed(2)} €</td>
-    </tr></table></div>
-  </td></tr>
-  <tr><td style="background:#fff;padding:0 36px 36px">
-    <table width="100%" cellpadding="0" cellspacing="0"><tr>
-      <td style="padding-right:8px;width:50%">
-        <a href="mailto:${email}?subject=Ihr Angebot von DeineFenster.de&body=Hallo ${encodeURIComponent(name)},"
-           style="display:block;background:#225eaa;color:#fff;text-align:center;font-size:14px;font-weight:700;padding:13px;border-radius:10px;text-decoration:none">✉️ Antwort an Kunde</a>
-      </td>
-      <td style="padding-left:8px;width:50%">
-        <a href="https://www.deinefenster.de/dashboard.html"
-           style="display:block;background:#f1f3ff;color:#225eaa;text-align:center;font-size:14px;font-weight:700;padding:13px;border-radius:10px;text-decoration:none;border:2px solid #d6e3ff">📊 Dashboard öffnen</a>
-      </td>
-    </tr></table>
-  </td></tr>
-  <tr><td style="background:#0e1a38;border-radius:0 0 16px 16px;padding:20px 36px;text-align:center">
-    <div style="font-size:13px;color:rgba(255,255,255,.35)">DeineFenster.de · Automatische Benachrichtigung</div>
-  </td></tr>
-</table></td></tr></table><script src="js/chatbot.js" defer><\/script>
-</body></html>`;
-
-  const kundeHtml = `<!DOCTYPE html><html lang="de"><body style="margin:0;padding:0;background:#f1f3ff;font-family:'Segoe UI',Arial,sans-serif">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f3ff;padding:32px 16px"><tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%">
-  <tr><td style="background:#112455;border-radius:16px 16px 0 0;padding:28px 36px;text-align:center">
-    <div style="font-size:22px;font-weight:800;color:#fff">DeineFenster<span style="color:#76a9fa">.de</span></div>
-    <div style="color:rgba(255,255,255,.55);font-size:13px;margin-top:4px">Drutex-Händler · Fensterhandel Christ Brandenburg</div>
-  </td></tr>
-  <tr><td style="background:#fff;padding:36px 36px 0">
-    <div style="font-size:26px;font-weight:700;color:#161c27;margin-bottom:8px">✅ Anfrage erhalten!</div>
-    <p style="font-size:16px;color:#424751;line-height:1.6;margin:0 0 20px">
-      Hallo <strong>${name}</strong>,<br><br>
-      vielen Dank für Ihre Anfrage bei DeineFenster.de. Wir haben Ihre Konfiguration erhalten
-      und melden uns innerhalb von <strong style="color:#225eaa">24 Stunden</strong> mit einem persönlichen Angebot bei Ihnen.
-    </p>
-  </td></tr>
-  <tr><td style="background:#fff;padding:0 36px">
-    <div style="background:#f1f3ff;border-radius:12px;padding:20px 24px;margin-bottom:24px">
-      <div style="font-size:13px;font-weight:700;color:#424751;text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px">Ihre Konfiguration · ${offerId}</div>
-      <table width="100%" cellpadding="0" cellspacing="0">
-        ${konfRow('Produkt', prodName)}
-        ${konfRow('Anzahl', S.qty+' Stück')}
-        ${konfRow('Maße (Rohbau)', S.bMm+' × '+S.hMm+' mm')}
-        ${konfRow('Profil', profilName)}
-        ${konfRow('Flügelaufteilung', fluegelName)}
-        ${konfRow('Öffnungsart', oeffName)}
-        ${tuerModellName ? konfRow('Türmodell', tuerModellName) : ''}
-        ${konfRow('Verglasung', glasName)}
-        ${schallName !== 'Kein Zusatz' ? konfRow('Schallschutz', schallName) : ''}
-        ${sicherGlasName !== 'Kein' ? konfRow('Sicherheitsglas', sicherGlasName) : ''}
-        ${konfRow('Farbe außen', faName)}
-        ${konfRow('Farbe innen', fiName)}
-        ${(S.prod!=='haustuere' && S.prod!=='hst') ? konfRow('Rolladen', rollName) : ''}
-        ${konfRow('Einbruchschutz', sicherName)}
-        ${konfRow('Lieferadresse', ort)}
-      </table>
-    </div>
-  </td></tr>
-  <tr><td style="background:#fff;padding:0 36px 24px">
-    <div style="background:#112455;border-radius:12px;padding:20px 24px;text-align:center">
-      <div style="font-size:13px;color:rgba(255,255,255,.6);margin-bottom:6px">Ihr Richtpreis inkl. MwSt.</div>
-      <div style="font-size:32px;font-weight:800;color:#fff">${tot} €</div>
-      <div style="font-size:12px;color:rgba(255,255,255,.45);margin-top:4px">inkl. Lieferkosten ${parseFloat(ship).toFixed(2)} € · ${S.qty} Stück à ${unit.toFixed(2)} €</div>
-    </div>
-  </td></tr>
-  <tr><td style="background:#0e1a38;border-radius:0 0 16px 16px;padding:24px 36px;text-align:center">
-    <div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:6px">DeineFenster<span style="color:#76a9fa">.de</span></div>
-    <div style="font-size:13px;color:rgba(255,255,255,.4)">Drutex-Händler · info@baustoffchrist.de</div>
-  </td></tr>
-</table></td></tr></table><script src="js/chatbot.js" defer><\/script>
-</body></html>`;
-
-  const sendMail = async (to, subject, html, replyTo) => {
-    const res = await fetch('/api/send-email', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ from:FROM_ADDR, to:[to], reply_to:replyTo, subject, html })
-    });
-    if(!res.ok){ const t=await res.text(); console.warn('Resend error ('+to+'):', t); }
-    return res;
+  // ── Anfragedaten in sessionStorage für Danke-Seite speichern ──
+  const anfrageSummary = {
+    offerId, prodName, name, email, tel, ort,
+    breite: S.bMm, hoehe: S.hMm, anzahl: S.qty,
+    farbaussen: S.fa, farbinnen: S.fi,
+    glas: S.glas, oeff: S.oeff1,
+    profil: S.profil
   };
-
-  try {
-    await Promise.all([
-      sendMail('sarahchrist@aol.com',
-        '🔔 Neue Anfrage '+offerId+': '+prodName+' – '+name,
-        sarahHtml, email),
-      sendMail(email,
-        'Ihre Anfrage bei DeineFenster.de – '+prodName,
-        kundeHtml, 'sarahchrist@aol.com'),
-    ]);
-  } catch(err){ console.warn('E-Mail Fehler:', err); }
-
-  // ── Make.com Webhook (optional, als Backup) ──────────────────────
-  try {
-    await fetch(WH,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-      formular_typ:'Konfigurator-Anfrage', datum, angebots_nr:offerId,
-      kunde_name:name, kunde_email:email, kunde_telefon:tel, kunde_ort:ort,
-      produkt:prodName, breite_mm:S.bMm, hoehe_mm:S.hMm, anzahl:S.qty,
-      preis_gesamt:tot+' €'
-    })});
-  } catch(err){ console.warn('Webhook error:', err); }
+  try { sessionStorage.setItem('df_anfrage', JSON.stringify(anfrageSummary)); } catch(e) {}
 
   // Sarah-Wunsch 21.04.2026: Bild-Anzahl für Danke-Seite merken, dann Warenkorb + Bilder leeren
   const finalImgCount = uploadedImages.length;
@@ -7357,42 +7180,16 @@ async function submitSkizze(e) {
   err.style.display = 'none';
 
   try {
-    // Resend-Email an Sarah
-    const bildListe = skizzeImages.map(i => `${i.name} (${Math.round(i.size/1024)} KB)`).join(', ');
-    const sarahHtml = `<!DOCTYPE html><html><body style="font-family:Segoe UI,Arial;background:#f1f3ff;padding:24px">
-      <div style="max-width:600px;margin:auto;background:#fff;border-radius:14px;padding:28px">
-        <div style="background:#fef3c7;border:2px solid #f59e0b;border-radius:10px;padding:14px;margin-bottom:20px">
-          <div style="font-weight:800;color:#92400e">📸 Alternativ-Skizzen-Anfrage</div>
-          <div style="font-size:13px;color:#78350f">Kunde kann Konfigurator nicht nutzen · Manuelle Prüfung nötig · Antwort 2-5 Werktage</div>
-        </div>
-        <h2 style="color:#161c27">Kundendaten</h2>
-        <p><strong>Name:</strong> ${data.name}<br><strong>E-Mail:</strong> <a href="mailto:${data.email}">${data.email}</a><br><strong>Telefon:</strong> ${data.tel || '–'}<br><strong>PLZ/Ort:</strong> ${data.plz}</p>
-        <h2 style="color:#161c27">Beschreibung</h2>
-        <p style="background:#f1f3ff;padding:14px;border-radius:10px;white-space:pre-wrap">${data.beschreibung}</p>
-        <h2 style="color:#161c27">Angehängte Bilder</h2>
-        <p>${skizzeImages.length} Datei(en): ${bildListe}</p>
-        <p style="font-size:12px;color:#475569">Bild-Daten sind im Webhook-Payload.</p>
-      </div><script src="js/chatbot.js" defer><\/script>
-</body></html>`;
-
-    await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer re_5o5JYMky_MXfQoo7vAZoaNMn4KzLrNyht' },
-      body: JSON.stringify({
-        from: 'DeineFenster.de <onboarding@resend.dev>',
-        to: ['sarahchrist@aol.com'],
-        subject: `📸 Alternativ-Skizze von ${data.name} (${data.plz})`,
-        html: sarahHtml,
-      }),
-    });
-    // Make.com Webhook
-    await fetch('https://hook.eu1.make.com/so6vhvekae4ve7e3peh7vgcgqmv7cbrc', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'skizze-anfrage', data, images: skizzeImages }),
-    });
+    // Skizze-Anfrage per mailto vorbereiten
+    const skizzeText = encodeURIComponent(
+      `Hallo,\n\nich schicke Ihnen Fotos/Skizzen meiner Fenster.\n\n` +
+      `Name: ${data.name}\nE-Mail: ${data.email}\nTelefon: ${data.tel || '–'}\nPLZ / Ort: ${data.plz}\n\n` +
+      `Beschreibung:\n${data.beschreibung}\n\n` +
+      `Bitte senden Sie mir ein Angebot.\n\nMit freundlichen Grüßen\n${data.name}`
+    );
+    window.open(`mailto:info@baustoffchrist.de?subject=${encodeURIComponent('Fensteranfrage mit Skizze von ' + data.name)}&body=${skizzeText}`, '_self');
     closeSkizzeModal();
-    alert('Danke! Ihre Skizze wurde gesendet. Wir melden uns in 2-5 Werktagen.');
+    alert('Ihr E-Mail-Programm wurde geöffnet. Bitte senden Sie die vorausgefüllte E-Mail ab.');
     document.getElementById('skizze-form').reset();
     skizzeImages = [];
     renderSkPreview();
