@@ -5,6 +5,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUniformsLib.js';
 
 // ════════════════════════════════════════════════════════════
 // DRUTEX IGLO 5 — Profilmaße (1 unit = 1 Meter)
@@ -955,34 +956,39 @@ function initScene(container){
     pmremGen.dispose(); eTex.dispose();
   }
 
-  // ── BELEUCHTUNG — Produktfoto-Studio ─────────────────────
-  scene.add(new THREE.HemisphereLight(0x1a3560,0x060a14,0.28));
+  // ── BELEUCHTUNG — Produktfoto-Studio mit RectAreaLight (Softbox) ─────
+  RectAreaLightUniformsLib.init();
+  scene.add(new THREE.HemisphereLight(0x1a3560,0x050810,0.22));
 
-  // Key-Light: oben-links — definierter Schatten, enthüllt Profiltiefe
-  const key=new THREE.DirectionalLight(0xfffdf6,2.10);
-  key.position.set(-3.5,9,5);key.castShadow=true;
-  key.shadow.mapSize.set(2048,2048);
-  key.shadow.camera.near=1;key.shadow.camera.far=20;
-  key.shadow.camera.left=-5;key.shadow.camera.right=5;
-  key.shadow.camera.top=7;key.shadow.camera.bottom=-7;
-  key.shadow.bias=-0.0008;key.shadow.normalBias=0.015;
-  scene.add(key);
+  // Key-Softbox: oben-links, 3.5m×4m — erzeugt echten Gradienten über weiße PVC-Flächen
+  const key=new THREE.RectAreaLight(0xfffdf0,7.0,3.5,4.0);
+  key.position.set(-2.8,4.5,4.5);key.lookAt(0,0,0);scene.add(key);
 
-  // Fill-Light: rechts, kühl — kompensiert ohne auszulöschen
-  const fill=new THREE.DirectionalLight(0xc0d4ee,0.55);
-  fill.position.set(5,1,4);scene.add(fill);
+  // Shadow-Caster: separates DirectionalLight nur für Schatten (RectAreaLight wirft keine)
+  const shadowCaster=new THREE.DirectionalLight(0xffffff,0.001);
+  shadowCaster.position.set(-3,8,5);shadowCaster.castShadow=true;
+  shadowCaster.shadow.mapSize.set(2048,2048);
+  shadowCaster.shadow.camera.near=1;shadowCaster.shadow.camera.far=20;
+  shadowCaster.shadow.camera.left=-5;shadowCaster.shadow.camera.right=5;
+  shadowCaster.shadow.camera.top=7;shadowCaster.shadow.camera.bottom=-7;
+  shadowCaster.shadow.bias=-0.0008;shadowCaster.shadow.normalBias=0.015;
+  scene.add(shadowCaster);
 
-  // Kanten-Akzent-Licht: von oben direkt — trifft 45°-Fasen optimal
-  const accent=new THREE.DirectionalLight(0xfff8f0,0.45);
-  accent.position.set(0,10,2);scene.add(accent);
+  // Fill-Softbox: rechts-kühl — kompensiert ohne auszulöschen
+  const fill=new THREE.RectAreaLight(0xc0d4f0,2.2,2.0,3.0);
+  fill.position.set(3.5,1.5,3.5);fill.lookAt(0,0,0);scene.add(fill);
 
-  // Bounce-Light: von unten warm
-  const bounce=new THREE.DirectionalLight(0xfff0e0,0.18);
-  bounce.position.set(0,-5,3);scene.add(bounce);
+  // Akzent von oben — trifft 45°-Fasen-Geometrie optimal
+  const accent=new THREE.DirectionalLight(0xfff6e8,0.55);
+  accent.position.set(0,12,1);scene.add(accent);
 
-  // Rim-Light: von hinten für Tiefenkanten-Highlight
-  const rim=new THREE.DirectionalLight(0xffffff,0.32);
-  rim.position.set(0,4,-5);scene.add(rim);
+  // Bounce: von unten warm
+  const bounce=new THREE.DirectionalLight(0xffe8d0,0.14);
+  bounce.position.set(0,-4,3);scene.add(bounce);
+
+  // Rim: von hinten für Profiltiefenkanten
+  const rim=new THREE.DirectionalLight(0xffffff,0.28);
+  rim.position.set(0,3,-5);scene.add(rim);
 
   // Bodenschatten — prominent + weich
   const gnd=new THREE.Mesh(
