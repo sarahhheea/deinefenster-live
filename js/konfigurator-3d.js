@@ -59,7 +59,7 @@ const glassMat = new THREE.MeshPhysicalMaterial({
   envMapIntensity: 1.2
 });
 const glassRoomMat = new THREE.MeshStandardMaterial({
-  color: 0xe8ecee, roughness: 0.95, metalness: 0
+  color: 0x8ca0b0, roughness: 0.95, metalness: 0  // mittel Blau-Grau → Innenraum sichtbar durch Glas
 });
 const sealMat = new THREE.MeshStandardMaterial({
   color: 0x1a1a1a, roughness: 0.92, metalness: 0
