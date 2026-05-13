@@ -9,13 +9,14 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 // ════════════════════════════════════════════════════════════
 // KONSTANTEN — Drutex IGLO 5 Profilmaße (1 unit = 1 Meter)
 // ════════════════════════════════════════════════════════════
-const OFR  = 0.115;   // Blendrahmen-Breite 115mm
-const SFR  = 0.082;   // Flügelrahmen-Breite 82mm
+const OFR  = 0.075;   // Blendrahmen-Ansichtsbreite 75mm (Agent 1 bestätigt, IGLO 5 Classic)
+const SFR  = 0.078;   // Flügelrahmen-Ansichtsbreite 78mm (ähnlich Blendrahmen)
 const DD   = 0.070;   // Profiltiefe 70mm
 const OVHG = 0.010;   // Flügel-Überschlag: 10mm (IGLO 5 realistisch, Agent 1 bestätigt 8–12mm)
 const DCT  = 0.009;   // Dichtungsbreite 9mm
 const GLB  = 0.018;   // Glasleiste Breite 18mm
 const ABH  = 0.022;   // Abstandhalter sichtbare Breite 22mm (großzügig für Sichtbarkeit im Konfigurator)
+const SD   = 0.001;   // Spielraum (Tiefenpuffer für Stege/Oberlicht)
 
 // ════════════════════════════════════════════════════════════
 // SCENE STATE
@@ -32,12 +33,12 @@ const texLoader = new THREE.TextureLoader();
 
 const frameMat = new THREE.MeshPhysicalMaterial({
   color: 0xF1F0EA,   // RAL 9016 Traffic White
-  roughness: 0.22, metalness: 0.02,
-  clearcoat: 0.40, clearcoatRoughness: 0.18,
-  envMapIntensity: 1.20
+  roughness: 0.20, metalness: 0.02,
+  clearcoat: 0.50, clearcoatRoughness: 0.10,
+  envMapIntensity: 1.40
 });
 const glassMat = new THREE.MeshPhysicalMaterial({
-  color: 0xc0d8c8,  // Float-Glas grün-blauer Tint (wie echtes Isolierglas)
+  color: 0xa8c8b8,  // Float-Glas: satteres Grün-Blau (echtes Isolierglas-Tint)
   metalness: 0.0, roughness: 0.04,
   transmission: 0.42, thickness: 0.028, ior: 1.52, transparent: true,
   envMapIntensity: 2.5
@@ -231,7 +232,7 @@ function applyGlass(key) {
     glassMat.normalMap=buildNormalTex(masterCarreHeight,4.0,3,11);
     glassMat.normalScale=new THREE.Vector2(1.5,1.5);
   } else {
-    glassMat.transmission=0.92; glassMat.roughness=0.02; glassMat.color.set(0xd0e8f4);
+    glassMat.transmission=0.75; glassMat.roughness=0.03; glassMat.color.set(0x90bca8);
   }
   glassMat.needsUpdate=true;
 }
@@ -284,14 +285,31 @@ function buildOuterFrame(g, X, Y, W, H, FW, depth, mat, zStart=0) {
   addBox(g, X+W-FW,  Y+FW,    zStart, FW, H-2*FW,      depth, mat);
 }
 
+// ExtrudeGeometry-Rahmen mit Profilfase (Bevel an Vorderkanten — typisches PVC-Profil)
+function buildFrameExtruded(g, X, Y, W, H, FW, depth, mat, zStart=0) {
+  const shape = new THREE.Shape();
+  shape.moveTo(X, Y); shape.lineTo(X+W, Y); shape.lineTo(X+W, Y+H); shape.lineTo(X, Y+H); shape.closePath();
+  const hole = new THREE.Path();
+  hole.moveTo(X+FW, Y+FW); hole.lineTo(X+W-FW, Y+FW); hole.lineTo(X+W-FW, Y+H-FW); hole.lineTo(X+FW, Y+H-FW); hole.closePath();
+  shape.holes.push(hole);
+  const geo = new THREE.ExtrudeGeometry(shape, {
+    depth, bevelEnabled: true,
+    bevelSize: 0.0035, bevelThickness: 0.0035, bevelSegments: 2
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.z = zStart;
+  mesh.castShadow = mesh.receiveShadow = true;
+  g.add(mesh);
+}
+
 // ════════════════════════════════════════════════════════════
 // HARDWARE — Griffe, Scharniere, Stoßgriff
 // ════════════════════════════════════════════════════════════
 function addFensterGriff(g, cx, cy, z) {
   // NEVADA-Griff: ovale Rosette 40×26mm + Hals + Hebelarm 120mm (Schließstellung = nach unten)
   const hMat = new THREE.MeshPhysicalMaterial({
-    color: 0xd8d8d4, roughness: 0.14, metalness: 0.84,
-    clearcoat: 0.30, clearcoatRoughness: 0.08, envMapIntensity: 3.5
+    color: 0x8a9098, roughness: 0.10, metalness: 0.92,
+    clearcoat: 0.45, clearcoatRoughness: 0.06, envMapIntensity: 4.5
   });
   const pinMat = new THREE.MeshStandardMaterial({color: 0x60686e, roughness: 0.22, metalness: 0.92});
 
@@ -438,6 +456,14 @@ function addSash(g, sx, sy, sw, sh, oeff, view, prod) {
       addFensterScharnier(g, hingeX, sy+sh-0.165-0.048, SZ_FRONT);
     }
   }
+
+  // Schattenfuge — dunkle Schattennut am Flügel-Außenrand (sichtbarer Spalt zwischen Blend- und Flügelrahmen)
+  const _sfMat = new THREE.MeshStandardMaterial({color: 0x060708, roughness: 0.99, metalness: 0});
+  const SFG = 0.006;  // 6mm sichtbare Schattenfuge
+  addBox(g, sx,        sy+sh-SFG, SZ_FRONT, sw,      SFG,      0.002, _sfMat);  // oben
+  addBox(g, sx,        sy,        SZ_FRONT, sw,      SFG,      0.002, _sfMat);  // unten
+  addBox(g, sx,        sy+SFG,    SZ_FRONT, SFG,     sh-2*SFG, 0.002, _sfMat);  // links
+  addBox(g, sx+sw-SFG, sy+SFG,    SZ_FRONT, SFG,     sh-2*SFG, 0.002, _sfMat);  // rechts
 }
 
 // ════════════════════════════════════════════════════════════
@@ -459,8 +485,8 @@ function buildFenster(S, view) {
 
   buildLeibung(g, W, H);
 
-  // Blendrahmen
-  buildOuterFrame(g, 0, 0, W, H, OFR, DD, frameMat);
+  // Blendrahmen (mit Profilfase via ExtrudeGeometry)
+  buildFrameExtruded(g, 0, 0, W, H, OFR, DD, frameMat);
 
   // Glanzlinie — charakteristische helle PVC-Kante auf der Frontfläche des Blendrahmens
   const hlMat=new THREE.MeshStandardMaterial({color:0xffffff, roughness:0.04, metalness:0, emissive:0xffffff, emissiveIntensity:0.35});
@@ -766,7 +792,8 @@ function initScene(container) {
   pmremGen.dispose();
 
   // Szenenbeleuchtung — warmes Tageslicht, Rahmen erscheint weiß
-  scene.add(new THREE.AmbientLight(0xf5f2f0, 0.88));  // warmes Weiß, hoch genug für weiße Flächen
+  scene.add(new THREE.HemisphereLight(0xf0eeea, 0x8090a0, 0.60)); // Himmel warm, Boden kühl
+  scene.add(new THREE.AmbientLight(0xf5f2f0, 0.60));  // warmes Weiß, reduziert wegen HemisphereLight
   const key=new THREE.DirectionalLight(0xfffcf0, 1.20);  // warme Sonne von rechts-oben
   key.position.set(4,6,5); key.castShadow=true;
   key.shadow.mapSize.set(2048,2048);
