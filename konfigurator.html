@@ -1279,150 +1279,162 @@
   #sidebar > button:last-child:hover { background: #2563eb !important; box-shadow: 0 6px 28px rgba(37,99,235,0.65) !important; }
 </style>
 
-<!-- ══ PRODUKTKARTEN 4-IN-ROW + SIDEBAR-POLISH v4 ══ -->
+<!-- ══ PRODUKTKARTEN 4-IN-ROW + SIDEBAR v5 ══ -->
 <style>
-  /* ── GRID: 4 nebeneinander ── */
+  /* ── GRID: 4 Karten nebeneinander ── */
   #s1 .sb > .grid {
     grid-template-columns: repeat(4, 1fr) !important;
-    gap: 10px !important;
+    gap: 12px !important;
   }
   @media (max-width: 639px) {
     #s1 .sb > .grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
   }
-  #s1 .sb { padding: 18px !important; background: #07080f !important; }
+  #s1 .sb { padding: 20px !important; background: #07080f !important; }
 
-  /* ── KARTE: schlankes Hochformat ── */
+  /* ── KARTE: dunkle Premium-Karte — Bild-Bg (#0e1430) = Karten-Bg → nahtlos ── */
   #s1 .pc {
-    border-radius: 16px !important;
-    background: #f4f6fb !important;
-    border: 1.5px solid rgba(255,255,255,0.06) !important;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.50) !important;
+    position: relative !important;
+    border-radius: 18px !important;
+    background: #0e1430 !important;
+    border: 1px solid rgba(255,255,255,0.07) !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.60) !important;
     overflow: hidden !important;
-    transition: transform 0.32s cubic-bezier(.4,0,.2,1), box-shadow 0.32s ease, border-color 0.22s ease !important;
+    transition: transform 0.30s cubic-bezier(.4,0,.2,1), box-shadow 0.30s ease, border-color 0.20s ease !important;
     cursor: pointer !important;
+    display: flex !important;
+    flex-direction: column !important;
   }
   #s1 .pc:hover {
-    transform: translateY(-8px) scale(1.015) !important;
-    box-shadow: 0 18px 48px rgba(0,0,0,0.75), 0 0 0 2px rgba(77,136,255,0.55) !important;
-    border-color: rgba(77,136,255,0.70) !important;
+    transform: translateY(-10px) scale(1.02) !important;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.85), 0 0 0 1.5px rgba(77,136,255,0.60) !important;
+    border-color: rgba(77,136,255,0.55) !important;
   }
   #s1 .pc.sel {
-    border: 2px solid #4d88ff !important;
-    box-shadow: 0 0 0 3px rgba(77,136,255,0.22), 0 12px 36px rgba(29,78,216,0.45) !important;
-    transform: translateY(-6px) !important;
+    border: 1.5px solid #4d88ff !important;
+    box-shadow: 0 0 0 3px rgba(77,136,255,0.18), 0 16px 44px rgba(29,78,216,0.40) !important;
+    transform: translateY(-8px) !important;
   }
 
-  /* ── BILD: hochformat, weißer bg ── */
+  /* ── BILD: nahtlos ins Karten-Bg übergehen, kein Padding ── */
   #s1 .pc-img {
     width: 100% !important;
     aspect-ratio: 3/4 !important;
     object-fit: contain !important;
-    background: #f4f6fb !important;
-    padding: 14px 10px 4px !important;
+    object-position: center bottom !important;
+    background: #0e1430 !important;
+    padding: 16px 12px 0 !important;
     display: block !important;
-    transition: transform 0.40s cubic-bezier(.4,0,.2,1) !important;
+    transition: transform 0.38s cubic-bezier(.4,0,.2,1) !important;
   }
-  #s1 .pc:hover .pc-img { transform: scale(1.07) !important; }
+  #s1 .pc:hover .pc-img { transform: scale(1.05) !important; }
 
-  /* ── INFO-STRIP: kompakt dunkel ── */
+  /* ── LABEL: dünne Leiste unten, passend zum dunklen Karten-Bg ── */
   #s1 .s1-info {
-    background: #0d1120 !important;
-    border-top: 1px solid rgba(77,136,255,0.18) !important;
-    padding: 9px 12px 12px !important;
-    gap: 2px !important;
+    background: rgba(0,0,0,0.28) !important;
+    border-top: 1px solid rgba(77,136,255,0.12) !important;
+    padding: 10px 14px 13px !important;
+    gap: 0 !important;
     display: flex !important;
     flex-direction: column !important;
+    align-items: flex-start !important;
+    flex-shrink: 0 !important;
   }
-  #s1 .pc.sel .s1-info { border-top-color: #4d88ff !important; background: #0a0e20 !important; }
+  #s1 .pc.sel .s1-info {
+    border-top-color: rgba(77,136,255,0.45) !important;
+    background: rgba(29,78,216,0.12) !important;
+  }
 
-  /* ── NAME: kompakt aber lesbar ── */
+  /* ── NAME ── */
   #s1 .pc-name {
-    font-size: 13px !important;
+    font-size: 13.5px !important;
     font-weight: 800 !important;
-    color: rgba(232,238,255,0.96) !important;
+    color: rgba(232,238,255,0.95) !important;
     letter-spacing: -0.02em !important;
-    line-height: 1.25 !important;
+    line-height: 1.2 !important;
     font-family: 'Plus Jakarta Sans', sans-serif !important;
   }
 
-  /* ── BADGE + CHIPS: noch hidden (wie gehabt) ── */
+  /* ── BADGE + CHIPS: hidden ── */
   #s1 .pc-badge { display: none !important; }
   #s1 .pc-chips { display: none !important; }
 
-  /* ── CHECKMARK bei Auswahl ── */
+  /* ── SELECTED CHECKMARK ── */
   #s1 .pc.sel::after {
     content: 'check_circle' !important;
     font-family: 'Material Symbols Outlined' !important;
     font-variation-settings: 'FILL' 1 !important;
-    font-size: 18px !important;
+    font-size: 20px !important;
     color: #4d88ff !important;
     position: absolute !important;
-    top: 8px !important;
-    right: 8px !important;
-    background: rgba(8,10,20,0.80) !important;
+    top: 10px !important;
+    right: 10px !important;
+    background: rgba(7,8,15,0.85) !important;
     border-radius: 50% !important;
-    width: 24px !important;
-    height: 24px !important;
+    width: 26px !important;
+    height: 26px !important;
     display: grid !important;
     place-items: center !important;
     line-height: 1 !important;
     z-index: 6 !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.50) !important;
   }
-  #s1 .pc:not(.sel)::after { content: '' !important; width: 0 !important; height: 0 !important; background: none !important; background-image: none !important; font-size: 0 !important; position: absolute !important; }
+  #s1 .pc:not(.sel)::after {
+    content: '' !important; position: absolute !important;
+    width: 0 !important; height: 0 !important;
+    background: none !important; background-image: none !important; font-size: 0 !important;
+  }
 
-  /* ── VIEW TOGGLE: klare Pill-Optik ── */
+  /* ── VIEW TOGGLE: iOS-Style Segmented Control ── */
   #sidebar > div:first-child {
     background: rgba(255,255,255,0.05) !important;
-    border: 1px solid rgba(255,255,255,0.08) !important;
+    border: 1px solid rgba(255,255,255,0.09) !important;
     border-radius: 12px !important;
     padding: 4px !important;
-    gap: 3px !important;
+    gap: 2px !important;
     margin-bottom: 12px !important;
   }
   .view-btn {
     border-radius: 9px !important;
-    font-size: 12px !important;
+    font-size: 12.5px !important;
     font-weight: 700 !important;
     padding: 7px 10px !important;
     border: none !important;
-    color: rgba(255,255,255,0.45) !important;
+    color: rgba(255,255,255,0.40) !important;
     background: transparent !important;
-    transition: all 0.20s ease !important;
+    transition: all 0.18s ease !important;
     letter-spacing: 0.01em !important;
     font-family: 'Plus Jakarta Sans', sans-serif !important;
+    cursor: pointer !important;
   }
   .view-btn.active {
-    background: rgba(77,136,255,0.20) !important;
-    color: #a8c8ff !important;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.35) !important;
+    background: rgba(77,136,255,0.22) !important;
+    color: #b8d4ff !important;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.40) !important;
   }
-  .view-btn:not(.active):hover {
-    color: rgba(255,255,255,0.70) !important;
-    background: rgba(255,255,255,0.05) !important;
-  }
+  .view-btn:not(.active):hover { color: rgba(255,255,255,0.65) !important; }
 
-  /* ── PREVIEW BOX: subtiler Rahmen, angenehme Höhe ── */
+  /* ── PREVIEW BOX ── */
   #prev-wrap {
     border-radius: 14px !important;
     border: 1px solid rgba(255,255,255,0.08) !important;
-    background: rgba(255,255,255,0.03) !important;
-    height: 380px !important;
+    background: rgba(14,20,48,0.40) !important;
+    height: 360px !important;
     flex-shrink: 0 !important;
   }
 
-  /* ── CHIPS: sauber unterhalb preview ── */
+  /* ── CHIPS ── */
   #chips { margin-top: 10px !important; }
 
-  /* ── CTA: volle Breite, satter Blau ── */
+  /* ── CTA ── */
   #sidebar > button:last-child {
     margin-top: 12px !important;
     padding: 13px !important;
     border-radius: 12px !important;
     font-size: 14px !important;
     font-weight: 800 !important;
-    letter-spacing: 0.005em !important;
     background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%) !important;
     box-shadow: 0 4px 18px rgba(29,78,216,0.45) !important;
+    transition: all 0.20s ease !important;
   }
   #sidebar > button:last-child:hover {
     background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%) !important;
