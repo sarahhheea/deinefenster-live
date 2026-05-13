@@ -48,9 +48,15 @@ const RULES = [
     answer: 'Wir <strong>liefern</strong> — den Einbau übernehmen wir selbst nicht. Du beauftragst einen Handwerker deiner Wahl. Tipp: Frag beim Liefertermin nach, ob dein Monteur vor Ort sein kann — die meisten Fensterbauer nehmen die Lieferung direkt entgegen. Wichtig: Nicht-fachgerechte Montage lässt die Garantie erlöschen.'
   },
 
-  // ── Fehlmessung / Haftung (VOR Ausmessen — "messen" würde sonst zuerst matchen) ─
+  // ── Ausmessen / Aufmaß ──────────────────────────────────────────────────────────
   {
-    keys: ['falsch gemessen','fehlmessung','haftet','haftung','falsches maß','wer haftet','passiert wenn','falsch gemessen','was passiert'],
+    keys: ['ausmessen','aufmaß','maße nehmen','maß nehmen','fenster messen','wie messe','richtig messen','richtig ausmessen','lichte weite','rohbaumaß','einbaumaß','maße ermitteln','maße bestimmen'],
+    answer: '📏 <strong>So misst du dein Fenster richtig aus:</strong><br><br>Nicht das alte Fenster messen — sondern das <strong>Wandloch (Lichte Weite)</strong>:<br>• Breite: oben, mitte, unten messen → <strong>kleinsten Wert nehmen</strong><br>• Höhe: links, mitte, rechts messen → <strong>kleinsten Wert nehmen</strong><br>• Davon ca. <strong>1 cm rundum</strong> abziehen (Montagefuge)<br><br><strong>Beispiel:</strong> Wandloch 1182 × 982 mm → Bestellung <strong>1180 × 980 mm</strong><br><br>💡 Tipp: Mit zwei Personen messen — dann passieren weniger Fehler. Bei Unsicherheit einfach ein Foto per <a href="https://wa.me/491717263776" target="_blank">WhatsApp 0171 7263776</a> schicken — wir schauen drüber!'
+  },
+
+  // ── Fehlmessung / Haftung ────────────────────────────────────────────────────
+  {
+    keys: ['falsch gemessen','fehlmessung','haftet','haftung','falsches maß','wer haftet','passiert wenn','was passiert'],
     answer: 'Bei selbst gemessenem Aufmaß liegt das Risiko bei dir — Fenster werden mm-genau nach deinen Angaben gefertigt. Deshalb: zweimal messen (oben/unten und links/rechts), kleineres Maß nehmen. Für größere Projekte empfehlen wir ein <strong>kostenloses Aufmaß-Angebot</strong> per <a href="https://wa.me/491717263776" target="_blank">WhatsApp 0171 7263776</a>.'
   },
 
@@ -414,7 +420,7 @@ const QUICK_CHIPS = [
           <div class="df-msg-avatar">🤖</div>
           <div class="df-msg-bubble">
             Hallo! Ich bin der <strong>KI-Assistent</strong> von DeineFenster.de 👋<br><br>
-            Ich kenne alle Produkte, Preise, Lieferzeiten und beantworte deine Fragen sofort. Was möchtest du wissen?
+            Ich kenne alle Produkte, Lieferzeiten und Konditionen — und beantworte deine Fragen sofort. Was möchtest du wissen?
           </div>
         </div>
         <div id="df-typing">
@@ -454,7 +460,7 @@ const QUICK_CHIPS = [
   const tooltip  = document.getElementById('df-chat-tooltip');
   const chips    = document.getElementById('df-chat-chips');
 
-  let isOpen = false, isLoading = false, history = [], tooltipShown = false;
+  let isOpen = false, isLoading = false, history = [], tooltipShown = false, noMatchCount = 0;
 
   // ── Seiten mit FAB unten-rechts → Chatbot nach links verschieben ──────────
   const path = window.location.pathname;
@@ -542,7 +548,17 @@ const QUICK_CHIPS = [
       await new Promise(r => setTimeout(r, delay));
       setLoading(false);
       const answer = ruleBasedAnswer(text);
-      addMsg(answer || 'Zu dieser Frage habe ich leider keine direkte Antwort. Ruf uns an: <a href="tel:+493381214837">03381 / 214 83 73</a> oder schreib auf <a href="https://wa.me/491717263776" target="_blank">WhatsApp 0171 7263776</a> — wir helfen schnell weiter!', 'bot');
+      if (answer) {
+        noMatchCount = 0;
+        addMsg(answer, 'bot');
+      } else {
+        noMatchCount++;
+        if (noMatchCount >= 2) {
+          addMsg('Dazu habe ich gerade keine fertige Antwort — am schnellsten hilft dir unser Team direkt weiter:<br><br><a href="https://wa.me/491717263776" target="_blank" style="display:inline-block;margin-top:4px;padding:7px 14px;background:rgba(118,169,250,0.15);border:1px solid rgba(118,169,250,0.3);border-radius:8px;color:#76a9fa;text-decoration:none;font-weight:700;font-size:12px;">💬 WhatsApp 0171 7263776</a>&nbsp;&nbsp;<a href="tel:+493381214837" style="display:inline-block;margin-top:4px;padding:7px 14px;background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.2);border-radius:8px;color:#76a9fa;text-decoration:none;font-weight:700;font-size:12px;">📞 03381 / 214 83 73</a>', 'bot');
+        } else {
+          addMsg('Dazu habe ich leider keine direkte Antwort. Versuch es mit anderen Worten — oder ruf uns an: <a href="tel:+493381214837">03381 / 214 83 73</a>.', 'bot');
+        }
+      }
       return;
     }
 
