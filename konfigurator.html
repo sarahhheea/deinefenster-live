@@ -552,146 +552,295 @@
     #s1 .pc-from{font-size:11px;font-weight:600;color:rgba(118,169,250,0.90);letter-spacing:0.01em}
   </style>
 
-  <!-- VISUAL POLISH — 13.05.2026 v2 -->
+  <!-- VISUAL POLISH — 13.05.2026 v3 Apple-Dark -->
   <style>
-    /* ── Step bodies: refined dark gradient ── */
-    .sb{background:linear-gradient(160deg,#0c1a2e 0%,#112038 60%,#0d1928 100%)!important;}
-    #s1 .sb{padding:10px!important;background:var(--c-page-bg)!important;}
-    #s1 .sb>.grid{gap:10px!important;}
+    /* ════════════════════════════════════════════
+       APPLE-DARK REDESIGN — einheitliches Dunkel
+       Kein Misch-Licht/Dunkel mehr. Alles konsequent.
+    ════════════════════════════════════════════ */
 
-    /* ── Product cards (Step 1) ── */
-    #s1 .pc-img{aspect-ratio:4/5!important;object-fit:cover!important;}
-    #s1 .pc-name{font-size:17px!important;letter-spacing:-0.03em!important;}
+    /* ── Seiten-Hintergrund: tiefes Schwarz-Blau ── */
+    body{background:#080c14!important;}
 
-    /* ── Open step: stronger accent bar ── */
-    .sc.open .sh{box-shadow:inset 5px 0 0 #76a9fa,0 1px 0 rgba(118,169,250,0.12)!important;}
+    /* ── Steps-Container: kein heller Rand ── */
+    #steps{
+      border:1px solid rgba(255,255,255,0.07)!important;
+      box-shadow:0 8px 48px rgba(0,0,0,0.7),0 2px 8px rgba(0,0,0,0.5)!important;
+      border-radius:16px!important;
+      overflow:hidden!important;
+    }
+    .sc:first-child{border-top-left-radius:16px!important;border-top-right-radius:16px!important;}
+    .sc:last-child{border-bottom-left-radius:16px!important;border-bottom-right-radius:16px!important;}
 
-    /* ── Badge ── */
-    .badge{width:28px!important;height:28px!important;font-size:12px!important;box-shadow:0 2px 8px rgba(0,0,0,0.35)!important;}
-    .slabel{font-size:15px!important;}
+    /* ── Section Header: tiefes Navy, sauber ── */
+    .sh{
+      background:#0e1728!important;
+      border-bottom:1px solid rgba(255,255,255,0.05)!important;
+      padding:16px 20px 16px 24px!important;
+    }
+    .sh:hover{background:#141e35!important;}
+    .sc.open .sh{
+      background:#0d1628!important;
+      box-shadow:inset 4px 0 0 #5d97e8,0 1px 0 rgba(118,169,250,0.10)!important;
+      padding-left:27px!important;
+    }
+    .sc.open .slabel{color:#76a9fa!important;font-size:15px!important;}
+    .slabel{font-size:15px!important;font-weight:700!important;letter-spacing:-0.01em!important;}
+    .sdesc{font-size:12px!important;}
 
-    /* ── Progress bar glow ── */
-    #prog-fill{background:linear-gradient(90deg,#1a4d8a 0%,#225eaa 45%,#5d97e8 80%,#76a9fa 100%)!important;box-shadow:0 0 14px rgba(118,169,250,0.55)!important;}
+    /* ── Step-Nummer Badge: minimal pill ── */
+    .badge{
+      width:26px!important;height:26px!important;
+      border-radius:6px!important;
+      background:rgba(255,255,255,0.08)!important;
+      font-size:12px!important;font-weight:700!important;
+      box-shadow:none!important;
+    }
+    .sc.open .badge{background:#5d97e8!important;color:#fff!important;}
+    .sc.done .badge{background:rgba(93,151,232,0.25)!important;color:rgba(255,255,255,0.7)!important;}
 
-    /* ── Hover lifts ── */
-    .sb .oc:hover{transform:translateY(-1px)!important;}
-    .sb .fk:hover{transform:translateY(-2px)!important;}
+    /* ── Section Body: einheitliches Dunkel, kein Gradient ── */
+    .sb{
+      background:#0b1525!important;
+      border-top:1px solid rgba(93,151,232,0.20)!important;
+      padding:22px 22px 26px!important;
+    }
+    #s1 .sb{background:#080c14!important;padding:12px!important;}
+    #s1 .sb>.grid{gap:12px!important;}
 
-    /* ── Vignette on SVG preview ── */
-    #prev-wrap{position:relative!important;overflow:hidden!important;}
-    #prev-wrap::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 52%,rgba(0,0,0,0.22) 100%);pointer-events:none;z-index:1;}
+    /* ── Option Cards: clean dark glass ── */
+    .sb .oc{
+      background:rgba(255,255,255,0.04)!important;
+      border:1px solid rgba(255,255,255,0.09)!important;
+      border-radius:12px!important;
+      transition:all 0.2s ease!important;
+    }
+    .sb .oc:hover{
+      background:rgba(255,255,255,0.08)!important;
+      border-color:rgba(93,151,232,0.45)!important;
+      transform:translateY(-1px)!important;
+    }
+    .sb .oc.sel{
+      background:rgba(34,94,170,0.18)!important;
+      border-color:#5d97e8!important;
+      box-shadow:0 0 0 1px rgba(93,151,232,0.35)!important;
+    }
+    .sb .ora{background:rgba(255,255,255,0.06)!important;border-color:rgba(255,255,255,0.18)!important;}
+    .sb .oc.sel .ora{background:#5d97e8!important;border-color:#5d97e8!important;}
 
-    /* ── Section titles: elegant uppercase micro-labels ── */
+    /* ── Checkbox Cards ── */
+    .sb .cc{
+      background:rgba(255,255,255,0.04)!important;
+      border:1px solid rgba(255,255,255,0.09)!important;
+      border-radius:12px!important;
+    }
+    .sb .cc:hover{background:rgba(255,255,255,0.08)!important;border-color:rgba(93,151,232,0.45)!important;}
+    .sb .cc.sel{background:rgba(34,94,170,0.18)!important;border-color:#5d97e8!important;box-shadow:0 0 0 1px rgba(93,151,232,0.35)!important;}
+    .sb .cbox{background:rgba(255,255,255,0.06)!important;border-color:rgba(255,255,255,0.18)!important;}
+    .sb .cc.sel .cbox{background:#5d97e8!important;border-color:#5d97e8!important;}
+
+    /* ── Flügel-Karten (.fk) ── */
+    .sb .fk{
+      background:rgba(255,255,255,0.04)!important;
+      border:1px solid rgba(255,255,255,0.09)!important;
+      border-radius:10px!important;
+    }
+    .sb .fk:hover{background:rgba(255,255,255,0.08)!important;border-color:rgba(93,151,232,0.45)!important;transform:translateY(-2px)!important;}
+    .sb .fk.sel{background:rgba(34,94,170,0.18)!important;border-color:#5d97e8!important;box-shadow:0 0 0 1px rgba(93,151,232,0.30)!important;}
+
+    /* ── Größen-Buttons ── */
+    .sb .szb{
+      background:rgba(255,255,255,0.05)!important;
+      border:1px solid rgba(255,255,255,0.11)!important;
+      color:rgba(255,255,255,0.75)!important;
+      border-radius:8px!important;
+      font-weight:600!important;
+    }
+    .sb .szb:hover{border-color:#5d97e8!important;background:rgba(93,151,232,0.12)!important;color:#76a9fa!important;}
+
+    /* ── Inputs: vollständig dunkel ── */
+    .sb .inp,.inp{
+      background:rgba(255,255,255,0.05)!important;
+      border:1px solid rgba(255,255,255,0.12)!important;
+      color:#fff!important;
+      border-radius:10px!important;
+    }
+    .sb .inp::placeholder,.inp::placeholder{color:rgba(255,255,255,0.30)!important;}
+    .sb .inp:focus,.inp:focus{border-color:#5d97e8!important;box-shadow:0 0 0 3px rgba(93,151,232,0.20)!important;}
+
+    /* ── Labels + Texte ── */
+    .sb label,.sb .fl,label.fl{color:rgba(255,255,255,0.75)!important;}
+    .sb p,.sb > p{color:rgba(255,255,255,0.50)!important;}
+    .sb p strong{color:rgba(255,255,255,0.80)!important;}
+    .sb h3,.sb h4{color:rgba(255,255,255,0.95)!important;}
+    .sb .olabel{color:rgba(255,255,255,0.90)!important;}
+    .sb .osub{color:rgba(255,255,255,0.50)!important;}
+    .sb .fk-label{color:rgba(255,255,255,0.85)!important;}
+    .sb .text-sm.font-semibold{color:rgba(255,255,255,0.50)!important;}
+
+    /* ── Section-Titel (Trenn-Label) ── */
     .sb .sec-t{
-      color:rgba(118,169,250,0.65)!important;
-      font-size:10.5px!important;
-      letter-spacing:0.12em!important;
-      font-weight:700!important;
-      padding-top:18px!important;
-      margin-top:18px!important;
-      border-top:1px solid rgba(255,255,255,0.06)!important;
+      color:rgba(93,151,232,0.70)!important;
+      font-size:10px!important;
+      letter-spacing:0.14em!important;
+      font-weight:800!important;
+      padding-top:20px!important;margin-top:20px!important;
+      border-top:1px solid rgba(255,255,255,0.05)!important;
     }
     .sb .sec-t:first-child{border-top:none!important;padding-top:0!important;margin-top:0!important;}
-    .sb [style*="margin-top:0"].sec-t{border-top:none!important;padding-top:0!important;margin-top:0!important;}
 
-    /* ── Info boxes: dark glass with colored accent ── */
+    /* ── Info-Boxen: farbiger Akzent ── */
     .sb .info{
-      background:rgba(118,169,250,0.07)!important;
-      border:1px solid rgba(118,169,250,0.16)!important;
+      background:rgba(93,151,232,0.07)!important;
+      border:1px solid rgba(93,151,232,0.18)!important;
       border-radius:10px!important;
-      color:rgba(220,235,255,0.72)!important;
+      color:rgba(215,232,255,0.72)!important;
     }
-    .sb .info strong{color:rgba(255,255,255,0.88)!important;}
-    /* Override helle inline-Farben für Info-Boxen */
-    .sb .info[style*="background:#eff6ff"]{background:rgba(34,94,170,0.12)!important;border-left:3px solid rgba(118,169,250,0.55)!important;}
-    .sb .info[style*="background:#fef2f2"]{background:rgba(220,38,38,0.12)!important;border-left:3px solid rgba(248,113,113,0.55)!important;}
-    .sb .info[style*="background:#ecfdf5"]{background:rgba(16,185,129,0.10)!important;border-left:3px solid rgba(52,211,153,0.55)!important;}
-    .sb .info[style*="color:#7f1d1d"]{color:rgba(252,165,165,0.80)!important;}
+    .sb .info strong{color:rgba(255,255,255,0.90)!important;}
+    .sb .info[style*="background:#eff6ff"]{background:rgba(34,94,170,0.10)!important;border-left:3px solid rgba(93,151,232,0.55)!important;}
+    .sb .info[style*="background:#fef2f2"]{background:rgba(220,38,38,0.10)!important;border-left:3px solid rgba(248,113,113,0.55)!important;}
+    .sb .info[style*="background:#ecfdf5"]{background:rgba(16,185,129,0.08)!important;border-left:3px solid rgba(52,211,153,0.55)!important;}
 
-    /* ── Farb-Tabs: sichtbar auf dunklem Body ── */
-    .sb .farb-tab{color:rgba(255,255,255,0.40)!important;border-bottom-color:transparent!important;}
+    /* ── Farb-Tabs ── */
+    .sb .farb-tab{color:rgba(255,255,255,0.35)!important;border-bottom-color:transparent!important;}
     .sb .farb-tab:hover{color:rgba(255,255,255,0.80)!important;}
     .sb .farb-tab.active{color:#76a9fa!important;border-bottom-color:#76a9fa!important;}
-    .sb [style*="border-bottom:1px solid rgba(0,0,0"]{border-bottom-color:rgba(255,255,255,0.10)!important;}
+    .sb [style*="border-bottom:1px solid rgba(0,0,0"]{border-bottom-color:rgba(255,255,255,0.08)!important;}
 
-    /* ── Farb-Picker Namen ── */
-    .sb .fp-name{color:rgba(255,255,255,0.72)!important;}
+    /* ── Farb-Picker ── */
+    .sb .fp-name{color:rgba(255,255,255,0.68)!important;}
     .sb .fp-item.sel .fp-name{color:#76a9fa!important;font-weight:700!important;}
-    .sb .fp-item:hover{background:rgba(255,255,255,0.05)!important;}
+    .sb .fp-item:hover{background:rgba(255,255,255,0.05)!important;border-color:rgba(93,151,232,0.35)!important;}
+    .sb .fp-item.sel{background:transparent!important;border-color:#5d97e8!important;box-shadow:0 0 0 1px rgba(93,151,232,0.35)!important;}
 
-    /* ── Griff-Optionen: dark glass ── */
-    .sb .griff-opt{
-      background:rgba(255,255,255,0.05)!important;
-      border-color:rgba(255,255,255,0.12)!important;
+    /* ── Griff-Optionen ── */
+    .sb .griff-opt{background:rgba(255,255,255,0.04)!important;border-color:rgba(255,255,255,0.10)!important;border-radius:12px!important;}
+    .sb .griff-opt:hover{background:rgba(255,255,255,0.08)!important;border-color:rgba(93,151,232,0.40)!important;}
+    .sb .griff-opt.sel{background:rgba(34,94,170,0.18)!important;border-color:#5d97e8!important;box-shadow:0 0 0 1px rgba(93,151,232,0.30)!important;}
+
+    /* ── Qty-Buttons ── */
+    .sb .qbtn{background:rgba(255,255,255,0.05)!important;border-color:rgba(255,255,255,0.12)!important;}
+    .sb .qbtn:hover{border-color:#5d97e8!important;background:rgba(93,151,232,0.12)!important;color:#76a9fa!important;}
+    #qv{color:#76a9fa!important;font-size:20px!important;font-weight:800!important;}
+
+    /* ── Rolladen/Sprossen Bild-Container ── */
+    .sb .oc > div[style*="background:#f4f6fb"]{background:rgba(255,255,255,0.05)!important;border-radius:8px!important;}
+
+    /* ── Zusammenfassung / Summary ── */
+    .sb .sr{border-bottom-color:rgba(255,255,255,0.06)!important;color:rgba(255,255,255,0.70)!important;}
+    .sb [style*="border-top:1px solid #eef1fb"]{border-top-color:rgba(255,255,255,0.07)!important;}
+    .pr.bold{border-top-color:rgba(255,255,255,0.08)!important;color:#fff!important;}
+    .pr.sub{color:rgba(215,232,255,0.55)!important;}
+
+    /* ── CTA-Buttons: premium Blau ── */
+    .sb button[onclick*="finish"]{
+      background:linear-gradient(135deg,#2970d4 0%,#1a52a0 100%)!important;
+      box-shadow:0 4px 20px rgba(34,94,170,0.45),0 1px 4px rgba(0,0,0,0.35)!important;
+      letter-spacing:0.02em!important;border-radius:12px!important;
     }
-    .sb .griff-opt:hover{background:rgba(255,255,255,0.09)!important;border-color:rgba(255,255,255,0.25)!important;}
-    .sb .griff-opt.sel{background:rgba(34,94,170,0.22)!important;border-color:#76a9fa!important;}
-
-    /* ── Rolladen/Sprossen Bild-Container: hell → dunkel ── */
-    .sb .oc > div[style*="background:#f4f6fb"]{background:rgba(255,255,255,0.06)!important;border-radius:8px!important;}
-    .sb .oc > img[style*="background:#f4f6fb"]{background:rgba(255,255,255,0.06)!important;}
-
-    /* ── Schnellauswahl-Label & sonstige helle Texte ── */
-    .sb .text-sm.font-semibold{color:rgba(255,255,255,0.55)!important;}
-    .sb .text-sm.text-on-surf-v{color:rgba(255,255,255,0.50)!important;}
-    .sb > p, .sb p{color:rgba(255,255,255,0.50)!important;}
-    .sb p strong{color:rgba(255,255,255,0.78)!important;}
-
-    /* ── Größen-Buttons (Schnellauswahl Maße) ── */
-    .sb .szb{
-      background:rgba(255,255,255,0.06)!important;
-      border-color:rgba(255,255,255,0.14)!important;
-      color:rgba(255,255,255,0.78)!important;
+    .sb button[onclick*="finish"]:hover{
+      box-shadow:0 8px 32px rgba(41,112,212,0.60),0 2px 8px rgba(0,0,0,0.30)!important;
+      transform:translateY(-2px)!important;
     }
-    .sb .szb:hover{border-color:#76a9fa!important;background:rgba(118,169,250,0.12)!important;color:#76a9fa!important;}
 
-    /* ── Anzahl-Zahl: heller blauer Akzent ── */
-    #qv{color:#76a9fa!important;}
-
-    /* ── Türmodell-Karten im dunklen Body ── */
+    /* ── Türmodell-Karten ── */
     #s-tm .pc{
       background:rgba(255,255,255,0.04)!important;
-      border:1px solid rgba(255,255,255,0.10)!important;
+      border:1px solid rgba(255,255,255,0.09)!important;
       border-radius:12px!important;
       padding:0 0 10px!important;
       overflow:hidden!important;
       gap:6px!important;
+      transition:all 0.25s ease!important;
     }
-    #s-tm .pc:hover{border-color:rgba(118,169,250,0.45)!important;background:rgba(255,255,255,0.07)!important;}
-    #s-tm .pc.sel{border-color:#76a9fa!important;background:rgba(34,94,170,0.18)!important;}
-    #s-tm .pc-name{font-size:12px!important;color:rgba(255,255,255,0.92)!important;padding:0 8px!important;}
-    #s-tm .pc-from{font-size:10.5px!important;color:rgba(118,169,250,0.70)!important;padding:0 8px!important;}
+    #s-tm .pc:hover{border-color:rgba(93,151,232,0.50)!important;background:rgba(255,255,255,0.07)!important;transform:translateY(-3px)!important;}
+    #s-tm .pc.sel{border-color:#5d97e8!important;background:rgba(34,94,170,0.16)!important;box-shadow:0 0 0 1px rgba(93,151,232,0.35),0 8px 24px rgba(34,94,170,0.25)!important;}
+    #s-tm .pc-name{font-size:12px!important;color:rgba(255,255,255,0.90)!important;padding:0 8px!important;}
+    #s-tm .pc-from{font-size:10.5px!important;color:rgba(93,151,232,0.75)!important;padding:0 8px!important;}
     #s-tm .pc-img{border-radius:0!important;}
-
-    /* ── Weiter/Bestätigen-Buttons: premium CTA ── */
-    .sb button[onclick*="finish"]{
-      background:linear-gradient(135deg,#2267bb 0%,#1a4d8a 100%)!important;
-      box-shadow:0 4px 20px rgba(34,94,170,0.40),0 1px 4px rgba(0,0,0,0.30)!important;
-      letter-spacing:0.03em!important;
-      transition:all 0.2s ease!important;
-    }
-    .sb button[onclick*="finish"]:hover{
-      box-shadow:0 6px 28px rgba(34,94,170,0.58),0 2px 8px rgba(0,0,0,0.30)!important;
-      transform:translateY(-2px)!important;
-    }
-
-    /* ── Farbe-Step: untere Hinweis-Zeile ── */
-    .sb [style*="border-top:1px solid #eef1fb"]{border-top-color:rgba(255,255,255,0.08)!important;}
-
-    /* ── Türmodell: "Anderes Modell anfragen" Card ── */
-    #s-tm .pc[href]{border:2px dashed rgba(118,169,250,0.30)!important;background:rgba(118,169,250,0.04)!important;}
+    #s-tm .pc[href]{border:2px dashed rgba(93,151,232,0.28)!important;background:rgba(93,151,232,0.04)!important;}
     #s-tm .pc[href] .pc-name{color:#76a9fa!important;}
-    #s-tm .pc[href] .pc-from{color:rgba(118,169,250,0.60)!important;}
+
+    /* ── Product Cards Step 1: premium showcase ── */
+    #s1 .pc{
+      border-radius:18px!important;
+      background:#0a1020!important;
+      border:1px solid rgba(255,255,255,0.07)!important;
+      box-shadow:0 4px 24px rgba(0,0,0,0.60),inset 0 1px 0 rgba(255,255,255,0.04)!important;
+      transition:transform 0.3s cubic-bezier(.4,0,.2,1),box-shadow 0.3s ease,border-color 0.25s ease!important;
+    }
+    #s1 .pc:hover{
+      transform:translateY(-6px) scale(1.012)!important;
+      border-color:rgba(93,151,232,0.50)!important;
+      box-shadow:0 24px 60px rgba(0,0,0,0.70),0 0 0 1px rgba(93,151,232,0.25),inset 0 1px 0 rgba(255,255,255,0.08)!important;
+    }
+    #s1 .pc.sel{
+      border-color:rgba(93,151,232,0.85)!important;
+      box-shadow:0 0 0 2px rgba(93,151,232,0.45),0 20px 60px rgba(34,94,170,0.50),inset 0 1px 0 rgba(255,255,255,0.10)!important;
+      transform:translateY(-6px)!important;
+    }
+    #s1 .pc-img{aspect-ratio:4/5!important;object-fit:cover!important;}
+    #s1 .pc-name{font-size:16px!important;letter-spacing:-0.025em!important;font-weight:800!important;}
+    #s1 .s1-info{background:rgba(5,8,18,0.96)!important;border-top:1px solid rgba(255,255,255,0.07)!important;}
+    #s1 .pc-badge{
+      background:rgba(34,94,170,0.30)!important;
+      border-color:rgba(93,151,232,0.35)!important;
+      font-size:8px!important;letter-spacing:0.11em!important;
+    }
+    #s1 .pc.sel .pc-badge{background:rgba(34,94,170,0.55)!important;border-color:rgba(93,151,232,0.65)!important;}
+    #s1 .pc-chips span{
+      background:rgba(10,14,30,0.90)!important;
+      border-color:rgba(93,151,232,0.18)!important;
+      color:rgba(140,190,255,0.75)!important;
+    }
+    #s1 .pc.sel::after{content:''!important;position:absolute!important;top:0!important;left:8%!important;right:8%!important;width:auto!important;height:1.5px!important;background:linear-gradient(90deg,transparent,rgba(93,151,232,0.95),transparent)!important;font-family:inherit!important;font-size:0!important;color:transparent!important;border-radius:0!important;box-shadow:none!important;background-color:transparent!important;z-index:5!important;}
+
+    /* ── Sidebar: tiefes Glass ── */
+    #sidebar{
+      background:rgba(8,14,28,0.92)!important;
+      border:1px solid rgba(255,255,255,0.09)!important;
+      box-shadow:0 8px 40px rgba(0,0,0,0.60),0 2px 6px rgba(0,0,0,0.40)!important;
+      border-radius:16px!important;
+    }
+    #chips .sr{border-bottom-color:rgba(255,255,255,0.06)!important;}
+    #chips{color:rgba(215,232,255,0.88)!important;}
+
+    /* ── Preview-Bereich ── */
+    #prev-wrap{
+      background:rgba(255,255,255,0.03)!important;
+      border:1px solid rgba(255,255,255,0.08)!important;
+      border-radius:14px!important;
+      position:relative!important;overflow:hidden!important;
+    }
+    #prev-wrap::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,0.18) 100%);pointer-events:none;z-index:1;}
+    .view-btn{color:rgba(215,232,255,0.50)!important;}
+    .view-btn.active{background:#0e1728!important;color:#fff!important;border-color:rgba(93,151,232,0.30)!important;}
+
+    /* ── Progress Bar ── */
+    #prog-fill{
+      background:linear-gradient(90deg,#1a4d8a 0%,#2970d4 50%,#76a9fa 100%)!important;
+      box-shadow:0 0 12px rgba(118,169,250,0.50)!important;
+    }
+    #prog-bar{background:rgba(5,8,18,0.98)!important;}
+
+    /* ── Trust Strip ── */
+    #trust-strip .ms.f{filter:drop-shadow(0 0 5px currentColor);opacity:0.85;}
+
+    /* ── Mobile Bottom Bar ── */
+    #mobile-bottom-bar{background:rgba(5,8,18,0.98)!important;border-top-color:rgba(255,255,255,0.07)!important;}
+    #mobile-bottom-bar *:not(button):not(a){color:rgba(215,232,255,0.88)!important;}
 
     /* ── Balkontür Set-Info ── */
     #balk-set-info{color:rgba(200,255,225,0.78)!important;}
     #balk-set-info strong{color:#34d399!important;}
 
-    /* ── Trust strip ── */
-    #trust-strip .ms.f{filter:drop-shadow(0 0 5px currentColor);opacity:0.88;}
+    /* ── Öffnen-Button ── */
+    .oeffnen-btn{background:rgba(255,255,255,0.05)!important;border-color:rgba(255,255,255,0.12)!important;color:rgba(255,255,255,0.80)!important;border-radius:10px!important;}
+    .oeffnen-btn:hover{background:rgba(255,255,255,0.09)!important;border-color:rgba(93,151,232,0.40)!important;}
+    .oeffnen-btn.active{background:#0e1728!important;color:#fff!important;border-color:rgba(93,151,232,0.40)!important;}
 
-    /* ── Zusammenfassung: sr rows ── */
-    .sb .sr{border-bottom-color:rgba(255,255,255,0.07)!important;color:rgba(255,255,255,0.72)!important;}
+    /* ── Cart Section ── */
+    #cart-section{background:rgba(255,255,255,0.04)!important;border-color:rgba(93,151,232,0.20)!important;border-radius:12px!important;}
   </style>
 </head>
 <body>
