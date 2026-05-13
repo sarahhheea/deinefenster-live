@@ -987,6 +987,205 @@
   #s1 .pc-name { font-size: 15px !important; }
 </style>
 
+<!-- ══ REDESIGN 13.05.2026 — Premium Produktkarten + Struktur ══ -->
+<style>
+  /* ── 1. PRODUKTKARTEN: immer 2×2 Grid ── */
+  #s1 .sb > .grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 16px !important;
+  }
+
+  /* Badges + Chips wieder sichtbar */
+  #s1 .pc-badge {
+    display: inline-block !important;
+    position: static !important;
+    font-size: 9px !important;
+    letter-spacing: 0.10em !important;
+    padding: 3px 9px !important;
+    background: rgba(93,151,232,0.18) !important;
+    border: 1px solid rgba(93,151,232,0.32) !important;
+    color: rgba(175,210,255,0.90) !important;
+    border-radius: 4px !important;
+    width: fit-content !important;
+    backdrop-filter: none !important;
+  }
+
+  #s1 .pc-chips {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 4px !important;
+    margin-top: 5px !important;
+  }
+
+  #s1 .pc-chips span {
+    font-size: 10px !important;
+    padding: 2.5px 8px !important;
+    background: rgba(255,255,255,0.06) !important;
+    border: 1px solid rgba(255,255,255,0.11) !important;
+    color: rgba(165,200,255,0.70) !important;
+    border-radius: 4px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.01em !important;
+  }
+
+  /* Karte */
+  #s1 .pc {
+    border-radius: 22px !important;
+    background: #0b1222 !important;
+    border: 1px solid rgba(255,255,255,0.09) !important;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.05) !important;
+    transition: transform 0.38s cubic-bezier(.4,0,.2,1), box-shadow 0.38s ease, border-color 0.25s ease !important;
+  }
+
+  #s1 .pc:hover {
+    transform: translateY(-12px) scale(1.018) !important;
+    border-color: rgba(93,151,232,0.70) !important;
+    box-shadow: 0 28px 80px rgba(0,0,0,0.82), 0 0 0 1px rgba(93,151,232,0.32), inset 0 1px 0 rgba(255,255,255,0.08) !important;
+  }
+
+  #s1 .pc.sel {
+    border: 2px solid #5d97e8 !important;
+    box-shadow: 0 0 0 4px rgba(93,151,232,0.22), 0 20px 64px rgba(29,78,216,0.55) !important;
+    transform: translateY(-10px) !important;
+  }
+
+  /* Bild */
+  #s1 .pc-img {
+    aspect-ratio: 3/4 !important;
+    object-fit: cover !important;
+    transition: transform 0.55s cubic-bezier(.4,0,.2,1) !important;
+  }
+
+  #s1 .pc:hover .pc-img {
+    transform: scale(1.09) translateY(-2%) !important;
+  }
+
+  /* Info-Sektion */
+  #s1 .s1-info {
+    padding: 13px 16px 18px !important;
+    background: #07091c !important;
+    border-top: 1px solid rgba(93,151,232,0.22) !important;
+    gap: 5px !important;
+  }
+
+  #s1 .pc.sel .s1-info {
+    border-top-color: #5d97e8 !important;
+    background: #060818 !important;
+  }
+
+  /* Name */
+  #s1 .pc-name {
+    font-size: 17px !important;
+    font-weight: 800 !important;
+    color: rgba(255,255,255,0.97) !important;
+    letter-spacing: -0.03em !important;
+    line-height: 1.2 !important;
+  }
+
+  /* Checkmark bei Auswahl */
+  #s1 .pc.sel::after {
+    content: 'check_circle' !important;
+    font-family: 'Material Symbols Outlined' !important;
+    font-variation-settings: 'FILL' 1 !important;
+    font-size: 22px !important;
+    color: #5d97e8 !important;
+    position: absolute !important;
+    top: 12px !important;
+    right: 12px !important;
+    background: rgba(7,9,28,0.75) !important;
+    border-radius: 50% !important;
+    width: 28px !important;
+    height: 28px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1.25 !important;
+    z-index: 6 !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.50) !important;
+    /* kein gradient mehr */
+    background-image: none !important;
+  }
+
+  /* Shimmer Linie am Top nur wenn NICHT selected */
+  #s1 .pc:not(.sel)::after {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 8% !important; right: 8% !important;
+    width: auto !important;
+    height: 1px !important;
+    background: rgba(255,255,255,0.06) !important;
+    background-image: none !important;
+    font-size: 0 !important;
+  }
+
+  /* ── 2. STEP-GROUP LABELS: prominente Kapitel-Trenner ── */
+  .step-group {
+    padding: 18px 24px 12px !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.20em !important;
+    color: rgba(255,255,255,0.35) !important;
+    background: #050810 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+    border-top: none !important;
+  }
+
+  .step-group::before {
+    content: '' !important;
+    width: 3px !important;
+    height: 16px !important;
+    background: #5d97e8 !important;
+    border-radius: 2px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .step-group::after {
+    content: '' !important;
+    flex: 1 !important;
+    height: 1px !important;
+    background: rgba(255,255,255,0.07) !important;
+    border-radius: 1px !important;
+  }
+
+  /* ── 3. OPTION + CHECKBOX KARTEN: linker Akzent bei Auswahl ── */
+  .sb .oc.sel {
+    background: rgba(29,78,216,0.16) !important;
+    border-color: #5d97e8 !important;
+    box-shadow: inset 3px 0 0 #5d97e8, 0 0 0 1px rgba(93,151,232,0.25) !important;
+  }
+
+  .sb .cc.sel {
+    background: rgba(29,78,216,0.14) !important;
+    border-color: #5d97e8 !important;
+    box-shadow: inset 3px 0 0 #5d97e8, 0 0 0 1px rgba(93,151,232,0.22) !important;
+  }
+
+  /* ── 4. PROGRESS BAR: dunkel ── */
+  #prog-bar .flex-1.rounded-full {
+    background: rgba(255,255,255,0.10) !important;
+  }
+
+  /* ── 5. AUTO-GESPEICHERT BADGE: dunkelgrün ── */
+  #prog-bar [style*="ecfdf5"] {
+    background: rgba(4,120,87,0.22) !important;
+    color: #34d399 !important;
+    border-color: rgba(52,211,153,0.25) !important;
+  }
+
+  /* ── 6. SCHRITT-HEADER: done-Schritte mit subtiler linker Markierung ── */
+  .sc.done .sh {
+    border-left: 3px solid rgba(93,151,232,0.30) !important;
+    padding-left: 21px !important;
+  }
+  .sc.open .sh {
+    border-left: 3px solid #5d97e8 !important;
+  }
+</style>
+
 <script>
   document.getElementById('menuBtn').addEventListener('click', () => {
     const m = document.getElementById('mobileMenu');
