@@ -6944,12 +6944,10 @@ async function submitForm(e) {
     ...(wunschLiefertermin ? ['Wunschtermin: ' + wunschLiefertermin] : []),
   ].join('\n');
 
-  fetch('https://api.resend.com/emails', {
+  // E-Mail läuft über Cloudflare Worker (API-Key bleibt serverseitig geheim)
+  fetch('https://deinefenster-email.deinefenster.workers.dev', {
     method: 'POST',
-    headers: {
-      'Authorization': 'Bearer re_JEnfPvXi_DYGmrrgPBXJnLzzoMBjeKa3n',
-      'Content-Type': 'application/json'
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       from: 'DeineFenster.de <noreply@deinefenster.de>',
       to: ['info@baustoffchrist.de'],
