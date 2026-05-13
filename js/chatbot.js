@@ -17,13 +17,13 @@ const RULES = [
 
   // ── Schutzfolie (VOR Pflege) ─────────────────────────────────────────────────
   {
-    keys: ['schutzfolie','folie abziehen','folie entfernen','folie drauf','folie kleben','folie fenster'],
+    keys: ['schutzfolie','folie abziehen','folie entfernen','folie drauf','folie kleben','folie fenster','folie klebt','klebt am fenster','klebt auf'],
     answer: '⚠️ <strong>Schutzfolie sofort nach dem Einbau abziehen!</strong> Bei längerem UV-Kontakt klebt sie sich dauerhaft in den Rahmen — kaum mehr zu entfernen. Handwerker vergessen das häufig. Bitte nach der Montage kurz kontrollieren.'
   },
 
   // ── Kondensation / Beschlag ──────────────────────────────────────────────────
   {
-    keys: ['kondensation','beschlägt','beschlagen','schwitzwasser','tauwasser','wasser am fenster','fenster schwitzen','innen beschlagen','außen beschlagen','feuchtigkeit fenster'],
+    keys: ['kondensation','beschlägt','beschlagen','schwitzwasser','tauwasser','wasser am fenster','fenster schwitzen','innen beschlagen','außen beschlagen','feuchtigkeit fenster','schwitzt','wasser zwischen','zwischen den scheiben','zwischen scheiben'],
     answer: '🌡️ <strong>Beschlag am Fenster — was steckt dahinter:</strong><br><br>• <strong>Innen beschlagen</strong> = zu hohe Luftfeuchtigkeit im Raum. Lösung: 3–4× täglich <strong>stoßlüften</strong> (5 Min. voll öffnen — nicht kippen!).<br>• <strong>Außen beschlagen</strong> (morgens) = sehr gute Dämmung. Das ist ein Qualitätsmerkmal, kein Fehler!<br>• <strong>Zwischen den Scheiben</strong> = defekte Dichtung → Garantiefall. Bitte Foto per <a href="https://wa.me/491717263776" target="_blank">WhatsApp</a> schicken.'
   },
 
@@ -53,7 +53,7 @@ const RULES = [
 
   // ── Förderung (VOR Preis) ────────────────────────────────────────────────────
   {
-    keys: ['förderung','fördermittel','bafa','kfw','zuschuss','staatlich','subvention','beg','förderfähig','steuer absetzen','steuerlich absetzbar'],
+    keys: ['förderung','fördermittel','foerderung','bafa','kfw','zuschuss','staatlich','subvention','beg','förderfähig','foerderfähig','steuer absetzen','steuerlich absetzbar','gefördet','gefordert'],
     answer: '💰 <strong>Förderung für neue Fenster (Stand 2026):</strong><br><br>• <strong>BAFA BEG EM</strong>: bis <strong>15% Zuschuss</strong> für IGLO Energy (Uw 0,71) und IGLO Edge (Uw 0,66). Antrag <strong>vor</strong> Bestellung auf bafa.de stellen!<br>• <strong>KfW 458</strong>: gilt <strong>nicht mehr</strong> für Einzelmaßnahmen (nur noch in Kombination mit Komplettsanierung)<br>• <strong>IGLO 5 Classic (Uw 0,83)</strong>: nicht BAFA-förderfähig<br>• <strong>Steuer</strong>: 20% der Handwerker-Lohnkosten absetzbar (§35a EStG) — nur Arbeitsleistung, nicht Material<br><br>⚠️ Angaben ohne Gewähr — bitte bafa.de und Steuerberater prüfen.'
   },
 
@@ -143,7 +143,7 @@ const RULES = [
 
   // ── Gebrauchte verkaufen ────────────────────────────────────────────────────
   {
-    keys: ['fenster abgeben','fenster loswerden','ankaufen','nehmt ihr an','ihr kauft','fenster verkaufen','gebraucht verkaufen'],
+    keys: ['fenster abgeben','fenster loswerden','ankaufen','nehmt ihr an','ihr kauft','fenster verkaufen','gebraucht verkaufen','kauft ihr','alte fenster kaufen','kaufen sie','nehmen sie gebraucht'],
     answer: 'Wir kaufen <strong>keine</strong> gebrauchten Fenster an.'
   },
 
@@ -155,13 +155,13 @@ const RULES = [
 
   // ── Öffnungszeiten ──────────────────────────────────────────────────────────
   {
-    keys: ['öffnungszeit','geöffnet','wann offen','wann da','freitag','wann auf','vorbeikommen','wann habt','besuch'],
+    keys: ['öffnungszeit','geöffnet','wann offen','wann da','freitag','wann auf','vorbeikommen','wann habt','besuch','aufgemacht','aufgemacht','öffnet','wann öffnet','wann kann ich kommen','öffnungszeiten'],
     answer: '🕙 <strong>Hofverkauf:</strong> Freitags <strong>10–17 Uhr</strong> (Fohrder Landstraße 13, Brandenburg). Bis 20 Uhr nach Voranmeldung: <a href="tel:+493381214837">03381 / 214 83 73</a>. Mo–Do und Sa–So kein Hofverkauf.<br><br>⚠️ Sommerferien und Feiertage: ggf. abweichende Zeiten — vorher kurz anrufen!<br><br><a href="kontakt.html" style="display:inline-block;margin-top:6px;padding:7px 14px;background:rgba(118,169,250,0.15);border:1px solid rgba(118,169,250,0.3);border-radius:8px;color:#76a9fa;text-decoration:none;font-weight:700;font-size:12px;">→ Kontaktseite</a>'
   },
 
   // ── Schallschutz ─────────────────────────────────────────────────────────────
   {
-    keys: ['schallschutz','schallschutzklasse','lärm','lärmschutz','straßenlärm','dezibel','db ','geräusche','lärmdämmung'],
+    keys: ['schallschutz','schallschutzklasse','ssk','lärm','lärmschutz','straßenlärm','dezibel','db ','geräusche','lärmdämmung','laut','schallgedämmt'],
     answer: '🔇 <strong>Schallschutzklassen (SSK):</strong><br><br>• <strong>SSK 1</strong> (25 dB) — ruhige Wohnlage<br>• <strong>SSK 2</strong> (30 dB) — normale Wohnstraße, Standard 3-fach-Verglasung<br>• <strong>SSK 3</strong> (35 dB) — Hauptstraßen, städtische Lage (empfohlen)<br>• <strong>SSK 4</strong> (40 dB) — stark befahrene Straßen, Bahnlinien<br><br>Für SSK 3–4 gibt es VSG-Verbundsicherheitsglas und asymmetrische Scheibenstärken. Anfrage per <a href="https://wa.me/491717263776" target="_blank">WhatsApp</a>.'
   },
 
@@ -197,19 +197,19 @@ const RULES = [
 
   // ── Milchglas / Satinato ──────────────────────────────────────────────────
   {
-    keys: ['milchglas','satinato','ornamentglas','badezimmer fenster','sichtschutzglas','blickdicht','opak','mattes glas','bad fenster'],
+    keys: ['milchglas','satinato','ornamentglas','badezimmer fenster','badezimmer','bad fenster','wc fenster','sichtschutzglas','blickdicht','opak','mattes glas','sichtschutz glas'],
     answer: 'Ja, <strong>Satinato (Milchglas)</strong> ist als Verglasung verfügbar — für Bad, WC oder Treppe. Im <a href="konfigurator.html">Konfigurator</a> als Glasoption wählbar oder per <a href="https://wa.me/491717263776" target="_blank">WhatsApp</a> anfragen.'
   },
 
   // ── Standardmaße ─────────────────────────────────────────────────────────────
   {
-    keys: ['standardmaß','normmaß','normfenster','standardgröße','gängige größen','übliche maße','welche größe','typische maße'],
+    keys: ['standardmaß','normmaß','normfenster','standardgröße','gängige größen','übliche maße','welche größe','typische maße','fenstermaße','gängige fenster','übliche größe','normale fenster','welche fenstergröße'],
     answer: '📐 <strong>Gängige Fenstermaße:</strong><br><br>• Wohnzimmer: 1200 × 1200 mm<br>• Schlafzimmer: 1000 × 1000 mm oder 1200 × 900 mm<br>• Küche: 1000 × 600 mm<br>• Bad: 600 × 600 mm<br>• Balkontür einflügelig: 900 × 2100 mm<br><br>Wir fertigen <strong>jeden Millimeter auf Maß</strong> — keine Standardzwänge.'
   },
 
   // ── Wie lange hält ───────────────────────────────────────────────────────────
   {
-    keys: ['wie lange hält','lebensdauer','haltbarkeit','wie alt','wann erneuern','wann tauschen','30 jahre','50 jahre'],
+    keys: ['wie lange hält','lebensdauer','haltbarkeit','wie alt','wann erneuern','wann tauschen','30 jahre','50 jahre','erneuern','tauschen','austauschen','wie lange fenster'],
     answer: 'PVC-Fenster halten bei guter Pflege <strong>30–50 Jahre</strong>. Drutex Klasse A (3 mm Wandstärke) ist die langlebigste Qualitätsstufe. Typische Zeichen für Erneuerung: Zugluft, schwergängige Beschläge, Beschlag zwischen den Scheiben.'
   },
 
@@ -221,7 +221,7 @@ const RULES = [
 
   // ── Österreich / Ausland ────────────────────────────────────────────────────
   {
-    keys: ['österreich','schweiz','ausland','liefert ihr nach österreich','liefert ihr nach schweiz','international'],
+    keys: ['österreich','schweiz','ausland','liefert ihr nach österreich','liefert ihr nach schweiz','international','wien','graz','zürich','basel','außerhalb deutschland'],
     answer: 'Wir liefern aktuell <strong>nur innerhalb Deutschlands</strong>. Für Österreich und die Schweiz gibt es autorisierte Drutex-Händler — auf drutex.eu den nächsten Händler suchen.'
   },
 
@@ -245,7 +245,7 @@ const RULES = [
 
   // ── Produktübersicht ────────────────────────────────────────────────────────
   {
-    keys: ['was habt ihr','welche produkte','was verkauft ihr','sortiment','was führt ihr','was gibt es','was kann ich bestellen'],
+    keys: ['was habt ihr','welche produkte','was verkauft ihr','sortiment','was führt ihr','was gibt es','was kann ich bestellen','was kann ich kaufen','bei euch kaufen','was kann man kaufen','was bietet ihr','euer angebot'],
     answer: '🪟 <strong>Unser Sortiment:</strong><br><br>🪟 Kunststofffenster — alle Formen, Farben, Größen<br>🚪 Balkontüren & Terrassentüren<br>🏠 Haustüren — viele Modelle, RAL & Holzdekore<br>⬅️ Hebe-Schiebetüren — bis 6.500 mm Breite<br>🔄 Rollladen — passend zu Drutex-Fenstern<br>♻️ Gebrauchte Fenster — Hofverkauf freitags<br><br>Alles Maßanfertigung. <a href="produkte.html">→ Alle Produkte</a>'
   },
 
@@ -275,7 +275,7 @@ const RULES = [
 
   // ── Kontakt ──────────────────────────────────────────────────────────────────
   {
-    keys: ['kontakt','telefon','anrufen','whatsapp','mail','email','erreichbar','wann erreichbar','wie erreiche','telefonnummer'],
+    keys: ['kontakt','telefon','anrufen','whatsapp','mail','email','erreichbar','wann erreichbar','wie erreiche','telefonnummer','erreichen','wie komme ich in kontakt','schreiben'],
     answer: '📞 <a href="tel:+493381214837"><strong>03381 / 214 83 73</strong></a> — Mo–Fr 10–18 Uhr<br>💬 <a href="https://wa.me/491717263776" target="_blank"><strong>WhatsApp 0171 7263776</strong></a> — nur schreiben (kein Anruf)<br>📧 info@baustoffchrist.de — Antwort i.d.R. innerhalb 24h'
   },
 
