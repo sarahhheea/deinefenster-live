@@ -345,8 +345,10 @@ function addFensterGriff(g,cx,cy,z){
   const hMat=new THREE.MeshPhysicalMaterial({
     color:0xEEEDE9,
     roughness:0.13, metalness:0.0,
-    clearcoat:0.85, clearcoatRoughness:0.04,
-    envMapIntensity:1.8
+    clearcoat:0.55, clearcoatRoughness:0.08,
+    anisotropy:0.7, anisotropyRotation:Math.PI/2,
+    sheen:0.3, sheenRoughness:0.6,
+    envMapIntensity:1.2
   });
 
   const sD=0.024;      // 24mm Tiefe — starker Schattenwurf
@@ -936,8 +938,8 @@ function initScene(container){
   key.position.set(-2.5,5.0,4.0);key.lookAt(0,0,0);scene.add(key);
 
   // Shadow-Caster: Schatten für weiße Hardware sichtbar machen (RectAreaLight wirft keine Schatten)
-  const shadowCaster=new THREE.DirectionalLight(0xffffff,0.42);
-  shadowCaster.position.set(-3,8,5);shadowCaster.castShadow=true;
+  const shadowCaster=new THREE.DirectionalLight(0xffffff,0.65);
+  shadowCaster.position.set(-6,4,6);shadowCaster.castShadow=true;
   shadowCaster.shadow.mapSize.set(2048,2048);
   shadowCaster.shadow.camera.near=1;shadowCaster.shadow.camera.far=20;
   shadowCaster.shadow.camera.left=-5;shadowCaster.shadow.camera.right=5;
@@ -960,6 +962,12 @@ function initScene(container){
   // Rim: von hinten für Profiltiefenkanten
   const rim=new THREE.DirectionalLight(0xffffff,0.28);
   rim.position.set(0,3,-5);scene.add(rim);
+
+  // Rim-Lichter von schräg hinten — erzeugen Kontur-Separation weiß-auf-weiß (Griff/Scharniere)
+  const rimR=new THREE.DirectionalLight(0xddeeff,0.90);
+  rimR.position.set(2.5,4.0,-3.5);scene.add(rimR);
+  const rimL=new THREE.DirectionalLight(0xffffff,0.60);
+  rimL.position.set(-1.5,6.0,-2.0);scene.add(rimL);
 
   // Bodenschatten — prominent + weich
   const gnd=new THREE.Mesh(

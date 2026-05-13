@@ -25,7 +25,7 @@
       "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.162.0/examples/jsm/"
   } }
   </script>
-  <script type="module" src="js/konfigurator-3d.js?v=19"></script>
+  <script type="module" src="js/konfigurator-3d.js?v=20"></script>
 
   <link rel="preconnect" href="https://fonts.bunny.net"/>
   <link href="https://fonts.bunny.net/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -2695,6 +2695,14 @@ function tog(n) {
     // User öffnet eine andere → erst alle anderen zu, dann diese auf
     closeOtherSections(c);
     c.classList.add('open');
+    // FIX: Scroll zum geöffneten Step, damit kein Layout-Sprung entsteht
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const rect = c.getBoundingClientRect();
+        const targetY = rect.top + window.pageYOffset - 120;
+        window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
+      });
+    });
   }
 }
 function openS(n) {
@@ -2743,6 +2751,9 @@ function pickProd(el) {
     setPreviewView('inn');
     // Sinnvolle Standard-Maße für Balkontür (verhindert nicht-tür-ähnliche Vorschau)
     if (S.hMm / S.bMm < 1.5) { S.hMm = 2200; S.bMm = 900; }
+  } else if (S.prod === 'kunststoff') {
+    // Fenster-Maße zurücksetzen wenn sie von Tür/Balkontür-Wechsel stammen
+    if (S.hMm >= 1800) { S.hMm = 1200; S.bMm = 1000; }
   }
   _updateDinToggle();
 
@@ -3102,9 +3113,17 @@ function pick(el, key) {
     if (S.sicherGlas && S.sicherGlas !== 'kein') parts.push(P.sicherGlas[S.sicherGlas]?.name?.split('(')[0]?.trim() || S.sicherGlas);
     document.getElementById('d7').textContent = parts.join(' · ');
     mkDone(7);
-    if (key==='glas') setTimeout(()=>openS(8),200);
+    // FIX BUG 1: kein Auto-Advance nach Wärmeschutz — Schall + Sicherheitsglas müssen noch gewählt werden.
+    // Nur nach Sicherheitsglas-Wahl (letzter Block in Step 7) auto-advance zu Glasdekor.
+    if (key==='sicherGlas') setTimeout(()=>openS(8),300);
   }
-  if (key==='glasdekor'){ document.getElementById('d8').textContent = P.glasdekor[v]?.name || v; mkDone(8); setTimeout(()=>openS(9),200); }
+  if (key==='glasdekor'){
+    document.getElementById('d8').textContent = P.glasdekor[v]?.name || v;
+    mkDone(8);
+    // FIX BUG 4: korrekten nächsten Schritt je Produkt wählen
+    const nextGriffStep = S.prod === 'haustuere' ? '9t' : S.prod === 'hst' ? '9s' : '9';
+    setTimeout(()=>openS(nextGriffStep), 200);
+  }
   if (key==='profil')   {
     // Sarah-Korrektur 21.04.2026: Profil-Namen aus nameMap (für HST und andere Produkte)
     const displayName = ({
@@ -3130,13 +3149,17 @@ function pick(el, key) {
     // Fix W8 (21.04.2026): Rolladen-Details nur zeigen wenn Rolladen gewählt
     const rd = document.getElementById('roll-details');
     if (rd) rd.classList.toggle('hidden', v==='ohne');
-    setTimeout(()=>openS(12),200);
+    // FIX BUG 3: nur bei "Kein Rolladen" auto-advance zu Sprossen.
+    // Bei Gurt/Motor muss der User erst Gurt-Seite + Kastenhöhe wählen (im selben Schritt).
+    if (v==='ohne') setTimeout(()=>openS(12), 200);
   }
   if (key==='rollKasten') {
     // Detail-Beschreibung in Schritt 11 erweitern
     const parts = [P.roll[S.roll]?.name || ''];
     if (S.rollKasten !== '175') parts.push(S.rollKasten+' mm Kasten');
     document.getElementById('d11').textContent = parts.filter(Boolean).join(' · ');
+    // FIX: nach Kastenhöhe-Wahl immer zu Sprossen weiter (rollKasten ist letzter Sub-Step)
+    setTimeout(()=>openS(12), 200);
   }
   if (key==='sicher'){
     document.getElementById('d10').textContent = P.sicher[v]?.name||v; mkDone(10);
@@ -3172,6 +3195,8 @@ function pick(el, key) {
   if (key==='sproDicke') {
     mkDone(12);
     document.getElementById('d12').textContent = (S.sproTyp==='aufgeklebt'?'Aufgeklebt':'SZR') + ' ' + v + ' mm';
+    // FIX BUG 5: nach Sprossendicke-Wahl zu Zusammenfassung weitergehen
+    setTimeout(()=>openS(13), 200);
   }
   if (key==='fa') { document.getElementById('d6').textContent = 'Außen: '+(P.fa[v]?.name||v); mkDone(6); }
   if (key==='fi') { document.getElementById('d6').textContent = 'A: '+(P.fa[S.fa]?.name||S.fa)+' / I: '+(P.fi[v]?.name||v); }
