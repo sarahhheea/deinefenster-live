@@ -40,7 +40,7 @@ const frameMat = new THREE.MeshPhysicalMaterial({
 const glassMat = new THREE.MeshPhysicalMaterial({
   color: 0xf0f8f2,
   metalness: 0.0, roughness: 0.02,
-  transmission: 0.42, thickness: 0.024, ior: 1.52, transparent: true,
+  transmission: 0.72, thickness: 0.024, ior: 1.52, transparent: true,
   envMapIntensity: 0.08  // niedrig → kein Environment-Kreisfleck
 });
 const sealMat = new THREE.MeshStandardMaterial({
@@ -538,7 +538,7 @@ function addSash(g, sx, sy, sw, sh, oeff, view, prod) {
   buildOuterFrame(g, sx, sy, sw, sh, SFR, DD, frameMat, OVHG);
 
   // Glanzlinie auf Flügelrahmen-Front (Profil-Kante)
-  const _hl=new THREE.MeshStandardMaterial({color:0xffffff,roughness:0.04,metalness:0,emissive:0xffffff,emissiveIntensity:0.32});
+  const _hl=new THREE.MeshStandardMaterial({color:0xffffff,roughness:0.04,metalness:0,emissive:0xffffff,emissiveIntensity:0.10});
   const HL2=0.003;
   addBox(g, sx, sy+sh-SFR, SZ_FRONT-HL2, sw, HL2, HL2, _hl);
   addBox(g, sx, sy+SFR-HL2, SZ_FRONT-HL2, sw, HL2, HL2, _hl);
@@ -615,7 +615,7 @@ function buildFenster(S, view) {
   addBox(g, W-OFR-STEP,OFR+STEP,   DD+0.001, STEP, H-2*OFR-2*STEP, 0.0025, _stepMat);  // rechts
 
   // Glanzlinie — helle PVC-Kante am äußersten Rahmenrand (Profil-Highlight)
-  const hlMat=new THREE.MeshStandardMaterial({color:0xffffff, roughness:0.04, metalness:0, emissive:0xffffff, emissiveIntensity:0.28});
+  const hlMat=new THREE.MeshStandardMaterial({color:0xffffff, roughness:0.04, metalness:0, emissive:0xffffff, emissiveIntensity:0.10});
   const HL=0.004;
   addBox(g, 0, H-OFR, DD-HL, W, HL, HL, hlMat);  // oben
   addBox(g, 0, OFR-HL, DD-HL, W, HL, HL, hlMat);  // unten
@@ -769,7 +769,7 @@ function buildHaustuer(S, view) {
 
   // ── Außen: Stoßgriff ──────────────────────────────
   // Immer an HX=0.115 von links; scale.x=-1 spiegelt für DIN-links
-  const HX=0.115*scX, LX=0.082*scX, LY=1.110*scY;
+  const HX=0.115, LX=0.082, LY=1.110*scY;
   if(isAussen) {
     addStoßgriff(g, HX, 0.670*scY, 1.740*scY, DD);
     // Schloss
@@ -920,8 +920,8 @@ function initScene(container) {
   controls.maxDistance=14;
   controls.maxPolarAngle=Math.PI*0.56;
   controls.minPolarAngle=Math.PI*0.44;
-  controls.minAzimuthAngle=-0.28;
-  controls.maxAzimuthAngle= 0.28;
+  controls.minAzimuthAngle=-0.45;
+  controls.maxAzimuthAngle= 0.45;
   controls.update();
 
   // PMREM Environment für Chrome-Reflexionen
