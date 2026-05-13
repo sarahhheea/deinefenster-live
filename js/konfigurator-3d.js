@@ -623,6 +623,8 @@ function buildFenster(S,view){
 
   // Blendrahmen — ExtrudeGeometry mit echtem Bevel
   buildFrameExtruded(g,0,0,W,H,OFR,DD,frameMat);
+  // Tiefenkanten-Abdunklungsstreifen (simuliert sichtbare 70mm Profildicke)
+  addDepthEdges(g,0,0,W,H,DD);
 
   // Innere Profil-Stufe — stark abgedunkelt für maximale Tiefenwirkung
   const _stepCol=new THREE.Color(frameMat.color).multiplyScalar(0.44);
