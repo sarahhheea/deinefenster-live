@@ -10,8 +10,8 @@ import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUnifo
 // ════════════════════════════════════════════════════════════
 // DRUTEX IGLO 5 — Profilmaße (1 unit = 1 Meter)
 // ════════════════════════════════════════════════════════════
-const OFR  = 0.068;   // Blendrahmen 68mm (Drutex IGLO 5: 70mm, -2mm für Floating-Optik)
-const SFR  = 0.066;   // Flügelrahmen 66mm
+const OFR  = 0.060;   // Blendrahmen 60mm — schlank für Floating-Render
+const SFR  = 0.058;   // Flügelrahmen 58mm
 const DD   = 0.070;   // Profiltiefe 70mm
 const OVHG = 0.008;   // Flügel-Überschlag 8mm
 const DCT  = 0.007;   // EPDM-Dichtung 7mm
@@ -341,16 +341,16 @@ function addInnerFasen(g, X, Y, W, H, depth) {
 // HARDWARE — HOPPE Atlanta Griff (original Geometrie)
 // ════════════════════════════════════════════════════════════
 function addFensterGriff(g,cx,cy,z){
-  // HOPPE Atlanta F1 — Edelstahl gebürstet (Standardfarbe bei Drutex weiß/silber)
+  // HOPPE Atlanta — silber/anthrazit, klar sichtbar
   const hMat=new THREE.MeshStandardMaterial({
-    color:0xc8cdd2, roughness:0.22, metalness:0.88, envMapIntensity:3.5
+    color:0x9aa0a8, roughness:0.28, metalness:0.85, envMapIntensity:4.0
   });
   const schildMat=new THREE.MeshStandardMaterial({
-    color:0xcdd2d6, roughness:0.18, metalness:0.85, envMapIntensity:3.0
+    color:0x8890a0, roughness:0.35, metalness:0.78, envMapIntensity:3.0
   });
 
-  // Langschild 30×95mm — schlanker als vorher
-  const sW=0.030,sH=0.095,sD=0.009,sR=0.005;
+  // Langschild — 28mm breit, 130mm hoch, 8mm tief
+  const sW=0.028,sH=0.130,sD=0.008,sR=0.008;
   const sShape=new THREE.Shape();
   sShape.moveTo(-sW/2+sR,-sH/2);
   sShape.lineTo(sW/2-sR,-sH/2);sShape.absarc(sW/2-sR,-sH/2+sR,sR,-Math.PI/2,0,false);
@@ -361,25 +361,27 @@ function addFensterGriff(g,cx,cy,z){
   const sMesh=new THREE.Mesh(sGeo,schildMat);
   sMesh.position.set(cx-sW/2,cy-sH/2,z);sMesh.castShadow=true;g.add(sMesh);
 
-  // Vierkantnuss — quadratischer Achsstummel
-  const nuss=new THREE.Mesh(new THREE.BoxGeometry(0.009,0.009,0.014),hMat);
-  nuss.position.set(cx,cy,z+sD+0.007);g.add(nuss);
+  // Achsstummel — Zylinder aus dem Schild
+  const axle=new THREE.Mesh(new THREE.CylinderGeometry(0.008,0.008,0.022,16),hMat);
+  axle.rotation.x=Math.PI/2;axle.position.set(cx,cy,z+sD+0.011);g.add(axle);
 
-  // Griffhebel — schlanke S-Kurve, Ø8mm = realistisch
+  // Griffhebel — KORREKTE Geometrie: erst nach VORNE, dann leicht nach unten
+  // Echte Fenstergriff-Form: Hebel geht vom Schild horizontal nach vorne heraus
   const armCurve=new THREE.CatmullRomCurve3([
-    new THREE.Vector3(cx,     cy,       z+sD+0.002),
-    new THREE.Vector3(cx,     cy,       z+sD+0.018),
-    new THREE.Vector3(cx,     cy-0.010, z+sD+0.028),
-    new THREE.Vector3(cx,     cy-0.048, z+sD+0.036),
-    new THREE.Vector3(cx,     cy-0.090, z+sD+0.030),
-    new THREE.Vector3(cx,     cy-0.100, z+sD+0.022),
+    new THREE.Vector3(cx,     cy,        z+sD+0.008),   // Schild-Ansatz
+    new THREE.Vector3(cx,     cy,        z+sD+0.038),   // gerade nach vorne
+    new THREE.Vector3(cx,     cy-0.020,  z+sD+0.058),   // leicht nach unten schwingen
+    new THREE.Vector3(cx,     cy-0.058,  z+sD+0.068),   // Griffmitte
+    new THREE.Vector3(cx,     cy-0.095,  z+sD+0.062),   // nach unten Ende
+    new THREE.Vector3(cx,     cy-0.110,  z+sD+0.050),   // Griffende
   ]);
-  const armMesh=new THREE.Mesh(new THREE.TubeGeometry(armCurve,24,0.009,12,false),hMat);
+  const armMesh=new THREE.Mesh(new THREE.TubeGeometry(armCurve,28,0.013,14,false),hMat);
   armMesh.castShadow=true;g.add(armMesh);
 
-  // Griffkopf — kleine ovale Kugel
-  const tip=new THREE.Mesh(new THREE.SphereGeometry(0.010,14,10),hMat);
-  tip.scale.set(1,1.3,1);tip.position.set(cx,cy-0.101,z+sD+0.022);tip.castShadow=true;g.add(tip);
+  // Griffende — ovale Kappe
+  const tip=new THREE.Mesh(new THREE.SphereGeometry(0.014,14,10),hMat);
+  tip.scale.set(0.9,1.0,0.9);
+  tip.position.set(cx,cy-0.112,z+sD+0.050);tip.castShadow=true;g.add(tip);
 }
 
 function addBalkontuerGriff(g,cx,cy,z,isLinks){
@@ -537,10 +539,10 @@ function buildSash(parentG, sx, sy, sw, sh, oeff, view, prod) {
   // Flügelrahmen (ExtrudeGeometry mit Bevel)
   buildFrameExtruded(inner, sx, sy, sw, sh, SFR, DD, frameMat, OVHG);
 
-  // Profil-Stufe (Innenrand — subtile Schattierung)
-  const _stepCol=new THREE.Color(frameMat.color).multiplyScalar(0.72);
-  const _stepMat=new THREE.MeshStandardMaterial({color:_stepCol,roughness:0.28,metalness:0});
-  const STEP=0.012;
+  // Profil-Stufe (nur schmale Abschattungslinie an der Glasleiste)
+  const _stepCol=new THREE.Color(frameMat.color).multiplyScalar(0.76);
+  const _stepMat=new THREE.MeshStandardMaterial({color:_stepCol,roughness:0.25,metalness:0});
+  const STEP=0.008;
   addBox(inner,sx+SFR,    sy+sh-SFR-STEP,  DD+OVHG+0.001,sw-2*SFR,STEP,0.003,_stepMat);
   addBox(inner,sx+SFR,    sy+SFR,          DD+OVHG+0.001,sw-2*SFR,STEP,0.003,_stepMat);
   addBox(inner,sx+SFR,    sy+SFR+STEP,     DD+OVHG+0.001,STEP,sh-2*SFR-2*STEP,0.003,_stepMat);
@@ -552,15 +554,13 @@ function buildSash(parentG, sx, sy, sw, sh, oeff, view, prod) {
   addBox(inner,sx,      sy+DCT,   OVHG-0.002,DCT,sh-2*DCT,0.004,sealMat);
   addBox(inner,sx+sw-DCT,sy+DCT,  OVHG-0.002,DCT,sh-2*DCT,0.004,sealMat);
 
-  // Schattenfuge — breite, fast-schwarze Randlinie = wichtigstes Realismus-Merkmal
-  const _sfMat=new THREE.MeshStandardMaterial({color:0x010102,roughness:0.99,metalness:0});
-  const SFG=0.013;
-  addBox(inner,sx,        sy+sh-SFG,SZ_FRONT-0.002,sw,      SFG,     0.005,_sfMat);
-  addBox(inner,sx,        sy,       SZ_FRONT-0.002,sw,      SFG,     0.005,_sfMat);
-  addBox(inner,sx,        sy+SFG,   SZ_FRONT-0.002,SFG,     sh-2*SFG,0.005,_sfMat);
-  addBox(inner,sx+sw-SFG, sy+SFG,   SZ_FRONT-0.002,SFG,     sh-2*SFG,0.005,_sfMat);
-  // Innere Fase-Kante (Schlagleiste-Übergang → dunklere 45°-Linie)
-  addInnerFasen(inner, sx+SFR, sy+SFR, sw-2*SFR, sh-2*SFR, OVHG+DD-0.005);
+  // Schattenfuge — dunkles Grau, schmaler Rand (natürlicher Schatten, kein Loch)
+  const _sfMat=new THREE.MeshStandardMaterial({color:0x1c1e22,roughness:0.98,metalness:0});
+  const SFG=0.006;
+  addBox(inner,sx,        sy+sh-SFG,SZ_FRONT,sw,      SFG,0.003,_sfMat);
+  addBox(inner,sx,        sy,       SZ_FRONT,sw,      SFG,0.003,_sfMat);
+  addBox(inner,sx,        sy+SFG,   SZ_FRONT,SFG,sh-2*SFG,0.003,_sfMat);
+  addBox(inner,sx+sw-SFG,sy+SFG,   SZ_FRONT,SFG,sh-2*SFG,0.003,_sfMat);
 
   // Glasfeld
   const gx=sx+SFR,gy=sy+SFR,gw=sw-2*SFR,gh=sh-2*SFR;
@@ -621,17 +621,13 @@ function buildFenster(S,view){
   // Blendrahmen — ExtrudeGeometry mit echtem Bevel
   buildFrameExtruded(g,0,0,W,H,OFR,DD,frameMat);
 
-  // Innere Profil-Stufe — subtil, kein doppelter-Rahmen-Effekt
-  const _stepCol=new THREE.Color(frameMat.color).multiplyScalar(0.68);
-  const _stepMat=new THREE.MeshStandardMaterial({color:_stepCol,roughness:0.30,metalness:0});
-  const STEP=0.014;
-  addBox(g,OFR,      H-OFR-STEP,DD+0.001,W-2*OFR,STEP,0.003,_stepMat);
-  addBox(g,OFR,      OFR,       DD+0.001,W-2*OFR,STEP,0.003,_stepMat);
-  addBox(g,OFR,      OFR+STEP,  DD+0.001,STEP,H-2*OFR-2*STEP,0.003,_stepMat);
-  addBox(g,W-OFR-STEP,OFR+STEP, DD+0.001,STEP,H-2*OFR-2*STEP,0.003,_stepMat);
-
-  // 45°-Fase an der Außenkante des Blendrahmens — echte Kanten-Highlights
-  addOuterFasen(g, 0, 0, W, H, DD);
+  // Dunkle Abschatten-Linie am Innenrand (Schlagschatten — Rahmen→Glas-Öffnung)
+  const _rebateMat=new THREE.MeshStandardMaterial({color:0x1e2228,roughness:0.98,metalness:0});
+  const RB=0.005;
+  addBox(g,OFR-RB,  OFR-RB,  DD-0.001,W-2*OFR+2*RB,RB,   0.004,_rebateMat);
+  addBox(g,OFR-RB,  H-OFR,   DD-0.001,W-2*OFR+2*RB,RB,   0.004,_rebateMat);
+  addBox(g,OFR-RB,  OFR,     DD-0.001,RB,   H-2*OFR,      0.004,_rebateMat);
+  addBox(g,W-OFR,   OFR,     DD-0.001,RB,   H-2*OFR,      0.004,_rebateMat);
 
   // Oberlicht
   if(hasOL){
@@ -654,10 +650,7 @@ function buildFenster(S,view){
     if(i>0) addBox(g,sx-OFR*0.2,mainY,0,OFR*0.4,MAIN_H-OFR,DD,frameMat);
   }
 
-  // Fensterbank
-  if(isFenster){
-    addBox(g,-sbOvhg,-SB_H,-0.100,W+2*sbOvhg,SB_H,0.185,sillMat);
-  }
+  // Fensterbank entfernt — nur Fenster ohne Sockel
 
   g.position.set(-W/2,-H/2,0);
   return g;
@@ -900,7 +893,7 @@ function initScene(container){
   renderer.shadowMap.enabled=true;
   renderer.shadowMap.type=THREE.PCFSoftShadowMap;
   renderer.toneMapping=THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure=0.95;
+  renderer.toneMappingExposure=0.82;
   renderer.setClearColor(0x0f172a,1);
 
   const cvs=renderer.domElement;
@@ -932,9 +925,9 @@ function initScene(container){
   RectAreaLightUniformsLib.init();
   scene.add(new THREE.HemisphereLight(0x1a3560,0x050810,0.22));
 
-  // Key-Softbox: oben-links, 3.5m×4m — erzeugt echten Gradienten über weiße PVC-Flächen
-  const key=new THREE.RectAreaLight(0xfffdf0,5.0,3.5,4.0);
-  key.position.set(-2.8,4.5,4.5);key.lookAt(0,0,0);scene.add(key);
+  // Key-Softbox: oben-links — Gradient über PVC, reduziert damit Details sichtbar
+  const key=new THREE.RectAreaLight(0xfffdf0,4.0,3.0,3.5);
+  key.position.set(-2.5,5.0,4.0);key.lookAt(0,0,0);scene.add(key);
 
   // Shadow-Caster: separates DirectionalLight nur für Schatten (RectAreaLight wirft keine)
   const shadowCaster=new THREE.DirectionalLight(0xffffff,0.001);
