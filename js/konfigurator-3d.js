@@ -461,7 +461,7 @@ function buildSash(parentG, sx, sy, sw, sh, oeff, view, prod) {
   const SZ_FRONT=OVHG+DD;
   const isFixed=(oeff==='fest'||!oeff);
   const isLinks=(oeff==='dreh-l'||oeff==='dk-l');
-  const isKipp=(oeff==='kipp');
+  const isKipp=(oeff==='kipp'||oeff==='dk-r'||oeff==='dk-l');
 
   // Pivot-Gruppe an der Scharnier-Achse
   // Dreh-rechts: Scharnier links (sx), Flügel öffnet rechts raus → rotiert um linke Y-Achse
@@ -529,7 +529,7 @@ function buildSash(parentG, sx, sy, sw, sh, oeff, view, prod) {
     let openRot;
     if(isKipp){
       // Kipp: Oberkante kommt 30° auf Betrachter zu
-      openRot=new THREE.Euler(-Math.PI/6,0,0);
+      openRot=new THREE.Euler(-Math.PI/5,0,0);
     }else if(isLinks){
       // Dreh-links: Scharnier rechts, öffnet nach links
       openRot=new THREE.Euler(0,Math.PI/3,0);
@@ -846,15 +846,15 @@ function initScene(container){
   renderer.shadowMap.enabled=true;
   renderer.shadowMap.type=THREE.PCFSoftShadowMap;
   renderer.toneMapping=THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure=1.08;
-  renderer.setClearColor(0xffffff,1);
+  renderer.toneMappingExposure=1.22;
+  renderer.setClearColor(0x0f172a,1);
 
   const cvs=renderer.domElement;
-  cvs.style.cssText='width:100%;height:100%;display:block;border-radius:inherit;background:#ffffff;';
+  cvs.style.cssText='width:100%;height:100%;display:block;border-radius:inherit;background:#0f172a;';
   container.appendChild(cvs);
 
   scene=new THREE.Scene();
-  scene.background=new THREE.Color(0xffffff);  // Reines Weiß — Fenster "schwimmt"
+  scene.background=new THREE.Color(0x0f172a);
 
   camera=new THREE.PerspectiveCamera(22,W/H,0.1,50);
   camera.position.set(0,0,6);
@@ -874,10 +874,10 @@ function initScene(container){
 
   // ── BELEUCHTUNG — Produktfoto-Studio-Setup ──────────────
   // HemisphereLight: weicher Himmel von oben
-  scene.add(new THREE.HemisphereLight(0xf8f6f2,0x8090a0,0.50));
+  scene.add(new THREE.HemisphereLight(0x1a3a6a,0x060d1a,0.35));
 
   // Key-Light: oben-links, harter Schatten für Profiltiefe
-  const key=new THREE.DirectionalLight(0xfffdf8,1.40);
+  const key=new THREE.DirectionalLight(0xfffdf8,1.80);
   key.position.set(-4,8,5);key.castShadow=true;
   key.shadow.mapSize.set(2048,2048);
   key.shadow.camera.near=1;key.shadow.camera.far=18;
