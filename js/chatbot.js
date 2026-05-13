@@ -204,6 +204,20 @@ function ruleBasedAnswer(text) {
   return null;
 }
 
+const IS_AI_MODE = !!WORKER_URL;
+
+// Einfaches Markdown → HTML (für echten KI-Modus)
+function renderMarkdown(text) {
+  return text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g,'<em>$1</em>')
+    .replace(/^#{1,3}\s+(.+)$/gm,'<strong>$1</strong>')
+    .replace(/^[-•]\s+(.+)$/gm,'• $1')
+    .replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>')
+    .replace(/(https?:\/\/[^\s<&]+)/g,'<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+}
+
 // ─── System-Prompt für echte KI ────────────────────────────────────────────────
 const SYSTEM_PROMPT = `Du bist der KI-Assistent von DeineFenster.de (Fensterhandel Christ, Brandenburg). Antworte auf Deutsch, kurz (max. 4 Sätze), freundlich und kompetent.
 
@@ -341,6 +355,13 @@ const QUICK_CHIPS = [
     }
     .df-chip:hover{background:rgba(118,169,250,0.15);border-color:rgba(118,169,250,0.5);color:#fff;}
 
+    .df-lead-card{animation:df-msg-in 0.3s ease;margin-top:4px;}
+    .df-lead-bubble-inner{background:linear-gradient(135deg,rgba(34,94,170,0.15),rgba(118,169,250,0.08));border:1px solid rgba(118,169,250,0.3);border-radius:14px;padding:12px 14px;font-size:13px;color:rgba(255,255,255,0.88);line-height:1.5;}
+    .df-lead-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:700;font-family:inherit;transition:opacity 0.15s;}
+    .df-lead-btn:hover{opacity:0.85;}
+    .df-lead-btn-wa{background:#25d366;color:#fff;}
+    .df-lead-btn-skip{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.45);font-size:11px;}
+
     #df-chat-input-area{
       padding:10px 12px 12px;border-top:1px solid rgba(255,255,255,0.06);
       display:flex;gap:8px;align-items:center;flex-shrink:0;
@@ -410,6 +431,9 @@ const QUICK_CHIPS = [
             <span id="df-chat-header-dot"></span>KI-gestützt · Antwortet sofort
           </div>
         </div>
+        <button id="df-wa-header-btn" aria-label="Per WhatsApp anfragen" title="Chat per WhatsApp weiterführen" style="width:32px;height:32px;border-radius:8px;background:rgba(37,211,102,0.12);border:1px solid rgba(37,211,102,0.25);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background 0.15s;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#25d366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.658 1.438 5.168L2 22l4.985-1.414A9.956 9.956 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg>
+        </button>
         <button id="df-chat-close-btn" aria-label="Chat schließen">
           <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
         </button>
@@ -446,6 +470,16 @@ const QUICK_CHIPS = [
   `);
 })();
 
+// KI-Badge nur bei echtem API-Modus anzeigen
+if (!IS_AI_MODE) {
+  const kiHeader = document.getElementById('df-chat-header-ki');
+  const kiLabel  = document.getElementById('df-chat-label-ki');
+  const subEl    = document.getElementById('df-chat-header-sub');
+  if (kiHeader) kiHeader.style.display = 'none';
+  if (kiLabel)  kiLabel.style.display  = 'none';
+  if (subEl) subEl.innerHTML = '<span style="width:6px;height:6px;border-radius:50%;background:#4ade80;display:inline-block;animation:df-badge-pulse 2s infinite;flex-shrink:0"></span>Antwortet sofort';
+}
+
 // ─── Logik ─────────────────────────────────────────────────────────────────────
 (function init() {
   const label    = document.getElementById('df-chat-label');
@@ -460,7 +494,7 @@ const QUICK_CHIPS = [
   const tooltip  = document.getElementById('df-chat-tooltip');
   const chips    = document.getElementById('df-chat-chips');
 
-  let isOpen = false, isLoading = false, history = [], tooltipShown = false, noMatchCount = 0;
+  let isOpen = false, isLoading = false, history = [], tooltipShown = false, noMatchCount = 0, botMsgCount = 0, leadShown = false;
 
   // ── Seiten mit FAB unten-rechts → Chatbot nach links verschieben ──────────
   const path = window.location.pathname;
@@ -505,6 +539,11 @@ const QUICK_CHIPS = [
     btn.setAttribute('aria-label', isOpen ? 'Chat schließen' : 'KI-Chatbot öffnen');
   }
 
+  const waHeaderBtn = document.getElementById('df-wa-header-btn');
+  if (waHeaderBtn) waHeaderBtn.addEventListener('click', () => {
+    window.open('https://wa.me/491717263776?text=' + buildWaContext(), '_blank');
+  });
+
   btn.addEventListener('click', toggleChat);
   label.addEventListener('click', toggleChat);
   label.addEventListener('keydown', e => { if (e.key==='Enter'||e.key===' ') toggleChat(); });
@@ -512,6 +551,48 @@ const QUICK_CHIPS = [
   document.addEventListener('keydown', e => { if (e.key==='Escape' && isOpen) toggleChat(); });
 
   function scrollBottom() { msgs.scrollTop = msgs.scrollHeight; }
+
+  // Baut WhatsApp-Vortext aus dem bisherigen Chat-Verlauf
+  function buildWaContext() {
+    const allMsgs = msgs.querySelectorAll('.df-msg:not(#df-typing)');
+    const lines = [];
+    allMsgs.forEach(m => {
+      const isUser = m.classList.contains('df-user');
+      const b = m.querySelector('.df-msg-bubble');
+      if (!b) return;
+      const t = (b.innerText || b.textContent || '').trim().replace(/\s+/g,' ').slice(0, 150);
+      if (t) lines.push((isUser ? 'Ich: ' : 'Bot: ') + t);
+    });
+    const ctx = lines.slice(1, 9).join('\n'); // erste Bot-Begrüßung überspringen
+    return encodeURIComponent('Hallo! Ich hatte folgende Fragen im Chat auf DeineFenster.de:\n\n' + ctx + '\n\nKönnen Sie mir weiterhelfen?');
+  }
+
+  // Lead-Card: Angebot per WhatsApp anbieten
+  function showLeadCard() {
+    if (leadShown) return;
+    leadShown = true;
+    const card = document.createElement('div');
+    card.className = 'df-msg df-bot df-lead-card';
+    card.innerHTML = `
+      <div class="df-msg-avatar">📨</div>
+      <div class="df-lead-bubble-inner">
+        <strong>Möchtest du direkt ein Angebot?</strong><br>
+        <span style="font-size:12px;color:rgba(255,255,255,0.55)">Wir schicken dir deinen Chat-Verlauf mit — so erklärt sich alles von selbst.</span>
+        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+          <button class="df-lead-btn df-lead-btn-wa" data-wa="1">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.658 1.438 5.168L2 22l4.985-1.414A9.956 9.956 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg>
+            Jetzt per WhatsApp anfragen
+          </button>
+          <button class="df-lead-btn df-lead-btn-skip" data-skip="1">Nein danke</button>
+        </div>
+      </div>`;
+    msgs.insertBefore(card, typing);
+    scrollBottom();
+    card.querySelector('[data-wa]').addEventListener('click', () => {
+      window.open('https://wa.me/491717263776?text=' + buildWaContext(), '_blank');
+    });
+    card.querySelector('[data-skip]').addEventListener('click', () => card.remove());
+  }
 
   function addMsg(html, role) {
     const isUser = role === 'user';
@@ -525,6 +606,8 @@ const QUICK_CHIPS = [
       const av = document.createElement('div');
       av.className = 'df-msg-avatar'; av.textContent = '🤖';
       div.appendChild(av);
+      botMsgCount++;
+      if (botMsgCount === 3 && !leadShown) setTimeout(showLeadCard, 700);
     }
     div.appendChild(bubble);
     msgs.insertBefore(div, typing);
@@ -573,7 +656,7 @@ const QUICK_CHIPS = [
       const reply = data?.content?.[0]?.text || 'Kein Ergebnis erhalten. Bitte ruf uns an: 03381 / 214 83 73';
       history.push({ role: 'assistant', content: reply });
       setLoading(false);
-      addMsg(reply.replace(/&/g,'&amp;').replace(/(https?:\/\/[^\s]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>'), 'bot');
+      addMsg(renderMarkdown(reply), 'bot');
     } catch(err) {
       console.warn('[Chatbot]', err);
       setLoading(false);
