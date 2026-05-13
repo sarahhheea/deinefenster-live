@@ -989,12 +989,18 @@
 
 <!-- ══ PREMIUM REDESIGN v3 — Komplett ══ -->
 <style>
-  /* ── 0. STEP-ÖFFNER ANIMATION: weich + dramatisch ── */
+  /* ── 0. ANIMATIONEN ── */
   @keyframes sb-fade {
     from { opacity: 0; transform: translateY(12px); }
     to   { opacity: 1; transform: translateY(0); }
   }
   .sc.open .sb { animation: sb-fade 0.42s cubic-bezier(0.16,1,0.3,1) !important; }
+
+  @keyframes prev-pulse {
+    0%   { box-shadow: 0 0 0 0   rgba(77,136,255,0.30); }
+    60%  { box-shadow: 0 0 0 18px rgba(77,136,255,0); }
+    100% { box-shadow: 0 0 0 0   rgba(77,136,255,0); }
+  }
 </style>
 <style>
   /* ── 1. CONTAINER ── */
@@ -1177,46 +1183,76 @@
   .sb .info[style*="fef2f2"] { background: rgba(239,68,68,0.06) !important; border-color: rgba(239,68,68,0.18) !important; color: rgba(255,195,195,0.72) !important; }
   .sb .info[style*="ecfdf5"] { background: rgba(16,185,129,0.06) !important; border-color: rgba(16,185,129,0.16) !important; color: rgba(167,243,208,0.72) !important; }
 
-  /* ── 14. STEP-GROUP LABELS ── */
+  /* ── 14. STEP-GROUP LABELS — echte Kapitel-Trenner ── */
   .step-group {
-    padding: 20px 28px 14px !important;
-    font-size: 11px !important; font-weight: 800 !important; letter-spacing: 0.22em !important;
-    color: rgba(255,255,255,0.30) !important;
-    background: #060810 !important;
-    display: flex !important; align-items: center !important; gap: 14px !important;
-    border-bottom: 1px solid rgba(255,255,255,0.04) !important;
-    border-top: none !important;
+    padding: 24px 28px 18px !important;
+    font-size: 12px !important; font-weight: 900 !important; letter-spacing: 0.28em !important;
+    color: rgba(255,255,255,0.70) !important;
+    background: #07091a !important;
+    display: flex !important; align-items: center !important; gap: 16px !important;
+    border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+    border-top: 1px solid rgba(255,255,255,0.04) !important;
   }
-  .step-group::before { content: '' !important; width: 3px !important; height: 16px !important; background: #4d88ff !important; border-radius: 2px !important; flex-shrink: 0 !important; }
-  .step-group::after  { content: '' !important; flex: 1 !important; height: 1px !important; background: rgba(255,255,255,0.07) !important; }
+  .step-group:first-of-type { border-top: none !important; }
+  .step-group::before { content: '' !important; width: 4px !important; height: 22px !important; background: linear-gradient(180deg,#4d88ff,#7eb5ff) !important; border-radius: 3px !important; flex-shrink: 0 !important; box-shadow: 0 0 8px rgba(77,136,255,0.60) !important; }
+  .step-group::after  { content: '' !important; flex: 1 !important; height: 1px !important; background: rgba(255,255,255,0.10) !important; }
 
   /* ── 15. PROGRESS BAR ── */
   #prog-bar .flex-1.rounded-full { background: rgba(255,255,255,0.10) !important; }
   #prog-bar [style*="ecfdf5"] { background: rgba(5,150,105,0.20) !important; color: #34d399 !important; border-color: rgba(52,211,153,0.22) !important; }
 
-  /* ── 16. PRODUKTKARTEN STEP 1 ── */
+  /* ── 16. PRODUKTKARTEN STEP 1 — helles Bild, dunkles Label ── */
   #s1 .sb > .grid { grid-template-columns: repeat(2,1fr) !important; gap: 14px !important; }
+  #s1 .sb { background: #09090f !important; padding: 14px !important; }
+
+  /* Karte: weißer/heller Bild-Bereich oben, dunkle Info-Leiste unten */
   #s1 .pc {
     border-radius: 22px !important;
-    background: #0b0d1b !important;
-    border: 1px solid rgba(255,255,255,0.09) !important;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.70) !important;
+    background: #f0f3f9 !important;      /* hell — Bild sitzt auf Produkt-Weiß */
+    border: 1.5px solid rgba(0,0,0,0.07) !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.55), 0 1px 3px rgba(0,0,0,0.35) !important;
     transition: transform 0.40s cubic-bezier(.4,0,.2,1), box-shadow 0.40s ease, border-color 0.28s ease !important;
+    overflow: hidden !important;
   }
   #s1 .pc:hover {
     transform: translateY(-12px) scale(1.02) !important;
-    border-color: rgba(77,136,255,0.72) !important;
-    box-shadow: 0 32px 90px rgba(0,0,0,0.88), 0 0 0 1px rgba(77,136,255,0.35) !important;
+    border-color: rgba(77,136,255,0.80) !important;
+    box-shadow: 0 28px 80px rgba(0,0,0,0.80), 0 0 0 2px rgba(77,136,255,0.45) !important;
   }
   #s1 .pc.sel {
     border: 2px solid #4d88ff !important;
-    box-shadow: 0 0 0 4px rgba(77,136,255,0.22), 0 24px 72px rgba(29,78,216,0.55) !important;
+    box-shadow: 0 0 0 4px rgba(77,136,255,0.25), 0 20px 64px rgba(29,78,216,0.50) !important;
     transform: translateY(-10px) !important;
   }
-  #s1 .pc-img { aspect-ratio: 3/4 !important; object-fit: cover !important; transition: transform 0.55s cubic-bezier(.4,0,.2,1) !important; }
-  #s1 .pc:hover .pc-img { transform: scale(1.08) translateY(-2%) !important; }
-  #s1 .s1-info { padding: 14px 16px 20px !important; background: #07091c !important; border-top: 1px solid rgba(77,136,255,0.22) !important; gap: 6px !important; display: flex !important; flex-direction: column !important; }
-  #s1 .pc.sel .s1-info { border-top-color: #4d88ff !important; }
+  /* Bild: contain + heller Hintergrund — Produkt sauber zentriert */
+  #s1 .pc-img {
+    width: 100% !important;
+    aspect-ratio: 3/4 !important;
+    object-fit: contain !important;
+    background: #f0f3f9 !important;
+    padding: 18px 14px 6px !important;
+    display: block !important;
+    transition: transform 0.50s cubic-bezier(.4,0,.2,1) !important;
+  }
+  #s1 .pc:hover .pc-img { transform: scale(1.06) !important; }
+
+  /* Info-Streifen: dunkle Leiste am Kartenunterrand */
+  #s1 .s1-info {
+    padding: 12px 16px 18px !important;
+    background: #0f1228 !important;
+    border-top: 2px solid rgba(77,136,255,0.20) !important;
+    gap: 5px !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  #s1 .pc.sel .s1-info { border-top-color: #4d88ff !important; background: #0c0f22 !important; }
+  #s1 .pc-name { color: rgba(255,255,255,0.97) !important; font-size: 16px !important; font-weight: 800 !important; letter-spacing: -0.025em !important; }
+  #s1 .pc-badge { color: rgba(180,215,255,0.90) !important; background: rgba(77,136,255,0.18) !important; border-color: rgba(77,136,255,0.32) !important; }
+  #s1 .pc-chips span { color: rgba(160,200,255,0.70) !important; background: rgba(255,255,255,0.07) !important; border-color: rgba(255,255,255,0.12) !important; }
+
+  /* Checkmark badge */
+  #s1 .pc.sel::after { content: 'check_circle' !important; font-family: 'Material Symbols Outlined' !important; font-variation-settings: 'FILL' 1 !important; font-size: 22px !important; color: #4d88ff !important; position: absolute !important; top: 12px !important; right: 12px !important; background: rgba(240,243,249,0.85) !important; border-radius: 50% !important; width: 28px !important; height: 28px !important; display: grid !important; place-items: center !important; line-height: 1 !important; z-index: 6 !important; background-image: none !important; box-shadow: 0 2px 8px rgba(0,0,0,0.25) !important; }
+  #s1 .pc:not(.sel)::after { content: '' !important; position: absolute !important; background: none !important; background-image: none !important; font-size: 0 !important; width: 0 !important; height: 0 !important; }
   #s1 .pc-name { font-size: 17px !important; font-weight: 800 !important; color: rgba(255,255,255,0.97) !important; letter-spacing: -0.03em !important; }
   #s1 .pc-badge { display: inline-block !important; position: static !important; font-size: 9px !important; letter-spacing: 0.12em !important; padding: 3px 9px !important; background: rgba(77,136,255,0.18) !important; border: 1px solid rgba(77,136,255,0.32) !important; color: rgba(175,210,255,0.90) !important; border-radius: 4px !important; width: fit-content !important; backdrop-filter: none !important; }
   #s1 .pc-chips { display: flex !important; flex-wrap: wrap !important; gap: 4px !important; margin-top: 5px !important; }
@@ -2353,12 +2389,25 @@
         <iframe id="haus3d-frame" src="about:blank" style="width:100%;height:100%;border:none;display:block" allowfullscreen></iframe>
       </div>
       <div id="vorschau-container" style="position:relative;width:100%;height:100%">
-        <div id="prev-placeholder" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:rgba(232,238,255,0.5);text-align:center;padding:24px">
-          <div style="width:88px;height:88px;border-radius:50%;background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.15);display:flex;align-items:center;justify-content:center;margin-bottom:14px">
-            <i class="ms" style="font-size:44px;color:#76a9fa;opacity:.75">window</i>
+        <div id="prev-placeholder" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:28px">
+          <div style="margin-bottom:22px">
+            <div style="width:92px;height:92px;border-radius:50%;background:rgba(77,136,255,0.07);border:1px solid rgba(77,136,255,0.20);display:flex;align-items:center;justify-content:center;animation:prev-pulse 2.8s ease-in-out infinite;margin:0 auto">
+              <i class="ms" style="font-size:44px;color:rgba(77,136,255,0.65)">window</i>
+            </div>
           </div>
-          <div class="text-[14px] font-semibold" style="color:rgba(232,238,255,0.88);font-family:'Plus Jakarta Sans',sans-serif;margin-bottom:4px">Vorschau erscheint hier</div>
-          <div style="font-size:12px;font-family:'Manrope',sans-serif;color:rgba(232,238,255,0.42);max-width:200px">Wählen Sie oben ein Produkt — die Live-Vorschau aktualisiert sich automatisch.</div>
+          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;font-weight:800;color:rgba(232,238,255,0.92);letter-spacing:-0.025em;margin-bottom:8px">Ihr Fenster. Live.</div>
+          <div style="font-size:12.5px;font-family:'Manrope',sans-serif;color:rgba(232,238,255,0.38);max-width:175px;line-height:1.6;margin-bottom:22px">Produkt wählen — Vorschau startet sofort</div>
+          <div style="display:flex;flex-direction:column;gap:8px;width:100%;max-width:195px">
+            <div style="display:flex;align-items:center;gap:9px;font-size:12px;font-family:'Manrope',sans-serif;color:rgba(232,238,255,0.42)">
+              <i class="ms f" style="font-size:15px;color:rgba(77,136,255,0.60);flex-shrink:0">palette</i> Live Farb-Vorschau
+            </div>
+            <div style="display:flex;align-items:center;gap:9px;font-size:12px;font-family:'Manrope',sans-serif;color:rgba(232,238,255,0.42)">
+              <i class="ms f" style="font-size:15px;color:rgba(77,136,255,0.60);flex-shrink:0">flip</i> Innen- &amp; Außenansicht
+            </div>
+            <div style="display:flex;align-items:center;gap:9px;font-size:12px;font-family:'Manrope',sans-serif;color:rgba(232,238,255,0.42)">
+              <i class="ms f" style="font-size:15px;color:rgba(77,136,255,0.60);flex-shrink:0">straighten</i> Maß-Vorschau in Echtzeit
+            </div>
+          </div>
         </div>
         <div id="prev-img-wrap" style="display:none;position:absolute;inset:0;padding:0;margin:0">
           <!-- Symbolfoto-Hinweis (Compliance: KI-Bilder, UWG + EU AI Act 2026) -->
