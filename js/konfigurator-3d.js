@@ -341,35 +341,38 @@ function addInnerFasen(g, X, Y, W, H, depth) {
 // HARDWARE — HOPPE Atlanta Griff (original Geometrie)
 // ════════════════════════════════════════════════════════════
 function addFensterGriff(g,cx,cy,z){
-  // HOPPE Atlanta weiß — klar erkennbar durch Größe + Schatten
+  // HOPPE Atlanta weiß — Schild oben am Pivot, Olive klar darunter hängend
   const hMat=new THREE.MeshPhysicalMaterial({
-    color:0xEDECE8,
-    roughness:0.14, metalness:0.0,
-    clearcoat:0.80, clearcoatRoughness:0.05,
-    envMapIntensity:1.6
+    color:0xEEEDE9,
+    roughness:0.13, metalness:0.0,
+    clearcoat:0.85, clearcoatRoughness:0.04,
+    envMapIntensity:1.8
   });
 
-  // Schild — 28mm breit, 70mm hoch, 12mm tief → wirft deutlichen Schatten
-  const sW=0.028,sH=0.070,sD=0.012,sR=0.006;
+  const sD=0.014;      // 14mm Tiefe — wirft deutlichen Schatten
+  const pivotY=cy;     // Pivot (Achse) auf Höhe cy
+
+  // Kurzschild — 26mm breit, 48mm hoch, Unterseite liegt auf pivotY
+  // → Schild wächst nach OBEN vom Pivot
+  const sW=0.026,sH=0.048,sR=0.006;
   const sShape=new THREE.Shape();
-  sShape.moveTo(-sW/2+sR,-sH/2);
-  sShape.lineTo(sW/2-sR,-sH/2);sShape.absarc(sW/2-sR,-sH/2+sR,sR,-Math.PI/2,0,false);
-  sShape.lineTo(sW/2,sH/2-sR);sShape.absarc(sW/2-sR,sH/2-sR,sR,0,Math.PI/2,false);
-  sShape.lineTo(-sW/2+sR,sH/2);sShape.absarc(-sW/2+sR,sH/2-sR,sR,Math.PI/2,Math.PI,false);
-  sShape.lineTo(-sW/2,-sH/2+sR);sShape.absarc(-sW/2+sR,-sH/2+sR,sR,Math.PI,Math.PI*1.5,false);
+  sShape.moveTo(-sW/2+sR,0);
+  sShape.lineTo(sW/2-sR,0);sShape.absarc(sW/2-sR,sR,sR,-Math.PI/2,0,false);
+  sShape.lineTo(sW/2,sH-sR);sShape.absarc(sW/2-sR,sH-sR,sR,0,Math.PI/2,false);
+  sShape.lineTo(-sW/2+sR,sH);sShape.absarc(-sW/2+sR,sH-sR,sR,Math.PI/2,Math.PI,false);
+  sShape.lineTo(-sW/2,sR);sShape.absarc(-sW/2+sR,sR,sR,Math.PI,Math.PI*1.5,false);
   const sGeo=new THREE.ExtrudeGeometry(sShape,{depth:sD,bevelEnabled:true,bevelSize:0.003,bevelThickness:0.003,bevelSegments:3});
   const sMesh=new THREE.Mesh(sGeo,hMat);
-  sMesh.position.set(cx-sW/2,cy-sH/2,z);sMesh.castShadow=true;g.add(sMesh);
+  sMesh.position.set(cx-sW/2,pivotY,z);sMesh.castShadow=true;g.add(sMesh);
 
-  // Achsstummel — Ø16mm × 16mm
-  const pivotY=cy;
-  const axle=new THREE.Mesh(new THREE.CylinderGeometry(0.008,0.008,0.016,14),hMat);
-  axle.rotation.x=Math.PI/2;axle.position.set(cx,pivotY,z+sD+0.008);axle.castShadow=true;g.add(axle);
+  // Achsstummel — Ø16mm × 18mm, auf Pivot-Höhe
+  const axle=new THREE.Mesh(new THREE.CylinderGeometry(0.008,0.008,0.018,14),hMat);
+  axle.rotation.x=Math.PI/2;axle.position.set(cx,pivotY,z+sD+0.009);axle.castShadow=true;g.add(axle);
 
-  // Kreuzolive — 90mm × 24mm, deutlich sichtbar, nach UNTEN (Schließstellung)
-  const grR=0.012, grLen=0.090;
-  const olive=new THREE.Mesh(new THREE.SphereGeometry(grR,20,14),hMat);
-  olive.scale.y=grLen/(2*grR);
+  // Kreuzolive — 105mm × 24mm, hängt klar UNTER dem Pivot (Schließstellung)
+  const grR=0.012, grLen=0.105;
+  const olive=new THREE.Mesh(new THREE.SphereGeometry(grR,22,16),hMat);
+  olive.scale.y=grLen/(2*grR);  // → 4.375× gestreckt = klar erkennbares Oval
   olive.position.set(cx, pivotY-grLen*0.5, z+sD+0.022);
   olive.castShadow=true;g.add(olive);
 }
