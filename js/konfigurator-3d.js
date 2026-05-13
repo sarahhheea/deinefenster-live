@@ -341,36 +341,36 @@ function addInnerFasen(g, X, Y, W, H, depth) {
 // HARDWARE — HOPPE Atlanta Griff (original Geometrie)
 // ════════════════════════════════════════════════════════════
 function addFensterGriff(g,cx,cy,z){
-  // HOPPE Atlanta weiß — PVC gleich wie Rahmen, Kreuzolive, Schließstellung=unten
+  // HOPPE Atlanta weiß — klar erkennbar durch Größe + Schatten
   const hMat=new THREE.MeshPhysicalMaterial({
-    color:0xF2F1EC,
-    roughness:0.15, metalness:0.0,
-    clearcoat:0.72, clearcoatRoughness:0.06,
-    envMapIntensity:1.5
+    color:0xEDECE8,
+    roughness:0.14, metalness:0.0,
+    clearcoat:0.80, clearcoatRoughness:0.05,
+    envMapIntensity:1.6
   });
 
-  // Schild (Rosette) — 22mm breit, 52mm hoch, 6mm tief, abgerundete Ecken
-  const sW=0.022,sH=0.052,sD=0.006,sR=0.005;
+  // Schild — 28mm breit, 70mm hoch, 12mm tief → wirft deutlichen Schatten
+  const sW=0.028,sH=0.070,sD=0.012,sR=0.006;
   const sShape=new THREE.Shape();
   sShape.moveTo(-sW/2+sR,-sH/2);
   sShape.lineTo(sW/2-sR,-sH/2);sShape.absarc(sW/2-sR,-sH/2+sR,sR,-Math.PI/2,0,false);
   sShape.lineTo(sW/2,sH/2-sR);sShape.absarc(sW/2-sR,sH/2-sR,sR,0,Math.PI/2,false);
   sShape.lineTo(-sW/2+sR,sH/2);sShape.absarc(-sW/2+sR,sH/2-sR,sR,Math.PI/2,Math.PI,false);
   sShape.lineTo(-sW/2,-sH/2+sR);sShape.absarc(-sW/2+sR,-sH/2+sR,sR,Math.PI,Math.PI*1.5,false);
-  const sGeo=new THREE.ExtrudeGeometry(sShape,{depth:sD,bevelEnabled:true,bevelSize:0.002,bevelThickness:0.002,bevelSegments:3});
+  const sGeo=new THREE.ExtrudeGeometry(sShape,{depth:sD,bevelEnabled:true,bevelSize:0.003,bevelThickness:0.003,bevelSegments:3});
   const sMesh=new THREE.Mesh(sGeo,hMat);
   sMesh.position.set(cx-sW/2,cy-sH/2,z);sMesh.castShadow=true;g.add(sMesh);
 
-  // Achsstummel — Ø14mm × 14mm, Schildmitte
+  // Achsstummel — Ø16mm × 16mm
   const pivotY=cy;
-  const axle=new THREE.Mesh(new THREE.CylinderGeometry(0.007,0.007,0.014,14),hMat);
-  axle.rotation.x=Math.PI/2;axle.position.set(cx,pivotY,z+sD+0.007);axle.castShadow=true;g.add(axle);
+  const axle=new THREE.Mesh(new THREE.CylinderGeometry(0.008,0.008,0.016,14),hMat);
+  axle.rotation.x=Math.PI/2;axle.position.set(cx,pivotY,z+sD+0.008);axle.castShadow=true;g.add(axle);
 
-  // Kreuzolive — 68mm × 20mm, beidseitig rund, zeigt nach UNTEN (Schließstellung)
-  const grR=0.010, grLen=0.068;
+  // Kreuzolive — 90mm × 24mm, deutlich sichtbar, nach UNTEN (Schließstellung)
+  const grR=0.012, grLen=0.090;
   const olive=new THREE.Mesh(new THREE.SphereGeometry(grR,20,14),hMat);
   olive.scale.y=grLen/(2*grR);
-  olive.position.set(cx, pivotY-grLen*0.5, z+sD+0.014);
+  olive.position.set(cx, pivotY-grLen*0.5, z+sD+0.022);
   olive.castShadow=true;g.add(olive);
 }
 
@@ -415,20 +415,20 @@ function addBalkontuerGriff(g,cx,cy,z,isLinks){
   addBox(g,cx-0.004,cy-sH*0.25,z+0.001,0.008,0.014,0.006,grooveMat);
 }
 
-// MACO Multi-Matic Scharnier — schmal, flach, silber
+// MACO Scharnier — silber/alu, klar sichtbar gegen weißen Rahmen
 function addFensterScharnier(g,cx,cy,z){
-  const sMat=new THREE.MeshStandardMaterial({color:0xbcc0c4,roughness:0.30,metalness:0.72,envMapIntensity:2.5});
-  const pinMat=new THREE.MeshStandardMaterial({color:0xa8acb0,roughness:0.22,metalness:0.80,envMapIntensity:2.0});
-  // Flügelplatte 28×36×4mm — schmal und flach
-  addBox(g,cx-0.014,cy-0.018,z,0.028,0.036,0.004,sMat);
-  // 2 sichtbare Schraubenköpfe
-  [cy-0.010,cy+0.008].forEach(sy=>{
-    const scr=new THREE.Mesh(new THREE.CylinderGeometry(0.0025,0.0022,0.004,8),pinMat);
-    scr.rotation.x=Math.PI/2;scr.position.set(cx,sy,z+0.005);g.add(scr);
+  const sMat=new THREE.MeshStandardMaterial({color:0xa8b0b8,roughness:0.28,metalness:0.78,envMapIntensity:3.0});
+  const pinMat=new THREE.MeshStandardMaterial({color:0x90989e,roughness:0.20,metalness:0.85,envMapIntensity:3.5});
+  // Hauptplatte 34×48×8mm — groß genug um klar erkennbar zu sein
+  addBox(g,cx-0.017,cy-0.024,z,0.034,0.048,0.008,sMat);
+  // Scharnier-Achse (zentraler Bolzen)
+  const pin=new THREE.Mesh(new THREE.CylinderGeometry(0.005,0.005,0.012,12),pinMat);
+  pin.rotation.x=Math.PI/2;pin.position.set(cx,cy,z+0.010);pin.castShadow=true;g.add(pin);
+  // 4 Schraubenköpfe (Eck-Punkte) — markante Punkte
+  [cy-0.016,cy+0.016].forEach(sy=>{
+    const scr=new THREE.Mesh(new THREE.CylinderGeometry(0.004,0.0035,0.005,10),pinMat);
+    scr.rotation.x=Math.PI/2;scr.position.set(cx,sy,z+0.009);scr.castShadow=true;g.add(scr);
   });
-  // Scharnierachse (kleiner Stift)
-  const pin=new THREE.Mesh(new THREE.CylinderGeometry(0.003,0.003,0.010,10),pinMat);
-  pin.rotation.x=Math.PI/2;pin.position.set(cx,cy,z+0.005);g.add(pin);
 }
 
 // Bandscharniere für Haustür (3-fach)
