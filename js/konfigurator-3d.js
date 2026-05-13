@@ -276,6 +276,21 @@ function buildOuterFrame(g,X,Y,W,H,FW,depth,mat,zStart=0){
   addBox(g,X,      Y+FW,   zStart,FW,   H-2*FW,depth,mat);
   addBox(g,X+W-FW, Y+FW,   zStart,FW,   H-2*FW,depth,mat);
 }
+// Seitenflächen-Abdunklungsstreifen — machen die 70mm Profiltiefe sichtbar
+function addDepthEdges(g, X, Y, W, H, depth) {
+  const E=0.018; // sichtbarer Dunkel-Streifen an den Tiefenkanten
+  const edgeMat=new THREE.MeshStandardMaterial({
+    color:new THREE.Color(frameMat.color).multiplyScalar(0.36),roughness:0.55,metalness:0
+  });
+  // Obere Tiefenkante (die horizontale Seite oben)
+  addBox(g,X,Y+H-E,0,W,E,depth,edgeMat);
+  // Untere Tiefenkante
+  addBox(g,X,Y,    0,W,E,depth,edgeMat);
+  // Linke Tiefenkante
+  addBox(g,X,Y+E,  0,E,H-2*E,depth,edgeMat);
+  // Rechte Tiefenkante
+  addBox(g,X+W-E,Y+E,0,E,H-2*E,depth,edgeMat);
+}
 function buildFrameExtruded(g,X,Y,W,H,FW,depth,mat,zStart=0){
   const shape=new THREE.Shape();
   shape.moveTo(X,Y);shape.lineTo(X+W,Y);shape.lineTo(X+W,Y+H);shape.lineTo(X,Y+H);shape.closePath();
@@ -291,36 +306,34 @@ function buildFrameExtruded(g,X,Y,W,H,FW,depth,mat,zStart=0){
   g.add(mesh);
 }
 
-// 45°-Fase-Streifen an den Vorderkanten eines Rahmens — fangen Key-Light anders ein
+// 45°-Fase-Boxen an Außenkanten — echte Geometrie die Licht bei Winkel bricht
 function addOuterFasen(g, X, Y, W, H, depth) {
-  const F = 0.009; // 9mm Fase-Breite
-  const sq2 = Math.SQRT2;
-  // Oben
-  const mT=new THREE.Mesh(new THREE.BoxGeometry(W,F*sq2,0.001),faseMat);
-  mT.rotation.x=-Math.PI/4; mT.position.set(X+W/2,Y+H-F*0.5,depth-F*0.5); g.add(mT);
+  const F = 0.010; // 10mm Fase
+  // Oben: Box an oberer Außenkante, um X-Achse -45° gedreht
+  {const m=new THREE.Mesh(new THREE.BoxGeometry(W,F,F),faseMat);
+   m.rotation.x=-Math.PI/4;m.position.set(X+W/2,Y+H-F*0.707,depth-F*0.207);m.castShadow=true;g.add(m);}
   // Unten
-  const mB=new THREE.Mesh(new THREE.BoxGeometry(W,F*sq2,0.001),faseMat);
-  mB.rotation.x=Math.PI/4; mB.position.set(X+W/2,Y+F*0.5,depth-F*0.5); g.add(mB);
+  {const m=new THREE.Mesh(new THREE.BoxGeometry(W,F,F),faseMat);
+   m.rotation.x=Math.PI/4;m.position.set(X+W/2,Y+F*0.707,depth-F*0.207);m.castShadow=true;g.add(m);}
   // Links
-  const mL=new THREE.Mesh(new THREE.BoxGeometry(F*sq2,H-2*F,0.001),faseMat);
-  mL.rotation.y=-Math.PI/4; mL.position.set(X+F*0.5,Y+H/2,depth-F*0.5); g.add(mL);
+  {const m=new THREE.Mesh(new THREE.BoxGeometry(F,H-F*2,F),faseMat);
+   m.rotation.y=-Math.PI/4;m.position.set(X+F*0.707,Y+H/2,depth-F*0.207);m.castShadow=true;g.add(m);}
   // Rechts
-  const mR=new THREE.Mesh(new THREE.BoxGeometry(F*sq2,H-2*F,0.001),faseMat);
-  mR.rotation.y=Math.PI/4; mR.position.set(X+W-F*0.5,Y+H/2,depth-F*0.5); g.add(mR);
+  {const m=new THREE.Mesh(new THREE.BoxGeometry(F,H-F*2,F),faseMat);
+   m.rotation.y=Math.PI/4;m.position.set(X+W-F*0.707,Y+H/2,depth-F*0.207);m.castShadow=true;g.add(m);}
 }
-// Fase an der INNEREN Profilkante (Glasöffnung) — dunkle Schattenlinie
+// Innere Fasen (Glasöffnung) — Schlagschatten-Linie zwischen Sash und Rahmen
 function addInnerFasen(g, X, Y, W, H, depth) {
-  const F = 0.007;
-  const sq2 = Math.SQRT2;
-  const sfMat=new THREE.MeshStandardMaterial({color:0x080a0c,roughness:0.99,metalness:0});
-  const mT=new THREE.Mesh(new THREE.BoxGeometry(W,F*sq2,0.001),sfMat);
-  mT.rotation.x=Math.PI/4; mT.position.set(X+W/2,Y+H+F*0.5,depth+F*0.5); g.add(mT);
-  const mB=new THREE.Mesh(new THREE.BoxGeometry(W,F*sq2,0.001),sfMat);
-  mB.rotation.x=-Math.PI/4; mB.position.set(X+W/2,Y-F*0.5,depth+F*0.5); g.add(mB);
-  const mL=new THREE.Mesh(new THREE.BoxGeometry(F*sq2,H+2*F,0.001),sfMat);
-  mL.rotation.y=Math.PI/4; mL.position.set(X-F*0.5,Y+H/2,depth+F*0.5); g.add(mL);
-  const mR=new THREE.Mesh(new THREE.BoxGeometry(F*sq2,H+2*F,0.001),sfMat);
-  mR.rotation.y=-Math.PI/4; mR.position.set(X+W+F*0.5,Y+H/2,depth+F*0.5); g.add(mR);
+  const F = 0.008;
+  const sfMat=new THREE.MeshStandardMaterial({color:0x020304,roughness:0.99,metalness:0});
+  {const m=new THREE.Mesh(new THREE.BoxGeometry(W,F,F),sfMat);
+   m.rotation.x=Math.PI/4;m.position.set(X+W/2,Y+H+F*0.707,depth+F*0.207);g.add(m);}
+  {const m=new THREE.Mesh(new THREE.BoxGeometry(W,F,F),sfMat);
+   m.rotation.x=-Math.PI/4;m.position.set(X+W/2,Y-F*0.707,depth+F*0.207);g.add(m);}
+  {const m=new THREE.Mesh(new THREE.BoxGeometry(F,H+F*2,F),sfMat);
+   m.rotation.y=Math.PI/4;m.position.set(X-F*0.707,Y+H/2,depth+F*0.207);g.add(m);}
+  {const m=new THREE.Mesh(new THREE.BoxGeometry(F,H+F*2,F),sfMat);
+   m.rotation.y=-Math.PI/4;m.position.set(X+W+F*0.707,Y+H/2,depth+F*0.207);g.add(m);}
 }
 
 // ════════════════════════════════════════════════════════════
