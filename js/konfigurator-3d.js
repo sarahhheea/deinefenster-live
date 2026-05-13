@@ -341,37 +341,36 @@ function addInnerFasen(g, X, Y, W, H, depth) {
 // HARDWARE — HOPPE Atlanta Griff (original Geometrie)
 // ════════════════════════════════════════════════════════════
 function addFensterGriff(g,cx,cy,z){
-  // HOPPE Atlanta — Anthrazit, Kreuzolive (beidseitig oval), Geschlossen=nach unten
-  const hMat=new THREE.MeshStandardMaterial({
-    color:0x282b2e, roughness:0.36, metalness:0.70, envMapIntensity:1.8
-  });
-  const schildMat=new THREE.MeshStandardMaterial({
-    color:0x232628, roughness:0.45, metalness:0.62, envMapIntensity:1.4
+  // HOPPE Atlanta weiß — PVC gleich wie Rahmen, Kreuzolive, Schließstellung=unten
+  const hMat=new THREE.MeshPhysicalMaterial({
+    color:0xF2F1EC,
+    roughness:0.15, metalness:0.0,
+    clearcoat:0.72, clearcoatRoughness:0.06,
+    envMapIntensity:1.5
   });
 
-  // Langschild — 30mm breit, 140mm hoch, 8mm tief
-  const sW=0.030,sH=0.140,sD=0.008,sR=0.007;
+  // Schild (Rosette) — 22mm breit, 52mm hoch, 6mm tief, abgerundete Ecken
+  const sW=0.022,sH=0.052,sD=0.006,sR=0.005;
   const sShape=new THREE.Shape();
   sShape.moveTo(-sW/2+sR,-sH/2);
   sShape.lineTo(sW/2-sR,-sH/2);sShape.absarc(sW/2-sR,-sH/2+sR,sR,-Math.PI/2,0,false);
   sShape.lineTo(sW/2,sH/2-sR);sShape.absarc(sW/2-sR,sH/2-sR,sR,0,Math.PI/2,false);
   sShape.lineTo(-sW/2+sR,sH/2);sShape.absarc(-sW/2+sR,sH/2-sR,sR,Math.PI/2,Math.PI,false);
   sShape.lineTo(-sW/2,-sH/2+sR);sShape.absarc(-sW/2+sR,-sH/2+sR,sR,Math.PI,Math.PI*1.5,false);
-  const sGeo=new THREE.ExtrudeGeometry(sShape,{depth:sD,bevelEnabled:true,bevelSize:0.003,bevelThickness:0.003,bevelSegments:3});
-  const sMesh=new THREE.Mesh(sGeo,schildMat);
+  const sGeo=new THREE.ExtrudeGeometry(sShape,{depth:sD,bevelEnabled:true,bevelSize:0.002,bevelThickness:0.002,bevelSegments:3});
+  const sMesh=new THREE.Mesh(sGeo,hMat);
   sMesh.position.set(cx-sW/2,cy-sH/2,z);sMesh.castShadow=true;g.add(sMesh);
 
-  // Achsstummel — Ø18mm × 20mm, im oberen Schildbereich
-  const pivotY=cy+sH*0.15;
-  const axle=new THREE.Mesh(new THREE.CylinderGeometry(0.009,0.009,0.020,16),hMat);
-  axle.rotation.x=Math.PI/2;axle.position.set(cx,pivotY,z+sD+0.010);axle.castShadow=true;g.add(axle);
+  // Achsstummel — Ø14mm × 14mm, Schildmitte
+  const pivotY=cy;
+  const axle=new THREE.Mesh(new THREE.CylinderGeometry(0.007,0.007,0.014,14),hMat);
+  axle.rotation.x=Math.PI/2;axle.position.set(cx,pivotY,z+sD+0.007);axle.castShadow=true;g.add(axle);
 
-  // Kreuzolive (Griffkörper) — gestreckter Ellipsoid, beide Enden rund
-  // Geschlossen-Position: Olive zeigt nach UNTEN (6-Uhr)
-  const grR=0.013, grLen=0.110;
+  // Kreuzolive — 68mm × 20mm, beidseitig rund, zeigt nach UNTEN (Schließstellung)
+  const grR=0.010, grLen=0.068;
   const olive=new THREE.Mesh(new THREE.SphereGeometry(grR,20,14),hMat);
-  olive.scale.y=grLen/(2*grR);   // → 110mm tall × 26mm wide = echte Kreuzolive
-  olive.position.set(cx, pivotY-grLen*0.5, z+sD+0.020);
+  olive.scale.y=grLen/(2*grR);
+  olive.position.set(cx, pivotY-grLen*0.5, z+sD+0.014);
   olive.castShadow=true;g.add(olive);
 }
 
