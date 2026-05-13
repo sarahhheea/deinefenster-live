@@ -52,11 +52,11 @@ const faseMat = new THREE.MeshPhysicalMaterial({
   envMapIntensity: 2.2
 });
 const glassMat = new THREE.MeshPhysicalMaterial({
-  color: 0xd8ede6,          // echtes Float-Glas: sehr geringe Sättigung (~8%)
+  color: 0xd4eae8,          // echtes Float-Glas: leichter Blau-Grün-Stich, niedrige Sättigung
   metalness: 0.0, roughness: 0.03,
-  transmission: 0.86, thickness: 0.028, ior: 1.52, transparent: true,
-  clearcoat: 0.35, clearcoatRoughness: 0.03,
-  envMapIntensity: 2.5
+  transmission: 0.88, thickness: 0.028, ior: 1.52, transparent: true,
+  clearcoat: 0.28, clearcoatRoughness: 0.04,
+  envMapIntensity: 1.2
 });
 const glassRoomMat = new THREE.MeshStandardMaterial({
   color: 0xe8ecee, roughness: 0.95, metalness: 0
@@ -230,10 +230,10 @@ function applyGlass(key){
     glassMat.normalMap=buildNormalTex(masterCarreHeight,4.0,3,11);
     glassMat.normalScale=new THREE.Vector2(1.5,1.5);
   }else{
-    // Klarglas — minimal-grün wie echtes Float-Glas + scharfe Reflexionen
-    glassMat.transmission=0.86;glassMat.roughness=0.03;glassMat.color.set(0xd8ede6);
-    glassMat.clearcoat=0.35;glassMat.clearcoatRoughness=0.03;
-    glassMat.envMapIntensity=2.5;
+    // Klarglas — leichter Blau-Grün-Stich wie echtes Float-Glas
+    glassMat.transmission=0.88;glassMat.roughness=0.03;glassMat.color.set(0xd4eae8);
+    glassMat.clearcoat=0.28;glassMat.clearcoatRoughness=0.04;
+    glassMat.envMapIntensity=1.2;
   }
   glassMat.needsUpdate=true;
 }
