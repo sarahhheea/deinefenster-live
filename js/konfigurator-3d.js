@@ -37,16 +37,25 @@ let _currentProd  = null;
 const texLoader = new THREE.TextureLoader();
 
 const frameMat = new THREE.MeshPhysicalMaterial({
-  color: 0xF2F1EC,
-  roughness: 0.18, metalness: 0.0,
-  clearcoat: 0.60, clearcoatRoughness: 0.08,
-  envMapIntensity: 1.20
+  color: 0xF0EFE8,
+  roughness: 0.13, metalness: 0.0,
+  clearcoat: 0.88, clearcoatRoughness: 0.05,
+  sheen: 0.35, sheenColor: new THREE.Color(0xffffff), sheenRoughness: 0.08,
+  envMapIntensity: 1.60
+});
+// Fasenmaterial — etwas heller + maximaler Clearcoat → fängt Licht von Kantenwinkeln
+const faseMat = new THREE.MeshPhysicalMaterial({
+  color: 0xFAF9F5,
+  roughness: 0.08, metalness: 0.0,
+  clearcoat: 1.0, clearcoatRoughness: 0.03,
+  envMapIntensity: 2.2
 });
 const glassMat = new THREE.MeshPhysicalMaterial({
-  color: 0xd8eef4,          // leichter Blau-Grün-Stich — Klarglas sieht man so
-  metalness: 0.0, roughness: 0.04,
-  transmission: 0.88, thickness: 0.028, ior: 1.52, transparent: true,
-  envMapIntensity: 0.06
+  color: 0xc8e8f2,
+  metalness: 0.0, roughness: 0.03,
+  transmission: 0.86, thickness: 0.028, ior: 1.52, transparent: true,
+  clearcoat: 0.25, clearcoatRoughness: 0.04,
+  envMapIntensity: 1.0
 });
 const glassRoomMat = new THREE.MeshStandardMaterial({
   color: 0xe8ecee, roughness: 0.95, metalness: 0
@@ -130,7 +139,12 @@ function applyColor(mat, faKey) {
     mat.clearcoatRoughness = isUltiMatt ? 1.0 : isGlatt ? 0.06 : 0.16;
   }
   mat.needsUpdate = true;
-  grooveMat.color.set(hex).multiplyScalar(0.58);
+  // faseMat folgt frameMat: gleiche Farbe, aber etwas heller für Kantenglanz
+  faseMat.color.set(hex).multiplyScalar(1.06);
+  faseMat.roughness = isUltiMatt?0.30:isGlatt?0.06:0.08;
+  faseMat.envMapIntensity = isUltiMatt?0.1:isGlatt?2.8:2.2;
+  faseMat.needsUpdate = true;
+  grooveMat.color.set(hex).multiplyScalar(0.50);
   grooveMat.needsUpdate = true;
 }
 function applyWood(mat, k) {
@@ -215,9 +229,10 @@ function applyGlass(key){
     glassMat.normalMap=buildNormalTex(masterCarreHeight,4.0,3,11);
     glassMat.normalScale=new THREE.Vector2(1.5,1.5);
   }else{
-    // Klarglas — leicht blau-grün wie echtes Float-Glas
-    glassMat.transmission=0.88;glassMat.roughness=0.04;glassMat.color.set(0xd8eef4);
-    glassMat.envMapIntensity=0.06;
+    // Klarglas — leicht blau-grün + echte Reflexionen
+    glassMat.transmission=0.86;glassMat.roughness=0.03;glassMat.color.set(0xc8e8f2);
+    glassMat.clearcoat=0.25;glassMat.clearcoatRoughness=0.04;
+    glassMat.envMapIntensity=1.0;
   }
   glassMat.needsUpdate=true;
 }
@@ -268,12 +283,44 @@ function buildFrameExtruded(g,X,Y,W,H,FW,depth,mat,zStart=0){
   hole.moveTo(X+FW,Y+FW);hole.lineTo(X+W-FW,Y+FW);hole.lineTo(X+W-FW,Y+H-FW);hole.lineTo(X+FW,Y+H-FW);hole.closePath();
   shape.holes.push(hole);
   const geo=new THREE.ExtrudeGeometry(shape,{
-    depth,bevelEnabled:true,bevelSize:0.004,bevelThickness:0.004,bevelSegments:3
+    depth,bevelEnabled:true,bevelSize:0.009,bevelThickness:0.009,bevelSegments:4
   });
   const mesh=new THREE.Mesh(geo,mat);
   mesh.position.z=zStart;
   mesh.castShadow=mesh.receiveShadow=true;
   g.add(mesh);
+}
+
+// 45°-Fase-Streifen an den Vorderkanten eines Rahmens — fangen Key-Light anders ein
+function addOuterFasen(g, X, Y, W, H, depth) {
+  const F = 0.009; // 9mm Fase-Breite
+  const sq2 = Math.SQRT2;
+  // Oben
+  const mT=new THREE.Mesh(new THREE.BoxGeometry(W,F*sq2,0.001),faseMat);
+  mT.rotation.x=-Math.PI/4; mT.position.set(X+W/2,Y+H-F*0.5,depth-F*0.5); g.add(mT);
+  // Unten
+  const mB=new THREE.Mesh(new THREE.BoxGeometry(W,F*sq2,0.001),faseMat);
+  mB.rotation.x=Math.PI/4; mB.position.set(X+W/2,Y+F*0.5,depth-F*0.5); g.add(mB);
+  // Links
+  const mL=new THREE.Mesh(new THREE.BoxGeometry(F*sq2,H-2*F,0.001),faseMat);
+  mL.rotation.y=-Math.PI/4; mL.position.set(X+F*0.5,Y+H/2,depth-F*0.5); g.add(mL);
+  // Rechts
+  const mR=new THREE.Mesh(new THREE.BoxGeometry(F*sq2,H-2*F,0.001),faseMat);
+  mR.rotation.y=Math.PI/4; mR.position.set(X+W-F*0.5,Y+H/2,depth-F*0.5); g.add(mR);
+}
+// Fase an der INNEREN Profilkante (Glasöffnung) — dunkle Schattenlinie
+function addInnerFasen(g, X, Y, W, H, depth) {
+  const F = 0.007;
+  const sq2 = Math.SQRT2;
+  const sfMat=new THREE.MeshStandardMaterial({color:0x080a0c,roughness:0.99,metalness:0});
+  const mT=new THREE.Mesh(new THREE.BoxGeometry(W,F*sq2,0.001),sfMat);
+  mT.rotation.x=Math.PI/4; mT.position.set(X+W/2,Y+H+F*0.5,depth+F*0.5); g.add(mT);
+  const mB=new THREE.Mesh(new THREE.BoxGeometry(W,F*sq2,0.001),sfMat);
+  mB.rotation.x=-Math.PI/4; mB.position.set(X+W/2,Y-F*0.5,depth+F*0.5); g.add(mB);
+  const mL=new THREE.Mesh(new THREE.BoxGeometry(F*sq2,H+2*F,0.001),sfMat);
+  mL.rotation.y=Math.PI/4; mL.position.set(X-F*0.5,Y+H/2,depth+F*0.5); g.add(mL);
+  const mR=new THREE.Mesh(new THREE.BoxGeometry(F*sq2,H+2*F,0.001),sfMat);
+  mR.rotation.y=-Math.PI/4; mR.position.set(X+W+F*0.5,Y+H/2,depth+F*0.5); g.add(mR);
 }
 
 // ════════════════════════════════════════════════════════════
@@ -288,8 +335,8 @@ function addFensterGriff(g,cx,cy,z){
   });
   const axisMat=new THREE.MeshStandardMaterial({color:0x8a8a92,roughness:0.35,metalness:0.75});
 
-  // Langschild 28×92×18mm abgerundet
-  const sW=0.028,sH=0.092,sD=0.018,sR=0.005;
+  // Langschild 34×108×20mm abgerundet
+  const sW=0.034,sH=0.108,sD=0.020,sR=0.006;
   const sShape=new THREE.Shape();
   sShape.moveTo(-sW/2+sR,-sH/2);
   sShape.lineTo(sW/2-sR,-sH/2);sShape.absarc(sW/2-sR,-sH/2+sR,sR,-Math.PI/2,0,false);
@@ -313,11 +360,11 @@ function addFensterGriff(g,cx,cy,z){
     new THREE.Vector3(cx,cy-0.095,   z+sD+0.034),
     new THREE.Vector3(cx,cy-0.104,   z+sD+0.026),
   ]);
-  const armMesh=new THREE.Mesh(new THREE.TubeGeometry(armCurve,28,0.014,14,false),hMat);
+  const armMesh=new THREE.Mesh(new THREE.TubeGeometry(armCurve,28,0.018,16,false),hMat);
   armMesh.castShadow=true;g.add(armMesh);
 
   // Griffspitze — leicht ovale Kugel
-  const tip=new THREE.Mesh(new THREE.SphereGeometry(0.014,16,10),hMat);
+  const tip=new THREE.Mesh(new THREE.SphereGeometry(0.018,16,12),hMat);
   tip.scale.set(1,1.35,1);tip.position.set(cx,cy-0.106,z+sD+0.026);tip.castShadow=true;g.add(tip);
 }
 
@@ -495,13 +542,15 @@ function buildSash(parentG, sx, sy, sw, sh, oeff, view, prod) {
   addBox(inner,sx,      sy+DCT,   OVHG-0.002,DCT,sh-2*DCT,0.004,sealMat);
   addBox(inner,sx+sw-DCT,sy+DCT,  OVHG-0.002,DCT,sh-2*DCT,0.004,sealMat);
 
-  // Schattenfuge
-  const _sfMat=new THREE.MeshStandardMaterial({color:0x050608,roughness:0.99,metalness:0});
-  const SFG=0.007;
-  addBox(inner,sx,        sy+sh-SFG,SZ_FRONT,sw,      SFG,     0.002,_sfMat);
-  addBox(inner,sx,        sy,       SZ_FRONT,sw,      SFG,     0.002,_sfMat);
-  addBox(inner,sx,        sy+SFG,   SZ_FRONT,SFG,     sh-2*SFG,0.002,_sfMat);
-  addBox(inner,sx+sw-SFG, sy+SFG,   SZ_FRONT,SFG,     sh-2*SFG,0.002,_sfMat);
+  // Schattenfuge — breite, fast-schwarze Randlinie = wichtigstes Realismus-Merkmal
+  const _sfMat=new THREE.MeshStandardMaterial({color:0x010102,roughness:0.99,metalness:0});
+  const SFG=0.013;
+  addBox(inner,sx,        sy+sh-SFG,SZ_FRONT-0.002,sw,      SFG,     0.005,_sfMat);
+  addBox(inner,sx,        sy,       SZ_FRONT-0.002,sw,      SFG,     0.005,_sfMat);
+  addBox(inner,sx,        sy+SFG,   SZ_FRONT-0.002,SFG,     sh-2*SFG,0.005,_sfMat);
+  addBox(inner,sx+sw-SFG, sy+SFG,   SZ_FRONT-0.002,SFG,     sh-2*SFG,0.005,_sfMat);
+  // Innere Fase-Kante (Schlagleiste-Übergang → dunklere 45°-Linie)
+  addInnerFasen(inner, sx+SFR, sy+SFR, sw-2*SFR, sh-2*SFR, OVHG+DD-0.005);
 
   // Glasfeld
   const gx=sx+SFR,gy=sy+SFR,gw=sw-2*SFR,gh=sh-2*SFR;
@@ -562,22 +611,17 @@ function buildFenster(S,view){
   // Blendrahmen — ExtrudeGeometry mit echtem Bevel
   buildFrameExtruded(g,0,0,W,H,OFR,DD,frameMat);
 
-  // Innere Profil-Stufe (deutlich dunkler — sichtbare Tiefe)
-  const _stepCol=new THREE.Color(frameMat.color).multiplyScalar(0.58);
-  const _stepMat=new THREE.MeshStandardMaterial({color:_stepCol,roughness:0.32,metalness:0});
-  const STEP=0.024;
-  addBox(g,OFR,      H-OFR-STEP,DD+0.001,W-2*OFR,STEP,0.003,_stepMat);
-  addBox(g,OFR,      OFR,       DD+0.001,W-2*OFR,STEP,0.003,_stepMat);
-  addBox(g,OFR,      OFR+STEP,  DD+0.001,STEP,H-2*OFR-2*STEP,0.003,_stepMat);
-  addBox(g,W-OFR-STEP,OFR+STEP, DD+0.001,STEP,H-2*OFR-2*STEP,0.003,_stepMat);
+  // Innere Profil-Stufe — stark abgedunkelt für maximale Tiefenwirkung
+  const _stepCol=new THREE.Color(frameMat.color).multiplyScalar(0.44);
+  const _stepMat=new THREE.MeshStandardMaterial({color:_stepCol,roughness:0.38,metalness:0});
+  const STEP=0.026;
+  addBox(g,OFR,      H-OFR-STEP,DD+0.001,W-2*OFR,STEP,0.004,_stepMat);
+  addBox(g,OFR,      OFR,       DD+0.001,W-2*OFR,STEP,0.004,_stepMat);
+  addBox(g,OFR,      OFR+STEP,  DD+0.001,STEP,H-2*OFR-2*STEP,0.004,_stepMat);
+  addBox(g,W-OFR-STEP,OFR+STEP, DD+0.001,STEP,H-2*OFR-2*STEP,0.004,_stepMat);
 
-  // Glanzlinie — subtile Profilkante
-  const hlMat=new THREE.MeshStandardMaterial({color:0xffffff,roughness:0.04,metalness:0,emissive:0xffffff,emissiveIntensity:0.08});
-  const HL=0.004;
-  addBox(g,0,H-OFR,DD-HL,W,HL,HL,hlMat);
-  addBox(g,0,OFR-HL,DD-HL,W,HL,HL,hlMat);
-  addBox(g,OFR-HL,OFR,DD-HL,HL,H-2*OFR,HL,hlMat);
-  addBox(g,W-OFR,OFR,DD-HL,HL,H-2*OFR,HL,hlMat);
+  // 45°-Fase an der Außenkante des Blendrahmens — echte Kanten-Highlights
+  addOuterFasen(g, 0, 0, W, H, DD);
 
   // Oberlicht
   if(hasOL){
@@ -866,44 +910,73 @@ function initScene(container){
   controls.minAzimuthAngle=-0.45;controls.maxAzimuthAngle=0.45;
   controls.update();
 
-  // PMREM Environment
-  const pmremGen=new THREE.PMREMGenerator(renderer);
-  pmremGen.compileEquirectangularShader();
-  scene.environment=pmremGen.fromScene(new RoomEnvironment(renderer),0.04).texture;
-  pmremGen.dispose();
+  // ── STUDIO-HDRI aus Canvas (keine externen Dateien) ──────
+  {
+    const EW=2048,EH=1024,ec=document.createElement('canvas');
+    ec.width=EW;ec.height=EH;
+    const ex=ec.getContext('2d');
+    // Hintergrund-Gradient: oben hell → unten dunkel
+    const bg=ex.createLinearGradient(0,0,0,EH);
+    bg.addColorStop(0,'#e8edf6'); bg.addColorStop(0.25,'#bcccd8');
+    bg.addColorStop(0.55,'#7090aa'); bg.addColorStop(0.8,'#2a3a52'); bg.addColorStop(1,'#060c14');
+    ex.fillStyle=bg; ex.fillRect(0,0,EW,EH);
+    // Key-Light Spot oben-links (entspricht DirectionalLight Winkel)
+    const kg=ex.createRadialGradient(EW*0.30,EH*0.06,0,EW*0.30,EH*0.06,EH*0.42);
+    kg.addColorStop(0,'rgba(255,255,250,1.0)'); kg.addColorStop(0.25,'rgba(252,252,244,0.90)');
+    kg.addColorStop(0.6,'rgba(200,210,230,0.30)'); kg.addColorStop(1,'rgba(0,0,0,0)');
+    ex.fillStyle=kg; ex.fillRect(0,0,EW,EH);
+    // Fill-Light Spot rechts, kühler
+    const fg=ex.createRadialGradient(EW*0.72,EH*0.14,0,EW*0.72,EH*0.14,EH*0.28);
+    fg.addColorStop(0,'rgba(200,220,245,0.72)'); fg.addColorStop(1,'rgba(0,0,0,0)');
+    ex.fillStyle=fg; ex.fillRect(0,0,EW,EH);
+    // Rim-Light hinten-oben (Mitte)
+    const rg=ex.createRadialGradient(EW*0.50,EH*0.03,0,EW*0.50,EH*0.03,EH*0.20);
+    rg.addColorStop(0,'rgba(255,255,255,0.50)'); rg.addColorStop(1,'rgba(0,0,0,0)');
+    ex.fillStyle=rg; ex.fillRect(0,0,EW,EH);
+    const eTex=new THREE.CanvasTexture(ec);
+    eTex.mapping=THREE.EquirectangularReflectionMapping;
+    eTex.colorSpace=THREE.SRGBColorSpace;
+    const pmremGen=new THREE.PMREMGenerator(renderer);
+    pmremGen.compileEquirectangularShader();
+    scene.environment=pmremGen.fromEquirectangular(eTex).texture;
+    pmremGen.dispose(); eTex.dispose();
+  }
 
-  // ── BELEUCHTUNG — Produktfoto-Studio-Setup ──────────────
-  // HemisphereLight: weicher Himmel von oben
-  scene.add(new THREE.HemisphereLight(0x1a3a6a,0x060d1a,0.35));
+  // ── BELEUCHTUNG — Produktfoto-Studio ─────────────────────
+  scene.add(new THREE.HemisphereLight(0x1a3560,0x060a14,0.28));
 
-  // Key-Light: oben-links, harter Schatten für Profiltiefe
-  const key=new THREE.DirectionalLight(0xfffdf8,1.80);
-  key.position.set(-4,8,5);key.castShadow=true;
+  // Key-Light: oben-links — definierter Schatten, enthüllt Profiltiefe
+  const key=new THREE.DirectionalLight(0xfffdf6,2.10);
+  key.position.set(-3.5,9,5);key.castShadow=true;
   key.shadow.mapSize.set(2048,2048);
-  key.shadow.camera.near=1;key.shadow.camera.far=18;
-  key.shadow.camera.left=-4;key.shadow.camera.right=4;
-  key.shadow.camera.top=6;key.shadow.camera.bottom=-6;
-  key.shadow.bias=-0.001;key.shadow.normalBias=0.02;
+  key.shadow.camera.near=1;key.shadow.camera.far=20;
+  key.shadow.camera.left=-5;key.shadow.camera.right=5;
+  key.shadow.camera.top=7;key.shadow.camera.bottom=-7;
+  key.shadow.bias=-0.0008;key.shadow.normalBias=0.015;
   scene.add(key);
 
-  // Fill-Light: rechts, kühl (kompensiert Schatten ohne auszulöschen)
-  const fill=new THREE.DirectionalLight(0xd8e8f4,0.45);
-  fill.position.set(4,2,4);scene.add(fill);
+  // Fill-Light: rechts, kühl — kompensiert ohne auszulöschen
+  const fill=new THREE.DirectionalLight(0xc0d4ee,0.55);
+  fill.position.set(5,1,4);scene.add(fill);
 
-  // Bounce-Light: von unten (simuliert Boden-Reflexion im Studio)
-  const bounce=new THREE.DirectionalLight(0xfff8f0,0.20);
-  bounce.position.set(0,-4,3);scene.add(bounce);
+  // Kanten-Akzent-Licht: von oben direkt — trifft 45°-Fasen optimal
+  const accent=new THREE.DirectionalLight(0xfff8f0,0.45);
+  accent.position.set(0,10,2);scene.add(accent);
 
-  // Rim-Light: von hinten-oben für Profilkanten-Highlight
-  const rim=new THREE.DirectionalLight(0xffffff,0.25);
-  rim.position.set(0,5,-4);scene.add(rim);
+  // Bounce-Light: von unten warm
+  const bounce=new THREE.DirectionalLight(0xfff0e0,0.18);
+  bounce.position.set(0,-5,3);scene.add(bounce);
 
-  // Subtiler Bodenschatten (ShadowMaterial, unsichtbare Ebene)
+  // Rim-Light: von hinten für Tiefenkanten-Highlight
+  const rim=new THREE.DirectionalLight(0xffffff,0.32);
+  rim.position.set(0,4,-5);scene.add(rim);
+
+  // Bodenschatten — prominent + weich
   const gnd=new THREE.Mesh(
-    new THREE.PlaneGeometry(14,14),
-    new THREE.ShadowMaterial({opacity:0.12})
+    new THREE.PlaneGeometry(16,16),
+    new THREE.ShadowMaterial({opacity:0.38,color:0x000008})
   );
-  gnd.rotation.x=-Math.PI/2;gnd.position.set(0.04,-1.8,0);gnd.receiveShadow=true;
+  gnd.rotation.x=-Math.PI/2;gnd.position.set(0,-1.82,0);gnd.receiveShadow=true;
   scene.add(gnd);
 
   productGroup=new THREE.Group();
