@@ -987,203 +987,260 @@
   #s1 .pc-name { font-size: 15px !important; }
 </style>
 
-<!-- ══ REDESIGN 13.05.2026 — Premium Produktkarten + Struktur ══ -->
+<!-- ══ PREMIUM REDESIGN v3 — Komplett ══ -->
 <style>
-  /* ── 1. PRODUKTKARTEN: immer 2×2 Grid ── */
-  #s1 .sb > .grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 16px !important;
+  /* ── 0. STEP-ÖFFNER ANIMATION: weich + dramatisch ── */
+  @keyframes sb-fade {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
-
-  /* Badges + Chips wieder sichtbar */
-  #s1 .pc-badge {
-    display: inline-block !important;
-    position: static !important;
-    font-size: 9px !important;
-    letter-spacing: 0.10em !important;
-    padding: 3px 9px !important;
-    background: rgba(93,151,232,0.18) !important;
-    border: 1px solid rgba(93,151,232,0.32) !important;
-    color: rgba(175,210,255,0.90) !important;
-    border-radius: 4px !important;
-    width: fit-content !important;
-    backdrop-filter: none !important;
+  .sc.open .sb { animation: sb-fade 0.42s cubic-bezier(0.16,1,0.3,1) !important; }
+</style>
+<style>
+  /* ── 1. CONTAINER ── */
+  body { background: #09090f !important; }
+  #steps {
+    border-radius: 24px !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.025), 0 48px 120px rgba(0,0,0,0.88) !important;
   }
+  .sc:first-child { border-top-left-radius: 24px !important; border-top-right-radius: 24px !important; }
+  .sc:last-child  { border-bottom-left-radius: 24px !important; border-bottom-right-radius: 24px !important; }
 
-  #s1 .pc-chips {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    gap: 4px !important;
-    margin-top: 5px !important;
+  /* ── 2. STEP HEADERS ── */
+  .sh {
+    background: #0c0e1c !important;
+    padding: 20px 24px 20px 28px !important;
+    border-bottom: 1px solid rgba(255,255,255,0.04) !important;
   }
-
-  #s1 .pc-chips span {
-    font-size: 10px !important;
-    padding: 2.5px 8px !important;
-    background: rgba(255,255,255,0.06) !important;
-    border: 1px solid rgba(255,255,255,0.11) !important;
-    color: rgba(165,200,255,0.70) !important;
-    border-radius: 4px !important;
-    font-weight: 600 !important;
-    letter-spacing: 0.01em !important;
+  .sh:hover { background: #0f1225 !important; }
+  .sc.open .sh {
+    background: #101523 !important;
+    box-shadow: inset 4px 0 0 #4d88ff !important;
+    padding-left: 32px !important;
   }
-
-  /* Karte */
-  #s1 .pc {
-    border-radius: 22px !important;
-    background: #0b1222 !important;
-    border: 1px solid rgba(255,255,255,0.09) !important;
-    box-shadow: 0 6px 24px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.05) !important;
-    transition: transform 0.38s cubic-bezier(.4,0,.2,1), box-shadow 0.38s ease, border-color 0.25s ease !important;
-  }
-
-  #s1 .pc:hover {
-    transform: translateY(-12px) scale(1.018) !important;
-    border-color: rgba(93,151,232,0.70) !important;
-    box-shadow: 0 28px 80px rgba(0,0,0,0.82), 0 0 0 1px rgba(93,151,232,0.32), inset 0 1px 0 rgba(255,255,255,0.08) !important;
-  }
-
-  #s1 .pc.sel {
-    border: 2px solid #5d97e8 !important;
-    box-shadow: 0 0 0 4px rgba(93,151,232,0.22), 0 20px 64px rgba(29,78,216,0.55) !important;
-    transform: translateY(-10px) !important;
-  }
-
-  /* Bild */
-  #s1 .pc-img {
-    aspect-ratio: 3/4 !important;
-    object-fit: cover !important;
-    transition: transform 0.55s cubic-bezier(.4,0,.2,1) !important;
-  }
-
-  #s1 .pc:hover .pc-img {
-    transform: scale(1.09) translateY(-2%) !important;
-  }
-
-  /* Info-Sektion */
-  #s1 .s1-info {
-    padding: 13px 16px 18px !important;
-    background: #07091c !important;
-    border-top: 1px solid rgba(93,151,232,0.22) !important;
-    gap: 5px !important;
-  }
-
-  #s1 .pc.sel .s1-info {
-    border-top-color: #5d97e8 !important;
-    background: #060818 !important;
-  }
-
-  /* Name */
-  #s1 .pc-name {
+  .sc.open .slabel {
+    color: #7eb5ff !important;
     font-size: 17px !important;
     font-weight: 800 !important;
+    letter-spacing: -0.02em !important;
+  }
+  .slabel { font-size: 15.5px !important; font-weight: 700 !important; letter-spacing: -0.01em !important; }
+  .sdesc  { font-size: 12.5px !important; color: rgba(255,255,255,0.48) !important; }
+  .chev   { color: rgba(255,255,255,0.35) !important; }
+  .sc.open .chev { color: #4d88ff !important; }
+
+  /* ── 3. BADGES ── */
+  .badge {
+    width: 28px !important; height: 28px !important;
+    border-radius: 8px !important;
+    background: rgba(255,255,255,0.07) !important;
+    font-size: 12.5px !important; font-weight: 700 !important;
+    color: rgba(255,255,255,0.55) !important;
+  }
+  .sc.open .badge { background: #4d88ff !important; color: #fff !important; box-shadow: 0 2px 10px rgba(77,136,255,0.55) !important; }
+  .sc.done .badge { background: rgba(77,136,255,0.18) !important; color: rgba(130,185,255,0.90) !important; }
+  .sc.done .sh { border-left: 3px solid rgba(77,136,255,0.28) !important; padding-left: 25px !important; }
+
+  /* ── 4. STEP BODY ── */
+  .sb {
+    background: #0a0c1a !important;
+    border-top: 1px solid rgba(77,136,255,0.14) !important;
+    padding: 28px 28px 34px !important;
+  }
+  #s1 .sb { background: #09090f !important; padding: 16px !important; }
+
+  /* ── 5. OPTION CARDS ── */
+  .sb .oc {
+    background: rgba(255,255,255,0.030) !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    border-radius: 14px !important;
+    padding: 16px 18px !important;
+    transition: all 0.22s cubic-bezier(.4,0,.2,1) !important;
+  }
+  .sb .oc:hover {
+    background: rgba(77,136,255,0.07) !important;
+    border-color: rgba(77,136,255,0.45) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.35) !important;
+  }
+  .sb .oc.sel {
+    background: rgba(77,136,255,0.11) !important;
+    border-color: #4d88ff !important;
+    box-shadow: inset 4px 0 0 #4d88ff, 0 0 0 1px rgba(77,136,255,0.20) !important;
+    transform: translateY(-1px) !important;
+  }
+  .sb .olabel {
+    font-size: 15px !important; font-weight: 700 !important;
+    color: rgba(255,255,255,0.95) !important;
+    letter-spacing: -0.01em !important; line-height: 1.3 !important;
+  }
+  .sb .osub {
+    font-size: 12.5px !important;
+    color: rgba(255,255,255,0.42) !important;
+    line-height: 1.5 !important; margin-top: 3px !important;
+  }
+  .sb .ora {
+    width: 20px !important; height: 20px !important;
+    border-color: rgba(255,255,255,0.14) !important;
+    background: rgba(255,255,255,0.04) !important;
+    margin-top: 2px !important;
+  }
+  .sb .oc.sel .ora { background: #4d88ff !important; border-color: #4d88ff !important; box-shadow: 0 0 0 3px rgba(77,136,255,0.22) !important; }
+
+  /* ── 6. CHECKBOX CARDS ── */
+  .sb .cc {
+    background: rgba(255,255,255,0.030) !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    border-radius: 14px !important; padding: 16px 18px !important;
+  }
+  .sb .cc:hover { background: rgba(77,136,255,0.07) !important; border-color: rgba(77,136,255,0.45) !important; }
+  .sb .cc.sel   { background: rgba(77,136,255,0.10) !important; border-color: #4d88ff !important; box-shadow: inset 4px 0 0 #4d88ff, 0 0 0 1px rgba(77,136,255,0.16) !important; }
+  .sb .cbox { width: 20px !important; height: 20px !important; border-radius: 5px !important; background: rgba(255,255,255,0.05) !important; border-color: rgba(255,255,255,0.14) !important; }
+  .sb .cc.sel .cbox { background: #4d88ff !important; border-color: #4d88ff !important; box-shadow: 0 0 0 3px rgba(77,136,255,0.20) !important; }
+
+  /* ── 7. FLÜGEL-KARTEN ── */
+  .sb .fk { background: rgba(255,255,255,0.03) !important; border: 1px solid rgba(255,255,255,0.08) !important; border-radius: 12px !important; transition: all 0.20s ease !important; }
+  .sb .fk:hover { background: rgba(77,136,255,0.07) !important; border-color: rgba(77,136,255,0.45) !important; transform: translateY(-3px) !important; box-shadow: 0 6px 20px rgba(0,0,0,0.35) !important; }
+  .sb .fk.sel   { background: rgba(77,136,255,0.10) !important; border-color: #4d88ff !important; box-shadow: 0 0 0 1px rgba(77,136,255,0.25) !important; }
+  .sb .fk-label { font-size: 10.5px !important; color: rgba(255,255,255,0.75) !important; font-weight: 600 !important; margin-top: 6px !important; }
+
+  /* ── 8. MASZE INPUTS — große Zahlen, premium ── */
+  .sb .inp, .inp {
+    background: rgba(255,255,255,0.040) !important;
+    border: 1px solid rgba(255,255,255,0.11) !important;
+    border-radius: 14px !important;
+    padding: 18px 14px !important;
+    font-size: 28px !important; font-weight: 700 !important;
     color: rgba(255,255,255,0.97) !important;
     letter-spacing: -0.03em !important;
-    line-height: 1.2 !important;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    text-align: center !important;
+    height: auto !important;
+  }
+  .sb .inp:focus, .inp:focus {
+    border-color: #4d88ff !important;
+    background: rgba(77,136,255,0.07) !important;
+    box-shadow: 0 0 0 4px rgba(77,136,255,0.18) !important;
+    outline: none !important;
+  }
+  .sb label.fl, .sb .fl, label.fl {
+    font-size: 10.5px !important; font-weight: 800 !important;
+    letter-spacing: 0.12em !important; text-transform: uppercase !important;
+    color: rgba(255,255,255,0.35) !important; margin-bottom: 10px !important;
   }
 
-  /* Checkmark bei Auswahl */
-  #s1 .pc.sel::after {
-    content: 'check_circle' !important;
-    font-family: 'Material Symbols Outlined' !important;
-    font-variation-settings: 'FILL' 1 !important;
-    font-size: 22px !important;
-    color: #5d97e8 !important;
-    position: absolute !important;
-    top: 12px !important;
-    right: 12px !important;
-    background: rgba(7,9,28,0.75) !important;
-    border-radius: 50% !important;
-    width: 28px !important;
-    height: 28px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    line-height: 1.25 !important;
-    z-index: 6 !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.50) !important;
-    /* kein gradient mehr */
-    background-image: none !important;
+  /* ── 9. GRÖSSEN-SCHNELLWAHL ── */
+  .sb .szb {
+    background: rgba(255,255,255,0.04) !important;
+    border: 1px solid rgba(255,255,255,0.09) !important;
+    color: rgba(255,255,255,0.68) !important;
+    border-radius: 10px !important; font-size: 13px !important; font-weight: 600 !important;
+    padding: 9px 14px !important; min-height: 40px !important;
   }
+  .sb .szb:hover { border-color: #4d88ff !important; background: rgba(77,136,255,0.10) !important; color: #7eb5ff !important; }
 
-  /* Shimmer Linie am Top nur wenn NICHT selected */
-  #s1 .pc:not(.sel)::after {
-    content: '' !important;
-    position: absolute !important;
-    top: 0 !important;
-    left: 8% !important; right: 8% !important;
-    width: auto !important;
-    height: 1px !important;
-    background: rgba(255,255,255,0.06) !important;
-    background-image: none !important;
-    font-size: 0 !important;
+  /* ── 10. QTY BUTTONS ── */
+  .sb .qbtn { width: 48px !important; height: 48px !important; border-radius: 12px !important; background: rgba(255,255,255,0.05) !important; border: 1px solid rgba(255,255,255,0.10) !important; font-size: 22px !important; color: rgba(255,255,255,0.75) !important; }
+  .sb .qbtn:hover { background: rgba(77,136,255,0.12) !important; border-color: #4d88ff !important; color: #7eb5ff !important; }
+  #qv { font-size: 40px !important; font-weight: 800 !important; color: #7eb5ff !important; letter-spacing: -0.03em !important; }
+
+  /* ── 11. FARB-PICKER ── */
+  .sb .fp-item { border-radius: 14px !important; padding: 10px !important; width: 82px !important; }
+  .sb .fp-item:hover { background: rgba(255,255,255,0.06) !important; }
+  .sb .fp-item.sel   { background: rgba(77,136,255,0.07) !important; border-color: #4d88ff !important; box-shadow: 0 0 0 1px rgba(77,136,255,0.28) !important; }
+  .sb .fp-swatch { width: 48px !important; height: 48px !important; }
+  .sb .fp-name { font-size: 10.5px !important; color: rgba(255,255,255,0.60) !important; font-weight: 600 !important; }
+  .sb .fp-item.sel .fp-name { color: #7eb5ff !important; font-weight: 700 !important; }
+  .sb .farb-tab { font-size: 13.5px !important; font-weight: 700 !important; color: rgba(255,255,255,0.32) !important; letter-spacing: -0.01em !important; }
+  .sb .farb-tab.active { color: #7eb5ff !important; border-bottom-color: #4d88ff !important; }
+  .sb .farb-tab:hover  { color: rgba(255,255,255,0.75) !important; }
+
+  /* ── 12. SEKTION-TITEL ── */
+  .sb .sec-t {
+    font-size: 10.5px !important; font-weight: 800 !important; letter-spacing: 0.16em !important;
+    color: rgba(77,136,255,0.65) !important;
+    padding-top: 24px !important; margin-top: 24px !important;
+    border-top: 1px solid rgba(255,255,255,0.05) !important;
   }
+  .sb .sec-t:first-child { border-top: none !important; padding-top: 0 !important; margin-top: 0 !important; }
 
-  /* ── 2. STEP-GROUP LABELS: prominente Kapitel-Trenner ── */
+  /* ── 13. INFO BOXEN ── */
+  .sb .info {
+    background: rgba(77,136,255,0.05) !important;
+    border: 1px solid rgba(77,136,255,0.13) !important;
+    border-radius: 12px !important;
+    color: rgba(195,220,255,0.65) !important;
+    font-size: 13px !important; line-height: 1.55 !important; padding: 13px 15px !important;
+  }
+  .sb .info strong { color: rgba(255,255,255,0.90) !important; }
+  .sb .info[style*="fef2f2"] { background: rgba(239,68,68,0.06) !important; border-color: rgba(239,68,68,0.18) !important; color: rgba(255,195,195,0.72) !important; }
+  .sb .info[style*="ecfdf5"] { background: rgba(16,185,129,0.06) !important; border-color: rgba(16,185,129,0.16) !important; color: rgba(167,243,208,0.72) !important; }
+
+  /* ── 14. STEP-GROUP LABELS ── */
   .step-group {
-    padding: 18px 24px 12px !important;
-    font-size: 11px !important;
-    font-weight: 800 !important;
-    letter-spacing: 0.20em !important;
-    color: rgba(255,255,255,0.35) !important;
-    background: #050810 !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 12px !important;
-    border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+    padding: 20px 28px 14px !important;
+    font-size: 11px !important; font-weight: 800 !important; letter-spacing: 0.22em !important;
+    color: rgba(255,255,255,0.30) !important;
+    background: #060810 !important;
+    display: flex !important; align-items: center !important; gap: 14px !important;
+    border-bottom: 1px solid rgba(255,255,255,0.04) !important;
     border-top: none !important;
   }
+  .step-group::before { content: '' !important; width: 3px !important; height: 16px !important; background: #4d88ff !important; border-radius: 2px !important; flex-shrink: 0 !important; }
+  .step-group::after  { content: '' !important; flex: 1 !important; height: 1px !important; background: rgba(255,255,255,0.07) !important; }
 
-  .step-group::before {
-    content: '' !important;
-    width: 3px !important;
-    height: 16px !important;
-    background: #5d97e8 !important;
-    border-radius: 2px !important;
-    flex-shrink: 0 !important;
-  }
+  /* ── 15. PROGRESS BAR ── */
+  #prog-bar .flex-1.rounded-full { background: rgba(255,255,255,0.10) !important; }
+  #prog-bar [style*="ecfdf5"] { background: rgba(5,150,105,0.20) !important; color: #34d399 !important; border-color: rgba(52,211,153,0.22) !important; }
 
-  .step-group::after {
-    content: '' !important;
-    flex: 1 !important;
-    height: 1px !important;
-    background: rgba(255,255,255,0.07) !important;
-    border-radius: 1px !important;
+  /* ── 16. PRODUKTKARTEN STEP 1 ── */
+  #s1 .sb > .grid { grid-template-columns: repeat(2,1fr) !important; gap: 14px !important; }
+  #s1 .pc {
+    border-radius: 22px !important;
+    background: #0b0d1b !important;
+    border: 1px solid rgba(255,255,255,0.09) !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.70) !important;
+    transition: transform 0.40s cubic-bezier(.4,0,.2,1), box-shadow 0.40s ease, border-color 0.28s ease !important;
   }
+  #s1 .pc:hover {
+    transform: translateY(-12px) scale(1.02) !important;
+    border-color: rgba(77,136,255,0.72) !important;
+    box-shadow: 0 32px 90px rgba(0,0,0,0.88), 0 0 0 1px rgba(77,136,255,0.35) !important;
+  }
+  #s1 .pc.sel {
+    border: 2px solid #4d88ff !important;
+    box-shadow: 0 0 0 4px rgba(77,136,255,0.22), 0 24px 72px rgba(29,78,216,0.55) !important;
+    transform: translateY(-10px) !important;
+  }
+  #s1 .pc-img { aspect-ratio: 3/4 !important; object-fit: cover !important; transition: transform 0.55s cubic-bezier(.4,0,.2,1) !important; }
+  #s1 .pc:hover .pc-img { transform: scale(1.08) translateY(-2%) !important; }
+  #s1 .s1-info { padding: 14px 16px 20px !important; background: #07091c !important; border-top: 1px solid rgba(77,136,255,0.22) !important; gap: 6px !important; display: flex !important; flex-direction: column !important; }
+  #s1 .pc.sel .s1-info { border-top-color: #4d88ff !important; }
+  #s1 .pc-name { font-size: 17px !important; font-weight: 800 !important; color: rgba(255,255,255,0.97) !important; letter-spacing: -0.03em !important; }
+  #s1 .pc-badge { display: inline-block !important; position: static !important; font-size: 9px !important; letter-spacing: 0.12em !important; padding: 3px 9px !important; background: rgba(77,136,255,0.18) !important; border: 1px solid rgba(77,136,255,0.32) !important; color: rgba(175,210,255,0.90) !important; border-radius: 4px !important; width: fit-content !important; backdrop-filter: none !important; }
+  #s1 .pc-chips { display: flex !important; flex-wrap: wrap !important; gap: 4px !important; margin-top: 5px !important; }
+  #s1 .pc-chips span { font-size: 10px !important; padding: 2.5px 8px !important; background: rgba(255,255,255,0.06) !important; border: 1px solid rgba(255,255,255,0.10) !important; color: rgba(165,200,255,0.70) !important; border-radius: 4px !important; font-weight: 600 !important; }
+  #s1 .pc.sel::after { content: 'check_circle' !important; font-family: 'Material Symbols Outlined' !important; font-variation-settings: 'FILL' 1 !important; font-size: 22px !important; color: #4d88ff !important; position: absolute !important; top: 12px !important; right: 12px !important; background: rgba(5,5,15,0.72) !important; border-radius: 50% !important; width: 28px !important; height: 28px !important; display: grid !important; place-items: center !important; line-height: 1 !important; z-index: 6 !important; background-image: none !important; }
+  #s1 .pc:not(.sel)::after { content: '' !important; position: absolute !important; top: 0 !important; left: 8% !important; right: 8% !important; height: 1px !important; background: rgba(255,255,255,0.05) !important; background-image: none !important; font-size: 0 !important; }
 
-  /* ── 3. OPTION + CHECKBOX KARTEN: linker Akzent bei Auswahl ── */
-  .sb .oc.sel {
-    background: rgba(29,78,216,0.16) !important;
-    border-color: #5d97e8 !important;
-    box-shadow: inset 3px 0 0 #5d97e8, 0 0 0 1px rgba(93,151,232,0.25) !important;
-  }
+  /* ── 17. TÜRMODELL-KARTEN ── */
+  #s-tm .pc { background: rgba(255,255,255,0.03) !important; border: 1px solid rgba(255,255,255,0.08) !important; border-radius: 14px !important; transition: all 0.22s ease !important; }
+  #s-tm .pc:hover { border-color: rgba(77,136,255,0.50) !important; background: rgba(77,136,255,0.06) !important; transform: translateY(-4px) !important; box-shadow: 0 8px 24px rgba(0,0,0,0.40) !important; }
+  #s-tm .pc.sel  { border-color: #4d88ff !important; background: rgba(77,136,255,0.12) !important; box-shadow: 0 0 0 1px rgba(77,136,255,0.30), 0 8px 24px rgba(77,136,255,0.20) !important; }
+  #s-tm .pc-name { font-size: 12.5px !important; color: rgba(255,255,255,0.90) !important; }
+  #s-tm .pc-from { font-size: 10.5px !important; color: rgba(77,136,255,0.80) !important; }
 
-  .sb .cc.sel {
-    background: rgba(29,78,216,0.14) !important;
-    border-color: #5d97e8 !important;
-    box-shadow: inset 3px 0 0 #5d97e8, 0 0 0 1px rgba(93,151,232,0.22) !important;
-  }
+  /* ── 18. GRIFF-OPTIONEN ── */
+  .sb .griff-opt { background: rgba(255,255,255,0.03) !important; border-color: rgba(255,255,255,0.08) !important; border-radius: 14px !important; }
+  .sb .griff-opt:hover { background: rgba(77,136,255,0.07) !important; border-color: rgba(77,136,255,0.40) !important; }
+  .sb .griff-opt.sel { background: rgba(77,136,255,0.10) !important; border-color: #4d88ff !important; box-shadow: 0 0 0 1px rgba(77,136,255,0.22) !important; }
 
-  /* ── 4. PROGRESS BAR: dunkel ── */
-  #prog-bar .flex-1.rounded-full {
-    background: rgba(255,255,255,0.10) !important;
-  }
-
-  /* ── 5. AUTO-GESPEICHERT BADGE: dunkelgrün ── */
-  #prog-bar [style*="ecfdf5"] {
-    background: rgba(4,120,87,0.22) !important;
-    color: #34d399 !important;
-    border-color: rgba(52,211,153,0.25) !important;
-  }
-
-  /* ── 6. SCHRITT-HEADER: done-Schritte mit subtiler linker Markierung ── */
-  .sc.done .sh {
-    border-left: 3px solid rgba(93,151,232,0.30) !important;
-    padding-left: 21px !important;
-  }
-  .sc.open .sh {
-    border-left: 3px solid #5d97e8 !important;
-  }
+  /* ── 19. SIDEBAR ── */
+  #sidebar { background: rgba(8,10,20,0.94) !important; border: 1px solid rgba(255,255,255,0.09) !important; border-radius: 18px !important; box-shadow: 0 8px 40px rgba(0,0,0,0.65) !important; }
+  #conf-price-box { background: rgba(255,255,255,0.04) !important; border: 1px solid rgba(255,255,255,0.08) !important; border-radius: 14px !important; }
+  #sidebar > button:last-child { background: #1e50d4 !important; border-radius: 14px !important; font-size: 14px !important; font-weight: 700 !important; box-shadow: 0 4px 20px rgba(30,80,212,0.50) !important; letter-spacing: 0.01em !important; }
+  #sidebar > button:last-child:hover { background: #2563eb !important; box-shadow: 0 6px 28px rgba(37,99,235,0.65) !important; }
 </style>
 
 <script>
