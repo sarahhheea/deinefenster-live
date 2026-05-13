@@ -341,16 +341,16 @@ function addInnerFasen(g, X, Y, W, H, depth) {
 // HARDWARE — HOPPE Atlanta Griff (original Geometrie)
 // ════════════════════════════════════════════════════════════
 function addFensterGriff(g,cx,cy,z){
-  // HOPPE Atlanta — dunkles Anthrazit: stark kontrastierend zum weißen Rahmen
+  // HOPPE Atlanta — Anthrazit, Kreuzolive (beidseitig oval), Geschlossen=nach unten
   const hMat=new THREE.MeshStandardMaterial({
-    color:0x282b2e, roughness:0.38, metalness:0.68, envMapIntensity:1.8
+    color:0x282b2e, roughness:0.36, metalness:0.70, envMapIntensity:1.8
   });
   const schildMat=new THREE.MeshStandardMaterial({
-    color:0x242729, roughness:0.44, metalness:0.62, envMapIntensity:1.4
+    color:0x232628, roughness:0.45, metalness:0.62, envMapIntensity:1.4
   });
 
-  // Langschild — 32mm breit, 140mm hoch, 10mm tief
-  const sW=0.032,sH=0.140,sD=0.010,sR=0.008;
+  // Langschild — 30mm breit, 140mm hoch, 8mm tief
+  const sW=0.030,sH=0.140,sD=0.008,sR=0.007;
   const sShape=new THREE.Shape();
   sShape.moveTo(-sW/2+sR,-sH/2);
   sShape.lineTo(sW/2-sR,-sH/2);sShape.absarc(sW/2-sR,-sH/2+sR,sR,-Math.PI/2,0,false);
@@ -361,27 +361,18 @@ function addFensterGriff(g,cx,cy,z){
   const sMesh=new THREE.Mesh(sGeo,schildMat);
   sMesh.position.set(cx-sW/2,cy-sH/2,z);sMesh.castShadow=true;g.add(sMesh);
 
-  // Achse im oberen Drittel des Schildes
-  const pivotY=cy+sH*0.18;
-  const axle=new THREE.Mesh(new THREE.CylinderGeometry(0.009,0.009,0.024,16),hMat);
-  axle.rotation.x=Math.PI/2;axle.position.set(cx,pivotY,z+sD+0.012);g.add(axle);
+  // Achsstummel — Ø18mm × 20mm, im oberen Schildbereich
+  const pivotY=cy+sH*0.15;
+  const axle=new THREE.Mesh(new THREE.CylinderGeometry(0.009,0.009,0.020,16),hMat);
+  axle.rotation.x=Math.PI/2;axle.position.set(cx,pivotY,z+sD+0.010);axle.castShadow=true;g.add(axle);
 
-  // Griffhebel — zeigt NACH OBEN (Geschlossen-Position, sofort als Fenstergriff erkennbar)
-  const armCurve=new THREE.CatmullRomCurve3([
-    new THREE.Vector3(cx, pivotY,        z+sD+0.004),
-    new THREE.Vector3(cx, pivotY,        z+sD+0.030),
-    new THREE.Vector3(cx, pivotY+0.020,  z+sD+0.048),
-    new THREE.Vector3(cx, pivotY+0.060,  z+sD+0.056),
-    new THREE.Vector3(cx, pivotY+0.095,  z+sD+0.050),
-    new THREE.Vector3(cx, pivotY+0.110,  z+sD+0.038),
-  ]);
-  const armMesh=new THREE.Mesh(new THREE.TubeGeometry(armCurve,28,0.015,14,false),hMat);
-  armMesh.castShadow=true;g.add(armMesh);
-
-  // Griffspitze
-  const tip=new THREE.Mesh(new THREE.SphereGeometry(0.016,14,10),hMat);
-  tip.scale.set(0.9,1.0,0.9);
-  tip.position.set(cx,pivotY+0.112,z+sD+0.038);tip.castShadow=true;g.add(tip);
+  // Kreuzolive (Griffkörper) — gestreckter Ellipsoid, beide Enden rund
+  // Geschlossen-Position: Olive zeigt nach UNTEN (6-Uhr)
+  const grR=0.013, grLen=0.110;
+  const olive=new THREE.Mesh(new THREE.SphereGeometry(grR,20,14),hMat);
+  olive.scale.y=grLen/(2*grR);   // → 110mm tall × 26mm wide = echte Kreuzolive
+  olive.position.set(cx, pivotY-grLen*0.5, z+sD+0.020);
+  olive.castShadow=true;g.add(olive);
 }
 
 function addBalkontuerGriff(g,cx,cy,z,isLinks){
