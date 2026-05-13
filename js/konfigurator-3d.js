@@ -10,13 +10,13 @@ import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUnifo
 // ════════════════════════════════════════════════════════════
 // DRUTEX IGLO 5 — Profilmaße (1 unit = 1 Meter)
 // ════════════════════════════════════════════════════════════
-const OFR  = 0.090;   // Blendrahmen 90mm
-const SFR  = 0.085;   // Flügelrahmen 85mm
+const OFR  = 0.068;   // Blendrahmen 68mm (Drutex IGLO 5: 70mm, -2mm für Floating-Optik)
+const SFR  = 0.066;   // Flügelrahmen 66mm
 const DD   = 0.070;   // Profiltiefe 70mm
-const OVHG = 0.010;   // Flügel-Überschlag 10mm
-const DCT  = 0.009;   // EPDM-Dichtung 9mm
-const GLB  = 0.018;   // Glasleiste 18mm
-const ABH  = 0.022;   // Abstandhalter 22mm
+const OVHG = 0.008;   // Flügel-Überschlag 8mm
+const DCT  = 0.007;   // EPDM-Dichtung 7mm
+const GLB  = 0.014;   // Glasleiste 14mm
+const ABH  = 0.018;   // Abstandhalter 18mm
 
 // ════════════════════════════════════════════════════════════
 // SZENEN-STATE + ANIMATION
@@ -341,45 +341,45 @@ function addInnerFasen(g, X, Y, W, H, depth) {
 // HARDWARE — HOPPE Atlanta Griff (original Geometrie)
 // ════════════════════════════════════════════════════════════
 function addFensterGriff(g,cx,cy,z){
-  // Griff weiß wie Rahmen (Drutex Standard) — extremer Clearcoat für Glanzlinie
-  const hMat=new THREE.MeshPhysicalMaterial({
-    color:frameMat.color.clone(),
-    roughness:0.12,metalness:0.0,
-    clearcoat:0.98,clearcoatRoughness:0.04,envMapIntensity:3.0
+  // HOPPE Atlanta F1 — Edelstahl gebürstet (Standardfarbe bei Drutex weiß/silber)
+  const hMat=new THREE.MeshStandardMaterial({
+    color:0xc8cdd2, roughness:0.22, metalness:0.88, envMapIntensity:3.5
   });
-  const axisMat=new THREE.MeshStandardMaterial({color:0x8a8a92,roughness:0.35,metalness:0.75});
+  const schildMat=new THREE.MeshStandardMaterial({
+    color:0xcdd2d6, roughness:0.18, metalness:0.85, envMapIntensity:3.0
+  });
 
-  // Langschild 34×108×20mm abgerundet
-  const sW=0.034,sH=0.108,sD=0.020,sR=0.006;
+  // Langschild 30×95mm — schlanker als vorher
+  const sW=0.030,sH=0.095,sD=0.009,sR=0.005;
   const sShape=new THREE.Shape();
   sShape.moveTo(-sW/2+sR,-sH/2);
   sShape.lineTo(sW/2-sR,-sH/2);sShape.absarc(sW/2-sR,-sH/2+sR,sR,-Math.PI/2,0,false);
   sShape.lineTo(sW/2,sH/2-sR);sShape.absarc(sW/2-sR,sH/2-sR,sR,0,Math.PI/2,false);
   sShape.lineTo(-sW/2+sR,sH/2);sShape.absarc(-sW/2+sR,sH/2-sR,sR,Math.PI/2,Math.PI,false);
   sShape.lineTo(-sW/2,-sH/2+sR);sShape.absarc(-sW/2+sR,-sH/2+sR,sR,Math.PI,Math.PI*1.5,false);
-  const sGeo=new THREE.ExtrudeGeometry(sShape,{depth:sD,bevelEnabled:true,bevelSize:0.003,bevelThickness:0.003,bevelSegments:3});
-  const sMesh=new THREE.Mesh(sGeo,hMat);
+  const sGeo=new THREE.ExtrudeGeometry(sShape,{depth:sD,bevelEnabled:true,bevelSize:0.002,bevelThickness:0.002,bevelSegments:2});
+  const sMesh=new THREE.Mesh(sGeo,schildMat);
   sMesh.position.set(cx-sW/2,cy-sH/2,z);sMesh.castShadow=true;g.add(sMesh);
 
-  // Achslager — sichtbarer Metall-Zapfen
-  const axle=new THREE.Mesh(new THREE.CylinderGeometry(0.006,0.006,0.012,16),axisMat);
-  axle.rotation.x=Math.PI/2;axle.position.set(cx,cy,z+sD+0.006);g.add(axle);
+  // Vierkantnuss — quadratischer Achsstummel
+  const nuss=new THREE.Mesh(new THREE.BoxGeometry(0.009,0.009,0.014),hMat);
+  nuss.position.set(cx,cy,z+sD+0.007);g.add(nuss);
 
-  // Griffarm — TubeGeometry S-Kurve nach unten
+  // Griffhebel — schlanke S-Kurve, Ø8mm = realistisch
   const armCurve=new THREE.CatmullRomCurve3([
-    new THREE.Vector3(cx,cy,         z+sD+0.002),
-    new THREE.Vector3(cx,cy,         z+sD+0.020),
-    new THREE.Vector3(cx,cy-0.014,   z+sD+0.034),
-    new THREE.Vector3(cx,cy-0.052,   z+sD+0.040),
-    new THREE.Vector3(cx,cy-0.095,   z+sD+0.034),
-    new THREE.Vector3(cx,cy-0.104,   z+sD+0.026),
+    new THREE.Vector3(cx,     cy,       z+sD+0.002),
+    new THREE.Vector3(cx,     cy,       z+sD+0.018),
+    new THREE.Vector3(cx,     cy-0.010, z+sD+0.028),
+    new THREE.Vector3(cx,     cy-0.048, z+sD+0.036),
+    new THREE.Vector3(cx,     cy-0.090, z+sD+0.030),
+    new THREE.Vector3(cx,     cy-0.100, z+sD+0.022),
   ]);
-  const armMesh=new THREE.Mesh(new THREE.TubeGeometry(armCurve,28,0.018,16,false),hMat);
+  const armMesh=new THREE.Mesh(new THREE.TubeGeometry(armCurve,24,0.009,12,false),hMat);
   armMesh.castShadow=true;g.add(armMesh);
 
-  // Griffspitze — leicht ovale Kugel
-  const tip=new THREE.Mesh(new THREE.SphereGeometry(0.018,16,12),hMat);
-  tip.scale.set(1,1.35,1);tip.position.set(cx,cy-0.106,z+sD+0.026);tip.castShadow=true;g.add(tip);
+  // Griffkopf — kleine ovale Kugel
+  const tip=new THREE.Mesh(new THREE.SphereGeometry(0.010,14,10),hMat);
+  tip.scale.set(1,1.3,1);tip.position.set(cx,cy-0.101,z+sD+0.022);tip.castShadow=true;g.add(tip);
 }
 
 function addBalkontuerGriff(g,cx,cy,z,isLinks){
@@ -423,24 +423,20 @@ function addBalkontuerGriff(g,cx,cy,z,isLinks){
   addBox(g,cx-0.004,cy-sH*0.25,z+0.001,0.008,0.014,0.006,grooveMat);
 }
 
-// MACO Multi-Matic Scharnier — echte Geometrie
+// MACO Multi-Matic Scharnier — schmal, flach, silber
 function addFensterScharnier(g,cx,cy,z){
-  const sMat=new THREE.MeshStandardMaterial({color:0xbec0be,roughness:0.55,metalness:0.25,envMapIntensity:1.0});
-  const pinMat=new THREE.MeshStandardMaterial({color:0xa8aaa8,roughness:0.45,metalness:0.35});
-  // Flügelplatte 44×48×7mm
-  addBox(g,cx-0.022,cy-0.024,z,0.044,0.048,0.007,sMat);
-  // L-Körper (Lagerkörper) tiefer ins Profil
-  addBox(g,cx-0.022,cy-0.006,z-0.016,0.044,0.012,0.016,sMat);
-  // Tragezapfen Ø8mm
-  const pin=new THREE.Mesh(new THREE.CylinderGeometry(0.004,0.004,0.018,12),pinMat);
-  pin.rotation.x=Math.PI/2;pin.position.set(cx,cy,z+0.009);g.add(pin);
-  // 2 Schraubenköpfe (sichtbare Befestigung)
-  [cy-0.014,cy+0.012].forEach(sy=>{
-    const scr=new THREE.Mesh(new THREE.CylinderGeometry(0.0030,0.0028,0.005,8),pinMat);
-    scr.rotation.x=Math.PI/2;scr.position.set(cx,sy,z+0.008);g.add(scr);
-    // Schlitz im Schraubenkopf
-    addBox(g,cx-0.003,sy-0.0002,z+0.011,0.006,0.0004,0.002,grooveMat);
+  const sMat=new THREE.MeshStandardMaterial({color:0xbcc0c4,roughness:0.30,metalness:0.72,envMapIntensity:2.5});
+  const pinMat=new THREE.MeshStandardMaterial({color:0xa8acb0,roughness:0.22,metalness:0.80,envMapIntensity:2.0});
+  // Flügelplatte 28×36×4mm — schmal und flach
+  addBox(g,cx-0.014,cy-0.018,z,0.028,0.036,0.004,sMat);
+  // 2 sichtbare Schraubenköpfe
+  [cy-0.010,cy+0.008].forEach(sy=>{
+    const scr=new THREE.Mesh(new THREE.CylinderGeometry(0.0025,0.0022,0.004,8),pinMat);
+    scr.rotation.x=Math.PI/2;scr.position.set(cx,sy,z+0.005);g.add(scr);
   });
+  // Scharnierachse (kleiner Stift)
+  const pin=new THREE.Mesh(new THREE.CylinderGeometry(0.003,0.003,0.010,10),pinMat);
+  pin.rotation.x=Math.PI/2;pin.position.set(cx,cy,z+0.005);g.add(pin);
 }
 
 // Bandscharniere für Haustür (3-fach)
@@ -541,10 +537,10 @@ function buildSash(parentG, sx, sy, sw, sh, oeff, view, prod) {
   // Flügelrahmen (ExtrudeGeometry mit Bevel)
   buildFrameExtruded(inner, sx, sy, sw, sh, SFR, DD, frameMat, OVHG);
 
-  // Profil-Stufe (sichtbarer Innenrand — deutlich dunkler für Tiefenwirkung)
-  const _stepCol=new THREE.Color(frameMat.color).multiplyScalar(0.60);
-  const _stepMat=new THREE.MeshStandardMaterial({color:_stepCol,roughness:0.30,metalness:0});
-  const STEP=0.022;
+  // Profil-Stufe (Innenrand — subtile Schattierung)
+  const _stepCol=new THREE.Color(frameMat.color).multiplyScalar(0.72);
+  const _stepMat=new THREE.MeshStandardMaterial({color:_stepCol,roughness:0.28,metalness:0});
+  const STEP=0.012;
   addBox(inner,sx+SFR,    sy+sh-SFR-STEP,  DD+OVHG+0.001,sw-2*SFR,STEP,0.003,_stepMat);
   addBox(inner,sx+SFR,    sy+SFR,          DD+OVHG+0.001,sw-2*SFR,STEP,0.003,_stepMat);
   addBox(inner,sx+SFR,    sy+SFR+STEP,     DD+OVHG+0.001,STEP,sh-2*SFR-2*STEP,0.003,_stepMat);
@@ -625,14 +621,14 @@ function buildFenster(S,view){
   // Blendrahmen — ExtrudeGeometry mit echtem Bevel
   buildFrameExtruded(g,0,0,W,H,OFR,DD,frameMat);
 
-  // Innere Profil-Stufe — stark abgedunkelt für maximale Tiefenwirkung
-  const _stepCol=new THREE.Color(frameMat.color).multiplyScalar(0.44);
-  const _stepMat=new THREE.MeshStandardMaterial({color:_stepCol,roughness:0.38,metalness:0});
-  const STEP=0.026;
-  addBox(g,OFR,      H-OFR-STEP,DD+0.001,W-2*OFR,STEP,0.004,_stepMat);
-  addBox(g,OFR,      OFR,       DD+0.001,W-2*OFR,STEP,0.004,_stepMat);
-  addBox(g,OFR,      OFR+STEP,  DD+0.001,STEP,H-2*OFR-2*STEP,0.004,_stepMat);
-  addBox(g,W-OFR-STEP,OFR+STEP, DD+0.001,STEP,H-2*OFR-2*STEP,0.004,_stepMat);
+  // Innere Profil-Stufe — subtil, kein doppelter-Rahmen-Effekt
+  const _stepCol=new THREE.Color(frameMat.color).multiplyScalar(0.68);
+  const _stepMat=new THREE.MeshStandardMaterial({color:_stepCol,roughness:0.30,metalness:0});
+  const STEP=0.014;
+  addBox(g,OFR,      H-OFR-STEP,DD+0.001,W-2*OFR,STEP,0.003,_stepMat);
+  addBox(g,OFR,      OFR,       DD+0.001,W-2*OFR,STEP,0.003,_stepMat);
+  addBox(g,OFR,      OFR+STEP,  DD+0.001,STEP,H-2*OFR-2*STEP,0.003,_stepMat);
+  addBox(g,W-OFR-STEP,OFR+STEP, DD+0.001,STEP,H-2*OFR-2*STEP,0.003,_stepMat);
 
   // 45°-Fase an der Außenkante des Blendrahmens — echte Kanten-Highlights
   addOuterFasen(g, 0, 0, W, H, DD);
