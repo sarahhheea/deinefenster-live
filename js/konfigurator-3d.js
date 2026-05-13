@@ -349,12 +349,11 @@ function addFensterGriff(g,cx,cy,z){
     envMapIntensity:1.8
   });
 
-  const sD=0.020;      // 20mm Tiefe — wirft deutlichen Schatten
+  const sD=0.024;      // 24mm Tiefe — starker Schattenwurf
   const pivotY=cy;     // Pivot (Achse) auf Höhe cy
 
-  // Kurzschild — 26mm breit, 48mm hoch, Unterseite liegt auf pivotY
-  // → Schild wächst nach OBEN vom Pivot
-  const sW=0.026,sH=0.048,sR=0.006;
+  // Kurzschild — 30mm breit, 55mm hoch
+  const sW=0.030,sH=0.055,sR=0.006;
   const sShape=new THREE.Shape();
   sShape.moveTo(-sW/2+sR,0);
   sShape.lineTo(sW/2-sR,0);sShape.absarc(sW/2-sR,sR,sR,-Math.PI/2,0,false);
@@ -369,11 +368,11 @@ function addFensterGriff(g,cx,cy,z){
   const axle=new THREE.Mesh(new THREE.CylinderGeometry(0.008,0.008,0.018,14),hMat);
   axle.rotation.x=Math.PI/2;axle.position.set(cx,pivotY,z+sD+0.009);axle.castShadow=true;g.add(axle);
 
-  // Kreuzolive — 115mm × 26mm, hängt klar UNTER dem Pivot (Schließstellung)
-  const grR=0.013, grLen=0.115;
+  // Kreuzolive — 125mm × 28mm, klar sichtbar, nach UNTEN
+  const grR=0.014, grLen=0.125;
   const olive=new THREE.Mesh(new THREE.SphereGeometry(grR,22,16),hMat);
   olive.scale.y=grLen/(2*grR);
-  olive.position.set(cx, pivotY-grLen*0.5, z+sD+0.026);
+  olive.position.set(cx, pivotY-grLen*0.5, z+sD+0.028);
   olive.castShadow=true;g.add(olive);
 }
 
@@ -418,32 +417,34 @@ function addBalkontuerGriff(g,cx,cy,z,isLinks){
   addBox(g,cx-0.004,cy-sH*0.25,z+0.001,0.008,0.014,0.006,grooveMat);
 }
 
-// MACO Abdeckkappe — weiße PVC-Abdeckung + Stahlbolzen (realistisch)
+// Fensterband (Flügelband) — silbernes Alu wie im Referenzbild, klar erkennbar
 function addFensterScharnier(g,cx,cy,z){
-  const capMat=new THREE.MeshPhysicalMaterial({
-    color:0xF0EFEB, roughness:0.15, metalness:0.0,
-    clearcoat:0.75, clearcoatRoughness:0.06, envMapIntensity:1.5
+  const plateMat=new THREE.MeshStandardMaterial({
+    color:0xB0B8C0, roughness:0.22, metalness:0.80, envMapIntensity:3.2
   });
   const pinMat=new THREE.MeshStandardMaterial({
-    color:0x8890a0, roughness:0.22, metalness:0.82, envMapIntensity:3.0
+    color:0x7a8490, roughness:0.15, metalness:0.90, envMapIntensity:4.0
   });
-  // Weiße Abdeckkappe: 20mm breit × 46mm hoch × 8mm tief (MACO-Maß 18×45mm)
-  const cW=0.020,cH=0.046,cD=0.008,cR=0.004;
-  const cShape=new THREE.Shape();
-  cShape.moveTo(-cW/2+cR,0);
-  cShape.lineTo(cW/2-cR,0);cShape.absarc(cW/2-cR,cR,cR,-Math.PI/2,0,false);
-  cShape.lineTo(cW/2,cH-cR);cShape.absarc(cW/2-cR,cH-cR,cR,0,Math.PI/2,false);
-  cShape.lineTo(-cW/2+cR,cH);cShape.absarc(-cW/2+cR,cH-cR,cR,Math.PI/2,Math.PI,false);
-  cShape.lineTo(-cW/2,cR);cShape.absarc(-cW/2+cR,cR,cR,Math.PI,Math.PI*1.5,false);
-  const cGeo=new THREE.ExtrudeGeometry(cShape,{depth:cD,bevelEnabled:true,bevelSize:0.002,bevelThickness:0.002,bevelSegments:2});
-  const cap=new THREE.Mesh(cGeo,capMat);
-  cap.position.set(cx-cW/2, cy-cH/2, z);
-  cap.castShadow=true; g.add(cap);
-  // Scharnier-Stahlbolzen — sichtbares silbernes Metallelement in der Mitte
-  const pin=new THREE.Mesh(new THREE.CylinderGeometry(0.006,0.006,0.014,12),pinMat);
+
+  // Hauptplatte — 24mm breit × 40mm hoch × 6mm tief, silber
+  addBox(g, cx-0.012, cy-0.020, z, 0.024, 0.040, 0.006, plateMat);
+
+  // Scharnier-Achse (zentraler Bolzen, rund, sichtbar hervorstehend)
+  const pin=new THREE.Mesh(new THREE.CylinderGeometry(0.005,0.005,0.010,14),pinMat);
   pin.rotation.x=Math.PI/2;
-  pin.position.set(cx, cy, z+cD+0.007);
+  pin.position.set(cx, cy, z+0.008);
   pin.castShadow=true; g.add(pin);
+
+  // 2 Schraubenköpfe (Kreuzschlitz) — oben + unten, markant
+  [cy-0.013, cy+0.013].forEach(sy=>{
+    const head=new THREE.Mesh(new THREE.CylinderGeometry(0.0040,0.0035,0.005,10),pinMat);
+    head.rotation.x=Math.PI/2;
+    head.position.set(cx, sy, z+0.007);
+    head.castShadow=true; g.add(head);
+    // Kreuzschlitz (zwei flache Boxen)
+    addBox(g, cx-0.0035, sy-0.0005, z+0.010, 0.007, 0.001, 0.001, new THREE.MeshStandardMaterial({color:0x3a3e42,roughness:0.8,metalness:0}));
+    addBox(g, cx-0.0005, sy-0.0035, z+0.010, 0.001, 0.007, 0.001, new THREE.MeshStandardMaterial({color:0x3a3e42,roughness:0.8,metalness:0}));
+  });
 }
 
 // Bandscharniere für Haustür (3-fach)
