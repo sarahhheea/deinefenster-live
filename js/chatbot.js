@@ -5,191 +5,296 @@
 
 const WORKER_URL = ''; // Leer = regelbasierter Modus. Worker-URL eintragen für echte KI.
 
-// ─── Regelwerk (aus echten Website-Inhalten) ───────────────────────────────────
+// ─── Regelwerk ─────────────────────────────────────────────────────────────────
+// Reihenfolge ist entscheidend — spezifisch vor allgemein, bekannte Konflikte zuerst
 const RULES = [
+
+  // ── Begrüßung ────────────────────────────────────────────────────────────────
   {
-    keys: ['hallo','hey','guten tag','moin','guten morgen','guten abend','servus'],
-    answer: 'Hallo! Schön, dass du da bist. 👋 Ich bin der KI-Assistent von DeineFenster.de und helfe dir bei Fragen zu Fenstern, Preisen, Lieferung oder unserem Hofverkauf. Was möchtest du wissen?'
+    keys: ['hallo','hey','guten tag','moin','guten morgen','guten abend','servus','hi!'],
+    answer: 'Hallo! 👋 Ich helfe dir bei Fragen zu Fenstern, Türen, Lieferung, Förderung und unserem Hofverkauf. Was möchtest du wissen?'
   },
 
-  // ── Lieferkosten (VOR Preis — sonst matcht "wie viel" in Preis zuerst) ────────
+  // ── Schutzfolie (VOR Pflege) ─────────────────────────────────────────────────
   {
-    keys: ['lieferkosten','versandkosten','versand kostet','porto','kostet die lieferung','kostet versand','kostet lieferung','lieferung kostet','kostet der versand','was kostet versand','was kostet lieferung'],
-    answer: 'Lieferung deutschlandweit per Spedition (mit eigenem Stapler). <strong>Kostenlos</strong> ab 4.000 € Bestellwert oder ab 10 Fensterelementen. Bei 5–9 Elementen: <strong>200 € Versandpauschale</strong>. Einzelne Hebeschiebetür: 300 €. Lagerware und Gebrauchtware: <strong>nur Selbstabholung</strong> in Brandenburg.'
+    keys: ['schutzfolie','folie abziehen','folie entfernen','folie drauf','folie kleben','folie fenster'],
+    answer: '⚠️ <strong>Schutzfolie sofort nach dem Einbau abziehen!</strong> Bei längerem UV-Kontakt klebt sie sich dauerhaft in den Rahmen — kaum mehr zu entfernen. Handwerker vergessen das häufig. Bitte nach der Montage kurz kontrollieren.'
   },
 
-  // ── Förderung (VOR Preis — sonst matcht "wie viel zuschuss" in Preis) ─────────
+  // ── Kondensation / Beschlag ──────────────────────────────────────────────────
   {
-    keys: ['förderung','fördermittel','bafa','kfw','zuschuss','staatlich','subvention','beg','förderfähig'],
-    answer: 'Ja! Für <strong>IGLO Energy (Uw 0,71)</strong> und <strong>IGLO Edge (Uw 0,66)</strong> gibt es <strong>BAFA BEG EM</strong> — bis zu 15% Zuschuss. Wichtig: Antrag <strong>vor</strong> der Bestellung stellen auf bafa.de. KfW Nr. 458 gilt <strong>nicht mehr</strong> für Einzelfenster. IGLO 5 Classic (Uw 0,83) ist lt. aktueller Richtlinie nicht förderfähig. Angaben ohne Gewähr — bitte bafa.de prüfen.'
+    keys: ['kondensation','beschlägt','beschlagen','schwitzwasser','tauwasser','wasser am fenster','fenster schwitzen','innen beschlagen','außen beschlagen','feuchtigkeit fenster'],
+    answer: '🌡️ <strong>Beschlag am Fenster — was steckt dahinter:</strong><br><br>• <strong>Innen beschlagen</strong> = zu hohe Luftfeuchtigkeit im Raum. Lösung: 3–4× täglich <strong>stoßlüften</strong> (5 Min. voll öffnen — nicht kippen!).<br>• <strong>Außen beschlagen</strong> (morgens) = sehr gute Dämmung. Das ist ein Qualitätsmerkmal, kein Fehler!<br>• <strong>Zwischen den Scheiben</strong> = defekte Dichtung → Garantiefall. Bitte Foto per <a href="https://wa.me/491717263776" target="_blank">WhatsApp</a> schicken.'
   },
 
-  // ── Haustüren (VOR Ankauf — sonst matcht "verkauft ihr" in Ankauf) ────────────
+  // ── Pflege / Wartung ──────────────────────────────────────────────────────────
   {
-    keys: ['haustür','haustüren','eingangstür','außentür','neue tür','neue türen'],
-    answer: 'Ja, wir führen auch <strong>Drutex-Haustüren</strong> — verschiedene Modelle und Farben (inkl. RAL-Farben und Holzdekore). Im <a href="haustuer-3d.html">Haustür-3D-Konfigurator</a> kannst du Modell und Farbe direkt visualisieren. Für ein Angebot: <a href="https://wa.me/491717263776" target="_blank">WhatsApp 0171 7263776</a>.'
+    keys: ['pflege','warten','wartung','reinigen','putzen','ölen','schmieren','dichtung','gummidichtung','fenster einstellen','klemmt','schließt nicht','knarrt'],
+    answer: '🧹 <strong>Fenster richtig pflegen:</strong><br><br>• <strong>Rahmen</strong>: mildes Seifenwasser, keine Lösungsmittel oder Scheuermittel<br>• <strong>Beschläge ölen</strong>: 1× jährlich (Maschinenöl oder Fensterpflegeöl)<br>• <strong>Dichtungen</strong>: 1× jährlich mit Glycerin einreiben — bleiben elastisch und dichten besser<br>• <strong>Klemmt / schließt schlecht</strong>: meist durch einfaches Nachstellen des Beschlags zu beheben — Anleitung auf Anfrage per <a href="https://wa.me/491717263776" target="_blank">WhatsApp</a>.'
   },
 
-  // ── Preise ──────────────────────────────────────────────────────────────────
+  // ── Lüften / Schimmel ────────────────────────────────────────────────────────
   {
-    keys: ['preis','kosten','kostet','wie viel','wieviel','teuer','günstig','angebot','budget','ab welchem'],
-    answer: 'Der Preis hängt von Maßen, Profil, Farbe und Verglasung ab — daher machen wir für jede Anfrage ein individuelles Angebot.<br><br>📩 <strong>Schreib uns einfach direkt, was du haben möchtest</strong> — Maße, Fenstertyp, gewünschte Farbe — und wir melden uns mit einem konkreten Preis:<br><br><a href="https://wa.me/491717263776" target="_blank" style="display:inline-block;margin-top:4px;padding:7px 14px;background:rgba(118,169,250,0.15);border:1px solid rgba(118,169,250,0.3);border-radius:8px;color:#76a9fa;text-decoration:none;font-weight:700;font-size:12px;">💬 WhatsApp 0171 7263776</a>'
+    keys: ['lüften','stoßlüften','dauerlüften','kipplüften','schimmel','schimmelgefahr','lüftung','wie oft lüften','richtig lüften'],
+    answer: '💨 <strong>Richtig lüften mit neuen Fenstern:</strong><br><br>Neue dichte Fenster dämmen so gut, dass du aktiv lüften musst — die „natürliche Undichtigkeit" alter Fenster fehlt.<br><br>✅ <strong>Stoßlüften</strong>: 5 Min. voll öffnen, 3–4× täglich — am effektivsten<br>❌ <strong>Dauerkippen vermeiden</strong>: kühlt Wände aus, erhöht Schimmelgefahr<br><br>Bad & Küche: Lüftungsanlage oder Abzugshaube empfohlen.'
+  },
+
+  // ── Widerruf / Rückgabe (Legal §312g BGB) ───────────────────────────────────
+  {
+    keys: ['widerruf','widerrufsrecht','zurückgeben','rückgabe','rückgaberecht','stornieren','storno','kann ich stornieren','bestellung stornieren','umtauschen'],
+    answer: '⚠️ <strong>Kein Widerrufsrecht bei Maßfenstern.</strong><br><br>Fenster werden mm-genau nach deinen individuellen Angaben gefertigt — sie sind nach <strong>§312g Abs. 2 Nr. 1 BGB</strong> von der Rückgabe ausgenommen. Das gilt für alle Fenster-Online-Shops, nicht nur bei uns.<br><br>Daher: Maße und Angebot sorgfältig prüfen, <strong>dann erst überweisen</strong>. Fehler im Angebot vor der Überweisung? Sofort Bescheid geben — wir korrigieren das kostenlos.'
+  },
+
+  // ── Lieferkosten (VOR Preis) ─────────────────────────────────────────────────
+  {
+    keys: ['lieferkosten','versandkosten','versand kostet','porto','kostet die lieferung','kostet versand','kostet lieferung','lieferung kostet','was kostet versand','was kostet lieferung','versandkostenfrei'],
+    answer: '🚚 <strong>Lieferkosten:</strong><br><br>• <strong>Kostenlos</strong> ab 4.000 € oder ab 10 Fensterelementen<br>• <strong>200 €</strong> Versandpauschale bei 5–9 Elementen<br>• Einzelne Hebeschiebetür: <strong>300 €</strong><br>• Lager- & Gebrauchtware: <strong>nur Selbstabholung</strong> in Brandenburg<br><br>Lieferung per Spedition deutschlandweit, mit eigenem Stapler beim Kunden.'
+  },
+
+  // ── Förderung (VOR Preis) ────────────────────────────────────────────────────
+  {
+    keys: ['förderung','fördermittel','bafa','kfw','zuschuss','staatlich','subvention','beg','förderfähig','steuer absetzen','steuerlich absetzbar'],
+    answer: '💰 <strong>Förderung für neue Fenster (Stand 2026):</strong><br><br>• <strong>BAFA BEG EM</strong>: bis <strong>15% Zuschuss</strong> für IGLO Energy (Uw 0,71) und IGLO Edge (Uw 0,66). Antrag <strong>vor</strong> Bestellung auf bafa.de stellen!<br>• <strong>KfW 458</strong>: gilt <strong>nicht mehr</strong> für Einzelmaßnahmen (nur noch in Kombination mit Komplettsanierung)<br>• <strong>IGLO 5 Classic (Uw 0,83)</strong>: nicht BAFA-förderfähig<br>• <strong>Steuer</strong>: 20% der Handwerker-Lohnkosten absetzbar (§35a EStG) — nur Arbeitsleistung, nicht Material<br><br>⚠️ Angaben ohne Gewähr — bitte bafa.de und Steuerberater prüfen.'
+  },
+
+  // ── Haustüren ────────────────────────────────────────────────────────────────
+  {
+    keys: ['haustür','haustüren','eingangstür','außentür'],
+    answer: 'Ja, wir führen <strong>Drutex-Haustüren</strong> in vielen Modellen — RAL-Farben und Holzdekore verfügbar. Im <a href="haustuer-3d.html">Haustür-3D-Konfigurator</a> kannst du Modell und Farbe direkt visualisieren. Angebot: <a href="https://wa.me/491717263776" target="_blank">WhatsApp 0171 7263776</a>.'
+  },
+
+  // ── Haustür Maße / DIN ───────────────────────────────────────────────────────
+  {
+    keys: ['haustür maße','haustür größe','haustür breite','haustür höhe','türmaße','türgröße','norm haustür','din haustür','standard haustür'],
+    answer: '📐 <strong>Standard-Haustürmaße (nach DIN):</strong><br><br>• Türblatt: <strong>1000 × 2100 mm</strong> (Breite × Höhe) — häufigste Variante<br>• Auch üblich: 900 mm oder 1100 mm Breite<br>• Rohbauöffnung: ca. 60–80 mm größer als Türblatt einrechnen<br><br>Wir fertigen auch Sondermaße — einfach Rohbaumaß per <a href="https://wa.me/491717263776" target="_blank">WhatsApp</a> schicken.'
+  },
+
+  // ── Haustür Einbruchschutz ───────────────────────────────────────────────────
+  {
+    keys: ['haustür einbruch','haustür sicherheit','einbruchsichere haustür','türschloss','mehrfachverriegelung haustür'],
+    answer: 'Drutex-Haustüren haben standardmäßig <strong>3-Punkt-Verriegelung</strong> + Stahlverstärkung. Auf Anfrage auch <strong>RC2-zertifiziert</strong> (für Erdgeschoss empfohlen). Details per <a href="https://wa.me/491717263776" target="_blank">WhatsApp</a>.'
+  },
+
+  // ── Preis ───────────────────────────────────────────────────────────────────
+  {
+    keys: ['preis','kosten','kostet','wie viel','wieviel','teuer','günstig','budget','ab welchem','was kostet ein'],
+    answer: 'Der Preis hängt von Maßen, Profil, Farbe und Verglasung ab — wir erstellen für jede Anfrage ein individuelles Angebot.<br><br>📩 <strong>Schreib uns:</strong> Maße, Fenstertyp und Farbe — wir melden uns mit einem konkreten Preis:<br><br><a href="https://wa.me/491717263776" target="_blank" style="display:inline-block;margin-top:4px;padding:7px 14px;background:rgba(118,169,250,0.15);border:1px solid rgba(118,169,250,0.3);border-radius:8px;color:#76a9fa;text-decoration:none;font-weight:700;font-size:12px;">💬 WhatsApp 0171 7263776</a>'
+  },
+
+  // ── Transportschaden ─────────────────────────────────────────────────────────
+  {
+    keys: ['transportschaden','lieferschaden','beschädigt angekommen','kaputt geliefert','schaden bei lieferung','kaputt angekommen'],
+    answer: '⚠️ <strong>Transportschäden sofort bei Anlieferung melden!</strong><br><br>1. Lieferschein <strong>vor</strong> dem Unterschreiben auf Schäden prüfen<br>2. Schäden auf dem Lieferschein notieren oder Annahme verweigern<br>3. Fotos machen → sofort kontaktieren: <a href="https://wa.me/491717263776" target="_blank">WhatsApp</a> oder <a href="tel:+493381214837">03381 / 214 83 73</a><br><br>Nachträglich gemeldete Transportschäden sind kaum durchsetzbar!'
   },
 
   // ── Lieferzeit ──────────────────────────────────────────────────────────────
   {
-    keys: ['lieferzeit','wann kommt','wann liefert','geliefert','lieferung','liefern','zustellung','wann fertig','bestellung geliefert','dauert die lieferung','wie lange dauert','abholen','selbst abholen','abholung','lager abholen'],
-    answer: '📦 <strong>Neuware (Drutex Maßfenster):</strong> Nach deiner Zahlung bestellen wir beim Werk — ab dann ca. <strong>2 Wochen</strong> bis zur Lieferung. Versand per Spedition deutschlandweit, <strong>versandkostenfrei</strong> ab 4.000 € oder 10 Elementen (sonst 200 €).<br><br>🚗 <strong>Selbstabholung möglich:</strong> Du kannst deine Bestellung auch ins Lager liefern lassen und selbst abholen — praktisch wenn Spedition nicht passt.<br><br>❌ <strong>Gebrauchtware & Lagerware</strong> liefern wir grundsätzlich nicht — nur Selbstabholung in Brandenburg a.d.H. (Hofverkauf freitags).'
+    keys: ['lieferzeit','wann kommt','wann liefert','geliefert','lieferung','liefern','zustellung','wann fertig','dauert die lieferung','wie lange dauert','abholen','selbst abholen','abholung','lager abholen'],
+    answer: '📦 <strong>Lieferzeiten:</strong><br><br>• <strong>Drutex Maßfenster (Neuware)</strong>: ca. <strong>2 Wochen</strong> ab unserem Bestelldatum beim Werk — nach deiner Zahlung<br>• <strong>Deutschlandweit</strong> per Spedition — kostenlos ab 4.000 € oder 10 Elementen (sonst 200 €)<br>• <strong>Selbstabholung</strong>: möglich — Bestellung ins Lager, selbst abholen<br>• <strong>Gebrauchte & Lagerware</strong>: nur Selbstabholung in Brandenburg, kein Versand'
   },
 
   // ── Einbau ──────────────────────────────────────────────────────────────────
   {
-    keys: ['einbau','montage','montieren','einbauen','installieren','wer baut','monteur','handwerker','baut ihr','baut ihr auch','montiert ihr'],
-    answer: 'Wir <strong>liefern</strong> — den Einbau übernehmen wir selbst nicht. Du beauftragst einen Handwerker deiner Wahl. Tipp: Frag beim Liefertermin nach, ob dein Monteur vor Ort sein kann — die meisten Fensterbauer nehmen die Lieferung direkt entgegen. Wichtig: Nicht-fachgerechte Montage lässt die Garantie erlöschen.'
+    keys: ['einbau','montage','montieren','einbauen','installieren','wer baut','monteur','handwerker','baut ihr','einbaukosten'],
+    answer: 'Wir <strong>liefern nur</strong> — Einbau bieten wir selbst nicht an. Du beauftragst deinen Handwerker. Wichtig: Nicht-fachgerechte Montage lässt die Herstellergarantie erlöschen. Tipp: Frag ob dein Monteur bei der Lieferung vor Ort sein kann.'
   },
 
-  // ── Ausmessen / Aufmaß ──────────────────────────────────────────────────────────
+  // ── Ausmessen ───────────────────────────────────────────────────────────────
   {
-    keys: ['ausmessen','aufmaß','maße nehmen','maß nehmen','fenster messen','wie messe','richtig messen','richtig ausmessen','lichte weite','rohbaumaß','einbaumaß','maße ermitteln','maße bestimmen'],
-    answer: '📏 <strong>So misst du dein Fenster richtig aus:</strong><br><br>Nicht das alte Fenster messen — sondern das <strong>Wandloch (Lichte Weite)</strong>:<br>• Breite: oben, mitte, unten messen → <strong>kleinsten Wert nehmen</strong><br>• Höhe: links, mitte, rechts messen → <strong>kleinsten Wert nehmen</strong><br>• Davon ca. <strong>1 cm rundum</strong> abziehen (Montagefuge)<br><br><strong>Beispiel:</strong> Wandloch 1182 × 982 mm → Bestellung <strong>1180 × 980 mm</strong><br><br>💡 Tipp: Mit zwei Personen messen — dann passieren weniger Fehler. Bei Unsicherheit einfach ein Foto per <a href="https://wa.me/491717263776" target="_blank">WhatsApp 0171 7263776</a> schicken — wir schauen drüber!'
+    keys: ['ausmessen','aufmaß','maße nehmen','maß nehmen','fenster messen','wie messe','richtig messen','richtig ausmessen','lichte weite','rohbaumaß','einbaumaß','maße ermitteln'],
+    answer: '📏 <strong>Fenster richtig ausmessen:</strong><br><br>Nicht das alte Fenster — sondern das <strong>Wandloch (Lichte Weite)</strong> messen:<br>• Breite: oben, mitte, unten → <strong>kleinsten Wert nehmen</strong><br>• Höhe: links, mitte, rechts → <strong>kleinsten Wert nehmen</strong><br>• Montagefuge: ca. <strong>1 cm pro Seite</strong> abziehen<br><br>📌 Beispiel: Wandloch 1182 × 982 mm → Bestellung <strong>1180 × 980 mm</strong><br><br>Unsicher? Foto per <a href="https://wa.me/491717263776" target="_blank">WhatsApp</a> schicken — wir schauen drüber!'
   },
 
-  // ── Fehlmessung / Haftung ────────────────────────────────────────────────────
+  // ── Fehlmessung ─────────────────────────────────────────────────────────────
   {
-    keys: ['falsch gemessen','fehlmessung','haftet','haftung','falsches maß','wer haftet','passiert wenn','was passiert'],
-    answer: 'Bei selbst gemessenem Aufmaß liegt das Risiko bei dir — Fenster werden mm-genau nach deinen Angaben gefertigt. Deshalb: zweimal messen (oben/unten und links/rechts), kleineres Maß nehmen. Für größere Projekte empfehlen wir ein <strong>kostenloses Aufmaß-Angebot</strong> per <a href="https://wa.me/491717263776" target="_blank">WhatsApp 0171 7263776</a>.'
+    keys: ['falsch gemessen','fehlmessung','haftet','haftung','falsches maß','wer haftet','was passiert wenn falsch'],
+    answer: 'Bei selbst gemessenen Maßen liegt das Risiko bei dir — Fenster werden mm-genau gefertigt. Fehler im Angebot <strong>vor</strong> der Überweisung melden — dann korrigieren wir kostenlos. Nach Zahlungseingang und Produktionsstart nicht mehr möglich.'
+  },
+
+  // ── PSK vs HST ───────────────────────────────────────────────────────────────
+  {
+    keys: ['psk unterschied','hst unterschied','unterschied hebeschiebe','unterschied psk','parallel schiebe kipp','welche schiebetür besser','psk oder hst','welches system besser'],
+    answer: '🔄 <strong>PSK vs. Hebe-Schiebetür (HST):</strong><br><br><strong>PSK (Parallel-Schiebe-Kipp)</strong>:<br>✓ Günstiger · Kippfunktion zum Lüften<br>✗ Nicht barrierefrei (hohe Bodenschwelle)<br><br><strong>HST (Hebe-Schiebetür)</strong>:<br>✓ Sehr leichtgängig auch bei großen Elementen · Null-Schwelle möglich<br>✗ Teurer · Keine Kippfunktion<br><br>Empfehlung: HST ab 2.500 mm Breite oder wenn barrierefrei gewünscht. Beratung: <a href="https://wa.me/491717263776" target="_blank">WhatsApp</a>.'
+  },
+
+  // ── Schiebetüren ────────────────────────────────────────────────────────────
+  {
+    keys: ['schiebetür','schiebtür','hebe-schiebe','hebeschiebe','hebe schiebe','psk','panoramatür','terrassenschiebe','große öffnung','sliding door'],
+    answer: 'Wir fertigen <strong>Drutex Hebe-Schiebetüren</strong> bis zu <strong>6.500 mm Breite</strong> — ideal für große Terrassenöffnungen. Profile: IGLO HS, IGLO Energy PSK, IGLO 5 Classic PSK, IGLO Slide. Angebot: <a href="https://wa.me/491717263776" target="_blank">WhatsApp 0171 7263776</a>.'
+  },
+
+  // ── Balkontüren ──────────────────────────────────────────────────────────────
+  {
+    keys: ['balkontür','balkontüren','terrassentür','terrassentüren','balkon','terrasse','terrassenausgang','balkonausgang'],
+    answer: 'Ja, wir fertigen <strong>Drutex Balkontüren & Terrassentüren</strong> in allen IGLO-Profilen, maßgefertigt. Einzel- oder Doppeltür, mit oder ohne Rollo. Anfragen: <a href="https://wa.me/491717263776" target="_blank">WhatsApp</a> oder direkt im <a href="konfigurator.html">Konfigurator</a>.'
   },
 
   // ── Zahlung ─────────────────────────────────────────────────────────────────
   {
-    keys: ['zahlen','zahlung','bezahlen','zahlungsart','zahlungsmöglichkeit','zahlungsweise','wie kann ich bezahlen','wie bezahle','wie zahle','wie zahlt','vor ort bezahlen','barzahlung','bar zahlen','kann ich bar','bar bezahlen','überweisung','anzahlung','ratenzahlung','rate','auf rechnung','per rechnung','rechnung','vorkasse','welche zahlungsmittel','welche zahlungsarten'],
-    answer: '💳 <strong>So läuft die Zahlung:</strong><br><br>📦 <strong>Online-Bestellung (Konfigurator):</strong><br>Du konfigurierst → wir schicken dir ein individuelles Angebot per E-Mail → du überweist den Betrag → dann bestellen wir bei Drutex.<br><br>🏪 <strong>Vor-Ort-Kauf (Hofverkauf freitags):</strong><br>Bar, Karte oder PayPal — Zahlung nach der Abholung ist möglich.<br><br>❌ Keine Ratenzahlung.'
+    keys: ['zahlen','zahlung','bezahlen','zahlungsart','zahlungsmöglichkeit','wie kann ich bezahlen','wie bezahle','wie zahle','barzahlung','bar zahlen','kann ich bar','überweisung','anzahlung','ratenzahlung','rate','auf rechnung','per rechnung','vorkasse','welche zahlungsarten','paypal'],
+    answer: '💳 <strong>Zahlungsablauf:</strong><br><br>📦 <strong>Online-Bestellung:</strong><br>Konfigurieren → Angebot per E-Mail erhalten → <strong>Gesamtbetrag überweisen</strong> → wir bestellen bei Drutex<br><br>🏪 <strong>Vor-Ort (Hofverkauf freitags):</strong><br>Bar, EC-Karte oder PayPal — Zahlung nach der Abholung möglich<br><br>❌ Keine Ratenzahlung · Keine Teilzahlung · Keine Anzahlung'
   },
 
   // ── Gebrauchte kaufen ───────────────────────────────────────────────────────
   {
     keys: ['gebraucht','gebrauchte','occasion','hofverkauf','hof','besichtigen','vor ort','second hand','lagerware','lagerfenster'],
-    answer: 'Gebrauchte Fenster (wechselnder Bestand) gibt es bei uns jeden <strong>Freitag 10–17 Uhr</strong> auf dem Hof (Fohrder Landstraße 13, Brandenburg). Kein Vorabverkauf, keine Reservierungen — Selbstverladung, eigenes Fahrzeug mitbringen. Bis 20 Uhr möglich nach tel. Voranmeldung: <a href="tel:+493381214837">03381 / 214 83 73</a>.'
+    answer: '♻️ Gebrauchte Fenster (wechselnder Bestand) gibt es jeden <strong>Freitag 10–17 Uhr</strong> auf dem Hof (Fohrder Landstraße 13, Brandenburg). Keine Reservierungen, kein Vorabverkauf. Selbstverladung, eigenes Fahrzeug mitbringen. Bis 20 Uhr nach Voranmeldung: <a href="tel:+493381214837">03381 / 214 83 73</a>.'
   },
 
   // ── Gebrauchte verkaufen ────────────────────────────────────────────────────
   {
-    keys: ['fenster abgeben','fenster loswerden','alte fenster','ankaufen','nehmt ihr an','nehmt ihr','ihr kauft','fenster verkaufen','gebraucht verkaufen'],
-    answer: 'Wir kaufen <strong>keine</strong> gebrauchten Fenster an. Für die Entsorgung ist der örtliche Wertstoffhof zuständig — PVC-Fenster können dort kostenlos abgegeben werden.'
+    keys: ['fenster abgeben','fenster loswerden','ankaufen','nehmt ihr an','ihr kauft','fenster verkaufen','gebraucht verkaufen'],
+    answer: 'Wir kaufen <strong>keine</strong> gebrauchten Fenster an.'
+  },
+
+  // ── Alte Fenster entsorgen ───────────────────────────────────────────────────
+  {
+    keys: ['alte fenster entsorgen','fenster entsorgen','altes fenster weg','wohin mit alten fenstern','entsorgung','recycling fenster','wo entsorgen'],
+    answer: 'Alte PVC-Fenster zum <strong>Wertstoffhof</strong> bringen — dort kostenlos abgebbar (PVC-Recycling). Viele Handwerker nehmen beim Einbau die Altfenster gleich mit. Wir selbst nehmen keine Altfenster an.'
   },
 
   // ── Öffnungszeiten ──────────────────────────────────────────────────────────
   {
-    keys: ['öffnungszeit','geöffnet','wann offen','wann da','freitag','wann auf','kommen','vorbeikommen','wann habt','besuch'],
-    answer: 'Unser <strong>Hofverkauf</strong> ist jeden <strong>Freitag 10–17 Uhr</strong> geöffnet (Fohrder Landstraße 13, Brandenburg). Bis 20 Uhr möglich nach tel. Voranmeldung: <a href="tel:+493381214837">03381 / 214 83 73</a>. Mo–Do und Sa–So kein Hofverkauf.<br><br>⚠️ <strong>Achtung Ferien & Urlaub:</strong> In den Sommerferien und zu Feiertagen kann es abweichende Zeiten geben — bitte vorher kurz anrufen!<br><br><a href="kontakt.html" style="display:inline-block;margin-top:6px;padding:7px 14px;background:rgba(118,169,250,0.15);border:1px solid rgba(118,169,250,0.3);border-radius:8px;color:#76a9fa;text-decoration:none;font-weight:700;font-size:12px;">→ Öffnungszeiten auf der Kontaktseite</a>'
+    keys: ['öffnungszeit','geöffnet','wann offen','wann da','freitag','wann auf','vorbeikommen','wann habt','besuch'],
+    answer: '🕙 <strong>Hofverkauf:</strong> Freitags <strong>10–17 Uhr</strong> (Fohrder Landstraße 13, Brandenburg). Bis 20 Uhr nach Voranmeldung: <a href="tel:+493381214837">03381 / 214 83 73</a>. Mo–Do und Sa–So kein Hofverkauf.<br><br>⚠️ Sommerferien und Feiertage: ggf. abweichende Zeiten — vorher kurz anrufen!<br><br><a href="kontakt.html" style="display:inline-block;margin-top:6px;padding:7px 14px;background:rgba(118,169,250,0.15);border:1px solid rgba(118,169,250,0.3);border-radius:8px;color:#76a9fa;text-decoration:none;font-weight:700;font-size:12px;">→ Kontaktseite</a>'
   },
 
-  // ── IGLO Energy / Produktmodelle ────────────────────────────────────────────
+  // ── Schallschutz ─────────────────────────────────────────────────────────────
   {
-    keys: ['iglo energy','iglo edge','iglo 5','7-kammer','passivhaus','profil','einbautiefe','82 mm'],
-    answer: '<strong>IGLO Energy</strong>: 7-Kammer, 82 mm Einbautiefe, Uw 0,71 W/m²K — Passivhaus-tauglich und BAFA-förderfähig. <strong>IGLO Edge</strong>: Uw 0,66, Premium. <strong>IGLO 5 Classic</strong>: Einstiegsmodell, Uw 0,83 — günstig, nicht BAFA-förderfähig. Alle Profile: Klasse A nach EN 12608 (3 mm Wandstärke — höchste Qualitätsstufe).'
+    keys: ['schallschutz','schallschutzklasse','lärm','lärmschutz','straßenlärm','dezibel','db ','geräusche','lärmdämmung'],
+    answer: '🔇 <strong>Schallschutzklassen (SSK):</strong><br><br>• <strong>SSK 1</strong> (25 dB) — ruhige Wohnlage<br>• <strong>SSK 2</strong> (30 dB) — normale Wohnstraße, Standard 3-fach-Verglasung<br>• <strong>SSK 3</strong> (35 dB) — Hauptstraßen, städtische Lage (empfohlen)<br>• <strong>SSK 4</strong> (40 dB) — stark befahrene Straßen, Bahnlinien<br><br>Für SSK 3–4 gibt es VSG-Verbundsicherheitsglas und asymmetrische Scheibenstärken. Anfrage per <a href="https://wa.me/491717263776" target="_blank">WhatsApp</a>.'
   },
 
-  // ── 3-fach vs 2-fach ────────────────────────────────────────────────────────
+  // ── IGLO Profile ────────────────────────────────────────────────────────────
   {
-    keys: ['dreifach','3-fach','triple','doppel','2-fach','zweifach','verglasung','uw-wert','u-wert','wärmeschutz','schallschutz','dämmung'],
-    answer: '<strong>2-fach</strong> (Uw ca. 1,1): günstiger, reicht für Nebenräume/Keller. <strong>3-fach</strong> (Uw bis 0,66): empfohlen für Wohnräume, Schlafzimmer, BAFA-Förderung — ca. 20–30% Aufpreis, aber deutlich weniger Wärmeverlust. Für Sanierungen und Neubauten empfehlen wir 3-fach.'
+    keys: ['iglo energy','iglo edge','iglo 5','7-kammer','passivhaus','profil','einbautiefe','82 mm','welches profil','profilsystem'],
+    answer: '<strong>IGLO Energy</strong>: 7-Kammer, 82 mm, Uw 0,71 — Passivhaus-tauglich, BAFA-förderfähig<br><strong>IGLO Edge</strong>: Uw 0,66 — Premium<br><strong>IGLO 5 Classic</strong>: Uw 0,83 — Einstieg, günstiger, nicht BAFA-förderfähig<br><br>Alle Profile Klasse A nach EN 12608 (3 mm Wandstärke — höchste Qualitätsstufe).'
+  },
+
+  // ── 2-fach vs 3-fach ────────────────────────────────────────────────────────
+  {
+    keys: ['dreifach','3-fach','zweifach','2-fach','verglasung','uw-wert','u-wert','wärmeschutz','wärmedämmung','welche verglasung'],
+    answer: '<strong>2-fach</strong> (Uw ca. 1,1): günstiger, für Keller und Nebenräume.<br><strong>3-fach</strong> (Uw bis 0,66): empfohlen für Wohnräume, BAFA-förderfähig, ca. 20–30% Aufpreis — deutlich weniger Wärmeverlust.<br><br>Für Sanierungen und Neubauten: immer <strong>3-fach</strong>.'
   },
 
   // ── Einbruchschutz ──────────────────────────────────────────────────────────
   {
-    keys: ['einbruch','rc2','rc1','sicherheit','einbruchsicher','pilzkopf','sicherheitsglas','p4a'],
-    answer: 'Standard ist <strong>RC1N</strong> (Grundschutz). <strong>RC2</strong> ist im Konfigurator als Option wählbar — beinhaltet verstärkte Pilzkopfzapfen-Beschläge und VSG-Sicherheitsglas P4A. Polizei empfiehlt RC2 für EG-Fenster und leicht zugängliche Türen. <strong>RC3</strong> (noch höherer Schutz) ebenfalls verfügbar.'
+    keys: ['einbruch','rc2','rc1','sicherheit','einbruchsicher','pilzkopf','sicherheitsglas'],
+    answer: 'Standard: <strong>RC1N</strong> (Grundschutz). <strong>RC2</strong> im Konfigurator wählbar — Pilzkopfzapfen-Beschläge + VSG-Glas P4A. Polizei empfiehlt RC2 für Erdgeschoss. RC3 auf Anfrage verfügbar.'
   },
 
   // ── Garantie ────────────────────────────────────────────────────────────────
   {
     keys: ['garantie','gewährleistung','reklamation','defekt','kaputt','mangel','wie lange gilt','jahre garantie'],
-    answer: 'Drutex-Herstellergarantie: <strong>10 Jahre Profil</strong> (Verzug, Vergilbung, Versprödung) + <strong>5 Jahre Beschlag</strong> (Mechanik) + 2 Jahre gesetzliche Gewährleistung. Nicht abgedeckt: Schäden durch unfachgemäße Montage, Transportschäden (sofort bei Anlieferung melden!), Kratzer durch Bauarbeiten.'
+    answer: 'Drutex-Garantie: <strong>10 Jahre Profil</strong> + <strong>5 Jahre Beschlag</strong> + 2 Jahre gesetzliche Gewährleistung.<br><br>Nicht abgedeckt: unfachgerechte Montage, Transportschäden (sofort bei Lieferung melden!), Kratzer durch Bauarbeiten.'
   },
 
-  // ── Deutschlandweite Lieferung ──────────────────────────────────────────────
+  // ── Öffnungsarten ────────────────────────────────────────────────────────────
+  {
+    keys: ['dreh-kipp','dreh kipp','kippfenster','drehfenster','öffnungsart','wie öffnet','welche art','stulp','wie geht das fenster auf'],
+    answer: '🪟 <strong>Öffnungsarten:</strong><br><br>• <strong>Dreh-Kipp</strong>: Standard — voll öffnen (Drehen) oder Lüften (Kippen)<br>• <strong>Kipp</strong>: nur Kippfunktion — Keller, schmale Fenster<br>• <strong>Fest</strong>: keine Öffnung — günstig als Festfeld<br>• <strong>Stulp</strong>: Zweiflügelig ohne Mittelpfosten — großes, offenes Bild<br><br>Alles im <a href="konfigurator.html">Konfigurator</a> wählbar.'
+  },
+
+  // ── Milchglas / Satinato ──────────────────────────────────────────────────
+  {
+    keys: ['milchglas','satinato','ornamentglas','badezimmer fenster','sichtschutzglas','blickdicht','opak','mattes glas','bad fenster'],
+    answer: 'Ja, <strong>Satinato (Milchglas)</strong> ist als Verglasung verfügbar — für Bad, WC oder Treppe. Im <a href="konfigurator.html">Konfigurator</a> als Glasoption wählbar oder per <a href="https://wa.me/491717263776" target="_blank">WhatsApp</a> anfragen.'
+  },
+
+  // ── Standardmaße ─────────────────────────────────────────────────────────────
+  {
+    keys: ['standardmaß','normmaß','normfenster','standardgröße','gängige größen','übliche maße','welche größe','typische maße'],
+    answer: '📐 <strong>Gängige Fenstermaße:</strong><br><br>• Wohnzimmer: 1200 × 1200 mm<br>• Schlafzimmer: 1000 × 1000 mm oder 1200 × 900 mm<br>• Küche: 1000 × 600 mm<br>• Bad: 600 × 600 mm<br>• Balkontür einflügelig: 900 × 2100 mm<br><br>Wir fertigen <strong>jeden Millimeter auf Maß</strong> — keine Standardzwänge.'
+  },
+
+  // ── Wie lange hält ───────────────────────────────────────────────────────────
+  {
+    keys: ['wie lange hält','lebensdauer','haltbarkeit','wie alt','wann erneuern','wann tauschen','30 jahre','50 jahre'],
+    answer: 'PVC-Fenster halten bei guter Pflege <strong>30–50 Jahre</strong>. Drutex Klasse A (3 mm Wandstärke) ist die langlebigste Qualitätsstufe. Typische Zeichen für Erneuerung: Zugluft, schwergängige Beschläge, Beschlag zwischen den Scheiben.'
+  },
+
+  // ── Deutschlandweit ─────────────────────────────────────────────────────────
   {
     keys: ['deutschlandweit','ganz deutschland','bundesweit','liefert ihr nach','liefert ihr auch','wohnort','entfernung'],
-    answer: 'Ja, wir liefern <strong>deutschlandweit</strong> per Spedition (Neubestellungen/Maßware). Lagerware und Gebrauchtware: nur Selbstabholung in Brandenburg an der Havel. Lieferkosten: kostenlos ab 4.000 € oder 10 Elementen, sonst 200 € Versandpauschale.'
+    answer: 'Ja, wir liefern <strong>deutschlandweit</strong> per Spedition (Neuware/Maßware). Österreich und Schweiz leider nicht. Lager- und Gebrauchtware: nur Selbstabholung in Brandenburg.'
+  },
+
+  // ── Österreich / Ausland ────────────────────────────────────────────────────
+  {
+    keys: ['österreich','schweiz','ausland','liefert ihr nach österreich','liefert ihr nach schweiz','international'],
+    answer: 'Wir liefern aktuell <strong>nur innerhalb Deutschlands</strong>. Für Österreich und die Schweiz gibt es autorisierte Drutex-Händler — auf drutex.eu den nächsten Händler suchen.'
+  },
+
+  // ── Dachfenster ─────────────────────────────────────────────────────────────
+  {
+    keys: ['dachfenster','velux','fakro','dachflächenfenster','schrägfenster'],
+    answer: 'Dachfenster führen wir <strong>nicht</strong> im Sortiment — wir sind auf senkrechte PVC-Fenster spezialisiert. Für Dachfenster empfehlen wir Velux oder Fakro.'
   },
 
   // ── Material ────────────────────────────────────────────────────────────────
   {
-    keys: ['kunststoff','pvc','material','holz','aluminium','alu','welches material','unterschied material'],
-    answer: 'Wir führen ausschließlich <strong>Drutex Kunststoff-PVC-Fenster</strong>. Kunststoff ist pflegeleicht (kein Streichen nötig), feuchtigkeitsresistent und langlebig (30–50 Jahre). Holz- oder Aluminiumfenster sind nicht in unserem Sortiment.'
+    keys: ['kunststoff','pvc','material','holz','aluminium','alu','welches material'],
+    answer: 'Wir führen ausschließlich <strong>Drutex Kunststoff-PVC-Fenster</strong>. Pflegeleicht, feuchtigkeitsresistent, langlebig (30–50 Jahre), kein Streichen nötig. Holz- oder Alufenster sind nicht in unserem Sortiment.'
   },
 
   // ── Drutex ──────────────────────────────────────────────────────────────────
   {
-    keys: ['drutex','hersteller','qualität','herkunft','woher','polnisch','bytów','marke','werk','europas größter'],
-    answer: '<strong>Drutex</strong> ist Europas größter PVC-Fenster-Hersteller mit eigenem Glaswerk und Profil-Extrusion in Bytów/Polen. Alle Profile Klasse A nach EN 12608 — das höchste Qualitätsniveau. Direktlieferung vom Werk = 20–30% günstiger als marktüblich. Wir sind autorisierter Drutex-Händler.'
+    keys: ['drutex','hersteller','qualität','herkunft','woher','polnisch','bytów','marke','werk'],
+    answer: '<strong>Drutex</strong> ist Europas größter PVC-Fenster-Hersteller — eigenes Glaswerk + Profil-Extrusion in Bytów, Polen. Klasse A nach EN 12608. Direktlieferung vom Werk = 20–30% günstiger als Handel. Wir sind autorisierter Drutex-Händler.'
   },
 
   // ── Produktübersicht ────────────────────────────────────────────────────────
   {
-    keys: ['was habt ihr','welche produkte','was verkauft ihr','sortiment','was führt ihr','was bietet ihr','euer angebot','was für produkte','euer sortiment','was gibt es','was kann ich bestellen','was kann man kaufen'],
-    answer: 'Unser <strong>Drutex-Sortiment:</strong><br><br>🪟 <strong>Kunststofffenster</strong> — Dreh, Kipp, Dreh-Kipp, alle Größen und Farben<br>🚪 <strong>Balkontüren & Terrassentüren</strong> — passend zu jedem Fenster<br>🏠 <strong>Haustüren</strong> — viele Modelle, RAL-Farben und Holzdekore<br>⬅️ <strong>Hebe-Schiebetüren</strong> — bis 6.500 mm Breite, ideal für große Terrassenöffnungen<br>🔄 <strong>Rollladen</strong> — passend zu Drutex-Fenstern<br>♻️ <strong>Gebrauchte Fenster</strong> — wechselnder Bestand, nur Hofverkauf freitags<br><br>Alles individuell maßgefertigt. <a href="produkte.html">→ Alle Produkte ansehen</a>'
-  },
-
-  // ── Schiebetüren ────────────────────────────────────────────────────────────
-  {
-    keys: ['schiebetür','schiebtür','hebe-schiebe','hebeschiebe','hebe schiebe','psk','panoramatür','panorama tür','sliding','terrassenschiebe','große öffnung'],
-    answer: 'Ja! Wir fertigen <strong>Drutex Hebe-Schiebetüren</strong> an — bis zu <strong>6.500 mm Breite</strong> möglich. Ideal für große Terrassenöffnungen und Panoramaansichten. Profile: IGLO HS, IGLO Energy PSK, IGLO 5 Classic PSK und IGLO Slide. Lieferung nach Maß, deutschlandweit per Spedition. Für ein Angebot: <a href="https://wa.me/491717263776" target="_blank">WhatsApp 0171 7263776</a>.'
-  },
-
-  // ── Balkontüren / Terrassentüren ────────────────────────────────────────────
-  {
-    keys: ['balkontür','balkontüren','balkon','terrassentür','terrassentüren','terrasse','terrassenausgang','balkonausgang'],
-    answer: 'Ja, wir fertigen <strong>Drutex-Balkontüren und Terrassentüren</strong> an — in allen IGLO-Profilen (5 Classic und Energy), maßgefertigt nach deinen Angaben. Einfach- oder Doppeltür möglich. Für ein Angebot: <a href="https://wa.me/491717263776" target="_blank">WhatsApp 0171 7263776</a> oder direkt im <a href="konfigurator.html">Konfigurator</a> konfigurieren.'
-  },
-
-  // ── Haustüren (generischer Türen-Catch) ────────────────────────────────────
-  {
-    keys: ['tür ','türen','türmodell','türfarbe'],
-    answer: 'Ja, wir führen auch <strong>Drutex-Haustüren</strong> — verschiedene Modelle und Farben (inkl. RAL-Farben und Holzdekore). Im <a href="haustuer-3d.html">Haustür-3D-Konfigurator</a> kannst du Modell und Farbe direkt visualisieren. Für ein Angebot: <a href="https://wa.me/491717263776" target="_blank">WhatsApp 0171 7263776</a>.'
+    keys: ['was habt ihr','welche produkte','was verkauft ihr','sortiment','was führt ihr','was gibt es','was kann ich bestellen'],
+    answer: '🪟 <strong>Unser Sortiment:</strong><br><br>🪟 Kunststofffenster — alle Formen, Farben, Größen<br>🚪 Balkontüren & Terrassentüren<br>🏠 Haustüren — viele Modelle, RAL & Holzdekore<br>⬅️ Hebe-Schiebetüren — bis 6.500 mm Breite<br>🔄 Rollladen — passend zu Drutex-Fenstern<br>♻️ Gebrauchte Fenster — Hofverkauf freitags<br><br>Alles Maßanfertigung. <a href="produkte.html">→ Alle Produkte</a>'
   },
 
   // ── Farben ──────────────────────────────────────────────────────────────────
   {
-    keys: ['farbe','farben','ral','anthrazit','weiß','braun','grau','schwarz','golden oak','holzdekor','farbig'],
-    answer: 'Neben Standard-Weiß gibt es viele <strong>RAL-Farben</strong> (z.B. Anthrazitgrau RAL 7016, Schwarzbraun RAL 8022, Moosgrün) und <strong>Holzdekore</strong> (z.B. Golden Oak, Sheffield Oak). Welche genau verfügbar sind, siehst du im <a href="konfigurator.html">Konfigurator</a> oder frag direkt an.'
-  },
-
-  // ── Rollladen ───────────────────────────────────────────────────────────────
-  {
-    keys: ['rollladen','rolladen','sonnenschutz','beschattung','jalousie'],
-    answer: 'Ja, wir führen auch <strong>Drutex-Rollladen und Sonnenschutz</strong> — passend zu den Fenstern. Für ein Angebot ruf uns an (<a href="tel:+493381214837">03381 / 214 83 73</a>) oder schreib auf <a href="https://wa.me/491717263776" target="_blank">WhatsApp</a>.'
-  },
-
-  // ── Konfigurator / Bestellung ───────────────────────────────────────────────
-  {
-    keys: ['konfigurator','online bestellen','bestellen','konfigurieren','zusammenstellen','online kaufen','wie bestelle','wie kann ich bestellen','wie kaufe ich','ablauf','bestellvorgang','bestellprozess','wie funktioniert','wie läuft das','wie geht das','wie geht eine bestellung'],
-    answer: '🪟 <strong>So bestellst du bei uns:</strong><br><br><strong>1. Konfigurator öffnen</strong> → Maße eingeben, Profil, Farbe und Verglasung wählen — der Preis erscheint live. Du kannst mehrere Fenster in einer Anfrage zusammenstellen.<br><br><strong>2. Anfrage absenden</strong> → du gibst deine Kontaktdaten ein, wir bekommen eine E-Mail mit deiner Konfiguration.<br><br><strong>3. Angebot von uns</strong> → wir melden uns mit einem individuellen Angebot — inklusive genauem Preis und Lieferbedingungen.<br><br><strong>4. Zahlung</strong> → nach deiner Überweisung bestellen wir die Fenster direkt beim Hersteller Drutex.<br><br><strong>5. Lieferung</strong> → ab unserem Bestelldatum ca. <strong>2 Wochen</strong> bis zur Lieferung zu dir.<br><br><a href="konfigurator.html" style="display:inline-block;margin-top:6px;padding:7px 14px;background:rgba(118,169,250,0.15);border:1px solid rgba(118,169,250,0.3);border-radius:8px;color:#76a9fa;text-decoration:none;font-weight:700;font-size:12px;">→ Jetzt im Konfigurator starten</a>'
-  },
-
-  // ── Kontakt / Erreichbarkeit ────────────────────────────────────────────────
-  {
-    keys: ['kontakt','telefon','anrufen','whatsapp','mail','email','erreichbar','wie kann ich','wann erreichbar','wie erreiche','erreichen','telefonnummer','rufnummer'],
-    answer: '📞 <a href="tel:+493381214837"><strong>03381 / 214 83 73</strong></a> — Festnetz, Mo–Fr 10–18 Uhr<br>💬 <a href="https://wa.me/491717263776" target="_blank"><strong>WhatsApp 0171 7263776</strong></a> — nur schreiben (kein Anruf)<br>📧 info@baustoffchrist.de — Antwort i.d.R. innerhalb 24h'
-  },
-
-  // ── Adresse / Anfahrt ───────────────────────────────────────────────────────
-  {
-    keys: ['adresse','standort','wo seid','wo sind','wo befindet','anfahrt','wie komme','navigation','google maps','hinfahren','wo findet','findet man euch','wo kann ich','wo kaufen'],
-    answer: '<strong>Fohrder Landstraße 13, 14772 Brandenburg an der Havel.</strong> Google Maps: "Fensterhandel Christ Brandenburg" eingeben. Hofverkauf freitags 10–17 Uhr — kein Termin nötig.'
+    keys: ['farbe','farben','ral','anthrazit','weiß','braun','grau','schwarz','golden oak','holzdekor','farbig','wie viele farben'],
+    answer: '<strong>41 Farben & Holzdekore:</strong> RAL-Farben (Anthrazitgrau 7016, Schwarzbraun 8022, Moosgrün u.v.m.) + Holzdekore (Golden Oak, Sheffield Oak, Nussbaum u.v.m.). Alle Optionen: <a href="farben-vorschau.html">Farben-Vorschau</a> oder im <a href="konfigurator.html">Konfigurator</a>.'
   },
 
   // ── Sprossen / Sonderform ───────────────────────────────────────────────────
   {
     keys: ['sprosse','sprossen','rund','bogenfenster','sonderform','rundbogen','dreieck','trapez'],
-    answer: 'Sprossen sind im <a href="konfigurator.html">Konfigurator</a> als Extra-Option wählbar. Sonderformen (Rundbogen, Dreieck, Trapez) sind auf Anfrage möglich — direkt per <a href="https://wa.me/491717263776" target="_blank">WhatsApp</a> oder Telefon anfragen, da diese nicht im Standard-Konfigurator abgedeckt sind.'
+    answer: 'Sprossen im <a href="konfigurator.html">Konfigurator</a> wählbar. Sonderformen (Rundbogen, Dreieck, Trapez) auf Anfrage möglich — nicht im Standard-Konfigurator, bitte per <a href="https://wa.me/491717263776" target="_blank">WhatsApp</a> anfragen.'
   },
 
-  // ── Danke / Abschluss ───────────────────────────────────────────────────────
+  // ── Rollladen ───────────────────────────────────────────────────────────────
   {
-    keys: ['danke','vielen dank','super','perfekt','toll','prima','klasse','gut','hilfreich','hat geholfen'],
-    answer: 'Gerne! 😊 Wenn du noch mehr Fragen hast oder ein konkretes Angebot möchtest: <a href="tel:+493381214837">03381 / 214 83 73</a> oder <a href="https://wa.me/491717263776" target="_blank">WhatsApp 0171 7263776</a>. Viel Erfolg bei deinem Fenster-Projekt!'
+    keys: ['rollladen','rolladen','sonnenschutz','beschattung','jalousie'],
+    answer: 'Ja, wir führen <strong>Drutex-Rollladen</strong> passend zu den Fenstern. Angebot: <a href="tel:+493381214837">03381 / 214 83 73</a> oder <a href="https://wa.me/491717263776" target="_blank">WhatsApp</a>.'
+  },
+
+  // ── Konfigurator / Bestellung ───────────────────────────────────────────────
+  {
+    keys: ['konfigurator','online bestellen','bestellen','konfigurieren','zusammenstellen','wie bestelle','wie kann ich bestellen','ablauf','bestellvorgang','wie läuft das','wie geht das','wie geht eine bestellung'],
+    answer: '🪟 <strong>Bestellablauf:</strong><br><br><strong>1. Konfigurieren</strong> → Maße, Profil, Farbe, Verglasung wählen<br><strong>2. Anfrage senden</strong> → wir erhalten deine Konfiguration per E-Mail<br><strong>3. Angebot erhalten</strong> → individueller Preis + Lieferbedingungen von uns<br><strong>4. Überweisen</strong> → nach Zahlung bestellen wir bei Drutex<br><strong>5. Lieferung</strong> → ca. <strong>2 Wochen</strong> ab Bestelldatum beim Werk<br><br><a href="konfigurator.html" style="display:inline-block;margin-top:6px;padding:7px 14px;background:rgba(118,169,250,0.15);border:1px solid rgba(118,169,250,0.3);border-radius:8px;color:#76a9fa;text-decoration:none;font-weight:700;font-size:12px;">→ Jetzt konfigurieren</a>'
+  },
+
+  // ── Kontakt ──────────────────────────────────────────────────────────────────
+  {
+    keys: ['kontakt','telefon','anrufen','whatsapp','mail','email','erreichbar','wann erreichbar','wie erreiche','telefonnummer'],
+    answer: '📞 <a href="tel:+493381214837"><strong>03381 / 214 83 73</strong></a> — Mo–Fr 10–18 Uhr<br>💬 <a href="https://wa.me/491717263776" target="_blank"><strong>WhatsApp 0171 7263776</strong></a> — nur schreiben (kein Anruf)<br>📧 info@baustoffchrist.de — Antwort i.d.R. innerhalb 24h'
+  },
+
+  // ── Adresse ──────────────────────────────────────────────────────────────────
+  {
+    keys: ['adresse','standort','wo seid','wo sind','wo befindet','anfahrt','wie komme','navigation','google maps','wo kaufen'],
+    answer: '📍 <strong>Fohrder Landstraße 13, 14772 Brandenburg an der Havel.</strong> Google Maps: "Fensterhandel Christ Brandenburg". Hofverkauf freitags 10–17 Uhr, kein Termin nötig.'
+  },
+
+  // ── Datenschutz / Impressum / Firma ─────────────────────────────────────────
+  {
+    keys: ['datenschutz','impressum','dsgvo','rechtlich','agb','geschäftsbedingungen','wer seid ihr','firma','über euch'],
+    answer: 'Betrieben von <strong>Fensterhandel Christ</strong> (Baustoff Christ GmbH), Fohrder Landstraße 13, 14772 Brandenburg a.d.H. Rechtliche Infos: <a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a> · <a href="agb.html">AGB</a>.'
+  },
+
+  // ── Danke ────────────────────────────────────────────────────────────────────
+  {
+    keys: ['danke','vielen dank','super','perfekt','toll','prima','klasse','hilfreich','hat geholfen'],
+    answer: 'Gerne! 😊 Weitere Fragen: <a href="tel:+493381214837">03381 / 214 83 73</a> oder <a href="https://wa.me/491717263776" target="_blank">WhatsApp 0171 7263776</a>. Viel Erfolg!'
   },
 ];
 
@@ -219,13 +324,25 @@ function renderMarkdown(text) {
 }
 
 // ─── System-Prompt für echte KI ────────────────────────────────────────────────
-const SYSTEM_PROMPT = `Du bist der KI-Assistent von DeineFenster.de (Fensterhandel Christ, Brandenburg). Antworte auf Deutsch, kurz (max. 4 Sätze), freundlich und kompetent.
+const SYSTEM_PROMPT = `Du bist der automatische Assistent von DeineFenster.de (Fensterhandel Christ, Brandenburg an der Havel). Du bist ein automatisiertes System — weise dich als solches aus wenn gefragt. Antworte auf Deutsch, kurz (max. 5 Sätze), freundlich und kompetent.
 
-REGELN: Niemals konkrete Preise nennen — bei jeder Preisfrage den Kunden bitten, direkt per WhatsApp anzufragen (Maße, Typ, Farbe). Keine genauen Lieferdaten. Nur Fenster/Türen-Themen. Bei Unsicherheit: Telefon oder WhatsApp empfehlen.
+REGELN: Niemals konkrete Preise nennen — bei Preisfragen Kunden bitten, Maße/Typ/Farbe per WhatsApp zu schicken. Keine genauen Lieferdaten versprechen. Nur Fenster/Türen-Themen. Bei Unsicherheit: Telefon oder WhatsApp empfehlen. Angaben ohne Gewähr.
 
-FIRMA: Fohrder Landstraße 13, 14772 Brandenburg a.d.H. | Tel: 03381/214837 (Mo-Fr 10-18h) | WhatsApp: 0171 7263776 (nur schreiben) | Hofverkauf: Freitag 10-17h
+FIRMA: Fohrder Landstraße 13, 14772 Brandenburg a.d.H. | Tel: 03381/214837 (Mo-Fr 10-18h) | WhatsApp: 0171 7263776 (nur schreiben, kein Anruf) | Hofverkauf: Freitag 10-17h
 
-PRODUKTE: Nur Drutex PVC-Fenster (neu+Maß) + Gebrauchtware (nur Freitag vor Ort). IGLO Energy (7-Kammer, Uw 0,71, BAFA-förderfähig), IGLO Edge (Uw 0,66), IGLO 5 Classic (Uw 0,83, nicht BAFA). 10J Profil-Garantie + 5J Beschlag. Kein Einbau. Kein Ankauf gebraucht. RC2/RC3 als Option. Deutschlandweit liefern (kostenlos ab 4000€ oder 10 Elemente). Zahlung: Überweisung nach Angebotserhalt. BAFA BEG EM bis 15%, Antrag VOR Bestellung.`;
+PRODUKTE: Nur Drutex PVC-Fenster (neu+Maß) + Gebrauchtware (Freitag vor Ort, Selbstverladung, keine Reservierung). Haustüren (3D-Konfigurator: haustuer-3d.html), Balkontüren, Hebe-Schiebetüren bis 6500mm, Rollladen. KEIN Einbau, KEIN Ankauf gebraucht, KEIN Dachfenster, NICHT nach Österreich/Schweiz.
+
+PROFILE: IGLO Energy (7-Kammer, 82mm, Uw 0,71, BAFA-förderfähig) | IGLO Edge (Uw 0,66, Premium) | IGLO 5 Classic (Uw 0,83, kein BAFA). Klasse A, EN 12608. Garantie: 10J Profil + 5J Beschlag.
+
+LIEFERUNG: Kostenlos ab 4.000€ oder 10 Elemente. Sonst 200€ (5-9 Elemente), HST einzeln 300€. Gebrauchte/Lager: nur Selbstabholung. Ca. 2 Wochen Lieferzeit ab Bestelldatum beim Werk.
+
+ZAHLUNG: Vollständige Überweisung nach Angebotserhalt → dann Bestellung bei Drutex. Keine Anzahlung, keine Ratenzahlung. Vor-Ort (freitags): Bar/EC/PayPal.
+
+FÖRDERUNG: BAFA BEG EM bis 15% Zuschuss (IGLO Energy + Edge). Antrag VOR Bestellung auf bafa.de! KfW 458 gilt nicht mehr für Einzelmaßnahmen. §35a EStG: 20% Handwerkerlohn steuerlich absetzbar (nicht Material).
+
+RECHT: Maßfenster = kein Widerruf nach §312g Abs. 2 Nr. 1 BGB — Maße VOR Überweisung prüfen! Transportschäden sofort bei Lieferung auf dem Lieferschein vermerken.
+
+TECHNISCH: Schutzfolie sofort nach Einbau abziehen (UV klebt sie dauerhaft fest). Außen beschlagene Scheiben morgens = gutes Zeichen (gute Dämmung). Zwischen den Scheiben beschlagen = Garantiefall. Pflege: 1x/Jahr Beschläge ölen, Dichtungen mit Glycerin einreiben. Lüften: Stoßlüften 3-4x täglich, kein Dauerkippen (Schimmelgefahr).`;
 
 const QUICK_CHIPS = [
   { text: 'Preis & Angebot',   q: 'Was kostet ein Fenster ungefähr?' },
@@ -465,12 +582,12 @@ const QUICK_CHIPS = [
           <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
       </div>
-      <div id="df-chat-disclaimer">KI-Assistent · Angaben ohne Gewähr · kein Rechtsrat</div>
+      <div id="df-chat-disclaimer">Automatischer Assistent · Angaben ohne Gewähr · <a href="datenschutz.html" style="color:inherit;text-decoration:underline;opacity:0.6;">Datenschutz</a></div>
     </div>
   `);
 })();
 
-// KI-Badge nur bei echtem API-Modus anzeigen
+// KI-Badge und Willkommenstext nur bei echtem API-Modus anzeigen
 if (!IS_AI_MODE) {
   const kiHeader = document.getElementById('df-chat-header-ki');
   const kiLabel  = document.getElementById('df-chat-label-ki');
@@ -478,6 +595,18 @@ if (!IS_AI_MODE) {
   if (kiHeader) kiHeader.style.display = 'none';
   if (kiLabel)  kiLabel.style.display  = 'none';
   if (subEl) subEl.innerHTML = '<span style="width:6px;height:6px;border-radius:50%;background:#4ade80;display:inline-block;animation:df-badge-pulse 2s infinite;flex-shrink:0"></span>Antwortet sofort';
+  // Willkommensnachricht: kein "KI", da regelbasiert (EU AI Act Art. 50: Transparenzpflicht)
+  const welcomeBubble = document.querySelector('#df-chat-messages .df-msg.df-bot .df-msg-bubble');
+  if (welcomeBubble) {
+    welcomeBubble.innerHTML = 'Hallo! Ich bin der <strong>Fenster-Assistent</strong> von DeineFenster.de 👋<br><br>Ich kenne alle Produkte, Lieferzeiten und Konditionen — und beantworte deine Fragen sofort. Was möchtest du wissen?';
+  }
+  // Aria-Labels anpassen
+  const chatBtn = document.getElementById('df-chat-btn');
+  const chatWin = document.getElementById('df-chat-window');
+  const chatLabel = document.getElementById('df-chat-label');
+  if (chatBtn)   chatBtn.setAttribute('aria-label', 'Fenster-Assistent öffnen');
+  if (chatLabel) chatLabel.setAttribute('aria-label', 'Fenster-Assistent öffnen');
+  if (chatWin)   chatWin.setAttribute('aria-label', 'DeineFenster Fenster-Assistent');
 }
 
 // ─── Logik ─────────────────────────────────────────────────────────────────────
