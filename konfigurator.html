@@ -6910,9 +6910,8 @@ async function submitForm(e) {
   };
   try { sessionStorage.setItem('df_anfrage', JSON.stringify(anfrageSummary)); } catch(e) {}
 
-  // ── E-Mail-Client öffnen mit allen Daten vorausgefüllt ──
-  const _betreff = '[DeineFenster.de] Anfrage ' + offerId + ': ' + prodName;
-  const _body = [
+  // ── Automatische E-Mail via Resend ──
+  const _emailText = [
     'Neue Fensteranfrage über DeineFenster.de',
     '══════════════════════════════════════════',
     '',
@@ -6942,21 +6941,30 @@ async function submitForm(e) {
     'Lieferung:   ' + parseFloat(ship).toFixed(2) + ' €',
     'Datum:       ' + datum,
     ...(notiz ? ['', 'Anmerkungen: ' + notiz] : []),
-    ...(wunschLiefertermin ? ['Wunschtermin:' + wunschLiefertermin] : []),
+    ...(wunschLiefertermin ? ['Wunschtermin: ' + wunschLiefertermin] : []),
   ].join('\n');
 
-  window.location.href = 'mailto:info@baustoffchrist.de'
-    + '?subject=' + encodeURIComponent(_betreff)
-    + '&body='    + encodeURIComponent(_body);
+  fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer re_JEnfPvXi_DYGmrrgPBXJnLzzoMBjeKa3n',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      from: 'DeineFenster.de <onboarding@resend.dev>',
+      to: ['sarahchrist@aol.com'],
+      reply_to: email,
+      subject: '[DeineFenster.de] Neue Anfrage ' + offerId + ': ' + prodName,
+      text: _emailText
+    })
+  }).catch(() => {});
 
   // Sarah-Wunsch 21.04.2026: Bild-Anzahl für Danke-Seite merken, dann Warenkorb + Bilder leeren
   const finalImgCount = uploadedImages.length;
   try { localStorage.setItem('df_last_img_count', String(finalImgCount)); } catch(e) {}
   cart = []; saveCart();
   uploadedImages = [];
-  setTimeout(() => {
-    window.location.href = 'danke.html?prod=' + encodeURIComponent(prodName) + '&imgs=' + finalImgCount;
-  }, 500);
+  window.location.href = 'danke.html?prod=' + encodeURIComponent(prodName) + '&imgs=' + finalImgCount;
 }
 
 // ── SEKTION-LABELS (Sarah-Update 02.05.2026) ──────────
