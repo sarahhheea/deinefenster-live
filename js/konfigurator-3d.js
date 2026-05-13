@@ -9,8 +9,8 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 // ════════════════════════════════════════════════════════════
 // KONSTANTEN — Drutex IGLO 5 Profilmaße (1 unit = 1 Meter)
 // ════════════════════════════════════════════════════════════
-const OFR  = 0.075;   // Blendrahmen-Ansichtsbreite 75mm (Agent 1 bestätigt, IGLO 5 Classic)
-const SFR  = 0.078;   // Flügelrahmen-Ansichtsbreite 78mm (ähnlich Blendrahmen)
+const OFR  = 0.090;   // Blendrahmen-Ansichtsbreite 90mm (Agent-Analyse: 9% Fensterbreite)
+const SFR  = 0.085;   // Flügelrahmen-Ansichtsbreite 85mm (Agent-Analyse: 8.5%)
 const DD   = 0.070;   // Profiltiefe 70mm
 const OVHG = 0.010;   // Flügel-Überschlag: 10mm (IGLO 5 realistisch, Agent 1 bestätigt 8–12mm)
 const DCT  = 0.009;   // Dichtungsbreite 9mm
@@ -38,10 +38,10 @@ const frameMat = new THREE.MeshPhysicalMaterial({
   envMapIntensity: 1.40
 });
 const glassMat = new THREE.MeshPhysicalMaterial({
-  color: 0xa8c8b8,  // Float-Glas: satteres Grün-Blau (echtes Isolierglas-Tint)
-  metalness: 0.0, roughness: 0.04,
-  transmission: 0.42, thickness: 0.028, ior: 1.52, transparent: true,
-  envMapIntensity: 2.5
+  color: 0xf0f8f2,
+  metalness: 0.0, roughness: 0.02,
+  transmission: 0.42, thickness: 0.024, ior: 1.52, transparent: true,
+  envMapIntensity: 0.08  // niedrig → kein Environment-Kreisfleck
 });
 const sealMat = new THREE.MeshStandardMaterial({
   color: 0x1a1a1a, roughness: 0.90, metalness: 0
@@ -50,7 +50,7 @@ const spacerMat = new THREE.MeshStandardMaterial({
   color: 0x1a1a18, roughness: 0.80, metalness: 0.08  // Swisspacer Ultimate (Standard bei Drutex)
 });
 const glassBackMat = new THREE.MeshStandardMaterial({
-  color: 0x7ca0bc, roughness: 0.92, metalness: 0  // Raumhintergrund, mittelhell (Himmel/Raum)
+  color: 0xf2f2f0, roughness: 0.92, metalness: 0  // helles Weiß hinter Glas (wie Produktfoto-Hintergrund)
 });
 const chromeMat = new THREE.MeshStandardMaterial({
   color: 0xdde0e4, roughness: 0.10, metalness: 0.92, envMapIntensity: 3.5
@@ -232,7 +232,8 @@ function applyGlass(key) {
     glassMat.normalMap=buildNormalTex(masterCarreHeight,4.0,3,11);
     glassMat.normalScale=new THREE.Vector2(1.5,1.5);
   } else {
-    glassMat.transmission=0.75; glassMat.roughness=0.03; glassMat.color.set(0x90bca8);
+    glassMat.transmission=0.96; glassMat.roughness=0.08; glassMat.color.set(0xf4faf6);
+    glassMat.envMapIntensity=0.05;
   }
   glassMat.needsUpdate=true;
 }
@@ -306,71 +307,134 @@ function buildFrameExtruded(g, X, Y, W, H, FW, depth, mat, zStart=0) {
 // HARDWARE — Griffe, Scharniere, Stoßgriff
 // ════════════════════════════════════════════════════════════
 function addFensterGriff(g, cx, cy, z) {
-  // NEVADA-Griff: ovale Rosette 40×26mm + Hals + Hebelarm 120mm (Schließstellung = nach unten)
+  // Drutex-Standardgriff (HOPPE Atlanta/SecuForte Stil) — weiß, klar sichtbar
+  // Leicht abgesetzt vom Rahmen für 3D-Kontrast
+  // Griff weiß wie Rahmen, hoher Clearcoat → Glanzlinie macht den Zylinder sichtbar
   const hMat = new THREE.MeshPhysicalMaterial({
-    color: 0x8a9098, roughness: 0.10, metalness: 0.92,
-    clearcoat: 0.45, clearcoatRoughness: 0.06, envMapIntensity: 4.5
+    color: frameMat.color.clone(),
+    roughness: 0.16, metalness: 0.0,
+    clearcoat: 0.92, clearcoatRoughness: 0.05, envMapIntensity: 2.2
   });
-  const pinMat = new THREE.MeshStandardMaterial({color: 0x60686e, roughness: 0.22, metalness: 0.92});
+  const axisMat = new THREE.MeshStandardMaterial({color: 0x909098, roughness: 0.40, metalness: 0.70});
 
-  // 1. Rosette — ovale Abdeckplatte (40mm breit × 26mm hoch × 7mm tief)
-  addBox(g, cx-0.020, cy-0.013, z, 0.040, 0.026, 0.007, hMat);
+  // 1. Langschild — 28mm × 92mm × 18mm, abgerundete Ecken (HOPPE Atlanta)
+  const sW=0.028, sH=0.092, sD=0.018, sR=0.005;
+  const sShape = new THREE.Shape();
+  sShape.moveTo(-sW/2+sR, -sH/2);
+  sShape.lineTo( sW/2-sR, -sH/2); sShape.absarc(sW/2-sR,  -sH/2+sR, sR, -Math.PI/2,  0, false);
+  sShape.lineTo( sW/2,     sH/2-sR); sShape.absarc(sW/2-sR,  sH/2-sR,  sR,  0,  Math.PI/2, false);
+  sShape.lineTo(-sW/2+sR,  sH/2); sShape.absarc(-sW/2+sR, sH/2-sR,  sR,  Math.PI/2, Math.PI, false);
+  sShape.lineTo(-sW/2,    -sH/2+sR); sShape.absarc(-sW/2+sR,-sH/2+sR, sR,  Math.PI,  Math.PI*1.5, false);
+  const sGeo = new THREE.ExtrudeGeometry(sShape, {depth:sD, bevelEnabled:true, bevelSize:0.0025, bevelThickness:0.0025, bevelSegments:3});
+  const sMesh = new THREE.Mesh(sGeo, hMat);
+  sMesh.position.set(cx - sW/2, cy - sH/2, z);
+  sMesh.castShadow = true;
+  g.add(sMesh);
 
-  // 2. Spindel-Achse (sichtbarer dunkler Zylinder in Rosetten-Mitte)
-  const sp = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.010, 12), pinMat);
-  sp.rotation.x = Math.PI/2;
-  sp.position.set(cx, cy, z + 0.012);
-  g.add(sp);
+  // 2. Achslager — sichtbarer Metall-Zylinder im Schild-Zentrum (Drehpunkt)
+  const axle = new THREE.Mesh(new THREE.CylinderGeometry(0.0050, 0.0050, 0.010, 16), axisMat);
+  axle.rotation.x = Math.PI/2;
+  axle.position.set(cx, cy, z + sD + 0.005);
+  g.add(axle);
 
-  // 3. Griffhals (konischer Übergang Rosette→Arm, Ø18mm→Ø13mm, 20mm lang)
-  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.0065, 0.020, 14), hMat);
-  neck.rotation.x = Math.PI/2;
-  neck.position.set(cx, cy, z + 0.017);
-  g.add(neck);
+  // 3. Griffarm — 28mm Ø TubeGeometry, S-Kurve 50mm nach vorne + 130mm nach unten
+  // 3. Arm — 26mm Ø, 110mm lang, sanfte S-Kurve nach vorne+unten (Agent: 2.5% × 9%)
+  const armCurve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(cx, cy,        z + sD + 0.002),
+    new THREE.Vector3(cx, cy,        z + sD + 0.018),
+    new THREE.Vector3(cx, cy-0.015,  z + sD + 0.032),
+    new THREE.Vector3(cx, cy-0.052,  z + sD + 0.038),
+    new THREE.Vector3(cx, cy-0.095,  z + sD + 0.033),
+    new THREE.Vector3(cx, cy-0.102,  z + sD + 0.026),
+  ]);
+  const armGeo = new THREE.TubeGeometry(armCurve, 24, 0.013, 12, false);
+  const armMesh = new THREE.Mesh(armGeo, hMat);
+  armMesh.castShadow = true;
+  g.add(armMesh);
 
-  // 4. Griffarm — zylindrisch Ø13mm, 120mm lang, zeigt nach unten (Schließstellung)
-  const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.0065, 0.0065, 0.120, 14), hMat);
-  arm.position.set(cx, cy - 0.060, z + 0.027); // mittig bei cy-60mm
-  g.add(arm);
-
-  // 5. Griffspitze (Halbkugel, abgerundetes Ende)
-  const tip = new THREE.Mesh(new THREE.SphereGeometry(0.0068, 12, 8), hMat);
-  tip.position.set(cx, cy - 0.120, z + 0.027);
+  // 4. Griffspitze — Ovoid/Tropfenform (Agent: nicht Kugel, leicht verjüngt)
+  const tip = new THREE.Mesh(new THREE.SphereGeometry(0.013, 12, 8), hMat);
+  tip.scale.set(1, 1.4, 1);
+  tip.position.set(cx, cy - 0.104, z + sD + 0.026);
+  tip.castShadow = true;
   g.add(tip);
 }
 
 function addBalkontuerGriff(g, cx, cy, z, isLinks) {
-  // Langschild
-  addBox(g, cx-0.012, cy-0.055, z, 0.024, 0.110, 0.013, chromeMat);
-  // Drücker (horizontal arm)
-  const dx = isLinks ? 0 : -0.048;
-  addBox(g, cx+dx, cy-0.008, z+0.013, 0.048, 0.016, 0.010, chromeMat);
+  const hMat = new THREE.MeshPhysicalMaterial({
+    color: frameMat.color.clone(),
+    roughness: 0.16, metalness: 0.0,
+    clearcoat: 0.92, clearcoatRoughness: 0.05, envMapIntensity: 2.2
+  });
+  const axisMat = new THREE.MeshStandardMaterial({color: 0x909098, roughness: 0.40, metalness: 0.70});
+
+  // Langschild — 28×118mm abgerundet (wie Fenstergriff, etwas höher für Tür)
+  const sW=0.028, sH=0.118, sD=0.018, sR=0.005;
+  const sShape = new THREE.Shape();
+  sShape.moveTo(-sW/2+sR, -sH/2);
+  sShape.lineTo( sW/2-sR, -sH/2); sShape.absarc(sW/2-sR,  -sH/2+sR, sR, -Math.PI/2,  0, false);
+  sShape.lineTo( sW/2,     sH/2-sR); sShape.absarc(sW/2-sR,  sH/2-sR,  sR,  0,  Math.PI/2, false);
+  sShape.lineTo(-sW/2+sR,  sH/2); sShape.absarc(-sW/2+sR, sH/2-sR,  sR,  Math.PI/2, Math.PI, false);
+  sShape.lineTo(-sW/2,    -sH/2+sR); sShape.absarc(-sW/2+sR,-sH/2+sR, sR,  Math.PI,  Math.PI*1.5, false);
+  const sGeo = new THREE.ExtrudeGeometry(sShape, {depth:sD, bevelEnabled:true, bevelSize:0.0025, bevelThickness:0.0025, bevelSegments:3});
+  const sMesh = new THREE.Mesh(sGeo, hMat);
+  sMesh.position.set(cx - sW/2, cy - sH/2, z);
+  sMesh.castShadow = true;
+  g.add(sMesh);
+
+  // Achslager
+  const axle = new THREE.Mesh(new THREE.CylinderGeometry(0.0050, 0.0050, 0.010, 16), axisMat);
+  axle.rotation.x = Math.PI/2;
+  axle.position.set(cx, cy + sH*0.20, z + sD + 0.005);
+  g.add(axle);
+
+  // Horizontaler Drücker-Arm — 140mm lang, nach innen (weg vom Scharnier)
+  const dir = isLinks ? 1 : -1;
+  const pivotY = cy + sH * 0.20;
+  const armCurve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(cx,                pivotY, z + sD + 0.002),
+    new THREE.Vector3(cx,                pivotY, z + sD + 0.018),
+    new THREE.Vector3(cx + dir*0.018,    pivotY, z + sD + 0.028),
+    new THREE.Vector3(cx + dir*0.080,    pivotY, z + sD + 0.032),
+    new THREE.Vector3(cx + dir*0.130,    pivotY, z + sD + 0.028),
+    new THREE.Vector3(cx + dir*0.140,    pivotY, z + sD + 0.022),
+  ]);
+  const armMesh = new THREE.Mesh(new THREE.TubeGeometry(armCurve, 20, 0.013, 12, false), hMat);
+  armMesh.castShadow = true;
+  g.add(armMesh);
+
+  const tip = new THREE.Mesh(new THREE.SphereGeometry(0.013, 12, 8), hMat);
+  tip.scale.set(1, 1.4, 1);
+  tip.position.set(cx + dir*0.142, pivotY, z + sD + 0.022);
+  tip.castShadow = true;
+  g.add(tip);
+
   // Schlüsselloch
-  addBox(g, cx-0.004, cy+0.020, z+0.001, 0.008, 0.012, 0.006, grooveMat);
+  addBox(g, cx-0.004, cy - sH*0.25, z+0.001, 0.008, 0.014, 0.006, grooveMat);
 }
 
 function addFensterScharnier(g, cx, cy, z) {
-  // MACO Multi Matic Ecklager — L-Form Zinkdruckguss, silbergrau #a0a098
+  // MACO-Scharnier — hellgrau matt (Agent: #c0c0c0, kein Chrom)
   const sMat = new THREE.MeshStandardMaterial({
-    color: 0xa0a098, roughness: 0.35, metalness: 0.72, envMapIntensity: 2.5
+    color: 0xc4c4c2, roughness: 0.60, metalness: 0.20, envMapIntensity: 0.8
   });
-  const pinMat = new THREE.MeshStandardMaterial({color: 0x7888a8, roughness: 0.12, metalness: 0.96});
+  const pinMat = new THREE.MeshStandardMaterial({color: 0xb0b0ae, roughness: 0.50, metalness: 0.30});
 
-  // Platte an Flügelkante (sichtbar von innen, 56×14mm)
-  addBox(g, cx-0.012, cy-0.028, z, 0.024, 0.056, 0.007, sMat);
+  // Flügelplatte (48×44mm — Agent: 4% Höhe × 4.5% Breite bei 1200×1000mm)
+  addBox(g, cx-0.022, cy-0.024, z, 0.044, 0.048, 0.007, sMat);
 
-  // L-Körper (dicker Lagerkörper, 20×14×14mm) — Knotenpunkt der L-Form
-  addBox(g, cx-0.012, cy-0.007, z-0.014, 0.024, 0.014, 0.014, sMat);
+  // L-Körper (Lagerkörper)
+  addBox(g, cx-0.022, cy-0.006, z-0.014, 0.044, 0.012, 0.014, sMat);
 
-  // Tragezapfen (Ø7mm, 16mm lang — sichtbarer Drehzapfen)
-  const pin = new THREE.Mesh(new THREE.CylinderGeometry(0.0035, 0.0035, 0.016, 12), pinMat);
+  // Tragezapfen (Ø8mm, 16mm lang)
+  const pin = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.016, 12), pinMat);
   pin.rotation.x = Math.PI/2;
   pin.position.set(cx, cy, z + 0.008);
   g.add(pin);
 
-  // Schraubenattrappen (2× kleine Zylinder auf Platte)
-  [cy-0.020, cy+0.008].forEach(sy => {
-    const scr = new THREE.Mesh(new THREE.CylinderGeometry(0.002, 0.002, 0.003, 8), pinMat);
+  // Schraubenattrappen (2×)
+  [cy-0.016, cy+0.010].forEach(sy => {
+    const scr = new THREE.Mesh(new THREE.CylinderGeometry(0.0025, 0.0025, 0.004, 8), pinMat);
     scr.rotation.x = Math.PI/2;
     scr.position.set(cx, sy, z + 0.008);
     g.add(scr);
@@ -388,24 +452,76 @@ function addBandScharnier(g, cx, cy, z) {
 }
 
 function addKlinke(g, cx, cy, z) {
-  // Langschild
-  addBox(g, cx-0.011, cy-0.092, z, 0.022, 0.118, 0.013, chromeMat);
-  // Highlight auf Schild
-  addBox(g, cx-0.004, cy-0.085, z+0.013, 0.008, 0.032, 0.003, new THREE.MeshStandardMaterial({color:0xffffff,roughness:0.3,metalness:0.8}));
+  const sW=0.022, sH=0.118, sD=0.015, sR=0.004;
+  const shieldShape = new THREE.Shape();
+  shieldShape.moveTo(-sW/2+sR, -sH/2);
+  shieldShape.lineTo( sW/2-sR, -sH/2); shieldShape.absarc( sW/2-sR, -sH/2+sR, sR, -Math.PI/2,  0,         false);
+  shieldShape.lineTo( sW/2,     sH/2-sR); shieldShape.absarc( sW/2-sR,  sH/2-sR, sR,  0,         Math.PI/2, false);
+  shieldShape.lineTo(-sW/2+sR,  sH/2); shieldShape.absarc(-sW/2+sR,  sH/2-sR, sR,  Math.PI/2, Math.PI,   false);
+  shieldShape.lineTo(-sW/2,    -sH/2+sR); shieldShape.absarc(-sW/2+sR,-sH/2+sR, sR,  Math.PI,   Math.PI*1.5,false);
+  const shieldGeo = new THREE.ExtrudeGeometry(shieldShape, {
+    depth:sD, bevelEnabled:true, bevelSize:0.0020, bevelThickness:0.0020, bevelSegments:2
+  });
+  const shieldMesh = new THREE.Mesh(shieldGeo, frameMat);
+  shieldMesh.position.set(cx - sW/2, cy - sH/2, z);
+  shieldMesh.castShadow = true;
+  g.add(shieldMesh);
+
+  // Drücker — horizontaler Arm nach links (Innenansicht), 140mm
+  const pivotY = cy + sH * 0.20;
+  const drvCurve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(cx,         pivotY,        z + sD + 0.002),
+    new THREE.Vector3(cx,         pivotY,        z + sD + 0.016),
+    new THREE.Vector3(cx - 0.018, pivotY - 0.008, z + sD + 0.026),
+    new THREE.Vector3(cx - 0.080, pivotY - 0.012, z + sD + 0.030),
+    new THREE.Vector3(cx - 0.130, pivotY - 0.010, z + sD + 0.026),
+    new THREE.Vector3(cx - 0.140, pivotY - 0.006, z + sD + 0.020),
+  ]);
+  const drvMesh = new THREE.Mesh(new THREE.TubeGeometry(drvCurve, 20, 0.013, 12, false), chromeMat);
+  drvMesh.castShadow = true;
+  g.add(drvMesh);
+
+  const tip = new THREE.Mesh(new THREE.SphereGeometry(0.014, 12, 8), chromeMat);
+  tip.scale.set(1, 1.3, 1);
+  tip.position.set(cx - 0.142, pivotY - 0.005, z + sD + 0.020);
+  tip.castShadow = true;
+  g.add(tip);
+
+  const axle = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, 0.010, 14), chromeMat);
+  axle.rotation.x = Math.PI / 2;
+  axle.position.set(cx, pivotY, z + sD + 0.005);
+  g.add(axle);
+
   // Schlüsselloch
-  addBox(g, cx-0.004, cy+0.018, z+0.001, 0.008, 0.014, 0.006, grooveMat);
-  // Drücker (L-förmig nach links, weil Tür innen)
-  addBox(g, cx-0.008, cy-0.008, z+0.013, 0.046, 0.016, 0.010, chromeMat);
+  addBox(g, cx-0.004, cy + 0.018, z+0.001, 0.008, 0.014, 0.006, grooveMat);
 }
 
 function addStoßgriff(g, cx, cyBottom, cyTop, z) {
-  const L=cyTop-cyBottom;
-  // Hauptstab
-  addBox(g, cx-0.013, cyBottom, z, 0.026, L, 0.040, chromeMat);
-  // Halterung oben
-  addBox(g, cx-0.024, cyTop-0.110-0.007, z-0.002, 0.016, 0.014, 0.042, bracketMat);
-  // Halterung unten
-  addBox(g, cx-0.024, cyBottom+0.096, z-0.002, 0.016, 0.014, 0.042, bracketMat);
+  const L = cyTop - cyBottom;
+  const midY = (cyBottom + cyTop) / 2;
+
+  // Hauptstab — runder Zylinder Ø40mm, vertikal
+  const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.020, 0.020, L, 16), chromeMat);
+  rod.position.set(cx, midY, z + 0.060);
+  rod.castShadow = true;
+  g.add(rod);
+
+  // Kappen oben + unten
+  const capTop = new THREE.Mesh(new THREE.SphereGeometry(0.021, 14, 10), chromeMat);
+  capTop.position.set(cx, cyTop, z + 0.060);
+  capTop.castShadow = true;
+  g.add(capTop);
+  const capBot = new THREE.Mesh(new THREE.SphereGeometry(0.021, 14, 10), chromeMat);
+  capBot.position.set(cx, cyBottom, z + 0.060);
+  capBot.castShadow = true;
+  g.add(capBot);
+
+  // Obere Halterung (L-Bracket)
+  addBox(g, cx - 0.020, cyTop - 0.130, z,        0.040, 0.025, 0.065, bracketMat);
+  addBox(g, cx - 0.020, cyTop - 0.130, z + 0.045, 0.040, 0.025, 0.022, bracketMat);
+  // Untere Halterung
+  addBox(g, cx - 0.020, cyBottom + 0.095, z,        0.040, 0.025, 0.065, bracketMat);
+  addBox(g, cx - 0.020, cyBottom + 0.095, z + 0.045, 0.040, 0.025, 0.022, bracketMat);
 }
 
 // ════════════════════════════════════════════════════════════
@@ -445,15 +561,15 @@ function addSash(g, sx, sy, sw, sh, oeff, view, prod) {
   }
 
   if(!isFixed&&view==='inn') {
-    const hx=isLinks ? sx+SFR*0.55 : sx+sw-SFR*0.55;
-    const hy=sy+sh*0.43;
+    const hx=isLinks ? sx+SFR*0.60 : sx+sw-SFR*0.60;
+    const hy=sy+sh*0.53;  // Agent: 47% von oben = 53% von unten
     if(prod==='balkontuer') addBalkontuerGriff(g, hx, hy, SZ_FRONT, isLinks);
     else                    addFensterGriff(g, hx, hy, SZ_FRONT);
 
-    if(prod==='kunststoff') {
+    if(prod==='kunststoff'||prod==='balkontuer') {
       const hingeX=isLinks ? sx+sw-SFR*0.55 : sx+SFR*0.55;
-      addFensterScharnier(g, hingeX, sy+0.165, SZ_FRONT);
-      addFensterScharnier(g, hingeX, sy+sh-0.165-0.048, SZ_FRONT);
+      addFensterScharnier(g, hingeX, sy + sh*0.14, SZ_FRONT);
+      addFensterScharnier(g, hingeX, sy + sh*0.86 - 0.024, SZ_FRONT);
     }
   }
 
@@ -488,9 +604,19 @@ function buildFenster(S, view) {
   // Blendrahmen (mit Profilfase via ExtrudeGeometry)
   buildFrameExtruded(g, 0, 0, W, H, OFR, DD, frameMat);
 
-  // Glanzlinie — charakteristische helle PVC-Kante auf der Frontfläche des Blendrahmens
-  const hlMat=new THREE.MeshStandardMaterial({color:0xffffff, roughness:0.04, metalness:0, emissive:0xffffff, emissiveIntensity:0.35});
-  const HL=0.005; // 5mm Glanzstreifen
+  // Profil-Stufe — innere Blendrahmen-Kante leicht abgedunkelt (simuliert 3-stufiges PVC-Profil)
+  // Sichtbar als leicht dunklerer Ring am inneren Rand der Blendrahmen-Frontfläche
+  const _stepCol = new THREE.Color(frameMat.color).multiplyScalar(0.82);
+  const _stepMat = new THREE.MeshStandardMaterial({color:_stepCol, roughness:0.28, metalness:0});
+  const STEP = 0.022;  // 22mm innere Profil-Stufe
+  addBox(g, OFR,       H-OFR-STEP, DD+0.001, W-2*OFR, STEP, 0.0025, _stepMat);  // oben
+  addBox(g, OFR,       OFR,        DD+0.001, W-2*OFR, STEP, 0.0025, _stepMat);  // unten
+  addBox(g, OFR,       OFR+STEP,   DD+0.001, STEP, H-2*OFR-2*STEP, 0.0025, _stepMat);  // links
+  addBox(g, W-OFR-STEP,OFR+STEP,   DD+0.001, STEP, H-2*OFR-2*STEP, 0.0025, _stepMat);  // rechts
+
+  // Glanzlinie — helle PVC-Kante am äußersten Rahmenrand (Profil-Highlight)
+  const hlMat=new THREE.MeshStandardMaterial({color:0xffffff, roughness:0.04, metalness:0, emissive:0xffffff, emissiveIntensity:0.28});
+  const HL=0.004;
   addBox(g, 0, H-OFR, DD-HL, W, HL, HL, hlMat);  // oben
   addBox(g, 0, OFR-HL, DD-HL, W, HL, HL, hlMat);  // unten
   addBox(g, OFR-HL, OFR, DD-HL, HL, H-2*OFR, HL, hlMat);  // links
@@ -622,11 +748,12 @@ function buildHaustuer(S, view) {
     m.position.set((x1+x2)/2,(y1+y2)/2,DD+0.001); g.add(m);
   });
 
-  // ── Glas + Glasrahmen pro Panel ───────────────────
+  // ── Glas + Glasleiste + Glasrahmen pro Panel ─────
   const GFW=0.040*scX;
   panels.forEach(p => {
     const px=p.x*scX, py=p.y*scY, pw=p.w*scX, ph=p.h*scY;
     addGlass(g, px, py, pw, ph, DD/2);
+    addGlasleiste(g, px, py, pw, ph, DD + 0.006);
     // Glasrahmen (Edelstahl)
     const gf=(x,y,w,h)=>addBox(g,x,y,0,w,h,DD+0.010,glFrameMat);
     gf(px-GFW,     py-GFW,     pw+GFW*2, GFW);
@@ -675,42 +802,58 @@ function buildHST(S, view) {
   const W=(S.bMm||2400)/1000, H=(S.hMm||2100)/1000;
   const n=(S.hstTeilung==='3-teilig')?3:2;
   const lauf=S.hstLauf||'rechts';
-  const HOF=0.115; // HST outer frame
-  const HSF=0.095; // HST sash profile (breiter als Fenster)
-  const BR=0.022;  // Bodenschwelle
+  const HOF=0.115;
+  const HSF=0.095;
+  const BR=0.042;  // realistischere Bodenschwellenhöhe
+
+  const sealMat_hst = new THREE.MeshStandardMaterial({color:0x1a1a1a, roughness:0.90, metalness:0});
 
   const g=new THREE.Group();
   buildLeibung(g, W, H);
 
-  // Außenrahmen
   buildOuterFrame(g, 0, 0, W, H, HOF, DD, frameMat);
 
-  // Panels
   const panW=(W-2*HOF)/n;
   for(let i=0;i<n;i++) {
     const isSchieber=(lauf==='rechts')?(i===0):(i===n-1);
     const px=HOF+i*panW, py=HOF+BR, ph=H-2*HOF-BR;
-    // Rahmen des Panels
+
     buildOuterFrame(g, px, py, panW, ph, HSF, DD, frameMat, OVHG);
-    // Glas
+
     const gx=px+HSF, gy=py+HSF, gw=panW-2*HSF, gh=ph-2*HSF;
-    if(gw>0.01&&gh>0.01) addGlass(g, gx, gy, gw, gh, DD*0.60);
-    // Vertikaler Griff auf Schiebeflügel (Innenansicht)
+    if(gw>0.01&&gh>0.01) {
+      addGlass(g, gx, gy, gw, gh, DD*0.60);
+      addGlasleiste(g, gx, gy, gw, gh, DD+OVHG);
+    }
+
+    // Schattenfuge an Panel-Übergängen
+    if(i>0) {
+      const _sfMat=new THREE.MeshStandardMaterial({color:0x060708,roughness:0.99,metalness:0});
+      addBox(g, px-0.004, py, DD+OVHG, 0.008, ph, 0.003, _sfMat);
+    }
+
+    // Stangengriff auf Schiebeflügel (Innenansicht)
     if(isSchieber&&view==='inn') {
       const gripX=lauf==='rechts'?px+panW-HSF*0.55:px+HSF*0.55;
       const gripY=py+ph*0.38;
       const gripH=ph*0.24;
-      addBox(g, gripX-0.015, gripY, OVHG+DD+0.012, 0.030, gripH, 0.016, chromeMat);
-    }
-    // Schiebepfeil-Andeutung auf festem Panel (außen sichtbar)
-    if(!isSchieber&&view==='aus'&&gw>0.05&&gh>0.05) {
-      // kleine Glasrahmen-Andeutung der Überlappungszone
-      addBox(g, isSchieber?px+panW-0.03:px, py, DD+0.012, 0.012, ph, 0.006, glFrameMat);
+
+      // Rosetten oben und unten
+      addBox(g, gripX-0.016, gripY,              OVHG+DD+0.014, 0.032, 0.065, 0.014, chromeMat);
+      addBox(g, gripX-0.016, gripY+gripH-0.065,  OVHG+DD+0.014, 0.032, 0.065, 0.014, chromeMat);
+
+      // Stange (CylinderGeometry, vertikal)
+      const stange=new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, gripH-0.050, 14), chromeMat);
+      stange.position.set(gripX, gripY+gripH/2, OVHG+DD+0.028);
+      stange.castShadow=true;
+      g.add(stange);
     }
   }
 
-  // Bodenschwelle
-  addBox(g, HOF, HOF, DD, W-2*HOF, BR, 0.028, chromeMat);
+  // Bodenschwelle 3-teilig
+  addBox(g, HOF, HOF,       0,      W-2*HOF, 0.040, 0.022, chromeMat);   // Hauptprofil
+  addBox(g, HOF+0.010, HOF+0.012, 0.018, W-2*HOF-0.020, 0.016, 0.008, grooveMat); // Laufnut
+  addBox(g, HOF, HOF+0.036, 0,      W-2*HOF, 0.006, 0.012, sealMat_hst); // Dichtlippe
 
   g.position.set(-W/2, -H/2, 0);
   return g;
@@ -720,8 +863,8 @@ function buildHST(S, view) {
 // LEIBUNG — angedeutete Maueröffnung (4 angeschrägte Flächen)
 // ════════════════════════════════════════════════════════════
 function buildLeibung(g, W, H) {
-  const LD=0.160; // Leibungstiefe 160mm
-  const WD=0.200; // Mauerbreite sichtbar (schmal halten)
+  const LD=0.090; // Leibungstiefe 90mm
+  const WD=0.060; // Mauerbreite sichtbar (dezent)
 
   const addLeibFace = (pts, col) => {
     const verts=new Float32Array(pts.length*3);
@@ -733,14 +876,11 @@ function buildLeibung(g, W, H) {
     g.add(new THREE.Mesh(geo, new THREE.MeshStandardMaterial({color:col,roughness:0.88,metalness:0})));
   };
 
-  // Top (hell — Licht von oben)
-  addLeibFace([[-WD,H+WD,-LD],[W+WD,H+WD,-LD],[W,H,0],[0,H,0]], 0xa8b8c8);
-  // Bottom
-  addLeibFace([[0,0,0],[W,0,0],[W+WD,-WD,-LD],[-WD,-WD,-LD]], 0x9aaabb);
-  // Left
-  addLeibFace([[-WD,H+WD,-LD],[0,H,0],[0,0,0],[-WD,-WD,-LD]], 0xa0b0c0);
-  // Right (Schattenseite)
-  addLeibFace([[W,H,0],[W+WD,H+WD,-LD],[W+WD,-WD,-LD],[W,0,0]], 0x7a8898);
+  // Leibung = exakt Hintergrundfarbe (f4f4f2) → komplett unsichtbar wie im Reference-Foto
+  addLeibFace([[-WD,H+WD,-LD],[W+WD,H+WD,-LD],[W,H,0],[0,H,0]], 0xf4f4f2);
+  addLeibFace([[0,0,0],[W,0,0],[W+WD,-WD,-LD],[-WD,-WD,-LD]], 0xf4f4f2);
+  addLeibFace([[-WD,H+WD,-LD],[0,H,0],[0,0,0],[-WD,-WD,-LD]], 0xf4f4f2);
+  addLeibFace([[W,H,0],[W+WD,H+WD,-LD],[W+WD,-WD,-LD],[W,0,0]], 0xf4f4f2);
 }
 
 // ════════════════════════════════════════════════════════════
@@ -769,7 +909,7 @@ function initScene(container) {
   container.appendChild(cvs);
 
   scene=new THREE.Scene();
-  scene.background=new THREE.Color(0xbcc8d4);
+  scene.background=new THREE.Color(0xf4f4f2);  // fast weiß — wie Produktfoto
 
   camera=new THREE.PerspectiveCamera(22, W/H, 0.1, 50);
   camera.position.set(0, 0, 6);
@@ -794,28 +934,29 @@ function initScene(container) {
   // Szenenbeleuchtung — warmes Tageslicht, Rahmen erscheint weiß
   scene.add(new THREE.HemisphereLight(0xf0eeea, 0x8090a0, 0.60)); // Himmel warm, Boden kühl
   scene.add(new THREE.AmbientLight(0xf5f2f0, 0.60));  // warmes Weiß, reduziert wegen HemisphereLight
-  const key=new THREE.DirectionalLight(0xfffcf0, 1.20);  // warme Sonne von rechts-oben
-  key.position.set(4,6,5); key.castShadow=true;
+  // Hauptlicht: oben-links bei 45° (Agent: "Hauptlichtquelle oben-links")
+  const key=new THREE.DirectionalLight(0xfffaf6, 1.15);
+  key.position.set(-4,6,5); key.castShadow=true;
   key.shadow.mapSize.set(2048,2048);
   key.shadow.camera.near=1; key.shadow.camera.far=16;
   key.shadow.camera.left=-3; key.shadow.camera.right=3;
   key.shadow.camera.top=5; key.shadow.camera.bottom=-5;
   key.shadow.bias=-0.001; scene.add(key);
-  const fill=new THREE.DirectionalLight(0xc0d8f0, 0.55);  // kühles Fülllicht links
-  fill.position.set(-3,2,4); scene.add(fill);
-  const front=new THREE.DirectionalLight(0xffffff, 0.18); // leichter Front-Akzent versetzt
-  front.position.set(1.2, 0.8, 9); scene.add(front);
-  // Chrome-Spot für Griff-Reflexion
-  const cL=new THREE.SpotLight(0xffffff, 12.0, 16, Math.PI/9, 0.12);
-  cL.position.set(-1.0, 2.5, 5.5); scene.add(cL); scene.add(cL.target);
+  const fill=new THREE.DirectionalLight(0xdde8f0, 0.50);  // Fülllicht rechts
+  fill.position.set(3,2,4); scene.add(fill);
+  const front=new THREE.DirectionalLight(0xffffff, 0.15);
+  front.position.set(-0.8, 0.5, 9); scene.add(front);
+  // Zusätzliche Füllquelle für Griff-Highlight (kein Spot — verhindert Glasfleck)
+  const cL=new THREE.DirectionalLight(0xffffff, 0.30);
+  cL.position.set(-1.5, 2.0, 6); scene.add(cL);
 
-  // Wand hinter Produkt
-  const wallMesh=new THREE.Mesh(new THREE.PlaneGeometry(16,16), new THREE.MeshStandardMaterial({color:0x8090a4,roughness:0.95}));
+  // Wand hinter Produkt — weiß wie Studio-Foto
+  const wallMesh=new THREE.Mesh(new THREE.PlaneGeometry(16,16), new THREE.MeshStandardMaterial({color:0xf0efed,roughness:0.98}));
   wallMesh.position.set(0,0,-0.30); wallMesh.receiveShadow=true; scene.add(wallMesh);
 
-  // Boden-Schatten
-  const gnd=new THREE.Mesh(new THREE.PlaneGeometry(14,14), new THREE.ShadowMaterial({opacity:0.10}));
-  gnd.rotation.x=-Math.PI/2; gnd.position.y=-1.6; gnd.receiveShadow=true; scene.add(gnd);
+  // Boden-Schatten (Agent: weicher, leicht nach rechts-unten versetzt)
+  const gnd=new THREE.Mesh(new THREE.PlaneGeometry(14,14), new THREE.ShadowMaterial({opacity:0.18}));
+  gnd.rotation.x=-Math.PI/2; gnd.position.set(0.05,-1.6,0); gnd.receiveShadow=true; scene.add(gnd);
 
   productGroup=new THREE.Group();
   scene.add(productGroup);
@@ -838,14 +979,14 @@ function initScene(container) {
 // KAMERA AUF PRODUKT ANPASSEN
 // ════════════════════════════════════════════════════════════
 function fitCamera(S) {
-  // Include Leibung (WD=0.200) in visible extent so product never clips
-  const LB=0.200;
+  // Include reduced Leibung (WD=0.060) + small margin
+  const LB=0.080;
   const W=(S.bMm||1000)/1000 + 2*LB;
   const H=(S.hMm||(S.prod==='haustuere'?2100:1200))/1000 + 2*LB;
   const fovRad=22*Math.PI/180;
   const ar=camera.aspect;
-  const distH=(H*0.58)/Math.tan(fovRad/2);
-  const distW=(W*0.58)/(ar*Math.tan(fovRad/2));
+  const distH=(H*0.50)/Math.tan(fovRad/2);
+  const distW=(W*0.50)/(ar*Math.tan(fovRad/2));
   const dist=Math.max(distH,distW,2.5);
   camera.position.set(0,0,dist);
   controls.target.set(0,0,0);
