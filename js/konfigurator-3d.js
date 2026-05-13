@@ -4,6 +4,7 @@
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 // ════════════════════════════════════════════════════════════
 // KONSTANTEN — Drutex IGLO 5 Profilmaße (1 unit = 1 Meter)
@@ -11,7 +12,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 const OFR  = 0.115;   // Blendrahmen-Breite 115mm
 const SFR  = 0.082;   // Flügelrahmen-Breite 82mm
 const DD   = 0.070;   // Profiltiefe 70mm
-const OVHG = 0.020;   // Flügel-Überschlag: Sash front protrudes 20mm past frame front face
+const OVHG = 0.010;   // Flügel-Überschlag: 10mm (IGLO 5 realistisch, Agent 1 bestätigt 8–12mm)
 const DCT  = 0.009;   // Dichtungsbreite 9mm
 const GLB  = 0.018;   // Glasleiste Breite 18mm
 const ABH  = 0.022;   // Abstandhalter sichtbare Breite 22mm (großzügig für Sichtbarkeit im Konfigurator)
@@ -36,15 +37,16 @@ const frameMat = new THREE.MeshPhysicalMaterial({
   envMapIntensity: 1.20
 });
 const glassMat = new THREE.MeshPhysicalMaterial({
-  color: 0xb0cce0, metalness: 0.0, roughness: 0.04,
-  transmission: 0.38, thickness: 0.028, ior: 1.52, transparent: true,
-  envMapIntensity: 2.8
+  color: 0xc0d8c8,  // Float-Glas grün-blauer Tint (wie echtes Isolierglas)
+  metalness: 0.0, roughness: 0.04,
+  transmission: 0.42, thickness: 0.028, ior: 1.52, transparent: true,
+  envMapIntensity: 2.5
 });
 const sealMat = new THREE.MeshStandardMaterial({
   color: 0x1a1a1a, roughness: 0.90, metalness: 0
 });
 const spacerMat = new THREE.MeshStandardMaterial({
-  color: 0x9aa4ac, roughness: 0.35, metalness: 0.55, envMapIntensity: 2.0  // Aluminium-Spacer silber
+  color: 0x1a1a18, roughness: 0.80, metalness: 0.08  // Swisspacer Ultimate (Standard bei Drutex)
 });
 const glassBackMat = new THREE.MeshStandardMaterial({
   color: 0x7ca0bc, roughness: 0.92, metalness: 0  // Raumhintergrund, mittelhell (Himmel/Raum)
@@ -286,15 +288,37 @@ function buildOuterFrame(g, X, Y, W, H, FW, depth, mat, zStart=0) {
 // HARDWARE — Griffe, Scharniere, Stoßgriff
 // ════════════════════════════════════════════════════════════
 function addFensterGriff(g, cx, cy, z) {
-  // Rosette NEVADA — 30×63mm, 13mm Aufbauhöhe
-  addBox(g, cx-0.015, cy-0.0315, z,       0.030, 0.063, 0.013, chromeMat);
-  // Spindel
-  addBox(g, cx-0.006, cy-0.006,  z+0.013, 0.012, 0.012, 0.006, grooveMat);
-  // Hebel 130mm nach unten
-  addBox(g, cx-0.008, cy-0.130,  z+0.002, 0.016, 0.130, 0.010, chromeMat);
-  // Hebelende (zylindrisch)
-  const cap=new THREE.Mesh(new THREE.CylinderGeometry(0.009,0.007,0.010,16), chromeMat);
-  cap.rotation.x=Math.PI/2; cap.position.set(cx, cy-0.130, z+0.007); g.add(cap);
+  // NEVADA-Griff: ovale Rosette 40×26mm + Hals + Hebelarm 120mm (Schließstellung = nach unten)
+  const hMat = new THREE.MeshPhysicalMaterial({
+    color: 0xd8d8d4, roughness: 0.14, metalness: 0.84,
+    clearcoat: 0.30, clearcoatRoughness: 0.08, envMapIntensity: 3.5
+  });
+  const pinMat = new THREE.MeshStandardMaterial({color: 0x60686e, roughness: 0.22, metalness: 0.92});
+
+  // 1. Rosette — ovale Abdeckplatte (40mm breit × 26mm hoch × 7mm tief)
+  addBox(g, cx-0.020, cy-0.013, z, 0.040, 0.026, 0.007, hMat);
+
+  // 2. Spindel-Achse (sichtbarer dunkler Zylinder in Rosetten-Mitte)
+  const sp = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.010, 12), pinMat);
+  sp.rotation.x = Math.PI/2;
+  sp.position.set(cx, cy, z + 0.012);
+  g.add(sp);
+
+  // 3. Griffhals (konischer Übergang Rosette→Arm, Ø18mm→Ø13mm, 20mm lang)
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.0065, 0.020, 14), hMat);
+  neck.rotation.x = Math.PI/2;
+  neck.position.set(cx, cy, z + 0.017);
+  g.add(neck);
+
+  // 4. Griffarm — zylindrisch Ø13mm, 120mm lang, zeigt nach unten (Schließstellung)
+  const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.0065, 0.0065, 0.120, 14), hMat);
+  arm.position.set(cx, cy - 0.060, z + 0.027); // mittig bei cy-60mm
+  g.add(arm);
+
+  // 5. Griffspitze (Halbkugel, abgerundetes Ende)
+  const tip = new THREE.Mesh(new THREE.SphereGeometry(0.0068, 12, 8), hMat);
+  tip.position.set(cx, cy - 0.120, z + 0.027);
+  g.add(tip);
 }
 
 function addBalkontuerGriff(g, cx, cy, z, isLinks) {
@@ -308,11 +332,31 @@ function addBalkontuerGriff(g, cx, cy, z, isLinks) {
 }
 
 function addFensterScharnier(g, cx, cy, z) {
-  // Scharnierplatte
-  addBox(g, cx-0.011, cy-0.024, z, 0.022, 0.048, 0.008, chromeMat);
-  // Scharnierstift (Zylinder)
-  const pin=new THREE.Mesh(new THREE.CylinderGeometry(0.005,0.005,0.050,12), grooveMat);
-  pin.position.set(cx, cy, z+0.004); g.add(pin);
+  // MACO Multi Matic Ecklager — L-Form Zinkdruckguss, silbergrau #a0a098
+  const sMat = new THREE.MeshStandardMaterial({
+    color: 0xa0a098, roughness: 0.35, metalness: 0.72, envMapIntensity: 2.5
+  });
+  const pinMat = new THREE.MeshStandardMaterial({color: 0x7888a8, roughness: 0.12, metalness: 0.96});
+
+  // Platte an Flügelkante (sichtbar von innen, 56×14mm)
+  addBox(g, cx-0.012, cy-0.028, z, 0.024, 0.056, 0.007, sMat);
+
+  // L-Körper (dicker Lagerkörper, 20×14×14mm) — Knotenpunkt der L-Form
+  addBox(g, cx-0.012, cy-0.007, z-0.014, 0.024, 0.014, 0.014, sMat);
+
+  // Tragezapfen (Ø7mm, 16mm lang — sichtbarer Drehzapfen)
+  const pin = new THREE.Mesh(new THREE.CylinderGeometry(0.0035, 0.0035, 0.016, 12), pinMat);
+  pin.rotation.x = Math.PI/2;
+  pin.position.set(cx, cy, z + 0.008);
+  g.add(pin);
+
+  // Schraubenattrappen (2× kleine Zylinder auf Platte)
+  [cy-0.020, cy+0.008].forEach(sy => {
+    const scr = new THREE.Mesh(new THREE.CylinderGeometry(0.002, 0.002, 0.003, 8), pinMat);
+    scr.rotation.x = Math.PI/2;
+    scr.position.set(cx, sy, z + 0.008);
+    g.add(scr);
+  });
 }
 
 function addBandScharnier(g, cx, cy, z) {
@@ -717,13 +761,9 @@ function initScene(container) {
   // PMREM Environment für Chrome-Reflexionen
   const pmremGen=new THREE.PMREMGenerator(renderer);
   pmremGen.compileEquirectangularShader();
-  // PMREM — warme neutrale Umgebung damit RAL 9016 weiß bleibt, nicht grau
-  const envSc=new THREE.Scene();
-  envSc.add(new THREE.AmbientLight(0xf0ece8, 3.0));                                  // warmes Tageslicht
-  const eS=new THREE.DirectionalLight(0xfffcf0, 5.0); eS.position.set(3,6,3); envSc.add(eS);  // Sonne
-  const eF=new THREE.DirectionalLight(0xe8eef8, 2.0); eF.position.set(-3,2,5); envSc.add(eF); // kühler Fill
-  const eG=new THREE.DirectionalLight(0xf0ece0, 1.5); eG.position.set(0,-3,3); envSc.add(eG); // Bodenlicht
-  scene.environment=pmremGen.fromScene(envSc,0.05).texture;
+  // RoomEnvironment — kalibriertes Studio-Licht, ideal für Clearcoat + Metallic
+  scene.environment = pmremGen.fromScene(new RoomEnvironment(renderer), 0.04).texture;
+  pmremGen.dispose();
 
   // Szenenbeleuchtung — warmes Tageslicht, Rahmen erscheint weiß
   scene.add(new THREE.AmbientLight(0xf5f2f0, 0.88));  // warmes Weiß, hoch genug für weiße Flächen
