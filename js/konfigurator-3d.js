@@ -343,10 +343,10 @@ function addInnerFasen(g, X, Y, W, H, depth) {
 function addFensterGriff(g,cx,cy,z){
   // HOPPE Atlanta — dunkles Anthrazit: stark kontrastierend zum weißen Rahmen
   const hMat=new THREE.MeshStandardMaterial({
-    color:0x282b2e, roughness:0.18, metalness:0.88, envMapIntensity:4.5
+    color:0x282b2e, roughness:0.38, metalness:0.68, envMapIntensity:1.8
   });
   const schildMat=new THREE.MeshStandardMaterial({
-    color:0x2e3135, roughness:0.25, metalness:0.82, envMapIntensity:3.5
+    color:0x242729, roughness:0.44, metalness:0.62, envMapIntensity:1.4
   });
 
   // Langschild — 32mm breit, 140mm hoch, 10mm tief
