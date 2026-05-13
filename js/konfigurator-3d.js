@@ -341,47 +341,47 @@ function addInnerFasen(g, X, Y, W, H, depth) {
 // HARDWARE — HOPPE Atlanta Griff (original Geometrie)
 // ════════════════════════════════════════════════════════════
 function addFensterGriff(g,cx,cy,z){
-  // HOPPE Atlanta — silber/anthrazit, klar sichtbar
+  // HOPPE Atlanta — dunkles Anthrazit: stark kontrastierend zum weißen Rahmen
   const hMat=new THREE.MeshStandardMaterial({
-    color:0x9aa0a8, roughness:0.28, metalness:0.85, envMapIntensity:4.0
+    color:0x282b2e, roughness:0.18, metalness:0.88, envMapIntensity:4.5
   });
   const schildMat=new THREE.MeshStandardMaterial({
-    color:0x8890a0, roughness:0.35, metalness:0.78, envMapIntensity:3.0
+    color:0x2e3135, roughness:0.25, metalness:0.82, envMapIntensity:3.5
   });
 
-  // Langschild — 28mm breit, 130mm hoch, 8mm tief
-  const sW=0.028,sH=0.130,sD=0.008,sR=0.008;
+  // Langschild — 32mm breit, 140mm hoch, 10mm tief
+  const sW=0.032,sH=0.140,sD=0.010,sR=0.008;
   const sShape=new THREE.Shape();
   sShape.moveTo(-sW/2+sR,-sH/2);
   sShape.lineTo(sW/2-sR,-sH/2);sShape.absarc(sW/2-sR,-sH/2+sR,sR,-Math.PI/2,0,false);
   sShape.lineTo(sW/2,sH/2-sR);sShape.absarc(sW/2-sR,sH/2-sR,sR,0,Math.PI/2,false);
   sShape.lineTo(-sW/2+sR,sH/2);sShape.absarc(-sW/2+sR,sH/2-sR,sR,Math.PI/2,Math.PI,false);
   sShape.lineTo(-sW/2,-sH/2+sR);sShape.absarc(-sW/2+sR,-sH/2+sR,sR,Math.PI,Math.PI*1.5,false);
-  const sGeo=new THREE.ExtrudeGeometry(sShape,{depth:sD,bevelEnabled:true,bevelSize:0.002,bevelThickness:0.002,bevelSegments:2});
+  const sGeo=new THREE.ExtrudeGeometry(sShape,{depth:sD,bevelEnabled:true,bevelSize:0.003,bevelThickness:0.003,bevelSegments:3});
   const sMesh=new THREE.Mesh(sGeo,schildMat);
   sMesh.position.set(cx-sW/2,cy-sH/2,z);sMesh.castShadow=true;g.add(sMesh);
 
-  // Achsstummel — Zylinder aus dem Schild
-  const axle=new THREE.Mesh(new THREE.CylinderGeometry(0.008,0.008,0.022,16),hMat);
-  axle.rotation.x=Math.PI/2;axle.position.set(cx,cy,z+sD+0.011);g.add(axle);
+  // Achse im oberen Drittel des Schildes
+  const pivotY=cy+sH*0.18;
+  const axle=new THREE.Mesh(new THREE.CylinderGeometry(0.009,0.009,0.024,16),hMat);
+  axle.rotation.x=Math.PI/2;axle.position.set(cx,pivotY,z+sD+0.012);g.add(axle);
 
-  // Griffhebel — KORREKTE Geometrie: erst nach VORNE, dann leicht nach unten
-  // Echte Fenstergriff-Form: Hebel geht vom Schild horizontal nach vorne heraus
+  // Griffhebel — zeigt NACH OBEN (Geschlossen-Position, sofort als Fenstergriff erkennbar)
   const armCurve=new THREE.CatmullRomCurve3([
-    new THREE.Vector3(cx,     cy,        z+sD+0.008),   // Schild-Ansatz
-    new THREE.Vector3(cx,     cy,        z+sD+0.038),   // gerade nach vorne
-    new THREE.Vector3(cx,     cy-0.020,  z+sD+0.058),   // leicht nach unten schwingen
-    new THREE.Vector3(cx,     cy-0.058,  z+sD+0.068),   // Griffmitte
-    new THREE.Vector3(cx,     cy-0.095,  z+sD+0.062),   // nach unten Ende
-    new THREE.Vector3(cx,     cy-0.110,  z+sD+0.050),   // Griffende
+    new THREE.Vector3(cx, pivotY,        z+sD+0.004),
+    new THREE.Vector3(cx, pivotY,        z+sD+0.030),
+    new THREE.Vector3(cx, pivotY+0.020,  z+sD+0.048),
+    new THREE.Vector3(cx, pivotY+0.060,  z+sD+0.056),
+    new THREE.Vector3(cx, pivotY+0.095,  z+sD+0.050),
+    new THREE.Vector3(cx, pivotY+0.110,  z+sD+0.038),
   ]);
-  const armMesh=new THREE.Mesh(new THREE.TubeGeometry(armCurve,28,0.013,14,false),hMat);
+  const armMesh=new THREE.Mesh(new THREE.TubeGeometry(armCurve,28,0.015,14,false),hMat);
   armMesh.castShadow=true;g.add(armMesh);
 
-  // Griffende — ovale Kappe
-  const tip=new THREE.Mesh(new THREE.SphereGeometry(0.014,14,10),hMat);
+  // Griffspitze
+  const tip=new THREE.Mesh(new THREE.SphereGeometry(0.016,14,10),hMat);
   tip.scale.set(0.9,1.0,0.9);
-  tip.position.set(cx,cy-0.112,z+sD+0.050);tip.castShadow=true;g.add(tip);
+  tip.position.set(cx,pivotY+0.112,z+sD+0.038);tip.castShadow=true;g.add(tip);
 }
 
 function addBalkontuerGriff(g,cx,cy,z,isLinks){
