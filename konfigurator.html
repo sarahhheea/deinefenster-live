@@ -6429,11 +6429,25 @@ function toggleOpen() {
   const btn = document.getElementById('oeffnen-btn');
   if (btn) {
     btn.classList.toggle('active', prevOpen);
-    const icon = prevOpen ? 'close' : 'play_arrow';
-    const label = prevOpen ? 'Fenster schließen' : 'Fenster öffnen';
+    const S = window._kS || {};
+    const labels = {
+      'kunststoff':'Fenster schließen','balkontuer':'Balkontür schließen',
+      'haustuere':'Haustür schließen','hst':'Schiebetür schließen'
+    };
+    const labelsOpen = {
+      'kunststoff':'Fenster öffnen','balkontuer':'Balkontür öffnen',
+      'haustuere':'Haustür öffnen','hst':'Schiebetür öffnen'
+    };
+    const label = prevOpen ? (labels[S.prod]||'Schließen') : (labelsOpen[S.prod]||'Öffnen');
+    const icon  = prevOpen ? 'close' : 'play_arrow';
     btn.innerHTML = `<span style="display:inline-flex;align-items:center;gap:8px"><i class="ms" style="font-size:16px">${icon}</i> ${label}</span>`;
   }
-  drawPrev();
+  // 3D-Animation triggern (kein drawPrev mehr nötig — animation läuft intern)
+  if (typeof window.openProduct3D === 'function') {
+    window.openProduct3D(prevOpen);
+  } else {
+    drawPrev();
+  }
 }
 
 // ── Haustür 3D postMessage Bridge ─────────────────────────────
