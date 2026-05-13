@@ -623,8 +623,6 @@ function buildFenster(S,view){
 
   // Blendrahmen — ExtrudeGeometry mit echtem Bevel
   buildFrameExtruded(g,0,0,W,H,OFR,DD,frameMat);
-  // Tiefenkanten-Abdunklungsstreifen (simuliert sichtbare 70mm Profildicke)
-  addDepthEdges(g,0,0,W,H,DD);
 
   // Innere Profil-Stufe — stark abgedunkelt für maximale Tiefenwirkung
   const _stepCol=new THREE.Color(frameMat.color).multiplyScalar(0.44);
@@ -916,13 +914,13 @@ function initScene(container){
   scene.background=new THREE.Color(0x0f172a);
 
   camera=new THREE.PerspectiveCamera(22,W/H,0.1,50);
-  camera.position.set(0,0,6);
+  camera.position.set(-0.22,0.12,6);  // leicht links-oben → Profiltiefe sofort sichtbar
 
   controls=new OrbitControls(camera,cvs);
   controls.enablePan=false;
   controls.minDistance=2;controls.maxDistance=14;
-  controls.maxPolarAngle=Math.PI*0.55;controls.minPolarAngle=Math.PI*0.45;
-  controls.minAzimuthAngle=-0.45;controls.maxAzimuthAngle=0.45;
+  controls.maxPolarAngle=Math.PI*0.56;controls.minPolarAngle=Math.PI*0.44;
+  controls.minAzimuthAngle=-0.50;controls.maxAzimuthAngle=0.50;
   controls.update();
 
   // ── STUDIO-HDRI aus Canvas (keine externen Dateien) ──────
