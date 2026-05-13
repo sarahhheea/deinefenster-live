@@ -52,11 +52,11 @@ const faseMat = new THREE.MeshPhysicalMaterial({
   envMapIntensity: 2.2
 });
 const glassMat = new THREE.MeshPhysicalMaterial({
-  color: 0xc8e8f2,
+  color: 0xd8ede6,          // echtes Float-Glas: sehr geringe Sättigung (~8%)
   metalness: 0.0, roughness: 0.03,
   transmission: 0.86, thickness: 0.028, ior: 1.52, transparent: true,
-  clearcoat: 0.25, clearcoatRoughness: 0.04,
-  envMapIntensity: 1.0
+  clearcoat: 0.35, clearcoatRoughness: 0.03,
+  envMapIntensity: 2.5
 });
 const glassRoomMat = new THREE.MeshStandardMaterial({
   color: 0xe8ecee, roughness: 0.95, metalness: 0
@@ -230,10 +230,10 @@ function applyGlass(key){
     glassMat.normalMap=buildNormalTex(masterCarreHeight,4.0,3,11);
     glassMat.normalScale=new THREE.Vector2(1.5,1.5);
   }else{
-    // Klarglas — leicht blau-grün + echte Reflexionen
-    glassMat.transmission=0.86;glassMat.roughness=0.03;glassMat.color.set(0xc8e8f2);
-    glassMat.clearcoat=0.25;glassMat.clearcoatRoughness=0.04;
-    glassMat.envMapIntensity=1.0;
+    // Klarglas — minimal-grün wie echtes Float-Glas + scharfe Reflexionen
+    glassMat.transmission=0.86;glassMat.roughness=0.03;glassMat.color.set(0xd8ede6);
+    glassMat.clearcoat=0.35;glassMat.clearcoatRoughness=0.03;
+    glassMat.envMapIntensity=2.5;
   }
   glassMat.needsUpdate=true;
 }
@@ -904,7 +904,7 @@ function initScene(container){
   renderer.shadowMap.enabled=true;
   renderer.shadowMap.type=THREE.PCFSoftShadowMap;
   renderer.toneMapping=THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure=1.22;
+  renderer.toneMappingExposure=0.95;
   renderer.setClearColor(0x0f172a,1);
 
   const cvs=renderer.domElement;
@@ -924,36 +924,12 @@ function initScene(container){
   controls.minAzimuthAngle=-0.50;controls.maxAzimuthAngle=0.50;
   controls.update();
 
-  // ── STUDIO-HDRI aus Canvas (keine externen Dateien) ──────
+  // ── Studio-Environment (RoomEnvironment — schärfere Reflexionen als Canvas-HDRI) ──
   {
-    const EW=2048,EH=1024,ec=document.createElement('canvas');
-    ec.width=EW;ec.height=EH;
-    const ex=ec.getContext('2d');
-    // Hintergrund-Gradient: oben hell → unten dunkel
-    const bg=ex.createLinearGradient(0,0,0,EH);
-    bg.addColorStop(0,'#e8edf6'); bg.addColorStop(0.25,'#bcccd8');
-    bg.addColorStop(0.55,'#7090aa'); bg.addColorStop(0.8,'#2a3a52'); bg.addColorStop(1,'#060c14');
-    ex.fillStyle=bg; ex.fillRect(0,0,EW,EH);
-    // Key-Light Spot oben-links (entspricht DirectionalLight Winkel)
-    const kg=ex.createRadialGradient(EW*0.30,EH*0.06,0,EW*0.30,EH*0.06,EH*0.42);
-    kg.addColorStop(0,'rgba(255,255,250,1.0)'); kg.addColorStop(0.25,'rgba(252,252,244,0.90)');
-    kg.addColorStop(0.6,'rgba(200,210,230,0.30)'); kg.addColorStop(1,'rgba(0,0,0,0)');
-    ex.fillStyle=kg; ex.fillRect(0,0,EW,EH);
-    // Fill-Light Spot rechts, kühler
-    const fg=ex.createRadialGradient(EW*0.72,EH*0.14,0,EW*0.72,EH*0.14,EH*0.28);
-    fg.addColorStop(0,'rgba(200,220,245,0.72)'); fg.addColorStop(1,'rgba(0,0,0,0)');
-    ex.fillStyle=fg; ex.fillRect(0,0,EW,EH);
-    // Rim-Light hinten-oben (Mitte)
-    const rg=ex.createRadialGradient(EW*0.50,EH*0.03,0,EW*0.50,EH*0.03,EH*0.20);
-    rg.addColorStop(0,'rgba(255,255,255,0.50)'); rg.addColorStop(1,'rgba(0,0,0,0)');
-    ex.fillStyle=rg; ex.fillRect(0,0,EW,EH);
-    const eTex=new THREE.CanvasTexture(ec);
-    eTex.mapping=THREE.EquirectangularReflectionMapping;
-    eTex.colorSpace=THREE.SRGBColorSpace;
     const pmremGen=new THREE.PMREMGenerator(renderer);
     pmremGen.compileEquirectangularShader();
-    scene.environment=pmremGen.fromEquirectangular(eTex).texture;
-    pmremGen.dispose(); eTex.dispose();
+    scene.environment=pmremGen.fromScene(new RoomEnvironment(renderer),0.025).texture;
+    pmremGen.dispose();
   }
 
   // ── BELEUCHTUNG — Produktfoto-Studio mit RectAreaLight (Softbox) ─────
@@ -961,7 +937,7 @@ function initScene(container){
   scene.add(new THREE.HemisphereLight(0x1a3560,0x050810,0.22));
 
   // Key-Softbox: oben-links, 3.5m×4m — erzeugt echten Gradienten über weiße PVC-Flächen
-  const key=new THREE.RectAreaLight(0xfffdf0,7.0,3.5,4.0);
+  const key=new THREE.RectAreaLight(0xfffdf0,5.0,3.5,4.0);
   key.position.set(-2.8,4.5,4.5);key.lookAt(0,0,0);scene.add(key);
 
   // Shadow-Caster: separates DirectionalLight nur für Schatten (RectAreaLight wirft keine)
