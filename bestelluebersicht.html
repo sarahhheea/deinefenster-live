@@ -129,20 +129,22 @@
       </a>
     </div>
 
-    <!-- Gesamtpreis-Block -->
-    <div id="total-block" class="hidden" style="background:linear-gradient(135deg,#225eaa 0%,#1e3a8a 100%);color:#fff;border-radius:18px;padding:28px;margin-bottom:24px;box-shadow:0 10px 30px rgba(34,94,170,.2)">
-      <div class="flex items-end justify-between flex-wrap gap-3">
+    <!-- Zusammenfassung-Block (kein Preis) -->
+    <div id="total-block" class="hidden" style="background:linear-gradient(135deg,#225eaa 0%,#1e3a8a 100%);color:#fff;border-radius:18px;padding:22px 28px;margin-bottom:24px;box-shadow:0 10px 30px rgba(34,94,170,.2)">
+      <div class="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <div style="font-size:13px;opacity:0.75;text-transform:uppercase;letter-spacing:0.05em;font-weight:600">Gesamtpreis inkl. 19 % MwSt.</div>
-          <div id="total-price" style="font-family:'Archivo',sans-serif;font-size:44px;font-weight:900;line-height:1;margin-top:4px">–</div>
-          <div style="font-size:13px;opacity:0.85;margin-top:6px" id="total-meta">unverbindliches Angebot · Wir melden uns zeitnah</div>
+          <div style="font-size:13px;opacity:0.75;text-transform:uppercase;letter-spacing:0.05em;font-weight:600">Ihre Zusammenstellung</div>
+          <div id="total-meta" style="font-family:'Archivo',sans-serif;font-size:22px;font-weight:900;line-height:1.2;margin-top:6px">Preis auf Anfrage</div>
+          <div style="font-size:13px;opacity:0.85;margin-top:5px">Wir senden Ihnen ein individuelles Angebot — kostenlos &amp; unverbindlich.</div>
         </div>
         <div style="font-size:13px;opacity:0.85;text-align:right">
           <div id="item-count">0 Elemente</div>
           <div id="stueck-count" style="margin-top:2px">0 Stück gesamt</div>
-          <div id="versand-info" style="margin-top:2px">+ Versand</div>
         </div>
       </div>
+      <!-- JS braucht dieses Element, bleibt aber unsichtbar -->
+      <div id="total-price" style="display:none"></div>
+      <div id="versand-info" style="display:none"></div>
     </div>
 
     <!-- KONTAKT-FORMULAR (prominent, direkt nach Preis) -->
@@ -452,23 +454,17 @@ function renderCartCard(item, idx) {
           </div>
         </div>
       </div>
-      <!-- Price + Actions -->
-      <div style="padding:24px 28px;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-end;border-left:1px solid #eef1fb;min-width:210px;background:linear-gradient(180deg,#fbfcff 0%,#ffffff 100%)">
+      <!-- Anzahl + Aktionen -->
+      <div style="padding:24px 28px;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-end;border-left:1px solid #eef1fb;min-width:170px;background:linear-gradient(180deg,#fbfcff 0%,#ffffff 100%)">
         <div style="text-align:right;width:100%">
-          <div style="font-size:11px;color:#727782;text-transform:uppercase;letter-spacing:0.06em;font-weight:600">Einzelpreis</div>
-          <div style="font-size:14px;color:#424751;font-weight:700;margin-top:2px">${unitStr}</div>
-          <!-- Anzahl-Stepper (Sarah-Wunsch 21.04.2026) -->
-          <div style="font-size:11px;color:#727782;text-transform:uppercase;letter-spacing:0.06em;font-weight:600;margin-top:14px">Anzahl</div>
-          <div style="display:flex;align-items:center;gap:6px;justify-content:flex-end;margin-top:4px">
+          <div style="font-size:11px;color:#727782;text-transform:uppercase;letter-spacing:0.06em;font-weight:600">Anzahl</div>
+          <div style="display:flex;align-items:center;gap:6px;justify-content:flex-end;margin-top:8px">
             <button type="button" class="qty-btn" onclick="changeQty('${item.id}',-1)" ${item.qty<=1?'disabled':''} title="Weniger"
               style="width:32px;height:32px;border-radius:8px;border:2px solid ${item.qty<=1?'#e0e4f0':'#225eaa'};background:#fff;color:${item.qty<=1?'#c2c6d3':'#225eaa'};font-size:18px;font-weight:900;cursor:${item.qty<=1?'default':'pointer'};font-family:Archivo,sans-serif">−</button>
             <span style="min-width:40px;text-align:center;font-family:Archivo,sans-serif;font-size:20px;font-weight:800;color:#161c27">${item.qty}</span>
             <button type="button" class="qty-btn" onclick="changeQty('${item.id}',1)" title="Mehr"
               style="width:32px;height:32px;border-radius:8px;border:2px solid #225eaa;background:#fff;color:#225eaa;font-size:18px;font-weight:900;cursor:pointer;font-family:Archivo,sans-serif">+</button>
           </div>
-          <div style="font-size:11px;color:#727782;text-transform:uppercase;letter-spacing:0.06em;font-weight:600;margin-top:14px">Zwischensumme</div>
-          <div class="price-big" style="margin-top:2px">${priceStr}<span class="cur">€</span></div>
-          <div style="font-size:11px;color:#16a34a;font-weight:600;margin-top:4px">inkl. 19 % MwSt.</div>
         </div>
         <div style="display:flex;gap:8px;margin-top:16px;width:100%;justify-content:flex-end">
           <button class="action-btn btn-edit" onclick="editItem('${item.id}')">
