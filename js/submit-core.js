@@ -284,46 +284,31 @@
   </td></tr>
 </table></td></tr></table></body></html>`;
 
-      // ── Benachrichtigung an Sarah via Formsubmit.co ──
-      // Kein Account, keine Domain-Verifizierung nötig.
-      // EINMALIG: Erste Sendung → Bestätigungs-E-Mail an info@baustoffchrist.de → einmal klicken → fertig.
+      // ── Benachrichtigung via Web3Forms (CORS-sicher, kein Server nötig) ──
       try {
         const positionen = cart.map((item, idx) =>
           `${idx + 1}. ${item.qty}× ${item.summary || (item.config && item.config.prod) || '–'}`
-        ).join('  |  ');
-        await fetch('https://formsubmit.co/ajax/info@baustoffchrist.de', {
+        ).join(' | ');
+        await fetch('https://api.web3forms.com/submit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
           body: JSON.stringify({
-            _subject: `🔔 Neue Anfrage ${offerId} — DeineFenster.de`,
-            _replyto: formData.email,
-            _template: 'table',
+            access_key: '440a94ff-9f42-46af-bf3d-47013dbd8f5f',
+            subject: `🔔 Neue Anfrage ${offerId} — DeineFenster.de`,
+            from_name: 'DeineFenster.de Konfigurator',
             'Anfrage-Nr': offerId,
             'Datum': datum,
             'Name': formData.name,
             'E-Mail': formData.email,
             'Telefon': formData.phone || '–',
             'PLZ & Ort': formData.ort,
-            'Straße': formData.strasse || '–',
+            'Strasse': formData.strasse || '–',
             'Positionen': positionen,
             'Anmerkungen': formData.notiz || '–',
+            'Kalkulierter Preis': `${tot} €`,
           }),
         });
-      } catch (e) { console.warn('Formsubmit fehlgeschlagen:', e); }
-
-      // ── Kunden-Bestätigung via Resend ──
-      try {
-        await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + RESEND_KEY },
-          body: JSON.stringify({
-            from: FROM_ADDR,
-            to: [formData.email],
-            subject: `Ihre Anfrage ${offerId} — DeineFenster.de`,
-            html: kundenHtml,
-          }),
-        });
-      } catch (e) { console.warn('Resend-Kundenmail fehlgeschlagen:', e); }
+      } catch (e) { console.warn('Web3Forms fehlgeschlagen:', e); }
 
       // Make.com Webhook senden (inkl. Bildanhänge)
       try {
