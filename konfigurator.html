@@ -1428,67 +1428,105 @@
   /* Navbar bleibt über Hero sichtbar */
   #navbar { z-index: 110 !important; }
 
-  /* ── 3-PANEL LAYOUT (Desktop) ── */
+  /* ══════════════════════════════════════════════════
+     3-PANEL FULL-VIEWPORT LAYOUT (Desktop ≥ 1024px)
+     Links: Schritt-Nav | Mitte: Inhalt | Rechts: Preview
+     ══════════════════════════════════════════════════ */
   @media (min-width: 1024px) {
+    /* Kein Body-Scroll — alles in den 3 Panels */
+    body { overflow: hidden !important; }
+
+    /* Haupt-Shell: Fixed, füllt alles unter Navbar */
     #kfg-main {
-      grid-template-columns: 196px 1fr 276px !important;
-      gap: 16px !important;
+      position: fixed !important;
+      top: 60px !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+      display: flex !important; flex-direction: row !important;
+      max-width: none !important; width: 100% !important;
+      margin: 0 !important; padding: 0 !important;
+      gap: 0 !important; overflow: hidden !important;
+      z-index: 2 !important;
+      background: #060914 !important;
     }
-    /* Inaktive Steps komplett ausblenden */
-    #steps .sc:not(.open) { display: none !important; }
-    /* Steps-Wrapper ohne Karten-Box — jeder aktive Step hat eigene Box */
+
+    /* LINKE NAV-SPALTE */
+    #kfg-nav {
+      display: flex !important; flex-direction: column !important;
+      width: 220px !important; flex-shrink: 0 !important;
+      overflow-y: auto; padding: 28px 14px 28px 18px;
+      border-right: 1px solid rgba(255,255,255,0.07);
+      background: rgba(5,8,20,0.96);
+    }
+
+    /* MITTE: Steps-Panel */
     #steps {
+      flex: 1 !important; overflow-y: auto !important; overflow-x: hidden !important;
+      padding: 0 !important;
       box-shadow: none !important; border: none !important;
-      border-radius: 0 !important; overflow: visible !important;
-      background: transparent !important;
+      border-radius: 0 !important; background: transparent !important;
     }
-    /* Aktiver Step als eigenständige Karte */
-    #steps .sc.open {
-      border-radius: 12px !important;
-      border: 1px solid rgba(255,255,255,0.10) !important;
-      overflow: hidden !important;
-      box-shadow: 0 4px 28px rgba(0,0,0,0.25) !important;
-    }
-    /* Step-Header auf Desktop: nur Titel, kein Toggle */
-    #steps .sh { cursor: default !important; pointer-events: none !important; }
+    /* Alle inaktiven Steps ausblenden */
+    #steps .sc:not(.open) { display: none !important; }
+    /* Aktiver Step: kein Karten-Rahmen, füllt die Mitte */
+    #steps .sc.open { border-radius: 0 !important; border: none !important; box-shadow: none !important; overflow: visible !important; }
+    /* Step-Header → Seiten-Titel, kein Toggle */
+    #steps .sh { cursor: default !important; pointer-events: none !important; padding: 36px 44px 20px !important; background: transparent !important; border: none !important; }
     #steps .sh .chev { display: none !important; }
+    #steps .sh .badge { display: none !important; }
+    #steps .sh .slabel { font-size: 24px !important; font-weight: 800 !important; letter-spacing: -0.025em !important; color: rgba(238,242,255,0.97) !important; line-height: 1.15 !important; }
+    #steps .sh .sdesc  { font-size: 14px !important; color: rgba(200,215,255,0.5) !important; margin-top: 6px !important; white-space: normal !important; overflow: visible !important; text-overflow: unset !important; }
+    /* Step-Body: seitliche Padding */
+    #steps .sc.open > .sb { padding: 0 44px 44px !important; }
+
+    /* RECHTE PREVIEW-SPALTE */
+    #sidebar-wrap {
+      width: 296px !important; flex-shrink: 0 !important;
+      overflow-y: auto;
+      border-left: 1px solid rgba(255,255,255,0.07) !important;
+      padding: 0 !important;
+      position: static !important;
+      max-height: none !important;
+    }
   }
 
-  /* ── LINKE SCHRITT-NAVIGATION ── */
-  #kfg-nav-inner {
-    position: sticky; top: 76px;
-  }
+  /* ── LINKE SCHRITT-NAVIGATION (alle Bildschirmgrößen) ── */
+  #kfg-nav-inner { width: 100%; }
   .kfg-nav-header {
     font-family: 'Manrope', sans-serif;
-    font-size: 9.5px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
-    color: rgba(118,169,250,0.45); padding: 0 4px 13px;
-    margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.07);
+    font-size: 9px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
+    color: rgba(118,169,250,0.4); padding: 0 4px 14px;
+    margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.07);
   }
   .ksnav-item {
     display: flex; align-items: center; gap: 9px;
-    padding: 7px 9px; border-radius: 8px; cursor: pointer;
-    transition: background 0.2s ease; margin-bottom: 1px;
+    padding: 7px 8px; border-radius: 8px; cursor: pointer;
+    transition: background 0.18s ease; margin-bottom: 1px; position: relative;
   }
-  .ksnav-item:hover { background: rgba(255,255,255,0.06); }
+  .ksnav-item:hover { background: rgba(255,255,255,0.05); }
   .ksnav-num {
     width: 22px; height: 22px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 10.5px; font-weight: 700; flex-shrink: 0;
+    font-size: 10px; font-weight: 700; flex-shrink: 0;
     font-family: 'Manrope', sans-serif; transition: all 0.2s ease;
   }
   .ksnav-pending .ksnav-num { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.28); }
-  .ksnav-active  .ksnav-num { background: #225eaa; color: #fff; box-shadow: 0 0 0 3px rgba(34,94,170,0.28); }
+  .ksnav-active  .ksnav-num { background: #225eaa; color: #fff; box-shadow: 0 0 0 3px rgba(34,94,170,0.25); }
   .ksnav-done    .ksnav-num { background: rgba(34,197,94,0.14); color: rgba(74,222,128,0.85); }
-  .ksnav-done    .ksnav-num svg { width: 11px; height: 11px; }
+  .ksnav-done    .ksnav-num svg { width: 10px; height: 10px; }
   .ksnav-lbl {
     font-family: 'Manrope', sans-serif; font-size: 12.5px; font-weight: 500;
-    color: rgba(255,255,255,0.35); line-height: 1.2; flex: 1;
+    color: rgba(255,255,255,0.32); line-height: 1.2; flex: 1;
     min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    transition: color 0.2s ease;
+    transition: color 0.18s ease;
   }
-  .ksnav-active { background: rgba(34,94,170,0.12); }
-  .ksnav-active .ksnav-lbl { color: rgba(255,255,255,0.92); font-weight: 600; }
-  .ksnav-done   .ksnav-lbl { color: rgba(255,255,255,0.55); }
+  .ksnav-active { background: rgba(34,94,170,0.13); }
+  .ksnav-active .ksnav-lbl { color: rgba(255,255,255,0.94); font-weight: 600; }
+  .ksnav-done   .ksnav-lbl { color: rgba(255,255,255,0.52); }
+  /* Pfeil rechts beim aktiven Item */
+  .ksnav-active::after {
+    content: '›'; position: absolute; right: 8px;
+    font-size: 16px; color: rgba(118,169,250,0.7); font-weight: 700;
+    line-height: 1;
+  }
   /* SLIDE UP — echte Seiten-Transition */
   #prod-hero.hero-closing {
     transform: translateY(-100%);
@@ -1858,7 +1896,7 @@
 <div id="kfg-main" class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-4 md:py-5 grid grid-cols-1 lg:grid-cols-5 gap-5 lg:gap-6 items-start">
 
 <!-- ════ SCHRITT-NAVIGATION LINKS ════ -->
-<div id="kfg-nav" class="hidden lg:block">
+<div id="kfg-nav" style="display:none">
   <div id="kfg-nav-inner">
     <div class="kfg-nav-header">Konfiguration</div>
     <div id="kfg-nav-list"></div>
@@ -3860,6 +3898,9 @@ function heroSelectProd(prodKey) {
       hero.style.display = 'none';
       const s1 = document.getElementById('s1');
       if (s1) s1.classList.add('hero-done');
+      // Linke Nav zeigen
+      const nav = document.getElementById('kfg-nav');
+      if (nav) nav.style.display = '';
       openS(2); // openS calls buildNav() internally
     }, 700);
   }
