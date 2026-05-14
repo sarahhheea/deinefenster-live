@@ -552,17 +552,55 @@ function goToStep1() {
 }
 
 /* ─── Bild-Upload ─── */
+function getExifOrientation(dataUrl) {
+  try {
+    const b64 = dataUrl.split(',')[1];
+    const bin = atob(b64.substring(0, 3000));
+    const b = i => bin.charCodeAt(i);
+    if (b(0) !== 0xFF || b(1) !== 0xD8) return 1;
+    let i = 2;
+    while (i < bin.length - 3) {
+      if (b(i) !== 0xFF) break;
+      const m = b(i + 1), len = (b(i + 2) << 8) | b(i + 3);
+      if (m === 0xE1 && bin.substr(i + 4, 4) === 'Exif') {
+        const t = i + 10;
+        const le = b(t) === 0x49;
+        const r16 = o => le ? (b(t+o) | b(t+o+1)<<8) : (b(t+o)<<8 | b(t+o+1));
+        const r32 = o => le
+          ? (b(t+o) | b(t+o+1)<<8 | b(t+o+2)<<16 | b(t+o+3)<<24)
+          : (b(t+o)<<24 | b(t+o+1)<<16 | b(t+o+2)<<8 | b(t+o+3));
+        const ifd = r32(4), n = r16(ifd);
+        for (let j = 0; j < n; j++) {
+          const e = ifd + 2 + j * 12;
+          if (r16(e) === 0x0112) return r16(e + 8);
+        }
+      }
+      i += 2 + len;
+    }
+  } catch (_) {}
+  return 1;
+}
+
 function compressImage(dataUrl, maxPx = 1200, quality = 0.85) {
   return new Promise(resolve => {
+    const orient = getExifOrientation(dataUrl);
     const img = new Image();
     img.onload = () => {
-      const scale = Math.min(1, maxPx / Math.max(img.width, img.height));
-      const w = Math.round(img.width * scale);
-      const h = Math.round(img.height * scale);
+      const swap = orient === 5 || orient === 6 || orient === 7 || orient === 8;
+      const iw = swap ? img.naturalHeight : img.naturalWidth;
+      const ih = swap ? img.naturalWidth : img.naturalHeight;
+      const scale = Math.min(1, maxPx / Math.max(iw, ih));
+      const w = Math.round(iw * scale);
+      const h = Math.round(ih * scale);
       const canvas = document.createElement('canvas');
-      canvas.width = w;
-      canvas.height = h;
-      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      switch (orient) {
+        case 3: ctx.translate(w, h);  ctx.rotate(Math.PI);       break;
+        case 6: ctx.translate(w, 0);  ctx.rotate(Math.PI / 2);   break;
+        case 8: ctx.translate(0, h);  ctx.rotate(-Math.PI / 2);  break;
+      }
+      ctx.drawImage(img, 0, 0, img.naturalWidth * scale, img.naturalHeight * scale);
       resolve(canvas.toDataURL('image/jpeg', quality));
     };
     img.src = dataUrl;
