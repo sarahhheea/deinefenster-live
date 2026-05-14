@@ -1298,6 +1298,102 @@
   #conf-price-box { background: rgba(255,255,255,0.04) !important; border: 1px solid rgba(255,255,255,0.08) !important; border-radius: 14px !important; }
   #sidebar > button:last-child { background: #1e50d4 !important; border-radius: 14px !important; font-size: 14px !important; font-weight: 700 !important; box-shadow: 0 4px 20px rgba(30,80,212,0.50) !important; letter-spacing: 0.01em !important; }
   #sidebar > button:last-child:hover { background: #2563eb !important; box-shadow: 0 6px 28px rgba(37,99,235,0.65) !important; }
+
+  /* ── PRODUKT-HERO ── */
+  #prod-hero {
+    min-height: 100vh;
+    background: #080c1e;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 40px 24px 60px; gap: 44px;
+    overflow: hidden;
+    transition: max-height 0.55s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease, padding 0.4s ease;
+    position: relative;
+  }
+  #prod-hero::before {
+    content: '';
+    position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse 80% 50% at 20% 0%, rgba(34,94,170,0.16) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 100%, rgba(17,36,85,0.35) 0%, transparent 60%);
+  }
+  #prod-hero .hero-head { text-align: center; position: relative; z-index: 1; }
+  #prod-hero .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+    color: rgba(118,169,250,0.75); margin-bottom: 14px;
+  }
+  #prod-hero .hero-eyebrow::before, #prod-hero .hero-eyebrow::after {
+    content: ''; width: 20px; height: 1px; background: rgba(118,169,250,0.4);
+  }
+  #prod-hero h1 {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: clamp(28px, 4vw, 46px); font-weight: 800;
+    color: #f0f4ff; line-height: 1.15; letter-spacing: -0.03em; margin-bottom: 10px;
+  }
+  #prod-hero .hero-sub {
+    font-size: 16px; color: rgba(240,244,255,0.5); font-weight: 400; line-height: 1.6;
+  }
+  #prod-hero .hero-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 16px; max-width: 1100px; width: 100%; position: relative; z-index: 1;
+  }
+  @media (max-width: 768px) { #prod-hero .hero-grid { grid-template-columns: repeat(2,1fr); } }
+  #prod-hero .hcard {
+    border-radius: 20px; overflow: hidden;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    cursor: pointer; display: flex; flex-direction: column;
+    transition: transform 0.35s cubic-bezier(0.34,1.4,0.64,1), border-color 0.25s ease, box-shadow 0.35s ease;
+    animation: pc-reveal 0.6s cubic-bezier(.16,1,.3,1) both;
+  }
+  #prod-hero .hcard:nth-child(1) { animation-delay: 0.05s; }
+  #prod-hero .hcard:nth-child(2) { animation-delay: 0.12s; }
+  #prod-hero .hcard:nth-child(3) { animation-delay: 0.19s; }
+  #prod-hero .hcard:nth-child(4) { animation-delay: 0.26s; }
+  #prod-hero .hcard:hover {
+    transform: translateY(-8px) scale(1.02);
+    border-color: rgba(118,169,250,0.55);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(118,169,250,0.2);
+  }
+  #prod-hero .hcard-img-wrap {
+    width: 100%; height: 200px; overflow: hidden; position: relative; background: #112455;
+  }
+  #prod-hero .hcard-img-wrap::after {
+    content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+    background: linear-gradient(180deg, rgba(8,12,30,0.2) 0%, transparent 30%, transparent 65%, rgba(8,12,30,0.7) 100%);
+  }
+  #prod-hero .hcard-img {
+    width: 100%; height: 100%; object-fit: cover; object-position: center 20%;
+    transition: transform 0.4s ease; display: block;
+  }
+  #prod-hero .hcard:hover .hcard-img { transform: scale(1.06); }
+  #prod-hero .hcard-info {
+    padding: 12px 14px 16px; background: rgba(5,8,22,0.95);
+    border-top: 1px solid rgba(255,255,255,0.07);
+    display: flex; flex-direction: column; gap: 5px;
+  }
+  #prod-hero .hcard-badge {
+    font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    color: rgba(175,210,255,0.85); background: rgba(77,136,255,0.15);
+    border: 1px solid rgba(77,136,255,0.3); border-radius: 4px;
+    padding: 2px 8px; width: fit-content;
+  }
+  #prod-hero .hcard-name {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 16px; font-weight: 800; color: rgba(255,255,255,0.97); letter-spacing: -0.025em;
+  }
+  #prod-hero .hcard-cta {
+    font-size: 11px; font-weight: 700; color: rgba(118,169,250,0.7);
+    letter-spacing: 0.02em; margin-top: 2px;
+    transition: color 0.2s ease;
+  }
+  #prod-hero .hcard:hover .hcard-cta { color: rgba(118,169,250,1); }
+  #prod-hero.hero-closing {
+    max-height: 0 !important; opacity: 0 !important;
+    padding-top: 0 !important; padding-bottom: 0 !important;
+    min-height: 0 !important; pointer-events: none;
+  }
+  #s1.hero-done { display: none !important; }
 </style>
 
 <!-- ══ PRODUKTKARTEN v11 — Dark Premium, einheitlich ══ -->
@@ -1585,6 +1681,62 @@
       <i class="ms f" style="font-size:18px;color:#25D366">chat</i>
       <span style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:600">WhatsApp-Beratung&nbsp;kostenlos</span>
     </div>
+  </div>
+</div>
+
+<!-- ══ PRODUKT-HERO ══ -->
+<div id="prod-hero">
+  <div class="hero-head">
+    <div class="hero-eyebrow">DeineFenster.de</div>
+    <h1>Was möchten Sie<br>konfigurieren?</h1>
+    <p class="hero-sub">Wählen Sie Ihr Produkt — wir führen Sie Schritt für Schritt durch die Konfiguration.</p>
+  </div>
+  <div class="hero-grid">
+
+    <div class="hcard" onclick="heroSelectProd('kunststoff')">
+      <div class="hcard-img-wrap">
+        <img class="hcard-img" src="img/karten/fenster-anthrazit.png" alt="Kunststofffenster" loading="eager">
+      </div>
+      <div class="hcard-info">
+        <span class="hcard-badge">DRUTEX IGLO</span>
+        <div class="hcard-name">Kunststofffenster</div>
+        <div class="hcard-cta">Konfigurieren →</div>
+      </div>
+    </div>
+
+    <div class="hcard" onclick="heroSelectProd('balkontuer')">
+      <div class="hcard-img-wrap">
+        <img class="hcard-img" src="img/karten/balkontuer-anthrazit.png" alt="Balkontür" loading="eager">
+      </div>
+      <div class="hcard-info">
+        <span class="hcard-badge">DRUTEX IGLO</span>
+        <div class="hcard-name">Balkontür</div>
+        <div class="hcard-cta">Konfigurieren →</div>
+      </div>
+    </div>
+
+    <div class="hcard" onclick="heroSelectProd('haustuere')">
+      <div class="hcard-img-wrap">
+        <img class="hcard-img" src="img/karten/haustuer-anthrazit.png" alt="Haustür" loading="eager">
+      </div>
+      <div class="hcard-info">
+        <span class="hcard-badge">DRUTEX STYLE</span>
+        <div class="hcard-name">Haustür</div>
+        <div class="hcard-cta">Konfigurieren →</div>
+      </div>
+    </div>
+
+    <div class="hcard" onclick="heroSelectProd('hst')">
+      <div class="hcard-img-wrap">
+        <img class="hcard-img" src="img/karten/hst-anthrazit.png" alt="Hebe-Schiebetür" loading="eager">
+      </div>
+      <div class="hcard-info">
+        <span class="hcard-badge">DRUTEX IGLO-HS</span>
+        <div class="hcard-name">Hebe-Schiebetür</div>
+        <div class="hcard-cta">Konfigurieren →</div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -3545,6 +3697,30 @@ function openS(n) {
       window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
     });
   });
+}
+
+// ── HERO PRODUKT WÄHLEN ──────────────────────────────
+function heroSelectProd(prodKey) {
+  const hero = document.getElementById('prod-hero');
+  const pcEl = document.querySelector('#s1 .pc[data-p="' + prodKey + '"]');
+  if (pcEl) pickProd(pcEl);
+
+  // Animate hero closed
+  if (hero) {
+    hero.style.maxHeight = hero.offsetHeight + 'px';
+    hero.style.overflow = 'hidden';
+    requestAnimationFrame(() => {
+      hero.classList.add('hero-closing');
+    });
+    setTimeout(() => {
+      hero.style.display = 'none';
+      // Hide s1 from accordion — product is selected via hero
+      const s1 = document.getElementById('s1');
+      if (s1) s1.classList.add('hero-done');
+      // Open step 2 (Profil)
+      openS(2);
+    }, 500);
+  }
 }
 
 // ── PRODUKT WÄHLEN ───────────────────────────────────
