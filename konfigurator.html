@@ -1427,6 +1427,68 @@
   #prod-hero .hcard:hover .hcard-cta svg { transform: translateX(3px); }
   /* Navbar bleibt über Hero sichtbar */
   #navbar { z-index: 110 !important; }
+
+  /* ── 3-PANEL LAYOUT (Desktop) ── */
+  @media (min-width: 1024px) {
+    #kfg-main {
+      grid-template-columns: 196px 1fr 276px !important;
+      gap: 16px !important;
+    }
+    /* Inaktive Steps komplett ausblenden */
+    #steps .sc:not(.open) { display: none !important; }
+    /* Steps-Wrapper ohne Karten-Box — jeder aktive Step hat eigene Box */
+    #steps {
+      box-shadow: none !important; border: none !important;
+      border-radius: 0 !important; overflow: visible !important;
+      background: transparent !important;
+    }
+    /* Aktiver Step als eigenständige Karte */
+    #steps .sc.open {
+      border-radius: 12px !important;
+      border: 1px solid rgba(255,255,255,0.10) !important;
+      overflow: hidden !important;
+      box-shadow: 0 4px 28px rgba(0,0,0,0.25) !important;
+    }
+    /* Step-Header auf Desktop: nur Titel, kein Toggle */
+    #steps .sh { cursor: default !important; pointer-events: none !important; }
+    #steps .sh .chev { display: none !important; }
+  }
+
+  /* ── LINKE SCHRITT-NAVIGATION ── */
+  #kfg-nav-inner {
+    position: sticky; top: 76px;
+  }
+  .kfg-nav-header {
+    font-family: 'Manrope', sans-serif;
+    font-size: 9.5px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
+    color: rgba(118,169,250,0.45); padding: 0 4px 13px;
+    margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.07);
+  }
+  .ksnav-item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 7px 9px; border-radius: 8px; cursor: pointer;
+    transition: background 0.2s ease; margin-bottom: 1px;
+  }
+  .ksnav-item:hover { background: rgba(255,255,255,0.06); }
+  .ksnav-num {
+    width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10.5px; font-weight: 700; flex-shrink: 0;
+    font-family: 'Manrope', sans-serif; transition: all 0.2s ease;
+  }
+  .ksnav-pending .ksnav-num { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.28); }
+  .ksnav-active  .ksnav-num { background: #225eaa; color: #fff; box-shadow: 0 0 0 3px rgba(34,94,170,0.28); }
+  .ksnav-done    .ksnav-num { background: rgba(34,197,94,0.14); color: rgba(74,222,128,0.85); }
+  .ksnav-done    .ksnav-num svg { width: 11px; height: 11px; }
+  .ksnav-lbl {
+    font-family: 'Manrope', sans-serif; font-size: 12.5px; font-weight: 500;
+    color: rgba(255,255,255,0.35); line-height: 1.2; flex: 1;
+    min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    transition: color 0.2s ease;
+  }
+  .ksnav-active { background: rgba(34,94,170,0.12); }
+  .ksnav-active .ksnav-lbl { color: rgba(255,255,255,0.92); font-weight: 600; }
+  .ksnav-done   .ksnav-lbl { color: rgba(255,255,255,0.55); }
   /* SLIDE UP — echte Seiten-Transition */
   #prod-hero.hero-closing {
     transform: translateY(-100%);
@@ -1792,10 +1854,18 @@
   </div>
 </div>
 
-<!-- MAIN — Sarah-Update 05.05.2026 v10: 60/40 statt 50/50 — Schritte-Bereich bekommt mehr Platz, Bilder ~22% größer ohne Layout-Bruch -->
-<div class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-4 md:py-5 grid grid-cols-1 lg:grid-cols-5 gap-5 lg:gap-6 items-start">
+<!-- MAIN — 3-Panel Layout: Schritt-Nav | Aktiver Schritt | 3D-Preview -->
+<div id="kfg-main" class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-4 md:py-5 grid grid-cols-1 lg:grid-cols-5 gap-5 lg:gap-6 items-start">
 
-<!-- ════ STEPS LEFT (60% = col-span-3) ════ -->
+<!-- ════ SCHRITT-NAVIGATION LINKS ════ -->
+<div id="kfg-nav" class="hidden lg:block">
+  <div id="kfg-nav-inner">
+    <div class="kfg-nav-header">Konfiguration</div>
+    <div id="kfg-nav-list"></div>
+  </div>
+</div>
+
+<!-- ════ STEPS CENTER ════ -->
 <div id="steps" class="lg:col-span-3" style="border-radius:6px;overflow:hidden;box-shadow:0 4px 24px rgba(26,41,66,0.10),0 1px 3px rgba(26,41,66,0.06);border:1px solid rgba(26,41,66,0.08)">
 
 <!-- ── SCHRITT 1: PRODUKTTYP ──────────────────────── -->
@@ -3729,18 +3799,44 @@ function tog(n) {
     c.classList.add('open');
   }
 }
+// ── LINKE SCHRITT-NAVIGATION AUFBAUEN ──────────────────
+function buildNav() {
+  const list = document.getElementById('kfg-nav-list');
+  if (!list) return;
+  const allSc = Array.from(document.querySelectorAll('#steps .sc'));
+  list.innerHTML = '';
+  let visNum = 1;
+  let openFound = false;
+  const checkSvg = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3.5L13 5"/></svg>';
+
+  allSc.forEach(sc => {
+    if (sc.id === 's1') return; // Produkttyp via Hero gewählt — nicht in Nav
+    if (getComputedStyle(sc).display === 'none') return;
+
+    const stepId = sc.id.replace(/^s/, '');
+    const label = sc.querySelector('.slabel')?.textContent?.trim() || '';
+    const isOpen = sc.classList.contains('open');
+
+    let state = 'ksnav-pending';
+    if (isOpen) { state = 'ksnav-active'; openFound = true; }
+    else if (!openFound) { state = 'ksnav-done'; }
+
+    const div = document.createElement('div');
+    div.className = 'ksnav-item ' + state;
+    div.innerHTML = `<span class="ksnav-num">${state === 'ksnav-done' ? checkSvg : visNum}</span><span class="ksnav-lbl">${label}</span>`;
+    div.onclick = () => openS(stepId);
+    list.appendChild(div);
+    visNum++;
+  });
+}
+
 function openS(n) {
   const c = document.getElementById('s'+n);
-  if (!c) return; // Sarah-Fix 22.04.2026: defensive — Step kann ausgeblendet sein (display:none)
+  if (!c) return; // defensive — Step kann ausgeblendet sein (display:none)
   if (getComputedStyle(c).display === 'none') return;
-  // Option A 02.05.2026: bei Auto-Advance auch andere schließen
   closeOtherSections(c);
   if (!c.classList.contains('open')) c.classList.add('open');
-  // Sarah-Fix 22.04.2026 (v2): scrollIntoView reichte nicht — Sticky-Navbar (54px) +
-  // Progress-Bar (~50px) + Luft (20px) verdeckten den frisch geöffneten Step.
-  // Jetzt manueller Scroll mit hart berechnetem Offset, damit der Step-Header garantiert sichtbar wird.
-  // Timeout wird mit zwei requestAnimationFrames abgesichert, damit der build*-Code vorher
-  // das DOM fertig aktualisiert hat und die y-Position stimmt.
+  buildNav(); // linke Nav-Highlights aktualisieren
   const STICKY_OFFSET = 72; // navbar 54px + Luft 18px
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
@@ -3764,7 +3860,7 @@ function heroSelectProd(prodKey) {
       hero.style.display = 'none';
       const s1 = document.getElementById('s1');
       if (s1) s1.classList.add('hero-done');
-      openS(2);
+      openS(2); // openS calls buildNav() internally
     }, 700);
   }
 }
