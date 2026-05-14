@@ -1436,6 +1436,18 @@
     /* Kein Body-Scroll — alles in den 3 Panels */
     body { overflow: hidden !important; }
 
+    /* ── CSS-VARIABLEN-OVERRIDE: alles dunkel in 3-Panel-Modus ── */
+    #kfg-main {
+      --c-bg: rgba(255,255,255,0.04);
+      --c-bg-soft: rgba(255,255,255,0.06);
+      --c-border: rgba(255,255,255,0.09);
+      --c-border-hover: rgba(93,151,232,0.45);
+      --c-text: rgba(235,245,255,0.95);
+      --c-text-soft: rgba(160,190,230,0.68);
+      --c-text-muted: rgba(120,155,215,0.55);
+      --c-primary-tint: rgba(34,94,170,0.14);
+    }
+
     /* Haupt-Shell: Fixed, füllt alles unter Navbar */
     #kfg-main {
       position: fixed !important;
@@ -1473,6 +1485,7 @@
     #steps .sc.open {
       border-radius: 0 !important; border: none !important;
       box-shadow: none !important; overflow: visible !important;
+      background: transparent !important;
     }
 
     /* ── ALLE .sh komplett verstecken — Titel kommt von #kfg-step-hdr ── */
@@ -1584,28 +1597,75 @@
     .sb p:not(.oprice) { color: rgba(190,215,255,0.75) !important; }
 
     /* ── Zusammenfassung: weiße Container dunkel ── */
+    /* ── Inline-Weiß überall in #steps abfangen ── */
+    #steps .sb [style*="background:#fff"],
+    #steps .sb [style*="background: #fff"],
+    #steps .sb [style*="background:white"],
+    #steps .sb [style*="background:#ffffff"],
+    #steps .sb [style*="background: #ffffff"],
+    #steps .sb [style*="background:var(--c-bg)"],
+    #steps .sb [style*="background: var(--c-bg)"],
+    #steps .sb [style*="background:#f4f5f8"],
+    #steps .sb [style*="background:#f5f5f7"],
+    #steps .sb [style*="background:#f4f6fb"],
+    #steps .sb [style*="background:var(--c-bg-soft)"] {
+      background: rgba(10,18,45,0.75) !important;
+      border-color: rgba(255,255,255,0.09) !important;
+    }
+    /* Text in solchen Containern: lesbar weiß */
+    #steps .sb [style*="background:#fff"] *,
+    #steps .sb [style*="background:#ffffff"] *,
+    #steps .sb [style*="background:white"] * {
+      color: rgba(210,228,255,0.90) !important;
+    }
+    /* Einzelne Farbswatch-Container dürfen ihren Hintergrund behalten */
+    #steps .sb [style*="background:#fff"] [style*="background:#"],
+    #steps .sb [style*="background:#fff"] [style*="background:rgb"] {
+      color: inherit !important;
+    }
+
+    /* Border-Farben: kein helles #eef1fb im Dark-Modus */
+    #steps .sb [style*="border:1px solid #e0e4f0"],
+    #steps .sb [style*="border-top:1px solid #eef1fb"],
+    #steps .sb [style*="border-color:#eef1fb"] {
+      border-color: rgba(255,255,255,0.08) !important;
+    }
+
+    /* ── Empty-State ── */
     #empty-state-hint {
       background: rgba(255,255,255,0.04) !important;
       border-color: rgba(255,255,255,0.12) !important;
     }
     #empty-state-hint i { color: rgba(255,255,255,0.15) !important; }
-    #s13 .sb [style*="background:#fff"],
-    #s13 .sb [style*="background:var(--c-bg"] {
-      background: rgba(12,22,50,0.80) !important;
-      border-color: rgba(255,255,255,0.10) !important;
-    }
-    #s13 .sb [style*="background:#fff"] span,
-    #s13 .sb [style*="background:#fff"] div { color: rgba(200,225,255,0.85) !important; }
-    #s13 .sb [style*="border-top:1px solid #eef1fb"] { border-color: rgba(255,255,255,0.08) !important; }
+
+    /* ── Warenkorb-Section ── */
     #cart-section { background: rgba(12,22,50,0.80) !important; border-color: rgba(93,151,232,0.30) !important; }
     #s13 .sb .bg-white { background: rgba(12,22,50,0.80) !important; }
-    /* Weiteres-Element Button: dezentes Glas statt weiß */
+
+    /* ── Weiteres-Element Button: dezentes Glas ── */
     #s13 .sb button[onclick*="addCurrentToCart"] {
       background: rgba(255,255,255,0.05) !important;
       border-color: rgba(93,151,232,0.40) !important;
       color: #76a9fa !important;
       border-radius: 12px !important;
     }
+
+    /* ── Tailwind-Klassen: dunkle Textfarben in Steps überschreiben ── */
+    #steps .sb .text-on-surf-v,
+    #steps .sb .text-on-surf,
+    #steps .sb .text-gray-900,
+    #steps .sb .text-gray-800,
+    #steps .sb .text-gray-700 { color: rgba(235,245,255,0.88) !important; }
+    #steps .sb .text-gray-600,
+    #steps .sb .text-gray-500,
+    #steps .sb .text-gray-400 { color: rgba(160,190,230,0.65) !important; }
+    /* ── Tailwind bg-white / bg-gray in Steps ── */
+    #steps .sb .bg-white  { background: rgba(255,255,255,0.05) !important; }
+    #steps .sb .bg-gray-50,
+    #steps .sb .bg-gray-100 { background: rgba(255,255,255,0.04) !important; }
+    /* ── border-gray: kaum sichtbar auf Dunkel — dezent heller Strich ── */
+    #steps .sb .border-gray-200,
+    #steps .sb .border-gray-100 { border-color: rgba(255,255,255,0.08) !important; }
 
     /* ── Step-Group-Überschriften im Center ausblenden ── */
     .step-group { display: none !important; }
@@ -3051,15 +3111,15 @@
     </div>
 
     <!-- BLOCK 3: ALLE DETAILS (einklappbar) -->
-    <div class="rounded-xl mb-4" style="background:#fff;border:1px solid rgba(0,0,0,.10)">
+    <div class="rounded-xl mb-4" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.10)">
       <div onclick="toggleDetails()" style="padding:14px 18px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none">
         <div style="display:flex;align-items:center;gap:10px">
-          <i class="ms f" style="color:var(--c-primary);font-size:20px">checklist</i>
-          <span style="font-weight:700;font-size:14px">Alle Konfigurations-Details anzeigen</span>
+          <i class="ms f" style="color:#76a9fa;font-size:20px">checklist</i>
+          <span style="font-weight:700;font-size:14px;color:rgba(235,245,255,0.92)">Alle Konfigurations-Details anzeigen</span>
         </div>
-        <i class="ms" id="details-arrow" style="transition:transform .25s;color:var(--c-text-soft)">expand_more</i>
+        <i class="ms" id="details-arrow" style="transition:transform .25s;color:rgba(160,190,230,0.60)">expand_more</i>
       </div>
-      <div id="details-content" style="display:none;padding:0 18px 16px;border-top:1px solid #eef1fb">
+      <div id="details-content" style="display:none;padding:0 18px 16px;border-top:1px solid rgba(255,255,255,0.07)">
         <div id="sum-rows" class="mt-3"></div>
       </div>
     </div>
@@ -3079,8 +3139,8 @@
 
     <!-- BLOCK 5: WEITERES-ELEMENT-BUTTON (dezent) -->
     <button type="button" onclick="addCurrentToCart()"
-      class="w-full mb-4 flex items-center justify-center gap-2 font-bold py-3 px-4 rounded-full text-primary transition-colors text-sm border-2 border-primary"
-      style="background:#fff;font-family:'Plus Jakarta Sans',sans-serif">
+      class="w-full mb-4 flex items-center justify-center gap-2 font-bold py-3 px-4 rounded-full transition-colors text-sm border-2"
+      style="background:rgba(255,255,255,0.05);border-color:rgba(93,151,232,0.40);color:#76a9fa;font-family:'Plus Jakarta Sans',sans-serif">
       <i class="ms">add_shopping_cart</i>
       Weiteres Element hinzufügen &amp; neu konfigurieren
     </button>
@@ -6539,7 +6599,7 @@ function upFinalSum(rows,tot) {
   ];
   const sumRows = document.getElementById('sum-rows');
   if (sumRows) sumRows.innerHTML = items.map(([k,v])=>
-    `<div class="sr"><span style="color:#424751">${k}</span><span style="font-weight:600;text-align:right">${v}</span></div>`
+    `<div class="sr"><span style="color:rgba(160,190,230,0.70)">${k}</span><span style="font-weight:600;text-align:right;color:rgba(235,245,255,0.92)">${v}</span></div>`
   ).join('');
   const sumPrice = document.getElementById('sum-price');
   if (sumPrice) sumPrice.innerHTML = rows.map(r=>
@@ -6617,24 +6677,24 @@ function buildHighlights() {
   const extrasText = extras.length ? extras.slice(0,3).join(' · ') : 'Klarglas · Standard-Ausstattung';
   // Card template
   const card = (icon, title, value, accentColor) => `
-    <div style="background:#fff;border:1px solid #e0e4f0;border-radius:10px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start">
-      <div style="width:36px;height:36px;border-radius:8px;background:${accentColor||'#eef1fb'};color:#225eaa;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+    <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.10);border-radius:10px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start">
+      <div style="width:36px;height:36px;border-radius:8px;background:rgba(34,94,170,0.22);color:#76a9fa;display:flex;align-items:center;justify-content:center;flex-shrink:0">
         <i class="ms f" style="font-size:18px">${icon}</i>
       </div>
       <div style="min-width:0;flex:1">
-        <div style="font-size:11px;color:#727782;text-transform:uppercase;letter-spacing:0.03em;font-weight:600">${title}</div>
-        <div style="font-size:14px;color:#161c27;font-weight:700;margin-top:2px;line-height:1.25;word-wrap:break-word">${value}</div>
+        <div style="font-size:11px;color:rgba(118,169,250,0.70);text-transform:uppercase;letter-spacing:0.03em;font-weight:600">${title}</div>
+        <div style="font-size:14px;color:rgba(235,245,255,0.95);font-weight:700;margin-top:2px;line-height:1.25;word-wrap:break-word">${value}</div>
       </div>
     </div>`;
   const farbCard = `
-    <div style="background:#fff;border:1px solid #e0e4f0;border-radius:10px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start">
+    <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.10);border-radius:10px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start">
       <div style="display:flex;gap:3px;flex-shrink:0">
-        <div style="width:18px;height:36px;border-radius:4px 0 0 4px;background:${faSwatch};border:1px solid #ccc" title="Außen"></div>
-        <div style="width:18px;height:36px;border-radius:0 4px 4px 0;background:${fiSwatch};border:1px solid #ccc" title="Innen"></div>
+        <div style="width:18px;height:36px;border-radius:4px 0 0 4px;background:${faSwatch};border:1px solid rgba(255,255,255,0.20)" title="Außen"></div>
+        <div style="width:18px;height:36px;border-radius:0 4px 4px 0;background:${fiSwatch};border:1px solid rgba(255,255,255,0.20)" title="Innen"></div>
       </div>
       <div style="min-width:0;flex:1">
-        <div style="font-size:11px;color:#727782;text-transform:uppercase;letter-spacing:0.03em;font-weight:600">Farbe (A / I)</div>
-        <div style="font-size:13px;color:#161c27;font-weight:700;margin-top:2px;line-height:1.25">${faName} / ${fiName}</div>
+        <div style="font-size:11px;color:rgba(118,169,250,0.70);text-transform:uppercase;letter-spacing:0.03em;font-weight:600">Farbe (A / I)</div>
+        <div style="font-size:13px;color:rgba(235,245,255,0.95);font-weight:700;margin-top:2px;line-height:1.25">${faName} / ${fiName}</div>
       </div>
     </div>`;
   grid.innerHTML = [
@@ -6699,8 +6759,8 @@ function renderCart() {
     cartSub += item.subtotal;
     return `<div class="flex items-start gap-2 py-2 border-b border-gray-100 last:border-0">
       <div style="flex:1;min-width:0">
-        <div class="text-sm font-semibold" style="color:#161c27">${item.summary}</div>
-        <div class="text-xs text-on-surf-v">${item.qty} × ${fmt(item.unitPrice)} = <strong>${fmt(item.subtotal)}</strong></div>
+        <div class="text-sm font-semibold" style="color:rgba(235,245,255,0.92)">${item.summary}</div>
+        <div class="text-xs" style="color:rgba(160,190,230,0.70)">${item.qty} × ${fmt(item.unitPrice)} = <strong>${fmt(item.subtotal)}</strong></div>
       </div>
       <button type="button" onclick="removeFromCart('${item.id}')" title="Entfernen"
         style="background:transparent;border:none;color:#dc2626;cursor:pointer;padding:4px;flex-shrink:0">
