@@ -1441,6 +1441,7 @@
       position: fixed !important;
       top: 60px !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
       display: flex !important; flex-direction: row !important;
+      align-items: stretch !important;
       max-width: none !important; width: 100% !important;
       margin: 0 !important; padding: 0 !important;
       gap: 0 !important; overflow: hidden !important;
@@ -1455,6 +1456,7 @@
       overflow-y: auto; padding: 24px 12px 24px 16px;
       border-right: 1px solid rgba(255,255,255,0.07);
       background: rgba(5,8,20,0.96);
+      align-self: stretch !important; min-height: 0 !important;
     }
 
     /* MITTE: Steps-Panel */
@@ -1463,6 +1465,7 @@
       padding: 0 !important;
       box-shadow: none !important; border: none !important;
       border-radius: 0 !important; background: transparent !important;
+      height: 100% !important; min-height: 0 !important; align-self: stretch !important;
     }
     /* Alle inaktiven Steps ausblenden */
     #steps .sc:not(.open) { display: none !important; }
@@ -1511,16 +1514,97 @@
       padding: 0 !important;
       position: static !important;
       max-height: none !important;
+      align-self: stretch !important; min-height: 0 !important;
     }
 
-    /* ── Weiter-Buttons: unsichtbar (Nav läuft über linke Schritt-Liste) ── */
-    .sb button.w-full[onclick] { display: none !important; }
+    /* ── Weiter-Buttons: dunkel gestylt (sichtbar als nächster-Schritt CTA) ── */
+    .sb button.w-full[onclick] {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 8px !important;
+      background: linear-gradient(135deg, #1f5abf 0%, #163f8a 100%) !important;
+      border: 1px solid rgba(93,151,232,0.40) !important;
+      border-radius: 12px !important;
+      color: #fff !important;
+      font-family: 'Plus Jakarta Sans', sans-serif !important;
+      font-size: 14px !important;
+      font-weight: 700 !important;
+      letter-spacing: 0.01em !important;
+      padding: 14px 28px !important;
+      margin-top: 28px !important;
+      width: 100% !important;
+      box-shadow: 0 4px 18px rgba(21,74,180,0.38) !important;
+      transition: all 0.2s ease !important;
+      cursor: pointer !important;
+    }
+    .sb button.w-full[onclick]:hover {
+      background: linear-gradient(135deg, #2668d4 0%, #1a4fab 100%) !important;
+      box-shadow: 0 8px 28px rgba(21,74,180,0.55) !important;
+      transform: translateY(-2px) !important;
+    }
 
-    /* ── Profil-Bilder: hellen Hintergrund dämpfen auf dunkler Seite ── */
+    /* ── Profil-Bilder: dunkler Navy-Hintergrund ── */
     #profil-grid .oc img {
-      background: rgba(245,247,252,0.92) !important;
-      border-radius: 8px !important;
-      padding: 6px !important;
+      background: rgba(8,18,50,0.90) !important;
+      border-radius: 10px !important;
+      padding: 8px !important;
+    }
+
+    /* ── Flügel / Optionskarten: Bilder auf dunklem Träger ── */
+    .sb .fk img, .sb .fk svg { background: transparent !important; }
+    .sb .oc > div[style*="background:#f4f6fb"] { background: rgba(255,255,255,0.04) !important; }
+    .sb .oc > div[style*="background:#f4f5f8"] { background: rgba(8,18,50,0.85) !important; }
+
+    /* ── Info-Boxen: besserer Kontrast ── */
+    .sb .info {
+      background: rgba(34,80,160,0.12) !important;
+      border: 1px solid rgba(93,151,232,0.22) !important;
+      border-radius: 12px !important;
+      color: rgba(200,225,255,0.85) !important;
+      font-size: 13px !important;
+      padding: 14px 16px !important;
+    }
+    .sb .info strong { color: #ffffff !important; }
+    .sb .info[style*="eff6ff"] { background: rgba(34,94,220,0.12) !important; border-color: rgba(93,151,232,0.30) !important; }
+    .sb .info[style*="fef2f2"], .sb .info[style*="fef3c7"] { background: rgba(220,38,38,0.10) !important; border-color: rgba(248,113,113,0.30) !important; color: rgba(255,195,180,0.85) !important; }
+    .sb .info[style*="fef3c7"] { background: rgba(200,120,0,0.12) !important; border-color: rgba(251,191,36,0.30) !important; color: rgba(255,220,150,0.85) !important; }
+    .sb .info[style*="ecfdf5"] { background: rgba(16,120,80,0.12) !important; border-color: rgba(52,211,153,0.30) !important; color: rgba(150,255,200,0.85) !important; }
+
+    /* ── Karten-Texte: maximale Lesbarkeit ── */
+    .sb .olabel { color: rgba(235,245,255,0.95) !important; font-weight: 700 !important; }
+    .sb .osub   { color: rgba(160,190,230,0.72) !important; }
+    .sb .fk-label { color: rgba(220,235,255,0.88) !important; }
+    .sb .oprice { font-size: 12px !important; margin-top: 4px !important; }
+
+    /* ── Allgemeine Text-Lesbarkeit in Steps ── */
+    .sb .text-gray-700, .sb .text-gray-600 { color: rgba(190,215,255,0.75) !important; }
+    .sb .text-gray-500 { color: rgba(160,190,230,0.60) !important; }
+    .sb h3, .sb h4, .sb h5 { color: rgba(235,245,255,0.95) !important; }
+    .sb p:not(.oprice) { color: rgba(190,215,255,0.75) !important; }
+
+    /* ── Zusammenfassung: weiße Container dunkel ── */
+    #empty-state-hint {
+      background: rgba(255,255,255,0.04) !important;
+      border-color: rgba(255,255,255,0.12) !important;
+    }
+    #empty-state-hint i { color: rgba(255,255,255,0.15) !important; }
+    #s13 .sb [style*="background:#fff"],
+    #s13 .sb [style*="background:var(--c-bg"] {
+      background: rgba(12,22,50,0.80) !important;
+      border-color: rgba(255,255,255,0.10) !important;
+    }
+    #s13 .sb [style*="background:#fff"] span,
+    #s13 .sb [style*="background:#fff"] div { color: rgba(200,225,255,0.85) !important; }
+    #s13 .sb [style*="border-top:1px solid #eef1fb"] { border-color: rgba(255,255,255,0.08) !important; }
+    #cart-section { background: rgba(12,22,50,0.80) !important; border-color: rgba(93,151,232,0.30) !important; }
+    #s13 .sb .bg-white { background: rgba(12,22,50,0.80) !important; }
+    /* Weiteres-Element Button: dezentes Glas statt weiß */
+    #s13 .sb button[onclick*="addCurrentToCart"] {
+      background: rgba(255,255,255,0.05) !important;
+      border-color: rgba(93,151,232,0.40) !important;
+      color: #76a9fa !important;
+      border-radius: 12px !important;
     }
 
     /* ── Step-Group-Überschriften im Center ausblenden ── */
