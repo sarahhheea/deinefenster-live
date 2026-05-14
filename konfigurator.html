@@ -8475,9 +8475,9 @@ async function submitSkizze(e) {
   function svgDefs(dekor) {
     return '<defs>'+patternDefs(dekor)
       // Scene gradients
-      +'<linearGradient id="wallGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#1c1a16"/><stop offset="50%" stop-color="#141210"/><stop offset="100%" stop-color="#0a0908"/></linearGradient>'
-      +'<radialGradient id="floorGrad" cx="50%" cy="100%" r="55%"><stop offset="0%" stop-color="rgba(220,200,160,0.06)"/><stop offset="100%" stop-color="rgba(0,0,0,0)"/></radialGradient>'
-      +'<radialGradient id="lightSpill" cx="50%" cy="48%" r="52%"><stop offset="0%" stop-color="rgba(210,232,255,0.13)"/><stop offset="60%" stop-color="rgba(180,210,255,0.04)"/><stop offset="100%" stop-color="rgba(0,0,0,0)"/></radialGradient>'
+      +'<linearGradient id="wallGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#f0ebe3"/><stop offset="45%" stop-color="#eee9e2"/><stop offset="100%" stop-color="#e2dbd2"/></linearGradient>'
+      +'<linearGradient id="floorGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="rgba(0,0,0,0)"/><stop offset="52%" stop-color="rgba(0,0,0,0)"/><stop offset="68%" stop-color="rgba(185,152,105,0.14)"/><stop offset="82%" stop-color="rgba(165,132,86,0.42)"/><stop offset="100%" stop-color="rgba(148,116,70,0.64)"/></linearGradient>'
+      +'<radialGradient id="lightSpill" cx="50%" cy="45%" r="60%"><stop offset="0%" stop-color="rgba(255,252,238,0.40)"/><stop offset="40%" stop-color="rgba(255,248,225,0.18)"/><stop offset="70%" stop-color="rgba(240,235,215,0.06)"/><stop offset="100%" stop-color="rgba(0,0,0,0)"/></radialGradient>'
       // Glass sky-to-ground gradient (objectBoundingBox scales to any rect)
       +'<linearGradient id="glBase" x1="0%" y1="0%" x2="6%" y2="100%" gradientUnits="objectBoundingBox"><stop offset="0%" stop-color="#ddf0ff" stop-opacity="0.52"/><stop offset="18%" stop-color="#a8d8f8" stop-opacity="0.26"/><stop offset="52%" stop-color="#6aacdc" stop-opacity="0.09"/><stop offset="100%" stop-color="#1848b0" stop-opacity="0.28"/></linearGradient>'
       // Outdoor scene through glass: sky
@@ -8556,21 +8556,21 @@ async function submitSkizze(e) {
     const right = `${fx+fw+LD},${fy-LD} ${fx+fw},${fy} ${fx+fw},${fy+fh} ${fx+fw+LD},${fy+fh+LD}`;
     const bot   = `${fx},${fy+fh} ${fx+fw},${fy+fh} ${fx+fw+LD},${fy+fh+LD} ${fx-LD},${fy+fh+LD}`;
     let s = '';
-    // Top (lit from above — brightest face)
-    s += `<polygon points="${top}" fill="rgba(60,80,112,0.94)"/>`;
+    // Top (lit from above — ceiling reveal, brightest)
+    s += `<polygon points="${top}" fill="rgba(222,216,206,0.94)"/>`;
     s += `<polygon points="${top}" fill="url(#leib-top)" opacity="0.90"/>`;
-    // Left (lit from left — medium bright)
-    s += `<polygon points="${left}" fill="rgba(44,60,86,0.88)"/>`;
-    // Right (shadow side — darkest)
-    s += `<polygon points="${right}" fill="rgba(18,26,40,0.92)"/>`;
+    // Left (lit side reveal)
+    s += `<polygon points="${left}" fill="rgba(200,194,184,0.88)"/>`;
+    // Right (shadow side reveal — darkest)
+    s += `<polygon points="${right}" fill="rgba(158,152,144,0.92)"/>`;
     // Bottom (sill — slightly lit)
-    s += `<polygon points="${bot}" fill="rgba(54,70,96,0.90)"/>`;
+    s += `<polygon points="${bot}" fill="rgba(212,206,196,0.90)"/>`;
     s += `<polygon points="${bot}" fill="url(#leib-bot)" opacity="0.65"/>`;
     // Sill edge highlight
-    s += `<line x1="${fx}" y1="${fy+fh}" x2="${fx+fw}" y2="${fy+fh}" stroke="rgba(255,255,255,0.13)" stroke-width="2"/>`;
+    s += `<line x1="${fx}" y1="${fy+fh}" x2="${fx+fw}" y2="${fy+fh}" stroke="rgba(255,255,255,0.22)" stroke-width="2"/>`;
     // Frame edge depth shadow lines
-    s += `<line x1="${fx}" y1="${fy}" x2="${fx}" y2="${fy+fh}" stroke="rgba(0,0,0,0.50)" stroke-width="5"/>`;
-    s += `<line x1="${fx+fw}" y1="${fy}" x2="${fx+fw}" y2="${fy+fh}" stroke="rgba(0,0,0,0.38)" stroke-width="5"/>`;
+    s += `<line x1="${fx}" y1="${fy}" x2="${fx}" y2="${fy+fh}" stroke="rgba(0,0,0,0.38)" stroke-width="5"/>`;
+    s += `<line x1="${fx+fw}" y1="${fy}" x2="${fx+fw}" y2="${fy+fh}" stroke="rgba(0,0,0,0.26)" stroke-width="5"/>`;
     return s;
   }
 
