@@ -4,15 +4,14 @@
 <meta charset="UTF-8">
 <meta name="robots" content="noindex, nofollow"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fenster 3D — Dreh-Kipp</title>
+<title>Fenster 3D — Drutex Iglo 5</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #e8e8e8; overflow: hidden; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f0f2f5; overflow: hidden; }
 
-  body.embed .header    { display: none; }
-  body.embed .layout    { height: 100vh; }
-  body.embed .ref-panel { display: none; }
-  body.embed .controls  { display: none; }
+  body.embed .header   { display: none; }
+  body.embed .layout   { height: 100vh; }
+  body.embed .controls { display: none; }
   body.embed #threeCanvas { width: 100% !important; }
 
   .header {
@@ -29,34 +28,7 @@
 
   .layout { display: flex; height: calc(100vh - 40px); }
 
-  .ref-panel {
-    width: 290px; min-width: 290px;
-    background: #f4f4f4;
-    border-right: 1px solid #d8d8d8;
-    display: flex; flex-direction: column;
-    align-items: center;
-    padding: 10px 8px 8px;
-    gap: 6px;
-  }
-  .ref-label {
-    font-size: 9px; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 1.2px;
-    color: #94a3b8;
-  }
-  .ref-panel img {
-    max-height: calc(100vh - 100px);
-    max-width: 100%;
-    object-fit: contain;
-    border-radius: 3px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.12);
-  }
-  .ref-model-name {
-    font-size: 10px; font-weight: 700; color: #1e3a8a;
-    text-align: center; padding: 3px 0;
-    letter-spacing: 0.3px;
-  }
-
-  #threeCanvas { flex: 1; display: block; cursor: grab; background: #f5f6f8; }
+  #threeCanvas { flex: 1; display: block; cursor: grab; }
   #threeCanvas:active { cursor: grabbing; }
 
   .controls {
@@ -111,35 +83,22 @@
   .glass-btn.active { border-color: #1e3a8a; color: #1e3a8a; background: #f0f5ff; }
   .glass-btn:hover { border-color: #93a8d4; }
 </style>
-  <script defer data-domain="deinefenster.de" src="https://plausible.io/js/script.js"></script>
 </head>
 <body>
 
 <div class="header">
   <h1>Fenster 3D Konfigurator</h1>
-  <select id="modelSelect" style="background:#2a4fa0;color:white;border:1px solid rgba(255,255,255,0.3);border-radius:4px;padding:3px 8px;font-size:12px;font-weight:600;cursor:pointer;">
-    <option value="1fluegel-dk">1-Flügel Dreh-Kipp</option>
-  </select>
+  <span class="model-tag">Drutex Iglo 5 · Dreh-Kipp</span>
 </div>
 
 <div class="layout">
-
-  <!-- Referenzfoto links — Innenseite -->
-  <div class="ref-panel">
-    <div class="ref-label">Referenz — Innenseite</div>
-    <div class="ref-model-name" id="refModelName">1-Flügel Dreh-Kipp</div>
-    <img id="refImg" src="img/fenster-innen-1fluegel-farbig.png" alt="Fenster Innenseite">
-  </div>
-
-  <!-- 3D Modell Mitte -->
   <canvas id="threeCanvas"></canvas>
 
-  <!-- Farbsteuerung rechts -->
   <div class="controls">
-    <div class="current-label" id="currentLabel">Weiß FX</div>
+    <div class="current-label" id="currentLabel">Anthrazitgrau</div>
     <div class="section-title">Weißtöne</div>
     <div class="colors" id="whites"></div>
-    <div class="section-title">Grautöne & Schwarz</div>
+    <div class="section-title">Grautöne &amp; Schwarz</div>
     <div class="colors" id="grays"></div>
     <div class="section-title">Farben</div>
     <div class="colors" id="colorGroup"></div>
@@ -148,7 +107,6 @@
     <div class="section-title">Verglasung</div>
     <div class="glass-btns" id="glassBtns"></div>
   </div>
-
 </div>
 
 <script type="importmap">
@@ -166,371 +124,333 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 // RENDERER
 // ══════════════════════════════════════════════
 const canvasEl = document.getElementById('threeCanvas');
-const renderer = new THREE.WebGLRenderer({ canvas: canvasEl, antialias: true });
+const renderer = new THREE.WebGLRenderer({ canvas: canvasEl, antialias: true, preserveDrawingBuffer: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 0.85;
+renderer.toneMappingExposure = 1.0;
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xf0f0f0);  // Solider Hintergrund — fix für Glass-Transmission
+scene.background = new THREE.Color(0xf0f2f5);
 
-const camera = new THREE.OrthographicCamera(-0.75, 0.75, 0.75, -0.75, 0.1, 50);
-camera.position.set(0, 0.60, 5.5);
+// Camera targets window center (0,0,0) after group shift
+const camera = new THREE.PerspectiveCamera(18, 1, 0.1, 50);
+camera.position.set(0, 0, 6.5);
 
 const orb = new OrbitControls(camera, canvasEl);
-orb.target.set(0, 0.60, 0);
+orb.target.set(0, 0, 0);
 orb.enablePan = false;
-orb.maxPolarAngle = Math.PI * 0.52;
-orb.minPolarAngle = Math.PI * 0.48;
-orb.minAzimuthAngle = -0.10;
-orb.maxAzimuthAngle =  0.10;
+orb.minDistance = 3.0;
+orb.maxDistance = 11.0;
+orb.maxPolarAngle = Math.PI * 0.56;
+orb.minPolarAngle = Math.PI * 0.44;
+orb.minAzimuthAngle = -0.30;
+orb.maxAzimuthAngle =  0.30;
 orb.update();
 
 // ══════════════════════════════════════════════
-// ENVIRONMENT — hell für Griff-Reflexionen
+// ENVIRONMENT
 // ══════════════════════════════════════════════
 const pmremGen = new THREE.PMREMGenerator(renderer);
 pmremGen.compileEquirectangularShader();
 const envSc = new THREE.Scene();
-envSc.add(new THREE.AmbientLight(0xffffff, 5.0));
+envSc.add(new THREE.AmbientLight(0xffffff, 4.0));
 const eL1 = new THREE.DirectionalLight(0xffffff, 4.0);
-eL1.position.set(0, 0, 5); envSc.add(eL1);
+eL1.position.set(1, 2, 3); envSc.add(eL1);
 const eL2 = new THREE.DirectionalLight(0xffffff, 3.0);
-eL2.position.set(-1, 1, 4); envSc.add(eL2);
-const eL3 = new THREE.DirectionalLight(0xffffff, 2.0);
-eL3.position.set(1, -1, 4); envSc.add(eL3);
-const envTex = pmremGen.fromScene(envSc, 0.04).texture;
-scene.environment = envTex;
+eL2.position.set(-2, 1, 3); envSc.add(eL2);
+scene.environment = pmremGen.fromScene(envSc, 0.04).texture;
 
-// Ambient niedrig → Schatten werden sichtbar
-scene.add(new THREE.AmbientLight(0xffffff, 0.30));
+scene.add(new THREE.AmbientLight(0xffffff, 0.42));
 
-// Key-Licht oben-links — Hauptlicht, erzeugt Rahmenschatten
-const keyLight = new THREE.DirectionalLight(0xffffff, 2.4);
-keyLight.position.set(-2.5, 4, 6);
+const keyLight = new THREE.DirectionalLight(0xffffff, 1.6);
+keyLight.position.set(2, 4, 5);
 keyLight.castShadow = true;
 keyLight.shadow.mapSize.set(2048, 2048);
-keyLight.shadow.camera.near = 0.5; keyLight.shadow.camera.far = 20;
-keyLight.shadow.camera.left = -1.5; keyLight.shadow.camera.right = 1.5;
-keyLight.shadow.camera.top = 2.5; keyLight.shadow.camera.bottom = -0.5;
-keyLight.shadow.bias = -0.0005;
+keyLight.shadow.camera.near = 1; keyLight.shadow.camera.far = 12;
+keyLight.shadow.camera.left = -1.2; keyLight.shadow.camera.right = 1.2;
+keyLight.shadow.camera.top = 1.5; keyLight.shadow.camera.bottom = -1.5;
+keyLight.shadow.bias = -0.001;
 scene.add(keyLight);
 
-// Fill von rechts oben — weicher Gegenlichter
-const fillRight = new THREE.DirectionalLight(0xffffff, 0.60);
-fillRight.position.set(3, 2, 4);
-scene.add(fillRight);
+const fillLight = new THREE.DirectionalLight(0xddeeff, 0.5);
+fillLight.position.set(-3, 2, 3); scene.add(fillLight);
 
-// Fill von unten — verhindert zu dunkle untere Kante
-const fillBottom = new THREE.DirectionalLight(0xffffff, 0.25);
-fillBottom.position.set(0, -3, 5);
-scene.add(fillBottom);
+// No direct front light — avoids specular blob through glass
+// Extra ambient compensates to keep anthrazit visible
+scene.add(new THREE.AmbientLight(0xffffff, 0.18));
 
-// Spotlight direkt auf Griff — heller Schein auf Edelstahl
-const chromeLight = new THREE.SpotLight(0xffffff, 10.0, 8, Math.PI / 8, 0.2);
-chromeLight.position.set(0.8, 1.2, 4);
-chromeLight.target.position.set(0.36, 0.60, 0.10);
-scene.add(chromeLight); scene.add(chromeLight.target);
+// Spotlight for DK handle chrome — aimed at handle position in world space
+// Handle is at approximately (0.419 - 0.5 = -0.081... wait after setSide x=-FW/2)
+// Actually handle hx=0.919 local, after group.position.x=-0.5 → world x=0.419
+const handleSpot = new THREE.SpotLight(0xffffff, 6.0, 10, Math.PI / 9, 0.12);
+handleSpot.position.set(1.5, 0.8, 5.5);
+handleSpot.target.position.set(0.42, 0.00, 0.09);
+scene.add(handleSpot); scene.add(handleSpot.target);
+
+const gnd = new THREE.Mesh(
+  new THREE.PlaneGeometry(8, 8),
+  new THREE.ShadowMaterial({ opacity: 0.08 })
+);
+gnd.rotation.x = -Math.PI / 2;
+gnd.position.y = -0.62;
+gnd.receiveShadow = true;
+scene.add(gnd);
 
 // ══════════════════════════════════════════════
 // MATERIALIEN
 // ══════════════════════════════════════════════
 const texLoader = new THREE.TextureLoader();
-
-// doorMat = Flügelrahmen-Fläche, frameMat = Blendrahmen-Streifen, glFrameMat = Glasleiste
-// Alle drei bekommen dieselbe Farbe/Holztextur (Fenster ist einheitlich)
-const doorMat    = new THREE.MeshStandardMaterial({ color: 0xfcfcfc, roughness: 0.68, metalness: 0 });
-const frameMat   = new THREE.MeshStandardMaterial({ color: 0xeaeaea, roughness: 0.80, metalness: 0 });
-const glFrameMat = new THREE.MeshStandardMaterial({ color: 0xfafafa, roughness: 0.72, metalness: 0 });
-const chromeMat  = new THREE.MeshStandardMaterial({ color: 0xb8bec2, roughness: 0.22, metalness: 0.95, envMapIntensity: 4.0 });
-const brushedMat = new THREE.MeshStandardMaterial({ color: 0xdde0e2, roughness: 0.28, metalness: 0.55, envMapIntensity: 3.5 });
-const glassMat   = new THREE.MeshPhysicalMaterial({
-  color: 0xffffff, metalness: 0, roughness: 0.0,
-  transmission: 0.05, thickness: 0.018, ior: 1.5, transparent: true,
-  reflectivity: 0.08,
-  depthWrite: false,  // blockiert sonst glassBacking dahinter
+const frameMat  = new THREE.MeshStandardMaterial({ color: 0x232729, roughness: 0.74, metalness: 0.0 });
+const sashMat   = new THREE.MeshStandardMaterial({ color: 0x232729, roughness: 0.74, metalness: 0.0 });
+const grooveMat = new THREE.MeshStandardMaterial({ color: 0x181b1d, roughness: 0.68 });
+const spacerMat = new THREE.MeshStandardMaterial({ color: 0x1c1e20, roughness: 0.55, metalness: 0.45 });
+const handleMat = new THREE.MeshStandardMaterial({ color: 0xd8dde0, roughness: 0.18, metalness: 0.92, envMapIntensity: 2.5 });
+const hingeMat  = new THREE.MeshStandardMaterial({ color: 0xbabfc2, roughness: 0.55, metalness: 0.05 });
+const glassMat  = new THREE.MeshPhysicalMaterial({
+  color: 0xc8dff0, metalness: 0, roughness: 0.03,
+  transmission: 0.90, thickness: 0.02, ior: 1.5, transparent: true,
 });
 
 // ══════════════════════════════════════════════
-// FENSTERDIMENSIONEN — 1-Flügel 900×1200mm
-// Maßstab: 1 unit = 1 m
+// FENSTER-KONSTANTEN — Drutex Iglo 5
+// 1 unit = 1 m · 1000 × 1200 × 73 mm
 // ══════════════════════════════════════════════
-const WW = 0.900;   // Fensterbreite
-const WH = 1.200;   // Fensterhöhe
-const WD = 0.068;   // Profiltiefe
+const FW   = 1.000;   // Außenbreite
+const FH   = 1.200;   // Außenhöhe
+const FD   = 0.073;   // Rahmentiefe
 
-// Blendrahmen: sichtbare Breite ~45mm, 2 Stufen
-const z1w = 0.048, z1d = 0.020;                              // Stufe 1 — breiter Hauptstreifen
-const z2off = z1w + 0.004, z2w = 0.007, z2d = 0.010;       // Stufe 2 — Falz-Absatz
+const FRT  = 0.068;   // Blendrahmen-Profilbreite
+const SOVL = 0.018;   // Falzüberdeckung (Flügel überlappt Blendrahmen um 18mm)
+const FST  = 0.060;   // Flügel-Profilbreite
 
-// Flügelrahmen + Glasfeld
-const OVL  = 0.014;              // Überschlag: Sash überlappt Blendrahmen
-const SX0  = z1w - OVL;         // = 0.034 — Sash-Startpunkt X
-const SY0  = z1w - OVL;         // = 0.034 — Sash-Startpunkt Y
-const FW   = 0.062;              // Flügelrahmen-Profilbreite (jede Seite)
-const GX   = SX0 + FW;          // Glasfeld-Beginn X
-const GY   = SY0 + FW;          // Glasfeld-Beginn Y
-const GW   = WW - 2 * GX;       // Glasfeld-Breite
-const GH   = WH - 2 * GY;       // Glasfeld-Höhe
+// Flügel-Außenmaße
+const SW = FW - 2 * (FRT - SOVL);   // 0.900
+const SH = FH - 2 * (FRT - SOVL);   // 1.100
 
-// Handle-Position (Innenansicht: rechts, Mitte)
-const HX_local = WW - SX0 - FW / 2;  // Mitte rechtes Stilo
-const HY_local = WH * 0.50;          // Mitte Höhe
+// Sash origin (bottom-left in local group coords)
+const x0 = FRT - SOVL;  // 0.050
+const y0 = FRT - SOVL;  // 0.050
 
-const windowGroup = new THREE.Group();
+// Abstandhalter (Spacer bar) sichtbare Breite
+const SBW = 0.012;
+
+// Glasmaße (Sichtglas innerhalb Spacer)
+const GW = SW - 2 * FST - 2 * SBW;  // 0.756
+const GH = SH - 2 * FST - 2 * SBW;  // 0.956
+
+// Flügel steht 5mm vor dem Blendrahmen hervor (Falz)
+const SASH_DZ = 0.005;
+
+const winGroup = new THREE.Group();
 let glassObjects = [];
-let _curColor = 'weiss-fx';
+let _curColor = 'anthrazitgrau';
 let _curWood  = null;
 let _curGlass = 'klar';
 
-// ── Hilfsfunktion: Rechteck-Streifen vor dem Fenster ──
-function strip(x, y, w, h, d, mat) {
+// ── Helper: Box zentriert an (cx,cy,cz) ──────────────
+function bx(cx, cy, cz, w, h, d, mat) {
   const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat || frameMat);
-  m.position.set(x + w / 2, y + h / 2, WD + d / 2);
+  m.position.set(cx, cy, cz);
   m.castShadow = true;
   m.receiveShadow = true;
   return m;
 }
 
+// ── Profilnut (dekorative Rille auf Vorderfläche) ────
+function nut(x1, y1, x2, y2, faceZ) {
+  const dx = x2 - x1, dy = y2 - y1;
+  const len = Math.sqrt(dx * dx + dy * dy);
+  const isH = Math.abs(dx) > Math.abs(dy);
+  const gw = 0.0046, gd = 0.0036;
+  const m = new THREE.Mesh(
+    new THREE.BoxGeometry(isH ? len : gw, isH ? gw : len, gd),
+    grooveMat
+  );
+  m.position.set((x1 + x2) / 2, (y1 + y2) / 2, faceZ + 0.0012);
+  return m;
+}
+
 // ══════════════════════════════════════════════
 // buildWindow — Fenstergeometrie aufbauen
+// Koordinaten: (0,0) = Blendrahmen unten-links
+// Gruppe wird danach um (-FW/2, -FH/2, 0) verschoben
 // ══════════════════════════════════════════════
 function buildWindow() {
-  while (windowGroup.children.length > 0) {
-    const c = windowGroup.children[0];
+  while (winGroup.children.length > 0) {
+    const c = winGroup.children[0];
     if (c.geometry) c.geometry.dispose();
-    windowGroup.remove(c);
+    winGroup.remove(c);
   }
   glassObjects = [];
 
-  // ────────────────────────────────────────────
-  // DIMENSIONEN
-  // Blendrahmen-Vorderfläche: breit (0.078m) und wenig tief (flacher Look)
-  // ────────────────────────────────────────────
-  const BR_W = 0.078;   // sichtbare Blendrahmen-Breite (jeden Seite)
-  const BR_D = WD;      // volle Profiltiefe
-  const BR_FACE = 0.014; // Stufe die nach vorne steht (flacher Look)
+  const fzc = FD / 2;                     // Frame z center
+  const szc = FD / 2 + SASH_DZ;           // Sash z center
+  const ffz = FD;                          // Frame front face Z
+  const sfz = FD + SASH_DZ;               // Sash front face Z
 
-  // Flügelrahmen
-  const OVL  = 0.020;           // Überschlag (Flügel überlappt Blendrahmen)
-  const SX0f = BR_W - OVL;      // Flügel-Start X = 0.058
-  const SY0f = BR_W - OVL;      // Flügel-Start Y = 0.058
-  const FWf  = 0.065;           // Flügelrahmen Profilbreite
-  const GXf  = SX0f + FWf;      // Glasfeld-Beginn X = 0.123
-  const GYf  = SY0f + FWf;      // Glasfeld-Beginn Y = 0.123
-  const GWf  = WW - 2 * GXf;    // Glasfeld-Breite
-  const GHf  = WH - 2 * GYf;    // Glasfeld-Höhe
+  // ── Blendrahmen — 4 Stäbe ────────────────────────────
+  // Unten
+  winGroup.add(bx(FW/2,          FRT/2,         fzc, FW,           FRT,         FD, frameMat));
+  // Oben
+  winGroup.add(bx(FW/2,          FH - FRT/2,    fzc, FW,           FRT,         FD, frameMat));
+  // Links
+  winGroup.add(bx(FRT/2,         FH/2,           fzc, FRT,          FH - 2*FRT,  FD, frameMat));
+  // Rechts
+  winGroup.add(bx(FW - FRT/2,    FH/2,           fzc, FRT,          FH - 2*FRT,  FD, frameMat));
 
-  // Z-Ebenen
-  // sashZ muss VOR der Blendrahmen-Vorderkante liegen (BR_D + BR_FACE = 0.082)
-  const sashZ = BR_D + BR_FACE + 0.028;   // Flügelrahmen sitzt 28mm vor Blendrahmen → stärkerer Schattenwurf
+  // Profilnuten Blendrahmen
+  const fni = FRT * 0.56;
+  winGroup.add(nut(fni, fni, FW - fni, fni, ffz));
+  winGroup.add(nut(fni, FH - fni, FW - fni, FH - fni, ffz));
+  winGroup.add(nut(fni, fni, fni, FH - fni, ffz));
+  winGroup.add(nut(FW - fni, fni, FW - fni, FH - fni, ffz));
 
-  // Griff-Position: rechtes Stilo, leicht unterhalb Mitte
-  const HX = WW - SX0f - FWf * 0.55;
-  const HY = WH * 0.490;
+  // ── Flügel — 4 Stäbe ─────────────────────────────────
+  // Unten
+  winGroup.add(bx(x0 + SW/2,        y0 + FST/2,        szc, SW,   FST,         FD, sashMat));
+  // Oben
+  winGroup.add(bx(x0 + SW/2,        y0 + SH - FST/2,   szc, SW,   FST,         FD, sashMat));
+  // Links
+  winGroup.add(bx(x0 + FST/2,       y0 + SH/2,         szc, FST,  SH - 2*FST,  FD, sashMat));
+  // Rechts
+  winGroup.add(bx(x0 + SW - FST/2,  y0 + SH/2,         szc, FST,  SH - 2*FST,  FD, sashMat));
 
-  // ────────────────────────────────────────────
-  // 1. WEISSE BACKING-PLANE (simuliert Tageslicht)
-  //    Liegt auf Sash-Vorderfläche — garantiert sichtbar
-  // ────────────────────────────────────────────
-  const glassBacking = new THREE.Mesh(
-    new THREE.PlaneGeometry(GWf, GHf),
-    new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false })
+  // Profilnuten Flügel
+  const sni = x0 + FST * 0.54;
+  const snix = x0 + SW - FST * 0.54;
+  const sniy = y0 + FST * 0.54;
+  const sniyt = y0 + SH - FST * 0.54;
+  winGroup.add(nut(sni, sniy, snix, sniy, sfz));
+  winGroup.add(nut(sni, sniyt, snix, sniyt, sfz));
+  winGroup.add(nut(sni, sniy, sni, sniyt, sfz));
+  winGroup.add(nut(snix, sniy, snix, sniyt, sfz));
+
+  // ── Glas-Hintergrund (weißer Innenraum — unlit, kein Glare) ──
+  const backMat = new THREE.MeshBasicMaterial({ color: 0xdce8ef });
+  const backing = new THREE.Mesh(
+    new THREE.PlaneGeometry(GW + SBW * 2 + 0.002, GH + SBW * 2 + 0.002),
+    backMat
   );
-  glassBacking.position.set(GXf + GWf / 2, GYf + GHf / 2, sashZ + 0.001);
-  glassBacking.renderOrder = 1;
-  windowGroup.add(glassBacking);
+  const gcx = x0 + FST + SBW + GW / 2;   // = x0 + FST + SBW + GW/2
+  const gcy = y0 + FST + SBW + GH / 2;
+  backing.position.set(gcx, gcy, 0.002);
+  winGroup.add(backing);
 
-  // ────────────────────────────────────────────
-  // 2. BLENDRAHMEN — 4 Streifen (volle Tiefe)
-  // ────────────────────────────────────────────
-  const blendFn = (x, y, w, h) => {
-    const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, BR_D), frameMat);
-    m.position.set(x + w/2, y + h/2, BR_D / 2);
-    m.castShadow = true;
-    m.receiveShadow = true;
-    return m;
-  };
-  windowGroup.add(blendFn(0,          WH - BR_W, WW,             BR_W));  // oben
-  windowGroup.add(blendFn(0,          0,          WW,             BR_W));  // unten
-  windowGroup.add(blendFn(0,          BR_W,       BR_W, WH - 2*BR_W));    // links
-  windowGroup.add(blendFn(WW - BR_W,  BR_W,       BR_W, WH - 2*BR_W));   // rechts
+  // ── Glasscheibe ───────────────────────────────────────
+  const gm = new THREE.Mesh(new THREE.PlaneGeometry(GW, GH), glassMat);
+  gm.position.set(gcx, gcy, szc + 0.001);
+  winGroup.add(gm);
+  glassObjects.push(gm);
 
-  // Blendrahmen-Vorderkante (flache Aufkantung — gibt Schatteneffekt)
-  const bfFace = (x, y, w, h) => {
-    const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, BR_FACE), frameMat);
-    m.position.set(x + w/2, y + h/2, BR_D + BR_FACE / 2);
-    m.castShadow = true;
-    m.receiveShadow = true;
-    return m;
-  };
-  windowGroup.add(bfFace(0,          WH - BR_W, WW,             BR_W));
-  windowGroup.add(bfFace(0,          0,          WW,             BR_W));
-  windowGroup.add(bfFace(0,          BR_W,       BR_W, WH - 2*BR_W));
-  windowGroup.add(bfFace(WW - BR_W,  BR_W,       BR_W, WH - 2*BR_W));
+  // ── Spacer Bar (Abstandhalter-Rahmen) ─────────────────
+  const sbz = szc;
+  const sbd = 0.004;
+  // Oben
+  winGroup.add(bx(gcx, gcy + GH/2 + SBW/2, sbz, GW + SBW * 2, SBW, sbd, spacerMat));
+  // Unten
+  winGroup.add(bx(gcx, gcy - GH/2 - SBW/2, sbz, GW + SBW * 2, SBW, sbd, spacerMat));
+  // Links
+  winGroup.add(bx(gcx - GW/2 - SBW/2, gcy, sbz, SBW, GH, sbd, spacerMat));
+  // Rechts
+  winGroup.add(bx(gcx + GW/2 + SBW/2, gcy, sbz, SBW, GH, sbd, spacerMat));
 
-  // ────────────────────────────────────────────
-  // 3. FLÜGELRAHMEN (Sash) — ExtrudeGeometry mit Glasloch
-  // ────────────────────────────────────────────
-  {
-    const s = new THREE.Shape();
-    s.moveTo(SX0f,       SY0f);
-    s.lineTo(WW - SX0f,  SY0f);
-    s.lineTo(WW - SX0f,  WH - SY0f);
-    s.lineTo(SX0f,       WH - SY0f);
-    s.closePath();
+  // ── DK-Griff ─────────────────────────────────────────
+  // Auf rechtem Flügel-Profil, Mitte-Höhe (DIN-links Ansicht von außen)
+  const hx  = x0 + SW - FST * 0.52;  // ≈ 0.919 — Mitte rechtes Profil
+  const hy  = y0 + SH / 2;            // ≈ 0.600 — Mitte Höhe
+  const hbz = sfz + 0.003;           // knapp vor Flügel-Front
 
-    const hole = new THREE.Path();
-    hole.moveTo(GXf,       GYf);
-    hole.lineTo(GXf + GWf, GYf);
-    hole.lineTo(GXf + GWf, GYf + GHf);
-    hole.lineTo(GXf,       GYf + GHf);
-    hole.closePath();
-    s.holes.push(hole);
+  // Rosette (runde Scheibe, flach anliegend)
+  const rosette = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.021, 0.021, 0.009, 24),
+    handleMat
+  );
+  rosette.rotation.x = Math.PI / 2;
+  rosette.position.set(hx, hy, hbz + 0.0045);
+  rosette.castShadow = true;
+  winGroup.add(rosette);
 
-    const sashDepth = 0.055;
-    const body = new THREE.Mesh(
-      new THREE.ExtrudeGeometry(s, {
-        depth: sashDepth,
-        bevelEnabled: true,
-        bevelThickness: 0.003,
-        bevelSize: 0.002,
-        bevelSegments: 2
-      }),
-      [doorMat, frameMat]
+  // Hals (kurzer Zylinder, verbindet Rosette mit Hebel)
+  const neck = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.0075, 0.0075, 0.022, 14),
+    handleMat
+  );
+  neck.rotation.x = Math.PI / 2;
+  neck.position.set(hx, hy, hbz + 0.009 + 0.011);
+  neck.castShadow = true;
+  winGroup.add(neck);
+
+  // Hebel-Achse-Platte (kleine quadratische Basis wo Hebel dreht)
+  const axle = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.010, 0.010, 0.010, 12),
+    handleMat
+  );
+  axle.rotation.x = Math.PI / 2;
+  axle.position.set(hx, hy, hbz + 0.009 + 0.022 + 0.005);
+  axle.castShadow = true;
+  winGroup.add(axle);
+
+  // Hebel (ovaler Querschnitt, zeigt nach UNTEN = verriegelt)
+  const leverLen = 0.138;
+  const leverGeom = new THREE.CylinderGeometry(0.014, 0.013, leverLen, 16);
+  const lever = new THREE.Mesh(leverGeom, handleMat);
+  lever.scale.set(0.68, 1.0, 0.52);   // ovaler Querschnitt
+  const lz = hbz + 0.009 + 0.022 + 0.012 + 0.013;
+  lever.position.set(hx, hy - leverLen / 2, lz);
+  lever.castShadow = true;
+  winGroup.add(lever);
+
+  // Hebelspitze (abgerundet)
+  const tipGeom = new THREE.SphereGeometry(0.014, 12, 8);
+  const tip = new THREE.Mesh(tipGeom, handleMat);
+  tip.scale.set(0.68, 1.0, 0.52);
+  tip.position.set(hx, hy - leverLen, lz);
+  tip.castShadow = true;
+  winGroup.add(tip);
+
+  // ── Scharnier-Abdeckkappen (links, 3 Stück) ───────────
+  // Kleine rechteckige Kunststoff-Kappen auf linkem Flügel-Profil
+  const hingeX = x0 + FST * 0.42;   // ≈ 0.075 — Mitte linkes Profil
+  const hingeZ = sfz + 0.002;
+  const hingeYs = [
+    y0 + SH * 0.14,   // unteres Scharnier
+    y0 + SH * 0.50,   // mittleres Scharnier
+    y0 + SH * 0.86,   // oberes Scharnier
+  ];
+  hingeYs.forEach(hy => {
+    const hc = new THREE.Mesh(
+      new THREE.BoxGeometry(0.028, 0.048, 0.005),
+      hingeMat
     );
-    body.position.z = sashZ - sashDepth;
-    body.castShadow = true;
-    body.receiveShadow = true;
-    windowGroup.add(body);
-  }
-
-  // ────────────────────────────────────────────
-  // 4. SCHWARZE GUMMIDICHTUNG um Glasscheibe
-  //    Prominente schwarze Streifen ~10mm breit
-  //    Sitzen auf der Vorderfläche des Flügelrahmens
-  // ────────────────────────────────────────────
-  const sealMat = new THREE.MeshStandardMaterial({
-    color: 0x111111, roughness: 0.95, metalness: 0
-  });
-  const SW = 0.012;  // Dichtungsbreite — 12mm (prominent schwarz wie im Referenzbild)
-  const SD = 0.008;  // Dichtungstiefe (leicht erhaben)
-  const seZ = sashZ + 0.001;
-
-  // Dichtung oben (sitzt direkt am Glasrand)
-  const dichtFn = (x, y, w, h) => {
-    const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, SD), sealMat);
-    m.position.set(x + w/2, y + h/2, seZ);
-    m.castShadow = true;
-    return m;
-  };
-  windowGroup.add(dichtFn(GXf,           GYf + GHf,      GWf,           SW)); // oben
-  windowGroup.add(dichtFn(GXf,           GYf - SW,       GWf,           SW)); // unten
-  windowGroup.add(dichtFn(GXf - SW,      GYf,            SW,            GHf)); // links
-  windowGroup.add(dichtFn(GXf + GWf,     GYf,            SW,            GHf)); // rechts
-
-  // Glas: nur MeshBasicMaterial-Backing (glassBacking oben, Section 1)
-  glassObjects.push(glassBacking);
-
-  // ────────────────────────────────────────────
-  // 6. FENSTERGRIFF — Standard Dreh-Kipp-Hebel
-  //    Ovale Rosette + gerader Hebelarm nach links
-  // ────────────────────────────────────────────
-  {
-    const GZ = sashZ + 0.002;  // liegt auf Sash-Fläche
-
-    // --- Ovale Basisrosette (flach auf dem Rahmen) ---
-    // ~38mm breit, ~55mm hoch, 7mm tief
-    const rosette = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.019, 0.019, 0.007, 32),
-      brushedMat
-    );
-    rosette.rotation.x = Math.PI / 2;
-    rosette.scale.y = 1.45;          // Kreis → Oval
-    rosette.position.set(HX, HY, GZ + 0.0035);
-    rosette.castShadow = true;
-    windowGroup.add(rosette);
-
-    // --- Vierkantnabe (Spindle, wo Hebel sitzt) ---
-    const spindle = new THREE.Mesh(
-      new THREE.BoxGeometry(0.010, 0.010, 0.016),
-      brushedMat
-    );
-    spindle.position.set(HX, HY, GZ + 0.012);
-    windowGroup.add(spindle);
-
-    // --- Hebelarm: gerader Zylinder nach links (Richtung Glas) ---
-    // 105mm lang, 13mm Durchmesser, leicht schräg nach vorne
-    const leverLen = 0.105;
-    const lever = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.0065, 0.0065, leverLen, 16),
-      brushedMat
-    );
-    lever.rotation.z = Math.PI / 2;   // vertikal → horizontal
-    lever.position.set(HX - leverLen / 2, HY, GZ + 0.018);
-    lever.castShadow = true;
-    windowGroup.add(lever);
-
-    // --- Griffende (leicht verdickt, ergonomisch) ---
-    const tip = new THREE.Mesh(
-      new THREE.SphereGeometry(0.0085, 12, 8),
-      brushedMat
-    );
-    tip.position.set(HX - leverLen, HY, GZ + 0.018);
-    windowGroup.add(tip);
-
-    // --- Übergangs-Kragen (wo Hebel aus Rosette kommt) ---
-    const collar = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.010, 0.010, 0.012, 16),
-      brushedMat
-    );
-    collar.rotation.x = Math.PI / 2;
-    collar.position.set(HX, HY, GZ + 0.013);
-    windowGroup.add(collar);
-  }
-
-  // ────────────────────────────────────────────
-  // 7. SCHARNIERE — links, 2 flache Rechteckplatten
-  //    Oben = Scherenlager (~85%), Unten = Ecklager (~12%)
-  // ────────────────────────────────────────────
-  // Scharniere sitzen am Übergang Blendrahmen/Flügelrahmen (linke Kante Überschlag)
-  const hingeX = BR_W * 0.55;  // ~43mm vom linken Rand = Mitte des Überschlag-Bereichs
-
-  [
-    { hy: WH * 0.115, hw: 0.038, hh: 0.038 },  // Ecklager unten
-    { hy: WH * 0.845, hw: 0.038, hh: 0.052 },  // Scherenlager oben (höher)
-  ].forEach(({ hy, hw, hh }) => {
-    const plate = new THREE.Mesh(
-      new THREE.BoxGeometry(hw, hh, 0.008),
-      brushedMat
-    );
-    plate.position.set(hingeX, hy, sashZ + 0.005);
-    plate.castShadow = true;
-    windowGroup.add(plate);
-
-    // 2 Schraubenköpfe
-    [-hh * 0.28, hh * 0.28].forEach(dy => {
-      const sc = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.0035, 0.0035, 0.004, 10),
-        chromeMat
-      );
-      sc.rotation.x = Math.PI / 2;
-      sc.position.set(hingeX, hy + dy, sashZ + 0.011);
-      windowGroup.add(sc);
-    });
+    hc.position.set(hingeX, hy, hingeZ);
+    hc.castShadow = true;
+    winGroup.add(hc);
   });
 }
 
 buildWindow();
-windowGroup.position.set(-WW / 2, 0, 0);
-scene.add(windowGroup);
 
+// Fenster auf Welt-Origin zentrieren
+winGroup.position.set(-FW / 2, -FH / 2, 0);
+scene.add(winGroup);
+
+// setSide: 'r' = Griff rechts (Standard), 'l' = Griff links (gespiegelt)
+function setSide(s) {
+  if (s === 'l') {
+    winGroup.scale.x    = -1;
+    winGroup.position.x =  FW / 2;
+  } else {
+    winGroup.scale.x    =  1;
+    winGroup.position.x = -FW / 2;
+  }
+}
+const _urlSide = new URLSearchParams(location.search).get('side') || 'r';
+setSide(_urlSide);
 
 // ══════════════════════════════════════════════
 // FARBEN — alle 41 echten Drutex-Dekore
-// Identisch mit Haustür-System
 // ══════════════════════════════════════════════
 const CDN = 'https://www.drutex.de/media/webp/80/';
 const FARBEN = {
@@ -548,9 +468,9 @@ const FARBEN = {
     { key:'quarzgrau-gl',  name:'Quarzgrau Glatt',     hex:'#43413d', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvc3phcnkta3dhcmN5dG93eS1nbGFka2kuanBn.webp' },
     { key:'basaltgrau',    name:'Basaltgrau',          hex:'#535d5c', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvYmF6YWx0b3d5X3N6YXJ5LmpwZw==.webp' },
     { key:'basaltgrau-gl', name:'Basaltgrau Glatt',    hex:'#605f56', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvYmF6YWx0b3d5LXN6YXJ5LWdhZGtpLmpwZw==.webp' },
-    { key:'eisengl',       name:'Eisenglimmer Schiefer',hex:'#424949',swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5LzIwMTcvbHVwa293eS1uLmpwZw==.webp' },
+    { key:'eisengl',       name:'Eisenglimmer',        hex:'#424949', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5LzIwMTcvbHVwa293eS1uLmpwZw==.webp' },
     { key:'schiefgrau-gl', name:'Schiefergrau Glatt',  hex:'#404747', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5LzIwMTcvbHVwa293eS1nbGFka2ktbi5qcGc=.webp' },
-    { key:'graphit-sand',  name:'Graphit-Sandfarben',  hex:'#595b51', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvZ3JhZml0b3d5X3BpYXNrb3dhbnkuanBn.webp' },
+    { key:'graphit-sand',  name:'Graphit-Sand',        hex:'#595b51', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvZ3JhZml0b3d5X3BpYXNrb3dhbnkuanBn.webp' },
     { key:'anthrazitgrau', name:'Anthrazitgrau',       hex:'#242426', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvYW50cmFjeXQuanBn.webp' },
     { key:'anthrazit-gl',  name:'Anthrazit Glatt',     hex:'#252527', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvYW50cnljeXQwZ2xhZGtpLmpwZw==.webp' },
     { key:'anthrazit-um',  name:'Anthrazit Ulti-Matt', hex:'#2f3231', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvYW50cmFjdXRfdWx0aS1tYXR0X3d3dy5qcGc=.webp' },
@@ -576,7 +496,7 @@ const FARBEN = {
     { key:'eiche-nat',     name:'Eiche Natur',         swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvZGFiLW5hdHVyYWxueS5qcGc=.webp' },
     { key:'winchester',    name:'Winchester',          swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvd2luY2hlc3Rlcl9ray5qcGc=.webp' },
     { key:'oregon',        name:'Oregon',              swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvb3JlZ29uX2trLmpwZw==.webp' },
-    { key:'douglasie',     name:'Streifen Douglasie',  swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvZGFnbGV6amFfa2suanBn.webp' },
+    { key:'douglasie',     name:'Douglasie',           swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvZGFnbGV6amFfa2suanBn.webp' },
     { key:'nussbaum',      name:'Nussbaum',            swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L3dvb2Qvb3J6ZWNoLWEuanBn.webp' },
     { key:'eiche-dunkel',  name:'Eiche Dunkel',        swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvY2llbW55LWRhYl9ray5qcGc=.webp' },
     { key:'schwarzbraun',  name:'Schwarzbraun',        swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvcGFsaXNhbmRlci5qcGc=.webp' },
@@ -586,7 +506,7 @@ const FARBEN = {
 };
 
 // ══════════════════════════════════════════════
-// HOLZDEKORE — gleiche Textur-Methode wie Haustür
+// HOLZDEKORE
 // ══════════════════════════════════════════════
 const WOOD_REPEAT = {
   'golden-oak':    [1.5, 1],
@@ -622,62 +542,43 @@ const WOOD_PARAMS = {
   'mahagoni':      { base:'#2A1A14', grain:'#140A08' },
 };
 
-const WOOD_TEX_MAP = {
-  'golden-oak':    'img/holz/golden_oak.jpg',
-  'sheffield':     'img/holz/sheffield.jpg',
-  'turner-oak':    'img/holz/sheffield.jpg',
-  'turner-toffee': 'img/holz/eiche_natur.jpg',
-  'turner-walnut': 'img/holz/nussbaum.jpg',
-  'eiche-nat':     'img/holz/eiche_natur.jpg',
-  'winchester':    'img/holz/winchester.jpg',
-  'oregon':        'img/holz/oregon.jpg',
-  'douglasie':     'img/holz/douglasie.jpg',
-  'nussbaum':      'img/holz/nussbaum.jpg',
-  'eiche-dunkel':  'img/holz/eiche_dunkel.jpg',
-  'schwarzbraun':  'img/holz/mahagoni.jpg',
-  'macore':        'img/holz/macore.jpg',
-  'mahagoni':      'img/holz/mahagoni.jpg',
-};
-
-// ── Holztextur-Maps aus allen drei Frame-Materialien entfernen ──
+// ── Farbe anwenden ────────────────────────────────────
 function clearWoodMaps() {
-  [doorMat, frameMat, glFrameMat].forEach(mat => {
-    ['map', 'bumpMap', 'roughnessMap'].forEach(k => {
-      if (mat[k]) { mat[k].dispose(); mat[k] = null; }
-    });
+  ['map', 'bumpMap', 'roughnessMap'].forEach(k => {
+    if (frameMat[k]) { frameMat[k].dispose(); frameMat[k] = null; }
+    if (sashMat[k])  { sashMat[k].dispose();  sashMat[k]  = null; }
   });
 }
 
 function findColor(key) {
-  const all = [...FARBEN.whites, ...FARBEN.grays, ...FARBEN.colors];
-  return all.find(c => c.key === key);
+  return [...FARBEN.whites, ...FARBEN.grays, ...FARBEN.colors].find(c => c.key === key);
 }
 
-// ── Farbe setzen (Unifarbe — Holztextur entfernen) ──
 function setColor(key) {
   _curColor = key; _curWood = null;
   clearWoodMaps();
 
   const colorObj = findColor(key);
-  const hex = colorObj?.hex || '#fcfcfc';
-  const c = new THREE.Color(hex);
+  const c = new THREE.Color(colorObj?.hex || '#888888');
+
+  frameMat.color.copy(c);
+  sashMat.color.copy(c);
+  grooveMat.color.copy(c).multiplyScalar(0.60);
 
   const isGlatt    = key.endsWith('-gl');
   const isUltiMatt = key.endsWith('-um');
   const roughness  = isUltiMatt ? 0.97 : isGlatt ? 0.20 : 0.74;
   const envInt     = isUltiMatt ? 0.02 : isGlatt ? 0.85 : 0.08;
 
-  [doorMat, frameMat, glFrameMat].forEach(mat => {
-    mat.map = null;
-    mat.color.copy(c);
-    mat.roughness  = roughness;
-    mat.metalness  = 0;
-    mat.envMapIntensity = envInt;
-    mat.needsUpdate = true;
-  });
+  frameMat.roughness = sashMat.roughness = roughness;
+  frameMat.metalness = sashMat.metalness = 0;
+  frameMat.envMapIntensity = sashMat.envMapIntensity = envInt;
+  frameMat.needsUpdate = true;
+  sashMat.needsUpdate  = true;
+
+  document.getElementById('currentLabel').textContent = colorObj?.name || key;
 }
 
-// ── Holzdekor setzen — echtes Drutex-Swatch (img/swatches/{key}.webp) ──
 function setWood(key) {
   _curWood = key; _curColor = null;
   const p = WOOD_PARAMS[key];
@@ -686,14 +587,14 @@ function setWood(key) {
   clearWoodMaps();
 
   if (key === 'schwarzbraun') {
-    [doorMat, frameMat, glFrameMat].forEach(mat => {
-      mat.map = null;
-      mat.color.set(p.base);
-      mat.roughness = 0.88;
-      mat.metalness = 0;
-      mat.envMapIntensity = 0.04;
-      mat.needsUpdate = true;
+    [frameMat, sashMat].forEach(m => {
+      m.map = null;
+      m.color.set(p.base);
+      m.roughness = 0.88; m.metalness = 0;
+      m.envMapIntensity = 0.04;
+      m.needsUpdate = true;
     });
+    grooveMat.color.set(p.grain); grooveMat.needsUpdate = true;
     return;
   }
 
@@ -707,27 +608,31 @@ function setWood(key) {
     tex.repeat.set(rx, ry);
     tex.needsUpdate = true;
 
-    [doorMat, frameMat, glFrameMat].forEach(mat => {
-      mat.map = tex;
-      mat.color.set(0xffffff);
-      mat.bumpMap = tex;
-      mat.bumpScale = 0.025;
-      mat.roughness = 0.82;
-      mat.metalness = 0;
-      mat.envMapIntensity = 0.10;
-      mat.needsUpdate = true;
+    [frameMat, sashMat].forEach(m => {
+      m.map = tex;
+      m.color.set(0xffffff);
+      m.bumpMap = tex;
+      m.bumpScale = 0.025;
+      m.roughness = 0.82; m.metalness = 0;
+      m.envMapIntensity = 0.10;
+      m.needsUpdate = true;
     });
   });
+
+  grooveMat.color.set(p.grain); grooveMat.needsUpdate = true;
+
+  const colorObj = FARBEN.woods.find(w => w.key === key);
+  if (colorObj) document.getElementById('currentLabel').textContent = colorObj.name;
 }
 
 // ══════════════════════════════════════════════
-// GLASARTEN — 4 Typen wie beim Haustür-Konfigurator
+// GLASARTEN
 // ══════════════════════════════════════════════
 const GLASS_TYPES = [
-  { key:'klar',         name:'Klar',         color:0xc8dff0, transmission:0.90, roughness:0.03 },
-  { key:'satinato',     name:'Satinato',      color:0xe8eced, transmission:0.18, roughness:0.96 },
-  { key:'chinchilla',   name:'Chinchilla',    color:0xffffff, transmission:0.22, roughness:0.88 },
-  { key:'master-carre', name:'Master Carré',  color:0xffffff, transmission:0.28, roughness:0.72 },
+  { key:'klar',         name:'Klar'         },
+  { key:'satinato',     name:'Satinato'     },
+  { key:'chinchilla',   name:'Chinchilla'   },
+  { key:'master-carre', name:'Master Carré' },
 ];
 
 function seededRnd(seed) {
@@ -735,9 +640,9 @@ function seededRnd(seed) {
   return () => { s = (s * 1664525 + 1013904223) & 0xffffffff; return (s >>> 0) / 0xffffffff; };
 }
 
-function heightToNormal(heightCanvas, strength) {
-  const W = heightCanvas.width, H = heightCanvas.height;
-  const hData = heightCanvas.getContext('2d').getImageData(0, 0, W, H).data;
+function heightToNormal(hCanvas, strength) {
+  const W = hCanvas.width, H = hCanvas.height;
+  const hData = hCanvas.getContext('2d').getImageData(0, 0, W, H).data;
   const out = document.createElement('canvas'); out.width = W; out.height = H;
   const nCtx = out.getContext('2d');
   const nImg = nCtx.createImageData(W, H);
@@ -747,8 +652,8 @@ function heightToNormal(heightCanvas, strength) {
   }
   for (let y = 0; y < H; y++) {
     for (let x = 0; x < W; x++) {
-      const dX = (h(x-1,y-1) - h(x+1,y-1)) + 2*(h(x-1,y) - h(x+1,y)) + (h(x-1,y+1) - h(x+1,y+1));
-      const dY = (h(x-1,y-1) - h(x-1,y+1)) + 2*(h(x,y-1) - h(x,y+1)) + (h(x+1,y-1) - h(x+1,y+1));
+      const dX = (h(x-1,y-1)-h(x+1,y-1)) + 2*(h(x-1,y)-h(x+1,y)) + (h(x-1,y+1)-h(x+1,y+1));
+      const dY = (h(x-1,y-1)-h(x-1,y+1)) + 2*(h(x,y-1)-h(x,y+1)) + (h(x+1,y-1)-h(x+1,y+1));
       const nx = dX * strength, ny = dY * strength, nz = 1.0;
       const len = Math.sqrt(nx*nx + ny*ny + nz*nz);
       const i = (y * W + x) * 4;
@@ -769,17 +674,14 @@ function chinchillaHeight() {
   const rnd = seededRnd(4217);
   ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
   for (let i = 0; i < 300; i++) {
-    const x = rnd() * W, y = rnd() * H;
-    const r = 18 + rnd() * 28;
-    const rx = r * (0.65 + rnd() * 0.7), ry = r * (0.65 + rnd() * 0.7);
-    const grad = ctx.createRadialGradient(x, y, 0, x, y, Math.max(rx, ry));
-    grad.addColorStop(0,   'rgba(255,255,255,1)');
-    grad.addColorStop(0.6, 'rgba(128,128,128,0.5)');
-    grad.addColorStop(1,   'rgba(0,0,0,0)');
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.ellipse(x, y, rx, ry, rnd() * Math.PI, 0, Math.PI * 2);
-    ctx.fill();
+    const x = rnd()*W, y = rnd()*H, r = 18 + rnd()*28;
+    const rx = r*(0.65+rnd()*0.7), ry = r*(0.65+rnd()*0.7);
+    const g = ctx.createRadialGradient(x, y, 0, x, y, Math.max(rx, ry));
+    g.addColorStop(0, 'rgba(255,255,255,1)');
+    g.addColorStop(0.6, 'rgba(128,128,128,0.5)');
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.ellipse(x, y, rx, ry, rnd()*Math.PI, 0, Math.PI*2); ctx.fill();
   }
   return cvs;
 }
@@ -791,18 +693,14 @@ function masterCarreHeight() {
   const STEP = 32, LINE = 8;
   ctx.fillStyle = '#111'; ctx.fillRect(0, 0, W, H);
   for (let pos = 0; pos <= W; pos += STEP) {
-    const grad = ctx.createLinearGradient(pos - LINE, 0, pos + LINE, 0);
-    grad.addColorStop(0, 'rgba(0,0,0,0)');
-    grad.addColorStop(0.5, 'rgba(255,255,255,1)');
-    grad.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = grad; ctx.fillRect(pos - LINE, 0, LINE*2, H);
+    const g = ctx.createLinearGradient(pos-LINE, 0, pos+LINE, 0);
+    g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(0.5, 'rgba(255,255,255,1)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g; ctx.fillRect(pos-LINE, 0, LINE*2, H);
   }
   for (let pos = 0; pos <= H; pos += STEP) {
-    const grad = ctx.createLinearGradient(0, pos - LINE, 0, pos + LINE);
-    grad.addColorStop(0, 'rgba(0,0,0,0)');
-    grad.addColorStop(0.5, 'rgba(255,255,255,1)');
-    grad.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = grad; ctx.fillRect(0, pos - LINE, W, LINE*2);
+    const g = ctx.createLinearGradient(0, pos-LINE, 0, pos+LINE);
+    g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(0.5, 'rgba(255,255,255,1)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g; ctx.fillRect(0, pos-LINE, W, LINE*2);
   }
   return cvs;
 }
@@ -822,31 +720,25 @@ function cleanGlassMaps() {
 
 function setGlass(key) {
   _curGlass = key;
-  const g = GLASS_TYPES.find(t => t.key === key); if (!g) return;
-
   cleanGlassMaps();
 
   if (key === 'klar') {
-    glassMat.transmission  = 0.05;
-    glassMat.roughness     = 0.0;
+    glassMat.transmission = 0.92; glassMat.roughness = 0.02;
     glassMat.normalScale?.set(0, 0);
-    glassMat.color.set(0xffffff);
+    glassMat.color.set(0xd0e8f4);
   } else if (key === 'satinato') {
-    glassMat.transmission  = 0.35;
-    glassMat.roughness     = 0.96;
+    glassMat.transmission = 0.35; glassMat.roughness = 0.96;
     glassMat.color.set(0xe8eeee);
   } else if (key === 'chinchilla') {
-    glassMat.transmission  = 0.65;
-    glassMat.roughness     = 0.12;
+    glassMat.transmission = 0.65; glassMat.roughness = 0.12;
     glassMat.color.set(0xd4e8f0);
-    glassMat.normalMap     = buildNormalTex(chinchillaHeight, 4.5, 5, 16);
-    glassMat.normalScale   = new THREE.Vector2(1.8, 1.8);
+    glassMat.normalMap   = buildNormalTex(chinchillaHeight, 4.5, 5, 16);
+    glassMat.normalScale = new THREE.Vector2(1.8, 1.8);
   } else if (key === 'master-carre') {
-    glassMat.transmission  = 0.78;
-    glassMat.roughness     = 0.06;
+    glassMat.transmission = 0.78; glassMat.roughness = 0.06;
     glassMat.color.set(0xd4eaf4);
-    glassMat.normalMap     = buildNormalTex(masterCarreHeight, 4.0, 3, 11);
-    glassMat.normalScale   = new THREE.Vector2(1.5, 1.5);
+    glassMat.normalMap   = buildNormalTex(masterCarreHeight, 4.0, 3, 11);
+    glassMat.normalScale = new THREE.Vector2(1.5, 1.5);
   }
 
   glassMat.needsUpdate = true;
@@ -855,15 +747,15 @@ function setGlass(key) {
   );
 }
 
-// ── Swatches — echte Drutex-Swatch-Bilder als UI-Buttons ──
+// ── UI: Farbswatches bauen ────────────────────────────
 function buildSwatches(id, list, onSelect, defaultKey) {
   const el = document.getElementById(id);
   list.forEach(c => {
     const s = document.createElement('div');
     s.className = 'color-swatch' + (c.key === defaultKey ? ' active' : '');
     if (c.swatchUrl) {
-      s.style.backgroundImage = `url(${c.swatchUrl})`;
-      s.style.backgroundSize = 'cover';
+      s.style.backgroundImage  = `url(${c.swatchUrl})`;
+      s.style.backgroundSize   = 'cover';
       s.style.backgroundPosition = 'center';
     } else {
       s.style.background = c.hex || '#888';
@@ -873,24 +765,18 @@ function buildSwatches(id, list, onSelect, defaultKey) {
       document.querySelectorAll('.color-swatch').forEach(x => x.classList.remove('active'));
       s.classList.add('active');
       onSelect(c);
-      document.getElementById('currentLabel').textContent = c.name;
     };
     el.appendChild(s);
   });
 }
 
-buildSwatches('whites',     FARBEN.whites,  c => setColor(c.key), 'weiss-fx');
-buildSwatches('grays',      FARBEN.grays,   c => setColor(c.key));
+buildSwatches('whites',     FARBEN.whites,  c => setColor(c.key));
+buildSwatches('grays',      FARBEN.grays,   c => setColor(c.key), 'anthrazitgrau');
 buildSwatches('colorGroup', FARBEN.colors,  c => setColor(c.key));
 buildSwatches('woods',      FARBEN.woods,   c => setWood(c.key));
 
-// Startzustand: URL-Param ?color= oder Weiß FX
-const _urlColor = new URLSearchParams(location.search).get('color');
-if (_urlColor) { setColor(_urlColor); }
-else { setColor('weiss-fx'); }
-
 // Glasarten-Buttons
-(function buildGlassBtns() {
+(function() {
   const el = document.getElementById('glassBtns');
   GLASS_TYPES.forEach(g => {
     const b = document.createElement('button');
@@ -902,29 +788,24 @@ else { setColor('weiss-fx'); }
   });
 })();
 
-// postMessage-Bridge: Konfigurator schickt Farb/Holz/Glas-Änderungen
-window.addEventListener('message', (e) => {
-  const d = e.data;
-  if (!d || !d.type) return;
-  if (d.type === 'setColor') { setColor(d.key); }
-  if (d.type === 'setWood')  { setWood(d.key); }
-  if (d.type === 'setGlass') { setGlass(d.key); }
-});
+// Startzustand aus URL-Params
+const _urlColor = new URLSearchParams(location.search).get('color');
+if (_urlColor) setColor(_urlColor);
+else           setColor('anthrazitgrau');
+
+const _urlGlass = new URLSearchParams(location.search).get('glass');
+if (_urlGlass) setGlass(_urlGlass);
+else           setGlass('klar');
 
 // ══════════════════════════════════════════════
 // RESIZE + RENDER LOOP
 // ══════════════════════════════════════════════
 function resize() {
   const embed = new URLSearchParams(location.search).has('embed');
-  const w = embed ? window.innerWidth  : window.innerWidth  - 290 - 252;
+  const w = embed ? window.innerWidth  : window.innerWidth  - 252;
   const h = embed ? window.innerHeight : window.innerHeight - 40;
   renderer.setSize(w, h);
-  const aspect = w / h;
-  const vh = 0.75;
-  camera.left   = -vh * aspect;
-  camera.right  =  vh * aspect;
-  camera.top    =  vh;
-  camera.bottom = -vh;
+  camera.aspect = w / h;
   camera.updateProjectionMatrix();
 }
 window.addEventListener('resize', resize);
@@ -933,6 +814,22 @@ resize();
 if (new URLSearchParams(location.search).has('embed')) {
   document.body.classList.add('embed');
 }
+
+// postMessage-Bridge: Konfigurator schickt Farb/Glas-Änderungen
+window.addEventListener('message', (e) => {
+  const d = e.data;
+  if (!d || !d.type) return;
+  if (d.type === 'setColor') setColor(d.key);
+  if (d.type === 'setWood')  setWood(d.key);
+  if (d.type === 'setGlass') setGlass(d.key);
+  if (d.type === 'setSide')  setSide(d.key);
+  if (d.type === 'update') {
+    if (d.wood)  setWood(d.wood);
+    else         setColor(d.color || 'anthrazitgrau');
+    setGlass(d.glass || 'klar');
+    if (d.side) setSide(d.side);
+  }
+});
 
 (function animate() {
   requestAnimationFrame(animate);
