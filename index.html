@@ -236,8 +236,37 @@
   }
 </style>
   <script defer data-domain="deinefenster.de" src="https://plausible.io/js/script.js"></script>
+<style>
+  /* ── DeineFenster Polish — Grain · Cursor · Ticker · Color fixes ── */
+  body::before {
+    content:''; position:fixed; inset:0; z-index:9990; pointer-events:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='256' height='256' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E");
+    background-size:200px;
+  }
+  * { cursor:none; }
+  #df-cur {
+    position:fixed; z-index:9999; pointer-events:none;
+    width:8px; height:8px; border-radius:50%; background:#76a9fa;
+    transform:translate(-50%,-50%);
+    transition:width .22s cubic-bezier(.34,1.56,.64,1), height .22s cubic-bezier(.34,1.56,.64,1), background .15s;
+  }
+  #df-cur.big { width:36px; height:36px; background:transparent; border:1.5px solid rgba(118,169,250,0.65); }
+  @media (hover:none) { * { cursor:auto !important; } #df-cur { display:none; } }
+  .df-ticker { border-top:1px solid rgba(255,255,255,0.06); border-bottom:1px solid rgba(255,255,255,0.06); background:#0f1c30; overflow:hidden; padding:.72rem 0; }
+  .df-ticker-inner { display:flex; gap:3rem; animation:dfTicker 40s linear infinite; width:max-content; }
+  .df-tick { font-size:.63rem; letter-spacing:.17em; text-transform:uppercase; color:rgba(232,238,255,0.4); white-space:nowrap; font-family:'Manrope',sans-serif; font-weight:600; }
+  .df-tick-sep { color:rgba(118,169,250,0.32); font-size:.7rem; }
+  @keyframes dfTicker { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+  @media (prefers-reduced-motion:reduce) { .df-ticker-inner { animation:none; } }
+  .bg-slate-900 { background-color:#0a1225 !important; }
+  .hover\:bg-slate-800:hover { background-color:#0f1c30 !important; }
+  ::-webkit-scrollbar { width:3px; }
+  ::-webkit-scrollbar-track { background:#0a1530; }
+  ::-webkit-scrollbar-thumb { background:#225eaa; border-radius:2px; }
+</style>
 </head>
 <body class="selection:bg-primary-fixed selection:text-on-primary-fixed" style="background:#0a1530;color:#e8eeff;" data-auto-anim="true">
+<div id="df-cur" aria-hidden="true"></div>
 
 <!-- Navigation mit 2-Ebenen Mega-Menu (Sarah-Wunsch 22.04.2026: wie Drutex — Kategorien links, Systeme rechts on hover) -->
 <style>
@@ -662,34 +691,28 @@
   </div>
 </section>
 
-<!-- Trust Bar — Sarah-Aufräumen 22.04.2026: keine Drutex-Partner-Wiederholung mehr (steht schon im Hero),
-     stattdessen 5 unterschiedliche Kaufargumente -->
-<section class="py-5 md:py-6" style="background:#0f1c30">
-  <div class="max-w-[1440px] mx-auto px-6 md:px-12">
-    <div class="flex flex-wrap justify-center md:justify-between items-center gap-6 md:gap-4 text-white/80">
-      <div class="flex items-center gap-2">
-        <span class="material-symbols-outlined text-primary-container" style='font-variation-settings: "FILL" 1;'>history</span>
-        <span class="text-sm font-semibold">30 Jahre Erfahrung in Brandenburg</span>
-      </div>
-      <div class="flex items-center gap-2">
-        <span class="material-symbols-outlined text-primary-container" style='font-variation-settings: "FILL" 1;'>schedule</span>
-        <span class="text-sm font-semibold">Ca. 2 Wochen Lieferzeit</span>
-      </div>
-      <div class="flex items-center gap-2">
-        <span class="material-symbols-outlined text-primary-container" style='font-variation-settings: "FILL" 1;'>local_shipping</span>
-        <span class="text-sm font-semibold">Deutschlandweite Lieferung</span>
-      </div>
-      <div class="flex items-center gap-2">
-        <span class="material-symbols-outlined text-primary-container" style='font-variation-settings: "FILL" 1;'>palette</span>
-        <span class="text-sm font-semibold">41 Drutex-Dekore</span>
-      </div>
-      <div class="flex items-center gap-2">
-        <span class="material-symbols-outlined text-primary-container" style='font-variation-settings: "FILL" 1;'>star</span>
-        <span class="text-sm font-semibold">4,2 / 5 · 110 Google-Bewertungen</span>
-      </div>
-    </div>
+<div class="df-ticker" aria-hidden="true">
+  <div class="df-ticker-inner">
+    <span class="df-tick">30 Jahre Fachhandel</span><span class="df-tick-sep">✦</span>
+    <span class="df-tick">Drutex-Originalware</span><span class="df-tick-sep">✦</span>
+    <span class="df-tick">Ca. 2 Wochen Lieferzeit</span><span class="df-tick-sep">✦</span>
+    <span class="df-tick">Deutschlandweite Lieferung</span><span class="df-tick-sep">✦</span>
+    <span class="df-tick">4,2 ★ Google · 110 Bewertungen</span><span class="df-tick-sep">✦</span>
+    <span class="df-tick">41 Drutex-Dekore</span><span class="df-tick-sep">✦</span>
+    <span class="df-tick">Kostenlos ab 4.000 €</span><span class="df-tick-sep">✦</span>
+    <span class="df-tick">500+ Fenster auf Lager</span><span class="df-tick-sep">✦</span>
+    <span class="df-tick">10 Jahre Garantie</span><span class="df-tick-sep">✦</span>
+    <span class="df-tick">30 Jahre Fachhandel</span><span class="df-tick-sep">✦</span>
+    <span class="df-tick">Drutex-Originalware</span><span class="df-tick-sep">✦</span>
+    <span class="df-tick">Ca. 2 Wochen Lieferzeit</span><span class="df-tick-sep">✦</span>
+    <span class="df-tick">Deutschlandweite Lieferung</span><span class="df-tick-sep">✦</span>
+    <span class="df-tick">4,2 ★ Google · 110 Bewertungen</span><span class="df-tick-sep">✦</span>
+    <span class="df-tick">41 Drutex-Dekore</span><span class="df-tick-sep">✦</span>
+    <span class="df-tick">Kostenlos ab 4.000 €</span><span class="df-tick-sep">✦</span>
+    <span class="df-tick">500+ Fenster auf Lager</span><span class="df-tick-sep">✦</span>
+    <span class="df-tick">10 Jahre Garantie</span><span class="df-tick-sep">✦</span>
   </div>
-</section>
+</div>
 
 <!-- ════════════════════════════════════════════════════════════════
      HOFVERKAUF — Gebrauchte Fenster + Drutex-Lager
@@ -1034,7 +1057,7 @@
 <!-- ════════════════════════════════════════════════════════════════
      LIEFERGEBIET — Typografische Stadt-Konstellation
      ════════════════════════════════════════════════════════════════ -->
-<section id="lieferregionen" class="py-20 md:py-24 relative overflow-hidden" style="background:#060d1a;">
+<section id="lieferregionen" class="py-20 md:py-24 relative overflow-hidden" style="background:#0a1225;">
 <style>
 #stadtcloud { display:flex;flex-wrap:wrap;align-items:baseline;gap:0; }
 .sc-city {
@@ -2173,5 +2196,19 @@
 </script>
 
 
+<script>
+  (function(){
+    var cur = document.getElementById('df-cur');
+    if (!cur) return;
+    document.addEventListener('mousemove', function(e) {
+      cur.style.left = e.clientX + 'px';
+      cur.style.top = e.clientY + 'px';
+    });
+    document.querySelectorAll('a, button, .hover-lift, .hover-glow, .card-interactive, .step-card, .case-card, .svc, .rezcard').forEach(function(el) {
+      el.addEventListener('mouseenter', function() { cur.classList.add('big'); });
+      el.addEventListener('mouseleave', function() { cur.classList.remove('big'); });
+    });
+  })();
+</script>
 </body>
 </html>
