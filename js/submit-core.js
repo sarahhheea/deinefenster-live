@@ -284,18 +284,35 @@
   </td></tr>
 </table></td></tr></table></body></html>`;
 
-      // Resend API senden (Sarah + Kunde)
+      // ── Benachrichtigung an Sarah via Formsubmit.co ──
+      // Kein Account, keine Domain-Verifizierung nötig.
+      // EINMALIG: Erste Sendung → Bestätigungs-E-Mail an info@baustoffchrist.de → einmal klicken → fertig.
       try {
-        await fetch('https://api.resend.com/emails', {
+        const positionen = cart.map((item, idx) =>
+          `${idx + 1}. ${item.qty}× ${item.summary || (item.config && item.config.prod) || '–'}`
+        ).join('  |  ');
+        await fetch('https://formsubmit.co/ajax/info@baustoffchrist.de', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + RESEND_KEY },
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
           body: JSON.stringify({
-            from: FROM_ADDR,
-            to: ['info@baustoffchrist.de'],
-            subject: `🔔 Neue Anfrage ${offerId} · ${cart.length} Element(e) · ${tot} €`,
-            html: sarahHtml,
+            _subject: `🔔 Neue Anfrage ${offerId} — DeineFenster.de`,
+            _replyto: formData.email,
+            _template: 'table',
+            'Anfrage-Nr': offerId,
+            'Datum': datum,
+            'Name': formData.name,
+            'E-Mail': formData.email,
+            'Telefon': formData.phone || '–',
+            'PLZ & Ort': formData.ort,
+            'Straße': formData.strasse || '–',
+            'Positionen': positionen,
+            'Anmerkungen': formData.notiz || '–',
           }),
         });
+      } catch (e) { console.warn('Formsubmit fehlgeschlagen:', e); }
+
+      // ── Kunden-Bestätigung via Resend ──
+      try {
         await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + RESEND_KEY },
@@ -306,7 +323,7 @@
             html: kundenHtml,
           }),
         });
-      } catch (e) { console.warn('Resend-Email fehlgeschlagen:', e); }
+      } catch (e) { console.warn('Resend-Kundenmail fehlgeschlagen:', e); }
 
       // Make.com Webhook senden (inkl. Bildanhänge)
       try {
