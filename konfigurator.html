@@ -1299,99 +1299,130 @@
   #sidebar > button:last-child { background: #1e50d4 !important; border-radius: 14px !important; font-size: 14px !important; font-weight: 700 !important; box-shadow: 0 4px 20px rgba(30,80,212,0.50) !important; letter-spacing: 0.01em !important; }
   #sidebar > button:last-child:hover { background: #2563eb !important; box-shadow: 0 6px 28px rgba(37,99,235,0.65) !important; }
 
-  /* ── PRODUKT-HERO ── */
+  /* ── PRODUKT-HERO v2 — Fixed overlay, slide-up transition ── */
+  @keyframes ph-card-in {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
   #prod-hero {
-    min-height: 100vh;
-    background: #080c1e;
+    position: fixed; inset: 0; z-index: 100;
+    background: #06091a;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
-    padding: 40px 24px 60px; gap: 44px;
-    overflow: hidden;
-    transition: max-height 0.55s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease, padding 0.4s ease;
-    position: relative;
+    padding: clamp(28px,4vh,56px) clamp(16px,3vw,40px);
+    gap: clamp(24px,3.5vh,44px);
+    overflow-y: auto; overflow-x: hidden;
+    transition: transform 0.7s cubic-bezier(0.76,0,0.24,1), opacity 0.5s ease;
   }
+  /* Blueprint grid */
   #prod-hero::before {
     content: '';
-    position: absolute; inset: 0; pointer-events: none;
-    background: radial-gradient(ellipse 80% 50% at 20% 0%, rgba(34,94,170,0.16) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 40% at 80% 100%, rgba(17,36,85,0.35) 0%, transparent 60%);
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image:
+      linear-gradient(rgba(118,169,250,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(118,169,250,0.03) 1px, transparent 1px);
+    background-size: 64px 64px;
   }
-  #prod-hero .hero-head { text-align: center; position: relative; z-index: 1; }
+  /* Atmospheric radial glow */
+  #prod-hero::after {
+    content: '';
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background:
+      radial-gradient(ellipse 75% 55% at 50% 0%, rgba(34,94,170,0.22) 0%, transparent 65%),
+      radial-gradient(ellipse 45% 45% at 90% 90%, rgba(118,169,250,0.07) 0%, transparent 55%);
+  }
+  #prod-hero .hero-head {
+    text-align: center; position: relative; z-index: 1;
+    max-width: 560px;
+  }
   #prod-hero .hero-eyebrow {
-    display: inline-flex; align-items: center; gap: 6px;
-    font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
-    color: rgba(118,169,250,0.75); margin-bottom: 14px;
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: 'Manrope', sans-serif;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
+    color: rgba(118,169,250,0.6); margin-bottom: 16px;
   }
   #prod-hero .hero-eyebrow::before, #prod-hero .hero-eyebrow::after {
-    content: ''; width: 20px; height: 1px; background: rgba(118,169,250,0.4);
+    content: ''; width: 32px; height: 1px; background: rgba(118,169,250,0.3);
   }
   #prod-hero h1 {
     font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: clamp(28px, 4vw, 46px); font-weight: 800;
-    color: #f0f4ff; line-height: 1.15; letter-spacing: -0.03em; margin-bottom: 10px;
+    font-size: clamp(24px,3.2vw,42px); font-weight: 800;
+    color: #eef2ff; line-height: 1.12; letter-spacing: -0.03em; margin-bottom: 10px;
   }
   #prod-hero .hero-sub {
-    font-size: 16px; color: rgba(240,244,255,0.5); font-weight: 400; line-height: 1.6;
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px; color: rgba(220,228,255,0.4); font-weight: 400; line-height: 1.6;
   }
   #prod-hero .hero-grid {
-    display: grid; grid-template-columns: repeat(4, 1fr);
-    gap: 16px; max-width: 1100px; width: 100%; position: relative; z-index: 1;
+    display: grid; grid-template-columns: repeat(4,1fr);
+    gap: clamp(10px,1.4vw,18px);
+    max-width: 1160px; width: 100%;
+    position: relative; z-index: 1;
   }
-  @media (max-width: 768px) { #prod-hero .hero-grid { grid-template-columns: repeat(2,1fr); } }
+  @media (max-width: 900px) { #prod-hero .hero-grid { grid-template-columns: repeat(2,1fr); } }
   #prod-hero .hcard {
-    border-radius: 20px; overflow: hidden;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px; overflow: hidden;
+    background: rgba(13,22,53,0.85);
+    border: 1px solid rgba(118,169,250,0.1);
     cursor: pointer; display: flex; flex-direction: column;
-    transition: transform 0.35s cubic-bezier(0.34,1.4,0.64,1), border-color 0.25s ease, box-shadow 0.35s ease;
-    animation: pc-reveal 0.6s cubic-bezier(.16,1,.3,1) both;
+    transition: transform 0.4s cubic-bezier(0.34,1.1,0.64,1), border-color 0.3s ease, box-shadow 0.4s ease;
+    animation: ph-card-in 0.65s cubic-bezier(0.16,1,0.3,1) both;
   }
-  #prod-hero .hcard:nth-child(1) { animation-delay: 0.05s; }
-  #prod-hero .hcard:nth-child(2) { animation-delay: 0.12s; }
-  #prod-hero .hcard:nth-child(3) { animation-delay: 0.19s; }
-  #prod-hero .hcard:nth-child(4) { animation-delay: 0.26s; }
+  #prod-hero .hcard:nth-child(1) { animation-delay: 0.06s; }
+  #prod-hero .hcard:nth-child(2) { animation-delay: 0.13s; }
+  #prod-hero .hcard:nth-child(3) { animation-delay: 0.20s; }
+  #prod-hero .hcard:nth-child(4) { animation-delay: 0.27s; }
   #prod-hero .hcard:hover {
-    transform: translateY(-8px) scale(1.02);
-    border-color: rgba(118,169,250,0.55);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(118,169,250,0.2);
+    transform: translateY(-7px);
+    border-color: rgba(118,169,250,0.5);
+    box-shadow: 0 24px 64px rgba(0,0,0,0.55), 0 0 28px rgba(34,94,170,0.2);
   }
+  /* Full product image — contain so nothing is cropped */
   #prod-hero .hcard-img-wrap {
-    width: 100%; height: 200px; overflow: hidden; position: relative; background: #112455;
-  }
-  #prod-hero .hcard-img-wrap::after {
-    content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none;
-    background: linear-gradient(180deg, rgba(8,12,30,0.2) 0%, transparent 30%, transparent 65%, rgba(8,12,30,0.7) 100%);
+    aspect-ratio: 3/4;
+    background: #0d1635;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
   }
   #prod-hero .hcard-img {
-    width: 100%; height: 100%; object-fit: cover; object-position: center 20%;
-    transition: transform 0.4s ease; display: block;
+    width: 100%; height: 100%;
+    object-fit: contain;
+    transition: transform 0.5s cubic-bezier(0.34,1.1,0.64,1);
+    display: block;
   }
-  #prod-hero .hcard:hover .hcard-img { transform: scale(1.06); }
+  #prod-hero .hcard:hover .hcard-img { transform: scale(1.04); }
   #prod-hero .hcard-info {
-    padding: 12px 14px 16px; background: rgba(5,8,22,0.95);
-    border-top: 1px solid rgba(255,255,255,0.07);
+    padding: 13px 15px 15px;
+    background: rgba(6,9,26,0.97);
+    border-top: 1px solid rgba(118,169,250,0.08);
     display: flex; flex-direction: column; gap: 5px;
   }
   #prod-hero .hcard-badge {
-    font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
-    color: rgba(175,210,255,0.85); background: rgba(77,136,255,0.15);
-    border: 1px solid rgba(77,136,255,0.3); border-radius: 4px;
-    padding: 2px 8px; width: fit-content;
+    font-family: 'Manrope', sans-serif;
+    font-size: 8.5px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+    color: rgba(118,169,250,0.65);
   }
   #prod-hero .hcard-name {
     font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 16px; font-weight: 800; color: rgba(255,255,255,0.97); letter-spacing: -0.025em;
+    font-size: 15px; font-weight: 800;
+    color: rgba(238,242,255,0.97); letter-spacing: -0.02em; line-height: 1.2;
   }
   #prod-hero .hcard-cta {
-    font-size: 11px; font-weight: 700; color: rgba(118,169,250,0.7);
-    letter-spacing: 0.02em; margin-top: 2px;
-    transition: color 0.2s ease;
+    display: flex; align-items: center; gap: 5px;
+    font-family: 'Manrope', sans-serif;
+    font-size: 10.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    color: rgba(118,169,250,0.55);
+    transition: color 0.2s ease, gap 0.2s ease;
+    margin-top: 2px;
   }
-  #prod-hero .hcard:hover .hcard-cta { color: rgba(118,169,250,1); }
+  #prod-hero .hcard:hover .hcard-cta { color: rgba(118,169,250,1); gap: 8px; }
+  #prod-hero .hcard-cta svg { width: 11px; height: 11px; transition: transform 0.2s ease; flex-shrink: 0; }
+  #prod-hero .hcard:hover .hcard-cta svg { transform: translateX(3px); }
+  /* SLIDE UP — echte Seiten-Transition */
   #prod-hero.hero-closing {
-    max-height: 0 !important; opacity: 0 !important;
-    padding-top: 0 !important; padding-bottom: 0 !important;
-    min-height: 0 !important; pointer-events: none;
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
   }
   #s1.hero-done { display: none !important; }
 </style>
@@ -1684,7 +1715,7 @@
   </div>
 </div>
 
-<!-- ══ PRODUKT-HERO ══ -->
+<!-- ══ PRODUKT-HERO v2 ══ -->
 <div id="prod-hero">
   <div class="hero-head">
     <div class="hero-eyebrow">DeineFenster.de</div>
@@ -1698,9 +1729,12 @@
         <img class="hcard-img" src="img/karten/fenster-anthrazit.png" alt="Kunststofffenster" loading="eager">
       </div>
       <div class="hcard-info">
-        <span class="hcard-badge">DRUTEX IGLO</span>
+        <span class="hcard-badge">Drutex IGLO</span>
         <div class="hcard-name">Kunststofffenster</div>
-        <div class="hcard-cta">Konfigurieren →</div>
+        <div class="hcard-cta">
+          <span>Konfigurieren</span>
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+        </div>
       </div>
     </div>
 
@@ -1709,9 +1743,12 @@
         <img class="hcard-img" src="img/karten/balkontuer-anthrazit.png" alt="Balkontür" loading="eager">
       </div>
       <div class="hcard-info">
-        <span class="hcard-badge">DRUTEX IGLO</span>
+        <span class="hcard-badge">Drutex IGLO</span>
         <div class="hcard-name">Balkontür</div>
-        <div class="hcard-cta">Konfigurieren →</div>
+        <div class="hcard-cta">
+          <span>Konfigurieren</span>
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+        </div>
       </div>
     </div>
 
@@ -1720,9 +1757,12 @@
         <img class="hcard-img" src="img/karten/haustuer-anthrazit.png" alt="Haustür" loading="eager">
       </div>
       <div class="hcard-info">
-        <span class="hcard-badge">DRUTEX STYLE</span>
+        <span class="hcard-badge">Drutex STYLE</span>
         <div class="hcard-name">Haustür</div>
-        <div class="hcard-cta">Konfigurieren →</div>
+        <div class="hcard-cta">
+          <span>Konfigurieren</span>
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+        </div>
       </div>
     </div>
 
@@ -1731,9 +1771,12 @@
         <img class="hcard-img" src="img/karten/hst-anthrazit.png" alt="Hebe-Schiebetür" loading="eager">
       </div>
       <div class="hcard-info">
-        <span class="hcard-badge">DRUTEX IGLO-HS</span>
+        <span class="hcard-badge">Drutex IGLO-HS</span>
         <div class="hcard-name">Hebe-Schiebetür</div>
-        <div class="hcard-cta">Konfigurieren →</div>
+        <div class="hcard-cta">
+          <span>Konfigurieren</span>
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+        </div>
       </div>
     </div>
 
@@ -3705,21 +3748,15 @@ function heroSelectProd(prodKey) {
   const pcEl = document.querySelector('#s1 .pc[data-p="' + prodKey + '"]');
   if (pcEl) pickProd(pcEl);
 
-  // Animate hero closed
+  // Slide hero up — like opening a new page
   if (hero) {
-    hero.style.maxHeight = hero.offsetHeight + 'px';
-    hero.style.overflow = 'hidden';
-    requestAnimationFrame(() => {
-      hero.classList.add('hero-closing');
-    });
+    hero.classList.add('hero-closing');
     setTimeout(() => {
       hero.style.display = 'none';
-      // Hide s1 from accordion — product is selected via hero
       const s1 = document.getElementById('s1');
       if (s1) s1.classList.add('hero-done');
-      // Open step 2 (Profil)
       openS(2);
-    }, 500);
+    }, 700);
   }
 }
 
