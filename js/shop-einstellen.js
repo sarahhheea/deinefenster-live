@@ -117,6 +117,7 @@ const FARBE_LABEL = {
 };
 
 const STATE = {
+  typ: null,        // 'vermessen' oder 'sonderposten'
   zustand: 'neu',  // 'neu' oder 'gebraucht'
   kategorie: null,
   groesseKlasse: '',
@@ -175,12 +176,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   rendereKategorien();
   rendereEigenschaften();
   bindeFormHandler();
+  bindeTypHandler();
   bindeZustandHandler();
   bindeGroesseHandler();
   if (!STATE.editMode) ladeDraft();
+  setTypUI();
   setZustandUI();
   setGroesseUI();
   setEditModeUI();
+  // Im Edit-Modus oder wenn Draft schon einen Typ hat → direkt zu Schritt 1
+  if (STATE.editMode || STATE.typ) {
+    goToStep1FromStep0();
+  } else {
+    goToStep0();
+  }
   rendereVorschau();
 });
 
@@ -327,6 +336,62 @@ function autoVorauswahlGroesse() {
   setGroesseUI();
   saveDraft();
   rendereVorschau();
+}
+
+/* ─── Typ-Auswahl (Vermessen / Sonderposten) ─── */
+function bindeTypHandler() {
+  ['typVermessen', 'typSonderposten'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('click', () => {
+      STATE.typ = el.dataset.typ;
+      setTypUI();
+      goToStep1FromStep0();
+      saveDraft();
+    });
+  });
+  const zurueck = document.getElementById('zurueckZuStep0');
+  if (zurueck) zurueck.addEventListener('click', goToStep0);
+}
+
+function setTypUI() {
+  ['typVermessen', 'typSonderposten'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.toggle('selected', el.dataset.typ === STATE.typ);
+  });
+  const badge = document.getElementById('gewaehlterTypBadge');
+  if (badge) {
+    const labels = { vermessen: 'Vermessen', sonderposten: 'Sonderposten' };
+    badge.textContent = labels[STATE.typ] || '—';
+  }
+}
+
+function goToStep0() {
+  document.getElementById('step0').classList.remove('hidden');
+  document.getElementById('step1').classList.add('hidden');
+  document.getElementById('step2').classList.add('hidden');
+  document.getElementById('stepCircle0').classList.add('active');
+  document.getElementById('stepCircle0').classList.remove('done');
+  document.getElementById('stepLine0').classList.remove('done');
+  document.getElementById('stepCircle1').classList.remove('active', 'done');
+  document.getElementById('stepLine1').classList.remove('done');
+  document.getElementById('stepCircle2').classList.remove('active');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function goToStep1FromStep0() {
+  document.getElementById('step0').classList.add('hidden');
+  document.getElementById('step1').classList.remove('hidden');
+  document.getElementById('step2').classList.add('hidden');
+  document.getElementById('stepCircle0').classList.remove('active');
+  document.getElementById('stepCircle0').classList.add('done');
+  document.getElementById('stepLine0').classList.add('done');
+  document.getElementById('stepCircle1').classList.add('active');
+  document.getElementById('stepCircle1').classList.remove('done');
+  document.getElementById('stepLine1').classList.remove('done');
+  document.getElementById('stepCircle2').classList.remove('active');
+  window.scrollTo({top: 0, behavior: 'smooth'});
 }
 
 /* ─── Zustand-Auswahl (Neu / Gebraucht) ─── */
@@ -518,14 +583,16 @@ function resetFormular() {
   document.querySelectorAll('.eig-check').forEach(c => { c.checked = false; });
   STATE.bilder = [];
   STATE.zustand = 'neu';
+  STATE.typ = null;
   setZustandUI();
+  setTypUI();
   rendereBildVorschau();
   document.getElementById('autoErkanntHinweis').classList.add('hidden');
-  // Zurück zu Schritt 1
+  // Zurück zu Schritt 0
   STATE.kategorie = null;
   document.querySelectorAll('.kat-karte').forEach(b => b.classList.remove('selected'));
   document.getElementById('weiterZuStep2').disabled = true;
-  goToStep1();
+  goToStep0();
   rendereVorschau();
 }
 
@@ -533,8 +600,12 @@ function goToStep2() {
   if (!STATE.kategorie) return;
   const label = KATEGORIEN_LIVE.find(k => k.key === STATE.kategorie)?.label || STATE.kategorie;
   document.getElementById('gewaehlteKategorie').textContent = label;
+  document.getElementById('step0').classList.add('hidden');
   document.getElementById('step1').classList.add('hidden');
   document.getElementById('step2').classList.remove('hidden');
+  document.getElementById('stepCircle0').classList.remove('active');
+  document.getElementById('stepCircle0').classList.add('done');
+  document.getElementById('stepLine0').classList.add('done');
   document.getElementById('stepCircle1').classList.remove('active');
   document.getElementById('stepCircle1').classList.add('done');
   document.getElementById('stepLine1').classList.add('done');
@@ -542,8 +613,12 @@ function goToStep2() {
   window.scrollTo({top: 0, behavior: 'smooth'});
 }
 function goToStep1() {
+  document.getElementById('step0').classList.add('hidden');
   document.getElementById('step1').classList.remove('hidden');
   document.getElementById('step2').classList.add('hidden');
+  document.getElementById('stepCircle0').classList.remove('active');
+  document.getElementById('stepCircle0').classList.add('done');
+  document.getElementById('stepLine0').classList.add('done');
   document.getElementById('stepCircle1').classList.add('active');
   document.getElementById('stepCircle1').classList.remove('done');
   document.getElementById('stepLine1').classList.remove('done');
@@ -780,6 +855,7 @@ async function veroeffentlichen() {
     const eintrag = {
       titel,
       kategorie_key: STATE.kategorie,
+      typ: STATE.typ || 'sonderposten',
       zustand: STATE.zustand,
       system: STATE.zustand === 'gebraucht' ? null : document.getElementById('formSystem').value,
       breite_mm: breite,
@@ -835,6 +911,7 @@ function dataURLToBlob(dataUrl) {
 /* ─── Draft Auto-Save ─── */
 function saveDraft() {
   const draft = {
+    typ: STATE.typ,
     zustand: STATE.zustand,
     kategorie: STATE.kategorie,
     titel: document.getElementById('formTitel')?.value || '',
@@ -860,6 +937,7 @@ function ladeDraft() {
     const raw = localStorage.getItem(DRAFT_KEY);
     if (!raw) return;
     const d = JSON.parse(raw);
+    if (d.typ) STATE.typ = d.typ;
     if (d.zustand) STATE.zustand = d.zustand;
     if (d.kategorie) STATE.kategorie = d.kategorie;
     const setIfPresent = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
