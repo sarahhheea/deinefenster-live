@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Produktauswahl — DeineFenster.de</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0b1630;
+    --navy-mid: #112455;
+    --blue: #225eaa;
+    --accent: #76a9fa;
+    --accent-glow: rgba(118,169,250,0.35);
+    --card-bg: rgba(255,255,255,0.04);
+    --card-border: rgba(255,255,255,0.08);
+    --card-hover-border: rgba(118,169,250,0.5);
+    --card-selected-border: rgba(118,169,250,1);
+    --text: #f0f4ff;
+    --text-muted: rgba(240,244,255,0.5);
+  }
+
+  html, body {
+    min-height: 100vh;
+    background: var(--navy);
+    font-family: 'Manrope', sans-serif;
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  /* Atmospheric background */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 0%, rgba(34,94,170,0.18) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 100%, rgba(17,36,85,0.4) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 60% 40%, rgba(118,169,250,0.06) 0%, transparent 50%);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* Subtle grid texture */
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(118,169,250,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(118,169,250,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none; z-index: 0;
+  }
+
+  .wrapper {
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+    gap: 48px;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    animation: fadeUp 0.7s ease both;
+  }
+
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+
+  .logo-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0.6;
+  }
+
+  .headline {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: clamp(26px, 4vw, 40px);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+
+  .sub {
+    font-size: 15px;
+    color: var(--text-muted);
+    font-weight: 400;
+    max-width: 440px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* Cards grid */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    width: 100%;
+    max-width: 1100px;
+    transition: all 0.4s ease;
+  }
+
+  .card {
+    position: relative;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 28px 22px 24px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    transition:
+      transform 0.35s cubic-bezier(0.34,1.4,0.64,1),
+      border-color 0.25s ease,
+      box-shadow 0.35s ease,
+      opacity 0.35s ease,
+      background 0.25s ease;
+    overflow: hidden;
+    animation: fadeUp 0.6s ease both;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .card:nth-child(1) { animation-delay: 0.05s; }
+  .card:nth-child(2) { animation-delay: 0.12s; }
+  .card:nth-child(3) { animation-delay: 0.19s; }
+  .card:nth-child(4) { animation-delay: 0.26s; }
+
+  /* Shimmer line at top */
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 20%; right: 20%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(118,169,250,0.5), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  /* Glow effect behind image */
+  .card::after {
+    content: '';
+    position: absolute;
+    top: 30%; left: 50%;
+    transform: translateX(-50%);
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+  }
+
+  .card:hover {
+    transform: translateY(-6px) scale(1.01);
+    border-color: var(--card-hover-border);
+    box-shadow:
+      0 20px 60px rgba(0,0,0,0.4),
+      0 0 0 1px rgba(118,169,250,0.15),
+      inset 0 1px 0 rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.07);
+  }
+
+  .card:hover::before { opacity: 1; }
+  .card:hover::after { opacity: 1; }
+
+  /* Selected state */
+  .card.selected {
+    transform: translateY(-10px) scale(1.03);
+    border-color: var(--card-selected-border);
+    background: rgba(34,94,170,0.18);
+    box-shadow:
+      0 30px 80px rgba(0,0,0,0.5),
+      0 0 0 1px var(--accent),
+      0 0 40px rgba(118,169,250,0.2),
+      inset 0 1px 0 rgba(118,169,250,0.2);
+    opacity: 1 !important;
+  }
+
+  .card.selected::before { opacity: 1; }
+  .card.selected::after { opacity: 1.5; }
+
+  .card.dimmed {
+    opacity: 0.3;
+    transform: scale(0.98);
+  }
+
+  /* Image area */
+  .card-img-wrap {
+    width: 100%;
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-bottom: 18px;
+  }
+
+  .card-img {
+    max-width: 100%;
+    max-height: 170px;
+    object-fit: contain;
+    transition: transform 0.4s cubic-bezier(0.34,1.4,0.64,1), filter 0.3s ease;
+    filter: drop-shadow(0 12px 24px rgba(0,0,0,0.5));
+    position: relative; z-index: 1;
+  }
+
+  .card:hover .card-img,
+  .card.selected .card-img {
+    transform: translateY(-6px) scale(1.06);
+    filter: drop-shadow(0 20px 32px rgba(0,0,0,0.6)) drop-shadow(0 0 20px rgba(118,169,250,0.15));
+  }
+
+  /* Badge */
+  .card-badge {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: rgba(118,169,250,0.12);
+    border: 1px solid rgba(118,169,250,0.25);
+    border-radius: 4px;
+    padding: 3px 8px;
+    margin-bottom: 10px;
+    align-self: flex-start;
+  }
+
+  /* Name */
+  .card-name {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -0.01em;
+    align-self: flex-start;
+    margin-bottom: 8px;
+    line-height: 1.2;
+  }
+
+  /* Chips */
+  .card-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    align-self: flex-start;
+    margin-bottom: 16px;
+  }
+
+  .chip {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 4px;
+    padding: 3px 7px;
+  }
+
+  /* CTA line */
+  .card-cta {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    transition: border-color 0.25s;
+  }
+
+  .card.selected .card-cta {
+    border-color: rgba(118,169,250,0.25);
+  }
+
+  .cta-text {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    transition: color 0.25s;
+  }
+
+  .card:hover .cta-text,
+  .card.selected .cta-text {
+    color: var(--accent);
+  }
+
+  .cta-arrow {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: rgba(118,169,250,0.1);
+    border: 1px solid rgba(118,169,250,0.2);
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.25s ease;
+    flex-shrink: 0;
+  }
+
+  .cta-arrow svg {
+    width: 12px; height: 12px;
+    fill: var(--accent);
+    transition: transform 0.25s ease;
+  }
+
+  .card:hover .cta-arrow,
+  .card.selected .cta-arrow {
+    background: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 0 16px rgba(118,169,250,0.4);
+  }
+
+  .card:hover .cta-arrow svg,
+  .card.selected .cta-arrow svg {
+    fill: #fff;
+    transform: translateX(2px);
+  }
+
+  /* Selected check badge */
+  .selected-badge {
+    position: absolute;
+    top: 14px; right: 14px;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0;
+    transform: scale(0) rotate(-90deg);
+    transition: all 0.3s cubic-bezier(0.34,1.6,0.64,1);
+    z-index: 10;
+  }
+
+  .selected-badge svg {
+    width: 12px; height: 12px;
+    fill: none;
+    stroke: #fff;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .card.selected .selected-badge {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+
+  /* Continue button */
+  .continue-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: all 0.4s cubic-bezier(0.34,1.2,0.64,1);
+    pointer-events: none;
+  }
+
+  .continue-wrap.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: all;
+  }
+
+  .continue-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #225eaa 0%, #1e3a8a 100%);
+    color: #fff;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    padding: 14px 32px;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 8px 32px rgba(34,94,170,0.4), 0 0 0 1px rgba(118,169,250,0.2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .continue-btn::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 60%);
+    border-radius: inherit;
+  }
+
+  .continue-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 40px rgba(34,94,170,0.6), 0 0 0 1px rgba(118,169,250,0.4);
+  }
+
+  .continue-btn:active { transform: translateY(0); }
+
+  .continue-btn .btn-arrow {
+    width: 20px; height: 20px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.2s ease;
+  }
+
+  .continue-btn:hover .btn-arrow {
+    transform: translateX(3px);
+  }
+
+  .continue-btn .btn-arrow svg {
+    width: 10px; height: 10px;
+    fill: #fff;
+  }
+
+  .selected-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .selected-label strong {
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .cards { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 560px) {
+    .cards { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .card { padding: 18px 14px 16px; }
+    .card-img-wrap { height: 130px; }
+    .card-name { font-size: 14px; }
+    .headline { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrapper">
+
+  <div class="header">
+    <div class="logo">
+      <div class="logo-dot"></div>
+      DeineFenster.de
+      <div class="logo-dot"></div>
+    </div>
+    <h1 class="headline">Was möchten Sie<br>konfigurieren?</h1>
+    <p class="sub">Wählen Sie Ihr Produkt — wir führen Sie Schritt für Schritt durch Ihre individuelle Konfiguration.</p>
+  </div>
+
+  <div class="cards" id="cards">
+
+    <!-- Kunststofffenster -->
+    <div class="card" data-name="Kunststofffenster" onclick="select(this)">
+      <div class="selected-badge">
+        <svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg>
+      </div>
+      <div class="card-img-wrap">
+        <img class="card-img" src="img/farben/fenster_1fl_anthrazit_t.png" alt="Kunststofffenster" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 120 160%22><rect width=%22120%22 height=%22160%22 rx=%228%22 fill=%22rgba(34,94,170,0.3)%22/><rect x=%2210%22 y=%2210%22 width=%22100%22 height=%22140%22 rx=%225%22 fill=%22none%22 stroke=%22rgba(118,169,250,0.5)%22 stroke-width=%222%22/><line x1=%2260%22 y1=%2210%22 x2=%2260%22 y2=%22150%22 stroke=%22rgba(118,169,250,0.3)%22/><line x1=%2210%22 y1=%2285%22 x2=%22110%22 y2=%2285%22 stroke=%22rgba(118,169,250,0.3)%22/></svg>'">
+      </div>
+      <span class="card-badge">DRUTEX IGLO</span>
+      <div class="card-name">Kunststofffenster</div>
+      <div class="card-chips">
+        <span class="chip">Dreh-Kipp</span>
+        <span class="chip">5-Kammer</span>
+        <span class="chip">Uw 0,9</span>
+      </div>
+      <div class="card-cta">
+        <span class="cta-text">Konfigurieren</span>
+        <div class="cta-arrow">
+          <svg viewBox="0 0 12 12"><path d="M2 6h8M7 3l3 3-3 3"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Balkontür -->
+    <div class="card" data-name="Balkontür" onclick="select(this)">
+      <div class="selected-badge">
+        <svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg>
+      </div>
+      <div class="card-img-wrap">
+        <img class="card-img" src="img/farben/balkontuer_1fl_anthrazit_t.png" alt="Balkontür" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 200%22><rect width=%22100%22 height=%22200%22 rx=%228%22 fill=%22rgba(34,94,170,0.3)%22/><rect x=%228%22 y=%228%22 width=%2284%22 height=%22184%22 rx=%225%22 fill=%22none%22 stroke=%22rgba(118,169,250,0.5)%22 stroke-width=%222%22/><rect x=%228%22 y=%228%22 width=%2284%22 height=%2280%22 rx=%225%22 fill=%22none%22 stroke=%22rgba(118,169,250,0.3)%22 stroke-width=%221%22/></svg>'">
+      </div>
+      <span class="card-badge">DRUTEX IGLO</span>
+      <div class="card-name">Balkontür</div>
+      <div class="card-chips">
+        <span class="chip">Dreh-Kipp</span>
+        <span class="chip">5-Kammer</span>
+        <span class="chip">Wärmeschutz</span>
+      </div>
+      <div class="card-cta">
+        <span class="cta-text">Konfigurieren</span>
+        <div class="cta-arrow">
+          <svg viewBox="0 0 12 12"><path d="M2 6h8M7 3l3 3-3 3"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Haustür -->
+    <div class="card" data-name="Haustür" onclick="select(this)">
+      <div class="selected-badge">
+        <svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg>
+      </div>
+      <div class="card-img-wrap">
+        <img class="card-img" src="img/haustuer/montana-anthrazit.png" alt="Haustür" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 200%22><rect width=%22100%22 height=%22200%22 rx=%228%22 fill=%22rgba(34,94,170,0.3)%22/><rect x=%228%22 y=%228%22 width=%2284%22 height=%22184%22 rx=%225%22 fill=%22none%22 stroke=%22rgba(118,169,250,0.5)%22 stroke-width=%222%22/><circle cx=%2280%22 cy=%22100%22 r=%225%22 fill=%22rgba(118,169,250,0.5)%22/></svg>'">
+      </div>
+      <span class="card-badge">DRUTEX STYLE</span>
+      <div class="card-name">Haustür</div>
+      <div class="card-chips">
+        <span class="chip">36 Designs</span>
+        <span class="chip">RC2</span>
+        <span class="chip">Uw 1,1</span>
+      </div>
+      <div class="card-cta">
+        <span class="cta-text">Konfigurieren</span>
+        <div class="cta-arrow">
+          <svg viewBox="0 0 12 12"><path d="M2 6h8M7 3l3 3-3 3"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hebe-Schiebetür -->
+    <div class="card" data-name="Hebe-Schiebetür" onclick="select(this)">
+      <div class="selected-badge">
+        <svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg>
+      </div>
+      <div class="card-img-wrap">
+        <img class="card-img" src="img/farben/hst_anthrazit_t.png" alt="Hebe-Schiebetür" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 220 160%22><rect width=%22220%22 height=%22160%22 rx=%228%22 fill=%22rgba(34,94,170,0.3)%22/><rect x=%228%22 y=%228%22 width=%22104%22 height=%22144%22 rx=%225%22 fill=%22none%22 stroke=%22rgba(118,169,250,0.5)%22 stroke-width=%222%22/><rect x=%22118%22 y=%228%22 width=%2294%22 height=%22144%22 rx=%225%22 fill=%22none%22 stroke=%22rgba(118,169,250,0.3)%22 stroke-width=%221%22/></svg>'">
+      </div>
+      <span class="card-badge">DRUTEX HST</span>
+      <div class="card-name">Hebe-Schiebetür</div>
+      <div class="card-chips">
+        <span class="chip">Bis 6m²</span>
+        <span class="chip">Barrierefrei</span>
+        <span class="chip">3-fach</span>
+      </div>
+      <div class="card-cta">
+        <span class="cta-text">Konfigurieren</span>
+        <div class="cta-arrow">
+          <svg viewBox="0 0 12 12"><path d="M2 6h8M7 3l3 3-3 3"/></svg>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Continue CTA -->
+  <div class="continue-wrap" id="continueWrap">
+    <button class="continue-btn" onclick="goConfigure()">
+      <span id="btnText">Fenster konfigurieren</span>
+      <div class="btn-arrow">
+        <svg viewBox="0 0 10 10"><path d="M1 5h8M6 2l3 3-3 3" stroke="#fff" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>
+      </div>
+    </button>
+    <div class="selected-label">Ausgewählt: <strong id="selectedName">—</strong></div>
+  </div>
+
+</div>
+
+<script>
+  let selectedCard = null;
+
+  function select(card) {
+    const cards = document.querySelectorAll('.card');
+    const continueWrap = document.getElementById('continueWrap');
+    const btnText = document.getElementById('btnText');
+    const selectedName = document.getElementById('selectedName');
+
+    if (selectedCard === card) {
+      // Deselect
+      card.classList.remove('selected');
+      cards.forEach(c => c.classList.remove('dimmed'));
+      selectedCard = null;
+      continueWrap.classList.remove('visible');
+      return;
+    }
+
+    selectedCard = card;
+    const name = card.dataset.name;
+
+    cards.forEach(c => {
+      if (c === card) {
+        c.classList.add('selected');
+        c.classList.remove('dimmed');
+      } else {
+        c.classList.remove('selected');
+        c.classList.add('dimmed');
+      }
+    });
+
+    btnText.textContent = name + ' konfigurieren';
+    selectedName.textContent = name;
+    continueWrap.classList.add('visible');
+  }
+
+  function goConfigure() {
+    if (!selectedCard) return;
+    const map = {
+      'Kunststofffenster': 'konfigurator.html?prod=kunststoff',
+      'Balkontür': 'konfigurator.html?prod=balkontuer',
+      'Haustür': 'konfigurator.html?prod=haustuere',
+      'Hebe-Schiebetür': 'konfigurator.html?prod=hst',
+    };
+    const url = map[selectedCard.dataset.name];
+    if (url) window.location.href = url;
+  }
+</script>
+</body>
+</html>
