@@ -595,7 +595,7 @@ function karteHtml(p) {
         <div class="flex flex-wrap gap-1.5 mb-2">${standBadge}${zustandBadge}${sonderpreisBadge}${exportBadge}${groesseBadge}${verglasungBadge}${rcBadge}${lagerBadge}</div>
         <h3 class="text-sm font-bold leading-snug line-clamp-2 mb-1 text-ink">${escapeHtml(p.titel)}</h3>
         <p class="text-[11px] text-ink-soft mb-1">${escapeHtml(p.system)} · ${p.breite_mm} × ${p.hoehe_mm} mm</p>
-        <p class="text-[11px] text-ink-soft mb-3 line-clamp-2">${escapeHtml(p.beschreibung)}</p>
+        <p class="text-[11px] text-ink-soft mb-3 line-clamp-2">${nl2br(p.beschreibung)}</p>
         <div class="mt-auto flex items-end justify-between gap-2">
           <div>
             <span class="text-[10px] text-ink-soft block">${p.sonderpreis_eur ? 'Sonderpreis' : (p.export_modell ? 'Export' : 'ab')}</span>
@@ -1009,7 +1009,7 @@ function oeffneDetail(id) {
         <div class="bg-bg-soft rounded-lg px-3 py-2"><span class="block text-[10px] text-ink-soft">System</span><span class="font-bold text-ink">${p.system ? escapeHtml(p.system) : '—'}</span></div>
         ${p.oeffnungsart ? `<div class="bg-bg-soft rounded-lg px-3 py-2 col-span-2"><span class="block text-[10px] text-ink-soft">Öffnungsart</span><span class="font-bold text-ink">${escapeHtml(oeffnungsartLabel(p.oeffnungsart))}</span></div>` : ''}
       </div>
-      <p class="text-sm text-ink-soft leading-relaxed">${escapeHtml(p.beschreibung)}</p>
+      <p class="text-sm text-ink-soft leading-relaxed">${nl2br(p.beschreibung)}</p>
       <div>
         <h4 class="text-sm font-bold mb-2 text-ink">Eigenschaften</h4>
         <ul class="text-xs space-y-1 text-ink">${eigList || '<li class="text-ink-soft">Keine besonderen Eigenschaften eingetragen</li>'}</ul>
@@ -1160,6 +1160,9 @@ function escapeHtml(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+function nl2br(str) {
+  return escapeHtml(str).replace(/\n/g, '<br>');
 }
 
 function farbeAnzeige(code) {
