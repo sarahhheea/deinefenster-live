@@ -102,6 +102,7 @@ async function loadProdukte() {
       titel: p.titel || '',
       kategorie: p.kategorie || p.kategorie_key || '',
       system: p.system || '',
+      typ: p.typ || null,
       zustand: p.zustand || 'neu',
       breite_mm: Number(p.breite_mm) || 0,
       hoehe_mm: Number(p.hoehe_mm) || 0,
@@ -221,6 +222,7 @@ function baueFilterSidebar() {
   setCountAttr('zustand-neu', STATE.produkte.filter(p => (p.zustand || 'neu') === 'neu').length);
   setCountAttr('zustand-gebraucht', STATE.produkte.filter(p => p.zustand === 'gebraucht').length);
   setCountAttr('zustand-vermessen', STATE.produkte.filter(p => (p.eigenschaften || []).includes('vermessen')).length);
+  setCountAttr('zustand-sonderposten', STATE.produkte.filter(p => p.typ === 'sonderposten').length);
   setCountAttr('verglasung-2-fach', STATE.produkte.filter(p => p.verglasung === '2-fach').length);
   setCountAttr('verglasung-3-fach', STATE.produkte.filter(p => p.verglasung === '3-fach').length);
   setCountAttr('rc-RC2', STATE.produkte.filter(p => p.rc_klasse === 'RC2').length);
@@ -388,6 +390,8 @@ function gefilterteProdukte() {
     if (f.zustand.size) {
       if (f.zustand.has('vermessen')) {
         if (!(p.eigenschaften || []).includes('vermessen')) return false;
+      } else if (f.zustand.has('sonderposten')) {
+        if (p.typ !== 'sonderposten') return false;
       } else {
         if (!f.zustand.has(p.zustand || 'neu')) return false;
       }
