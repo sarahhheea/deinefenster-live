@@ -31,6 +31,7 @@ let _openProgress = 0;     // 0=geschlossen, 1=offen
 let _openTarget   = 0;
 let _animatables  = [];    // [{pivot, openRot, openPos, type}]
 let _currentProd  = null;
+let _prevProd     = null;   // kamera-Reset nur wenn Produkt wechselt
 
 // ════════════════════════════════════════════════════════════
 // MATERIALIEN
@@ -341,40 +342,40 @@ function addInnerFasen(g, X, Y, W, H, depth) {
 // HARDWARE — HOPPE Atlanta Griff (original Geometrie)
 // ════════════════════════════════════════════════════════════
 function addFensterGriff(g,cx,cy,z){
-  // HOPPE Atlanta weiß — Schild oben am Pivot, Olive klar darunter hängend
+  // HOPPE Atlanta — leicht warm-grau für maximalen Kontrast gegen weißen Rahmen
   const hMat=new THREE.MeshPhysicalMaterial({
-    color:0xEEEDE9,
-    roughness:0.13, metalness:0.0,
-    clearcoat:0.55, clearcoatRoughness:0.08,
-    anisotropy:0.7, anisotropyRotation:Math.PI/2,
-    sheen:0.3, sheenRoughness:0.6,
-    envMapIntensity:1.2
+    color:0xD8D6D0,              // sichtbar von weiß abgesetzt
+    roughness:0.10, metalness:0.0,
+    clearcoat:0.85, clearcoatRoughness:0.06,
+    anisotropy:0.8, anisotropyRotation:Math.PI/2,
+    sheen:0.4, sheenRoughness:0.5,
+    envMapIntensity:2.2          // mehr Reflexion → plastisch
   });
 
-  const sD=0.024;      // 24mm Tiefe — starker Schattenwurf
-  const pivotY=cy;     // Pivot (Achse) auf Höhe cy
+  const sD=0.034;      // 34mm Tiefe (war 24mm) — deutlicherer Schattenwurf
+  const pivotY=cy;
 
-  // Kurzschild — 30mm breit, 55mm hoch
-  const sW=0.030,sH=0.055,sR=0.006;
+  // Kurzschild — 36mm breit, 65mm hoch (war 30×55)
+  const sW=0.036,sH=0.065,sR=0.007;
   const sShape=new THREE.Shape();
   sShape.moveTo(-sW/2+sR,0);
   sShape.lineTo(sW/2-sR,0);sShape.absarc(sW/2-sR,sR,sR,-Math.PI/2,0,false);
   sShape.lineTo(sW/2,sH-sR);sShape.absarc(sW/2-sR,sH-sR,sR,0,Math.PI/2,false);
   sShape.lineTo(-sW/2+sR,sH);sShape.absarc(-sW/2+sR,sH-sR,sR,Math.PI/2,Math.PI,false);
   sShape.lineTo(-sW/2,sR);sShape.absarc(-sW/2+sR,sR,sR,Math.PI,Math.PI*1.5,false);
-  const sGeo=new THREE.ExtrudeGeometry(sShape,{depth:sD,bevelEnabled:true,bevelSize:0.003,bevelThickness:0.003,bevelSegments:3});
+  const sGeo=new THREE.ExtrudeGeometry(sShape,{depth:sD,bevelEnabled:true,bevelSize:0.004,bevelThickness:0.004,bevelSegments:4});
   const sMesh=new THREE.Mesh(sGeo,hMat);
   sMesh.position.set(cx-sW/2,pivotY,z);sMesh.castShadow=true;g.add(sMesh);
 
-  // Achsstummel — Ø16mm × 18mm, auf Pivot-Höhe
-  const axle=new THREE.Mesh(new THREE.CylinderGeometry(0.008,0.008,0.018,14),hMat);
-  axle.rotation.x=Math.PI/2;axle.position.set(cx,pivotY,z+sD+0.009);axle.castShadow=true;g.add(axle);
+  // Achsstummel — Ø18mm × 22mm
+  const axle=new THREE.Mesh(new THREE.CylinderGeometry(0.009,0.009,0.022,16),hMat);
+  axle.rotation.x=Math.PI/2;axle.position.set(cx,pivotY,z+sD+0.011);axle.castShadow=true;g.add(axle);
 
-  // Kreuzolive — 125mm × 28mm, klar sichtbar, nach UNTEN
-  const grR=0.014, grLen=0.125;
-  const olive=new THREE.Mesh(new THREE.SphereGeometry(grR,22,16),hMat);
+  // Kreuzolive — 140mm × 34mm (war 125×28), klar sichtbar, nach UNTEN
+  const grR=0.017, grLen=0.140;
+  const olive=new THREE.Mesh(new THREE.SphereGeometry(grR,24,18),hMat);
   olive.scale.y=grLen/(2*grR);
-  olive.position.set(cx, pivotY-grLen*0.5, z+sD+0.028);
+  olive.position.set(cx, pivotY-grLen*0.5, z+sD+0.034);
   olive.castShadow=true;g.add(olive);
 }
 
@@ -422,30 +423,30 @@ function addBalkontuerGriff(g,cx,cy,z,isLinks){
 // Fensterband (Flügelband) — silbernes Alu wie im Referenzbild, klar erkennbar
 function addFensterScharnier(g,cx,cy,z){
   const plateMat=new THREE.MeshStandardMaterial({
-    color:0xB0B8C0, roughness:0.22, metalness:0.80, envMapIntensity:3.2
+    color:0x7a8898, roughness:0.16, metalness:0.92, envMapIntensity:5.0  // dunkler + hochglanz → klar sichtbar
   });
   const pinMat=new THREE.MeshStandardMaterial({
-    color:0x7a8490, roughness:0.15, metalness:0.90, envMapIntensity:4.0
+    color:0x5a6470, roughness:0.10, metalness:0.96, envMapIntensity:6.0
   });
+  const slotMat=new THREE.MeshStandardMaterial({color:0x1e2428,roughness:0.9,metalness:0});
 
-  // Hauptplatte — 24mm breit × 40mm hoch × 6mm tief, silber
-  addBox(g, cx-0.012, cy-0.020, z, 0.024, 0.040, 0.006, plateMat);
+  // Hauptplatte — 32mm breit × 52mm hoch × 8mm tief (war 24×40×6)
+  addBox(g, cx-0.016, cy-0.026, z, 0.032, 0.052, 0.008, plateMat);
 
-  // Scharnier-Achse (zentraler Bolzen, rund, sichtbar hervorstehend)
-  const pin=new THREE.Mesh(new THREE.CylinderGeometry(0.005,0.005,0.010,14),pinMat);
+  // Scharnier-Achse — Ø16mm × 14mm (war Ø10×10)
+  const pin=new THREE.Mesh(new THREE.CylinderGeometry(0.008,0.008,0.014,16),pinMat);
   pin.rotation.x=Math.PI/2;
-  pin.position.set(cx, cy, z+0.008);
+  pin.position.set(cx, cy, z+0.011);
   pin.castShadow=true; g.add(pin);
 
-  // 2 Schraubenköpfe (Kreuzschlitz) — oben + unten, markant
-  [cy-0.013, cy+0.013].forEach(sy=>{
-    const head=new THREE.Mesh(new THREE.CylinderGeometry(0.0040,0.0035,0.005,10),pinMat);
+  // 2 Schraubenköpfe (Kreuzschlitz) — oben + unten
+  [cy-0.017, cy+0.017].forEach(sy=>{
+    const head=new THREE.Mesh(new THREE.CylinderGeometry(0.0055,0.0048,0.007,12),pinMat);
     head.rotation.x=Math.PI/2;
-    head.position.set(cx, sy, z+0.007);
+    head.position.set(cx, sy, z+0.009);
     head.castShadow=true; g.add(head);
-    // Kreuzschlitz (zwei flache Boxen)
-    addBox(g, cx-0.0035, sy-0.0005, z+0.010, 0.007, 0.001, 0.001, new THREE.MeshStandardMaterial({color:0x3a3e42,roughness:0.8,metalness:0}));
-    addBox(g, cx-0.0005, sy-0.0035, z+0.010, 0.001, 0.007, 0.001, new THREE.MeshStandardMaterial({color:0x3a3e42,roughness:0.8,metalness:0}));
+    addBox(g, cx-0.0045, sy-0.0006, z+0.013, 0.009, 0.0012, 0.0012, slotMat);
+    addBox(g, cx-0.0006, sy-0.0045, z+0.013, 0.0012, 0.009,  0.0012, slotMat);
   });
 }
 
@@ -937,8 +938,8 @@ function initScene(container){
   const key=new THREE.RectAreaLight(0xfffdf0,4.0,3.0,3.5);
   key.position.set(-2.5,5.0,4.0);key.lookAt(0,0,0);scene.add(key);
 
-  // Shadow-Caster: Schatten für weiße Hardware sichtbar machen (RectAreaLight wirft keine Schatten)
-  const shadowCaster=new THREE.DirectionalLight(0xffffff,0.65);
+  // Shadow-Caster: Schatten für Hardware sichtbar machen
+  const shadowCaster=new THREE.DirectionalLight(0xffffff,0.90);
   shadowCaster.position.set(-6,4,6);shadowCaster.castShadow=true;
   shadowCaster.shadow.mapSize.set(2048,2048);
   shadowCaster.shadow.camera.near=1;shadowCaster.shadow.camera.far=20;
@@ -963,11 +964,15 @@ function initScene(container){
   const rim=new THREE.DirectionalLight(0xffffff,0.28);
   rim.position.set(0,3,-5);scene.add(rim);
 
-  // Rim-Lichter von schräg hinten — erzeugen Kontur-Separation weiß-auf-weiß (Griff/Scharniere)
-  const rimR=new THREE.DirectionalLight(0xddeeff,0.90);
+  // Rim-Lichter — Kontur-Separation für Griff/Scharniere (jetzt stärker)
+  const rimR=new THREE.DirectionalLight(0xddeeff,1.50);
   rimR.position.set(2.5,4.0,-3.5);scene.add(rimR);
-  const rimL=new THREE.DirectionalLight(0xffffff,0.60);
+  const rimL=new THREE.DirectionalLight(0xffffff,1.10);
   rimL.position.set(-1.5,6.0,-2.0);scene.add(rimL);
+
+  // Hardware-Akzentlicht: schräg von links-vorne → Griff/Scharnier herausheben
+  const hwLight=new THREE.DirectionalLight(0xfff8f0,0.70);
+  hwLight.position.set(-3,2,5);scene.add(hwLight);
 
   // Bodenschatten — prominent + weich
   const gnd=new THREE.Mesh(
@@ -1074,7 +1079,10 @@ function rebuildScene(S,view){
   else if(S.prod==='hst')group=buildHST(S,view);
   if(group)productGroup.add(group);
 
-  fitCamera(S);
+  // Kamera nur zurücksetzen wenn Produkt wechselt — verhindert "wipe forward" bei Option-Klicks
+  const _prodChanged = S.prod !== _prevProd;
+  _prevProd = S.prod;
+  if (_prodChanged) fitCamera(S);
 
   // Öffnen-Button Sichtbarkeit + Label
   const btn=document.getElementById('oeffnen-btn');
