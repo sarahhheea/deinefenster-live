@@ -1483,14 +1483,14 @@
   }
   .view-btn:not(.active):hover { color: rgba(215,232,255,0.82) !important; }
 
-  /* ── Preview: adaptiv skaliert ── */
+  /* ── Preview: kompakter, Rest der Sidebar sichtbar ── */
   #prev-wrap {
     border-radius: 14px !important;
     border: 1px solid rgba(255,255,255,0.08) !important;
     background: rgba(8,12,28,0.55) !important;
-    height: calc(100vh - 390px) !important;
-    min-height: 300px !important;
-    max-height: 480px !important;
+    height: 240px !important;
+    min-height: 220px !important;
+    max-height: 260px !important;
     flex-shrink: 0 !important;
   }
 
@@ -8252,9 +8252,9 @@ async function submitSkizze(e) {
     // Narrow bright specular glare stripe
     s += '<polygon points="'+(x+w*0.50)+','+y+' '+(x+w*0.58)+','+y+' '+(x+w*0.36)+','+(y+h)+' '+(x+w*0.30)+','+(y+h)+'" fill="white" opacity="0.040"/>';
     // Sky zone: top 25% brighter blue-white
-    s += '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+(h*0.25)+'" fill="rgba(200,228,255,0.065)"/>';
+    s += '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+(h*0.25)+'" fill="rgba(190,225,255,0.11)"/>';
     // Top edge specular highlight (sharp bright line)
-    s += '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="2.5" fill="rgba(255,255,255,0.30)"/>';
+    s += '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="3" fill="rgba(255,255,255,0.42)"/>';
     // Left edge specular
     s += '<rect x="'+x+'" y="'+(y+2.5)+'" width="2" height="'+(h-2.5)+'" fill="rgba(255,255,255,0.18)"/>';
     // Room interior warmth: bottom 32% warm amber tint (indoor light reflection)
@@ -8457,10 +8457,11 @@ async function submitSkizze(e) {
   function svgDefs(dekor) {
     return '<defs>'+patternDefs(dekor)
       // Scene gradients
-      +'<linearGradient id="wallGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#111828"/><stop offset="55%" stop-color="#0c1320"/><stop offset="100%" stop-color="#06080f"/></linearGradient>'
-      +'<radialGradient id="floorGrad" cx="50%" cy="100%" r="55%"><stop offset="0%" stop-color="rgba(118,169,250,0.07)"/><stop offset="100%" stop-color="rgba(0,0,0,0)"/></radialGradient>'
+      +'<linearGradient id="wallGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#1c1a16"/><stop offset="50%" stop-color="#141210"/><stop offset="100%" stop-color="#0a0908"/></linearGradient>'
+      +'<radialGradient id="floorGrad" cx="50%" cy="100%" r="55%"><stop offset="0%" stop-color="rgba(220,200,160,0.06)"/><stop offset="100%" stop-color="rgba(0,0,0,0)"/></radialGradient>'
+      +'<radialGradient id="lightSpill" cx="50%" cy="48%" r="52%"><stop offset="0%" stop-color="rgba(210,232,255,0.13)"/><stop offset="60%" stop-color="rgba(180,210,255,0.04)"/><stop offset="100%" stop-color="rgba(0,0,0,0)"/></radialGradient>'
       // Glass sky-to-ground gradient (objectBoundingBox scales to any rect)
-      +'<linearGradient id="glBase" x1="0%" y1="0%" x2="8%" y2="100%" gradientUnits="objectBoundingBox"><stop offset="0%" stop-color="#c8e8ff" stop-opacity="0.32"/><stop offset="22%" stop-color="#90c8f0" stop-opacity="0.14"/><stop offset="58%" stop-color="#5898c8" stop-opacity="0.06"/><stop offset="100%" stop-color="#1840a0" stop-opacity="0.22"/></linearGradient>'
+      +'<linearGradient id="glBase" x1="0%" y1="0%" x2="6%" y2="100%" gradientUnits="objectBoundingBox"><stop offset="0%" stop-color="#ddf0ff" stop-opacity="0.52"/><stop offset="18%" stop-color="#a8d8f8" stop-opacity="0.26"/><stop offset="52%" stop-color="#6aacdc" stop-opacity="0.09"/><stop offset="100%" stop-color="#1848b0" stop-opacity="0.28"/></linearGradient>'
       // Frame luminosity: 6-stop gradient (PVC bevel simulation)
       +'<linearGradient id="frameLum" x1="0%" y1="0%" x2="100%" y2="100%" gradientUnits="objectBoundingBox"><stop offset="0%" stop-color="rgba(255,255,255,0.30)"/><stop offset="12%" stop-color="rgba(255,255,255,0.20)"/><stop offset="38%" stop-color="rgba(255,255,255,0.04)"/><stop offset="62%" stop-color="rgba(0,0,0,0.06)"/><stop offset="88%" stop-color="rgba(0,0,0,0.24)"/><stop offset="100%" stop-color="rgba(0,0,0,0.38)"/></linearGradient>'
       // Chrome metallic gradient (horizontal — for Stoßgriff, hinges)
@@ -8571,6 +8572,7 @@ async function submitSkizze(e) {
       +svgDefs(S.glasdekor)
       +'<rect x="'+lbX+'" y="'+lbY+'" width="'+lbW+'" height="'+lbH+'" fill="url(#wallGrad)"/>'
       +'<rect x="'+lbX+'" y="'+lbY+'" width="'+lbW+'" height="'+lbH+'" fill="url(#floorGrad)"/>'
+      +'<rect x="'+lbX+'" y="'+lbY+'" width="'+lbW+'" height="'+lbH+'" fill="url(#lightSpill)"/>'
       +leibung(0,wY,bMm,hMm,LD);
     if (hasRoll) svg+=rolladenKasten(0,0,bMm,rollH,S.rollSeite,S.roll);
     svg+='<g filter="url(#winGlow)">'
@@ -8622,6 +8624,7 @@ async function submitSkizze(e) {
     let svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+(0-LD)+' '+(0-LD)+' '+(bMm+2*LD)+' '+(totalH+2*LD)+'" style="width:100%;height:100%;display:block" preserveAspectRatio="xMidYMid meet">'
       +svgDefs(S.glasdekor)+'<rect x="'+(0-LD)+'" y="'+(0-LD)+'" width="'+(bMm+2*LD)+'" height="'+(totalH+2*LD)+'" fill="url(#wallGrad)"/>'
       +'<rect x="'+(0-LD)+'" y="'+(0-LD)+'" width="'+(bMm+2*LD)+'" height="'+(totalH+2*LD)+'" fill="url(#floorGrad)"/>'
+      +'<rect x="'+(0-LD)+'" y="'+(0-LD)+'" width="'+(bMm+2*LD)+'" height="'+(totalH+2*LD)+'" fill="url(#lightSpill)"/>'
       +leibung(0,dY,bMm,hMm,LD);
     if (hasRoll) svg+=rolladenKasten(0,0,bMm,rollH,S.rollSeite,S.roll);
     if (hasST_L) svg+=drawSeitenteil(0,dY,ST_W,hMm,S,fCol,fBorder);
@@ -8736,6 +8739,7 @@ async function submitSkizze(e) {
     let svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+(0-LD)+' '+(0-LD)+' '+(bMm+2*LD)+' '+(totalH+2*LD)+'" style="width:100%;height:100%;display:block" preserveAspectRatio="xMidYMid meet">'
       +svgDefs(S.glasdekor)+'<rect x="'+(0-LD)+'" y="'+(0-LD)+'" width="'+(bMm+2*LD)+'" height="'+(totalH+2*LD)+'" fill="url(#wallGrad)"/>'
       +'<rect x="'+(0-LD)+'" y="'+(0-LD)+'" width="'+(bMm+2*LD)+'" height="'+(totalH+2*LD)+'" fill="url(#floorGrad)"/>'
+      +'<rect x="'+(0-LD)+'" y="'+(0-LD)+'" width="'+(bMm+2*LD)+'" height="'+(totalH+2*LD)+'" fill="url(#lightSpill)"/>'
       +leibung(0,wY,bMm,hMm,LD);
     if (hasRoll) svg+=rolladenKasten(0,0,bMm,rollH,S.rollSeite,S.roll);
     svg+='<rect x="0" y="'+wY+'" width="'+bMm+'" height="'+hMm+'" fill="'+fCol+'" rx="3"/>'
