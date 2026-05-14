@@ -583,24 +583,14 @@ function getExifOrientation(dataUrl) {
 
 function compressImage(dataUrl, maxPx = 1200, quality = 0.85) {
   return new Promise(resolve => {
-    const orient = getExifOrientation(dataUrl);
     const img = new Image();
     img.onload = () => {
-      const swap = orient === 5 || orient === 6 || orient === 7 || orient === 8;
-      const iw = swap ? img.naturalHeight : img.naturalWidth;
-      const ih = swap ? img.naturalWidth : img.naturalHeight;
-      const scale = Math.min(1, maxPx / Math.max(iw, ih));
-      const w = Math.round(iw * scale);
-      const h = Math.round(ih * scale);
+      const scale = Math.min(1, maxPx / Math.max(img.naturalWidth, img.naturalHeight));
+      const w = Math.round(img.naturalWidth * scale);
+      const h = Math.round(img.naturalHeight * scale);
       const canvas = document.createElement('canvas');
       canvas.width = w; canvas.height = h;
-      const ctx = canvas.getContext('2d');
-      switch (orient) {
-        case 3: ctx.translate(w, h);  ctx.rotate(Math.PI);       break;
-        case 6: ctx.translate(w, 0);  ctx.rotate(Math.PI / 2);   break;
-        case 8: ctx.translate(0, h);  ctx.rotate(-Math.PI / 2);  break;
-      }
-      ctx.drawImage(img, 0, 0, img.naturalWidth * scale, img.naturalHeight * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
       resolve(canvas.toDataURL('image/jpeg', quality));
     };
     img.src = dataUrl;
