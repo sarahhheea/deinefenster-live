@@ -2238,7 +2238,7 @@
         <strong>Drutex-Richtwerte:</strong> 1 Flügel bis ca. 1400 mm Breite · 2 Flügel 1200–2400 mm · 3 Flügel 1800–3000 mm. Pro Flügel maximal ca. 2,5 m² Glasfläche. Ober-/Unterlicht typisch ab Raumhöhe 2300 mm sinnvoll. Sondermaße auf Anfrage.
       </div>
     </div>
-    <div id="fluegel-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-1 mt-1">
+    <div id="fluegel-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
       <!-- filled by JS -->
     </div>
     <button type="button" onclick="openS(4)" class="w-full mt-4 flex items-center justify-center gap-2 font-bold py-3 rounded-full text-white text-sm" style="background:var(--c-primary);font-family:'Plus Jakarta Sans',sans-serif">
@@ -4884,9 +4884,9 @@ function buildFluegel() {
       {v:'2-fluegel', add:85 },
     ];
     grid.innerHTML = opts.map(o=>`
-      <div class="fk${S.fluegel===o.v?' sel':''}" data-v="${o.v}" onclick="pickFluegel(this)">
-        <img class="fk-img" src="${getMasterImage('balkontuer','innen',o.v)}" loading="lazy" alt="${P.fluegel[o.v].name}">
-        <div class="fk-label">${P.fluegel[o.v].name}</div>
+      <div class="fk${S.fluegel===o.v?' sel':''}" data-v="${o.v}" onclick="pickFluegel(this)" style="padding:8px 6px 10px">
+        ${windowSVG(o.v,null)}
+        <div class="fk-label" style="margin-top:7px">${P.fluegel[o.v].name}</div>
         <div class="fk-price ${o.add===0?'p-inc':'p-add'}">${o.add===0?'inkl.':'+ '+o.add+' €'}</div>
       </div>`).join('');
     return;
@@ -4906,9 +4906,9 @@ function buildFluegel() {
     {v:'3-ober-unter',add:340},
   ];
   grid.innerHTML = opts.map(o=>`
-    <div class="fk${S.fluegel===o.v?' sel':''}" data-v="${o.v}" onclick="pickFluegel(this)">
-      <img class="fk-img" src="${getMasterImage('kunststoff','innen',o.v)}" loading="lazy" alt="${P.fluegel[o.v].name}">
-      <div class="fk-label">${P.fluegel[o.v].name}</div>
+    <div class="fk${S.fluegel===o.v?' sel':''}" data-v="${o.v}" onclick="pickFluegel(this)" style="padding:8px 6px 10px">
+      ${windowSVG(o.v,null)}
+      <div class="fk-label" style="margin-top:7px">${P.fluegel[o.v].name}</div>
       <div class="fk-price ${o.add===0?'p-inc':'p-add'}">${o.add===0?'inkl.':'+ '+o.add+' €'}</div>
     </div>`).join('');
 }
@@ -5363,6 +5363,47 @@ function olComboSVG(olTyp, mainTyp) {
   return s;
 }
 
+// ── Vollständiges Fenster-Schema-SVG (Flügelaufteilung + Öffnungsart) ───────────
+// layout: '1-fluegel' | '2-fluegel' | '3-fluegel' | '1-oberlicht' | '2-oberlicht' etc.
+// sashTypes: null (nur Layout) | Array von Öffnungstypen pro Hauptflügel ['dk-l','dreh-r']
+function windowSVG(layout, sashTypes, W, H) {
+  W=W||100; H=H||76;
+  const FR=4, DV=5;
+  const hasOL=(layout||'').includes('oberlicht')||(layout||'').includes('ober-unter');
+  const hasUL=(layout||'').includes('unterlicht')||(layout||'').includes('ober-unter');
+  const fc=(layout||'1').charAt(0);
+  const nMain=fc==='3'?3:fc==='2'?2:1;
+  let s=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block;border-radius:5px" xmlns="http://www.w3.org/2000/svg">`;
+  s+=`<rect width="${W}" height="${H}" rx="3" fill="#0d1929"/>`;
+  const gx=FR,gy=FR,gw=W-2*FR,gh=H-2*FR;
+  let mY=gy,mH=gh;
+  function pane(px,py,pw,ph,typ){
+    const fix=!typ||typ==='fest';
+    s+=`<rect x="${px}" y="${py}" width="${pw}" height="${ph}" fill="${fix?'rgba(10,30,75,0.50)':'rgba(20,58,138,0.42)'}" stroke="rgba(80,136,225,0.72)" stroke-width="1.5"/>`;
+    if(!typ)return;
+    if(typ==='fest'){
+      s+=`<line x1="${px+4}" y1="${py+4}" x2="${px+pw-4}" y2="${py+ph-4}" stroke="rgba(118,169,250,0.25)" stroke-width="1.2"/>`;
+      s+=`<line x1="${px+pw-4}" y1="${py+4}" x2="${px+4}" y2="${py+ph-4}" stroke="rgba(118,169,250,0.25)" stroke-width="1.2"/>`;return;
+    }
+    const cx=px+pw/2,cy=py+ph/2,P=3.5;
+    const L=px+P,R=px+pw-P,T=py+P,B=py+ph-P;
+    const TK=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#5d97e8" stroke-width="2.8" stroke-linecap="round"/>`;
+    const DA=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#76a9fa" stroke-width="1.4" stroke-dasharray="3.5,2.5" stroke-linecap="round"/>`;
+    const DF=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#76a9fa" stroke-width="0.9" stroke-dasharray="2,3" stroke-linecap="round" opacity="0.6"/>`;
+    const MK=(hx,hy)=>`<rect x="${hx-2.5}" y="${hy-6}" width="5" height="12" rx="2" fill="#8fbde0" opacity="0.85"/>`;
+    if(typ==='kipp'){s+=TK(L,B,R,B);s+=DA(L,B,cx,T);s+=DA(R,B,cx,T);s+=MK(cx,cy-4);}
+    else if(typ==='dreh-l'){s+=TK(L,T,L,B);s+=DA(L,T,R,cy);s+=DA(L,B,R,cy);s+=MK(R-5,cy);}
+    else if(typ==='dreh-r'){s+=TK(R,T,R,B);s+=DA(R,T,L,cy);s+=DA(R,B,L,cy);s+=MK(L+5,cy);}
+    else if(typ==='dk-l'){s+=TK(L,T,L,B);s+=TK(L,B,R,B);s+=DA(L,T,R,cy);s+=DA(L,B,R,cy);s+=DF(L,B,cx,T);s+=DF(R,B,cx,T);s+=MK(R-5,cy);}
+    else if(typ==='dk-r'){s+=TK(R,T,R,B);s+=TK(L,B,R,B);s+=DA(R,T,L,cy);s+=DA(R,B,L,cy);s+=DF(L,B,cx,T);s+=DF(R,B,cx,T);s+=MK(L+5,cy);}
+  }
+  if(hasOL){const olH=Math.round(gh*0.24);pane(gx,gy,gw,olH,sashTypes?'fest':null);s+=`<rect x="${gx}" y="${gy+olH}" width="${gw}" height="${DV}" fill="#0d1929"/>`;mY=gy+olH+DV;mH-=olH+DV;}
+  if(hasUL){const ulH=Math.round(gh*0.22);const ulY=gy+gh-ulH;s+=`<rect x="${gx}" y="${ulY-DV}" width="${gw}" height="${DV}" fill="#0d1929"/>`;pane(gx,ulY,gw,ulH,sashTypes?'fest':null);mH-=ulH+DV;}
+  const sw=(gw-DV*(nMain-1))/nMain;
+  for(let i=0;i<nMain;i++){const sx=gx+i*(sw+DV);pane(sx,mY,sw,mH,sashTypes?sashTypes[i]||null:null);if(i<nMain-1)s+=`<rect x="${sx+sw}" y="${mY}" width="${DV}" height="${mH}" fill="#0d1929"/>`;}
+  return s+'</svg>';
+}
+
 function oeffSVG(typ) {
   const W=60, H=60, M=5, FW=50, FH=50;
   const L=M, R=M+FW, T=M, B=M+FH, CX=W/2, CY=H/2;
@@ -5520,10 +5561,9 @@ function buildOeffSash() {
         const priceDelta = (P.oeff_sash[c.v1]?.add||0) + (P.oeff_sash[c.v2]?.add||0);
         const priceTxt = priceDelta === 0 ? 'inkl.' : (priceDelta > 0 ? `+ ${priceDelta} €` : `− ${Math.abs(priceDelta)} €`);
         const priceCls = priceDelta === 0 ? 'p-inc' : (priceDelta > 0 ? 'p-add' : 'p-sav');
-        html += `<div class="oc${isSel?' sel':''}" data-v1="${c.v1}" data-v2="${c.v2}" data-type="${c.type}" onclick="pickOeffCombo(this)" style="flex-direction:column;align-items:center;text-align:center;padding:10px 6px;gap:3px">
-          <div style="display:flex;gap:3px;justify-content:center">${oeffSVG(c.v1)}${oeffSVG(c.v2)}</div>
-          <div class="olabel" style="font-size:11px;line-height:1.3">${c.name}</div>
-          <div class="osub" style="font-size:10px">${c.sub}</div>
+        html += `<div class="oc${isSel?' sel':''}" data-v1="${c.v1}" data-v2="${c.v2}" data-type="${c.type}" onclick="pickOeffCombo(this)" style="flex-direction:column;align-items:center;text-align:center;padding:8px 6px 10px;gap:3px">
+          ${windowSVG(S.fluegel,[c.v1,c.v2])}
+          <div class="olabel" style="font-size:11px;line-height:1.3;margin-top:5px">${c.sub}</div>
           <div class="oprice ${priceCls}" style="font-size:11px">${priceTxt}</div>
         </div>`;
       });
@@ -5549,10 +5589,9 @@ function buildOeffSash() {
         const priceDelta = (P.oeff_sash[c.v1]?.add||0) + (P.oeff_sash[c.v2]?.add||0);
         const priceTxt = priceDelta === 0 ? 'inkl.' : (priceDelta > 0 ? `+ ${priceDelta} €` : `− ${Math.abs(priceDelta)} €`);
         const priceCls = priceDelta === 0 ? 'p-inc' : (priceDelta > 0 ? 'p-add' : 'p-sav');
-        html += `<div class="oc${isSel?' sel':''}" data-v1="${c.v1}" data-v2="${c.v2}" data-type="${c.type}" onclick="pickOeffCombo(this)" style="flex-direction:column;align-items:center;text-align:center;padding:10px 6px;gap:3px">
-          <div style="display:flex;gap:3px;justify-content:center">${oeffSVG(c.v1)}${oeffSVG(c.v2)}</div>
-          <div class="olabel" style="font-size:11px;line-height:1.3">${c.name}</div>
-          <div class="osub" style="font-size:10px">${c.sub}</div>
+        html += `<div class="oc${isSel?' sel':''}" data-v1="${c.v1}" data-v2="${c.v2}" data-type="${c.type}" onclick="pickOeffCombo(this)" style="flex-direction:column;align-items:center;text-align:center;padding:8px 6px 10px;gap:3px">
+          ${windowSVG(S.fluegel,[c.v1,c.v2])}
+          <div class="olabel" style="font-size:11px;line-height:1.3;margin-top:5px">${c.sub}</div>
           <div class="oprice ${priceCls}" style="font-size:11px">${priceTxt}</div>
         </div>`;
       });
@@ -5580,10 +5619,9 @@ function buildOeffSash() {
         const pd = (P.oeff_sash[c.v1]?.add||0) + (P.oeff_sash[c.v2]?.add||0) + (P.oeff_sash[c.v3]?.add||0);
         const pTxt = pd===0?'inkl.':(pd>0?`+ ${pd} €`:`− ${Math.abs(pd)} €`);
         const pCls = pd===0?'p-inc':(pd>0?'p-add':'p-sav');
-        html += `<div class="oc${isSel?' sel':''}" data-v1="${c.v1}" data-v2="${c.v2}" data-v3="${c.v3}" data-type3="${c.t}" onclick="pickOeffCombo(this)" style="flex-direction:column;align-items:center;text-align:center;padding:10px 6px;gap:3px">
-          <div style="display:flex;gap:2px;justify-content:center">${oeffSVG(c.v1)}${oeffSVG(c.v2)}${oeffSVG(c.v3)}</div>
-          <div class="olabel" style="font-size:10px;line-height:1.3">${c.name}</div>
-          <div class="osub" style="font-size:10px">${c.sub}</div>
+        html += `<div class="oc${isSel?' sel':''}" data-v1="${c.v1}" data-v2="${c.v2}" data-v3="${c.v3}" data-type3="${c.t}" onclick="pickOeffCombo(this)" style="flex-direction:column;align-items:center;text-align:center;padding:8px 6px 10px;gap:3px">
+          ${windowSVG(S.fluegel,[c.v1,c.v2,c.v3])}
+          <div class="olabel" style="font-size:11px;line-height:1.3;margin-top:5px">${c.sub}</div>
           <div class="oprice ${pCls}" style="font-size:11px">${pTxt}</div>
         </div>`;
       });
@@ -5898,9 +5936,9 @@ function buildOeffSash() {
       html += `<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-3" id="oeff-grid-1">`;
       btOpts.forEach(opt => {
         const sel = S.oeff1 === opt.v;
-        html += `<div class="oc${sel?' sel':''}" data-v="${opt.v}" data-sash="1" onclick="pickOeff(this,1)" style="flex-direction:column;align-items:center;text-align:center;padding:10px 6px;gap:4px">
-          ${oeffSVG(opt.v)}
-          <div class="olabel" style="font-size:12px">${opt.name}</div>
+        html += `<div class="oc${sel?' sel':''}" data-v="${opt.v}" data-sash="1" onclick="pickOeff(this,1)" style="flex-direction:column;align-items:center;text-align:center;padding:8px 6px 10px;gap:3px">
+          ${windowSVG('1-fluegel',[opt.v])}
+          <div class="olabel" style="font-size:12px;margin-top:5px">${opt.name}</div>
           <div class="osub" style="font-size:11px">${opt.sub}</div>
           <div class="oprice ${opt.pcls}" style="font-size:11px">${opt.pTxt}</div>
         </div>`;
@@ -5921,9 +5959,9 @@ function buildOeffSash() {
         const sel = S[sk]===opt.v && !opt.disabled;
         const disabledStyle = opt.disabled ? ';opacity:0.45;pointer-events:none;cursor:not-allowed' : '';
         const onClickAttr = opt.disabled ? '' : `onclick="pickOeff(this,${i+1})"`;
-        html+=`<div class="oc${sel?' sel':''}" data-v="${opt.v}" data-sash="${i+1}" ${onClickAttr} style="flex-direction:column;align-items:center;text-align:center;padding:10px 6px;gap:4px${disabledStyle}">
-          ${oeffSVG(opt.v)}
-          <div class="olabel" style="font-size:12px">${opt.name}</div>
+        html+=`<div class="oc${sel?' sel':''}" data-v="${opt.v}" data-sash="${i+1}" ${onClickAttr} style="flex-direction:column;align-items:center;text-align:center;padding:8px 6px 10px;gap:3px${disabledStyle}">
+          ${windowSVG('1-fluegel',[opt.v])}
+          <div class="olabel" style="font-size:12px;margin-top:5px">${opt.name}</div>
           <div class="osub" style="font-size:11px">${opt.sub}</div>
           <div class="oprice ${opt.pcls}" style="font-size:11px">${opt.pTxt}</div>
         </div>`;
