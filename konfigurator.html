@@ -4092,18 +4092,13 @@ function heroSelectProd(prodKey) {
   const pcEl = document.querySelector('#s1 .pc[data-p="' + prodKey + '"]');
   if (pcEl) pickProd(pcEl);
 
-  // Slide hero up — like opening a new page
   if (hero) {
-    hero.classList.add('hero-closing');
-    setTimeout(() => {
-      hero.style.display = 'none';
-      const s1 = document.getElementById('s1');
-      if (s1) s1.classList.add('hero-done');
-      // Linke Nav zeigen
-      const nav = document.getElementById('kfg-nav');
-      if (nav) nav.style.display = '';
-      openS(2); // openS calls buildNav() internally
-    }, 700);
+    hero.style.display = 'none';
+    const s1 = document.getElementById('s1');
+    if (s1) s1.classList.add('hero-done');
+    const nav = document.getElementById('kfg-nav');
+    if (nav) nav.style.display = '';
+    openS(2);
   }
 }
 
@@ -5380,7 +5375,8 @@ function windowSVG(layout, sashTypes, W, H) {
   const hasUL=(layout||'').includes('unterlicht')||(layout||'').includes('ober-unter');
   const fc=(layout||'1').charAt(0);
   const nMain=fc==='3'?3:fc==='2'?2:1;
-  let s=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W}px;height:auto;display:block" xmlns="http://www.w3.org/2000/svg">`;
+  const MW=W+8;
+  let s=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${MW}px;height:auto;display:block" xmlns="http://www.w3.org/2000/svg">`;
   s+=`<defs>
     <linearGradient id="gs${id}" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%"   stop-color="#f2f8fc"/>
@@ -5429,8 +5425,8 @@ function windowSVG(layout, sashTypes, W, H) {
     if(typ==='kipp'){s+=TK(L,B,R,B);s+=AR(L,B,cx,T);s+=AR(R,B,cx,T);s+=MK(cx,cy-3);}
     else if(typ==='dreh-l'){s+=TK(L,T,L,B);s+=AR(L,T,R,cy);s+=AR(L,B,R,cy);s+=MK(R-5,cy);}
     else if(typ==='dreh-r'){s+=TK(R,T,R,B);s+=AR(R,T,L,cy);s+=AR(R,B,L,cy);s+=MK(L+5,cy);}
-    else if(typ==='dk-l'){s+=TK(L,T,L,B);s+=TK(L,B,R,B);s+=AR(L,T,R,cy);s+=AR(L,B,R,cy);s+=AF(L,B,cx,T);s+=AF(R,B,cx,T);s+=MK(R-5,cy);}
-    else if(typ==='dk-r'){s+=TK(R,T,R,B);s+=TK(L,B,R,B);s+=AR(R,T,L,cy);s+=AR(R,B,L,cy);s+=AF(L,B,cx,T);s+=AF(R,B,cx,T);s+=MK(L+5,cy);}
+    else if(typ==='dk-l'){s+=TK(L,T,L,B);s+=TK(L,B,R,B);s+=AR(L,T,R,cy);s+=AR(L,B,R,cy);s+=MK(R-5,cy);}
+    else if(typ==='dk-r'){s+=TK(R,T,R,B);s+=TK(L,B,R,B);s+=AR(R,T,L,cy);s+=AR(R,B,L,cy);s+=MK(L+5,cy);}
   }
   if(hasOL){const olH=Math.round(gh*0.24);pane(gx,gy,gw,olH,sashTypes?'fest':null);s+=`<rect x="${gx}" y="${gy+olH}" width="${gw}" height="${DV}" fill="${PFO}"/>`;mY=gy+olH+DV;mH-=olH+DV;}
   if(hasUL){const ulH=Math.round(gh*0.22);const ulY=gy+gh-ulH;s+=`<rect x="${gx}" y="${ulY-DV}" width="${gw}" height="${DV}" fill="${PFO}"/>`;pane(gx,ulY,gw,ulH,sashTypes?'fest':null);mH-=ulH+DV;}
