@@ -1429,10 +1429,10 @@
   #navbar { z-index: 110 !important; }
 
   /* ══════════════════════════════════════════════════
-     3-PANEL FULL-VIEWPORT LAYOUT (Desktop ≥ 1024px)
+     3-PANEL FULL-VIEWPORT LAYOUT (Tablet + Desktop ≥ 768px)
      Links: Schritt-Nav | Mitte: Inhalt | Rechts: Preview
      ══════════════════════════════════════════════════ */
-  @media (min-width: 1024px) {
+  @media (min-width: 768px) {
     /* Kein Body-Scroll — alles in den 3 Panels */
     body { overflow: hidden !important; }
 
@@ -1451,8 +1451,8 @@
     /* LINKE NAV-SPALTE */
     #kfg-nav {
       display: flex !important; flex-direction: column !important;
-      width: 220px !important; flex-shrink: 0 !important;
-      overflow-y: auto; padding: 28px 14px 28px 18px;
+      width: 200px !important; flex-shrink: 0 !important;
+      overflow-y: auto; padding: 24px 12px 24px 16px;
       border-right: 1px solid rgba(255,255,255,0.07);
       background: rgba(5,8,20,0.96);
     }
@@ -1480,32 +1480,32 @@
       display: block !important;
       background: transparent !important;
       border-top: none !important;
-      padding: 0 40px 48px !important;
+      padding: 0 28px 48px !important;
       animation: none !important;
     }
 
     /* Neuer Schritt-Titel-Bereich oben in #steps */
     #kfg-step-hdr {
-      padding: 40px 40px 24px;
+      padding: 28px 28px 20px;
       border-bottom: 1px solid rgba(255,255,255,0.07);
       margin-bottom: 0;
     }
     #kfg-step-title-text {
       font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 26px; font-weight: 800;
+      font-size: 22px; font-weight: 800;
       letter-spacing: -0.025em;
       color: rgba(238,242,255,0.97);
-      line-height: 1.15; margin: 0 0 8px;
+      line-height: 1.15; margin: 0 0 6px;
     }
     #kfg-step-desc-text {
       font-family: 'Manrope', sans-serif;
-      font-size: 14px; color: rgba(200,215,255,0.45);
+      font-size: 13px; color: rgba(200,215,255,0.45);
       margin: 0; line-height: 1.5;
     }
 
     /* RECHTE PREVIEW-SPALTE */
     #sidebar-wrap {
-      width: 340px !important; flex-shrink: 0 !important;
+      width: 300px !important; flex-shrink: 0 !important;
       overflow-y: auto;
       border-left: 1px solid rgba(255,255,255,0.07) !important;
       padding: 0 !important;
@@ -1513,7 +1513,7 @@
       max-height: none !important;
     }
 
-    /* ── Weiter-Buttons: auf Desktop unsichtbar (Nav läuft über linke Schritt-Liste) ── */
+    /* ── Weiter-Buttons: unsichtbar (Nav läuft über linke Schritt-Liste) ── */
     .sb button.w-full[onclick] { display: none !important; }
 
     /* ── Profil-Bilder: hellen Hintergrund dämpfen auf dunkler Seite ── */
@@ -3894,7 +3894,7 @@ function buildNav() {
 
   allSc.forEach(sc => {
     if (sc.id === 's1') return; // Produkttyp via Hero gewählt — nicht in Nav
-    if (getComputedStyle(sc).display === 'none') return;
+    if (sc.style.display === 'none') return; // inline-hidden = nicht für dieses Produkt
 
     const stepId = sc.id.replace(/^s/, '');
     const label = sc.querySelector('.slabel')?.textContent?.trim() || '';
@@ -3916,7 +3916,7 @@ function buildNav() {
 function openS(n) {
   const c = document.getElementById('s'+n);
   if (!c) return; // defensive — Step kann ausgeblendet sein (display:none)
-  if (getComputedStyle(c).display === 'none') return;
+  if (c.style.display === 'none') return; // inline-hidden = nicht für dieses Produkt
   closeOtherSections(c);
   if (!c.classList.contains('open')) c.classList.add('open');
   buildNav(); // linke Nav-Highlights aktualisieren
