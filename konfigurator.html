@@ -1463,6 +1463,25 @@
   .sb .osub      { color: rgba(215,232,255,0.60) !important; }
   .sb .text-sm.font-semibold { color: rgba(215,232,255,0.65) !important; }
 
+  /* ── Weiter-Buttons ── */
+  .sb button.w-full[onclick] {
+    background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%) !important;
+    border-radius: 12px !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    box-shadow: 0 4px 18px rgba(29,78,216,0.42) !important;
+    transition: all 0.18s ease !important;
+    letter-spacing: 0.01em !important;
+    border: none !important;
+    color: #fff !important;
+    padding: 13px 20px !important;
+  }
+  .sb button.w-full[onclick]:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%) !important;
+    box-shadow: 0 6px 24px rgba(37,99,235,0.58) !important;
+    transform: translateY(-1px) !important;
+  }
+
   /* ── Sidebar View Toggle ── */
   #sidebar > div:first-child {
     background: rgba(255,255,255,0.06) !important;
@@ -1483,14 +1502,14 @@
   }
   .view-btn:not(.active):hover { color: rgba(215,232,255,0.82) !important; }
 
-  /* ── Preview: kompakter, Rest der Sidebar sichtbar ── */
+  /* ── Preview ── */
   #prev-wrap {
     border-radius: 14px !important;
     border: 1px solid rgba(255,255,255,0.08) !important;
     background: rgba(8,12,28,0.55) !important;
-    height: 240px !important;
-    min-height: 220px !important;
-    max-height: 260px !important;
+    height: 290px !important;
+    min-height: 260px !important;
+    max-height: 320px !important;
     flex-shrink: 0 !important;
   }
 
@@ -1522,19 +1541,6 @@
 <div style="height:54px" aria-hidden="true"></div>
 
 
-<!-- PROGRESS (sticky) — hell, passt zu hellem Body (02.05.2026 v4) -->
-<div id="prog-bar" class="sticky z-40 px-4 py-2" style="top:54px;background:rgba(8,14,28,0.96);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid rgba(255,255,255,0.08)">
-  <div class="max-w-7xl mx-auto flex items-center gap-4 flex-wrap">
-    <div class="flex-1 rounded-full h-1.5 overflow-hidden min-w-[120px]" style="background:#f0f0f3">
-      <div id="prog-fill" class="h-full rounded-full" style="width:0%;background:linear-gradient(90deg,var(--c-primary),#76a9fa);transition:width .4s cubic-bezier(.4,0,.2,1)"></div>
-    </div>
-    <span id="prog-txt" class="text-[13px] whitespace-nowrap font-semibold" style="font-family:'Plus Jakarta Sans',sans-serif;color:rgba(232,238,255,0.85);letter-spacing:-.01em">0 / 12 Schritte</span>
-    <div class="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full" style="background:#ecfdf5;color:#047857;border:1px solid #a7f3d0">
-      <i class="ms f" style="font-size:13px">cloud_done</i>
-      Auto-gespeichert
-    </div>
-  </div>
-</div>
 
 <!-- TRUST-BADGE-STREIFEN — meinfenster24-Pattern (02.05.2026 v4): hell auf hellem Body. -->
 <div id="trust-strip" class="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 pt-4 pb-3">
@@ -1658,6 +1664,9 @@
       <i class="ms f" style="color:var(--c-primary);font-size:20px;flex-shrink:0">eco</i>
       <div>Höhere Kammerzahl = bessere Wärmedämmung. GEG 2024 konform je nach Profil und Verglasung.</div>
     </div>
+    <button type="button" onclick="openS(3)" class="w-full mt-4 flex items-center justify-center gap-2 font-bold py-3 rounded-full text-white text-sm" style="background:var(--c-primary);font-family:'Plus Jakarta Sans',sans-serif">
+      <i class="ms">arrow_forward</i> Weiter zur Flügelaufteilung
+    </button>
   </div>
 </div>
 
@@ -1682,6 +1691,9 @@
     <div id="fluegel-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-1 mt-1">
       <!-- filled by JS -->
     </div>
+    <button type="button" onclick="openS(4)" class="w-full mt-4 flex items-center justify-center gap-2 font-bold py-3 rounded-full text-white text-sm" style="background:var(--c-primary);font-family:'Plus Jakarta Sans',sans-serif">
+      <i class="ms">arrow_forward</i> Weiter zur Öffnungsart
+    </button>
   </div>
 </div>
 
@@ -1699,6 +1711,9 @@
     <div id="oeff-sash-wrap">
       <!-- filled dynamically by buildOeffSash() -->
     </div>
+    <button type="button" onclick="openS(5)" class="w-full mt-4 flex items-center justify-center gap-2 font-bold py-3 rounded-full text-white text-sm" style="background:var(--c-primary);font-family:'Plus Jakarta Sans',sans-serif">
+      <i class="ms">arrow_forward</i> Weiter zu den Maßen
+    </button>
   </div>
 </div>
 
@@ -1738,6 +1753,9 @@
         <!-- Sarah-Fix J (21.04.2026): wird von buildSzButtons() produkt-spezifisch gefüllt -->
       </div>
     </div>
+    <button type="button" onclick="onMass();setTimeout(()=>{if(S.bMm&&S.hMm)openS('-anzahl')},80)" class="w-full mt-4 flex items-center justify-center gap-2 font-bold py-3 rounded-full text-white text-sm" style="background:var(--c-primary);font-family:'Plus Jakarta Sans',sans-serif">
+      <i class="ms">arrow_forward</i> Maße bestätigen — weiter zur Anzahl
+    </button>
   </div>
 </div>
 
@@ -2016,7 +2034,9 @@
       <i class="ms f" style="color:var(--c-primary);font-size:20px;flex-shrink:0">info</i>
       <div>Alle vier Aspekte (Wärme · Warme Kante · Schall · Sicherheit) sind frei kombinierbar. Drutex-Qualitätsglas in allen Varianten.</div>
     </div>
-
+    <button type="button" onclick="openS(8)" class="w-full mt-4 flex items-center justify-center gap-2 font-bold py-3 rounded-full text-white text-sm" style="background:var(--c-primary);font-family:'Plus Jakarta Sans',sans-serif">
+      <i class="ms">arrow_forward</i> Weiter zum Glasdekor
+    </button>
   </div>
 </div>
 
@@ -2082,6 +2102,9 @@
       </div>
     </div>
     <p class="text-sm text-on-surf-v mt-3">Ornamentgläser bieten Sichtschutz bei hoher Lichtdurchlässigkeit. <strong>Drutex-Originalprodukte.</strong></p>
+    <button type="button" onclick="openS(9)" class="w-full mt-4 flex items-center justify-center gap-2 font-bold py-3 rounded-full text-white text-sm" style="background:var(--c-primary);font-family:'Plus Jakarta Sans',sans-serif">
+      <i class="ms">arrow_forward</i> Weiter zu Griffen &amp; Beschlägen
+    </button>
   </div>
 </div>
 
@@ -2149,6 +2172,9 @@
         <div class="oprice p-add">+ 55 €/Stück</div>
       </div>
     </div>
+    <button type="button" onclick="openS(10)" class="w-full mt-4 flex items-center justify-center gap-2 font-bold py-3 rounded-full text-white text-sm" style="background:var(--c-primary);font-family:'Plus Jakarta Sans',sans-serif">
+      <i class="ms">arrow_forward</i> Weiter zum Einbruchschutz
+    </button>
   </div>
 </div>
 
@@ -2260,6 +2286,9 @@
       <i class="ms f" style="color:var(--c-primary);font-size:20px;flex-shrink:0">verified_user</i>
       <div>RC2 wird von den meisten Versicherungen für Erdgeschoss-Fenster empfohlen und ist von vielen Versicherern anerkannt.</div>
     </div>
+    <button type="button" onclick="openS(11)" class="w-full mt-4 flex items-center justify-center gap-2 font-bold py-3 rounded-full text-white text-sm" style="background:var(--c-primary);font-family:'Plus Jakarta Sans',sans-serif">
+      <i class="ms">arrow_forward</i> Weiter zum Rolladen
+    </button>
   </div>
 </div>
 
@@ -2341,7 +2370,9 @@
 
       <!-- Sarah-Korrektur 21.04.2026: Insektenschutz wird NICHT angeboten — Block entfernt -->
     </div>
-
+    <button type="button" onclick="openS(12)" class="w-full mt-4 flex items-center justify-center gap-2 font-bold py-3 rounded-full text-white text-sm" style="background:var(--c-primary);font-family:'Plus Jakarta Sans',sans-serif">
+      <i class="ms">arrow_forward</i> Weiter zu den Sprossen
+    </button>
   </div>
 </div>
 
@@ -2403,6 +2434,9 @@
       <div class="sec-t" id="spro-dicke-label">Sprossendicke</div>
       <div id="spro-dicke-grid" class="grid grid-cols-3 gap-2"><!-- dynamisch gefüllt von buildSprossenDicken() --></div>
     </div>
+    <button type="button" onclick="openS(13)" class="w-full mt-4 flex items-center justify-center gap-2 font-bold py-3 rounded-full text-white text-sm" style="background:var(--c-primary);font-family:'Plus Jakarta Sans',sans-serif">
+      <i class="ms">send</i> Weiter zur Zusammenfassung &amp; Angebot
+    </button>
   </div>
 </div>
 
@@ -3442,14 +3476,6 @@ function tog(n) {
     // User öffnet eine andere → erst alle anderen zu, dann diese auf
     closeOtherSections(c);
     c.classList.add('open');
-    // FIX: Scroll zum geöffneten Step, damit kein Layout-Sprung entsteht
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        const rect = c.getBoundingClientRect();
-        const targetY = rect.top + window.pageYOffset - 120;
-        window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
-      });
-    });
   }
 }
 function openS(n) {
@@ -3464,7 +3490,7 @@ function openS(n) {
   // Jetzt manueller Scroll mit hart berechnetem Offset, damit der Step-Header garantiert sichtbar wird.
   // Timeout wird mit zwei requestAnimationFrames abgesichert, damit der build*-Code vorher
   // das DOM fertig aktualisiert hat und die y-Position stimmt.
-  const STICKY_OFFSET = 120; // navbar + progress-bar + Luft
+  const STICKY_OFFSET = 72; // navbar 54px + Luft 18px
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       const rect = c.getBoundingClientRect();
@@ -3511,15 +3537,6 @@ function pickProd(el) {
   const _s2 = document.getElementById('s2');
   if (_s1) _s1.classList.remove('open');
   if (_s2) _s2.classList.add('open');
-  // Scroll nach zwei Frames, damit der Browser das Klapp-Layout fertig gerechnet hat
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      if (!_s2) return;
-      const rect = _s2.getBoundingClientRect();
-      const targetY = rect.top + window.pageYOffset - 120;
-      window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
-    });
-  });
   // Auto-setup for special products
   if (S.prod === 'hst') {
     // Sarah-Korrektur 21.04.2026: 3 Schiebetür-Systeme (IGLO-HS / PSK / IGLO-Slide)
@@ -8239,32 +8256,35 @@ async function submitSkizze(e) {
 
   function glassRect(x, y, w, h, dekor) {
     const gf = glassFill(dekor), go = glassStyle(dekor).op;
-    const cx = x + w/2;
     let s = '';
-    // Base glass color
-    s += '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+gf+'" opacity="'+go+'"/>';
-    // Sky-to-ground atmospheric gradient
-    s += '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="url(#glBase)"/>';
-    // Subtle glass streak pattern (simulates rolled/float glass texture)
+    if (dekor && dekor !== 'klar') {
+      // Frosted / patterned glass — opaque, no outdoor scene
+      s += '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+gf+'" opacity="'+go+'"/>';
+      s += '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="url(#glBase)"/>';
+    } else {
+      // Clear glass — outdoor scene: sky (top 68%) + ground (bottom 32%)
+      const skyH = h * 0.68, gndH = h * 0.32;
+      s += '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+skyH+'" fill="url(#outSky)"/>';
+      s += '<rect x="'+x+'" y="'+(y+skyH)+'" width="'+w+'" height="'+gndH+'" fill="url(#outGround)"/>';
+      // Horizon haze band across sky/ground seam
+      s += '<rect x="'+x+'" y="'+(y+h*0.58)+'" width="'+w+'" height="'+(h*0.20)+'" fill="url(#outHaze)"/>';
+      // Very subtle glass tint
+      s += '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="rgba(200,228,255,0.05)"/>';
+    }
+    // Glass streak texture
     s += '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="url(#glStreak)"/>';
-    // Wide diagonal reflex band — light from top-left (42% width)
-    s += '<polygon points="'+x+','+y+' '+(x+w*0.48)+','+y+' '+(x+w*0.24)+','+(y+h)+' '+x+','+(y+h)+'" fill="white" opacity="0.062"/>';
-    // Narrow bright specular glare stripe
-    s += '<polygon points="'+(x+w*0.50)+','+y+' '+(x+w*0.58)+','+y+' '+(x+w*0.36)+','+(y+h)+' '+(x+w*0.30)+','+(y+h)+'" fill="white" opacity="0.040"/>';
-    // Sky zone: top 25% brighter blue-white
-    s += '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+(h*0.25)+'" fill="rgba(190,225,255,0.11)"/>';
-    // Top edge specular highlight (sharp bright line)
+    // Wide diagonal reflex band (light from top-left)
+    s += '<polygon points="'+x+','+y+' '+(x+w*0.46)+','+y+' '+(x+w*0.22)+','+(y+h)+' '+x+','+(y+h)+'" fill="white" opacity="0.07"/>';
+    // Narrow bright specular glare
+    s += '<polygon points="'+(x+w*0.48)+','+y+' '+(x+w*0.56)+','+y+' '+(x+w*0.34)+','+(y+h)+' '+(x+w*0.28)+','+(y+h)+'" fill="white" opacity="0.038"/>';
+    // Top edge specular highlight
     s += '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="3" fill="rgba(255,255,255,0.42)"/>';
     // Left edge specular
-    s += '<rect x="'+x+'" y="'+(y+2.5)+'" width="2" height="'+(h-2.5)+'" fill="rgba(255,255,255,0.18)"/>';
-    // Room interior warmth: bottom 32% warm amber tint (indoor light reflection)
-    s += '<rect x="'+x+'" y="'+(y+h*0.68)+'" width="'+w+'" height="'+(h*0.32)+'" fill="rgba(255,200,120,0.025)"/>';
-    // Bottom edge darkening (ground / sill shadow)
-    s += '<rect x="'+x+'" y="'+(y+h*0.82)+'" width="'+w+'" height="'+(h*0.18)+'" fill="rgba(8,16,48,0.14)"/>';
-    // Inner shadow from sash frame (depth gap)
-    s += '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="none" stroke="rgba(0,15,55,0.38)" stroke-width="6"/>';
-    // Glazing bead: perimeter chrome strip (glass-to-sash interface)
-    s += '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="none" stroke="rgba(180,196,212,0.45)" stroke-width="4"/>';
+    s += '<rect x="'+x+'" y="'+(y+2.5)+'" width="2" height="'+(h-2.5)+'" fill="rgba(255,255,255,0.16)"/>';
+    // Inner shadow from sash frame
+    s += '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="none" stroke="rgba(0,15,55,0.32)" stroke-width="6"/>';
+    // Glazing bead (glass-to-sash chrome strip)
+    s += '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="none" stroke="rgba(180,196,212,0.38)" stroke-width="3.5"/>';
     return s;
   }
 
@@ -8462,6 +8482,12 @@ async function submitSkizze(e) {
       +'<radialGradient id="lightSpill" cx="50%" cy="48%" r="52%"><stop offset="0%" stop-color="rgba(210,232,255,0.13)"/><stop offset="60%" stop-color="rgba(180,210,255,0.04)"/><stop offset="100%" stop-color="rgba(0,0,0,0)"/></radialGradient>'
       // Glass sky-to-ground gradient (objectBoundingBox scales to any rect)
       +'<linearGradient id="glBase" x1="0%" y1="0%" x2="6%" y2="100%" gradientUnits="objectBoundingBox"><stop offset="0%" stop-color="#ddf0ff" stop-opacity="0.52"/><stop offset="18%" stop-color="#a8d8f8" stop-opacity="0.26"/><stop offset="52%" stop-color="#6aacdc" stop-opacity="0.09"/><stop offset="100%" stop-color="#1848b0" stop-opacity="0.28"/></linearGradient>'
+      // Outdoor scene through glass: sky
+      +'<linearGradient id="outSky" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#ddf1ff"/><stop offset="28%" stop-color="#aad6f5"/><stop offset="60%" stop-color="#6cb8e8"/><stop offset="100%" stop-color="#9dd2f0"/></linearGradient>'
+      // Outdoor scene through glass: ground
+      +'<linearGradient id="outGround" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#c8e8f8"/><stop offset="18%" stop-color="#d8eec0"/><stop offset="52%" stop-color="#90b458"/><stop offset="100%" stop-color="#5e8030"/></linearGradient>'
+      // Horizon haze (applied over sky/ground seam)
+      +'<linearGradient id="outHaze" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="rgba(235,248,255,0)"/><stop offset="35%" stop-color="rgba(235,248,255,0.72)"/><stop offset="65%" stop-color="rgba(235,248,255,0.72)"/><stop offset="100%" stop-color="rgba(235,248,255,0)"/></linearGradient>'
       // Frame luminosity: 6-stop gradient (PVC bevel simulation)
       +'<linearGradient id="frameLum" x1="0%" y1="0%" x2="100%" y2="100%" gradientUnits="objectBoundingBox"><stop offset="0%" stop-color="rgba(255,255,255,0.30)"/><stop offset="12%" stop-color="rgba(255,255,255,0.20)"/><stop offset="38%" stop-color="rgba(255,255,255,0.04)"/><stop offset="62%" stop-color="rgba(0,0,0,0.06)"/><stop offset="88%" stop-color="rgba(0,0,0,0.24)"/><stop offset="100%" stop-color="rgba(0,0,0,0.38)"/></linearGradient>'
       // Chrome metallic gradient (horizontal — for Stoßgriff, hinges)
@@ -8515,7 +8541,6 @@ async function submitSkizze(e) {
     if (gw>10&&gh>10) {
       s += glassRect(gx,gy,gw,gh,S.glasdekor);
       s += sprosse(gx,gy,gw,gh,S.sproTyp,S.sproDicke);
-      if (!isFixed) s += oeffSymbol(gx,gy,gw,gh,oeff);
       if (view==='inn'&&!isFixed&&S.prod!=='haustuere') {
         if (S.prod==='balkontuer') s += balkontuerGriff(x,y,w,h,oeff,S.griff);
         else                       s += fensterGriff(x,y,w,h,oeff,S.griff);
