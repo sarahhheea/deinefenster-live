@@ -518,6 +518,123 @@
   </div>
 </section>
 
+<!-- KONTAKTFORMULAR -->
+<section class="py-20 md:py-28" style="background:#060e1e;border-top:1px solid rgba(255,255,255,0.06);">
+  <div class="max-w-[1440px] mx-auto px-6 md:px-12">
+    <div class="max-w-2xl mx-auto">
+      <div class="flex items-center gap-3 mb-6">
+        <span class="inline-block w-12 h-px bg-[#76a9fa]"></span>
+        <span class="text-[#76a9fa] font-bold text-xs uppercase tracking-[0.25em]">Nachricht schreiben</span>
+      </div>
+      <h2 class="font-extrabold text-white tracking-tighter mb-3" style="font-size:clamp(1.8rem,4vw,2.8rem);">
+        Direkt anfragen —<br><span style="font-family:'Fraunces',serif;font-weight:500;font-style:italic;color:#76a9fa;">wir antworten schnell.</span>
+      </h2>
+      <p class="text-white/50 text-sm mb-10">Sie erhalten sofort eine automatische Bestätigung — und von uns persönlich innerhalb von 24 Stunden.</p>
+
+      <form id="kontakt-form" novalidate>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="block text-white/60 text-xs font-bold uppercase tracking-wider mb-2">Name *</label>
+            <input id="kf-name" type="text" required autocomplete="name" placeholder="Max Mustermann"
+              class="w-full rounded-xl px-4 py-3 text-white text-sm font-medium outline-none transition-all"
+              style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);caret-color:#76a9fa;"
+              onfocus="this.style.borderColor='rgba(118,169,250,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
+          </div>
+          <div>
+            <label class="block text-white/60 text-xs font-bold uppercase tracking-wider mb-2">E-Mail *</label>
+            <input id="kf-email" type="email" required autocomplete="email" placeholder="ihre@email.de"
+              class="w-full rounded-xl px-4 py-3 text-white text-sm font-medium outline-none transition-all"
+              style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);caret-color:#76a9fa;"
+              onfocus="this.style.borderColor='rgba(118,169,250,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
+          </div>
+        </div>
+        <div class="mb-4">
+          <label class="block text-white/60 text-xs font-bold uppercase tracking-wider mb-2">Telefon (optional)</label>
+          <input id="kf-tel" type="tel" autocomplete="tel" placeholder="03381 / ..."
+            class="w-full rounded-xl px-4 py-3 text-white text-sm font-medium outline-none transition-all"
+            style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);caret-color:#76a9fa;"
+            onfocus="this.style.borderColor='rgba(118,169,250,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'">
+        </div>
+        <div class="mb-6">
+          <label class="block text-white/60 text-xs font-bold uppercase tracking-wider mb-2">Ihre Nachricht *</label>
+          <textarea id="kf-msg" required rows="5" placeholder="Ich interessiere mich für ..."
+            class="w-full rounded-xl px-4 py-3 text-white text-sm font-medium outline-none transition-all resize-none"
+            style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);caret-color:#76a9fa;"
+            onfocus="this.style.borderColor='rgba(118,169,250,0.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.12)'"></textarea>
+        </div>
+
+        <div id="kf-err" class="hidden mb-4 px-4 py-3 rounded-xl text-sm font-semibold" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;"></div>
+        <div id="kf-ok" class="hidden mb-4 px-4 py-4 rounded-xl text-sm" style="background:#edfaf3;border:1px solid #c3eed8;">
+          <div class="font-bold text-green-800 mb-1">✅ Nachricht gesendet!</div>
+          <div class="text-green-700">Wir haben Ihre Anfrage erhalten und Sie sofort per E-Mail bestätigt. Wir melden uns bei Ihnen.</div>
+        </div>
+
+        <button type="submit" id="kf-btn"
+          class="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold text-white text-sm transition-all"
+          style="background:linear-gradient(135deg,#225eaa,#1e3a8a);border:none;cursor:pointer;">
+          <span id="kf-btn-txt">Nachricht senden</span>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+        </button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<script>
+(function(){
+  const WORKER = 'https://deinefenster-email.deinefenster.workers.dev';
+  document.getElementById('kontakt-form').addEventListener('submit', async function(e){
+    e.preventDefault();
+    const name  = document.getElementById('kf-name').value.trim();
+    const email = document.getElementById('kf-email').value.trim();
+    const tel   = document.getElementById('kf-tel').value.trim();
+    const msg   = document.getElementById('kf-msg').value.trim();
+    const err   = document.getElementById('kf-err');
+    const ok    = document.getElementById('kf-ok');
+    const btn   = document.getElementById('kf-btn');
+    const btnTxt= document.getElementById('kf-btn-txt');
+    err.classList.add('hidden'); ok.classList.add('hidden');
+    if (!name || !email || !msg) {
+      err.textContent = 'Bitte Name, E-Mail und Nachricht ausfüllen.';
+      err.classList.remove('hidden'); return;
+    }
+    btn.disabled = true; btnTxt.textContent = 'Wird gesendet …';
+    const offerId = 'KT-' + Date.now().toString().slice(-6);
+    const datum   = new Date().toLocaleDateString('de-DE');
+    const internalText = [
+      'Kontaktanfrage über DeineFenster.de',
+      '══════════════════════════════════',
+      '', 'Name:    ' + name,
+      'E-Mail:  ' + email,
+      'Telefon: ' + (tel || '–'),
+      '', 'Nachricht:', msg,
+      '', 'Datum: ' + datum,
+    ].join('\n');
+    try {
+      await fetch(WORKER, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from: 'DeineFenster.de <noreply@deinefenster.de>',
+          to: ['info@baustoffchrist.de'],
+          reply_to: email,
+          subject: '[DeineFenster.de] Kontaktanfrage von ' + name,
+          text: internalText,
+          customer_email: email,
+          confirmation: { name, offerId, prodName: 'Kontaktanfrage', breite: '–', hoehe: '–', anzahl: 1 },
+        }),
+      });
+      ok.classList.remove('hidden');
+      document.getElementById('kontakt-form').reset();
+    } catch(ex) {
+      err.textContent = 'Fehler beim Senden. Bitte versuchen Sie es erneut oder rufen Sie uns an.';
+      err.classList.remove('hidden');
+    }
+    btn.disabled = false; btnTxt.textContent = 'Nachricht senden';
+  });
+})();
+</script>
+
 <!-- ZAHLUNGSARTEN -->
 <section class="py-16 md:py-20" style="background:#0a1530;border-top:1px solid rgba(255,255,255,0.06);">
   <div class="max-w-[1440px] mx-auto px-6 md:px-12">
