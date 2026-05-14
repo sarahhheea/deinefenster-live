@@ -5363,72 +5363,112 @@ function olComboSVG(olTyp, mainTyp) {
   return s;
 }
 
-// ── Fenster-Schema: Anthrazit-Rahmen + Glas-Gradient + Öffnungspfeile ───────────
+// ── Fenster-Schema: realistisches Anthrazit-Fenster SVG ─────────────────────────
 let _wsvgN=0;
 function windowSVG(layout, sashTypes, W, H) {
-  W=W||78; H=H||88; // Portrait-Proportionen (schlanker, mehr Fensterhöhe)
+  W=W||64; H=H||92;
   const id=++_wsvgN;
-  const FC='#363b42', FE='#525a64', FI='#23272d', MC='#2e3338';
-  const AW='rgba(255,255,255,0.92)', HG='rgba(255,255,255,0.96)', HD='#ccdde8';
-  const FR=6, DV=6;
+  // RAL 7016 Anthrazit Farbpalette
+  const FRM='#363c44';   // Außenrahmen
+  const FHL='#525c68';   // Rahmen-Highlight oben/links
+  const FSH='#22262d';   // Rahmen-Schatten unten/rechts
+  const SFR='#303640';   // Flügelrahmen (auf Glas)
+  const SFHL='#484f5c';  // Flügelrahmen-Highlight
+  const MUL='#2c3138';   // Pfosten/Kämpfer
+  const AW='rgba(255,255,255,0.90)';
+  const HG='rgba(255,255,255,0.95)';
+  const HDL='#aabcca';   // Griff
+  const FR=7, SF=3, DV=7;
   const hasOL=(layout||'').includes('oberlicht')||(layout||'').includes('ober-unter');
   const hasUL=(layout||'').includes('unterlicht')||(layout||'').includes('ober-unter');
   const fc=(layout||'1').charAt(0);
   const nMain=fc==='3'?3:fc==='2'?2:1;
-  let s=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block;border-radius:4px" xmlns="http://www.w3.org/2000/svg">`;
-  // Gradient-Definitionen: Glas oben hell → unten dunkler (Tageslicht-Effekt)
+  let s=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block;border-radius:3px" xmlns="http://www.w3.org/2000/svg">`;
   s+=`<defs>
-    <linearGradient id="gl${id}" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%"   stop-color="#d4ecfa" stop-opacity="0.62"/>
-      <stop offset="35%"  stop-color="#b8d8ee" stop-opacity="0.44"/>
-      <stop offset="100%" stop-color="#8ab8d4" stop-opacity="0.28"/>
+    <linearGradient id="gl${id}" x1="0" y1="0" x2="0.08" y2="1">
+      <stop offset="0%"   stop-color="#cde8f8" stop-opacity="0.82"/>
+      <stop offset="18%"  stop-color="#aed4ee" stop-opacity="0.65"/>
+      <stop offset="55%"  stop-color="#88b8d8" stop-opacity="0.48"/>
+      <stop offset="100%" stop-color="#5e9abc" stop-opacity="0.32"/>
     </linearGradient>
     <linearGradient id="gf${id}" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%"   stop-color="#b0cede" stop-opacity="0.40"/>
-      <stop offset="100%" stop-color="#7aaec8" stop-opacity="0.20"/>
+      <stop offset="0%"   stop-color="#98c4dc" stop-opacity="0.52"/>
+      <stop offset="100%" stop-color="#5888a8" stop-opacity="0.28"/>
     </linearGradient>
-    <linearGradient id="rf${id}" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%"   stop-color="white" stop-opacity="0.28"/>
-      <stop offset="45%"  stop-color="white" stop-opacity="0.06"/>
+    <linearGradient id="sk${id}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="white" stop-opacity="0.52"/>
+      <stop offset="100%" stop-color="white" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="rl${id}" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="white" stop-opacity="0.30"/>
+      <stop offset="42%"  stop-color="white" stop-opacity="0.05"/>
       <stop offset="100%" stop-color="white" stop-opacity="0"/>
     </linearGradient>
   </defs>`;
-  s+=`<rect width="${W}" height="${H}" rx="3" fill="#181d26"/>`;
-  s+=`<rect x="1" y="1" width="${W-2}" height="${H-2}" rx="2" fill="${FC}"/>`;
-  // 3D-Tiefe: helle Oberkante + linke Kante
-  s+=`<rect x="2" y="2" width="${W-4}" height="1.8" rx="0.9" fill="${FE}" opacity="0.42"/>`;
-  s+=`<rect x="2" y="2" width="1.8" height="${H-4}" rx="0.9" fill="${FE}" opacity="0.28"/>`;
+  // Wand-Hintergrund
+  s+=`<rect width="${W}" height="${H}" rx="3" fill="#161b23"/>`;
+  // Außenrahmen-Block
+  s+=`<rect x="1" y="1" width="${W-2}" height="${H-2}" rx="2" fill="${FRM}"/>`;
+  // Rahmen 3D: Highlight oben+links, Schatten unten+rechts
+  s+=`<rect x="1" y="1" width="${W-2}" height="2" fill="${FHL}" opacity="0.50"/>`;
+  s+=`<rect x="1" y="1" width="2" height="${H-2}" fill="${FHL}" opacity="0.34"/>`;
+  s+=`<rect x="1" y="${H-3}" width="${W-2}" height="2" fill="${FSH}" opacity="0.55"/>`;
+  s+=`<rect x="${W-3}" y="1" width="2" height="${H-2}" fill="${FSH}" opacity="0.45"/>`;
   const gx=FR,gy=FR,gw=W-2*FR,gh=H-2*FR;
   let mY=gy,mH=gh;
   function pane(px,py,pw,ph,typ){
     const fix=!typ||typ==='fest';
-    s+=`<rect x="${px}" y="${py}" width="${pw}" height="${ph}" fill="url(#${fix?'gf':'gl'}${id})"/>`;
-    // Flügelrahmen-Innenkontur (Profilschatten)
-    s+=`<rect x="${px}" y="${py}" width="${pw}" height="${ph}" fill="none" stroke="${FI}" stroke-width="1.8" opacity="0.65"/>`;
-    // Lichtreflexion diagonal (oben-links → Mitte)
-    if(!fix) s+=`<rect x="${px}" y="${py}" width="${pw}" height="${ph}" fill="url(#rf${id})"/>`;
+    const gid=fix?'gf':'gl';
+    // Glas-Fläche
+    s+=`<rect x="${px}" y="${py}" width="${pw}" height="${ph}" fill="url(#${gid}${id})"/>`;
+    // Himmels-Lichtband oben (22% Glasfläche)
+    const skH=Math.round(ph*0.22);
+    s+=`<rect x="${px}" y="${py}" width="${pw}" height="${skH}" fill="url(#sk${id})"/>`;
+    // Diagonaler Reflex oben-links
+    s+=`<rect x="${px}" y="${py}" width="${pw}" height="${ph}" fill="url(#rl${id})"/>`;
+    // Scharfe Reflexlinie ganz oben am Glas
+    s+=`<line x1="${px+2}" y1="${py+1}" x2="${px+pw-4}" y2="${py+1}" stroke="rgba(255,255,255,0.55)" stroke-width="0.9" stroke-linecap="round"/>`;
+    // Flügelrahmen ÜBER dem Glas (zeigt Profil-Tiefe)
+    if(!fix){
+      s+=`<rect x="${px}" y="${py}" width="${pw}" height="${ph}" fill="none" stroke="${SFR}" stroke-width="${SF*2}"/>`;
+      // Highlight auf Flügelrahmen oben+links
+      s+=`<line x1="${px}" y1="${py}" x2="${px+pw}" y2="${py}" stroke="${SFHL}" stroke-width="1" opacity="0.55"/>`;
+      s+=`<line x1="${px}" y1="${py}" x2="${px}" y2="${py+ph}" stroke="${SFHL}" stroke-width="1" opacity="0.38"/>`;
+    }
     if(!typ)return;
     if(typ==='fest'){
-      s+=`<line x1="${px+5}" y1="${py+5}" x2="${px+pw-5}" y2="${py+ph-5}" stroke="${AW}" stroke-width="1" opacity="0.28"/>`;
-      s+=`<line x1="${px+pw-5}" y1="${py+5}" x2="${px+5}" y2="${py+ph-5}" stroke="${AW}" stroke-width="1" opacity="0.28"/>`;
+      s+=`<line x1="${px+5}" y1="${py+5}" x2="${px+pw-5}" y2="${py+ph-5}" stroke="${AW}" stroke-width="0.9" opacity="0.25"/>`;
+      s+=`<line x1="${px+pw-5}" y1="${py+5}" x2="${px+5}" y2="${py+ph-5}" stroke="${AW}" stroke-width="0.9" opacity="0.25"/>`;
       return;
     }
-    const cx=px+pw/2,cy=py+ph/2,P=4.5;
-    const L=px+P,R=px+pw-P,T=py+P,B=py+ph-P;
-    const TK=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${HG}" stroke-width="2.2" stroke-linecap="round"/>`;
-    const AR=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${AW}" stroke-width="1.2" stroke-linecap="round"/>`;
-    const AF=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${AW}" stroke-width="0.75" stroke-linecap="round" opacity="0.48"/>`;
-    const MK=(hx,hy)=>`<rect x="${hx-1.8}" y="${hy-5}" width="3.6" height="10" rx="1.4" fill="${HD}"/>`;
-    if(typ==='kipp'){s+=TK(L,B,R,B);s+=AR(L,B,cx,T);s+=AR(R,B,cx,T);s+=MK(cx,cy-3);}
-    else if(typ==='dreh-l'){s+=TK(L,T,L,B);s+=AR(L,T,R,cy);s+=AR(L,B,R,cy);s+=MK(R-5,cy);}
-    else if(typ==='dreh-r'){s+=TK(R,T,R,B);s+=AR(R,T,L,cy);s+=AR(R,B,L,cy);s+=MK(L+5,cy);}
-    else if(typ==='dk-l'){s+=TK(L,T,L,B);s+=TK(L,B,R,B);s+=AR(L,T,R,cy);s+=AR(L,B,R,cy);s+=AF(L,B,cx,T);s+=AF(R,B,cx,T);s+=MK(R-5,cy);}
-    else if(typ==='dk-r'){s+=TK(R,T,R,B);s+=TK(L,B,R,B);s+=AR(R,T,L,cy);s+=AR(R,B,L,cy);s+=AF(L,B,cx,T);s+=AF(R,B,cx,T);s+=MK(L+5,cy);}
+    const ip=SF+1; // Innenpad (nach Flügelrahmen)
+    const cx=px+pw/2,cy=py+ph/2;
+    const L=px+ip,R=px+pw-ip,T=py+ip,B=py+ph-ip;
+    const TK=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${HG}" stroke-width="2.0" stroke-linecap="round"/>`;
+    const AR=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${AW}" stroke-width="1.1" stroke-linecap="round"/>`;
+    const AF=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${AW}" stroke-width="0.7" stroke-linecap="round" opacity="0.42"/>`;
+    // T-Griff (realistischer als Rechteck)
+    const MK=(hx,hy)=>
+      `<rect x="${hx-1.5}" y="${hy-6.5}" width="3" height="12" rx="1.2" fill="${HDL}"/>`+
+      `<rect x="${hx-5.5}" y="${hy-2}" width="11" height="3.5" rx="1.2" fill="${HDL}"/>`;
+    if(typ==='kipp'){s+=TK(L,B,R,B);s+=AR(L,B,cx,T);s+=AR(R,B,cx,T);s+=MK(cx,cy-5);}
+    else if(typ==='dreh-l'){s+=TK(L,T,L,B);s+=AR(L,T,R,cy);s+=AR(L,B,R,cy);s+=MK(R-7,cy);}
+    else if(typ==='dreh-r'){s+=TK(R,T,R,B);s+=AR(R,T,L,cy);s+=AR(R,B,L,cy);s+=MK(L+7,cy);}
+    else if(typ==='dk-l'){s+=TK(L,T,L,B);s+=TK(L,B,R,B);s+=AR(L,T,R,cy);s+=AR(L,B,R,cy);s+=AF(L,B,cx,T);s+=AF(R,B,cx,T);s+=MK(R-7,cy);}
+    else if(typ==='dk-r'){s+=TK(R,T,R,B);s+=TK(L,B,R,B);s+=AR(R,T,L,cy);s+=AR(R,B,L,cy);s+=AF(L,B,cx,T);s+=AF(R,B,cx,T);s+=MK(L+7,cy);}
   }
-  if(hasOL){const olH=Math.round(gh*0.24);pane(gx,gy,gw,olH,sashTypes?'fest':null);s+=`<rect x="${gx}" y="${gy+olH}" width="${gw}" height="${DV}" fill="${MC}"/>`;mY=gy+olH+DV;mH-=olH+DV;}
-  if(hasUL){const ulH=Math.round(gh*0.22);const ulY=gy+gh-ulH;s+=`<rect x="${gx}" y="${ulY-DV}" width="${gw}" height="${DV}" fill="${MC}"/>`;pane(gx,ulY,gw,ulH,sashTypes?'fest':null);mH-=ulH+DV;}
+  if(hasOL){const olH=Math.round(gh*0.24);pane(gx,gy,gw,olH,sashTypes?'fest':null);s+=`<rect x="${gx}" y="${gy+olH}" width="${gw}" height="${DV}" fill="${MUL}"/>`;mY=gy+olH+DV;mH-=olH+DV;}
+  if(hasUL){const ulH=Math.round(gh*0.22);const ulY=gy+gh-ulH;s+=`<rect x="${gx}" y="${ulY-DV}" width="${gw}" height="${DV}" fill="${MUL}"/>`;pane(gx,ulY,gw,ulH,sashTypes?'fest':null);mH-=ulH+DV;}
   const sw=(gw-DV*(nMain-1))/nMain;
-  for(let i=0;i<nMain;i++){const sx=gx+i*(sw+DV);pane(sx,mY,sw,mH,sashTypes?sashTypes[i]||null:null);if(i<nMain-1)s+=`<rect x="${sx+sw}" y="${mY}" width="${DV}" height="${mH}" fill="${MC}"/>`;}
+  for(let i=0;i<nMain;i++){
+    const sx=gx+i*(sw+DV);
+    pane(sx,mY,sw,mH,sashTypes?sashTypes[i]||null:null);
+    if(i<nMain-1){
+      s+=`<rect x="${sx+sw}" y="${mY}" width="${DV}" height="${mH}" fill="${MUL}"/>`;
+      // Pfosten-Highlight
+      s+=`<line x1="${sx+sw}" y1="${mY}" x2="${sx+sw}" y2="${mY+mH}" stroke="${FHL}" stroke-width="0.7" opacity="0.25"/>`;
+    }
+  }
   return s+'</svg>';
 }
 
