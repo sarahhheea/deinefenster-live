@@ -291,7 +291,7 @@
           headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + RESEND_KEY },
           body: JSON.stringify({
             from: FROM_ADDR,
-            to: ['sarahchrist@aol.com'],
+            to: ['info@baustoffchrist.de'],
             subject: `🔔 Neue Anfrage ${offerId} · ${cart.length} Element(e) · ${tot} €`,
             html: sarahHtml,
           }),
