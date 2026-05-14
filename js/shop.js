@@ -342,17 +342,6 @@ function bindeEventHandler() {
     rendere();
   });
 
-  // Warenkorb
-  document.getElementById('cartBtnNav').addEventListener('click', oeffneCart);
-  document.getElementById('cartCloseBtn').addEventListener('click', schliesseCart);
-  document.getElementById('cartOverlay').addEventListener('click', schliesseCart);
-  document.getElementById('cartLeerenBtn').addEventListener('click', leereCart);
-  document.getElementById('cartAnfrageBtn').addEventListener('click', stelleCartAnfrage);
-  document.getElementById('cartWhatsappBtn').addEventListener('click', e => {
-    e.preventDefault();
-    stelleCartAnfrageWhatsApp();
-  });
-
   // Detail-Modal
   document.getElementById('detailCloseBtn').addEventListener('click', schliesseDetail);
   document.getElementById('detailOverlay').addEventListener('click', schliesseDetail);
@@ -549,13 +538,6 @@ function rendere() {
   // Karten rendern
   gridEl.innerHTML = result.map(p => karteHtml(p)).join('');
 
-  // Click-Handler für Karten (Event-Delegation würde reichen, aber für Klarheit hier)
-  gridEl.querySelectorAll('[data-action="cart-add"]').forEach(btn => {
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
-      addToCart(btn.dataset.id);
-    });
-  });
   // Druck-Icon: Klick soll nicht das Detail-Modal öffnen
   gridEl.querySelectorAll('[data-action="drucken"]').forEach(a => {
     a.addEventListener('click', e => e.stopPropagation());
@@ -619,9 +601,9 @@ function karteHtml(p) {
             <span class="text-[10px] text-ink-soft block">${p.sonderpreis_eur ? 'Sonderpreis' : (p.export_modell ? 'Export' : 'ab')}</span>
             <span class="text-xl font-extrabold text-primary leading-none">${formatPreis(p.preis_eur)}<span class="text-sm">${preisStern}</span></span>
           </div>
-          <button data-action="cart-add" data-id="${p.id}" class="bg-primary text-white px-3 py-2 rounded-full text-xs font-bold hover:bg-primary-d transition-colors flex items-center gap-1">
-            <span class="material-symbols-outlined" style="font-size:14px">add_shopping_cart</span>
-            <span class="hidden sm:inline">Hinzufügen</span>
+          <button data-action="detail" data-id="${p.id}" class="bg-primary/10 text-primary px-3 py-2 rounded-full text-xs font-bold hover:bg-primary/20 transition-colors flex items-center gap-1">
+            <span class="material-symbols-outlined" style="font-size:14px">open_in_new</span>
+            <span class="hidden sm:inline">Details</span>
           </button>
         </div>
       </div>
