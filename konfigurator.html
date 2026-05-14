@@ -1467,15 +1467,57 @@
     /* Alle inaktiven Steps ausblenden */
     #steps .sc:not(.open) { display: none !important; }
     /* Aktiver Step: kein Karten-Rahmen, füllt die Mitte */
-    #steps .sc.open { border-radius: 0 !important; border: none !important; box-shadow: none !important; overflow: visible !important; }
-    /* Step-Header → Seiten-Titel, kein Toggle */
-    #steps .sh { cursor: default !important; pointer-events: none !important; padding: 36px 44px 20px !important; background: transparent !important; border: none !important; }
-    #steps .sh .chev { display: none !important; }
+    #steps .sc.open {
+      border-radius: 0 !important; border: none !important;
+      box-shadow: none !important; overflow: visible !important;
+    }
+
+    /* ── Step-Header: Accordion-Look komplett entfernen, nur Seiten-Titel ── */
+    #steps .sh,
+    #steps .sc.open .sh,
+    #steps .sh:hover {
+      background: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+      border-bottom: none !important;
+      cursor: default !important;
+      pointer-events: none !important;
+      padding: 40px 44px 16px 44px !important;
+    }
+    #steps .sh .chev  { display: none !important; }
     #steps .sh .badge { display: none !important; }
-    #steps .sh .slabel { font-size: 24px !important; font-weight: 800 !important; letter-spacing: -0.025em !important; color: rgba(238,242,255,0.97) !important; line-height: 1.15 !important; }
-    #steps .sh .sdesc  { font-size: 14px !important; color: rgba(200,215,255,0.5) !important; margin-top: 6px !important; white-space: normal !important; overflow: visible !important; text-overflow: unset !important; }
-    /* Step-Body: seitliche Padding */
-    #steps .sc.open > .sb { padding: 0 44px 44px !important; }
+    #steps .sh .slabel {
+      font-size: 26px !important; font-weight: 800 !important;
+      letter-spacing: -0.03em !important;
+      color: rgba(238,242,255,0.97) !important;
+      line-height: 1.12 !important;
+      font-family: 'Plus Jakarta Sans', sans-serif !important;
+      white-space: normal !important;
+    }
+    #steps .sh .sdesc {
+      font-size: 14px !important; font-weight: 400 !important;
+      color: rgba(200,215,255,0.45) !important;
+      margin-top: 6px !important;
+      white-space: normal !important; overflow: visible !important;
+      text-overflow: unset !important; line-height: 1.5 !important;
+    }
+    /* Trennlinie nach dem Titel */
+    #steps .sh::after {
+      content: '' !important; display: block !important;
+      width: 100% !important; height: 1px !important;
+      background: rgba(255,255,255,0.07) !important;
+      margin-top: 20px !important;
+      position: static !important;
+    }
+
+    /* Step-Body: Accordion-Box-Styles entfernen */
+    #steps .sc.open > .sb {
+      display: block !important;
+      background: transparent !important;
+      border-top: none !important;
+      padding: 28px 44px 44px !important;
+      animation: none !important;
+    }
 
     /* RECHTE PREVIEW-SPALTE */
     #sidebar-wrap {
