@@ -2238,7 +2238,7 @@
         <strong>Drutex-Richtwerte:</strong> 1 Flügel bis ca. 1400 mm Breite · 2 Flügel 1200–2400 mm · 3 Flügel 1800–3000 mm. Pro Flügel maximal ca. 2,5 m² Glasfläche. Ober-/Unterlicht typisch ab Raumhöhe 2300 mm sinnvoll. Sondermaße auf Anfrage.
       </div>
     </div>
-    <div id="fluegel-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
+    <div id="fluegel-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-2 mt-2">
       <!-- filled by JS -->
     </div>
     <button type="button" onclick="openS(4)" class="w-full mt-4 flex items-center justify-center gap-2 font-bold py-3 rounded-full text-white text-sm" style="background:var(--c-primary);font-family:'Plus Jakarta Sans',sans-serif">
@@ -5363,56 +5363,62 @@ function olComboSVG(olTyp, mainTyp) {
   return s;
 }
 
-// ── Fenster-Schema: Anthrazit-Rahmen + echtes Glas + Öffnungspfeile ──────────────
-// layout: '1-fluegel'|'2-fluegel'|'3-fluegel'|'1-oberlicht'|'2-oberlicht' etc.
-// sashTypes: null = Layout-only | ['dk-l','dreh-r'] = mit Öffnungsart-Pfeilen
+// ── Fenster-Schema: Anthrazit-Rahmen + Glas-Gradient + Öffnungspfeile ───────────
+let _wsvgN=0;
 function windowSVG(layout, sashTypes, W, H) {
-  W=W||100; H=H||82;
-  // Anthrazit-Palette (RAL 7016 Stil)
-  const FC='#363b42';   // Anthrazit Außenrahmen
-  const FE='#4a5060';   // Rahmen-Highlight (helle Kante, simuliert Tiefe)
-  const FI='#2c3038';   // Innenkante/Schatten
-  const MC='#353a40';   // Mittelpfosten/Kämpfer
-  const GL='rgba(185,215,235,0.42)';   // Glas – helles Blau-Grau
-  const GF='rgba(155,195,215,0.28)';   // Glas fest – leicht dunkler
-  const AW='rgba(255,255,255,0.90)';   // Öffnungspfeile (weiß)
-  const HG='rgba(255,255,255,0.95)';   // Scharnierlinie (helles Weiß)
-  const HD='#d8e4f0';                  // Griff
-  const FR=7, DV=6;
+  W=W||78; H=H||88; // Portrait-Proportionen (schlanker, mehr Fensterhöhe)
+  const id=++_wsvgN;
+  const FC='#363b42', FE='#525a64', FI='#23272d', MC='#2e3338';
+  const AW='rgba(255,255,255,0.92)', HG='rgba(255,255,255,0.96)', HD='#ccdde8';
+  const FR=6, DV=6;
   const hasOL=(layout||'').includes('oberlicht')||(layout||'').includes('ober-unter');
   const hasUL=(layout||'').includes('unterlicht')||(layout||'').includes('ober-unter');
   const fc=(layout||'1').charAt(0);
   const nMain=fc==='3'?3:fc==='2'?2:1;
   let s=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block;border-radius:4px" xmlns="http://www.w3.org/2000/svg">`;
-  // Hintergrund (Wandfarbe = dunkel)
-  s+=`<rect width="${W}" height="${H}" rx="3" fill="#1a1f28"/>`;
-  // Äußerer Rahmen (Anthrazit-Block)
+  // Gradient-Definitionen: Glas oben hell → unten dunkler (Tageslicht-Effekt)
+  s+=`<defs>
+    <linearGradient id="gl${id}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#d4ecfa" stop-opacity="0.62"/>
+      <stop offset="35%"  stop-color="#b8d8ee" stop-opacity="0.44"/>
+      <stop offset="100%" stop-color="#8ab8d4" stop-opacity="0.28"/>
+    </linearGradient>
+    <linearGradient id="gf${id}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#b0cede" stop-opacity="0.40"/>
+      <stop offset="100%" stop-color="#7aaec8" stop-opacity="0.20"/>
+    </linearGradient>
+    <linearGradient id="rf${id}" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="white" stop-opacity="0.28"/>
+      <stop offset="45%"  stop-color="white" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="white" stop-opacity="0"/>
+    </linearGradient>
+  </defs>`;
+  s+=`<rect width="${W}" height="${H}" rx="3" fill="#181d26"/>`;
   s+=`<rect x="1" y="1" width="${W-2}" height="${H-2}" rx="2" fill="${FC}"/>`;
-  // Oberkante-Highlight für 3D-Tiefe
-  s+=`<rect x="2" y="2" width="${W-4}" height="2" rx="1" fill="${FE}" opacity="0.5"/>`;
-  s+=`<rect x="2" y="2" width="2" height="${H-4}" rx="1" fill="${FE}" opacity="0.35"/>`;
+  // 3D-Tiefe: helle Oberkante + linke Kante
+  s+=`<rect x="2" y="2" width="${W-4}" height="1.8" rx="0.9" fill="${FE}" opacity="0.42"/>`;
+  s+=`<rect x="2" y="2" width="1.8" height="${H-4}" rx="0.9" fill="${FE}" opacity="0.28"/>`;
   const gx=FR,gy=FR,gw=W-2*FR,gh=H-2*FR;
   let mY=gy,mH=gh;
   function pane(px,py,pw,ph,typ){
     const fix=!typ||typ==='fest';
-    // Glas-Fläche
-    s+=`<rect x="${px}" y="${py}" width="${pw}" height="${ph}" fill="${fix?GF:GL}"/>`;
-    // Innen-Schattenlinie (Flügelrahmen-Profil)
-    s+=`<rect x="${px}" y="${py}" width="${pw}" height="${ph}" fill="none" stroke="${FI}" stroke-width="2" opacity="0.7"/>`;
-    // Subtiler Glas-Lichtreflex oben-links
-    if(!fix) s+=`<line x1="${px+3}" y1="${py+2}" x2="${px+pw-8}" y2="${py+2}" stroke="rgba(255,255,255,0.18)" stroke-width="1.5" stroke-linecap="round"/>`;
+    s+=`<rect x="${px}" y="${py}" width="${pw}" height="${ph}" fill="url(#${fix?'gf':'gl'}${id})"/>`;
+    // Flügelrahmen-Innenkontur (Profilschatten)
+    s+=`<rect x="${px}" y="${py}" width="${pw}" height="${ph}" fill="none" stroke="${FI}" stroke-width="1.8" opacity="0.65"/>`;
+    // Lichtreflexion diagonal (oben-links → Mitte)
+    if(!fix) s+=`<rect x="${px}" y="${py}" width="${pw}" height="${ph}" fill="url(#rf${id})"/>`;
     if(!typ)return;
     if(typ==='fest'){
-      s+=`<line x1="${px+6}" y1="${py+6}" x2="${px+pw-6}" y2="${py+ph-6}" stroke="${AW}" stroke-width="1" opacity="0.35"/>`;
-      s+=`<line x1="${px+pw-6}" y1="${py+6}" x2="${px+6}" y2="${py+ph-6}" stroke="${AW}" stroke-width="1" opacity="0.35"/>`;
+      s+=`<line x1="${px+5}" y1="${py+5}" x2="${px+pw-5}" y2="${py+ph-5}" stroke="${AW}" stroke-width="1" opacity="0.28"/>`;
+      s+=`<line x1="${px+pw-5}" y1="${py+5}" x2="${px+5}" y2="${py+ph-5}" stroke="${AW}" stroke-width="1" opacity="0.28"/>`;
       return;
     }
-    const cx=px+pw/2,cy=py+ph/2,P=5;
+    const cx=px+pw/2,cy=py+ph/2,P=4.5;
     const L=px+P,R=px+pw-P,T=py+P,B=py+ph-P;
-    const TK=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${HG}" stroke-width="2.5" stroke-linecap="round"/>`;
-    const AR=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${AW}" stroke-width="1.3" stroke-linecap="round"/>`;
-    const AF=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${AW}" stroke-width="0.8" stroke-linecap="round" opacity="0.5"/>`;
-    const MK=(hx,hy)=>`<rect x="${hx-2}" y="${hy-5.5}" width="4" height="11" rx="1.5" fill="${HD}"/>`;
+    const TK=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${HG}" stroke-width="2.2" stroke-linecap="round"/>`;
+    const AR=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${AW}" stroke-width="1.2" stroke-linecap="round"/>`;
+    const AF=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${AW}" stroke-width="0.75" stroke-linecap="round" opacity="0.48"/>`;
+    const MK=(hx,hy)=>`<rect x="${hx-1.8}" y="${hy-5}" width="3.6" height="10" rx="1.4" fill="${HD}"/>`;
     if(typ==='kipp'){s+=TK(L,B,R,B);s+=AR(L,B,cx,T);s+=AR(R,B,cx,T);s+=MK(cx,cy-3);}
     else if(typ==='dreh-l'){s+=TK(L,T,L,B);s+=AR(L,T,R,cy);s+=AR(L,B,R,cy);s+=MK(R-5,cy);}
     else if(typ==='dreh-r'){s+=TK(R,T,R,B);s+=AR(R,T,L,cy);s+=AR(R,B,L,cy);s+=MK(L+5,cy);}
@@ -5577,7 +5583,7 @@ function buildOeffSash() {
 
     if (allCombos.length > 0) {
       html += `<div class="sec-t" style="margin-top:0">Öffnungsart wählen</div>`;
-      html += `<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">`;
+      html += `<div class="grid grid-cols-3 sm:grid-cols-3 gap-2 mb-4">`;
       allCombos.forEach(c => {
         const isSel = S.oeff1 === c.v1 && S.oeff2 === c.v2 && (S.zweiteilung||'') === c.type;
         const priceDelta = (P.oeff_sash[c.v1]?.add||0) + (P.oeff_sash[c.v2]?.add||0);
@@ -5605,7 +5611,7 @@ function buildOeffSash() {
 
     if (btCombos.length > 0) {
       html += `<div class="sec-t" style="margin-top:0">Öffnungsart wählen</div>`;
-      html += `<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">`;
+      html += `<div class="grid grid-cols-3 sm:grid-cols-3 gap-2 mb-4">`;
       btCombos.forEach(c => {
         const isSel = S.oeff1 === c.v1 && S.oeff2 === c.v2 && (S.zweiteilung||'') === c.type;
         const priceDelta = (P.oeff_sash[c.v1]?.add||0) + (P.oeff_sash[c.v2]?.add||0);
@@ -5635,7 +5641,7 @@ function buildOeffSash() {
 
     if (combos3.length > 0) {
       html += `<div class="sec-t" style="margin-top:0">Öffnungsart wählen</div>`;
-      html += `<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">`;
+      html += `<div class="grid grid-cols-3 sm:grid-cols-3 gap-2 mb-4">`;
       combos3.forEach(c => {
         const isSel = S.oeff1===c.v1 && S.oeff2===c.v2 && S.oeff3===c.v3 && (S.dreiteilung||'')===c.t;
         const pd = (P.oeff_sash[c.v1]?.add||0) + (P.oeff_sash[c.v2]?.add||0) + (P.oeff_sash[c.v3]?.add||0);
@@ -5674,7 +5680,7 @@ function buildOeffSash() {
     });
     if (combos2ol.length > 0) {
       html += `<div class="sec-t" style="margin-top:0">Öffnungsart wählen</div>`;
-      html += `<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">`;
+      html += `<div class="grid grid-cols-3 sm:grid-cols-3 gap-2 mb-4">`;
       combos2ol.forEach(c => {
         const isSel = S.oeff1===c.v1 && S.oeff2===c.v2 && (S.zweiteilung||'')===c.sep && (S.oberlichtOeff||'fest')===c.ol;
         const pd = (P.oeff_sash[c.v1]?.add||0) + (P.oeff_sash[c.v2]?.add||0);
@@ -5712,7 +5718,7 @@ function buildOeffSash() {
     });
     if (combos3ol.length > 0) {
       html += `<div class="sec-t" style="margin-top:0">Öffnungsart wählen</div>`;
-      html += `<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">`;
+      html += `<div class="grid grid-cols-3 sm:grid-cols-3 gap-2 mb-4">`;
       combos3ol.forEach(c => {
         const t3 = `${c.sep12}-${c.sep23}`.replace(/^-|-$/g,'') || '';
         const isSel = S.oeff1===c.v1 && S.oeff2===c.v2 && S.oeff3===c.v3
@@ -5744,7 +5750,7 @@ function buildOeffSash() {
       {v1:'dk-l',   v2:'fest',   sep:'',        suf:'DrehKippLinks-Fest'},
     ];
     html += `<div class="sec-t" style="margin-top:0">Öffnungsart wählen</div>`;
-    html += `<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">`;
+    html += `<div class="grid grid-cols-3 sm:grid-cols-3 gap-2 mb-4">`;
     ['fest','kipp'].forEach(ol => {
       ['fest','kipp'].forEach(ul => {
         base7.forEach(c => {
@@ -5807,7 +5813,7 @@ function buildOeffSash() {
       {v1:'dk-l',   v2:'fest',   sep:'',        suf:'DrehKippLinks-Fest'},
     ];
     html += `<div class="sec-t" style="margin-top:0">Öffnungsart wählen</div>`;
-    html += `<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">`;
+    html += `<div class="grid grid-cols-3 sm:grid-cols-3 gap-2 mb-4">`;
     ['fest','kipp'].forEach(ul => {
       base7.forEach(c => {
         const isSel = S.oeff1===c.v1 && S.oeff2===c.v2 && S.zweiteilung===c.sep && (S.unterlichtOeff||'fest')===ul;
@@ -5955,7 +5961,7 @@ function buildOeffSash() {
     ].filter(o => !o.disabled);
     if (btOpts.length > 0) {
       html += `<div class="sec-t" style="margin-top:0">Öffnungsart wählen</div>`;
-      html += `<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-3" id="oeff-grid-1">`;
+      html += `<div class="grid grid-cols-3 sm:grid-cols-3 gap-2 mb-3" id="oeff-grid-1">`;
       btOpts.forEach(opt => {
         const sel = S.oeff1 === opt.v;
         html += `<div class="oc${sel?' sel':''}" data-v="${opt.v}" data-sash="1" onclick="pickOeff(this,1)" style="flex-direction:column;align-items:center;text-align:center;padding:8px 6px 10px;gap:3px">
@@ -5976,7 +5982,7 @@ function buildOeffSash() {
     for(let i=0;i<sashCount;i++){
       const sk='oeff'+(i+1);
       if(sashCount>1) html+=`<div class="sec-t">${sashLabels[i]}</div>`;
-      html+=`<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-3" id="oeff-grid-${i+1}">`;
+      html+=`<div class="grid grid-cols-3 sm:grid-cols-3 gap-2 mb-3" id="oeff-grid-${i+1}">`;
       sashOpts.forEach(opt=>{
         const sel = S[sk]===opt.v && !opt.disabled;
         const disabledStyle = opt.disabled ? ';opacity:0.45;pointer-events:none;cursor:not-allowed' : '';
