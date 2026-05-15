@@ -1,5 +1,43 @@
 # DeineFenster.de — Claude Anweisungen
 
+## DEUTSCHE COMPLIANCE — IMMER MITPRÜFEN (Sarah-Wunsch 15.05.2026)
+
+Bei JEDER Änderung an dieser Website muss ich proaktiv prüfen — auch ohne dass Sarah explizit fragt:
+
+**Skills die ich heranziehe:**
+- `anwalt-de` — DSGVO, TTDSG, DDG/TMG, UWG, AGB, Urheberrecht, BFSG, EU AI Act
+- `dsgvo-third-country-transfer` — bei JEDEM externen Dienst (CDN/SaaS/API)
+- `dsgvo-auth-and-logging` — bei Login/Session/Logging
+- `dsgvo-email-marketing` — bei Newsletter/Marketing-Mail
+- `accessibility-compliance-accessibility-audit` — BFSG ab 28.06.2025 (B2C-Pflicht)
+
+**6 Pflicht-Checks die ich bei relevanten Änderungen automatisch laufen lasse:**
+
+1. **Impressum** (§ 5 DDG) — Firmenname konsistent zwischen Impressum + AGB + Footer
+2. **Datenschutzerklärung** (Art. 13 DSGVO) — Jeder neue externe Dienst muss in DSE rein, sonst Bußgeldrisiko
+3. **Cookie-Consent** (§ 25 TTDSG) — Vor jedem nicht-essentiellen Cookie/Script: Consent erforderlich. Plausible nur nach Statistik-Consent.
+4. **Widerrufsbelehrung** (§ 312g, § 355 BGB) — Bei B2C-Bestellprozess: Muster-Widerrufsformular + 14 Tage Frist + Ausnahme Maßanfertigung
+5. **Preisangaben** (PAngV) — Endpreise inkl. MwSt., Versandkosten in Preisnähe sichtbar
+6. **Barrierefreiheit** (BFSG ab 28.06.2025) — WCAG 2.1 AA: Kontrast 4.5:1, Tastatur-Nav, Alt-Texte, Formular-Labels, Focus-Indikatoren, Skip-Link
+
+**Triggerlose Pflichtprüfungen** (auch ohne Sarah-Anfrage):
+- Externe Script-Tags (Fonts, CDNs, Analytics) → DSGVO/TTDSG-Check + DSE-Eintrag
+- Iframes (Maps, YouTube, Social Embeds) → 2-Klick-Lösung Pflicht
+- Formulare → Einwilligungs-Checkbox + DSE-Link + AVV bei Auftragsverarbeiter
+- API-Keys/Tokens → niemals im Frontend
+- Stock-Bilder → Lizenz-Quelle prüfen
+- Konkurrenten-Nennung → UWG § 6 prüfen
+
+**Bekannte Risiken in dieser Codebase (Status 15.05.2026):**
+- ✅ Cookie-Banner live (TTDSG-konform)
+- ✅ Google Fonts entfernt (LG-München-Risiko ausgeschlossen)
+- ✅ Resend/GitHub-Token aus Frontend (Worker-Proxy + Login-Token)
+- ✅ Google Maps 2-Klick-Lösung
+- ✅ DSE Cloudflare/Resend/Web3Forms/Make/Plausible/Tailwind/Supabase/Maps gelistet
+- 🟡 BFSG-Audit ausstehend (B2C-Site, ab 28.06.2025 Pflicht)
+- 🟡 PAngV-Check Konfigurator (Versandkosten in Preisnähe?)
+- 🟡 Impressum vs. AGB Firmenname harmonisieren
+
 ## CHANGELOG (neueste zuerst)
 
 ### 15.05.2026 (2. Eintrag — Werbung mit Higgsfield)
