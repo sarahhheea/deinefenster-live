@@ -2,7 +2,12 @@
 
 ## CHANGELOG (neueste zuerst)
 
-### 15.05.2026
+### 15.05.2026 (2. Eintrag — Werbung mit Higgsfield)
+- **YouTube-Learning gespeichert:** `~/youtube-learnings/higgsfield-mcp-claude-ugc-hooks.md` — Higgsfield MCP + Claude → UGC-Hooks-Pipeline. Sarah-Plan: später Werbung schalten (Reels/TikTok) mit Hook-Pattern (Shock-Opener stoppt Scrolling). Drei konkrete Hook-Ideen für DeineFenster: Lagerverkauf, Ankauf, Hofverkauf.
+- **WICHTIG:** Higgsfield-Generate-Sperre bleibt aktiv — Memory `kontakt_christ` und CLAUDE.md "Higgsfield kritische Finanzregel" haben Vorrang. Vor produktivem Hook-Einsatz: Browser-Playwright-Test, Toggle prüfen, Balance vor/nach.
+- **Recherche-Tipp aus Video:** Alex Hormozi Hook-Theorie ist die Foundation hinter Higgsfields Hooks-Feature — sein Buch "$100M Offers" ist gratis Foundation für Hook-Prompt-Engineering.
+
+### 15.05.2026 (1. Eintrag — Seiten-Aufräumen)
 - **index.html · Hofverkauf-Karten redesigned:** Bilder voll sichtbar oben (240px), hellblauer Rand 1.5px (rgba(118,169,250,0.32)), Hover lifts card. Lagerfenster-Karte: LKW-Bild (`hof-lager-lieferung.jpg`, object-position:center) — vorher hatte ich auf Stapler bzw. Hochregal-Halle getauscht, Sarah wollte LKW zurück.
 - **fenster-austauschen-kosten.html (Ankauf-Seite) · Custom-CSS nachgerüstet:** Klassen badge / hero-blob / info-card / btn-whatsapp / faq-summary / ankauf-step / answer-box-blue / gallery-img / notice-box waren im HTML benutzt aber nirgends definiert → Style-Block aus gebrauchte-fenster-kaufen.html portiert + Ankauf-spezifische Klassen ergänzt + global-design.css verlinkt. **3 unpassende Stock-Fotos** (Bar/Hand/Skyline von Unsplash) entfernt — passten nicht zum Thema "alte Fenster verkaufen".
 - **kunststofffenster-kaufen.html (Neue Fenster) · Sektionen kompakter:** Sektionen "ABLAUF" (96/100→72/80px) und "WARUM BEI UNS" (88→72px) hatten zuviel Padding für ihren Inhalt → wirkten leer. mb-20 → mb-12, mt-16 → mt-12.
