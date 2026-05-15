@@ -67,19 +67,29 @@ Sarah antwortet persönlich
 - **Formspree** (50 Submits/Monat free) hat Auto-Reply kostenlos
 - **Status quo**: Kunde sieht nur den Erfolgs-Screen „Wir melden uns innerhalb 24h"
 
-## Shop-Backend (offen — deine Entscheidung nötig)
+## Shop-Backend / Inserieren (jetzt umgebaut)
 
-Der GitHub-Token war das größte Risiko. Aktuell zeigt `js/sheets-config.js` auf einen nicht-existenten Cloudflare-Worker — d.h. **Schreibzugriff auf den Shop ist aktuell kaputt** (Lesen funktioniert weiter, weil das öffentliche JSON über GitHub Pages geladen wird).
+**Wie es jetzt funktioniert:** Der GitHub-Zugangsschlüssel (Personal Access Token) liegt NICHT mehr im Quellcode. Stattdessen geben Sarah und die Familie den Schlüssel **einmalig beim Login** auf `admin.html` ein. Der Browser merkt sich den Schlüssel (localStorage). Inserieren, Bilder hochladen, Inserate ändern funktioniert wieder wie früher.
 
-Drei Optionen:
+**Wenn der Browser-Speicher gelöscht wird** (z.B. Cookies löschen, anderer Browser) → Schlüssel muss neu eingegeben werden.
 
-| Option | Vor- | Nachteil |
-|--------|------|----------|
-| **A** Shop-Schreibzugriff dauerhaft deaktivieren | maximale Sicherheit, keine weitere Arbeit | du musst neue Inserate selbst lokal via Git pflegen, Familie kann nicht selbst inserieren |
-| **B** GitHub-Token wieder ins Frontend (mit minimalen Scopes + regelmäßiger Rotation) | Familie kann wieder inserieren | Risiko bleibt, Token muss alle 3 Monate rotiert werden |
-| **C** Migration auf Supabase | sauber, Supabase-anon-Key ist designed für Frontend, ist eh schon im Projekt | 1-2h Migrations-Arbeit, RLS-Regeln müssen stimmen |
+### Token erstellen (einmalig, 3 Min)
 
-**Meine Empfehlung: C** — du hast Supabase schon eingerichtet (`js/supabase-config.js`), das ist die richtige Lösung. Aber **sag mir wann es brennt** — wenn Familie morgen inserieren muss, ist B als Übergang OK.
+1. https://github.com/settings/personal-access-tokens/new öffnen (am besten am Computer, nicht am Handy)
+2. **Token name**: z.B. "DeineFenster Shop Admin"
+3. **Expiration**: 90 days (alle 3 Monate erneuern)
+4. **Repository access** → "Only select repositories" → `sarahhheea/deinefenster-live` auswählen
+5. **Permissions** → "Repository permissions" aufklappen:
+   - **Contents**: `Read and write`
+   - alle anderen auf "No access" lassen
+6. **Generate token** klicken → Token kopieren (beginnt mit `github_pat_…`)
+7. Auf `admin.html` einloggen → Token einfügen → fertig
+
+### Wichtig
+
+- **Schreib den Token NICHT in WhatsApp / Mail / Notizen-App in der Cloud**. Wenn du ihn merkst: in einem Passwort-Manager (Apple Schlüsselbund, 1Password, Bitwarden) oder auf Papier.
+- **Wenn der Token verloren / kompromittiert wird**: github.com/settings/tokens → revoken → neuen erstellen → wieder einloggen.
+- **Token-Scope ist minimal** (nur Contents, nur dieses eine Repo) — selbst wenn jemand den Token klaut, kann er max. den Shop-Katalog ändern, nicht dein GitHub-Konto übernehmen.
 
 ## Git-History
 
