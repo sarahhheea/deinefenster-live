@@ -1,5 +1,31 @@
 # DeineFenster.de — Claude Anweisungen
 
+## 100 % COMPLIANCE-PFLICHT (Sarah-Wunsch 15.05.2026, NICHT VERHANDELBAR)
+
+**Sarah's Vorgabe wörtlich:** „Es muss immer alles 100 % rechtens sein vom deutschen EU was auch immer. Mich darf zu 100 % keiner abmahnen. Es gibt nichts was man bei uns anmerken können."
+
+**Bedeutung für jede Session:**
+- **Niemals aufhören** wenn nicht ALLE öffentlichen Seiten geprüft sind. Eine Halbprüfung ist keine Prüfung.
+- **Niemals "ist schon okay" ohne Beleg** — jede Aussage zur Rechtskonformität muss eine konkrete Rechtsgrundlage haben (§/Art. + Gesetz)
+- **Bei Zweifel: konservativ entfernen / umformulieren** — eher zu vorsichtig als abmahnbar
+- **Tägliche Shadow-Scans** laufen als Routine `trig_01QfZdhD3166J7vbWthZcrkU` auf claude.ai/code/routines
+
+## SCAN-SCOPE: ALLE ÖFFENTLICHEN SEITEN
+
+Bei einem vollständigen Audit zählen folgende Seiten als Pflicht (NICHT überspringen, NICHT mit „die wichtigsten" abkürzen):
+
+**Hauptseiten:** `index.html`, `konfigurator.html`, `bestelluebersicht.html`, `danke.html`, `kontakt.html`, `produkte.html`, `gebrauchte-fenster-kaufen.html`, `fenster-austauschen-kosten.html`, `kunststofffenster-kaufen.html`, `shop.html`, `faq.html`, `glossar.html`, `kfw-foerderung.html`, `ueber-uns.html`, `ueber-drutex.html`, `404.html`
+
+**Legal-Seiten:** `impressum.html`, `datenschutz.html`, `agb.html`
+
+**Produkt-Unterseiten:** alles unter `produkte/*.html`
+
+**Ratgeber:** alles unter `ratgeber/*.html`
+
+**Admin (nicht öffentlich, aber prüfen):** `admin.html`, `dashboard.html`, `shop-einstellen.html`
+
+NICHT prüfen: `_archive/*`, `*_backup*.html`, `BILDER-VERGLEICH*.html`, `MASTER-COMPARE.html`, `css-filter-test.html`, `haustuer-recolor.html`, andere Test-Files
+
 ## DEUTSCHE COMPLIANCE — IMMER MITPRÜFEN (Sarah-Wunsch 15.05.2026)
 
 Bei JEDER Änderung an dieser Website muss ich proaktiv prüfen — auch ohne dass Sarah explizit fragt:
