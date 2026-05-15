@@ -117,3 +117,114 @@
   padding-left: 0 !important;
   margin-left: 0 !important;
 }
+
+/* ════════════════════════════════════════════════════════════
+   Mega-Menu — 2-Ebenen Dropdown (Kategorien links, Panels rechts)
+   ════════════════════════════════════════════════════════════ */
+
+/* ── Nav-Item Wrapper ── */
+.nav-item { position: relative; }
+
+/* ── Mega-Menu Dropdown ── */
+.mega-menu {
+  position: absolute; top: 100%; left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  width: 760px; max-width: 95vw;
+  background: #0f1c30;
+  border-radius: 14px;
+  box-shadow: 0 18px 48px rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 0;
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity .2s ease, transform .2s ease, visibility .2s;
+  z-index: 100; margin-top: 10px;
+  overflow: hidden;
+  transition-delay: 0s;
+}
+.mega-menu::before {
+  content: ''; position: absolute; top: -10px; left: 0; right: 0; height: 10px;
+}
+.nav-item:hover .mega-menu,
+.mega-menu:hover,
+.nav-item:focus-within .mega-menu,
+.nav-item.mega-pinned .mega-menu {
+  opacity: 1; visibility: visible; pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+  transition-delay: 0.3s;
+}
+@media (max-width: 767px) { .mega-menu { display: none; } }
+
+/* ── Mega-Grid: Kategorien links + Panels rechts ── */
+.mega-grid { display: grid; grid-template-columns: 240px 1fr; min-height: 320px; }
+
+/* ── Kategorie-Liste ── */
+.mega-cats { background: #0a1225; padding: 18px 0; }
+.mega-cat {
+  display: flex; align-items: center; gap: 12px; padding: 14px 22px;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 14px;
+  color: rgba(232,238,255,0.65); cursor: pointer; transition: all .18s;
+  border-left: 3px solid transparent; user-select: none;
+}
+.mega-cat .material-symbols-outlined { font-size: 20px; color: #76a9fa; transition: color .18s; }
+.mega-cat:hover,
+.mega-cat.active { background: #0f1c30; color: #76a9fa; border-left-color: #76a9fa; }
+.mega-cat.active .material-symbols-outlined,
+.mega-cat:hover .material-symbols-outlined { color: #76a9fa; }
+.mega-cat .mega-cat-arrow {
+  margin-left: auto; color: rgba(255,255,255,0.25); font-size: 18px; transition: transform .18s;
+}
+.mega-cat.active .mega-cat-arrow,
+.mega-cat:hover .mega-cat-arrow { color: #76a9fa; transform: translateX(2px); }
+
+/* ── Panel-Bereich ── */
+.mega-panels { padding: 26px 32px; position: relative; }
+.mega-panel { display: none; }
+.mega-panel.active { display: block; animation: megaFade .2s ease; }
+@keyframes megaFade {
+  from { opacity: 0; transform: translateX(4px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.mega-panel-title {
+  font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 12px;
+  color: #76a9fa; text-transform: uppercase; letter-spacing: 0.08em;
+  margin-bottom: 16px;
+}
+
+/* ── System-Einträge (Produkt-Zeilen) ── */
+.mega-system {
+  display: flex; align-items: flex-start; gap: 12px; padding: 10px 12px;
+  border-radius: 8px; transition: background .15s; margin-bottom: 2px;
+}
+.mega-system:hover { background: rgba(118,169,250,0.08); }
+.mega-system-label {
+  font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 14px; color: #e8eeff;
+}
+.mega-system-desc { font-size: 12px; color: rgba(232,238,255,0.55); margin-top: 1px; }
+.mega-system-icon {
+  width: 36px; height: 36px; border-radius: 8px; background: rgba(118,169,250,0.15);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.mega-system-icon .material-symbols-outlined { font-size: 20px; color: #225eaa; }
+
+/* ── Panel CTA-Zeile ── */
+.mega-panel-cta {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 18px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08); gap: 12px;
+}
+.mega-panel-cta .all-link { font-size: 12px; font-weight: 700; color: rgba(232,238,255,0.65); }
+.mega-panel-cta .all-link:hover { color: #76a9fa; }
+
+/* ── Nav-Chevron (rotiert bei Hover) ── */
+.nav-chev { font-size: 16px !important; transition: transform .2s; }
+.nav-item:hover .nav-chev { transform: rotate(180deg); }
+
+/* ── Nav-Link Underline Hover ── */
+.nav-link { position: relative; }
+.nav-link::after {
+  content: ''; position: absolute; bottom: -5px; left: 0;
+  width: 0; height: 2px; background: #76a9fa; border-radius: 1px;
+  transition: width 0.22s ease;
+}
+.nav-link:hover::after { width: 100%; }
+
+a.hover-tag { cursor: pointer; }

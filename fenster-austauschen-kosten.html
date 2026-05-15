@@ -80,77 +80,63 @@
   <link href="https://fonts.bunny.net/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet"/>
   <link href="fonts/material-symbols.css" rel="stylesheet"/>
 
-  <style>
-    *, *::before, *::after { box-sizing: border-box; }
-    body { background: #060e1e; color: #e8eeff; font-family: 'Manrope', sans-serif; overflow-x: hidden; }
-    h1,h2,h3,h4 { font-family: 'Plus Jakarta Sans', sans-serif; }
+  <!-- Navigation Mega-Menu -->
+<style>
+  .nav-item { position: relative; }
+  .mega-menu { position: absolute; top: 100%; left: 50%; transform: translateX(-50%) translateY(8px);
+               width: 760px; max-width: 95vw; background: #0f1c30;
+               border-radius: 14px; box-shadow: 0 18px 48px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);
+               padding: 0; opacity: 0; visibility: hidden; pointer-events: none;
+               transition: opacity .2s ease, transform .2s ease, visibility .2s; z-index: 100; margin-top: 10px;
+               overflow: hidden;
+               transition-delay: 0s; }
+  .mega-menu::before { content:''; position: absolute; top: -10px; left: 0; right: 0; height: 10px; }
+  .nav-item:hover .mega-menu, .mega-menu:hover, .nav-item:focus-within .mega-menu,
+  .nav-item.mega-pinned .mega-menu {
+    opacity: 1; visibility: visible; pointer-events: auto; transform: translateX(-50%) translateY(0);
+    transition-delay: 0.3s;
+  }
+  .mega-grid { display: grid; grid-template-columns: 240px 1fr; min-height: 320px; }
+  .mega-cats { background: #0a1225; padding: 18px 0; }
+  .mega-cat { display: flex; align-items: center; gap: 12px; padding: 14px 22px;
+              font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 14px;
+              color: rgba(232,238,255,0.65); cursor: pointer; transition: all .18s;
+              border-left: 3px solid transparent; user-select: none; }
+  .mega-cat .material-symbols-outlined { font-size: 20px; color: #76a9fa; transition: color .18s; }
+  .mega-cat:hover, .mega-cat.active {
+    background: #0f1c30; color: #76a9fa; border-left-color: #76a9fa;
+  }
+  .mega-cat.active .material-symbols-outlined, .mega-cat:hover .material-symbols-outlined { color: #76a9fa; }
+  .mega-cat .mega-cat-arrow { margin-left: auto; color: rgba(255,255,255,0.25); font-size: 18px; transition: transform .18s; }
+  .mega-cat.active .mega-cat-arrow, .mega-cat:hover .mega-cat-arrow { color: #76a9fa; transform: translateX(2px); }
+  .mega-panels { padding: 26px 32px; position: relative; }
+  .mega-panel { display: none; }
+  .mega-panel.active { display: block; animation: megaFade .2s ease; }
+  @keyframes megaFade { from { opacity:0; transform: translateX(4px); } to { opacity:1; transform: translateX(0); } }
+  .mega-panel-title { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 12px;
+                      color: #76a9fa; text-transform: uppercase; letter-spacing: 0.08em;
+                      margin-bottom: 16px; }
+  .mega-system { display: flex; align-items: flex-start; gap: 12px; padding: 10px 12px;
+                 border-radius: 8px; transition: background .15s; margin-bottom: 2px; }
+  .mega-system:hover { background: rgba(118,169,250,0.08); }
+  .mega-system-label { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 14px; color: #e8eeff; }
+  .mega-system-desc { font-size: 12px; color: rgba(232,238,255,0.55); margin-top: 1px; }
+  .mega-system-icon { width: 36px; height: 36px; border-radius: 8px; background: rgba(118,169,250,0.15);
+                      display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .mega-system-icon .material-symbols-outlined { font-size: 20px; color: #225eaa; }
+  .mega-panel-cta { display: flex; align-items: center; justify-content: space-between;
+                    margin-top: 18px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08); gap: 12px; }
+  .mega-panel-cta .all-link { font-size: 12px; font-weight: 700; color: rgba(232,238,255,0.65); }
+  .mega-panel-cta .all-link:hover { color: #76a9fa; }
+  .nav-chev { font-size: 16px !important; transition: transform .2s; }
+  .nav-item:hover .nav-chev { transform: rotate(180deg); }
+  @media (max-width: 767px) { .mega-menu { display: none; } }
+  .nav-link { position: relative; }
+  .nav-link::after { content:''; position:absolute; bottom:-5px; left:0; width:0; height:2px; background:#76a9fa; border-radius:1px; transition:width 0.22s ease; }
+  .nav-link:hover::after { width:100%; }
+  a.hover-tag { cursor:pointer; }
+</style>
 
-    .glass { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:16px; backdrop-filter:blur(12px); transition:border-color .3s,background .3s,box-shadow .3s; }
-    .glass:hover { border-color:rgba(118,169,250,0.2); background:rgba(255,255,255,0.055); box-shadow:0 8px 32px rgba(34,94,170,0.12); }
-    .glass-nav { background:rgba(6,14,30,0.85); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); }
-
-    .btn-primary { background:linear-gradient(135deg,#225eaa,#1e4fa0); color:#fff; padding:14px 28px; border-radius:999px; font-weight:700; display:inline-flex; align-items:center; gap:8px; text-decoration:none; transition:all .3s cubic-bezier(.16,1,.3,1); box-shadow:0 4px 24px rgba(34,94,170,.35); cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif; }
-    .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 40px rgba(34,94,170,.55); background:linear-gradient(135deg,#2a70cc,#225eaa); }
-    .btn-secondary { background:rgba(255,255,255,.07); color:#e8eeff; padding:14px 28px; border-radius:999px; font-weight:700; text-decoration:none; border:1px solid rgba(255,255,255,.12); display:inline-flex; align-items:center; gap:8px; transition:all .3s; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif; }
-    .btn-secondary:hover { background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.2); }
-    .btn-whatsapp { background:linear-gradient(135deg,#128C7E,#25D366); color:#fff; padding:14px 28px; border-radius:999px; font-weight:700; display:inline-flex; align-items:center; gap:8px; text-decoration:none; transition:all .3s; box-shadow:0 4px 24px rgba(37,211,102,.35); font-family:'Plus Jakarta Sans',sans-serif; }
-    .btn-whatsapp:hover { transform:translateY(-2px); box-shadow:0 8px 40px rgba(37,211,102,.5); filter:brightness(1.08); }
-
-    .badge { background:rgba(118,169,250,.12); color:#76a9fa; border:1px solid rgba(118,169,250,.28); border-radius:999px; padding:5px 14px; font-size:12.5px; font-weight:600; display:inline-block; }
-    .badge-blue { background:rgba(118,169,250,.15); color:#93c5fd; border:1px solid rgba(118,169,250,.35); border-radius:999px; padding:5px 14px; font-size:12.5px; font-weight:600; display:inline-block; }
-
-    .reveal { opacity:0; transform:translateY(28px); transition:opacity .7s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1); }
-    .reveal.visible { opacity:1; transform:translateY(0); }
-    .reveal-d1 { transition-delay:.1s; } .reveal-d2 { transition-delay:.2s; } .reveal-d3 { transition-delay:.3s; } .reveal-d4 { transition-delay:.4s; }
-
-    @keyframes fadeInUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
-    @keyframes blob-move { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(30px,-20px) scale(1.05)} 66%{transform:translate(-20px,15px) scale(0.97)} }
-
-    .hero-blob { position:absolute; border-radius:50%; filter:blur(80px); pointer-events:none; }
-    .hero-blob-1 { width:600px;height:600px; background:rgba(34,94,170,.28); top:-200px;right:-100px; animation:blob-move 12s ease-in-out infinite; }
-    .hero-blob-2 { width:400px;height:400px; background:rgba(118,169,250,.14); bottom:-100px;left:20%; animation:blob-move 16s ease-in-out infinite reverse; }
-    .hero-blob-3 { width:300px;height:300px; background:rgba(59,130,246,.12); top:20%;left:-80px; animation:blob-move 10s ease-in-out infinite 4s; }
-    .hero-grid { position:absolute;inset:0; background-image:linear-gradient(rgba(118,169,250,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(118,169,250,.045) 1px,transparent 1px); background-size:48px 48px; pointer-events:none; }
-
-    .hero-t1{animation:fadeInUp .7s ease both .05s;} .hero-t2{animation:fadeInUp .7s ease both .2s;} .hero-t3{animation:fadeInUp .7s ease both .35s;} .hero-t4{animation:fadeInUp .7s ease both .5s;} .hero-cta{animation:fadeInUp .7s ease both .65s;}
-
-    .ankauf-step { display:flex; gap:16px; align-items:flex-start; }
-    .ankauf-num { width:40px; height:40px; border-radius:50%; background:rgba(118,169,250,.15); border:1px solid rgba(118,169,250,.35); color:#76a9fa; font-weight:800; font-size:16px; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-family:'Plus Jakarta Sans',sans-serif; }
-
-    .faq-details { border-radius:14px; overflow:hidden; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); transition:border-color .3s; }
-    .faq-details:hover { border-color:rgba(118,169,250,.2); }
-    .faq-details[open] { border-color:rgba(118,169,250,.25); background:rgba(34,94,170,.06); }
-    .faq-summary { cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center; font-weight:700; font-size:16px; padding:20px 24px; gap:12px; font-family:'Plus Jakarta Sans',sans-serif; }
-    .faq-summary::-webkit-details-marker { display:none; }
-    .faq-icon { color:#76a9fa; font-size:22px; transition:transform .3s cubic-bezier(.16,1,.3,1); flex-shrink:0; }
-    .faq-details[open] .faq-icon { transform:rotate(45deg); }
-    .faq-body { padding:0 24px 20px; color:rgba(232,238,255,.75); line-height:1.75; font-size:15px; }
-
-    .answer-box-blue { background:rgba(34,94,170,.16); border-left:4px solid #76a9fa; border-radius:0 12px 12px 0; padding:16px 20px; }
-    .glow-line { height:1px; background:linear-gradient(90deg,transparent,rgba(118,169,250,.25) 40%,rgba(118,169,250,.25) 60%,transparent); }
-    .breadcrumb a { color:rgba(118,169,250,.7); text-decoration:none; }
-    .breadcrumb a:hover { color:#76a9fa; }
-
-    .nav-link { position:relative; }
-    .nav-link::after { content:''; position:absolute; bottom:-5px; left:0; width:0; height:2px; background:#76a9fa; border-radius:1px; transition:width .22s; }
-    .nav-link:hover::after { width:100%; }
-
-    .info-card { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:28px 24px; transition:all .3s; }
-    .info-card:hover { border-color:rgba(118,169,250,.2); transform:translateY(-3px); box-shadow:0 12px 36px rgba(34,94,170,.12); }
-    .info-icon { width:52px;height:52px; background:linear-gradient(135deg,rgba(34,94,170,.25),rgba(34,94,170,.08)); border:1px solid rgba(118,169,250,.25); border-radius:14px; display:flex;align-items:center;justify-content:center; font-size:24px;margin-bottom:18px; }
-
-    .notice-box { background:linear-gradient(135deg,rgba(34,94,170,.1),rgba(118,169,250,.05)); border:1.5px solid rgba(118,169,250,.25); border-radius:16px; padding:24px 28px; }
-
-    /* Bild-Galerie */
-    .gallery-img { width:100%; aspect-ratio:4/3; object-fit:cover; border-radius:14px; border:1px solid rgba(255,255,255,.07); transition:transform .4s ease, box-shadow .4s ease; }
-    .gallery-img:hover { transform:scale(1.02); box-shadow:0 16px 48px rgba(34,94,170,.25); }
-  </style>
-  <script defer data-domain="deinefenster.de" src="https://plausible.io/js/script.js"></script>
-<link rel="stylesheet" href="css/global-design.css?v=1"/>
-</head>
-<body>
-
-<!-- NAV -->
 <div id="topbar">
   <div class="topbar-inner">
     <nav class="topbar-links">
@@ -177,36 +163,237 @@
     </div>
   </div>
 </div>
-<nav id="navbar" class="fixed top-0 w-full z-50 glass-nav border-b border-white/10">
-  <div class="flex justify-between items-center px-6 md:px-12 py-4 max-w-[1440px] mx-auto">
+<nav id="navbar" class="fixed top-0 w-full z-50 bg-white/10 glass-nav border-b border-white/10">
+  <div class="flex justify-between items-center px-6 md:px-12 py-2.5 max-w-[1440px] mx-auto">
     <a href="index.html" class="text-xl md:text-2xl font-bold tracking-tighter text-white">DeineFenster<span style="color:#76a9fa">.de</span></a>
     <div class="hidden md:flex items-center gap-x-5">
-      <a href="produkte.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Produkte</a>
+      <!-- Produkte mit Mega-Menu -->
+      <div class="nav-item">
+        <a href="produkte.html" class="nav-link inline-flex items-center gap-1 text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">
+          Produkte <span class="material-symbols-outlined nav-chev">expand_more</span>
+        </a>
+        <div class="mega-menu" id="mega-produkte">
+          <div class="mega-grid">
+            <!-- Links: Kategorien -->
+            <div class="mega-cats">
+              <div class="mega-cat active" data-mega="fenster">
+                <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">window</span>
+                <span>Fenster</span>
+                <span class="material-symbols-outlined mega-cat-arrow">chevron_right</span>
+              </div>
+              <div class="mega-cat" data-mega="balkon">
+                <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">deck</span>
+                <span>Balkontüren</span>
+                <span class="material-symbols-outlined mega-cat-arrow">chevron_right</span>
+              </div>
+              <div class="mega-cat" data-mega="haustuer">
+                <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">door_front</span>
+                <span>Haustüren</span>
+                <span class="material-symbols-outlined mega-cat-arrow">chevron_right</span>
+              </div>
+              <div class="mega-cat" data-mega="schiebe">
+                <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">meeting_room</span>
+                <span>Schiebetüren</span>
+                <span class="material-symbols-outlined mega-cat-arrow">chevron_right</span>
+              </div>
+              <div class="mega-cat" data-mega="rollladen">
+                <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">roller_shades</span>
+                <span>Rollläden</span>
+                <span class="material-symbols-outlined mega-cat-arrow">chevron_right</span>
+              </div>
+            </div>
+
+            <!-- Rechts: Panels pro Kategorie -->
+            <div class="mega-panels">
+              <!-- FENSTER -->
+              <div class="mega-panel active" data-mega-panel="fenster">
+                <div class="mega-panel-title">PVC-Kunststofffenster</div>
+                <a href="produkte/kunststofffenster/iglo-5-classic.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">window</span></div>
+                  <div>
+                    <div class="mega-system-label">IGLO 5 Classic</div>
+                    <div class="mega-system-desc">5-Kammer · 70 mm · Uw 0,83 · Bewährter Allrounder</div>
+                  </div>
+                </a>
+                <a href="produkte/kunststofffenster/iglo-energy.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">bolt</span></div>
+                  <div>
+                    <div class="mega-system-label">IGLO Energy</div>
+                    <div class="mega-system-desc">7-Kammer · 82 mm · Uw 0,71 · Premium-Wärmedämmung</div>
+                  </div>
+                </a>
+                <a href="produkte/kunststofffenster/iglo-edge.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">diamond</span></div>
+                  <div>
+                    <div class="mega-system-label">IGLO EDGE</div>
+                    <div class="mega-system-desc">Flaggschiff · 7-Kammer · 82 mm · Uw 0,66 · technologisch fortschrittlichst</div>
+                  </div>
+                </a>
+                <a href="produkte/kunststofffenster/iglo-light.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">wb_sunny</span></div>
+                  <div>
+                    <div class="mega-system-label">IGLO Light</div>
+                    <div class="mega-system-desc">Schlanke Profile · 5-Kammer · 70 mm · Uw 0,88 · mehr Lichteinfall</div>
+                  </div>
+                </a>
+                <a href="produkte/kunststofffenster/iglo-ext.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">open_in_new</span></div>
+                  <div>
+                    <div class="mega-system-label">IGLO EXT</div>
+                    <div class="mega-system-desc">Nach außen öffnend · 5-Kammer · 70 mm · Uw 0,89 · Skandi-/UK-Stil</div>
+                  </div>
+                </a>
+                <div class="mega-panel-cta">
+                  <a href="konfigurator.html?prod=kunststoff" class="all-link">Fenster konfigurieren →</a>
+                  <a href="konfigurator.html" class="inline-flex items-center gap-1.5 bg-primary text-white px-3 py-1.5 rounded-full font-bold text-xs hover:bg-primary-d transition-colors">
+                    <span class="material-symbols-outlined" style="font-size:14px">tune</span> Angebot anfragen
+                  </a>
+                </div>
+              </div>
+
+              <!-- BALKONTÜREN -->
+              <div class="mega-panel" data-mega-panel="balkon">
+                <div class="mega-panel-title">Balkontüren</div>
+                <a href="produkte/balkontueren/iglo-5-classic.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">deck</span></div>
+                  <div>
+                    <div class="mega-system-label">IGLO 5 Classic Balkontür</div>
+                    <div class="mega-system-desc">Ein- oder zweiflügelig · Alu-Schwelle · 70 mm Profil</div>
+                  </div>
+                </a>
+                <a href="produkte/balkontueren/iglo-energy.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">bolt</span></div>
+                  <div>
+                    <div class="mega-system-label">IGLO Energy Balkontür</div>
+                    <div class="mega-system-desc">Premium · 82 mm · maximale Wärmedämmung</div>
+                  </div>
+                </a>
+                <div class="mega-panel-cta">
+                  <a href="konfigurator.html?prod=balkontuer" class="all-link">Balkontür konfigurieren →</a>
+                  <a href="konfigurator.html" class="inline-flex items-center gap-1.5 bg-primary text-white px-3 py-1.5 rounded-full font-bold text-xs hover:bg-primary-d transition-colors">
+                    <span class="material-symbols-outlined" style="font-size:14px">tune</span> Angebot anfragen
+                  </a>
+                </div>
+              </div>
+
+              <!-- HAUSTÜREN -->
+              <div class="mega-panel" data-mega-panel="haustuer">
+                <div class="mega-panel-title">Haustüren</div>
+                <a href="produkte/haustueren/iglo-5-classic.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">door_front</span></div>
+                  <div>
+                    <div class="mega-system-label">IGLO 5 Classic Tür</div>
+                    <div class="mega-system-desc">5-Kammer Türprofil · Ud 1,0 · über 50 Design-Modelle</div>
+                  </div>
+                </a>
+                <a href="produkte/haustueren/iglo-energy.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">bolt</span></div>
+                  <div>
+                    <div class="mega-system-label">IGLO Energy Tür</div>
+                    <div class="mega-system-desc">Premium 7-Kammer · Ud 0,8 · höchste Effizienz</div>
+                  </div>
+                </a>
+                <div class="mega-panel-cta">
+                  <a href="konfigurator.html?prod=haustuere" class="all-link">Haustür konfigurieren →</a>
+                  <a href="konfigurator.html" class="inline-flex items-center gap-1.5 bg-primary text-white px-3 py-1.5 rounded-full font-bold text-xs hover:bg-primary-d transition-colors">
+                    <span class="material-symbols-outlined" style="font-size:14px">tune</span> Angebot anfragen
+                  </a>
+                </div>
+              </div>
+
+              <!-- SCHIEBETÜREN -->
+              <div class="mega-panel" data-mega-panel="schiebe">
+                <div class="mega-panel-title">Schiebetüren (HST)</div>
+                <a href="produkte/hebe-schiebetueren/iglo-energy-psk.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">meeting_room</span></div>
+                  <div>
+                    <div class="mega-system-label">PSK Schiebetür</div>
+                    <div class="mega-system-desc">Parallel-Schiebe-Kipp · bis 2400 mm breit · kompakt</div>
+                  </div>
+                </a>
+                <a href="produkte/hebe-schiebetueren/iglo-slide.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">swap_horiz</span></div>
+                  <div>
+                    <div class="mega-system-label">IGLO Slide</div>
+                    <div class="mega-system-desc">Mittlere Schiebetür · bis 4000 mm · komfortabel</div>
+                  </div>
+                </a>
+                <a href="produkte/hebe-schiebetueren/iglo-5-classic-psk.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">door_sliding</span></div>
+                  <div>
+                    <div class="mega-system-label">IGLO-HS</div>
+                    <div class="mega-system-desc">Große Hebe-Schiebe-Tür · bis 6500 mm · Null-Schwelle DIN 18040</div>
+                  </div>
+                </a>
+                <div class="mega-panel-cta">
+                  <a href="konfigurator.html?prod=hst" class="all-link">Schiebetür konfigurieren →</a>
+                  <a href="konfigurator.html" class="inline-flex items-center gap-1.5 bg-primary text-white px-3 py-1.5 rounded-full font-bold text-xs hover:bg-primary-d transition-colors">
+                    <span class="material-symbols-outlined" style="font-size:14px">tune</span> Angebot anfragen
+                  </a>
+                </div>
+              </div>
+
+              <!-- ROLLLÄDEN -->
+              <div class="mega-panel" data-mega-panel="rollladen">
+                <div class="mega-panel-title">Rollläden</div>
+                <a href="produkte/rollladen/aufsatz-rollladen.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">roller_shades</span></div>
+                  <div>
+                    <div class="mega-system-label">PVC-Aufsatzrollladen</div>
+                    <div class="mega-system-desc">Elektrisch mit Funk-Motor · 5 Farben · Smart-Home-ready · Wärme- + Hitzeschutz</div>
+                  </div>
+                </a>
+                <div class="mega-panel-cta">
+                  <a href="konfigurator.html?prod=rollladen" class="all-link">Rollladen konfigurieren →</a>
+                  <a href="konfigurator.html" class="inline-flex items-center gap-1.5 bg-primary text-white px-3 py-1.5 rounded-full font-bold text-xs hover:bg-primary-d transition-colors">
+                    <span class="material-symbols-outlined" style="font-size:14px">tune</span> Angebot anfragen
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       <a href="ueber-drutex.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Hersteller</a>
       <a href="kunststofffenster-kaufen.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Neue Fenster</a>
       <a href="gebrauchte-fenster-kaufen.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Gebraucht</a>
-      <a href="fenster-austauschen-kosten.html" class="text-white font-semibold border-b-2 border-white pb-1 text-sm tracking-tight">Ankauf</a>
+      <a href="fenster-austauschen-kosten.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Ankauf</a>
       <a href="konfigurator.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Konfigurator</a>
-      <a href="shop.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight inline-flex items-center gap-1.5">Shop <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none" style="background:#76a9fa;color:#001b3d">NEU</span></a>
+      <a href="shop.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight inline-flex items-center gap-1.5">
+        Shop
+        <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none" style="background:#76a9fa;color:#001b3d">NEU</span>
+      </a>
       <a href="faq.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">FAQ</a>
       <a href="glossar.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Glossar</a>
       <a href="ueber-uns.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Über uns</a>
       <a href="kontakt.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Kontakt</a>
     </div>
     <div class="flex items-center gap-3 md:gap-6">
-      <a href="konfigurator.html" class="hidden md:block px-6 py-3 rounded-full font-bold text-sm transition-all" style="background:#225eaa;color:#fff;">Angebot anfordern</a>
+      <a href="konfigurator.html" class="hidden md:block px-5 py-1.5 rounded-full font-semibold text-xs tracking-wide transition-all duration-200" style="background:#225eaa;color:#fff;letter-spacing:0.02em;">Angebot anfragen</a>
       <button id="menuBtn" class="md:hidden text-white p-1" aria-label="Menü öffnen">
         <span class="material-symbols-outlined text-3xl" id="menuIcon">menu</span>
       </button>
     </div>
   </div>
-  <div id="mobileMenu" class="hidden md:hidden px-6 py-6 border-t border-white/10" style="background:rgba(6,14,30,.98);">
+  <!-- Mobile Menu -->
+  <div id="mobileMenu" class="hidden md:hidden px-6 py-6 border-t border-white/10">
     <div class="flex flex-col gap-2">
-      <a href="produkte.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Produkte</a>
+      <details class="text-white">
+        <summary class="flex items-center justify-between py-3 border-b border-white/10 font-semibold text-lg cursor-pointer list-none">
+          Produkte <span class="material-symbols-outlined">expand_more</span>
+        </summary>
+        <div class="pl-4 py-2 space-y-2 text-base text-white/80">
+          <a href="produkte/kunststofffenster/iglo-energy.html" class="block py-1">Kunststofffenster</a>
+          <a href="produkte/balkontueren/iglo-energy.html" class="block py-1">Balkontüren</a>
+          <a href="produkte/haustueren/iglo-energy.html" class="block py-1">Haustüren</a>
+          <a href="produkte/hebe-schiebetueren/iglo-energy-psk.html" class="block py-1">Schiebetüren</a>
+          <a href="produkte.html" class="block py-1 font-semibold text-white">Alle Produkte →</a>
+        </div>
+      </details>
       <a href="ueber-drutex.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Hersteller</a>
       <a href="kunststofffenster-kaufen.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Neue Fenster</a>
       <a href="gebrauchte-fenster-kaufen.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Gebraucht</a>
-      <a href="fenster-austauschen-kosten.html" class="text-white font-bold text-lg py-2 border-b border-white/10">Ankauf</a>
+      <a href="fenster-austauschen-kosten.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Ankauf</a>
       <a href="konfigurator.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Konfigurator</a>
       <a href="shop.html" class="text-white font-semibold text-lg py-2 border-b border-white/10 flex items-center gap-2">Shop <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style="background:#76a9fa;color:#001b3d">NEU</span></a>
       <a href="faq.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">FAQ</a>
