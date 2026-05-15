@@ -1,70 +1,86 @@
-# Security-Setup — was Sarah jetzt tun muss
+# Security-Setup — finale Variante (ohne Cloudflare)
 
-Stand: 2026-05-14
+Stand: 2026-05-14 (Sarah-Entscheidung: kein Cloudflare, simpel halten)
 
-Hintergrund: Bis heute lagen 4 API-Keys/Webhooks im Frontend-Code und damit für jeden Besucher lesbar. Die wurden alle entfernt und auf Cloudflare-Worker als Proxy umgestellt. Damit die Live-Seite wieder funktioniert, müssen die folgenden Schritte abgearbeitet werden.
+## Was jetzt passiert ist
 
-## 1. ALTE KEYS SOFORT REVOKEN (5 Minuten)
+Vorher waren 4 sensible Werte direkt im Frontend-Code öffentlich lesbar:
+- Resend API-Key (kritisch — fremde Mails versendbar)
+- GitHub Personal Access Token (kritisch — Repo übernehmbar)
+- Web3Forms Access-Key (akzeptabel — designed für Frontend)
+- Make.com Webhook URL (Spam-Risiko)
 
-> Wichtig: Code ist gesäubert, **aber die alten Keys sind in der Git-History und auf archive.org für immer drin**. Wer sie schon kopiert hat, kann sie weiter missbrauchen, bis sie revoked sind.
+**Jetzt im Frontend:** nur noch der Web3Forms Access-Key. Das ist OK — Web3Forms-Keys identifizieren ein Formular, sie autorisieren keinen direkten Mail-Versand.
 
-| Plattform | Wo revoken | Welcher Key |
-|-----------|-----------|-------------|
-| **Resend** | https://resend.com/api-keys | Den vorhandenen Key löschen (beginnt mit `re_5o5JYMky_…`) und neuen erstellen |
-| **GitHub** | https://github.com/settings/tokens | Vorhandenen Token revoken (beginnt mit `gho_FVoOt…`) und neuen PAT erstellen (Scope: `repo` für `sarahhheea/deinefenster-live`) |
-| **Web3Forms** | https://web3forms.com/dashboard | Access Key regenerieren (alter beginnt mit `440a94ff-…`) |
-| **Make.com** | Make.com → Scenarios | Webhook-Modul löschen + neu anlegen (alte URL endete auf `…so6vhvekae…`) |
+## Was DU jetzt tun musst
 
-## 2. WORKER NEU DEPLOYEN (10 Minuten)
+### 1. Resend-Key revoken (1 Min)
 
-Zwei Worker existieren in `cloudflare-worker/`:
+https://resend.com/api-keys → den alten Key (beginnt mit `re_5o5JYMky_…`) löschen. Du brauchst Resend nicht mehr — der Mail-Versand läuft jetzt direkt über Web3Forms.
 
-- `email-proxy.js`  → bereits live unter `https://deinefenster-email.deinefenster.workers.dev`
-- `github-proxy.js` → **NEU**, muss als zweiter Worker deployed werden
+### 2. GitHub-Token revoken (1 Min)
 
-### A) `email-proxy.js` aktualisieren
+https://github.com/settings/tokens → den alten Token (beginnt mit `gho_FVoOt…`) revoken.
 
-1. Cloudflare Dashboard → Workers & Pages → Worker `deinefenster-email` öffnen
-2. **Edit Code** → Inhalt von `cloudflare-worker/email-proxy.js` komplett ersetzen → Save and Deploy
-3. **Settings → Variables → Add Variable** (alle als „Encrypt"!):
-   - `RESEND_API_KEY`   = der neue Resend-Key aus Schritt 1
-   - `WEB3FORMS_KEY`    = der neue Web3Forms-Key aus Schritt 1
-   - `MAKE_WEBHOOK_URL` = die neue Make.com-URL aus Schritt 1
+⚠ **Achtung:** Der Shop-Admin (`shop-einstellen.html`) braucht aktuell den Token, um Inserate hinzuzufügen. Solange du den Shop nutzt, ist das ein Sicherheitsproblem (Token wäre wieder im Frontend, wenn wir ihn da reintun) — siehe „Shop-Backend" unten.
 
-### B) `github-proxy.js` neu anlegen
+### 3. Make.com Scenario löschen (2 Min)
 
-1. Cloudflare Dashboard → Workers & Pages → **Create Worker** → Name: `deinefenster-shop`
-2. **Edit Code** → Inhalt von `cloudflare-worker/github-proxy.js` einfügen → Save and Deploy
-3. **Settings → Variables → Add Variable** (alle als „Encrypt"!):
-   - `GH_TOKEN`      = der neue GitHub-PAT aus Schritt 1
-   - `SHOP_PASSWORD` = das Passwort für die Familie (z.B. das bisherige `Fenster2026`, oder ein neues)
-   - `GH_REPO`       = `sarahhheea/deinefenster-live`
-4. **Endgültige URL prüfen**: muss `https://deinefenster-shop.deinefenster.workers.dev` sein, damit `js/sheets-config.js` Zeile 13 passt. Falls die URL anders ist → diese eine Zeile in `js/sheets-config.js` anpassen.
+Du sagtest, du willst Make.com weghaben (haben deine Bilder gesperrt). Make.com Dashboard → Scenarios → das webhook-Scenario löschen. Der Code ruft Make.com nicht mehr auf, aber das offene Scenario kostet ggf. Operations.
 
-## 3. TESTEN
+### 4. Web3Forms (optional)
 
-- **Konfigurator-Submit**: Eine Test-Anfrage über die Bestellübersicht abschicken. Erwartet:
-  - Bestätigungs-Mail an Kundenadresse (Resend)
-  - Benachrichtigung an Sarah's Mailbox (Web3Forms)
-  - Eintrag in Make.com-Datenbank
-- **Shop-Login** in `/shop-einstellen.html`: Passwort eingeben → muss durchkommen. Dann ein Produkt hochladen/bearbeiten → muss in GitHub-Repo landen.
+Der Access-Key `440a94ff-…` ist im Frontend OK, aber wenn du ihn rotieren willst:
+- https://web3forms.com/dashboard → Access Key regenerieren
+- Den neuen Key an 3 Stellen eintragen:
+  - `js/submit-core.js` Zeile 16
+  - `konfigurator.html` (suche nach `440a94ff` — eine Stelle)
+  - `kontakt.html` (suche nach `440a94ff` — eine Stelle)
 
-## 4. WAS IM CODE NICHT MEHR EXISTIERT
+### 5. Plausible Analytics
 
-- `js/submit-core.js` — kein Resend-Key, kein Web3Forms-Key, keine Make.com-URL mehr. Alle Calls gehen an den Worker.
-- `js/sheets-config.js` — kein GitHub-Token mehr. Alle Calls gehen an den Worker. Shop-Passwort liegt nur im localStorage des angemeldeten Browsers.
-- `konfigurator-backup-2026-05-12.html` — gelöscht, war ein Snapshot mit den alten Keys.
+Frage: Ist der Plausible-Account auf deinen Namen oder bei Jonas? Wenn du Analytics nicht mehr willst → das Script aus allen HTML-Dateien entfernen (suche `plausible.io/js/script.js`). Wenn du es behältst → in der Datenschutzerklärung steht es korrekt drin.
 
-## 5. OPTIONAL — Git-History säubern (für maximale Sauberkeit)
+## Was im Code passiert ist
 
-Die alten Keys sind in alten Commits archiviert. Da sie eh revoked sind, ist das kein akuter Hebel mehr, aber für die Optik:
+| Datei | Änderung |
+|-------|----------|
+| `js/submit-core.js` | Resend-Call + Make.com-Call entfernt. Nur noch ein Web3Forms-Call an `info@baustoffchrist.de` |
+| `konfigurator.html` | Cloudflare-Worker-Call ersetzt durch direkten Web3Forms-Call |
+| `kontakt.html` | Cloudflare-Worker-Call ersetzt durch direkten Web3Forms-Call + DSGVO-Checkbox |
+| `js/sheets-config.js` | (steht auf einem nicht-existenten Cloudflare-Worker — Shop-Editing aktuell kaputt, siehe unten) |
 
-```bash
-# Mit BFG Repo-Cleaner (separat installieren):
-bfg --replace-text patterns.txt   # patterns.txt enthält die alten Keys
-git reflog expire --expire=now --all
-git gc --prune=now --aggressive
-git push live --force HEAD:main
+## Mail-Flow heute
+
+```
+Kunde füllt Konfigurator/Kontakt aus
+   ↓
+direkter POST an api.web3forms.com/submit (Access-Key public)
+   ↓
+Web3Forms sendet Mail an info@baustoffchrist.de (im Web3Forms-Dashboard hinterlegt)
+   ↓
+Sarah antwortet persönlich
 ```
 
-⚠ Das ist destruktiv und kann Co-Workern den Tag versauen — bei Einzelbetrieb aber unkritisch.
+**Kein Auto-Reply an den Kunden.** Web3Forms-Free hat das nicht. Falls du Auto-Reply willst:
+- **Web3Forms Pro** ($5/Monat) hat eingebautes Auto-Response-Feature
+- **Formspree** (50 Submits/Monat free) hat Auto-Reply kostenlos
+- **Status quo**: Kunde sieht nur den Erfolgs-Screen „Wir melden uns innerhalb 24h"
+
+## Shop-Backend (offen — deine Entscheidung nötig)
+
+Der GitHub-Token war das größte Risiko. Aktuell zeigt `js/sheets-config.js` auf einen nicht-existenten Cloudflare-Worker — d.h. **Schreibzugriff auf den Shop ist aktuell kaputt** (Lesen funktioniert weiter, weil das öffentliche JSON über GitHub Pages geladen wird).
+
+Drei Optionen:
+
+| Option | Vor- | Nachteil |
+|--------|------|----------|
+| **A** Shop-Schreibzugriff dauerhaft deaktivieren | maximale Sicherheit, keine weitere Arbeit | du musst neue Inserate selbst lokal via Git pflegen, Familie kann nicht selbst inserieren |
+| **B** GitHub-Token wieder ins Frontend (mit minimalen Scopes + regelmäßiger Rotation) | Familie kann wieder inserieren | Risiko bleibt, Token muss alle 3 Monate rotiert werden |
+| **C** Migration auf Supabase | sauber, Supabase-anon-Key ist designed für Frontend, ist eh schon im Projekt | 1-2h Migrations-Arbeit, RLS-Regeln müssen stimmen |
+
+**Meine Empfehlung: C** — du hast Supabase schon eingerichtet (`js/supabase-config.js`), das ist die richtige Lösung. Aber **sag mir wann es brennt** — wenn Familie morgen inserieren muss, ist B als Übergang OK.
+
+## Git-History
+
+Die alten Keys sind in alten Commits archiviert (auch wenn das Backup-File gelöscht ist). Sie sind nach Schritt 1-3 oben revoked und damit wertlos. Optional: BFG Repo-Cleaner löscht sie aus der History — destruktiv, aber bei Einzelbetrieb sicher.
