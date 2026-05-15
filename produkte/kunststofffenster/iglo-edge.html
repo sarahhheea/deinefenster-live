@@ -116,13 +116,63 @@
 </head>
 <body style="background:#0a1225;color:#e8eeff;" data-auto-anim="true">
 
-<!-- Navigation -->
+<!-- Navigation Mega-Menu -->
 <style>
-/* ── Nav Underline Hover ── */
-.nav-link { position: relative; }
-.nav-link::after { content:''; position:absolute; bottom:-5px; left:0; width:0; height:2px; background:#76a9fa; border-radius:1px; transition:width 0.22s ease; }
-.nav-link:hover::after { width:100%; }
+  .nav-item { position: relative; }
+  .mega-menu { position: absolute; top: 100%; left: 50%; transform: translateX(-50%) translateY(8px);
+               width: 760px; max-width: 95vw; background: #0f1c30;
+               border-radius: 14px; box-shadow: 0 18px 48px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);
+               padding: 0; opacity: 0; visibility: hidden; pointer-events: none;
+               transition: opacity .2s ease, transform .2s ease, visibility .2s; z-index: 100; margin-top: 10px;
+               overflow: hidden;
+               transition-delay: 0s; }
+  .mega-menu::before { content:''; position: absolute; top: -10px; left: 0; right: 0; height: 10px; }
+  .nav-item:hover .mega-menu, .mega-menu:hover, .nav-item:focus-within .mega-menu,
+  .nav-item.mega-pinned .mega-menu {
+    opacity: 1; visibility: visible; pointer-events: auto; transform: translateX(-50%) translateY(0);
+    transition-delay: 0.3s;
+  }
+  .mega-grid { display: grid; grid-template-columns: 240px 1fr; min-height: 320px; }
+  .mega-cats { background: #0a1225; padding: 18px 0; }
+  .mega-cat { display: flex; align-items: center; gap: 12px; padding: 14px 22px;
+              font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 14px;
+              color: rgba(232,238,255,0.65); cursor: pointer; transition: all .18s;
+              border-left: 3px solid transparent; user-select: none; }
+  .mega-cat .material-symbols-outlined { font-size: 20px; color: #76a9fa; transition: color .18s; }
+  .mega-cat:hover, .mega-cat.active {
+    background: #0f1c30; color: #76a9fa; border-left-color: #76a9fa;
+  }
+  .mega-cat.active .material-symbols-outlined, .mega-cat:hover .material-symbols-outlined { color: #76a9fa; }
+  .mega-cat .mega-cat-arrow { margin-left: auto; color: rgba(255,255,255,0.25); font-size: 18px; transition: transform .18s; }
+  .mega-cat.active .mega-cat-arrow, .mega-cat:hover .mega-cat-arrow { color: #76a9fa; transform: translateX(2px); }
+  .mega-panels { padding: 26px 32px; position: relative; }
+  .mega-panel { display: none; }
+  .mega-panel.active { display: block; animation: megaFade .2s ease; }
+  @keyframes megaFade { from { opacity:0; transform: translateX(4px); } to { opacity:1; transform: translateX(0); } }
+  .mega-panel-title { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 12px;
+                      color: #76a9fa; text-transform: uppercase; letter-spacing: 0.08em;
+                      margin-bottom: 16px; }
+  .mega-system { display: flex; align-items: flex-start; gap: 12px; padding: 10px 12px;
+                 border-radius: 8px; transition: background .15s; margin-bottom: 2px; }
+  .mega-system:hover { background: rgba(118,169,250,0.08); }
+  .mega-system-label { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 14px; color: #e8eeff; }
+  .mega-system-desc { font-size: 12px; color: rgba(232,238,255,0.55); margin-top: 1px; }
+  .mega-system-icon { width: 36px; height: 36px; border-radius: 8px; background: rgba(118,169,250,0.15);
+                      display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .mega-system-icon .material-symbols-outlined { font-size: 20px; color: #225eaa; }
+  .mega-panel-cta { display: flex; align-items: center; justify-content: space-between;
+                    margin-top: 18px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08); gap: 12px; }
+  .mega-panel-cta .all-link { font-size: 12px; font-weight: 700; color: rgba(232,238,255,0.65); }
+  .mega-panel-cta .all-link:hover { color: #76a9fa; }
+  .nav-chev { font-size: 16px !important; transition: transform .2s; }
+  .nav-item:hover .nav-chev { transform: rotate(180deg); }
+  @media (max-width: 767px) { .mega-menu { display: none; } }
+  .nav-link { position: relative; }
+  .nav-link::after { content:''; position:absolute; bottom:-5px; left:0; width:0; height:2px; background:#76a9fa; border-radius:1px; transition:width 0.22s ease; }
+  .nav-link:hover::after { width:100%; }
+  a.hover-tag { cursor:pointer; }
 </style>
+
 <div id="topbar">
   <div class="topbar-inner">
     <nav class="topbar-links">
@@ -149,34 +199,237 @@
     </div>
   </div>
 </div>
-<nav id="navbar" class="fixed top-0 w-full z-50 glass-nav border-b border-white/10">
-  <div class="flex justify-between items-center px-6 md:px-12 py-4 max-w-[1440px] mx-auto">
+<nav id="navbar" class="fixed top-0 w-full z-50 bg-white/10 glass-nav border-b border-white/10">
+  <div class="flex justify-between items-center px-6 md:px-12 py-2.5 max-w-[1440px] mx-auto">
     <a href="../../index.html" class="text-xl md:text-2xl font-bold tracking-tighter text-white">DeineFenster<span style="color:#76a9fa">.de</span></a>
     <div class="hidden md:flex items-center gap-x-5">
-      <a href="../../produkte.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Produkte</a>
+      <!-- Produkte mit Mega-Menu -->
+      <div class="nav-item">
+        <a href="../../produkte.html" class="nav-link inline-flex items-center gap-1 text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">
+          Produkte <span class="material-symbols-outlined nav-chev">expand_more</span>
+        </a>
+        <div class="mega-menu" id="mega-produkte">
+          <div class="mega-grid">
+            <!-- Links: Kategorien -->
+            <div class="mega-cats">
+              <div class="mega-cat active" data-mega="fenster">
+                <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">window</span>
+                <span>Fenster</span>
+                <span class="material-symbols-outlined mega-cat-arrow">chevron_right</span>
+              </div>
+              <div class="mega-cat" data-mega="balkon">
+                <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">deck</span>
+                <span>Balkontüren</span>
+                <span class="material-symbols-outlined mega-cat-arrow">chevron_right</span>
+              </div>
+              <div class="mega-cat" data-mega="haustuer">
+                <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">door_front</span>
+                <span>Haustüren</span>
+                <span class="material-symbols-outlined mega-cat-arrow">chevron_right</span>
+              </div>
+              <div class="mega-cat" data-mega="schiebe">
+                <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">meeting_room</span>
+                <span>Schiebetüren</span>
+                <span class="material-symbols-outlined mega-cat-arrow">chevron_right</span>
+              </div>
+              <div class="mega-cat" data-mega="rollladen">
+                <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">roller_shades</span>
+                <span>Rollläden</span>
+                <span class="material-symbols-outlined mega-cat-arrow">chevron_right</span>
+              </div>
+            </div>
+
+            <!-- Rechts: Panels pro Kategorie -->
+            <div class="mega-panels">
+              <!-- FENSTER -->
+              <div class="mega-panel active" data-mega-panel="fenster">
+                <div class="mega-panel-title">PVC-Kunststofffenster</div>
+                <a href="../../produkte/kunststofffenster/iglo-5-classic.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">window</span></div>
+                  <div>
+                    <div class="mega-system-label">IGLO 5 Classic</div>
+                    <div class="mega-system-desc">5-Kammer · 70 mm · Uw 0,83 · Bewährter Allrounder</div>
+                  </div>
+                </a>
+                <a href="../../produkte/kunststofffenster/iglo-energy.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">bolt</span></div>
+                  <div>
+                    <div class="mega-system-label">IGLO Energy</div>
+                    <div class="mega-system-desc">7-Kammer · 82 mm · Uw 0,71 · Premium-Wärmedämmung</div>
+                  </div>
+                </a>
+                <a href="../../produkte/kunststofffenster/iglo-edge.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">diamond</span></div>
+                  <div>
+                    <div class="mega-system-label">IGLO EDGE</div>
+                    <div class="mega-system-desc">Flaggschiff · 7-Kammer · 82 mm · Uw 0,66 · technologisch fortschrittlichst</div>
+                  </div>
+                </a>
+                <a href="../../produkte/kunststofffenster/iglo-light.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">wb_sunny</span></div>
+                  <div>
+                    <div class="mega-system-label">IGLO Light</div>
+                    <div class="mega-system-desc">Schlanke Profile · 5-Kammer · 70 mm · Uw 0,88 · mehr Lichteinfall</div>
+                  </div>
+                </a>
+                <a href="../../produkte/kunststofffenster/iglo-ext.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">open_in_new</span></div>
+                  <div>
+                    <div class="mega-system-label">IGLO EXT</div>
+                    <div class="mega-system-desc">Nach außen öffnend · 5-Kammer · 70 mm · Uw 0,89 · Skandi-/UK-Stil</div>
+                  </div>
+                </a>
+                <div class="mega-panel-cta">
+                  <a href="../../konfigurator.html?prod=kunststoff" class="all-link">Fenster konfigurieren →</a>
+                  <a href="../../konfigurator.html" class="inline-flex items-center gap-1.5 bg-primary text-white px-3 py-1.5 rounded-full font-bold text-xs hover:bg-primary-d transition-colors">
+                    <span class="material-symbols-outlined" style="font-size:14px">tune</span> Angebot anfragen
+                  </a>
+                </div>
+              </div>
+
+              <!-- BALKONTÜREN -->
+              <div class="mega-panel" data-mega-panel="balkon">
+                <div class="mega-panel-title">Balkontüren</div>
+                <a href="../../produkte/balkontueren/iglo-5-classic.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">deck</span></div>
+                  <div>
+                    <div class="mega-system-label">IGLO 5 Classic Balkontür</div>
+                    <div class="mega-system-desc">Ein- oder zweiflügelig · Alu-Schwelle · 70 mm Profil</div>
+                  </div>
+                </a>
+                <a href="../../produkte/balkontueren/iglo-energy.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">bolt</span></div>
+                  <div>
+                    <div class="mega-system-label">IGLO Energy Balkontür</div>
+                    <div class="mega-system-desc">Premium · 82 mm · maximale Wärmedämmung</div>
+                  </div>
+                </a>
+                <div class="mega-panel-cta">
+                  <a href="../../konfigurator.html?prod=balkontuer" class="all-link">Balkontür konfigurieren →</a>
+                  <a href="../../konfigurator.html" class="inline-flex items-center gap-1.5 bg-primary text-white px-3 py-1.5 rounded-full font-bold text-xs hover:bg-primary-d transition-colors">
+                    <span class="material-symbols-outlined" style="font-size:14px">tune</span> Angebot anfragen
+                  </a>
+                </div>
+              </div>
+
+              <!-- HAUSTÜREN -->
+              <div class="mega-panel" data-mega-panel="haustuer">
+                <div class="mega-panel-title">Haustüren</div>
+                <a href="../../produkte/haustueren/iglo-5-classic.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">door_front</span></div>
+                  <div>
+                    <div class="mega-system-label">IGLO 5 Classic Tür</div>
+                    <div class="mega-system-desc">5-Kammer Türprofil · Ud 1,0 · über 50 Design-Modelle</div>
+                  </div>
+                </a>
+                <a href="../../produkte/haustueren/iglo-energy.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">bolt</span></div>
+                  <div>
+                    <div class="mega-system-label">IGLO Energy Tür</div>
+                    <div class="mega-system-desc">Premium 7-Kammer · Ud 0,8 · höchste Effizienz</div>
+                  </div>
+                </a>
+                <div class="mega-panel-cta">
+                  <a href="../../konfigurator.html?prod=haustuere" class="all-link">Haustür konfigurieren →</a>
+                  <a href="../../konfigurator.html" class="inline-flex items-center gap-1.5 bg-primary text-white px-3 py-1.5 rounded-full font-bold text-xs hover:bg-primary-d transition-colors">
+                    <span class="material-symbols-outlined" style="font-size:14px">tune</span> Angebot anfragen
+                  </a>
+                </div>
+              </div>
+
+              <!-- SCHIEBETÜREN -->
+              <div class="mega-panel" data-mega-panel="schiebe">
+                <div class="mega-panel-title">Schiebetüren (HST)</div>
+                <a href="../../produkte/hebe-schiebetueren/iglo-energy-psk.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">meeting_room</span></div>
+                  <div>
+                    <div class="mega-system-label">PSK Schiebetür</div>
+                    <div class="mega-system-desc">Parallel-Schiebe-Kipp · bis 2400 mm breit · kompakt</div>
+                  </div>
+                </a>
+                <a href="../../produkte/hebe-schiebetueren/iglo-slide.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">swap_horiz</span></div>
+                  <div>
+                    <div class="mega-system-label">IGLO Slide</div>
+                    <div class="mega-system-desc">Mittlere Schiebetür · bis 4000 mm · komfortabel</div>
+                  </div>
+                </a>
+                <a href="../../produkte/hebe-schiebetueren/iglo-5-classic-psk.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">door_sliding</span></div>
+                  <div>
+                    <div class="mega-system-label">IGLO-HS</div>
+                    <div class="mega-system-desc">Große Hebe-Schiebe-Tür · bis 6500 mm · Null-Schwelle DIN 18040</div>
+                  </div>
+                </a>
+                <div class="mega-panel-cta">
+                  <a href="../../konfigurator.html?prod=hst" class="all-link">Schiebetür konfigurieren →</a>
+                  <a href="../../konfigurator.html" class="inline-flex items-center gap-1.5 bg-primary text-white px-3 py-1.5 rounded-full font-bold text-xs hover:bg-primary-d transition-colors">
+                    <span class="material-symbols-outlined" style="font-size:14px">tune</span> Angebot anfragen
+                  </a>
+                </div>
+              </div>
+
+              <!-- ROLLLÄDEN -->
+              <div class="mega-panel" data-mega-panel="rollladen">
+                <div class="mega-panel-title">Rollläden</div>
+                <a href="../../produkte/rollladen/aufsatz-rollladen.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">roller_shades</span></div>
+                  <div>
+                    <div class="mega-system-label">PVC-Aufsatzrollladen</div>
+                    <div class="mega-system-desc">Elektrisch mit Funk-Motor · 5 Farben · Smart-Home-ready · Wärme- + Hitzeschutz</div>
+                  </div>
+                </a>
+                <div class="mega-panel-cta">
+                  <a href="../../konfigurator.html?prod=rollladen" class="all-link">Rollladen konfigurieren →</a>
+                  <a href="../../konfigurator.html" class="inline-flex items-center gap-1.5 bg-primary text-white px-3 py-1.5 rounded-full font-bold text-xs hover:bg-primary-d transition-colors">
+                    <span class="material-symbols-outlined" style="font-size:14px">tune</span> Angebot anfragen
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       <a href="../../ueber-drutex.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Hersteller</a>
       <a href="../../kunststofffenster-kaufen.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Neue Fenster</a>
       <a href="../../gebrauchte-fenster-kaufen.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Gebraucht</a>
+      <a href="../../fenster-austauschen-kosten.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Ankauf</a>
       <a href="../../konfigurator.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Konfigurator</a>
-      <a href="../../shop.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight inline-flex items-center gap-1.5">Shop <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none" style="background:#76a9fa;color:#001b3d">NEU</span></a>
+      <a href="../../shop.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight inline-flex items-center gap-1.5">
+        Shop
+        <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none" style="background:#76a9fa;color:#001b3d">NEU</span>
+      </a>
       <a href="../../faq.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">FAQ</a>
       <a href="../../glossar.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Glossar</a>
       <a href="../../ueber-uns.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Über uns</a>
       <a href="../../kontakt.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Kontakt</a>
     </div>
     <div class="flex items-center gap-3 md:gap-6">
-      <a href="../../konfigurator.html" class="hidden md:block px-6 py-3 rounded-full font-bold text-sm transition-all duration-300" style="background:#225eaa;color:#fff;">Angebot anfordern</a>
+      <a href="../../konfigurator.html" class="hidden md:block px-5 py-1.5 rounded-full font-semibold text-xs tracking-wide transition-all duration-200" style="background:#225eaa;color:#fff;letter-spacing:0.02em;">Angebot anfragen</a>
       <button id="menuBtn" class="md:hidden text-white p-1" aria-label="Menü öffnen">
         <span class="material-symbols-outlined text-3xl" id="menuIcon">menu</span>
       </button>
     </div>
   </div>
-  <div id="mobileMenu" class="hidden md:hidden px-6 py-6 border-t border-white/10" style="background:rgba(6,14,30,0.98);">
+  <!-- Mobile Menu -->
+  <div id="mobileMenu" class="hidden md:hidden px-6 py-6 border-t border-white/10">
     <div class="flex flex-col gap-2">
-      <a href="../../produkte.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Produkte</a>
+      <details class="text-white">
+        <summary class="flex items-center justify-between py-3 border-b border-white/10 font-semibold text-lg cursor-pointer list-none">
+          Produkte <span class="material-symbols-outlined">expand_more</span>
+        </summary>
+        <div class="pl-4 py-2 space-y-2 text-base text-white/80">
+          <a href="../../produkte/kunststofffenster/iglo-energy.html" class="block py-1">Kunststofffenster</a>
+          <a href="../../produkte/balkontueren/iglo-energy.html" class="block py-1">Balkontüren</a>
+          <a href="../../produkte/haustueren/iglo-energy.html" class="block py-1">Haustüren</a>
+          <a href="../../produkte/hebe-schiebetueren/iglo-energy-psk.html" class="block py-1">Schiebetüren</a>
+          <a href="../../produkte.html" class="block py-1 font-semibold text-white">Alle Produkte →</a>
+        </div>
+      </details>
       <a href="../../ueber-drutex.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Hersteller</a>
       <a href="../../kunststofffenster-kaufen.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Neue Fenster</a>
       <a href="../../gebrauchte-fenster-kaufen.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Gebraucht</a>
+      <a href="../../fenster-austauschen-kosten.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Ankauf</a>
       <a href="../../konfigurator.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Konfigurator</a>
       <a href="../../shop.html" class="text-white font-semibold text-lg py-2 border-b border-white/10 flex items-center gap-2">Shop <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style="background:#76a9fa;color:#001b3d">NEU</span></a>
       <a href="../../faq.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">FAQ</a>
