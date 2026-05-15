@@ -657,21 +657,37 @@
   </div>
 </section>
 
-<!-- GOOGLE MAPS EMBED -->
+<!-- GOOGLE MAPS — 2-Click-Lösung (DSGVO/TTDSG: Iframe lädt erst nach Einwilligung) -->
 <section style="background:#0a1530;padding:0;">
   <div class="max-w-[1440px] mx-auto px-6 md:px-12 pb-20 md:pb-28">
-    <div class="rounded-2xl overflow-hidden" style="border:1px solid rgba(255,255,255,0.08);">
-      <iframe
-        src="https://maps.google.com/maps?q=Fensterhandel+Christ+Fohrder+Landstra%C3%9Fe+13+Brandenburg+an+der+Havel&output=embed&hl=de"
-        width="100%"
-        height="420"
-        style="border:0;filter:invert(90%) hue-rotate(180deg) saturate(0.6) brightness(0.85);"
-        allowfullscreen=""
-        loading="lazy"
-        referrerpolicy="no-referrer-when-downgrade"
-        title="Standort Fensterhandel Christ Brandenburg an der Havel">
-      </iframe>
+    <div id="map-container" class="rounded-2xl overflow-hidden relative" style="border:1px solid rgba(255,255,255,0.08); min-height:420px; background:#0f1c30;">
+      <!-- Vorschau (statisch, kein Tracking) -->
+      <div id="map-placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+        <span class="material-symbols-outlined" style="font-size:48px; color:#76a9fa; margin-bottom:14px;">map</span>
+        <p class="text-white font-bold text-lg mb-2">Standort auf Google Maps</p>
+        <p class="text-white/60 text-sm max-w-md mb-5">
+          Fensterhandel Christ · Fohrder Landstraße 13 · 14772 Brandenburg an der Havel
+        </p>
+        <p class="text-white/40 text-xs max-w-md mb-5">
+          Beim Laden der Karte werden Daten (u.a. Ihre IP-Adresse) an Google in den USA übertragen.
+          Details in der <a href="datenschutz.html" class="underline">Datenschutzerklärung</a>.
+        </p>
+        <button type="button" onclick="loadMap()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all"
+                style="background:#225eaa;color:#fff;">
+          <span class="material-symbols-outlined" style="font-size:18px;">play_arrow</span>
+          Karte laden
+        </button>
+      </div>
     </div>
+    <script>
+      function loadMap() {
+        var c = document.getElementById('map-container');
+        c.innerHTML = '<iframe src="https://maps.google.com/maps?q=Fensterhandel+Christ+Fohrder+Landstra%C3%9Fe+13+Brandenburg+an+der+Havel&output=embed&hl=de" '
+          + 'width="100%" height="420" style="border:0;filter:invert(90%) hue-rotate(180deg) saturate(0.6) brightness(0.85);display:block;" '
+          + 'allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" '
+          + 'title="Standort Fensterhandel Christ Brandenburg an der Havel"></iframe>';
+      }
+    </script>
     <div class="mt-4 flex flex-col sm:flex-row gap-3 justify-center">
       <a href="https://www.google.com/maps/dir//Fohrder+Landstraße+13,+14772+Brandenburg+an+der+Havel" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.7);" onmouseover="this.style.color='white'" onmouseout="this.style.color='rgba(255,255,255,0.7)'">
         <span class="material-symbols-outlined" style="font-size:16px;font-variation-settings:'FILL' 1;">directions</span>Route berechnen
@@ -818,6 +834,16 @@
           <div class="text-green-700">Wir haben Ihre Anfrage erhalten und Sie sofort per E-Mail bestätigt. Wir melden uns bei Ihnen.</div>
         </div>
 
+        <!-- DSGVO-Einwilligung (Art. 6 Abs. 1 lit. a DSGVO) -->
+        <label class="flex items-start gap-3 mb-6 cursor-pointer text-white/70 text-sm leading-relaxed">
+          <input id="kf-dsgvo" type="checkbox" required class="mt-1 w-4 h-4 flex-shrink-0 cursor-pointer accent-[#76a9fa]">
+          <span>
+            Ich habe die <a href="datenschutz.html" target="_blank" class="text-[#76a9fa] underline">Datenschutzerklärung</a>
+            zur Kenntnis genommen und willige ein, dass meine Angaben zur Bearbeitung meiner Anfrage
+            elektronisch erhoben und gespeichert werden. <span class="text-red-400">*</span>
+          </span>
+        </label>
+
         <button type="submit" id="kf-btn"
           class="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 font-bold text-sm transition-all"
           style="background:#76a9fa;color:#001830;border-radius:8px;border:none;cursor:pointer;">
@@ -842,9 +868,14 @@
     const ok    = document.getElementById('kf-ok');
     const btn   = document.getElementById('kf-btn');
     const btnTxt= document.getElementById('kf-btn-txt');
+    const dsgvo = document.getElementById('kf-dsgvo').checked;
     err.classList.add('hidden'); ok.classList.add('hidden');
     if (!name || !email || !msg) {
       err.textContent = 'Bitte Name, E-Mail und Nachricht ausfüllen.';
+      err.classList.remove('hidden'); return;
+    }
+    if (!dsgvo) {
+      err.textContent = 'Bitte stimmen Sie der Datenschutzerklärung zu.';
       err.classList.remove('hidden'); return;
     }
     btn.disabled = true; btnTxt.textContent = 'Wird gesendet …';
