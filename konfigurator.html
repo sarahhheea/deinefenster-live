@@ -1940,6 +1940,37 @@
     pointer-events: none;
   }
   #s1.hero-done { display: none !important; }
+
+  /* ── MOBILE: Step-Nav als horizontale Pille oben (< 768px) ──
+     3-Panel-Layout greift erst ab 768px. Darunter zeigen wir die Nav
+     als kompakten horizontalen Scroll-Strip — gleicher Inhalt, neues Format.
+     Aktivierung: Klasse .kfg-nav--mobile-strip vom JS gesetzt, sobald Produkt gewählt. */
+  @media (max-width: 767px) {
+    #kfg-nav.kfg-nav--mobile-strip {
+      display: block !important;
+      position: sticky; top: 54px; z-index: 50;
+      width: 100%; padding: 8px 12px;
+      background: rgba(6,14,30,0.96); backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(118,169,250,0.12);
+      overflow-x: auto; overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    #kfg-nav.kfg-nav--mobile-strip::-webkit-scrollbar { display: none; }
+    #kfg-nav.kfg-nav--mobile-strip .kfg-nav-header { display: none; }
+    #kfg-nav.kfg-nav--mobile-strip #kfg-nav-inner { width: max-content; }
+    #kfg-nav.kfg-nav--mobile-strip #kfg-nav-list {
+      display: flex; flex-direction: row; gap: 6px; align-items: center;
+    }
+    #kfg-nav.kfg-nav--mobile-strip .ksnav-item {
+      flex-direction: row; padding: 6px 10px; margin: 0;
+      background: rgba(255,255,255,0.04); border-radius: 16px;
+      white-space: nowrap;
+    }
+    #kfg-nav.kfg-nav--mobile-strip .ksnav-num { width: 18px; height: 18px; font-size: 9.5px; }
+    #kfg-nav.kfg-nav--mobile-strip .ksnav-lbl { font-size: 11.5px; max-width: 110px; }
+    #kfg-nav.kfg-nav--mobile-strip .ksnav-active::after { display: none; }
+  }
 </style>
 
 <!-- ══ PRODUKTKARTEN v11 — Dark Premium, einheitlich ══ -->
@@ -4525,7 +4556,11 @@ function heroSelectProd(prodKey) {
     const s1 = document.getElementById('s1');
     if (s1) s1.classList.add('hero-done');
     const nav = document.getElementById('kfg-nav');
-    if (nav) nav.style.display = '';
+    if (nav) {
+      nav.style.display = '';
+      if (window.innerWidth < 768) nav.classList.add('kfg-nav--mobile-strip');
+      else nav.classList.remove('kfg-nav--mobile-strip');
+    }
     openS(2);
   }
 }
@@ -4538,6 +4573,22 @@ function pickProd(el) {
   S.profil = null; S.fluegel = null; S.oeff1 = null; S.oeff2 = null; S.oeff3 = null;
   document.getElementById('d1').textContent = P.prod[S.prod].name;
   mkDone(1);
+
+  // Step-Nav sichtbar machen sobald ein Produkt gewählt ist (defensive: auch wenn
+  // pickProd ohne Hero-Path getriggert wird).
+  // Desktop (≥768px): linke Spalte. Mobile (<768px): horizontale Pille oben.
+  {
+    const _nav = document.getElementById('kfg-nav');
+    if (_nav) {
+      if (window.innerWidth >= 768) {
+        if (_nav.style.display === 'none') _nav.style.display = '';
+        _nav.classList.remove('kfg-nav--mobile-strip');
+      } else {
+        _nav.style.display = '';  // Inline-none aufheben — CSS-Klasse übernimmt
+        _nav.classList.add('kfg-nav--mobile-strip');
+      }
+    }
+  }
 
   // View-Toggle immer zeigen (Haustür: Außen=3D, Innen=Pillow-Bild)
   const vToggle = document.querySelector('#sidebar [style*="display:flex"][style*="gap:4px"]');
@@ -10005,11 +10056,26 @@ async function submitSkizze(e) {
   document.addEventListener('DOMContentLoaded', function() {
     injectSummaryBlock();
 
-    // ── Mobile: rechte Spalte unter Steps; Nav verstecken ──
+    // ── Mobile: rechte Spalte unter Steps; Nav initial verstecken bis Produkt gewählt ──
     if (window.innerWidth < 768) {
       const nav = document.getElementById('kfg-nav');
       if (nav) nav.style.display = 'none';
     }
+
+    // ── Resize-Handler: Mobile-Strip-Toggle wenn das Viewport die 768px-Schwelle kreuzt ──
+    let _kfgNavResizeTimer = null;
+    window.addEventListener('resize', function() {
+      clearTimeout(_kfgNavResizeTimer);
+      _kfgNavResizeTimer = setTimeout(function() {
+        const nav = document.getElementById('kfg-nav');
+        if (!nav) return;
+        // Nur reagieren wenn schon ein Produkt gewählt (Nav also sichtbar sein soll)
+        if (!window.S || !window.S.prod) return;
+        nav.style.display = '';
+        if (window.innerWidth < 768) nav.classList.add('kfg-nav--mobile-strip');
+        else nav.classList.remove('kfg-nav--mobile-strip');
+      }, 120);
+    });
   });
 
 })();
