@@ -39,11 +39,11 @@ let _prevProd     = null;   // kamera-Reset nur wenn Produkt wechselt
 const texLoader = new THREE.TextureLoader();
 
 const frameMat = new THREE.MeshPhysicalMaterial({
-  color: 0xF0EFE8,
-  roughness: 0.13, metalness: 0.0,
-  clearcoat: 0.88, clearcoatRoughness: 0.05,
+  color: 0xF0EFE8,      // Weiß-PVC Ton (leicht warm, nicht reines Weiß)
+  roughness: 0.18, metalness: 0.0,
+  clearcoat: 0.6, clearcoatRoughness: 0.25,
   sheen: 0.35, sheenColor: new THREE.Color(0xffffff), sheenRoughness: 0.08,
-  envMapIntensity: 1.60
+  envMapIntensity: 1.4,
 });
 // Fasenmaterial — etwas heller + maximaler Clearcoat → fängt Licht von Kantenwinkeln
 const faseMat = new THREE.MeshPhysicalMaterial({
@@ -53,11 +53,13 @@ const faseMat = new THREE.MeshPhysicalMaterial({
   envMapIntensity: 2.2
 });
 const glassMat = new THREE.MeshPhysicalMaterial({
-  color: 0xd4eae8,          // echtes Float-Glas: leichter Blau-Grün-Stich, niedrige Sättigung
-  metalness: 0.0, roughness: 0.03,
-  transmission: 0.88, thickness: 0.028, ior: 1.52, transparent: true,
+  color: 0xd8eef5,        // Echter Float-Glas-Ton (leicht blau-grün)
+  metalness: 0.0, roughness: 0.02,
+  transmission: 0.94, thickness: 0.028, ior: 1.52, transparent: true,
+  reflectivity: 0.08,
   clearcoat: 0.28, clearcoatRoughness: 0.04,
-  envMapIntensity: 1.2
+  envMapIntensity: 1.8,
+  side: THREE.DoubleSide,
 });
 const glassRoomMat = new THREE.MeshStandardMaterial({
   color: 0x8ca0b0, roughness: 0.95, metalness: 0  // mittel Blau-Grau → Innenraum sichtbar durch Glas
@@ -221,20 +223,22 @@ function buildNormalTex(hFn,strength,rx,ry){
 function applyGlass(key){
   ['normalMap'].forEach(k=>{if(glassMat[k]){glassMat[k].dispose();glassMat[k]=null;}});
   if(key==='satinato'){
-    glassMat.transmission=0.28;glassMat.roughness=0.95;glassMat.color.set(0xdde4e4);
+    glassMat.transmission=0.35;glassMat.roughness=0.85;glassMat.color.set(0xe8eef0);
+    glassMat.normalMap=null;
   }else if(key==='chinchilla'){
-    glassMat.transmission=0.58;glassMat.roughness=0.12;glassMat.color.set(0xc8dce8);
+    glassMat.transmission=0.62;glassMat.roughness=0.15;glassMat.color.set(0xdce6e8);
     glassMat.normalMap=buildNormalTex(chinchillaHeight,4.5,5,16);
     glassMat.normalScale=new THREE.Vector2(1.8,1.8);
   }else if(key==='master-carre'){
-    glassMat.transmission=0.72;glassMat.roughness=0.06;glassMat.color.set(0xc8dce8);
+    glassMat.transmission=0.75;glassMat.roughness=0.08;glassMat.color.set(0xd8eaf0);
     glassMat.normalMap=buildNormalTex(masterCarreHeight,4.0,3,11);
     glassMat.normalScale=new THREE.Vector2(1.5,1.5);
   }else{
-    // Klarglas — leichter Blau-Grün-Stich wie echtes Float-Glas
-    glassMat.transmission=0.88;glassMat.roughness=0.03;glassMat.color.set(0xd4eae8);
+    // Klarglas — echter Float-Glas-Ton (leicht blau-grün)
+    glassMat.transmission=0.94;glassMat.roughness=0.02;glassMat.color.set(0xd8eef5);
     glassMat.clearcoat=0.28;glassMat.clearcoatRoughness=0.04;
-    glassMat.envMapIntensity=1.2;
+    glassMat.envMapIntensity=1.8;
+    glassMat.normalMap=null;
   }
   glassMat.needsUpdate=true;
 }
@@ -336,6 +340,53 @@ function addInnerFasen(g, X, Y, W, H, depth) {
    m.rotation.y=Math.PI/4;m.position.set(X-F*0.707,Y+H/2,depth+F*0.207);g.add(m);}
   {const m=new THREE.Mesh(new THREE.BoxGeometry(F,H+F*2,F),sfMat);
    m.rotation.y=-Math.PI/4;m.position.set(X+W+F*0.707,Y+H/2,depth+F*0.207);g.add(m);}
+}
+
+// Innere Abkantung am Fensterrahmen — macht Rahmen dimensional
+function addFrameDepthDetail(group, X, Y, W, H, frameW, depth) {
+  const bevel = new THREE.MeshPhysicalMaterial({
+    color: 0xD8D7D0,      // leicht dunkler als Außenrahmen
+    roughness: 0.22,
+    metalness: 0.0,
+    clearcoat: 0.4,
+    envMapIntensity: 0.8,
+  });
+
+  const bevelSize = 0.008; // 8mm Fase
+  const bevelDepth = depth * 0.6;
+
+  const sides = [
+    { w: W - frameW*2, h: bevelSize, x: X + frameW,             y: Y + H - frameW - bevelSize },  // oben innen
+    { w: W - frameW*2, h: bevelSize, x: X + frameW,             y: Y + frameW },                  // unten innen
+    { w: bevelSize,    h: H - frameW*2, x: X + frameW,          y: Y + frameW },                  // links innen
+    { w: bevelSize,    h: H - frameW*2, x: X + W - frameW - bevelSize, y: Y + frameW },           // rechts innen
+  ];
+
+  sides.forEach(s => {
+    if(s.w <= 0 || s.h <= 0) return;
+    const geo = new THREE.BoxGeometry(s.w, s.h, bevelDepth);
+    const mesh = new THREE.Mesh(geo, bevel);
+    mesh.position.set(s.x + s.w/2, s.y + s.h/2, depth/2);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    group.add(mesh);
+  });
+}
+
+// Fensterbank — gibt dem Modell Kontext
+function addSill(group, w, h) {
+  const sillGeo = new THREE.BoxGeometry(w + 0.08, 0.018, 0.12);
+  const sillMatLocal = new THREE.MeshPhysicalMaterial({
+    color: 0xE8E6E0,
+    roughness: 0.35,
+    metalness: 0.0,
+    clearcoat: 0.2,
+  });
+  const sill = new THREE.Mesh(sillGeo, sillMatLocal);
+  sill.position.set(0, -h/2 - 0.009, 0.04); // leicht nach vorne
+  sill.castShadow = true;
+  sill.receiveShadow = true;
+  group.add(sill);
 }
 
 // ════════════════════════════════════════════════════════════
@@ -659,7 +710,11 @@ function buildFenster(S,view){
     if(i>0) addBox(g,sx-OFR*0.2,mainY,0,OFR*0.4,MAIN_H-OFR,DD,frameMat);
   }
 
-  // Fensterbank entfernt — nur Fenster ohne Sockel
+  // Rahmentiefe-Detail — innere Abkantung für Dimensionalität
+  addFrameDepthDetail(g, 0, 0, W, H, OFR, DD);
+
+  // Fensterbank — gibt dem Modell Kontext (nur bei Fenster, nicht Balkontür)
+  if(isFenster) addSill(g, W, H);
 
   g.position.set(-W/2,-H/2,0);
   return g;
@@ -878,10 +933,21 @@ function buildHST(S,view){
     }
   }
 
-  // Bodenschwelle (3-teilig — realistisch)
+  // Bodenschwelle innen (3-teilig — realistisch)
   addBox(g,HOF,HOF,0,          W-2*HOF,0.040,0.022,chromeMat);
   addBox(g,HOF+0.010,HOF+0.012,0.018,W-2*HOF-0.020,0.016,0.008,grooveMat);
   addBox(g,HOF,HOF+0.036,0,    W-2*HOF,0.006,0.012,sealMat_hst);
+
+  // HST Bodenschiene außen — Edelstahl-Optik, bündig unter Rahmen
+  const trackGeo = new THREE.BoxGeometry(W + 0.04, 0.012, 0.08);
+  const trackMat = new THREE.MeshPhysicalMaterial({
+    color: 0xC8C8C8, roughness: 0.12, metalness: 0.7
+  });
+  const track = new THREE.Mesh(trackGeo, trackMat);
+  track.position.set(W/2, HOF - 0.006, 0.04); // unten am Außenrahmen
+  track.castShadow = true;
+  track.receiveShadow = true;
+  g.add(track);
 
   g.position.set(-W/2,-H/2,0);
   return g;
@@ -902,7 +968,8 @@ function initScene(container){
   renderer.shadowMap.enabled=true;
   renderer.shadowMap.type=THREE.PCFSoftShadowMap;
   renderer.toneMapping=THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure=0.82;
+  renderer.toneMappingExposure=1.1;
+  renderer.outputColorSpace=THREE.SRGBColorSpace;
   renderer.setClearColor(0x0f172a,1);
 
   const cvs=renderer.domElement;
