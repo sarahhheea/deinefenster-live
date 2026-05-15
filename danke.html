@@ -1,148 +1,248 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Anfrage erfolgreich gesendet | DeineFenster.de</title>
-  <meta name="robots" content="noindex, nofollow">
-  <link rel="stylesheet" href="css/tailwind.css"/>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
-  <style>
-    body{font-family:'Manrope',sans-serif;background:#0a1530;color:#e8eeff;min-height:100vh;display:flex;flex-direction:column}
-    h1,h2{font-family:'Plus Jakarta Sans',sans-serif}
-    .ms{font-family:'Material Symbols Outlined';font-size:22px;vertical-align:-5px;line-height:1;font-style:normal}
-    .ms.f{font-variation-settings:'FILL' 1}
-    #navbar{background:rgba(14, 30, 58, 0.95);backdrop-filter:blur(12px)}
-  </style>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js" defer></script>
-<script src="js/scroll-animations.js" defer></script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Anfrage erfolgreich gesendet | DeineFenster.de</title>
+<meta name="robots" content="noindex, nofollow"/>
+<link rel="icon" type="image/svg+xml" href="img/logo/deinefenster-mark.svg"/>
+<link rel="preconnect" href="https://fonts.bunny.net"/>
+<link href="https://fonts.bunny.net/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="fonts/material-symbols.css" rel="stylesheet"/>
+<link rel="stylesheet" href="css/global-design.css?v=1"/>
+<script defer data-domain="deinefenster.de" src="https://plausible.io/js/script.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Manrope', sans-serif;
+    background: #0a1225;
+    color: #e8eeff;
+    min-height: 100vh;
+  }
+  h1, h2, h3, h4 { font-family: 'Plus Jakarta Sans', sans-serif; }
+  .glass-nav { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+  #navbar { background: rgba(6,14,30,0.92); transition: background 0.3s; border-bottom: 1px solid rgba(255,255,255,0.1); }
+  #navbar.scrolled { background: rgba(6,14,30,0.98); box-shadow: 0 2px 24px rgba(0,0,0,0.4); }
+  .nav-link { position: relative; }
+  .nav-link::after { content:''; position:absolute; bottom:-5px; left:0; width:0; height:2px; background:#76a9fa; border-radius:1px; transition:width 0.22s ease; }
+  .nav-link:hover::after { width:100%; }
+</style>
 </head>
-<body data-auto-anim="true">
+<body>
 
-<!-- NAV -->
-<nav id="navbar" class="fixed top-0 w-full z-50 border-b border-white/10">
-  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-    <a href="index.html" class="flex items-center gap-2 text-white font-bold text-xl" style="font-family:'Archivo',sans-serif">
-      <i class="ms f" style="color:#76a9fa">window</i>
-      DeineFenster<span style="color:#76a9fa">.de</span>
-    </a>
-    <a href="konfigurator.html" class="hidden md:inline-flex items-center gap-1.5 font-semibold text-sm px-4 py-2 rounded-full transition-colors" style="background:#d6e3ff;color:#225eaa;font-family:'Archivo',sans-serif">
-      <i class="ms" style="font-size:18px">settings</i> Konfigurator
-    </a>
+<!-- Topbar -->
+<div id="topbar">
+  <div class="topbar-inner">
+    <nav class="topbar-links">
+      <a href="ueber-drutex.html" class="topbar-link">Hersteller</a>
+      <span class="topbar-dot">·</span>
+      <a href="faq.html" class="topbar-link">FAQ</a>
+      <span class="topbar-dot">·</span>
+      <a href="ratgeber/" class="topbar-link">Ratgeber</a>
+      <span class="topbar-dot">·</span>
+      <a href="ueber-uns.html" class="topbar-link">Über uns</a>
+      <span class="topbar-dot">·</span>
+      <a href="kontakt.html" class="topbar-link">Kontakt</a>
+    </nav>
+    <div class="topbar-contacts">
+      <a href="tel:+4933812148373" class="topbar-phone">
+        <span class="material-symbols-outlined" style="font-size:12px;font-variation-settings:'FILL' 1">call</span>
+        03381 / 2148373
+      </a>
+      <span class="topbar-dot">·</span>
+      <a href="mailto:info@baustoffchrist.de" class="topbar-phone">
+        <span class="material-symbols-outlined" style="font-size:12px;font-variation-settings:'FILL' 1">mail</span>
+        info@baustoffchrist.de
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Navigation -->
+<nav id="navbar" class="fixed top-0 w-full z-50 glass-nav">
+  <div class="flex justify-between items-center px-6 md:px-12 py-4 max-w-[1440px] mx-auto">
+    <a href="index.html" style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.25rem;color:#fff;text-decoration:none;letter-spacing:-0.04em;">DeineFenster<span style="color:#76a9fa">.de</span></a>
+    <div class="hidden md:flex items-center gap-x-5">
+      <a href="produkte.html" class="nav-link" style="color:rgba(255,255,255,0.8);font-size:0.875rem;font-weight:500;text-decoration:none;">Produkte</a>
+      <a href="konfigurator.html" class="nav-link" style="color:rgba(255,255,255,0.8);font-size:0.875rem;font-weight:500;text-decoration:none;">Konfigurator</a>
+      <a href="ueber-uns.html" class="nav-link" style="color:rgba(255,255,255,0.8);font-size:0.875rem;font-weight:500;text-decoration:none;">Über uns</a>
+      <a href="kontakt.html" class="nav-link" style="color:rgba(255,255,255,0.8);font-size:0.875rem;font-weight:500;text-decoration:none;">Kontakt</a>
+    </div>
+    <div class="flex items-center gap-3 md:gap-6">
+      <a href="konfigurator.html" class="hidden md:block px-6 py-3 font-bold text-sm transition-all duration-300" style="background:#225eaa;color:#fff;border-radius:8px;">Angebot anfordern</a>
+      <button id="menuBtn" class="md:hidden text-white p-1" aria-label="Menü öffnen">
+        <span class="material-symbols-outlined text-3xl" id="menuIcon">menu</span>
+      </button>
+    </div>
+  </div>
+  <div id="mobileMenu" class="hidden md:hidden px-6 py-6 border-t border-white/10" style="background:rgba(6,14,30,0.98);">
+    <div class="flex flex-col gap-2">
+      <a href="produkte.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Produkte</a>
+      <a href="konfigurator.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Konfigurator</a>
+      <a href="ueber-uns.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Über uns</a>
+      <a href="kontakt.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Kontakt</a>
+      <a href="konfigurator.html" class="mt-2 px-6 py-4 font-bold text-center text-sm" style="background:#225eaa;color:#fff;border-radius:8px;">Angebot anfordern</a>
+    </div>
   </div>
 </nav>
 
-<!-- MAIN -->
-<main class="flex-1 flex items-center justify-center px-4 pt-24 pb-12">
-  <div class="rounded-3xl p-8 md:p-12 max-w-lg w-full text-center" style="background:#0f1c30;border:1px solid rgba(255,255,255,0.1);box-shadow:0 32px 80px rgba(0,0,0,0.5);">
+<!-- Main Content -->
+<main style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:120px 24px 64px;">
+  <div style="width:100%;max-width:540px;">
 
-    <!-- Icon -->
-    <div class="flex items-center justify-center w-24 h-24 rounded-full mx-auto mb-6" style="background:rgba(5,150,105,0.15);border:2px solid rgba(5,150,105,0.3);">
-      <i class="ms f" style="font-size:52px;color:#34d399">check_circle</i>
-    </div>
+    <!-- Success Card -->
+    <div style="background:#0f1c30;border:1px solid rgba(118,169,250,0.12);border-radius:14px;padding:48px 40px;text-align:center;">
 
-    <!-- Headline -->
-    <h1 class="text-2xl md:text-3xl font-bold mb-3 text-white">
-      Anfrage erfolgreich gesendet!
-    </h1>
-
-    <!-- Product name -->
-    <p class="text-base font-semibold mb-5" style="color:#76a9fa" id="prodname"></p>
-
-    <!-- Message -->
-    <p class="text-base leading-relaxed mb-5 text-white/70">
-      Vielen Dank für Ihre Anfrage! Wir melden uns <strong class="text-white">zeitnah</strong>
-      mit einem persönlichen Angebot bei Ihnen.
-      Bitte prüfen Sie auch Ihren <strong class="text-white">Spam-Ordner</strong>.
-    </p>
-
-    <!-- Bild-Upload-Bestätigung (nur wenn Fotos mitgeschickt wurden) -->
-    <div id="bildBestaetigung" class="hidden mb-6 p-4 rounded-xl" style="background:rgba(118,169,250,0.1);border:1px solid rgba(118,169,250,0.25)">
-      <div class="flex items-center gap-3">
-        <i class="ms f" style="color:#76a9fa;font-size:24px;flex-shrink:0">attach_file</i>
-        <div class="text-left">
-          <div class="text-sm font-bold text-white">Ihre Bilder sind angekommen</div>
-          <div class="text-sm text-white/65" id="bildBestaetigungText">Wir haben Ihre Fotos erhalten und beziehen sie in das Angebot ein.</div>
-        </div>
+      <!-- Icon -->
+      <div style="width:72px;height:72px;background:rgba(74,222,128,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;margin:0 auto 28px;">
+        <span class="material-symbols-outlined" style="font-size:36px;color:#4ade80;font-variation-settings:'FILL' 1;">check_circle</span>
       </div>
-    </div>
 
-    <!-- Steps what happens next -->
-    <div class="text-left space-y-3 mb-8 p-5 rounded-2xl" style="background:#0a1225;">
-      <div class="text-sm font-bold mb-2 text-white">Was passiert als nächstes?</div>
-      <div class="flex items-start gap-3">
-        <div class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5" style="background:#225eaa">1</div>
-        <div class="text-sm text-white/70">Sie erhalten eine <strong class="text-white">Bestätigungs-E-Mail</strong> mit Ihrer Konfiguration</div>
+      <!-- Section Label -->
+      <div style="display:inline-flex;align-items:center;gap:10px;margin-bottom:14px;">
+        <span style="display:block;width:22px;height:1px;background:#76a9fa;"></span>
+        <span style="font-size:11px;font-weight:700;color:#76a9fa;text-transform:uppercase;letter-spacing:0.28em;">Anfrage eingegangen</span>
+        <span style="display:block;width:22px;height:1px;background:#76a9fa;"></span>
       </div>
-      <div class="flex items-start gap-3">
-        <div class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5" style="background:#225eaa">2</div>
-        <div class="text-sm text-white/70">Unser Team prüft Ihre Anfrage und erstellt ein <strong class="text-white">persönliches Angebot</strong></div>
+
+      <!-- Headline -->
+      <h1 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:clamp(1.6rem,4vw,2.2rem);color:#fff;letter-spacing:-0.03em;margin-bottom:12px;">
+        Anfrage gesendet!
+      </h1>
+
+      <!-- Product name (from URL param) -->
+      <p id="prodname" style="color:#76a9fa;font-weight:600;font-size:1rem;margin-bottom:16px;min-height:1.4em;"></p>
+
+      <!-- Message -->
+      <p style="color:rgba(232,238,255,0.6);font-size:0.95rem;line-height:1.65;margin-bottom:28px;">
+        Vielen Dank. Wir haben Ihre Anfrage erhalten und melden uns innerhalb von
+        <strong style="color:#e8eeff;">24 Stunden</strong> mit einem persönlichen Angebot.
+      </p>
+
+      <!-- Config summary box -->
+      <div id="summary-box" class="hidden" style="text-align:left;margin-bottom:28px;padding:18px 20px;background:rgba(255,255,255,0.04);border:1px solid rgba(118,169,250,0.12);border-radius:10px;">
+        <div style="font-size:10px;font-weight:700;color:#76a9fa;text-transform:uppercase;letter-spacing:0.28em;margin-bottom:12px;">Ihre Konfiguration</div>
+        <div id="summary-content" style="font-size:0.85rem;color:rgba(232,238,255,0.65);line-height:1.7;font-family:monospace;"></div>
       </div>
-      <div class="flex items-start gap-3">
-        <div class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5" style="background:#225eaa">3</div>
-        <div class="text-sm text-white/70">Nach Ihrer Zusage liefern wir Ihre <strong class="text-white">Drutex-Produkte</strong> direkt zu Ihnen nach Hause</div>
+
+      <!-- Fallback hint -->
+      <p style="font-size:0.8rem;color:rgba(232,238,255,0.35);margin-bottom:12px;">E-Mail-App nicht geöffnet?</p>
+
+      <!-- Buttons -->
+      <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px;">
+        <a id="btn-email" href="mailto:info@baustoffchrist.de" style="display:flex;align-items:center;justify-content:center;gap:10px;background:#76a9fa;color:#001830;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:0.9rem;padding:14px 24px;border-radius:8px;text-decoration:none;transition:opacity 0.2s;" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
+          <span class="material-symbols-outlined" style="font-size:18px;font-variation-settings:'FILL' 1">mail</span>
+          E-Mail nochmal öffnen
+        </a>
+        <a id="btn-wa" href="https://wa.me/491717263776" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;gap:10px;background:rgba(37,211,102,0.12);color:#4ade80;border:1px solid rgba(37,211,102,0.25);font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:0.9rem;padding:14px 24px;border-radius:8px;text-decoration:none;transition:opacity 0.2s;" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#4ade80"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Per WhatsApp anfragen
+        </a>
+        <a href="konfigurator.html" style="display:flex;align-items:center;justify-content:center;gap:8px;font-size:0.875rem;font-weight:600;color:rgba(232,238,255,0.45);text-decoration:none;padding:10px;transition:color 0.2s;" onmouseover="this.style.color='rgba(118,169,250,0.8)'" onmouseout="this.style.color='rgba(232,238,255,0.45)'">
+          <span class="material-symbols-outlined" style="font-size:16px;">arrow_back</span>
+          Konfiguration ändern
+        </a>
       </div>
+
+      <!-- Contact hint -->
+      <p style="font-size:0.85rem;color:rgba(232,238,255,0.35);">
+        Fragen?
+        <a href="tel:+493381214837" style="color:#76a9fa;font-weight:600;text-decoration:none;">03381 / 214 83 73</a>
+        &nbsp;·&nbsp;
+        <a href="mailto:info@baustoffchrist.de" style="color:#76a9fa;font-weight:600;text-decoration:none;">info@baustoffchrist.de</a>
+      </p>
+
     </div>
-
-    <!-- Buttons -->
-    <div class="flex flex-col sm:flex-row gap-3">
-      <a href="konfigurator.html"
-        class="flex-1 flex items-center justify-center gap-2 font-bold py-4 rounded-full text-base transition-colors"
-        style="background:#225eaa;color:#fff;">
-        <i class="ms">settings</i>
-        Weiteres Element konfigurieren
-      </a>
-      <a href="index.html"
-        class="flex-1 flex items-center justify-center gap-2 font-bold py-4 rounded-full text-base transition-colors"
-        style="background:rgba(255,255,255,0.08);color:#e8eeff;border:1px solid rgba(255,255,255,0.15);">
-        <i class="ms">home</i>
-        Zurück zur Startseite
-      </a>
-    </div>
-
-    <!-- Contact hint -->
-    <p class="text-sm mt-6 text-white/50">
-      Fragen? Rufen Sie uns an:
-      <a href="tel:+4933812148373" class="font-semibold" style="color:#76a9fa;">03381 / 2148373</a>
-      oder schreiben Sie an
-      <a href="mailto:info@baustoffchrist.de" class="font-semibold" style="color:#76a9fa;">info@baustoffchrist.de</a>
-    </p>
-
   </div>
 </main>
 
-<!-- FOOTER mini -->
-<footer style="background:#0e1a38" class="text-white py-5 text-center text-xs" style="color:rgba(255,255,255,.35)">
-  <span style="color:rgba(255,255,255,.3)">© 2026 DeineFenster.de · Fensterhandel Christ · <a href="impressum.html" style="color:rgba(255,255,255,.4)" class="hover:text-white transition-colors">Impressum</a> · <a href="datenschutz.html" style="color:rgba(255,255,255,.4)" class="hover:text-white transition-colors">Datenschutz</a> · <a href="agb.html" style="color:rgba(255,255,255,.4)" class="hover:text-white transition-colors">AGB</a></span>
-
-  <div style="text-align:center;padding:8px 0 4px;"><a href="shop-einstellen.html" style="color:rgba(255,255,255,0.15);font-size:11px;text-decoration:none;">Mitarbeiter</a></div>
+<!-- Footer -->
+<footer style="background:#060e1e;border-top:1px solid rgba(255,255,255,0.07);padding:48px 24px 28px;">
+  <div style="max-width:1440px;margin:0 auto;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px;">
+    <p style="color:rgba(255,255,255,0.35);font-size:0.75rem;font-weight:600;">© 2026 DeineFenster.de · Fensterhandel Christ · Brandenburg an der Havel</p>
+    <div style="display:flex;gap:24px;">
+      <a href="impressum.html" style="color:rgba(255,255,255,0.35);font-size:0.75rem;font-weight:600;text-decoration:none;">Impressum</a>
+      <a href="datenschutz.html" style="color:rgba(255,255,255,0.35);font-size:0.75rem;font-weight:600;text-decoration:none;">Datenschutz</a>
+      <a href="agb.html" style="color:rgba(255,255,255,0.35);font-size:0.75rem;font-weight:600;text-decoration:none;">AGB</a>
+    </div>
+  </div>
 </footer>
 
 <script>
-  // Show product name from URL param
-  const params = new URLSearchParams(window.location.search);
-  const prod = params.get('prod');
-  if (prod) {
-    document.getElementById('prodname').textContent = 'Ihre Anfrage: ' + prod;
-  }
-  // Bild-Upload-Bestätigung (Sarah-Wunsch 21.04.2026)
-  const imgCount = parseInt(params.get('imgs')) || parseInt(localStorage.getItem('df_last_img_count') || '0');
-  if (imgCount > 0) {
-    const el = document.getElementById('bildBestaetigung');
-    const txt = document.getElementById('bildBestaetigungText');
-    if (el) el.classList.remove('hidden');
-    if (txt) {
-      txt.innerHTML = imgCount === 1
-        ? 'Wir haben <strong>1 Foto</strong> erhalten und beziehen es in das Angebot ein.'
-        : `Wir haben <strong>${imgCount} Fotos</strong> erhalten und beziehen sie in das Angebot ein.`;
+  // Nav scroll effect
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 80);
+  }, {passive:true});
+
+  document.getElementById('menuBtn').addEventListener('click', () => {
+    const m = document.getElementById('mobileMenu');
+    const i = document.getElementById('menuIcon');
+    m.classList.toggle('hidden');
+    i.textContent = m.classList.contains('hidden') ? 'menu' : 'close';
+  });
+
+  // Read config from sessionStorage (set by konfigurator.html)
+  try {
+    const raw = sessionStorage.getItem('df_anfrage');
+    if (raw) {
+      const d = JSON.parse(raw);
+
+      if (d.prodName) {
+        document.getElementById('prodname').textContent = 'Ihre Anfrage: ' + d.prodName;
+      }
+
+      const lines = [];
+      if (d.prodName)         lines.push(['Produkt',        d.prodName]);
+      if (d.anzahl)           lines.push(['Anzahl',          d.anzahl + ' Stück']);
+      if (d.breite && d.hoehe) lines.push(['Maße (Rohbau)', d.breite + ' × ' + d.hoehe + ' mm']);
+      if (d.glas)             lines.push(['Glasart',         d.glas]);
+      if (d.oeff)             lines.push(['Öffnungsart',     d.oeff]);
+      if (d.profil)           lines.push(['Profil',          d.profil]);
+      if (d.farbaussen)       lines.push(['Außenfarbe',      d.farbaussen]);
+      if (d.farbinnen)        lines.push(['Innenfarbe',      d.farbinnen]);
+      if (d.name)             lines.push(['Name',            d.name]);
+      if (d.ort)              lines.push(['Lieferort',       d.ort]);
+
+      if (lines.length > 0) {
+        const box = document.getElementById('summary-box');
+        const content = document.getElementById('summary-content');
+        content.innerHTML = lines.map(([k, v]) =>
+          `<div style="display:flex;justify-content:space-between;gap:16px;padding:3px 0;border-bottom:1px solid rgba(118,169,250,0.06);">
+            <span style="color:rgba(232,238,255,0.4);">${k}</span>
+            <span style="font-weight:600;color:#e8eeff;text-align:right;">${v}</span>
+           </div>`
+        ).join('');
+        box.classList.remove('hidden');
+      }
+
+      // Pre-fill mailto button
+      const subj = encodeURIComponent('Fensteranfrage: ' + (d.prodName || 'Konfiguration'));
+      const bodyLines = [
+        'Guten Tag,',
+        '',
+        'hiermit sende ich meine Konfiguration von DeineFenster.de:',
+        '',
+        ...lines.map(([k, v]) => k + ': ' + v),
+        '',
+        'Bitte senden Sie mir ein Angebot.',
+        '',
+        'Mit freundlichen Grüßen',
+        d.name || ''
+      ];
+      const body = encodeURIComponent(bodyLines.join('\n'));
+      document.getElementById('btn-email').href =
+        'mailto:info@baustoffchrist.de?subject=' + subj + '&body=' + body;
+
+      // Pre-fill WhatsApp button
+      const waText = encodeURIComponent(
+        'Hallo, ich interessiere mich für:\n' +
+        lines.map(([k, v]) => k + ': ' + v).join('\n') +
+        '\n\nBitte um Angebot.'
+      );
+      document.getElementById('btn-wa').href = 'https://wa.me/491717263776?text=' + waText;
     }
-    // localStorage aufräumen nach Anzeige
-    localStorage.removeItem('df_last_img_count');
-  }
+  } catch(e) {}
 </script>
 </body>
 </html>

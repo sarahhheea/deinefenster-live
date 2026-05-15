@@ -41,18 +41,33 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadProdukte();
   baueFilterSidebar();
   bindeEventHandler();
+  applyUrlFilter();
   rendere();
   updateCartUI();
 });
 
+/* ─── URL-Parameter Filter (z.B. shop.html?zustand=gebraucht) ─── */
+function applyUrlFilter() {
+  const params = new URLSearchParams(window.location.search);
+  const zustand = params.get('zustand');
+  if (zustand === 'gebraucht' || zustand === 'neu') {
+    STATE.filter.zustand.add(zustand);
+    // Checkbox visuell anpassen
+    const cb = document.querySelector(`.filter-zustand[value="${zustand}"]`);
+    if (cb) cb.checked = true;
+    // Scroll sanft zur Produktliste
+    setTimeout(() => {
+      const grid = document.getElementById('produktGrid');
+      if (grid) grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 300);
+  }
+}
+
 async function checkAuth() {
-  if (typeof supabaseClient === 'undefined' || !supabaseClient) return;
-  try {
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    STATE.loggedIn = !!session;
-    STATE.user = session?.user || null;
-    if (session) setupLoggedInUI();
-  } catch (e) { STATE.loggedIn = false; }
+  if (!isShopLoggedIn()) { STATE.loggedIn = false; return; }
+  STATE.loggedIn = true;
+  STATE.user = { email: localStorage.getItem('df_shop_email') || 'Mitarbeiter' };
+  setupLoggedInUI();
 }
 
 function setupLoggedInUI() {
@@ -63,69 +78,59 @@ function setupLoggedInUI() {
   if (eml && STATE.user) eml.textContent = STATE.user.email;
   const logout = document.getElementById('logoutShopBtn');
   if (logout) {
-    logout.addEventListener('click', async () => {
-      await supabaseClient.auth.signOut();
+    logout.addEventListener('click', () => {
+      clearShopToken();
       location.reload();
     });
   }
+  // Admin-FAB (+ Inserat anlegen) nur für eingeloggte Mitarbeiter
+  const adminFab = document.getElementById('admin-fab');
+  if (adminFab) adminFab.style.display = 'flex';
 }
 
-/* ─── Daten laden (aus Supabase) ─── */
+/* ─── Daten laden (aus Google Sheets) ─── */
 async function loadProdukte() {
-  if (typeof supabaseClient === 'undefined' || !supabaseClient) {
-    console.warn('Supabase nicht verfügbar — fallback auf JSON');
-    return loadProdukteFromJson();
-  }
   try {
-    // Kategorien laden (geordnet nach reihenfolge)
-    const { data: katData, error: katErr } = await supabaseClient
-      .from('kategorien')
-      .select('*')
-      .eq('aktiv', true)
-      .order('reihenfolge', { ascending: true });
-    if (katErr) throw katErr;
+    const data = await sheetsGet('produkte');
 
-    STATE.kategorien = {};
-    (katData || []).forEach(k => { STATE.kategorien[k.key] = k.label; });
-    STATE.kategorienListe = katData || [];
+    STATE.kategorien = data.kategorien || {};
+    STATE.kategorienListe = Object.entries(data.kategorien || {})
+      .map(([key, label]) => ({ key, label }));
 
-    // Produkte laden
-    const { data: prodData, error: prodErr } = await supabaseClient
-      .from('produkte')
-      .select('*')
-      .eq('aktiv', true)
-      .order('created_at', { ascending: false });
-    if (prodErr) throw prodErr;
-
-    // Auf bestehende JSON-Form mappen (damit der Render-Code unverändert bleibt)
-    STATE.produkte = (prodData || []).map(p => ({
-      id: p.id,
-      titel: p.titel,
-      kategorie: p.kategorie_key,
+    const sheetsProdukte = (data.produkte || []).map(p => ({
+      id: String(p.id),
+      titel: p.titel || '',
+      kategorie: p.kategorie || p.kategorie_key || '',
       system: p.system || '',
       zustand: p.zustand || 'neu',
-      breite_mm: p.breite_mm,
-      hoehe_mm: p.hoehe_mm,
-      preis_eur: p.preis_eur,
-      sonderpreis_eur: p.sonderpreis_eur || null,
+      breite_mm: Number(p.breite_mm) || 0,
+      hoehe_mm: Number(p.hoehe_mm) || 0,
+      preis_eur: Number(p.preis_eur) || 0,
+      sonderpreis_eur: p.sonderpreis_eur ? Number(p.sonderpreis_eur) : null,
       groesse_klasse: p.groesse_klasse || null,
       export_modell: !!p.export_modell,
       standnummer: p.standnummer || null,
       farbe: p.farbe || 'weiss',
       verglasung: p.verglasung || '2-fach',
-      u_wert: p.u_wert,
+      u_wert: p.u_wert || null,
       oeffnungsart: p.oeffnungsart || 'dreh-kipp',
-      rc_klasse: p.rc_klasse,
+      rc_klasse: p.rc_klasse || null,
       eigenschaften: Array.isArray(p.eigenschaften) ? p.eigenschaften : [],
-      lagerbestand: p.lagerbestand || 1,
+      lagerbestand: Number(p.lagerbestand) || 1,
       bild: (Array.isArray(p.bilder) && p.bilder[0]) || 'img/fenster_standard.png',
-      bilder: (Array.isArray(p.bilder) && p.bilder.length > 0) ? p.bilder : [],
+      bilder: Array.isArray(p.bilder) ? p.bilder : [],
       beschreibung: p.beschreibung || ''
     }));
 
+    // Wenn Sheets leer → JSON-Fallback damit der Shop nie blank ist
+    if (sheetsProdukte.length === 0) {
+      return loadProdukteFromJson();
+    }
+
+    STATE.produkte = sheetsProdukte;
     STATE.metadaten = berechneMetadaten(STATE.produkte);
   } catch (err) {
-    console.error('Supabase-Fehler — fallback auf JSON:', err);
+    console.error('Sheets-Fehler beim Laden — Fallback auf JSON:', err);
     return loadProdukteFromJson();
   }
 }
@@ -177,11 +182,10 @@ function baueFilterSidebar() {
   const katWrap = document.getElementById('filterKategorien');
   katWrap.innerHTML = Object.entries(STATE.kategorien).map(([key, label]) => {
     const count = STATE.produkte.filter(p => p.kategorie === key).length;
-    if (count === 0) return '';
     return `
       <label class="filter-option">
         <span class="flex items-center gap-2"><input type="checkbox" class="check filter-kategorie" value="${key}"/><span>${escapeHtml(label)}</span></span>
-        <span class="count">${count}</span>
+        ${count > 0 ? `<span class="count">${count}</span>` : ''}
       </label>`;
   }).join('');
 
@@ -216,6 +220,8 @@ function baueFilterSidebar() {
   // Counts für Verglasung, RC, Zustand, Größe, Sonderpreis, Export (statisch im HTML)
   setCountAttr('zustand-neu', STATE.produkte.filter(p => (p.zustand || 'neu') === 'neu').length);
   setCountAttr('zustand-gebraucht', STATE.produkte.filter(p => p.zustand === 'gebraucht').length);
+  setCountAttr('zustand-vermessen', STATE.produkte.filter(p => (p.eigenschaften || []).includes('vermessen')).length);
+  setCountAttr('zustand-sonderposten', STATE.produkte.filter(p => p.zustand === 'sonderposten').length);
   setCountAttr('verglasung-2-fach', STATE.produkte.filter(p => p.verglasung === '2-fach').length);
   setCountAttr('verglasung-3-fach', STATE.produkte.filter(p => p.verglasung === '3-fach').length);
   setCountAttr('rc-RC2', STATE.produkte.filter(p => p.rc_klasse === 'RC2').length);
@@ -263,7 +269,13 @@ function bindeEventHandler() {
     if (!t.matches('input[type="checkbox"]')) return;
     const wert = t.value;
     let setRef;
-    if (t.classList.contains('filter-zustand')) setRef = STATE.filter.zustand;
+    if (t.classList.contains('filter-zustand')) {
+      // Gegenseitiger Ausschluss — nur einer aktiv
+      STATE.filter.zustand.clear();
+      document.querySelectorAll('.filter-zustand').forEach(cb => { if (cb !== t) cb.checked = false; });
+      if (t.checked) STATE.filter.zustand.add(wert);
+      rendere(); return;
+    }
     else if (t.classList.contains('filter-kategorie')) setRef = STATE.filter.kategorien;
     else if (t.classList.contains('filter-farbe')) setRef = STATE.filter.farben;
     else if (t.classList.contains('filter-verglasung')) setRef = STATE.filter.verglasung;
@@ -331,13 +343,6 @@ function bindeEventHandler() {
     rendere();
   });
 
-  // Warenkorb
-  document.getElementById('cartBtnNav').addEventListener('click', oeffneCart);
-  document.getElementById('cartCloseBtn').addEventListener('click', schliesseCart);
-  document.getElementById('cartOverlay').addEventListener('click', schliesseCart);
-  document.getElementById('cartLeerenBtn').addEventListener('click', leereCart);
-  document.getElementById('cartAnfrageBtn').addEventListener('click', stelleCartAnfrage);
-
   // Detail-Modal
   document.getElementById('detailCloseBtn').addEventListener('click', schliesseDetail);
   document.getElementById('detailOverlay').addEventListener('click', schliesseDetail);
@@ -380,8 +385,14 @@ function gefilterteProdukte() {
   const f = STATE.filter;
 
   let result = STATE.produkte.filter(p => {
-    // Zustand (neu/gebraucht)
-    if (f.zustand.size && !f.zustand.has(p.zustand || 'neu')) return false;
+    // Zustand (neu / gebraucht / vermessen — exklusiv)
+    if (f.zustand.size) {
+      if (f.zustand.has('vermessen')) {
+        if (!(p.eigenschaften || []).includes('vermessen')) return false;
+      } else {
+        if (!f.zustand.has(p.zustand || 'neu')) return false;
+      }
+    }
     // Kategorie
     if (f.kategorien.size && !f.kategorien.has(p.kategorie)) return false;
     // Größen-Klasse
@@ -467,10 +478,48 @@ function gefilterteProdukte() {
   return result;
 }
 
+/* ─── Shop-Header dynamisch je nach Zustand-Filter ─── */
+const SHOP_HEADERS = {
+  default: {
+    label: 'Direkt vor Ort · Brandenburg an der Havel',
+    title: 'Unser Lagerbestand — Drutex Ware direkt zum Mitnehmen',
+    desc: 'Originale <strong>Drutex-Kunststofffenster, Balkontüren und Haustüren</strong> in gängigen Maßen — neu, gebraucht und falsch vermessen. Alles zur Selbstabholung vor Ort in Brandenburg an der Havel. <strong>Bitte Helfer und Transporter mitbringen. Öffnungszeiten beachten.</strong>'
+  },
+  neu: {
+    label: 'Neuware · Brandenburg an der Havel',
+    title: 'Drutex Neuware ab Lager — ungeöffnet, direkt zum Mitnehmen',
+    desc: 'Originale <strong>Drutex-Kunststofffenster, Balkontüren und Haustüren</strong> in gängigen Maßen — neu, ungeöffnet, ab Lager. Zur Selbstabholung vor Ort in Brandenburg an der Havel. <strong>Bitte Öffnungszeiten beachten.</strong>'
+  },
+  gebraucht: {
+    label: 'Gebrauchtware · Brandenburg an der Havel',
+    title: 'Gebrauchte Fenster & Türen direkt vor Ort abholen',
+    desc: 'Gebrauchte <strong>Fenster, Balkontüren und Haustüren</strong> — geprüft, funktional und zu fairen Preisen. Nachhaltig kaufen: Gut erhaltene Fenster weiterverwenden schont Ressourcen und schützt die Umwelt. Zur Selbstabholung vor Ort. <strong>Bitte Helfer und Transporter mitbringen. Öffnungszeiten beachten.</strong>'
+  },
+  vermessen: {
+    label: 'Falsch vermessen · Bis zu 50 % unter Neupreis · Brandenburg',
+    title: 'Falsch vermessen — Ihr Gewinn. Neuware zum halben Preis.',
+    desc: 'Maßgefertigte <strong>Neuware</strong> — unbenutzt, einwandfreie Qualität — die durch einen Aufmaßfehler nicht gepasst hat. Für Sie bedeutet das: <strong>ein fabrikneues Fenster für ca. 50 % unter Neupreis.</strong> Kein Kompromiss bei Qualität. Zur Selbstabholung vor Ort in Brandenburg an der Havel. <strong>Bitte Helfer und Transporter mitbringen. Öffnungszeiten beachten.</strong>'
+  }
+};
+
+function aktualisiereShopHeader() {
+  const zustand = STATE.filter.zustand.size ? [...STATE.filter.zustand][0] : 'default';
+  const h = SHOP_HEADERS[zustand] || SHOP_HEADERS.default;
+  const label = document.getElementById('shopHeaderLabel');
+  const title = document.getElementById('shopHeaderTitle');
+  const desc  = document.getElementById('shopHeaderDesc');
+  if (label) label.textContent = h.label;
+  if (title) title.textContent = h.title;
+  if (desc)  desc.innerHTML = h.desc;
+  const hinweis = document.getElementById('gebrauchtHinweis');
+  if (hinweis) hinweis.classList.remove('hidden');
+}
+
 /* ─── Render-Pipeline ─── */
 function rendere() {
   const result = gefilterteProdukte();
   document.getElementById('produktAnzahl').textContent = result.length;
+  aktualisiereShopHeader();
   rendereSchemaOrg(result);
 
   // Aktive Chips
@@ -490,13 +539,6 @@ function rendere() {
   // Karten rendern
   gridEl.innerHTML = result.map(p => karteHtml(p)).join('');
 
-  // Click-Handler für Karten (Event-Delegation würde reichen, aber für Klarheit hier)
-  gridEl.querySelectorAll('[data-action="cart-add"]').forEach(btn => {
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
-      addToCart(btn.dataset.id);
-    });
-  });
   // Druck-Icon: Klick soll nicht das Detail-Modal öffnen
   gridEl.querySelectorAll('[data-action="drucken"]').forEach(a => {
     a.addEventListener('click', e => e.stopPropagation());
@@ -545,7 +587,7 @@ function karteHtml(p) {
   return `
     <article class="karte" data-action="detail" data-id="${p.id}">
       <div class="karte-bild-wrap">
-        <img src="${escapeHtml(p.bild)}" alt="${escapeHtml(p.titel)}" class="karte-bild w-full" loading="lazy" onerror="this.src='img/fenster_standard.png'"/>
+        <img src="${escapeHtml(p.bild)}" alt="${escapeHtml(p.titel)}" class="karte-bild w-full" loading="lazy" decoding="async" onerror="this.src='img/fenster_standard.png'"/>
         <span class="symbolbild-mini">Symbolbild</span>
         ${druckIcon}
         ${aktionMenu}
@@ -554,15 +596,15 @@ function karteHtml(p) {
         <div class="flex flex-wrap gap-1.5 mb-2">${standBadge}${zustandBadge}${sonderpreisBadge}${exportBadge}${groesseBadge}${verglasungBadge}${rcBadge}${lagerBadge}</div>
         <h3 class="text-sm font-bold leading-snug line-clamp-2 mb-1 text-ink">${escapeHtml(p.titel)}</h3>
         <p class="text-[11px] text-ink-soft mb-1">${escapeHtml(p.system)} · ${p.breite_mm} × ${p.hoehe_mm} mm</p>
-        <p class="text-[11px] text-ink-soft mb-3 line-clamp-2">${escapeHtml(p.beschreibung)}</p>
+        <p class="text-[11px] text-ink-soft mb-3 line-clamp-2">${nl2br(p.beschreibung)}</p>
         <div class="mt-auto flex items-end justify-between gap-2">
           <div>
             <span class="text-[10px] text-ink-soft block">${p.sonderpreis_eur ? 'Sonderpreis' : (p.export_modell ? 'Export' : 'ab')}</span>
             <span class="text-xl font-extrabold text-primary leading-none">${formatPreis(p.preis_eur)}<span class="text-sm">${preisStern}</span></span>
           </div>
-          <button data-action="cart-add" data-id="${p.id}" class="bg-primary text-white px-3 py-2 rounded-full text-xs font-bold hover:bg-primary-d transition-colors flex items-center gap-1">
-            <span class="material-symbols-outlined" style="font-size:14px">add_shopping_cart</span>
-            <span class="hidden sm:inline">Hinzufügen</span>
+          <button data-action="detail" data-id="${p.id}" class="bg-primary/10 text-primary px-3 py-2 rounded-full text-xs font-bold hover:bg-primary/20 transition-colors flex items-center gap-1">
+            <span class="material-symbols-outlined" style="font-size:14px">open_in_new</span>
+            <span class="hidden sm:inline">Details</span>
           </button>
         </div>
       </div>
@@ -620,17 +662,17 @@ function oeffneAktionsMenu(id, anchor) {
 }
 
 async function archiviereProdukt(id) {
-  if (!confirm('Inserat archivieren? Es verschwindet aus dem Shop, kann aber später in Supabase wiederhergestellt werden (aktiv=true setzen).')) return;
-  const { error } = await supabaseClient.from('produkte').update({ aktiv: false }).eq('id', id);
-  if (error) { alert('Fehler beim Archivieren: ' + error.message); return; }
+  if (!confirm('Inserat archivieren? Es verschwindet aus dem Shop (kann im Google Sheet wiederhergestellt werden: Spalte aktiv = TRUE).')) return;
+  const res = await sheetsPost({ action: 'archive', id });
+  if (res.error) { alert('Fehler beim Archivieren: ' + res.error); return; }
   await loadProdukte();
   rendere();
 }
 
 async function loescheProdukt(id) {
   if (!confirm('Inserat KOMPLETT LÖSCHEN?\n\nDie Aktion ist endgültig — Produkt + alle Daten weg.\n\nWenn du nur „aufräumen" willst, nimm lieber „Archivieren".')) return;
-  const { error } = await supabaseClient.from('produkte').delete().eq('id', id);
-  if (error) { alert('Fehler beim Löschen: ' + error.message); return; }
+  const res = await sheetsPost({ action: 'delete', id });
+  if (res.error) { alert('Fehler beim Löschen: ' + res.error); return; }
   await loadProdukte();
   rendere();
 }
@@ -901,6 +943,21 @@ function stelleCartAnfrage() {
   window.location.href = `mailto:info@baustoffchrist.de?subject=${subject}&body=${body}`;
 }
 
+function stelleCartAnfrageWhatsApp() {
+  if (STATE.warenkorb.length === 0) return;
+  const items = STATE.warenkorb.map(e => {
+    const p = STATE.produkte.find(x => x.id === e.id);
+    if (!p) return '';
+    return `${e.menge}× ${p.titel} (${p.breite_mm}×${p.hoehe_mm}mm) – ${formatPreis(p.preis_eur * e.menge)}`;
+  }).filter(Boolean).join('\n');
+  const subtotal = STATE.warenkorb.reduce((s, e) => {
+    const p = STATE.produkte.find(x => x.id === e.id);
+    return s + (p ? p.preis_eur * e.menge : 0);
+  }, 0);
+  const text = encodeURIComponent(`Hallo, ich interessiere mich für folgende Lagerware:\n\n${items}\n\nGesamt: ${formatPreis(subtotal)}\n\nBitte um Rückmeldung. Danke!`);
+  window.open(`https://wa.me/491717263776?text=${text}`, '_blank');
+}
+
 /* ─── Detail-Modal ─── */
 function oeffneDetail(id) {
   const p = STATE.produkte.find(x => x.id === id);
@@ -953,7 +1010,7 @@ function oeffneDetail(id) {
         <div class="bg-bg-soft rounded-lg px-3 py-2"><span class="block text-[10px] text-ink-soft">System</span><span class="font-bold text-ink">${p.system ? escapeHtml(p.system) : '—'}</span></div>
         ${p.oeffnungsart ? `<div class="bg-bg-soft rounded-lg px-3 py-2 col-span-2"><span class="block text-[10px] text-ink-soft">Öffnungsart</span><span class="font-bold text-ink">${escapeHtml(oeffnungsartLabel(p.oeffnungsart))}</span></div>` : ''}
       </div>
-      <p class="text-sm text-ink-soft leading-relaxed">${escapeHtml(p.beschreibung)}</p>
+      <p class="text-sm text-ink-soft leading-relaxed">${nl2br(p.beschreibung)}</p>
       <div>
         <h4 class="text-sm font-bold mb-2 text-ink">Eigenschaften</h4>
         <ul class="text-xs space-y-1 text-ink">${eigList || '<li class="text-ink-soft">Keine besonderen Eigenschaften eingetragen</li>'}</ul>
@@ -1051,7 +1108,7 @@ function rendereSchemaOrg(produkte) {
       '@type': 'Product',
       'name': p.titel,
       'description': p.beschreibung || `${STATE.kategorien[p.kategorie] || 'Fenster'} ${p.breite_mm}×${p.hoehe_mm} mm`,
-      'image': p.bild ? `https://iridescent-chebakia-1796b0.netlify.app/${p.bild}` : undefined,
+      'image': p.bild ? `https://sarahhheea.github.io/deinefenster-live/${p.bild}` : undefined,
       'category': STATE.kategorien[p.kategorie] || 'Fenster und Türen',
       'brand': { '@type': 'Brand', 'name': p.system ? p.system.split(' ')[0] : 'Drutex' },
       'width':  { '@type': 'QuantitativeValue', 'value': p.breite_mm, 'unitCode': 'MMT' },
@@ -1062,11 +1119,11 @@ function rendereSchemaOrg(produkte) {
         'price': p.preis_eur,
         'priceCurrency': 'EUR',
         'availability': p.lagerbestand > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-        'url': `https://iridescent-chebakia-1796b0.netlify.app/shop.html#${p.id}`,
+        'url': `https://sarahhheea.github.io/deinefenster-live/shop.html#${p.id}`,
         'seller': {
           '@type': 'Organization',
           'name': 'Türen und Fensterhandel Christ',
-          'url': 'https://iridescent-chebakia-1796b0.netlify.app/'
+          'url': 'https://sarahhheea.github.io/deinefenster-live/'
         }
       }
     }
@@ -1104,6 +1161,9 @@ function escapeHtml(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+function nl2br(str) {
+  return escapeHtml(str).replace(/\n/g, '<br>');
 }
 
 function farbeAnzeige(code) {

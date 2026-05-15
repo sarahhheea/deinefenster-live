@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Haustür Preview — Montana 3 L/R Inox</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f5f5f5; color: #333; }
+
+  .header { background: #1e3a8a; color: white; padding: 20px 30px; text-align: center; }
+  .header h1 { font-size: 22px; font-weight: 600; }
+  .header p { font-size: 14px; opacity: 0.8; margin-top: 4px; }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 20px; display: flex; gap: 30px; }
+
+  .preview { flex: 1; text-align: center; }
+  .preview img {
+    max-height: 70vh; width: auto; border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15); background: white;
+  }
+  .preview .label {
+    margin-top: 12px; font-size: 16px; font-weight: 600; color: #1e3a8a;
+  }
+
+  .controls { width: 320px; }
+
+  .toggle { display: flex; gap: 0; margin-bottom: 20px; border-radius: 8px; overflow: hidden; }
+  .toggle button {
+    flex: 1; padding: 12px; border: none; font-size: 15px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .toggle button.active { background: #1e3a8a; color: white; }
+  .toggle button:not(.active) { background: #e2e8f0; color: #64748b; }
+
+  .section-title { font-size: 13px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1px; color: #94a3b8; margin: 16px 0 8px; }
+
+  .colors { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+  .color-swatch {
+    width: 100%; aspect-ratio: 1; border-radius: 6px; cursor: pointer;
+    border: 3px solid transparent; transition: all 0.15s;
+    position: relative;
+  }
+  .color-swatch:hover { transform: scale(1.1); z-index: 1; }
+  .color-swatch.active { border-color: #1e3a8a; box-shadow: 0 0 0 2px #1e3a8a; }
+  .color-swatch .tooltip {
+    display: none; position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%);
+    background: #333; color: white; padding: 4px 8px; border-radius: 4px;
+    font-size: 11px; white-space: nowrap; z-index: 10;
+  }
+  .color-swatch:hover .tooltip { display: block; }
+
+  .info { margin-top: 20px; padding: 16px; background: white; border-radius: 8px;
+    font-size: 13px; line-height: 1.6; }
+  .info strong { color: #1e3a8a; }
+</style>
+  <script defer data-domain="deinefenster.de" src="https://plausible.io/js/script.js"></script>
+</head>
+<body>
+
+<div class="header">
+  <h1>Haustür-Preview: Blender 3D Renders</h1>
+  <p>Montana 3 L/R Inox — 41 Farben, Außen + Innen</p>
+</div>
+
+<div class="container">
+  <div class="preview">
+    <img id="doorImg" src="img/farben/haustuer_aussen_montana-3-lr-inox_anthrazit.png" alt="Haustür Vorschau">
+    <div class="label" id="currentLabel">Anthrazit — Außen</div>
+  </div>
+
+  <div class="controls">
+    <div class="toggle">
+      <button class="active" onclick="setSide('aussen')">Außen</button>
+      <button onclick="setSide('innen')">Innen</button>
+    </div>
+
+    <div class="section-title">Grautöne</div>
+    <div class="colors" id="grays"></div>
+
+    <div class="section-title">Farben</div>
+    <div class="colors" id="colors"></div>
+
+    <div class="section-title">Holzdekore</div>
+    <div class="colors" id="woods"></div>
+
+    <div class="info">
+      <strong>Modell:</strong> Montana 3 L/R Inox<br>
+      <strong>Bilder:</strong> 82 (41 Außen + 41 Innen)<br>
+      <strong>Render:</strong> Blender Cycles, 1024×1280px<br>
+      <strong>Klick</strong> auf eine Farbe zum Wechseln
+    </div>
+  </div>
+</div>
+
+<script>
+const model = 'montana-3-lr-inox';
+let currentSide = 'aussen';
+let currentColor = 'anthrazit';
+
+const FARBEN = {
+  grays: [
+    { key: 'weiss', hex: '#ffffff', name: 'Weiß' },
+    { key: 'weiss-fx', hex: '#f4f4f0', name: 'Weiß FX' },
+    { key: 'cremeweiss', hex: '#fdf6e3', name: 'Cremeweiß' },
+    { key: 'crown-plat', hex: '#dddbd6', name: 'Crown Platin' },
+    { key: 'lichtgrau', hex: '#c5c6be', name: 'Lichtgrau' },
+    { key: 'betongrau', hex: '#7c7f79', name: 'Betongrau' },
+    { key: 'quarzgr-sa', hex: '#6c6f66', name: 'Quarzgrau SA' },
+    { key: 'quarzgr-gl', hex: '#6c6f66', name: 'Quarzgrau GL' },
+    { key: 'basaltgr-sa', hex: '#4f5458', name: 'Basaltgrau SA' },
+    { key: 'basaltgr-gl', hex: '#4f5458', name: 'Basaltgrau GL' },
+    { key: 'grafitgr', hex: '#4a4c46', name: 'Grafitgrau' },
+    { key: 'schiefgr-sa', hex: '#3e454c', name: 'Schiefergrau SA' },
+    { key: 'schiefgr-gl', hex: '#3e454c', name: 'Schiefergrau GL' },
+    { key: 'eisengl', hex: '#3c3e42', name: 'Eisenglimmer' },
+    { key: 'anthrazit', hex: '#373d3f', name: 'Anthrazit' },
+    { key: 'anthraz-gl', hex: '#373d3f', name: 'Anthrazit GL' },
+    { key: 'anthraz-um', hex: '#2e3235', name: 'Anthrazit Ultimatt' },
+    { key: 'schwarz-um', hex: '#1a1c1e', name: 'Schwarz Ultimatt' },
+    { key: 'jet-black', hex: '#101214', name: 'Jet Black' },
+  ],
+  colors: [
+    { key: 'brillblau', hex: '#1c5080', name: 'Brillantblau' },
+    { key: 'stahlblau', hex: '#1c4c6c', name: 'Stahlblau' },
+    { key: 'moosgruen', hex: '#2d4a30', name: 'Moosgrün' },
+    { key: 'dunkelgr', hex: '#1e3828', name: 'Dunkelgrün' },
+    { key: 'dunkelrot', hex: '#6c1c1c', name: 'Dunkelrot' },
+    { key: 'braun-mar', hex: '#6b4226', name: 'Braun Marrone' },
+    { key: 'schoko-br', hex: '#4a2820', name: 'Schokobraun' },
+    { key: 'schwarzbr', hex: '#26211e', name: 'Schwarzbraun' },
+    { key: 'piryt', hex: '#6a5a30', name: 'Pyrit' },
+    { key: 'deep-bronze', hex: '#6b6040', name: 'Deep Bronze' },
+  ],
+  woods: [
+    { key: 'golden-oak', hex: '#9b6840', name: 'Golden Oak' },
+    { key: 'sheffield', hex: '#c8b89a', name: 'Sheffield Oak' },
+    { key: 'eiche-hell', hex: '#c8b89a', name: 'Eiche Hell' },
+    { key: 'eiche-nat', hex: '#b89660', name: 'Eiche Natur' },
+    { key: 'winchester', hex: '#8c6440', name: 'Winchester' },
+    { key: 'oregon', hex: '#a07040', name: 'Oregon' },
+    { key: 'douglasie', hex: '#906238', name: 'Douglasie' },
+    { key: 'nussbaum', hex: '#6e4828', name: 'Nussbaum' },
+    { key: 'mooreiche', hex: '#4e3828', name: 'Mooreiche' },
+    { key: 'dunkleiche', hex: '#3c2c20', name: 'Dunkle Eiche' },
+    { key: 'macore', hex: '#7a4030', name: 'Macoré' },
+    { key: 'mahagoni', hex: '#6b3a2a', name: 'Mahagoni' },
+  ]
+};
+
+function buildSwatches(containerId, colors) {
+  const el = document.getElementById(containerId);
+  colors.forEach(c => {
+    const swatch = document.createElement('div');
+    swatch.className = 'color-swatch' + (c.key === currentColor ? ' active' : '');
+    swatch.style.background = c.hex;
+    if (c.hex === '#ffffff') swatch.style.border = '2px solid #ddd';
+    swatch.dataset.key = c.key;
+    swatch.dataset.name = c.name;
+    swatch.innerHTML = `<span class="tooltip">${c.name}</span>`;
+    swatch.onclick = () => setColor(c.key, c.name);
+    el.appendChild(swatch);
+  });
+}
+
+function setColor(key, name) {
+  currentColor = key;
+  updateImage();
+  document.querySelectorAll('.color-swatch').forEach(s => {
+    s.classList.toggle('active', s.dataset.key === key);
+  });
+  if (!name) {
+    const all = [...FARBEN.grays, ...FARBEN.colors, ...FARBEN.woods];
+    const found = all.find(c => c.key === key);
+    name = found ? found.name : key;
+  }
+  document.getElementById('currentLabel').textContent =
+    `${name} — ${currentSide === 'aussen' ? 'Außen' : 'Innen'}`;
+}
+
+function setSide(side) {
+  currentSide = side;
+  updateImage();
+  document.querySelectorAll('.toggle button').forEach(b => {
+    b.classList.toggle('active', b.textContent.toLowerCase().includes(side === 'aussen' ? 'auß' : 'inn'));
+  });
+  const all = [...FARBEN.grays, ...FARBEN.colors, ...FARBEN.woods];
+  const found = all.find(c => c.key === currentColor);
+  const name = found ? found.name : currentColor;
+  document.getElementById('currentLabel').textContent =
+    `${name} — ${side === 'aussen' ? 'Außen' : 'Innen'}`;
+}
+
+function updateImage() {
+  const prefix = currentSide === 'aussen' ? 'haustuer_aussen' : 'haustuer_innen';
+  const src = `img/farben/${prefix}_${model}_${currentColor}.png`;
+  document.getElementById('doorImg').src = src;
+}
+
+buildSwatches('grays', FARBEN.grays);
+buildSwatches('colors', FARBEN.colors);
+buildSwatches('woods', FARBEN.woods);
+</script>
+</body>
+</html>

@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Haustür 3D — Colorado</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f0f2f5; overflow: hidden; }
+  body.embed { background: #f0f2f5; }
+
+  /* ── Embed-Modus (iframe im Konfigurator) ── */
+  body.embed .header    { display: none; }
+  body.embed .layout    { height: 100vh; }
+  body.embed .ref-panel { display: none; }
+  body.embed .controls  { display: none; }
+  body.embed #threeCanvas { width: 100% !important; }
+
+  .header {
+    background: #1e3a8a; color: white;
+    height: 40px; padding: 0 20px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .header h1 { font-size: 15px; font-weight: 600; letter-spacing: 0.3px; }
+  .header .model-tag {
+    background: rgba(255,255,255,0.18); border-radius: 4px;
+    padding: 2px 9px; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  .layout { display: flex; height: calc(100vh - 40px); }
+
+  /* ── Reference panel ── */
+  .ref-panel {
+    width: 290px; min-width: 290px;
+    background: #f4f4f4;
+    border-right: 1px solid #d8d8d8;
+    display: flex; flex-direction: column;
+    align-items: center;
+    padding: 10px 8px 8px;
+    gap: 6px;
+  }
+  .ref-label {
+    font-size: 9px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1.2px;
+    color: #94a3b8;
+  }
+  .ref-panel img {
+    max-height: calc(100vh - 140px);
+    max-width: 100%;
+    object-fit: contain;
+    border-radius: 3px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+  }
+  .ref-nav {
+    display: flex; gap: 6px; width: 100%; margin-top: 4px;
+  }
+  .ref-nav button {
+    flex: 1; padding: 7px 4px; border-radius: 5px;
+    border: none; background: #1e3a8a; color: white;
+    font-size: 11px; font-weight: 700; cursor: pointer;
+    letter-spacing: 0.3px;
+  }
+  .ref-nav button:hover { background: #225eaa; }
+  .ref-model-name {
+    font-size: 10px; font-weight: 700; color: #1e3a8a;
+    text-align: center; padding: 3px 0;
+    letter-spacing: 0.3px;
+  }
+
+  /* ── Three.js canvas ── */
+  #threeCanvas { flex: 1; display: block; cursor: grab; }
+  #threeCanvas:active { cursor: grabbing; }
+
+  /* ── Controls panel ── */
+  .controls {
+    width: 252px; min-width: 252px;
+    padding: 10px 10px 20px;
+    overflow-y: auto;
+    background: white;
+    box-shadow: -2px 0 12px rgba(0,0,0,0.07);
+  }
+  .current-label {
+    font-size: 13px; font-weight: 700; color: #1e3a8a;
+    text-align: center; padding: 7px 4px 9px;
+    border-bottom: 1px solid #e8edf5;
+    margin-bottom: 8px;
+  }
+  .section-title {
+    font-size: 9px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1.1px;
+    color: #94a3b8; margin: 10px 0 5px;
+  }
+  .section-title:first-of-type { margin-top: 0; }
+  .colors { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
+  .color-swatch {
+    width: 100%; aspect-ratio: 1; border-radius: 4px;
+    cursor: pointer; border: 2px solid transparent;
+    transition: all 0.1s; position: relative;
+  }
+  .color-swatch:hover { transform: scale(1.18); z-index: 1; }
+  .color-swatch.active {
+    border-color: #1e3a8a;
+    box-shadow: 0 0 0 2px #1e3a8a;
+  }
+  .tooltip {
+    display: none; position: absolute;
+    bottom: 115%; left: 50%; transform: translateX(-50%);
+    background: #1a1a1a; color: white;
+    padding: 3px 7px; border-radius: 4px;
+    font-size: 10px; white-space: nowrap;
+    z-index: 20; pointer-events: none;
+  }
+  .color-swatch:hover .tooltip { display: block; }
+
+  /* ── Glasarten ── */
+  .glass-btns { display: flex; gap: 4px; margin-top: 3px; flex-wrap: wrap; }
+  .glass-btn {
+    flex: 1; min-width: 0;
+    padding: 6px 2px; border-radius: 5px;
+    border: 2px solid #e0e8f4; background: white;
+    cursor: pointer; font-size: 9px; font-weight: 700;
+    color: #64748b; text-align: center; line-height: 1.2;
+    transition: all 0.1s; letter-spacing: 0.2px;
+  }
+  .glass-btn.active { border-color: #1e3a8a; color: #1e3a8a; background: #f0f5ff; }
+  .glass-btn:hover { border-color: #93a8d4; }
+</style>
+  <script defer data-domain="deinefenster.de" src="https://plausible.io/js/script.js"></script>
+</head>
+<body>
+
+<div class="header">
+  <h1>Haustür 3D Konfigurator</h1>
+  <select id="modelSelect" style="background:#2a4fa0;color:white;border:1px solid rgba(255,255,255,0.3);border-radius:4px;padding:3px 8px;font-size:12px;font-weight:600;cursor:pointer;">
+    <option value="florida-lr-inox">Florida (L/R) · Inox</option>
+    <option value="montana-2-lr-inox">Montana 2 L/R · Inox</option>
+    <option value="montana-3-lr-inox">Montana 3 L/R · Inox</option>
+    <option value="ohio-inox">Ohio · Inox</option>
+    <option value="colorado-inox">Colorado · Inox</option>
+    <option value="alaska-2-inox">Alaska 2 · Inox</option>
+    <option value="alaska-1-inox">Alaska 1 · Inox</option>
+    <option value="montana-1-inox">Montana 1 · Inox</option>
+    <option value="nebraska-lcr-inox">Nebraska (L/C/R) · Inox</option>
+    <option value="pennsylvania-1-inox">Pennsylvania 1 · Inox</option>
+    <option value="texas-c-inox">Texas (Mittig) · Inox</option>
+    <option value="texas-lr-inox">Texas (L/R) · Inox</option>
+    <option value="pennsylvania-2-lr-inox">Pennsylvania 2 L/R · Inox</option>
+    <option value="pennsylvania-3-lr-inox">Pennsylvania 3 L/R · Inox</option>
+  </select>
+</div>
+
+<div class="layout">
+
+  <!-- Referenzfoto links -->
+  <div class="ref-panel">
+    <div class="ref-label">Referenz — Drutex Original</div>
+    <div class="ref-model-name" id="refModelName">Colorado</div>
+    <img id="refImg" src="img/drutex-tueren/florida-inox-lr_antracyt.jpg" alt="Referenz">
+    <div class="ref-nav">
+      <button onclick="navModel(-1)">← Zurück</button>
+      <button onclick="navModel(+1)">Weiter →</button>
+    </div>
+  </div>
+  <script>
+  // Sync (non-module): setzt das richtige Referenzfoto sofort beim HTML-Parsing,
+  // BEVOR Three.js überhaupt lädt — funktioniert auch ohne JS-Modul
+  (function() {
+    var photos = {
+      'florida-lr-inox':        'img/drutex-tueren/florida-inox-lr_antracyt.jpg',
+      'montana-2-lr-inox':      'img/drutex-tueren/montana-inox-2-lr_antracyt.jpg',
+      'montana-3-lr-inox':      'img/drutex-tueren/montana-inox-3-lr_antracyt.jpg',
+      'ohio-inox':              'img/drutex-tueren/ohio-inox_antracyt.jpg',
+      'colorado-inox':          'img/drutex-tueren/colorado-inox_antracyt.jpg',
+      'alaska-2-inox':          'img/drutex-tueren/alaska-inox-2_antracyt.jpg',
+      'alaska-1-inox':          'img/drutex-tueren/alaska-inox-1_antracyt.jpg',
+      'montana-1-inox':         'img/drutex-tueren/montana-inox-1_antracyt.jpg',
+      'nebraska-lcr-inox':      'img/drutex-tueren/nebraska-inox-lcr_antracyt.jpg',
+      'pennsylvania-1-inox':    'img/drutex-tueren/pennsylvania-inox-1_antracyt.jpg',
+      'texas-c-inox':           'img/drutex-tueren/texas-inox-c_antracyt.jpg',
+      'texas-lr-inox':          'img/drutex-tueren/texas-inox-lr_antracyt.jpg',
+      'pennsylvania-2-lr-inox': 'img/drutex-tueren/pennsylvania-inox-2-lr_antracyt.jpg',
+      'pennsylvania-3-lr-inox': 'img/drutex-tueren/pennsylvania-inox-3-lr_antracyt.jpg',
+    };
+    var m = new URLSearchParams(location.search).get('model');
+    if (m && photos[m]) {
+      document.getElementById('refImg').src = photos[m];
+      document.getElementById('refImg').alt = m;
+    }
+  })();
+  </script>
+
+  <!-- 3D Modell Mitte -->
+  <canvas id="threeCanvas"></canvas>
+
+  <!-- Farbsteuerung rechts -->
+  <div class="controls">
+    <div class="current-label" id="currentLabel">Anthrazitgrau</div>
+    <div class="section-title">Weißtöne</div>
+    <div class="colors" id="whites"></div>
+    <div class="section-title">Grautöne & Schwarz</div>
+    <div class="colors" id="grays"></div>
+    <div class="section-title">Farben</div>
+    <div class="colors" id="colorGroup"></div>
+    <div class="section-title">Holzdekore</div>
+    <div class="colors" id="woods"></div>
+    <div class="section-title">Verglasung</div>
+    <div class="glass-btns" id="glassBtns"></div>
+  </div>
+
+</div>
+
+<script type="importmap">
+{ "imports": {
+    "three":         "https://cdn.jsdelivr.net/npm/three@0.162.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.162.0/examples/jsm/"
+} }
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ══════════════════════════════════════════════
+// RENDERER
+// ══════════════════════════════════════════════
+const canvasEl = document.getElementById('threeCanvas');
+const renderer = new THREE.WebGLRenderer({ canvas: canvasEl, antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xf0f2f5);  // Helles Blaugrau — sauber im Konfigurator
+
+const camera = new THREE.PerspectiveCamera(20, 1, 0.1, 50);
+camera.position.set(0, 1.05, 7.5);  // weit genug zurück um ganze Tür zu sehen
+
+const orb = new OrbitControls(camera, canvasEl);
+orb.target.set(0, 1.05, 0);
+orb.enablePan = false;
+orb.minDistance = 4.0;
+orb.maxDistance = 12.0;
+orb.maxPolarAngle = Math.PI * 0.54;   // kaum vertikale Drehung
+orb.minPolarAngle = Math.PI * 0.46;
+orb.minAzimuthAngle = -0.22;           // max ~12° horizontal
+orb.maxAzimuthAngle =  0.22;
+orb.update();
+
+// ══════════════════════════════════════════════
+// ENVIRONMENT — hell für Chrome-Reflexionen
+// ══════════════════════════════════════════════
+const pmremGen = new THREE.PMREMGenerator(renderer);
+pmremGen.compileEquirectangularShader();
+const envSc = new THREE.Scene();
+envSc.add(new THREE.AmbientLight(0xffffff, 4.0));
+const eL1 = new THREE.DirectionalLight(0xffffff, 4.0);
+eL1.position.set(1, 2, 3); envSc.add(eL1);
+const eL2 = new THREE.DirectionalLight(0xffffff, 3.0);
+eL2.position.set(-2, 1, 3); envSc.add(eL2);
+const envTex = pmremGen.fromScene(envSc, 0.04).texture;
+scene.environment = envTex;
+
+// ── Szenen-Beleuchtung ──────────────────────────────
+// Nur SO VIEL Ambient dass Anthrazit als dunkelgrau sichtbar ist
+scene.add(new THREE.AmbientLight(0xffffff, 0.42));
+
+// Key-Licht von oben-rechts-leicht-vorne (klassische Produktfoto-Beleuchtung)
+const key = new THREE.DirectionalLight(0xffffff, 1.6);
+key.position.set(2, 4, 5);
+key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+key.shadow.camera.near = 1; key.shadow.camera.far = 12;
+key.shadow.camera.left = -1.5; key.shadow.camera.right = 1.5;
+key.shadow.camera.top = 3; key.shadow.camera.bottom = -0.5;
+key.shadow.bias = -0.001;
+scene.add(key);
+
+// Fill-Licht von links (Schatten aufhellen)
+const fill = new THREE.DirectionalLight(0xddeeff, 0.5);
+fill.position.set(-3, 2.5, 3); scene.add(fill);
+
+// Sehr schwaches Frontlicht — verhindert pure-black bei Anthrazit
+const front = new THREE.DirectionalLight(0xffffff, 0.25);
+front.position.set(0, 1, 10); scene.add(front);
+
+// ── SpotLight für Stoßgriff ──────────────────────────
+// Zielt genau auf Bar-Mitte in Weltkoordinaten: X=-0.38, Y=1.24, Z=0.11
+// Erzeugt das silberne Highlight auf dem Chrome-Stab
+const chromeLight = new THREE.SpotLight(0xffffff, 10.0, 12, Math.PI / 8, 0.15);
+chromeLight.position.set(-1.6, 2.5, 5);
+chromeLight.target.position.set(-0.385, 1.21, 0.10);
+scene.add(chromeLight); scene.add(chromeLight.target);
+
+const chromeLight2 = new THREE.SpotLight(0xffffff, 6.0, 10, Math.PI / 7, 0.2);
+chromeLight2.position.set(0.4, 1.8, 5);
+chromeLight2.target.position.set(-0.385, 1.21, 0.10);
+scene.add(chromeLight2); scene.add(chromeLight2.target);
+
+// Boden-Schatten
+const gnd = new THREE.Mesh(
+  new THREE.PlaneGeometry(8, 8),
+  new THREE.ShadowMaterial({ opacity: 0.10 })
+);
+gnd.rotation.x = -Math.PI / 2;
+gnd.receiveShadow = true;
+scene.add(gnd);
+
+// ══════════════════════════════════════════════
+// MATERIALIEN
+// ══════════════════════════════════════════════
+const texLoader = new THREE.TextureLoader();
+const doorMat   = new THREE.MeshStandardMaterial({ color: 0x232729, roughness: 0.36, metalness: 0.02 });
+const frameMat  = new THREE.MeshStandardMaterial({ color: 0x232729, roughness: 0.36, metalness: 0.02 });
+const grooveMat = new THREE.MeshStandardMaterial({ color: 0x181b1d, roughness: 0.68 });
+// Chrome/Edelstahl: leicht breiteres Highlight (roughness 0.18) damit Stab als
+// SILBER sichtbar ist, nicht als dunkler Spiegel. Metalness 0.92 = Minimalanteil Diffus.
+const chromeMat    = new THREE.MeshStandardMaterial({ color: 0xd8dde0, roughness: 0.18, metalness: 0.92, envMapIntensity: 2.5 });
+// Bracket-Kopf: heller Silber/Chrome, gut sichtbar vor dunkler Tür
+const bracketMat   = new THREE.MeshStandardMaterial({ color: 0xe0e6ea, roughness: 0.22, metalness: 0.65, envMapIntensity: 3.0 });
+const glFrameMat= new THREE.MeshStandardMaterial({ color: 0xd0d5d8, roughness: 0.22, metalness: 0.70, envMapIntensity: 2.0 });  // Silber/Chrome Edelstahl wie Referenz
+const glassMat  = new THREE.MeshPhysicalMaterial({
+  color: 0xc8dff0, metalness: 0, roughness: 0.03,
+  transmission: 0.90, thickness: 0.02, ior: 1.5, transparent: true,
+});
+
+// ══════════════════════════════════════════════
+// DOOR CONSTANTS — 1:1 vom Referenzfoto
+// Maßstab: 1 unit = 1 m · Tür 1000×2100×70 mm
+// ══════════════════════════════════════════════
+const DW = 1.000;   // Türbreite
+const DH = 2.100;   // Türhöhe
+const DD = 0.070;   // Türtiefe
+
+const doorGroup = new THREE.Group();
+
+// ── Hilfsfunktion: Rechteck-Strip ──────────────────
+function strip(x, y, w, h, d, mat) {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat || frameMat);
+  m.position.set(x + w/2, y + h/2, DD + d/2);
+  m.castShadow = true;
+  m.receiveShadow = true;
+  return m;
+}
+
+// ── Hilfsfunktion: Profilnut ──────────────────────
+function nut(x1, y1, x2, y2) {
+  const dx = x2 - x1, dy = y2 - y1;
+  const len = Math.sqrt(dx*dx + dy*dy);
+  const isH = Math.abs(dx) > Math.abs(dy);
+  const gw = 0.0052, gd = 0.0042;
+  const m = new THREE.Mesh(
+    new THREE.BoxGeometry(isH ? len : gw, isH ? gw : len, gd),
+    grooveMat
+  );
+  m.position.set((x1 + x2) / 2, (y1 + y2) / 2, DD + 0.0008);
+  m.receiveShadow = true;
+  return m;
+}
+
+// ── Hilfsfunktion: Ovale Schloss-Form ─────────────
+function roundedRectShape(w, h, r) {
+  const s = new THREE.Shape();
+  s.moveTo(-w/2 + r, -h/2);
+  s.lineTo( w/2 - r, -h/2);
+  s.absarc( w/2 - r, -h/2 + r, r, -Math.PI/2, 0, false);
+  s.lineTo( w/2,      h/2 - r);
+  s.absarc( w/2 - r,  h/2 - r, r, 0, Math.PI/2, false);
+  s.lineTo(-w/2 + r,  h/2);
+  s.absarc(-w/2 + r,  h/2 - r, r, Math.PI/2, Math.PI, false);
+  s.lineTo(-w/2,     -h/2 + r);
+  s.absarc(-w/2 + r, -h/2 + r, r, Math.PI, Math.PI * 1.5, false);
+  return s;
+}
+
+// ══════════════════════════════════════════════
+// MODELLE — Glaspanel-Definitionen aller 14 Türen
+// x/y = Unterkante-links in Meter · w/h = Breite/Höhe
+// strips = sichtbare Edelstahl-Dekor-Stäbe
+// ══════════════════════════════════════════════
+const MODELLE = {
+  'colorado-inox': {
+    panels: [{x:0.285, y:0.430, w:0.220, h:1.340}]
+  },
+  'montana-1-inox': {
+    panels: [{x:0.400, y:0.320, w:0.185, h:1.460}]
+  },
+  'montana-2-lr-inox': {
+    // Pixelgenau gemessen: Strip 256-297mm (w=41mm), Glasrahmen 365-635mm, Gap=68mm
+    // Strips von y=359–1935mm (h=1576mm), Glaseinheit y=359–1712mm (h=1353mm)
+    // Strips 223mm HÖHER als Glasfeld — so im Original-Design
+    // GFW=0.040 → Glas-Loch: x=0.405 (=0.365+0.040), w=0.190 (=0.595-0.405)
+    panels: [{x:0.405, y:0.399, w:0.190, h:1.273}],
+    // Links: unten=359mm (=Glasrahmen-UK), oben=1935mm (+223mm über Glasrahmen-OK)
+    // Rechts: unten=136mm (-223mm unter Glasrahmen-UK), oben=1712mm (=Glasrahmen-OK)
+    strips: [{x:0.256, y:0.359, w:0.041, h:1.616}, {x:0.704, y:0.096, w:0.040, h:1.616}]
+  },
+  'montana-3-lr-inox': {
+    panels: [
+      {x:0.275, y:0.235, w:0.175, h:1.565},  // Großes Glasfeld links
+      {x:0.610, y:1.590, w:0.125, h:0.120},  // Kleinfenster 1 (oben)
+      {x:0.610, y:1.330, w:0.125, h:0.120},  // Kleinfenster 2
+      {x:0.610, y:1.070, w:0.125, h:0.120},  // Kleinfenster 3
+      {x:0.610, y:0.810, w:0.125, h:0.120},  // Kleinfenster 4
+      {x:0.610, y:0.550, w:0.125, h:0.120},  // Kleinfenster 5 (unten)
+    ]
+  },
+  'florida-lr-inox': {
+    panels: [{x:0.390, y:0.165, w:0.200, h:1.750}]
+  },
+  'ohio-inox': {
+    panels: [
+      {x:0.385, y:1.590, w:0.230, h:0.198},
+      {x:0.385, y:1.245, w:0.230, h:0.198},
+      {x:0.385, y:0.900, w:0.230, h:0.198},
+    ],
+    strips: [{x:0.270, y:0.880, w:0.050, h:1.130}, {x:0.680, y:0.880, w:0.050, h:1.130}]
+  },
+  'alaska-1-inox': {
+    panels: [
+      {x:0.390, y:1.640, w:0.220, h:0.210},
+      {x:0.390, y:1.270, w:0.220, h:0.210},
+      {x:0.390, y:0.900, w:0.220, h:0.210},
+    ]
+  },
+  'alaska-2-inox': {
+    panels: [
+      {x:0.390, y:1.750, w:0.220, h:0.195},
+      {x:0.390, y:1.480, w:0.220, h:0.195},
+      {x:0.390, y:1.210, w:0.220, h:0.195},
+      {x:0.390, y:0.940, w:0.220, h:0.195},
+      {x:0.390, y:0.670, w:0.220, h:0.195},
+    ]
+  },
+  'nebraska-lcr-inox': {
+    panels: [
+      {x:0.360, y:1.720, w:0.220, h:0.195},
+      {x:0.360, y:1.490, w:0.220, h:0.195},
+      {x:0.360, y:1.260, w:0.220, h:0.195},
+      {x:0.360, y:1.030, w:0.220, h:0.195},
+      {x:0.360, y:0.800, w:0.220, h:0.195},
+    ],
+    strips: [{x:0.150, y:0.780, w:0.075, h:1.160}]
+  },
+  'pennsylvania-1-inox': {
+    panels: [
+      {x:0.230, y:1.635, w:0.540, h:0.185},
+      {x:0.230, y:0.360, w:0.215, h:1.235},
+      {x:0.555, y:0.360, w:0.215, h:1.235},
+    ]
+  },
+  'pennsylvania-2-lr-inox': {
+    panels: [
+      {x:0.375, y:1.580, w:0.175, h:0.170},
+      {x:0.400, y:1.355, w:0.175, h:0.170},
+      {x:0.370, y:1.130, w:0.175, h:0.170},
+      {x:0.400, y:0.905, w:0.175, h:0.170},
+      {x:0.370, y:0.680, w:0.175, h:0.170},
+    ]
+  },
+  'pennsylvania-3-lr-inox': {
+    panels: [{x:0.230, y:0.200, w:0.385, h:1.710}]
+  },
+  'texas-c-inox':  {panels: [{x:0.413, y:0.235, w:0.175, h:1.580}]},
+  'texas-lr-inox': {panels: [{x:0.413, y:0.235, w:0.175, h:1.580}]},
+};
+
+let glassObjects = [];
+let _curColor = 'anthrazitgrau';
+let _curWood  = null;
+let _curGlass = 'klar';
+
+// ══════════════════════════════════════════════
+// buildDoor — baut Türgeometrie für gewähltes Modell
+// ══════════════════════════════════════════════
+function buildDoor(modelKey) {
+  while (doorGroup.children.length > 0) {
+    const c = doorGroup.children[0];
+    if (c.geometry) c.geometry.dispose();
+    doorGroup.remove(c);
+  }
+  glassObjects = [];
+
+  const model = MODELLE[modelKey] || MODELLE['colorado-inox'];
+  const panels = model.panels || [];
+  const modelStrips = model.strips || [];
+
+  // ── Zarge (3-stufig) ──────────────────────────────
+  const z1w = 0.043, z1d = 0.032;
+  doorGroup.add(strip(0,             DH - z1w,  DW,           z1w, z1d));
+  doorGroup.add(strip(0,             0,         DW,           z1w, z1d));
+  doorGroup.add(strip(0,             z1w,       z1w,  DH - 2*z1w, z1d));
+  doorGroup.add(strip(DW - z1w,      z1w,       z1w,  DH - 2*z1w, z1d));
+
+  const z2off = z1w + 0.009, z2w = 0.021, z2d = 0.018;
+  doorGroup.add(strip(z2off,             DH - z2off - z2w, DW - 2*z2off,            z2w, z2d));
+  doorGroup.add(strip(z2off,             z2off,             DW - 2*z2off,            z2w, z2d));
+  doorGroup.add(strip(z2off,             z2off + z2w,       z2w, DH - 2*(z2off+z2w), z2d));
+  doorGroup.add(strip(DW - z2off - z2w,  z2off + z2w,       z2w, DH - 2*(z2off+z2w), z2d));
+
+  const z3off = z2off + z2w + 0.006, z3w = 0.009, z3d = 0.007;
+  doorGroup.add(strip(z3off,             DH - z3off - z3w, DW - 2*z3off,            z3w, z3d));
+  doorGroup.add(strip(z3off,             z3off,             DW - 2*z3off,            z3w, z3d));
+  doorGroup.add(strip(z3off,             z3off + z3w,       z3w, DH - 2*(z3off+z3w), z3d));
+  doorGroup.add(strip(DW - z3off - z3w,  z3off + z3w,       z3w, DH - 2*(z3off+z3w), z3d));
+
+  // ── Türblatt mit Glasausschnitten ──────────────────
+  {
+    const s = new THREE.Shape();
+    s.moveTo(0, 0); s.lineTo(DW, 0); s.lineTo(DW, DH); s.lineTo(0, DH); s.closePath();
+    panels.forEach(p => {
+      const hole = new THREE.Path();
+      hole.moveTo(p.x, p.y);
+      hole.lineTo(p.x + p.w, p.y);
+      hole.lineTo(p.x + p.w, p.y + p.h);
+      hole.lineTo(p.x,       p.y + p.h);
+      hole.closePath();
+      s.holes.push(hole);
+    });
+    const body = new THREE.Mesh(
+      new THREE.ExtrudeGeometry(s, {
+        depth: DD,
+        bevelEnabled: true, bevelThickness: 0.003, bevelSize: 0.002, bevelSegments: 2
+      }),
+      [doorMat, frameMat]
+    );
+    body.castShadow = true; body.receiveShadow = true;
+    doorGroup.add(body);
+  }
+
+  // ── Profilnut ─────────────────────────────────────
+  const NUT = 0.095;
+  doorGroup.add(nut(NUT,      NUT,      DW - NUT, NUT));
+  doorGroup.add(nut(NUT,      DH - NUT, DW - NUT, DH - NUT));
+  doorGroup.add(nut(NUT,      NUT,      NUT,      DH - NUT));
+  doorGroup.add(nut(DW - NUT, NUT,      DW - NUT, DH - NUT));
+
+  // ── Glas + Glasrahmen pro Panel ───────────────────
+  const GFW = 0.040;  // gemessen: 40-42mm Glasrahmen-Breite im Referenzfoto
+  const GFD = DD + 0.010;
+  const glBackMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 });
+  panels.forEach(p => {
+    // Weißer Hintergrund hinter Glas (simulates interior light)
+    const backing = new THREE.Mesh(new THREE.PlaneGeometry(p.w, p.h), glBackMat);
+    backing.position.set(p.x + p.w/2, p.y + p.h/2, 0.002);
+    doorGroup.add(backing);
+
+    const gm = new THREE.Mesh(
+      new THREE.PlaneGeometry(p.w - 0.008, p.h - 0.008),
+      glassMat
+    );
+    gm.position.set(p.x + p.w/2, p.y + p.h/2, DD/2);
+    doorGroup.add(gm);
+    glassObjects.push(gm);
+
+    const gf = (x, y, w, h) => {
+      const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, GFD), glFrameMat);
+      m.position.set(x, y, GFD / 2);
+      m.castShadow = true; m.receiveShadow = true;
+      return m;
+    };
+    doorGroup.add(gf(p.x + p.w/2,         p.y + p.h + GFW/2, p.w + GFW*2, GFW));
+    doorGroup.add(gf(p.x + p.w/2,         p.y - GFW/2,       p.w + GFW*2, GFW));
+    doorGroup.add(gf(p.x - GFW/2,         p.y + p.h/2,       GFW,         p.h));
+    doorGroup.add(gf(p.x + p.w + GFW/2,   p.y + p.h/2,       GFW,         p.h));
+  });
+
+  // ── Dekorative Edelstahl-Strips ───────────────────
+  modelStrips.forEach(st => {
+    const m = new THREE.Mesh(
+      new THREE.BoxGeometry(st.w, st.h, 0.008),
+      chromeMat
+    );
+    m.position.set(st.x + st.w/2, st.y + st.h/2, DD + 0.004);
+    m.castShadow = true;
+    doorGroup.add(m);
+  });
+
+  // ── Stoßgriff ────────────────────────────────────
+  const HX    = 0.115;
+  const BAR_W = 0.026;
+  const BAR_D = 0.040;
+  const BAR_B = 0.670;
+  const BAR_T = 1.740;
+  const BAR_L = BAR_T - BAR_B;
+
+  const bar = new THREE.Mesh(new THREE.BoxGeometry(BAR_W, BAR_L, BAR_D), chromeMat);
+  bar.position.set(HX, BAR_B + BAR_L / 2, DD + BAR_D / 2);
+  bar.castShadow = true;
+  doorGroup.add(bar);
+
+  const AW = 0.016, AH = 0.014, AD = BAR_D + 0.002;
+  const AX = HX - BAR_W / 2 - AW / 2;
+  [BAR_T - 0.110, BAR_B + 0.110].forEach(bracketY => {
+    const arm = new THREE.Mesh(new THREE.BoxGeometry(AW, AH, AD), bracketMat);
+    arm.position.set(AX, bracketY, DD + AD / 2);
+    arm.castShadow = true;
+    doorGroup.add(arm);
+  });
+
+  // ── Schloss ──────────────────────────────────────
+  const LX = 0.082, LY = 1.110;
+  const lsShape = roundedRectShape(0.024, 0.072, 0.012);
+  const lsGeom  = new THREE.ExtrudeGeometry(lsShape, { depth: 0.007, bevelEnabled: false });
+  const lsPlate = new THREE.Mesh(lsGeom, chromeMat);
+  lsPlate.position.set(LX, LY, DD + 0.020);
+  lsPlate.castShadow = true;
+  doorGroup.add(lsPlate);
+
+  const keyCyl = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.007, 0.007, 0.009, 20), chromeMat
+  );
+  keyCyl.rotation.x = Math.PI / 2;
+  keyCyl.position.set(LX, LY + 0.014, DD + 0.029);
+  keyCyl.castShadow = true;
+  doorGroup.add(keyCyl);
+
+  const darkM = new THREE.MeshStandardMaterial({ color: 0x080808, roughness: 0.95 });
+  const slot = new THREE.Mesh(new THREE.BoxGeometry(0.004, 0.009, 0.002), darkM);
+  slot.position.set(LX, LY + 0.014, DD + 0.033);
+  doorGroup.add(slot);
+
+  // Ref-Panel zeigt korrektes Modell-Foto für direkten Vergleich
+  setModelRefPhoto(modelKey);
+}
+
+function setModel(key) {
+  buildDoor(key);
+  if (_curWood)  setWood(_curWood);
+  else           setColor(_curColor || 'anthrazitgrau');
+  setGlass(_curGlass || 'klar');
+}
+
+// Modell-spezifische Referenzfotos — muss VOR buildDoor() definiert sein
+const MODEL_PHOTOS = {
+  'florida-lr-inox':        'img/drutex-tueren/florida-inox-lr_antracyt.jpg',
+  'montana-2-lr-inox':      'img/drutex-tueren/montana-inox-2-lr_antracyt.jpg',
+  'montana-3-lr-inox':      'img/drutex-tueren/montana-inox-3-lr_antracyt.jpg',
+  'ohio-inox':              'img/drutex-tueren/ohio-inox_antracyt.jpg',
+  'colorado-inox':          'img/drutex-tueren/colorado-inox_antracyt.jpg',
+  'alaska-2-inox':          'img/drutex-tueren/alaska-inox-2_antracyt.jpg',
+  'alaska-1-inox':          'img/drutex-tueren/alaska-inox-1_antracyt.jpg',
+  'montana-1-inox':         'img/drutex-tueren/montana-inox-1_antracyt.jpg',
+  'nebraska-lcr-inox':      'img/drutex-tueren/nebraska-inox-lcr_antracyt.jpg',
+  'pennsylvania-1-inox':    'img/drutex-tueren/pennsylvania-inox-1_antracyt.jpg',
+  'texas-c-inox':           'img/drutex-tueren/texas-inox-c_antracyt.jpg',
+  'texas-lr-inox':          'img/drutex-tueren/texas-inox-lr_antracyt.jpg',
+  'pennsylvania-2-lr-inox': 'img/drutex-tueren/pennsylvania-inox-2-lr_antracyt.jpg',
+  'pennsylvania-3-lr-inox': 'img/drutex-tueren/pennsylvania-inox-3-lr_antracyt.jpg',
+};
+
+// Startup: Modell + Seite aus URL-Param
+const _urlModel = new URLSearchParams(location.search).get('model') || 'florida-lr-inox';
+const _urlSide  = new URLSearchParams(location.search).get('side')  || 'r';
+buildDoor(_urlModel);
+scene.add(doorGroup);
+
+// setSide: 'r' = Dreh-rechts (Griff links, Standard), 'l' = Dreh-links (gespiegelt)
+function setSide(s) {
+  if (s === 'l') {
+    doorGroup.scale.x    =  -1;
+    doorGroup.position.x =  DW / 2;
+  } else {
+    doorGroup.scale.x    =  1;
+    doorGroup.position.x = -DW / 2;
+  }
+  doorGroup.position.y = 0;
+  doorGroup.position.z = 0;
+}
+setSide(_urlSide);
+
+
+// ══════════════════════════════════════════════
+// DOOR_PHOTOS — echte Drutex-Türfotos pro Farbe
+// Direkt von produkte/haustueren/iglo-energy.html (data-frame-url)
+// ══════════════════════════════════════════════
+const CDN_P = 'https://www.drutex.de/media/webp/80/';
+const DOOR_PHOTOS = {
+  'weiss-fx':      CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktbW9udGFuYS1iaWFseS1meC5qcGc=.webp',
+  'white-sand':    CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktbW9udGFuYS13aGl0ZS1zYW5kLmpwZw==.webp',
+  'crown-plat':    CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktbW9udGFuYS1jcm93LXBsYXRpbml1bS5qcGc=.webp',
+  'cremeweiss':    CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktbW9udGFuYS1rcmVtb3d5LmpwZw==.webp',
+  'lichtgrau':     CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktbW9udGFuYS1qYXNueS1zemFyeS5qcGc=.webp',
+  'grau':          CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktbW9udGFuYS1zemFyeS5qcGc=.webp',
+  'betongrau':     CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktYmV0b25vd3ktc3phcnkuanBn.webp',
+  'quarzgrau':     CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktYmV0b25vd3ktc3phcnkta3dhcmN5dG93eS5qcGc=.webp',
+  'quarzgrau-gl':  CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktYmV0b25vd3ktc3phcnkta3dhcmN5dG93eS1nbGFka2kuanBn.webp',
+  'basaltgrau':    CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktYmV0b25vd3ktYmF6YWx0b3d5LXN6YXJ5LmpwZw==.webp',
+  'basaltgrau-gl': CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktYmF6YWx0b3d5LXN6YXJ5LWdsYWRraS5qcGc=.webp',
+  'eisengl':       CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktbHVwa293eS5qcGc=.webp',
+  'schiefgrau-gl': CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktbHVwa293eS1zemFyeS1nbGFka2kuanBn.webp',
+  'graphit-sand':  CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktbGdyYWZpdG93eS1waWFza293eS5qcGc=.webp',
+  'anthrazitgrau': CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktYW50cmFjeXQuanBn.webp',
+  'anthrazit-gl':  CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktYW50cmFjeXQtZ2xhZGtpLmpwZw==.webp',
+  'anthrazit-um':  CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktYW50cmFjeXQtdWx0aS1tYXR0LmpwZw==.webp',
+  'jet-black':     CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktamV0LWJsYWNrLmpwZw==.webp',
+  'schwarz-um':    CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktY3phcm55LXVsdGktbWF0dC5qcGc=.webp',
+  'pyrit':         CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktbW9udGFuYS1waXJ5dC5qcGc=.webp',
+  'deep-bronze':   CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktZGVlcC1icmF6ZS5qcGc=.webp',
+  'moosgruen':     CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktemllbGVuLW1jaHUuanBn.webp',
+  'dunkelgruen':   CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktY2llbW5vLXppZWxvbnkuanBn.webp',
+  'dunkelrot':     CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktY2llbW55LWN6ZXJ3b255LmpwZw==.webp',
+  'brillblau':     CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktYnJ5bGFudG93by1uaWViaWVza2kuanBn.webp',
+  'stahlblau':     CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktc3RhbG93eS1uaWViaWVza2kuanBn.webp',
+  'schoko-br':     CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktYnJhei1jemVrb2xhZG93eS5qcGc=.webp',
+  'golden-oak':    CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktemxvdHktZGFiLmpwZw==.webp',
+  'sheffield':     CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktZGFiLWJpZWxvbnkuanBn.webp',
+  'turner-oak':    CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktdHVybmVyLW9hay5qcGc=.webp',
+  'turner-toffee': CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktdHVybmVyLW9hay10b2ZmZWUuanBn.webp',
+  'turner-walnut': CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktdHVybmVyLW9hay13YWxudXQuanBn.webp',
+  'eiche-nat':     CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktZGFiLW5hdHVyYWxueS5qcGc=.webp',
+  'winchester':    CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktd2luY2hlc3Rlci5qcGc=.webp',
+  'oregon':        CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktb3JlZ29uLmpwZw==.webp',
+  'douglasie':     CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktZGFnbGV6amEuanBn.webp',
+  'nussbaum':      CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktb3J6ZWNoLmpwZw==.webp',
+  'eiche-dunkel':  CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktY2llbW55LWRhYi5qcGc=.webp',
+  'schwarzbraun':  CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktcGFsaXNhbmRlci5qcGc=.webp',
+  'macore':        CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktbWFjb3JlLmpwZw==.webp',
+  'mahagoni':      CDN_P+'L21lZGlhL191cGxvYWQvcHJvZHVrdHkvZHJ6d2ktaWdsby1lbmVyZ3kva29sb3J5L3d5cGVsbmllbmlhLTIwMjYvaWdsby1lbmVyZ3ktbWFob24uanBn.webp',
+};
+
+// Referenzfoto: Farb-Varianten (Montana-CDN) bei Farbwechsel
+function setRefPhoto(key) {
+  const url = DOOR_PHOTOS[key];
+  if (!url) return;
+  const img = document.querySelector('.ref-panel img');
+  if (img) { img.src = url; img.alt = key; }
+}
+function setModelRefPhoto(modelKey) {
+  const url = MODEL_PHOTOS[modelKey];
+  if (!url) return;
+  const img = document.querySelector('.ref-panel img');
+  if (img) { img.src = url; img.alt = modelKey; }
+}
+
+// ══════════════════════════════════════════════
+// FARBEN — alle 41 echten Drutex-Dekore
+// Identisch mit deinefenster.de/produkte/haustueren/iglo-energy.html
+// swatchUrl = Original Drutex-Swatch-Foto (für UI-Buttons)
+// hex       = Näherungshex für 3D-Material (Volltonfarben)
+// ══════════════════════════════════════════════
+const CDN = 'https://www.drutex.de/media/webp/80/';
+const FARBEN = {
+  whites: [
+    { key:'weiss-fx',      name:'Weiß FX',            hex:'#fcfcfc', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvYmlhbHktZnguanBn.webp' },
+    { key:'white-sand',    name:'White Sand U-Matt',   hex:'#e5e2d7', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L3doaXRlX3NhbmQtdS1tYXR0LmpwZw==.webp' },
+    { key:'crown-plat',    name:'Crown Platin',        hex:'#343134', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5LzIwMTcvY3Jvdml1X3BsYXR5bml1bS1uLmpwZw==.webp' },
+    { key:'cremeweiss',    name:'Cremeweiß',           hex:'#f0ebcf', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkva3JlbW93eS5qcGc=.webp' },
+  ],
+  grays: [
+    { key:'lichtgrau',     name:'Lichtgrau',           hex:'#c5c7c6', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5LzIwMTcvamFzbnlfc3phcnktbi5qcGc=.webp' },
+    { key:'grau',          name:'Grau',                hex:'#949899', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvc3phcnkuanBn.webp' },
+    { key:'betongrau',     name:'Betongrau',           hex:'#6c6962', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvYmV0b25vd3ktc3phcnkuanBn.webp' },
+    { key:'quarzgrau',     name:'Quarzgrau',           hex:'#42403c', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvc3phcnkta3dhcmN5dG93eS5qcGc=.webp' },
+    { key:'quarzgrau-gl',  name:'Quarzgrau Glatt',     hex:'#43413d', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvc3phcnkta3dhcmN5dG93eS1nbGFka2kuanBn.webp' },
+    { key:'basaltgrau',    name:'Basaltgrau',          hex:'#535d5c', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvYmF6YWx0b3d5X3N6YXJ5LmpwZw==.webp' },
+    { key:'basaltgrau-gl', name:'Basaltgrau Glatt',    hex:'#605f56', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvYmF6YWx0b3d5LXN6YXJ5LWdhZGtpLmpwZw==.webp' },
+    { key:'eisengl',       name:'Eisenglimmer Schiefer',hex:'#424949',swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5LzIwMTcvbHVwa293eS1uLmpwZw==.webp' },
+    { key:'schiefgrau-gl', name:'Schiefergrau Glatt',  hex:'#404747', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5LzIwMTcvbHVwa293eS1nbGFka2ktbi5qcGc=.webp' },
+    { key:'graphit-sand',  name:'Graphit-Sandfarben',  hex:'#595b51', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvZ3JhZml0b3d5X3BpYXNrb3dhbnkuanBn.webp' },
+    { key:'anthrazitgrau', name:'Anthrazitgrau',       hex:'#242426', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvYW50cmFjeXQuanBn.webp' },
+    { key:'anthrazit-gl',  name:'Anthrazit Glatt',     hex:'#252527', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvYW50cnljeXQwZ2xhZGtpLmpwZw==.webp' },
+    { key:'anthrazit-um',  name:'Anthrazit Ulti-Matt', hex:'#2f3231', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvYW50cmFjdXRfdWx0aS1tYXR0X3d3dy5qcGc=.webp' },
+    { key:'jet-black',     name:'Jet Black',           hex:'#262829', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L2pldC1ibGFjay5qcGc=.webp' },
+    { key:'schwarz-um',    name:'Schwarz Ulti-Matt',   hex:'#060606', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvY3phcm55X3VsdGktbWF0dF93d3cuanBn.webp' },
+  ],
+  colors: [
+    { key:'pyrit',         name:'Pyrit',               hex:'#6c6046', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L3Bpcnl0LmpwZw==.webp' },
+    { key:'deep-bronze',   name:'Shine Deep Bronze',   hex:'#564b36', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvZGVlcF9icm9uemUuanBn.webp' },
+    { key:'moosgruen',     name:'Moosgrün',            hex:'#2a412e', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvemllbGVuLW1jaHUuanBn.webp' },
+    { key:'dunkelgruen',   name:'Dunkelgrün',          hex:'#152610', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvY2llbW5vLXppZWxvbnkuanBn.webp' },
+    { key:'dunkelrot',     name:'Dunkelrot',           hex:'#690b16', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvY2llbW55LWN6ZXJ3b255LmpwZw==.webp' },
+    { key:'brillblau',     name:'Brillantblau',        hex:'#366885', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L2JyeWxhbnRvd28tbmllYmllc2tpLmpwZw==.webp' },
+    { key:'stahlblau',     name:'Stahlblau',           hex:'#13203e', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvc3RhbG93eS1uaWViaWVza2lfTjJpbVdJUy5qcGc=.webp' },
+    { key:'schoko-br',     name:'Schokobraun',         hex:'#2f201a', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvYnJhei1jemVrb2xhZG93eS5qcGc=.webp' },
+  ],
+  woods: [
+    { key:'golden-oak',    name:'Golden Oak',          swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvemFvdHktZGFiX2trLmpwZw==.webp' },
+    { key:'sheffield',     name:'Sheffield Oak Light', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvZGFiLWJpZWxvbnkuanBn.webp' },
+    { key:'turner-oak',    name:'Turner Oak',          swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L3R1cm5lci1vYWstMjAyMy5qcGc=.webp' },
+    { key:'turner-toffee', name:'Turner Oak Toffee',   swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L3R1cm5lcl9vYWtfdG9mZmVlXzQ3MC0zMDA0LmpwZw==.webp' },
+    { key:'turner-walnut', name:'Turner Oak Walnut',   swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L3R1cm5lcl9vYWtfd2FsbnV0XzQ3MC0zMDA0LmpwZw==.webp' },
+    { key:'eiche-nat',     name:'Eiche Natur',         swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvZGFiLW5hdHVyYWxueS5qcGc=.webp' },
+    { key:'winchester',    name:'Winchester',          swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvd2luY2hlc3Rlcl9ray5qcGc=.webp' },
+    { key:'oregon',        name:'Oregon',              swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvb3JlZ29uX2trLmpwZw==.webp' },
+    { key:'douglasie',     name:'Streifen Douglasie',  swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvZGFnbGV6amFfa2suanBn.webp' },
+    { key:'nussbaum',      name:'Nussbaum',            swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L3dvb2Qvb3J6ZWNoLWEuanBn.webp' },
+    { key:'eiche-dunkel',  name:'Eiche Dunkel',        swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvY2llbW55LWRhYl9ray5qcGc=.webp' },
+    { key:'schwarzbraun',  name:'Schwarzbraun',        swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvcGFsaXNhbmRlci5qcGc=.webp' },
+    { key:'macore',        name:'Macoré',              swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvbWFjb3JlX2trLmpwZw==.webp' },
+    { key:'mahagoni',      name:'Mahagoni',            swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvbWFjaG9hX2trLmpwZw==.webp' },
+  ]
+};
+
+// ══════════════════════════════════════════════
+// HOLZDEKORE — Drutex-Swatch-Texturen + Zarge-Farben
+// ══════════════════════════════════════════════
+
+// Textur-Wiederholung pro Holzart [repeatX, repeatY]
+const WOOD_REPEAT = {
+  'golden-oak':    [1.5, 1],
+  'sheffield':     [1.5, 1],
+  'turner-oak':    [1.5, 1],
+  'turner-toffee': [1.5, 1],
+  'turner-walnut': [1.5, 1],
+  'eiche-nat':     [1.5, 1],
+  'winchester':    [1.5, 1],
+  'oregon':        [1,   1],   // Jahresringe — weniger Wiederholung
+  'douglasie':     [1.5, 1],
+  'nussbaum':      [1.5, 1],
+  'eiche-dunkel':  [1.5, 1],
+  'schwarzbraun':  [1,   1],   // wird als Vollton behandelt
+  'macore':        [2,   1],   // feine Streifen — dichter
+  'mahagoni':      [2,   1],   // feine Streifen — dichter
+};
+
+const WOOD_PARAMS = {
+  'golden-oak':    { base:'#C8883A', grain:'#7A4A18' },
+  'sheffield':     { base:'#C8BDB0', grain:'#A0958A' },
+  'turner-oak':    { base:'#D4B878', grain:'#9A7840' },
+  'turner-toffee': { base:'#4A3020', grain:'#241408' },
+  'turner-walnut': { base:'#6A4A30', grain:'#341808' },
+  'eiche-nat':     { base:'#C8963C', grain:'#8A6020' },
+  'winchester':    { base:'#8C6136', grain:'#52341A' },
+  'oregon':        { base:'#E8A030', grain:'#A06010' },
+  'douglasie':     { base:'#A06530', grain:'#603A10' },
+  'nussbaum':      { base:'#3C1E18', grain:'#180A08' },
+  'eiche-dunkel':  { base:'#4A3025', grain:'#201008' },
+  'schwarzbraun':  { base:'#1C1810', grain:'#100C08' },
+  'macore':        { base:'#6A3824', grain:'#381408' },
+  'mahagoni':      { base:'#2A1A14', grain:'#140A08' },
+};
+
+const WOOD_TEX_MAP = {
+  'golden-oak':    'img/holz/golden_oak.jpg',
+  'sheffield':     'img/holz/sheffield.jpg',
+  'turner-oak':    'img/holz/sheffield.jpg',     // naheste Textur
+  'turner-toffee': 'img/holz/eiche_natur.jpg',
+  'turner-walnut': 'img/holz/nussbaum.jpg',
+  'eiche-nat':     'img/holz/eiche_natur.jpg',
+  'winchester':    'img/holz/winchester.jpg',
+  'oregon':        'img/holz/oregon.jpg',
+  'douglasie':     'img/holz/douglasie.jpg',
+  'nussbaum':      'img/holz/nussbaum.jpg',
+  'eiche-dunkel':  'img/holz/eiche_dunkel.jpg',
+  'schwarzbraun':  'img/holz/mahagoni.jpg',      // naheste Textur
+  'macore':        'img/holz/macore.jpg',
+  'mahagoni':      'img/holz/mahagoni.jpg',
+};
+
+// ── Farbe setzen (Unifarbe — entfernt Holztextur) ──
+function clearWoodMaps() {
+  ['map','bumpMap','roughnessMap'].forEach(k => {
+    if (doorMat[k]) { doorMat[k].dispose(); doorMat[k] = null; }
+  });
+  if (frameMat.map) { frameMat.map.dispose(); frameMat.map = null; }
+}
+
+// Findet Farbobjekt aus FARBEN anhand key
+function findColor(key) {
+  const all = [...FARBEN.whites, ...FARBEN.grays, ...FARBEN.colors];
+  return all.find(c => c.key === key);
+}
+
+function setColor(key) {
+  _curColor = key; _curWood = null;
+  clearWoodMaps();
+  frameMat.map = null;
+  doorMat.map = null;
+
+  const colorObj = findColor(key);
+  const hex = colorObj?.hex || '#888888';
+  const c = new THREE.Color(hex);
+
+  // Exakter Drutex-Farbwert direkt auf Tür + Zarge
+  doorMat.color.copy(c);
+  frameMat.color.copy(c);
+  grooveMat.color.copy(c).multiplyScalar(0.62);
+
+  // Finish-Eigenschaften
+  const isGlatt    = key.endsWith('-gl');
+  const isUltiMatt = key.endsWith('-um');
+  const roughness  = isUltiMatt ? 0.97 : isGlatt ? 0.20 : 0.74;
+  const envInt     = isUltiMatt ? 0.02 : isGlatt ? 0.85 : 0.08;
+
+  doorMat.roughness  = frameMat.roughness  = roughness;
+  doorMat.metalness  = frameMat.metalness  = 0;
+  doorMat.envMapIntensity = envInt;
+  doorMat.needsUpdate = true;
+  frameMat.needsUpdate = true;
+}
+
+// ── Holzdekor setzen — echtes Drutex-Swatch-Foto (img/swatches/{key}.webp) ──
+function setWood(key) {
+  _curWood = key; _curColor = null;
+  const p = WOOD_PARAMS[key];
+  if (!p) return;
+
+  clearWoodMaps();
+
+  // Schwarzbraun = fast kein Holzmuster sichtbar → Vollton
+  if (key === 'schwarzbraun') {
+    doorMat.map = null;
+    doorMat.color.set(p.base);
+    doorMat.roughness = 0.88;
+    doorMat.metalness = 0;
+    doorMat.envMapIntensity = 0.04;
+    doorMat.needsUpdate = true;
+    frameMat.color.set(p.base);
+    frameMat.roughness = 0.88;
+    frameMat.metalness = 0;
+    frameMat.needsUpdate = true;
+    grooveMat.color.set(p.grain);
+    grooveMat.needsUpdate = true;
+    return;
+  }
+
+  const [rx, ry] = WOOD_REPEAT[key] ?? [1.5, 1];
+
+  // Echtes Drutex-Holzswatch laden — Maserung läuft vertikal (rotation 90°)
+  texLoader.load('img/swatches/' + key + '.webp', (tex) => {
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.rotation = Math.PI / 2;     // Maserung vertikal (hoch statt quer)
+    tex.center.set(0.5, 0.5);
+    tex.repeat.set(rx, ry);
+    tex.needsUpdate = true;
+
+    // Türblatt + Zarge bekommen dieselbe Holztextur
+    doorMat.map = tex;
+    doorMat.color.set(0xffffff);
+    doorMat.bumpMap = tex;
+    doorMat.bumpScale = 0.025;
+    doorMat.roughness = 0.82;
+    doorMat.metalness = 0;
+    doorMat.envMapIntensity = 0.10;
+    doorMat.needsUpdate = true;
+
+    frameMat.map = tex;
+    frameMat.color.set(0xffffff);
+    frameMat.roughness = 0.78;
+    frameMat.metalness = 0;
+    frameMat.needsUpdate = true;
+  });
+
+  grooveMat.color.set(p.grain);
+  grooveMat.needsUpdate = true;
+}
+
+// ══════════════════════════════════════════════
+// GLASARTEN — 4 Typen passend zum Konfigurator
+//
+// roughnessMap-Prinzip: weiß = gestreut/matt (opak), schwarz = klar (transparent)
+// Diese Map multipliziert mit glassMat.roughness → erzeugt SICHTBARE Muster
+// ══════════════════════════════════════════════
+const GLASS_TYPES = [
+  { key:'klar',         name:'Klar',         color:0xc8dff0, transmission:0.90, roughness:0.03 },
+  { key:'satinato',     name:'Satinato',      color:0xe8eced, transmission:0.18, roughness:0.96 },
+  { key:'chinchilla',   name:'Chinchilla',    color:0xffffff, transmission:0.22, roughness:0.88 },
+  { key:'master-carre', name:'Master Carré',  color:0xffffff, transmission:0.28, roughness:0.72 },
+];
+
+// Deterministischer Pseudozufallsgenerator (Seed → reproduzierbare Muster)
+function seededRnd(seed) {
+  let s = seed;
+  return () => { s = (s * 1664525 + 1013904223) & 0xffffffff; return (s >>> 0) / 0xffffffff; };
+}
+
+// ── Glas-Normalmap: Heightmap → Normalmap via Sobel ──────────────────────────
+// Weiß = Erhöhung (Glaserhebung), Schwarz = flach → erzeugt echten 3D-Schliff
+function heightToNormal(heightCanvas, strength) {
+  const W = heightCanvas.width, H = heightCanvas.height;
+  const hData = heightCanvas.getContext('2d').getImageData(0, 0, W, H).data;
+  const out = document.createElement('canvas'); out.width = W; out.height = H;
+  const nCtx = out.getContext('2d');
+  const nImg = nCtx.createImageData(W, H);
+  function h(x, y) {
+    x = Math.max(0, Math.min(W-1, x)); y = Math.max(0, Math.min(H-1, y));
+    return hData[(y * W + x) * 4] / 255.0;
+  }
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      const dX = (h(x-1,y-1) - h(x+1,y-1)) + 2*(h(x-1,y) - h(x+1,y)) + (h(x-1,y+1) - h(x+1,y+1));
+      const dY = (h(x-1,y-1) - h(x-1,y+1)) + 2*(h(x,y-1) - h(x,y+1)) + (h(x+1,y-1) - h(x+1,y+1));
+      const nx = dX * strength, ny = dY * strength, nz = 1.0;
+      const len = Math.sqrt(nx*nx + ny*ny + nz*nz);
+      const i = (y * W + x) * 4;
+      nImg.data[i]   = (nx/len * 0.5 + 0.5) * 255;
+      nImg.data[i+1] = (ny/len * 0.5 + 0.5) * 255;
+      nImg.data[i+2] = (nz/len * 0.5 + 0.5) * 255;
+      nImg.data[i+3] = 255;
+    }
+  }
+  nCtx.putImageData(nImg, 0, 0);
+  return out;
+}
+
+// Chinchilla Heightmap: unregelmäßige Pebble-Hügel wie echter Chinchilla-Schliff
+function chinchillaHeight() {
+  const W = 512, H = 512;
+  const cvs = document.createElement('canvas'); cvs.width = W; cvs.height = H;
+  const ctx = cvs.getContext('2d');
+  const rnd = seededRnd(4217);
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+  for (let i = 0; i < 300; i++) {
+    const x = rnd() * W, y = rnd() * H;
+    const r = 18 + rnd() * 28;
+    const rx = r * (0.65 + rnd() * 0.7), ry = r * (0.65 + rnd() * 0.7);
+    const grad = ctx.createRadialGradient(x, y, 0, x, y, Math.max(rx, ry));
+    grad.addColorStop(0,   'rgba(255,255,255,1)');  // Hügelkuppe = weiß
+    grad.addColorStop(0.6, 'rgba(128,128,128,0.5)');
+    grad.addColorStop(1,   'rgba(0,0,0,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.ellipse(x, y, rx, ry, rnd() * Math.PI, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  return cvs;
+}
+
+// Master Carré Heightmap: erhabene Gitterlinien wie echter Glas-Raster
+function masterCarreHeight() {
+  const W = 256, H = 256;
+  const cvs = document.createElement('canvas'); cvs.width = W; cvs.height = H;
+  const ctx = cvs.getContext('2d');
+  const STEP = 32, LINE = 8;
+  ctx.fillStyle = '#111'; ctx.fillRect(0, 0, W, H);   // Quadratflächen = tief
+  // Erhabene Linien mit weichem Rand (wie Glas-Riffel)
+  for (let pos = 0; pos <= W; pos += STEP) {
+    const grad = ctx.createLinearGradient(pos - LINE, 0, pos + LINE, 0);
+    grad.addColorStop(0, 'rgba(0,0,0,0)');
+    grad.addColorStop(0.5, 'rgba(255,255,255,1)');
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grad; ctx.fillRect(pos - LINE, 0, LINE*2, H);
+  }
+  for (let pos = 0; pos <= H; pos += STEP) {
+    const grad = ctx.createLinearGradient(0, pos - LINE, 0, pos + LINE);
+    grad.addColorStop(0, 'rgba(0,0,0,0)');
+    grad.addColorStop(0.5, 'rgba(255,255,255,1)');
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grad; ctx.fillRect(0, pos - LINE, W, LINE*2);
+  }
+  return cvs;
+}
+
+function buildNormalTex(heightFn, strength, repeatX, repeatY) {
+  const tex = new THREE.CanvasTexture(heightToNormal(heightFn(), strength));
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(repeatX, repeatY);
+  return tex;
+}
+
+function cleanGlassMaps() {
+  ['map','roughnessMap','normalMap'].forEach(k => {
+    if (glassMat[k]) { glassMat[k].dispose(); glassMat[k] = null; }
+  });
+}
+
+function setGlass(key) {
+  _curGlass = key;
+  const g = GLASS_TYPES.find(t => t.key === key); if (!g) return;
+
+  cleanGlassMaps();
+
+  if (key === 'klar') {
+    // Klar: sauber transparent, leicht blaues Glas-Tint
+    glassMat.transmission  = 0.92;
+    glassMat.roughness     = 0.02;
+    glassMat.normalScale?.set(0, 0);
+    glassMat.color.set(0xd0e8f4);
+  } else if (key === 'satinato') {
+    // Satinato: uniform milchig-weiß — hohe Streuung, kein Muster
+    glassMat.transmission  = 0.35;
+    glassMat.roughness     = 0.96;
+    glassMat.color.set(0xe8eeee);
+  } else if (key === 'chinchilla') {
+    // Chinchilla: Normalmap aus Pebble-Hügeln → echter 3D-Schliff
+    glassMat.transmission  = 0.65;
+    glassMat.roughness     = 0.12;
+    glassMat.color.set(0xd4e8f0);
+    glassMat.normalMap     = buildNormalTex(chinchillaHeight, 4.5, 5, 16);
+    glassMat.normalScale   = new THREE.Vector2(1.8, 1.8);
+  } else if (key === 'master-carre') {
+    // Master Carré: subtile Gitterlinien — normalScale niedrig für echten Glaserschliff
+    glassMat.transmission  = 0.78;
+    glassMat.roughness     = 0.06;
+    glassMat.color.set(0xd4eaf4);
+    glassMat.normalMap     = buildNormalTex(masterCarreHeight, 4.0, 3, 11);
+    glassMat.normalScale   = new THREE.Vector2(1.5, 1.5);
+  }
+
+  glassMat.needsUpdate = true;
+  document.querySelectorAll('.glass-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.key === key)
+  );
+}
+
+// ── Swatches — echte Drutex-Swatch-Bilder als UI-Buttons ──
+function buildSwatches(id, list, onSelect, defaultKey) {
+  const el = document.getElementById(id);
+  list.forEach(c => {
+    const s = document.createElement('div');
+    s.className = 'color-swatch' + (c.key === defaultKey ? ' active' : '');
+    if (c.swatchUrl) {
+      // Echtes Drutex-Swatch-Foto: Farbe/Holzmaserung sichtbar im Button
+      s.style.backgroundImage = `url(${c.swatchUrl})`;
+      s.style.backgroundSize = 'cover';
+      s.style.backgroundPosition = 'center';
+    } else {
+      s.style.background = c.hex || '#888';
+    }
+    s.innerHTML = `<span class="tooltip">${c.name}</span>`;
+    s.onclick = () => {
+      document.querySelectorAll('.color-swatch').forEach(x => x.classList.remove('active'));
+      s.classList.add('active');
+      onSelect(c);
+      document.getElementById('currentLabel').textContent = c.name;
+    };
+    el.appendChild(s);
+  });
+}
+buildSwatches('whites',     FARBEN.whites,  c => { setColor(c.key); setRefPhoto(c.key); });
+buildSwatches('grays',      FARBEN.grays,   c => { setColor(c.key); setRefPhoto(c.key); }, 'anthrazitgrau');
+buildSwatches('colorGroup', FARBEN.colors,  c => { setColor(c.key); setRefPhoto(c.key); });
+buildSwatches('woods',      FARBEN.woods,   c => { setWood(c.key);  setRefPhoto(c.key); });
+
+// Startzustand: URL-Param ?color= oder Anthrazitgrau
+const _urlColor = new URLSearchParams(location.search).get('color');
+if (_urlColor) { setColor(_urlColor); setRefPhoto(_urlColor); }
+else { setColor('anthrazitgrau'); setRefPhoto('anthrazitgrau'); }
+
+// ── Glasarten-Buttons ──
+(function buildGlassBtns() {
+  const el = document.getElementById('glassBtns');
+  GLASS_TYPES.forEach(g => {
+    const b = document.createElement('button');
+    b.className = 'glass-btn' + (g.key === 'klar' ? ' active' : '');
+    b.dataset.key = g.key;
+    b.textContent = g.name;
+    b.onclick = () => setGlass(g.key);
+    el.appendChild(b);
+  });
+})();
+
+// ══════════════════════════════════════════════
+// RESIZE + RENDER LOOP
+// ══════════════════════════════════════════════
+function resize() {
+  const embed = new URLSearchParams(location.search).has('embed');
+  const w = embed ? window.innerWidth  : window.innerWidth  - 290 - 252;
+  const h = embed ? window.innerHeight : window.innerHeight - 40;
+  renderer.setSize(w, h);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize);
+resize();
+
+// Embed-Modus: ?embed in URL → Header + Referenz-Panel + Controls ausblenden
+if (new URLSearchParams(location.search).has('embed')) {
+  document.body.classList.add('embed');
+}
+
+// ── Konfigurator-Reihenfolge (genau wie im Konfigurator)
+const MODEL_ORDER = [
+  { key:'florida-lr-inox',        label:'Florida (L/R) · Inox' },
+  { key:'montana-2-lr-inox',      label:'Montana 2 L/R · Inox' },
+  { key:'montana-3-lr-inox',      label:'Montana 3 L/R · Inox' },
+  { key:'ohio-inox',              label:'Ohio · Inox' },
+  { key:'colorado-inox',          label:'Colorado · Inox' },
+  { key:'alaska-2-inox',          label:'Alaska 2 · Inox' },
+  { key:'alaska-1-inox',          label:'Alaska 1 · Inox' },
+  { key:'montana-1-inox',         label:'Montana 1 · Inox' },
+  { key:'nebraska-lcr-inox',      label:'Nebraska (L/C/R) · Inox' },
+  { key:'pennsylvania-1-inox',    label:'Pennsylvania 1 · Inox' },
+  { key:'texas-c-inox',           label:'Texas (Mittig) · Inox' },
+  { key:'texas-lr-inox',          label:'Texas (L/R) · Inox' },
+  { key:'pennsylvania-2-lr-inox', label:'Pennsylvania 2 L/R · Inox' },
+  { key:'pennsylvania-3-lr-inox', label:'Pennsylvania 3 L/R · Inox' },
+];
+let _curModelIdx = MODEL_ORDER.findIndex(m => m.key === _urlModel);
+if (_curModelIdx < 0) _curModelIdx = 0;
+
+function navModel(dir) {
+  _curModelIdx = (_curModelIdx + dir + MODEL_ORDER.length) % MODEL_ORDER.length;
+  const { key, label } = MODEL_ORDER[_curModelIdx];
+  setModel(key);
+  setModelRefPhoto(key);
+  const nm = document.getElementById('refModelName');
+  if (nm) nm.textContent = label + ' (' + (_curModelIdx + 1) + '/14)';
+  history.replaceState(null, '', '?model=' + key);
+}
+// Startanzeige
+(function() {
+  const nm = document.getElementById('refModelName');
+  if (nm) nm.textContent = (MODEL_ORDER[_curModelIdx]?.label || 'Colorado') + ' (' + (_curModelIdx + 1) + '/14)';
+})();
+window.navModel = navModel;
+
+// Modell-Dropdown in Header verdrahten
+const _modelSel = document.getElementById('modelSelect');
+if (_modelSel) {
+  // Startwert auf aktuelles Modell setzen
+  _modelSel.value = _urlModel;
+  _modelSel.addEventListener('change', () => {
+    const key = _modelSel.value;
+    setModel(key);
+    setModelRefPhoto(key);
+    // URL aktualisieren ohne Reload
+    history.replaceState(null, '', '?model=' + key);
+  });
+}
+
+// postMessage-Bridge: Konfigurator schickt Farb/Holz/Glas-Änderungen
+window.addEventListener('message', (e) => {
+  const d = e.data;
+  if (!d || !d.type) return;
+  if (d.type === 'setColor') setColor(d.key);
+  if (d.type === 'setWood')  setWood(d.key);
+  if (d.type === 'setGlass') setGlass(d.key);
+  if (d.type === 'setModel') setModel(d.key);
+  if (d.type === 'setSide')  setSide(d.key);
+  if (d.type === 'update') {
+    // Atomare Aktualisierung: alles in einem Tick → kein Zwischenframe
+    buildDoor(d.model);
+    setSide(d.side || 'r');
+    if (d.wood)  setWood(d.wood);
+    else         setColor(d.color || 'anthrazitgrau');
+    setGlass(d.glass || 'klar');
+  }
+});
+
+(function animate() {
+  requestAnimationFrame(animate);
+  orb.update();
+  renderer.render(scene, camera);
+})();
+</script>
+<script src="js/chatbot.js" defer></script>
+</body>
+</html>

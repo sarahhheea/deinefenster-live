@@ -5,20 +5,26 @@
    ───────────────────────────────────────────────────────────────────── */
 
 const KATEGORIEN = [
-  { key: 'fenster-1fluegel',     label: 'Einflügelig',           icon: 'window' },
-  { key: 'fenster-2fluegel',     label: 'Zweiflügelig',          icon: 'border_outer' },
-  { key: 'fenster-3fluegel',     label: 'Dreiflügelig',          icon: 'view_column' },
-  { key: 'fenster-4fluegel',     label: 'Vierflügelig',          icon: 'grid_view' },
-  { key: 'festelement',          label: 'Festverglasung',        icon: 'crop_free' },
-  { key: 'kellerfenster',        label: 'Kellerfenster',         icon: 'crop_landscape' },
-  { key: 'haustuer',             label: 'Haustür',               icon: 'door_front' },
-  { key: 'balkontuer-1fluegel',  label: 'Balkontür einflüglig',  icon: 'deck' },
-  { key: 'balkontuer-2fluegel',  label: 'Balkontür zweiflüglig', icon: 'fence' },
-  { key: 'balkontuer-rollo',     label: 'Balkontür mit Rollo',   icon: 'roller_shades' },
-  { key: 'schiebetuer-psk',      label: 'Schiebetür PSK',        icon: 'meeting_room' },
-  { key: 'schiebetuer-hst',      label: 'Hebe-Schiebetür',       icon: 'door_sliding' },
-  { key: 'fenster-oberlicht',    label: 'Fenster mit Oberlicht', icon: 'space_dashboard' },
-  { key: 'fenster-sprossen',     label: 'Fenster mit Sprossen',  icon: 'window_open' }
+  { key: 'fenster-1fluegel',           label: 'Einflügelig',                      icon: 'window' },
+  { key: 'fenster-1fluegel-rollo',     label: 'Einflügelig mit Rollo',            icon: 'roller_shades' },
+  { key: 'fenster-2fluegel',           label: 'Zweiflügelig',                     icon: 'border_outer' },
+  { key: 'fenster-2fluegel-rollo',     label: 'Zweiflügelig mit Rollo',           icon: 'roller_shades' },
+  { key: 'fenster-3fluegel',           label: 'Dreiflügelig',                     icon: 'view_column' },
+  { key: 'fenster-3fluegel-rollo',     label: 'Dreiflügelig mit Rollo',           icon: 'roller_shades' },
+  { key: 'fenster-4fluegel',           label: 'Vierflügelig',                     icon: 'grid_view' },
+  { key: 'festelement',                label: 'Festverglasung',                   icon: 'crop_free' },
+  { key: 'kellerfenster',              label: 'Kellerfenster',                    icon: 'crop_landscape' },
+  { key: 'rundfenster',                label: 'Rundfenster',                      icon: 'circle' },
+  { key: 'haustuer',                   label: 'Haustür',                          icon: 'door_front' },
+  { key: 'balkontuer-1fluegel',        label: 'Balkontür einflüglig',             icon: 'deck' },
+  { key: 'balkontuer-1fluegel-rollo',  label: 'Balkontür einflüglig mit Rollo',   icon: 'roller_shades' },
+  { key: 'balkontuer-2fluegel',        label: 'Balkontür zweiflüglig',            icon: 'fence' },
+  { key: 'balkontuer-2fluegel-rollo',  label: 'Balkontür zweiflüglig mit Rollo',  icon: 'roller_shades' },
+  { key: 'schiebetuer-psk',            label: 'Schiebetür PSK',                   icon: 'meeting_room' },
+  { key: 'schiebetuer-hst',            label: 'Hebe-Schiebetür',                  icon: 'door_sliding' },
+  { key: 'schiebetuer-rollo',          label: 'Schiebetür mit Rollo',             icon: 'roller_shades' },
+  { key: 'fenster-oberlicht',          label: 'Fenster mit Oberlicht',            icon: 'space_dashboard' },
+  { key: 'fenster-sprossen',           label: 'Fenster mit Sprossen',             icon: 'window_open' }
 ];
 
 // Sarah-Update 30.04.2026 v2: Gruppierte Eigenschaften für übersichtlichere Auswahl
@@ -111,6 +117,7 @@ const FARBE_LABEL = {
 };
 
 const STATE = {
+  typ: null,        // 'vermessen' oder 'sonderposten'
   zustand: 'neu',  // 'neu' oder 'gebraucht'
   kategorie: null,
   groesseKlasse: '',
@@ -133,49 +140,36 @@ const DRAFT_KEY = 'deinefenster_inserat_draft_v1';
 let KATEGORIEN_LIVE = [...KATEGORIEN]; // wird aus DB überschrieben falls verfügbar
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // Auth-Check + Kategorien aus DB laden
-  if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+  // Auth-Check via localStorage-Token
+  if (!isShopLoggedIn()) {
+    location.href = `shop-login.html?next=${encodeURIComponent('shop-einstellen.html')}`;
+    return;
+  }
+
+  // User-Badge anzeigen
+  const ub   = document.getElementById('userBadge');
+  const ueml = document.getElementById('userEmail');
+  const lb   = document.getElementById('logoutBtn');
+  if (ueml) ueml.textContent = localStorage.getItem('df_shop_email') || 'eingeloggt';
+  if (ub)   ub.classList.remove('hidden');
+  if (lb) {
+    lb.classList.remove('hidden');
+    lb.addEventListener('click', () => {
+      clearShopToken();
+      location.href = 'shop-login.html';
+    });
+  }
+
+  // Edit-Mode: ?edit=PRODUKT_ID
+  const editParam = new URLSearchParams(location.search).get('edit');
+  if (editParam) {
+    STATE.editMode = true;
+    STATE.editId   = editParam;
     try {
-      const { data: { session } } = await supabaseClient.auth.getSession();
-      if (!session) {
-        // nicht eingeloggt → zur Login-Seite
-        location.href = `shop-login.html?next=${encodeURIComponent('shop-einstellen.html')}`;
-        return;
-      }
-      STATE.user = session.user;
-      const ub = document.getElementById('userBadge');
-      const ueml = document.getElementById('userEmail');
-      const lb = document.getElementById('logoutBtn');
-      if (ueml) ueml.textContent = session.user.email || 'eingeloggt';
-      if (ub) ub.classList.remove('hidden');
-      if (lb) {
-        lb.classList.remove('hidden');
-        lb.addEventListener('click', async () => {
-          await supabaseClient.auth.signOut();
-          location.href = 'shop-login.html';
-        });
-      }
-
-      // Live-Kategorien aus DB
-      const { data: katData } = await supabaseClient
-        .from('kategorien')
-        .select('*')
-        .eq('aktiv', true)
-        .order('reihenfolge', { ascending: true });
-      if (katData && katData.length) {
-        KATEGORIEN_LIVE = katData.map(k => ({ key: k.key, label: k.label, icon: k.icon || 'window' }));
-      }
-
-      // Edit-Mode: ?edit=PRODUKT_ID
-      const editParam = new URLSearchParams(location.search).get('edit');
-      if (editParam) {
-        STATE.editMode = true;
-        STATE.editId = editParam;
-        const { data: prod } = await supabaseClient.from('produkte').select('*').eq('id', editParam).maybeSingle();
-        if (prod) await ladeProduktInsFormular(prod);
-      }
-    } catch (e) {
-      console.warn('Auth/DB-Init fehlgeschlagen, verwende Standard-Kategorien:', e);
+      const res = await sheetsGet('produkt', { id: editParam });
+      if (res.produkt) await ladeProduktInsFormular(res.produkt);
+    } catch(e) {
+      console.warn('Produkt laden fehlgeschlagen:', e);
     }
   }
 
@@ -236,9 +230,7 @@ function setEditModeUI() {
   if (!STATE.editMode) return;
   const btn = document.getElementById('veroeffentlichenBtn');
   if (btn) btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px">save</span> Änderungen speichern';
-  // Kategorie-Wechsel deaktivieren beim Bearbeiten (Kategorie ändert nichts wesentliches, aber hindert Verwirrung)
-  const wechseln = document.getElementById('kategorieWechseln');
-  if (wechseln) wechseln.style.display = 'none';
+  // Kategorie-Wechsel bleibt im Edit-Mode aktiv (Sarah: Kategorie nachträglich korrigierbar)
 }
 
 /* ─── Größen-Klasse ─── */
@@ -338,9 +330,9 @@ function autoVorauswahlGroesse() {
   rendereVorschau();
 }
 
-/* ─── Zustand-Auswahl (Neu / Gebraucht) ─── */
+/* ─── Zustand-Auswahl (Neu / Gebraucht / Vermessen / Sonderposten) ─── */
 function bindeZustandHandler() {
-  ['zustandNeu', 'zustandGebraucht'].forEach(id => {
+  ['zustandNeu', 'zustandGebraucht', 'zustandVermessen', 'zustandSonderposten'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     el.addEventListener('click', () => {
@@ -353,16 +345,15 @@ function bindeZustandHandler() {
 }
 
 function setZustandUI() {
-  // Karten: aktive Auswahl markieren
-  ['zustandNeu', 'zustandGebraucht'].forEach(id => {
+  ['zustandNeu', 'zustandGebraucht', 'zustandVermessen', 'zustandSonderposten'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     el.classList.toggle('selected', el.dataset.zustand === STATE.zustand);
   });
-  // System-Feld nur bei "neu" anzeigen
+  // Drutex-System nur bei "neu" anzeigen
   const sysWrap = document.getElementById('formSystemWrap');
   if (sysWrap) {
-    sysWrap.style.display = STATE.zustand === 'gebraucht' ? 'none' : '';
+    sysWrap.style.display = STATE.zustand === 'neu' ? '' : 'none';
   }
 }
 
@@ -404,7 +395,7 @@ function rendereEigenschaften() {
   wrap.innerHTML = EIGENSCHAFTEN_GRUPPEN.map(g => `
     <div class="eig-gruppe" style="margin-bottom:18px">
       <div class="flex items-center gap-1.5 mb-2 pb-1.5 border-b" style="border-color:rgba(0,0,0,0.08)">
-        <i class="ms" style="font-size:16px;color:#225eaa">${g.icon || 'tune'}</i>
+        <span class="material-symbols-outlined" style="font-size:16px;color:#225eaa">${g.icon || 'tune'}</span>
         <span class="text-[12px] font-bold uppercase tracking-wider" style="color:#225eaa;letter-spacing:0.05em">${g.titel}</span>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5">
@@ -471,8 +462,16 @@ function bindeFormHandler() {
   if (camBtn) camBtn.addEventListener('click', () => camInput.click());
   if (galBtn) galBtn.addEventListener('click', () => galInput.click());
   if (camInput) camInput.addEventListener('change', e => {
+    if (!e.target.files.length) return;
+    const vorher    = STATE.bilderBestand.length + STATE.bilder.length;
+    const neuAnzahl = e.target.files.length; // vor Reset merken
     handleFiles(e.target.files);
-    e.target.value = ''; // Reset damit das gleiche Foto nochmal nachladbar ist
+    e.target.value = ''; // Reset damit dasselbe Foto nochmal ladbar ist
+    // Kamera automatisch wieder öffnen → mehrere Fotos hintereinander schießen
+    // Stoppt wenn Nutzer in der Kamera-App auf "Abbrechen" drückt (kein change-Event)
+    if (vorher + neuAnzahl < 20) {
+      setTimeout(() => camInput.click(), 350);
+    }
   });
   if (galInput) galInput.addEventListener('change', e => {
     handleFiles(e.target.files);
@@ -522,7 +521,7 @@ function resetFormular() {
   setZustandUI();
   rendereBildVorschau();
   document.getElementById('autoErkanntHinweis').classList.add('hidden');
-  // Zurück zu Schritt 1
+  // Zurück zu Schritt 0
   STATE.kategorie = null;
   document.querySelectorAll('.kat-karte').forEach(b => b.classList.remove('selected'));
   document.getElementById('weiterZuStep2').disabled = true;
@@ -553,6 +552,51 @@ function goToStep1() {
 }
 
 /* ─── Bild-Upload ─── */
+function getExifOrientation(dataUrl) {
+  try {
+    const b64 = dataUrl.split(',')[1];
+    const bin = atob(b64.substring(0, 3000));
+    const b = i => bin.charCodeAt(i);
+    if (b(0) !== 0xFF || b(1) !== 0xD8) return 1;
+    let i = 2;
+    while (i < bin.length - 3) {
+      if (b(i) !== 0xFF) break;
+      const m = b(i + 1), len = (b(i + 2) << 8) | b(i + 3);
+      if (m === 0xE1 && bin.substr(i + 4, 4) === 'Exif') {
+        const t = i + 10;
+        const le = b(t) === 0x49;
+        const r16 = o => le ? (b(t+o) | b(t+o+1)<<8) : (b(t+o)<<8 | b(t+o+1));
+        const r32 = o => le
+          ? (b(t+o) | b(t+o+1)<<8 | b(t+o+2)<<16 | b(t+o+3)<<24)
+          : (b(t+o)<<24 | b(t+o+1)<<16 | b(t+o+2)<<8 | b(t+o+3));
+        const ifd = r32(4), n = r16(ifd);
+        for (let j = 0; j < n; j++) {
+          const e = ifd + 2 + j * 12;
+          if (r16(e) === 0x0112) return r16(e + 8);
+        }
+      }
+      i += 2 + len;
+    }
+  } catch (_) {}
+  return 1;
+}
+
+function compressImage(dataUrl, maxPx = 1200, quality = 0.85) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, maxPx / Math.max(img.naturalWidth, img.naturalHeight));
+      const w = Math.round(img.naturalWidth * scale);
+      const h = Math.round(img.naturalHeight * scale);
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.src = dataUrl;
+  });
+}
+
 function handleFiles(files) {
   const total = STATE.bilderBestand.length + STATE.bilder.length;
   const arr = Array.from(files).slice(0, 20 - total);
@@ -563,8 +607,9 @@ function handleFiles(files) {
   arr.forEach(file => {
     if (!file.type.startsWith('image/')) return;
     const reader = new FileReader();
-    reader.onload = e => {
-      STATE.bilder.push(e.target.result);
+    reader.onload = async e => {
+      const compressed = await compressImage(e.target.result);
+      STATE.bilder.push(compressed);
       rendereBildVorschau();
       rendereVorschau();
     };
@@ -672,15 +717,15 @@ function rendereVorschau() {
   document.getElementById('vorschauKarte').innerHTML = html;
 }
 
-/* ─── Veröffentlichen → in Supabase speichern ─── */
+/* ─── Veröffentlichen → in Google Sheets speichern ─── */
 async function veroeffentlichen() {
-  const titel = document.getElementById('formTitel').value.trim();
-  const breite = parseInt(document.getElementById('formBreite').value, 10);
-  const hoehe = parseInt(document.getElementById('formHoehe').value, 10);
-  const preis = parseInt(document.getElementById('formPreis').value, 10);
-  const standnummer = document.getElementById('formStandnummer')?.value.trim() || '';
+  const titel      = document.getElementById('formTitel').value.trim();
+  const breite     = parseInt(document.getElementById('formBreite').value, 10);
+  const hoehe      = parseInt(document.getElementById('formHoehe').value, 10);
+  const preis      = parseInt(document.getElementById('formPreis').value, 10);
+  const standnummer     = document.getElementById('formStandnummer')?.value.trim() || '';
   const sonderpreisAktiv = !!document.getElementById('formSonderpreis')?.checked;
-  const exportModell = !!document.getElementById('formExport')?.checked;
+  const exportModell    = !!document.getElementById('formExport')?.checked;
 
   if (!STATE.kategorie || !titel || !breite || !hoehe || !preis) {
     showSnackbar('Bitte Pflichtfelder ausfüllen: Kategorie, Titel, Maße, Preis', 'error');
@@ -689,10 +734,6 @@ async function veroeffentlichen() {
   if (!standnummer) {
     showSnackbar('Standnummer ist Pflicht — bitte eintragen (z.B. A-12)', 'error');
     document.getElementById('formStandnummer')?.focus();
-    return;
-  }
-  if (typeof supabaseClient === 'undefined' || !supabaseClient) {
-    showSnackbar('Keine Datenbank-Verbindung. Lade die Seite neu.', 'error');
     return;
   }
 
@@ -707,40 +748,40 @@ async function veroeffentlichen() {
     const verglasung = document.getElementById('formVerglasung').value;
     if (verglasung === '2-fach') eigArr.push('2-fach-verglasung');
     if (verglasung === '3-fach') eigArr.push('3-fach-verglasung');
-    // RC-Klasse + U-Wert wurden auf Sarah-Wunsch 27.04. aus dem Formular entfernt
     const rc = null;
 
-    // Bilder hochladen
+    // Bilder zu Google Drive hochladen
     btn.innerHTML = '<span class="material-symbols-outlined animate-spin" style="font-size:18px">progress_activity</span> Lade Bilder hoch…';
     const bildUrls = [];
     for (let i = 0; i < STATE.bilder.length; i++) {
-      const dataUrl = STATE.bilder[i];
-      const blob = dataURLToBlob(dataUrl);
-      const ext = (blob.type.split('/')[1] || 'jpg').replace('jpeg', 'jpg');
+      const dataUrl  = STATE.bilder[i];
+      const parts    = dataUrl.split(',');
+      const mimeType = parts[0].match(/:(.*?);/)[1];
+      const base64   = parts[1];
+      const ext      = mimeType.split('/')[1].replace('jpeg', 'jpg');
       const fileName = `${Date.now()}-${Math.random().toString(36).slice(2,8)}-${i}.${ext}`;
-      const { error: upErr } = await supabaseClient.storage
-        .from(SUPABASE_STORAGE_BUCKET || 'produkt-bilder')
-        .upload(fileName, blob, { contentType: blob.type, upsert: false });
-      if (upErr) {
-        throw new Error('Bild-Upload fehlgeschlagen: ' + upErr.message);
-      }
-      const { data: urlData } = supabaseClient.storage
-        .from(SUPABASE_STORAGE_BUCKET || 'produkt-bilder')
-        .getPublicUrl(fileName);
-      bildUrls.push(urlData.publicUrl);
+
+      const res = await sheetsPost({
+        action: 'upload_image',
+        imageBase64: base64,
+        mimeType,
+        fileName
+      });
+      if (res.error) throw new Error('Bild-Upload fehlgeschlagen: ' + res.error);
+      bildUrls.push(res.url);
     }
+
     // Bilder zusammenführen: bestehende (beim Bearbeiten) + neu hochgeladene
     const alleBilder = [...STATE.bilderBestand, ...bildUrls];
     if (alleBilder.length === 0) alleBilder.push('img/fenster_standard.png');
 
     btn.innerHTML = '<span class="material-symbols-outlined animate-spin" style="font-size:18px">progress_activity</span> Speichere Inserat…';
 
-    // In produkte-Tabelle einfügen / aktualisieren
     const eintrag = {
       titel,
       kategorie_key: STATE.kategorie,
       zustand: STATE.zustand,
-      system: STATE.zustand === 'gebraucht' ? null : document.getElementById('formSystem').value,
+      system: STATE.zustand === 'neu' ? document.getElementById('formSystem').value : null,
       breite_mm: breite,
       hoehe_mm: hoehe,
       preis_eur: preis,
@@ -754,21 +795,19 @@ async function veroeffentlichen() {
       rc_klasse: rc,
       eigenschaften: Array.from(new Set(eigArr)),
       lagerbestand: parseInt(document.getElementById('formLager').value, 10) || 1,
-      standnummer: standnummer,
+      standnummer,
       bilder: alleBilder,
       beschreibung: document.getElementById('formBeschreibung').value.trim() || '',
       aktiv: true
     };
 
-    let dbErr;
+    let res;
     if (STATE.editMode && STATE.editId) {
-      const { error } = await supabaseClient.from('produkte').update(eintrag).eq('id', STATE.editId);
-      dbErr = error;
+      res = await sheetsPost({ action: 'update', id: STATE.editId, data: eintrag });
     } else {
-      const { error } = await supabaseClient.from('produkte').insert(eintrag);
-      dbErr = error;
+      res = await sheetsPost({ action: 'insert', data: eintrag });
     }
-    if (dbErr) throw new Error('Speichern fehlgeschlagen: ' + dbErr.message);
+    if (res.error) throw new Error('Speichern fehlgeschlagen: ' + res.error);
 
     // Erfolg → Modal anzeigen, Draft löschen
     try { localStorage.removeItem(DRAFT_KEY); } catch (e) {}

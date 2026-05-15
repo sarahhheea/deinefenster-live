@@ -42,8 +42,9 @@
 }
 </script>
 <link rel="stylesheet" href="../../css/tailwind.css"/>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="../../css/nav.css?v=3"/>
+<link href="https://fonts.bunny.net/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="../../fonts/material-symbols.css" rel="stylesheet"/>
 <link rel="stylesheet" href="../../css/produktseiten.css"/>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
@@ -67,7 +68,7 @@
       "name": "Was kostet IGLO 5 Classic Balkontür?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Eine Standard-Balkontür (1,0 × 2,1 m, 2-fach-Glas, weiß) kostet ab 590 € brutto. Ein 3er-Paket liegt bei ca. 1.700–2.400 € (ohne Montage). Mit Folierung: +25–65 € pro Tür Aufpreis."
+        "text": "Preise auf Anfrage — jede Tür wird nach Maß gefertigt. Bitte Konfigurator nutzen oder E-Mail an info@baustoffchrist.de."
       }
     },    {
       "@type": "Question",
@@ -81,7 +82,7 @@
       "name": "Wie lange ist die Lieferzeit?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "4–6 Wochen für Standard-Größen in Weiß. Bei Folierung (Anthrazit, Eichen-Dekor): 6–8 Wochen. In der Bausaison Mai–September auch 8–10 Wochen. Lieferung frachtfrei deutschlandweit."
+        "text": "Ca. 2 Wochen ab dem Tag, an dem wir Ihre Bestellung beim Hersteller aufgeben. Das ist nach Eingang Ihrer Zahlung. Vor-Ort-Käufer in Brandenburg können wir auch mit Zahlung bei Abholung abwickeln."
       }
     },    {
       "@type": "Question",
@@ -109,30 +110,329 @@
 }
 </script>
 
+  <script defer data-domain="deinefenster.de" src="https://plausible.io/js/script.js"></script>
+<link rel="stylesheet" href="../../css/global-design.css?v=1"/>
 </head>
-<body style="background:#0a1530;color:#e8eeff;" data-auto-anim="true">
+<body style="background:#0a1225;color:#e8eeff;" data-auto-anim="true">
 
-<!-- Navigation -->
-<nav id="navbar" class="fixed top-0 w-full z-50 glass-nav border-b border-white/10">
-  <div class="flex justify-between items-center px-6 md:px-12 py-4 max-w-[1440px] mx-auto">
-    <a href="../../index.html" class="text-xl md:text-2xl font-bold tracking-tighter text-white">DeineFenster<span class="text-primary-container">.de</span></a>
-    <div class="hidden md:flex items-center gap-x-8">
-      <a href="../../produkte.html" class="text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Produkte</a>
-      <a href="../../konfigurator.html" class="text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Konfigurator</a>
-      <a href="../../ueber-uns.html" class="text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Über uns</a>
-      <a href="../../kontakt.html" class="text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Kontakt</a>
+<!-- Navigation Mega-Menu -->
+<style>
+  .nav-item { position: relative; }
+  .mega-menu { position: absolute; top: 100%; left: 50%; transform: translateX(-50%) translateY(8px);
+               width: 760px; max-width: 95vw; background: #0f1c30;
+               border-radius: 14px; box-shadow: 0 18px 48px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);
+               padding: 0; opacity: 0; visibility: hidden; pointer-events: none;
+               transition: opacity .2s ease, transform .2s ease, visibility .2s; z-index: 100; margin-top: 10px;
+               overflow: hidden;
+               transition-delay: 0s; }
+  .mega-menu::before { content:''; position: absolute; top: -10px; left: 0; right: 0; height: 10px; }
+  .nav-item:hover .mega-menu, .mega-menu:hover, .nav-item:focus-within .mega-menu,
+  .nav-item.mega-pinned .mega-menu {
+    opacity: 1; visibility: visible; pointer-events: auto; transform: translateX(-50%) translateY(0);
+    transition-delay: 0.3s;
+  }
+  .mega-grid { display: grid; grid-template-columns: 240px 1fr; min-height: 320px; }
+  .mega-cats { background: #0a1225; padding: 18px 0; }
+  .mega-cat { display: flex; align-items: center; gap: 12px; padding: 14px 22px;
+              font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 14px;
+              color: rgba(232,238,255,0.65); cursor: pointer; transition: all .18s;
+              border-left: 3px solid transparent; user-select: none; }
+  .mega-cat .material-symbols-outlined { font-size: 20px; color: #76a9fa; transition: color .18s; }
+  .mega-cat:hover, .mega-cat.active {
+    background: #0f1c30; color: #76a9fa; border-left-color: #76a9fa;
+  }
+  .mega-cat.active .material-symbols-outlined, .mega-cat:hover .material-symbols-outlined { color: #76a9fa; }
+  .mega-cat .mega-cat-arrow { margin-left: auto; color: rgba(255,255,255,0.25); font-size: 18px; transition: transform .18s; }
+  .mega-cat.active .mega-cat-arrow, .mega-cat:hover .mega-cat-arrow { color: #76a9fa; transform: translateX(2px); }
+  .mega-panels { padding: 26px 32px; position: relative; }
+  .mega-panel { display: none; }
+  .mega-panel.active { display: block; animation: megaFade .2s ease; }
+  @keyframes megaFade { from { opacity:0; transform: translateX(4px); } to { opacity:1; transform: translateX(0); } }
+  .mega-panel-title { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 12px;
+                      color: #76a9fa; text-transform: uppercase; letter-spacing: 0.08em;
+                      margin-bottom: 16px; }
+  .mega-system { display: flex; align-items: flex-start; gap: 12px; padding: 10px 12px;
+                 border-radius: 8px; transition: background .15s; margin-bottom: 2px; }
+  .mega-system:hover { background: rgba(118,169,250,0.08); }
+  .mega-system-label { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 14px; color: #e8eeff; }
+  .mega-system-desc { font-size: 12px; color: rgba(232,238,255,0.55); margin-top: 1px; }
+  .mega-system-icon { width: 36px; height: 36px; border-radius: 8px; background: rgba(118,169,250,0.15);
+                      display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .mega-system-icon .material-symbols-outlined { font-size: 20px; color: #225eaa; }
+  .mega-panel-cta { display: flex; align-items: center; justify-content: space-between;
+                    margin-top: 18px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08); gap: 12px; }
+  .mega-panel-cta .all-link { font-size: 12px; font-weight: 700; color: rgba(232,238,255,0.65); }
+  .mega-panel-cta .all-link:hover { color: #76a9fa; }
+  .nav-chev { font-size: 16px !important; transition: transform .2s; }
+  .nav-item:hover .nav-chev { transform: rotate(180deg); }
+  @media (max-width: 767px) { .mega-menu { display: none; } }
+  .nav-link { position: relative; }
+  .nav-link::after { content:''; position:absolute; bottom:-5px; left:0; width:0; height:2px; background:#76a9fa; border-radius:1px; transition:width 0.22s ease; }
+  .nav-link:hover::after { width:100%; }
+  a.hover-tag { cursor:pointer; }
+</style>
+
+<div id="topbar">
+  <div class="topbar-inner">
+    <nav class="topbar-links">
+      <a href="../../ueber-drutex.html" class="topbar-link">Hersteller</a>
+      <span class="topbar-dot">·</span>
+      <a href="../../faq.html" class="topbar-link">FAQ</a>
+      <span class="topbar-dot">·</span>
+      <a href="../../ratgeber/" class="topbar-link">Ratgeber</a>
+      <span class="topbar-dot">·</span>
+      <a href="../../ueber-uns.html" class="topbar-link">Über uns</a>
+      <span class="topbar-dot">·</span>
+      <a href="../../kontakt.html" class="topbar-link">Kontakt</a>
+    </nav>
+    <div class="topbar-contacts">
+      <a href="tel:+4933812148373" class="topbar-phone">
+        <span class="material-symbols-outlined" style="font-size:12px;font-variation-settings:'FILL' 1">call</span>
+        03381 / 2148373
+      </a>
+      <span class="topbar-dot">·</span>
+      <a href="mailto:info@baustoffchrist.de" class="topbar-phone">
+        <span class="material-symbols-outlined" style="font-size:12px;font-variation-settings:'FILL' 1">mail</span>
+        info@baustoffchrist.de
+      </a>
+    </div>
+  </div>
+</div>
+<nav id="navbar" class="fixed top-0 w-full z-50 bg-white/10 glass-nav border-b border-white/10">
+  <div class="flex justify-between items-center px-6 md:px-12 py-2.5 max-w-[1440px] mx-auto">
+    <a href="../../index.html" class="text-xl md:text-2xl font-bold tracking-tighter text-white">DeineFenster<span style="color:#76a9fa">.de</span></a>
+    <div class="hidden md:flex items-center gap-x-5">
+      <!-- Produkte mit Mega-Menu -->
+      <div class="nav-item">
+        <a href="../../produkte.html" class="nav-link inline-flex items-center gap-1 text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">
+          Produkte <span class="material-symbols-outlined nav-chev">expand_more</span>
+        </a>
+        <div class="mega-menu" id="mega-produkte">
+          <div class="mega-grid">
+            <!-- Links: Kategorien -->
+            <div class="mega-cats">
+              <div class="mega-cat active" data-mega="fenster">
+                <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">window</span>
+                <span>Fenster</span>
+                <span class="material-symbols-outlined mega-cat-arrow">chevron_right</span>
+              </div>
+              <div class="mega-cat" data-mega="balkon">
+                <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">deck</span>
+                <span>Balkontüren</span>
+                <span class="material-symbols-outlined mega-cat-arrow">chevron_right</span>
+              </div>
+              <div class="mega-cat" data-mega="haustuer">
+                <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">door_front</span>
+                <span>Haustüren</span>
+                <span class="material-symbols-outlined mega-cat-arrow">chevron_right</span>
+              </div>
+              <div class="mega-cat" data-mega="schiebe">
+                <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">meeting_room</span>
+                <span>Schiebetüren</span>
+                <span class="material-symbols-outlined mega-cat-arrow">chevron_right</span>
+              </div>
+              <div class="mega-cat" data-mega="rollladen">
+                <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">roller_shades</span>
+                <span>Rollläden</span>
+                <span class="material-symbols-outlined mega-cat-arrow">chevron_right</span>
+              </div>
+            </div>
+
+            <!-- Rechts: Panels pro Kategorie -->
+            <div class="mega-panels">
+              <!-- FENSTER -->
+              <div class="mega-panel active" data-mega-panel="fenster">
+                <div class="mega-panel-title">PVC-Kunststofffenster</div>
+                <a href="../../produkte/kunststofffenster/iglo-5-classic.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">window</span></div>
+                  <div>
+                    <div class="mega-system-label">IGLO 5 Classic</div>
+                    <div class="mega-system-desc">5-Kammer · 70 mm · Uw 0,83 · Bewährter Allrounder</div>
+                  </div>
+                </a>
+                <a href="../../produkte/kunststofffenster/iglo-energy.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">bolt</span></div>
+                  <div>
+                    <div class="mega-system-label">IGLO Energy</div>
+                    <div class="mega-system-desc">7-Kammer · 82 mm · Uw 0,71 · Premium-Wärmedämmung</div>
+                  </div>
+                </a>
+                <a href="../../produkte/kunststofffenster/iglo-edge.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">diamond</span></div>
+                  <div>
+                    <div class="mega-system-label">IGLO EDGE</div>
+                    <div class="mega-system-desc">Flaggschiff · 7-Kammer · 82 mm · Uw 0,66 · technologisch fortschrittlichst</div>
+                  </div>
+                </a>
+                <a href="../../produkte/kunststofffenster/iglo-light.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">wb_sunny</span></div>
+                  <div>
+                    <div class="mega-system-label">IGLO Light</div>
+                    <div class="mega-system-desc">Schlanke Profile · 5-Kammer · 70 mm · Uw 0,88 · mehr Lichteinfall</div>
+                  </div>
+                </a>
+                <a href="../../produkte/kunststofffenster/iglo-ext.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">open_in_new</span></div>
+                  <div>
+                    <div class="mega-system-label">IGLO EXT</div>
+                    <div class="mega-system-desc">Nach außen öffnend · 5-Kammer · 70 mm · Uw 0,89 · Skandi-/UK-Stil</div>
+                  </div>
+                </a>
+                <div class="mega-panel-cta">
+                  <a href="../../konfigurator.html?prod=kunststoff" class="all-link">Fenster konfigurieren →</a>
+                  <a href="../../konfigurator.html" class="inline-flex items-center gap-1.5 bg-primary text-white px-3 py-1.5 rounded-full font-bold text-xs hover:bg-primary-d transition-colors">
+                    <span class="material-symbols-outlined" style="font-size:14px">tune</span> Angebot anfragen
+                  </a>
+                </div>
+              </div>
+
+              <!-- BALKONTÜREN -->
+              <div class="mega-panel" data-mega-panel="balkon">
+                <div class="mega-panel-title">Balkontüren</div>
+                <a href="../../produkte/balkontueren/iglo-5-classic.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">deck</span></div>
+                  <div>
+                    <div class="mega-system-label">IGLO 5 Classic Balkontür</div>
+                    <div class="mega-system-desc">Ein- oder zweiflügelig · Alu-Schwelle · 70 mm Profil</div>
+                  </div>
+                </a>
+                <a href="../../produkte/balkontueren/iglo-energy.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">bolt</span></div>
+                  <div>
+                    <div class="mega-system-label">IGLO Energy Balkontür</div>
+                    <div class="mega-system-desc">Premium · 82 mm · maximale Wärmedämmung</div>
+                  </div>
+                </a>
+                <div class="mega-panel-cta">
+                  <a href="../../konfigurator.html?prod=balkontuer" class="all-link">Balkontür konfigurieren →</a>
+                  <a href="../../konfigurator.html" class="inline-flex items-center gap-1.5 bg-primary text-white px-3 py-1.5 rounded-full font-bold text-xs hover:bg-primary-d transition-colors">
+                    <span class="material-symbols-outlined" style="font-size:14px">tune</span> Angebot anfragen
+                  </a>
+                </div>
+              </div>
+
+              <!-- HAUSTÜREN -->
+              <div class="mega-panel" data-mega-panel="haustuer">
+                <div class="mega-panel-title">Haustüren</div>
+                <a href="../../produkte/haustueren/iglo-5-classic.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">door_front</span></div>
+                  <div>
+                    <div class="mega-system-label">IGLO 5 Classic Tür</div>
+                    <div class="mega-system-desc">5-Kammer Türprofil · Ud 1,0 · über 50 Design-Modelle</div>
+                  </div>
+                </a>
+                <a href="../../produkte/haustueren/iglo-energy.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">bolt</span></div>
+                  <div>
+                    <div class="mega-system-label">IGLO Energy Tür</div>
+                    <div class="mega-system-desc">Premium 7-Kammer · Ud 0,8 · höchste Effizienz</div>
+                  </div>
+                </a>
+                <div class="mega-panel-cta">
+                  <a href="../../konfigurator.html?prod=haustuere" class="all-link">Haustür konfigurieren →</a>
+                  <a href="../../konfigurator.html" class="inline-flex items-center gap-1.5 bg-primary text-white px-3 py-1.5 rounded-full font-bold text-xs hover:bg-primary-d transition-colors">
+                    <span class="material-symbols-outlined" style="font-size:14px">tune</span> Angebot anfragen
+                  </a>
+                </div>
+              </div>
+
+              <!-- SCHIEBETÜREN -->
+              <div class="mega-panel" data-mega-panel="schiebe">
+                <div class="mega-panel-title">Schiebetüren (HST)</div>
+                <a href="../../produkte/hebe-schiebetueren/iglo-energy-psk.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">meeting_room</span></div>
+                  <div>
+                    <div class="mega-system-label">PSK Schiebetür</div>
+                    <div class="mega-system-desc">Parallel-Schiebe-Kipp · bis 2400 mm breit · kompakt</div>
+                  </div>
+                </a>
+                <a href="../../produkte/hebe-schiebetueren/iglo-slide.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">swap_horiz</span></div>
+                  <div>
+                    <div class="mega-system-label">IGLO Slide</div>
+                    <div class="mega-system-desc">Mittlere Schiebetür · bis 4000 mm · komfortabel</div>
+                  </div>
+                </a>
+                <a href="../../produkte/hebe-schiebetueren/iglo-5-classic-psk.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">door_sliding</span></div>
+                  <div>
+                    <div class="mega-system-label">IGLO-HS</div>
+                    <div class="mega-system-desc">Große Hebe-Schiebe-Tür · bis 6500 mm · Null-Schwelle DIN 18040</div>
+                  </div>
+                </a>
+                <div class="mega-panel-cta">
+                  <a href="../../konfigurator.html?prod=hst" class="all-link">Schiebetür konfigurieren →</a>
+                  <a href="../../konfigurator.html" class="inline-flex items-center gap-1.5 bg-primary text-white px-3 py-1.5 rounded-full font-bold text-xs hover:bg-primary-d transition-colors">
+                    <span class="material-symbols-outlined" style="font-size:14px">tune</span> Angebot anfragen
+                  </a>
+                </div>
+              </div>
+
+              <!-- ROLLLÄDEN -->
+              <div class="mega-panel" data-mega-panel="rollladen">
+                <div class="mega-panel-title">Rollläden</div>
+                <a href="../../produkte/rollladen/aufsatz-rollladen.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">roller_shades</span></div>
+                  <div>
+                    <div class="mega-system-label">PVC-Aufsatzrollladen</div>
+                    <div class="mega-system-desc">Elektrisch mit Funk-Motor · 5 Farben · Smart-Home-ready · Wärme- + Hitzeschutz</div>
+                  </div>
+                </a>
+                <div class="mega-panel-cta">
+                  <a href="../../konfigurator.html?prod=rollladen" class="all-link">Rollladen konfigurieren →</a>
+                  <a href="../../konfigurator.html" class="inline-flex items-center gap-1.5 bg-primary text-white px-3 py-1.5 rounded-full font-bold text-xs hover:bg-primary-d transition-colors">
+                    <span class="material-symbols-outlined" style="font-size:14px">tune</span> Angebot anfragen
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <a href="../../ueber-drutex.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Hersteller</a>
+      <a href="../../kunststofffenster-kaufen.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Neue Fenster</a>
+      <a href="../../gebrauchte-fenster-kaufen.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Gebraucht</a>
+      <a href="../../fenster-austauschen-kosten.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Ankauf</a>
+      <a href="../../konfigurator.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Konfigurator</a>
+      <a href="../../shop.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight inline-flex items-center gap-1.5">
+        Shop
+        <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none" style="background:#76a9fa;color:#001b3d">NEU</span>
+      </a>
+      <a href="../../faq.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">FAQ</a>
+      <a href="../../glossar.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Glossar</a>
+      <a href="../../ueber-uns.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Über uns</a>
+      <a href="../../kontakt.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Kontakt</a>
     </div>
     <div class="flex items-center gap-3 md:gap-6">
-      <a href="../../konfigurator.html" class="hidden md:block px-6 py-3 rounded-full font-bold text-sm transition-all duration-300" style="background:#225eaa;color:#fff;">Angebot anfordern</a>
+      <a href="../../konfigurator.html" class="hidden md:block px-5 py-1.5 rounded-full font-semibold text-xs tracking-wide transition-all duration-200" style="background:#225eaa;color:#fff;letter-spacing:0.02em;">Angebot anfragen</a>
       <button id="menuBtn" class="md:hidden text-white p-1" aria-label="Menü öffnen">
         <span class="material-symbols-outlined text-3xl" id="menuIcon">menu</span>
       </button>
     </div>
   </div>
+  <!-- Mobile Menu -->
   <div id="mobileMenu" class="hidden md:hidden px-6 py-6 border-t border-white/10">
-    <div class="flex flex-col gap-4">
-      <a href="../../produkte.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Produkte</a>
+    <div class="flex flex-col gap-2">
+      <details class="text-white">
+        <summary class="flex items-center justify-between py-3 border-b border-white/10 font-semibold text-lg cursor-pointer list-none">
+          Produkte <span class="material-symbols-outlined">expand_more</span>
+        </summary>
+        <div class="pl-4 py-2 space-y-2 text-base text-white/80">
+          <a href="../../produkte/kunststofffenster/iglo-energy.html" class="block py-1">Kunststofffenster</a>
+          <a href="../../produkte/balkontueren/iglo-energy.html" class="block py-1">Balkontüren</a>
+          <a href="../../produkte/haustueren/iglo-energy.html" class="block py-1">Haustüren</a>
+          <a href="../../produkte/hebe-schiebetueren/iglo-energy-psk.html" class="block py-1">Schiebetüren</a>
+          <a href="../../produkte.html" class="block py-1 font-semibold text-white">Alle Produkte →</a>
+        </div>
+      </details>
+      <a href="../../ueber-drutex.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Hersteller</a>
+      <a href="../../kunststofffenster-kaufen.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Neue Fenster</a>
+      <a href="../../gebrauchte-fenster-kaufen.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Gebraucht</a>
+      <a href="../../fenster-austauschen-kosten.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Ankauf</a>
       <a href="../../konfigurator.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Konfigurator</a>
+      <a href="../../shop.html" class="text-white font-semibold text-lg py-2 border-b border-white/10 flex items-center gap-2">Shop <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style="background:#76a9fa;color:#001b3d">NEU</span></a>
+      <a href="../../faq.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">FAQ</a>
+      <a href="../../glossar.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Glossar</a>
       <a href="../../ueber-uns.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Über uns</a>
       <a href="../../kontakt.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Kontakt</a>
       <a href="../../konfigurator.html" class="mt-2 px-6 py-4 rounded-full font-bold text-center text-sm" style="background:#225eaa;color:#fff;">Angebot anfordern</a>
@@ -182,7 +482,7 @@
          class="inline-flex items-center gap-2 font-bold text-base py-4 px-9 rounded-full text-white transition-all duration-200 hover:scale-[1.03] hover:brightness-110"
          style="background:#225eaa;box-shadow:0 8px 32px rgba(34,94,170,0.55)">
         <span class="material-symbols-outlined" style="font-size:20px">tune</span>
-        Jetzt konfigurieren &amp; Preis berechnen
+        Jetzt konfigurieren &amp; Angebot anfragen
       </a>
     </div>
   </div>
@@ -193,9 +493,9 @@
   <div class="max-w-[1440px] mx-auto px-6 md:px-12">
     <div class="grid grid-cols-1 md:grid-cols-[1.1fr_1fr] gap-10 md:gap-14 items-start">
       <div>
-        <div class="inline-flex items-center gap-2 bg-primary-fixed text-primary px-3 py-1.5 rounded-full mb-5" style="background:rgba(118,169,250,0.15);color:#76a9fa;">
-          <span class="material-symbols-outlined" style="font-size:16px;font-variation-settings:'FILL' 1">door_sliding</span>
-          <span class="text-xs font-bold uppercase tracking-wider">5-Kammer · 70 mm · PVC</span>
+        <div class="inline-flex items-center gap-3 mb-5">
+          <span style="display:inline-block;width:22px;height:1px;background:#76a9fa;"></span>
+          <span class="text-xs font-bold uppercase tracking-wider" style="color:#76a9fa;letter-spacing:0.08em;">5-Kammer · 70 mm · PVC</span>
         </div>
         <h2 class="text-2xl md:text-4xl font-extrabold text-white mb-6 tracking-tight leading-tight">Über die IGLO 5 Classic Balkontür</h2>
         <p class="beschreibung-text text-base md:text-lg mb-4 leading-relaxed">
@@ -221,11 +521,11 @@
             <tr><td class="py-2.5 pr-4">Sicherheit</td><td class="py-2.5">Standard Pilzzapfen, optional RC2</td></tr>
           </tbody>
         </table>
-        <p class="text-xs" style="color:rgba(232,238,255,0.55);" mt-3">* Uw-Wert abhängig von Verglasung, Abstandshalter und Maßen. Bei 3-fach-Verglasung mit Argon + Warme Kante.</p>
+        <p class="text-xs" style="color:rgba(232,238,255,0.55);">* Uw-Wert abhängig von Verglasung, Abstandshalter und Maßen. Bei 3-fach-Verglasung mit Argon + Warme Kante.</p>
       </div>
 
       <div class="md:sticky md:top-24">
-        <div class="rounded-2xl overflow-hidden relative" style="background:linear-gradient(180deg,#f6f9ff 0%,#e8eeff 100%); box-shadow: 0 20px 50px rgba(34,94,170,0.18); border:1px solid rgba(34,94,170,0.1)">
+        <div class="rounded-2xl overflow-hidden relative" style="background:linear-gradient(180deg,#0e1e3a 0%,#0a1530 100%); box-shadow: 0 20px 50px rgba(34,94,170,0.18); border:1px solid rgba(34,94,170,0.1)">
           <div class="absolute top-4 left-4 z-10 inline-flex items-center gap-1.5 px-3 py-1 rounded-full" style="background:rgba(14,30,58,0.85);backdrop-filter:blur(8px);color:#fff">
             <span class="material-symbols-outlined" style="font-size:14px;font-variation-settings:'FILL' 1;color:#76a9fa">play_circle</span>
             <span class="text-xs font-bold uppercase tracking-wider">IGLO 5 Classic Profil in Aktion</span>
@@ -235,11 +535,11 @@
             autoplay muted loop playsinline preload="auto"
             class="w-full h-auto block"
             aria-label="Produkt-Video IGLO 5 Classic Profil (identisch zur Balkontür-Ausführung)"></video>
-          <div class="px-5 py-4" style="background:linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.9) 40%)">
+          <div class="px-5 py-4" style="background:linear-gradient(180deg, transparent 0%, rgba(10,21,48,0.92) 40%)">
             <div class="flex items-center justify-between gap-3">
               <div>
                 <div class="font-extrabold text-white text-base" style="font-family:'Archivo',sans-serif">Profil im Detail</div>
-                <div class="text-xs" style="color:rgba(232,238,255,0.55);" mt-0.5">5-Kammer-Aufbau der IGLO 5 Classic Serie</div>
+                <div class="text-xs" style="color:rgba(232,238,255,0.55);">5-Kammer-Aufbau der IGLO 5 Classic Serie</div>
               </div>
               <a href="../../konfigurator.html?prod=balkontuer&profil=iglo-5-classic" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full font-bold text-xs text-white transition-colors" style="background:#225eaa">
                 <span class="material-symbols-outlined" style="font-size:14px">tune</span> Konfigurieren
@@ -452,15 +752,15 @@
 </section>
 
 <!-- Vergleich IGLO 5 Classic Balkontür vs IGLO Energy Balkontür -->
-<section class="py-16 md:py-24" style="background:linear-gradient(180deg,#f1f3ff 0%,#e8eeff 100%)">
+<section class="py-16 md:py-24" style="background:linear-gradient(180deg,#060e1e 0%,#0a1225 100%)">
   <div class="max-w-[1440px] mx-auto px-6 md:px-12">
     <div class="text-center max-w-2xl mx-auto mb-12">
-      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-4" style="background:rgba(34,94,170,0.3);color:#76a9fa;">
-        <span class="material-symbols-outlined" style="font-size:16px;font-variation-settings:'FILL' 1">compare_arrows</span>
-        <span class="text-xs font-bold uppercase tracking-wider">Produktvergleich Balkontüren</span>
+      <div class="inline-flex items-center gap-3 mb-4">
+        <span style="display:inline-block;width:22px;height:1px;background:#76a9fa;"></span>
+        <span class="text-xs font-bold uppercase tracking-wider" style="color:#76a9fa;letter-spacing:0.08em;">Produktvergleich Balkontüren</span>
       </div>
       <h2 class="text-2xl md:text-4xl font-extrabold text-white tracking-tight leading-tight">IGLO 5 Classic oder IGLO Energy?</h2>
-      <p class="" style="color:rgba(232,238,255,0.75);" text-base md:text-lg mt-3">Beide mit allen Schwellen-Varianten erhältlich — so entscheiden Sie richtig für Ihren Balkon-Zugang.</p>
+      <p class="" style="color:rgba(232,238,255,0.75);">Beide mit allen Schwellen-Varianten erhältlich — so entscheiden Sie richtig für Ihren Balkon-Zugang.</p>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
       <!-- IGLO 5 Classic (hervorgehoben) -->
@@ -470,7 +770,7 @@
           Sie sind hier
         </div>
         <h3 class="text-xl md:text-2xl font-extrabold text-white mb-2" style="font-family:'Archivo',sans-serif">IGLO 5 Classic Balkontür</h3>
-        <p class="text-sm" style="color:rgba(232,238,255,0.75);" mb-6">5-Kammer · 70 mm · Bewährte Drutex-Qualität zum Standard-Preis</p>
+        <p class="text-sm" style="color:rgba(232,238,255,0.75);">5-Kammer · 70 mm · Bewährte Drutex-Qualität zum Standard-Preis</p>
         <dl class="space-y-3 text-sm">
           <div class="flex justify-between items-center pb-2 border-b" style="border-bottom:1px solid rgba(255,255,255,0.08);"><dt class="" style="color:rgba(232,238,255,0.75);">Kammern</dt><dd class="font-extrabold text-white">5</dd></div>
           <div class="flex justify-between items-center pb-2 border-b" style="border-bottom:1px solid rgba(255,255,255,0.08);"><dt class="" style="color:rgba(232,238,255,0.75);">Einbautiefe</dt><dd class="font-extrabold text-white">70 mm</dd></div>
@@ -491,26 +791,26 @@
 
       <!-- IGLO Energy Balkontür -->
       <div class="rounded-2xl p-7 md:p-8 relative" style="background:#0f1c30;border:2px solid rgba(255,255,255,0.08);">
-        <div class="absolute -top-3 left-6 inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-bold text-xs uppercase tracking-wider" style="background:#c9a84c;color:#3d2d08">
+        <div class="absolute -top-3 left-6 inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-bold text-xs uppercase tracking-wider" style="background:#76a9fa;color:#001b3d">
           <span class="material-symbols-outlined" style="font-size:12px;font-variation-settings:'FILL' 1">star</span>
           Passivhaus-Niveau
         </div>
         <h3 class="text-xl md:text-2xl font-extrabold text-white mb-2" style="font-family:'Archivo',sans-serif">IGLO Energy Balkontür</h3>
-        <p class="text-sm" style="color:rgba(232,238,255,0.75);" mb-6">7-Kammer · 82 mm · Für Passivhaus- und KfW-Effizienzhaus-Standard</p>
+        <p class="text-sm" style="color:rgba(232,238,255,0.75);">7-Kammer · 82 mm · Für Passivhaus- und KfW-Effizienzhaus-Standard</p>
         <dl class="space-y-3 text-sm">
           <div class="flex justify-between items-center pb-2 border-b" style="border-bottom:1px solid rgba(255,255,255,0.08);"><dt class="" style="color:rgba(232,238,255,0.75);">Kammern</dt><dd class="font-extrabold text-white">7</dd></div>
           <div class="flex justify-between items-center pb-2 border-b" style="border-bottom:1px solid rgba(255,255,255,0.08);"><dt class="" style="color:rgba(232,238,255,0.75);">Einbautiefe</dt><dd class="font-extrabold text-white">82 mm</dd></div>
           <div class="flex justify-between items-center pb-2 border-b" style="border-bottom:1px solid rgba(255,255,255,0.08);"><dt class="" style="color:rgba(232,238,255,0.75);">Uw-Wert</dt><dd class="font-extrabold text-white">ab 0,71 W/(m²K)</dd></div>
           <div class="flex justify-between items-center pb-2 border-b" style="border-bottom:1px solid rgba(255,255,255,0.08);"><dt class="" style="color:rgba(232,238,255,0.75);">EPDM-Dichtungen</dt><dd class="font-extrabold text-white">3</dd></div>
           <div class="flex justify-between items-center pb-2 border-b" style="border-bottom:1px solid rgba(255,255,255,0.08);"><dt class="" style="color:rgba(232,238,255,0.75);">Schallschutz</dt><dd class="font-extrabold text-white">bis 46 dB</dd></div>
-          <div class="flex justify-between items-center"><dt class="" style="color:rgba(232,238,255,0.75);">Preis</dt><dd class="font-extrabold" style="color:#c9a84c">Premium</dd></div>
+          <div class="flex justify-between items-center"><dt class="" style="color:rgba(232,238,255,0.75);">Preis</dt><dd class="font-extrabold" style="color:#76a9fa">Premium</dd></div>
         </dl>
         <div class="mt-6 pt-5 border-t border-outline-variant/30">
-          <div class="text-xs font-bold uppercase tracking-wider mb-2" style="color:#c9a84c">Ideal für:</div>
+          <div class="text-xs font-bold uppercase tracking-wider mb-2" style="color:#76a9fa">Ideal für:</div>
           <ul class="space-y-1.5 text-sm text-on-surface">
-            <li class="flex items-start gap-2"><span style="color:#c9a84c">•</span>Neubauten mit Passivhaus-Anspruch</li>
-            <li class="flex items-start gap-2"><span style="color:#c9a84c">•</span>KfW-Förderung / BAFA-Zuschuss</li>
-            <li class="flex items-start gap-2"><span style="color:#c9a84c">•</span>Großflächige Balkon-Verglasungen</li>
+            <li class="flex items-start gap-2"><span style="color:#76a9fa">•</span>Neubauten mit Passivhaus-Anspruch</li>
+            <li class="flex items-start gap-2"><span style="color:#76a9fa">•</span>KfW-Förderung / BAFA-Zuschuss</li>
+            <li class="flex items-start gap-2"><span style="color:#76a9fa">•</span>Großflächige Balkon-Verglasungen</li>
           </ul>
         </div>
         <a href="iglo-energy.html" class="mt-6 inline-flex items-center gap-2 text-sm font-bold transition-all hover:gap-3" style="color:#225eaa">
@@ -587,7 +887,7 @@
     <div class="text-center max-w-3xl mx-auto mb-12">
       <span class="inline-block text-primary font-bold text-xs uppercase tracking-[0.25em] mb-3">Praxis &amp; Anwendung</span>
       <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-4">Wann ist IGLO 5 Classic Balkontür die richtige Wahl?</h2>
-      <p class="" style="color:rgba(232,238,255,0.75);" text-base md:text-lg leading-relaxed">IGLO 5 Classic Balkontür verbindet moderne Wärmedämmung mit praktischer Benutzerfreundlichkeit. Drei typische Bauprojekte, in denen sich diese Balkontür auszahlt.</p>
+      <p class="" style="color:rgba(232,238,255,0.75);">IGLO 5 Classic Balkontür verbindet moderne Wärmedämmung mit praktischer Benutzerfreundlichkeit. Drei typische Bauprojekte, in denen sich diese Balkontür auszahlt.</p>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <div class="rounded-2xl p-7" style="background:#0f1c30;border:1px solid rgba(255,255,255,0.08);">
@@ -595,8 +895,8 @@
           <span class="material-symbols-outlined text-primary" style="font-size:32px">home_repair_service</span>
           <h3 class="text-xl font-extrabold text-white">Sanierung Altbau</h3>
         </div>
-        <p class="text-sm" style="color:rgba(232,238,255,0.75);" leading-relaxed mb-3">Sie tauschen alte Balkontüren oder einfache neue Kunststoff-Profile gegen moderne Drutex-Qualität. 70 mm Bautiefe passt in fast alle vorhandenen Laibungen — keine Mauerarbeiten nötig.</p>
-        <div class="text-xs text-white font-bold bg-blue-50 px-3 py-2 rounded">
+        <p class="text-sm" style="color:rgba(232,238,255,0.75);">Sie tauschen alte Balkontüren oder einfache neue Kunststoff-Profile gegen moderne Drutex-Qualität. 70 mm Bautiefe passt in fast alle vorhandenen Laibungen — keine Mauerarbeiten nötig.</p>
+        <div class="text-xs font-bold px-3 py-2 rounded" style="background:rgba(34,94,170,0.18);color:#76a9fa;border:1px solid rgba(118,169,250,0.2);">
           Praxis: Uw-Wert 0,90 reduziert Wärmeverlust an Balkontür-Flächen um ca. 55 % gegenüber Altbestand
         </div>
       </div>
@@ -606,8 +906,8 @@
           <span class="material-symbols-outlined text-primary" style="font-size:32px">apartment</span>
           <h3 class="text-xl font-extrabold text-white">Mehrfamilienhaus</h3>
         </div>
-        <p class="text-sm" style="color:rgba(232,238,255,0.75);" leading-relaxed mb-3">Sie verwalten oder sanieren ein Mehrfamilienhaus mit mehreren Balkonen. IGLO 5 Classic Balkontür hat sich im Mehrfamilienbau bewährt: wartungsarm, sicher, mit standardisierter Konfiguration für mehrere Einheiten</p>
-        <div class="text-xs text-white font-bold bg-blue-50 px-3 py-2 rounded">
+        <p class="text-sm" style="color:rgba(232,238,255,0.75);">Sie verwalten oder sanieren ein Mehrfamilienhaus mit mehreren Balkonen. IGLO 5 Classic Balkontür hat sich im Mehrfamilienbau bewährt: wartungsarm, sicher, mit standardisierter Konfiguration für mehrere Einheiten</p>
+        <div class="text-xs font-bold px-3 py-2 rounded" style="background:rgba(34,94,170,0.18);color:#76a9fa;border:1px solid rgba(118,169,250,0.2);">
           Praxis: Standardlösung ab 5+ Balkone mit Mengen-Rabatt auf Anfrage
         </div>
       </div>
@@ -617,8 +917,8 @@
           <span class="material-symbols-outlined text-primary" style="font-size:32px">domain</span>
           <h3 class="text-xl font-extrabold text-white">Standard-Neubau (GEG)</h3>
         </div>
-        <p class="text-sm" style="color:rgba(232,238,255,0.75);" leading-relaxed mb-3">Neubau ohne KfW-Förderanspruch. Ud 0,90 erfüllt die behördlichen Mindestwerte sicher und bietet solide Drutex-Qualität.</p>
-        <div class="text-xs text-white font-bold bg-blue-50 px-3 py-2 rounded">
+        <p class="text-sm" style="color:rgba(232,238,255,0.75);">Neubau ohne KfW-Förderanspruch. Ud 0,90 erfüllt die behördlichen Mindestwerte sicher und bietet solide Drutex-Qualität.</p>
+        <div class="text-xs font-bold px-3 py-2 rounded" style="background:rgba(34,94,170,0.18);color:#76a9fa;border:1px solid rgba(118,169,250,0.2);">
           Für KfW-40/55-Förderung ist IGLO Energy (Ud 0,77) nötig
         </div>
       </div>
@@ -626,159 +926,27 @@
   </div>
 </section>
 
-<!-- 2. IGLO 5 Classic Balkontür Preis -->
-<section class="py-16 md:py-20" style="background:#f8fafc">
-  <div class="max-w-[1280px] mx-auto px-6 md:px-12">
-    <div class="text-center max-w-3xl mx-auto mb-12">
-      <span class="inline-block text-primary font-bold text-xs uppercase tracking-[0.25em] mb-3">Transparente Preise</span>
-      <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-4">IGLO 5 Classic Balkontür Preis: Was kostet eine Balkontür wirklich?</h2>
-      <p class="" style="color:rgba(232,238,255,0.75);" text-base md:text-lg leading-relaxed">Was beeinflusst den Preis und wie viel müssen Sie für mehrere Balkone einplanen? Hier die ehrlichen Zahlen.</p>
+<!-- 2. Preis auf Anfrage -->
+<section class="py-16 md:py-20" style="background:#0a1225">
+  <div class="max-w-[860px] mx-auto px-6 md:px-12 text-center">
+    <span class="inline-block text-primary font-bold text-xs uppercase tracking-[0.25em] mb-3">Ihr persönliches Angebot</span>
+    <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-4">Preis auf Anfrage — individuell für Ihre Maße</h2>
+    <p class="text-lg mb-8" style="color:rgba(232,238,255,0.75);">Jede Balkontür wird nach Ihren Maßen gefertigt. Stellen Sie Ihre Wunschkonfiguration im Konfigurator zusammen — wir schicken Ihnen ein konkretes Angebot per E-Mail.</p>
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <a href="../../konfigurator.html" class="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold text-white transition-all" style="background:linear-gradient(135deg,#225eaa,#1e3a8a);">
+        <span class="material-symbols-outlined" style="font-size:20px;font-variation-settings:'FILL' 1;">tune</span>
+        Jetzt konfigurieren
+      </a>
+      <a href="mailto:info@baustoffchrist.de?subject=Angebot%20Balkont%C3%BCr%20IGLO%205%20Classic" class="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold transition-all" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:#fff;">
+        <span class="material-symbols-outlined" style="font-size:20px;">mail</span>
+        Direkt anfragen
+      </a>
     </div>
-
-    <div class="rounded-2xl border border-slate-200 overflow-hidden mb-8 shadow-sm" style="background:#0f1c30;border:1px solid rgba(255,255,255,0.08);">
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead class="bg-blue-900 text-white">
-            <tr>
-              <th class="text-left px-5 py-4 font-bold">Szenario</th>
-              <th class="text-center px-5 py-4 font-bold">Anzahl</th>
-              <th class="text-center px-5 py-4 font-bold">Größe (Ø)</th>
-              <th class="text-right px-5 py-4 font-bold">Preis brutto</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="border-b border-slate-100">
-              <td class="px-5 py-4 font-semibold text-white">1 Balkontür Einzelkauf</td>
-              <td class="text-center px-5 py-4 text-on-surface-variant">1</td>
-              <td class="text-center px-5 py-4 text-on-surface-variant">1,0 × 2,1 m, Dreh-Kipp</td>
-              <td class="text-right px-5 py-4 font-extrabold text-primary">ab 590–690 €</td>
-            </tr>
-            <tr class="border-b" style="background:#0a1225;border-bottom:1px solid rgba(255,255,255,0.06);">
-              <td class="px-5 py-4 font-semibold text-white">Mehrfamilienhaus (3 Balkone)</td>
-              <td class="text-center px-5 py-4 text-on-surface-variant">3</td>
-              <td class="text-center px-5 py-4 text-on-surface-variant">gemischt 1,0–1,2 m</td>
-              <td class="text-right px-5 py-4 font-extrabold text-primary">[MEHREINHEITEN_PREIS]</td>
-            </tr>
-            <tr>
-              <td class="px-5 py-4 font-semibold text-white">Mehrfamilienhaus (8 Balkone)</td>
-              <td class="text-center px-5 py-4 text-on-surface-variant">8</td>
-              <td class="text-center px-5 py-4 text-on-surface-variant">gemischte Größen</td>
-              <td class="text-right px-5 py-4 font-extrabold text-primary">4.500–6.500 €</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="px-5 py-3  text-xs text-on-surface-variant border-t border-slate-100" style="background:#0a1225;">
-        Preise inkl. 19 % MwSt., Standard weiß, 2-fach-Wärmeschutzglas, MACO Beschlag. Ohne Montage. Folierung, 3-fach-Glas und Sondermaße kosten Aufpreis.
-      </div>
-    </div>
-
-    <div class="rounded-2xl p-7 border border-slate-200" style="background:#0f1c30;border:1px solid rgba(255,255,255,0.08);">
-      <h3 class="text-lg font-bold text-white mb-5">Was beeinflusst den IGLO 5 Classic Balkontür Preis?</h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div class="flex gap-4">
-          <span class="material-symbols-outlined text-primary flex-shrink-0" style="font-size:28px">straighten</span>
-          <div>
-            <h4 class="font-bold text-white mb-1">Türgröße</h4>
-            <p class="text-sm text-on-surface-variant">Eine große 1,2 × 2,4 m Balkontür kostet ca. 40–50 % mehr als 1,0 × 2,1 m — Material und Beschlag skalieren mit der Fläche.</p>
-          </div>
-        </div>
-        <div class="flex gap-4">
-          <span class="material-symbols-outlined text-primary flex-shrink-0" style="font-size:28px">palette</span>
-          <div>
-            <h4 class="font-bold text-white mb-1">Farbe &amp; Folierung</h4>
-            <p class="text-sm text-on-surface-variant">Weiß ist Standard. Folierung in Anthrazit oder Eichen-Dekor kostet 25–65 € pro Tür Aufpreis und verlängert die Lieferzeit.</p>
-          </div>
-        </div>
-        <div class="flex gap-4">
-          <span class="material-symbols-outlined text-primary flex-shrink-0" style="font-size:28px">layers</span>
-          <div>
-            <h4 class="font-bold text-white mb-1">Verglasung</h4>
-            <p class="text-sm text-on-surface-variant">2-fach Wärmeschutz Standard (Ud 0,90). 3-fach-Verglasung verbessert auf Ud ~0,80 und kostet 50–80 € Aufpreis pro Tür.</p>
-          </div>
-        </div>
-        <div class="flex gap-4">
-          <span class="material-symbols-outlined text-primary flex-shrink-0" style="font-size:28px">security</span>
-          <div>
-            <h4 class="font-bold text-white mb-1">Sicherheit &amp; Beschlag</h4>
-            <p class="text-sm text-on-surface-variant">MACO-Beschlag inklusive, wartungsarm. Aufrüstung auf abschließbare Griffe: 25–50 € pro Tür.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- 3. Konkurrenzvergleich -->
-<section class="py-16 md:py-20" style="background:#0a1225;">
-  <div class="max-w-[1280px] mx-auto px-6 md:px-12">
-    <div class="text-center max-w-3xl mx-auto mb-10">
-      <span class="inline-block text-primary font-bold text-xs uppercase tracking-[0.25em] mb-3">Im Direktvergleich</span>
-      <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-4">Drutex IGLO 5 Classic Balkontür vs. Schüco / Hörmann / Inotherm</h2>
-      <p class="" style="color:rgba(232,238,255,0.75);" text-base md:text-lg leading-relaxed">Faire Gegenüberstellung mit deutschen Türen-Herstellern in der gleichen Qualitätsklasse.</p>
-    </div>
-
-    <div class="rounded-2xl border border-slate-200 overflow-hidden shadow-sm" style="background:#0f1c30;border:1px solid rgba(255,255,255,0.08);">
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead class="bg-blue-900 text-white">
-            <tr>
-              <th class="text-left px-5 py-4 font-bold">Merkmal</th>
-              <th class="text-center px-5 py-4 font-bold">Drutex IGLO 5 Classic Balkontür</th>
-              <th class="text-center px-5 py-4 font-bold text-white/85">Schüco AluClip 70</th>
-              <th class="text-center px-5 py-4 font-bold text-white/85">Hörmann Thermo65</th>
-              <th class="text-center px-5 py-4 font-bold text-white/85">Inotherm Eco 70</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="border-b border-slate-100">
-              <td class="px-5 py-3 text-on-surface-variant">Bautiefe</td>
-              <td class="text-center px-5 py-3 text-white font-bold">70 mm</td>
-              <td class="text-center px-5 py-3 text-on-surface-variant">70 mm</td>
-              <td class="text-center px-5 py-3 text-on-surface-variant">65 mm</td>
-              <td class="text-center px-5 py-3 text-on-surface-variant">70 mm</td>
-            </tr>
-            <tr class="border-b" style="background:#0a1225;border-bottom:1px solid rgba(255,255,255,0.06);">
-              <td class="px-5 py-3 text-on-surface-variant">Ud-Wert (Ganzheit)</td>
-              <td class="text-center px-5 py-3 text-white font-bold">0,90 W/(m²K)</td>
-              <td class="text-center px-5 py-3 text-on-surface-variant">0,90</td>
-              <td class="text-center px-5 py-3 text-on-surface-variant">0,85</td>
-              <td class="text-center px-5 py-3 text-on-surface-variant">0,89</td>
-            </tr>
-            <tr class="border-b border-slate-100">
-              <td class="px-5 py-3 text-on-surface-variant">Profil-Kammern</td>
-              <td class="text-center px-5 py-3 text-white font-bold">5</td>
-              <td class="text-center px-5 py-3 text-on-surface-variant">5</td>
-              <td class="text-center px-5 py-3 text-on-surface-variant">4</td>
-              <td class="text-center px-5 py-3 text-on-surface-variant">5</td>
-            </tr>
-            <tr class="border-b" style="background:#0a1225;border-bottom:1px solid rgba(255,255,255,0.06);">
-              <td class="px-5 py-3 text-on-surface-variant">Garantie Profil</td>
-              <td class="text-center px-5 py-3 text-white font-bold">7 Jahre</td>
-              <td class="text-center px-5 py-3 text-on-surface-variant">10 Jahre</td>
-              <td class="text-center px-5 py-3 text-on-surface-variant">10 Jahre</td>
-              <td class="text-center px-5 py-3 text-on-surface-variant">5 Jahre</td>
-            </tr>
-            <tr class="bg-blue-50">
-              <td class="px-5 py-3 font-bold text-white">Preis-Niveau (Ø)</td>
-              <td class="text-center px-5 py-3 font-extrabold text-primary">100 % (Referenz)</td>
-              <td class="text-center px-5 py-3 text-on-surface-variant">+35–50 %</td>
-              <td class="text-center px-5 py-3 text-on-surface-variant">+40–60 %</td>
-              <td class="text-center px-5 py-3 text-on-surface-variant">+20–30 %</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <p class="text-xs" style="color:rgba(232,238,255,0.55);" max-w-3xl mx-auto text-center leading-relaxed mt-5">
-      <strong>Quelle:</strong> Vergleich auf Basis öffentlicher Datenblätter Schüco/Hörmann/Inotherm Stand 2025/26. Drutex-Werte aus Hersteller-Datenblättern Drutex S.A. Listenpreise typischer Fachhandels-Aufschläge, kein direkter Hersteller-Preisvergleich. Schallschutz und Wärmedämmung variieren je nach Verglasung.
-    </p>
   </div>
 </section>
 
 <!-- 4. Erfahrungsbericht aus der Praxis -->
-<section class="py-16 md:py-20" style="background:#f8fafc">
+<section class="py-16 md:py-20" style="background:#0a1225">
   <div class="max-w-[860px] mx-auto px-6 md:px-12">
     <div class="mb-8">
       <span class="inline-block text-primary font-bold text-xs uppercase tracking-[0.25em] mb-3">Aus der Praxis</span>
@@ -788,7 +956,7 @@
     <div class="space-y-5 text-base md:text-lg text-on-surface leading-relaxed">
       <p>IGLO 5 Classic Balkontür ist das Arbeitstier unter den Drutex-Balkontüren. Hier sind die Punkte, die Kunden am häufigsten fragen — und die DeineFenster.de Ihnen transparent weitergeben.</p>
 
-      <p><strong class="text-white">Lieferzeit ehrlich:</strong> 4–6 Wochen ab Auftragsbestätigung. Bei Folierung: 6–8 Wochen. In der Bausaison (Mai–September) auch 8–10 Wochen.</p>
+      <p><strong class="text-white">Lieferzeit:</strong> Ca. 2 Wochen ab Auftragserteilung beim Hersteller — nach Ihrem Zahlungseingang. Vor-Ort-Kunden können auch mit Zahlung bei Abholung kaufen.</p>
 
       <p><strong class="text-white">Häufigster Kunden-Fehler — falsches Aufmaß:</strong> Balkontür-Öffnungen sind besonders tückisch: oft verputzte Kanten, schiefe Schächte, unterschiedliche Höhen links/rechts. Empfehlung: mindestens fünf Messungen pro Seite, den kleinsten Wert nehmen. Im Zweifel: WhatsApp-Foto schicken — wir prüfen das kostenlos.</p>
 
@@ -807,7 +975,7 @@
     <div class="text-center max-w-3xl mx-auto mb-12">
       <span class="inline-block text-primary font-bold text-xs uppercase tracking-[0.25em] mb-3">Werterhalt</span>
       <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-4">Wartung &amp; Pflege: Damit IGLO 5 Classic Balkontür 25+ Jahre hält</h2>
-      <p class="" style="color:rgba(232,238,255,0.75);" text-base md:text-lg leading-relaxed">Vier einfache Routinen, die Ihre Balkontür wie neu halten — und nichts kosten.</p>
+      <p class="" style="color:rgba(232,238,255,0.75);">Vier einfache Routinen, die Ihre Balkontür wie neu halten — und nichts kosten.</p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -815,40 +983,40 @@
         <span class="material-symbols-outlined text-primary flex-shrink-0" style="font-size:36px">water_drop</span>
         <div>
           <h3 class="text-lg font-bold text-white mb-2">1. Entwässerungsbohrungen frei halten</h3>
-          <p class="text-sm" style="color:rgba(232,238,255,0.75);" leading-relaxed">Monatlich prüfen: kleine Bohrungen am unteren Türrahmen nicht durch Laub/Schmutz verstopft. Verstopfung führt zu Staunässe und Schimmel.</p>
+          <p class="text-sm" style="color:rgba(232,238,255,0.75);">Monatlich prüfen: kleine Bohrungen am unteren Türrahmen nicht durch Laub/Schmutz verstopft. Verstopfung führt zu Staunässe und Schimmel.</p>
         </div>
       </div>
       <div class="rounded-2xl p-7 flex gap-5" style="background:#0f1c30;border:1px solid rgba(255,255,255,0.08);">
         <span class="material-symbols-outlined text-primary flex-shrink-0" style="font-size:36px">cleaning</span>
         <div>
           <h3 class="text-lg font-bold text-white mb-2">2. Rahmen und Scheibe reinigen</h3>
-          <p class="text-sm" style="color:rgba(232,238,255,0.75);" leading-relaxed">Zwei bis drei Mal pro Jahr mit warmem Wasser und Spülmittel, weichem Tuch. Keine Scheuermittel oder Stahlwolle — die zerkratzen Folierungen.</p>
+          <p class="text-sm" style="color:rgba(232,238,255,0.75);">Zwei bis drei Mal pro Jahr mit warmem Wasser und Spülmittel, weichem Tuch. Keine Scheuermittel oder Stahlwolle — die zerkratzen Folierungen.</p>
         </div>
       </div>
       <div class="rounded-2xl p-7 flex gap-5" style="background:#0f1c30;border:1px solid rgba(255,255,255,0.08);">
         <span class="material-symbols-outlined text-primary flex-shrink-0" style="font-size:36px">settings</span>
         <div>
           <h3 class="text-lg font-bold text-white mb-2">3. Beschläge schmieren</h3>
-          <p class="text-sm" style="color:rgba(232,238,255,0.75);" leading-relaxed">Einmal jährlich einen Tropfen Maschinenöl auf Scharniere und Schließzapfen. Das hält den Beschlag geschmeidig und verlängert die Lebensdauer deutlich.</p>
+          <p class="text-sm" style="color:rgba(232,238,255,0.75);">Einmal jährlich einen Tropfen Maschinenöl auf Scharniere und Schließzapfen. Das hält den Beschlag geschmeidig und verlängert die Lebensdauer deutlich.</p>
         </div>
       </div>
       <div class="rounded-2xl p-7 flex gap-5" style="background:#0f1c30;border:1px solid rgba(255,255,255,0.08);">
         <span class="material-symbols-outlined text-primary flex-shrink-0" style="font-size:36px">verified</span>
         <div>
           <h3 class="text-lg font-bold text-white mb-2">4. Dichtungen prüfen</h3>
-          <p class="text-sm" style="color:rgba(232,238,255,0.75);" leading-relaxed">Alle zwei Jahre die EPDM-Dichtungen kontrollieren — sind sie noch elastisch oder bereits hart? Dichtungs-Ersatz kostet 15–25 € und ist einfach selbst zu installieren.</p>
+          <p class="text-sm" style="color:rgba(232,238,255,0.75);">Alle zwei Jahre die EPDM-Dichtungen kontrollieren — sind sie noch elastisch oder bereits hart? Dichtungs-Ersatz kostet 15–25 € und ist einfach selbst zu installieren.</p>
         </div>
       </div>
     </div>
 
-    <div class="mt-10 max-w-3xl mx-auto bg-blue-50 border-l-4 border-primary pl-5 py-4 pr-6 rounded-r-lg">
+    <div class="mt-10 max-w-3xl mx-auto pl-5 py-4 pr-6 rounded-r-lg" style="background:rgba(34,94,170,0.12);border-left:4px solid #225eaa;">
       <p class="text-sm md:text-base text-white"><strong>Wichtig für Werterhalt:</strong> PVC-Profile mögen keine Temperaturschocks. Lüften Sie regelmäßig statt punktuell — das reduziert thermische Spannungen und erhält die Formstabilität.</p>
     </div>
   </div>
 </section>
 
 <!-- 6. FAQ -->
-<section class="py-16 md:py-20" style="background:#f8fafc">
+<section class="py-16 md:py-20" style="background:#0a1225">
   <div class="max-w-[860px] mx-auto px-6 md:px-12">
     <div class="text-center mb-10">
       <span class="inline-block text-primary font-bold text-xs uppercase tracking-[0.25em] mb-3">FAQ zu IGLO 5 Classic Balkontür</span>
@@ -862,17 +1030,17 @@
           <span class="material-symbols-outlined text-primary group-open:rotate-180 transition-transform">expand_more</span>
         </summary>
         <p class="mt-3 text-sm md:text-base text-on-surface-variant leading-relaxed">
-          [FAQ_1_TEXT]
+          Den genauen Preis teilen wir Ihnen nach einer kurzen Anfrage per E-Mail mit — jede Tür wird nach Ihren Maßen gefertigt. Stellen Sie Ihre Wunschkonfiguration im Konfigurator zusammen und wir schicken Ihnen ein konkretes Angebot.
         </p>
       </details>
 
       <details class="group rounded-xl p-5 transition-colors" style="background:#0f1c30;border:1px solid rgba(255,255,255,0.08);">
         <summary class="cursor-pointer font-bold text-white text-base md:text-lg list-none flex justify-between items-center">
-          <span>[FAQ_2_FRAGE]</span>
+          <span>Kann ich Maße selbst bestimmen?</span>
           <span class="material-symbols-outlined text-primary group-open:rotate-180 transition-transform">expand_more</span>
         </summary>
         <p class="mt-3 text-sm md:text-base text-on-surface-variant leading-relaxed">
-          [FAQ_2_TEXT]
+          Ja — jede Tür wird nach Ihrem Aufmaß gefertigt. Breite und Höhe geben Sie im Konfigurator ein. Als Rohbaumaß planen Sie 1–2 cm Abstand ringsherum ein. Bei Unsicherheit: WhatsApp-Foto schicken — wir schauen kostenfrei drüber.
         </p>
       </details>
 
@@ -882,7 +1050,7 @@
           <span class="material-symbols-outlined text-primary group-open:rotate-180 transition-transform">expand_more</span>
         </summary>
         <p class="mt-3 text-sm md:text-base text-on-surface-variant leading-relaxed">
-          4–6 Wochen für Standard-Größen in Weiß. Bei Folierung (Anthrazit, Eichen-Dekor): 6–8 Wochen. In der Bausaison Mai–September auch 8–10 Wochen. Lieferung frachtfrei deutschlandweit.
+          Ca. 2 Wochen ab dem Tag, an dem wir Ihre Bestellung beim Hersteller aufgeben. Das ist nach Eingang Ihrer Zahlung. Vor-Ort-Käufer in Brandenburg können wir auch mit Zahlung bei Abholung abwickeln.
         </p>
       </details>
 
@@ -908,11 +1076,11 @@
 
       <details class="group rounded-xl p-5 transition-colors" style="background:#0f1c30;border:1px solid rgba(255,255,255,0.08);">
         <summary class="cursor-pointer font-bold text-white text-base md:text-lg list-none flex justify-between items-center">
-          <span>[FAQ_6_FRAGE]</span>
+          <span>Gibt es auch Rollläden für Balkontüren?</span>
           <span class="material-symbols-outlined text-primary group-open:rotate-180 transition-transform">expand_more</span>
         </summary>
         <p class="mt-3 text-sm md:text-base text-on-surface-variant leading-relaxed">
-          [FAQ_6_TEXT]
+          Ja — für alle IGLO-Balkontüren sind elektrische Aufsatzrollläden erhältlich. Motor und Steuerung (Funk oder Wandschalter) können Sie direkt im Konfigurator hinzufügen.
         </p>
       </details>
     </div>
@@ -942,5 +1110,28 @@
   gsap.registerPlugin(ScrollTrigger);
 </script>
 <script src="../../js/profil-farben.js" defer></script>
+
+<script>
+// Farb-Vorschau: Hover zeigt Produktfoto in dieser Farbe, Klick fixiert
+(function(){
+  var mainImg = document.querySelector('.pf-main-img');
+  if (!mainImg) return;
+  var fixedSrc = mainImg.src;
+  var swatches = document.querySelectorAll('.pf-swatch');
+  swatches.forEach(function(btn){
+    var url = btn.dataset.frameUrl;
+    if (!url) return;
+    btn.addEventListener('mouseenter', function(){ mainImg.src = url; });
+    btn.addEventListener('mouseleave', function(){ mainImg.src = fixedSrc; });
+    btn.addEventListener('click', function(){
+      fixedSrc = url;
+      mainImg.src = url;
+      swatches.forEach(function(b){ b.classList.remove('is-active'); });
+      btn.classList.add('is-active');
+      if (btn.dataset.name) mainImg.alt = btn.dataset.name;
+    });
+  });
+})();
+</script>
 </body>
 </html>
