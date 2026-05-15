@@ -2,13 +2,28 @@
 
 ## 100 % COMPLIANCE-PFLICHT (Sarah-Wunsch 15.05.2026, NICHT VERHANDELBAR)
 
-**Sarah's Vorgabe wörtlich:** „Es muss immer alles 100 % rechtens sein vom deutschen EU was auch immer. Mich darf zu 100 % keiner abmahnen. Es gibt nichts was man bei uns anmerken können."
+**Sarah's Vorgabe wörtlich:** „Es muss immer alles 100 % rechtens sein vom deutschen EU was auch immer. Mich darf zu 100 % keiner abmahnen. Es gibt nichts was man bei uns anmerken können — weder Konkurrenz, Finanzamt, Rechtskanzlei, noch Leute die mich nicht mögen."
+
+**Sarah's Sitz:** Deutschland (Brandenburg an der Havel). Steuerpflichtig in DE. Alle Rechtsbezüge: deutsches Recht + EU-Recht.
 
 **Bedeutung für jede Session:**
 - **Niemals aufhören** wenn nicht ALLE öffentlichen Seiten geprüft sind. Eine Halbprüfung ist keine Prüfung.
 - **Niemals "ist schon okay" ohne Beleg** — jede Aussage zur Rechtskonformität muss eine konkrete Rechtsgrundlage haben (§/Art. + Gesetz)
 - **Bei Zweifel: konservativ entfernen / umformulieren** — eher zu vorsichtig als abmahnbar
-- **Tägliche Shadow-Scans** laufen als Routine `trig_01QfZdhD3166J7vbWthZcrkU` auf claude.ai/code/routines
+- **Tägliche Shadow-Scans** laufen als Routine `trig_01QfZdhD3166J7vbWthZcrkU` auf claude.ai/code/routines (täglich 6:00 UTC = 7-8 Uhr deutsche Zeit)
+
+## KONKURRENTEN-NAMEN — HART VERBOTEN
+
+**Sarah-Wunsch 15.05.2026:** Niemals einen Konkurrenten namentlich in irgendeinem Output erwähnen — weder im sichtbaren Text der Website, noch in Code-Kommentaren, noch in Markdown-Dateien im Repo.
+
+**Erlaubt:** Sich von Konkurrenten **inspirieren lassen** für Design/UX-Patterns — das macht jeder.
+**Verboten:** Den Konkurrenten dabei beim Namen nennen.
+
+**Beispiele wie es richtig geht:**
+- ❌ „wie bei meinfenster24" / „kopiert von Schüco" / „ähnlich zu Veka-Layout"
+- ✅ „moderner Konfigurator-Stil" / „Akkordeon-Pattern" / „Standard-Industrie-UX"
+
+**Warum:** Source-Code-Kommentare können von Wettbewerbs-Anwälten gefunden werden (rechte Maustaste → Seitenquelltext). Eine Erwähnung im Code ist kein direkter UWG-Verstoß, aber liefert Munition. Sarah will null Angriffsfläche.
 
 ## SCAN-SCOPE: ALLE ÖFFENTLICHEN SEITEN
 
