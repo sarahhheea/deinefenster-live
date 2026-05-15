@@ -847,6 +847,188 @@
     #cart-section{background:rgba(255,255,255,0.04)!important;border-color:rgba(93,151,232,0.20)!important;border-radius:12px!important;}
   </style>
   <script defer data-domain="deinefenster.de" src="https://plausible.io/js/script.js"></script>
+
+  <!-- ════════════════════════════════════════════════
+       DESIGN-SYSTEM RESET — Konfigurator v14
+       Überschreibt alle widersprechenden !important-Blöcke
+       mit einheitlichem DeineFenster-Farbsystem.
+       #0a1225 = Body / Main-BG
+       #0f1c30 = Elevated (Steps-BG, Cards, Nav)
+       #060e1e = Sehr tief (Spalten-Hintergrund)
+       #76a9fa = Akzent
+       #225eaa = Primär
+  ════════════════════════════════════════════════ -->
+  <style id="ds-reset">
+    /* ── Seiten-Hintergrund: einheitlich #0a1225 ── */
+    body { background: #0a1225 !important; }
+
+    /* ── Steps-Container: kein weißer Rand ── */
+    #steps {
+      border: none !important;
+      box-shadow: none !important;
+      border-radius: 0 !important;
+      background: transparent !important;
+    }
+
+    /* ── Step-Card ── */
+    .sc {
+      background: #0f1c30 !important;
+      border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+    }
+    .sc:first-child { border-top-left-radius: 0 !important; border-top-right-radius: 0 !important; }
+    .sc:last-child  { border-bottom-left-radius: 0 !important; border-bottom-right-radius: 0 !important; }
+
+    /* ── Step-Header: einheitlich ── */
+    .sh {
+      background: #0f1c30 !important;
+      border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+    }
+    .sh:hover { background: #0a1225 !important; }
+    .sc.open .sh {
+      background: #0f1c30 !important;
+      box-shadow: inset 0 2px 0 #76a9fa !important;
+      padding-left: 19px !important;
+    }
+    .sc.open .slabel { color: #76a9fa !important; }
+
+    /* ── Aktiv-Badge ── */
+    .sc.open .badge { background: #225eaa !important; color: #fff !important; box-shadow: none !important; }
+
+    /* ── Step-Body: dunkel ── */
+    .sb {
+      background: #0a1225 !important;
+      border-top: 1px solid rgba(118,169,250,0.15) !important;
+      padding: 28px 28px 34px !important;
+    }
+    #s1 .sb { background: #0a1225 !important; padding: 16px !important; }
+
+    /* ── Done-Steps: dezenter blauer linker Strich ── */
+    .sc.done .sh { border-left: none !important; }
+
+    /* ── Linke Nav-Spalte ── */
+    #kfg-nav { background: #060e1e !important; border-right: 1px solid rgba(118,169,250,0.10) !important; }
+
+    /* ── Rechte Sidebar ── */
+    #sidebar-wrap { background: #060e1e !important; border-left: 1px solid rgba(118,169,250,0.10) !important; }
+    #sidebar {
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      border-radius: 0 !important;
+    }
+
+    /* ── Haupt-Layout ── */
+    #kfg-main { background: #0a1225 !important; }
+
+    /* ── Product Cards Step 1: neue Grid-Struktur ── */
+    #s1 .sb > .grid {
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 14px !important;
+    }
+    @media (min-width: 900px) {
+      #s1 .sb > .grid {
+        grid-template-columns: repeat(4, 1fr) !important;
+      }
+    }
+    /* Produkt-Karte Basis */
+    #s1 .pc {
+      border-radius: 14px !important;
+      border: 1px solid rgba(118,169,250,0.12) !important;
+      background: #0f1c30 !important;
+      overflow: hidden !important;
+      cursor: pointer !important;
+      transition: all 0.2s ease !important;
+      box-shadow: none !important;
+    }
+    #s1 .pc:hover {
+      border-color: rgba(118,169,250,0.45) !important;
+      transform: translateY(-4px) !important;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.40) !important;
+    }
+    #s1 .pc.sel {
+      border-color: #76a9fa !important;
+      transform: translateY(-4px) !important;
+      box-shadow: 0 0 0 2px rgba(118,169,250,0.30), 0 12px 32px rgba(34,94,170,0.35) !important;
+    }
+    #s1 .pc-img {
+      width: 100% !important;
+      aspect-ratio: 3/4 !important;
+      object-fit: cover !important;
+      object-position: center 20% !important;
+      background: #112455 !important;
+      display: block !important;
+    }
+    #s1 .s1-info {
+      padding: 12px 14px 14px !important;
+      background: rgba(6,10,24,0.96) !important;
+      border-top: 1px solid rgba(255,255,255,0.07) !important;
+    }
+    #s1 .pc-name {
+      font-size: 13px !important;
+      font-weight: 700 !important;
+      color: rgba(232,238,255,0.95) !important;
+      letter-spacing: 0.01em !important;
+    }
+    #s1 .pc.sel .pc-name { color: #76a9fa !important; }
+    #s1 .pc-badge { display: none !important; }
+    #s1 .pc-chips { display: none !important; }
+    #s1 .pc-from { font-size: 10.5px !important; color: rgba(118,169,250,0.60) !important; margin-top: 2px !important; }
+    #s1 .pc.sel .pc-from { color: #76a9fa !important; }
+
+    /* Kein Shimmer-Effekt, kein weißer Hintergrund */
+    #s1 .pc::before { display: none !important; }
+    #s1 .pc.sel::after {
+      content: '' !important;
+      position: absolute !important;
+      top: 0 !important; left: 10% !important; right: 10% !important;
+      height: 2px !important; width: auto !important;
+      background: linear-gradient(90deg, transparent, #76a9fa, transparent) !important;
+      box-shadow: none !important;
+      font-family: inherit !important; font-size: 0 !important; color: transparent !important;
+      border-radius: 0 !important; z-index: 5 !important;
+    }
+    #s1 .pc:not(.sel)::after {
+      content: '' !important; width: 0 !important; height: 0 !important;
+      background: none !important; font-size: 0 !important; position: absolute !important;
+    }
+
+    /* ── Weiter-Buttons: konsistentes Blau ── */
+    .sb button.w-full[onclick] {
+      background: #225eaa !important;
+      border: 1px solid rgba(118,169,250,0.30) !important;
+      border-radius: 10px !important;
+      color: #fff !important;
+      font-weight: 700 !important;
+      font-size: 14px !important;
+      padding: 13px 20px !important;
+      box-shadow: 0 4px 16px rgba(34,94,170,0.35) !important;
+      transition: all 0.18s ease !important;
+      letter-spacing: 0.01em !important;
+    }
+    .sb button.w-full[onclick]:hover {
+      background: #2d72c7 !important;
+      box-shadow: 0 6px 20px rgba(34,94,170,0.55) !important;
+      transform: translateY(-1px) !important;
+    }
+
+    /* ── Progress Bar ── */
+    #prog-fill { background: linear-gradient(90deg, #225eaa, #76a9fa) !important; box-shadow: none !important; }
+    #prog-bar { background: rgba(255,255,255,0.08) !important; }
+
+    /* ── Sidebar CTA ── */
+    #sidebar > button:last-child {
+      background: #225eaa !important;
+      border-radius: 10px !important;
+      box-shadow: 0 4px 16px rgba(34,94,170,0.40) !important;
+    }
+    #sidebar > button:last-child:hover {
+      background: #2d72c7 !important;
+      box-shadow: 0 6px 20px rgba(34,94,170,0.55) !important;
+    }
+
+    /* ── Produkt-Hero Overlay ── */
+    #prod-hero { background: #0a1225 !important; }
+  </style>
 </head>
 <body>
 
@@ -1969,6 +2151,117 @@
     background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%) !important;
     box-shadow: 0 6px 24px rgba(29,78,216,0.60) !important; transform: translateY(-1px) !important;
   }
+</style>
+
+<!-- ════════════════════════════════════════════════════════════
+     DESIGN-SYSTEM FINAL — nach allen anderen Style-Blöcken.
+     Gewinnt die Kaskade gegen alle früheren !important-Blöcke.
+     Farb-Quelle: DeineFenster Design-System (CLAUDE.md)
+════════════════════════════════════════════════════════════ -->
+<style id="ds-final">
+  /* ── Body: konsistent #0a1225 ── */
+  body { background: #0a1225 !important; overflow-x: hidden; }
+
+  /* ── Step-Card ── */
+  .sc { background: #0f1c30 !important; border-bottom: 1px solid rgba(255,255,255,0.06) !important; }
+  .sc:first-child, .sc:last-child { border-radius: 0 !important; }
+
+  /* ── Step-Header: kein side-stripe, nur oben bei aktiv ── */
+  .sh { background: #0f1c30 !important; border-bottom: 1px solid rgba(255,255,255,0.05) !important; }
+  .sh:hover { background: rgba(15,28,48,0.7) !important; }
+  .sc.open .sh {
+    background: #0f1c30 !important;
+    box-shadow: inset 0 2px 0 #76a9fa !important;
+    padding-left: 19px !important;
+    border-left: none !important;
+  }
+  .sc.done .sh { border-left: none !important; }
+  .sc.open .slabel { color: #76a9fa !important; }
+  .sc.open .badge { background: #225eaa !important; color: #fff !important; box-shadow: none !important; }
+
+  /* ── Step-Body ── */
+  .sb { background: #0a1225 !important; border-top: 1px solid rgba(118,169,250,0.15) !important; }
+  #s1 .sb { background: #0a1225 !important; padding: 16px !important; }
+
+  /* ── Layout-Container ── */
+  #kfg-main { background: #0a1225 !important; }
+  #kfg-nav { background: #060e1e !important; border-right: 1px solid rgba(118,169,250,0.10) !important; }
+  #sidebar-wrap { background: #060e1e !important; border-left: 1px solid rgba(118,169,250,0.10) !important; }
+  #sidebar { background: transparent !important; border: none !important; box-shadow: none !important; border-radius: 0 !important; }
+  #steps { border: none !important; box-shadow: none !important; border-radius: 0 !important; background: transparent !important; }
+
+  /* ── Produkt-Hero ── */
+  #prod-hero { background: #0a1225 !important; }
+
+  /* ── Product Cards in Step 1 ── */
+  #s1 .sb > .grid { grid-template-columns: repeat(2,1fr) !important; gap: 14px !important; }
+  @media (min-width: 900px) { #s1 .sb > .grid { grid-template-columns: repeat(4,1fr) !important; } }
+  #s1 .pc {
+    border-radius: 14px !important;
+    border: 1px solid rgba(118,169,250,0.12) !important;
+    background: #0f1c30 !important;
+    overflow: hidden !important;
+    box-shadow: none !important;
+    transition: all 0.22s ease !important;
+    cursor: pointer !important;
+  }
+  #s1 .pc:hover {
+    border-color: rgba(118,169,250,0.50) !important;
+    transform: translateY(-5px) !important;
+    box-shadow: 0 14px 36px rgba(0,0,0,0.45) !important;
+  }
+  #s1 .pc.sel {
+    border-color: #76a9fa !important;
+    transform: translateY(-4px) !important;
+    box-shadow: 0 0 0 2px rgba(118,169,250,0.28), 0 12px 32px rgba(34,94,170,0.38) !important;
+  }
+  #s1 .pc::before { display: none !important; }
+  #s1 .pc.sel::after {
+    content: '' !important; position: absolute !important;
+    top: 0 !important; left: 10% !important; right: 10% !important;
+    width: auto !important; height: 2px !important;
+    background: linear-gradient(90deg,transparent,#76a9fa,transparent) !important;
+    box-shadow: none !important; font-size: 0 !important; color: transparent !important;
+    border-radius: 0 !important; background-color: transparent !important; z-index: 5 !important;
+    font-family: inherit !important;
+  }
+  #s1 .pc:not(.sel)::after { content: '' !important; width: 0 !important; height: 0 !important; background: none !important; font-size: 0 !important; position: absolute !important; background-image: none !important; }
+  #s1 .pc-img { width: 100% !important; aspect-ratio: 3/4 !important; object-fit: cover !important; object-position: center 20% !important; background: #112455 !important; display: block !important; padding: 0 !important; flex: none !important; }
+  #s1 .pc:hover .pc-img { transform: scale(1.05) !important; filter: none !important; }
+  #s1 .s1-info { padding: 12px 14px 14px !important; background: rgba(6,10,24,0.96) !important; border-top: 1px solid rgba(255,255,255,0.07) !important; gap: 3px !important; }
+  #s1 .pc-badge { display: none !important; }
+  #s1 .pc-chips { display: none !important; }
+  #s1 .pc-name { font-size: 13px !important; font-weight: 700 !important; color: rgba(232,238,255,0.92) !important; letter-spacing: 0.02em !important; text-transform: uppercase !important; }
+  #s1 .pc.sel .pc-name { color: #76a9fa !important; }
+  #s1 .pc-from { font-size: 10px !important; color: rgba(118,169,250,0.55) !important; margin-top: 2px !important; font-weight: 500 !important; letter-spacing: normal !important; }
+  #s1 .pc.sel .pc-from { color: #76a9fa !important; }
+
+  /* ── Weiter-Buttons: einheitliches Brand-Blau ── */
+  .sb button.w-full[onclick]:not(#submit-btn) {
+    background: #225eaa !important;
+    border: 1px solid rgba(118,169,250,0.25) !important;
+    border-radius: 10px !important; color: #fff !important;
+    font-weight: 700 !important; font-size: 14px !important;
+    padding: 13px 20px !important;
+    box-shadow: 0 4px 14px rgba(34,94,170,0.35) !important;
+    transition: all 0.18s ease !important; letter-spacing: 0.01em !important;
+  }
+  .sb button.w-full[onclick]:not(#submit-btn):hover {
+    background: #2d72c7 !important;
+    box-shadow: 0 6px 20px rgba(34,94,170,0.55) !important;
+    transform: translateY(-1px) !important;
+  }
+
+  /* ── Progress Bar ── */
+  #prog-fill { background: linear-gradient(90deg,#225eaa 0%,#76a9fa 100%) !important; box-shadow: none !important; }
+  #prog-bar { background: rgba(255,255,255,0.07) !important; }
+
+  /* ── Sidebar CTA ── */
+  #sidebar > button:last-child { background: #225eaa !important; border-radius: 10px !important; box-shadow: 0 4px 14px rgba(34,94,170,0.40) !important; }
+  #sidebar > button:last-child:hover { background: #2d72c7 !important; box-shadow: 0 6px 20px rgba(34,94,170,0.55) !important; }
+
+  /* ── Mobile Bottom Bar ── */
+  #mobile-bottom-bar { background: rgba(6,14,30,0.98) !important; border-top-color: rgba(118,169,250,0.10) !important; }
 </style>
 
 <script>
@@ -9508,5 +9801,99 @@ async function submitSkizze(e) {
 })();
 </script>
 <script src="js/chatbot.js" defer></script>
+
+<!-- ════════════════════════════════════════════════
+     KONFIGURATOR — Step-Nav + Live-Summary Erweiterung
+     Arbeitet auf dem bestehenden buildNav() / openS() auf.
+════════════════════════════════════════════════ -->
+<script>
+(function() {
+  'use strict';
+
+  // ── Live-Zusammenfassung in der rechten Sidebar aktualisieren ──
+  window.updateKfgSummary = function(state) {
+    const rows = document.getElementById('kfg-sum-rows');
+    if (!rows) return;
+    if (!state || !state.prod) {
+      rows.innerHTML = '<div style="color:rgba(232,238,255,0.35);font-size:12px;font-family:Manrope,sans-serif;">Noch nichts konfiguriert.</div>';
+      return;
+    }
+    const items = [];
+    const prodNames = { kunststoff: 'Kunststofffenster', balkontuer: 'Balkontür', haustuere: 'Haustür', hst: 'Hebe-Schiebetür' };
+    if (state.prod) items.push({ label: 'Produkt', value: prodNames[state.prod] || state.prod });
+    if (state.profil && window.P && P.profil[state.profil]) items.push({ label: 'Profil', value: P.profil[state.profil].name.split('·')[0].trim() });
+    if (state.fluegel && window.P && P.fluegel[state.fluegel]) items.push({ label: 'Flügel', value: P.fluegel[state.fluegel].name });
+    if (state.oeff1 && window.P && P.oeff[state.oeff1]) items.push({ label: 'Öffnung', value: P.oeff[state.oeff1].name });
+    if (state.glas && window.P && P.glas[state.glas]) items.push({ label: 'Glas', value: P.glas[state.glas].name.split('·')[0].trim() });
+    if (state.bMm && state.hMm && state.bMm > 0 && state.hMm > 0) items.push({ label: 'Maße', value: state.bMm + ' × ' + state.hMm + ' mm' });
+    if (state.fa && window.P && P.fa[state.fa]) items.push({ label: 'Farbe Außen', value: P.fa[state.fa].name.split('(')[0].trim() });
+    if (state.fi && window.P && P.fi[state.fi]) items.push({ label: 'Farbe Innen', value: P.fi[state.fi].name.split('(')[0].trim() });
+    if (state.qty && state.qty > 1) items.push({ label: 'Anzahl', value: state.qty + ' Stück' });
+    if (items.length === 0) {
+      rows.innerHTML = '<div style="color:rgba(232,238,255,0.35);font-size:12px;font-family:Manrope,sans-serif;">Noch nichts konfiguriert.</div>';
+    } else {
+      rows.innerHTML = items.map(it => `
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+          <span style="font-size:11px;color:rgba(232,238,255,0.40);flex-shrink:0;font-family:Manrope,sans-serif;">${it.label}</span>
+          <span style="font-size:12px;color:rgba(232,238,255,0.88);font-weight:600;text-align:right;font-family:Manrope,sans-serif;">${it.value}</span>
+        </div>`).join('');
+    }
+  };
+
+  // ── Summary-HTML in die rechte Sidebar einfügen (nach #chips, vor den Buttons) ──
+  function injectSummaryBlock() {
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar || document.getElementById('kfg-sum-rows')) return;
+    const chips = document.getElementById('chips');
+    const summaryBlock = document.createElement('div');
+    summaryBlock.id = 'kfg-sum-block';
+    summaryBlock.style.cssText = 'padding:14px 0 0;display:none;'; // wird per heroSelectProd sichtbar
+    summaryBlock.innerHTML = `
+      <div style="font-size:9px;font-weight:700;letter-spacing:0.18em;color:rgba(118,169,250,0.6);text-transform:uppercase;margin-bottom:10px;font-family:Manrope,sans-serif;display:flex;align-items:center;gap:8px;">
+        <span style="flex:1;height:1px;background:rgba(118,169,250,0.15);display:block;"></span>Ihre Konfiguration<span style="flex:1;height:1px;background:rgba(118,169,250,0.15);display:block;"></span>
+      </div>
+      <div id="kfg-sum-rows" style="display:flex;flex-direction:column;">
+        <div style="color:rgba(232,238,255,0.35);font-size:12px;font-family:Manrope,sans-serif;">Noch nichts konfiguriert.</div>
+      </div>`;
+    if (chips && chips.nextSibling) {
+      sidebar.insertBefore(summaryBlock, chips.nextSibling);
+    } else {
+      sidebar.appendChild(summaryBlock);
+    }
+  }
+
+  // ── Summary nach jedem openS() aufrufen ──
+  const _origOpenS = window.openS;
+  if (typeof _origOpenS === 'function') {
+    window.openS = function(n) {
+      _origOpenS(n);
+      if (window.S) updateKfgSummary(window.S);
+    };
+  }
+
+  // ── Summary-Block beim Hero-Select einblenden ──
+  const _origHeroSelect = window.heroSelectProd;
+  if (typeof _origHeroSelect === 'function') {
+    window.heroSelectProd = function(prodKey) {
+      _origHeroSelect(prodKey);
+      const blk = document.getElementById('kfg-sum-block');
+      if (blk) blk.style.display = '';
+      if (window.S) updateKfgSummary(window.S);
+    };
+  }
+
+  // ── DOM-Ready: Summary-Block injizieren ──
+  document.addEventListener('DOMContentLoaded', function() {
+    injectSummaryBlock();
+
+    // ── Mobile: rechte Spalte unter Steps; Nav verstecken ──
+    if (window.innerWidth < 768) {
+      const nav = document.getElementById('kfg-nav');
+      if (nav) nav.style.display = 'none';
+    }
+  });
+
+})();
+</script>
 </body>
 </html>
