@@ -5,6 +5,8 @@
 ### 15.05.2026
 - **index.html · Hofverkauf-Karten redesigned:** Bilder voll sichtbar oben (240px), hellblauer Rand 1.5px (rgba(118,169,250,0.32)), Hover lifts card. Lagerfenster-Karte: LKW-Bild (`hof-lager-lieferung.jpg`, object-position:center) — vorher hatte ich auf Stapler bzw. Hochregal-Halle getauscht, Sarah wollte LKW zurück.
 - **fenster-austauschen-kosten.html (Ankauf-Seite) · Custom-CSS nachgerüstet:** Klassen badge / hero-blob / info-card / btn-whatsapp / faq-summary / ankauf-step / answer-box-blue / gallery-img / notice-box waren im HTML benutzt aber nirgends definiert → Style-Block aus gebrauchte-fenster-kaufen.html portiert + Ankauf-spezifische Klassen ergänzt + global-design.css verlinkt. **3 unpassende Stock-Fotos** (Bar/Hand/Skyline von Unsplash) entfernt — passten nicht zum Thema "alte Fenster verkaufen".
+- **kunststofffenster-kaufen.html (Neue Fenster) · Sektionen kompakter:** Sektionen "ABLAUF" (96/100→72/80px) und "WARUM BEI UNS" (88→72px) hatten zuviel Padding für ihren Inhalt → wirkten leer. mb-20 → mb-12, mt-16 → mt-12.
+- **gebrauchte-fenster-kaufen.html · Geprüft, kein Action:** Hero-CTA ist nur 1 Primary + 1 Öffnungszeiten-Pille (sauber). Die im Screenshot sichtbare "Fragen?"-chat-Pille ist ein globales Widget, nicht im Page-Code.
 - **YouTube-Lerning gespeichert:** `~/youtube-learnings/stitch-2-claude-code-design-pipeline.md` — Plan: Stitch-MCP einbinden, `design.md` als Single-Source-of-Truth für alle Seiten generieren (verhindert künftiges Drift wie auf Ankauf-Seite).
 
 ---
