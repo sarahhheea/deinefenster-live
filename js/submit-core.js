@@ -9,10 +9,12 @@
   'use strict';
 
   const CART_STORAGE_KEY = 'df_cart_v1';
-  // Alle externen Mail-/Webhook-Calls laufen über den Cloudflare-Worker.
-  // Keys liegen NUR dort als Worker-Secrets (RESEND_API_KEY, WEB3FORMS_KEY, MAKE_WEBHOOK_URL).
-  const WORKER = 'https://deinefenster-email.deinefenster.workers.dev';
-  const FROM_ADDR = 'DeineFenster.de <noreply@deinefenster.de>';
+  // Web3Forms: Access-Key darf laut Hersteller im Frontend stehen.
+  // Er identifiziert nur das Formular und liefert die Mail an die
+  // im Web3Forms-Dashboard hinterlegte Adresse (info@baustoffchrist.de).
+  // Bei Spam → in web3forms.com/dashboard rotieren + diese Zeile updaten.
+  const WEB3FORMS_KEY = '440a94ff-9f42-46af-bf3d-47013dbd8f5f';
+  const TEAM_EMAIL = 'info@baustoffchrist.de';
 
   function fmt(n) {
     return Number(n).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '\u00a0€';
@@ -357,31 +359,26 @@
 </td></tr></table>
 </body></html>`;
 
-      // ── Bestätigungsmail an Kunden via Worker → Resend ─────────────────
-      try {
-        await fetch(WORKER + '/resend', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            from: FROM_ADDR,
-            to: [formData.email],
-            subject: `✅ Ihre Anfrage ${offerId} ist eingegangen – DeineFenster.de`,
-            html: kundenHtml,
-          }),
-        });
-      } catch (e) { console.warn('Kunden-Bestätigung fehlgeschlagen:', e); }
-
-      // ── Sarah-Benachrichtigung via Worker → Web3Forms ──────────────────
+      // ── Mail an Sarah über Web3Forms (direkt, kein Worker) ────────────
+      // Kunden bekommen keine automatische Auto-Reply — Sarah antwortet
+      // persönlich. Web3Forms Free hat keine Auto-Reply.
       try {
         const positionen = cart.map((item, idx) =>
           `${idx + 1}. ${item.qty}× ${item.summary || (item.config && item.config.prod) || '–'}`
-        ).join(' | ');
-        await fetch(WORKER + '/web3forms', {
+        ).join('\n');
+        const konfigDetail = cart.map((item, idx) => {
+          const rows = configRows(item.config).map(([k, v]) => `   ${k}: ${v.replace(/<[^>]+>/g, '')}`).join('\n');
+          return `═ Element ${idx + 1}: ${prodName(item.config.prod)} ═\n${rows}\n   Einzelpreis: ${fmt(item.unitPrice)}\n   Zwischensumme: ${fmt(item.subtotal)}`;
+        }).join('\n\n');
+
+        await fetch('https://api.web3forms.com/submit', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
           body: JSON.stringify({
+            access_key: WEB3FORMS_KEY,
             subject: `🔔 Neue Anfrage ${offerId} — DeineFenster.de`,
             from_name: 'DeineFenster.de Konfigurator',
+            replyto: formData.email,
             'Anfrage-Nr': offerId,
             'Datum': datum,
             'Name': formData.name,
@@ -389,21 +386,15 @@
             'Telefon': formData.phone || '–',
             'PLZ & Ort': formData.ort,
             'Strasse': formData.strasse || '–',
-            'Positionen': positionen,
             'Anmerkungen': formData.notiz || '–',
+            'Wunsch-Liefertermin': formData.wunschLiefertermin || '–',
+            'Positionen (Übersicht)': positionen,
+            'Konfiguration (Details)': konfigDetail,
+            'Anzahl Fotos/Skizzen': (uploadedImages || []).length,
             'Kalkulierter Preis': `${tot} €`,
           }),
         });
       } catch (e) { console.warn('Web3Forms fehlgeschlagen:', e); }
-
-      // ── Make.com Webhook via Worker (inkl. Bildanhänge) ────────────────
-      try {
-        await fetch(WORKER + '/make', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ deal: deal, sarah_html: sarahHtml }),
-        });
-      } catch (e) { console.warn('Make.com Webhook fehlgeschlagen:', e); }
 
       // Cart + Bilder löschen nach erfolgreichem Versand
       try {

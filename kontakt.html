@@ -857,7 +857,7 @@
 
 <script>
 (function(){
-  const WORKER = 'https://deinefenster-email.deinefenster.workers.dev';
+  const WEB3FORMS_KEY = '440a94ff-9f42-46af-bf3d-47013dbd8f5f';
   document.getElementById('kontakt-form').addEventListener('submit', async function(e){
     e.preventDefault();
     const name  = document.getElementById('kf-name').value.trim();
@@ -891,17 +891,20 @@
       '', 'Datum: ' + datum,
     ].join('\n');
     try {
-      await fetch(WORKER, {
+      await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({
-          from: 'DeineFenster.de <noreply@deinefenster.de>',
-          to: ['info@baustoffchrist.de'],
-          reply_to: email,
+          access_key: WEB3FORMS_KEY,
           subject: '[DeineFenster.de] Kontaktanfrage von ' + name,
-          text: internalText,
-          customer_email: email,
-          confirmation: { name, offerId, prodName: 'Kontaktanfrage', breite: '–', hoehe: '–', anzahl: 1 },
+          from_name: 'DeineFenster.de Kontaktformular',
+          replyto: email,
+          'Anfrage-Nr': offerId,
+          'Name': name,
+          'E-Mail': email,
+          'Telefon': tel || '–',
+          'Nachricht': msg,
+          'Datum': datum,
         }),
       });
       ok.classList.remove('hidden');

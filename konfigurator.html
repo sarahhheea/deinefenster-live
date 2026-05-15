@@ -8811,18 +8811,22 @@ async function submitForm(e) {
     ...(wunschLiefertermin ? ['Wunschtermin: ' + wunschLiefertermin] : []),
   ].join('\n');
 
-  // E-Mail läuft über Cloudflare Worker (API-Key bleibt serverseitig geheim)
-  fetch('https://deinefenster-email.deinefenster.workers.dev', {
+  // Mail an Sarah über Web3Forms (Access-Key ist frontend-safe)
+  fetch('https://api.web3forms.com/submit', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
     body: JSON.stringify({
-      from: 'DeineFenster.de <noreply@deinefenster.de>',
-      to: ['info@baustoffchrist.de'],
-      reply_to: email,
+      access_key: '440a94ff-9f42-46af-bf3d-47013dbd8f5f',
       subject: '[DeineFenster.de] Neue Anfrage ' + offerId + ': ' + prodName,
-      text: _emailText,
-      customer_email: email,
-      confirmation: { name, offerId, prodName, breite: S.bMm, hoehe: S.hMm, anzahl: S.qty }
+      from_name: 'DeineFenster.de Konfigurator',
+      replyto: email,
+      'Anfrage-Nr': offerId,
+      'Name': name,
+      'E-Mail': email,
+      'Produkt': prodName,
+      'Maße': S.bMm + ' × ' + S.hMm + ' mm',
+      'Anzahl': S.qty,
+      'Details': _emailText,
     })
   }).catch(() => {});
 
