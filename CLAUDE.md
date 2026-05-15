@@ -1,5 +1,14 @@
 # DeineFenster.de — Claude Anweisungen
 
+## CHANGELOG (neueste zuerst)
+
+### 15.05.2026
+- **index.html · Hofverkauf-Karten redesigned:** Bilder voll sichtbar oben (240px), hellblauer Rand 1.5px (rgba(118,169,250,0.32)), Hover lifts card. Lagerfenster-Karte: LKW-Bild (`hof-lager-lieferung.jpg`, object-position:center) — vorher hatte ich auf Stapler bzw. Hochregal-Halle getauscht, Sarah wollte LKW zurück.
+- **fenster-austauschen-kosten.html (Ankauf-Seite) · Custom-CSS nachgerüstet:** Klassen badge / hero-blob / info-card / btn-whatsapp / faq-summary / ankauf-step / answer-box-blue / gallery-img / notice-box waren im HTML benutzt aber nirgends definiert → Style-Block aus gebrauchte-fenster-kaufen.html portiert + Ankauf-spezifische Klassen ergänzt + global-design.css verlinkt. **3 unpassende Stock-Fotos** (Bar/Hand/Skyline von Unsplash) entfernt — passten nicht zum Thema "alte Fenster verkaufen".
+- **YouTube-Lerning gespeichert:** `~/youtube-learnings/stitch-2-claude-code-design-pipeline.md` — Plan: Stitch-MCP einbinden, `design.md` als Single-Source-of-Truth für alle Seiten generieren (verhindert künftiges Drift wie auf Ankauf-Seite).
+
+---
+
 ## AKTUELLE URLs (Stand 07.05.2026)
 | Was | URL |
 |-----|-----|
