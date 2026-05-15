@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+<meta name="robots" content="noindex,nofollow"/>
+<meta name="theme-color" content="#0e1e3a"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="DF Admin"/>
+<link rel="manifest" href="manifest-admin.webmanifest"/>
+<link rel="apple-touch-icon" href="img/logo/deinefenster-mark.svg"/>
+<title>DeineFenster Admin</title>
+
+<link href="https://fonts.bunny.net/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="fonts/material-symbols.css" rel="stylesheet"/>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{
+  font-family:'Manrope',sans-serif;
+  background:#0a1628;
+  color:#f0f4ff;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  min-height:100vh;
+  min-height:100dvh;
+  padding:24px 20px;
+  padding-top:env(safe-area-inset-top,24px);
+  padding-bottom:env(safe-area-inset-bottom,24px);
+}
+
+h1,h2{font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:-0.02em}
+
+/* ─── Login Screen ─── */
+#loginScreen{
+  width:100%;max-width:380px;
+  display:flex;flex-direction:column;align-items:center;
+  gap:0;
+}
+
+.logo-wrap{
+  width:72px;height:72px;
+  border-radius:20px;
+  background:rgba(34,94,170,0.2);
+  border:1.5px solid rgba(34,94,170,0.4);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:20px;
+}
+.logo-wrap span{font-size:36px;color:#76a9fa}
+
+#loginScreen h1{
+  font-size:26px;font-weight:800;color:#f0f4ff;
+  text-align:center;margin-bottom:6px;
+}
+#loginScreen p{
+  font-size:14px;color:rgba(240,244,255,0.5);
+  text-align:center;margin-bottom:28px;
+}
+
+.input-wrap{
+  width:100%;
+  background:rgba(255,255,255,0.05);
+  border:1.5px solid rgba(255,255,255,0.12);
+  border-radius:16px;
+  padding:16px 18px;
+  display:flex;align-items:center;gap:12px;
+  margin-bottom:12px;
+  transition:border-color .15s,background .15s;
+}
+.input-wrap:focus-within{
+  border-color:#225eaa;
+  background:rgba(34,94,170,0.1);
+}
+.input-wrap span{font-size:20px;color:rgba(240,244,255,0.4)}
+.input-wrap input{
+  flex:1;
+  background:transparent;
+  border:none;
+  outline:none;
+  color:#f0f4ff;
+  font-size:18px;
+  font-family:'Manrope',sans-serif;
+  font-weight:600;
+  letter-spacing:0.08em;
+}
+.input-wrap input::placeholder{
+  color:rgba(240,244,255,0.25);
+  font-weight:400;
+  letter-spacing:normal;
+}
+
+#loginError{
+  width:100%;
+  display:none;
+  background:rgba(186,26,26,0.15);
+  border:1px solid rgba(186,26,26,0.3);
+  border-radius:12px;
+  padding:10px 14px;
+  font-size:13px;
+  color:#ff8a8a;
+  text-align:center;
+  margin-bottom:12px;
+}
+
+.btn-login{
+  width:100%;
+  background:linear-gradient(135deg,#225eaa,#1e4fa0);
+  color:#fff;
+  border:none;
+  border-radius:16px;
+  padding:18px;
+  font-size:16px;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-weight:700;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:transform .15s,opacity .15s;
+  margin-bottom:16px;
+}
+.btn-login:active{transform:scale(0.97)}
+.btn-login:disabled{opacity:0.5;pointer-events:none}
+
+.security-note{
+  font-size:12px;
+  color:rgba(240,244,255,0.25);
+  text-align:center;
+  line-height:1.5;
+}
+.security-note span{font-size:14px;vertical-align:middle;margin-right:4px}
+
+/* ─── Dashboard Screen ─── */
+#dashScreen{
+  display:none;
+  width:100%;max-width:380px;
+  flex-direction:column;align-items:stretch;gap:12px;
+}
+
+.dash-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:4px;
+}
+.dash-header h2{font-size:22px;font-weight:800;color:#f0f4ff}
+.dash-header .user-badge{
+  font-size:12px;color:rgba(240,244,255,0.4);
+  background:rgba(255,255,255,0.06);
+  border-radius:999px;padding:4px 10px;
+}
+
+.action-card{
+  display:flex;align-items:center;gap:16px;
+  background:rgba(255,255,255,0.05);
+  border:1.5px solid rgba(255,255,255,0.1);
+  border-radius:18px;
+  padding:18px 20px;
+  text-decoration:none;
+  color:#f0f4ff;
+  cursor:pointer;
+  transition:background .15s,border-color .15s,transform .12s;
+  -webkit-user-select:none;user-select:none;
+}
+.action-card:active{transform:scale(0.97);background:rgba(34,94,170,0.15)}
+.action-card.primary{
+  background:linear-gradient(135deg,rgba(34,94,170,0.35),rgba(30,79,160,0.25));
+  border-color:rgba(34,94,170,0.5);
+}
+.action-card.primary:active{background:linear-gradient(135deg,rgba(34,94,170,0.5),rgba(30,79,160,0.4))}
+
+.card-icon{
+  width:48px;height:48px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.card-icon.blue{background:rgba(34,94,170,0.3);color:#76a9fa}
+.card-icon.green{background:rgba(10,138,58,0.2);color:#6ee7a8}
+.card-icon.orange{background:rgba(184,127,0,0.2);color:#fbbf24}
+.card-icon.red{background:rgba(186,26,26,0.2);color:#ff8a8a}
+.card-icon span{font-size:24px}
+
+.card-text{flex:1}
+.card-text strong{display:block;font-size:16px;font-weight:700;margin-bottom:2px}
+.card-text small{font-size:12px;color:rgba(240,244,255,0.45);line-height:1.4}
+
+.card-arrow{font-size:20px;color:rgba(240,244,255,0.25)}
+
+.divider{
+  height:1px;background:rgba(255,255,255,0.08);
+  margin:4px 0;
+}
+
+.btn-logout{
+  background:transparent;
+  border:1.5px solid rgba(255,255,255,0.1);
+  border-radius:14px;
+  padding:14px;
+  color:rgba(240,244,255,0.4);
+  font-size:13px;font-family:'Manrope',sans-serif;font-weight:600;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;
+  transition:border-color .15s,color .15s;
+  margin-top:4px;
+}
+.btn-logout:active{border-color:rgba(186,26,26,0.5);color:#ff8a8a}
+.btn-logout span{font-size:16px}
+</style>
+  <script defer data-domain="deinefenster.de" src="https://plausible.io/js/script.js"></script>
+</head>
+<body>
+
+<!-- ─── LOGIN ─── -->
+<div id="loginScreen">
+  <div class="logo-wrap">
+    <span class="material-symbols-outlined">storefront</span>
+  </div>
+  <h1>DeineFenster</h1>
+  <p>Mitarbeiter-Bereich · Inserieren &amp; Verwalten</p>
+
+  <div class="input-wrap">
+    <span class="material-symbols-outlined">lock</span>
+    <input id="pinInput" type="password" inputmode="text" autocomplete="current-password"
+           placeholder="Passwort eingeben" autofocus/>
+  </div>
+
+  <div id="loginError">Falsches Passwort. Bitte nochmal versuchen.</div>
+
+  <button class="btn-login" id="loginBtn" onclick="doLogin()">
+    <span class="material-symbols-outlined" style="font-size:20px">login</span>
+    Einloggen
+  </button>
+
+  <p class="security-note">
+    <span class="material-symbols-outlined" style="font-size:14px">shield</span>
+    Nur für autorisierte Mitarbeiter
+  </p>
+</div>
+
+<!-- ─── DASHBOARD ─── -->
+<div id="dashScreen">
+  <div class="dash-header">
+    <h2>Guten Tag 👋</h2>
+    <span class="user-badge" id="loggedInAs">eingeloggt</span>
+  </div>
+
+  <a class="action-card primary" href="shop-einstellen.html">
+    <div class="card-icon blue">
+      <span class="material-symbols-outlined">add_box</span>
+    </div>
+    <div class="card-text">
+      <strong>Neues Inserat</strong>
+      <small>Fenster oder Tür einstellen — Foto, Maße, Preis</small>
+    </div>
+    <span class="material-symbols-outlined card-arrow">chevron_right</span>
+  </a>
+
+  <a class="action-card" href="shop.html">
+    <div class="card-icon green">
+      <span class="material-symbols-outlined">inventory_2</span>
+    </div>
+    <div class="card-text">
+      <strong>Shop ansehen</strong>
+      <small>Alle aktuellen Inserate im Lager-Shop</small>
+    </div>
+    <span class="material-symbols-outlined card-arrow">chevron_right</span>
+  </a>
+
+  <a class="action-card" href="shop-drucken.html">
+    <div class="card-icon orange">
+      <span class="material-symbols-outlined">print</span>
+    </div>
+    <div class="card-text">
+      <strong>Lager-Schilder drucken</strong>
+      <small>QR-Code-Aufkleber für den Hof generieren</small>
+    </div>
+    <span class="material-symbols-outlined card-arrow">chevron_right</span>
+  </a>
+
+  <div class="divider"></div>
+
+  <button class="btn-logout" onclick="doLogout()">
+    <span class="material-symbols-outlined">logout</span>
+    Ausloggen
+  </button>
+</div>
+
+<script src="js/sheets-config.js"></script>
+<script>
+// ─── Beim Laden: eingeloggt → direkt Dashboard ───────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  const pin = document.getElementById('pinInput');
+  if (pin) {
+    // Enter → Login
+    pin.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  }
+  if (isShopLoggedIn()) showDashboard();
+});
+
+async function doLogin() {
+  const input  = document.getElementById('pinInput');
+  const errEl  = document.getElementById('loginError');
+  const btn    = document.getElementById('loginBtn');
+  const pw     = input ? input.value : '';
+
+  errEl.style.display = 'none';
+  btn.disabled = true;
+  btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:20px;animation:spin .8s linear infinite">progress_activity</span> Moment…';
+
+  const result = await shopLogin(pw);
+
+  btn.disabled = false;
+  btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:20px">login</span> Einloggen';
+
+  if (!result.ok) {
+    errEl.style.display = 'block';
+    if (input) { input.value = ''; input.focus(); }
+    return;
+  }
+
+  showDashboard();
+}
+
+function showDashboard() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('dashScreen').style.display = 'flex';
+  document.body.style.overflow = 'auto';
+}
+
+function doLogout() {
+  clearShopToken();
+  document.getElementById('dashScreen').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  const inp = document.getElementById('pinInput');
+  if (inp) { inp.value = ''; inp.focus(); }
+}
+</script>
+
+<style>
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</body>
+</html>

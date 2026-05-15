@@ -24,8 +24,9 @@
 <link rel="apple-touch-icon" href="img/logo/deinefenster-mark.svg"/>
 
 <link rel="stylesheet" href="css/tailwind.css"/>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="css/nav.css?v=3"/>
+<link href="https://fonts.bunny.net/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="fonts/material-symbols.css" rel="stylesheet"/>
 
 <script>
 tailwind.config = {
@@ -61,7 +62,7 @@ tailwind.config = {
 </script>
 
 <style>
-  body { font-family: 'Manrope', sans-serif; background: #f9f9ff; }
+  body { font-family: 'Manrope', sans-serif; background: #e8edf5; }
   h1, h2, h3, h4 { font-family: 'Plus Jakarta Sans', sans-serif; }
 
   .glass-nav { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
@@ -79,17 +80,39 @@ tailwind.config = {
     transition: all 0.2s;
   }
   .step-circle.active { background: #225eaa; color: white; }
-  .step-circle.done { background: #0a8a3a; color: white; }
+  .step-circle.done { background: #225eaa; color: white; }
   .step-line {
     flex: 1; height: 2px; background: #dde2f3;
     margin: 0 8px; transition: background 0.2s;
   }
-  .step-line.done { background: #0a8a3a; }
+  .step-line.done { background: #225eaa; }
+
+  /* Formular-Karten deutlicher */
+  .bg-white.rounded-2xl {
+    background: #ffffff !important;
+    border-color: #c4cad8 !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  }
+  .bg-white.rounded-2xl h4,
+  .bg-white.rounded-2xl h2,
+  .bg-white.rounded-2xl h3 { color: #0f1923; }
+  .bg-white.rounded-2xl span.block { color: #374151; }
+
+  /* Input-Felder kontrastreicher — Checkboxen/Radios AUSGENOMMEN */
+  input:not([type=checkbox]):not([type=radio]), select, textarea {
+    background: #f0f3f9 !important;
+    border-color: #8e97ad !important;
+    color: #1d1d1f !important;
+  }
+  input::placeholder, textarea::placeholder { color: #5a6374 !important; }
+  /* Tailwind bg-surface-container-low auf Inputs überschreiben */
+  .bg-surface-container-low { background: #f0f3f9 !important; }
+  .border-outline-variant { border-color: #8e97ad !important; }
 
   /* Kategorie-Karten */
   .kat-karte {
     background: white;
-    border: 2px solid #dde2f3;
+    border: 2px solid #b0b8cc;
     border-radius: 16px;
     padding: 20px 16px;
     cursor: pointer;
@@ -108,7 +131,7 @@ tailwind.config = {
   }
   .kat-karte .icon-wrap {
     width: 56px; height: 56px; border-radius: 16px;
-    background: linear-gradient(135deg, #d6e3ff, #a9c7ff);
+    background: linear-gradient(135deg, #b8cef0, #7aaade);
     display: flex; align-items: center; justify-content: center;
     margin: 0 auto 12px;
     transition: all 0.2s;
@@ -117,25 +140,26 @@ tailwind.config = {
     background: linear-gradient(135deg, #225eaa, #1e3a8a);
   }
   .kat-karte.selected .icon-wrap span { color: white !important; }
-  .kat-karte .icon-wrap span { color: #225eaa; font-size: 28px; }
+  .kat-karte .icon-wrap span { color: #1a4a8a; font-size: 28px; }
 
-  /* Custom Checkbox */
+  /* Checkbox — natives Rendering, Markenfarbe via accent-color (iOS 15.4+) */
   .filter-check {
-    appearance: none; -webkit-appearance: none;
-    width: 18px; height: 18px;
-    border: 1.5px solid #c2c6d3; border-radius: 4px;
-    cursor: pointer; position: relative; flex-shrink: 0;
+    width: 22px; height: 22px; min-width: 22px;
+    cursor: pointer; flex-shrink: 0;
+    accent-color: #225eaa;
   }
-  .filter-check:checked { background: #225eaa; border-color: #225eaa; }
-  .filter-check:checked::after {
-    content: ''; position: absolute; top: 2px; left: 5px;
-    width: 5px; height: 9px; border: solid white;
-    border-width: 0 2px 2px 0; transform: rotate(45deg);
+  /* Label-Zeile beim Abhaken hervorheben */
+  label:has(.filter-check:checked) {
+    color: #225eaa;
+    font-weight: 600;
   }
+
+  /* Stepper Pille */
+  .step-circle { background: #c4cad8; color: #1d1d1f; }
 
   /* Drop-Zone */
   .drop-zone {
-    border: 2px dashed #c2c6d3;
+    border: 2px dashed #a0a9bc;
     border-radius: 16px;
     padding: 32px 20px;
     text-align: center;
@@ -164,10 +188,37 @@ tailwind.config = {
   }
   .snackbar.show { transform: translateX(-50%) translateY(0); }
 </style>
+  <script defer data-domain="deinefenster.de" src="https://plausible.io/js/script.js"></script>
 </head>
-<body class="bg-surface text-on-surface">
+<body>
 
 <!-- Navigation -->
+<div id="topbar">
+  <div class="topbar-inner">
+    <nav class="topbar-links">
+      <a href="ueber-drutex.html" class="topbar-link">Hersteller</a>
+      <span class="topbar-dot">·</span>
+      <a href="faq.html" class="topbar-link">FAQ</a>
+      <span class="topbar-dot">·</span>
+      <a href="ratgeber/" class="topbar-link">Ratgeber</a>
+      <span class="topbar-dot">·</span>
+      <a href="ueber-uns.html" class="topbar-link">Über uns</a>
+      <span class="topbar-dot">·</span>
+      <a href="kontakt.html" class="topbar-link">Kontakt</a>
+    </nav>
+    <div class="topbar-contacts">
+      <a href="tel:+4933812148373" class="topbar-phone">
+        <span class="material-symbols-outlined" style="font-size:12px;font-variation-settings:'FILL' 1">call</span>
+        03381 / 2148373
+      </a>
+      <span class="topbar-dot">·</span>
+      <a href="mailto:info@baustoffchrist.de" class="topbar-phone">
+        <span class="material-symbols-outlined" style="font-size:12px;font-variation-settings:'FILL' 1">mail</span>
+        info@baustoffchrist.de
+      </a>
+    </div>
+  </div>
+</div>
 <nav id="navbar" class="fixed top-0 w-full z-50 glass-nav">
   <div class="flex justify-between items-center px-6 md:px-12 py-4 max-w-[1440px] mx-auto">
     <a href="index.html" class="text-xl md:text-2xl font-bold tracking-tighter text-white">DeineFenster<span class="text-primary-container">.de</span></a>
@@ -218,27 +269,37 @@ tailwind.config = {
   </div>
 </div>
 
-<!-- ── SCHRITT 1: ZUSTAND + KATEGORIE (Sarah-Polish 30.04.2026 v2: ordentlich, klar gegliedert) ── -->
+<!-- ── SCHRITT 1: ZUSTAND + KATEGORIE ── -->
 <section id="step1" class="max-w-[1200px] mx-auto px-6 md:px-12 pb-16">
 
   <!-- ─── Block 1: Zustand ─── -->
   <div class="bg-white rounded-2xl border border-outline-variant p-6 md:p-8 mb-6">
     <div class="flex items-center gap-3 mb-1">
       <div class="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white font-bold text-sm">1</div>
-      <h2 class="text-xl md:text-2xl font-extrabold">Neu oder Gebraucht?</h2>
+      <h2 class="text-xl md:text-2xl font-extrabold" style="color:#1d1d1f">Zustand wählen</h2>
     </div>
-    <p class="text-sm text-on-surface-variant mb-5 ml-11">Wähl zuerst den Zustand. Bei Gebrauchtware wird das Drutex-System nicht abgefragt.</p>
+    <p class="text-sm mb-5 ml-11" style="color:#4b5563">Bei Gebrauchtware, Vermessen und Sonderposten wird das Drutex-System nicht abgefragt.</p>
 
-    <div class="grid grid-cols-2 gap-3 max-w-md ml-11">
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 ml-11">
       <button type="button" id="zustandNeu" class="kat-karte" data-zustand="neu" style="padding:18px 14px">
         <div class="icon-wrap" style="width:44px;height:44px;border-radius:12px"><span class="material-symbols-outlined" style="font-size:24px">auto_awesome</span></div>
-        <h3 class="text-base font-bold leading-tight">Neu</h3>
-        <p class="text-[11px] text-on-surface-variant mt-0.5">Drutex-Originalware</p>
+        <h3 class="text-base font-bold leading-tight" style="color:#1d1d1f">Neu</h3>
+        <p class="text-[11px] mt-0.5" style="color:#4b5563">Drutex-Originalware</p>
       </button>
       <button type="button" id="zustandGebraucht" class="kat-karte" data-zustand="gebraucht" style="padding:18px 14px">
         <div class="icon-wrap" style="width:44px;height:44px;border-radius:12px"><span class="material-symbols-outlined" style="font-size:24px">recycling</span></div>
-        <h3 class="text-base font-bold leading-tight">Gebraucht</h3>
-        <p class="text-[11px] text-on-surface-variant mt-0.5">Hersteller egal</p>
+        <h3 class="text-base font-bold leading-tight" style="color:#1d1d1f">Gebraucht</h3>
+        <p class="text-[11px] mt-0.5" style="color:#4b5563">Hersteller egal</p>
+      </button>
+      <button type="button" id="zustandVermessen" class="kat-karte" data-zustand="vermessen" style="padding:18px 14px">
+        <div class="icon-wrap" style="width:44px;height:44px;border-radius:12px"><span class="material-symbols-outlined" style="font-size:24px">straighten</span></div>
+        <h3 class="text-base font-bold leading-tight" style="color:#1d1d1f">Vermessen</h3>
+        <p class="text-[11px] mt-0.5" style="color:#4b5563">Einzelmaß-Stück</p>
+      </button>
+      <button type="button" id="zustandSonderposten" class="kat-karte" data-zustand="sonderposten" style="padding:18px 14px">
+        <div class="icon-wrap" style="width:44px;height:44px;border-radius:12px"><span class="material-symbols-outlined" style="font-size:24px">local_offer</span></div>
+        <h3 class="text-base font-bold leading-tight" style="color:#1d1d1f">Sonderposten</h3>
+        <p class="text-[11px] mt-0.5" style="color:#4b5563">Sonderangebot</p>
       </button>
     </div>
   </div>
@@ -247,9 +308,9 @@ tailwind.config = {
   <div class="bg-white rounded-2xl border border-outline-variant p-6 md:p-8 mb-6">
     <div class="flex items-center gap-3 mb-1">
       <div class="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white font-bold text-sm">2</div>
-      <h2 class="text-xl md:text-2xl font-extrabold">Welche Kategorie?</h2>
+      <h2 class="text-xl md:text-2xl font-extrabold" style="color:#1d1d1f">Welche Kategorie?</h2>
     </div>
-    <p class="text-sm text-on-surface-variant mb-5 ml-11">Hauptkategorie wählen. Eigenschaften & Maße kommen im nächsten Schritt.</p>
+    <p class="text-sm mb-5 ml-11" style="color:#4b5563">Hauptkategorie wählen. Eigenschaften & Maße kommen im nächsten Schritt.</p>
 
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 ml-11" id="kategorieGrid">
       <!-- Befüllt von JS -->
@@ -322,7 +383,7 @@ tailwind.config = {
         <input id="bildInput" type="file" accept="image/*" multiple class="hidden"/>
 
         <!-- Drop-Zone nur auf Desktop für Drag&Drop sichtbar -->
-        <div id="dropZone" class="drop-zone hidden md:block" style="padding:18px;background:#fafafc;border-style:dashed;cursor:pointer">
+        <div id="dropZone" class="drop-zone hidden md:block" style="padding:18px;background:#f0f3f9;border-style:dashed;cursor:pointer">
           <p class="text-[11px] text-on-surface-variant text-center">oder Bilder hierher ziehen (JPG/PNG · max. 20 · empfohlen 1200×900 px)</p>
         </div>
 
@@ -520,8 +581,7 @@ tailwind.config = {
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-<script src="js/supabase-config.js" defer></script>
+<script src="js/sheets-config.js" defer></script>
 <script src="js/shop-einstellen.js" defer></script>
 </body>
 </html>

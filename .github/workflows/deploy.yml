@@ -1,0 +1,42 @@
+name: Auto-Deploy zu GitHub Pages
+
+on:
+  push:
+    branches: [ cowork-agentenaufbau, main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code auschecken
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Dateien ins Public-Repo pushen
+        uses: cpina/github-action-push-to-another-repository@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.DEPLOY_TOKEN }}
+        with:
+          source-directory: '.'
+          destination-github-username: 'sarahhheea'
+          destination-repository-name: 'deinefenster-live'
+          target-branch: main
+          exclude-paths: |
+            .git
+            node_modules
+            _archive
+            _cowork-uebergabe
+            _screenshots
+            audits
+            docs
+            scripts
+            img/masters
+            *.md
+            *.py
+            *.sql
+            database/
+            deinefenster-komplett-*.zip
+            konfigurator-*.png
+            result-*.png
+            before-generate.png
