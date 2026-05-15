@@ -9,9 +9,10 @@
   'use strict';
 
   const CART_STORAGE_KEY = 'df_cart_v1';
-  const WH = 'https://hook.eu1.make.com/so6vhvekae4ve7e3peh7vgcgqmv7cbrc';
-  const RESEND_KEY = 're_5o5JYMky_MXfQoo7vAZoaNMn4KzLrNyht';
-  const FROM_ADDR = 'DeineFenster.de <onboarding@resend.dev>';
+  // Alle externen Mail-/Webhook-Calls laufen über den Cloudflare-Worker.
+  // Keys liegen NUR dort als Worker-Secrets (RESEND_API_KEY, WEB3FORMS_KEY, MAKE_WEBHOOK_URL).
+  const WORKER = 'https://deinefenster-email.deinefenster.workers.dev';
+  const FROM_ADDR = 'DeineFenster.de <noreply@deinefenster.de>';
 
   function fmt(n) {
     return Number(n).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '\u00a0€';
@@ -356,13 +357,13 @@
 </td></tr></table>
 </body></html>`;
 
-      // ── Bestätigungsmail an Kunden via Resend ───────────────────────────
+      // ── Bestätigungsmail an Kunden via Worker → Resend ─────────────────
       try {
-        await fetch('https://api.resend.com/emails', {
+        await fetch(WORKER + '/resend', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${RESEND_KEY}` },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            from: 'DeineFenster.de <noreply@deinefenster.de>',
+            from: FROM_ADDR,
             to: [formData.email],
             subject: `✅ Ihre Anfrage ${offerId} ist eingegangen – DeineFenster.de`,
             html: kundenHtml,
@@ -370,16 +371,15 @@
         });
       } catch (e) { console.warn('Kunden-Bestätigung fehlgeschlagen:', e); }
 
-      // ── Benachrichtigung via Web3Forms (CORS-sicher, kein Server nötig) ──
+      // ── Sarah-Benachrichtigung via Worker → Web3Forms ──────────────────
       try {
         const positionen = cart.map((item, idx) =>
           `${idx + 1}. ${item.qty}× ${item.summary || (item.config && item.config.prod) || '–'}`
         ).join(' | ');
-        await fetch('https://api.web3forms.com/submit', {
+        await fetch(WORKER + '/web3forms', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            access_key: '440a94ff-9f42-46af-bf3d-47013dbd8f5f',
             subject: `🔔 Neue Anfrage ${offerId} — DeineFenster.de`,
             from_name: 'DeineFenster.de Konfigurator',
             'Anfrage-Nr': offerId,
@@ -396,9 +396,9 @@
         });
       } catch (e) { console.warn('Web3Forms fehlgeschlagen:', e); }
 
-      // Make.com Webhook senden (inkl. Bildanhänge)
+      // ── Make.com Webhook via Worker (inkl. Bildanhänge) ────────────────
       try {
-        await fetch(WH, {
+        await fetch(WORKER + '/make', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ deal: deal, sarah_html: sarahHtml }),

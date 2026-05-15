@@ -1,16 +1,16 @@
 /* ─────────────────────────────────────────────────────────────────────
-   GitHub-basiertes Shop-Backend für DeineFenster.de
-   Ersetzt Google Apps Script komplett.
+   Shop-Backend für DeineFenster.de — über Cloudflare-Worker-Proxy
    Daten:  data/shop-produkte.json  (im GitHub-Repo)
    Bilder: img/shop/               (im GitHub-Repo → GitHub Pages CDN)
-   Stand:  11.05.2026 — SHA-Retry + localStorage-Backup
+
+   ⚠ SECURITY: Der GitHub-Token liegt AUSSCHLIESSLICH als Secret im
+   Worker (cloudflare-worker/github-proxy.js). Das Frontend kennt nur
+   das Shop-Passwort — der Worker prüft es und führt die Operation
+   server-side mit dem Token aus.
    ───────────────────────────────────────────────────────────────────── */
 
-const _GH_REPO = 'sarahhheea/deinefenster-live';
-const _GH_TOK  = ['gho_FVoOt','E1NYndlH2','8C7IADxVO','LqTV0i21P','sFYB'].join('');
-const _SHOP_PW = 'Fenster2026';
-const _GH_API  = 'https://api.github.com';
-const _PAGES   = 'https://sarahhheea.github.io/deinefenster-live';
+const _WORKER = 'https://deinefenster-shop.deinefenster.workers.dev'; // siehe SECURITY-SETUP.md
+const _PAGES  = 'https://sarahhheea.github.io/deinefenster-live';
 const _JSON_PATH = 'data/shop-produkte.json';
 
 /* ─── Session ─────────────────────────────────────────────────────────── */
@@ -20,48 +20,62 @@ function setShopToken(t) { localStorage.setItem('df_shop_token', t); }
 
 function clearShopToken() {
   localStorage.removeItem('df_shop_token');
+  localStorage.removeItem('df_shop_pass');
   localStorage.removeItem('df_shop_email');
 }
 
 function isShopLoggedIn() {
-  return localStorage.getItem('df_shop_token') === 'ok';
+  return !!localStorage.getItem('df_shop_pass');
 }
 
 /* ─── Login ───────────────────────────────────────────────────────────── */
 
 async function shopLogin(password) {
-  if (password !== _SHOP_PW) {
-    return { ok: false, error: 'Falsches Passwort.' };
+  try {
+    const res = await fetch(_WORKER + '/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok && data.ok) {
+      // Passwort wird gebraucht um jeden Folge-Call zu authentifizieren.
+      // Es bleibt im localStorage (wie bisher); nicht ideal, aber kein
+      // GitHub-Token mehr — und es ist nur das Shop-Passwort, kein Schlüssel.
+      localStorage.setItem('df_shop_pass', password);
+      localStorage.setItem('df_shop_token', 'ok');
+      return { ok: true, token: 'ok' };
+    }
+    return { ok: false, error: data.error || 'Falsches Passwort.' };
+  } catch (err) {
+    return { ok: false, error: 'Verbindung zum Server fehlgeschlagen: ' + err.message };
   }
-  localStorage.setItem('df_shop_token', 'ok');
-  return { ok: true, token: 'ok' };
 }
 
-/* ─── GitHub API Helpers ──────────────────────────────────────────────── */
+function _authHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    'X-Shop-Pass': localStorage.getItem('df_shop_pass') || '',
+  };
+}
 
-async function _ghGet(path) {
-  const res = await fetch(`${_GH_API}/repos/${_GH_REPO}/contents/${path}`, {
-    headers: {
-      Authorization: `token ${_GH_TOK}`,
-      Accept: 'application/vnd.github.v3+json'
-    }
+/* ─── Worker-Helfer ──────────────────────────────────────────────────── */
+
+async function _proxyGet(path) {
+  const res = await fetch(_WORKER + '/get', {
+    method: 'POST',
+    headers: _authHeaders(),
+    body: JSON.stringify({ path }),
   });
-  if (!res.ok) throw new Error('GitHub Lesefehler: ' + res.status);
+  if (!res.ok) throw new Error('GitHub Lesefehler (' + res.status + ')');
   return res.json();
 }
 
-/* Gibt { ok: true } oder { ok: false, status, message } zurück */
-async function _ghPutRaw(path, content64, sha, message) {
-  const body = { message, content: content64 };
-  if (sha) body.sha = sha;
-  const res = await fetch(`${_GH_API}/repos/${_GH_REPO}/contents/${path}`, {
-    method: 'PUT',
-    headers: {
-      Authorization: `token ${_GH_TOK}`,
-      Accept: 'application/vnd.github.v3+json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(body)
+async function _proxyPut(path, content64, sha, message) {
+  const res = await fetch(_WORKER + '/put', {
+    method: 'POST',
+    headers: _authHeaders(),
+    body: JSON.stringify({ path, content64, sha, message }),
   });
   if (res.ok) return { ok: true, data: await res.json() };
   const txt = await res.text();
@@ -84,7 +98,7 @@ function _jsonToBase64(obj) {
   return btoa(binary);
 }
 
-/* ─── localStorage-Backup (Sicherheitsnetz bei GitHub-Fehlern) ───────── */
+/* ─── localStorage-Backup (Sicherheitsnetz bei Worker-Fehlern) ───────── */
 
 function _saveBackup(json) {
   try { localStorage.setItem('df_shop_backup', JSON.stringify(json)); } catch (e) { /* kein Platz */ }
@@ -98,28 +112,20 @@ function _loadBackup() {
 }
 
 /* ─── Kernfunktion: JSON modifizieren + schreiben mit SHA-Retry ───────── */
-/*
-   modifier(json) verändert das JSON-Objekt in-place.
-   Bei 409-Konflikt (SHA veraltet): frischen SHA holen + nochmal versuchen.
-   Bis zu maxRetries Versuche, mit kurzem Warten zwischen den Versuchen.
-*/
+
 async function _writeJSON(modifier, message, maxRetries = 3) {
   let lastError = null;
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     if (attempt > 0) {
-      // Kurz warten bevor Retry (200ms, 400ms, ...)
       await new Promise(r => setTimeout(r, 200 * attempt));
     }
-    const file = await _ghGet(_JSON_PATH);
+    const file = await _proxyGet(_JSON_PATH);
     const json = _base64ToJson(file.content);
-    // Backup vor dem Schreiben
     _saveBackup(json);
-    // Modifier anwenden
     modifier(json);
-    const result = await _ghPutRaw(_JSON_PATH, _jsonToBase64(json), file.sha, message);
-    if (result.ok) return json; // Erfolg
+    const result = await _proxyPut(_JSON_PATH, _jsonToBase64(json), file.sha, message);
+    if (result.ok) return json;
     if (result.status === 409) {
-      // SHA-Konflikt — frischer Versuch mit aktuellem SHA
       lastError = 'SHA-Konflikt (gleichzeitiger Schreibvorgang), Retry ' + (attempt + 1);
       continue;
     }
@@ -128,11 +134,9 @@ async function _writeJSON(modifier, message, maxRetries = 3) {
   throw new Error('Schreibvorgang nach ' + maxRetries + ' Versuchen gescheitert. ' + lastError);
 }
 
-/* ─── Produktdaten lesen ──────────────────────────────────────────────── */
+/* ─── Produktdaten lesen (öffentlich — kein Auth nötig) ───────────────── */
 
 async function _ladeJSON() {
-  // Kein Cache-Buster — Browser-Cache erlaubt, GitHub Pages liefert nach Push automatisch frisch
-  // Timeout nach 8 Sekunden damit der Shop nie ewig hängt
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 8000);
   try {
@@ -150,7 +154,7 @@ async function sheetsGet(action, params) {
   const data = await _ladeJSON();
 
   if (action === 'produkte') {
-    return data; // { produkte: [...], kategorien: {...} }
+    return data;
   }
   if (action === 'produkt' && params && params.id) {
     const p = (data.produkte || []).find(x => String(x.id) === String(params.id));
@@ -174,7 +178,7 @@ async function _uploadBild(body) {
   try {
     const fileName = body.fileName || `${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;
     const path     = `img/shop/${fileName}`;
-    const result   = await _ghPutRaw(path, body.imageBase64, null, `Bild: ${fileName}`);
+    const result   = await _proxyPut(path, body.imageBase64, null, `Bild: ${fileName}`);
     if (!result.ok) throw new Error(result.message);
     return { url: `${_PAGES}/${path}` };
   } catch (err) {
