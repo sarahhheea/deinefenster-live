@@ -26,6 +26,95 @@
   .nav-link { position: relative; }
   .nav-link::after { content:''; position:absolute; bottom:-5px; left:0; width:0; height:2px; background:#76a9fa; border-radius:1px; transition:width 0.22s ease; }
   .nav-link:hover::after { width:100%; }
+
+  /* Anfrage-Nummer prominent */
+  .offer-id-box {
+    background: linear-gradient(135deg, rgba(118,169,250,0.12), rgba(118,169,250,0.04));
+    border: 1px solid rgba(118,169,250,0.3);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    text-align: center;
+  }
+  .offer-id-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #76a9fa;
+    text-transform: uppercase;
+    letter-spacing: 0.28em;
+    margin-bottom: 6px;
+    display: block;
+  }
+  .offer-id-number {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 800;
+    font-size: clamp(1.6rem, 4vw, 2rem);
+    color: #fff;
+    letter-spacing: -0.01em;
+    user-select: all;
+    cursor: copy;
+  }
+  .offer-id-hint {
+    font-size: 0.75rem;
+    color: rgba(232,238,255,0.5);
+    margin-top: 8px;
+  }
+  .copy-feedback {
+    display: inline-block;
+    font-size: 0.7rem;
+    color: #4ade80;
+    margin-left: 8px;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .copy-feedback.show { opacity: 1; }
+
+  /* Druck-Button */
+  .btn-print {
+    background: rgba(255,255,255,0.06);
+    color: rgba(232,238,255,0.85);
+    border: 1px solid rgba(255,255,255,0.12);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    padding: 14px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .btn-print:hover { border-color: #76a9fa; color: #76a9fa; }
+
+  /* Druck-Stile: nur Quittung drucken, kein Nav/Footer */
+  @media print {
+    body { background: white !important; color: #111 !important; }
+    #topbar, #navbar, footer, .no-print { display: none !important; }
+    main { padding: 0 !important; min-height: auto !important; }
+    .success-card {
+      background: white !important;
+      border: 1px solid #999 !important;
+      box-shadow: none !important;
+      max-width: 100% !important;
+      padding: 24px !important;
+    }
+    .success-card * {
+      color: #111 !important;
+      background: transparent !important;
+      border-color: #ccc !important;
+    }
+    .offer-id-box {
+      background: #f5f5f5 !important;
+      border: 2px solid #225eaa !important;
+    }
+    .offer-id-number { color: #225eaa !important; }
+    .offer-id-label { color: #225eaa !important; }
+    h1 { color: #225eaa !important; }
+    a { color: #225eaa !important; text-decoration: underline !important; }
+  }
 </style>
 </head>
 <body>
@@ -91,7 +180,7 @@
   <div style="width:100%;max-width:540px;">
 
     <!-- Success Card -->
-    <div style="background:#0f1c30;border:1px solid rgba(118,169,250,0.12);border-radius:14px;padding:48px 40px;text-align:center;">
+    <div class="success-card" style="background:#0f1c30;border:1px solid rgba(118,169,250,0.12);border-radius:14px;padding:48px 40px;text-align:center;">
 
       <!-- Icon -->
       <div style="width:72px;height:72px;background:rgba(74,222,128,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;margin:0 auto 28px;">
@@ -106,17 +195,27 @@
       </div>
 
       <!-- Headline -->
-      <h1 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:clamp(1.6rem,4vw,2.2rem);color:#fff;letter-spacing:-0.03em;margin-bottom:12px;">
-        Anfrage gesendet!
+      <h1 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:clamp(1.6rem,4vw,2.2rem);color:#fff;letter-spacing:-0.03em;margin-bottom:20px;">
+        Vielen Dank!
       </h1>
+
+      <!-- Anfrage-Nummer prominent -->
+      <div class="offer-id-box" id="offerIdBox">
+        <span class="offer-id-label">Ihre Anfrage-Nummer</span>
+        <div class="offer-id-number" id="offerIdValue" onclick="copyOfferId()" title="Klicken zum Kopieren">–</div>
+        <div class="offer-id-hint">
+          <span id="copyHint">Bitte notieren — bei Rückfragen bitte angeben</span>
+          <span class="copy-feedback" id="copyFeedback">✓ kopiert</span>
+        </div>
+      </div>
 
       <!-- Product name (from URL param) -->
       <p id="prodname" style="color:#76a9fa;font-weight:600;font-size:1rem;margin-bottom:16px;min-height:1.4em;"></p>
 
       <!-- Message -->
       <p style="color:rgba(232,238,255,0.6);font-size:0.95rem;line-height:1.65;margin-bottom:28px;">
-        Vielen Dank. Wir haben Ihre Anfrage erhalten und melden uns innerhalb von
-        <strong style="color:#e8eeff;">24 Stunden</strong> mit einem persönlichen Angebot.
+        Wir haben Ihre Anfrage erhalten und melden uns innerhalb von
+        <strong style="color:#e8eeff;">24 Stunden</strong> persönlich mit einem unverbindlichen Angebot bei Ihnen.
       </p>
 
       <!-- Config summary box -->
@@ -125,14 +224,15 @@
         <div id="summary-content" style="font-size:0.85rem;color:rgba(232,238,255,0.65);line-height:1.7;font-family:monospace;"></div>
       </div>
 
-      <!-- Fallback hint -->
-      <p style="font-size:0.8rem;color:rgba(232,238,255,0.35);margin-bottom:12px;">E-Mail-App nicht geöffnet?</p>
-
       <!-- Buttons -->
-      <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px;">
+      <div class="no-print" style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px;">
+        <button type="button" onclick="window.print()" class="btn-print">
+          <span class="material-symbols-outlined" style="font-size:18px;font-variation-settings:'FILL' 1">print</span>
+          Bestätigung speichern / drucken
+        </button>
         <a id="btn-email" href="mailto:info@baustoffchrist.de" style="display:flex;align-items:center;justify-content:center;gap:10px;background:#76a9fa;color:#001830;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:0.9rem;padding:14px 24px;border-radius:8px;text-decoration:none;transition:opacity 0.2s;" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
           <span class="material-symbols-outlined" style="font-size:18px;font-variation-settings:'FILL' 1">mail</span>
-          E-Mail nochmal öffnen
+          Bestätigung an meine E-Mail senden
         </a>
         <a id="btn-wa" href="https://wa.me/491717263776" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;gap:10px;background:rgba(37,211,102,0.12);color:#4ade80;border:1px solid rgba(37,211,102,0.25);font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:0.9rem;padding:14px 24px;border-radius:8px;text-decoration:none;transition:opacity 0.2s;" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="#4ade80"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
@@ -182,11 +282,38 @@
     i.textContent = m.classList.contains('hidden') ? 'menu' : 'close';
   });
 
+  // Copy-to-clipboard für Anfrage-Nummer
+  function copyOfferId() {
+    const num = document.getElementById('offerIdValue').textContent.trim();
+    if (!num || num === '–') return;
+    navigator.clipboard.writeText(num).then(() => {
+      const fb = document.getElementById('copyFeedback');
+      const hint = document.getElementById('copyHint');
+      hint.style.opacity = '0';
+      fb.classList.add('show');
+      setTimeout(() => {
+        fb.classList.remove('show');
+        hint.style.opacity = '1';
+      }, 1800);
+    }).catch(() => {});
+  }
+
+  // Anfrage-Nummer: zuerst URL-Parameter ?offer=, sonst sessionStorage
+  function setOfferId(id) {
+    if (id) document.getElementById('offerIdValue').textContent = id;
+  }
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    setOfferId(urlParams.get('offer'));
+  } catch(e) {}
+
   // Read config from sessionStorage (set by konfigurator.html)
   try {
     const raw = sessionStorage.getItem('df_anfrage');
     if (raw) {
       const d = JSON.parse(raw);
+
+      if (d.offerId) setOfferId(d.offerId);
 
       if (d.prodName) {
         document.getElementById('prodname').textContent = 'Ihre Anfrage: ' + d.prodName;
@@ -216,23 +343,35 @@
         box.classList.remove('hidden');
       }
 
-      // Pre-fill mailto button
-      const subj = encodeURIComponent('Fensteranfrage: ' + (d.prodName || 'Konfiguration'));
+      // Pre-fill mailto button — als Bestätigung an Kunden selbst
+      const offerIdNow = document.getElementById('offerIdValue').textContent.trim();
+      const subj = encodeURIComponent('Ihre Anfrage ' + (offerIdNow && offerIdNow !== '–' ? offerIdNow + ' ' : '') + 'bei DeineFenster.de');
       const bodyLines = [
-        'Guten Tag,',
+        'Bestätigung Ihrer Anfrage bei DeineFenster.de',
+        '═══════════════════════════════════════════',
         '',
-        'hiermit sende ich meine Konfiguration von DeineFenster.de:',
+        ...(offerIdNow && offerIdNow !== '–' ? ['Anfrage-Nr: ' + offerIdNow, ''] : []),
+        'Sehr geehrte/r ' + (d.name || 'Kundin / Kunde') + ',',
         '',
-        ...lines.map(([k, v]) => k + ': ' + v),
+        'Ihre Anfrage ist bei uns eingegangen. Wir melden uns innerhalb von 24 Stunden persönlich mit einem unverbindlichen Angebot.',
         '',
-        'Bitte senden Sie mir ein Angebot.',
+        'IHRE KONFIGURATION',
+        ...lines.map(([k, v]) => '  ' + k + ': ' + v),
+        '',
+        'KONTAKT FENSTERHANDEL CHRIST',
+        '  Telefon: 03381 / 214 83 73',
+        '  E-Mail:  info@baustoffchrist.de',
+        '  Web:     www.deinefenster.de',
         '',
         'Mit freundlichen Grüßen',
-        d.name || ''
+        'Fensterhandel Christ',
+        'Brandenburg an der Havel'
       ];
       const body = encodeURIComponent(bodyLines.join('\n'));
+      // Mail geht an den Kunden selbst (seine Adresse aus dem Formular) → er hat die Bestätigung in seinem Postfach
+      const mailTo = d.email ? encodeURIComponent(d.email) : 'info@baustoffchrist.de';
       document.getElementById('btn-email').href =
-        'mailto:info@baustoffchrist.de?subject=' + subj + '&body=' + body;
+        'mailto:' + mailTo + '?subject=' + subj + '&body=' + body;
 
       // Pre-fill WhatsApp button
       const waText = encodeURIComponent(

@@ -1003,7 +1003,16 @@ function handleSubmit(e) {
   submitAngebot(formData, cart, uploadedImages, {
     onSuccess: (offerId, cartCount, imgCount) => {
       const prodName = cart[0] ? submitCoreHelpers.prodName(cart[0].config.prod) : 'Anfrage';
-      window.location.href = `danke.html?prod=${encodeURIComponent(prodName)}&imgs=${imgCount}`;
+      // Kundendaten für Danke-Seite zwischenspeichern (Anfrage-Nr, Name, E-Mail)
+      try {
+        sessionStorage.setItem('df_anfrage', JSON.stringify({
+          offerId, prodName,
+          name: formData.name, email: formData.email,
+          ort: formData.ort,
+          anzahl: cartCount,
+        }));
+      } catch(e) {}
+      window.location.href = `danke.html?prod=${encodeURIComponent(prodName)}&imgs=${imgCount}&offer=${encodeURIComponent(offerId)}`;
     },
     onError: (msg) => {
       fsub.disabled = false;
