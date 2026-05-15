@@ -142,8 +142,22 @@
     .oeff-btn:hover { background: rgba(118,169,250,0.18); border-color: rgba(118,169,250,0.4); }
     .oeff-btn .mat { font-size: 16px; }
 
-    .badge { background: rgba(118,169,250,0.12); color: #76a9fa; border: 1px solid rgba(118,169,250,0.28); border-radius: 6px; padding: 5px 14px; font-size: 12.5px; font-weight: 600; display: inline-block; }
-    .badge-gold { background: rgba(118,169,250,0.12); color:#76a9fa; border: 1px solid rgba(118,169,250,0.28); border-radius: 6px; padding: 5px 14px; font-size: 12.5px; font-weight: 600; display: inline-block; }
+    /* webwerk-Stil Badge-Label */
+    .section-label {
+      display: inline-flex; align-items: center; gap: 10px; margin-bottom: 16px;
+    }
+    .section-label-line {
+      width: 22px; height: 1px; background: #76a9fa; display: inline-block; flex-shrink: 0;
+    }
+    .section-label-text {
+      color: #76a9fa; font-size: 11px; letter-spacing: 0.18em; font-weight: 700; text-transform: uppercase;
+    }
+    .section-label-centered {
+      display: inline-flex; align-items: center; gap: 10px; margin-bottom: 16px;
+    }
+
+    .badge { background: rgba(118,169,250,0.1); color: #76a9fa; border: 1px solid rgba(118,169,250,0.28); border-radius: 6px; padding: 5px 14px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 7px; letter-spacing: 0.06em; text-transform: uppercase; }
+    .badge-gold { background: rgba(118,169,250,0.1); color:#76a9fa; border: 1px solid rgba(118,169,250,0.28); border-radius: 6px; padding: 5px 14px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 7px; letter-spacing: 0.06em; text-transform: uppercase; }
     .gold { color:#76a9fa; }
     .blue { color: #76a9fa; }
     .stat-num { text-shadow: 0 0 30px rgba(118,169,250,0.45); }
@@ -171,14 +185,26 @@
     .hero-t4{animation:fadeInUp .7s ease both .5s;}
     .hero-cta{animation:fadeInUp .7s ease both .65s;}
 
-    /* Hof feature cards */
-    .hof-card {
-      padding: 28px 24px; border-radius: 14px;
-      border: 1px solid rgba(118,169,250,0.12);
-      background: #0f1c30;
-      transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+    /* Hof info rows — horizontale Liste statt identische Cards */
+    .hof-info-row {
+      display: flex; gap: 20px; align-items: flex-start;
+      padding: 22px 0;
+      border-bottom: 1px solid rgba(118,169,250,0.08);
     }
-    .hof-card:hover { border-color: rgba(118,169,250,0.3); background: rgba(118,169,250,0.06); transform: translateY(-4px); box-shadow: 0 12px 40px rgba(34,94,170,0.15); }
+    .hof-info-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .hof-info-num {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 2.8rem; font-weight: 900; line-height: 1;
+      color: #76a9fa; opacity: 0.18; flex-shrink: 0; width: 56px; text-align: right;
+      letter-spacing: -0.04em; margin-top: -6px;
+    }
+    .hof-info-icon {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg,rgba(34,94,170,0.22),rgba(34,94,170,0.06));
+      border: 1px solid rgba(118,169,250,0.22); border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 2px;
+    }
     .hof-icon { width:52px;height:52px; background:linear-gradient(135deg,rgba(34,94,170,0.25),rgba(34,94,170,0.08)); border:1px solid rgba(118,169,250,0.25); border-radius:10px; display:flex;align-items:center;justify-content:center; font-size:24px;margin-bottom:16px; }
 
     /* Benefit row */
@@ -187,15 +213,58 @@
     .benefit-dot { width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;font-size:12px;font-weight:700; }
     .dot-green { background:rgba(74,222,128,0.12);color:#4ade80;border:1px solid rgba(74,222,128,0.3); }
 
-    /* Step card */
-    .step-card { padding:28px 24px; }
+    /* Feature row — WARUM FACHBETRIEB */
+    .feature-row {
+      display: flex; gap: 24px; align-items: flex-start;
+      padding: 28px 0;
+      border-bottom: 1px solid rgba(118,169,250,0.1);
+      transition: background 0.2s ease;
+    }
+    .feature-row:last-child { border-bottom: none; }
+    .feature-row:hover { background: rgba(118,169,250,0.02); }
+    .feature-row-num {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 3.5rem; font-weight: 900; line-height: 1;
+      color: #76a9fa; opacity: 0.12; flex-shrink: 0;
+      width: 64px; text-align: right; letter-spacing: -0.05em; margin-top: -8px;
+    }
+    .feature-row-icon {
+      width: 48px; height: 48px;
+      background: linear-gradient(135deg,rgba(34,94,170,0.22),rgba(34,94,170,0.06));
+      border: 1px solid rgba(118,169,250,0.22); border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
 
-    /* answer-box — kein border-left */
+    /* Kauftipps — nummerierte vertikale Liste mit Ghost-Nummer */
+    .tipp-row {
+      display: flex; gap: 0; align-items: flex-start; position: relative;
+      padding: 32px 0 32px 0;
+      border-bottom: 1px solid rgba(118,169,250,0.08);
+    }
+    .tipp-row:last-child { border-bottom: none; }
+    .tipp-ghost-num {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 5rem; font-weight: 900; line-height: 1;
+      color: #76a9fa; opacity: 0.13; flex-shrink: 0;
+      width: 80px; text-align: right; letter-spacing: -0.05em; margin-top: -10px;
+      pointer-events: none; user-select: none;
+    }
+    .tipp-content { padding-left: 24px; flex: 1; }
+    .tipp-content h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 10px; color: #e8eeff; }
+
+    /* answer-box */
     .answer-box { border:1px solid rgba(118,169,250,0.22); border-radius:12px; background:rgba(34,94,170,0.09); }
 
     /* FAQ */
-    .faq-details { border-radius:12px;overflow:hidden; }
-    .faq-summary { cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:16.5px;padding:22px 24px;gap:12px; }
+    .faq-details {
+      border: 1px solid rgba(118,169,250,0.12);
+      border-radius: 10px;
+      margin-bottom: 8px;
+      overflow: hidden;
+      transition: border-color 0.25s ease;
+    }
+    .faq-details[open] { border-color: rgba(118,169,250,0.28); }
+    .faq-summary { cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:16px;padding:22px 24px;gap:12px;font-family:'Plus Jakarta Sans',sans-serif; }
     .faq-summary::-webkit-details-marker { display:none; }
     .faq-icon { color:#76a9fa;font-size:22px;font-weight:400;transition:transform 0.3s cubic-bezier(0.16,1,0.3,1);flex-shrink:0;line-height:1; }
     .faq-details[open] .faq-icon { transform:rotate(45deg); }
@@ -304,32 +373,40 @@
 </div>
 
 <!-- HERO -->
-<section class="hero-section speakable-hero" style="position:relative;padding:48px 24px 72px;overflow:hidden;min-height:520px;background:linear-gradient(135deg,#060e1e 0%,#0e1e3a 55%,#0a1530 100%);">
+<section class="hero-section speakable-hero" style="position:relative;padding:56px 24px 88px;overflow:hidden;min-height:560px;background:linear-gradient(135deg,#060e1e 0%,#0e1e3a 55%,#0a1530 100%);">
   <!-- Grid-Overlay für Textur -->
   <div class="hero-grid" style="z-index:0;"></div>
+  <!-- Ambient Blobs -->
+  <div class="hero-blob hero-blob-1"></div>
+  <div class="hero-blob hero-blob-2"></div>
+  <div class="hero-blob hero-blob-3"></div>
 
   <div class="max-w-[1200px] mx-auto" style="position:relative;z-index:1;">
-    <div style="max-width:740px;">
-      <div class="flex gap-3 mb-6 flex-wrap hero-t1">
-        <span class="badge-gold">bis −50 % günstiger</span>
+    <div style="max-width:760px;">
+      <!-- webwerk-Stil Badge-Labels -->
+      <div class="flex gap-3 mb-8 flex-wrap items-center hero-t1">
+        <div class="section-label" style="margin-bottom:0;">
+          <span class="section-label-line"></span>
+          <span class="section-label-text">bis &minus;50 % günstiger</span>
+        </div>
         <span class="badge">Fachbetrieb seit 1996</span>
-        <span class="badge">Selbstabholung in Brandenburg</span>
+        <span class="badge">Selbstabholung Brandenburg</span>
       </div>
-      <h1 class="text-4xl md:text-5xl font-extrabold mb-5 leading-tight hero-t2">
-        Gebrauchte Fenster kaufen —<br/>
-        <span style="color:#76a9fa;">ab 80 € direkt vor Ort</span>
+      <h1 class="hero-t2" style="font-size:clamp(2.2rem,5vw,3.8rem);font-weight:900;letter-spacing:-0.03em;line-height:1.08;margin-bottom:24px;">
+        Gebrauchte Fenster kaufen<br/>
+        <span style="color:#76a9fa;">ab 80 &euro; direkt vor Ort</span>
       </h1>
-      <div class="answer-box speakable-hero" style="padding:14px 18px;margin-bottom:22px;max-width:680px;">
-        <p style="margin:0;font-size:15px;line-height:1.65;color:#e8eeff;">Gebrauchte Kunststofffenster kaufen Sie bei Fensterhandel Christ in Brandenburg an der Havel (Fohrder Landstraße 13, 14772). Rund 500 Stück ab 80 € — verschiedene Maße, 2- und 3-fach-Verglasung. Selbstabholung, <strong>Freitag 10–17 Uhr</strong>. Kein Versand, kein Onlinekauf.</p>
+      <div class="answer-box speakable-hero hero-t3" style="padding:16px 20px;margin-bottom:28px;max-width:700px;">
+        <p style="margin:0;font-size:15px;line-height:1.7;color:#e8eeff;">Gebrauchte Kunststofffenster kaufen Sie bei Fensterhandel Christ in Brandenburg an der Havel (Fohrder Landstraße 13, 14772). Rund 500 Stück ab 80 &euro; &mdash; verschiedene Maße, 2- und 3-fach-Verglasung. Selbstabholung, <strong>Freitag 10&ndash;17 Uhr</strong>. Kein Versand, kein Onlinekauf.</p>
       </div>
-      <p class="text-lg mb-4 hero-t3" style="color:rgba(232,238,255,0.9);max-width:640px;">
-        Bei Fensterhandel Christ in Brandenburg an der Havel warten hunderte gebrauchter Kunststofffenster auf einen neuen Einsatz. Einfach vorbeikommen, Maßband mitbringen, in Ruhe stöbern — und das Passende mitnehmen.
+      <p class="text-lg mb-4 hero-t3" style="color:rgba(232,238,255,0.88);max-width:640px;line-height:1.65;">
+        Bei Fensterhandel Christ in Brandenburg an der Havel warten hunderte gebrauchter Kunststofffenster auf einen neuen Einsatz. Einfach vorbeikommen, Maßband mitbringen, in Ruhe stöbern &mdash; und das Passende mitnehmen.
       </p>
-      <p class="mb-8 hero-t4" style="color:rgba(232,238,255,0.6);max-width:600px;">
-        Ob Schuppen, Anbau, Werkstatt oder günstige Sanierung — gebrauchte Fenster sind die ehrliche Lösung für alle, die nicht mehr ausgeben wollen als nötig. Fachbetrieb mit 30 Jahren Erfahrung.
+      <p class="mb-10 hero-t4" style="color:rgba(232,238,255,0.55);max-width:600px;line-height:1.65;">
+        Ob Schuppen, Anbau, Werkstatt oder günstige Sanierung &mdash; gebrauchte Fenster sind die ehrliche Lösung für alle, die nicht mehr ausgeben wollen als nötig. Fachbetrieb mit 30 Jahren Erfahrung.
       </p>
       <div class="flex flex-wrap gap-4 hero-cta">
-        <a href="shop.html" class="btn-primary">Alle Gebrauchtfenster im Shop →</a>
+        <a href="shop.html" class="btn-primary">Alle Gebrauchtfenster im Shop &rarr;</a>
         <a href="kontakt.html" class="oeff-btn">
           <span class="material-symbols-outlined mat">schedule</span>
           Öffnungszeiten ansehen
@@ -364,42 +441,42 @@
 <div class="glow-line"></div>
 
 <!-- HOF-ERLEBNIS -->
-<section style="padding:80px 24px;background:#0a1530;">
+<section style="padding:96px 24px;background:#0a1225;">
   <div class="max-w-[1200px] mx-auto">
 
     <!-- Foto + Text nebeneinander -->
-    <div class="grid md:grid-cols-2 gap-10 items-center mb-14 reveal">
+    <div class="grid md:grid-cols-2 gap-14 items-center mb-16 reveal">
       <!-- Hof-Foto -->
-      <div style="border-radius:14px;overflow:hidden;box-shadow:0 20px 48px rgba(0,0,0,0.5);aspect-ratio:4/3;position:relative;border:1px solid rgba(118,169,250,0.12);">
-        <img src="img/hof-gebrauchte-fenster.jpg" alt="Unser Hof in Brandenburg an der Havel — hunderte gebrauchte Fenster auf Lager" style="width:100%;height:100%;object-fit:cover;object-position:center 60%;display:block;" loading="lazy"/>
+      <div style="border-radius:16px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.55);aspect-ratio:4/3;position:relative;border:1px solid rgba(118,169,250,0.14);">
+        <img src="img/hof-gebrauchte-fenster.jpg" alt="Unser Hof in Brandenburg an der Havel &mdash; hunderte gebrauchte Fenster auf Lager" style="width:100%;height:100%;object-fit:cover;object-position:center 60%;display:block;" loading="lazy"/>
         <!-- Kleines Label unten links -->
-        <div style="position:absolute;bottom:16px;left:16px;background:rgba(6,14,30,0.82);backdrop-filter:blur(8px);border:1px solid rgba(118,169,250,0.2);border-radius:10px;padding:8px 14px;">
+        <div style="position:absolute;bottom:16px;left:16px;background:rgba(6,14,30,0.88);backdrop-filter:blur(12px);border:1px solid rgba(118,169,250,0.22);border-radius:10px;padding:10px 16px;">
           <div style="font-size:13px;font-weight:700;color:#fff;">500+ Fenster vor Ort</div>
-          <div style="font-size:11px;color:rgba(232,238,255,0.55);">Bestand ändert sich täglich</div>
+          <div style="font-size:11px;color:rgba(232,238,255,0.5);margin-top:2px;">Bestand ändert sich täglich</div>
         </div>
       </div>
       <!-- Text -->
       <div>
-        <div style="display:inline-flex;align-items:center;gap:10px;margin-bottom:16px;">
-          <span style="width:22px;height:1px;background:#76a9fa;display:inline-block;"></span>
-          <span style="color:#76a9fa;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.14em;display:inline-flex;align-items:center;gap:5px;">
+        <div class="section-label">
+          <span class="section-label-line"></span>
+          <span class="section-label-text" style="display:inline-flex;align-items:center;gap:5px;">
             <span class="material-symbols-outlined" style="font-size:13px;font-variation-settings:'FILL' 1;">location_on</span>
-            Fohrder Landstraße 13 · Brandenburg
+            Fohrder Landstraße 13 &middot; Brandenburg
           </span>
         </div>
-        <h2 class="text-3xl md:text-4xl font-extrabold mb-5" style="line-height:1.15;margin-top:4px;">Unser Hof — stöbern,<br/>messen, mitnehmen</h2>
+        <h2 style="font-size:clamp(1.9rem,3.5vw,3rem);font-weight:800;letter-spacing:-0.025em;line-height:1.1;margin-bottom:22px;margin-top:4px;">Unser Hof &mdash; stöbern,<br/>messen, mitnehmen</h2>
         <p class="text-lg leading-relaxed mb-4" style="color:rgba(232,238,255,0.82);">
-          Auf unserem Gelände stehen rund <strong>500 gebrauchte Kunststofffenster</strong> — aus Renovierungen, Abrissen und stornierten Aufträgen aus der Region. Einflüglig, zweiflüglig, Balkontüren, Kellerfenster. Weiß, Anthrazit, manche auch in Sonderfarben.
+          Auf unserem Gelände stehen rund <strong>500 gebrauchte Kunststofffenster</strong> &mdash; aus Renovierungen, Abrissen und stornierten Aufträgen aus der Region. Einflüglig, zweiflüglig, Balkontüren, Kellerfenster. Weiß, Anthrazit, manche auch in Sonderfarben.
         </p>
-        <p class="leading-relaxed mb-5" style="color:rgba(232,238,255,0.6);">
-          Einfach zu den Öffnungszeiten vorbeikommen — <strong>Freitag 10–17 Uhr</strong>. Maßband mitbringen, in Ruhe messen, direkt mitnehmen was passt. Kein Termin nötig, kein Stress.
+        <p class="leading-relaxed mb-6" style="color:rgba(232,238,255,0.58);">
+          Einfach zu den Öffnungszeiten vorbeikommen &mdash; <strong style="color:rgba(232,238,255,0.85);">Freitag 10&ndash;17 Uhr</strong>. Maßband mitbringen, in Ruhe messen, direkt mitnehmen was passt. Kein Termin nötig, kein Stress.
         </p>
-        <div class="scarcity-banner mb-6">
+        <div class="scarcity-banner mb-7">
           <span class="material-symbols-outlined" style="color:#76a9fa;font-size:20px;flex-shrink:0;">autorenew</span>
-          <p style="color:rgba(118,169,250,0.9);font-size:14px;font-weight:600;">Neue Ware kommt ständig rein — was heute noch da ist, kann morgen weg sein</p>
+          <p style="color:rgba(118,169,250,0.9);font-size:14px;font-weight:600;">Neue Ware kommt ständig rein &mdash; was heute noch da ist, kann morgen weg sein</p>
         </div>
         <div class="flex flex-wrap gap-3">
-          <a href="shop.html" class="btn-primary">Im Shop durchsuchen →</a>
+          <a href="shop.html" class="btn-primary">Im Shop durchsuchen &rarr;</a>
           <a href="kontakt.html" class="oeff-btn">
             <span class="material-symbols-outlined mat">schedule</span>
             Öffnungszeiten
@@ -408,28 +485,37 @@
       </div>
     </div>
 
-    <!-- 3 Infokarten -->
-    <div class="grid md:grid-cols-3 gap-6">
-      <div class="hof-card reveal reveal-d1">
-        <div class="hof-icon">
-          <span class="material-symbols-outlined" style="color:#76a9fa;font-size:26px;">store</span>
+    <!-- 3 Infopunkte als horizontale Zeilen-Liste statt identischer Cards -->
+    <div class="reveal reveal-d1" style="max-width:900px;">
+      <div class="hof-info-row">
+        <div class="hof-info-num">01</div>
+        <div class="hof-info-icon">
+          <span class="material-symbols-outlined" style="color:#76a9fa;font-size:22px;">store</span>
         </div>
-        <h3 class="font-bold text-lg mb-2">~500 Fenster auf Lager</h3>
-        <p style="color:rgba(232,238,255,0.65);font-size:14px;line-height:1.7;">Einflüglig bis raumhoch — verschiedene Bauarten, Flügelzahlen und Verglasungen. Der Bestand wächst ständig durch Zukäufe aus der Region.</p>
+        <div style="padding-left:18px;">
+          <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:1.05rem;margin-bottom:6px;color:#e8eeff;">~500 Fenster auf Lager</h3>
+          <p style="color:rgba(232,238,255,0.6);font-size:14px;line-height:1.7;max-width:560px;">Einflüglig bis raumhoch &mdash; verschiedene Bauarten, Flügelzahlen und Verglasungen. Der Bestand wächst ständig durch Zukäufe aus der Region.</p>
+        </div>
       </div>
-      <div class="hof-card reveal reveal-d2">
-        <div class="hof-icon">
-          <span class="material-symbols-outlined" style="color:#76a9fa;font-size:26px;">straighten</span>
+      <div class="hof-info-row">
+        <div class="hof-info-num">02</div>
+        <div class="hof-info-icon">
+          <span class="material-symbols-outlined" style="color:#76a9fa;font-size:22px;">straighten</span>
         </div>
-        <h3 class="font-bold text-lg mb-2">Maßband mitbringen</h3>
-        <p style="color:rgba(232,238,255,0.65);font-size:14px;line-height:1.7;">Direkt vor Ort messen ob das Fenster passt — kein Stress, kein Zeitdruck. Hofverkauf Freitag 10–17 Uhr. Kein Termin nötig.</p>
+        <div style="padding-left:18px;">
+          <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:1.05rem;margin-bottom:6px;color:#e8eeff;">Maßband mitbringen</h3>
+          <p style="color:rgba(232,238,255,0.6);font-size:14px;line-height:1.7;max-width:560px;">Direkt vor Ort messen ob das Fenster passt &mdash; kein Stress, kein Zeitdruck. Hofverkauf Freitag 10&ndash;17 Uhr. Kein Termin nötig.</p>
+        </div>
       </div>
-      <div class="hof-card reveal reveal-d3">
-        <div class="hof-icon">
-          <span class="material-symbols-outlined" style="color:#76a9fa;font-size:26px;">local_shipping</span>
+      <div class="hof-info-row">
+        <div class="hof-info-num">03</div>
+        <div class="hof-info-icon">
+          <span class="material-symbols-outlined" style="color:#76a9fa;font-size:22px;">local_shipping</span>
         </div>
-        <h3 class="font-bold text-lg mb-2">Transporter mitbringen</h3>
-        <p style="color:rgba(232,238,255,0.65);font-size:14px;line-height:1.7;">Gebrauchte Fenster sind nur zur Selbstabholung — bitte genug Helfer und einen geeigneten Transporter mitbringen. Wir helfen nicht beim Verladen.</p>
+        <div style="padding-left:18px;">
+          <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:1.05rem;margin-bottom:6px;color:#e8eeff;">Transporter mitbringen</h3>
+          <p style="color:rgba(232,238,255,0.6);font-size:14px;line-height:1.7;max-width:560px;">Gebrauchte Fenster sind nur zur Selbstabholung &mdash; bitte genug Helfer und einen geeigneten Transporter mitbringen. Wir helfen nicht beim Verladen.</p>
+        </div>
       </div>
     </div>
 
@@ -437,98 +523,114 @@
 </section>
 
 <!-- WARUM FACHBETRIEB -->
-<section style="padding:80px 24px;background:#060e1e;">
-  <div class="max-w-[1200px] mx-auto">
-    <div class="text-center mb-12 reveal">
-      <div style="display:inline-flex;align-items:center;gap:10px;margin-bottom:14px;">
-        <span style="width:22px;height:1px;background:#76a9fa;display:inline-block;"></span>
-        <span style="color:#76a9fa;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.14em;">Fachbetrieb</span>
-        <span style="width:22px;height:1px;background:#76a9fa;display:inline-block;"></span>
+<section style="padding:96px 24px;background:#060e1e;">
+  <div class="max-w-[1000px] mx-auto">
+    <div class="mb-14 reveal">
+      <div class="section-label">
+        <span class="section-label-line"></span>
+        <span class="section-label-text">Fachbetrieb</span>
       </div>
-      <h2 class="text-3xl font-extrabold mb-3">Was Sie bei uns bekommen</h2>
-      <p style="color:rgba(232,238,255,0.5);max-width:560px;margin:0 auto;">Fachbetrieb Christ — 30 Jahre Erfahrung im Fensterhandel.</p>
+      <h2 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(1.8rem,3vw,2.6rem);font-weight:800;letter-spacing:-0.025em;margin-bottom:10px;">Was Sie bei uns bekommen</h2>
+      <p style="color:rgba(232,238,255,0.45);max-width:520px;line-height:1.65;">Fachbetrieb Christ &mdash; 30 Jahre Erfahrung im Fensterhandel.</p>
     </div>
-    <div class="grid md:grid-cols-3 gap-6">
-      <div class="glass p-8 reveal reveal-d1">
-        <div class="hof-icon" style="margin-bottom:20px;">
-          <span class="material-symbols-outlined" style="color:#76a9fa;font-size:26px;">fact_check</span>
+    <!-- Feature-Zeilen mit großer Ghost-Nummer statt identischer Karten -->
+    <div class="reveal reveal-d1">
+      <div class="feature-row">
+        <div class="feature-row-num">1</div>
+        <div class="feature-row-icon" style="margin-left:12px;">
+          <span class="material-symbols-outlined" style="color:#76a9fa;font-size:22px;">fact_check</span>
         </div>
-        <h3 class="text-lg font-bold mb-3">Ehrliche Zustandsbeschreibung</h3>
-        <p style="color:rgba(232,238,255,0.65);font-size:14px;line-height:1.7;">Schäden, Kratzer, fehlende Teile — wir nennen alles offen. Keine bösen Überraschungen nach dem Kauf.</p>
+        <div style="padding-left:20px;flex:1;">
+          <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:1.1rem;margin-bottom:8px;color:#e8eeff;">Ehrliche Zustandsbeschreibung</h3>
+          <p style="color:rgba(232,238,255,0.62);font-size:14.5px;line-height:1.75;max-width:580px;">Schäden, Kratzer, fehlende Teile &mdash; wir nennen alles offen. Keine bösen Überraschungen nach dem Kauf.</p>
+        </div>
       </div>
-      <div class="glass p-8 reveal reveal-d2">
-        <div class="hof-icon" style="margin-bottom:20px;">
-          <span class="material-symbols-outlined" style="color:#76a9fa;font-size:26px;">support_agent</span>
+      <div class="feature-row">
+        <div class="feature-row-num">2</div>
+        <div class="feature-row-icon" style="margin-left:12px;">
+          <span class="material-symbols-outlined" style="color:#76a9fa;font-size:22px;">support_agent</span>
         </div>
-        <h3 class="text-lg font-bold mb-3">Fachberatung vor Ort</h3>
-        <p style="color:rgba(232,238,255,0.65);font-size:14px;line-height:1.7;">Unsere Mitarbeiter kennen sich aus. Fragen zum Einbau, zur Passgenauigkeit oder zum Zustand — wir helfen Ihnen weiter.</p>
+        <div style="padding-left:20px;flex:1;">
+          <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:1.1rem;margin-bottom:8px;color:#e8eeff;">Fachberatung vor Ort</h3>
+          <p style="color:rgba(232,238,255,0.62);font-size:14.5px;line-height:1.75;max-width:580px;">Unsere Mitarbeiter kennen sich aus. Fragen zum Einbau, zur Passgenauigkeit oder zum Zustand &mdash; wir helfen Ihnen weiter.</p>
+        </div>
       </div>
-      <div class="glass p-8 reveal reveal-d3">
-        <div class="hof-icon" style="margin-bottom:20px;">
-          <span class="material-symbols-outlined" style="color:#76a9fa;font-size:26px;">receipt_long</span>
+      <div class="feature-row">
+        <div class="feature-row-num">3</div>
+        <div class="feature-row-icon" style="margin-left:12px;">
+          <span class="material-symbols-outlined" style="color:#76a9fa;font-size:22px;">receipt_long</span>
         </div>
-        <h3 class="text-lg font-bold mb-3">Rechnung mit MwSt.</h3>
-        <p style="color:rgba(232,238,255,0.65);font-size:14px;line-height:1.7;">Sie erhalten eine ordentliche Rechnung mit ausgewiesener Mehrwertsteuer — für Gewerbetreibende steuerlich absetzbar.</p>
+        <div style="padding-left:20px;flex:1;">
+          <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:1.1rem;margin-bottom:8px;color:#e8eeff;">Rechnung mit MwSt.</h3>
+          <p style="color:rgba(232,238,255,0.62);font-size:14.5px;line-height:1.75;max-width:580px;">Sie erhalten eine ordentliche Rechnung mit ausgewiesener Mehrwertsteuer &mdash; für Gewerbetreibende steuerlich absetzbar.</p>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
 <!-- KAUFTIPPS -->
-<section style="padding:80px 24px;background:#0a1530;">
-  <div class="max-w-[1200px] mx-auto">
-    <div class="mb-12 reveal">
-      <div style="display:inline-flex;align-items:center;gap:10px;margin-bottom:14px;">
-        <span style="width:22px;height:1px;background:#76a9fa;display:inline-block;"></span>
-        <span style="color:#76a9fa;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.14em;">Kauftipps</span>
+<section style="padding:96px 24px;background:#0a1225;">
+  <div class="max-w-[1000px] mx-auto">
+    <div class="mb-14 reveal">
+      <div class="section-label">
+        <span class="section-label-line"></span>
+        <span class="section-label-text">Kauftipps</span>
       </div>
-      <h2 class="text-3xl font-extrabold mb-3">Tipps: Gebrauchte Fenster richtig kaufen</h2>
-      <p style="color:rgba(232,238,255,0.5);max-width:640px;">Was Sie vor dem Kauf wissen sollten — damit der Einbau klappt.</p>
+      <h2 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(1.8rem,3vw,2.6rem);font-weight:800;letter-spacing:-0.025em;margin-bottom:10px;">Tipps: Gebrauchte Fenster richtig kaufen</h2>
+      <p style="color:rgba(232,238,255,0.45);max-width:560px;line-height:1.65;">Was Sie vor dem Kauf wissen sollten &mdash; damit der Einbau klappt.</p>
     </div>
-    <div class="grid md:grid-cols-3 gap-6">
-      <div class="glass step-card reveal reveal-d1">
-        <div class="hof-icon">📐</div>
-        <h3 class="font-bold text-lg mb-3">1. Rohbauöffnung messen</h3>
-        <p style="color:rgba(232,238,255,0.65);font-size:14px;line-height:1.7;">Messen Sie Breite und Höhe Ihrer Wandöffnung. Das Fenster-Außenmaß muss ca. 1–2 cm kleiner sein. Wir geben immer das Außenmaß des Rahmens an — nicht das Glasmaß.</p>
+    <!-- Nummerierte vertikale Liste mit Ghost-Zahl im Hintergrund -->
+    <div class="reveal reveal-d1">
+      <div class="tipp-row">
+        <div class="tipp-ghost-num">1</div>
+        <div class="tipp-content">
+          <h3>1. Rohbauöffnung messen</h3>
+          <p style="color:rgba(232,238,255,0.62);font-size:14.5px;line-height:1.75;max-width:700px;">Messen Sie Breite und Höhe Ihrer Wandöffnung. Das Fenster-Außenmaß muss ca. 1&ndash;2 cm kleiner sein. Wir geben immer das Außenmaß des Rahmens an &mdash; nicht das Glasmaß.</p>
+        </div>
       </div>
-      <div class="glass step-card reveal reveal-d2">
-        <div class="hof-icon">🔍</div>
-        <h3 class="font-bold text-lg mb-3">2. Zustand prüfen</h3>
-        <p style="color:rgba(232,238,255,0.65);font-size:14px;line-height:1.7;">Dreh-Kipp-Funktion testen, Dichtungen auf Risse prüfen, Verglasung auf Blindheit. Dichtungen können Sie für 5–10 € selbst tauschen. Kunststoffprofile sind sehr langlebig.</p>
+      <div class="tipp-row">
+        <div class="tipp-ghost-num">2</div>
+        <div class="tipp-content">
+          <h3>2. Zustand prüfen</h3>
+          <p style="color:rgba(232,238,255,0.62);font-size:14.5px;line-height:1.75;max-width:700px;">Dreh-Kipp-Funktion testen, Dichtungen auf Risse prüfen, Verglasung auf Blindheit. Dichtungen können Sie für 5&ndash;10 &euro; selbst tauschen. Kunststoffprofile sind sehr langlebig.</p>
+        </div>
       </div>
-      <div class="glass step-card reveal reveal-d3">
-        <div class="hof-icon">🚗</div>
-        <h3 class="font-bold text-lg mb-3">3. Transport planen</h3>
-        <p style="color:rgba(232,238,255,0.65);font-size:14px;line-height:1.7;">Fenster sind schwerer als gedacht. Ein 2-flügeliges Fenster wiegt 40–80 kg. Bringen Sie genug Helfer und einen Transporter mit — das Verladen liegt bei Ihnen.</p>
+      <div class="tipp-row">
+        <div class="tipp-ghost-num">3</div>
+        <div class="tipp-content">
+          <h3>3. Transport planen</h3>
+          <p style="color:rgba(232,238,255,0.62);font-size:14.5px;line-height:1.75;max-width:700px;">Fenster sind schwerer als gedacht. Ein 2-flügeliges Fenster wiegt 40&ndash;80 kg. Bringen Sie genug Helfer und einen Transporter mit &mdash; das Verladen liegt bei Ihnen.</p>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
 <!-- FAQ -->
-<section style="padding:80px 24px;background:#060e1e;">
-  <div class="speakable-faq max-w-[800px] mx-auto">
-    <div class="text-center mb-12 reveal">
-      <div style="display:inline-flex;align-items:center;gap:10px;margin-bottom:14px;">
-        <span style="width:22px;height:1px;background:#76a9fa;display:inline-block;"></span>
-        <span style="color:#76a9fa;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.14em;">FAQ</span>
-        <span style="width:22px;height:1px;background:#76a9fa;display:inline-block;"></span>
+<section style="padding:96px 24px;background:#060e1e;">
+  <div class="speakable-faq max-w-[820px] mx-auto">
+    <div class="text-center mb-14 reveal">
+      <div class="section-label-centered">
+        <span class="section-label-line"></span>
+        <span class="section-label-text">FAQ</span>
+        <span class="section-label-line"></span>
       </div>
-      <h2 class="text-3xl font-extrabold mb-3">Häufige Fragen</h2>
-      <p style="color:rgba(232,238,255,0.45);">Alles Wichtige rund um den Kauf gebrauchter Fenster</p>
+      <h2 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(1.8rem,3vw,2.6rem);font-weight:800;letter-spacing:-0.025em;margin-bottom:10px;">Häufige Fragen</h2>
+      <p style="color:rgba(232,238,255,0.42);">Alles Wichtige rund um den Kauf gebrauchter Fenster</p>
     </div>
-    <div class="flex flex-col gap-3">
+    <div class="flex flex-col" style="gap:0;">
 
-      <details class="glass faq-details reveal" open>
+      <details class="faq-details reveal" style="background:#0f1c30;" open>
         <summary class="faq-summary">
           Wo kann man gebrauchte Fenster kaufen?
           <span class="faq-icon">+</span>
         </summary>
         <div class="faq-body">
-          <p>Bei uns auf dem Hof in Brandenburg an der Havel — ein großes Freigelände voller gebrauchter Fenster aus der Region. Verschiedene Maße, Flügelzahlen und Verglasung. Einfach vorbeikommen, in Ruhe stöbern, messen und mitnehmen was passt.</p>
-          <p class="mt-3">Im Online-Shop finden Sie eine Übersicht unseres aktuellen Bestands — allerdings spiegelt der Hof immer mehr wider als online steht. Vorbeikommen lohnt sich.</p>
+          <p>Bei uns auf dem Hof in Brandenburg an der Havel &mdash; ein großes Freigelände voller gebrauchter Fenster aus der Region. Verschiedene Maße, Flügelzahlen und Verglasung. Einfach vorbeikommen, in Ruhe stöbern, messen und mitnehmen was passt.</p>
+          <p class="mt-3">Im Online-Shop finden Sie eine Übersicht unseres aktuellen Bestands &mdash; allerdings spiegelt der Hof immer mehr wider als online steht. Vorbeikommen lohnt sich.</p>
           <div class="mt-4 flex flex-wrap gap-3">
-            <a href="shop.html" class="btn-primary" style="padding:9px 18px;font-size:13px;">Zum Online-Shop →</a>
+            <a href="shop.html" class="btn-primary" style="padding:9px 18px;font-size:13px;">Zum Online-Shop &rarr;</a>
             <a href="kontakt.html" class="oeff-btn">
               <span class="material-symbols-outlined mat">schedule</span>Öffnungszeiten
             </a>
@@ -536,49 +638,49 @@
         </div>
       </details>
 
-      <details class="glass faq-details reveal reveal-d1">
+      <details class="faq-details reveal reveal-d1" style="background:#0f1c30;">
         <summary class="faq-summary">
           Was kosten gebrauchte Fenster?
           <span class="faq-icon">+</span>
         </summary>
-        <p class="faq-body">Ab <strong>80 €</strong> für ein kleineres Fenster. Größere 2–3 flügelige Fenster liegen je nach Zustand und Verglasung zwischen 150 € und 300 €. Verglichen mit Neuware gleicher Größe sparen Sie damit deutlich — oft 40–60 %.</p>
+        <p class="faq-body">Ab <strong>80 &euro;</strong> für ein kleineres Fenster. Größere 2&ndash;3 flügelige Fenster liegen je nach Zustand und Verglasung zwischen 150 &euro; und 300 &euro;. Verglichen mit Neuware gleicher Größe sparen Sie damit deutlich &mdash; oft 40&ndash;60 %.</p>
       </details>
 
-      <details class="glass faq-details reveal reveal-d1">
+      <details class="faq-details reveal reveal-d1" style="background:#0f1c30;">
         <summary class="faq-summary">
           Sind gebrauchte Fenster noch gut?
           <span class="faq-icon">+</span>
         </summary>
-        <p class="faq-body">Kunststofffenster aus Renovierungen sind oft in einem soliden Zustand — Kunststoffprofile verwittern kaum und bleiben formstabil. Den Zustand beschreiben wir bei jedem Artikel ehrlich. Dichtungen und Beschläge lassen sich bei Bedarf günstig erneuern. Was genau Sie erwartet, sehen Sie am besten selbst vor Ort.</p>
+        <p class="faq-body">Kunststofffenster aus Renovierungen sind oft in einem soliden Zustand &mdash; Kunststoffprofile verwittern kaum und bleiben formstabil. Den Zustand beschreiben wir bei jedem Artikel ehrlich. Dichtungen und Beschläge lassen sich bei Bedarf günstig erneuern. Was genau Sie erwartet, sehen Sie am besten selbst vor Ort.</p>
       </details>
 
-      <details class="glass faq-details reveal reveal-d2">
+      <details class="faq-details reveal reveal-d2" style="background:#0f1c30;">
         <summary class="faq-summary">
           Wie messe ich, ob ein gebrauchtes Fenster passt?
           <span class="faq-icon">+</span>
         </summary>
-        <p class="faq-body">Messen Sie Ihre Wandöffnung (Rohbauöffnung) — das Fenster-Außenmaß sollte ca. 1–2 cm kleiner sein. Wir geben immer das <strong>Außenmaß des Rahmens</strong> an, nicht das Glasmaß. Bei Unsicherheit einfach vor Ort fragen — wir helfen.</p>
+        <p class="faq-body">Messen Sie Ihre Wandöffnung (Rohbauöffnung) &mdash; das Fenster-Außenmaß sollte ca. 1&ndash;2 cm kleiner sein. Wir geben immer das <strong>Außenmaß des Rahmens</strong> an, nicht das Glasmaß. Bei Unsicherheit einfach vor Ort fragen &mdash; wir helfen.</p>
       </details>
 
-      <details class="glass faq-details reveal reveal-d2">
+      <details class="faq-details reveal reveal-d2" style="background:#0f1c30;">
         <summary class="faq-summary">
           Wann kann ich gebrauchte Fenster abholen?
           <span class="faq-icon">+</span>
         </summary>
         <div class="faq-body">
-          <p>Zu unseren Öffnungszeiten können Sie jederzeit vorbeikommen — auf dem Hof ist genug Platz zum Stöbern, Messen und Fragen. Kein Termin nötig.</p>
+          <p>Zu unseren Öffnungszeiten können Sie jederzeit vorbeikommen &mdash; auf dem Hof ist genug Platz zum Stöbern, Messen und Fragen. Kein Termin nötig.</p>
           <a href="kontakt.html" class="oeff-btn" style="margin-top:14px;display:inline-flex;">
             <span class="material-symbols-outlined mat">schedule</span>Öffnungszeiten ansehen
           </a>
         </div>
       </details>
 
-      <details class="glass faq-details reveal reveal-d3">
+      <details class="faq-details reveal reveal-d3" style="background:#0f1c30;">
         <summary class="faq-summary">
           Gibt es auch Lieferung?
           <span class="faq-icon">+</span>
         </summary>
-        <p class="faq-body">Gebrauchte Fenster sind ausschließlich zur <strong>Selbstabholung</strong> in Brandenburg an der Havel. Bitte bringen Sie ausreichend Helfer und ein geeignetes Fahrzeug mit — das Verladen liegt bei Ihnen.</p>
+        <p class="faq-body">Gebrauchte Fenster sind ausschließlich zur <strong>Selbstabholung</strong> in Brandenburg an der Havel. Bitte bringen Sie ausreichend Helfer und ein geeignetes Fahrzeug mit &mdash; das Verladen liegt bei Ihnen.</p>
       </details>
 
     </div>
@@ -586,10 +688,10 @@
 </section>
 
 <!-- ÖFFNUNGSZEITEN + KONTAKT -->
-<section style="padding:60px 24px;background:#0a1530;">
+<section style="padding:80px 24px;background:#0a1225;">
   <div class="max-w-[900px] mx-auto grid md:grid-cols-2 gap-8">
     <div class="glass p-8 reveal reveal-d1">
-      <h2 class="text-xl font-extrabold mb-6">Lagerverkauf — Wann &amp; Wo</h2>
+      <h2 class="text-xl font-extrabold mb-6">Lagerverkauf &mdash; Wann &amp; Wo</h2>
       <div>
         <div class="contact-row">
           <div class="contact-icon">📅</div>
@@ -625,7 +727,7 @@
       <h2 class="text-xl font-extrabold mb-5">Bestimmtes Maß gesucht?</h2>
       <p class="text-sm mb-6" style="color:rgba(232,238,255,0.6);line-height:1.7;">Schreiben Sie uns kurz — Breite × Höhe, 1- oder 2-flügelig — und wir schauen nach, ob wir etwas Passendes auf dem Hof haben.</p>
       <div class="flex flex-col gap-3">
-        <a href="shop.html" class="btn-primary text-center">Im Shop suchen →</a>
+        <a href="shop.html" class="btn-primary text-center">Im Shop suchen &rarr;</a>
         <a href="kontakt.html" class="btn-secondary text-center" style="font-size:14px;">Anfrage schicken</a>
       </div>
     </div>
@@ -633,28 +735,38 @@
 </section>
 
 <!-- KEIN PASSENDES MASS -->
-<section style="padding:60px 24px;background:#060e1e;">
+<section style="padding:80px 24px;background:#060e1e;">
   <div class="max-w-[800px] mx-auto reveal">
     <div class="highlight-box p-8 text-center">
-      <h2 class="text-2xl font-extrabold mb-3">Kein passendes Maß gefunden?</h2>
-      <p class="mb-6" style="color:rgba(232,238,255,0.65);line-height:1.7;">Wir fertigen auch <strong>neue Drutex-Fenster nach Ihrem Maß</strong> — ab 99 €, ca. 2 Wochen Lieferzeit, BAFA-förderfähig. Energieeffizienzklasse A, Uw bis 0,71 W/(m²K).</p>
-      <a href="kunststofffenster-kaufen.html" class="btn-primary">Neues Fenster nach Maß konfigurieren →</a>
+      <div class="section-label-centered" style="justify-content:center;margin-bottom:14px;">
+        <span class="section-label-line"></span>
+        <span class="section-label-text">Alternative</span>
+        <span class="section-label-line"></span>
+      </div>
+      <h2 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:1.65rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:14px;">Kein passendes Maß gefunden?</h2>
+      <p class="mb-6" style="color:rgba(232,238,255,0.65);line-height:1.75;">Wir fertigen auch <strong>neue Drutex-Fenster nach Ihrem Maß</strong> &mdash; ab 99 &euro;, ca. 2 Wochen Lieferzeit, BAFA-förderfähig. Energieeffizienzklasse A, Uw bis 0,71 W/(m&sup2;K).</p>
+      <a href="kunststofffenster-kaufen.html" class="btn-primary">Neues Fenster nach Maß konfigurieren &rarr;</a>
     </div>
   </div>
 </section>
 
 <!-- CTA -->
-<section class="cta-glow" style="padding:80px 24px;">
+<section class="cta-glow" style="padding:96px 24px;">
   <div class="max-w-[700px] mx-auto text-center" style="position:relative;z-index:1;">
-    <h2 class="text-3xl md:text-4xl font-extrabold mb-6 reveal">Täglich neue Gebrauchtfenster auf dem Hof</h2>
-    <p class="mb-8 text-lg reveal" style="color:rgba(232,238,255,0.7);">Schauen Sie in unseren Shop oder kommen Sie direkt vorbei — der Hof hat immer mehr als online zu sehen ist.</p>
+    <div class="section-label-centered reveal" style="justify-content:center;margin-bottom:20px;">
+      <span class="section-label-line"></span>
+      <span class="section-label-text">Jetzt zuschlagen</span>
+      <span class="section-label-line"></span>
+    </div>
+    <h2 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(1.8rem,4vw,3rem);font-weight:900;letter-spacing:-0.03em;margin-bottom:20px;" class="reveal">Täglich neue Gebrauchtfenster auf dem Hof</h2>
+    <p class="mb-10 text-lg reveal" style="color:rgba(232,238,255,0.68);line-height:1.65;">Schauen Sie in unseren Shop oder kommen Sie direkt vorbei &mdash; der Hof hat immer mehr als online zu sehen ist.</p>
     <div class="flex flex-col sm:flex-row gap-4 justify-center reveal">
-      <a href="shop.html" class="btn-primary text-lg">Shop öffnen →</a>
+      <a href="shop.html" class="btn-primary text-lg">Shop öffnen &rarr;</a>
       <a href="kontakt.html" class="oeff-btn" style="padding:14px 24px;font-size:15px;">
         <span class="material-symbols-outlined mat">schedule</span>Öffnungszeiten
       </a>
     </div>
-    <p class="mt-6 text-sm reveal" style="color:rgba(232,238,255,0.35);">Fensterhandel Christ · Fohrder Landstraße 13 · 14772 Brandenburg an der Havel</p>
+    <p class="mt-8 text-sm reveal" style="color:rgba(232,238,255,0.3);">Fensterhandel Christ &middot; Fohrder Landstraße 13 &middot; 14772 Brandenburg an der Havel</p>
   </div>
 </section>
 
