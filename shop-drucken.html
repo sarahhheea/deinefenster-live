@@ -357,8 +357,7 @@
   <strong class="text-[#b87f00]">Druck-Tipp:</strong> Im Druck-Dialog „Hintergrundgrafiken drucken" aktivieren (sonst fehlen Farbe und Rahmen). Format A4 Hochformat, 1 Schild pro Seite.
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase-config.js"></script>
+<script src="js/sheets-config.js"></script>
 <script>
 const STATE = {
   produkte: [],
@@ -401,42 +400,42 @@ const KATEGORIE_DRUCK_LABEL = {
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
-  if (typeof supabaseClient === 'undefined' || !supabaseClient) {
-    showError('Datenbank-Verbindung fehlgeschlagen. Lade die Seite neu.');
-    return;
-  }
-
-  // Auth-Check
-  const { data: { session } } = await supabaseClient.auth.getSession();
-  if (!session) {
+  // Auth-Check via localStorage-Token (gleiches Backend wie Shop + Inserieren)
+  if (!isShopLoggedIn()) {
     location.href = `shop-login.html?next=${encodeURIComponent('shop-drucken.html')}`;
     return;
   }
 
   // User-Info
-  document.getElementById('userEmail').textContent = session.user.email || 'eingeloggt';
+  document.getElementById('userEmail').textContent = localStorage.getItem('df_shop_email') || 'eingeloggt';
   document.getElementById('userBadge').classList.remove('hidden');
   document.getElementById('logoutBtn').classList.remove('hidden');
-  document.getElementById('logoutBtn').addEventListener('click', async () => {
-    await supabaseClient.auth.signOut();
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    clearShopToken();
     location.href = 'shop-login.html';
   });
 
-  // Kategorien laden für Klartext-Labels
-  const { data: katData } = await supabaseClient
-    .from('kategorien')
-    .select('key, label')
-    .eq('aktiv', true);
-  (katData || []).forEach(k => { STATE.kategorien[k.key] = k.label; });
-
-  // Produkte laden
-  const { data, error } = await supabaseClient
-    .from('produkte')
-    .select('*')
-    .eq('aktiv', true)
-    .order('standnummer', { ascending: true, nullsLast: true });
-  if (error) { showError('Fehler beim Laden: ' + error.message); return; }
-  STATE.produkte = data || [];
+  // Produkte + Kategorien aus GitHub-JSON laden
+  try {
+    const data = await sheetsGet('produkte');
+    STATE.kategorien = data.kategorien || {};
+    STATE.produkte = (data.produkte || [])
+      .filter(p => p.aktiv !== false)
+      .sort((a, b) => {
+        // Standnummer aufsteigend, leere ans Ende
+        if (!a.standnummer && !b.standnummer) return 0;
+        if (!a.standnummer) return 1;
+        if (!b.standnummer) return -1;
+        return String(a.standnummer).localeCompare(String(b.standnummer), 'de', { numeric: true });
+      })
+      .map(p => ({
+        ...p,
+        kategorie_key: p.kategorie_key || p.kategorie || ''
+      }));
+  } catch (e) {
+    showError('Fehler beim Laden: ' + e.message);
+    return;
+  }
 
   // URL-Parameter ?id=ABC → dieses Produkt vorausgewählt zum direkten Drucken
   const params = new URLSearchParams(location.search);
