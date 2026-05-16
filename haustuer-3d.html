@@ -1325,8 +1325,17 @@ window.addEventListener('message', (e) => {
   if (d.type === 'setGlass') setGlass(d.key);
   if (d.type === 'setModel') setModel(d.key);
   if (d.type === 'setSide')  setSide(d.key);
+  if (d.type === 'setView') {
+    const newView = (d.key === 'innen') ? 'innen' : 'aussen';
+    if (newView !== _curView) {
+      _curView = newView;
+      const currentModel = document.getElementById('modelSelect')?.value || 'florida-lr-inox';
+      setModel(currentModel);
+    }
+  }
   if (d.type === 'update') {
     // Atomare Aktualisierung: alles in einem Tick → kein Zwischenframe
+    if (d.view) _curView = (d.view === 'innen') ? 'innen' : 'aussen';
     buildDoor(d.model);
     setSide(d.side || 'r');
     if (d.wood)  setWood(d.wood);

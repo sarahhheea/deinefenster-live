@@ -8626,6 +8626,48 @@ function sendHaus3dColor(faKey) {
     { type: HAUS3D_WOOD_KEYS.has(k) ? 'setWood' : 'setColor', key: k }, '*'
   );
 }
+
+// 3D-iframe für Haustür rendern (Außen + Innen + Live-Updates)
+// Sarah-Wunsch 16.05.2026: vollständige Logik-Bridge zwischen Konfigurator-Schritten und 3D
+function _renderHaustuer3d(previewView) {
+  const haus3dWrap  = document.getElementById('haus3d-wrap');
+  const haus3dFrame = document.getElementById('haus3d-frame');
+  if (!haus3dWrap || !haus3dFrame) return;
+
+  const _mdl   = S.tuerModell || 'florida-lr-inox';
+  const _side  = (S.oeff1 === 'dreh-l') ? 'l' : 'r';
+  const _view  = (previewView === 'inn') ? 'innen' : 'aussen';
+  const _ck    = HAUS3D_COLOR_MAP[S.fa] || 'anthrazitgrau';
+  const isWood = HAUS3D_WOOD_KEYS.has(_ck);
+
+  const _isLoaded = haus3dFrame.src.includes('haustuer-3d');
+  if (!_isLoaded) {
+    haus3dFrame.src = `haustuer-3d.html?embed&model=${_mdl}&side=${_side}&view=${_view}`;
+    haus3dFrame.onload = () => {
+      const cw = haus3dFrame.contentWindow;
+      if (!cw) return;
+      cw.postMessage({
+        type: 'update',
+        model: _mdl, side: _side, view: _view,
+        color: isWood ? null : _ck,
+        wood:  isWood ? _ck  : null,
+        glass: S.glasdekor || 'klar'
+      }, '*');
+    };
+  } else {
+    const cw = haus3dFrame.contentWindow;
+    if (cw) {
+      cw.postMessage({
+        type: 'update',
+        model: _mdl, side: _side, view: _view,
+        color: isWood ? null : _ck,
+        wood:  isWood ? _ck  : null,
+        glass: S.glasdekor || 'klar'
+      }, '*');
+    }
+  }
+  haus3dWrap.style.display = 'block';
+}
 // ─────────────────────────────────────────────────────────────
 
 function drawPrev() {
@@ -8648,13 +8690,23 @@ function drawPrev() {
       if (ph) ph.style.display = 'flex';
       return;
     }
-    // Alles ausblenden, SVG zeigen
+    // HAUSTÜR: kein SVG, sondern 3D-iframe (rechts in Vorschau-Bereich, mit Live-Logik)
+    // Sarah-Wunsch 16.05.2026: Haustür-3D im Konfigurator statt SVG-Vorschau.
+    if (S.prod === 'haustuere') {
+      svgWrap.style.display = 'none';
+      if (ph)   ph.style.display   = 'none';
+      if (wrap) wrap.style.display = 'none';
+      _renderHaustuer3d(previewView);
+      if (prevWrap) prevWrap.style.height = '560px';
+      return;
+    }
+    // Alle anderen Produkte: SVG zeigen, 3D ausblenden
     if (ph)   ph.style.display   = 'none';
     if (wrap) wrap.style.display = 'none';
     const h3w = document.getElementById('haus3d-wrap');
     if (h3w)  h3w.style.display  = 'none';
     svgWrap.style.display = 'block';
-    if (prevWrap) prevWrap.style.height = (S.prod === 'haustuere') ? '500px' : '440px';
+    if (prevWrap) prevWrap.style.height = '440px';
     window._kS = S; window._kP = P;
     renderSVGPrev('svg-prev', previewView);
     return;
