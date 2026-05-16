@@ -77,8 +77,10 @@ function _authHeaders(extra) {
 }
 
 async function _ghGet(path) {
-  const res = await fetch(`${_GH_API}/repos/${_GH_REPO}/contents/${encodeURI(path)}`, {
-    headers: _authHeaders(),
+  const url = `${_GH_API}/repos/${_GH_REPO}/contents/${encodeURI(path)}?ref=main&_=${Date.now()}`;
+  const res = await fetch(url, {
+    headers: _authHeaders({ 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }),
+    cache: 'no-store',
   });
   if (!res.ok) throw new Error('GitHub Lesefehler: ' + res.status);
   return res.json();
@@ -155,7 +157,13 @@ async function _ladeJSON() {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 8000);
   try {
-    const res = await fetch('data/shop-produkte.json', { signal: controller.signal });
+    // Cache-Buster gegen GitHub-Pages-CDN + Browser-Cache (sonst sieht man nach Speichern alte Daten)
+    const url = `data/shop-produkte.json?_=${Date.now()}`;
+    const res = await fetch(url, {
+      signal: controller.signal,
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' },
+    });
     if (!res.ok) throw new Error('Produkte konnten nicht geladen werden: ' + res.status);
     return res.json();
   } finally {

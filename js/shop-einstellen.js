@@ -739,7 +739,10 @@ function rendereVorschau() {
   const verglasung = document.getElementById('formVerglasung').value;
   const rc = '';
   const beschr = document.getElementById('formBeschreibung').value || (STATE.kategorie ? KATEGORIEN_LIVE.find(k=>k.key===STATE.kategorie)?.label + ' direkt aus dem Lager.' : 'Lagerware – sofort lieferbar.');
-  const bild = STATE.bilder[0] || 'img/fenster_standard.png';
+  // Hauptbild: erst neue (Bilder), dann bestehende (bilderBestand), sonst Default
+  const echtesBild = STATE.bilder[0] || STATE.bilderBestand[0] || null;
+  const bild = echtesBild || 'img/fenster_standard.png';
+  const istSymbolbild = !echtesBild;
 
   const lagerBadge = lager <= 1
     ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold" style="background:#fff4dc;color:#b87f00">Nur ${lager} verfügbar</span>`
@@ -749,7 +752,7 @@ function rendereVorschau() {
   const html = `
     <div class="relative aspect-[4/3] bg-surface-container-low">
       <img src="${escapeHtml(bild)}" alt="" class="w-full h-full object-contain" onerror="this.src='img/fenster_standard.png'"/>
-      <span class="absolute bottom-2 left-2 bg-[#0e1e3a]/70 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">Symbolbild</span>
+      ${istSymbolbild ? '<span class="absolute bottom-2 left-2 bg-[#0e1e3a]/70 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">Symbolbild</span>' : ''}
     </div>
     <div class="p-4">
       <div class="flex flex-wrap gap-1 mb-2">
