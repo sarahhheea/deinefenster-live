@@ -500,7 +500,11 @@ function rendere() {
 
   document.getElementById('produktAnzahl').textContent = STATE.produkte.length;
   document.getElementById('auswahlAnzahl').textContent = STATE.ausgewaehlt.size;
-  rendereSchilder();
+  if (document.body.classList.contains('schild-vorschau-zeigen')) rendereSchilder();
+}
+
+function updateZaehler() {
+  document.getElementById('auswahlAnzahl').textContent = STATE.ausgewaehlt.size;
 }
 
 function rendereSchilder() {
@@ -565,16 +569,29 @@ function bindeHandler() {
     const id = e.target.dataset.id;
     if (e.target.checked) STATE.ausgewaehlt.add(id);
     else STATE.ausgewaehlt.delete(id);
-    rendere();
+    const row = e.target.closest('.row');
+    if (row) row.classList.toggle('is-selected', e.target.checked);
+    updateZaehler();
+    if (document.body.classList.contains('schild-vorschau-zeigen')) rendereSchilder();
   });
 
   document.getElementById('alleAuswaehlen').addEventListener('click', () => {
     STATE.produkte.forEach(p => STATE.ausgewaehlt.add(p.id));
-    rendere();
+    document.querySelectorAll('#produktListe .row').forEach(r => {
+      r.classList.add('is-selected');
+      const cb = r.querySelector('.sel-check'); if (cb) cb.checked = true;
+    });
+    updateZaehler();
+    if (document.body.classList.contains('schild-vorschau-zeigen')) rendereSchilder();
   });
   document.getElementById('auswahlLeeren').addEventListener('click', () => {
     STATE.ausgewaehlt.clear();
-    rendere();
+    document.querySelectorAll('#produktListe .row').forEach(r => {
+      r.classList.remove('is-selected');
+      const cb = r.querySelector('.sel-check'); if (cb) cb.checked = false;
+    });
+    updateZaehler();
+    if (document.body.classList.contains('schild-vorschau-zeigen')) rendereSchilder();
   });
 
   document.getElementById('vorschauBtn').addEventListener('click', () => {
@@ -582,6 +599,7 @@ function bindeHandler() {
     document.body.classList.toggle('schild-vorschau-zeigen');
     document.getElementById('printHinweis').classList.toggle('hidden');
     if (document.body.classList.contains('schild-vorschau-zeigen')) {
+      rendereSchilder();
       document.getElementById('schildContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   });
@@ -590,6 +608,7 @@ function bindeHandler() {
     if (STATE.ausgewaehlt.size === 0) { alert('Wähl erst Produkte aus.'); return; }
     document.body.classList.add('schild-vorschau-zeigen');
     document.getElementById('printHinweis').classList.remove('hidden');
+    rendereSchilder();
     // Bilder kurz Zeit zum Laden geben, dann Druck-Dialog
     setTimeout(() => window.print(), 500);
   });
