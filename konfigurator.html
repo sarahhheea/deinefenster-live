@@ -1065,6 +1065,157 @@
     /* ── Produkt-Hero Overlay ── */
     #prod-hero { background: #0a1225 !important; }
 
+    /* ════════════════════════════════════════════════════════════════
+       HIGH-END REDESIGN PHASE A (Sarah-Wunsch 16.05.2026)
+       Layout: 3D dominant, Übersicht-Card unter 3D, Steps fokussiert
+       Konsolidiert aus 3 Spezialisten-Berichten + ui-ux-pro-max Skill
+       ════════════════════════════════════════════════════════════════ */
+
+    @media (min-width: 1024px) {
+      /* Rechte Spalte (Preview+Übersicht): von 360px fix → flex:1 (~780px bei 1440px) */
+      #sidebar-wrap {
+        width: auto !important;
+        flex: 1 1 0 !important;
+        min-width: 520px !important;
+        max-width: 880px !important;
+        padding: 22px 28px !important;
+        gap: 14px !important;
+        border-left: 1px solid rgba(255,255,255,0.06) !important;
+        background: linear-gradient(180deg, rgba(10,18,37,0.4) 0%, rgba(6,9,26,0.6) 100%) !important;
+      }
+      /* Mitte (Steps): nicht mehr flex:1, sondern fix-Max — gibt Atemraum dem 3D */
+      #steps {
+        flex: 0 0 460px !important;
+        max-width: 460px !important;
+      }
+    }
+
+    /* PREVIEW: 3D-Hero-Sockel (NICHT Glass-Card — Konfigurator-Pattern empfiehlt ruhigen Sockel) */
+    #prev-wrap {
+      height: clamp(520px, calc(100vh - 380px), 720px) !important;
+      min-height: 520px !important;
+      border-radius: 16px !important;
+      background: linear-gradient(180deg, #0d1830 0%, #06091a 100%) !important;
+      border: 1px solid rgba(118,169,250,0.10) !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.05),
+        0 1px 0 rgba(255,255,255,0.04),
+        0 40px 80px -24px rgba(0,0,0,0.7),
+        0 16px 32px -16px rgba(34,94,170,0.22) !important;
+      position: relative !important;
+      overflow: hidden !important;
+    }
+    /* Bodenglow unter dem 3D-Modell — gibt Showroom-Wirkung */
+    #prev-wrap::after {
+      content: '';
+      position: absolute;
+      inset: auto 0 0 0;
+      height: 40%;
+      pointer-events: none;
+      background: radial-gradient(ellipse at 50% 100%,
+        rgba(118,169,250,0.10) 0%,
+        rgba(118,169,250,0.04) 30%,
+        transparent 65%);
+      z-index: 5;
+    }
+
+    /* ÜBERSICHT-Card (vorhandener #chips): größer, lesbarer, sitzt unter 3D */
+    #chips {
+      margin-top: 0 !important;
+      flex: 0 0 auto !important;
+      overflow: visible !important;
+    }
+    #chips > div {
+      border-radius: 14px !important;
+      background: rgba(255,255,255,0.03) !important;
+      border-color: rgba(118,169,250,0.12) !important;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 24px rgba(0,0,0,0.25) !important;
+    }
+    #chips > div > div:first-child {
+      padding: 11px 16px 10px !important;
+      border-bottom-color: rgba(255,255,255,0.06) !important;
+    }
+    #chips > div > div:first-child span:last-child {
+      font-size: 11px !important;
+      letter-spacing: .12em !important;
+      color: rgba(255,255,255,0.45) !important;
+    }
+    #chips > div > div:nth-child(2) > div {
+      padding: 10px 16px !important;
+      font-variant-numeric: tabular-nums !important;
+    }
+    #chips > div > div:nth-child(2) > div span:first-child {
+      font-size: 11.5px !important;
+      font-weight: 600 !important;
+      text-transform: uppercase !important;
+      letter-spacing: .08em !important;
+      color: rgba(160,190,230,0.55) !important;
+      min-width: 100px !important;
+    }
+    #chips > div > div:nth-child(2) > div span:last-child {
+      font-size: 14px !important;
+      font-weight: 600 !important;
+      font-family: 'Plus Jakarta Sans', sans-serif !important;
+      color: rgba(238,242,255,0.95) !important;
+    }
+
+    /* Preis-Box (eigentlich Lieferzeit-Box jetzt) — passt zur Übersicht-Card optisch */
+    #conf-price-box {
+      border-radius: 14px !important;
+      background: rgba(118,169,250,0.06) !important;
+      border: 1px solid rgba(118,169,250,0.14) !important;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05) !important;
+      padding: 16px 18px !important;
+      margin-top: 12px !important;
+    }
+    #conf-price-box > div:first-child {
+      font-size: 11px !important;
+      letter-spacing: .12em !important;
+      color: rgba(160,190,230,0.55) !important;
+      margin-bottom: 6px !important;
+    }
+    #sb-total {
+      font-size: 15px !important;
+      font-family: 'Plus Jakarta Sans', sans-serif !important;
+      font-weight: 700 !important;
+      color: rgba(238,242,255,0.95) !important;
+      line-height: 1.3 !important;
+      font-variant-numeric: tabular-nums !important;
+    }
+
+    /* CTA „Angebot anfordern" — etwas mehr Atemraum + tieferer Schatten */
+    #sidebar-wrap button[onclick*="openS(13)"] {
+      border-radius: 12px !important;
+      padding: 14px !important;
+      font-size: 14px !important;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.10) inset, 0 8px 24px rgba(34,94,170,0.45), 0 2px 6px rgba(0,0,0,0.3) !important;
+      margin-top: 12px !important;
+    }
+
+    /* Step-Phase-Timeline: leichte Polish, LED-Akzent an aktiver Phase */
+    #kfg-nav .step-group.active-phase > .step-group-label,
+    #kfg-nav .phase-active .step-group-label {
+      position: relative;
+      padding-left: 10px !important;
+    }
+    #kfg-nav .step-group.active-phase > .step-group-label::before,
+    #kfg-nav .phase-active .step-group-label::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 6px; bottom: 6px;
+      width: 2px;
+      background: linear-gradient(180deg, #76a9fa 0%, #225eaa 100%);
+      box-shadow: 0 0 8px rgba(118,169,250,0.50);
+      border-radius: 2px;
+    }
+
+    /* Mobile-Anpassung: bei <1024px bleibt alles wie gehabt (Akkordeon-Stack) */
+    @media (max-width: 1023px) {
+      #prev-wrap { height: 380px !important; min-height: 360px !important; }
+    }
+
     /* ── High-End View-Toggle (Sarah 16.05.2026) ── */
     /* iOS-Segmented-Control: ruhiger Pill-Hintergrund, weiße aktive Pille mit subtilem Schatten */
     .view-btn-hi {
