@@ -14,6 +14,7 @@ const STATE = {
   filter: {
     zustand: new Set(),
     material: new Set(),
+    glasart: new Set(),
     kategorien: new Set(),
     farben: new Set(),
     verglasung: new Set(),
@@ -105,6 +106,7 @@ async function loadProdukte() {
       system: p.system || '',
       zustand: p.zustand || 'neu',
       material: (p.material || 'kunststoff').toLowerCase(),
+      glasart: (p.glasart || 'klarglas').toLowerCase(),
       breite_mm: Number(p.breite_mm) || 0,
       hoehe_mm: Number(p.hoehe_mm) || 0,
       preis_eur: Number(p.preis_eur) || 0,
@@ -228,6 +230,11 @@ function baueFilterSidebar() {
   setCountAttr('material-kunststoff', STATE.produkte.filter(p => (p.material || 'kunststoff') === 'kunststoff').length);
   setCountAttr('material-holz', STATE.produkte.filter(p => p.material === 'holz').length);
   setCountAttr('material-aluminium', STATE.produkte.filter(p => p.material === 'aluminium').length);
+  setCountAttr('glasart-klarglas', STATE.produkte.filter(p => (p.glasart || 'klarglas') === 'klarglas').length);
+  setCountAttr('glasart-chinchilla', STATE.produkte.filter(p => p.glasart === 'chinchilla').length);
+  setCountAttr('glasart-milchglas', STATE.produkte.filter(p => p.glasart === 'milchglas').length);
+  setCountAttr('glasart-sicherheitsglas', STATE.produkte.filter(p => p.glasart === 'sicherheitsglas').length);
+  setCountAttr('glasart-schallschutzglas', STATE.produkte.filter(p => p.glasart === 'schallschutzglas').length);
   setCountAttr('verglasung-2-fach', STATE.produkte.filter(p => p.verglasung === '2-fach').length);
   setCountAttr('verglasung-3-fach', STATE.produkte.filter(p => p.verglasung === '3-fach').length);
   setCountAttr('rc-RC2', STATE.produkte.filter(p => p.rc_klasse === 'RC2').length);
@@ -283,6 +290,7 @@ function bindeEventHandler() {
       rendere(); return;
     }
     else if (t.classList.contains('filter-material')) setRef = STATE.filter.material;
+    else if (t.classList.contains('filter-glasart')) setRef = STATE.filter.glasart;
     else if (t.classList.contains('filter-kategorie')) setRef = STATE.filter.kategorien;
     else if (t.classList.contains('filter-farbe')) setRef = STATE.filter.farben;
     else if (t.classList.contains('filter-verglasung')) setRef = STATE.filter.verglasung;
@@ -402,6 +410,8 @@ function gefilterteProdukte() {
     }
     // Material (Kunststoff / Holz / Aluminium — mehrere kombinierbar)
     if (f.material.size && !f.material.has(p.material || 'kunststoff')) return false;
+    // Glasart (Klarglas / Chinchilla / Milchglas / Sicherheitsglas / Schallschutzglas — mehrere kombinierbar)
+    if (f.glasart.size && !f.glasart.has(p.glasart || 'klarglas')) return false;
     // Kategorie
     if (f.kategorien.size && !f.kategorien.has(p.kategorie)) return false;
     // Größen-Klasse
@@ -696,6 +706,15 @@ function rendereAktiveChips() {
     const label = m === 'kunststoff' ? 'Kunststoff' : m === 'holz' ? 'Holz' : 'Aluminium';
     chips.push({label, type: 'material', value: m});
   });
+  f.glasart.forEach(g => {
+    const label = g === 'klarglas' ? 'Klarglas'
+      : g === 'chinchilla' ? 'Chinchilla'
+      : g === 'milchglas' ? 'Milchglas'
+      : g === 'sicherheitsglas' ? 'Sicherheitsglas'
+      : g === 'schallschutzglas' ? 'Schallschutzglas'
+      : g;
+    chips.push({label, type: 'glasart', value: g});
+  });
   f.kategorien.forEach(k => chips.push({label: STATE.kategorien[k] || k, type: 'kategorie', value: k}));
   f.farben.forEach(c => chips.push({label: 'Farbe: ' + farbeAnzeige(c), type: 'farbe', value: c}));
   f.verglasung.forEach(v => chips.push({label: v + '-Verglasung', type: 'verglasung', value: v}));
@@ -746,6 +765,11 @@ function entferneChipFilter(type, value) {
       const me = document.querySelector(`.filter-material[value="${value}"]`);
       if (me) me.checked = false;
       break;
+    case 'glasart':
+      STATE.filter.glasart.delete(value);
+      const ge = document.querySelector(`.filter-glasart[value="${value}"]`);
+      if (ge) ge.checked = false;
+      break;
     case 'kategorie':
       STATE.filter.kategorien.delete(value);
       document.querySelector(`.filter-kategorie[value="${value}"]`).checked = false;
@@ -787,6 +811,7 @@ function entferneChipFilter(type, value) {
 function resetAlleFilter() {
   STATE.filter.zustand.clear();
   STATE.filter.material.clear();
+  STATE.filter.glasart.clear();
   STATE.filter.kategorien.clear();
   STATE.filter.farben.clear();
   STATE.filter.groesse.clear();
