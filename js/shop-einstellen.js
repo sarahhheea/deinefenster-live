@@ -118,7 +118,8 @@ const FARBE_LABEL = {
 
 const STATE = {
   typ: null,        // 'vermessen' oder 'sonderposten'
-  zustand: 'neu',  // 'neu' oder 'gebraucht'
+  zustand: 'neu',  // 'neu' | 'gebraucht' | 'vermessen' | 'sonderposten'
+  material: 'kunststoff', // 'kunststoff' | 'holz' | 'aluminium' — gilt für neu UND gebraucht
   kategorie: null,
   groesseKlasse: '',
   bilder: [],          // Array von DataURLs (neue Bilder, Base64 für Vorschau)
@@ -177,9 +178,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   rendereEigenschaften();
   bindeFormHandler();
   bindeZustandHandler();
+  bindeMaterialHandler();
   bindeGroesseHandler();
   if (!STATE.editMode) ladeDraft();
   setZustandUI();
+  setMaterialUI();
   setGroesseUI();
   setEditModeUI();
   rendereVorschau();
@@ -188,6 +191,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 /* ─── Edit-Mode: Produkt ins Formular laden ─── */
 async function ladeProduktInsFormular(p) {
   STATE.zustand = p.zustand || 'neu';
+  STATE.material = p.material || 'kunststoff';
   STATE.kategorie = p.kategorie_key;
   STATE.groesseKlasse = p.groesse_klasse || '';
   STATE.bilderBestand = Array.isArray(p.bilder) ? [...p.bilder] : [];
@@ -357,6 +361,28 @@ function setZustandUI() {
   }
 }
 
+/* ─── Material-Auswahl (Kunststoff / Holz / Aluminium) ─── */
+function bindeMaterialHandler() {
+  ['materialKunststoff', 'materialHolz', 'materialAluminium'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('click', () => {
+      STATE.material = el.dataset.material;
+      setMaterialUI();
+      saveDraft();
+      rendereVorschau();
+    });
+  });
+}
+
+function setMaterialUI() {
+  ['materialKunststoff', 'materialHolz', 'materialAluminium'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.toggle('selected', el.dataset.material === STATE.material);
+  });
+}
+
 /* ─── Schritt 1: Kategorie-Auswahl ─── */
 function rendereKategorien() {
   const grid = document.getElementById('kategorieGrid');
@@ -518,7 +544,9 @@ function resetFormular() {
   document.querySelectorAll('.eig-check').forEach(c => { c.checked = false; });
   STATE.bilder = [];
   STATE.zustand = 'neu';
+  STATE.material = 'kunststoff';
   setZustandUI();
+  setMaterialUI();
   rendereBildVorschau();
   document.getElementById('autoErkanntHinweis').classList.add('hidden');
   // Zurück zu Schritt 0
@@ -781,6 +809,7 @@ async function veroeffentlichen() {
       titel,
       kategorie_key: STATE.kategorie,
       zustand: STATE.zustand,
+      material: STATE.material || 'kunststoff',
       system: STATE.zustand === 'neu' ? document.getElementById('formSystem').value : null,
       breite_mm: breite,
       hoehe_mm: hoehe,
@@ -836,6 +865,7 @@ function dataURLToBlob(dataUrl) {
 function saveDraft() {
   const draft = {
     zustand: STATE.zustand,
+    material: STATE.material,
     kategorie: STATE.kategorie,
     titel: document.getElementById('formTitel')?.value || '',
     breite: document.getElementById('formBreite')?.value || '',
@@ -861,6 +891,7 @@ function ladeDraft() {
     if (!raw) return;
     const d = JSON.parse(raw);
     if (d.zustand) STATE.zustand = d.zustand;
+    if (d.material) STATE.material = d.material;
     if (d.kategorie) STATE.kategorie = d.kategorie;
     const setIfPresent = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
     setIfPresent('formTitel', d.titel);

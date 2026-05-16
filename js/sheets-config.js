@@ -183,6 +183,7 @@ async function sheetsPost(data) {
   if (action === 'upload_image') return _uploadBild(data);
   if (action === 'insert')       return _insertProdukt(data.data);
   if (action === 'update')       return _updateProdukt(data.id, data.data);
+  if (action === 'archive')      return _archiviereProdukt(data.id);
   if (action === 'delete')       return _deleteProdukt(data.id);
   return { ok: false, error: 'Unbekannte Aktion: ' + action };
 }
@@ -232,15 +233,32 @@ async function _updateProdukt(id, eintrag) {
   }
 }
 
-/* ─── Produkt deaktivieren ────────────────────────────────────────────── */
+/* ─── Produkt archivieren (Soft-Delete — aktiv=false, bleibt im JSON) ─── */
 
-async function _deleteProdukt(id) {
+async function _archiviereProdukt(id) {
   try {
     let found = false;
     await _writeJSON(json => {
       const p = (json.produkte || []).find(x => String(x.id) === String(id));
       if (p) { p.aktiv = false; found = true; }
-    }, `Inserat deaktiviert: ${id}`);
+    }, `Inserat archiviert: ${id}`);
+    if (!found) return { ok: false, error: 'Produkt nicht gefunden: ' + id };
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+}
+
+/* ─── Produkt KOMPLETT löschen (hart aus JSON entfernen) ──────────────── */
+
+async function _deleteProdukt(id) {
+  try {
+    let found = false;
+    await _writeJSON(json => {
+      const vorher = (json.produkte || []).length;
+      json.produkte = (json.produkte || []).filter(x => String(x.id) !== String(id));
+      found = json.produkte.length < vorher;
+    }, `Inserat gelöscht: ${id}`);
     if (!found) return { ok: false, error: 'Produkt nicht gefunden: ' + id };
     return { ok: true };
   } catch (err) {
