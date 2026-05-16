@@ -124,12 +124,16 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 // RENDERER
 // ══════════════════════════════════════════════
 const canvasEl = document.getElementById('threeCanvas');
-const renderer = new THREE.WebGLRenderer({ canvas: canvasEl, antialias: true, preserveDrawingBuffer: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+const renderer = new THREE.WebGLRenderer({
+  canvas: canvasEl, antialias: true, preserveDrawingBuffer: true,
+  powerPreference: 'high-performance', alpha: false
+});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 3));   // max Schärfe
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.15;
+renderer.toneMappingExposure = 0.95;   // mehr Kontrast — Mittel-/Schattenbereiche dunkler
+renderer.outputColorSpace = THREE.SRGBColorSpace;
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xffffff);
@@ -164,14 +168,14 @@ const eL2 = new THREE.DirectionalLight(0xffffff, 3.0);
 eL2.position.set(-2, 1, 3); envSc.add(eL2);
 scene.environment = pmremGen.fromScene(envSc, 0.04).texture;
 
-// Helles Produktfoto-Licht (weißer Hintergrund)
-scene.add(new THREE.AmbientLight(0xffffff, 0.80));
+// Ambient reduziert — klare Schatten und schärferer Look
+scene.add(new THREE.AmbientLight(0xffffff, 0.55));
 
-// Key-Licht oben-LINKS — Reflexion wie auf Referenzfoto (links-oben Highlight)
-const keyLight = new THREE.DirectionalLight(0xffffff, 1.8);
+// Key-Licht intensiver — kräftige Definition und klare Highlights
+const keyLight = new THREE.DirectionalLight(0xffffff, 2.4);
 keyLight.position.set(-2, 4, 6);
 keyLight.castShadow = true;
-keyLight.shadow.mapSize.set(2048, 2048);
+keyLight.shadow.mapSize.set(4096, 4096);   // hochauflösende Schatten
 keyLight.shadow.camera.near = 1; keyLight.shadow.camera.far = 14;
 keyLight.shadow.camera.left = -1.4; keyLight.shadow.camera.right = 1.4;
 keyLight.shadow.camera.top = 1.8; keyLight.shadow.camera.bottom = -1.8;
@@ -186,11 +190,27 @@ fillLight.position.set(-3, 1, 3); scene.add(fillLight);
 const frontLight = new THREE.DirectionalLight(0xffffff, 0.35);
 frontLight.position.set(0, 3, 10); scene.add(frontLight);
 
-// Spotlight für Griff-Chrome
-const handleSpot = new THREE.SpotLight(0xffffff, 5.0, 10, Math.PI / 9, 0.12);
+// Spotlight für Griff-Highlight
+const handleSpot = new THREE.SpotLight(0xffffff, 3.5, 10, Math.PI / 9, 0.16);
 handleSpot.position.set(1.5, 0.8, 5.5);
 handleSpot.target.position.set(0.42, 0.00, 0.09);
 scene.add(handleSpot); scene.add(handleSpot.target);
+
+// Rim-Light von hinten-oben — Konturen aufhellen
+const rimLight = new THREE.DirectionalLight(0xffffff, 0.40);
+rimLight.position.set(0, 5, -3);
+scene.add(rimLight);
+
+// Soft-Light von unten-rechts — füllt dunkle Schattenseiten
+const bottomFill = new THREE.DirectionalLight(0xfff5e8, 0.30);
+bottomFill.position.set(3, -2, 4);
+scene.add(bottomFill);
+
+// Hinge-Highlight von links — Scharnier-Walzen klarer sichtbar
+const hingeSpot = new THREE.SpotLight(0xffffff, 2.5, 8, Math.PI / 10, 0.20);
+hingeSpot.position.set(-2.0, 0.0, 4.5);
+hingeSpot.target.position.set(-0.48, 0.00, 0.09);
+scene.add(hingeSpot); scene.add(hingeSpot.target);
 
 // Bodenschatten entfernt — Referenzbild zeigt reinen weißen Hintergrund ohne Schatten
 
@@ -201,6 +221,9 @@ const texLoader = new THREE.TextureLoader();
 const frameMat  = new THREE.MeshStandardMaterial({ color: 0xfcfcfc, roughness: 0.68, metalness: 0.0 });
 const sashMat   = new THREE.MeshStandardMaterial({ color: 0xfcfcfc, roughness: 0.68, metalness: 0.0 });
 const grooveMat = new THREE.MeshStandardMaterial({ color: 0x252829, roughness: 0.70 });
+const sealMat   = new THREE.MeshStandardMaterial({ color: 0x1a1c1e, roughness: 0.78 });
+// Subtile Nut-Linie — nur Tiefenwirkung, kein schwarzer Strich
+const subtleNutMat = new THREE.MeshStandardMaterial({ color: 0xdcdcdc, roughness: 0.65 });
 const spacerMat = new THREE.MeshStandardMaterial({ color: 0x22262a, roughness: 0.55, metalness: 0.45 });
 const handleMat = new THREE.MeshStandardMaterial({ color: 0xd8dde0, roughness: 0.18, metalness: 0.92, envMapIntensity: 2.5 });
 const hingeMat  = new THREE.MeshStandardMaterial({ color: 0xbabfc2, roughness: 0.55, metalness: 0.05 });
@@ -237,7 +260,7 @@ const GW = SW - 2 * FST - 2 * SBW;  // 0.756
 const GH = SH - 2 * FST - 2 * SBW;  // 0.956
 
 // Flügel steht 5mm vor dem Blendrahmen hervor (Falz)
-const SASH_DZ = 0.005;
+const SASH_DZ = 0.016;   // 16 mm Aufkantung — deutliche 3D-Trennung Rahmen|Flügel
 
 const winGroup  = new THREE.Group();
 const sashGroup = new THREE.Group();   // Flügel — rotiert um linke Scharnier-Achse zum Öffnen
@@ -263,14 +286,14 @@ function bx(cx, cy, cz, w, h, d, mat) {
 }
 
 // ── Profilnut (dekorative Rille auf Vorderfläche) ────
-function nut(x1, y1, x2, y2, faceZ) {
+function nut(x1, y1, x2, y2, faceZ, mat) {
   const dx = x2 - x1, dy = y2 - y1;
   const len = Math.sqrt(dx * dx + dy * dy);
   const isH = Math.abs(dx) > Math.abs(dy);
   const gw = 0.0046, gd = 0.0036;
   const m = new THREE.Mesh(
     new THREE.BoxGeometry(isH ? len : gw, isH ? gw : len, gd),
-    grooveMat
+    mat || grooveMat
   );
   m.position.set((x1 + x2) / 2, (y1 + y2) / 2, faceZ + 0.0012);
   return m;
@@ -313,12 +336,21 @@ function buildWindow() {
   winGroup.add(bx(FRT/2,         FH/2,           fzc, FRT,          FH - 2*FRT,  FD, frameMat));
   winGroup.add(bx(FW - FRT/2,    FH/2,           fzc, FRT,          FH - 2*FRT,  FD, frameMat));
 
-  // Profilnuten Blendrahmen
-  const fni = FRT * 0.56;
-  winGroup.add(nut(fni, fni, FW - fni, fni, ffz));
-  winGroup.add(nut(fni, FH - fni, FW - fni, FH - fni, ffz));
-  winGroup.add(nut(fni, fni, fni, FH - fni, ffz));
-  winGroup.add(nut(FW - fni, fni, FW - fni, FH - fni, ffz));
+  // Profilnut Blendrahmen — subtile Tiefenlinie (kein schwarzer Strich)
+  const fni = FRT - 0.012;
+  winGroup.add(nut(fni, fni, FW - fni, fni, ffz, subtleNutMat));
+  winGroup.add(nut(fni, FH - fni, FW - fni, FH - fni, ffz, subtleNutMat));
+  winGroup.add(nut(fni, fni, fni, FH - fni, ffz, subtleNutMat));
+  winGroup.add(nut(FW - fni, fni, FW - fni, FH - fni, ffz, subtleNutMat));
+
+  // FALZ-DICHTUNG (schwarz, umlaufend um Flügel) — klare Trennung Rahmen|Flügel
+  const sealW = 0.005;
+  const sealDp = 0.008;
+  const sealZ_pos = ffz + SASH_DZ / 2;
+  winGroup.add(bx(x0 + SW/2,         y0 - sealW/2,        sealZ_pos, SW + sealW*2, sealW, sealDp, sealMat));
+  winGroup.add(bx(x0 + SW/2,         y0 + SH + sealW/2,   sealZ_pos, SW + sealW*2, sealW, sealDp, sealMat));
+  winGroup.add(bx(x0 - sealW/2,      y0 + SH/2,           sealZ_pos, sealW, SH,           sealDp, sealMat));
+  winGroup.add(bx(x0 + SW + sealW/2, y0 + SH/2,           sealZ_pos, sealW, SH,           sealDp, sealMat));
 
   // ── Flügel — 4 Stäbe (in sashGroup, drehen sich beim Öffnen) ──
   sashGroup.add(bx(sx(x0 + SW/2),        y0 + FST/2,        szc, SW,   FST,         FD, sashMat));
@@ -355,59 +387,122 @@ function buildWindow() {
   sashGroup.add(bx(gcx - GW/2 - SBW/2, gcy, sbz, SBW, GH, sbd, spacerMat));
   sashGroup.add(bx(gcx + GW/2 + SBW/2, gcy, sbz, SBW, GH, sbd, spacerMat));
 
-  // ── DK-Griff (rechtes Flügelprofil, mittig) ──────────
+  // DK-GRIFF — Schild + durchgehender Tube + Schulter + Olive
   const hx  = sx(x0 + SW - FST * 0.52);
   const hy  = y0 + SH / 2;
-  const hbz = sfz + 0.003;
+  const hbz = sfz;
 
-  const rosette = new THREE.Mesh(new THREE.CylinderGeometry(0.021, 0.021, 0.009, 24), handleMat);
-  rosette.rotation.x = Math.PI / 2;
-  rosette.position.set(hx, hy, hbz + 0.0045);
+  // 1) Schild — Pille hochkant 30×100×7 mm
+  const rosette = new THREE.Mesh(
+    new THREE.CapsuleGeometry(0.015, 0.070, 6, 22),
+    handleMat
+  );
+  rosette.scale.set(1.0, 1.0, 0.47);
+  rosette.position.set(hx, hy, hbz + 0.0035);
   rosette.castShadow = true;
   rosette.userData.isHandle = true;
   sashGroup.add(rosette); handleObjects.push(rosette);
 
-  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.0075, 0.0075, 0.022, 14), handleMat);
-  neck.rotation.x = Math.PI / 2;
-  neck.position.set(hx, hy, hbz + 0.009 + 0.011);
-  neck.castShadow = true;
-  neck.userData.isHandle = true;
-  sashGroup.add(neck); handleObjects.push(neck);
+  // 2) Durchgehender Tube entlang einer Curve (kein zwei-Teile-Look)
+  const curvePts = [
+    new THREE.Vector3(hx, hy + 0.003,  hbz + 0.002),
+    new THREE.Vector3(hx, hy + 0.003,  hbz + 0.014),
+    new THREE.Vector3(hx, hy + 0.001,  hbz + 0.022),
+    new THREE.Vector3(hx, hy - 0.012,  hbz + 0.027),
+    new THREE.Vector3(hx, hy - 0.032,  hbz + 0.028),
+    new THREE.Vector3(hx, hy - 0.070,  hbz + 0.028),
+    new THREE.Vector3(hx, hy - 0.106,  hbz + 0.028),
+  ];
+  const handleCurve = new THREE.CatmullRomCurve3(curvePts, false, 'centripetal', 0.5);
+  const tubularSegs = 64;
+  const radialSegs  = 24;
+  const tubeGeo = new THREE.TubeGeometry(handleCurve, tubularSegs, 0.0115, radialSegs, false);
 
-  const axle = new THREE.Mesh(new THREE.CylinderGeometry(0.010, 0.010, 0.010, 12), handleMat);
-  axle.rotation.x = Math.PI / 2;
-  axle.position.set(hx, hy, hbz + 0.009 + 0.022 + 0.005);
-  axle.castShadow = true;
-  axle.userData.isHandle = true;
-  sashGroup.add(axle); handleObjects.push(axle);
+  // Verjüngung — Tube wird zum Ende der Curve dünner (1.0 → 0.85)
+  const pos = tubeGeo.attributes.position;
+  for (let i = 0; i <= tubularSegs; i++) {
+    const t = i / tubularSegs;
+    const point = handleCurve.getPointAt(t);
+    // bei Knick-Bogen schon leicht dünner, am Ende klar verjüngt
+    const scaleFactor = 1.0 - 0.16 * Math.pow(t, 1.4);
+    for (let j = 0; j <= radialSegs; j++) {
+      const idx = i * (radialSegs + 1) + j;
+      const dx = pos.getX(idx) - point.x;
+      const dy = pos.getY(idx) - point.y;
+      const dz = pos.getZ(idx) - point.z;
+      pos.setX(idx, point.x + dx * scaleFactor);
+      pos.setY(idx, point.y + dy * scaleFactor);
+      pos.setZ(idx, point.z + dz * scaleFactor);
+    }
+  }
+  pos.needsUpdate = true;
+  tubeGeo.computeVertexNormals();
 
-  // Hebel — leicht verjüngt für Tropfen-Silhouette
-  const leverLen = 0.138;
-  const leverGeom = new THREE.CylinderGeometry(0.016, 0.011, leverLen, 16);
-  const lever = new THREE.Mesh(leverGeom, handleMat);
-  lever.scale.set(0.68, 1.0, 0.52);
-  const lz = hbz + 0.009 + 0.022 + 0.012 + 0.013;
-  lever.position.set(hx, hy - leverLen / 2, lz);
-  lever.castShadow = true;
-  lever.userData.isHandle = true;
-  sashGroup.add(lever); handleObjects.push(lever);
+  const handleTube = new THREE.Mesh(tubeGeo, handleMat);
+  handleTube.castShadow = true;
+  handleTube.userData.isHandle = true;
+  sashGroup.add(handleTube); handleObjects.push(handleTube);
 
-  const tipGeom = new THREE.SphereGeometry(0.014, 12, 8);
-  const tip = new THREE.Mesh(tipGeom, handleMat);
-  tip.scale.set(0.68, 1.0, 0.52);
-  tip.position.set(hx, hy - leverLen, lz);
-  tip.castShadow = true;
-  tip.userData.isHandle = true;
-  sashGroup.add(tip); handleObjects.push(tip);
+  // 3) OLIVE — gleicher Radius wie der VERJÜNGTE Tube-Endpunkt (0.0115 × 0.84)
+  //    → fließender Halbkugel-Abschluss ohne sichtbare Stufe
+  const olive = new THREE.Mesh(
+    new THREE.SphereGeometry(0.0115 * 0.84, 28, 20),
+    handleMat
+  );
+  olive.position.set(hx, hy - 0.106, hbz + 0.028);
+  olive.castShadow = true;
+  olive.userData.isHandle = true;
+  sashGroup.add(olive); handleObjects.push(olive);
 
-  // ── Scharnier-Abdeckkappen (2 Stück, links am Flügel) ──
-  const hingeX = sx(x0 + FST * 0.42);
-  const hingeZ = sfz + 0.002;
-  [ y0 + SH * 0.12, y0 + SH * 0.88 ].forEach(hy => {
-    const hc = new THREE.Mesh(new THREE.BoxGeometry(0.030, 0.052, 0.006), hingeMat);
-    hc.position.set(hingeX, hy, hingeZ);
-    hc.castShadow = true;
-    sashGroup.add(hc);
+  // SCHARNIERE — Drutex IGLO Eckband-Walzen mit Endkappen + Trennring
+  const rollR = 0.0085;
+  const rollH = 0.092;
+  const rollX_abs = x0;
+  const rollZ_abs = sfz + 0.008;
+  const capR = rollR * 1.10;
+  const capH = 0.008;
+  const ringH = 0.0025;
+
+  [ FH - 0.150, 0.150 ].forEach(hy => {
+    const roll = new THREE.Mesh(
+      new THREE.CylinderGeometry(rollR, rollR, rollH, 30),
+      hingeMat
+    );
+    roll.position.set(rollX_abs, hy, rollZ_abs);
+    roll.castShadow = true;
+    winGroup.add(roll);
+
+    const capTop = new THREE.Mesh(
+      new THREE.CylinderGeometry(capR * 0.85, capR, capH, 28),
+      hingeMat
+    );
+    capTop.position.set(rollX_abs, hy + rollH / 2 + capH / 2 - 0.002, rollZ_abs);
+    capTop.castShadow = true;
+    winGroup.add(capTop);
+
+    const capBot = new THREE.Mesh(
+      new THREE.CylinderGeometry(capR, capR * 0.85, capH, 28),
+      hingeMat
+    );
+    capBot.position.set(rollX_abs, hy - rollH / 2 - capH / 2 + 0.002, rollZ_abs);
+    capBot.castShadow = true;
+    winGroup.add(capBot);
+
+    const midRing = new THREE.Mesh(
+      new THREE.CylinderGeometry(rollR * 1.04, rollR * 1.04, ringH, 30),
+      hingeMat
+    );
+    midRing.position.set(rollX_abs, hy, rollZ_abs);
+    midRing.castShadow = true;
+    winGroup.add(midRing);
+
+    const fuge = new THREE.Mesh(
+      new THREE.CylinderGeometry(rollR * 1.045, rollR * 1.045, 0.0006, 30),
+      sealMat
+    );
+    fuge.position.set(rollX_abs, hy, rollZ_abs);
+    fuge.castShadow = false;
+    winGroup.add(fuge);
   });
 }
 
@@ -550,6 +645,7 @@ function setColor(key) {
   frameMat.color.copy(c);
   sashMat.color.copy(c);
   grooveMat.color.copy(c).multiplyScalar(0.62);
+  subtleNutMat.color.copy(c).multiplyScalar(0.88);   // subtile Tiefenlinie folgt Rahmenfarbe
 
   const isGlatt    = key.endsWith('-gl');
   const isUltiMatt = key.endsWith('-um');
@@ -573,14 +669,17 @@ function setColor(key) {
 // Griff/Scharniere an Rahmenfarbe anpassen — bei hellen Tönen weiß-matt, sonst Chrom
 function applyHardwareColor(frameColor, frameLum) {
   if (frameLum >= 0.55) {
-    // Helle Rahmen (Weiß/Cremeweiß/Lichtgrau): Griff + Scharniere in Rahmenfarbe, matter Kunststoff
-    handleMat.color.copy(frameColor);
-    handleMat.roughness = 0.45;
-    handleMat.metalness = 0.0;
-    handleMat.envMapIntensity = 0.10;
-    hingeMat.color.copy(frameColor);
-    hingeMat.roughness = 0.55;
-    hingeMat.metalness = 0.0;
+    // Helle Rahmen: Hardware ~15 % dunkler + leichte Aluminium-Anmutung
+    // → klare Kontur zum Rahmen, wirkt aber wie pulverbeschichtetes Weiß
+    const hardwareTone = frameColor.clone().multiplyScalar(0.85);
+    handleMat.color.copy(hardwareTone);
+    handleMat.roughness = 0.32;
+    handleMat.metalness = 0.10;
+    handleMat.envMapIntensity = 0.50;
+    hingeMat.color.copy(hardwareTone);
+    hingeMat.roughness = 0.42;
+    hingeMat.metalness = 0.08;
+    hingeMat.envMapIntensity = 0.40;
   } else {
     // Dunkle Rahmen: Griff Chrom-Silber, Scharnierkappen leicht dunkler grau
     handleMat.color.setHex(0xd8dde0);

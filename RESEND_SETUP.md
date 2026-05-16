@@ -60,7 +60,7 @@ Gehe zu deinem Domain-Anbieter (IONOS / Strato / Namecheap / etc.) → DNS-Verwa
 ```
 
 ### 3a. Webhook-Modul (bereits vorhanden)
-- Dein Webhook: `https://hook.eu1.make.com/so6vhvekae4ve7e3peh7vgcgqmv7cbrc`
+- Dein Webhook: `https://hook.eu1.make.com/so6vhein Profil-Herstellere4ve7e3peh7vgcgqmv7cbrc`
 
 ### 3b. Erstes HTTP-Modul: Kunden-Bestätigung
 
