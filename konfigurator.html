@@ -5366,6 +5366,19 @@ function anschlagImg(v) {
   return `<img src="img/anschlag-karten/${file}.png" alt="${v}" loading="lazy" style="width:100%;height:auto;max-height:240px;object-fit:contain;display:block"/>`;
 }
 
+function anschlag2fImg(v1, v2, type) {
+  let file = null;
+  if (v1 === 'fest' && v2 === 'dk-r')                                file = 'fest-dkR';
+  else if (v1 === 'dk-l'   && v2 === 'fest')                         file = 'dkL-fest';
+  else if (type === 'stulp'   && v1 === 'dreh-l' && v2 === 'dk-r')   file = 'stulp-drehL-dkR';
+  else if (type === 'stulp'   && v1 === 'dk-l'   && v2 === 'dreh-r') file = 'stulp-dkL-drehR';
+  else if (type === 'pfosten' && v1 === 'dreh-l' && v2 === 'dk-r')   file = 'pfosten-drehL-dkR';
+  else if (type === 'pfosten' && v1 === 'dk-l'   && v2 === 'dreh-r') file = 'pfosten-dkL-drehR';
+  else if (type === 'pfosten' && v1 === 'dk-l'   && v2 === 'dk-r')   file = 'pfosten-dkL-dkR';
+  if (!file) return windowSVG(S.fluegel, [v1, v2]);
+  return `<img src="img/anschlag-karten-2f/${file}.png" alt="${v1}-${v2}-${type}" loading="lazy" style="width:100%;height:auto;max-height:240px;object-fit:contain;display:block"/>`;
+}
+
 function buildFluegel() {
   const grid = document.getElementById('fluegel-grid');
   if (!grid) return;
@@ -6112,9 +6125,9 @@ function buildOeffSash() {
         const priceTxt = priceDelta === 0 ? 'inkl.' : (priceDelta > 0 ? `+ ${priceDelta} €` : `− ${Math.abs(priceDelta)} €`);
         const priceCls = priceDelta === 0 ? 'p-inc' : (priceDelta > 0 ? 'p-add' : 'p-sav');
         html += `<div class="oc${isSel?' sel':''}" data-v1="${c.v1}" data-v2="${c.v2}" data-type="${c.type}" onclick="pickOeffCombo(this)" style="flex-direction:column;align-items:center;text-align:center;padding:8px 6px 10px;gap:3px">
-          ${windowSVG(S.fluegel,[c.v1,c.v2])}
-          <div class="olabel" style="font-size:11px;line-height:1.3;margin-top:5px">${c.sub}</div>
-          <div class="oprice ${priceCls}" style="font-size:11px">${priceTxt}</div>
+          ${anschlag2fImg(c.v1,c.v2,c.type)}
+          <div class="olabel" style="font-size:13px;font-weight:600;line-height:1.3;margin-top:7px">${c.sub}</div>
+          <div class="oprice ${priceCls}" style="font-size:12px">${priceTxt}</div>
         </div>`;
       });
       html += `</div>`;
@@ -6140,9 +6153,9 @@ function buildOeffSash() {
         const priceTxt = priceDelta === 0 ? 'inkl.' : (priceDelta > 0 ? `+ ${priceDelta} €` : `− ${Math.abs(priceDelta)} €`);
         const priceCls = priceDelta === 0 ? 'p-inc' : (priceDelta > 0 ? 'p-add' : 'p-sav');
         html += `<div class="oc${isSel?' sel':''}" data-v1="${c.v1}" data-v2="${c.v2}" data-type="${c.type}" onclick="pickOeffCombo(this)" style="flex-direction:column;align-items:center;text-align:center;padding:8px 6px 10px;gap:3px">
-          ${windowSVG(S.fluegel,[c.v1,c.v2])}
-          <div class="olabel" style="font-size:11px;line-height:1.3;margin-top:5px">${c.sub}</div>
-          <div class="oprice ${priceCls}" style="font-size:11px">${priceTxt}</div>
+          ${anschlag2fImg(c.v1,c.v2,c.type)}
+          <div class="olabel" style="font-size:13px;font-weight:600;line-height:1.3;margin-top:7px">${c.sub}</div>
+          <div class="oprice ${priceCls}" style="font-size:12px">${priceTxt}</div>
         </div>`;
       });
       html += `</div>`;
