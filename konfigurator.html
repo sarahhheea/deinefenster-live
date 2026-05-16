@@ -1257,9 +1257,130 @@
     /* Body-Hintergrund minimal kühler (nimmt den Lila-Stich raus) */
     body, #prod-hero { background: #05080f !important; }
 
-    /* Phase B (Step-Refactor mit Mini-Pills) wieder entfernt (Sarah-Feedback:
-       klassisches Aufklappen ist besser). Step-Akkordeon bleibt wie es war.
-       3D-Kamera-Bridge in JS bleibt aktiv — nur unsichtbar, kein UI-Bruch. */
+    /* ════════════════════════════════════════════════════════════════
+       PHASE C: Echte aufklappbare Premium-Karten (Sarah-Wunsch 16.05.2026 v5)
+       Jeder Step = eigene visuelle Card mit Hintergrund + Border + Radius.
+       KEIN Glow, KEINE bunten Komponenten. Ruhig, kompakt, edel.
+       ════════════════════════════════════════════════════════════════ */
+
+    @media (min-width: 1024px) {
+      /* Step-Header generell sichtbar machen (war global hidden) */
+      #steps .sh {
+        display: flex !important;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        padding: 14px 18px !important;
+        background: transparent !important;
+        border-radius: 14px;
+        transition: background 0.18s ease;
+      }
+      #steps .sh:hover { background: rgba(255,255,255,0.03) !important; }
+
+      /* Step als eigene Card */
+      #steps .sc {
+        background: rgba(255,255,255,0.025) !important;
+        border: 1px solid rgba(255,255,255,0.06) !important;
+        border-radius: 14px !important;
+        margin: 0 0 10px !important;
+        padding: 0 !important;
+        box-shadow:
+          inset 0 1px 0 rgba(255,255,255,0.03),
+          0 1px 2px rgba(0,0,0,0.2) !important;
+        transition: border-color 0.2s ease, background 0.2s ease;
+        overflow: hidden;
+      }
+      #steps .sc:hover { border-color: rgba(255,255,255,0.10) !important; }
+
+      /* Inaktive Card: kompakter Header, Beschreibung kleiner */
+      #steps .sc:not(.open) > .sh .sdesc {
+        font-size: 11.5px !important;
+        color: rgba(180,196,228,0.42) !important;
+      }
+      #steps .sc:not(.open) > .sh i.chev { color: rgba(255,255,255,0.30) !important; }
+
+      /* Aktive Card: leicht heller Hintergrund, Header bleibt ruhig */
+      #steps .sc.open {
+        background: rgba(255,255,255,0.04) !important;
+        border-color: rgba(255,255,255,0.10) !important;
+      }
+      #steps .sc.open > .sh {
+        border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+        border-radius: 14px 14px 0 0 !important;
+      }
+      #steps .sc.open > .sh i.chev {
+        transform: rotate(180deg);
+        color: rgba(118,169,250,0.85) !important;
+      }
+      #steps .sc.open > .sb {
+        padding: 18px 18px 20px !important;
+      }
+
+      /* Step-Nummer als ruhiges Pill (kein farbiger Gradient) */
+      #steps .sc > .sh .badge {
+        width: 26px !important; height: 26px !important;
+        line-height: 26px !important;
+        font-size: 12px !important;
+        font-weight: 700 !important;
+        background: rgba(255,255,255,0.06) !important;
+        color: rgba(238,242,255,0.65) !important;
+        border-radius: 50% !important;
+        text-align: center !important;
+        flex-shrink: 0;
+      }
+      #steps .sc.open > .sh .badge {
+        background: rgba(118,169,250,0.18) !important;
+        color: rgba(238,242,255,0.95) !important;
+      }
+
+      /* Step-Titel + Beschreibung */
+      #steps .sc > .sh .slabel {
+        font-size: 14px !important; font-weight: 600 !important;
+        color: rgba(238,242,255,0.88) !important;
+        letter-spacing: -0.005em !important;
+      }
+      #steps .sc.open > .sh .slabel {
+        color: rgba(238,242,255,0.97) !important;
+        font-weight: 700 !important;
+      }
+      #steps .sc > .sh .sdesc {
+        font-size: 12px !important;
+        color: rgba(180,196,228,0.50) !important;
+      }
+      #steps .sc > .sh i.chev {
+        font-size: 18px !important;
+        margin-left: auto;
+        transition: transform 0.2s ease, color 0.2s ease;
+      }
+
+      /* Phasen-Trenner: 11px-Label mit Linie davor und danach */
+      #steps .step-group {
+        display: flex !important;
+        align-items: center;
+        gap: 12px;
+        margin: 22px 4px 10px !important;
+        padding: 0 !important;
+      }
+      #steps .step-group:first-of-type { margin-top: 4px !important; }
+      #steps .step-group::before,
+      #steps .step-group::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.10), transparent) !important;
+      }
+      #steps .step-group-label,
+      #steps .step-group > * {
+        font-size: 10px !important;
+        font-weight: 700 !important;
+        text-transform: uppercase;
+        letter-spacing: 0.16em !important;
+        color: rgba(160,190,230,0.40) !important;
+        background: none !important;
+        padding: 0 !important;
+        flex: 0 0 auto;
+      }
+    }
 
     /* ── High-End View-Toggle (Sarah 16.05.2026) ── */
     /* iOS-Segmented-Control: ruhiger Pill-Hintergrund, weiße aktive Pille mit subtilem Schatten */
