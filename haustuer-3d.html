@@ -196,6 +196,11 @@
   <!-- Farbsteuerung rechts -->
   <div class="controls">
     <div class="current-label" id="currentLabel">Anthrazitgrau</div>
+    <div class="section-title">Ansicht</div>
+    <div class="glass-btns" id="viewBtns" style="margin-bottom:10px">
+      <button class="glass-btn active" data-view="aussen">Außen</button>
+      <button class="glass-btn" data-view="innen">Innen</button>
+    </div>
     <div class="section-title">Weißtöne</div>
     <div class="colors" id="whites"></div>
     <div class="section-title">Grautöne & Schwarz</div>
@@ -320,6 +325,10 @@ const grooveMat = new THREE.MeshStandardMaterial({ color: 0x181b1d, roughness: 0
 const chromeMat    = new THREE.MeshStandardMaterial({ color: 0xd8dde0, roughness: 0.18, metalness: 0.92, envMapIntensity: 2.5 });
 // Bracket-Kopf: heller Silber/Chrome, gut sichtbar vor dunkler Tür
 const bracketMat   = new THREE.MeshStandardMaterial({ color: 0xe0e6ea, roughness: 0.22, metalness: 0.65, envMapIntensity: 3.0 });
+// Bandscharniere (WALA AXM Drutex-Standard): Aluminium-eloxiert silber, matter als Chrom.
+const hingeMat     = new THREE.MeshStandardMaterial({ color: 0xc4c8cc, roughness: 0.40, metalness: 0.60, envMapIntensity: 1.6 });
+// Drücker 30A + Langschild: gebürstetes Edelstahl, etwas matter als Stoßgriff-Chrome.
+const handleMat    = new THREE.MeshStandardMaterial({ color: 0xd4d8dc, roughness: 0.45, metalness: 0.88, envMapIntensity: 1.8 });
 const glFrameMat= new THREE.MeshStandardMaterial({ color: 0xd0d5d8, roughness: 0.22, metalness: 0.70, envMapIntensity: 2.0 });  // Silber/Chrome Edelstahl wie Referenz
 const glassMat  = new THREE.MeshPhysicalMaterial({
   color: 0xc8dff0, metalness: 0, roughness: 0.03,
@@ -471,6 +480,7 @@ let glassObjects = [];
 let _curColor = 'anthrazitgrau';
 let _curWood  = null;
 let _curGlass = 'klar';
+let _curView  = (new URLSearchParams(location.search).get('view') === 'innen') ? 'innen' : 'aussen';
 
 // ══════════════════════════════════════════════
 // buildDoor — baut Türgeometrie für gewähltes Modell
@@ -578,7 +588,15 @@ function buildDoor(modelKey) {
     doorGroup.add(m);
   });
 
-  // ── Stoßgriff ────────────────────────────────────
+  if (_curView === 'aussen') buildAussenBeschlag();
+  else                       buildInnenBeschlag();
+
+  // Ref-Panel zeigt korrektes Modell-Foto für direkten Vergleich
+  setModelRefPhoto(modelKey);
+}
+
+// AUSSEN-BESCHLAG: Stoßgriff (Drutex Z1/Q-Serie, eckig) + Schloss-Langschild
+function buildAussenBeschlag() {
   const HX    = 0.115;
   const BAR_W = 0.026;
   const BAR_D = 0.040;
@@ -600,7 +618,6 @@ function buildDoor(modelKey) {
     doorGroup.add(arm);
   });
 
-  // ── Schloss ──────────────────────────────────────
   const LX = 0.082, LY = 1.110;
   const lsShape = roundedRectShape(0.024, 0.072, 0.012);
   const lsGeom  = new THREE.ExtrudeGeometry(lsShape, { depth: 0.007, bevelEnabled: false });
@@ -621,9 +638,78 @@ function buildDoor(modelKey) {
   const slot = new THREE.Mesh(new THREE.BoxGeometry(0.004, 0.009, 0.002), darkM);
   slot.position.set(LX, LY + 0.014, DD + 0.033);
   doorGroup.add(slot);
+}
 
-  // Ref-Panel zeigt korrektes Modell-Foto für direkten Vergleich
-  setModelRefPhoto(modelKey);
+// INNEN-BESCHLAG: Drücker 30A auf Langschild RECHTS + 3 WALA-AXM Bandscharniere LINKS
+// DIN-rechts Tür → Bänder LINKS innen, Klinke RECHTS. DIN 18101: Drücker Y=1050mm.
+function buildInnenBeschlag() {
+  // 3 Bandscharniere LINKS innen (WALA AXM, Alu-eloxiert silber, ø22mm h130mm)
+  const HINGE_R = 0.011;
+  const HINGE_H = 0.130;
+  const HINGE_X = 0.011;
+  const HINGE_Z = DD + 0.020;
+  [0.230, DH * 0.5, DH - 0.230].forEach(yPos => {
+    const hinge = new THREE.Mesh(
+      new THREE.CylinderGeometry(HINGE_R, HINGE_R, HINGE_H, 20),
+      hingeMat
+    );
+    hinge.position.set(HINGE_X, yPos, HINGE_Z);
+    hinge.castShadow = true;
+    doorGroup.add(hinge);
+  });
+
+  // Drücker 30A + Langschild RECHTS innen
+  const KX = DW - 0.065;
+  const KY_HANDLE = 1.050;
+  const KY_LOCK   = 1.000;
+  const PLATE_W = 0.045, PLATE_H = 0.240, PLATE_THK = 0.003;
+
+  const plateY = (KY_HANDLE + KY_LOCK) / 2 + 0.005;
+  const plShape = roundedRectShape(PLATE_W, PLATE_H, 0.008);
+  const plGeom  = new THREE.ExtrudeGeometry(plShape, { depth: PLATE_THK, bevelEnabled: false });
+  const plate = new THREE.Mesh(plGeom, handleMat);
+  plate.position.set(KX - PLATE_W / 2, plateY - PLATE_H / 2, DD + 0.001);
+  plate.castShadow = true;
+  doorGroup.add(plate);
+
+  // PZ-Zylinder dunkle Öffnung
+  const pzDark = new THREE.MeshStandardMaterial({ color: 0x0a0a0a, roughness: 0.95 });
+  const pz = new THREE.Mesh(new THREE.CylinderGeometry(0.0085, 0.0085, 0.004, 24), pzDark);
+  pz.rotation.x = Math.PI / 2;
+  pz.position.set(KX, KY_LOCK, DD + PLATE_THK + 0.002);
+  doorGroup.add(pz);
+
+  const pzSlot = new THREE.Mesh(new THREE.BoxGeometry(0.011, 0.003, 0.002), pzDark);
+  pzSlot.position.set(KX, KY_LOCK - 0.005, DD + PLATE_THK + 0.003);
+  doorGroup.add(pzSlot);
+
+  // Drücker-Rosette/Nuss
+  const nut2 = new THREE.Mesh(new THREE.CylinderGeometry(0.011, 0.011, 0.006, 20), handleMat);
+  nut2.rotation.x = Math.PI / 2;
+  nut2.position.set(KX, KY_HANDLE, DD + PLATE_THK + 0.003);
+  doorGroup.add(nut2);
+
+  // Drücker 30A: U-Form (Hals raus, Bügel zur Türmitte)
+  const HANDLE_L = 0.130, NECK_L = 0.025, HANDLE_R = 0.0085;
+  const neck = new THREE.Mesh(
+    new THREE.CylinderGeometry(HANDLE_R, HANDLE_R, NECK_L, 16), handleMat
+  );
+  neck.rotation.x = Math.PI / 2;
+  neck.position.set(KX, KY_HANDLE, DD + PLATE_THK + 0.006 + NECK_L / 2);
+  neck.castShadow = true;
+  doorGroup.add(neck);
+
+  const bow = new THREE.Mesh(
+    new THREE.CylinderGeometry(HANDLE_R, HANDLE_R, HANDLE_L, 16), handleMat
+  );
+  bow.rotation.z = Math.PI / 2;
+  bow.position.set(KX - HANDLE_L / 2, KY_HANDLE, DD + PLATE_THK + 0.006 + NECK_L);
+  bow.castShadow = true;
+  doorGroup.add(bow);
+
+  const tip = new THREE.Mesh(new THREE.SphereGeometry(HANDLE_R, 16, 12), handleMat);
+  tip.position.set(KX - HANDLE_L, KY_HANDLE, DD + PLATE_THK + 0.006 + NECK_L);
+  doorGroup.add(tip);
 }
 
 function setModel(key) {
@@ -1130,6 +1216,21 @@ buildSwatches('woods',      FARBEN.woods,   c => { setWood(c.key);  setRefPhoto(
 const _urlColor = new URLSearchParams(location.search).get('color');
 if (_urlColor) { setColor(_urlColor); setRefPhoto(_urlColor); }
 else { setColor('anthrazitgrau'); setRefPhoto('anthrazitgrau'); }
+
+// ── Ansicht-Buttons (Außen / Innen) — Sarah-Wunsch 16.05.2026 ──
+document.querySelectorAll('#viewBtns .glass-btn').forEach(btn => {
+  // Initial-Sync mit URL-Param
+  btn.classList.toggle('active', btn.dataset.view === _curView);
+  btn.onclick = () => {
+    const v = btn.dataset.view;
+    if (v === _curView) return;
+    _curView = v;
+    document.querySelectorAll('#viewBtns .glass-btn').forEach(b =>
+      b.classList.toggle('active', b.dataset.view === v));
+    const currentModel = document.getElementById('modelSelect')?.value || 'florida-lr-inox';
+    setModel(currentModel);
+  };
+});
 
 // ── Glasarten-Buttons ──
 (function buildGlassBtns() {
