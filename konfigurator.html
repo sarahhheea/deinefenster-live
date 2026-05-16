@@ -5354,6 +5354,20 @@ function fluegelImg(v) {
   return `<img src="img/fluegel-karten/${file}.png" alt="${P.fluegel[v]?.name||v}" loading="lazy" style="width:100%;height:auto;max-height:280px;object-fit:contain;display:block"/>`;
 }
 
+const ANSCHLAG_KARTEN_IMG = {
+  'dreh-l': 'dreh-links',
+  'dreh-r': 'dreh-rechts',
+  'dk-l':   'dreh-kipp-links',
+  'dk-r':   'dreh-kipp-rechts',
+  'kipp':   'kipp',
+  'fest':   'fest'
+};
+function anschlagImg(v) {
+  const file = ANSCHLAG_KARTEN_IMG[v];
+  if (!file) return windowSVG('1-fluegel', [v]);
+  return `<img src="img/anschlag-karten/${file}.png" alt="${v}" loading="lazy" style="width:100%;height:auto;max-height:240px;object-fit:contain;display:block"/>`;
+}
+
 function buildFluegel() {
   const grid = document.getElementById('fluegel-grid');
   if (!grid) return;
@@ -6475,10 +6489,10 @@ function buildOeffSash() {
       btOpts.forEach(opt => {
         const sel = S.oeff1 === opt.v;
         html += `<div class="oc${sel?' sel':''}" data-v="${opt.v}" data-sash="1" onclick="pickOeff(this,1)" style="flex-direction:column;align-items:center;text-align:center;padding:8px 6px 10px;gap:3px">
-          ${windowSVG('1-fluegel',[opt.v])}
-          <div class="olabel" style="font-size:12px;margin-top:5px">${opt.name}</div>
-          <div class="osub" style="font-size:11px">${opt.sub}</div>
-          <div class="oprice ${opt.pcls}" style="font-size:11px">${opt.pTxt}</div>
+          ${anschlagImg(opt.v)}
+          <div class="olabel" style="font-size:14px;font-weight:600;margin-top:8px">${opt.name}</div>
+          <div class="osub" style="font-size:12px">${opt.sub}</div>
+          <div class="oprice ${opt.pcls}" style="font-size:12px">${opt.pTxt}</div>
         </div>`;
       });
       html += '</div>';
@@ -6498,10 +6512,10 @@ function buildOeffSash() {
         const disabledStyle = opt.disabled ? ';opacity:0.45;pointer-events:none;cursor:not-allowed' : '';
         const onClickAttr = opt.disabled ? '' : `onclick="pickOeff(this,${i+1})"`;
         html+=`<div class="oc${sel?' sel':''}" data-v="${opt.v}" data-sash="${i+1}" ${onClickAttr} style="flex-direction:column;align-items:center;text-align:center;padding:8px 6px 10px;gap:3px${disabledStyle}">
-          ${windowSVG('1-fluegel',[opt.v])}
-          <div class="olabel" style="font-size:12px;margin-top:5px">${opt.name}</div>
-          <div class="osub" style="font-size:11px">${opt.sub}</div>
-          <div class="oprice ${opt.pcls}" style="font-size:11px">${opt.pTxt}</div>
+          ${anschlagImg(opt.v)}
+          <div class="olabel" style="font-size:14px;font-weight:600;margin-top:8px">${opt.name}</div>
+          <div class="osub" style="font-size:12px">${opt.sub}</div>
+          <div class="oprice ${opt.pcls}" style="font-size:12px">${opt.pTxt}</div>
         </div>`;
       });
       html+='</div>';
