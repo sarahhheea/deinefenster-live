@@ -20,7 +20,7 @@
 **Verboten:** Den Konkurrenten dabei beim Namen nennen.
 
 **Beispiele wie es richtig geht:**
-- ❌ „wie bei meinfenster24" / „kopiert von Schüco" / „ähnlich zu Veka-Layout"
+- ❌ „wie bei der Marktführer" / „kopiert von ein Profil-Hersteller" / „ähnlich zu Veka-Layout"
 - ✅ „moderner Konfigurator-Stil" / „Akkordeon-Pattern" / „Standard-Industrie-UX"
 
 **Warum:** Source-Code-Kommentare können von Wettbewerbs-Anwälten gefunden werden (rechte Maustaste → Seitenquelltext). Eine Erwähnung im Code ist kein direkter UWG-Verstoß, aber liefert Munition. Sarah will null Angriffsfläche.
@@ -108,7 +108,7 @@ Netlify-URL ist OFFLINE. GitHub Pages ist aktuell.
 
 ## KONFIGURATOR-SCOPE
 - Nur Drutex, nur Kunststoff. Kein Alu, kein Holz, kein anderer Hersteller.
-- Scope: meinfenster24.de minus Materialvielfalt. Fehlendes = Lücke, nicht Feature.
+- Scope: der Marktführer minus Materialvielfalt. Fehlendes = Lücke, nicht Feature.
 - Links IMMER mit `.html` Extension (`/konfigurator.html`, nie `/konfigurator`).
 - Funktionierenden Code (Step-Order, SVG-Preview, CRM-Logik) NICHT anfassen ohne Anfrage.
 
