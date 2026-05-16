@@ -1065,40 +1065,25 @@
     /* ── Produkt-Hero Overlay ── */
     #prod-hero { background: #0a1225 !important; }
 
-    /* ════════════════════════════════════════════════════════════════
-       HIGH-END REDESIGN PHASE A+ (Sarah-Wunsch 16.05.2026, v2)
-       Layout: 3D ZENTRAL, Steps rechts, Phasen links
-       Sarah-Feedback: "überfordert das Gehirn, schlicht/dunkel/premium"
-       ════════════════════════════════════════════════════════════════ */
-
+    /* PHASE A+ Layout-Tausch wieder entfernt (Sarah-Feedback: lieber klassisch
+       Akkordeon, 3D rechts). Layout-Werte zurück zum Phase-A-Stand:
+       - rechte Spalte (Preview) flex:1 → ~780px breit bei 1440
+       - mittlere Spalte (Steps) max 460px → fokussiert */
     @media (min-width: 1024px) {
-      /* Layout-Tausch: Mitte wird 3D-Showroom, Steps wandern nach rechts */
-      #kfg-main {
-        display: grid !important;
-        grid-template-columns: 200px minmax(540px, 1fr) 400px !important;
-        grid-template-areas: "nav preview side" !important;
-      }
-      #kfg-nav      { grid-area: nav !important; }
-      #sidebar-wrap { grid-area: preview !important;
-        width: auto !important; flex: none !important;
-        padding: 28px 32px !important;
-        gap: 16px !important;
-        border-left: 1px solid rgba(255,255,255,0.05) !important;
-        border-right: 1px solid rgba(255,255,255,0.05) !important;
-        background: radial-gradient(ellipse at 50% 30%, rgba(20,38,75,0.30) 0%, rgba(5,8,20,0.0) 70%), #06091a !important;
+      #sidebar-wrap {
+        width: auto !important;
+        flex: 1 1 0 !important;
+        min-width: 520px !important;
+        max-width: 880px !important;
+        padding: 22px 28px !important;
+        gap: 14px !important;
+        border-left: 1px solid rgba(255,255,255,0.06) !important;
+        background: linear-gradient(180deg, rgba(10,18,37,0.4) 0%, rgba(6,9,26,0.6) 100%) !important;
       }
       #steps {
-        grid-area: side !important;
-        flex: none !important; max-width: none !important;
-        padding: 28px 26px 32px !important;
-        border-left: 1px solid rgba(255,255,255,0.05) !important;
-        background: rgba(8,12,28,0.45) !important;
+        flex: 0 0 460px !important;
+        max-width: 460px !important;
       }
-      /* Step-Header oben in #steps kompakter */
-      #kfg-step-hdr { padding: 0 0 18px !important; border-bottom-color: rgba(255,255,255,0.05) !important; }
-      #kfg-step-title-text { font-size: 17px !important; }
-      #kfg-step-desc-text  { font-size: 12px !important; }
-      #steps .sc.open > .sb { padding: 18px 0 0 !important; }
     }
 
     /* PREVIEW: 3D-Hero-Sockel (NICHT Glass-Card — Konfigurator-Pattern empfiehlt ruhigen Sockel) */
@@ -1233,25 +1218,7 @@
        Übersicht-Atmung, Mikro-Typo
        ════════════════════════════════════════════════════════════════ */
 
-    /* Quick-Fix 1: Bühne (Mitte heller) vs. Pulte (Seiten tiefer) */
-    @media (min-width:1024px){
-      #sidebar-wrap { background:
-        radial-gradient(ellipse at 50% 35%, rgba(38,72,140,0.22) 0%, rgba(5,8,20,0) 65%),
-        linear-gradient(180deg,#0a0f22 0%,#05080f 100%) !important; }
-      #kfg-nav, #steps { background: rgba(4,6,14,0.72) !important; }
-      #kfg-main { background:#03050c !important; }
-    }
-
-    /* Quick-Fix 2: Aktiver Step in rechter Spalte leuchtet auf */
-    #steps .sc.open {
-      background: linear-gradient(180deg, rgba(118,169,250,0.06) 0%, rgba(118,169,250,0.015) 100%) !important;
-      border: 1px solid rgba(118,169,250,0.18) !important;
-      border-radius: 14px !important;
-      box-shadow: 0 0 0 1px rgba(118,169,250,0.05), 0 12px 32px -12px rgba(86,140,220,0.35) !important;
-      margin: 0 -6px 14px !important; padding: 4px 14px !important;
-    }
-    #steps .sc:not(.open) { opacity:.55 !important; transition: opacity .25s ease !important; }
-    #steps .sc:not(.open):hover { opacity:.85 !important; }
+    /* Quick-Fix 1 + 2 entfernt (Sarah-Feedback: blaue Glow-Komponenten gefielen nicht) */
 
     /* Quick-Fix 3: Showroom-Boden unter dem 3D — Spotlight + Schatten-Ellipse */
     #prev-wrap::before {
@@ -1290,106 +1257,9 @@
     /* Body-Hintergrund minimal kühler (nimmt den Lila-Stich raus) */
     body, #prod-hero { background: #05080f !important; }
 
-    /* ════════════════════════════════════════════════════════════════
-       PHASE B: Steps neu darstellen (Sarah-Wunsch 16.05.2026 v3)
-       Inaktive Steps werden zu schlanken Mini-Zeilen,
-       aktiver Step bleibt prominent (Glow aus Quick-Fix 2 bleibt aktiv)
-       ════════════════════════════════════════════════════════════════ */
-
-    /* Step-Header generell wieder einblenden (war global hidden) */
-    @media (min-width: 1024px) {
-      #steps .sh { display: flex !important; align-items: center; gap: 10px; cursor: pointer; }
-    }
-
-    /* Inaktive Steps: schlanke Mini-Zeile mit Nummer + Name, kein Beschreibungstext, kein Chevron */
-    @media (min-width: 1024px) {
-      #steps .sc:not(.open) { display: block !important; padding: 0 !important; margin: 0 -6px 2px !important; }
-      #steps .sc:not(.open) > .sh {
-        padding: 7px 14px !important;
-        border-radius: 10px;
-        transition: background .18s ease, color .18s ease;
-      }
-      #steps .sc:not(.open) > .sh:hover {
-        background: rgba(118,169,250,0.07);
-      }
-      #steps .sc:not(.open) > .sh .sdesc { display: none !important; }
-      #steps .sc:not(.open) > .sh .chev,
-      #steps .sc:not(.open) > .sh i.chev { display: none !important; }
-      #steps .sc:not(.open) > .sh .badge {
-        width: 22px !important; height: 22px !important;
-        font-size: 11px !important; line-height: 22px !important;
-        background: rgba(255,255,255,0.06) !important;
-        color: rgba(255,255,255,0.55) !important;
-      }
-      #steps .sc:not(.open) > .sh .slabel {
-        font-size: 13px !important; font-weight: 500 !important;
-        color: rgba(238,242,255,0.65) !important;
-      }
-      #steps .sc:not(.open) > .sh:hover .slabel { color: rgba(238,242,255,0.92) !important; }
-      /* Inaktiver Step-Body komplett aus (war schon, sicherheitshalber) */
-      #steps .sc:not(.open) > .sb { display: none !important; }
-    }
-
-    /* Aktiver Step: prominenter Header (großer Step-Titel + Beschreibung) */
-    @media (min-width: 1024px) {
-      #steps .sc.open > .sh {
-        padding: 14px 16px 12px !important;
-        border-bottom: 1px solid rgba(118,169,250,0.10) !important;
-        margin-bottom: 6px;
-      }
-      #steps .sc.open > .sh .badge {
-        width: 28px !important; height: 28px !important;
-        font-size: 13px !important; line-height: 28px !important;
-        background: linear-gradient(135deg, #3b78d4, #2a5fb0) !important;
-        color: #fff !important;
-        box-shadow: 0 4px 12px rgba(59,120,212,0.45);
-      }
-      #steps .sc.open > .sh .slabel {
-        font-size: 16px !important; font-weight: 700 !important;
-        color: rgba(238,242,255,0.97) !important;
-        letter-spacing: -0.015em;
-      }
-      #steps .sc.open > .sh .sdesc { display: block !important; }
-      #steps .sc.open > .sh .chev {
-        font-size: 18px !important; color: rgba(255,255,255,0.35) !important;
-        transform: rotate(180deg);
-      }
-    }
-
-    /* Step-Group-Header (Phasen: AUFBAU / OPTIK / EXTRAS / ANGEBOT) sichtbar in der rechten Spalte */
-    @media (min-width: 1024px) {
-      #steps .step-group {
-        display: flex !important; align-items: center; gap: 8px;
-        margin: 14px 0 6px !important; padding: 0 8px !important;
-        border-top: 1px solid rgba(255,255,255,0.05) !important;
-        padding-top: 14px !important;
-      }
-      #steps .step-group:first-of-type { border-top: none !important; padding-top: 4px !important; }
-      #steps .step-group-label,
-      #steps .step-group > * {
-        font-size: 10px !important; font-weight: 700 !important;
-        text-transform: uppercase;
-        letter-spacing: 0.14em;
-        color: rgba(160,190,230,0.40) !important;
-      }
-      /* Aktive Phase: heller + LED-Akzent */
-      #steps .step-group.active-phase,
-      #steps .step-group.phase-active {
-        position: relative;
-      }
-      #steps .step-group.active-phase .step-group-label,
-      #steps .step-group.phase-active .step-group-label {
-        color: rgba(118,169,250,0.95) !important;
-      }
-      #steps .step-group.active-phase::before,
-      #steps .step-group.phase-active::before {
-        content: ''; position: absolute; left: 0; top: 14px;
-        width: 2px; height: 14px;
-        background: linear-gradient(180deg, #76a9fa, #3b78d4);
-        box-shadow: 0 0 8px rgba(118,169,250,0.5);
-        border-radius: 2px;
-      }
-    }
+    /* Phase B (Step-Refactor mit Mini-Pills) wieder entfernt (Sarah-Feedback:
+       klassisches Aufklappen ist besser). Step-Akkordeon bleibt wie es war.
+       3D-Kamera-Bridge in JS bleibt aktiv — nur unsichtbar, kein UI-Bruch. */
 
     /* ── High-End View-Toggle (Sarah 16.05.2026) ── */
     /* iOS-Segmented-Control: ruhiger Pill-Hintergrund, weiße aktive Pille mit subtilem Schatten */
