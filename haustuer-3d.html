@@ -644,10 +644,12 @@ function buildAussenBeschlag() {
 // DIN-rechts Tür → Bänder LINKS innen, Klinke RECHTS. DIN 18101: Drücker Y=1050mm.
 function buildInnenBeschlag() {
   // 3 Bandscharniere LINKS innen (WALA AXM, Alu-eloxiert silber, ø22mm h130mm)
+  // X-Position muss AUSSERHALB der 43mm breiten Zarge sein, sonst unsichtbar:
+  // Bandscharnier sitzt real auf dem Türblatt-Rand, halb über die Zarge ragend.
   const HINGE_R = 0.011;
   const HINGE_H = 0.130;
-  const HINGE_X = 0.011;
-  const HINGE_Z = DD + 0.020;
+  const HINGE_X = 0.055;          // 55mm vom linken Rand (sichtbar VOR der Zarge z1w=43mm)
+  const HINGE_Z = DD + 0.022;     // 2mm vor der Türblatt-Front, deutlich hervorstehend
   [0.230, DH * 0.5, DH - 0.230].forEach(yPos => {
     const hinge = new THREE.Mesh(
       new THREE.CylinderGeometry(HINGE_R, HINGE_R, HINGE_H, 20),
