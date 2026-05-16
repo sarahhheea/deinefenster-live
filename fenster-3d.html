@@ -140,12 +140,15 @@ camera.position.set(0, 0, 6.5);
 const orb = new OrbitControls(camera, canvasEl);
 orb.target.set(0, 0, 0);
 orb.enablePan = false;
-orb.minDistance = 3.0;
-orb.maxDistance = 11.0;
-orb.maxPolarAngle = Math.PI * 0.56;
-orb.minPolarAngle = Math.PI * 0.44;
-orb.minAzimuthAngle = -0.30;
-orb.maxAzimuthAngle =  0.30;
+orb.enableDamping = true;
+orb.dampingFactor = 0.08;
+orb.minDistance = 2.5;
+orb.maxDistance = 12.0;
+// Frei drehbar — von oben bis fast unten, fast 360° rundherum
+orb.minPolarAngle = Math.PI * 0.10;
+orb.maxPolarAngle = Math.PI * 0.85;
+orb.minAzimuthAngle = -Math.PI * 0.85;
+orb.maxAzimuthAngle =  Math.PI * 0.85;
 orb.update();
 
 // ══════════════════════════════════════════════
@@ -164,9 +167,9 @@ scene.environment = pmremGen.fromScene(envSc, 0.04).texture;
 // Helles Produktfoto-Licht (weißer Hintergrund)
 scene.add(new THREE.AmbientLight(0xffffff, 0.80));
 
-// Key-Licht oben-rechts — klassische Produktfoto-Beleuchtung
+// Key-Licht oben-LINKS — Reflexion wie auf Referenzfoto (links-oben Highlight)
 const keyLight = new THREE.DirectionalLight(0xffffff, 1.8);
-keyLight.position.set(2, 5, 6);
+keyLight.position.set(-2, 4, 6);
 keyLight.castShadow = true;
 keyLight.shadow.mapSize.set(2048, 2048);
 keyLight.shadow.camera.near = 1; keyLight.shadow.camera.far = 14;
@@ -189,14 +192,7 @@ handleSpot.position.set(1.5, 0.8, 5.5);
 handleSpot.target.position.set(0.42, 0.00, 0.09);
 scene.add(handleSpot); scene.add(handleSpot.target);
 
-const gnd = new THREE.Mesh(
-  new THREE.PlaneGeometry(8, 8),
-  new THREE.ShadowMaterial({ opacity: 0.10 })
-);
-gnd.rotation.x = -Math.PI / 2;
-gnd.position.y = -0.62;
-gnd.receiveShadow = true;
-scene.add(gnd);
+// Bodenschatten entfernt — Referenzbild zeigt reinen weißen Hintergrund ohne Schatten
 
 // ══════════════════════════════════════════════
 // MATERIALIEN
@@ -243,11 +239,19 @@ const GH = SH - 2 * FST - 2 * SBW;  // 0.956
 // Flügel steht 5mm vor dem Blendrahmen hervor (Falz)
 const SASH_DZ = 0.005;
 
-const winGroup = new THREE.Group();
-let glassObjects = [];
+const winGroup  = new THREE.Group();
+const sashGroup = new THREE.Group();   // Flügel — rotiert um linke Scharnier-Achse zum Öffnen
+sashGroup.position.set(x0, 0, 0);      // Pivot = linker Scharnier-Rand (x0 in winGroup-Koords)
+winGroup.add(sashGroup);
+
+let glassObjects   = [];
+let handleObjects  = [];   // Hebel/Rosette/Achse — Click-Targets fürs Öffnen
 let _curColor = 'anthrazitgrau';
 let _curWood  = null;
 let _curGlass = 'klar';
+let sashOpen  = false;
+let sashAnim  = 0;         // 0 = zu, 1 = ganz auf
+const SASH_OPEN_ANGLE = Math.PI / 4;   // 45° Drehöffnung
 
 // ── Helper: Box zentriert an (cx,cy,cz) ──────────────
 function bx(cx, cy, cz, w, h, d, mat) {
@@ -278,26 +282,35 @@ function nut(x1, y1, x2, y2, faceZ) {
 // Gruppe wird danach um (-FW/2, -FH/2, 0) verschoben
 // ══════════════════════════════════════════════
 function buildWindow() {
+  // Cleanup: Blendrahmen und Sash separat leeren
   while (winGroup.children.length > 0) {
     const c = winGroup.children[0];
+    if (c === sashGroup) { winGroup.remove(c); continue; }
     if (c.geometry) c.geometry.dispose();
     winGroup.remove(c);
   }
+  while (sashGroup.children.length > 0) {
+    const c = sashGroup.children[0];
+    if (c.geometry) c.geometry.dispose();
+    sashGroup.remove(c);
+  }
+  winGroup.add(sashGroup);   // wieder anfügen nach cleanup
+  sashGroup.position.set(x0, 0, 0);
   glassObjects = [];
+  handleObjects = [];
 
   const fzc = FD / 2;                     // Frame z center
   const szc = FD / 2 + SASH_DZ;           // Sash z center
   const ffz = FD;                          // Frame front face Z
   const sfz = FD + SASH_DZ;               // Sash front face Z
 
-  // ── Blendrahmen — 4 Stäbe ────────────────────────────
-  // Unten
+  // Helper für Sash-Meshes: x-Position relativ zur Scharnier-Achse (= absolute - x0)
+  const sx = (absX) => absX - x0;
+
+  // ── Blendrahmen — 4 Stäbe (bleiben in winGroup, statisch) ──
   winGroup.add(bx(FW/2,          FRT/2,         fzc, FW,           FRT,         FD, frameMat));
-  // Oben
   winGroup.add(bx(FW/2,          FH - FRT/2,    fzc, FW,           FRT,         FD, frameMat));
-  // Links
   winGroup.add(bx(FRT/2,         FH/2,           fzc, FRT,          FH - 2*FRT,  FD, frameMat));
-  // Rechts
   winGroup.add(bx(FW - FRT/2,    FH/2,           fzc, FRT,          FH - 2*FRT,  FD, frameMat));
 
   // Profilnuten Blendrahmen
@@ -307,119 +320,94 @@ function buildWindow() {
   winGroup.add(nut(fni, fni, fni, FH - fni, ffz));
   winGroup.add(nut(FW - fni, fni, FW - fni, FH - fni, ffz));
 
-  // ── Flügel — 4 Stäbe ─────────────────────────────────
-  // Unten
-  winGroup.add(bx(x0 + SW/2,        y0 + FST/2,        szc, SW,   FST,         FD, sashMat));
-  // Oben
-  winGroup.add(bx(x0 + SW/2,        y0 + SH - FST/2,   szc, SW,   FST,         FD, sashMat));
-  // Links
-  winGroup.add(bx(x0 + FST/2,       y0 + SH/2,         szc, FST,  SH - 2*FST,  FD, sashMat));
-  // Rechts
-  winGroup.add(bx(x0 + SW - FST/2,  y0 + SH/2,         szc, FST,  SH - 2*FST,  FD, sashMat));
+  // ── Flügel — 4 Stäbe (in sashGroup, drehen sich beim Öffnen) ──
+  sashGroup.add(bx(sx(x0 + SW/2),        y0 + FST/2,        szc, SW,   FST,         FD, sashMat));
+  sashGroup.add(bx(sx(x0 + SW/2),        y0 + SH - FST/2,   szc, SW,   FST,         FD, sashMat));
+  sashGroup.add(bx(sx(x0 + FST/2),       y0 + SH/2,         szc, FST,  SH - 2*FST,  FD, sashMat));
+  sashGroup.add(bx(sx(x0 + SW - FST/2),  y0 + SH/2,         szc, FST,  SH - 2*FST,  FD, sashMat));
 
   // Profilnuten Flügel
-  const sni = x0 + FST * 0.54;
-  const snix = x0 + SW - FST * 0.54;
-  const sniy = y0 + FST * 0.54;
-  const sniyt = y0 + SH - FST * 0.54;
-  winGroup.add(nut(sni, sniy, snix, sniy, sfz));
-  winGroup.add(nut(sni, sniyt, snix, sniyt, sfz));
-  winGroup.add(nut(sni, sniy, sni, sniyt, sfz));
-  winGroup.add(nut(snix, sniy, snix, sniyt, sfz));
+  const sniAbs  = x0 + FST * 0.54;
+  const snixAbs = x0 + SW - FST * 0.54;
+  const sniy    = y0 + FST * 0.54;
+  const sniyt   = y0 + SH - FST * 0.54;
+  sashGroup.add(nut(sx(sniAbs),  sniy,  sx(snixAbs), sniy,  sfz));
+  sashGroup.add(nut(sx(sniAbs),  sniyt, sx(snixAbs), sniyt, sfz));
+  sashGroup.add(nut(sx(sniAbs),  sniy,  sx(sniAbs),  sniyt, sfz));
+  sashGroup.add(nut(sx(snixAbs), sniy,  sx(snixAbs), sniyt, sfz));
 
-  const gcx = x0 + FST + SBW + GW / 2;
-  const gcy = y0 + FST + SBW + GH / 2;
+  const gcxAbs = x0 + FST + SBW + GW / 2;
+  const gcy    = y0 + FST + SBW + GH / 2;
+  const gcx    = sx(gcxAbs);
 
-  // ── Glasscheibe (reflektive Platte wie Produktfoto) ───
+  // ── Glasscheibe ─────────────────────────────────────
   const gm = new THREE.Mesh(new THREE.BoxGeometry(GW, GH, 0.006), glassMat);
   gm.position.set(gcx, gcy, szc + 0.002);
   gm.castShadow = true;
-  winGroup.add(gm);
+  sashGroup.add(gm);
   glassObjects.push(gm);
 
   // ── Spacer Bar (Abstandhalter-Rahmen) ─────────────────
   const sbz = szc;
   const sbd = 0.004;
-  // Oben
-  winGroup.add(bx(gcx, gcy + GH/2 + SBW/2, sbz, GW + SBW * 2, SBW, sbd, spacerMat));
-  // Unten
-  winGroup.add(bx(gcx, gcy - GH/2 - SBW/2, sbz, GW + SBW * 2, SBW, sbd, spacerMat));
-  // Links
-  winGroup.add(bx(gcx - GW/2 - SBW/2, gcy, sbz, SBW, GH, sbd, spacerMat));
-  // Rechts
-  winGroup.add(bx(gcx + GW/2 + SBW/2, gcy, sbz, SBW, GH, sbd, spacerMat));
+  sashGroup.add(bx(gcx, gcy + GH/2 + SBW/2, sbz, GW + SBW * 2, SBW, sbd, spacerMat));
+  sashGroup.add(bx(gcx, gcy - GH/2 - SBW/2, sbz, GW + SBW * 2, SBW, sbd, spacerMat));
+  sashGroup.add(bx(gcx - GW/2 - SBW/2, gcy, sbz, SBW, GH, sbd, spacerMat));
+  sashGroup.add(bx(gcx + GW/2 + SBW/2, gcy, sbz, SBW, GH, sbd, spacerMat));
 
-  // ── DK-Griff ─────────────────────────────────────────
-  // Auf rechtem Flügel-Profil, Mitte-Höhe (DIN-links Ansicht von außen)
-  const hx  = x0 + SW - FST * 0.52;  // ≈ 0.919 — Mitte rechtes Profil
-  const hy  = y0 + SH / 2;            // ≈ 0.600 — Mitte Höhe
-  const hbz = sfz + 0.003;           // knapp vor Flügel-Front
+  // ── DK-Griff (rechtes Flügelprofil, mittig) ──────────
+  const hx  = sx(x0 + SW - FST * 0.52);
+  const hy  = y0 + SH / 2;
+  const hbz = sfz + 0.003;
 
-  // Rosette (runde Scheibe, flach anliegend)
-  const rosette = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.021, 0.021, 0.009, 24),
-    handleMat
-  );
+  const rosette = new THREE.Mesh(new THREE.CylinderGeometry(0.021, 0.021, 0.009, 24), handleMat);
   rosette.rotation.x = Math.PI / 2;
   rosette.position.set(hx, hy, hbz + 0.0045);
   rosette.castShadow = true;
-  winGroup.add(rosette);
+  rosette.userData.isHandle = true;
+  sashGroup.add(rosette); handleObjects.push(rosette);
 
-  // Hals (kurzer Zylinder, verbindet Rosette mit Hebel)
-  const neck = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.0075, 0.0075, 0.022, 14),
-    handleMat
-  );
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.0075, 0.0075, 0.022, 14), handleMat);
   neck.rotation.x = Math.PI / 2;
   neck.position.set(hx, hy, hbz + 0.009 + 0.011);
   neck.castShadow = true;
-  winGroup.add(neck);
+  neck.userData.isHandle = true;
+  sashGroup.add(neck); handleObjects.push(neck);
 
-  // Hebel-Achse-Platte (kleine quadratische Basis wo Hebel dreht)
-  const axle = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.010, 0.010, 0.010, 12),
-    handleMat
-  );
+  const axle = new THREE.Mesh(new THREE.CylinderGeometry(0.010, 0.010, 0.010, 12), handleMat);
   axle.rotation.x = Math.PI / 2;
   axle.position.set(hx, hy, hbz + 0.009 + 0.022 + 0.005);
   axle.castShadow = true;
-  winGroup.add(axle);
+  axle.userData.isHandle = true;
+  sashGroup.add(axle); handleObjects.push(axle);
 
-  // Hebel (ovaler Querschnitt, zeigt nach UNTEN = verriegelt)
+  // Hebel — leicht verjüngt für Tropfen-Silhouette
   const leverLen = 0.138;
-  const leverGeom = new THREE.CylinderGeometry(0.014, 0.013, leverLen, 16);
+  const leverGeom = new THREE.CylinderGeometry(0.016, 0.011, leverLen, 16);
   const lever = new THREE.Mesh(leverGeom, handleMat);
-  lever.scale.set(0.68, 1.0, 0.52);   // ovaler Querschnitt
+  lever.scale.set(0.68, 1.0, 0.52);
   const lz = hbz + 0.009 + 0.022 + 0.012 + 0.013;
   lever.position.set(hx, hy - leverLen / 2, lz);
   lever.castShadow = true;
-  winGroup.add(lever);
+  lever.userData.isHandle = true;
+  sashGroup.add(lever); handleObjects.push(lever);
 
-  // Hebelspitze (abgerundet)
   const tipGeom = new THREE.SphereGeometry(0.014, 12, 8);
   const tip = new THREE.Mesh(tipGeom, handleMat);
   tip.scale.set(0.68, 1.0, 0.52);
   tip.position.set(hx, hy - leverLen, lz);
   tip.castShadow = true;
-  winGroup.add(tip);
+  tip.userData.isHandle = true;
+  sashGroup.add(tip); handleObjects.push(tip);
 
-  // ── Scharnier-Abdeckkappen (links, 3 Stück) ───────────
-  // Kleine rechteckige Kunststoff-Kappen auf linkem Flügel-Profil
-  const hingeX = x0 + FST * 0.42;   // ≈ 0.075 — Mitte linkes Profil
+  // ── Scharnier-Abdeckkappen (2 Stück, links am Flügel) ──
+  const hingeX = sx(x0 + FST * 0.42);
   const hingeZ = sfz + 0.002;
-  const hingeYs = [
-    y0 + SH * 0.14,   // unteres Scharnier
-    y0 + SH * 0.50,   // mittleres Scharnier
-    y0 + SH * 0.86,   // oberes Scharnier
-  ];
-  hingeYs.forEach(hy => {
-    const hc = new THREE.Mesh(
-      new THREE.BoxGeometry(0.028, 0.048, 0.005),
-      hingeMat
-    );
+  [ y0 + SH * 0.12, y0 + SH * 0.88 ].forEach(hy => {
+    const hc = new THREE.Mesh(new THREE.BoxGeometry(0.030, 0.052, 0.006), hingeMat);
     hc.position.set(hingeX, hy, hingeZ);
     hc.castShadow = true;
-    winGroup.add(hc);
+    sashGroup.add(hc);
   });
 }
 
@@ -477,7 +465,7 @@ const FARBEN = {
     { key:'dunkelgruen',   name:'Dunkelgrün',          hex:'#152610', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvY2llbW5vLXppZWxvbnkuanBn.webp' },
     { key:'dunkelrot',     name:'Dunkelrot',           hex:'#690b16', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvY2llbW55LWN6ZXJ3b255LmpwZw==.webp' },
     { key:'brillblau',     name:'Brillantblau',        hex:'#366885', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L2JyeWxhbnRvd28tbmllYmllc2tpLmpwZw==.webp' },
-    { key:'stahlblau',     name:'Stahlblau',           hex:'#13203e', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvc3RhbG93eS1uaWViaWVza2lfTjJpbVdJUy5qcGc=.webp' },
+    { key:'stahlblau',     name:'Stahlblau',           hex:'#1c4c6c', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvc3RhbG93eS1uaWViaWVza2lfTjJpbVdJUy5qcGc=.webp' },
     { key:'schoko-br',     name:'Schokobraun',         hex:'#2f201a', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvYnJhei1jemVrb2xhZG93eS5qcGc=.webp' },
   ],
   woods: [
@@ -530,7 +518,7 @@ const WOOD_PARAMS = {
   'douglasie':     { base:'#A06530', grain:'#603A10' },
   'nussbaum':      { base:'#3C1E18', grain:'#180A08' },
   'eiche-dunkel':  { base:'#4A3025', grain:'#201008' },
-  'schwarzbraun':  { base:'#1C1810', grain:'#100C08' },
+  'schwarzbraun':  { base:'#26211e', grain:'#140e0b' },
   'macore':        { base:'#6A3824', grain:'#381408' },
   'mahagoni':      { base:'#2A1A14', grain:'#140A08' },
 };
@@ -574,7 +562,37 @@ function setColor(key) {
   frameMat.needsUpdate = true;
   sashMat.needsUpdate  = true;
 
+  // Griff + Scharniere folgen Rahmenfarbe (Sarah-Vorgabe 16.05.2026):
+  // Bei hellen/weißen Tönen → Kunststoff in Rahmenfarbe (kein Chrom)
+  // Bei dunklen Farben + Edelstahl-Optik → silbern wie real
+  applyHardwareColor(c.clone(), lum);
+
   document.getElementById('currentLabel').textContent = colorObj?.name || key;
+}
+
+// Griff/Scharniere an Rahmenfarbe anpassen — bei hellen Tönen weiß-matt, sonst Chrom
+function applyHardwareColor(frameColor, frameLum) {
+  if (frameLum >= 0.55) {
+    // Helle Rahmen (Weiß/Cremeweiß/Lichtgrau): Griff + Scharniere in Rahmenfarbe, matter Kunststoff
+    handleMat.color.copy(frameColor);
+    handleMat.roughness = 0.45;
+    handleMat.metalness = 0.0;
+    handleMat.envMapIntensity = 0.10;
+    hingeMat.color.copy(frameColor);
+    hingeMat.roughness = 0.55;
+    hingeMat.metalness = 0.0;
+  } else {
+    // Dunkle Rahmen: Griff Chrom-Silber, Scharnierkappen leicht dunkler grau
+    handleMat.color.setHex(0xd8dde0);
+    handleMat.roughness = 0.18;
+    handleMat.metalness = 0.92;
+    handleMat.envMapIntensity = 2.5;
+    hingeMat.color.setHex(0xbabfc2);
+    hingeMat.roughness = 0.55;
+    hingeMat.metalness = 0.05;
+  }
+  handleMat.needsUpdate = true;
+  hingeMat.needsUpdate = true;
 }
 
 function setWood(key) {
@@ -583,6 +601,17 @@ function setWood(key) {
   if (!p) return;
 
   clearWoodMaps();
+
+  // Bei Holzdekoren immer Chrom-Hardware (echtes Drutex-Verhalten)
+  handleMat.color.setHex(0xd8dde0);
+  handleMat.roughness = 0.18;
+  handleMat.metalness = 0.92;
+  handleMat.envMapIntensity = 2.5;
+  hingeMat.color.setHex(0xbabfc2);
+  hingeMat.roughness = 0.55;
+  hingeMat.metalness = 0.05;
+  handleMat.needsUpdate = true;
+  hingeMat.needsUpdate = true;
 
   if (key === 'schwarzbraun') {
     [frameMat, sashMat].forEach(m => {
@@ -820,6 +849,7 @@ window.addEventListener('message', (e) => {
   if (d.type === 'setWood')  setWood(d.key);
   if (d.type === 'setGlass') setGlass(d.key);
   if (d.type === 'setSide')  setSide(d.key);
+  if (d.type === 'toggleOpen') sashOpen = !sashOpen;
   if (d.type === 'update') {
     if (d.wood)  setWood(d.wood);
     else         setColor(d.color || 'anthrazitgrau');
@@ -828,9 +858,32 @@ window.addEventListener('message', (e) => {
   }
 });
 
+// Click-to-Open: Klick auf Griff/Hebel toggelt die Öffnung
+const raycaster = new THREE.Raycaster();
+const ndc       = new THREE.Vector2();
+canvasEl.addEventListener('click', (ev) => {
+  const rect = canvasEl.getBoundingClientRect();
+  ndc.x =  ((ev.clientX - rect.left) / rect.width)  * 2 - 1;
+  ndc.y = -((ev.clientY - rect.top)  / rect.height) * 2 + 1;
+  raycaster.setFromCamera(ndc, camera);
+  const hits = raycaster.intersectObjects(handleObjects, false);
+  if (hits.length > 0) sashOpen = !sashOpen;
+});
+
+// Sanfte Öffnen/Schließen-Animation
+function updateSashAnimation() {
+  const target = sashOpen ? 1 : 0;
+  if (Math.abs(sashAnim - target) < 0.001) { sashAnim = target; return; }
+  sashAnim += (target - sashAnim) * 0.08;   // ease-out
+  // Rotation um Y-Achse — bei spiegelung (setSide='l') in Gegenrichtung
+  const sign = (winGroup.scale.x < 0) ? 1 : -1;
+  sashGroup.rotation.y = sign * sashAnim * SASH_OPEN_ANGLE;
+}
+
 (function animate() {
   requestAnimationFrame(animate);
   orb.update();
+  updateSashAnimation();
   renderer.render(scene, camera);
 })();
 </script>
