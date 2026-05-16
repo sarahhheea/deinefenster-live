@@ -1321,6 +1321,36 @@ if (_modelSel) {
 }
 
 // postMessage-Bridge: Konfigurator schickt Farb/Holz/Glas-Änderungen
+// ── 3D-Kamera-Animation (Sarah-Wunsch 16.05.2026 v3) ──
+// Sanftes "Drüberfahren" der Kamera passend zum aktuellen Konfigurations-Schritt
+const CAMERA_PRESETS = {
+  default: { pos: [0, 1.05, 7.5],  target: [0, 1.05, 0] },
+  griff:   { pos: [-0.9, 1.20, 4.8], target: [0.16, 1.20, 0] },  // Stoßgriff links groß
+  glas:    { pos: [0, 1.55, 4.2],   target: [0.50, 1.10, 0] },   // Glasfeld zentral
+  rahmen:  { pos: [-1.4, 1.05, 6.0], target: [0, 1.05, 0] },     // Zarge/Profil von schräg links
+  innen:   { pos: [0.9, 1.20, 4.8],  target: [0.93, 1.05, 0] }   // Innen-Klinke rechts groß
+};
+let _camAnim = null;
+function focusCamera(presetKey) {
+  const p = CAMERA_PRESETS[presetKey] || CAMERA_PRESETS.default;
+  if (_camAnim) cancelAnimationFrame(_camAnim);
+  const start = performance.now();
+  const dur = 850;
+  const fromPos = camera.position.clone();
+  const fromTarget = orb.target.clone();
+  const toPos = new THREE.Vector3(p.pos[0], p.pos[1], p.pos[2]);
+  const toTarget = new THREE.Vector3(p.target[0], p.target[1], p.target[2]);
+  function tick(now) {
+    const t = Math.min(1, (now - start) / dur);
+    const e = 1 - Math.pow(1 - t, 3); // ease-out cubic
+    camera.position.lerpVectors(fromPos, toPos, e);
+    orb.target.lerpVectors(fromTarget, toTarget, e);
+    orb.update();
+    if (t < 1) _camAnim = requestAnimationFrame(tick);
+  }
+  _camAnim = requestAnimationFrame(tick);
+}
+
 window.addEventListener('message', (e) => {
   const d = e.data;
   if (!d || !d.type) return;
@@ -1329,6 +1359,7 @@ window.addEventListener('message', (e) => {
   if (d.type === 'setGlass') setGlass(d.key);
   if (d.type === 'setModel') setModel(d.key);
   if (d.type === 'setSide')  setSide(d.key);
+  if (d.type === 'cameraFocus') focusCamera(d.focus || 'default');
   if (d.type === 'setView') {
     const newView = (d.key === 'innen') ? 'innen' : 'aussen';
     if (newView !== _curView) {
