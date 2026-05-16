@@ -1258,127 +1258,175 @@
     body, #prod-hero { background: #05080f !important; }
 
     /* ════════════════════════════════════════════════════════════════
-       PHASE C: Echte aufklappbare Premium-Karten (Sarah-Wunsch 16.05.2026 v5)
-       Jeder Step = eigene visuelle Card mit Hintergrund + Border + Radius.
-       KEIN Glow, KEINE bunten Komponenten. Ruhig, kompakt, edel.
+       PHASE D: STICKY WIZARD (Sarah-Wunsch 16.05.2026 v6)
+       Pattern B aus Recherche-Bericht: 1 Schritt pro Seite, schmaler
+       Step-Indikator links als Timeline, viel Atemraum.
        ════════════════════════════════════════════════════════════════ */
 
     @media (min-width: 1024px) {
-      /* Step-Header generell sichtbar machen (war global hidden) */
-      #steps .sh {
-        display: flex !important;
-        align-items: center;
-        gap: 12px;
-        cursor: pointer;
-        padding: 14px 18px !important;
-        background: transparent !important;
-        border-radius: 14px;
-        transition: background 0.18s ease;
-      }
-      #steps .sh:hover { background: rgba(255,255,255,0.03) !important; }
+      /* Phasen-Gruppen-Header (AUFBAU/OPTIK/...) in der Mitte aus */
+      #steps .step-group { display: none !important; }
 
-      /* Step als eigene Card */
-      #steps .sc {
-        background: rgba(255,255,255,0.025) !important;
-        border: 1px solid rgba(255,255,255,0.06) !important;
-        border-radius: 14px !important;
-        margin: 0 0 10px !important;
-        padding: 0 !important;
-        box-shadow:
-          inset 0 1px 0 rgba(255,255,255,0.03),
-          0 1px 2px rgba(0,0,0,0.2) !important;
-        transition: border-color 0.2s ease, background 0.2s ease;
-        overflow: hidden;
-      }
-      #steps .sc:hover { border-color: rgba(255,255,255,0.10) !important; }
+      /* Alle inaktiven Steps in der Mitte komplett ausblenden — Wizard zeigt nur den aktiven */
+      #steps .sc:not(.open) { display: none !important; }
 
-      /* Inaktive Card: kompakter Header, Beschreibung kleiner */
-      #steps .sc:not(.open) > .sh .sdesc {
-        font-size: 11.5px !important;
-        color: rgba(180,196,228,0.42) !important;
-      }
-      #steps .sc:not(.open) > .sh i.chev { color: rgba(255,255,255,0.30) !important; }
-
-      /* Aktive Card: leicht heller Hintergrund, Header bleibt ruhig */
+      /* Aktiver Step: kein Card-Container, freier Atemraum, viel Padding */
       #steps .sc.open {
-        background: rgba(255,255,255,0.04) !important;
-        border-color: rgba(255,255,255,0.10) !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        animation: wizardFade .35s cubic-bezier(.4,0,.2,1);
       }
-      #steps .sc.open > .sh {
-        border-bottom: 1px solid rgba(255,255,255,0.06) !important;
-        border-radius: 14px 14px 0 0 !important;
+      @keyframes wizardFade {
+        from { opacity: 0; transform: translateY(8px); }
+        to   { opacity: 1; transform: translateY(0); }
       }
-      #steps .sc.open > .sh i.chev {
-        transform: rotate(180deg);
-        color: rgba(118,169,250,0.85) !important;
-      }
+      /* Step-Header in der Mitte komplett aus — wird vom kfg-step-hdr (oben) übernommen */
+      #steps .sc .sh { display: none !important; }
       #steps .sc.open > .sb {
-        padding: 18px 18px 20px !important;
+        display: block !important;
+        padding: 0 !important;
+        max-width: 560px;
+        margin: 0 auto;
       }
 
-      /* Step-Nummer als ruhiges Pill (kein farbiger Gradient) */
-      #steps .sc > .sh .badge {
-        width: 26px !important; height: 26px !important;
-        line-height: 26px !important;
-        font-size: 12px !important;
-        font-weight: 700 !important;
-        background: rgba(255,255,255,0.06) !important;
-        color: rgba(238,242,255,0.65) !important;
+      /* Großer Step-Header oben in der Mitte (kfg-step-hdr existiert bereits) */
+      #kfg-step-hdr {
+        padding: 36px 28px 24px !important;
+        border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+        text-align: center;
+        max-width: 560px;
+        margin: 0 auto 28px !important;
+      }
+      #kfg-step-title-text {
+        font-size: 26px !important;
+        font-weight: 800 !important;
+        letter-spacing: -0.025em !important;
+        line-height: 1.15 !important;
+      }
+      #kfg-step-desc-text {
+        font-size: 13.5px !important;
+        color: rgba(180,196,228,0.55) !important;
+        margin-top: 6px !important;
+      }
+
+      /* #steps-Container bekommt mehr Atemraum (zentriert) */
+      #steps {
+        padding: 28px 32px 48px !important;
+      }
+
+      /* ── Linke Sidebar als schmale Wizard-Timeline ──
+         Aktuell #kfg-nav 200px breit mit Step-Liste — schrumpfen auf 110px
+         mit kleinen Step-Punkten und Labels darunter */
+      #kfg-nav {
+        width: 110px !important;
+        padding: 28px 8px 24px !important;
+      }
+      #kfg-nav .ksnav-item {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 6px !important;
+        padding: 10px 4px !important;
+        cursor: pointer;
+        position: relative;
+        border-radius: 8px;
+        transition: background .15s ease;
+      }
+      #kfg-nav .ksnav-item:hover { background: rgba(255,255,255,0.03); }
+      #kfg-nav .ksnav-item + .ksnav-item::before {
+        content: '';
+        position: absolute;
+        top: -4px; left: 50%;
+        transform: translateX(-50%);
+        width: 1px; height: 8px;
+        background: rgba(255,255,255,0.10);
+      }
+      #kfg-nav .ksnav-num {
+        width: 28px !important; height: 28px !important;
+        line-height: 28px !important; text-align: center !important;
         border-radius: 50% !important;
-        text-align: center !important;
+        font-size: 12px !important; font-weight: 700 !important;
+        background: rgba(255,255,255,0.05) !important;
+        color: rgba(238,242,255,0.55) !important;
+        border: 1px solid rgba(255,255,255,0.08) !important;
         flex-shrink: 0;
+        transition: all .2s ease;
       }
-      #steps .sc.open > .sh .badge {
-        background: rgba(118,169,250,0.18) !important;
-        color: rgba(238,242,255,0.95) !important;
+      #kfg-nav .ksnav-num svg { width: 13px; height: 13px; margin: 0 auto; display: block; }
+      #kfg-nav .ksnav-lbl {
+        font-size: 10px !important;
+        font-weight: 600 !important;
+        text-align: center;
+        color: rgba(180,196,228,0.45) !important;
+        line-height: 1.25 !important;
+        letter-spacing: 0.01em !important;
       }
-
-      /* Step-Titel + Beschreibung */
-      #steps .sc > .sh .slabel {
-        font-size: 14px !important; font-weight: 600 !important;
-        color: rgba(238,242,255,0.88) !important;
-        letter-spacing: -0.005em !important;
+      /* Done-State: gefüllter Kreis */
+      #kfg-nav .ksnav-item.ksnav-done .ksnav-num {
+        background: rgba(118,169,250,0.20) !important;
+        color: rgba(238,242,255,0.92) !important;
+        border-color: rgba(118,169,250,0.30) !important;
       }
-      #steps .sc.open > .sh .slabel {
+      #kfg-nav .ksnav-item.ksnav-done .ksnav-lbl { color: rgba(238,242,255,0.75) !important; }
+      /* Active-State: Brand-Background + Glow */
+      #kfg-nav .ksnav-item.ksnav-active .ksnav-num {
+        background: #3b78d4 !important;
+        color: #fff !important;
+        border-color: #3b78d4 !important;
+        box-shadow: 0 0 0 4px rgba(59,120,212,0.18);
+      }
+      #kfg-nav .ksnav-item.ksnav-active .ksnav-lbl {
         color: rgba(238,242,255,0.97) !important;
         font-weight: 700 !important;
       }
-      #steps .sc > .sh .sdesc {
-        font-size: 12px !important;
-        color: rgba(180,196,228,0.50) !important;
-      }
-      #steps .sc > .sh i.chev {
-        font-size: 18px !important;
-        margin-left: auto;
-        transition: transform 0.2s ease, color 0.2s ease;
-      }
 
-      /* Phasen-Trenner: 11px-Label mit Linie davor und danach */
-      #steps .step-group {
+      /* Wizard-Footer: Prev/Next Buttons unten an der Mitte zentriert */
+      #wizard-footer {
         display: flex !important;
+        justify-content: space-between;
         align-items: center;
-        gap: 12px;
-        margin: 22px 4px 10px !important;
-        padding: 0 !important;
+        max-width: 560px;
+        margin: 32px auto 0;
+        padding: 22px 0 8px;
+        border-top: 1px solid rgba(255,255,255,0.06);
       }
-      #steps .step-group:first-of-type { margin-top: 4px !important; }
-      #steps .step-group::before,
-      #steps .step-group::after {
-        content: '';
-        flex: 1;
-        height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.10), transparent) !important;
+      #wizard-footer button {
+        padding: 12px 22px;
+        border-radius: 10px;
+        font-size: 13.5px;
+        font-weight: 700;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        cursor: pointer;
+        transition: all .2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid transparent;
       }
-      #steps .step-group-label,
-      #steps .step-group > * {
-        font-size: 10px !important;
-        font-weight: 700 !important;
+      #wizard-prev {
+        background: transparent;
+        border-color: rgba(255,255,255,0.10) !important;
+        color: rgba(238,242,255,0.65);
+      }
+      #wizard-prev:hover { background: rgba(255,255,255,0.05); color: rgba(238,242,255,0.95); }
+      #wizard-prev:disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
+      #wizard-next {
+        background: linear-gradient(135deg, #3b78d4 0%, #2a5fb0 100%);
+        color: #fff;
+        box-shadow: 0 4px 14px rgba(59,120,212,0.35);
+      }
+      #wizard-next:hover { box-shadow: 0 6px 20px rgba(59,120,212,0.50); transform: translateY(-1px); }
+      #wizard-step-counter {
+        font-size: 11px;
         text-transform: uppercase;
-        letter-spacing: 0.16em !important;
-        color: rgba(160,190,230,0.40) !important;
-        background: none !important;
-        padding: 0 !important;
-        flex: 0 0 auto;
+        letter-spacing: 0.16em;
+        color: rgba(160,190,230,0.50);
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
       }
     }
 
@@ -3950,6 +3998,16 @@
   </div>
 </div>
 
+<!-- Wizard-Footer: Prev/Next-Buttons (Sarah-Wunsch 16.05.2026 v6, Sticky Wizard Pattern) -->
+<div id="wizard-footer">
+  <button id="wizard-prev" type="button" onclick="wizardPrev()">
+    <i class="ms" style="font-size:18px">arrow_back</i> Zurück
+  </button>
+  <span id="wizard-step-counter">Schritt – von –</span>
+  <button id="wizard-next" type="button" onclick="wizardNext()">
+    Weiter <i class="ms" style="font-size:18px">arrow_forward</i>
+  </button>
+</div>
 </div><!-- /steps -->
 
 <!-- ════ SIDEBAR RIGHT (40% = col-span-2) ════ -->
@@ -4883,6 +4941,45 @@ function sendHaus3dCamera(stepKey) {
   frame.contentWindow.postMessage({ type:'cameraFocus', focus }, '*');
 }
 
+// ── Wizard-Mode (Sarah-Wunsch 16.05.2026 v6) ──
+// Liefert sichtbare Step-IDs in DOM-Reihenfolge (ohne s1=Produkt-Hero)
+function _getWizardSteps() {
+  return Array.from(document.querySelectorAll('#steps .sc'))
+    .filter(sc => sc.style.display !== 'none' && sc.id !== 's1')
+    .map(sc => sc.id.replace(/^s/, ''));
+}
+function wizardPrev() {
+  const steps = _getWizardSteps();
+  const cur = document.querySelector('#steps .sc.open');
+  if (!cur) { if (steps.length) openS(steps[0]); return; }
+  const i = steps.indexOf(cur.id.replace(/^s/, ''));
+  if (i > 0) openS(steps[i - 1]);
+}
+function wizardNext() {
+  const steps = _getWizardSteps();
+  const cur = document.querySelector('#steps .sc.open');
+  if (!cur) { if (steps.length) openS(steps[0]); return; }
+  const i = steps.indexOf(cur.id.replace(/^s/, ''));
+  if (i >= 0 && i < steps.length - 1) openS(steps[i + 1]);
+}
+function updateWizardFooter() {
+  const counter = document.getElementById('wizard-step-counter');
+  const prev = document.getElementById('wizard-prev');
+  const next = document.getElementById('wizard-next');
+  if (!counter || !prev || !next) return;
+  const steps = _getWizardSteps();
+  const cur = document.querySelector('#steps .sc.open');
+  if (!cur || !steps.length) { counter.textContent = ''; prev.disabled = true; next.disabled = true; return; }
+  const i = steps.indexOf(cur.id.replace(/^s/, ''));
+  if (i < 0) { counter.textContent = ''; return; }
+  counter.textContent = `Schritt ${i + 1} von ${steps.length}`;
+  prev.disabled = i === 0;
+  next.disabled = i === steps.length - 1;
+  next.innerHTML = (i === steps.length - 1)
+    ? '<i class="ms" style="font-size:18px">check_circle</i> Anfrage senden'
+    : 'Weiter <i class="ms" style="font-size:18px">arrow_forward</i>';
+}
+
 function openS(n) {
   const c = document.getElementById('s'+n);
   if (!c) return; // defensive — Step kann ausgeblendet sein (display:none)
@@ -4890,6 +4987,7 @@ function openS(n) {
   closeOtherSections(c);
   if (!c.classList.contains('open')) c.classList.add('open');
   buildNav(); // linke Nav-Highlights aktualisieren
+  updateWizardFooter(); // Wizard-Counter + Prev/Next-Buttons sync
   sendHaus3dCamera(n); // 3D-Kamera sanft zum Step-relevanten Detail
 
   // Desktop 3-Panel: Schritt-Titel oben aktualisieren
