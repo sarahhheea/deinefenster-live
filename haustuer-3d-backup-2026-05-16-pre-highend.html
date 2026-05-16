@@ -8,8 +8,7 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f0f2f5; overflow: hidden; }
-  /* Embed-Modus (im Konfigurator-iframe): dunkler Verlauf, passt zum Dark-Glass-Konfigurator */
-  body.embed { background: radial-gradient(ellipse at center 40%, #1a2a4a 0%, #0a1225 75%); }
+  body.embed { background: #f0f2f5; }
 
   /* ── Embed-Modus (iframe im Konfigurator) ── */
   body.embed .header    { display: none; }
@@ -239,10 +238,7 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.0;
 
 const scene = new THREE.Scene();
-// Im Embed-Modus dunkler Hintergrund (passt zum Konfigurator-Dark-Glass),
-// in der Standalone-Sandbox bleibt es hell.
-const _isEmbed = new URLSearchParams(location.search).has('embed');
-scene.background = new THREE.Color(_isEmbed ? 0x0a1225 : 0xf0f2f5);
+scene.background = new THREE.Color(0xf0f2f5);  // Helles Blaugrau — sauber im Konfigurator
 
 const camera = new THREE.PerspectiveCamera(20, 1, 0.1, 50);
 camera.position.set(0, 1.05, 7.5);  // weit genug zurück um ganze Tür zu sehen

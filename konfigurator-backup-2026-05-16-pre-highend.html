@@ -1064,27 +1064,6 @@
 
     /* ── Produkt-Hero Overlay ── */
     #prod-hero { background: #0a1225 !important; }
-
-    /* ── High-End View-Toggle (Sarah 16.05.2026) ── */
-    /* iOS-Segmented-Control: ruhiger Pill-Hintergrund, weiße aktive Pille mit subtilem Schatten */
-    .view-btn-hi {
-      background: transparent;
-      color: rgba(232,238,255,0.55);
-    }
-    .view-btn-hi:hover {
-      color: rgba(232,238,255,0.85);
-      background: rgba(255,255,255,0.03);
-    }
-    .view-btn-hi.active {
-      background: linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 100%);
-      color: #ffffff;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.10);
-    }
-
-    /* ── High-End Preview-Wrap: weicheres Glow am Rand wenn iframe sichtbar ── */
-    #prev-wrap:has(#haus3d-wrap:not([style*="display:none"])) {
-      border-color: rgba(118,169,250,0.22);
-    }
   </style>
 </head>
 <body>
@@ -3639,17 +3618,17 @@
 <div id="sidebar-wrap" class="lg:col-span-2">
   <div id="sidebar" class="p-3">
 
-    <!-- VIEW TOGGLE — iOS-Segmented-Control-Stil (Sarah-Highend-Refactor 16.05.2026) -->
-    <div style="display:flex;gap:0;margin-bottom:14px;width:100%;background:rgba(255,255,255,0.06);padding:4px;border-radius:14px;border:1px solid rgba(255,255,255,0.06);box-shadow:inset 0 1px 0 rgba(255,255,255,0.04)">
-      <button id="view-btn-inn" class="view-btn-hi active" style="flex:1;padding:9px 14px;font-size:13px;font-weight:700;border-radius:10px;border:none;cursor:pointer;font-family:'Manrope',sans-serif;letter-spacing:.02em;transition:all 250ms cubic-bezier(.4,0,.2,1)" onclick="setPreviewView('inn')">Innen</button>
-      <button id="view-btn-aus" class="view-btn-hi" style="flex:1;padding:9px 14px;font-size:13px;font-weight:700;border-radius:10px;border:none;cursor:pointer;font-family:'Manrope',sans-serif;letter-spacing:.02em;transition:all 250ms cubic-bezier(.4,0,.2,1)" onclick="setPreviewView('aus')">Außen</button>
+    <!-- VIEW TOGGLE -->
+    <div style="display:flex;gap:4px;margin-bottom:6px;width:100%;background:rgba(255,255,255,0.08);padding:3px;border-radius:8px">
+      <button id="view-btn-inn" class="view-btn active" style="flex:1;padding:7px 10px;font-size:13px;font-weight:600;border-radius:6px" onclick="setPreviewView('inn')">Innen</button>
+      <button id="view-btn-aus" class="view-btn" style="flex:1;padding:7px 10px;font-size:13px;font-weight:600;border-radius:6px" onclick="setPreviewView('aus')">Außen</button>
     </div>
     <!-- DIN-ANSCHLAG TOGGLE — ausgeblendet per Sarah 06.05.2026 -->
     <div id="din-toggle-wrap" style="display:none"></div>
     <div id="din-btn-links" style="display:none"></div>
     <div id="din-btn-rechts" style="display:none"></div>
-    <!-- BILD-VORSCHAU — High-End Glass-Card (Sarah-Refactor 16.05.2026) -->
-    <div id="prev-wrap" class="w-full" style="position:relative;height:520px;width:100%;border-radius:20px;background:rgba(255,255,255,0.03);border:1px solid rgba(118,169,250,0.12);padding:0;flex-shrink:0;overflow:hidden;backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);box-shadow:0 30px 80px -20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06)">
+    <!-- BILD-VORSCHAU -->
+    <div id="prev-wrap" class="w-full" style="position:relative;height:420px;width:100%;border-radius:var(--r-md);background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.10);padding:0;flex-shrink:0;overflow:hidden">
       <!-- 3D-Vorschau für Haustür (iframe, embed-Modus) -->
       <div id="haus3d-wrap" style="display:none;position:absolute;inset:0;z-index:10;border-radius:var(--r-md);overflow:hidden">
         <iframe id="haus3d-frame" src="about:blank" style="width:100%;height:100%;border:none;display:block" allowfullscreen></iframe>
@@ -8763,7 +8742,7 @@ function drawPrev() {
       const f3w = document.getElementById('fenster3d-wrap');
       if (f3w)  f3w.style.display  = 'none';
       _renderHaustuer3d(previewView);
-      if (prevWrap) prevWrap.style.height = '520px';
+      if (prevWrap) prevWrap.style.height = '560px';
       return;
     }
     // FENSTER: 3D-iframe statt SVG-Vorschau (Sarah-Wunsch 16.05.2026)
