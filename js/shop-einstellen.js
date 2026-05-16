@@ -120,6 +120,7 @@ const STATE = {
   typ: null,        // 'vermessen' oder 'sonderposten'
   zustand: 'neu',  // 'neu' | 'gebraucht' | 'vermessen' | 'sonderposten'
   material: 'kunststoff', // 'kunststoff' | 'holz' | 'aluminium' — gilt für neu UND gebraucht
+  glasart: 'klarglas', // 'klarglas' | 'chinchilla' | 'milchglas' | 'sicherheitsglas' | 'schallschutzglas' — Shop-Filter
   kategorie: null,
   groesseKlasse: '',
   bilder: [],          // Array von DataURLs (neue Bilder, Base64 für Vorschau)
@@ -179,10 +180,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   bindeFormHandler();
   bindeZustandHandler();
   bindeMaterialHandler();
+  bindeGlasartHandler();
   bindeGroesseHandler();
   if (!STATE.editMode) ladeDraft();
   setZustandUI();
   setMaterialUI();
+  setGlasartUI();
   setGroesseUI();
   setEditModeUI();
   rendereVorschau();
@@ -192,6 +195,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function ladeProduktInsFormular(p) {
   STATE.zustand = p.zustand || 'neu';
   STATE.material = p.material || 'kunststoff';
+  STATE.glasart = p.glasart || 'klarglas';
   STATE.kategorie = p.kategorie_key;
   STATE.groesseKlasse = p.groesse_klasse || '';
   STATE.bilderBestand = Array.isArray(p.bilder) ? [...p.bilder] : [];
@@ -383,6 +387,30 @@ function setMaterialUI() {
   });
 }
 
+/* ─── Glasart-Auswahl (Klarglas / Chinchilla / Milchglas / Sicherheitsglas / Schallschutzglas) ─── */
+const GLASART_BTN_IDS = ['glasartKlarglas', 'glasartChinchilla', 'glasartMilchglas', 'glasartSicherheitsglas', 'glasartSchallschutzglas'];
+
+function bindeGlasartHandler() {
+  GLASART_BTN_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('click', () => {
+      STATE.glasart = el.dataset.glasart;
+      setGlasartUI();
+      saveDraft();
+      rendereVorschau();
+    });
+  });
+}
+
+function setGlasartUI() {
+  GLASART_BTN_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.toggle('selected', el.dataset.glasart === STATE.glasart);
+  });
+}
+
 /* ─── Schritt 1: Kategorie-Auswahl ─── */
 function rendereKategorien() {
   const grid = document.getElementById('kategorieGrid');
@@ -545,8 +573,10 @@ function resetFormular() {
   STATE.bilder = [];
   STATE.zustand = 'neu';
   STATE.material = 'kunststoff';
+  STATE.glasart = 'klarglas';
   setZustandUI();
   setMaterialUI();
+  setGlasartUI();
   rendereBildVorschau();
   document.getElementById('autoErkanntHinweis').classList.add('hidden');
   // Zurück zu Schritt 0
@@ -810,6 +840,7 @@ async function veroeffentlichen() {
       kategorie_key: STATE.kategorie,
       zustand: STATE.zustand,
       material: STATE.material || 'kunststoff',
+      glasart: STATE.glasart || 'klarglas',
       system: STATE.zustand === 'neu' ? document.getElementById('formSystem').value : null,
       breite_mm: breite,
       hoehe_mm: hoehe,
@@ -866,6 +897,7 @@ function saveDraft() {
   const draft = {
     zustand: STATE.zustand,
     material: STATE.material,
+    glasart: STATE.glasart,
     kategorie: STATE.kategorie,
     titel: document.getElementById('formTitel')?.value || '',
     breite: document.getElementById('formBreite')?.value || '',
@@ -892,6 +924,7 @@ function ladeDraft() {
     const d = JSON.parse(raw);
     if (d.zustand) STATE.zustand = d.zustand;
     if (d.material) STATE.material = d.material;
+    if (d.glasart) STATE.glasart = d.glasart;
     if (d.kategorie) STATE.kategorie = d.kategorie;
     const setIfPresent = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
     setIfPresent('formTitel', d.titel);
