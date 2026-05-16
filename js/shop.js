@@ -13,6 +13,7 @@ const STATE = {
   loggedIn: false,         // wahr wenn Sarah/Mitarbeiter eingeloggt — zeigt Druck-Icons
   filter: {
     zustand: new Set(),
+    material: new Set(),
     kategorien: new Set(),
     farben: new Set(),
     verglasung: new Set(),
@@ -103,6 +104,7 @@ async function loadProdukte() {
       kategorie: p.kategorie || p.kategorie_key || '',
       system: p.system || '',
       zustand: p.zustand || 'neu',
+      material: (p.material || 'kunststoff').toLowerCase(),
       breite_mm: Number(p.breite_mm) || 0,
       hoehe_mm: Number(p.hoehe_mm) || 0,
       preis_eur: Number(p.preis_eur) || 0,
@@ -119,8 +121,9 @@ async function loadProdukte() {
       lagerbestand: Number(p.lagerbestand) || 1,
       bild: (Array.isArray(p.bilder) && p.bilder[0]) || 'img/fenster_standard.png',
       bilder: Array.isArray(p.bilder) ? p.bilder : [],
-      beschreibung: p.beschreibung || ''
-    }));
+      beschreibung: p.beschreibung || '',
+      aktiv: p.aktiv !== false
+    })).filter(p => p.aktiv);
 
     // Wenn Sheets leer → JSON-Fallback damit der Shop nie blank ist
     if (sheetsProdukte.length === 0) {
@@ -222,6 +225,9 @@ function baueFilterSidebar() {
   setCountAttr('zustand-gebraucht', STATE.produkte.filter(p => p.zustand === 'gebraucht').length);
   setCountAttr('zustand-vermessen', STATE.produkte.filter(p => (p.eigenschaften || []).includes('vermessen')).length);
   setCountAttr('zustand-sonderposten', STATE.produkte.filter(p => p.zustand === 'sonderposten').length);
+  setCountAttr('material-kunststoff', STATE.produkte.filter(p => (p.material || 'kunststoff') === 'kunststoff').length);
+  setCountAttr('material-holz', STATE.produkte.filter(p => p.material === 'holz').length);
+  setCountAttr('material-aluminium', STATE.produkte.filter(p => p.material === 'aluminium').length);
   setCountAttr('verglasung-2-fach', STATE.produkte.filter(p => p.verglasung === '2-fach').length);
   setCountAttr('verglasung-3-fach', STATE.produkte.filter(p => p.verglasung === '3-fach').length);
   setCountAttr('rc-RC2', STATE.produkte.filter(p => p.rc_klasse === 'RC2').length);
@@ -276,6 +282,7 @@ function bindeEventHandler() {
       if (t.checked) STATE.filter.zustand.add(wert);
       rendere(); return;
     }
+    else if (t.classList.contains('filter-material')) setRef = STATE.filter.material;
     else if (t.classList.contains('filter-kategorie')) setRef = STATE.filter.kategorien;
     else if (t.classList.contains('filter-farbe')) setRef = STATE.filter.farben;
     else if (t.classList.contains('filter-verglasung')) setRef = STATE.filter.verglasung;
@@ -393,6 +400,8 @@ function gefilterteProdukte() {
         if (!f.zustand.has(p.zustand || 'neu')) return false;
       }
     }
+    // Material (Kunststoff / Holz / Aluminium — mehrere kombinierbar)
+    if (f.material.size && !f.material.has(p.material || 'kunststoff')) return false;
     // Kategorie
     if (f.kategorien.size && !f.kategorien.has(p.kategorie)) return false;
     // Größen-Klasse
@@ -683,6 +692,10 @@ function rendereAktiveChips() {
   const chips = [];
 
   f.zustand.forEach(z => chips.push({label: z === 'neu' ? 'Nur Neu' : 'Nur Gebraucht', type: 'zustand', value: z}));
+  f.material.forEach(m => {
+    const label = m === 'kunststoff' ? 'Kunststoff' : m === 'holz' ? 'Holz' : 'Aluminium';
+    chips.push({label, type: 'material', value: m});
+  });
   f.kategorien.forEach(k => chips.push({label: STATE.kategorien[k] || k, type: 'kategorie', value: k}));
   f.farben.forEach(c => chips.push({label: 'Farbe: ' + farbeAnzeige(c), type: 'farbe', value: c}));
   f.verglasung.forEach(v => chips.push({label: v + '-Verglasung', type: 'verglasung', value: v}));
@@ -728,6 +741,11 @@ function entferneChipFilter(type, value) {
       const ze = document.querySelector(`.filter-zustand[value="${value}"]`);
       if (ze) ze.checked = false;
       break;
+    case 'material':
+      STATE.filter.material.delete(value);
+      const me = document.querySelector(`.filter-material[value="${value}"]`);
+      if (me) me.checked = false;
+      break;
     case 'kategorie':
       STATE.filter.kategorien.delete(value);
       document.querySelector(`.filter-kategorie[value="${value}"]`).checked = false;
@@ -768,6 +786,7 @@ function entferneChipFilter(type, value) {
 
 function resetAlleFilter() {
   STATE.filter.zustand.clear();
+  STATE.filter.material.clear();
   STATE.filter.kategorien.clear();
   STATE.filter.farben.clear();
   STATE.filter.groesse.clear();
