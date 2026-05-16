@@ -5342,6 +5342,18 @@ function haustuerSVG(variant) {
   return s;
 }
 
+const FLUEGEL_KARTEN_IMG = {
+  '1-fluegel':'01_1-fluegel','2-fluegel':'02_2-fluegel','3-fluegel':'03_3-fluegel',
+  '1-oberlicht':'04_1-oberlicht','2-oberlicht':'05_2-oberlicht','3-oberlicht':'06_3-oberlicht',
+  '1-unterlicht':'07_1-unterlicht','2-unterlicht':'08_2-unterlicht','3-unterlicht':'09_3-unterlicht',
+  '1-ober-unter':'10_1-ober-unter','2-ober-unter':'11_2-ober-unter','3-ober-unter':'12_3-ober-unter'
+};
+function fluegelImg(v) {
+  const file = FLUEGEL_KARTEN_IMG[v];
+  if (!file) return windowSVG(v, null);
+  return `<img src="img/fluegel-karten/${file}.png" alt="${P.fluegel[v]?.name||v}" loading="lazy" style="width:100%;height:auto;max-height:96px;object-fit:contain;border-radius:6px;display:block"/>`;
+}
+
 function buildFluegel() {
   const grid = document.getElementById('fluegel-grid');
   if (!grid) return;
@@ -5370,7 +5382,7 @@ function buildFluegel() {
     ];
     grid.innerHTML = opts.map(o=>`
       <div class="fk${S.fluegel===o.v?' sel':''}" data-v="${o.v}" onclick="pickFluegel(this)" style="padding:8px 6px 10px">
-        ${windowSVG(o.v,null)}
+        ${fluegelImg(o.v)}
         <div class="fk-label" style="margin-top:7px">${P.fluegel[o.v].name}</div>
         <div class="fk-price ${o.add===0?'p-inc':'p-add'}">${o.add===0?'inkl.':'+ '+o.add+' €'}</div>
       </div>`).join('');
@@ -5392,7 +5404,7 @@ function buildFluegel() {
   ];
   grid.innerHTML = opts.map(o=>`
     <div class="fk${S.fluegel===o.v?' sel':''}" data-v="${o.v}" onclick="pickFluegel(this)" style="padding:8px 6px 10px">
-      ${windowSVG(o.v,null)}
+      ${fluegelImg(o.v)}
       <div class="fk-label" style="margin-top:7px">${P.fluegel[o.v].name}</div>
       <div class="fk-price ${o.add===0?'p-inc':'p-add'}">${o.add===0?'inkl.':'+ '+o.add+' €'}</div>
     </div>`).join('');
