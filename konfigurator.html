@@ -1066,28 +1066,39 @@
     #prod-hero { background: #0a1225 !important; }
 
     /* ════════════════════════════════════════════════════════════════
-       HIGH-END REDESIGN PHASE A (Sarah-Wunsch 16.05.2026)
-       Layout: 3D dominant, Übersicht-Card unter 3D, Steps fokussiert
-       Konsolidiert aus 3 Spezialisten-Berichten + ui-ux-pro-max Skill
+       HIGH-END REDESIGN PHASE A+ (Sarah-Wunsch 16.05.2026, v2)
+       Layout: 3D ZENTRAL, Steps rechts, Phasen links
+       Sarah-Feedback: "überfordert das Gehirn, schlicht/dunkel/premium"
        ════════════════════════════════════════════════════════════════ */
 
     @media (min-width: 1024px) {
-      /* Rechte Spalte (Preview+Übersicht): von 360px fix → flex:1 (~780px bei 1440px) */
-      #sidebar-wrap {
-        width: auto !important;
-        flex: 1 1 0 !important;
-        min-width: 520px !important;
-        max-width: 880px !important;
-        padding: 22px 28px !important;
-        gap: 14px !important;
-        border-left: 1px solid rgba(255,255,255,0.06) !important;
-        background: linear-gradient(180deg, rgba(10,18,37,0.4) 0%, rgba(6,9,26,0.6) 100%) !important;
+      /* Layout-Tausch: Mitte wird 3D-Showroom, Steps wandern nach rechts */
+      #kfg-main {
+        display: grid !important;
+        grid-template-columns: 200px minmax(540px, 1fr) 400px !important;
+        grid-template-areas: "nav preview side" !important;
       }
-      /* Mitte (Steps): nicht mehr flex:1, sondern fix-Max — gibt Atemraum dem 3D */
+      #kfg-nav      { grid-area: nav !important; }
+      #sidebar-wrap { grid-area: preview !important;
+        width: auto !important; flex: none !important;
+        padding: 28px 32px !important;
+        gap: 16px !important;
+        border-left: 1px solid rgba(255,255,255,0.05) !important;
+        border-right: 1px solid rgba(255,255,255,0.05) !important;
+        background: radial-gradient(ellipse at 50% 30%, rgba(20,38,75,0.30) 0%, rgba(5,8,20,0.0) 70%), #06091a !important;
+      }
       #steps {
-        flex: 0 0 460px !important;
-        max-width: 460px !important;
+        grid-area: side !important;
+        flex: none !important; max-width: none !important;
+        padding: 28px 26px 32px !important;
+        border-left: 1px solid rgba(255,255,255,0.05) !important;
+        background: rgba(8,12,28,0.45) !important;
       }
+      /* Step-Header oben in #steps kompakter */
+      #kfg-step-hdr { padding: 0 0 18px !important; border-bottom-color: rgba(255,255,255,0.05) !important; }
+      #kfg-step-title-text { font-size: 17px !important; }
+      #kfg-step-desc-text  { font-size: 12px !important; }
+      #steps .sc.open > .sb { padding: 18px 0 0 !important; }
     }
 
     /* PREVIEW: 3D-Hero-Sockel (NICHT Glass-Card — Konfigurator-Pattern empfiehlt ruhigen Sockel) */
