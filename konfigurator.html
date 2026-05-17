@@ -1828,11 +1828,15 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       font-size: 12.5px; color: rgba(200,215,255,0.50);
       margin: 0; line-height: 1.4;
     }
-    /* Alle 3 Header (links Step-Item, mitte Title, rechts Toggle) auf gleicher Y-Linie */
+    /* Alle 3 Header (links Step-Item, mitte Title, rechts Toggle) auf gleicher Y-Linie
+       Rechts hat einen ::before "IHRE KONFIGURATION" Label über dem Sidebar-Card (≈38px) +
+       Sidebar-Padding (16px) → Toggle-Pille startet bei y≈54px. Links + Mitte bekommen
+       den gleichen Offset, damit alle drei Spalten auf der gleichen Linie liegen. */
     #sidebar > div:first-child { min-height: 56px; display:flex; align-items:center; margin-bottom:14px; }
     #kfg-nav .ksnav-item:first-child { margin-top: 0; }
     #kfg-step-hdr { min-height: 56px !important; padding: 14px 28px !important; display:flex !important; flex-direction:column !important; justify-content:center !important; }
-    #kfg-nav { padding-top: 14px !important; }
+    #kfg-nav { padding-top: 54px !important; }
+    #steps { padding-top: 52px !important; }
 
     /* RECHTE PREVIEW-SPALTE */
     #sidebar-wrap {
@@ -5463,6 +5467,18 @@ function anschlag3fImg(v1, v2, v3, type) {
   return `<img src="img/anschlag-karten-3f/${file}.png" alt="${v1}-${v2}-${v3}-${type}" loading="lazy" style="width:100%;height:auto;max-height:240px;object-fit:contain;display:block"/>`;
 }
 
+function anschlag1olImg(mainV, olV) {
+  let file = null;
+  if (mainV === 'fest' && olV === 'fest')      file = 'olFest-fest';
+  else if (mainV === 'dk-l' && olV === 'fest') file = 'olFest-dk-l';
+  else if (mainV === 'dk-r' && olV === 'fest') file = 'olFest-dk-r';
+  else if (mainV === 'fest' && olV === 'kipp') file = 'olKipp-fest';
+  else if (mainV === 'dk-l' && olV === 'kipp') file = 'olKipp-dk-l';
+  else if (mainV === 'dk-r' && olV === 'kipp') file = 'olKipp-dk-r';
+  if (!file) return olComboSVG(olV, mainV);
+  return `<img src="img/anschlag-karten-1ol/${file}.png" alt="${mainV}-ol${olV}" loading="lazy" style="width:100%;height:auto;max-height:240px;object-fit:contain;display:block"/>`;
+}
+
 function buildFluegel() {
   const grid = document.getElementById('fluegel-grid');
   if (!grid) return;
@@ -6479,26 +6495,24 @@ function buildOeffSash() {
   // ── Schnell-Auswahl: 1-Flügel + Oberlicht (Fest oder Kipp) × Hauptflügel ───
   const is1Ol = sashCount===1 && (S.fluegel||'').includes('1-oberlicht');
   if (is1Ol && S.prod !== 'haustuere') {
+    // Praxis-reduziert (Recherche 17.05.): nur fest, dk-l, dk-r — Kipp/Dreh-only sind in DE unüblich
     const mainOpts = [
-      {v:'fest',   name:'Fest',             add:-15, pCls:'p-sav'},
-      {v:'kipp',   name:'Kipp',             add:15,  pCls:'p-add'},
-      {v:'dreh-r', name:'Dreh rechts',      add:0,   pCls:'p-inc'},
-      {v:'dreh-l', name:'Dreh links',       add:0,   pCls:'p-inc'},
-      {v:'dk-r',   name:'Dreh-Kipp rechts', add:35,  pCls:'p-add', disabled:dkZuBreit},
-      {v:'dk-l',   name:'Dreh-Kipp links',  add:35,  pCls:'p-add', disabled:dkZuBreit},
+      {v:'fest', name:'Fest',             add:-15, pCls:'p-sav'},
+      {v:'dk-l', name:'Dreh-Kipp links',  add:35,  pCls:'p-add', disabled:dkZuBreit},
+      {v:'dk-r', name:'Dreh-Kipp rechts', add:35,  pCls:'p-add', disabled:dkZuBreit},
     ];
     html += `<div class="sec-t" style="margin-top:0">Öffnungsart wählen</div>`;
-    html += `<div class="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-4">`;
+    html += `<div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">`;
     ['fest','kipp'].forEach(ol => {
       mainOpts.filter(m=>!m.disabled).forEach(m => {
         const isSel = S.oeff1===m.v && (S.oberlichtOeff||'fest')===ol;
         const pTxt = m.add===0?'inkl.':(m.add>0?`+ ${m.add} €`:`− ${Math.abs(m.add)} €`);
         const olLabel = ol==='kipp' ? 'OberlichtKipp' : 'OberlichtFest';
-        html += `<div class="oc${isSel?' sel':''}" data-v1="${m.v}" data-ol="${ol}" onclick="pickOeffCombo(this)" style="flex-direction:column;align-items:center;text-align:center;padding:8px 4px;gap:2px">
-          ${olComboSVG(ol,m.v)}
-          <div class="olabel" style="font-size:10px;line-height:1.2;font-weight:700">${olLabel}</div>
-          <div class="osub" style="font-size:10px">+${m.name}</div>
-          <div class="oprice ${m.pCls}" style="font-size:10px">${pTxt}</div>
+        html += `<div class="oc${isSel?' sel':''}" data-v1="${m.v}" data-ol="${ol}" onclick="pickOeffCombo(this)" style="flex-direction:column;align-items:center;text-align:center;padding:8px 6px 10px;gap:3px">
+          ${anschlag1olImg(m.v,ol)}
+          <div class="olabel" style="font-size:13px;font-weight:600;line-height:1.3;margin-top:7px">${olLabel}</div>
+          <div class="osub" style="font-size:11px">+${m.name}</div>
+          <div class="oprice ${m.pCls}" style="font-size:12px">${pTxt}</div>
         </div>`;
       });
     });
