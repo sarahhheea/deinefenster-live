@@ -8,9 +8,10 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f0f2f5; overflow: hidden; }
-  /* Embed-Modus (im Konfigurator-iframe): dunkler Verlauf, passt zum Dark-Glass-Konfigurator
+  /* Embed-Modus (im Konfigurator-iframe): exakt gleicher Solid-Blau wie Fenster-3D (Sarah-Wunsch 17.05.2026)
      Greift wenn ?embed in URL ODER body.embed Klasse gesetzt — höhere Spezifizität gegen Fallbacks */
-  html body.embed { background: radial-gradient(ellipse at center 40%, #1a2a4a 0%, #0a1225 75%) !important; }
+  html.is-embed body,
+  html body.embed { background: #0a1530 !important; }
   html body.embed .header,
   html body.embed .ref-panel,
   html body.embed .controls { display: none !important; }
@@ -261,7 +262,8 @@ const scene = new THREE.Scene();
 // Im Embed-Modus dunkler Hintergrund (passt zum Konfigurator-Dark-Glass),
 // in der Standalone-Sandbox bleibt es hell.
 const _isEmbed = new URLSearchParams(location.search).has('embed');
-scene.background = new THREE.Color(_isEmbed ? 0x0a1225 : 0xf0f2f5);
+// Sarah-Wunsch 17.05.2026: exakt gleicher Solid-Blau wie Fenster-3D (#0a1530) statt Verlauf
+scene.background = new THREE.Color(_isEmbed ? 0x0a1530 : 0xf0f2f5);
 
 const camera = new THREE.PerspectiveCamera(18, 1, 0.1, 50);
 camera.position.set(0, 1.05, 8.5);  // gleicher Abstand wie Fenster-3D (Sarah-Wunsch 17.05.): proportionaler Atemraum oben/unten/links/rechts
