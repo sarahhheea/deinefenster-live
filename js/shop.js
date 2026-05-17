@@ -1290,6 +1290,8 @@ function eigenschaftAnzeige(code) {
     'parallel-schiebe-kipp': 'Parallel-Schiebe-Kipp',
     'hebe-schiebe': 'Hebe-Schiebe',
     'oberlicht': 'Mit Oberlicht',
+    'unterlicht': 'Mit Unterlicht',
+    'ober-unter-licht': 'Mit Ober- und Unterlicht',
     'sprossen-aufgesetzt': 'Mit Sprossen',
     'holzdekor': 'Holzdekor',
     'passivhaus-tauglich': 'Passivhaus-tauglich',

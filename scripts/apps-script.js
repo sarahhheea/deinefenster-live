@@ -23,7 +23,8 @@ var KATEGORIEN_DATEN = [
   {key:'schiebetuer-hst',           label:'Hebe-Schiebetür',                 icon:'door_sliding',    reihenfolge:17},
   {key:'schiebetuer-rollo',         label:'Schiebetür mit Rollo',            icon:'roller_shades',   reihenfolge:18},
   {key:'fenster-oberlicht',         label:'Fenster mit Oberlicht',           icon:'space_dashboard', reihenfolge:19},
-  {key:'fenster-sprossen',          label:'Fenster mit Sprossen',            icon:'window_open',     reihenfolge:20}
+  {key:'fenster-unterlicht',        label:'Fenster mit Unterlicht',          icon:'vertical_split',  reihenfolge:20},
+  {key:'fenster-sprossen',          label:'Fenster mit Sprossen',            icon:'window_open',     reihenfolge:21}
 ];
 
 function doGet(e) {
