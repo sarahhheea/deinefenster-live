@@ -1088,18 +1088,14 @@
       }
     }
 
-    /* PREVIEW: 3D-Hero-Sockel (NICHT Glass-Card — Konfigurator-Pattern empfiehlt ruhigen Sockel) */
+    /* PREVIEW: 3D randlos, vollflächig (Sarah-Wunsch 17.05.2026: "nicht in irgendeinem Kasten") */
     #prev-wrap {
-      height: clamp(520px, calc(100vh - 380px), 720px) !important;
-      min-height: 520px !important;
-      border-radius: 16px !important;
+      height: 70vh !important;
+      min-height: 600px !important;
+      border-radius: 0 !important;
       background: linear-gradient(180deg, #0d1830 0%, #06091a 100%) !important;
-      border: 1px solid rgba(118,169,250,0.10) !important;
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.05),
-        0 1px 0 rgba(255,255,255,0.04),
-        0 40px 80px -24px rgba(0,0,0,0.7),
-        0 16px 32px -16px rgba(34,94,170,0.22) !important;
+      border: none !important;
+      box-shadow: none !important;
       position: relative !important;
       overflow: hidden !important;
     }
@@ -1284,6 +1280,9 @@
        Phasen-Nav komplett weg (war zuviel Lärm)
        ════════════════════════════════════════════════════════════════ */
 
+    /* Phasen-Navigation IMMER aus (global, nicht in Media-Query — Sarah-Wunsch 17.05.2026) */
+    #kfg-nav { display: none !important; }
+
     @media (min-width: 1024px) {
       /* 50/50 LAYOUT: Karten füllen LINKE Hälfte komplett, 3D + Zusammenfassung RECHTE Hälfte */
       #kfg-main {
@@ -1291,8 +1290,6 @@
         grid-template-columns: 1fr 1fr !important;
         grid-template-areas: "steps preview" !important;
       }
-      /* Phasen-Navigation komplett aus */
-      #kfg-nav { display: none !important; }
 
       #steps {
         grid-area: steps !important;
@@ -1319,20 +1316,23 @@
         flex-direction: column !important;
       }
 
-      /* ── 3D-Preview RECHTS: füllt die rechte Hälfte (Sarah-Wunsch 17.05.2026 v2) ── */
+      /* ── 3D-Preview RECHTS: füllt die rechte Hälfte randlos (Sarah-Wunsch 17.05.2026 v3) ── */
       #prev-wrap {
-        height: 62vh !important;
-        min-height: 540px !important;
+        height: 70vh !important;
+        min-height: 600px !important;
         max-height: none !important;
         max-width: 100% !important;
-        margin: 0 !important;
+        margin: 0 -28px !important;     /* negative margin = bricht aus dem Sidebar-Padding aus */
         order: 2 !important;
-        flex: 0 0 62vh !important;
+        flex: 0 0 70vh !important;
+        border-radius: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
       }
-      /* Sidebar-Padding reduzieren damit 3D maximal Platz hat */
+      /* Sidebar-Padding: oben/unten ok, links/rechts 0 damit 3D wirklich vollflächig ist */
       #sidebar-wrap {
-        padding: 18px 28px 24px !important;
-        gap: 12px !important;
+        padding: 16px 28px 20px !important;
+        gap: 10px !important;
       }
       /* View-Toggle + Tür-öffnen-Button als Top-Bar oben */
       #sidebar-wrap > div:first-child {
