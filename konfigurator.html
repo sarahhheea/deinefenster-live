@@ -17,7 +17,7 @@
   <link rel="preload" as="image" href="img/haustuer_iglo_energy_montana_weiss.png?v=20260506-5">
   <link rel="preload" as="image" href="img/hst_standard.png">
 
-  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <link rel="stylesheet" href="css/tailwind.css"/>
 
   <script type="importmap">
   { "imports": {
@@ -35,9 +35,11 @@
   <link rel="stylesheet" href="css/premium.css?v=4"/>
 
   <script>
-    tailwind.config = {
-      theme: {
-        extend: {
+    // tailwind.config wurde benötigt für CDN-Tailwind-JIT
+    // Lokale tailwind.css ist bereits mit diesen Custom-Colors gebuilded → Block hier nur als Fallback
+    if (typeof tailwind !== 'undefined') {
+      tailwind.config = {
+        theme: { extend: {
           colors: {
             primary: "#225eaa", "primary-d": "#1a4a87",
             "primary-light": "#d6e3ff", "primary-mid": "#76a9fa",
@@ -48,8 +50,8 @@
             gold: "#c9a84c",
           },
           fontFamily: { h: ["Plus Jakarta Sans"], b: ["Manrope"] },
-        },
-      },
+        } },
+      };
     }
   </script>
 
