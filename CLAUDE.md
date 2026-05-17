@@ -1,5 +1,22 @@
 # DeineFenster.de — Claude Anweisungen
 
+## VISUAL-CHECK PFLICHT (Sarah-Regel 17.05.2026)
+
+**Bei JEDER visuellen Änderung — neuen Bild-Generierungen, 3D-Modellen, UI-Layout-Änderungen, neuen Komponenten — MUSS ein visueller Verifikations-Schritt passieren bevor das Ergebnis Sarah gezeigt oder live gepusht wird:**
+
+1. **Selbst-Check:** Screenshot machen, mit Referenz vergleichen, Liste von Abweichungen
+2. **Subagent drüberschauen lassen:** Bei nicht-trivialen visuellen Änderungen (3D, Bilder, Layout-Refactor) einen Spezialisten-Agent (general-purpose oder code-review-Variante) das Ergebnis prüfen lassen — sucht nach Fehlern die Sarah sonst findet
+3. **Erst wenn keine offensichtlichen Bugs mehr da sind:** Sarah zeigen oder pushen
+
+**Warum:** Sarah hat wiederholt visuelle Bugs gefunden die ich übersehen hatte (komische Übergangsbögen, fehlende Tiefe, falscher Hintergrund, sichtbarer Header im Embed-Modus). Jeder dieser Bugs hätte mit einem 30-Sekunden-Agent-Check vorher gefunden werden können.
+
+**Konkrete Trigger für Agent-Check:**
+- Neue 3D-Geometrie / Material-Änderungen
+- iframe-Embeds in andere Seiten
+- Neue Komponenten die zum ersten Mal live gehen
+- Wenn Sarah „zeig mal" sagt nach mehreren Änderungen
+- Bei Code der CSS-Klassen oder Layout-Werte ändert
+
 ## 100 % COMPLIANCE-PFLICHT (Sarah-Wunsch 15.05.2026, NICHT VERHANDELBAR)
 
 **Sarah's Vorgabe wörtlich:** „Es muss immer alles 100 % rechtens sein vom deutschen EU was auch immer. Mich darf zu 100 % keiner abmahnen. Es gibt nichts was man bei uns anmerken können — weder Konkurrenz, Finanzamt, Rechtskanzlei, noch Leute die mich nicht mögen."
