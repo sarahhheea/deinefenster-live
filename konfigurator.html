@@ -8711,12 +8711,19 @@ function _renderFenster3d() {
   const isWood = HAUS3D_WOOD_KEYS.has(_ck);
   const _side  = (S.oeff1 === 'dreh-l') ? 'l' : 'r';
 
+  // WICHTIG: Wrap erst sichtbar machen — iframe braucht Container-Höhe
+  // damit Three.js' resize() korrekte Maße bekommt (sonst Canvas = 0×0 = weiß)
+  wrap.style.display = 'block';
+
   const _isLoaded = frame.src.includes('fenster-3d');
   if (!_isLoaded) {
-    frame.src = `fenster-3d.html?embed&color=${_ck}&side=${_side}`;
+    // Absoluter Pfad + Cache-Buster (Sarah 17.05.2026 — iframe-Cache-Probleme)
+    frame.src = `/fenster-3d.html?embed&v=20260517-2&color=${_ck}&side=${_side}`;
     frame.onload = () => {
       const cw = frame.contentWindow;
       if (!cw) return;
+      // Resize triggern nachdem iframe-Layout final ist
+      cw.dispatchEvent(new Event('resize'));
       cw.postMessage({
         type: 'update',
         color: isWood ? null : _ck,
@@ -8737,7 +8744,6 @@ function _renderFenster3d() {
       }, '*');
     }
   }
-  wrap.style.display = 'block';
 }
 
 // 3D-iframe für Haustür rendern (Außen + Innen + Live-Updates)
