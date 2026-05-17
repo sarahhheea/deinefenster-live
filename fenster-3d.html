@@ -111,8 +111,8 @@
 
 <script type="importmap">
 { "imports": {
-    "three":         "https://cdn.jsdelivr.net/npm/three@0.162.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.162.0/examples/jsm/"
+    "three":         "js/vendor/three.module.js",
+    "three/addons/": "js/vendor/three/examples/jsm/"
 } }
 </script>
 
@@ -168,11 +168,11 @@ const eL2 = new THREE.DirectionalLight(0xffffff, 3.0);
 eL2.position.set(-2, 1, 3); envSc.add(eL2);
 scene.environment = pmremGen.fromScene(envSc, 0.04).texture;
 
-// Ambient reduziert — klare Schatten und schärferer Look
-scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+// Ambient — gerade genug damit Außen-/Seitenflächen sichtbar, aber Schatten erhalten
+scene.add(new THREE.AmbientLight(0xffffff, 0.70));
 
-// Key-Licht intensiver — kräftige Definition und klare Highlights
-const keyLight = new THREE.DirectionalLight(0xffffff, 2.4);
+// Key-Licht maximal stark → starke Schatten an Profilkanten = max. 3D-Tiefe
+const keyLight = new THREE.DirectionalLight(0xffffff, 3.5);
 keyLight.position.set(-2, 4, 6);
 keyLight.castShadow = true;
 keyLight.shadow.mapSize.set(4096, 4096);   // hochauflösende Schatten
@@ -196,10 +196,15 @@ handleSpot.position.set(1.5, 0.8, 5.5);
 handleSpot.target.position.set(0.42, 0.00, 0.09);
 scene.add(handleSpot); scene.add(handleSpot.target);
 
-// Rim-Light von hinten-oben — Konturen aufhellen
-const rimLight = new THREE.DirectionalLight(0xffffff, 0.40);
-rimLight.position.set(0, 5, -3);
+// Rim-/Backlight — hellt Rückseite und Seitenflächen auf
+const rimLight = new THREE.DirectionalLight(0xffffff, 0.75);
+rimLight.position.set(0, 3, -5);
 scene.add(rimLight);
+
+// Side-Light von rechts — Seitenflächen klar erhellen
+const sideLight = new THREE.DirectionalLight(0xffffff, 0.55);
+sideLight.position.set(5, 1, 0);
+scene.add(sideLight);
 
 // Soft-Light von unten-rechts — füllt dunkle Schattenseiten
 const bottomFill = new THREE.DirectionalLight(0xfff5e8, 0.30);
@@ -260,7 +265,7 @@ const GW = SW - 2 * FST - 2 * SBW;  // 0.756
 const GH = SH - 2 * FST - 2 * SBW;  // 0.956
 
 // Flügel steht 5mm vor dem Blendrahmen hervor (Falz)
-const SASH_DZ = 0.016;   // 16 mm Aufkantung — deutliche 3D-Trennung Rahmen|Flügel
+const SASH_DZ = 0.022;   // 22 mm Aufkantung — starke 3D-Trennung Rahmen|Flügel
 
 const winGroup  = new THREE.Group();
 const sashGroup = new THREE.Group();   // Flügel — rotiert um linke Scharnier-Achse zum Öffnen
@@ -336,12 +341,18 @@ function buildWindow() {
   winGroup.add(bx(FRT/2,         FH/2,           fzc, FRT,          FH - 2*FRT,  FD, frameMat));
   winGroup.add(bx(FW - FRT/2,    FH/2,           fzc, FRT,          FH - 2*FRT,  FD, frameMat));
 
-  // Profilnut Blendrahmen — subtile Tiefenlinie (kein schwarzer Strich)
+  // Profilnut Blendrahmen — innere Linie nahe Falz
   const fni = FRT - 0.012;
   winGroup.add(nut(fni, fni, FW - fni, fni, ffz, subtleNutMat));
   winGroup.add(nut(fni, FH - fni, FW - fni, FH - fni, ffz, subtleNutMat));
   winGroup.add(nut(fni, fni, fni, FH - fni, ffz, subtleNutMat));
   winGroup.add(nut(FW - fni, fni, FW - fni, FH - fni, ffz, subtleNutMat));
+  // Zweite subtile Linie näher zur Außenkante — mehr Profil-Tiefe
+  const fno = 0.012;
+  winGroup.add(nut(fno, fno, FW - fno, fno, ffz, subtleNutMat));
+  winGroup.add(nut(fno, FH - fno, FW - fno, FH - fno, ffz, subtleNutMat));
+  winGroup.add(nut(fno, fno, fno, FH - fno, ffz, subtleNutMat));
+  winGroup.add(nut(FW - fno, fno, FW - fno, FH - fno, ffz, subtleNutMat));
 
   // FALZ-DICHTUNG (schwarz, umlaufend um Flügel) — klare Trennung Rahmen|Flügel
   const sealW = 0.005;
@@ -358,15 +369,24 @@ function buildWindow() {
   sashGroup.add(bx(sx(x0 + FST/2),       y0 + SH/2,         szc, FST,  SH - 2*FST,  FD, sashMat));
   sashGroup.add(bx(sx(x0 + SW - FST/2),  y0 + SH/2,         szc, FST,  SH - 2*FST,  FD, sashMat));
 
-  // Profilnuten Flügel
+  // Profilnuten Flügel — zwei Linien für mehr Profil-Tiefe
   const sniAbs  = x0 + FST * 0.54;
   const snixAbs = x0 + SW - FST * 0.54;
   const sniy    = y0 + FST * 0.54;
   const sniyt   = y0 + SH - FST * 0.54;
-  sashGroup.add(nut(sx(sniAbs),  sniy,  sx(snixAbs), sniy,  sfz));
-  sashGroup.add(nut(sx(sniAbs),  sniyt, sx(snixAbs), sniyt, sfz));
-  sashGroup.add(nut(sx(sniAbs),  sniy,  sx(sniAbs),  sniyt, sfz));
-  sashGroup.add(nut(sx(snixAbs), sniy,  sx(snixAbs), sniyt, sfz));
+  sashGroup.add(nut(sx(sniAbs),  sniy,  sx(snixAbs), sniy,  sfz, subtleNutMat));
+  sashGroup.add(nut(sx(sniAbs),  sniyt, sx(snixAbs), sniyt, sfz, subtleNutMat));
+  sashGroup.add(nut(sx(sniAbs),  sniy,  sx(sniAbs),  sniyt, sfz, subtleNutMat));
+  sashGroup.add(nut(sx(snixAbs), sniy,  sx(snixAbs), sniyt, sfz, subtleNutMat));
+  // Zweite Linie nahe Außenkante des Flügelprofils
+  const sniOutAbs  = x0 + FST * 0.16;
+  const snixOutAbs = x0 + SW - FST * 0.16;
+  const sniOutY    = y0 + FST * 0.16;
+  const sniOutYt   = y0 + SH - FST * 0.16;
+  sashGroup.add(nut(sx(sniOutAbs),  sniOutY,  sx(snixOutAbs), sniOutY,  sfz, subtleNutMat));
+  sashGroup.add(nut(sx(sniOutAbs),  sniOutYt, sx(snixOutAbs), sniOutYt, sfz, subtleNutMat));
+  sashGroup.add(nut(sx(sniOutAbs),  sniOutY,  sx(sniOutAbs),  sniOutYt, sfz, subtleNutMat));
+  sashGroup.add(nut(sx(snixOutAbs), sniOutY,  sx(snixOutAbs), sniOutYt, sfz, subtleNutMat));
 
   const gcxAbs = x0 + FST + SBW + GW / 2;
   const gcy    = y0 + FST + SBW + GH / 2;
@@ -646,6 +666,7 @@ function setColor(key) {
   sashMat.color.copy(c);
   grooveMat.color.copy(c).multiplyScalar(0.62);
   subtleNutMat.color.copy(c).multiplyScalar(0.88);   // subtile Tiefenlinie folgt Rahmenfarbe
+  sealMat.color.copy(c).multiplyScalar(0.62);          // Falz-Schatten — dunkler als Nut, nicht schwarz
 
   const isGlatt    = key.endsWith('-gl');
   const isUltiMatt = key.endsWith('-um');

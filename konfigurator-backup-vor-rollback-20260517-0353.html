@@ -28,7 +28,9 @@
   <script type="module" src="js/konfigurator-3d.js?v=20"></script>
 
   <link rel="preconnect" href="https://fonts.bunny.net"/>
-  <link href="https://fonts.bunny.net/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Three.js lokal gehostet (js/vendor/three.module.js) — kein CDN-Roundtrip mehr -->
+  <link rel="modulepreload" href="js/vendor/three.module.js"/>
+  <link href="https://fonts.bunny.net/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=optional" rel="stylesheet">
   <link rel="stylesheet" href="fonts/material-symbols.css">
   <link rel="stylesheet" href="css/nav.css?v=4"/>
   <link rel="stylesheet" href="css/global-design.css?v=1"/>
@@ -1065,73 +1067,694 @@
     /* ── Produkt-Hero Overlay ── */
     #prod-hero { background: #0a1225 !important; }
 
-    /* ── Drei gleich große Spalten + 3D ohne Kasten (Sarah-Wunsch 17.05.2026 nachts) ── */
+    /* PHASE A+ Layout-Tausch wieder entfernt (Sarah-Feedback: lieber klassisch
+       Akkordeon, 3D rechts). Layout-Werte zurück zum Phase-A-Stand:
+       - rechte Spalte (Preview) flex:1 → ~780px breit bei 1440
+       - mittlere Spalte (Steps) max 460px → fokussiert */
     @media (min-width: 1024px) {
-      /* Schmal links, breit mitte+rechts (Sarah-Anpassung 17.05.2026) */
-      html body #kfg-main {
-        display: grid !important;
-        grid-template-columns: 220px 1fr 1fr !important;
-        grid-template-areas: "nav steps preview" !important;
+      #sidebar-wrap {
+        width: auto !important;
+        flex: 1 1 0 !important;
+        min-width: 520px !important;
+        max-width: 880px !important;
+        padding: 22px 28px !important;
+        gap: 14px !important;
+        border-left: 1px solid rgba(255,255,255,0.06) !important;
+        background: linear-gradient(180deg, rgba(10,18,37,0.4) 0%, rgba(6,9,26,0.6) 100%) !important;
       }
-      html body #kfg-nav      { grid-area: nav !important; width: auto !important; }
-      html body #steps        { grid-area: steps !important; flex: none !important; max-width: none !important; }
-      html body #sidebar-wrap { grid-area: preview !important; width: auto !important; flex: none !important; }
-
-      /* 3D-Container: nach oben gezogen, weniger Höhe → Platz drunter für Übersicht + Öffnen-Button */
-      html body #prev-wrap {
-        height: 56vh !important;
-        min-height: 400px !important;
-        max-height: 580px !important;
-        background: transparent !important;
-        border: none !important;
-        border-radius: 0 !important;
-        box-shadow: none !important;
-        display: flex !important;
-        align-items: flex-start !important;
-        justify-content: center !important;
-        padding-top: 4px !important;
-      }
-      /* Übersicht-Card direkt drunter sichtbar machen */
-      html body #chips {
-        display: block !important;
-        margin-top: 12px !important;
-      }
-      html body #haus3d-wrap,
-      html body #fenster3d-wrap,
-      html body #prev-img-wrap,
-      html body #vorschau-container {
-        background: transparent !important;
-        border-radius: 0 !important;
+      #steps {
+        flex: 0 0 460px !important;
+        max-width: 460px !important;
       }
     }
 
-/* Nur das KONFIGURATION-Text-Label oben links verstecken (spezifischer Selektor, nicht den ganzen Container!) */
-html body #konfig-side-header,
-html body .konfig-side-header,
-html body #kfg-nav-header,
-html body .kfg-nav-header,
-html body .konfig-title { display: none !important; }
-/* Doppel-Header in rechter Sidebar weg */
-html body #sidebar-wrap #kfg-sum-block { display: none !important; }
+    /* PREVIEW: 3D randlos, vollflächig (Sarah-Wunsch 17.05.2026: "nicht in irgendeinem Kasten") */
+    #prev-wrap {
+      height: 70vh !important;
+      min-height: 600px !important;
+      border-radius: 0 !important;
+      background: linear-gradient(180deg, #0d1830 0%, #06091a 100%) !important;
+      border: none !important;
+      box-shadow: none !important;
+      position: relative !important;
+      overflow: hidden !important;
+    }
+    /* Bodenglow unter dem 3D-Modell — gibt Showroom-Wirkung */
+    #prev-wrap::after {
+      content: '';
+      position: absolute;
+      inset: auto 0 0 0;
+      height: 40%;
+      pointer-events: none;
+      background: radial-gradient(ellipse at 50% 100%,
+        rgba(118,169,250,0.10) 0%,
+        rgba(118,169,250,0.04) 30%,
+        transparent 65%);
+      z-index: 5;
+    }
 
-/* Polish B-F komplett ENTFERNT (war hässlich, Sarah-Rollback 17.05.) */
+    /* ÜBERSICHT-Card (vorhandener #chips): sauber strukturierte Liste */
+    #chips {
+      margin-top: 0 !important;
+      flex: 0 0 auto !important;
+      overflow: visible !important;
+    }
+    #chips > div {
+      border-radius: 16px !important;
+      background: rgba(255,255,255,0.03) !important;
+      border-color: rgba(118,169,250,0.10) !important;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.04),
+        0 8px 32px -8px rgba(0,0,0,0.4) !important;
+      backdrop-filter: blur(12px) !important;
+      -webkit-backdrop-filter: blur(12px) !important;
+    }
+    /* Header der Übersicht-Card */
+    #chips > div > div:first-child {
+      padding: 14px 20px 12px !important;
+      border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+      background: rgba(255,255,255,0.015) !important;
+    }
+    #chips > div > div:first-child i {
+      font-size: 15px !important;
+      color: rgba(118,169,250,0.85) !important;
+    }
+    #chips > div > div:first-child span:last-child {
+      font-size: 10.5px !important;
+      letter-spacing: .16em !important;
+      color: rgba(238,242,255,0.55) !important;
+      font-weight: 700 !important;
+    }
+    /* Zeilen-Liste mit klarer Struktur */
+    #chips > div > div:nth-child(2) > div {
+      padding: 12px 20px !important;
+      font-variant-numeric: tabular-nums !important;
+      align-items: baseline !important;
+    }
+    #chips > div > div:nth-child(2) > div span:first-child {
+      font-size: 10.5px !important;
+      font-weight: 700 !important;
+      text-transform: uppercase !important;
+      letter-spacing: .12em !important;
+      color: rgba(160,190,230,0.50) !important;
+      min-width: 110px !important;
+      font-family: 'Plus Jakarta Sans', sans-serif !important;
+    }
+    #chips > div > div:nth-child(2) > div span:last-child {
+      font-size: 14.5px !important;
+      font-weight: 600 !important;
+      font-family: 'Plus Jakarta Sans', sans-serif !important;
+      color: rgba(238,242,255,0.95) !important;
+      letter-spacing: -0.005em !important;
+      line-height: 1.35 !important;
+    }
+    /* Trennlinien zwischen Übersicht-Zeilen subtiler */
+    #chips > div > div:nth-child(2) > div[style*="border-bottom"] {
+      border-bottom-color: rgba(255,255,255,0.04) !important;
+    }
 
-/* NUR: 3D-Modell garantiert komplett sichtbar */
-@media (min-width: 1024px) {
-  html body #prev-wrap iframe,
-  html body #haus3d-frame,
-  html body #fenster3d-frame {
-    width: 100% !important;
-    height: 100% !important;
-    border: none !important;
-    display: block !important;
-  }
-  html body #haus3d-wrap,
-  html body #fenster3d-wrap {
-    position: absolute !important;
-    inset: 0 !important;
-  }
-}
+    /* Preis-Box (eigentlich Lieferzeit-Box jetzt) — passt zur Übersicht-Card optisch */
+    #conf-price-box {
+      border-radius: 14px !important;
+      background: rgba(118,169,250,0.06) !important;
+      border: 1px solid rgba(118,169,250,0.14) !important;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05) !important;
+      padding: 16px 18px !important;
+      margin-top: 12px !important;
+    }
+    #conf-price-box > div:first-child {
+      font-size: 11px !important;
+      letter-spacing: .12em !important;
+      color: rgba(160,190,230,0.55) !important;
+      margin-bottom: 6px !important;
+    }
+    #sb-total {
+      font-size: 15px !important;
+      font-family: 'Plus Jakarta Sans', sans-serif !important;
+      font-weight: 700 !important;
+      color: rgba(238,242,255,0.95) !important;
+      line-height: 1.3 !important;
+      font-variant-numeric: tabular-nums !important;
+    }
+
+    /* CTA „Angebot anfordern" — etwas mehr Atemraum + tieferer Schatten */
+    #sidebar-wrap button[onclick*="openS(13)"] {
+      border-radius: 12px !important;
+      padding: 14px !important;
+      font-size: 14px !important;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.10) inset, 0 8px 24px rgba(34,94,170,0.45), 0 2px 6px rgba(0,0,0,0.3) !important;
+      margin-top: 12px !important;
+    }
+
+    /* Step-Phase-Timeline: leichte Polish, LED-Akzent an aktiver Phase */
+    #kfg-nav .step-group.active-phase > .step-group-label,
+    #kfg-nav .phase-active .step-group-label {
+      position: relative;
+      padding-left: 10px !important;
+    }
+    #kfg-nav .step-group.active-phase > .step-group-label::before,
+    #kfg-nav .phase-active .step-group-label::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 6px; bottom: 6px;
+      width: 2px;
+      background: linear-gradient(180deg, #76a9fa 0%, #225eaa 100%);
+      box-shadow: 0 0 8px rgba(118,169,250,0.50);
+      border-radius: 2px;
+    }
+
+    /* Mobile-Anpassung: bei <1024px bleibt alles wie gehabt (Akkordeon-Stack) */
+    @media (max-width: 1023px) {
+      #prev-wrap { height: 380px !important; min-height: 360px !important; }
+    }
+
+    /* ════════════════════════════════════════════════════════════════
+       PHASE A+ POLISH (UX-Designer-Pass 16.05.2026)
+       Bühne/Pulte-Hierarchie, leuchtender Open-Step, Showroom-Boden,
+       Übersicht-Atmung, Mikro-Typo
+       ════════════════════════════════════════════════════════════════ */
+
+    /* Quick-Fix 1 + 2 entfernt (Sarah-Feedback: blaue Glow-Komponenten gefielen nicht) */
+
+    /* Quick-Fix 3: Showroom-Boden unter dem 3D — Spotlight + Schatten-Ellipse */
+    #prev-wrap::before {
+      content:''; position:absolute; left:15%; right:15%; bottom:6%;
+      height:24px; pointer-events:none; z-index:4;
+      background: radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 70%);
+      filter: blur(8px);
+    }
+    #prev-wrap::after {
+      height: 55% !important;
+      background: radial-gradient(ellipse at 50% 100%,
+        rgba(140,180,250,0.18) 0%, rgba(120,160,230,0.06) 35%, transparent 70%) !important;
+    }
+
+    /* Quick-Fix 4: Übersicht-Card atmet, sitzt als eigene Einheit */
+    #chips { margin-top: 18px !important; }
+    #chips > div {
+      background: rgba(10,16,34,0.85) !important;
+      border: 1px solid rgba(118,169,250,0.10) !important;
+      /* backdrop-filter ENTFERNT (Performance — Sarah-Feedback 17.05.2026: lädt langsam) */
+    }
+
+    /* Quick-Fix 5: Mikro-Typo — präziser, weniger Tailwind-Default */
+    #sidebar-wrap, #steps { font-feature-settings: "ss01","cv11","tnum" !important; }
+    #kfg-step-title-text { letter-spacing: -0.015em !important; font-weight: 700 !important; }
+    #steps .slabel { letter-spacing: -0.01em !important; }
+    #steps .sdesc { color: rgba(180,196,228,0.55) !important; font-size: 11.5px !important; }
+
+    /* ── BRAND-COLOR-SHIFT (UX-Designer-Empfehlung): kühler, weniger Öl-Glanz ──
+       #225eaa Brand → #3b78d4 (kühler, weniger gesättigt für German-Engineering-Look) */
+    :root {
+      --c-primary:   #3b78d4 !important;
+      --c-primary-d: #2a5fb0 !important;
+      --c-header-bg: #1e2c4a !important;
+    }
+    /* Body-Hintergrund minimal kühler (nimmt den Lila-Stich raus) */
+    body, #prod-hero { background: #05080f !important; }
+
+    /* ════════════════════════════════════════════════════════════════
+       PHASE F: ZWEI-SPALTEN-LAYOUT (Sarah-Wunsch 17.05.2026)
+       LINKS:  Schritte als aufklappbare Karten (klassisches Akkordeon)
+       RECHTS: 3D groß + Übersicht-Card direkt drunter
+       Phasen-Nav komplett weg (war zuviel Lärm)
+       ════════════════════════════════════════════════════════════════ */
+
+    /* Phasen-Navigation IMMER aus — höchste Spezifizität gegen Inline-Style */
+    html body #kfg-nav,
+    #kfg-nav,
+    #kfg-nav.kfg-nav--mobile-strip { display: none !important; visibility: hidden !important; width: 0 !important; }
+
+    /* Phasen-Trenner (AUFBAU/OPTIK/EXTRAS/ANGEBOT) GLOBAL aus — Sarah-Wunsch 17.05.2026
+       sehen blöd aus, weg überall, jeder Breakpoint */
+    html body #steps .step-group,
+    html body .step-group,
+    #steps .step-group,
+    .step-group { display: none !important; visibility: hidden !important; height: 0 !important; margin: 0 !important; padding: 0 !important; border: none !important; }
+
+    /* ════════════════════════════════════════════════════════════════
+       PHASE G3: KOMPAKT — alle Karten auf einen Schlag sichtbar
+       (Sarah-Feedback 17.05.2026 spät: alles in EINEN Viewport)
+       ════════════════════════════════════════════════════════════════ */
+    @media (min-width: 1024px) {
+      /* Steps-Container: füllt komplette Höhe, kompakt aber nicht abgeschnitten */
+      #steps {
+        padding: 24px 0 20px !important;
+        background: #050810 !important;
+        overflow-y: auto !important;
+        max-height: calc(100vh - 60px) !important;
+      }
+      #steps::-webkit-scrollbar { width: 6px; }
+      #steps::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+      /* Karte: KOMPAKT — auf 14 Karten reicht 100vh */
+      #steps .sc {
+        background: #0a111e !important;
+        border: none !important;
+        border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+        border-radius: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        overflow: hidden;
+        transition: background 0.18s ease;
+      }
+      #steps .sc:hover { background: #0f1828 !important; }
+      #steps .sc.open { background: #0f1828 !important; }
+
+      /* Header: SEHR KOMPAKT — 30px hoch, 14 Karten in 420px */
+      #steps .sh {
+        display: flex !important;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        padding: 6px 16px !important;
+        background: transparent !important;
+        min-height: 30px;
+      }
+      #steps .sh .badge { display: none !important; }
+      #steps .sh::before {
+        content: '+';
+        display: inline-flex;
+        align-items: center; justify-content: center;
+        width: 20px; height: 20px;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.12);
+        color: rgba(238,242,255,0.92);
+        border-radius: 4px;
+        font-size: 15px; font-weight: 300; line-height: 1;
+        flex-shrink: 0;
+        transition: background 0.15s, border-color 0.15s, color 0.15s;
+      }
+      #steps .sc:hover > .sh::before {
+        background: rgba(118,169,250,0.15);
+        border-color: rgba(118,169,250,0.30);
+      }
+      #steps .sc.open > .sh::before {
+        content: '−';
+        background: rgba(118,169,250,0.25);
+        border-color: rgba(118,169,250,0.40);
+        color: rgba(238,242,255,0.97);
+      }
+      /* Label kompakt + komplett lesbar (kein truncate, kein wrap) */
+      #steps .sh .flex-1 { flex: 0 1 auto; min-width: 0; }
+      #steps .sh .slabel {
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        color: rgba(238,242,255,0.90) !important;
+        letter-spacing: -0.005em;
+        line-height: 1.25;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      #steps .sc.open > .sh .slabel {
+        color: rgba(238,242,255,0.97) !important;
+        font-weight: 700 !important;
+      }
+      /* Beschreibung IMMER verstecken — Header kompakt, sval übernimmt */
+      #steps .sh .sdesc { display: none !important; }
+      /* Selected-Value-Echo rechts im Header */
+      #steps .sh .sval {
+        font-size: 12.5px !important;
+        font-weight: 500 !important;
+        color: rgba(180,196,228,0.62) !important;
+        font-family: 'Manrope', sans-serif !important;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -0.005em;
+        margin-left: auto;
+        text-align: right;
+        max-width: 55%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      #steps .sc.open > .sh .sval {
+        color: rgba(118,169,250,0.92) !important;
+        font-weight: 600 !important;
+      }
+      #steps .sh i.chev { display: none !important; }
+
+      /* Body wenn aufgeklappt — als overlay/expansion, scrollbar wenn nötig */
+      #steps .sc.open > .sb {
+        padding: 6px 18px 14px !important;
+        background: transparent !important;
+        max-height: 260px;
+        overflow-y: auto;
+      }
+
+      /* ── 3D rechts: Tür mittig + Übersicht direkt drunter (HARTE Selektoren) ── */
+      html body #sidebar-wrap { padding: 20px 24px !important; justify-content: flex-start !important; }
+      html body #sidebar-wrap #sidebar {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 12px !important;
+        height: auto !important;
+      }
+      /* Reihenfolge HART: jeder Child kriegt sein order zugewiesen */
+      html body #sidebar-wrap #sidebar > div:has(#view-btn-inn) { order: 1 !important; flex: 0 0 auto !important; margin: 0 0 4px !important; }
+      html body #sidebar-wrap #sidebar > #din-toggle-wrap,
+      html body #sidebar-wrap #sidebar > #din-btn-links,
+      html body #sidebar-wrap #sidebar > #din-btn-rechts { order: 1 !important; }
+      html body #sidebar-wrap #sidebar > #oeffnen-btn {
+        order: 2 !important;
+        display: inline-flex !important;
+        align-items: center !important; justify-content: center !important;
+        background: rgba(255,255,255,0.04) !important;
+        border: 1px solid rgba(255,255,255,0.10) !important;
+        color: rgba(238,242,255,0.85) !important;
+        padding: 9px 14px !important;
+        border-radius: 10px !important;
+        font-family: 'Manrope', sans-serif !important;
+        font-size: 12px !important; font-weight: 600 !important;
+        cursor: pointer;
+        flex: 0 0 auto !important;
+        margin: 0 0 4px !important;
+      }
+      html body #sidebar-wrap #sidebar > #prev-wrap {
+        order: 3 !important;
+        flex: 0 0 auto !important;
+        height: 52vh !important;
+        min-height: 420px !important;
+        max-height: 620px !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        border: none !important;
+        backdrop-filter: none !important;
+        box-shadow: none !important;
+        background: linear-gradient(180deg, #0d1830 0%, #06091a 100%) !important;
+      }
+      /* Sidebar gesamt KEIN scroll — alles muss auf einen Schlag passen */
+      html body #sidebar-wrap {
+        overflow-y: hidden !important;
+        max-height: calc(100vh - 60px) !important;
+      }
+      html body #sidebar-wrap #sidebar {
+        height: auto !important;
+        max-height: 100%;
+      }
+      html body #sidebar-wrap #sidebar > #chips {
+        order: 4 !important;
+        flex: 0 0 auto !important;
+        margin: 14px 0 0 !important;
+      }
+      /* Doppel-"KONFIGURATION" weg — kfg-sum-block verstecken (chips zeigt das schon) */
+      html body #sidebar-wrap #sidebar > #kfg-sum-block { display: none !important; }
+      html body #sidebar-wrap #sidebar > #sb-price { order: 5 !important; }
+      html body #sidebar-wrap #sidebar > #conf-price-box { order: 6 !important; flex: 0 0 auto !important; margin: 6px 0 0 !important; }
+      html body #sidebar-wrap #sidebar > button[onclick*="openS(13)"],
+      html body #sidebar-wrap #sidebar > button { order: 7 !important; flex: 0 0 auto !important; }
+      html body #sidebar-wrap #sidebar > div:last-child { order: 8 !important; flex: 0 0 auto !important; }
+    }
+
+    /* Sidebar-children Reihenfolge im rechten Panel (Sarah-Wunsch 17.05.2026 v10) */
+    @media (min-width: 1024px) {
+      #sidebar-wrap #sidebar {
+        display: flex !important;
+        flex-direction: column !important;
+        height: 100% !important;
+        gap: 10px !important;
+        padding: 16px 24px !important;
+      }
+      /* View-Toggle (Innen/Außen) — ganz oben */
+      #sidebar-wrap #sidebar > div:has(#view-btn-inn) { order: 1 !important; flex: 0 0 auto !important; margin-bottom: 0 !important; }
+      /* Tür-/Fenster-öffnen Button — gleich daneben */
+      #sidebar-wrap #sidebar > #oeffnen-btn {
+        display: inline-flex !important; order: 2 !important; flex: 0 0 auto !important;
+        align-items: center !important; justify-content: center !important;
+        background: rgba(255,255,255,0.04) !important;
+        border: 1px solid rgba(255,255,255,0.10) !important;
+        color: rgba(238,242,255,0.85) !important;
+        padding: 9px 14px !important; border-radius: 10px !important;
+        font-family: 'Manrope', sans-serif !important; font-size: 12px !important; font-weight: 600 !important;
+        cursor: pointer; transition: background .15s;
+      }
+      #sidebar-wrap #sidebar > #oeffnen-btn:hover {
+        background: rgba(118,169,250,0.10) !important;
+        border-color: rgba(118,169,250,0.30) !important;
+      }
+      /* 3D-Vorschau — DOMINANT, vollflächig randlos */
+      #sidebar-wrap #sidebar > #prev-wrap {
+        order: 3 !important;
+        flex: 1 1 auto !important;
+        height: auto !important;
+        min-height: 60vh !important;
+        max-height: none !important;
+        border-radius: 0 !important;
+        border: none !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        box-shadow: none !important;
+        background: linear-gradient(180deg, #0d1830 0%, #06091a 100%) !important;
+        margin: 4px -24px 0 !important;
+      }
+      /* Übersicht — drunter, kompakt */
+      #sidebar-wrap #sidebar > #chips { order: 4 !important; flex: 0 0 auto !important; margin-top: 12px !important; }
+      /* Lieferzeit-Box, CTA, sonstige Buttons — am Ende */
+      #sidebar-wrap #sidebar > #conf-price-box { order: 5 !important; flex: 0 0 auto !important; }
+      #sidebar-wrap #sidebar > button[onclick*="openS(13)"] { order: 6 !important; flex: 0 0 auto !important; }
+      #sidebar-wrap #sidebar > div:has(> a[href*="wa.me"]),
+      #sidebar-wrap #sidebar > div:last-child { order: 7 !important; flex: 0 0 auto !important; }
+    }
+
+    @media (min-width: 1024px) {
+      /* 50/50 LAYOUT: höhere Spezifizität gegen das alte "display: flex !important" */
+      html body #kfg-main {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        grid-template-areas: "steps preview" !important;
+        flex-direction: row !important;
+      }
+
+      #steps {
+        grid-area: steps !important;
+        flex: none !important; max-width: none !important;
+        padding: 36px 44px 52px !important;
+        background: linear-gradient(180deg, rgba(8,12,28,0.6) 0%, rgba(5,8,20,0.4) 100%) !important;
+        border-right: 1px solid rgba(255,255,255,0.05) !important;
+        overflow-y: auto !important;
+        max-height: calc(100vh - 60px) !important;
+      }
+
+      #sidebar-wrap {
+        grid-area: preview !important;
+        width: auto !important; flex: none !important;
+        padding: 28px 40px 40px !important;
+        gap: 18px !important;
+        border: none !important;
+        background:
+          radial-gradient(ellipse at 50% 35%, rgba(38,72,140,0.20) 0%, rgba(5,8,20,0) 65%),
+          linear-gradient(180deg, #07101f 0%, #04060d 100%) !important;
+        overflow-y: auto !important;
+        max-height: calc(100vh - 60px) !important;
+        display: flex !important;
+        flex-direction: column !important;
+      }
+
+      /* ── 3D-Preview RECHTS: füllt die rechte Hälfte randlos (Sarah-Wunsch 17.05.2026 v3) ── */
+      #prev-wrap {
+        height: 70vh !important;
+        min-height: 600px !important;
+        max-height: none !important;
+        max-width: 100% !important;
+        margin: 0 -28px !important;     /* negative margin = bricht aus dem Sidebar-Padding aus */
+        order: 2 !important;
+        flex: 0 0 70vh !important;
+        border-radius: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+      }
+      /* Sidebar-Padding: oben/unten ok, links/rechts 0 damit 3D wirklich vollflächig ist */
+      #sidebar-wrap {
+        padding: 16px 28px 20px !important;
+        gap: 10px !important;
+      }
+      /* View-Toggle + Tür-öffnen-Button als Top-Bar oben */
+      #sidebar-wrap > div:first-child {
+        order: 1 !important;
+        flex: 0 0 auto;
+        margin-bottom: 4px !important;
+      }
+      /* "Fenster/Tür öffnen"-Button sichtbar als zweite Aktion neben View-Toggle */
+      #oeffnen-btn {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        order: 1 !important;
+        flex: 0 0 auto;
+        background: rgba(255,255,255,0.04) !important;
+        border: 1px solid rgba(255,255,255,0.10) !important;
+        color: rgba(238,242,255,0.85) !important;
+        padding: 9px 14px !important;
+        border-radius: 10px !important;
+        font-family: 'Manrope', sans-serif !important;
+        font-size: 12px !important; font-weight: 600 !important;
+        cursor: pointer;
+        margin-bottom: 4px !important;
+        transition: background .15s, border-color .15s;
+      }
+      #oeffnen-btn:hover {
+        background: rgba(118,169,250,0.10) !important;
+        border-color: rgba(118,169,250,0.30) !important;
+      }
+      /* Übersicht-Card KOMPAKTER, sitzt drunter */
+      #chips { order: 3 !important; flex: 0 0 auto; margin-top: 12px !important; }
+      #chips > div > div:nth-child(2) > div { padding: 8px 16px !important; }
+      #chips > div > div:nth-child(2) > div span:first-child { font-size: 10px !important; min-width: 95px !important; }
+      #chips > div > div:nth-child(2) > div span:last-child { font-size: 13px !important; }
+      /* Preis-Box kompakter, ganz unten */
+      #conf-price-box { order: 4 !important; padding: 10px 14px !important; margin-top: 8px !important; }
+      #sb-total { font-size: 13px !important; }
+      /* CTA */
+      #sidebar-wrap > button[onclick*="openS(13)"],
+      #sidebar-wrap > button[onclick*="13"] { order: 5 !important; padding: 12px !important; font-size: 13.5px !important; }
+
+      /* Übersicht-Card unter dem 3D ist OK wie sie ist (Quick-Fix 4) */
+
+      /* ── Schritte rechts: kompakte Premium-Karten ── */
+      /* Step-Header sichtbar machen */
+      #steps .sh {
+        display: flex !important;
+        align-items: center; gap: 10px;
+        cursor: pointer;
+        padding: 12px 14px !important;
+        background: transparent !important;
+        border-radius: 12px;
+        transition: background .15s ease;
+      }
+      #steps .sh:hover { background: rgba(255,255,255,0.03) !important; }
+
+      /* Jeder Step als eigene Karte (kompakt) */
+      #steps .sc {
+        background: rgba(255,255,255,0.025) !important;
+        border: 1px solid rgba(255,255,255,0.06) !important;
+        border-radius: 12px !important;
+        margin: 0 0 8px !important;
+        padding: 0 !important;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.03) !important;
+        transition: border-color 0.2s ease, background 0.2s ease;
+        overflow: hidden;
+      }
+      #steps .sc:hover { border-color: rgba(255,255,255,0.10) !important; }
+
+      /* Inaktive Karte: schlanker Header (Beschreibung kleiner) */
+      #steps .sc:not(.open) > .sh .sdesc {
+        font-size: 11px !important;
+        color: rgba(180,196,228,0.38) !important;
+        margin-top: 1px;
+      }
+      #steps .sc:not(.open) > .sh i.chev { color: rgba(255,255,255,0.25) !important; font-size: 16px !important; }
+
+      /* Aktive Karte: minimal heller, Brand-Tint im Pill */
+      #steps .sc.open {
+        background: rgba(255,255,255,0.04) !important;
+        border-color: rgba(118,169,250,0.16) !important;
+      }
+      #steps .sc.open > .sh {
+        border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+        border-radius: 12px 12px 0 0 !important;
+      }
+      #steps .sc.open > .sh i.chev {
+        transform: rotate(180deg);
+        color: rgba(118,169,250,0.85) !important;
+      }
+      #steps .sc.open > .sb {
+        padding: 14px 14px 16px !important;
+      }
+
+      /* Step-Nummer als kleines Pill */
+      #steps .sc > .sh .badge {
+        width: 22px !important; height: 22px !important;
+        line-height: 22px !important;
+        font-size: 11px !important;
+        font-weight: 700 !important;
+        background: rgba(255,255,255,0.06) !important;
+        color: rgba(238,242,255,0.60) !important;
+        border-radius: 50% !important;
+        text-align: center !important;
+        flex-shrink: 0;
+      }
+      #steps .sc.open > .sh .badge {
+        background: rgba(118,169,250,0.20) !important;
+        color: rgba(238,242,255,0.95) !important;
+      }
+
+      /* Step-Titel + Beschreibung kompakter */
+      #steps .sc > .sh .slabel {
+        font-size: 13px !important; font-weight: 600 !important;
+        color: rgba(238,242,255,0.85) !important;
+        letter-spacing: -0.005em !important;
+        line-height: 1.25;
+      }
+      #steps .sc.open > .sh .slabel {
+        color: rgba(238,242,255,0.97) !important;
+        font-weight: 700 !important;
+      }
+      #steps .sc > .sh .sdesc {
+        font-size: 11.5px !important;
+        color: rgba(180,196,228,0.50) !important;
+      }
+      #steps .sc > .sh i.chev {
+        font-size: 16px !important;
+        margin-left: auto;
+        transition: transform 0.2s ease, color 0.2s ease;
+      }
+
+      /* Phasen-Trenner zwischen Steps (AUFBAU / OPTIK etc.) */
+      #steps .step-group {
+        display: flex !important;
+        align-items: center;
+        gap: 10px;
+        margin: 18px 4px 8px !important;
+        padding: 0 !important;
+      }
+      #steps .step-group:first-of-type { margin-top: 2px !important; }
+      #steps .step-group::before,
+      #steps .step-group::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent) !important;
+      }
+      #steps .step-group-label,
+      #steps .step-group > * {
+        font-size: 9.5px !important;
+        font-weight: 700 !important;
+        text-transform: uppercase;
+        letter-spacing: 0.16em !important;
+        color: rgba(160,190,230,0.38) !important;
+        background: none !important;
+        padding: 0 !important;
+        flex: 0 0 auto;
+      }
+
+      /* kfg-step-hdr (großer Step-Titel oben) wird IM RIGHT-PANEL nicht mehr gebraucht — aus */
+      #kfg-step-hdr { display: none !important; }
+
+      /* Wizard-Footer (Prev/Next) wird nicht mehr gebraucht — aus */
+      #wizard-footer { display: none !important; }
+    }
+
+    /* ── High-End View-Toggle (Sarah 16.05.2026) ── */
+    /* iOS-Segmented-Control: ruhiger Pill-Hintergrund, weiße aktive Pille mit subtilem Schatten */
+    .view-btn-hi {
+      background: transparent;
+      color: rgba(232,238,255,0.55);
+    }
+    .view-btn-hi:hover {
+      color: rgba(232,238,255,0.85);
+      background: rgba(255,255,255,0.03);
+    }
+    .view-btn-hi.active {
+      background: linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 100%);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.10);
+    }
+
+    /* ── High-End Preview-Wrap: weicheres Glow am Rand wenn iframe sichtbar ── */
+    #prev-wrap:has(#haus3d-wrap:not([style*="display:none"])) {
+      border-color: rgba(118,169,250,0.22);
+    }
   </style>
 </head>
 <body>
@@ -1780,8 +2403,8 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       border-radius: 0 !important; background: transparent !important;
       height: 100% !important; min-height: 0 !important; align-self: stretch !important;
     }
-    /* Alle inaktiven Steps ausblenden */
-    #steps .sc:not(.open) { display: none !important; }
+    /* Alle inaktiven Steps ausblenden — DEAKTIVIERT (Sarah-Wunsch 17.05.2026: alle Karten sichtbar als Liste) */
+    /* #steps .sc:not(.open) { display: none !important; } */
     /* Aktiver Step: kein Karten-Rahmen, füllt die Mitte */
     #steps .sc.open {
       border-radius: 0 !important; border: none !important;
@@ -1790,7 +2413,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
     }
 
     /* ── ALLE .sh komplett verstecken — Titel kommt von #kfg-step-hdr ── */
-    #steps .sh { display: none !important; }
+    /* #steps .sh { display: none !important; } */  /* DEAKTIVIERT: Header MUSS sichtbar sein für Aufklapp-Karten (Sarah 17.05.2026) */
 
     /* Step-Body: Accordion-Box-Styles entfernen */
     #steps .sc.open > .sb {
@@ -3191,7 +3814,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       <div class="griff-opt" data-v="std-weiss" onclick="pick(this,'griff')">
         <img src="https://www.drutex.eu/media/webp/80/L21lZGlhL191cGxvYWQvZG9kYXRraS9rbGFta2ktb2tuYS9rbGFta2EtbWlzdHJhbC0zNW1tLWYxLnBuZw==.webp"
              width="50" height="65" style="object-fit:contain;object-position:center;display:block"
-             alt="Standard Griff weiß" onerror="this.style.display='none'"/ loading="lazy" decoding="async">
+             alt="Standard Griff weiß" onerror="this.style.display='none'"/>
         <div class="olabel">Standard Griff</div>
         <div class="osub">Kunststoff weiß</div>
         <div class="oprice p-inc">inklusive</div>
@@ -3200,7 +3823,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
         <img src="https://www.drutex.eu/media/_upload/dodatki/klamki-okna/klamka-mistral-35mm-f9.png"
              width="50" height="65" style="object-fit:contain;object-position:center;display:block"
              onerror="this.onerror=null;this.src='https://www.drutex.eu/media/webp/80/L21lZGlhL191cGxvYWQvZG9kYXRraS9rbGFta2ktb2tuYS9rbGFta2EtbWlzdHJhbC0zNW1tLWYxLnBuZw==.webp';this.onerror=null"
-             alt="Drutex Mistral Edelstahl matt"/ loading="lazy" decoding="async">
+             alt="Drutex Mistral Edelstahl matt"/>
         <div class="olabel">Drutex Mistral</div>
         <div class="osub">Edelstahl matt</div>
         <div class="oprice p-add">+ 18 €/Stück</div>
@@ -3209,7 +3832,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
         <img src="https://www.drutex.eu/media/_upload/dodatki/klamki-okna/klamka-mistral-35mm-f2.png"
              width="50" height="65" style="object-fit:contain;object-position:center;display:block"
              onerror="this.onerror=null;this.src='https://www.drutex.eu/media/webp/80/L21lZGlhL191cGxvYWQvZG9kYXRraS9rbGFta2ktb2tuYS9rbGFta2EtbWlzdHJhbC0zNW1tLWYxLnBuZw==.webp';this.onerror=null"
-             alt="Drutex Mistral Edelstahl poliert"/ loading="lazy" decoding="async">
+             alt="Drutex Mistral Edelstahl poliert"/>
         <div class="olabel">Drutex Mistral</div>
         <div class="osub">Edelstahl poliert</div>
         <div class="oprice p-add">+ 22 €/Stück</div>
@@ -3218,7 +3841,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
         <img src="https://www.drutex.eu/media/_upload/dodatki/klamki-okna/klamka-nevada-35mm-f5.png"
              width="50" height="65" style="object-fit:contain;object-position:center;display:block"
              onerror="this.onerror=null;this.src='https://www.drutex.eu/media/webp/80/L21lZGlhL191cGxvYWQvZG9kYXRraS9rbGFta2ktb2tuYS9rbGFta2EtbWlzdHJhbC0zNW1tLWYxLnBuZw==.webp';this.onerror=null"
-             alt="Drutex Nevada Gold"/ loading="lazy" decoding="async">
+             alt="Drutex Nevada Gold"/>
         <div class="olabel">Drutex Nevada</div>
         <div class="osub">Gold-Finish</div>
         <div class="oprice p-add">+ 28 €/Stück</div>
@@ -3226,7 +3849,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       <div class="griff-opt" data-v="fsb-es" onclick="pick(this,'griff')">
         <img src="https://www.drutex.eu/media/webp/80/L21lZGlhL191cGxvYWQvZG9kYXRraS9rbGFta2ktb2tuYS9rd2FkcmF0L2tsYW1rYS1rd2FkcmF0LTM1bW0tZjEucG5n.webp"
              width="50" height="65" style="object-fit:contain;object-position:center;display:block"
-             alt="Drutex Kwadrat Edelstahl matt" onerror="this.style.display='none'"/ loading="lazy" decoding="async">
+             alt="Drutex Kwadrat Edelstahl matt" onerror="this.style.display='none'"/>
         <div class="olabel">Drutex Kwadrat</div>
         <div class="osub">Edelstahl matt, quadratisch</div>
         <div class="oprice p-add">+ 28 €/Stück</div>
@@ -3234,7 +3857,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       <div class="griff-opt" data-v="pz-beid" onclick="pick(this,'griff')">
         <img src="https://www.drutex.eu/media/webp/80/L21lZGlhL191cGxvYWQvZG9kYXRraS9rbGFta2ktb2tuYS9rbGFta2EtbmV2YWRhLWtsdWN6LTM1bW0tay03MDE2LnBuZw==.webp"
              width="50" height="65" style="object-fit:contain;object-position:center;display:block"
-             alt="PZ beidseitig (Drutex Nevada) mit Profilzylinder" onerror="this.style.display='none'"/ loading="lazy" decoding="async">
+             alt="PZ beidseitig (Drutex Nevada) mit Profilzylinder" onerror="this.style.display='none'"/>
         <div class="olabel">PZ beidseitig</div>
         <div class="osub">Schloss beidseitig · Profilzylinder innen &amp; außen (Drutex Nevada)</div>
         <div class="oprice p-add">+ 55 €/Stück</div>
@@ -3390,7 +4013,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       </div>
       <!-- Rolladen mit Gurtwickler -->
       <div class="oc" style="flex-direction:column;align-items:stretch;padding:14px;gap:0" data-v="gurt" onclick="pick(this,'roll')">
-        <img src="img/rolladen-gurt.png" alt="Rolladen mit Gurtwickler" style="width:100%;height:140px;object-fit:contain;background:#f4f6fb;border-radius:8px;margin-bottom:12px;display:block;padding:6px" loading="lazy" decoding="async">
+        <img src="img/rolladen-gurt.png" alt="Rolladen mit Gurtwickler" style="width:100%;height:140px;object-fit:contain;background:#f4f6fb;border-radius:8px;margin-bottom:12px;display:block;padding:6px">
         <div style="display:flex;align-items:flex-start;gap:10px">
           <div class="ora" style="margin-top:2px;flex-shrink:0"></div>
           <div>
@@ -3402,7 +4025,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       </div>
       <!-- Motorrolladen -->
       <div class="oc" style="flex-direction:column;align-items:stretch;padding:14px;gap:0" data-v="motor" onclick="pick(this,'roll')">
-        <img src="img/rolladen-elektrisch.png" alt="Motorrolladen elektrisch" style="width:100%;height:140px;object-fit:contain;background:#f4f6fb;border-radius:8px;margin-bottom:12px;display:block;padding:6px" loading="lazy" decoding="async">
+        <img src="img/rolladen-elektrisch.png" alt="Motorrolladen elektrisch" style="width:100%;height:140px;object-fit:contain;background:#f4f6fb;border-radius:8px;margin-bottom:12px;display:block;padding:6px">
         <div style="display:flex;align-items:flex-start;gap:10px">
           <div class="ora" style="margin-top:2px;flex-shrink:0"></div>
           <div>
@@ -3475,7 +4098,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       </div>
       <!-- Aufgeklebte Sprossen beidseitig (Sarah-bestätigt 21.04.2026) -->
       <div class="oc" style="flex-direction:column;align-items:stretch;padding:14px;gap:0" data-v="aufgeklebt" onclick="pick(this,'sproTyp')">
-        <img src="img/sprossen-aufgesetzt.png" alt="Aufgeklebte Sprossen" style="width:100%;height:140px;object-fit:cover;border-radius:8px;margin-bottom:12px;display:block" loading="lazy" decoding="async">
+        <img src="img/sprossen-aufgesetzt.png" alt="Aufgeklebte Sprossen" style="width:100%;height:140px;object-fit:cover;border-radius:8px;margin-bottom:12px;display:block">
         <div style="display:flex;align-items:flex-start;gap:10px">
           <div class="ora" style="margin-top:2px;flex-shrink:0"></div>
           <div>
@@ -3487,7 +4110,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       </div>
       <!-- Sprossen im Scheibenzwischenraum (SZR) -->
       <div class="oc" style="flex-direction:column;align-items:stretch;padding:14px;gap:0" data-v="szr" onclick="pick(this,'sproTyp')">
-        <img src="img/sprossen-innenliegend.png" alt="Sprossen im Scheibenzwischenraum" style="width:100%;height:140px;object-fit:cover;border-radius:8px;margin-bottom:12px;display:block" loading="lazy" decoding="async">
+        <img src="img/sprossen-innenliegend.png" alt="Sprossen im Scheibenzwischenraum" style="width:100%;height:140px;object-fit:cover;border-radius:8px;margin-bottom:12px;display:block">
         <div style="display:flex;align-items:flex-start;gap:10px">
           <div class="ora" style="margin-top:2px;flex-shrink:0"></div>
           <div>
@@ -3680,30 +4303,40 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   </div>
 </div>
 
+<!-- Wizard-Footer: Prev/Next-Buttons (Sarah-Wunsch 16.05.2026 v6, Sticky Wizard Pattern) -->
+<div id="wizard-footer">
+  <button id="wizard-prev" type="button" onclick="wizardPrev()">
+    <i class="ms" style="font-size:18px">arrow_back</i> Zurück
+  </button>
+  <span id="wizard-step-counter">Schritt – von –</span>
+  <button id="wizard-next" type="button" onclick="wizardNext()">
+    Weiter <i class="ms" style="font-size:18px">arrow_forward</i>
+  </button>
+</div>
 </div><!-- /steps -->
 
 <!-- ════ SIDEBAR RIGHT (40% = col-span-2) ════ -->
 <div id="sidebar-wrap" class="lg:col-span-2">
   <div id="sidebar" class="p-3">
 
-    <!-- VIEW TOGGLE -->
-    <div style="display:flex;gap:4px;margin-bottom:6px;width:100%;background:rgba(255,255,255,0.08);padding:3px;border-radius:8px">
-      <button id="view-btn-inn" class="view-btn active" style="flex:1;padding:7px 10px;font-size:13px;font-weight:600;border-radius:6px" onclick="setPreviewView('inn')">Innen</button>
-      <button id="view-btn-aus" class="view-btn" style="flex:1;padding:7px 10px;font-size:13px;font-weight:600;border-radius:6px" onclick="setPreviewView('aus')">Außen</button>
+    <!-- VIEW TOGGLE — iOS-Segmented-Control-Stil (Sarah-Highend-Refactor 16.05.2026) -->
+    <div style="display:flex;gap:0;margin-bottom:14px;width:100%;background:rgba(255,255,255,0.06);padding:4px;border-radius:14px;border:1px solid rgba(255,255,255,0.06);box-shadow:inset 0 1px 0 rgba(255,255,255,0.04)">
+      <button id="view-btn-inn" class="view-btn-hi active" style="flex:1;padding:9px 14px;font-size:13px;font-weight:700;border-radius:10px;border:none;cursor:pointer;font-family:'Manrope',sans-serif;letter-spacing:.02em;transition:all 250ms cubic-bezier(.4,0,.2,1)" onclick="setPreviewView('inn')">Innen</button>
+      <button id="view-btn-aus" class="view-btn-hi" style="flex:1;padding:9px 14px;font-size:13px;font-weight:700;border-radius:10px;border:none;cursor:pointer;font-family:'Manrope',sans-serif;letter-spacing:.02em;transition:all 250ms cubic-bezier(.4,0,.2,1)" onclick="setPreviewView('aus')">Außen</button>
     </div>
     <!-- DIN-ANSCHLAG TOGGLE — ausgeblendet per Sarah 06.05.2026 -->
     <div id="din-toggle-wrap" style="display:none"></div>
     <div id="din-btn-links" style="display:none"></div>
     <div id="din-btn-rechts" style="display:none"></div>
-    <!-- BILD-VORSCHAU -->
-    <div id="prev-wrap" class="w-full" style="position:relative;width:100%;padding:0;flex-shrink:0;overflow:hidden">
+    <!-- BILD-VORSCHAU — High-End Glass-Card (Sarah-Refactor 16.05.2026) -->
+    <div id="prev-wrap" class="w-full" style="position:relative;width:100%;padding:0;overflow:hidden">
       <!-- 3D-Vorschau für Haustür (iframe, embed-Modus) -->
       <div id="haus3d-wrap" style="display:none;position:absolute;inset:0;z-index:10;border-radius:var(--r-md);overflow:hidden">
-        <iframe id="haus3d-frame" src="about:blank" style="width:100%;height:100%;border:none;display:block" allowfullscreen></iframe>
+        <iframe id="haus3d-frame" src="about:blank" loading="lazy" style="width:100%;height:100%;border:none;display:block" allowfullscreen></iframe>
       </div>
       <!-- 3D-Vorschau für Fenster (Drutex Iglo 5) -->
       <div id="fenster3d-wrap" style="display:none;position:absolute;inset:0;z-index:10;border-radius:var(--r-md);overflow:hidden">
-        <iframe id="fenster3d-frame" src="about:blank" style="width:100%;height:100%;border:none;display:block" allowfullscreen></iframe>
+        <iframe id="fenster3d-frame" src="about:blank" loading="lazy" style="width:100%;height:100%;border:none;display:block" allowfullscreen></iframe>
       </div>
       <div id="vorschau-container" style="position:relative;width:100%;height:100%">
         <div id="prev-placeholder" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:28px">
@@ -3732,7 +4365,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
           <img id="vorschau-bild"
                alt="Konfigurator-Vorschau – Drutex Fenster oder Tür mit aktueller Auswahl"
                decoding="async"
-               style="width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;object-position:center center;transition:transform 0.3s;transform-origin:center center"/ loading="lazy" decoding="async">
+               style="width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;object-position:center center;transition:transform 0.3s;transform-origin:center center"/>
           <canvas id="farb-canvas" style="display:none;position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;object-fit:contain;"></canvas>
           <svg id="overlay-svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"
                style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none"></svg>
@@ -4436,7 +5069,7 @@ function renderBildPreview() {
   if (!preview) return;
   preview.innerHTML = uploadedImages.map((img, idx) => `
     <div style="position:relative;width:90px;height:90px;border-radius:8px;overflow:hidden;border:1px solid #c2c6d3">
-      <img src="${img.data}" title="${img.name}" style="width:100%;height:100%;object-fit:cover;display:block" loading="lazy" decoding="async">
+      <img src="${img.data}" title="${img.name}" style="width:100%;height:100%;object-fit:cover;display:block">
       <button type="button" onclick="removeBild(${idx})" title="Entfernen"
         style="position:absolute;top:2px;right:2px;width:22px;height:22px;border-radius:50%;background:rgba(220,38,38,0.95);color:#fff;border:none;cursor:pointer;font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center">×</button>
       <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.6);color:#fff;font-size:10px;padding:2px 4px;text-overflow:ellipsis;overflow:hidden;white-space:nowrap">${img.name}</div>
@@ -4597,6 +5230,99 @@ function buildNav() {
   });
 }
 
+// Schritt → Kamera-Fokus-Mapping für Haustür-3D (Sarah-Wunsch 16.05.2026 v3)
+const HAUS3D_CAMERA_FOCUS = {
+  '-tm':  'default',  // Türmodell wählen → Gesamtansicht
+  '9t':   'griff',    // Türgriff → Stoßgriff-Closeup
+  '8':    'glas',     // Glas/Glasdekor → Glasfeld-Closeup
+  '2':    'rahmen',   // Profilsystem → Rahmen-Detail
+  '10':   'rahmen',   // Dichtung → Rahmen-Detail
+};
+function sendHaus3dCamera(stepKey) {
+  const frame = document.getElementById('haus3d-frame');
+  if (!frame || !frame.contentWindow) return;
+  if (S.prod !== 'haustuere') return;
+  const focus = HAUS3D_CAMERA_FOCUS[String(stepKey)] || 'default';
+  frame.contentWindow.postMessage({ type:'cameraFocus', focus }, '*');
+}
+
+// ── Selected-Value-Echo im Step-Header (Sarah-Wunsch 17.05.2026) ──
+// Zeigt im zugeklappten Step rechts den aktuell gewählten Wert
+// z.B. "Profil: IGLO 5 Tür" statt nur "Profil"
+const STEP_VALUE_GETTERS = {
+  '2':   () => S.profil && (P.profil?.[S.profil]?.name || S.profil),
+  '3':   () => S.fluegel && (P.fluegel[S.fluegel]?.name || S.fluegel),
+  '4':   () => S.bMm && S.hMm && `${S.bMm} × ${S.hMm} mm`,
+  '5':   () => S.oeff1 && (P.oeff_sash[S.oeff1]?.name || S.oeff1),
+  '-tm': () => S.tuerModell,
+  '6':   () => S.fa && (P.fa[S.fa]?.name || S.fa),
+  '7':   () => S.fi && (P.fi[S.fi]?.name || S.fi),
+  '8':   () => S.glas && (P.glas[S.glas]?.name || S.glas),
+  '9':   () => S.griff && (P.griff?.[S.griff]?.name || S.griff),
+  '9t':  () => S.griffTuer && (P.griffTuer?.[S.griffTuer]?.name || S.griffTuer),
+  '9s':  () => S.griffHst && (P.griffHst?.[S.griffHst]?.name || S.griffHst),
+  '10':  () => S.sicher && (P.sicherGlas?.[S.sicher]?.name || S.sicher),
+  '11':  () => S.roll && S.roll !== 'ohne' && (P.roll[S.roll]?.name || S.roll),
+  '12':  () => S.sproTyp && S.sproTyp !== 'keine' && (P.sproTyp?.[S.sproTyp]?.name || S.sproTyp),
+};
+function updateStepEchos() {
+  for (const [id, fn] of Object.entries(STEP_VALUE_GETTERS)) {
+    const sc = document.getElementById('s' + id);
+    if (!sc) continue;
+    const sh = sc.querySelector('.sh');
+    if (!sh) continue;
+    let echo = sh.querySelector('.sval');
+    if (!echo) {
+      echo = document.createElement('span');
+      echo.className = 'sval';
+      sh.appendChild(echo);
+    }
+    let v;
+    try { v = fn(); } catch(e) { v = ''; }
+    echo.textContent = v || '';
+    echo.style.display = v ? 'inline' : 'none';
+  }
+}
+
+// ── Wizard-Mode (Sarah-Wunsch 16.05.2026 v6) ──
+// Liefert sichtbare Step-IDs in DOM-Reihenfolge (ohne s1=Produkt-Hero)
+function _getWizardSteps() {
+  return Array.from(document.querySelectorAll('#steps .sc'))
+    .filter(sc => sc.style.display !== 'none' && sc.id !== 's1')
+    .map(sc => sc.id.replace(/^s/, ''));
+}
+function wizardPrev() {
+  const steps = _getWizardSteps();
+  const cur = document.querySelector('#steps .sc.open');
+  if (!cur) { if (steps.length) openS(steps[0]); return; }
+  const i = steps.indexOf(cur.id.replace(/^s/, ''));
+  if (i > 0) openS(steps[i - 1]);
+}
+function wizardNext() {
+  const steps = _getWizardSteps();
+  const cur = document.querySelector('#steps .sc.open');
+  if (!cur) { if (steps.length) openS(steps[0]); return; }
+  const i = steps.indexOf(cur.id.replace(/^s/, ''));
+  if (i >= 0 && i < steps.length - 1) openS(steps[i + 1]);
+}
+function updateWizardFooter() {
+  const counter = document.getElementById('wizard-step-counter');
+  const prev = document.getElementById('wizard-prev');
+  const next = document.getElementById('wizard-next');
+  if (!counter || !prev || !next) return;
+  const steps = _getWizardSteps();
+  const cur = document.querySelector('#steps .sc.open');
+  if (!cur || !steps.length) { counter.textContent = ''; prev.disabled = true; next.disabled = true; return; }
+  const i = steps.indexOf(cur.id.replace(/^s/, ''));
+  if (i < 0) { counter.textContent = ''; return; }
+  counter.textContent = `Schritt ${i + 1} von ${steps.length}`;
+  prev.disabled = i === 0;
+  next.disabled = i === steps.length - 1;
+  next.innerHTML = (i === steps.length - 1)
+    ? '<i class="ms" style="font-size:18px">check_circle</i> Anfrage senden'
+    : 'Weiter <i class="ms" style="font-size:18px">arrow_forward</i>';
+}
+
 function openS(n) {
   const c = document.getElementById('s'+n);
   if (!c) return; // defensive — Step kann ausgeblendet sein (display:none)
@@ -4604,6 +5330,9 @@ function openS(n) {
   closeOtherSections(c);
   if (!c.classList.contains('open')) c.classList.add('open');
   buildNav(); // linke Nav-Highlights aktualisieren
+  updateWizardFooter(); // Wizard-Counter + Prev/Next-Buttons sync
+  updateStepEchos(); // Selected-Value im Step-Header syncen
+  sendHaus3dCamera(n); // 3D-Kamera sanft zum Step-relevanten Detail
 
   // Desktop 3-Panel: Schritt-Titel oben aktualisieren
   const hdr = document.getElementById('kfg-step-hdr');
@@ -4637,11 +5366,13 @@ function heroSelectProd(prodKey) {
     if (s1) s1.classList.add('hero-done');
     const nav = document.getElementById('kfg-nav');
     if (nav) {
-      nav.style.display = '';
+      nav.style.display = 'none';
       if (window.innerWidth < 768) nav.classList.add('kfg-nav--mobile-strip');
       else nav.classList.remove('kfg-nav--mobile-strip');
     }
+    // Sarah-Wunsch 17.05.2026: erste Karte (Profil) initial offen, beim Klick auf + springt zur nächsten
     openS(2);
+    updateStepEchos();
   }
 }
 
@@ -4661,10 +5392,10 @@ function pickProd(el) {
     const _nav = document.getElementById('kfg-nav');
     if (_nav) {
       if (window.innerWidth >= 768) {
-        if (_nav.style.display === 'none') _nav.style.display = '';
+        if (_nav.style.display === 'none') _nav.style.display = 'none';
         _nav.classList.remove('kfg-nav--mobile-strip');
       } else {
-        _nav.style.display = '';  // Inline-none aufheben — CSS-Klasse übernimmt
+        _nav.style.display = 'none';  // Inline-none aufheben — CSS-Klasse übernimmt
         _nav.classList.add('kfg-nav--mobile-strip');
       }
     }
@@ -6760,7 +7491,7 @@ function pvProfileSVG(key) {
   };
   const photoUrl = profilePhotos[key] || profilePhotos['iglo5'];
   return `<img src="${photoUrl}" alt="Profilquerschnitt ${key}"
-    style="width:100%;height:130px;object-fit:contain;object-position:center;display:block;border-radius:8px;background:#f4f5f8;margin-bottom:6px"/ loading="lazy" decoding="async">`;
+    style="width:100%;height:130px;object-fit:contain;object-position:center;display:block;border-radius:8px;background:#f4f5f8;margin-bottom:6px"/>`;
 
   // Cross-section diagram for each profile type (fallback / supplemental)
   const W=170, H=72;
@@ -7223,6 +7954,7 @@ function upSidebar() {
         </div>
       </div>`;
   upSidebar._prev = newVals;
+  if (typeof updateStepEchos === 'function') updateStepEchos();
 
   upFinalSum(rows,tot);
 }
@@ -8810,7 +9542,7 @@ function drawPrev() {
       const f3w = document.getElementById('fenster3d-wrap');
       if (f3w)  f3w.style.display  = 'none';
       _renderHaustuer3d(previewView);
-      if (prevWrap) prevWrap.style.height = '560px';
+      if (prevWrap) prevWrap.style.height = '520px';
       return;
     }
     // FENSTER: 3D-iframe statt SVG-Vorschau (Sarah-Wunsch 16.05.2026)
@@ -9507,7 +10239,7 @@ function renderSkPreview() {
   if (!el) return;
   el.innerHTML = skizzeImages.map((img, idx) => `
     <div style="position:relative;width:80px;height:80px;border-radius:8px;overflow:hidden;border:1px solid #c2c6d3">
-      <img src="${img.data}" style="width:100%;height:100%;object-fit:cover" loading="lazy" decoding="async">
+      <img src="${img.data}" style="width:100%;height:100%;object-fit:cover">
       <button type="button" onclick="skRemove(${idx})" style="position:absolute;top:2px;right:2px;width:22px;height:22px;border-radius:50%;background:rgba(220,38,38,0.95);color:#fff;border:none;cursor:pointer">×</button>
     </div>
   `).join('');
@@ -10296,7 +11028,7 @@ async function submitSkizze(e) {
         if (!nav) return;
         // Nur reagieren wenn schon ein Produkt gewählt (Nav also sichtbar sein soll)
         if (!window.S || !window.S.prod) return;
-        nav.style.display = '';
+        nav.style.display = 'none';
         if (window.innerWidth < 768) nav.classList.add('kfg-nav--mobile-strip');
         else nav.classList.remove('kfg-nav--mobile-strip');
       }, 120);
