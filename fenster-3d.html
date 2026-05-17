@@ -5,13 +5,25 @@
 <meta name="robots" content="noindex, nofollow"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Fenster 3D — Drutex Iglo 5</title>
+<script>
+  // Embed-Klasse SOFORT setzen (vor CSS-Render) damit Header nicht aufflackert
+  if (new URLSearchParams(location.search).has('embed')) {
+    document.documentElement.classList.add('is-embed');
+    document.addEventListener('DOMContentLoaded', () => document.body.classList.add('embed'));
+  }
+</script>
+<style>
+  html.is-embed body { background: #0a1530 !important; }
+  html.is-embed .header, html.is-embed .controls { display: none !important; }
+</style>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f0f2f5; overflow: hidden; }
 
-  body.embed .header   { display: none; }
-  body.embed .layout   { height: 100vh; }
-  body.embed .controls { display: none; }
+  body.embed { background: #0a1530 !important; }
+  body.embed .header   { display: none !important; }
+  body.embed .layout   { height: 100vh !important; }
+  body.embed .controls { display: none !important; }
   body.embed #threeCanvas { width: 100% !important; }
 
   .header {
@@ -136,7 +148,10 @@ renderer.toneMappingExposure = 0.95;   // mehr Kontrast — Mittel-/Schattenbere
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xffffff);
+// Im Konfigurator-Embed-Modus dunkler Hintergrund (passt zum Konfi-Theme),
+// sonst Standard weiß (für Standalone-Ansicht)
+const _embed = new URLSearchParams(location.search).has('embed');
+scene.background = new THREE.Color(_embed ? 0x0a1530 : 0xffffff);
 
 const camera = new THREE.PerspectiveCamera(15, 1, 0.1, 50);
 camera.position.set(0, 0, 7.6);   // Fenster mittig mit Abstand zu allen Seiten
