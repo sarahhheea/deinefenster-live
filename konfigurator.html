@@ -1829,9 +1829,10 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       margin: 0; line-height: 1.4;
     }
     /* Alle 3 Header (links Step-Item, mitte Title, rechts Toggle) auf gleicher Y-Linie */
-    #sidebar > div:first-child { min-height: 64px; display:flex; align-items:center; }
+    #sidebar > div:first-child { min-height: 56px; display:flex; align-items:center; margin-bottom:14px; }
     #kfg-nav .ksnav-item:first-child { margin-top: 0; }
-    #kfg-step-hdr { min-height: 64px !important; padding: 0 28px !important; }
+    #kfg-step-hdr { min-height: 56px !important; padding: 14px 28px !important; display:flex !important; flex-direction:column !important; justify-content:center !important; }
+    #kfg-nav { padding-top: 14px !important; }
 
     /* RECHTE PREVIEW-SPALTE */
     #sidebar-wrap {
@@ -4686,6 +4687,8 @@ function pickProd(el) {
   } else if (S.prod === 'kunststoff') {
     // Fenster-Maße zurücksetzen wenn sie von Tür/Balkontür-Wechsel stammen
     if (S.hMm >= 1800) { S.hMm = 1200; S.bMm = 1000; }
+    // Default-Farbe für Fenster-3D-Vorschau: Anthrazit (Sarah-Wunsch 17.05.)
+    if (!S._faChosen) S.fa = 'anthrazit';
   }
   _updateDinToggle();
 
@@ -6981,6 +6984,7 @@ function pickColor(el, key) {
   el.querySelector('.fp-swatch').style.borderColor = '#225eaa';
   el.querySelector('.fp-swatch').style.boxShadow = '0 0 0 3px rgba(34,94,170,.2)';
   S[key] = el.dataset.v;
+  if (key === 'fa') S._faChosen = true;   // User hat Farbe aktiv gewählt
   if (key==='fa') previewState.aussenFarbe = P.fa[S.fa]?.hex || '#F4F4F0';
   if (key==='fi') previewState.innenFarbe  = P.fi[S.fi]?.hex || '#F4F4F0';
   // Auto-switch preview to matching view when color is picked
