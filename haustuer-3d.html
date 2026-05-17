@@ -8,8 +8,14 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f0f2f5; overflow: hidden; }
-  /* Embed-Modus (im Konfigurator-iframe): dunkler Verlauf, passt zum Dark-Glass-Konfigurator */
-  body.embed { background: radial-gradient(ellipse at center 40%, #1a2a4a 0%, #0a1225 75%); }
+  /* Embed-Modus (im Konfigurator-iframe): dunkler Verlauf, passt zum Dark-Glass-Konfigurator
+     Greift wenn ?embed in URL ODER body.embed Klasse gesetzt — höhere Spezifizität gegen Fallbacks */
+  html body.embed { background: radial-gradient(ellipse at center 40%, #1a2a4a 0%, #0a1225 75%) !important; }
+  html body.embed .header,
+  html body.embed .ref-panel,
+  html body.embed .controls { display: none !important; }
+  html body.embed .layout { height: 100vh !important; }
+  html body.embed #threeCanvas { width: 100% !important; height: 100vh !important; }
 
   /* ── Embed-Modus (iframe im Konfigurator) ── */
   body.embed .header    { display: none; }
@@ -128,8 +134,21 @@
   .glass-btn.active { border-color: #1e3a8a; color: #1e3a8a; background: #f0f5ff; }
   .glass-btn:hover { border-color: #93a8d4; }
 </style>
+<script>
+  // Embed-Class IMMER setzen sobald HTML parsed wird (vor Module-Script-Load)
+  // Damit Sandbox-Elemente sofort versteckt sind, auch wenn Three.js noch lädt
+  if (location.search.indexOf('embed') !== -1) {
+    document.documentElement.classList.add('embed-mode');
+  }
+</script>
 </head>
-<body>
+<body class="">
+<script>
+  // Embed-Class auf body sobald body existiert (vor render)
+  if (location.search.indexOf('embed') !== -1) {
+    document.body.classList.add('embed');
+  }
+</script>
 
 <div class="header">
   <h1>Haustür 3D Konfigurator</h1>
@@ -218,8 +237,8 @@
 
 <script type="importmap">
 { "imports": {
-    "three":         "https://cdn.jsdelivr.net/npm/three@0.162.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.162.0/examples/jsm/"
+    "three":         "js/vendor/three.module.js",
+    "three/addons/": "js/vendor/three/examples/jsm/"
 } }
 </script>
 
@@ -244,8 +263,8 @@ const scene = new THREE.Scene();
 const _isEmbed = new URLSearchParams(location.search).has('embed');
 scene.background = new THREE.Color(_isEmbed ? 0x0a1225 : 0xf0f2f5);
 
-const camera = new THREE.PerspectiveCamera(20, 1, 0.1, 50);
-camera.position.set(0, 1.05, 7.5);  // weit genug zurück um ganze Tür zu sehen
+const camera = new THREE.PerspectiveCamera(22, 1, 0.1, 50);
+camera.position.set(0, 1.05, 9.5);  // weiter zurück (Sarah-Wunsch 17.05.): Tür mit Atemraum drum, sieht ganzes Modell
 
 const orb = new OrbitControls(camera, canvasEl);
 orb.target.set(0, 1.05, 0);
@@ -1324,7 +1343,7 @@ if (_modelSel) {
 // ── 3D-Kamera-Animation (Sarah-Wunsch 16.05.2026 v3) ──
 // Sanftes "Drüberfahren" der Kamera passend zum aktuellen Konfigurations-Schritt
 const CAMERA_PRESETS = {
-  default: { pos: [0, 1.05, 7.5],  target: [0, 1.05, 0] },
+  default: { pos: [0, 1.05, 9.5],  target: [0, 1.05, 0] },
   griff:   { pos: [-0.9, 1.20, 4.8], target: [0.16, 1.20, 0] },  // Stoßgriff links groß
   glas:    { pos: [0, 1.55, 4.2],   target: [0.50, 1.10, 0] },   // Glasfeld zentral
   rahmen:  { pos: [-1.4, 1.05, 6.0], target: [0, 1.05, 0] },     // Zarge/Profil von schräg links
