@@ -162,12 +162,16 @@
     .blue { color: #76a9fa; }
     .stat-num { text-shadow: 0 0 30px rgba(118,169,250,0.45); }
 
-    /* Scroll reveal */
-    .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1); }
-    .reveal.visible { opacity: 1; transform: translateY(0); }
+    /* Scroll reveal — Default sichtbar (kein JS-Risiko), Animation nur wenn JS aktiv */
+    .reveal { opacity: 1; transform: none; transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1); }
+    html.js-on .reveal { opacity: 0; transform: translateY(28px); }
+    html.js-on .reveal.visible { opacity: 1; transform: translateY(0); }
     .reveal-d1 { transition-delay: 0.1s; }
     .reveal-d2 { transition-delay: 0.2s; }
     .reveal-d3 { transition-delay: 0.3s; }
+    @media (prefers-reduced-motion: reduce) {
+      html.js-on .reveal { opacity: 1 !important; transform: none !important; }
+    }
 
     @keyframes fadeInUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
     @keyframes blob-move { 0%,100%{transform:translate(0,0) scale(1);} 33%{transform:translate(30px,-20px) scale(1.05);} 66%{transform:translate(-20px,15px) scale(0.97);} }
@@ -1154,11 +1158,14 @@
     document.getElementById('menuIcon').textContent = open ? 'menu' : 'close';
   });
 
-  // Scroll reveal
+  // Scroll reveal — js-on aktiviert Opacity:0-Startzustand, Observer fügt .visible hinzu sobald sichtbar
+  document.documentElement.classList.add('js-on');
   const ro = new IntersectionObserver((entries) => {
     entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); ro.unobserve(e.target); } });
-  }, { threshold: 0.12 });
+  }, { threshold: 0.12, rootMargin: '0px 0px -10% 0px' });
   document.querySelectorAll('.reveal').forEach(el => ro.observe(el));
+  // Safety-Net: alles spätestens nach 2s sichtbar (falls Observer schluckt)
+  setTimeout(() => { document.querySelectorAll('.reveal').forEach(el => el.classList.add('visible')); }, 2000);
 
   // Counter
   function countUp(el, target, suffix) {
