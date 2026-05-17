@@ -1319,27 +1319,60 @@
         flex-direction: column !important;
       }
 
-      /* ── 3D-Preview RECHTS oben: VIEL größer (Sarah-Wunsch 17.05.2026) ── */
+      /* ── 3D-Preview RECHTS: füllt die rechte Hälfte (Sarah-Wunsch 17.05.2026 v2) ── */
       #prev-wrap {
-        height: clamp(580px, calc(100vh - 280px), 820px) !important;
-        min-height: 580px !important;
+        height: 62vh !important;
+        min-height: 540px !important;
+        max-height: none !important;
         max-width: 100% !important;
         margin: 0 !important;
-        order: 2 !important; /* nach View-Toggle */
+        order: 2 !important;
+        flex: 0 0 62vh !important;
       }
-      /* View-Toggle (Innen/Außen) oben prominent */
-      #sidebar-wrap > div:has(#view-btn-inn),
-      #sidebar-wrap #viewBtns,
+      /* Sidebar-Padding reduzieren damit 3D maximal Platz hat */
+      #sidebar-wrap {
+        padding: 18px 28px 24px !important;
+        gap: 12px !important;
+      }
+      /* View-Toggle + Tür-öffnen-Button als Top-Bar oben */
       #sidebar-wrap > div:first-child {
         order: 1 !important;
         flex: 0 0 auto;
+        margin-bottom: 4px !important;
       }
-      /* Übersicht-Card RECHTS UNTEN */
-      #chips { order: 3 !important; }
-      /* Preis-Box ganz unten */
-      #conf-price-box { order: 4 !important; }
+      /* "Fenster/Tür öffnen"-Button sichtbar als zweite Aktion neben View-Toggle */
+      #oeffnen-btn {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        order: 1 !important;
+        flex: 0 0 auto;
+        background: rgba(255,255,255,0.04) !important;
+        border: 1px solid rgba(255,255,255,0.10) !important;
+        color: rgba(238,242,255,0.85) !important;
+        padding: 9px 14px !important;
+        border-radius: 10px !important;
+        font-family: 'Manrope', sans-serif !important;
+        font-size: 12px !important; font-weight: 600 !important;
+        cursor: pointer;
+        margin-bottom: 4px !important;
+        transition: background .15s, border-color .15s;
+      }
+      #oeffnen-btn:hover {
+        background: rgba(118,169,250,0.10) !important;
+        border-color: rgba(118,169,250,0.30) !important;
+      }
+      /* Übersicht-Card KOMPAKTER, sitzt drunter */
+      #chips { order: 3 !important; flex: 0 0 auto; margin-top: 12px !important; }
+      #chips > div > div:nth-child(2) > div { padding: 8px 16px !important; }
+      #chips > div > div:nth-child(2) > div span:first-child { font-size: 10px !important; min-width: 95px !important; }
+      #chips > div > div:nth-child(2) > div span:last-child { font-size: 13px !important; }
+      /* Preis-Box kompakter, ganz unten */
+      #conf-price-box { order: 4 !important; padding: 10px 14px !important; margin-top: 8px !important; }
+      #sb-total { font-size: 13px !important; }
+      /* CTA */
       #sidebar-wrap > button[onclick*="openS(13)"],
-      #sidebar-wrap > button[onclick*="13"] { order: 5 !important; }
+      #sidebar-wrap > button[onclick*="13"] { order: 5 !important; padding: 12px !important; font-size: 13.5px !important; }
 
       /* Übersicht-Card unter dem 3D ist OK wie sie ist (Quick-Fix 4) */
 
