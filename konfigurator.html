@@ -1768,7 +1768,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
     #kfg-nav {
       display: flex !important; flex-direction: column !important;
       width: 232px !important; flex-shrink: 0 !important;
-      overflow-y: auto; padding: 40px 20px 28px 28px;
+      overflow-y: auto; padding: 28px 20px 28px 28px;
       border-right: 1px solid rgba(255,255,255,0.07);
       background: rgba(5,8,20,0.96);
       align-self: stretch !important; min-height: 0 !important;
@@ -3686,12 +3686,18 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
 
 <!-- ════ SIDEBAR RIGHT (40% = col-span-2) ════ -->
 <div id="sidebar-wrap" class="lg:col-span-2">
-  <div id="sidebar" class="p-3">
+  <div id="sidebar" style="padding:28px 22px">
 
-    <!-- VIEW TOGGLE -->
-    <div style="display:flex;gap:4px;margin-bottom:6px;width:100%;background:rgba(255,255,255,0.08);padding:3px;border-radius:8px">
-      <button id="view-btn-inn" class="view-btn active" style="flex:1;padding:7px 10px;font-size:13px;font-weight:600;border-radius:6px" onclick="setPreviewView('inn')">Innen</button>
-      <button id="view-btn-aus" class="view-btn" style="flex:1;padding:7px 10px;font-size:13px;font-weight:600;border-radius:6px" onclick="setPreviewView('aus')">Außen</button>
+    <!-- VIEW TOGGLE + FENSTER ÖFFNEN -->
+    <div style="display:flex;gap:8px;margin-bottom:14px;width:100%;align-items:center">
+      <div style="display:flex;gap:4px;flex:1;background:rgba(255,255,255,0.06);padding:3px;border-radius:9px;border:1px solid rgba(255,255,255,0.06)">
+        <button id="view-btn-inn" class="view-btn active" style="flex:1;padding:8px 10px;font-size:13px;font-weight:600;border-radius:7px" onclick="setPreviewView('inn')">Innen</button>
+        <button id="view-btn-aus" class="view-btn" style="flex:1;padding:8px 10px;font-size:13px;font-weight:600;border-radius:7px" onclick="setPreviewView('aus')">Außen</button>
+      </div>
+      <button id="window-open-btn" type="button" onclick="toggleFensterOpen()"
+        style="flex-shrink:0;padding:8px 14px;font-size:12.5px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;border-radius:9px;background:linear-gradient(135deg,#2765c8,#1a4fa0);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 3px 12px rgba(34,94,170,0.35)">
+        <i class="ms" style="font-size:15px">open_in_full</i>Öffnen
+      </button>
     </div>
     <!-- DIN-ANSCHLAG TOGGLE — ausgeblendet per Sarah 06.05.2026 -->
     <div id="din-toggle-wrap" style="display:none"></div>
@@ -8680,6 +8686,22 @@ function sendHaus3dColor(faKey) {
 }
 
 // 3D-iframe für Fenster rendern — analog Haustür, mit Live-Farb-/Glas-Updates
+// Fenster öffnen/schließen — sendet postMessage an fenster3d-iframe (toggleOpen)
+function toggleFensterOpen() {
+  const frame = document.getElementById('fenster3d-frame');
+  if (!frame || !frame.contentWindow) return;
+  frame.contentWindow.postMessage({ type: 'toggleOpen' }, '*');
+  // Button-Label dynamisch
+  const btn = document.getElementById('window-open-btn');
+  if (btn) {
+    const isOpen = btn.dataset.open === '1';
+    btn.dataset.open = isOpen ? '0' : '1';
+    btn.innerHTML = isOpen
+      ? '<i class="ms" style="font-size:15px">open_in_full</i>Öffnen'
+      : '<i class="ms" style="font-size:15px">close_fullscreen</i>Schließen';
+  }
+}
+
 function _renderFenster3d() {
   const wrap  = document.getElementById('fenster3d-wrap');
   const frame = document.getElementById('fenster3d-frame');
