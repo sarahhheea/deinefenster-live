@@ -125,14 +125,18 @@ async function loadProdukte() {
       bilder: Array.isArray(p.bilder) ? p.bilder : [],
       beschreibung: p.beschreibung || '',
       aktiv: p.aktiv !== false
-    })).filter(p => p.aktiv);
+    }));
+    // Eingeloggte Admins sehen auch archivierte Inserate (für Reaktivierung)
+    // Normale Besucher sehen nur aktive
+    const istAdmin = typeof isShopLoggedIn === 'function' && isShopLoggedIn();
+    const sichtbar = istAdmin ? sheetsProdukte : sheetsProdukte.filter(p => p.aktiv);
 
     // Wenn Sheets leer → JSON-Fallback damit der Shop nie blank ist
-    if (sheetsProdukte.length === 0) {
+    if (sichtbar.length === 0) {
       return loadProdukteFromJson();
     }
 
-    STATE.produkte = sheetsProdukte;
+    STATE.produkte = sichtbar;
     STATE.metadaten = berechneMetadaten(STATE.produkte);
   } catch (err) {
     console.error('Sheets-Fehler beim Laden — Fallback auf JSON:', err);
@@ -603,11 +607,18 @@ function karteHtml(p) {
       <span class="material-symbols-outlined" style="font-size:20px">more_vert</span>
     </button>` : '';
 
+  const istArchiviert = p.aktiv === false;
+  const archivBadge = istArchiviert
+    ? '<span style="position:absolute;top:8px;left:8px;background:#b87f00;color:#fff;font-size:10px;font-weight:800;padding:4px 8px;border-radius:6px;letter-spacing:0.05em;text-transform:uppercase;box-shadow:0 2px 6px rgba(0,0,0,0.2);z-index:5">Archiviert</span>'
+    : '';
+  const archivStyle = istArchiviert ? 'opacity:0.55;filter:saturate(0.6)' : '';
+
   return `
-    <article class="karte" data-action="detail" data-id="${p.id}">
-      <div class="karte-bild-wrap">
+    <article class="karte" data-action="detail" data-id="${p.id}" style="${archivStyle}">
+      <div class="karte-bild-wrap" style="position:relative">
         <img src="${escapeHtml(p.bild)}" alt="${escapeHtml(p.titel)}" class="karte-bild w-full" loading="lazy" decoding="async" onerror="this.src='img/fenster_standard.png'"/>
         <span class="symbolbild-mini">Symbolbild</span>
+        ${archivBadge}
         ${druckIcon}
         ${aktionMenu}
       </div>
@@ -648,10 +659,19 @@ function oeffneAktionsMenu(id, anchor) {
       <span class="material-symbols-outlined" style="font-size:18px;color:#225eaa">print</span>
       Schild drucken
     </a>
-    <button data-do="archive" style="width:100%;display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;background:transparent;border:none;cursor:pointer;color:#1d1d1f;font-size:13px;font-weight:600;text-align:left" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background=''">
-      <span class="material-symbols-outlined" style="font-size:18px;color:#b87f00">archive</span>
-      Archivieren
-    </button>
+    ${(() => {
+      const aktuell = STATE.produkte.find(p => String(p.id) === String(id));
+      const istArchiviert = aktuell && aktuell.aktiv === false;
+      return istArchiviert
+        ? `<button data-do="reactivate" style="width:100%;display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;background:transparent;border:none;cursor:pointer;color:#0a8a3a;font-size:13px;font-weight:600;text-align:left" onmouseover="this.style.background='#e3f5e9'" onmouseout="this.style.background=''">
+            <span class="material-symbols-outlined" style="font-size:18px;color:#0a8a3a">unarchive</span>
+            Wieder aktivieren
+          </button>`
+        : `<button data-do="archive" style="width:100%;display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;background:transparent;border:none;cursor:pointer;color:#1d1d1f;font-size:13px;font-weight:600;text-align:left" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background=''">
+            <span class="material-symbols-outlined" style="font-size:18px;color:#b87f00">archive</span>
+            Archivieren
+          </button>`;
+    })()}
     <button data-do="delete" style="width:100%;display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;background:transparent;border:none;cursor:pointer;color:#ba1a1a;font-size:13px;font-weight:600;text-align:left" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background=''">
       <span class="material-symbols-outlined" style="font-size:18px">delete</span>
       Löschen
@@ -676,14 +696,22 @@ function oeffneAktionsMenu(id, anchor) {
     const action = btn.dataset.do;
     menu.remove();
     if (action === 'archive') archiviereProdukt(id);
+    else if (action === 'reactivate') reaktiviereProdukt(id);
     else if (action === 'delete') loescheProdukt(id);
   });
 }
 
 async function archiviereProdukt(id) {
-  if (!confirm('Inserat archivieren? Es verschwindet aus dem Shop (kann im Google Sheet wiederhergestellt werden: Spalte aktiv = TRUE).')) return;
+  if (!confirm('Inserat archivieren? Es verschwindet aus dem Shop, bleibt aber gespeichert — du kannst es jederzeit über das Menü wieder aktivieren (z.B. wenn ein reservierter Artikel doch nicht abgeholt wird).')) return;
   const res = await sheetsPost({ action: 'archive', id });
   if (res.error) { alert('Fehler beim Archivieren: ' + res.error); return; }
+  await loadProdukte();
+  rendere();
+}
+
+async function reaktiviereProdukt(id) {
+  const res = await sheetsPost({ action: 'reactivate', id });
+  if (res.error) { alert('Fehler beim Reaktivieren: ' + res.error); return; }
   await loadProdukte();
   rendere();
 }

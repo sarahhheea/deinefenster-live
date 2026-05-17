@@ -77,9 +77,10 @@ function _authHeaders(extra) {
 }
 
 async function _ghGet(path) {
+  // Cache-Buster via URL-Parameter (KEIN Cache-Control-Header — der löst bei GitHub einen CORS-Preflight aus, der die Auth-Header verliert und Save kaputt macht)
   const url = `${_GH_API}/repos/${_GH_REPO}/contents/${encodeURI(path)}?ref=main&_=${Date.now()}`;
   const res = await fetch(url, {
-    headers: _authHeaders({ 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }),
+    headers: _authHeaders(),
     cache: 'no-store',
   });
   if (!res.ok) throw new Error('GitHub Lesefehler: ' + res.status);
@@ -192,6 +193,7 @@ async function sheetsPost(data) {
   if (action === 'insert')       return _insertProdukt(data.data);
   if (action === 'update')       return _updateProdukt(data.id, data.data);
   if (action === 'archive')      return _archiviereProdukt(data.id);
+  if (action === 'reactivate')   return _reaktiviereProdukt(data.id);
   if (action === 'delete')       return _deleteProdukt(data.id);
   return { ok: false, error: 'Unbekannte Aktion: ' + action };
 }
@@ -250,6 +252,22 @@ async function _archiviereProdukt(id) {
       const p = (json.produkte || []).find(x => String(x.id) === String(id));
       if (p) { p.aktiv = false; found = true; }
     }, `Inserat archiviert: ${id}`);
+    if (!found) return { ok: false, error: 'Produkt nicht gefunden: ' + id };
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+}
+
+/* ─── Produkt reaktivieren (Archiv rückgängig — aktiv=true) ──────────── */
+
+async function _reaktiviereProdukt(id) {
+  try {
+    let found = false;
+    await _writeJSON(json => {
+      const p = (json.produkte || []).find(x => String(x.id) === String(id));
+      if (p) { p.aktiv = true; found = true; }
+    }, `Inserat reaktiviert: ${id}`);
     if (!found) return { ok: false, error: 'Produkt nicht gefunden: ' + id };
     return { ok: true };
   } catch (err) {
