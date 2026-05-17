@@ -24,6 +24,7 @@ const KATEGORIEN = [
   { key: 'schiebetuer-hst',            label: 'Hebe-Schiebetür',                  icon: 'door_sliding' },
   { key: 'schiebetuer-rollo',          label: 'Schiebetür mit Rollo',             icon: 'roller_shades' },
   { key: 'fenster-oberlicht',          label: 'Fenster mit Oberlicht',            icon: 'space_dashboard' },
+  { key: 'fenster-unterlicht',         label: 'Fenster mit Unterlicht',           icon: 'vertical_split' },
   { key: 'fenster-sprossen',           label: 'Fenster mit Sprossen',             icon: 'window_open' }
 ];
 
