@@ -336,7 +336,7 @@
     #steps{min-height:calc(100vh - 200px)}
     #sidebar{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px}
     /* Auswahl-Liste: großzügig (zeigt 8-10 Eigenschaften ohne Scroll), darüber scrollt intern */
-    #chips > div{max-height:240px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#d2d2d7 transparent}
+    #chips > div{max-height:none;overflow:visible}
     /* Highlight-Animation wenn sich eine Zeile ändert (Sarah 06.05.2026) */
     @keyframes spec-flash{0%{background:rgba(34,94,170,.13)}60%{background:rgba(34,94,170,.07)}100%{background:transparent}}
     .spec-row-changed{animation:spec-flash 1.4s ease-out forwards}
@@ -1979,8 +1979,9 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   .kfg-nav-header {
     font-family: 'Manrope', sans-serif;
     font-size: 10px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase;
-    color: rgba(118,169,250,0.55); padding: 0 4px 18px;
-    margin-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.08);
+    color: rgba(118,169,250,0.55); padding: 0 4px 10px;
+    margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.08);
+    display: none;   /* Header weglassen damit Step 1 auf gleicher Linie wie mittlerer Step-Header steht */
   }
   .ksnav-item {
     display: flex; align-items: center; gap: 12px;
@@ -3695,8 +3696,8 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
         <button id="view-btn-aus" class="view-btn" style="flex:1;padding:8px 10px;font-size:13px;font-weight:600;border-radius:7px" onclick="setPreviewView('aus')">Außen</button>
       </div>
       <button id="window-open-btn" type="button" onclick="toggleFensterOpen()"
-        style="flex-shrink:0;padding:8px 14px;font-size:12.5px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;border-radius:9px;background:linear-gradient(135deg,#2765c8,#1a4fa0);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 3px 12px rgba(34,94,170,0.35)">
-        <i class="ms" style="font-size:15px">open_in_full</i>Öffnen
+        style="flex-shrink:0;padding:8px 14px;font-size:12.5px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;border-radius:9px;background:linear-gradient(135deg,#2765c8,#1a4fa0);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 3px 12px rgba(34,94,170,0.35);white-space:nowrap">
+        <i class="ms" style="font-size:15px">open_in_full</i>Fenster öffnen
       </button>
     </div>
     <!-- DIN-ANSCHLAG TOGGLE — ausgeblendet per Sarah 06.05.2026 -->
@@ -8697,8 +8698,8 @@ function toggleFensterOpen() {
     const isOpen = btn.dataset.open === '1';
     btn.dataset.open = isOpen ? '0' : '1';
     btn.innerHTML = isOpen
-      ? '<i class="ms" style="font-size:15px">open_in_full</i>Öffnen'
-      : '<i class="ms" style="font-size:15px">close_fullscreen</i>Schließen';
+      ? '<i class="ms" style="font-size:15px">open_in_full</i>Fenster öffnen'
+      : '<i class="ms" style="font-size:15px">close_fullscreen</i>Fenster schließen';
   }
 }
 
