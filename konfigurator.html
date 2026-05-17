@@ -4677,6 +4677,9 @@ function pickProd(el) {
   const vToggle = document.querySelector('#sidebar [style*="display:flex"][style*="gap:4px"]');
   if (vToggle) vToggle.style.display = 'flex';
 
+  // Öffnen-Button-Label an Produkt anpassen (Fenster / Schiebetür / Haustür / Balkontür)
+  if (typeof updateOpenBtnLabel === 'function') updateOpenBtnLabel(false);
+
   // Sarah-Plan 05.05.2026: Bei Haustür direkt Außenansicht aktivieren —
   // Default-Bild ist das IGLO Energy Montana in Weiß FX mit Stoßgriff (= Außenansicht).
   // Beim Klick auf Anthrazitgrau o.ä. wechselt das Live-Preview nahtlos auf die
@@ -8727,20 +8730,36 @@ function sendHaus3dColor(faKey) {
 }
 
 // 3D-iframe für Fenster rendern — analog Haustür, mit Live-Farb-/Glas-Updates
+// Button-Label je nach Produkt: Fenster / Schiebetür / Haustür / Balkontür
+function _openBtnLabels(prod) {
+  const map = {
+    'kunststoff': ['Fenster öffnen', 'Fenster schließen'],
+    'balkontuer': ['Balkontür öffnen', 'Balkontür schließen'],
+    'haustuere':  ['Haustür öffnen', 'Haustür schließen'],
+    'hst':        ['Schiebetür öffnen', 'Schiebetür schließen'],
+  };
+  return map[prod] || ['Öffnen', 'Schließen'];
+}
+function updateOpenBtnLabel(isOpen) {
+  const btn = document.getElementById('window-open-btn');
+  if (!btn) return;
+  const [labelOpen, labelClose] = _openBtnLabels(window.S && S.prod);
+  const icon = isOpen ? 'close_fullscreen' : 'open_in_full';
+  const text = isOpen ? labelClose : labelOpen;
+  btn.innerHTML = `<i class="ms" style="font-size:15px">${icon}</i>${text}`;
+  btn.dataset.open = isOpen ? '1' : '0';
+}
 // Fenster öffnen/schließen — sendet postMessage an fenster3d-iframe (toggleOpen)
 function toggleFensterOpen() {
   const frame = document.getElementById('fenster3d-frame');
-  if (!frame || !frame.contentWindow) return;
-  frame.contentWindow.postMessage({ type: 'toggleOpen' }, '*');
-  // Button-Label dynamisch
   const btn = document.getElementById('window-open-btn');
-  if (btn) {
-    const isOpen = btn.dataset.open === '1';
-    btn.dataset.open = isOpen ? '0' : '1';
-    btn.innerHTML = isOpen
-      ? '<i class="ms" style="font-size:15px">open_in_full</i>Fenster öffnen'
-      : '<i class="ms" style="font-size:15px">close_fullscreen</i>Fenster schließen';
+  const isOpen = btn && btn.dataset.open === '1';
+  // postMessage nur wenn fenster3d-iframe geladen (Fenster + Balkontür)
+  if (frame && frame.contentWindow && frame.src.includes('fenster-3d')) {
+    frame.contentWindow.postMessage({ type: 'toggleOpen' }, '*');
   }
+  // Haustür/HST nutzen anderen iframe → kein Toggle hier, aber Label trotzdem aktualisieren
+  updateOpenBtnLabel(!isOpen);
 }
 
 function _renderFenster3d() {
