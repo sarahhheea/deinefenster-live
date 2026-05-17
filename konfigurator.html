@@ -1117,44 +1117,64 @@
       z-index: 5;
     }
 
-    /* ÜBERSICHT-Card (vorhandener #chips): größer, lesbarer, sitzt unter 3D */
+    /* ÜBERSICHT-Card (vorhandener #chips): sauber strukturierte Liste */
     #chips {
       margin-top: 0 !important;
       flex: 0 0 auto !important;
       overflow: visible !important;
     }
     #chips > div {
-      border-radius: 14px !important;
+      border-radius: 16px !important;
       background: rgba(255,255,255,0.03) !important;
-      border-color: rgba(118,169,250,0.12) !important;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 24px rgba(0,0,0,0.25) !important;
+      border-color: rgba(118,169,250,0.10) !important;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.04),
+        0 8px 32px -8px rgba(0,0,0,0.4) !important;
+      backdrop-filter: blur(12px) !important;
+      -webkit-backdrop-filter: blur(12px) !important;
     }
+    /* Header der Übersicht-Card */
     #chips > div > div:first-child {
-      padding: 11px 16px 10px !important;
-      border-bottom-color: rgba(255,255,255,0.06) !important;
+      padding: 14px 20px 12px !important;
+      border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+      background: rgba(255,255,255,0.015) !important;
+    }
+    #chips > div > div:first-child i {
+      font-size: 15px !important;
+      color: rgba(118,169,250,0.85) !important;
     }
     #chips > div > div:first-child span:last-child {
-      font-size: 11px !important;
-      letter-spacing: .12em !important;
-      color: rgba(255,255,255,0.45) !important;
+      font-size: 10.5px !important;
+      letter-spacing: .16em !important;
+      color: rgba(238,242,255,0.55) !important;
+      font-weight: 700 !important;
     }
+    /* Zeilen-Liste mit klarer Struktur */
     #chips > div > div:nth-child(2) > div {
-      padding: 10px 16px !important;
+      padding: 12px 20px !important;
       font-variant-numeric: tabular-nums !important;
+      align-items: baseline !important;
     }
     #chips > div > div:nth-child(2) > div span:first-child {
-      font-size: 11.5px !important;
-      font-weight: 600 !important;
+      font-size: 10.5px !important;
+      font-weight: 700 !important;
       text-transform: uppercase !important;
-      letter-spacing: .08em !important;
-      color: rgba(160,190,230,0.55) !important;
-      min-width: 100px !important;
+      letter-spacing: .12em !important;
+      color: rgba(160,190,230,0.50) !important;
+      min-width: 110px !important;
+      font-family: 'Plus Jakarta Sans', sans-serif !important;
     }
     #chips > div > div:nth-child(2) > div span:last-child {
-      font-size: 14px !important;
+      font-size: 14.5px !important;
       font-weight: 600 !important;
       font-family: 'Plus Jakarta Sans', sans-serif !important;
       color: rgba(238,242,255,0.95) !important;
+      letter-spacing: -0.005em !important;
+      line-height: 1.35 !important;
+    }
+    /* Trennlinien zwischen Übersicht-Zeilen subtiler */
+    #chips > div > div:nth-child(2) > div[style*="border-bottom"] {
+      border-bottom-color: rgba(255,255,255,0.04) !important;
     }
 
     /* Preis-Box (eigentlich Lieferzeit-Box jetzt) — passt zur Übersicht-Card optisch */
@@ -1258,102 +1278,51 @@
     body, #prod-hero { background: #05080f !important; }
 
     /* ════════════════════════════════════════════════════════════════
-       PHASE E: AUTOMOTIVE-CONFIGURATOR-STIL (Sarah-Wunsch 16.05.2026 v7)
-       3D-Modell als zentrale Bühne, Schritte als Bedienpanel rechts
-       in sauberen Premium-Karten. Dunkel-blau, edel, ruhig.
-
-       LAYOUT TAUSCH:
-       - NAV links 180px (Phasen-Punkte)
-       - 3D-PREVIEW MITTE flex:1 (~720px, dominant)
-       - STEPS rechts 380px (kompakte Karten)
+       PHASE F: ZWEI-SPALTEN-LAYOUT (Sarah-Wunsch 17.05.2026)
+       LINKS:  Schritte als aufklappbare Karten (klassisches Akkordeon)
+       RECHTS: 3D groß + Übersicht-Card direkt drunter
+       Phasen-Nav komplett weg (war zuviel Lärm)
        ════════════════════════════════════════════════════════════════ */
 
     @media (min-width: 1024px) {
-      /* LAYOUT-TAUSCH: 3D in die MITTE, Schritte nach RECHTS (Auto-Konfigurator-Stil) */
+      /* ZWEI-SPALTEN-LAYOUT: Steps links / 3D + Übersicht rechts. Phasen-Nav weg. */
       #kfg-main {
         display: grid !important;
-        grid-template-columns: 180px minmax(560px, 1fr) 380px !important;
-        grid-template-areas: "nav preview steps" !important;
+        grid-template-columns: minmax(420px, 1fr) minmax(560px, 1.15fr) !important;
+        grid-template-areas: "steps preview" !important;
       }
-      #kfg-nav      { grid-area: nav !important; }
-      #sidebar-wrap { grid-area: preview !important;
-        width: auto !important; flex: none !important;
-        padding: 32px 36px !important;
-        gap: 18px !important;
-        border: none !important;
-        background:
-          radial-gradient(ellipse at 50% 30%, rgba(38,72,140,0.20) 0%, rgba(5,8,20,0) 70%),
-          linear-gradient(180deg, #08111f 0%, #04060d 100%) !important;
-      }
+      /* Phasen-Navigation komplett aus (Sarah-Wunsch 17.05.2026 — zu viel Lärm) */
+      #kfg-nav { display: none !important; }
+
       #steps {
         grid-area: steps !important;
         flex: none !important; max-width: none !important;
-        padding: 28px 22px 32px !important;
-        background: rgba(6,9,22,0.85) !important;
-        border-left: 1px solid rgba(255,255,255,0.05) !important;
+        padding: 32px 32px 48px !important;
+        background: linear-gradient(180deg, rgba(8,12,28,0.6) 0%, rgba(5,8,20,0.4) 100%) !important;
+        border-right: 1px solid rgba(255,255,255,0.05) !important;
         overflow-y: auto !important;
         max-height: calc(100vh - 60px) !important;
       }
 
-      /* ── Phasen-Navigation links (180px schmal) ── */
-      #kfg-nav {
-        width: 180px !important;
-        padding: 28px 14px !important;
-        background: rgba(3,5,11,0.7) !important;
-      }
-      #kfg-nav .ksnav-item {
-        display: flex !important;
-        align-items: center !important;
-        gap: 10px !important;
-        padding: 10px 12px !important;
-        cursor: pointer;
-        border-radius: 10px;
-        transition: background .15s ease;
-        margin-bottom: 2px;
-      }
-      #kfg-nav .ksnav-item:hover { background: rgba(255,255,255,0.04); }
-      #kfg-nav .ksnav-num {
-        width: 24px !important; height: 24px !important;
-        line-height: 24px !important; text-align: center !important;
-        border-radius: 50% !important;
-        font-size: 11px !important; font-weight: 700 !important;
-        background: rgba(255,255,255,0.06) !important;
-        color: rgba(238,242,255,0.55) !important;
-        flex-shrink: 0;
-        transition: all .2s ease;
-      }
-      #kfg-nav .ksnav-num svg { width: 12px; height: 12px; margin: 0 auto; display: block; }
-      #kfg-nav .ksnav-lbl {
-        font-size: 12px !important;
-        font-weight: 500 !important;
-        color: rgba(180,196,228,0.55) !important;
-        line-height: 1.3 !important;
-        letter-spacing: -0.005em !important;
-      }
-      #kfg-nav .ksnav-item.ksnav-done .ksnav-num {
-        background: rgba(118,169,250,0.18) !important;
-        color: rgba(238,242,255,0.85) !important;
-      }
-      #kfg-nav .ksnav-item.ksnav-done .ksnav-lbl { color: rgba(238,242,255,0.72) !important; }
-      #kfg-nav .ksnav-item.ksnav-active {
-        background: rgba(59,120,212,0.10) !important;
-      }
-      #kfg-nav .ksnav-item.ksnav-active .ksnav-num {
-        background: #3b78d4 !important;
-        color: #fff !important;
-        box-shadow: 0 0 0 3px rgba(59,120,212,0.18);
-      }
-      #kfg-nav .ksnav-item.ksnav-active .ksnav-lbl {
-        color: rgba(238,242,255,0.97) !important;
-        font-weight: 600 !important;
+      #sidebar-wrap {
+        grid-area: preview !important;
+        width: auto !important; flex: none !important;
+        padding: 32px 40px 40px !important;
+        gap: 18px !important;
+        border: none !important;
+        background:
+          radial-gradient(ellipse at 50% 30%, rgba(38,72,140,0.18) 0%, rgba(5,8,20,0) 65%),
+          linear-gradient(180deg, #07101f 0%, #04060d 100%) !important;
+        overflow-y: auto !important;
+        max-height: calc(100vh - 60px) !important;
       }
 
-      /* ── 3D-Preview MITTE: groß, dominante Bühne ── */
+      /* ── 3D-Preview RECHTS oben: groß und ruhig ── */
       #prev-wrap {
-        height: clamp(560px, calc(100vh - 320px), 780px) !important;
-        min-height: 560px !important;
-        max-width: 760px !important;
-        margin: 0 auto !important;
+        height: clamp(440px, calc(100vh - 380px), 620px) !important;
+        min-height: 440px !important;
+        max-width: 100% !important;
+        margin: 0 !important;
       }
 
       /* Übersicht-Card unter dem 3D ist OK wie sie ist (Quick-Fix 4) */
