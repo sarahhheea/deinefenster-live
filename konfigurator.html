@@ -1326,6 +1326,14 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
     60%  { box-shadow: 0 0 0 18px rgba(77,136,255,0); }
     100% { box-shadow: 0 0 0 0   rgba(77,136,255,0); }
   }
+
+  /* Aufmerksamkeits-Pulse für "Fenster/Schiebetür/Haustür öffnen"-Button — 5s nach 3D-Start */
+  @keyframes btn-attn-pulse {
+    0%   { box-shadow: 0 3px 12px rgba(34,94,170,0.35), 0 0 0 0 rgba(118,169,250,0.55); }
+    60%  { box-shadow: 0 3px 12px rgba(34,94,170,0.35), 0 0 0 14px rgba(118,169,250,0); }
+    100% { box-shadow: 0 3px 12px rgba(34,94,170,0.35), 0 0 0 0 rgba(118,169,250,0); }
+  }
+  .btn-pulse-attn { animation: btn-attn-pulse 1.3s ease-out 0s 4; }
 </style>
 <style>
   /* ── 1. CONTAINER ── */
@@ -3760,6 +3768,14 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
     <div id="din-btn-rechts" style="display:none"></div>
     <!-- BILD-VORSCHAU -->
     <div id="prev-wrap" class="w-full" style="position:relative;width:100%;padding:0;flex-shrink:0;overflow:hidden">
+      <!-- 3D-Interaktivitäts-Hinweis (unten zentriert, nur bei aktiver 3D-Vorschau sichtbar) -->
+      <div id="prev-3d-hint" style="display:none;position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:20;background:rgba(8,14,28,0.78);backdrop-filter:blur(8px);border:1px solid rgba(118,169,250,0.22);color:rgba(232,238,255,0.92);font-family:'Manrope',sans-serif;font-size:11.5px;font-weight:600;letter-spacing:0.01em;padding:7px 13px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,0.35);pointer-events:none;align-items:center;gap:10px;white-space:nowrap">
+        <span style="display:inline-flex;align-items:center;gap:5px"><i class="ms" style="font-size:14px;color:#76a9fa">360</i>3D-Ansicht</span>
+        <span style="opacity:0.35">·</span>
+        <span style="display:inline-flex;align-items:center;gap:5px"><i class="ms" style="font-size:14px;color:#76a9fa">drag_pan</i>Drehen mit Maus</span>
+        <span style="opacity:0.35">·</span>
+        <span style="display:inline-flex;align-items:center;gap:5px"><i class="ms" style="font-size:14px;color:#76a9fa">touch_app</i>Öffnen-Button klicken</span>
+      </div>
       <!-- 3D-Vorschau für Haustür (iframe, embed-Modus) -->
       <div id="haus3d-wrap" style="display:none;position:absolute;inset:0;z-index:10;border-radius:var(--r-md);overflow:hidden">
         <iframe id="haus3d-frame" src="about:blank" style="width:100%;height:100%;border:none;display:block" allowfullscreen></iframe>
@@ -8771,6 +8787,19 @@ function sendHaus3dColor(faKey) {
   );
 }
 
+// 3D-Hinweis-Pille unten in der Vorschau: anzeigen wenn ein 3D-iframe aktiv ist
+function _show3dHint(visible) {
+  const hint = document.getElementById('prev-3d-hint');
+  if (!hint) return;
+  hint.style.display = visible ? 'flex' : 'none';
+  // Pulse-Animation auf Öffnen-Button beim ersten Erscheinen, damit User checkt: hier klicken
+  const btn = document.getElementById('window-open-btn');
+  if (btn && visible && !btn.dataset.pulsed) {
+    btn.dataset.pulsed = '1';
+    btn.classList.add('btn-pulse-attn');
+    setTimeout(() => btn.classList.remove('btn-pulse-attn'), 5200);
+  }
+}
 // 3D-iframe für Fenster rendern — analog Haustür, mit Live-Farb-/Glas-Updates
 // Button-Label je nach Produkt: Fenster / Schiebetür / Haustür / Balkontür
 function _openBtnLabels(prod) {
@@ -8814,6 +8843,7 @@ function _renderBalkontuer3d() {
   const wrap  = document.getElementById('balkon3d-wrap');
   const frame = document.getElementById('balkon3d-frame');
   if (!wrap || !frame) return;
+  _show3dHint(true);
 
   const _ck    = HAUS3D_COLOR_MAP[S.fa] || 'anthrazitgrau';
   const isWood = HAUS3D_WOOD_KEYS.has(_ck);
@@ -8854,6 +8884,7 @@ function _renderFenster3d() {
   const wrap  = document.getElementById('fenster3d-wrap');
   const frame = document.getElementById('fenster3d-frame');
   if (!wrap || !frame) return;
+  _show3dHint(true);
 
   const _ck    = HAUS3D_COLOR_MAP[S.fa] || 'anthrazitgrau';   // Default Anthrazit (Sarah 17.05.)
   const isWood = HAUS3D_WOOD_KEYS.has(_ck);
@@ -8900,6 +8931,7 @@ function _renderHaustuer3d(previewView) {
   const haus3dWrap  = document.getElementById('haus3d-wrap');
   const haus3dFrame = document.getElementById('haus3d-frame');
   if (!haus3dWrap || !haus3dFrame) return;
+  _show3dHint(true);
 
   const _mdl   = S.tuerModell || 'florida-lr-inox';
   const _side  = (S.oeff1 === 'dreh-l') ? 'l' : 'r';
@@ -8957,6 +8989,7 @@ function drawPrev() {
       document.getElementById('fenster3d-wrap')?.style && (document.getElementById('fenster3d-wrap').style.display = 'none');
       document.getElementById('balkon3d-wrap')?.style && (document.getElementById('balkon3d-wrap').style.display = 'none');
       if (ph) ph.style.display = 'flex';
+      _show3dHint(false);
       return;
     }
     // HAUSTÜR: kein SVG, sondern 3D-iframe (rechts in Vorschau-Bereich, mit Live-Logik)
