@@ -3,7 +3,7 @@
 // Sobald ein neues Bild kommt, wird es automatisch durch die Pipeline geschickt
 // und unter dem korrekten Namen gespeichert.
 //
-// Sarah lädt Bilder direkt in img/farben/ (oder einen Unterordner _incoming/)
+// Inhaberin lädt Bilder direkt in img/farben/ (oder einen Unterordner _incoming/)
 // Watcher erkennt sie, Pipeline läuft, fertig.
 //
 // Start: node scripts/incoming-watcher.js

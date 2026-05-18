@@ -28,7 +28,7 @@ const KATEGORIEN = [
   { key: 'fenster-sprossen',           label: 'Fenster mit Sprossen',             icon: 'window_open' }
 ];
 
-// Sarah-Update 30.04.2026 v2: Gruppierte Eigenschaften für übersichtlichere Auswahl
+// interner Hinweis.04.2026 v2: Gruppierte Eigenschaften für übersichtlichere Auswahl
 const EIGENSCHAFTEN_GRUPPEN = [
   {
     titel: 'Zustand',
@@ -239,7 +239,7 @@ function setEditModeUI() {
   if (!STATE.editMode) return;
   const btn = document.getElementById('veroeffentlichenBtn');
   if (btn) btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px">save</span> Änderungen speichern';
-  // Kategorie-Wechsel bleibt im Edit-Mode aktiv (Sarah: Kategorie nachträglich korrigierbar)
+  // Kategorie-Wechsel bleibt im Edit-Mode aktiv (Inhaberin: Kategorie nachträglich korrigierbar)
 }
 
 /* ─── Größen-Klasse ─── */
@@ -289,13 +289,13 @@ function groesseLabelDE(code) {
 }
 
 /* ─── Auto-Vorauswahl Größen-Klasse basierend auf Breite × Höhe + Kategorie ─── */
-// Sarah-Regel 28.04.2026:
+// interner Hinweis.04.2026:
 //  1-Flügelig:      Höhe < 1350 → klein, ≥ 1350 → groß | Breite ≤ 1000 → schmal
 //  2-Flügelig:      Höhe < 1350 → klein, ≥ 1350 → groß | Breite ≤ 1600 → schmal
 //  3-Flügelig:      Höhe < 1350 → klein, ≥ 1350 → groß | Breite ≤ 2000 → schmal
 //  Balkontür:       Höhe < 2100 → klein, ≥ 2100 → groß | Breite ≤ 1000 → schmal
 //  Wenn mehrere Klassen gleichzeitig zutreffen → keine Vorauswahl, Hinweis-Text
-//  Festelement / balkontuer-rollo → keine Auto-Voraus (Sarah-Anweisung)
+//  Festelement / balkontuer-rollo → keine Auto-Voraus (Inhaberin-Anweisung)
 function autoVorauswahlGroesse() {
   STATE.groesseHinweis = [];
   if (!STATE.kategorie) { setGroesseUI(); return; }
@@ -446,7 +446,7 @@ function rendereKategorien() {
 
 function rendereEigenschaften() {
   const wrap = document.getElementById('eigenschaftenWrap');
-  // Sarah-Refactor 30.04.2026 v2: Gruppen-Header für übersichtliche Auswahl
+  // Inhaberin-Refactor 30.04.2026 v2: Gruppen-Header für übersichtliche Auswahl
   wrap.innerHTML = EIGENSCHAFTEN_GRUPPEN.map(g => `
     <div class="eig-gruppe" style="margin-bottom:18px">
       <div class="flex items-center gap-1.5 mb-2 pb-1.5 border-b" style="border-color:rgba(0,0,0,0.08)">
@@ -496,7 +496,7 @@ function bindeFormHandler() {
     if (match) {
       const breite = parseInt(match[1], 10);
       const hoehe = parseInt(match[2], 10);
-      // Nur ausfüllen wenn Maß-Felder leer sind (nicht überschreiben falls Sarah eigene Werte eingegeben hat)
+      // Nur ausfüllen wenn Maß-Felder leer sind (nicht überschreiben falls Inhaberin eigene Werte eingegeben hat)
       const breiteEl = document.getElementById('formBreite');
       const hoeheEl = document.getElementById('formHoehe');
       if (!breiteEl.value) breiteEl.value = breite;

@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════════════
    Profil-Farben — Interaktive Hover-Vorschau mit ECHTEN Drutex-Bildern
-   Sarah-Wunsch 24.04.2026 (v3): Drutex-URLs direkt eingebunden.
-   Sarah ist Drutex-Händlerin und darf Marketing-Material nutzen.
+   interner Hinweis.04.2026 (v3): Drutex-URLs direkt eingebunden.
+   Inhaberin ist Drutex-Händlerin und darf Marketing-Material nutzen.
    Bilder werden von drutex.de geladen (CDN-gecached, schnell).
    ═══════════════════════════════════════════════════════════════════════ */
 (function () {
