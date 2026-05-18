@@ -137,6 +137,11 @@ NAV_ROOT = """\
                 <span>Rollläden</span>
                 <span class="material-symbols-outlined mega-cat-arrow">chevron_right</span>
               </div>
+              <div class="mega-cat" data-mega="baumaterial">
+                <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">layers</span>
+                <span>Baumaterial</span>
+                <span class="material-symbols-outlined mega-cat-arrow">chevron_right</span>
+              </div>
             </div>
 
             <!-- Rechts: Panels pro Kategorie -->
@@ -286,6 +291,31 @@ NAV_ROOT = """\
                   </a>
                 </div>
               </div>
+
+              <!-- BAUMATERIAL -->
+              <div class="mega-panel" data-mega-panel="baumaterial">
+                <div class="mega-panel-title">Baumaterial &amp; Sonstiges</div>
+                <a href="{p}daemmung-kaufen.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">grid_view</span></div>
+                  <div>
+                    <div class="mega-system-label">Dämmung – ISO-Verbund (neu)</div>
+                    <div class="mega-system-desc">Plattenformat 4450 × 1400 mm · 6,24 m²/Platte · Lagerware Brandenburg</div>
+                  </div>
+                </a>
+                <a href="{p}garagentor-gebraucht-kaufen.html" class="mega-system">
+                  <div class="mega-system-icon"><span class="material-symbols-outlined">garage</span></div>
+                  <div>
+                    <div class="mega-system-label">Garagentore (gebraucht)</div>
+                    <div class="mega-system-desc">Wechselnder Bestand · Sektional · Schwing · Rolltor · Anfrage WhatsApp/Mail</div>
+                  </div>
+                </a>
+                <div class="mega-panel-cta">
+                  <a href="{p}shop.html?cat=daemmung,garagentor-gebraucht" class="all-link">Alle Baumaterial-Angebote im Shop →</a>
+                  <a href="https://wa.me/491717263776" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 bg-primary text-white px-3 py-1.5 rounded-full font-bold text-xs hover:bg-primary-d transition-colors">
+                    <span class="material-symbols-outlined" style="font-size:14px">chat</span> WhatsApp Anfrage
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -323,6 +353,8 @@ NAV_ROOT = """\
           <a href="{p}produkte/balkontueren/iglo-energy.html" class="block py-1">Balkontüren</a>
           <a href="{p}produkte/haustueren/iglo-energy.html" class="block py-1">Haustüren</a>
           <a href="{p}produkte/hebe-schiebetueren/iglo-energy-psk.html" class="block py-1">Schiebetüren</a>
+          <a href="{p}daemmung-kaufen.html" class="block py-1">Dämmung (neu)</a>
+          <a href="{p}garagentor-gebraucht-kaufen.html" class="block py-1">Garagentore (gebraucht)</a>
           <a href="{p}produkte.html" class="block py-1 font-semibold text-white">Alle Produkte →</a>
         </div>
       </details>
@@ -456,6 +488,7 @@ def process_file(filepath, prefix):
 # ─────────────────────────────────────────────
 
 ROOT_PAGES = [
+    "index.html",
     "gebrauchte-fenster-kaufen.html",
     "kunststofffenster-kaufen.html",
     "shop.html",
@@ -469,6 +502,12 @@ ROOT_PAGES = [
     "agb.html",
     "fenster-austauschen-kosten.html",
     "bestelluebersicht.html",
+    "daemmung-kaufen.html",
+    "garagentor-gebraucht-kaufen.html",
+    "konfigurator.html",
+    "impressum.html",
+    "datenschutz.html",
+    "danke.html",
 ]
 
 SUBPAGES_2DEEP = []  # produkte/** — need ../../ prefix
