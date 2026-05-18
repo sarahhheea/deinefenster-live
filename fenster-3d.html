@@ -374,6 +374,26 @@ function buildOuterFrame() {
   return meshes;
 }
 
+// Vertikaler Pfosten zwischen Flügeln (Drutex 80 mm)
+// xCenter: Position der Pfosten-Mitte (Welt-X, Blendrahmen-Koord-System)
+// yTop, yBot: oberer/unterer Anschluss (z.B. an Querpfosten oder Blendrahmen-Innenkante)
+function buildVerticalMullion(xCenter, yBot, yTop) {
+  const h = yTop - yBot;
+  const yCenter = (yTop + yBot) / 2;
+  const fzc = FD / 2;
+  return bx(xCenter, yCenter, fzc, MULLION_T, h, FD, frameMat);
+}
+
+// Horizontaler Pfosten für Oberlicht/Unterlicht-Trennung
+// yCenter: Pfosten-Höhe (Welt-Y)
+// xLeft, xRight: linker/rechter Anschluss
+function buildHorizontalMullion(yCenter, xLeft, xRight) {
+  const w = xRight - xLeft;
+  const xCenter = (xLeft + xRight) / 2;
+  const fzc = FD / 2;
+  return bx(xCenter, yCenter, fzc, w, MULLION_T, FD, frameMat);
+}
+
 // ══════════════════════════════════════════════
 // buildWindow — Fenstergeometrie aufbauen
 // Koordinaten: (0,0) = Blendrahmen unten-links
