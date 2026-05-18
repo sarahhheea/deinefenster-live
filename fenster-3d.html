@@ -345,6 +345,35 @@ function nut(x1, y1, x2, y2, faceZ, mat) {
   return m;
 }
 
+// Außenrahmen (Blendrahmen) — 4 Stäbe + Profilnuten
+// Kein Sash darin, nur statische Geometrie. Wird in winGroup hinzugefügt.
+function buildOuterFrame() {
+  const meshes = [];
+  const fzc = FD / 2;
+  const ffz = FD;
+
+  // 4 Stäbe (oben, unten, links, rechts)
+  meshes.push(bx(FW/2,        FRT/2,        fzc, FW,          FRT,        FD, frameMat));
+  meshes.push(bx(FW/2,        FH - FRT/2,   fzc, FW,          FRT,        FD, frameMat));
+  meshes.push(bx(FRT/2,       FH/2,         fzc, FRT,         FH - 2*FRT, FD, frameMat));
+  meshes.push(bx(FW - FRT/2,  FH/2,         fzc, FRT,         FH - 2*FRT, FD, frameMat));
+
+  // Profilnut innen (nahe Falz)
+  const fni = FRT - 0.012;
+  meshes.push(nut(fni,        fni,         FW - fni,    fni,         ffz, subtleNutMat));
+  meshes.push(nut(fni,        FH - fni,    FW - fni,    FH - fni,    ffz, subtleNutMat));
+  meshes.push(nut(fni,        fni,         fni,         FH - fni,    ffz, subtleNutMat));
+  meshes.push(nut(FW - fni,   fni,         FW - fni,    FH - fni,    ffz, subtleNutMat));
+  // Profilnut außen
+  const fno = 0.012;
+  meshes.push(nut(fno,        fno,         FW - fno,    fno,         ffz, subtleNutMat));
+  meshes.push(nut(fno,        FH - fno,    FW - fno,    FH - fno,    ffz, subtleNutMat));
+  meshes.push(nut(fno,        fno,         fno,         FH - fno,    ffz, subtleNutMat));
+  meshes.push(nut(FW - fno,   fno,         FW - fno,    FH - fno,    ffz, subtleNutMat));
+
+  return meshes;
+}
+
 // ══════════════════════════════════════════════
 // buildWindow — Fenstergeometrie aufbauen
 // Koordinaten: (0,0) = Blendrahmen unten-links
@@ -376,24 +405,8 @@ function buildWindow() {
   // Helper für Sash-Meshes: x-Position relativ zur Scharnier-Achse (= absolute - x0)
   const sx = (absX) => absX - x0;
 
-  // ── Blendrahmen — 4 Stäbe (bleiben in winGroup, statisch) ──
-  winGroup.add(bx(FW/2,          FRT/2,         fzc, FW,           FRT,         FD, frameMat));
-  winGroup.add(bx(FW/2,          FH - FRT/2,    fzc, FW,           FRT,         FD, frameMat));
-  winGroup.add(bx(FRT/2,         FH/2,           fzc, FRT,          FH - 2*FRT,  FD, frameMat));
-  winGroup.add(bx(FW - FRT/2,    FH/2,           fzc, FRT,          FH - 2*FRT,  FD, frameMat));
-
-  // Profilnut Blendrahmen — innere Linie nahe Falz
-  const fni = FRT - 0.012;
-  winGroup.add(nut(fni, fni, FW - fni, fni, ffz, subtleNutMat));
-  winGroup.add(nut(fni, FH - fni, FW - fni, FH - fni, ffz, subtleNutMat));
-  winGroup.add(nut(fni, fni, fni, FH - fni, ffz, subtleNutMat));
-  winGroup.add(nut(FW - fni, fni, FW - fni, FH - fni, ffz, subtleNutMat));
-  // Zweite subtile Linie näher zur Außenkante — mehr Profil-Tiefe
-  const fno = 0.012;
-  winGroup.add(nut(fno, fno, FW - fno, fno, ffz, subtleNutMat));
-  winGroup.add(nut(fno, FH - fno, FW - fno, FH - fno, ffz, subtleNutMat));
-  winGroup.add(nut(fno, fno, fno, FH - fno, ffz, subtleNutMat));
-  winGroup.add(nut(FW - fno, fno, FW - fno, FH - fno, ffz, subtleNutMat));
+  // ── Blendrahmen (statisch in winGroup) ──
+  buildOuterFrame().forEach(m => winGroup.add(m));
 
   // FALZ-DICHTUNG (schwarz, umlaufend um Flügel) — klare Trennung Rahmen|Flügel
   const sealW = 0.005;
