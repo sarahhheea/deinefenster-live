@@ -5127,6 +5127,8 @@ function pickProd(el) {
     setPreviewView('inn');
     // Sinnvolle Standard-Maße für Balkontür (verhindert nicht-tür-ähnliche Vorschau)
     if (S.hMm / S.bMm < 1.5) { S.hMm = 2200; S.bMm = 900; }
+    // Default-Farbe für Balkontür-3D-Vorschau: Anthrazit (Sarah-Wunsch 18.05.2026)
+    if (!S._faChosen) S.fa = 'anthrazit';
   } else if (S.prod === 'kunststoff') {
     // Fenster-Maße zurücksetzen wenn sie von Tür/Balkontür-Wechsel stammen
     if (S.hMm >= 1800) { S.hMm = 1200; S.bMm = 1000; }
@@ -9314,18 +9316,25 @@ function _renderBalkontuer3d() {
   const _ck    = HAUS3D_COLOR_MAP[S.fa] || 'anthrazitgrau';
   const isWood = HAUS3D_WOOD_KEYS.has(_ck);
   const _side  = (S.oeff1 === 'dreh-l' || S.oeff1 === 'dk-l') ? 'l' : 'r';
+  const _layout = S.fluegel || '1-fluegel';
+  const _sashes = [S.oeff1, S.oeff2].filter(Boolean);
+  // 2-Flügel → multi-Variante, sonst 1-Flügel-Standard
+  const _isMulti = /^2-/.test(_layout);
+  const _src3d = _isMulti ? 'balkontuer-3d-multi.html' : 'balkontuer-3d.html';
 
   wrap.style.display = 'block';
 
-  const _isLoaded = frame.src.includes('balkontuer-3d');
-  if (!_isLoaded) {
-    frame.src = `/balkontuer-3d.html?embed&v=20260518-1&color=${_ck}&side=${_side}`;
+  const _wantsReload = !frame.src.includes(_src3d);
+  if (_wantsReload) {
+    frame.src = `/${_src3d}?embed&v=20260518-2&color=${_ck}&side=${_side}&layout=${_layout}`;
     frame.onload = () => {
       const cw = frame.contentWindow;
       if (!cw) return;
       cw.dispatchEvent(new Event('resize'));
       cw.postMessage({
         type: 'update',
+        layout: _layout,
+        sashes: _sashes,
         color: isWood ? null : _ck,
         wood:  isWood ? _ck  : null,
         glass: S.glasdekor || 'klar',
@@ -9337,6 +9346,8 @@ function _renderBalkontuer3d() {
     if (cw) {
       cw.postMessage({
         type: 'update',
+        layout: _layout,
+        sashes: _sashes,
         color: isWood ? null : _ck,
         wood:  isWood ? _ck  : null,
         glass: S.glasdekor || 'klar',
