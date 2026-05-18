@@ -105,13 +105,19 @@ function setupLoggedInUI() {
   if (adminFab) adminFab.style.display = 'flex';
 }
 
+/* ─── Feste Zusatz-Kategorien (immer im Filter sichtbar, auch wenn nicht im Sheet) ─── */
+const FIXED_KATEGORIEN = {
+  'daemmung': 'Dämmung',
+  'garagentor-gebraucht': 'Garagentor (gebraucht)'
+};
+
 /* ─── Daten laden (aus Google Sheets) ─── */
 async function loadProdukte() {
   try {
     const data = await sheetsGet('produkte');
 
-    STATE.kategorien = data.kategorien || {};
-    STATE.kategorienListe = Object.entries(data.kategorien || {})
+    STATE.kategorien = { ...(data.kategorien || {}), ...FIXED_KATEGORIEN };
+    STATE.kategorienListe = Object.entries(STATE.kategorien)
       .map(([key, label]) => ({ key, label }));
 
     const sheetsProdukte = (data.produkte || []).map(p => ({
@@ -165,7 +171,7 @@ async function loadProdukteFromJson() {
     const data = await res.json();
     STATE.produkte = data.produkte || [];
     STATE.metadaten = data.filter_metadaten || berechneMetadaten(STATE.produkte);
-    STATE.kategorien = data.kategorien || {};
+    STATE.kategorien = { ...(data.kategorien || {}), ...FIXED_KATEGORIEN };
   } catch (err) {
     console.error('JSON-Fallback auch fehlgeschlagen:', err);
     STATE.produkte = [];
