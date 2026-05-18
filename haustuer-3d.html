@@ -710,33 +710,62 @@ function buildInnenBeschlag() {
   pzSlot.position.set(KX, KY_LOCK - 0.005, DD + PLATE_THK + 0.003);
   doorGroup.add(pzSlot);
 
-  // Drücker-Rosette/Nuss
-  const nut2 = new THREE.Mesh(new THREE.CylinderGeometry(0.011, 0.011, 0.006, 20), handleMat);
-  nut2.rotation.x = Math.PI / 2;
-  nut2.position.set(KX, KY_HANDLE, DD + PLATE_THK + 0.003);
-  doorGroup.add(nut2);
-
-  // Drücker 30A: U-Form (Hals raus, Bügel zur Türmitte)
-  const HANDLE_L = 0.130, NECK_L = 0.025, HANDLE_R = 0.0085;
-  const neck = new THREE.Mesh(
-    new THREE.CylinderGeometry(HANDLE_R, HANDLE_R, NECK_L, 16), handleMat
+  // Drücker-Rosette — größer & prominenter (typische Drutex-Innenklinke, Hoppe-Stil)
+  const ROSETTE_R   = 0.024;
+  const ROSETTE_THK = 0.006;
+  const rosette = new THREE.Mesh(
+    new THREE.CylinderGeometry(ROSETTE_R, ROSETTE_R, ROSETTE_THK, 28), handleMat
   );
-  neck.rotation.x = Math.PI / 2;
-  neck.position.set(KX, KY_HANDLE, DD + PLATE_THK + 0.006 + NECK_L / 2);
-  neck.castShadow = true;
-  doorGroup.add(neck);
+  rosette.rotation.x = Math.PI / 2;
+  rosette.position.set(KX, KY_HANDLE, DD + PLATE_THK + ROSETTE_THK / 2 + 0.0005);
+  rosette.castShadow = true;
+  doorGroup.add(rosette);
 
-  const bow = new THREE.Mesh(
-    new THREE.CylinderGeometry(HANDLE_R, HANDLE_R, HANDLE_L, 16), handleMat
+  // Innere Nuss/Vierkant-Aufnahme (kleine dunkle Bohrung) — Detail an der Rosette
+  const nutHole = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.005, 0.005, 0.002, 12),
+    new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.9 })
   );
-  bow.rotation.z = Math.PI / 2;
-  bow.position.set(KX - HANDLE_L / 2, KY_HANDLE, DD + PLATE_THK + 0.006 + NECK_L);
-  bow.castShadow = true;
-  doorGroup.add(bow);
+  nutHole.rotation.x = Math.PI / 2;
+  nutHole.position.set(KX, KY_HANDLE, DD + PLATE_THK + ROSETTE_THK + 0.0015);
+  doorGroup.add(nutHole);
 
-  const tip = new THREE.Mesh(new THREE.SphereGeometry(HANDLE_R, 16, 12), handleMat);
-  tip.position.set(KX - HANDLE_L, KY_HANDLE, DD + PLATE_THK + 0.006 + NECK_L);
-  doorGroup.add(tip);
+  // KLINKE (Lever): smooth L-Form — kurzer Hals raus, horizontaler Hebel
+  // nach links (Richtung Bänder), Ende leicht nach unten abgewinkelt.
+  // Entspricht dem Standard-Drutex-/Hoppe-Drücker auf der Innenseite.
+  const LEVER_R       = 0.0095;
+  const LEVER_BASE_Z  = DD + PLATE_THK + ROSETTE_THK + 0.0015;
+  const LEVER_AXIS_Z  = LEVER_BASE_Z + 0.018;
+  const LEVER_END_X   = KX - 0.118;
+  const LEVER_END_Y   = KY_HANDLE - 0.022;
+
+  const leverPath = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(KX,           KY_HANDLE,    LEVER_BASE_Z),
+    new THREE.Vector3(KX - 0.012,   KY_HANDLE,    LEVER_BASE_Z + 0.010),
+    new THREE.Vector3(KX - 0.035,   KY_HANDLE,    LEVER_AXIS_Z),
+    new THREE.Vector3(KX - 0.090,   KY_HANDLE,    LEVER_AXIS_Z),
+    new THREE.Vector3(LEVER_END_X + 0.005, KY_HANDLE - 0.006, LEVER_AXIS_Z - 0.002),
+    new THREE.Vector3(LEVER_END_X,  LEVER_END_Y,  LEVER_AXIS_Z - 0.004),
+  ], false, 'catmullrom', 0.5);
+  const leverGeom = new THREE.TubeGeometry(leverPath, 48, LEVER_R, 18, false);
+  const lever = new THREE.Mesh(leverGeom, handleMat);
+  lever.castShadow = true;
+  doorGroup.add(lever);
+
+  // Endkappe am Tip (rundet den Hebelabschluss)
+  const tipCap = new THREE.Mesh(new THREE.SphereGeometry(LEVER_R, 18, 14), handleMat);
+  tipCap.position.set(LEVER_END_X, LEVER_END_Y, LEVER_AXIS_Z - 0.004);
+  tipCap.castShadow = true;
+  doorGroup.add(tipCap);
+
+  // Übergang Rosette → Lever (kleiner Sockel, damit der Schaft nicht "in der Luft" wirkt)
+  const stem = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.012, 0.014, 0.008, 20), handleMat
+  );
+  stem.rotation.x = Math.PI / 2;
+  stem.position.set(KX, KY_HANDLE, DD + PLATE_THK + ROSETTE_THK + 0.004);
+  stem.castShadow = true;
+  doorGroup.add(stem);
 }
 
 function setModel(key) {

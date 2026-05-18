@@ -283,6 +283,31 @@ const GH = SH - 2 * FST - 2 * SBW;  // 0.956
 // Flügel steht 5mm vor dem Blendrahmen hervor (Falz)
 const SASH_DZ = 0.022;   // 22 mm Aufkantung — starke 3D-Trennung Rahmen|Flügel
 
+// ══════════════════════════════════════════════
+// LAYOUT-PARSER — wandelt fluegel-Key in Geometry-Spec
+// ══════════════════════════════════════════════
+const LICHTE_H = 0.300;   // Oberlicht/Unterlicht Höhe (300 mm)
+const MULLION_T = 0.080;  // Pfosten-Stärke (80 mm Drutex)
+
+function parseLayout(key) {
+  const k = key || '1-fluegel';
+  const m = k.match(/^(\d)-(fluegel|oberlicht|unterlicht|ober-unter)$/);
+  if (!m) return { cols: 1, hasOber: false, hasUnter: false };
+  return {
+    cols: parseInt(m[1], 10),
+    hasOber: m[2] === 'oberlicht' || m[2] === 'ober-unter',
+    hasUnter: m[2] === 'unterlicht' || m[2] === 'ober-unter',
+  };
+}
+
+// Default-Sash-State pro Aufteilung (Drutex-Standard)
+function defaultSashes(cols) {
+  if (cols === 1) return ['dk-r'];
+  if (cols === 2) return ['dk-l', 'dk-r'];
+  if (cols === 3) return ['dk-l', 'fest', 'dk-r'];
+  return ['dk-r'];
+}
+
 const winGroup  = new THREE.Group();
 const sashGroup = new THREE.Group();   // Flügel — rotiert um linke Scharnier-Achse zum Öffnen
 sashGroup.position.set(x0, 0, 0);      // Pivot = linker Scharnier-Rand (x0 in winGroup-Koords)

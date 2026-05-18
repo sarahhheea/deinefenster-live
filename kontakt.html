@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<link rel="icon" type="image/svg+xml" href="img/logo/deinefenster-mark.svg"/>
+<link rel="icon" type="image/png" sizes="32x32" href="img/logo/favicon-32.png?v=20260518"/>
+<link rel="icon" type="image/png" sizes="180x180" href="img/logo/deinefenster-profile-720.png?v=20260518"/>
 <title>Kontakt — Fensterhandel Christ Brandenburg | DeineFenster.de</title>
 <meta name="description" content="Fensterhandel Christ Kontakt: Telefon 03381/214 83 73, E-Mail info@baustoffchrist.de. Standort Brandenburg an der Havel. Hofverkauf Freitag 10–17 Uhr."/>
 <meta name="keywords" content="Fensterhandel Christ Kontakt, Fensterhandel Christ Brandenburg, Fenster Brandenburg an der Havel, Gebrauchte Fenster Brandenburg, DeineFenster Kontakt, Telefon Fenster Brandenburg"/>
@@ -955,6 +956,32 @@
       '', 'Datum: ' + datum,
     ].join('\n');
     try {
+      const autoBody = [
+        'Hallo ' + name + ',',
+        '',
+        'vielen Dank für Ihre Anfrage über DeineFenster.de.',
+        'Wir haben Ihre Nachricht erhalten und melden uns innerhalb von 1–2 Werktagen bei Ihnen.',
+        '',
+        'Ihre Anfrage-Nummer: ' + offerId,
+        '',
+        '── Ihre Nachricht ──',
+        msg,
+        '────────────────────',
+        '',
+        'Bei dringenden Fragen erreichen Sie uns auch direkt:',
+        'Telefon: 03381 7039998',
+        'WhatsApp: 0171 7263776',
+        'Adresse: Fensterhandel Christ, Werner-Seelenbinder-Straße 76, 14772 Brandenburg an der Havel',
+        '',
+        'Öffnungszeiten: Mo–Fr 09:00–17:00 Uhr · Sa 09:00–12:00 Uhr',
+        '',
+        'Viele Grüße',
+        'Ihr Team von DeineFenster.de',
+        'Fensterhandel Christ · Inhaber Kersten Christ',
+        '',
+        '──',
+        'Diese E-Mail wurde automatisch generiert. Sie wird beantwortet, sobald wir Ihre Anfrage bearbeitet haben.'
+      ].join('\n');
       await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
@@ -969,6 +996,12 @@
           'Telefon': tel || '–',
           'Nachricht': msg,
           'Datum': datum,
+          // Bestätigungsmail an den Kunden (Web3Forms Autoresponse)
+          autoresponse: {
+            subject: 'Wir haben Ihre Anfrage erhalten — DeineFenster.de',
+            from_name: 'DeineFenster.de · Fensterhandel Christ',
+            message: autoBody
+          }
         }),
       });
       ok.classList.remove('hidden');
