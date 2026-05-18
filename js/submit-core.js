@@ -1,6 +1,6 @@
 // ════════════════════════════════════════════════════════════════
 // SUBMIT-CORE — gemeinsame Angebots-Absende-Logik
-// Sarah-Refaktor 21.04.2026 (Variante C sauber): Formular + Submit
+// Inhaberin-Refaktor 21.04.2026 (Variante C sauber): Formular + Submit
 // leben jetzt auf bestelluebersicht.html. Diese Datei wird von beiden
 // Seiten geladen — Konfigurator lädt es nicht zwingend, aber falls nötig.
 // ════════════════════════════════════════════════════════════════
@@ -207,7 +207,7 @@
         localStorage.setItem('df_deals', JSON.stringify(existing));
       } catch (e) { console.warn('localStorage write failed', e); }
 
-      // Email-Template für Sarah
+      // Email-Template für Inhaberin
       const konfRow = (label, val) =>
         `<tr><td style="padding:5px 0;border-bottom:1px solid #e0e4f0;font-size:14px;color:#424751;width:40%">${label}</td>
              <td style="padding:5px 0;border-bottom:1px solid #e0e4f0;font-size:14px;font-weight:700;color:#161c27">${val}</td></tr>`;
@@ -359,8 +359,8 @@
 </td></tr></table>
 </body></html>`;
 
-      // ── Mail an Sarah über Web3Forms (direkt, kein Worker) ────────────
-      // Kunden bekommen keine automatische Auto-Reply — Sarah antwortet
+      // ── Mail an Inhaberin über Web3Forms (direkt, kein Worker) ────────────
+      // Kunden bekommen keine automatische Auto-Reply — Inhaberin antwortet
       // persönlich. Web3Forms Free hat keine Auto-Reply.
       try {
         const positionen = cart.map((item, idx) =>

@@ -10,7 +10,7 @@ const STATE = {
   produkte: [],            // alle Produkte aus JSON
   metadaten: null,         // filter_metadaten aus JSON
   kategorien: {},          // kategorie-key → Anzeigename
-  loggedIn: false,         // wahr wenn Sarah/Mitarbeiter eingeloggt — zeigt Druck-Icons
+  loggedIn: false,         // wahr wenn Inhaberin/Mitarbeiter eingeloggt — zeigt Druck-Icons
   filter: {
     zustand: new Set(),
     material: new Set(),
@@ -105,7 +105,7 @@ function setupLoggedInUI() {
   if (adminFab) adminFab.style.display = 'flex';
 }
 
-/* ─── Hauptgruppen (Sarah-Wunsch 18.05.2026: Untertypen zu Eigenschaften)
+/* ─── Hauptgruppen (interner Hinweis.05.2026: Untertypen zu Eigenschaften)
        Filter zeigt nur diese 7 Hauptgruppen — Sub-Kategorien wie
        "fenster-1fluegel" werden über kategorieZuGruppe() gemappt. ─── */
 const FIXED_KATEGORIEN = {
@@ -153,7 +153,7 @@ async function loadProdukte() {
   try {
     const data = await sheetsGet('produkte');
 
-    // Nur Hauptgruppen (Sarah-Wunsch 18.05.2026 — Sub-Kategorien wandern zu Eigenschaften)
+    // Nur Hauptgruppen (interner Hinweis.05.2026 — Sub-Kategorien wandern zu Eigenschaften)
     STATE.kategorien = { ...FIXED_KATEGORIEN };
     STATE.kategorienListe = Object.entries(STATE.kategorien)
       .map(([key, label]) => ({ key, label }));
@@ -257,7 +257,7 @@ function berechneMetadaten(produkte) {
 
 /* ─── Filter-Sidebar dynamisch ─── */
 function baueFilterSidebar() {
-  // Reihenfolge der Hauptgruppen (Sarah-Wunsch 18.05.2026: Untertypen wandern zu Eigenschaften)
+  // Reihenfolge der Hauptgruppen (interner Hinweis.05.2026: Untertypen wandern zu Eigenschaften)
   const katWrap = document.getElementById('filterKategorien');
   const ORDER = ['fenster', 'balkontuer', 'haustuer', 'schiebetuer', 'daemmung', 'baumaterialien', 'garagentor-gebraucht'];
   const renderItem = (key, label) => {
@@ -1373,7 +1373,7 @@ function groesseLabel(code) {
   return ({klein:'Klein', schmal:'Schmal', normal:'Normal', hoch:'Hoch', gross:'Groß'})[code] || code;
 }
 
-/* Öffnungsart-Anzeige mit Griff-Hinweis (Sarah-Wunsch 28.04.2026)
+/* Öffnungsart-Anzeige mit Griff-Hinweis (interner Hinweis.04.2026)
    Damit Kunden im Shop sofort sehen wo der Griff sitzt. */
 function oeffnungsartLabel(code) {
   const map = {
@@ -1418,7 +1418,7 @@ function eigenschaftAnzeige(code) {
     '3-fach-verglasung': '3-fach-Verglasung',
     'rc2': 'RC2-Sicherheit',
     'rc3': 'RC3-Sicherheit',
-    // Bauart-Tags (abgeleitet aus kategorie_key, Sarah-Wunsch 18.05.2026)
+    // Bauart-Tags (abgeleitet aus kategorie_key, interner Hinweis.05.2026)
     'einfluegelig': 'Einflügelig',
     'zweifluegelig': 'Zweiflügelig',
     'dreifluegelig': 'Dreiflügelig',

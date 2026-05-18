@@ -1,10 +1,10 @@
 /**
- * DeineFenster.de — Cloudflare Worker: Claude API Proxy
+ * DeineFenster.de — Cloudflare Worker: AI API Proxy
  *
  * DEPLOYMENT:
  * 1. Auf https://workers.cloudflare.com einloggen
  * 2. "Create Worker" → diesen Code einfügen → "Save and Deploy"
- * 3. Settings → Variables → Secret hinzufügen: Name = CLAUDE_API_KEY, Wert = dein Anthropic API Key
+ * 3. Settings → Variables → Secret hinzufügen: Name = CLAUDE_API_KEY, Wert = dein  API Key
  * 4. Worker-URL in js/chatbot.js bei WORKER_URL eintragen
  *
  * API Key erstellen: https://console.anthropic.com → API Keys → Create Key
@@ -77,7 +77,7 @@ export default {
       messages: (body.messages || []).slice(-10), // Max 10 Nachrichten
     };
 
-    // ── Claude API aufrufen ────────────────────────────────────────────────────
+    // ── AI API aufrufen ────────────────────────────────────────────────────
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {

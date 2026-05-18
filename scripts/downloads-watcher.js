@@ -2,7 +2,7 @@
 // Downloads Watcher — überwacht ~/Downloads auf neue Bilder
 // und verarbeitet sie automatisch durch die Pipeline
 //
-// Workflow: Sarah lädt Bild in Higgsfield runter → Watcher erkennt es →
+// Workflow: Inhaberin lädt Bild in Higgsfield runter → Watcher erkennt es →
 //           Pipeline läuft → Bild landet in img/farben/ mit korrektem Namen
 //
 // Start: node scripts/downloads-watcher.js

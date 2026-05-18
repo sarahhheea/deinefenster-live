@@ -3,12 +3,12 @@
  * =========================
  * Liest generation-plan.json und generiert alle Bilder eines Batches automatisch.
  *
- * Verwendung (Claude Code Playwright-Session):
- *   1. Sarah loggt sich in Higgsfield ein, Toggle ist GRÜN
- *   2. Claude ruft dieses Script als Referenz für den Ablauf auf
- *   3. Claude führt die Schritte unten für jeden Eintrag durch
+ * Verwendung (AI Code Playwright-Session):
+ *   1. Inhaberin loggt sich in Higgsfield ein, Toggle ist GRÜN
+ *   2. AI ruft dieses Script als Referenz für den Ablauf auf
+ *   3. AI führt die Schritte unten für jeden Eintrag durch
  *
- * PFLICHT-REGELN (CLAUDE.md):
+ * PFLICHT-REGELN (Projektdoku):
  *   - Modell: Nano Banana 2
  *   - Toggle muss GRÜN sein vor jedem Generate
  *   - Balance VOR und NACH jedem Batch prüfen
@@ -19,7 +19,7 @@
 const plan = require('./generation-plan.json');
 
 // ─────────────────────────────────────────────
-// ALLE PROMPTS EXPANDIERT (für Claude zum Ablesen)
+// ALLE PROMPTS EXPANDIERT (für AI zum Ablesen)
 // ─────────────────────────────────────────────
 function expandPrompts(batchKey) {
   const batch = plan.batches[batchKey];
