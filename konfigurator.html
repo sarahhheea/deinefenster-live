@@ -9361,15 +9361,19 @@ function _renderFenster3d() {
   const _sashes = [S.oeff1, S.oeff2, S.oeff3].filter(Boolean);
   const _oberlicht  = S.oberlichtOeff  || 'fest';
   const _unterlicht = S.unterlichtOeff || 'fest';
+  // 1-Flügel-Aufteilungen → alte fenster-3d.html (ursprünglicher Look)
+  // Multi-Flügel (2+/3+) → fenster-3d-multi.html (mit Pfosten + Griff je Öffnungsart)
+  const _isMulti = /^[23]-/.test(_layout);
+  const _src3d = _isMulti ? 'fenster-3d-multi.html' : 'fenster-3d.html';
 
   // WICHTIG: Wrap erst sichtbar machen — iframe braucht Container-Höhe
   // damit Three.js' resize() korrekte Maße bekommt (sonst Canvas = 0×0 = weiß)
   wrap.style.display = 'block';
 
-  const _isLoaded = frame.src.includes('fenster-3d');
-  if (!_isLoaded) {
-    // Absoluter Pfad + Cache-Buster (Sarah 17.05.2026 — iframe-Cache-Probleme)
-    frame.src = `/fenster-3d.html?embed&v=20260518-1&color=${_ck}&side=${_side}`;
+  // iframe neu laden wenn sich die Quelle ändert (1-Flügel ↔ Multi)
+  const _wantsReload = !frame.src.includes(_src3d);
+  if (_wantsReload) {
+    frame.src = `/${_src3d}?embed&v=20260518-2&color=${_ck}&side=${_side}&layout=${_layout}`;
     frame.onload = () => {
       const cw = frame.contentWindow;
       if (!cw) return;
