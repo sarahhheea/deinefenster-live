@@ -8869,21 +8869,22 @@ function updateOpenBtnLabel(isOpen) {
   btn.innerHTML = `<i class="ms" style="font-size:15px">${icon}</i>${text}`;
   btn.dataset.open = isOpen ? '1' : '0';
 }
-// Fenster öffnen/schließen — sendet postMessage an passenden 3D-iframe (toggleOpen)
+// Öffnen/schließen — sendet postMessage an passenden 3D-iframe (toggleOpen)
 function toggleFensterOpen() {
   const fFrame = document.getElementById('fenster3d-frame');
   const bFrame = document.getElementById('balkon3d-frame');
+  const hFrame = document.getElementById('hst3d-frame');
   const btn = document.getElementById('window-open-btn');
   const isOpen = btn && btn.dataset.open === '1';
-  // Fenster
   if (fFrame && fFrame.contentWindow && fFrame.src.includes('fenster-3d')) {
     fFrame.contentWindow.postMessage({ type: 'toggleOpen' }, '*');
   }
-  // Balkontür (eigener iframe)
   if (bFrame && bFrame.contentWindow && bFrame.src.includes('balkontuer-3d')) {
     bFrame.contentWindow.postMessage({ type: 'toggleOpen' }, '*');
   }
-  // Haustür/HST nutzen anderen iframe → kein Toggle hier, aber Label trotzdem aktualisieren
+  if (hFrame && hFrame.contentWindow && hFrame.src.includes('hst-3d')) {
+    hFrame.contentWindow.postMessage({ type: 'toggleOpen' }, '*');
+  }
   updateOpenBtnLabel(!isOpen);
 }
 
