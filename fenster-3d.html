@@ -394,6 +394,105 @@ function buildHorizontalMullion(yCenter, xLeft, xRight) {
   return bx(xCenter, yCenter, fzc, w, MULLION_T, FD, frameMat);
 }
 
+// Ein Flügel (Sash) — eigener Profilrahmen + Glas + Griff je nach sashState
+// x, y: linke untere Ecke des Sash im Blendrahmen-Koordinatensystem
+// w, h: Sash-Außenmaße
+// sashState: 'fest' | 'kipp' | 'dreh-l' | 'dreh-r' | 'dk-l' | 'dk-r'
+// Liefert: { group: THREE.Group, glasses: Array, handles: Array }
+function buildSash(x, y, w, h, sashState) {
+  const group = new THREE.Group();
+  const szc = FD / 2 + SASH_DZ;
+  const sfz = FD + SASH_DZ;
+  const glasses = [];
+  const handles = [];
+
+  // Sash-Profilrahmen (4 Stäbe relativ zu (x,y))
+  group.add(bx(x + w/2,       y + FST/2,      szc, w,    FST,        FD, sashMat));
+  group.add(bx(x + w/2,       y + h - FST/2,  szc, w,    FST,        FD, sashMat));
+  group.add(bx(x + FST/2,     y + h/2,        szc, FST,  h - 2*FST,  FD, sashMat));
+  group.add(bx(x + w - FST/2, y + h/2,        szc, FST,  h - 2*FST,  FD, sashMat));
+
+  // Profilnuten Flügel
+  const sniL = x + FST * 0.54, sniR = x + w - FST * 0.54;
+  const sniB = y + FST * 0.54, sniT = y + h - FST * 0.54;
+  group.add(nut(sniL, sniB, sniR, sniB, sfz, subtleNutMat));
+  group.add(nut(sniL, sniT, sniR, sniT, sfz, subtleNutMat));
+  group.add(nut(sniL, sniB, sniL, sniT, sfz, subtleNutMat));
+  group.add(nut(sniR, sniB, sniR, sniT, sfz, subtleNutMat));
+  const sniOutL = x + FST * 0.16, sniOutR = x + w - FST * 0.16;
+  const sniOutB = y + FST * 0.16, sniOutT = y + h - FST * 0.16;
+  group.add(nut(sniOutL, sniOutB, sniOutR, sniOutB, sfz, subtleNutMat));
+  group.add(nut(sniOutL, sniOutT, sniOutR, sniOutT, sfz, subtleNutMat));
+  group.add(nut(sniOutL, sniOutB, sniOutL, sniOutT, sfz, subtleNutMat));
+  group.add(nut(sniOutR, sniOutB, sniOutR, sniOutT, sfz, subtleNutMat));
+
+  // Glas (innerhalb des Sash-Rahmens, mit Spacer-Abstand SBW)
+  const gw = w - 2 * (FST + SBW);
+  const gh = h - 2 * (FST + SBW);
+  const gcx = x + FST + SBW + gw / 2;
+  const gcy = y + FST + SBW + gh / 2;
+  const gm = new THREE.Mesh(new THREE.BoxGeometry(gw, gh, 0.006), glassMat);
+  gm.position.set(gcx, gcy, szc + 0.002);
+  gm.castShadow = true;
+  group.add(gm);
+  glasses.push(gm);
+
+  // Spacer-Rahmen ums Glas
+  const sbz = szc;
+  const sbd = 0.004;
+  group.add(bx(gcx, gcy + gh/2 + SBW/2, sbz, gw + SBW * 2, SBW, sbd, spacerMat));
+  group.add(bx(gcx, gcy - gh/2 - SBW/2, sbz, gw + SBW * 2, SBW, sbd, spacerMat));
+  group.add(bx(gcx - gw/2 - SBW/2, gcy, sbz, SBW, gh, sbd, spacerMat));
+  group.add(bx(gcx + gw/2 + SBW/2, gcy, sbz, SBW, gh, sbd, spacerMat));
+
+  // Griff je nach sashState
+  if (sashState && sashState !== 'fest') {
+    const isKipp = sashState === 'kipp';
+    const isLeft = sashState === 'dreh-r' || sashState === 'dk-r';  // Griff links bei dreh-r/dk-r
+    let hx, hy, hRotZ;
+    if (isKipp) {
+      hx = x + w / 2;
+      hy = y + h - FST * 0.52;
+      hRotZ = Math.PI / 2;
+    } else {
+      hx = isLeft ? x + FST * 0.52 : x + w - FST * 0.52;
+      hy = y + h / 2;
+      hRotZ = 0;
+    }
+    // Schild (Rosette)
+    const rosette = new THREE.Mesh(
+      new THREE.CapsuleGeometry(0.015, 0.070, 6, 22),
+      handleMat
+    );
+    rosette.rotation.z = hRotZ;
+    rosette.scale.set(1.0, 1.0, 0.47);
+    rosette.position.set(hx, hy, sfz + 0.0035);
+    rosette.castShadow = true;
+    rosette.userData.isHandle = true;
+    group.add(rosette);
+    handles.push(rosette);
+
+    // Olive-Griff (Stab)
+    const handle = new THREE.Mesh(
+      new THREE.CapsuleGeometry(0.008, 0.060, 6, 22),
+      handleMat
+    );
+    handle.rotation.z = hRotZ + Math.PI / 2;
+    const dir = isLeft ? -1 : 1;
+    handle.position.set(
+      isKipp ? hx : hx + dir * 0.030,
+      isKipp ? hy + 0.030 : hy,
+      sfz + 0.012
+    );
+    handle.castShadow = true;
+    handle.userData.isHandle = true;
+    group.add(handle);
+    handles.push(handle);
+  }
+
+  return { group, glasses, handles };
+}
+
 // ══════════════════════════════════════════════
 // buildWindow — Fenstergeometrie aufbauen
 // Koordinaten: (0,0) = Blendrahmen unten-links
