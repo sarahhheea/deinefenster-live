@@ -108,6 +108,7 @@ function setupLoggedInUI() {
 /* ─── Feste Zusatz-Kategorien (immer im Filter sichtbar, auch wenn nicht im Sheet) ─── */
 const FIXED_KATEGORIEN = {
   'daemmung': 'Dämmung',
+  'baumaterialien': 'Baumaterialien',
   'garagentor-gebraucht': 'Garagentor (gebraucht)'
 };
 
@@ -208,9 +209,9 @@ function berechneMetadaten(produkte) {
 
 /* ─── Filter-Sidebar dynamisch ─── */
 function baueFilterSidebar() {
-  // Kategorien: Fenster/Türen oben, "Baumaterial"-Subheader trennt Dämmung + Garagentor
+  // Reihenfolge: Fenster → Balkontür → Haustür → Dämmung → Baumaterialien → Garagentore → Rest (Sarah-Wunsch 18.05.2026)
   const katWrap = document.getElementById('filterKategorien');
-  const BAUMATERIAL_KEYS = ['daemmung', 'garagentor-gebraucht'];
+  const SPECIAL_ORDER = ['daemmung', 'baumaterialien', 'garagentor-gebraucht'];
   const renderItem = (key, label) => {
     const count = STATE.produkte.filter(p => p.kategorie === key).length;
     return `
@@ -219,19 +220,20 @@ function baueFilterSidebar() {
         ${count > 0 ? `<span class="count">${count}</span>` : ''}
       </label>`;
   };
-  const main = Object.entries(STATE.kategorien)
-    .filter(([key]) => !BAUMATERIAL_KEYS.includes(key))
-    .map(([key, label]) => renderItem(key, label))
-    .join('');
-  const baumat = BAUMATERIAL_KEYS
-    .filter(k => STATE.kategorien[k])
-    .map(k => renderItem(k, STATE.kategorien[k]))
-    .join('');
-  katWrap.innerHTML = main + (baumat ? `
-    <div style="margin-top:10px;padding-top:8px;border-top:1px solid rgba(118,169,250,0.18);">
-      <div style="font-size:10px;font-weight:800;letter-spacing:0.16em;text-transform:uppercase;color:rgba(118,169,250,0.7);margin:4px 0 4px;padding:0 4px;">Baumaterial</div>
-      ${baumat}
-    </div>` : '');
+  const isFenster = k => k.startsWith('fenster-') || k === 'festelement' || k === 'kellerfenster' || k === 'rundfenster';
+  const isBalkon = k => k.startsWith('balkontuer-');
+  const isHaustuer = k => k === 'haustuer';
+  const isSpecial = k => SPECIAL_ORDER.includes(k);
+
+  const all = Object.entries(STATE.kategorien);
+  const fenster = all.filter(([k]) => isFenster(k)).map(([k, l]) => renderItem(k, l)).join('');
+  const balkon  = all.filter(([k]) => isBalkon(k)).map(([k, l]) => renderItem(k, l)).join('');
+  const haustuer = all.filter(([k]) => isHaustuer(k)).map(([k, l]) => renderItem(k, l)).join('');
+  const special = SPECIAL_ORDER.filter(k => STATE.kategorien[k]).map(k => renderItem(k, STATE.kategorien[k])).join('');
+  const rest = all.filter(([k]) => !isFenster(k) && !isBalkon(k) && !isHaustuer(k) && !isSpecial(k))
+    .map(([k, l]) => renderItem(k, l)).join('');
+
+  katWrap.innerHTML = fenster + balkon + haustuer + special + rest;
 
   // Farben
   const farbWrap = document.getElementById('filterFarben');
@@ -587,14 +589,17 @@ function rendere() {
   const emptyEl = document.getElementById('emptyState');
   const gridEl = document.getElementById('produktGrid');
   if (result.length === 0) {
-    // Spezial-Hinweis wenn Filter Dämmung oder Garagentor aktiv (Bestand wechselt)
+    // Spezial-Hinweis wenn Filter Dämmung / Baumaterialien / Garagentor aktiv (Bestand wechselt)
     const f = STATE.filter.kategorien;
     const isDaemmung = f.has('daemmung');
+    const isBaumat = f.has('baumaterialien');
     const isGaragentor = f.has('garagentor-gebraucht');
-    if ((isDaemmung || isGaragentor) && f.size === 1) {
+    if ((isDaemmung || isBaumat || isGaragentor) && f.size === 1) {
       const sortiment = isDaemmung
-        ? { name: 'ISO-Verbunddämmung', detail: 'Plattenformat 4450 × 1400 mm (6,24 m² pro Platte) · Polen-Import · neu' }
-        : { name: 'gebrauchte Garagentore', detail: 'Sektional · Schwing · Rolltor — Bestand wechselt schnell' };
+        ? { name: 'ISO-Verbunddämmung', detail: 'Rollenformat 4450 × 1400 mm (6,24 m² pro Rolle) · Polen-Import · neu · Preis pro Rolle' }
+        : isGaragentor
+          ? { name: 'gebrauchte Garagentore', detail: 'Sektional · Schwing · Rolltor — Bestand wechselt schnell' }
+          : { name: 'Baumaterialien', detail: 'Sortiment wechselt — fragen Sie was Sie suchen' };
       emptyEl.innerHTML = `
         <span class="material-symbols-outlined" style="font-size:56px;color:rgba(118,169,250,0.45);">inventory_2</span>
         <h3 class="text-xl font-extrabold mt-3" style="color:#e8eeff;">Wir führen ${sortiment.name} ab Lager</h3>
