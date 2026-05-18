@@ -48,16 +48,31 @@ document.addEventListener('DOMContentLoaded', async () => {
   updateCartUI();
 });
 
-/* ─── URL-Parameter Filter (z.B. shop.html?zustand=gebraucht) ─── */
+/* ─── URL-Parameter Filter (z.B. shop.html?zustand=gebraucht oder ?cat=daemmung) ─── */
 function applyUrlFilter() {
   const params = new URLSearchParams(window.location.search);
   const zustand = params.get('zustand');
+  let scrollNeeded = false;
   if (zustand === 'gebraucht' || zustand === 'neu') {
     STATE.filter.zustand.add(zustand);
-    // Checkbox visuell anpassen
     const cb = document.querySelector(`.filter-zustand[value="${zustand}"]`);
     if (cb) cb.checked = true;
-    // Scroll sanft zur Produktliste
+    scrollNeeded = true;
+  }
+  // ?cat=daemmung oder ?cat=garagentor-gebraucht (auch komma-separiert möglich)
+  const cat = params.get('cat');
+  if (cat) {
+    const cats = cat.split(',').map(s => s.trim()).filter(Boolean);
+    cats.forEach(k => {
+      if (STATE.kategorien && STATE.kategorien[k]) {
+        STATE.filter.kategorien.add(k);
+        const cb = document.querySelector(`.filter-kategorie[value="${k}"]`);
+        if (cb) cb.checked = true;
+        scrollNeeded = true;
+      }
+    });
+  }
+  if (scrollNeeded) {
     setTimeout(() => {
       const grid = document.getElementById('produktGrid');
       if (grid) grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -552,6 +567,47 @@ function rendere() {
   const emptyEl = document.getElementById('emptyState');
   const gridEl = document.getElementById('produktGrid');
   if (result.length === 0) {
+    // Spezial-Hinweis wenn Filter Dämmung oder Garagentor aktiv (Bestand wechselt)
+    const f = STATE.filter.kategorien;
+    const isDaemmung = f.has('daemmung');
+    const isGaragentor = f.has('garagentor-gebraucht');
+    if ((isDaemmung || isGaragentor) && f.size === 1) {
+      const sortiment = isDaemmung
+        ? { name: 'ISO-Verbunddämmung', detail: 'Plattenformat 4450 × 1400 mm (6,24 m² pro Platte) · Polen-Import · neu' }
+        : { name: 'gebrauchte Garagentore', detail: 'Sektional · Schwing · Rolltor — Bestand wechselt schnell' };
+      emptyEl.innerHTML = `
+        <span class="material-symbols-outlined" style="font-size:56px;color:rgba(118,169,250,0.45);">inventory_2</span>
+        <h3 class="text-xl font-extrabold mt-3" style="color:#e8eeff;">Wir führen ${sortiment.name} ab Lager</h3>
+        <p class="text-sm mt-1.5 max-w-md mx-auto" style="color:rgba(232,238,255,0.65);">
+          ${sortiment.detail}.<br>
+          Bestand wechselt — bitte aktuelle Verfügbarkeit kurz anfragen.
+        </p>
+        <div class="mt-5 flex flex-wrap items-center justify-center gap-2.5">
+          <a href="https://wa.me/491717263776" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-5 py-2.5 text-sm font-bold" style="border-radius:8px;background:#25D366;color:#fff;text-decoration:none;">
+            <span class="material-symbols-outlined" style="font-size:18px">chat</span> WhatsApp 0171 7263776
+          </a>
+          <a href="mailto:info@baustoffchrist.de" class="inline-flex items-center gap-1.5 px-5 py-2.5 text-sm font-bold" style="border-radius:8px;background:#225eaa;color:#fff;text-decoration:none;">
+            <span class="material-symbols-outlined" style="font-size:18px">mail</span> Anfrage per E-Mail
+          </a>
+          <a href="kontakt.html" class="inline-flex items-center gap-1.5 px-5 py-2.5 text-sm font-bold" style="border-radius:8px;background:transparent;color:#76a9fa;border:1.5px solid rgba(118,169,250,0.5);text-decoration:none;">
+            <span class="material-symbols-outlined" style="font-size:18px">phone</span> Kontakt &amp; Anfahrt
+          </a>
+        </div>`;
+    } else {
+      emptyEl.innerHTML = `
+        <span class="material-symbols-outlined" style="font-size:56px;color:rgba(118,169,250,0.35);">search_off</span>
+        <h3 class="text-xl font-extrabold mt-3" style="color:#e8eeff;">Keine Produkte gefunden</h3>
+        <p class="text-sm mt-1.5 max-w-md mx-auto" style="color:rgba(232,238,255,0.55);">Probier andere Filter oder Maße — oder geh zum <a href="konfigurator.html" style="color:#76a9fa;font-weight:600;text-decoration:underline;">Konfigurator</a> für eine Maßanfertigung.</p>
+        <button id="resetFromEmpty" class="mt-4 inline-flex items-center gap-1.5 px-5 py-2.5 text-sm font-bold" style="border-radius:8px;background:#225eaa;color:#fff;border:none;cursor:pointer;">
+          <span class="material-symbols-outlined" style="font-size:18px">refresh</span>
+          Filter zurücksetzen
+        </button>`;
+      const resetBtn = document.getElementById('resetFromEmpty');
+      if (resetBtn) resetBtn.addEventListener('click', () => {
+        const reset = document.getElementById('resetFilters');
+        if (reset) reset.click();
+      });
+    }
     emptyEl.classList.remove('hidden');
     gridEl.classList.add('hidden');
     return;
