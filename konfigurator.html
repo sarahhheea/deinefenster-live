@@ -1101,6 +1101,7 @@
       html body #haus3d-wrap,
       html body #fenster3d-wrap,
       html body #balkon3d-wrap,
+      html body #hst3d-wrap,
       html body #prev-img-wrap,
       html body #vorschau-container {
         background: transparent !important;
@@ -1124,7 +1125,8 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   html body #prev-wrap iframe,
   html body #haus3d-frame,
   html body #fenster3d-frame,
-  html body #balkon3d-frame {
+  html body #balkon3d-frame,
+  html body #hst3d-frame {
     width: 100% !important;
     height: 100% !important;
     border: none !important;
@@ -1132,7 +1134,8 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   }
   html body #haus3d-wrap,
   html body #fenster3d-wrap,
-  html body #balkon3d-wrap {
+  html body #balkon3d-wrap,
+  html body #hst3d-wrap {
     position: absolute !important;
     inset: 0 !important;
   }
@@ -1618,6 +1621,51 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   @keyframes ph-card-in {
     from { opacity: 0; transform: translateY(30px); }
     to   { opacity: 1; transform: translateY(0); }
+  }
+  /* Hero-Disclaimer: kompakt, links auf Höhe der Überschrift, von links eingleitet */
+  @keyframes ph-disclaimer-slide-in {
+    from { opacity: 0; transform: translateX(-120%); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes ph-disclaimer-slide-in-mobile {
+    from { opacity: 0; transform: translateX(-40px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  #prod-hero .hero-disclaimer {
+    position: absolute;
+    left: clamp(16px, 2.5vw, 36px);
+    top: clamp(105px, 14vh, 150px);
+    width: min(250px, 21vw);
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 12px 13px;
+    border-radius: 11px;
+    background: rgba(220,38,38,0.20);
+    border: 1.5px solid #ef4444;
+    box-shadow: 0 0 0 1px rgba(239,68,68,0.22), 0 6px 20px rgba(220,38,38,0.18);
+    z-index: 2;
+    animation: ph-disclaimer-slide-in 0.75s cubic-bezier(0.22,1,0.36,1) 0.25s both;
+  }
+  #prod-hero .hero-disclaimer .ms {
+    font-size: 19px; color: #fecaca; flex-shrink: 0; line-height: 1; margin-top: 1px;
+  }
+  #prod-hero .hero-disclaimer .hd-body {
+    font-family: 'Manrope', sans-serif;
+    font-size: 11.5px; line-height: 1.45; color: #fee2e2; text-align: left;
+  }
+  #prod-hero .hero-disclaimer .hd-body strong.hd-title {
+    display: block; color: #fff;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 800; letter-spacing: 0.01em;
+    font-size: 12.5px; margin-bottom: 2px;
+  }
+  /* Mobile / schmale Screens: zurück in den Fluss über der Überschrift */
+  @media (max-width: 1100px) {
+    #prod-hero .hero-disclaimer {
+      position: relative; left: auto; top: auto; transform: none;
+      width: min(560px, 100%);
+      margin: 0 auto 4px;
+      animation: ph-disclaimer-slide-in-mobile 0.6s cubic-bezier(0.22,1,0.36,1) 0.15s both;
+    }
   }
   #prod-hero {
     position: fixed; inset: 0; z-index: 100;
@@ -2586,19 +2634,15 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
 
 <!-- ══ PRODUKT-HERO v2 ══ -->
 <div id="prod-hero">
-  <!-- Disclaimer im Hero (Sarah-Wunsch 18.05.2026) — gleicher Inhalt wie body-Hinweis, hier sichtbar auf dem Landing-Screen -->
-  <div role="note" aria-label="Hinweis zum Konfigurator"
-       style="width:min(100%,820px);display:flex;gap:14px;align-items:flex-start;padding:16px 18px;border-radius:12px;
-              background:rgba(220,38,38,0.22);border:2px solid #ef4444;position:relative;z-index:2;
-              box-shadow:0 0 0 1px rgba(239,68,68,0.25), 0 6px 18px rgba(220,38,38,0.18);">
-    <i class="ms f" aria-hidden="true"
-       style="font-size:26px;color:#fecaca;flex-shrink:0;line-height:1;margin-top:1px">construction</i>
-    <div style="font-family:'Manrope',sans-serif;font-size:14px;line-height:1.55;color:#fee2e2;text-align:left">
-      <strong style="display:block;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;letter-spacing:0.01em;font-size:15.5px;margin-bottom:3px">Konfigurator im Aufbau — bitte beachten</strong>
-      Funktionen, Design und Endpreise werden gerade fertiggestellt. Sie können trotzdem schon eine
-      <strong style="color:#fff">unverbindliche</strong> Anfrage senden: wir prüfen Ihre Auswahl persönlich,
-      kalkulieren den exakten Preis und melden uns mit einem <strong style="color:#fff">schriftlichen Angebot per E-Mail</strong>.
-      Durch das Absenden entstehen keine Kosten und kein Kaufvertrag.
+  <!-- Disclaimer im Hero (Sarah-Wunsch 18.05.2026) — kompakte Variante, von links eingleitet -->
+  <div class="hero-disclaimer" role="note" aria-label="Hinweis zum Konfigurator">
+    <i class="ms f" aria-hidden="true">construction</i>
+    <div class="hd-body">
+      <strong class="hd-title">Konfigurator im Aufbau</strong>
+      Funktionen und Endpreise sind noch in Arbeit. Anfragen bleiben
+      <strong style="color:#fff">unverbindlich</strong> — Sie erhalten ein
+      <strong style="color:#fff">schriftliches Angebot per E-Mail</strong>.
+      Keine Kosten, kein Kaufvertrag.
     </div>
   </div>
   <div class="hero-head">
@@ -3788,6 +3832,10 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       <!-- 3D-Vorschau für Balkontür (Drutex Iglo 5 Balkontür) -->
       <div id="balkon3d-wrap" style="display:none;position:absolute;inset:0;z-index:10;border-radius:var(--r-md);overflow:hidden">
         <iframe id="balkon3d-frame" src="about:blank" style="width:100%;height:100%;border:none;display:block" allowfullscreen></iframe>
+      </div>
+      <!-- 3D-Vorschau für Hebe-Schiebetür (Drutex IGLO-HS) -->
+      <div id="hst3d-wrap" style="display:none;position:absolute;inset:0;z-index:10;border-radius:var(--r-md);overflow:hidden">
+        <iframe id="hst3d-frame" src="about:blank" style="width:100%;height:100%;border:none;display:block" allowfullscreen></iframe>
       </div>
       <div id="vorschau-container" style="position:relative;width:100%;height:100%">
         <div id="prev-placeholder" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:28px">
@@ -8839,6 +8887,47 @@ function toggleFensterOpen() {
   updateOpenBtnLabel(!isOpen);
 }
 
+// 3D-iframe für Hebe-Schiebetür (HST) rendern — analog zu Balkontür, eigene hst-3d.html
+function _renderHst3d() {
+  const wrap  = document.getElementById('hst3d-wrap');
+  const frame = document.getElementById('hst3d-frame');
+  if (!wrap || !frame) return;
+
+  const _ck    = HAUS3D_COLOR_MAP[S.fa] || 'anthrazitgrau';
+  const isWood = HAUS3D_WOOD_KEYS.has(_ck);
+  const _side  = (S.oeff1 === 'dreh-l' || S.oeff1 === 'dk-l') ? 'l' : 'r';
+
+  wrap.style.display = 'block';
+
+  const _isLoaded = frame.src.includes('hst-3d');
+  if (!_isLoaded) {
+    frame.src = `/hst-3d.html?embed&v=20260518-1&color=${_ck}&side=${_side}`;
+    frame.onload = () => {
+      const cw = frame.contentWindow;
+      if (!cw) return;
+      cw.dispatchEvent(new Event('resize'));
+      cw.postMessage({
+        type: 'update',
+        color: isWood ? null : _ck,
+        wood:  isWood ? _ck  : null,
+        glass: S.glasdekor || 'klar',
+        side:  _side
+      }, '*');
+    };
+  } else {
+    const cw = frame.contentWindow;
+    if (cw) {
+      cw.postMessage({
+        type: 'update',
+        color: isWood ? null : _ck,
+        wood:  isWood ? _ck  : null,
+        glass: S.glasdekor || 'klar',
+        side:  _side
+      }, '*');
+    }
+  }
+}
+
 // 3D-iframe für Balkontür rendern — analog zu Fenster, eigene balkontuer-3d.html
 function _renderBalkontuer3d() {
   const wrap  = document.getElementById('balkon3d-wrap');
@@ -8989,6 +9078,7 @@ function drawPrev() {
       document.getElementById('haus3d-wrap')?.style && (document.getElementById('haus3d-wrap').style.display = 'none');
       document.getElementById('fenster3d-wrap')?.style && (document.getElementById('fenster3d-wrap').style.display = 'none');
       document.getElementById('balkon3d-wrap')?.style && (document.getElementById('balkon3d-wrap').style.display = 'none');
+      document.getElementById('hst3d-wrap')?.style && (document.getElementById('hst3d-wrap').style.display = 'none');
       if (ph) ph.style.display = 'flex';
       _show3dHint(false);
       return;
@@ -8999,12 +9089,10 @@ function drawPrev() {
       svgWrap.style.display = 'none';
       if (ph)   ph.style.display   = 'none';
       if (wrap) wrap.style.display = 'none';
-      const f3w = document.getElementById('fenster3d-wrap');
-      if (f3w)  f3w.style.display  = 'none';
-      const b3w = document.getElementById('balkon3d-wrap');
-      if (b3w)  b3w.style.display  = 'none';
+      document.getElementById('fenster3d-wrap')?.style && (document.getElementById('fenster3d-wrap').style.display = 'none');
+      document.getElementById('balkon3d-wrap')?.style && (document.getElementById('balkon3d-wrap').style.display = 'none');
+      document.getElementById('hst3d-wrap')?.style && (document.getElementById('hst3d-wrap').style.display = 'none');
       _renderHaustuer3d(previewView);
-      // Gleiche Höhe wie Fenster-3D (Sarah-Wunsch 17.05.2026: identischer Abstand)
       if (prevWrap) prevWrap.style.height = '500px';
       return;
     }
@@ -9013,10 +9101,9 @@ function drawPrev() {
       svgWrap.style.display = 'none';
       if (ph)   ph.style.display   = 'none';
       if (wrap) wrap.style.display = 'none';
-      const h3w = document.getElementById('haus3d-wrap');
-      if (h3w)  h3w.style.display  = 'none';
-      const b3w = document.getElementById('balkon3d-wrap');
-      if (b3w)  b3w.style.display  = 'none';
+      document.getElementById('haus3d-wrap')?.style && (document.getElementById('haus3d-wrap').style.display = 'none');
+      document.getElementById('balkon3d-wrap')?.style && (document.getElementById('balkon3d-wrap').style.display = 'none');
+      document.getElementById('hst3d-wrap')?.style && (document.getElementById('hst3d-wrap').style.display = 'none');
       _renderFenster3d();
       if (prevWrap) prevWrap.style.height = '500px';
       return;
@@ -9026,23 +9113,32 @@ function drawPrev() {
       svgWrap.style.display = 'none';
       if (ph)   ph.style.display   = 'none';
       if (wrap) wrap.style.display = 'none';
-      const h3w = document.getElementById('haus3d-wrap');
-      if (h3w)  h3w.style.display  = 'none';
-      const f3w = document.getElementById('fenster3d-wrap');
-      if (f3w)  f3w.style.display  = 'none';
+      document.getElementById('haus3d-wrap')?.style && (document.getElementById('haus3d-wrap').style.display = 'none');
+      document.getElementById('fenster3d-wrap')?.style && (document.getElementById('fenster3d-wrap').style.display = 'none');
+      document.getElementById('hst3d-wrap')?.style && (document.getElementById('hst3d-wrap').style.display = 'none');
       _renderBalkontuer3d();
+      if (prevWrap) prevWrap.style.height = '500px';
+      return;
+    }
+    // HEBE-SCHIEBETÜR: eigene 3D-Datei (hst-3d.html) — 2 Flügel mit Alu-Schiene + Stoßgriff
+    if (S.prod === 'hst') {
+      svgWrap.style.display = 'none';
+      if (ph)   ph.style.display   = 'none';
+      if (wrap) wrap.style.display = 'none';
+      document.getElementById('haus3d-wrap')?.style && (document.getElementById('haus3d-wrap').style.display = 'none');
+      document.getElementById('fenster3d-wrap')?.style && (document.getElementById('fenster3d-wrap').style.display = 'none');
+      document.getElementById('balkon3d-wrap')?.style && (document.getElementById('balkon3d-wrap').style.display = 'none');
+      _renderHst3d();
       if (prevWrap) prevWrap.style.height = '500px';
       return;
     }
     // Alle anderen Produkte: SVG zeigen, 3D ausblenden
     if (ph)   ph.style.display   = 'none';
     if (wrap) wrap.style.display = 'none';
-    const h3w = document.getElementById('haus3d-wrap');
-    if (h3w)  h3w.style.display  = 'none';
-    const f3w = document.getElementById('fenster3d-wrap');
-    if (f3w)  f3w.style.display  = 'none';
-    const b3w = document.getElementById('balkon3d-wrap');
-    if (b3w)  b3w.style.display  = 'none';
+    document.getElementById('haus3d-wrap')?.style && (document.getElementById('haus3d-wrap').style.display = 'none');
+    document.getElementById('fenster3d-wrap')?.style && (document.getElementById('fenster3d-wrap').style.display = 'none');
+    document.getElementById('balkon3d-wrap')?.style && (document.getElementById('balkon3d-wrap').style.display = 'none');
+    document.getElementById('hst3d-wrap')?.style && (document.getElementById('hst3d-wrap').style.display = 'none');
     svgWrap.style.display = 'block';
     if (prevWrap) prevWrap.style.height = '440px';
     window._kS = S; window._kP = P;
