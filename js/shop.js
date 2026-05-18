@@ -202,16 +202,30 @@ function berechneMetadaten(produkte) {
 
 /* ─── Filter-Sidebar dynamisch ─── */
 function baueFilterSidebar() {
-  // Kategorien
+  // Kategorien: Fenster/Türen oben, "Baumaterial"-Subheader trennt Dämmung + Garagentor
   const katWrap = document.getElementById('filterKategorien');
-  katWrap.innerHTML = Object.entries(STATE.kategorien).map(([key, label]) => {
+  const BAUMATERIAL_KEYS = ['daemmung', 'garagentor-gebraucht'];
+  const renderItem = (key, label) => {
     const count = STATE.produkte.filter(p => p.kategorie === key).length;
     return `
       <label class="filter-option">
         <span class="flex items-center gap-2"><input type="checkbox" class="check filter-kategorie" value="${key}"/><span>${escapeHtml(label)}</span></span>
         ${count > 0 ? `<span class="count">${count}</span>` : ''}
       </label>`;
-  }).join('');
+  };
+  const main = Object.entries(STATE.kategorien)
+    .filter(([key]) => !BAUMATERIAL_KEYS.includes(key))
+    .map(([key, label]) => renderItem(key, label))
+    .join('');
+  const baumat = BAUMATERIAL_KEYS
+    .filter(k => STATE.kategorien[k])
+    .map(k => renderItem(k, STATE.kategorien[k]))
+    .join('');
+  katWrap.innerHTML = main + (baumat ? `
+    <div style="margin-top:10px;padding-top:8px;border-top:1px solid rgba(118,169,250,0.18);">
+      <div style="font-size:10px;font-weight:800;letter-spacing:0.16em;text-transform:uppercase;color:rgba(118,169,250,0.7);margin:4px 0 4px;padding:0 4px;">Baumaterial</div>
+      ${baumat}
+    </div>` : '');
 
   // Farben
   const farbWrap = document.getElementById('filterFarben');
