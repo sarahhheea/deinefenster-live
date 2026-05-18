@@ -1100,6 +1100,7 @@
       }
       html body #haus3d-wrap,
       html body #fenster3d-wrap,
+      html body #balkon3d-wrap,
       html body #prev-img-wrap,
       html body #vorschau-container {
         background: transparent !important;
@@ -1122,14 +1123,16 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
 @media (min-width: 1024px) {
   html body #prev-wrap iframe,
   html body #haus3d-frame,
-  html body #fenster3d-frame {
+  html body #fenster3d-frame,
+  html body #balkon3d-frame {
     width: 100% !important;
     height: 100% !important;
     border: none !important;
     display: block !important;
   }
   html body #haus3d-wrap,
-  html body #fenster3d-wrap {
+  html body #fenster3d-wrap,
+  html body #balkon3d-wrap {
     position: absolute !important;
     inset: 0 !important;
   }
@@ -3764,6 +3767,10 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       <!-- 3D-Vorschau für Fenster (Drutex Iglo 5) -->
       <div id="fenster3d-wrap" style="display:none;position:absolute;inset:0;z-index:10;border-radius:var(--r-md);overflow:hidden">
         <iframe id="fenster3d-frame" src="about:blank" style="width:100%;height:100%;border:none;display:block" allowfullscreen></iframe>
+      </div>
+      <!-- 3D-Vorschau für Balkontür (Drutex Iglo 5 Balkontür) -->
+      <div id="balkon3d-wrap" style="display:none;position:absolute;inset:0;z-index:10;border-radius:var(--r-md);overflow:hidden">
+        <iframe id="balkon3d-frame" src="about:blank" style="width:100%;height:100%;border:none;display:block" allowfullscreen></iframe>
       </div>
       <div id="vorschau-container" style="position:relative;width:100%;height:100%">
         <div id="prev-placeholder" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:28px">
@@ -8784,17 +8791,63 @@ function updateOpenBtnLabel(isOpen) {
   btn.innerHTML = `<i class="ms" style="font-size:15px">${icon}</i>${text}`;
   btn.dataset.open = isOpen ? '1' : '0';
 }
-// Fenster öffnen/schließen — sendet postMessage an fenster3d-iframe (toggleOpen)
+// Fenster öffnen/schließen — sendet postMessage an passenden 3D-iframe (toggleOpen)
 function toggleFensterOpen() {
-  const frame = document.getElementById('fenster3d-frame');
+  const fFrame = document.getElementById('fenster3d-frame');
+  const bFrame = document.getElementById('balkon3d-frame');
   const btn = document.getElementById('window-open-btn');
   const isOpen = btn && btn.dataset.open === '1';
-  // postMessage nur wenn fenster3d-iframe geladen (Fenster + Balkontür)
-  if (frame && frame.contentWindow && frame.src.includes('fenster-3d')) {
-    frame.contentWindow.postMessage({ type: 'toggleOpen' }, '*');
+  // Fenster
+  if (fFrame && fFrame.contentWindow && fFrame.src.includes('fenster-3d')) {
+    fFrame.contentWindow.postMessage({ type: 'toggleOpen' }, '*');
+  }
+  // Balkontür (eigener iframe)
+  if (bFrame && bFrame.contentWindow && bFrame.src.includes('balkontuer-3d')) {
+    bFrame.contentWindow.postMessage({ type: 'toggleOpen' }, '*');
   }
   // Haustür/HST nutzen anderen iframe → kein Toggle hier, aber Label trotzdem aktualisieren
   updateOpenBtnLabel(!isOpen);
+}
+
+// 3D-iframe für Balkontür rendern — analog zu Fenster, eigene balkontuer-3d.html
+function _renderBalkontuer3d() {
+  const wrap  = document.getElementById('balkon3d-wrap');
+  const frame = document.getElementById('balkon3d-frame');
+  if (!wrap || !frame) return;
+
+  const _ck    = HAUS3D_COLOR_MAP[S.fa] || 'anthrazitgrau';
+  const isWood = HAUS3D_WOOD_KEYS.has(_ck);
+  const _side  = (S.oeff1 === 'dreh-l' || S.oeff1 === 'dk-l') ? 'l' : 'r';
+
+  wrap.style.display = 'block';
+
+  const _isLoaded = frame.src.includes('balkontuer-3d');
+  if (!_isLoaded) {
+    frame.src = `/balkontuer-3d.html?embed&v=20260518-1&color=${_ck}&side=${_side}`;
+    frame.onload = () => {
+      const cw = frame.contentWindow;
+      if (!cw) return;
+      cw.dispatchEvent(new Event('resize'));
+      cw.postMessage({
+        type: 'update',
+        color: isWood ? null : _ck,
+        wood:  isWood ? _ck  : null,
+        glass: S.glasdekor || 'klar',
+        side:  _side
+      }, '*');
+    };
+  } else {
+    const cw = frame.contentWindow;
+    if (cw) {
+      cw.postMessage({
+        type: 'update',
+        color: isWood ? null : _ck,
+        wood:  isWood ? _ck  : null,
+        glass: S.glasdekor || 'klar',
+        side:  _side
+      }, '*');
+    }
+  }
 }
 
 function _renderFenster3d() {
@@ -8901,6 +8954,8 @@ function drawPrev() {
       svgWrap.style.display = 'none';
       if (wrap) wrap.style.display = 'none';
       document.getElementById('haus3d-wrap')?.style && (document.getElementById('haus3d-wrap').style.display = 'none');
+      document.getElementById('fenster3d-wrap')?.style && (document.getElementById('fenster3d-wrap').style.display = 'none');
+      document.getElementById('balkon3d-wrap')?.style && (document.getElementById('balkon3d-wrap').style.display = 'none');
       if (ph) ph.style.display = 'flex';
       return;
     }
@@ -8912,6 +8967,8 @@ function drawPrev() {
       if (wrap) wrap.style.display = 'none';
       const f3w = document.getElementById('fenster3d-wrap');
       if (f3w)  f3w.style.display  = 'none';
+      const b3w = document.getElementById('balkon3d-wrap');
+      if (b3w)  b3w.style.display  = 'none';
       _renderHaustuer3d(previewView);
       // Gleiche Höhe wie Fenster-3D (Sarah-Wunsch 17.05.2026: identischer Abstand)
       if (prevWrap) prevWrap.style.height = '500px';
@@ -8924,7 +8981,22 @@ function drawPrev() {
       if (wrap) wrap.style.display = 'none';
       const h3w = document.getElementById('haus3d-wrap');
       if (h3w)  h3w.style.display  = 'none';
+      const b3w = document.getElementById('balkon3d-wrap');
+      if (b3w)  b3w.style.display  = 'none';
       _renderFenster3d();
+      if (prevWrap) prevWrap.style.height = '500px';
+      return;
+    }
+    // BALKONTÜR: eigene 3D-Datei (balkontuer-3d.html) — höher als Fenster, mit Alu-Schwelle
+    if (S.prod === 'balkontuer') {
+      svgWrap.style.display = 'none';
+      if (ph)   ph.style.display   = 'none';
+      if (wrap) wrap.style.display = 'none';
+      const h3w = document.getElementById('haus3d-wrap');
+      if (h3w)  h3w.style.display  = 'none';
+      const f3w = document.getElementById('fenster3d-wrap');
+      if (f3w)  f3w.style.display  = 'none';
+      _renderBalkontuer3d();
       if (prevWrap) prevWrap.style.height = '500px';
       return;
     }
@@ -8935,6 +9007,8 @@ function drawPrev() {
     if (h3w)  h3w.style.display  = 'none';
     const f3w = document.getElementById('fenster3d-wrap');
     if (f3w)  f3w.style.display  = 'none';
+    const b3w = document.getElementById('balkon3d-wrap');
+    if (b3w)  b3w.style.display  = 'none';
     svgWrap.style.display = 'block';
     if (prevWrap) prevWrap.style.height = '440px';
     window._kS = S; window._kP = P;
