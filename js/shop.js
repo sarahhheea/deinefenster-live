@@ -629,7 +629,7 @@ function karteHtml(p) {
         <p class="text-[11px] text-ink-soft mb-3 line-clamp-2">${nl2br(p.beschreibung)}</p>
         <div class="mt-auto flex items-end justify-between gap-2">
           <div>
-            <span class="text-[10px] text-ink-soft block">${p.sonderpreis_eur ? 'Sonderpreis' : (p.export_modell ? 'Export' : 'ab')}</span>
+            ${p.sonderpreis_eur ? '<span class="text-[10px] text-ink-soft block">Sonderpreis</span>' : (p.export_modell ? '<span class="text-[10px] text-ink-soft block">Export</span>' : (p.zustand === 'gebraucht' ? '' : '<span class="text-[10px] text-ink-soft block">ab</span>'))}
             <span class="text-xl font-extrabold text-primary leading-none">${formatPreis(p.preis_eur)}<span class="text-sm">${preisStern}</span></span>
           </div>
           <button data-action="detail" data-id="${p.id}" class="bg-primary/10 text-primary px-3 py-2 rounded-full text-xs font-bold hover:bg-primary/20 transition-colors flex items-center gap-1">
