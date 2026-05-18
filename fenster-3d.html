@@ -1050,6 +1050,16 @@ window.addEventListener('message', (e) => {
   if (d.type === 'setSide')  setSide(d.key);
   if (d.type === 'toggleOpen') sashOpen = !sashOpen;
   if (d.type === 'update') {
+    // Layout-Update — wenn Layout-Felder dabei sind, Szene neu bauen
+    if (d.layout || d.sashes) {
+      const newSpec = {
+        layout:     d.layout     || (_lastSpec && _lastSpec.layout)     || '1-fluegel',
+        sashes:     d.sashes     || (_lastSpec && _lastSpec.sashes)     || ['dk-r'],
+        oberlicht:  d.oberlicht  || (_lastSpec && _lastSpec.oberlicht)  || 'fest',
+        unterlicht: d.unterlicht || (_lastSpec && _lastSpec.unterlicht) || 'fest',
+      };
+      buildWindow(newSpec);
+    }
     if (d.wood)  setWood(d.wood);
     else         setColor(d.color || 'anthrazitgrau');
     setGlass(d.glass || 'klar');
