@@ -105,49 +105,91 @@ function setupLoggedInUI() {
   if (adminFab) adminFab.style.display = 'flex';
 }
 
-/* ─── Feste Zusatz-Kategorien (immer im Filter sichtbar, auch wenn nicht im Sheet) ─── */
+/* ─── Hauptgruppen (Sarah-Wunsch 18.05.2026: Untertypen zu Eigenschaften)
+       Filter zeigt nur diese 7 Hauptgruppen — Sub-Kategorien wie
+       "fenster-1fluegel" werden über kategorieZuGruppe() gemappt. ─── */
 const FIXED_KATEGORIEN = {
+  'fenster': 'Fenster',
+  'balkontuer': 'Balkontür',
+  'haustuer': 'Haustür',
+  'schiebetuer': 'Schiebetür',
   'daemmung': 'Dämmung',
   'baumaterialien': 'Baumaterialien',
   'garagentor-gebraucht': 'Garagentor (gebraucht)'
 };
+
+/* ─── Sub-Kategorie aus Sheet (z.B. "fenster-1fluegel") auf Hauptgruppe mappen ─── */
+function kategorieZuGruppe(kat) {
+  if (!kat) return '';
+  if (kat.startsWith('fenster-') || ['festelement','kellerfenster','rundfenster'].includes(kat)) return 'fenster';
+  if (kat.startsWith('balkontuer-')) return 'balkontuer';
+  if (kat === 'haustuer' || kat.startsWith('haustuer-')) return 'haustuer';
+  if (kat.startsWith('schiebetuer-')) return 'schiebetuer';
+  if (['daemmung','baumaterialien','garagentor-gebraucht'].includes(kat)) return kat;
+  return '';
+}
+
+/* ─── Bauart-Tags abgeleitet aus kategorie_key — wandern in p.eigenschaften ─── */
+function deriveBauartTags(kat) {
+  const tags = [];
+  if (!kat) return tags;
+  if (kat.includes('-1fluegel')) tags.push('einfluegelig');
+  else if (kat.includes('-2fluegel')) tags.push('zweifluegelig');
+  else if (kat.includes('-3fluegel')) tags.push('dreifluegelig');
+  else if (kat.includes('-4fluegel')) tags.push('vierfluegelig');
+  if (kat.endsWith('-rollo')) tags.push('mit-rollo');
+  if (kat === 'fenster-oberlicht') tags.push('oberlicht');
+  if (kat === 'fenster-sprossen') tags.push('sprossen-aufgesetzt');
+  if (kat === 'festelement') tags.push('festverglasung');
+  if (kat === 'kellerfenster') tags.push('kellerfenster-typ');
+  if (kat === 'rundfenster') tags.push('rundfenster-typ');
+  if (kat === 'schiebetuer-psk') tags.push('parallel-schiebe-kipp');
+  if (kat === 'schiebetuer-hst') tags.push('hebe-schiebe');
+  return tags;
+}
 
 /* ─── Daten laden (aus Google Sheets) ─── */
 async function loadProdukte() {
   try {
     const data = await sheetsGet('produkte');
 
-    STATE.kategorien = { ...(data.kategorien || {}), ...FIXED_KATEGORIEN };
+    // Nur Hauptgruppen (Sarah-Wunsch 18.05.2026 — Sub-Kategorien wandern zu Eigenschaften)
+    STATE.kategorien = { ...FIXED_KATEGORIEN };
     STATE.kategorienListe = Object.entries(STATE.kategorien)
       .map(([key, label]) => ({ key, label }));
 
-    const sheetsProdukte = (data.produkte || []).map(p => ({
-      id: String(p.id),
-      titel: p.titel || '',
-      kategorie: p.kategorie || p.kategorie_key || '',
-      system: p.system || '',
-      zustand: p.zustand || 'neu',
-      material: (p.material || 'kunststoff').toLowerCase(),
-      glasart: (p.glasart || 'klarglas').toLowerCase(),
-      breite_mm: Number(p.breite_mm) || 0,
-      hoehe_mm: Number(p.hoehe_mm) || 0,
-      preis_eur: Number(p.preis_eur) || 0,
-      sonderpreis_eur: p.sonderpreis_eur ? Number(p.sonderpreis_eur) : null,
-      groesse_klasse: p.groesse_klasse || null,
-      export_modell: !!p.export_modell,
-      standnummer: p.standnummer || null,
-      farbe: p.farbe || 'weiss',
-      verglasung: p.verglasung || '2-fach',
-      u_wert: p.u_wert || null,
-      oeffnungsart: p.oeffnungsart || 'dreh-kipp',
-      rc_klasse: p.rc_klasse || null,
-      eigenschaften: Array.isArray(p.eigenschaften) ? p.eigenschaften : [],
-      lagerbestand: Number(p.lagerbestand) || 1,
-      bild: (Array.isArray(p.bilder) && p.bilder[0]) || 'img/fenster_standard.png',
-      bilder: Array.isArray(p.bilder) ? p.bilder : [],
-      beschreibung: p.beschreibung || '',
-      aktiv: p.aktiv !== false
-    }));
+    const sheetsProdukte = (data.produkte || []).map(p => {
+      const kat = p.kategorie || p.kategorie_key || '';
+      const baseEig = Array.isArray(p.eigenschaften) ? p.eigenschaften : [];
+      const bauart = deriveBauartTags(kat).filter(t => !baseEig.includes(t));
+      return {
+        id: String(p.id),
+        titel: p.titel || '',
+        kategorie: kat,
+        system: p.system || '',
+        zustand: p.zustand || 'neu',
+        material: (p.material || 'kunststoff').toLowerCase(),
+        glasart: (p.glasart || 'klarglas').toLowerCase(),
+        breite_mm: Number(p.breite_mm) || 0,
+        hoehe_mm: Number(p.hoehe_mm) || 0,
+        preis_eur: Number(p.preis_eur) || 0,
+        sonderpreis_eur: p.sonderpreis_eur ? Number(p.sonderpreis_eur) : null,
+        groesse_klasse: p.groesse_klasse || null,
+        export_modell: !!p.export_modell,
+        standnummer: p.standnummer || null,
+        farbe: p.farbe || 'weiss',
+        verglasung: p.verglasung || '2-fach',
+        u_wert: p.u_wert || null,
+        oeffnungsart: p.oeffnungsart || 'dreh-kipp',
+        rc_klasse: p.rc_klasse || null,
+        eigenschaften: [...baseEig, ...bauart],
+        lagerbestand: Number(p.lagerbestand) || 1,
+        bild: (Array.isArray(p.bilder) && p.bilder[0]) || 'img/fenster_standard.png',
+        bilder: Array.isArray(p.bilder) ? p.bilder : [],
+        beschreibung: p.beschreibung || '',
+        aktiv: p.aktiv !== false
+      };
+    });
     // Eingeloggte Admins sehen auch archivierte Inserate (für Reaktivierung)
     // Normale Besucher sehen nur aktive
     const istAdmin = typeof isShopLoggedIn === 'function' && isShopLoggedIn();
@@ -170,9 +212,15 @@ async function loadProdukteFromJson() {
   try {
     const res = await fetch('data/shop-produkte.json');
     const data = await res.json();
-    STATE.produkte = data.produkte || [];
-    STATE.metadaten = data.filter_metadaten || berechneMetadaten(STATE.produkte);
-    STATE.kategorien = { ...(data.kategorien || {}), ...FIXED_KATEGORIEN };
+    // Bauart-Tags in eigenschaften reinpacken, Sub-Kategorien werden nur über kategorie_key referenziert
+    STATE.produkte = (data.produkte || []).map(p => {
+      const kat = p.kategorie || p.kategorie_key || '';
+      const baseEig = Array.isArray(p.eigenschaften) ? p.eigenschaften : [];
+      const bauart = deriveBauartTags(kat).filter(t => !baseEig.includes(t));
+      return { ...p, kategorie: kat, eigenschaften: [...baseEig, ...bauart] };
+    });
+    STATE.metadaten = berechneMetadaten(STATE.produkte);
+    STATE.kategorien = { ...FIXED_KATEGORIEN };
   } catch (err) {
     console.error('JSON-Fallback auch fehlgeschlagen:', err);
     STATE.produkte = [];
@@ -209,31 +257,21 @@ function berechneMetadaten(produkte) {
 
 /* ─── Filter-Sidebar dynamisch ─── */
 function baueFilterSidebar() {
-  // Reihenfolge: Fenster → Balkontür → Haustür → Dämmung → Baumaterialien → Garagentore → Rest (Sarah-Wunsch 18.05.2026)
+  // Reihenfolge der Hauptgruppen (Sarah-Wunsch 18.05.2026: Untertypen wandern zu Eigenschaften)
   const katWrap = document.getElementById('filterKategorien');
-  const SPECIAL_ORDER = ['daemmung', 'baumaterialien', 'garagentor-gebraucht'];
+  const ORDER = ['fenster', 'balkontuer', 'haustuer', 'schiebetuer', 'daemmung', 'baumaterialien', 'garagentor-gebraucht'];
   const renderItem = (key, label) => {
-    const count = STATE.produkte.filter(p => p.kategorie === key).length;
+    const count = STATE.produkte.filter(p => kategorieZuGruppe(p.kategorie) === key).length;
     return `
       <label class="filter-option">
         <span class="flex items-center gap-2"><input type="checkbox" class="check filter-kategorie" value="${key}"/><span>${escapeHtml(label)}</span></span>
         ${count > 0 ? `<span class="count">${count}</span>` : ''}
       </label>`;
   };
-  const isFenster = k => k.startsWith('fenster-') || k === 'festelement' || k === 'kellerfenster' || k === 'rundfenster';
-  const isBalkon = k => k.startsWith('balkontuer-');
-  const isHaustuer = k => k === 'haustuer';
-  const isSpecial = k => SPECIAL_ORDER.includes(k);
-
-  const all = Object.entries(STATE.kategorien);
-  const fenster = all.filter(([k]) => isFenster(k)).map(([k, l]) => renderItem(k, l)).join('');
-  const balkon  = all.filter(([k]) => isBalkon(k)).map(([k, l]) => renderItem(k, l)).join('');
-  const haustuer = all.filter(([k]) => isHaustuer(k)).map(([k, l]) => renderItem(k, l)).join('');
-  const special = SPECIAL_ORDER.filter(k => STATE.kategorien[k]).map(k => renderItem(k, STATE.kategorien[k])).join('');
-  const rest = all.filter(([k]) => !isFenster(k) && !isBalkon(k) && !isHaustuer(k) && !isSpecial(k))
-    .map(([k, l]) => renderItem(k, l)).join('');
-
-  katWrap.innerHTML = fenster + balkon + haustuer + special + rest;
+  katWrap.innerHTML = ORDER
+    .filter(k => STATE.kategorien[k])
+    .map(k => renderItem(k, STATE.kategorien[k]))
+    .join('');
 
   // Farben
   const farbWrap = document.getElementById('filterFarben');
@@ -453,8 +491,8 @@ function gefilterteProdukte() {
     if (f.material.size && !f.material.has(p.material || 'kunststoff')) return false;
     // Glasart (Klarglas / Chinchilla / Milchglas / Sicherheitsglas / Schallschutzglas — mehrere kombinierbar)
     if (f.glasart.size && !f.glasart.has(p.glasart || 'klarglas')) return false;
-    // Kategorie
-    if (f.kategorien.size && !f.kategorien.has(p.kategorie)) return false;
+    // Kategorie (Hauptgruppe matched alle Sub-Kategorien via kategorieZuGruppe)
+    if (f.kategorien.size && !f.kategorien.has(kategorieZuGruppe(p.kategorie))) return false;
     // Größen-Klasse
     if (f.groesse.size && (!p.groesse_klasse || !f.groesse.has(p.groesse_klasse))) return false;
     // Sonderpreis
@@ -1379,7 +1417,15 @@ function eigenschaftAnzeige(code) {
     '2-fach-verglasung': '2-fach-Verglasung',
     '3-fach-verglasung': '3-fach-Verglasung',
     'rc2': 'RC2-Sicherheit',
-    'rc3': 'RC3-Sicherheit'
+    'rc3': 'RC3-Sicherheit',
+    // Bauart-Tags (abgeleitet aus kategorie_key, Sarah-Wunsch 18.05.2026)
+    'einfluegelig': 'Einflügelig',
+    'zweifluegelig': 'Zweiflügelig',
+    'dreifluegelig': 'Dreiflügelig',
+    'vierfluegelig': 'Vierflügelig',
+    'mit-rollo': 'Mit Rollladen',
+    'kellerfenster-typ': 'Kellerfenster',
+    'rundfenster-typ': 'Rundfenster'
   };
   return map[code] || code;
 }
