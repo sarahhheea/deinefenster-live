@@ -233,14 +233,22 @@ hingeSpot.position.set(-2.0, 0.0, 4.5);
 hingeSpot.target.position.set(-0.48, 0.00, 0.09);
 scene.add(hingeSpot); scene.add(hingeSpot.target);
 
+
 // Bodenschatten entfernt — Referenzbild zeigt reinen weißen Hintergrund ohne Schatten
 
 // ══════════════════════════════════════════════
 // MATERIALIEN
 // ══════════════════════════════════════════════
 const texLoader = new THREE.TextureLoader();
-const frameMat  = new THREE.MeshStandardMaterial({ color: 0xfcfcfc, roughness: 0.68, metalness: 0.0 });
-const sashMat   = new THREE.MeshStandardMaterial({ color: 0xfcfcfc, roughness: 0.68, metalness: 0.0 });
+// PVC-Profil-Material mit subtilem Glanz (echter Drutex-Plastik-Look)
+const frameMat  = new THREE.MeshPhysicalMaterial({
+  color: 0xfcfcfc, roughness: 0.55, metalness: 0.0,
+  clearcoat: 0.25, clearcoatRoughness: 0.35, sheen: 0.0
+});
+const sashMat   = new THREE.MeshPhysicalMaterial({
+  color: 0xfcfcfc, roughness: 0.55, metalness: 0.0,
+  clearcoat: 0.25, clearcoatRoughness: 0.35
+});
 const grooveMat = new THREE.MeshStandardMaterial({ color: 0x252829, roughness: 0.70 });
 const sealMat   = new THREE.MeshStandardMaterial({ color: 0x1a1c1e, roughness: 0.78 });
 // Subtile Nut-Linie — nur Tiefenwirkung, kein schwarzer Strich
@@ -494,209 +502,107 @@ function buildSash(x, y, w, h, sashState) {
 }
 
 // ══════════════════════════════════════════════
-// buildWindow — Fenstergeometrie aufbauen
+// buildWindow — Layout-Spec verarbeiten
 // Koordinaten: (0,0) = Blendrahmen unten-links
 // Gruppe wird danach um (-FW/2, -FH/2, 0) verschoben
 // ══════════════════════════════════════════════
-function buildWindow() {
-  // Cleanup: Blendrahmen und Sash separat leeren
+let _lastSpec = null;
+
+function buildWindow(spec) {
+  spec = spec || { layout: '1-fluegel', sashes: ['dk-r'], oberlicht: 'fest', unterlicht: 'fest' };
+  _lastSpec = spec;
+
+  // Cleanup winGroup (statische Geometrie + alle Sash-Groups)
   while (winGroup.children.length > 0) {
     const c = winGroup.children[0];
     if (c === sashGroup) { winGroup.remove(c); continue; }
-    if (c.geometry) c.geometry.dispose();
+    c.traverse(node => { if (node.geometry) node.geometry.dispose(); });
     winGroup.remove(c);
   }
+  // sashGroup leeren (bleibt für künftige 1-Flügel-Animation reserviert)
   while (sashGroup.children.length > 0) {
     const c = sashGroup.children[0];
     if (c.geometry) c.geometry.dispose();
     sashGroup.remove(c);
   }
-  winGroup.add(sashGroup);   // wieder anfügen nach cleanup
-  sashGroup.position.set(x0, 0, 0);
+  winGroup.add(sashGroup);
+
   glassObjects = [];
   handleObjects = [];
 
-  const fzc = FD / 2;                     // Frame z center
-  const szc = FD / 2 + SASH_DZ;           // Sash z center
-  const ffz = FD;                          // Frame front face Z
-  const sfz = FD + SASH_DZ;               // Sash front face Z
-
-  // Helper für Sash-Meshes: x-Position relativ zur Scharnier-Achse (= absolute - x0)
-  const sx = (absX) => absX - x0;
-
-  // ── Blendrahmen (statisch in winGroup) ──
+  // Außenrahmen
   buildOuterFrame().forEach(m => winGroup.add(m));
 
-  // FALZ-DICHTUNG (schwarz, umlaufend um Flügel) — klare Trennung Rahmen|Flügel
-  const sealW = 0.005;
-  const sealDp = 0.008;
-  const sealZ_pos = ffz + SASH_DZ / 2;
-  winGroup.add(bx(x0 + SW/2,         y0 - sealW/2,        sealZ_pos, SW + sealW*2, sealW, sealDp, sealMat));
-  winGroup.add(bx(x0 + SW/2,         y0 + SH + sealW/2,   sealZ_pos, SW + sealW*2, sealW, sealDp, sealMat));
-  winGroup.add(bx(x0 - sealW/2,      y0 + SH/2,           sealZ_pos, sealW, SH,           sealDp, sealMat));
-  winGroup.add(bx(x0 + SW + sealW/2, y0 + SH/2,           sealZ_pos, sealW, SH,           sealDp, sealMat));
+  // Layout parsen
+  const lay = parseLayout(spec.layout);
+  const cols = lay.cols;
 
-  // ── Flügel — 4 Stäbe (in sashGroup, drehen sich beim Öffnen) ──
-  sashGroup.add(bx(sx(x0 + SW/2),        y0 + FST/2,        szc, SW,   FST,         FD, sashMat));
-  sashGroup.add(bx(sx(x0 + SW/2),        y0 + SH - FST/2,   szc, SW,   FST,         FD, sashMat));
-  sashGroup.add(bx(sx(x0 + FST/2),       y0 + SH/2,         szc, FST,  SH - 2*FST,  FD, sashMat));
-  sashGroup.add(bx(sx(x0 + SW - FST/2),  y0 + SH/2,         szc, FST,  SH - 2*FST,  FD, sashMat));
+  // Bereichs-Y im Blendrahmen-Innenraum
+  const yInnerBot = FRT;
+  const yInnerTop = FH - FRT;
+  const xInnerLeft = FRT;
+  const xInnerRight = FW - FRT;
 
-  // Profilnuten Flügel — zwei Linien für mehr Profil-Tiefe
-  const sniAbs  = x0 + FST * 0.54;
-  const snixAbs = x0 + SW - FST * 0.54;
-  const sniy    = y0 + FST * 0.54;
-  const sniyt   = y0 + SH - FST * 0.54;
-  sashGroup.add(nut(sx(sniAbs),  sniy,  sx(snixAbs), sniy,  sfz, subtleNutMat));
-  sashGroup.add(nut(sx(sniAbs),  sniyt, sx(snixAbs), sniyt, sfz, subtleNutMat));
-  sashGroup.add(nut(sx(sniAbs),  sniy,  sx(sniAbs),  sniyt, sfz, subtleNutMat));
-  sashGroup.add(nut(sx(snixAbs), sniy,  sx(snixAbs), sniyt, sfz, subtleNutMat));
-  // Zweite Linie nahe Außenkante des Flügelprofils
-  const sniOutAbs  = x0 + FST * 0.16;
-  const snixOutAbs = x0 + SW - FST * 0.16;
-  const sniOutY    = y0 + FST * 0.16;
-  const sniOutYt   = y0 + SH - FST * 0.16;
-  sashGroup.add(nut(sx(sniOutAbs),  sniOutY,  sx(snixOutAbs), sniOutY,  sfz, subtleNutMat));
-  sashGroup.add(nut(sx(sniOutAbs),  sniOutYt, sx(snixOutAbs), sniOutYt, sfz, subtleNutMat));
-  sashGroup.add(nut(sx(sniOutAbs),  sniOutY,  sx(sniOutAbs),  sniOutYt, sfz, subtleNutMat));
-  sashGroup.add(nut(sx(snixOutAbs), sniOutY,  sx(snixOutAbs), sniOutYt, sfz, subtleNutMat));
+  // Lichten-Grenzen
+  const oberY = lay.hasOber ? yInnerTop - LICHTE_H : yInnerTop;
+  const unterY = lay.hasUnter ? yInnerBot + LICHTE_H : yInnerBot;
 
-  const gcxAbs = x0 + FST + SBW + GW / 2;
-  const gcy    = y0 + FST + SBW + GH / 2;
-  const gcx    = sx(gcxAbs);
-
-  // ── Glasscheibe ─────────────────────────────────────
-  const gm = new THREE.Mesh(new THREE.BoxGeometry(GW, GH, 0.006), glassMat);
-  gm.position.set(gcx, gcy, szc + 0.002);
-  gm.castShadow = true;
-  sashGroup.add(gm);
-  glassObjects.push(gm);
-
-  // ── Spacer Bar (Abstandhalter-Rahmen) ─────────────────
-  const sbz = szc;
-  const sbd = 0.004;
-  sashGroup.add(bx(gcx, gcy + GH/2 + SBW/2, sbz, GW + SBW * 2, SBW, sbd, spacerMat));
-  sashGroup.add(bx(gcx, gcy - GH/2 - SBW/2, sbz, GW + SBW * 2, SBW, sbd, spacerMat));
-  sashGroup.add(bx(gcx - GW/2 - SBW/2, gcy, sbz, SBW, GH, sbd, spacerMat));
-  sashGroup.add(bx(gcx + GW/2 + SBW/2, gcy, sbz, SBW, GH, sbd, spacerMat));
-
-  // DK-GRIFF — Schild + durchgehender Tube + Schulter + Olive
-  const hx  = sx(x0 + SW - FST * 0.52);
-  const hy  = y0 + SH / 2;
-  const hbz = sfz;
-
-  // 1) Schild — Pille hochkant 30×100×7 mm
-  const rosette = new THREE.Mesh(
-    new THREE.CapsuleGeometry(0.015, 0.070, 6, 22),
-    handleMat
-  );
-  rosette.scale.set(1.0, 1.0, 0.47);
-  rosette.position.set(hx, hy, hbz + 0.0035);
-  rosette.castShadow = true;
-  rosette.userData.isHandle = true;
-  sashGroup.add(rosette); handleObjects.push(rosette);
-
-  // 2) Durchgehender Tube entlang einer Curve (kein zwei-Teile-Look)
-  const curvePts = [
-    new THREE.Vector3(hx, hy + 0.003,  hbz + 0.002),
-    new THREE.Vector3(hx, hy + 0.003,  hbz + 0.014),
-    new THREE.Vector3(hx, hy + 0.001,  hbz + 0.022),
-    new THREE.Vector3(hx, hy - 0.012,  hbz + 0.027),
-    new THREE.Vector3(hx, hy - 0.032,  hbz + 0.028),
-    new THREE.Vector3(hx, hy - 0.070,  hbz + 0.028),
-    new THREE.Vector3(hx, hy - 0.106,  hbz + 0.028),
-  ];
-  const handleCurve = new THREE.CatmullRomCurve3(curvePts, false, 'centripetal', 0.5);
-  const tubularSegs = 64;
-  const radialSegs  = 24;
-  const tubeGeo = new THREE.TubeGeometry(handleCurve, tubularSegs, 0.0115, radialSegs, false);
-
-  // Verjüngung — Tube wird zum Ende der Curve dünner (1.0 → 0.85)
-  const pos = tubeGeo.attributes.position;
-  for (let i = 0; i <= tubularSegs; i++) {
-    const t = i / tubularSegs;
-    const point = handleCurve.getPointAt(t);
-    // bei Knick-Bogen schon leicht dünner, am Ende klar verjüngt
-    const scaleFactor = 1.0 - 0.16 * Math.pow(t, 1.4);
-    for (let j = 0; j <= radialSegs; j++) {
-      const idx = i * (radialSegs + 1) + j;
-      const dx = pos.getX(idx) - point.x;
-      const dy = pos.getY(idx) - point.y;
-      const dz = pos.getZ(idx) - point.z;
-      pos.setX(idx, point.x + dx * scaleFactor);
-      pos.setY(idx, point.y + dy * scaleFactor);
-      pos.setZ(idx, point.z + dz * scaleFactor);
-    }
+  // Querpfosten für Lichten
+  if (lay.hasOber) {
+    winGroup.add(buildHorizontalMullion(oberY, xInnerLeft, xInnerRight));
   }
-  pos.needsUpdate = true;
-  tubeGeo.computeVertexNormals();
+  if (lay.hasUnter) {
+    winGroup.add(buildHorizontalMullion(unterY, xInnerLeft, xInnerRight));
+  }
 
-  const handleTube = new THREE.Mesh(tubeGeo, handleMat);
-  handleTube.castShadow = true;
-  handleTube.userData.isHandle = true;
-  sashGroup.add(handleTube); handleObjects.push(handleTube);
+  // Hauptbereich (zwischen Lichten oder voll)
+  const mainBot = unterY + (lay.hasUnter ? MULLION_T/2 : 0);
+  const mainTop = oberY - (lay.hasOber ? MULLION_T/2 : 0);
+  const mainH = mainTop - mainBot;
 
-  // 3) OLIVE — gleicher Radius wie der VERJÜNGTE Tube-Endpunkt (0.0115 × 0.84)
-  //    → fließender Halbkugel-Abschluss ohne sichtbare Stufe
-  const olive = new THREE.Mesh(
-    new THREE.SphereGeometry(0.0115 * 0.84, 28, 20),
-    handleMat
-  );
-  olive.position.set(hx, hy - 0.106, hbz + 0.028);
-  olive.castShadow = true;
-  olive.userData.isHandle = true;
-  sashGroup.add(olive); handleObjects.push(olive);
+  // Vertikale Pfosten (cols - 1 Stück)
+  const usableW = xInnerRight - xInnerLeft;
+  const sashW = (usableW - (cols - 1) * MULLION_T) / cols;
+  for (let i = 1; i < cols; i++) {
+    const xMull = xInnerLeft + i * sashW + (i - 1) * MULLION_T + MULLION_T/2;
+    winGroup.add(buildVerticalMullion(xMull, mainBot, mainTop));
+  }
 
-  // SCHARNIERE — Drutex IGLO Eckband-Walzen mit Endkappen + Trennring
-  const rollR = 0.0085;
-  const rollH = 0.092;
-  const rollX_abs = x0;
-  const rollZ_abs = sfz + 0.008;
-  const capR = rollR * 1.10;
-  const capH = 0.008;
-  const ringH = 0.0025;
+  // Hauptflügel
+  const sashStates = (spec.sashes || []).slice();
+  while (sashStates.length < cols) sashStates.push('dk-r');
+  for (let i = 0; i < cols; i++) {
+    const xSash = xInnerLeft + i * (sashW + MULLION_T);
+    const r = buildSash(xSash, mainBot, sashW, mainH, sashStates[i]);
+    winGroup.add(r.group);
+    glassObjects.push(...r.glasses);
+    handleObjects.push(...r.handles);
+  }
 
-  [ FH - 0.150, 0.150 ].forEach(hy => {
-    const roll = new THREE.Mesh(
-      new THREE.CylinderGeometry(rollR, rollR, rollH, 30),
-      hingeMat
-    );
-    roll.position.set(rollX_abs, hy, rollZ_abs);
-    roll.castShadow = true;
-    winGroup.add(roll);
+  // Oberlicht-Sash
+  if (lay.hasOber) {
+    const oberSashY = oberY + MULLION_T/2;
+    const oberSashH = yInnerTop - oberSashY;
+    const r = buildSash(xInnerLeft, oberSashY, usableW, oberSashH, spec.oberlicht || 'fest');
+    winGroup.add(r.group);
+    glassObjects.push(...r.glasses);
+    handleObjects.push(...r.handles);
+  }
 
-    const capTop = new THREE.Mesh(
-      new THREE.CylinderGeometry(capR * 0.85, capR, capH, 28),
-      hingeMat
-    );
-    capTop.position.set(rollX_abs, hy + rollH / 2 + capH / 2 - 0.002, rollZ_abs);
-    capTop.castShadow = true;
-    winGroup.add(capTop);
+  // Unterlicht-Sash
+  if (lay.hasUnter) {
+    const unterSashY = yInnerBot;
+    const unterSashH = unterY - MULLION_T/2 - unterSashY;
+    const r = buildSash(xInnerLeft, unterSashY, usableW, unterSashH, spec.unterlicht || 'fest');
+    winGroup.add(r.group);
+    glassObjects.push(...r.glasses);
+    handleObjects.push(...r.handles);
+  }
 
-    const capBot = new THREE.Mesh(
-      new THREE.CylinderGeometry(capR, capR * 0.85, capH, 28),
-      hingeMat
-    );
-    capBot.position.set(rollX_abs, hy - rollH / 2 - capH / 2 + 0.002, rollZ_abs);
-    capBot.castShadow = true;
-    winGroup.add(capBot);
-
-    const midRing = new THREE.Mesh(
-      new THREE.CylinderGeometry(rollR * 1.04, rollR * 1.04, ringH, 30),
-      hingeMat
-    );
-    midRing.position.set(rollX_abs, hy, rollZ_abs);
-    midRing.castShadow = true;
-    winGroup.add(midRing);
-
-    const fuge = new THREE.Mesh(
-      new THREE.CylinderGeometry(rollR * 1.045, rollR * 1.045, 0.0006, 30),
-      sealMat
-    );
-    fuge.position.set(rollX_abs, hy, rollZ_abs);
-    fuge.castShadow = false;
-    winGroup.add(fuge);
-  });
+  // Farbe/Glas-Materialien nach Rebuild neu anwenden
+  if (_curWood)  setWood(_curWood);
+  else if (_curColor) setColor(_curColor);
+  if (_curGlass) setGlass(_curGlass);
 }
 
 buildWindow();
