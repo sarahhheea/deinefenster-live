@@ -330,6 +330,53 @@ const ROL_END_H     = 0.045;   // Endschiene Höhe 45 mm
 const ROL_GURT_W    = 0.040;   // Gurt-Auslass Breite 40 mm
 const ROL_GURT_H    = 0.200;   // Gurt-Auslass Höhe 200 mm
 
+// Rollladen-Geometrie: Kasten + Schienen + Endschiene + optional Gurt-Auslass
+// spec.roll: 'ohne' | 'gurt' | 'motor'
+// spec.rollKasten: '175' | '215' | '225' (mm)
+// spec.rollSeite: 'links' | 'rechts'
+function _addRolladen(spec) {
+  if (!spec || !spec.roll || spec.roll === 'ohne') return;
+
+  const kastenH = (parseInt(spec.rollKasten, 10) || 175) / 1000;   // in m
+  const kastenY = FH + kastenH / 2;                                  // sitzt OBEN auf Blendrahmen
+  const kastenZ = FD / 2 + 0.115;                                    // ragt 115 mm nach vorne
+  const kastenD = ROL_BOX_DEPTH;
+  const fzc = FD / 2;
+
+  // ── Rollladenkasten ──
+  winGroup.add(bx(FW / 2, kastenY, kastenZ, FW, kastenH, kastenD, frameMat));
+
+  // Profilnut umlaufend auf Vorderfläche des Kastens
+  const kastenFront = kastenZ + kastenD / 2;
+  const kxL = 0.012, kxR = FW - 0.012;
+  const kyB = FH + 0.012, kyT = FH + kastenH - 0.012;
+  winGroup.add(nut(kxL, kyB, kxR, kyB, kastenFront, subtleNutMat));
+  winGroup.add(nut(kxL, kyT, kxR, kyT, kastenFront, subtleNutMat));
+  winGroup.add(nut(kxL, kyB, kxL, kyT, kastenFront, subtleNutMat));
+  winGroup.add(nut(kxR, kyB, kxR, kyT, kastenFront, subtleNutMat));
+
+  // ── Führungsschienen (links + rechts) ──
+  const schieneY = FH / 2;
+  const schieneZ = fzc + 0.005;
+  winGroup.add(bx(-ROL_SCHIENE_W / 2, schieneY, schieneZ, ROL_SCHIENE_W, FH, ROL_SCHIENE_D, frameMat));
+  winGroup.add(bx(FW + ROL_SCHIENE_W / 2, schieneY, schieneZ, ROL_SCHIENE_W, FH, ROL_SCHIENE_D, frameMat));
+
+  // ── Endschiene (gerade unter Kasten-Unterkante) ──
+  const endY = FH - ROL_END_H / 2;
+  const endZ = fzc + 0.020;
+  winGroup.add(bx(FW / 2, endY, endZ, FW, ROL_END_H, ROL_SCHIENE_D, frameMat));
+  winGroup.add(nut(0.020, FH - 0.002, FW - 0.020, FH - 0.002, endZ + ROL_SCHIENE_D / 2 + 0.001, subtleNutMat));
+
+  // ── Gurt-Auslass (nur bei 'gurt') ──
+  if (spec.roll === 'gurt') {
+    const gurtX = (spec.rollSeite === 'links') ? 0.030 : FW - 0.030;
+    const gurtY = 0.100;
+    const gurtZ = fzc + 0.010;
+    winGroup.add(bx(gurtX, gurtY, gurtZ, ROL_GURT_W, ROL_GURT_H, 0.020, frameMat));
+    winGroup.add(nut(gurtX, gurtY - ROL_GURT_H / 2 + 0.020, gurtX, gurtY + ROL_GURT_H / 2 - 0.020, gurtZ + 0.011, sealMat));
+  }
+}
+
 // ══════════════════════════════════════════════
 // buildWindow — Fenstergeometrie aufbauen
 // Koordinaten: (0,0) = Blendrahmen unten-links
