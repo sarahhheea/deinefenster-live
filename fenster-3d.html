@@ -414,31 +414,44 @@ function buildSash(x, y, w, h, sashState) {
   const glasses = [];
   const handles = [];
 
-  // Sash-Profilrahmen (4 Stäbe relativ zu (x,y))
-  group.add(bx(x + w/2,       y + FST/2,      szc, w,    FST,        FD, sashMat));
-  group.add(bx(x + w/2,       y + h - FST/2,  szc, w,    FST,        FD, sashMat));
-  group.add(bx(x + FST/2,     y + h/2,        szc, FST,  h - 2*FST,  FD, sashMat));
-  group.add(bx(x + w - FST/2, y + h/2,        szc, FST,  h - 2*FST,  FD, sashMat));
+  // Falzüberdeckung — Sash ragt um SOVL nach außen in Blendrahmen/Pfosten rein (Drutex-Standard)
+  const xS = x - SOVL, yS = y - SOVL;
+  const wS = w + 2 * SOVL, hS = h + 2 * SOVL;
+
+  // Falz-Dichtung (schwarz, umlaufend) — klare Trennung Rahmen|Flügel
+  const sealW = 0.005;
+  const sealDp = 0.008;
+  const sealZ_pos = FD + SASH_DZ / 2;
+  group.add(bx(xS + wS/2,        yS - sealW/2,         sealZ_pos, wS + sealW*2, sealW, sealDp, sealMat));
+  group.add(bx(xS + wS/2,        yS + hS + sealW/2,    sealZ_pos, wS + sealW*2, sealW, sealDp, sealMat));
+  group.add(bx(xS - sealW/2,     yS + hS/2,            sealZ_pos, sealW, hS,           sealDp, sealMat));
+  group.add(bx(xS + wS + sealW/2,yS + hS/2,            sealZ_pos, sealW, hS,           sealDp, sealMat));
+
+  // Sash-Profilrahmen (4 Stäbe)
+  group.add(bx(xS + wS/2,       yS + FST/2,       szc, wS,   FST,         FD, sashMat));
+  group.add(bx(xS + wS/2,       yS + hS - FST/2,  szc, wS,   FST,         FD, sashMat));
+  group.add(bx(xS + FST/2,      yS + hS/2,        szc, FST,  hS - 2*FST,  FD, sashMat));
+  group.add(bx(xS + wS - FST/2, yS + hS/2,        szc, FST,  hS - 2*FST,  FD, sashMat));
 
   // Profilnuten Flügel
-  const sniL = x + FST * 0.54, sniR = x + w - FST * 0.54;
-  const sniB = y + FST * 0.54, sniT = y + h - FST * 0.54;
+  const sniL = xS + FST * 0.54, sniR = xS + wS - FST * 0.54;
+  const sniB = yS + FST * 0.54, sniT = yS + hS - FST * 0.54;
   group.add(nut(sniL, sniB, sniR, sniB, sfz, subtleNutMat));
   group.add(nut(sniL, sniT, sniR, sniT, sfz, subtleNutMat));
   group.add(nut(sniL, sniB, sniL, sniT, sfz, subtleNutMat));
   group.add(nut(sniR, sniB, sniR, sniT, sfz, subtleNutMat));
-  const sniOutL = x + FST * 0.16, sniOutR = x + w - FST * 0.16;
-  const sniOutB = y + FST * 0.16, sniOutT = y + h - FST * 0.16;
+  const sniOutL = xS + FST * 0.16, sniOutR = xS + wS - FST * 0.16;
+  const sniOutB = yS + FST * 0.16, sniOutT = yS + hS - FST * 0.16;
   group.add(nut(sniOutL, sniOutB, sniOutR, sniOutB, sfz, subtleNutMat));
   group.add(nut(sniOutL, sniOutT, sniOutR, sniOutT, sfz, subtleNutMat));
   group.add(nut(sniOutL, sniOutB, sniOutL, sniOutT, sfz, subtleNutMat));
   group.add(nut(sniOutR, sniOutB, sniOutR, sniOutT, sfz, subtleNutMat));
 
   // Glas (innerhalb des Sash-Rahmens, mit Spacer-Abstand SBW)
-  const gw = w - 2 * (FST + SBW);
-  const gh = h - 2 * (FST + SBW);
-  const gcx = x + FST + SBW + gw / 2;
-  const gcy = y + FST + SBW + gh / 2;
+  const gw = wS - 2 * (FST + SBW);
+  const gh = hS - 2 * (FST + SBW);
+  const gcx = xS + FST + SBW + gw / 2;
+  const gcy = yS + FST + SBW + gh / 2;
   const gm = new THREE.Mesh(new THREE.BoxGeometry(gw, gh, 0.006), glassMat);
   gm.position.set(gcx, gcy, szc + 0.002);
   gm.castShadow = true;
@@ -459,12 +472,12 @@ function buildSash(x, y, w, h, sashState) {
     const isLeft = sashState === 'dreh-r' || sashState === 'dk-r';  // Griff links bei dreh-r/dk-r
     let hx, hy, hRotZ;
     if (isKipp) {
-      hx = x + w / 2;
-      hy = y + h - FST * 0.52;
+      hx = xS + wS / 2;
+      hy = yS + hS - FST * 0.52;
       hRotZ = Math.PI / 2;
     } else {
-      hx = isLeft ? x + FST * 0.52 : x + w - FST * 0.52;
-      hy = y + h / 2;
+      hx = isLeft ? xS + FST * 0.52 : xS + wS - FST * 0.52;
+      hy = yS + hS / 2;
       hRotZ = 0;
     }
     // Schild (Rosette)
