@@ -382,7 +382,10 @@ function _addRolladen(spec) {
 // Koordinaten: (0,0) = Blendrahmen unten-links
 // Gruppe wird danach um (-FW/2, -FH/2, 0) verschoben
 // ══════════════════════════════════════════════
-function buildWindow() {
+let _lastSpec = null;
+function buildWindow(spec) {
+  spec = spec || { roll: 'ohne', rollKasten: '175', rollSeite: 'rechts' };
+  _lastSpec = spec;
   // Cleanup: Blendrahmen und Sash separat leeren
   while (winGroup.children.length > 0) {
     const c = winGroup.children[0];
@@ -597,6 +600,9 @@ function buildWindow() {
     fuge.castShadow = false;
     winGroup.add(fuge);
   });
+
+  // ── Rollladen (falls konfiguriert) ──
+  _addRolladen(spec);
 }
 
 buildWindow();
@@ -1044,6 +1050,19 @@ window.addEventListener('message', (e) => {
   if (d.type === 'setSide')  setSide(d.key);
   if (d.type === 'toggleOpen') sashOpen = !sashOpen;
   if (d.type === 'update') {
+    // Rollladen-Spec aus update entnehmen (oder vorigen State weiterverwenden)
+    const prev = _lastSpec || {};
+    const newSpec = {
+      roll:       d.roll       !== undefined ? d.roll       : (prev.roll       || 'ohne'),
+      rollKasten: d.rollKasten !== undefined ? d.rollKasten : (prev.rollKasten || '175'),
+      rollSeite:  d.rollSeite  !== undefined ? d.rollSeite  : (prev.rollSeite  || 'rechts'),
+    };
+    // Nur Rebuild wenn Rolladen-State sich geändert hat
+    if (newSpec.roll !== prev.roll || newSpec.rollKasten !== prev.rollKasten || newSpec.rollSeite !== prev.rollSeite) {
+      buildWindow(newSpec);
+    } else {
+      _lastSpec = newSpec;
+    }
     if (d.wood)  setWood(d.wood);
     else         setColor(d.color || 'anthrazitgrau');
     setGlass(d.glass || 'klar');
