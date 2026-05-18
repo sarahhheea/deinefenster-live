@@ -9186,12 +9186,13 @@ function _renderHst3d() {
   const _ck    = HAUS3D_COLOR_MAP[S.fa] || 'anthrazitgrau';
   const isWood = HAUS3D_WOOD_KEYS.has(_ck);
   const _side  = (S.oeff1 === 'dreh-l' || S.oeff1 === 'dk-l') ? 'l' : 'r';
+  const _grip  = S.hstGriff || 'weiss-std';
 
   wrap.style.display = 'block';
 
   const _isLoaded = frame.src.includes('hst-3d');
   if (!_isLoaded) {
-    frame.src = `/hst-3d.html?embed&v=20260518-1&color=${_ck}&side=${_side}`;
+    frame.src = `/hst-3d.html?embed&v=20260518-2&color=${_ck}&side=${_side}&grip=${_grip}`;
     frame.onload = () => {
       const cw = frame.contentWindow;
       if (!cw) return;
@@ -9201,7 +9202,8 @@ function _renderHst3d() {
         color: isWood ? null : _ck,
         wood:  isWood ? _ck  : null,
         glass: S.glasdekor || 'klar',
-        side:  _side
+        side:  _side,
+        hstGriff: _grip
       }, '*');
     };
   } else {
@@ -9212,7 +9214,8 @@ function _renderHst3d() {
         color: isWood ? null : _ck,
         wood:  isWood ? _ck  : null,
         glass: S.glasdekor || 'klar',
-        side:  _side
+        side:  _side,
+        hstGriff: _grip
       }, '*');
     }
   }
