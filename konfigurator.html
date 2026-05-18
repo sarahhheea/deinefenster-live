@@ -5974,10 +5974,31 @@ function buildFluegel() {
     </div>`).join('');
 }
 
+// Default-Sash-States setzen wenn Aufteilung gewechselt (Drutex-Standard)
+function _applyDefaultSashStates(fluegelKey) {
+  const m = (fluegelKey || '1-fluegel').match(/^(\d)-/);
+  const cols = m ? parseInt(m[1], 10) : 1;
+  const defaults = cols === 1 ? ['dk-r']
+                 : cols === 2 ? ['dk-l', 'dk-r']
+                 : cols === 3 ? ['dk-l', 'fest', 'dk-r']
+                 : ['dk-r'];
+  S.oeff1 = defaults[0] || null;
+  S.oeff2 = defaults[1] || null;
+  S.oeff3 = defaults[2] || null;
+  const fk = fluegelKey || '';
+  if (fk.includes('oberlicht') || fk.includes('ober-unter')) {
+    S.oberlichtOeff = S.oberlichtOeff || 'fest';
+  }
+  if (fk.includes('unterlicht') || fk.includes('ober-unter')) {
+    S.unterlichtOeff = S.unterlichtOeff || 'fest';
+  }
+}
+
 function pickFluegel(el) {
   document.querySelectorAll('#fluegel-grid .fk, #fluegel-grid .oc').forEach(c=>c.classList.remove('sel'));
   el.classList.add('sel');
   S.fluegel = el.dataset.v;
+  _applyDefaultSashStates(S.fluegel);
   previewState.fluegel = parseInt(S.fluegel.charAt(0)) || 1;
   const newCount = getSashCount();
   if (newCount < 3) S.oeff3 = null;
