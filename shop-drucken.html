@@ -131,8 +131,10 @@
     align-self: flex-start;
     margin-top: 12px;
   }
-  .schild-zustand-tag.is-gebraucht { background: #b87f00; color: white; border-color: #b87f00; }
-  .schild-zustand-tag.is-neu { background: #225eaa; color: white; border-color: #225eaa; }
+  .schild-zustand-tag.is-gebraucht    { background: #b87f00; color: white; border-color: #b87f00; }
+  .schild-zustand-tag.is-neu          { background: #225eaa; color: white; border-color: #225eaa; }
+  .schild-zustand-tag.is-vermessen    { background: #1f8a55; color: white; border-color: #1f8a55; }
+  .schild-zustand-tag.is-sonderposten { background: #c2410c; color: white; border-color: #c2410c; }
 
   /* Mitte: Bild + Beschreibung */
   .schild-mitte {
@@ -529,8 +531,8 @@ function rendereSchilder() {
           <small>Stand</small>
           ${p.standnummer ? escape(p.standnummer) : '—'}
         </div>
-        <div class="schild-zustand-tag ${p.zustand === 'gebraucht' ? 'is-gebraucht' : 'is-neu'}">
-          ${p.zustand === 'gebraucht' ? 'Gebraucht' : 'Neuware'}
+        <div class="schild-zustand-tag is-${escape(p.zustand || 'neu')}">
+          ${({neu:'Neuware',gebraucht:'Gebraucht',vermessen:'Vermessen',sonderposten:'Sonderposten'})[p.zustand] || 'Neuware'}
         </div>
       </div>
 
