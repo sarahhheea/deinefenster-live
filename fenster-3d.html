@@ -605,9 +605,7 @@ function buildWindow(spec) {
   if (_curGlass) setGlass(_curGlass);
 }
 
-buildWindow();
-
-// Fenster auf Welt-Origin zentrieren
+// Fenster auf Welt-Origin zentrieren (Geometrie wird unten gebaut nach FARBEN-Definition)
 winGroup.position.set(-FW / 2, -FH / 2, 0);
 scene.add(winGroup);
 
@@ -1039,6 +1037,9 @@ resize();
 if (new URLSearchParams(location.search).has('embed')) {
   document.body.classList.add('embed');
 }
+
+// Initial-Build NACH FARBEN/WOOD_PARAMS-Definition (setColor/setWood brauchen die)
+buildWindow();
 
 // postMessage-Bridge: Konfigurator schickt Farb/Glas-Änderungen
 window.addEventListener('message', (e) => {
