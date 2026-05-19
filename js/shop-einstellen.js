@@ -16,6 +16,7 @@ const KATEGORIEN = [
   { key: 'kellerfenster',              label: 'Kellerfenster',                    icon: 'crop_landscape' },
   { key: 'rundfenster',                label: 'Rundes Fenster',                   icon: 'circle' },
   { key: 'rundbogenfenster',           label: 'Rundbogenfenster',                 icon: 'arch' },
+  { key: 'stichbogenfenster',          label: 'Stichbogenfenster',                icon: 'arch' },
   { key: 'haustuer',                   label: 'Haustür',                          icon: 'door_front' },
   { key: 'balkontuer-1fluegel',        label: 'Balkontür einflüglig',             icon: 'deck' },
   { key: 'balkontuer-1fluegel-rollo',  label: 'Balkontür einflüglig mit Rollo',   icon: 'roller_shades' },

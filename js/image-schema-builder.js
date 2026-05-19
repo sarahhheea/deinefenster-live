@@ -85,7 +85,7 @@ const ImageSchemaBuilder = {
     MACO: 'MACO chrome handle',
     ABUS: 'ABUS titanium handle',
     Roto: 'Roto white handle',
-    ein Profil-Hersteller: 'ein Profil-Hersteller aluminium handle'
+    Generic: 'Generic aluminium handle'
   },
 
   // ============================================================
@@ -100,7 +100,7 @@ const ImageSchemaBuilder = {
    *   - ansicht: 'exterior' | 'interior'
    *   - farbe: 'white' | 'grey' | 'darkbrown' | 'anthracite'
    *   - glas: 'neutral' | 'bluegreen' | 'green' | 'grey'
-   *   - griff: 'MACO' | 'ABUS' | 'Roto' | 'ein Profil-Hersteller'
+   *   - griff: 'MACO' | 'ABUS' | 'Roto' | 'Generic'
    *   - anschlag: 'right' | 'left'
    *   - flügel: 1 | 2 (optional, default 1)
    * @returns {String} Complete prompt for Imagen-4
