@@ -778,7 +778,7 @@ if (!IS_AI_MODE) {
     try {
       const res = await fetch(WORKER_URL, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:400, system:SYSTEM_PROMPT, messages:history.slice(-10) })
+        body: JSON.stringify({ max_tokens:400, system:SYSTEM_PROMPT, messages:history.slice(-10) })
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
