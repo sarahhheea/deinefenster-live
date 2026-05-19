@@ -394,17 +394,12 @@ function _addRolladen(spec) {
     winGroup.add(nut(wxL, wyT, wxR, wyT, wfz, subtleNutMat));
     winGroup.add(nut(wxL, wyB, wxL, wyT, wfz, subtleNutMat));
     winGroup.add(nut(wxR, wyB, wxR, wyT, wfz, subtleNutMat));
-    const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 0.006, 32), spacerMat);
-    wheel.rotation.x = Math.PI / 2;
-    wheel.position.set(wickX, wickY, wfz + 0.003);
-    winGroup.add(wheel);
-    const knauf = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.012, 24), handleMat);
-    knauf.rotation.x = Math.PI / 2;
-    knauf.position.set(wickX, wickY, wfz + 0.012);
-    winGroup.add(knauf);
-    winGroup.add(nut(wickX - 0.025, wickY + wickB / 2 - 0.006, wickX + 0.025, wickY + wickB / 2 - 0.006, wfz + 0.001, sealMat));
-    const band = new THREE.Mesh(new THREE.BoxGeometry(0.024, 0.180, 0.002), sealMat);
-    band.position.set(wickX, wickY + wickB / 2 - 0.180, wfz + 0.002);
+    const slot = new THREE.Mesh(new THREE.BoxGeometry(0.060, 0.008, 0.012), sealMat);
+    slot.position.set(wickX, wickY + wickB / 2 - 0.020, wfz - 0.004);
+    winGroup.add(slot);
+    const bandLen = wickB - 0.040;
+    const band = new THREE.Mesh(new THREE.BoxGeometry(0.024, bandLen, 0.002), sealMat);
+    band.position.set(wickX, wickY + wickB / 2 - 0.020 - bandLen / 2, wfz + 0.003);
     winGroup.add(band);
   }
 }

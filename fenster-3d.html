@@ -393,24 +393,16 @@ function _addRolladen(spec) {
     winGroup.add(nut(wxL, wyT, wxR, wyT, wfz, subtleNutMat));
     winGroup.add(nut(wxL, wyB, wxL, wyT, wfz, subtleNutMat));
     winGroup.add(nut(wxR, wyB, wxR, wyT, wfz, subtleNutMat));
-    // Wickelrad — Kreis sichtbar in der Gehäuse-Mitte (versenkt, dunkler)
-    const wheelGeo = new THREE.CylinderGeometry(0.055, 0.055, 0.006, 32);
-    const wheel = new THREE.Mesh(wheelGeo, spacerMat);
-    wheel.rotation.x = Math.PI / 2;
-    wheel.position.set(wickX, wickY, wfz + 0.003);
-    winGroup.add(wheel);
-    // Mittel-Drehknauf
-    const knaufGeo = new THREE.CylinderGeometry(0.012, 0.012, 0.012, 24);
-    const knauf = new THREE.Mesh(knaufGeo, handleMat);
-    knauf.rotation.x = Math.PI / 2;
-    knauf.position.set(wickX, wickY, wfz + 0.012);
-    winGroup.add(knauf);
-    // Gurt-Schlitz oben (dunkler horizontaler Schlitz)
-    winGroup.add(nut(wickX - 0.025, wickY + wickB / 2 - 0.006, wickX + 0.025, wickY + wickB / 2 - 0.006, wfz + 0.001, sealMat));
-    // Gurtband — schmaler vertikaler Streifen aus dem Schlitz nach unten
-    const bandGeo = new THREE.BoxGeometry(0.024, 0.180, 0.002);
+    // Gurt-Schlitz oben (dunkle Vertiefung — hier kommt der Gurt raus)
+    const slotGeo = new THREE.BoxGeometry(0.060, 0.008, 0.012);
+    const slot = new THREE.Mesh(slotGeo, sealMat);
+    slot.position.set(wickX, wickY + wickB / 2 - 0.020, wfz - 0.004);
+    winGroup.add(slot);
+    // Gurtband — hängt aus dem Schlitz nach unten (sichtbar vor dem Gehäuse)
+    const bandLen = wickB - 0.040;
+    const bandGeo = new THREE.BoxGeometry(0.024, bandLen, 0.002);
     const band = new THREE.Mesh(bandGeo, sealMat);
-    band.position.set(wickX, wickY + wickB / 2 - 0.090 - 0.090, wfz + 0.002);
+    band.position.set(wickX, wickY + wickB / 2 - 0.020 - bandLen / 2, wfz + 0.003);
     winGroup.add(band);
   }
 }
