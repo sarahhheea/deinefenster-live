@@ -143,6 +143,7 @@ function deriveBauartTags(kat) {
   if (kat === 'festelement') tags.push('festverglasung');
   if (kat === 'kellerfenster') tags.push('kellerfenster-typ');
   if (kat === 'rundfenster') tags.push('rundfenster-typ');
+  if (kat === 'rundbogenfenster') tags.push('rundbogenfenster-typ');
   if (kat === 'schiebetuer-psk') tags.push('parallel-schiebe-kipp');
   if (kat === 'schiebetuer-hst') tags.push('hebe-schiebe');
   return tags;
@@ -1425,7 +1426,8 @@ function eigenschaftAnzeige(code) {
     'vierfluegelig': 'Vierflügelig',
     'mit-rollo': 'Mit Rollladen',
     'kellerfenster-typ': 'Kellerfenster',
-    'rundfenster-typ': 'Rundfenster'
+    'rundfenster-typ': 'Rundes Fenster',
+    'rundbogenfenster-typ': 'Rundbogenfenster'
   };
   return map[code] || code;
 }
