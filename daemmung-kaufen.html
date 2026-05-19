@@ -158,6 +158,53 @@
 </head>
 <body>
 
+<!-- Hofverkauf-Banner (wiederkehrend jeden Freitag) -->
+<style>
+  .df-event-banner { position: sticky; top: 0; z-index: 70; background: linear-gradient(90deg,#76a9fa 0%,#92baf9 50%,#76a9fa 100%); color: #0a1225; font-family: 'Manrope', sans-serif; font-weight: 700; text-align: center; padding: 10px 16px; font-size: 13.5px; line-height: 1.4; box-shadow: 0 2px 12px rgba(0,0,0,0.25); }
+  .df-event-banner a { color: #0a1225; text-decoration: underline; font-weight: 800; }
+  .df-event-banner .df-event-strong { font-weight: 900; letter-spacing: 0.01em; }
+  .df-event-banner .df-event-count { display: inline-block; min-width: 36px; padding: 1px 8px; margin: 0 2px; background: rgba(10,18,37,0.18); border-radius: 6px; font-variant-numeric: tabular-nums; }
+  @media (max-width: 640px) { .df-event-banner { font-size: 12.5px; padding: 9px 12px; } }
+</style>
+<div id="dfEventBanner" class="df-event-banner" role="region" aria-label="Wöchentlicher Hofverkauf">
+  <span class="df-event-strong">Hofverkauf jeden Freitag · 10–17 Uhr</span> · Fohrder Landstr. 13, Brandenburg a.d.H. ·
+  500+ Fenster &amp; Türen ab Lager — <a href="shop.html">Bestand online ansehen</a> ·
+  <span class="df-event-strong"><span id="dfEventCount" class="df-event-count">–</span></span>
+</div>
+<script>
+  (function(){
+    var banner = document.getElementById('dfEventBanner');
+    var out = document.getElementById('dfEventCount');
+    if (!banner || !out) return;
+    function isSummerBreak(d){ return d.getMonth() === 7; }
+    function nextFriday(){
+      var now = new Date(); var dow = now.getDay();
+      var daysUntilFri = (5 - dow + 7) % 7;
+      var nf = new Date(now); nf.setDate(now.getDate() + daysUntilFri); nf.setHours(10, 0, 0, 0);
+      if (daysUntilFri === 0 && now.getHours() >= 17) nf.setDate(nf.getDate() + 7);
+      while (isSummerBreak(nf)) nf.setDate(nf.getDate() + 7);
+      return nf;
+    }
+    function tick(){
+      var now = new Date(); var target = nextFriday();
+      if (now.getDay() === 5 && now.getHours() >= 10 && now.getHours() < 17 && !isSummerBreak(now)) {
+        out.textContent = 'läuft gerade — bis 17 Uhr offen'; return;
+      }
+      var diff = target.getTime() - now.getTime();
+      if (diff <= 0) { out.textContent = 'gleich geht\'s los'; return; }
+      var d = Math.floor(diff / 86400000);
+      var h = Math.floor((diff % 86400000) / 3600000);
+      var m = Math.floor((diff % 3600000) / 60000);
+      var ds = target.toLocaleDateString('de-DE', { day:'numeric', month:'long' });
+      if (d === 0) out.textContent = 'Heute in ' + h + 'h ' + m + 'm';
+      else if (d === 1) out.textContent = 'Morgen um 10 Uhr · noch ' + h + 'h ' + m + 'm';
+      else out.textContent = 'In ' + d + ' Tagen · ' + ds;
+    }
+    tick(); setInterval(tick, 60000);
+  })();
+</script>
+
+
 <!-- Navigation Mega-Menu -->
 <style>
   .nav-item { position: relative; }
