@@ -205,6 +205,49 @@
 }
 </script>
 
+<!-- Event-Schema: Hofverkauf 21.05.2026 (taucht in Google-Suche + Maps als Event auf) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Event",
+  "name": "Hofverkauf Türen und Fensterhandel Christ — Brandenburg an der Havel",
+  "startDate": "2026-05-21T10:00:00+02:00",
+  "endDate": "2026-05-21T17:00:00+02:00",
+  "eventStatus": "https://schema.org/EventScheduled",
+  "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+  "description": "Offener Hofverkauf jeden Freitag von 10 bis 17 Uhr in Brandenburg an der Havel. 500+ neue Drutex-Fenster, gebrauchte Kunststofffenster, gebrauchte Haustüren und Garagentore zur Selbstabholung. Keine Anmeldung nötig — vorab Lagerware-Fragen per WhatsApp möglich.",
+  "location": {
+    "@type": "Place",
+    "name": "Türen und Fensterhandel Christ — Lagerhof",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Fohrder Landstraße 13",
+      "addressLocality": "Brandenburg an der Havel",
+      "postalCode": "14772",
+      "addressCountry": "DE"
+    }
+  },
+  "image": ["https://deinefenster.de/img/hero-fensterhandel.jpg"],
+  "offers": {
+    "@type": "Offer",
+    "url": "https://deinefenster.de/shop.html",
+    "price": "0",
+    "priceCurrency": "EUR",
+    "availability": "https://schema.org/InStock",
+    "validFrom": "2026-05-19T00:00:00+02:00",
+    "description": "Eintritt frei. Selbstabholung. Vor Ort einzelne Artikelpreise."
+  },
+  "organizer": {
+    "@type": "Organization",
+    "name": "Türen und Fensterhandel Christ",
+    "url": "https://deinefenster.de",
+    "telephone": "+49-3381-2148373"
+  },
+  "isAccessibleForFree": true,
+  "maximumAttendeeCapacity": 200
+}
+</script>
+
 <!-- Speakable-Schema für Voice Search (Google Assistant, Siri) -->
 <script type="application/ld+json">
 {
@@ -346,10 +389,56 @@
   ::-webkit-scrollbar { width:3px; }
   ::-webkit-scrollbar-track { background:#0a1530; }
   ::-webkit-scrollbar-thumb { background:#225eaa; border-radius:2px; }
+
+  /* Hofverkauf-Event-Banner (Freitag-Sprint) */
+  .df-event-banner {
+    position: sticky; top: 0; z-index: 70;
+    background: linear-gradient(90deg,#76a9fa 0%,#92baf9 50%,#76a9fa 100%);
+    color: #0a1225;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 700;
+    text-align: center;
+    padding: 10px 16px;
+    font-size: 13.5px;
+    line-height: 1.4;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+  }
+  .df-event-banner a { color: #0a1225; text-decoration: underline; font-weight: 800; }
+  .df-event-banner .df-event-strong { font-weight: 900; letter-spacing: 0.01em; }
+  .df-event-banner .df-event-count { display: inline-block; min-width: 36px; padding: 1px 8px; margin: 0 2px; background: rgba(10,18,37,0.18); border-radius: 6px; font-variant-numeric: tabular-nums; }
+  @media (max-width: 640px) { .df-event-banner { font-size: 12.5px; padding: 9px 12px; } }
 </style>
 </head>
 <body class="selection:bg-primary-fixed selection:text-on-primary-fixed" style="background:#0a1530;color:#e8eeff;" data-auto-anim="true">
 <a href="#main" class="skip-to-main">Zum Hauptinhalt springen</a>
+
+<!-- Hofverkauf-Event-Banner (entfällt nach dem Verkaufstag automatisch via JS) -->
+<div id="dfEventBanner" class="df-event-banner" role="region" aria-label="Aktueller Hofverkauf">
+  <span class="df-event-strong">Hofverkauf Freitag 21. Mai · 10–17 Uhr</span> · Fohrder Landstr. 13, Brandenburg a.d.H. ·
+  500+ Fenster &amp; Türen ab Lager — <a href="shop.html">Bestand online ansehen</a> ·
+  <span class="df-event-strong">In <span id="dfEventCount" class="df-event-count">–</span></span>
+</div>
+<script>
+  (function(){
+    var target = new Date('2026-05-21T10:00:00+02:00').getTime();
+    var endOfEvent = new Date('2026-05-21T17:00:00+02:00').getTime();
+    var banner = document.getElementById('dfEventBanner');
+    var out = document.getElementById('dfEventCount');
+    if (!banner || !out) return;
+    function tick(){
+      var now = Date.now();
+      if (now > endOfEvent) { banner.style.display = 'none'; return; }
+      var diff = target - now;
+      if (diff <= 0) { out.textContent = 'läuft jetzt!'; return; }
+      var d = Math.floor(diff / 86400000);
+      var h = Math.floor((diff % 86400000) / 3600000);
+      var m = Math.floor((diff % 3600000) / 60000);
+      out.textContent = d + 'T ' + h + 'h ' + m + 'm';
+    }
+    tick();
+    setInterval(tick, 60000);
+  })();
+</script>
 
 
 <!-- Navigation Mega-Menu -->
