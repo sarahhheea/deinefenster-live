@@ -21,8 +21,8 @@
 
   <script type="importmap">
   { "imports": {
-      "three":         "https://cdn.jsdelivr.net/npm/three@0.162.0/build/three.module.js",
-      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.162.0/examples/jsm/"
+      "three":         "/js/vendor/three.module.js",
+      "three/addons/": "/js/vendor/three/examples/jsm/"
   } }
   </script>
   <script type="module" src="js/konfigurator-3d.js?v=20"></script>
@@ -3951,8 +3951,8 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       <i class="ms f" style="color:var(--c-primary);font-size:20px;flex-shrink:0">verified_user</i>
       <div>RC2 wird von den meisten Versicherungen für Erdgeschoss-Fenster empfohlen und ist von vielen Versicherern anerkannt.</div>
     </div>
-    <button type="button" onclick="openS(11)" class="w-full mt-4 flex items-center justify-center gap-2 font-bold py-3 rounded-full text-white text-sm" style="background:var(--c-primary);font-family:'Plus Jakarta Sans',sans-serif">
-      <i class="ms">arrow_forward</i> Weiter zum Rolladen
+    <button type="button" onclick="_nextAfterRC()" class="w-full mt-4 flex items-center justify-center gap-2 font-bold py-3 rounded-full text-white text-sm" style="background:var(--c-primary);font-family:'Plus Jakarta Sans',sans-serif">
+      <i class="ms">arrow_forward</i> <span id="next-after-rc-text">Weiter zum Rolladen</span>
     </button>
   </div>
 </div>
@@ -5522,7 +5522,22 @@ function pickTuerGriffOpt(el) {
 
 // Sarah-Feedback 21.04.2026: Zentralisierte Sichtbarkeit der Schritte je Produkt.
 // Vermeidet Unlogik wie "Rolladen bei Haustür" oder "Fenstergriffe bei Haustür".
+// "Weiter"-Sprung nach Einbruchschutz: Haustür hat keinen Rolladen → direkt Angebot
+function _nextAfterRC() {
+  if (typeof S !== 'undefined' && S.prod === 'haustuere') {
+    openS(13);
+  } else {
+    openS(11);
+  }
+}
+function _updateRCNextLabel() {
+  const el = document.getElementById('next-after-rc-text');
+  if (!el) return;
+  el.textContent = (typeof S !== 'undefined' && S.prod === 'haustuere')
+    ? 'Weiter zum Angebot' : 'Weiter zum Rolladen';
+}
 function applyStepVisibility() {
+  if (typeof _updateRCNextLabel === 'function') _updateRCNextLabel();
   const rules = {
     's-tm':  { show: S.prod === 'haustuere',           openIf: true  }, // Türmodell
     's-balk':{ show: S.prod === 'balkontuer',          openIf: false }, // Balkontür-Spezifika (Sarah 21.04.2026)
@@ -5696,7 +5711,7 @@ function pick(el, key) {
       const d7 = document.getElementById('d7');
       if (d7) d7.textContent = (d7.textContent||'') + ' · VSG P4A (durch RC gesetzt)';
     }
-    setTimeout(()=>openS(11),200);
+    setTimeout(()=>_nextAfterRC(),200);
   }
   if (key==='sproTyp'){
     document.getElementById('d12').textContent = v==='keine'?'Ohne Sprossen':v==='aufgeklebt'?'Aufgeklebte Sprossen':'Sprossen im Scheibenzwischenraum';
