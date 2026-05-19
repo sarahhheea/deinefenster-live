@@ -42,6 +42,88 @@
     .bc-step.done{color:#16a34a}
     .bc-step.active{color:#225eaa}
     .bc-sep{color:#c2c6d3}
+
+    /* ══════════════════════════════════════════════
+       DARK-THEME OVERRIDE (Sarah 19.05.2026)
+       Gleiches Schema wie index.html: dunkles Navy + helle Schrift
+       ══════════════════════════════════════════════ */
+    body { background: #0a1530 !important; color: #e8eeff !important; font-family: 'Manrope', sans-serif !important; }
+
+    /* Karten dunkel mit hellblauem subtilem Rand */
+    .cart-card {
+      background: rgba(11,19,40,0.85) !important;
+      border: 1px solid rgba(118,169,250,0.18) !important;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.45), 0 0 0 1px rgba(118,169,250,0.04) !important;
+    }
+    .cart-card:hover {
+      box-shadow: 0 12px 40px rgba(0,0,0,0.55), 0 0 0 1px rgba(118,169,250,0.20) !important;
+      border-color: rgba(118,169,250,0.30) !important;
+    }
+    .skizze-box {
+      background: linear-gradient(180deg, rgba(6,12,28,0.95) 0%, rgba(11,19,40,0.85) 100%) !important;
+      border-bottom: 1px solid rgba(118,169,250,0.08) !important;
+    }
+
+    /* Text auf Karten */
+    .spec-row { color: rgba(232,238,255,0.78) !important; }
+    .spec-row i { color: #76a9fa !important; }
+    .spec-row strong { color: #ffffff !important; }
+    .price-big { color: #76a9fa !important; }
+    h1, h2, h3, h4 { color: #ffffff !important; font-family: 'Plus Jakarta Sans', sans-serif !important; }
+
+    /* Breadcrumb dunkel */
+    .breadcrumb {
+      background: rgba(11,19,40,0.85) !important;
+      border: 1px solid rgba(118,169,250,0.15) !important;
+      color: rgba(232,238,255,0.85) !important;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.30) !important;
+    }
+    .bc-step { color: rgba(232,238,255,0.55) !important; }
+    .bc-step.done { color: #4ade80 !important; }
+    .bc-step.active { color: #76a9fa !important; }
+    .bc-sep { color: rgba(232,238,255,0.25) !important; }
+
+    /* Form-Block (Anmerkungen / Bilder-Upload) — dunkles Pendant */
+    #form-block {
+      background: rgba(11,19,40,0.85) !important;
+      border: 1px solid rgba(118,169,250,0.18) !important;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.40) !important;
+      color: #e8eeff !important;
+    }
+    #form-block label, #form-block .form-label { color: rgba(232,238,255,0.92) !important; }
+    #form-block input[type="text"], #form-block input[type="email"], #form-block input[type="tel"], #form-block textarea, #form-block select {
+      background: rgba(6,12,28,0.85) !important;
+      border: 1px solid rgba(118,169,250,0.25) !important;
+      color: #ffffff !important;
+    }
+    #form-block input::placeholder, #form-block textarea::placeholder { color: rgba(232,238,255,0.40) !important; }
+    #form-block input:focus, #form-block textarea:focus, #form-block select:focus {
+      border-color: #76a9fa !important;
+      box-shadow: 0 0 0 3px rgba(118,169,250,0.18) !important;
+    }
+
+    /* Buttons mit weißem Hintergrund → dark variant */
+    .btn-remove {
+      background: rgba(11,19,40,0.85) !important;
+      color: #ff8a8a !important;
+      border-color: rgba(255,138,138,0.30) !important;
+    }
+    .btn-remove:hover {
+      background: #dc2626 !important;
+      color: #fff !important;
+      border-color: #dc2626 !important;
+    }
+
+    /* Modal — dunkle Box statt weiß */
+    #danke-modal > div, .modal-card {
+      background: rgba(11,19,40,0.96) !important;
+      color: #e8eeff !important;
+      border: 1px solid rgba(118,169,250,0.20) !important;
+    }
+
+    /* Empty-State (war schon dunkel — etwas verfeinern) */
+    #empty-state { background: rgba(11,19,40,0.85) !important; border-color: rgba(118,169,250,0.18) !important; color: rgba(232,238,255,0.85) !important; }
+    #empty-state h2 { color: #ffffff !important; }
   </style>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js" defer></script>
@@ -112,8 +194,6 @@
 <div id="topbar">
   <div class="topbar-inner">
     <nav class="topbar-links">
-      <a href="ueber-drutex.html" class="topbar-link">Hersteller</a>
-      <span class="topbar-dot">·</span>
       <a href="faq.html" class="topbar-link">FAQ</a>
       <span class="topbar-dot">·</span>
       <a href="ratgeber/" class="topbar-link">Ratgeber</a>
@@ -131,6 +211,10 @@
       <a href="mailto:info@baustoffchrist.de" class="topbar-phone">
         <span class="material-symbols-outlined" style="font-size:12px;font-variation-settings:'FILL' 1">mail</span>
         info@baustoffchrist.de
+      </a>
+      <a href="https://wa.me/491717263776" target="_blank" rel="noopener" class="topbar-whatsapp">
+        <span class="material-symbols-outlined" style="font-size:13px;font-variation-settings:'FILL' 1">chat</span>
+        WhatsApp
       </a>
     </div>
   </div>
@@ -482,8 +566,8 @@
 
     <!-- Add Another -->
     <div id="add-another-section" class="hidden mb-8">
-      <a href="konfigurator.html?weiter=1" class="w-full flex items-center justify-center gap-2 font-bold py-4 rounded-xl text-primary text-base border-2 border-dashed transition-all hover:bg-primary/5"
-        style="background:#fff;color:#225eaa;border-color:#225eaa;font-family:'Archivo',sans-serif">
+      <a href="konfigurator.html?weiter=1" class="w-full flex items-center justify-center gap-2 font-bold py-4 rounded-xl text-base border-2 border-dashed transition-all"
+        style="background:rgba(11,19,40,0.65);color:#76a9fa;border-color:rgba(118,169,250,0.45);font-family:'Plus Jakarta Sans',sans-serif">
         <i class="ms" style="font-size:22px">add_circle</i>
         Weiteres Element hinzufügen
       </a>
