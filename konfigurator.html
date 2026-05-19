@@ -386,12 +386,50 @@
     .fp-name{font-size:11px;color:var(--c-text);text-align:center;width:100%;line-height:1.25;word-break:break-word;font-weight:600}
     .fp-item.sel .fp-name{color:var(--c-primary);font-weight:700}
 
-    /* FARB-TABS */
-    .farb-tab{padding:10px 18px;border:none;background:transparent;color:var(--c-text-soft);font-weight:700;font-size:14px;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;border-bottom:2px solid transparent;transition:all var(--t-fast) var(--ease)}
-    .farb-tab:hover{color:var(--c-primary)}
-    .farb-tab.active{color:var(--c-primary);border-bottom-color:var(--c-primary)}
+    /* FARB-TABS — Pillen-Style auf dunklem Sektion-Body */
+    .farb-tab{padding:9px 18px;border:1px solid rgba(118,169,250,0.18);background:rgba(118,169,250,0.06);color:rgba(232,238,255,0.65);font-weight:700;font-size:13px;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;border-radius:999px;display:inline-flex;align-items:center;gap:6px;transition:all var(--t-fast) var(--ease)}
+    .farb-tab:hover{color:#fff;background:rgba(118,169,250,0.12);border-color:rgba(118,169,250,0.32)}
+    .farb-tab.active{color:#fff;background:#225eaa;border-color:#225eaa}
     .farb-tab-content{display:none}
     .farb-tab-content.active{display:block}
+
+    /* FARB-PICKER auf dunklem Sektion-Body (.sb) — bessere Lesbarkeit */
+    .sb .fp-item{background:transparent}
+    .sb .fp-item:hover{background:rgba(118,169,250,0.10)}
+    .sb .fp-item.sel{background:rgba(118,169,250,0.15);border-color:#76a9fa;box-shadow:0 0 0 2px rgba(118,169,250,.25)}
+    .sb .fp-swatch{border-color:rgba(255,255,255,0.18);box-shadow:0 2px 8px rgba(0,0,0,.4)}
+    .sb .fp-name{color:rgba(232,238,255,0.88)}
+    .sb .fp-item.sel .fp-name{color:#76a9fa}
+
+    /* FARB-GRUPPEN-HEADER auf dunklem Theme */
+    .sb .farb-section{margin-bottom:22px}
+    .sb .farb-section-head{display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(118,169,250,0.18)}
+    .sb .farb-section-head .ms{color:#76a9fa;font-size:15px}
+    .sb .farb-section-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:800;color:rgba(118,169,250,0.85);text-transform:uppercase;letter-spacing:.08em}
+    .sb .farb-section-count{font-size:11px;font-weight:600;color:rgba(232,238,255,0.45);margin-left:auto}
+    .sb .farb-section-items{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start}
+
+    /* BELIEBTESTE — größere Tiles */
+    .sb .fp-item.fp-big{width:108px;padding:10px 6px}
+    .sb .fp-item.fp-big .fp-swatch{width:62px;height:62px}
+    .sb .fp-item.fp-big .fp-name{font-size:12px}
+
+    /* GLAS-AUSWAHL — größere Karten mit SVG-Visualisierung */
+    .glass-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+    .glass-card{position:relative;display:flex;gap:14px;padding:14px;background:rgba(118,169,250,0.05);border:1.5px solid rgba(118,169,250,0.18);border-radius:12px;cursor:pointer;transition:all .18s ease;align-items:center}
+    .glass-card:hover{background:rgba(118,169,250,0.10);border-color:rgba(118,169,250,0.4);transform:translateY(-1px)}
+    .glass-card.sel{background:rgba(118,169,250,0.16);border-color:#76a9fa;box-shadow:0 0 0 2px rgba(118,169,250,.25)}
+    .glass-card .glass-vis{width:130px;height:88px;border-radius:8px;flex-shrink:0;border:1.5px solid rgba(255,255,255,0.18);box-shadow:0 2px 8px rgba(0,0,0,.35);overflow:hidden}
+    .glass-card .glass-vis svg{display:block;width:100%;height:100%}
+    .glass-card .glass-info{flex:1;min-width:0}
+    .glass-card .glass-name{font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:800;color:#fff;margin-bottom:4px}
+    .glass-card .glass-desc{font-size:12px;color:rgba(232,238,255,0.65);line-height:1.4;margin-bottom:8px}
+    .glass-card .glass-price{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.04em;padding:3px 10px;border-radius:999px}
+    .glass-card .glass-price.inc{color:#86efac;background:rgba(34,197,94,0.14);border:1px solid rgba(34,197,94,0.32)}
+    .glass-card .glass-price.add{color:#fbbf24;background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.32)}
+    .glass-card .glass-check{position:absolute;top:10px;right:10px;width:24px;height:24px;border-radius:50%;background:#76a9fa;display:none;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+    .glass-card.sel .glass-check{display:flex}
+    .glass-card .glass-check .ms{font-size:16px;color:#001b3d}
 
     /* GRIFF VISUAL (einheitlicher Selected-State) */
     .griff-opt{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;border:1px solid var(--c-border);border-radius:var(--r-md);padding:14px 10px;cursor:pointer;background:var(--c-bg);transition:border-color var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease);gap:6px}
@@ -3390,16 +3428,16 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
     <i class="ms chev">expand_more</i>
   </div>
   <div class="sb">
-    <!-- Inhaberin-Upgrade 21.04.2026: Tabs statt 3 Grids, Beliebteste vor Akkordeon, größere Kreise -->
-    <div style="display:flex;gap:4px;border-bottom:1px solid rgba(0,0,0,.10);margin-bottom:18px;overflow-x:auto">
+    <!-- Tabs als Pillen (2026-05-19) — übersichtlicher fürs Auge -->
+    <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap">
       <button type="button" class="farb-tab" data-tab="fa" onclick="switchFarbTab('fa')">
-        <i class="ms" style="font-size:16px;vertical-align:-3px">wb_sunny</i> Außenfarbe
+        <i class="ms" style="font-size:15px">wb_sunny</i> Außenfarbe
       </button>
       <button type="button" class="farb-tab active" data-tab="fi" onclick="switchFarbTab('fi')">
-        <i class="ms" style="font-size:16px;vertical-align:-3px">home</i> Innenfarbe
+        <i class="ms" style="font-size:15px">home</i> Innenfarbe
       </button>
       <button type="button" class="farb-tab" data-tab="fd" onclick="switchFarbTab('fd')">
-        <i class="ms" style="font-size:16px;vertical-align:-3px">line_weight</i> Dichtung
+        <i class="ms" style="font-size:15px">line_weight</i> Dichtung
       </button>
     </div>
     <!-- Tab-Content: Außenfarbe -->
@@ -3562,50 +3600,78 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       <i class="ms f" style="color:var(--c-primary);font-size:20px;flex-shrink:0">info</i>
       <div style="font-size:13px">Das Glasdekor gilt nur für das Glasfeld Ihrer Haustür (falls Modell eines hat). Bei Modellen ohne Glasfeld bleibt diese Auswahl ohne Effekt — wählen Sie in dem Fall "Klarglas".</div>
     </div>
-    <div id="glasdekor-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-      <div class="oc sel" data-v="klar" onclick="pick(this,'glasdekor')">
-        <div class="ora"></div>
-        <div style="display:flex;align-items:flex-start;gap:10px;width:100%">
-          <div style="flex:1">
-            <div class="olabel">Klarglas</div>
-            <div class="osub">Klar · maximaler Lichteinfall · Standard</div>
-            <div class="oprice p-inc">inklusive</div>
-          </div>
-          <div style="width:32px;height:32px;border-radius:4px;border:1.5px solid #c0ccd8;background:linear-gradient(135deg,#d8eaf8 0%,#b0d0e8 100%);flex-shrink:0"></div>
+    <div id="glasdekor-grid" class="glass-grid">
+      <div class="glass-card sel" data-v="klar" onclick="pick(this,'glasdekor')">
+        <div class="glass-vis"><svg viewBox="0 0 130 88" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+          <defs><linearGradient id="g-klar" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#d8eaf8"/><stop offset="50%" stop-color="#b8d8ec"/><stop offset="100%" stop-color="#9ac4dd"/></linearGradient></defs>
+          <rect width="130" height="88" fill="url(#g-klar)"/>
+          <polygon points="20,75 50,15 60,15 35,75" fill="#ffffff" opacity="0.32"/>
+          <polygon points="85,80 105,40 110,40 95,80" fill="#ffffff" opacity="0.18"/>
+        </svg></div>
+        <div class="glass-info">
+          <div class="glass-name">Klarglas</div>
+          <div class="glass-desc">Klar · maximaler Lichteinfall · Standard für alle Räume</div>
+          <span class="glass-price inc">inklusive</span>
         </div>
+        <div class="glass-check"><i class="ms f">check</i></div>
       </div>
-      <div class="oc" data-v="satinato" onclick="pick(this,'glasdekor')">
-        <div class="ora"></div>
-        <div style="display:flex;align-items:flex-start;gap:10px;width:100%">
-          <div style="flex:1">
-            <div class="olabel">Satinato</div>
-            <div class="osub">Milchig-weiß · gleichmäßig matt · Bad/WC</div>
-            <div class="oprice p-add">+ 35 €/Stück</div>
-          </div>
-          <div style="width:32px;height:32px;border-radius:4px;border:1.5px solid #c0ccd8;background:rgba(230,235,240,0.92);flex-shrink:0"></div>
+
+      <div class="glass-card" data-v="satinato" onclick="pick(this,'glasdekor')">
+        <div class="glass-vis"><svg viewBox="0 0 130 88" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="g-sat" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f0f3f5"/><stop offset="100%" stop-color="#dde3e8"/></linearGradient>
+            <filter id="sat-blur"><feGaussianBlur stdDeviation="2"/></filter>
+          </defs>
+          <rect width="130" height="88" fill="url(#g-sat)"/>
+          <circle cx="35" cy="30" r="18" fill="#ffffff" opacity="0.4" filter="url(#sat-blur)"/>
+          <circle cx="95" cy="60" r="22" fill="#ffffff" opacity="0.32" filter="url(#sat-blur)"/>
+        </svg></div>
+        <div class="glass-info">
+          <div class="glass-name">Satinato (Milchglas)</div>
+          <div class="glass-desc">Milchig-weiß · gleichmäßig matt · ideal für Bad &amp; WC</div>
+          <span class="glass-price add">+ 35 €/Stück</span>
         </div>
+        <div class="glass-check"><i class="ms f">check</i></div>
       </div>
-      <div class="oc" data-v="chinchilla" onclick="pick(this,'glasdekor')">
-        <div class="ora"></div>
-        <div style="display:flex;align-items:flex-start;gap:10px;width:100%">
-          <div style="flex:1">
-            <div class="olabel">Chinchilla</div>
-            <div class="osub">Gerippt · strukturiert · dekorativ</div>
-            <div class="oprice p-add">+ 35 €/Stück</div>
-          </div>
-          <div style="width:32px;height:32px;border-radius:4px;border:1.5px solid #c0ccd8;background:repeating-linear-gradient(90deg,#b8d0e0 0,#b8d0e0 3px,#d8eaf8 3px,#d8eaf8 7px);flex-shrink:0"></div>
+
+      <div class="glass-card" data-v="chinchilla" onclick="pick(this,'glasdekor')">
+        <div class="glass-vis"><svg viewBox="0 0 130 88" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+          <defs><linearGradient id="g-chin" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#b8d0e0"/><stop offset="20%" stop-color="#e8f0f5"/>
+            <stop offset="40%" stop-color="#b8d0e0"/><stop offset="60%" stop-color="#e8f0f5"/>
+            <stop offset="80%" stop-color="#b8d0e0"/><stop offset="100%" stop-color="#e8f0f5"/>
+          </linearGradient></defs>
+          <rect width="130" height="88" fill="url(#g-chin)"/>
+          <g opacity="0.5"><line x1="20" y1="0" x2="20" y2="88" stroke="#ffffff" stroke-width="0.5"/>
+          <line x1="50" y1="0" x2="50" y2="88" stroke="#ffffff" stroke-width="0.5"/>
+          <line x1="80" y1="0" x2="80" y2="88" stroke="#ffffff" stroke-width="0.5"/>
+          <line x1="110" y1="0" x2="110" y2="88" stroke="#ffffff" stroke-width="0.5"/></g>
+        </svg></div>
+        <div class="glass-info">
+          <div class="glass-name">Chinchilla</div>
+          <div class="glass-desc">Gerippt · strukturiert · dekorativer Sichtschutz</div>
+          <span class="glass-price add">+ 35 €/Stück</span>
         </div>
+        <div class="glass-check"><i class="ms f">check</i></div>
       </div>
-      <div class="oc" data-v="master-carre" onclick="pick(this,'glasdekor')">
-        <div class="ora"></div>
-        <div style="display:flex;align-items:flex-start;gap:10px;width:100%">
-          <div style="flex:1">
-            <div class="olabel">Master Carré</div>
-            <div class="osub">Quadratisches Muster · modern</div>
-            <div class="oprice p-add">+ 38 €/Stück</div>
-          </div>
-          <div style="width:32px;height:32px;border-radius:4px;border:1.5px solid #c0ccd8;background:repeating-conic-gradient(#b8d0e0 0% 25%,#d8eaf8 0% 50%) 0 0/8px 8px;flex-shrink:0"></div>
+
+      <div class="glass-card" data-v="master-carre" onclick="pick(this,'glasdekor')">
+        <div class="glass-vis"><svg viewBox="0 0 130 88" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+          <defs><pattern id="g-carre" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+            <rect width="10" height="10" fill="#b8d0e0"/>
+            <rect x="10" y="10" width="10" height="10" fill="#b8d0e0"/>
+            <rect x="10" y="0" width="10" height="10" fill="#e8f0f5"/>
+            <rect x="0" y="10" width="10" height="10" fill="#e8f0f5"/>
+          </pattern></defs>
+          <rect width="130" height="88" fill="url(#g-carre)"/>
+          <rect width="130" height="88" fill="#ffffff" opacity="0.15"/>
+        </svg></div>
+        <div class="glass-info">
+          <div class="glass-name">Master Carré</div>
+          <div class="glass-desc">Quadratisches Schachbrett-Muster · modern &amp; klar</div>
+          <span class="glass-price add">+ 38 €/Stück</span>
         </div>
+        <div class="glass-check"><i class="ms f">check</i></div>
       </div>
     </div>
     <p class="text-sm text-on-surf-v mt-3">Ornamentgläser bieten Sichtschutz bei hoher Lichtdurchlässigkeit. <strong>Drutex-Originalprodukte.</strong></p>
@@ -3824,18 +3890,6 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
           <div>
             <div class="olabel">Kein Rolladen</div>
             <div class="oprice p-inc">inklusive</div>
-          </div>
-        </div>
-      </div>
-      <!-- Rolladen mit Gurtwickler -->
-      <div class="oc" style="flex-direction:column;align-items:stretch;padding:14px;gap:0" data-v="gurt" onclick="pick(this,'roll')">
-        <img src="img/rolladen-gurt.png" alt="Rolladen mit Gurtwickler" style="width:100%;height:140px;object-fit:contain;background:#f4f6fb;border-radius:8px;margin-bottom:12px;display:block;padding:6px" loading="lazy" decoding="async">
-        <div style="display:flex;align-items:flex-start;gap:10px">
-          <div class="ora" style="margin-top:2px;flex-shrink:0"></div>
-          <div>
-            <div class="olabel">Rolladen mit Gurtwickler</div>
-            <div class="osub">Manuell · Kunststoff-Gurtwickler</div>
-            <div class="oprice p-add">+ 115 €/Stück</div>
           </div>
         </div>
       </div>
@@ -5426,8 +5480,8 @@ function pickTuerModell(el) {
 // ── GENERIC RADIO PICK ───────────────────────────────
 function pick(el, key) {
   // find sibling options in nearest grid/container
-  el.closest('.grid, [id$="-grid"], #spro-dicke .grid, #roll-seite .grid')
-    ?.querySelectorAll('.oc,.griff-opt').forEach(c=>c.classList.remove('sel'));
+  el.closest('.grid, .glass-grid, [id$="-grid"], #spro-dicke .grid, #roll-seite .grid')
+    ?.querySelectorAll('.oc,.griff-opt,.glass-card').forEach(c=>c.classList.remove('sel'));
   el.classList.add('sel');
   const v = el.dataset.v;
   S[key] = v;
@@ -7357,11 +7411,24 @@ function buildProfil() {
 // Sarah-Upgrade 21.04.2026: Farben neu strukturiert
 // Beliebteste-Zeile oben (6 Quick-Picks) + Akkordeon-Gruppen darunter + Tabs für außen/innen/dichtung
 const FARB_BELIEBTESTE = ['weiss','cremeweiss','anthrazit','golden-oak','nussbaum','schwarz-um'];
+// Konsolidiert 2026-05-19: 3 Gruppen statt 4, alle immer offen — übersichtlicher
 const FARB_GRUPPEN = {
-  'Weiß · Anthrazit · Schwarz': ['weiss','cremeweiss','weiss-fx','anthrazit','anthraz-gl','anthraz-um','schwarz-um','schwarzbr'],
-  'Grautöne (RAL)':             ['achatgrau','lichtgrau','signalgrau','betongrau','quarzgr-gl','quarzgr-sa','basaltgr-gl','basaltgr-sa','schiefgr-gl','schiefgr-sa','alux-db','alu-gebr','eisengl','crown-plat'],
-  'Holzdekore':                 ['sheffield','winchester','eiche-hell','eiche-nat','golden-oak','nussbaum','mooreiche','dunkleiche','siena-noce','siena-ross','mahagoni','macore','oregon','douglasie','bergkiefer','teak'],
-  'Grün · Blau · Rot · Sonder': ['schoko-br','braun-mar','moosgruen','dunkelgr','stahlblau','brillblau','dunkelrot','sonder'],
+  'Weiß · Grau · Anthrazit · Schwarz': [
+    'weiss','cremeweiss','weiss-fx',
+    'achatgrau','lichtgrau','signalgrau','betongrau',
+    'quarzgr-gl','quarzgr-sa','basaltgr-gl','basaltgr-sa',
+    'schiefgr-gl','schiefgr-sa','alux-db','alu-gebr','eisengl','crown-plat',
+    'anthrazit','anthraz-gl','anthraz-um','schwarz-um','schwarzbr'
+  ],
+  'Holzdekore': [
+    'sheffield','winchester','eiche-hell','eiche-nat','golden-oak','nussbaum',
+    'mooreiche','dunkleiche','siena-noce','siena-ross','mahagoni','macore',
+    'oregon','douglasie','bergkiefer','teak'
+  ],
+  'Farbig & Sonder': [
+    'schoko-br','braun-mar','moosgruen','dunkelgr',
+    'stahlblau','brillblau','dunkelrot','sonder'
+  ],
 };
 
 // Kürzere Display-Namen (ohne RAL-Code)
@@ -7387,41 +7454,46 @@ function buildFarbePicker() {
       grid.innerHTML = Object.entries(table).map(([k,v])=>farbItemHtml(k,v,key)).join('');
       return;
     }
-    // fa/fi: Beliebteste-Block + aufklappbare Gruppen (Sarah-Wunsch 21.04.2026: Akkordeon zurück, war übersichtlicher)
+    // fa/fi: Beliebteste-Block + 3 Sektionen (immer offen, übersichtlicher Kundenwunsch 2026-05-19)
     let html = '';
-    // Beliebteste-Zeile oben — immer offen (Blockliste filtert bei Haustür)
-    const beliebtItems = FARB_BELIEBTESTE.filter(k => table[k] && !istBlocked(k)).map(k => farbItemHtml(k, table[k], key)).join('');
-    html += `<div style="margin-bottom:18px">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--c-border)">
-        <i class="ms f" style="color:var(--c-primary);font-size:15px">star</i>
-        <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.06em">Beliebteste</span>
+    const beliebtItems = FARB_BELIEBTESTE
+      .filter(k => table[k] && !istBlocked(k))
+      .map(k => farbItemHtml(k, table[k], key, true))
+      .join('');
+    html += `<div class="farb-section">
+      <div class="farb-section-head">
+        <i class="ms f">star</i>
+        <span class="farb-section-title">Beliebteste — 1 Klick zum Ziel</span>
       </div>
-      <div style="display:flex;flex-wrap:wrap;gap:12px">${beliebtItems}</div>
+      <div class="farb-section-items">${beliebtItems}</div>
     </div>`;
-    // 4 aufklappbare Gruppen darunter — initial alle zu (Blockliste filtert bei Haustür)
+    // 3 Sektionen — alle immer offen, keine Akkordeons
     Object.entries(FARB_GRUPPEN).forEach(([grpName, grpKeys]) => {
-      const items = grpKeys.filter(k => table[k] && !istBlocked(k)).map(k => farbItemHtml(k, table[k], key)).join('');
-      if (!items) return;
-      html += `<div class="farb-gruppe" style="margin-bottom:8px;border:1px solid var(--c-border);border-radius:8px;overflow:hidden;background:var(--c-bg)">
-        <div onclick="toggleFarbGruppe(this)" style="padding:10px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none;transition:background .15s" onmouseover="this.style.background='var(--c-primary-tint)'" onmouseout="this.style.background=''">
-          <span style="font-size:12px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;color:var(--c-text)">${grpName}</span>
-          <span class="farb-grp-arrow" style="transition:transform .2s;color:var(--c-text-soft)"><i class="ms">expand_more</i></span>
+      const filtered = grpKeys.filter(k => table[k] && !istBlocked(k));
+      if (!filtered.length) return;
+      const items = filtered.map(k => farbItemHtml(k, table[k], key)).join('');
+      html += `<div class="farb-section">
+        <div class="farb-section-head">
+          <i class="ms f">palette</i>
+          <span class="farb-section-title">${grpName}</span>
+          <span class="farb-section-count">${filtered.length} Farben</span>
         </div>
-        <div class="farb-grp-content" style="padding:0 14px;display:none;flex-wrap:wrap;gap:12px;align-items:flex-start">${items}</div>
+        <div class="farb-section-items">${items}</div>
       </div>`;
     });
     grid.innerHTML = html;
   });
 }
 
-function farbItemHtml(k, v, key) {
+function farbItemHtml(k, v, key, isBig) {
   const name = shortFarbName(v);
-  return `<div class="fp-item ${S[key]===k?'sel':''}" data-v="${k}" onclick="pickColor(this,'${key}')">
+  const bigCls = isBig ? ' fp-big' : '';
+  return `<div class="fp-item${bigCls} ${S[key]===k?'sel':''}" data-v="${k}" onclick="pickColor(this,'${key}')">
     <div class="fp-swatch" style="background:${v.hex};border-color:${v.border||'#ccc'}">
       <div class="fp-check-dot"><i class="ms f" style="font-size:14px;color:#225eaa;line-height:1">check</i></div>
     </div>
     <div class="fp-name">${name}</div>
-    ${v.add>0?`<div style="font-size:11px;color:#d97706;font-weight:700">+${v.add}€</div>`:`<div style="font-size:11px;color:#16a34a;font-weight:700">inkl.</div>`}
+    ${v.add>0?`<div style="font-size:11px;color:#fbbf24;font-weight:700">+${v.add}€</div>`:`<div style="font-size:11px;color:#86efac;font-weight:700">inkl.</div>`}
   </div>`;
 }
 
