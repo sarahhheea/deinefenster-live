@@ -9272,7 +9272,8 @@ function _renderHst3d() {
   const frame = document.getElementById('hst3d-frame');
   if (!wrap || !frame) return;
 
-  const _ck    = HAUS3D_COLOR_MAP[S.fa] || 'anthrazitgrau';
+  // 3D zeigt Innenansicht → Innenfarbe S.fi
+  const _ck    = HAUS3D_COLOR_MAP[S.fi] || HAUS3D_COLOR_MAP[S.fa] || 'anthrazitgrau';
   const isWood = HAUS3D_WOOD_KEYS.has(_ck);
   const _side  = (S.oeff1 === 'dreh-l' || S.oeff1 === 'dk-l') ? 'l' : 'r';
   const _grip  = S.hstGriff || 'weiss-std';
@@ -9317,7 +9318,8 @@ function _renderBalkontuer3d() {
   if (!wrap || !frame) return;
   _show3dHint(true);
 
-  const _ck    = HAUS3D_COLOR_MAP[S.fa] || 'anthrazitgrau';
+  // 3D zeigt Innenansicht (Griff sichtbar) → Innenfarbe S.fi
+  const _ck    = HAUS3D_COLOR_MAP[S.fi] || HAUS3D_COLOR_MAP[S.fa] || 'anthrazitgrau';
   const isWood = HAUS3D_WOOD_KEYS.has(_ck);
   const _side  = (S.oeff1 === 'dreh-l' || S.oeff1 === 'dk-l') ? 'l' : 'r';
   const _layout = S.fluegel || '1-fluegel';
@@ -9339,6 +9341,9 @@ function _renderBalkontuer3d() {
         type: 'update',
         layout: _layout,
         sashes: _sashes,
+        roll:       S.roll       || 'ohne',
+        rollKasten: S.rollKasten || '175',
+        rollSeite:  S.rollSeite  || 'rechts',
         color: isWood ? null : _ck,
         wood:  isWood ? _ck  : null,
         glass: S.glasdekor || 'klar',
@@ -9352,6 +9357,9 @@ function _renderBalkontuer3d() {
         type: 'update',
         layout: _layout,
         sashes: _sashes,
+        roll:       S.roll       || 'ohne',
+        rollKasten: S.rollKasten || '175',
+        rollSeite:  S.rollSeite  || 'rechts',
         color: isWood ? null : _ck,
         wood:  isWood ? _ck  : null,
         glass: S.glasdekor || 'klar',
@@ -9367,7 +9375,8 @@ function _renderFenster3d() {
   if (!wrap || !frame) return;
   _show3dHint(true);
 
-  const _ck    = HAUS3D_COLOR_MAP[S.fa] || 'anthrazitgrau';   // Default Anthrazit (Sarah 17.05.)
+  // 3D zeigt Innenansicht (Griff sichtbar) → Innenfarbe S.fi
+  const _ck    = HAUS3D_COLOR_MAP[S.fi] || HAUS3D_COLOR_MAP[S.fa] || 'anthrazitgrau';
   const isWood = HAUS3D_WOOD_KEYS.has(_ck);
   const _side  = (S.oeff1 === 'dreh-l') ? 'l' : 'r';
 

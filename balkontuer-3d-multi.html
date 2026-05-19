@@ -339,6 +339,90 @@ function nut(x1, y1, x2, y2, faceZ, mat) {
 }
 
 // ══════════════════════════════════════════════
+// ROLLLADEN — Drutex-Aufsatzrollladen-Maße
+// ══════════════════════════════════════════════
+const ROL_BOX_DEPTH = 0.230;   // Kasten-Tiefe 230 mm (typisch Drutex Aufsatz)
+const ROL_SCHIENE_W = 0.035;   // Führungsschiene Breite 35 mm
+const ROL_SCHIENE_D = 0.025;   // Führungsschiene Tiefe 25 mm
+const ROL_END_H     = 0.045;   // Endschiene Höhe 45 mm
+const ROL_GURT_W    = 0.040;   // Gurt-Auslass Breite 40 mm
+const ROL_GURT_H    = 0.200;   // Gurt-Auslass Höhe 200 mm
+
+// Rollladen-Geometrie: Kasten + Schienen + Endschiene + optional Gurt-Auslass
+// spec.roll: 'ohne' | 'gurt' | 'motor'
+// spec.rollKasten: '175' | '215' | '225' (mm)
+// spec.rollSeite: 'links' | 'rechts'
+function _addRolladen(spec) {
+  if (!spec || !spec.roll || spec.roll === 'ohne') return;
+
+  const isBalkon = typeof SCH_H !== 'undefined';   // Balkontür hat SCH_H konstant
+  const baseY = isBalkon ? SCH_H : 0;              // Unterkante (Schwelle oder Boden)
+
+  const kastenH = (parseInt(spec.rollKasten, 10) || 175) / 1000;
+  const kastenY = FH + kastenH / 2;
+  const kastenZ = FD / 2 + 0.115;
+  const kastenD = ROL_BOX_DEPTH;
+  const fzc = FD / 2;
+
+  // Kasten
+  winGroup.add(bx(FW / 2, kastenY, kastenZ, FW, kastenH, kastenD, frameMat));
+  const kastenFront = kastenZ + kastenD / 2;
+  const kxL = 0.012, kxR = FW - 0.012;
+  const kyB = FH + 0.012, kyT = FH + kastenH - 0.012;
+  winGroup.add(nut(kxL, kyB, kxR, kyB, kastenFront, subtleNutMat));
+  winGroup.add(nut(kxL, kyT, kxR, kyT, kastenFront, subtleNutMat));
+  winGroup.add(nut(kxL, kyB, kxL, kyT, kastenFront, subtleNutMat));
+  winGroup.add(nut(kxR, kyB, kxR, kyT, kastenFront, subtleNutMat));
+
+  // Schienen
+  const schieneH = FH - baseY;
+  const schieneY = baseY + schieneH / 2;
+  const schieneZ = fzc + 0.005;
+  winGroup.add(bx(-ROL_SCHIENE_W / 2, schieneY, schieneZ, ROL_SCHIENE_W, schieneH, ROL_SCHIENE_D, frameMat));
+  winGroup.add(bx(FW + ROL_SCHIENE_W / 2, schieneY, schieneZ, ROL_SCHIENE_W, schieneH, ROL_SCHIENE_D, frameMat));
+
+  // Endschiene
+  const endY = FH - ROL_END_H / 2;
+  const endZ = fzc + 0.020;
+  winGroup.add(bx(FW / 2, endY, endZ, FW, ROL_END_H, ROL_SCHIENE_D, frameMat));
+  winGroup.add(nut(0.020, FH - 0.002, FW - 0.020, FH - 0.002, endZ + ROL_SCHIENE_D / 2 + 0.001, subtleNutMat));
+
+  // Gurt-Auslass am Fenster + Gurtwickler an der Wand
+  if (spec.roll === 'gurt') {
+    const gurtX = (spec.rollSeite === 'links') ? 0.030 : FW - 0.030;
+    const gurtY = baseY + 0.100;
+    const gurtZ = fzc + 0.010;
+    winGroup.add(bx(gurtX, gurtY, gurtZ, ROL_GURT_W, ROL_GURT_H, 0.020, frameMat));
+    winGroup.add(nut(gurtX, gurtY - ROL_GURT_H / 2 + 0.020, gurtX, gurtY + ROL_GURT_H / 2 - 0.020, gurtZ + 0.011, sealMat));
+
+    const wickB = 0.165, wickD = 0.040;
+    const wickX = (spec.rollSeite === 'links') ? -ROL_SCHIENE_W - 0.090 : FW + ROL_SCHIENE_W + 0.090;
+    const wickY = baseY + 0.450;
+    const wickZ = fzc + wickD / 2;
+    winGroup.add(bx(wickX, wickY, wickZ, wickB, wickB, wickD, frameMat));
+    const wfz = wickZ + wickD / 2;
+    const wxL = wickX - wickB / 2 + 0.010, wxR = wickX + wickB / 2 - 0.010;
+    const wyB = wickY - wickB / 2 + 0.010, wyT = wickY + wickB / 2 - 0.010;
+    winGroup.add(nut(wxL, wyB, wxR, wyB, wfz, subtleNutMat));
+    winGroup.add(nut(wxL, wyT, wxR, wyT, wfz, subtleNutMat));
+    winGroup.add(nut(wxL, wyB, wxL, wyT, wfz, subtleNutMat));
+    winGroup.add(nut(wxR, wyB, wxR, wyT, wfz, subtleNutMat));
+    const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 0.006, 32), spacerMat);
+    wheel.rotation.x = Math.PI / 2;
+    wheel.position.set(wickX, wickY, wfz + 0.003);
+    winGroup.add(wheel);
+    const knauf = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.012, 24), handleMat);
+    knauf.rotation.x = Math.PI / 2;
+    knauf.position.set(wickX, wickY, wfz + 0.012);
+    winGroup.add(knauf);
+    winGroup.add(nut(wickX - 0.025, wickY + wickB / 2 - 0.006, wickX + 0.025, wickY + wickB / 2 - 0.006, wfz + 0.001, sealMat));
+    const band = new THREE.Mesh(new THREE.BoxGeometry(0.024, 0.180, 0.002), sealMat);
+    band.position.set(wickX, wickY + wickB / 2 - 0.180, wfz + 0.002);
+    winGroup.add(band);
+  }
+}
+
+// ══════════════════════════════════════════════
 // buildWindow — Fenstergeometrie aufbauen
 // Koordinaten: (0,0) = Blendrahmen unten-links
 // Gruppe wird danach um (-FW/2, -FH/2, 0) verschoben
@@ -468,7 +552,7 @@ function buildWindow(spec) {
     // Griff je nach sashState
     if (!sashState || sashState === 'fest') return;
     const isKipp = sashState === 'kipp';
-    const isLeft = sashState === 'dreh-r' || sashState === 'dk-r';
+    const isLeft = sashState === 'dreh-l' || sashState === 'dk-l';   // Layman-Konvention: dk-l = Griff links
     let hx, hy;
     const hbz = sfz;
     if (isKipp) {
@@ -681,6 +765,7 @@ function buildWindow(spec) {
     fuge.castShadow = false;
     winGroup.add(fuge);
   });
+  _addRolladen(spec);
 }
 
 // Initial-Build folgt weiter unten NACH FARBEN-Definition
@@ -1134,11 +1219,16 @@ window.addEventListener('message', (e) => {
   if (d.type === 'setSide')  setSide(d.key);
   if (d.type === 'toggleOpen') sashOpen = !sashOpen;
   if (d.type === 'update') {
-    if (d.layout || d.sashes) {
-      buildWindow({
-        layout: d.layout || (_lastSpec && _lastSpec.layout) || '1-fluegel',
-        sashes: d.sashes || (_lastSpec && _lastSpec.sashes) || ['dk-r'],
-      });
+    const prev = (_lastSpec) ? _lastSpec : {};
+    const newSpec = Object.assign({}, prev, {
+      layout:     d.layout     !== undefined ? d.layout     : (prev.layout     || '1-fluegel'),
+      sashes:     d.sashes     !== undefined ? d.sashes     : (prev.sashes     || ['dk-r']),
+      roll:       d.roll       !== undefined ? d.roll       : (prev.roll       || 'ohne'),
+      rollKasten: d.rollKasten !== undefined ? d.rollKasten : (prev.rollKasten || '175'),
+      rollSeite:  d.rollSeite  !== undefined ? d.rollSeite  : (prev.rollSeite  || 'rechts'),
+    });
+    if (d.layout || d.sashes || d.roll !== undefined || d.rollKasten !== undefined || d.rollSeite !== undefined) {
+      buildWindow(newSpec);
     }
     if (d.wood)  setWood(d.wood);
     else         setColor(d.color || 'anthrazitgrau');

@@ -367,13 +367,51 @@ function _addRolladen(spec) {
   winGroup.add(bx(FW / 2, endY, endZ, FW, ROL_END_H, ROL_SCHIENE_D, frameMat));
   winGroup.add(nut(0.020, FH - 0.002, FW - 0.020, FH - 0.002, endZ + ROL_SCHIENE_D / 2 + 0.001, subtleNutMat));
 
-  // ── Gurt-Auslass (nur bei 'gurt') ──
+  // ── Gurt-Auslass am Fensterrahmen (nur bei 'gurt') ──
   if (spec.roll === 'gurt') {
     const gurtX = (spec.rollSeite === 'links') ? 0.030 : FW - 0.030;
     const gurtY = 0.100;
     const gurtZ = fzc + 0.010;
     winGroup.add(bx(gurtX, gurtY, gurtZ, ROL_GURT_W, ROL_GURT_H, 0.020, frameMat));
     winGroup.add(nut(gurtX, gurtY - ROL_GURT_H / 2 + 0.020, gurtX, gurtY + ROL_GURT_H / 2 - 0.020, gurtZ + 0.011, sealMat));
+
+    // ── Gurtwickler — Aufputz-Gehäuse neben Fenster (auf Wand) ──
+    const wickB = 0.165;                                              // Drutex-Standardmaß 165×165 mm
+    const wickD = 0.040;                                              // Tiefe 40 mm
+    const wickX = (spec.rollSeite === 'links')
+      ? -ROL_SCHIENE_W - 0.090
+      : FW + ROL_SCHIENE_W + 0.090;
+    const wickY = 0.450;                                              // Brüstungshöhe (Boden-relativ skaliert)
+    const wickZ = fzc + wickD / 2;
+    // Gehäuse
+    winGroup.add(bx(wickX, wickY, wickZ, wickB, wickB, wickD, frameMat));
+    // Profilnut umlaufend (subtile Tiefenwirkung)
+    const wfz = wickZ + wickD / 2;
+    const wxL = wickX - wickB / 2 + 0.010, wxR = wickX + wickB / 2 - 0.010;
+    const wyB = wickY - wickB / 2 + 0.010, wyT = wickY + wickB / 2 - 0.010;
+    winGroup.add(nut(wxL, wyB, wxR, wyB, wfz, subtleNutMat));
+    winGroup.add(nut(wxL, wyT, wxR, wyT, wfz, subtleNutMat));
+    winGroup.add(nut(wxL, wyB, wxL, wyT, wfz, subtleNutMat));
+    winGroup.add(nut(wxR, wyB, wxR, wyT, wfz, subtleNutMat));
+    // Wickelrad — Kreis sichtbar in der Gehäuse-Mitte (versenkt, dunkler)
+    const wheelGeo = new THREE.CylinderGeometry(0.055, 0.055, 0.006, 32);
+    const wheel = new THREE.Mesh(wheelGeo, spacerMat);
+    wheel.rotation.x = Math.PI / 2;
+    wheel.position.set(wickX, wickY, wfz + 0.003);
+    winGroup.add(wheel);
+    // Mittel-Drehknauf
+    const knaufGeo = new THREE.CylinderGeometry(0.012, 0.012, 0.012, 24);
+    const knauf = new THREE.Mesh(knaufGeo, handleMat);
+    knauf.rotation.x = Math.PI / 2;
+    knauf.position.set(wickX, wickY, wfz + 0.012);
+    winGroup.add(knauf);
+    // Gurt-Schlitz oben (dunkler horizontaler Schlitz)
+    winGroup.add(nut(wickX - 0.025, wickY + wickB / 2 - 0.006, wickX + 0.025, wickY + wickB / 2 - 0.006, wfz + 0.001, sealMat));
+    // Gurtband — schmaler vertikaler Streifen aus dem Schlitz nach unten
+    const bandGeo = new THREE.BoxGeometry(0.024, 0.180, 0.002);
+    const band = new THREE.Mesh(bandGeo, sealMat);
+    band.position.set(wickX, wickY + wickB / 2 - 0.090 - 0.090, wfz + 0.002);
+    winGroup.add(band);
   }
 }
 
