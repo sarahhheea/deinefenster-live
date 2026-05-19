@@ -806,16 +806,24 @@ const _urlSide  = new URLSearchParams(location.search).get('side')  || 'r';
 buildDoor(_urlModel);
 
 // Pivot-Group für Tür-Öffnen-Animation (Bandkante = Drehachse).
-// doorGroup → doorPivot → scene. Pivot sitzt auf der Bandkante,
-// damit die Tür "logisch" um die Scharniere schwenkt (Sarah-Wunsch 18.05.2026).
+// doorGroup → doorPivot → scene. Pivot sitzt auf der Bandkante.
 const doorPivot = new THREE.Group();
 doorPivot.add(doorGroup);
 scene.add(doorPivot);
 
-// setSide: 'r' = Dreh-rechts (Bänder links, Griff rechts, Standard),
-//          'l' = Dreh-links (gespiegelt)
+// setSide — DIN-Konvention:
+//   'r' = DIN-Rechts: Bänder RECHTS, Griff LINKS (von außen gesehen).
+//         Pivot sitzt rechts (+DW/2), doorGroup ist gespiegelt.
+//   'l' = DIN-Links:  Bänder LINKS, Griff RECHTS (von außen gesehen).
+//         Pivot sitzt links (-DW/2), doorGroup unverändert.
+let _curSide = 'r';
 function setSide(s) {
-  if (s === 'l') {
+  _curSide = (s === 'l') ? 'l' : 'r';
+  // Beim Seiten-Wechsel: Tür auf zu setzen
+  if (_doorAnim) { cancelAnimationFrame(_doorAnim); _doorAnim = null; }
+  doorPivot.rotation.y = 0;
+  _doorOpen = false;
+  if (_curSide === 'r') {
     doorGroup.scale.x    = -1;
     doorPivot.position.x =  DW / 2;
   } else {
@@ -826,30 +834,40 @@ function setSide(s) {
   doorPivot.position.y = 0;
   doorPivot.position.z = 0;
 }
-setSide(_urlSide);
 
-// ── Tür-Öffnen-Animation ───────────────────────────────────────
+// ── Tür-Öffnen-Animation ──────────────────────────────────────
 // Schwenkt um die Bandkante zum Innenraum (+Z, Richtung Kamera).
+// Drehrichtung hängt von der Seite ab: DIN-r → +Y rotation, DIN-l → -Y.
 let _doorOpen = false;
 let _doorAnim = null;
-const DOOR_OPEN_ANGLE = -Math.PI / 3;  // ~ -60°
-const DOOR_ANIM_DUR   = 950;
+const DOOR_OPEN_MAG  = Math.PI / 3;   // ~ 60°
+const DOOR_ANIM_DUR  = 950;            // ms
+function _doorOpenAngle() {
+  // Griff-Kante muss zum Innenraum (+Z) schwenken.
+  // DIN-r: Pivot rechts (+DW/2), Griff links (relativ x=-DW). +Y-Rotation
+  //        bewegt -X nach +Z → korrekt.
+  // DIN-l: Pivot links (-DW/2), Griff rechts (relativ x=+DW). -Y-Rotation
+  //        bewegt +X nach +Z → korrekt.
+  return _curSide === 'r' ? +DOOR_OPEN_MAG : -DOOR_OPEN_MAG;
+}
 function setDoorOpen(open) {
   const target = !!open;
   _doorOpen = target;
   const startAngle = doorPivot.rotation.y;
-  const endAngle   = target ? DOOR_OPEN_ANGLE : 0;
+  const endAngle   = target ? _doorOpenAngle() : 0;
   const t0 = performance.now();
   if (_doorAnim) cancelAnimationFrame(_doorAnim);
   function step(now) {
     const t = Math.min(1, (now - t0) / DOOR_ANIM_DUR);
-    const e = t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2; // ease-in-out cubic
+    const e = t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2;
     doorPivot.rotation.y = startAngle + (endAngle - startAngle) * e;
     if (t < 1) _doorAnim = requestAnimationFrame(step);
     else _doorAnim = null;
   }
   _doorAnim = requestAnimationFrame(step);
 }
+
+setSide(_urlSide);
 
 
 // ══════════════════════════════════════════════
