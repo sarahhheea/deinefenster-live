@@ -5972,32 +5972,16 @@ function fluegelSVG(n, ol, ul) {
 }
 
 // Fix W3 (21.04.2026): Haustür-Schemaansicht mit Türgriff und optionalem Seitenteil
+const HAUSTUER_KARTEN_IMG = {
+  '1-fluegel':    '01_1-fluegel',
+  'seitenteil-l': '02_seitenteil-links',
+  'seitenteil-r': '03_seitenteil-rechts',
+  '2-fluegel':    '04_2-fluegel'
+};
 function haustuerSVG(variant) {
-  const W=80, H=70, M=5, FW=70, FH=60;
-  let s=`<svg viewBox="0 0 ${W} ${H}" width="80" height="70" style="display:block">`;
-  s+=`<rect width="${W}" height="${H}" fill="#0c1930" rx="5"/>`;
-  if (variant === '1-fluegel') {
-    s+=`<rect x="${M}" y="${M}" width="${FW}" height="${FH}" fill="rgba(40,90,160,0.22)" stroke="rgba(118,169,250,0.55)" stroke-width="1.5"/>`;
-    s+=`<rect x="${M+FW-6}" y="${M+FH/2-4}" width="3" height="8" fill="#76a9fa"/>`;
-  } else if (variant === 'seitenteil-l') {
-    const stW=22, doorW=FW-stW;
-    s+=`<rect x="${M}" y="${M}" width="${stW}" height="${FH}" fill="rgba(30,65,120,0.18)" stroke="rgba(118,169,250,0.35)" stroke-width="1.5"/>`;
-    s+=`<rect x="${M+stW}" y="${M}" width="${doorW}" height="${FH}" fill="rgba(40,90,160,0.22)" stroke="rgba(118,169,250,0.55)" stroke-width="1.5"/>`;
-    s+=`<rect x="${M+FW-6}" y="${M+FH/2-4}" width="3" height="8" fill="#76a9fa"/>`;
-  } else if (variant === 'seitenteil-r') {
-    const stW=22, doorW=FW-stW;
-    s+=`<rect x="${M}" y="${M}" width="${doorW}" height="${FH}" fill="rgba(40,90,160,0.22)" stroke="rgba(118,169,250,0.55)" stroke-width="1.5"/>`;
-    s+=`<rect x="${M+doorW}" y="${M}" width="${stW}" height="${FH}" fill="rgba(30,65,120,0.18)" stroke="rgba(118,169,250,0.35)" stroke-width="1.5"/>`;
-    s+=`<rect x="${M+doorW-5}" y="${M+FH/2-4}" width="3" height="8" fill="#76a9fa"/>`;
-  } else if (variant === '2-fluegel') {
-    const halfW=FW/2;
-    s+=`<rect x="${M}" y="${M}" width="${halfW}" height="${FH}" fill="rgba(40,90,160,0.22)" stroke="rgba(118,169,250,0.55)" stroke-width="1.5"/>`;
-    s+=`<rect x="${M+halfW}" y="${M}" width="${halfW}" height="${FH}" fill="rgba(40,90,160,0.22)" stroke="rgba(118,169,250,0.55)" stroke-width="1.5"/>`;
-    s+=`<rect x="${M+halfW-5}" y="${M+FH/2-4}" width="3" height="8" fill="#76a9fa"/>`;
-    s+=`<rect x="${M+halfW+2}" y="${M+FH/2-4}" width="3" height="8" fill="#76a9fa"/>`;
-  }
-  s+='</svg>';
-  return s;
+  const file = HAUSTUER_KARTEN_IMG[variant];
+  if (!file) return '';
+  return `<img src="img/haustuer-karten/${file}.png?v=20260519" alt="${variant}" loading="lazy" style="width:100%;height:auto;max-height:240px;object-fit:contain;display:block;border-radius:6px"/>`;
 }
 
 const FLUEGEL_KARTEN_IMG = {
