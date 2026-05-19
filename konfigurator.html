@@ -1757,12 +1757,37 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   .btn-pulse-attn { animation: btn-attn-pulse 1.9s ease-out infinite; }
   .btn-pulse-attn[data-open="1"] { animation: none; }  /* aus, sobald geöffnet */
 
-  /* 3D-Interaktivitäts-Hinweis — moderner Look mit dezentem Pulse */
-  @keyframes hint-mouse-bob {
-    0%, 100% { transform: translateX(0); }
-    50%      { transform: translateX(-4px); }
+  /* 3D-Interaktivitäts-Hinweis — Pille pulsiert mit Glow-Ring, Icon wackelt wie Drag-Geste */
+  @keyframes hint-drag-shake {
+    0%, 100% { transform: translateX(-10px) rotate(-12deg); }
+    25%      { transform: translateX(0)      rotate(0deg); }
+    50%      { transform: translateX(10px)  rotate(12deg); }
+    75%      { transform: translateX(0)      rotate(0deg); }
   }
-  #prev-3d-hint .hint-mouse-icon { animation: hint-mouse-bob 1.8s ease-in-out infinite; }
+  @keyframes hint-pill-pulse {
+    0%, 100% {
+      transform: translateX(-50%) scale(1);
+      box-shadow: 0 8px 26px rgba(118,169,250,0.55),
+                  0 0 0 0 rgba(118,169,250,0.55);
+    }
+    50% {
+      transform: translateX(-50%) scale(1.06);
+      box-shadow: 0 10px 30px rgba(118,169,250,0.75),
+                  0 0 0 14px rgba(118,169,250,0);
+    }
+  }
+  #prev-3d-hint {
+    animation: hint-pill-pulse 1.55s ease-in-out infinite !important;
+  }
+  #prev-3d-hint .hint-mouse-icon {
+    animation: hint-drag-shake 1.4s ease-in-out infinite !important;
+    transform-origin: center center;
+  }
+  #prev-3d-hint.hint-dismissed {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transition: opacity .35s ease !important;
+  }
 </style>
 <style>
   /* ── 1. CONTAINER ── */
