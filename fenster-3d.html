@@ -375,35 +375,41 @@ function _addRolladen(spec) {
     winGroup.add(bx(gurtX, gurtY, gurtZ, ROL_GURT_W, ROL_GURT_H, 0.020, frameMat));
     winGroup.add(nut(gurtX, gurtY - ROL_GURT_H / 2 + 0.020, gurtX, gurtY + ROL_GURT_H / 2 - 0.020, gurtZ + 0.011, sealMat));
 
-    // ── Gurtwickler — Aufputz-Gehäuse neben Fenster (auf Wand) ──
-    const wickB = 0.180;                                              // sichtbar groß: 180×180 mm
-    const wickD = 0.045;                                              // Tiefe 45 mm
+    // ── Gurtwickler — Aufputz-Gehäuse (Selve-Stil, rechteckig hoch) ──
+    const wickW = 0.135;                                              // Breite 135 mm
+    const wickH = 0.180;                                              // Höhe 180 mm (höher als breit)
+    const wickD = 0.038;                                              // Tiefe 38 mm
     const wickX = (spec.rollSeite === 'links')
-      ? -ROL_SCHIENE_W - wickB / 2 - 0.010
-      : FW + ROL_SCHIENE_W + wickB / 2 + 0.010;
-    const wickY = 0.350;                                              // tiefer im Frame, garantiert sichtbar
+      ? -ROL_SCHIENE_W - wickW / 2 - 0.015
+      : FW + ROL_SCHIENE_W + wickW / 2 + 0.015;
+    const wickY = 0.380;
     const wickZ = fzc + wickD / 2;
-    // Gehäuse
-    winGroup.add(bx(wickX, wickY, wickZ, wickB, wickB, wickD, frameMat));
-    // Profilnut umlaufend (subtile Tiefenwirkung)
+    // Hauptgehäuse
+    winGroup.add(bx(wickX, wickY, wickZ, wickW, wickH, wickD, frameMat));
+    // Trennlinie horizontal in der Mitte (Klappgehäuse-Optik wie Selve)
     const wfz = wickZ + wickD / 2;
-    const wxL = wickX - wickB / 2 + 0.010, wxR = wickX + wickB / 2 - 0.010;
-    const wyB = wickY - wickB / 2 + 0.010, wyT = wickY + wickB / 2 - 0.010;
+    const wxL = wickX - wickW / 2 + 0.006, wxR = wickX + wickW / 2 - 0.006;
+    const wyB = wickY - wickH / 2 + 0.006, wyT = wickY + wickH / 2 - 0.006;
+    // Außen-Rahmen-Nut (subtle Tiefe)
     winGroup.add(nut(wxL, wyB, wxR, wyB, wfz, subtleNutMat));
     winGroup.add(nut(wxL, wyT, wxR, wyT, wfz, subtleNutMat));
     winGroup.add(nut(wxL, wyB, wxL, wyT, wfz, subtleNutMat));
     winGroup.add(nut(wxR, wyB, wxR, wyT, wfz, subtleNutMat));
-    // Gurt-Schlitz oben (dunkle Vertiefung — hier kommt der Gurt raus)
-    const slotGeo = new THREE.BoxGeometry(0.060, 0.008, 0.012);
-    const slot = new THREE.Mesh(slotGeo, sealMat);
-    slot.position.set(wickX, wickY + wickB / 2 - 0.020, wfz - 0.004);
+    // Horizontale Klapp-Linie oben (Selve-Scharniergehäuse)
+    winGroup.add(nut(wxL, wickY + wickH / 2 - 0.030, wxR, wickY + wickH / 2 - 0.030, wfz, sealMat));
+    // Gurt-Schlitz oben mittig (dunkle Vertiefung, da kommt der Gurt raus)
+    const slot = new THREE.Mesh(new THREE.BoxGeometry(0.030, 0.010, 0.014), sealMat);
+    slot.position.set(wickX, wickY + wickH / 2 - 0.016, wfz - 0.005);
     winGroup.add(slot);
-    // Gurtband — hängt aus dem Schlitz nach unten (sichtbar vor dem Gehäuse)
-    const bandLen = wickB - 0.040;
-    const bandGeo = new THREE.BoxGeometry(0.024, bandLen, 0.002);
-    const band = new THREE.Mesh(bandGeo, sealMat);
-    band.position.set(wickX, wickY + wickB / 2 - 0.020 - bandLen / 2, wfz + 0.003);
+    // Gurtband — hängt aus dem Schlitz nach unten/oben (typisch über das Gehäuse)
+    const bandLen = wickH * 0.55;
+    const band = new THREE.Mesh(new THREE.BoxGeometry(0.022, bandLen, 0.002), spacerMat);
+    band.position.set(wickX, wickY + wickH / 2 - 0.016 - bandLen / 2 + 0.040, wfz + 0.005);
     winGroup.add(band);
+    // Gurthaken unten (kleiner Vorsprung)
+    const haken = new THREE.Mesh(new THREE.BoxGeometry(0.022, 0.025, 0.010), frameMat);
+    haken.position.set(wickX, wickY - wickH / 2 + 0.012, wfz - 0.003);
+    winGroup.add(haken);
   }
 }
 

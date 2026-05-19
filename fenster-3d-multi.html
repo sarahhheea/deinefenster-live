@@ -396,25 +396,29 @@ function _addRolladen(spec) {
     winGroup.add(bx(gurtX, gurtY, gurtZ, ROL_GURT_W, ROL_GURT_H, 0.020, frameMat));
     winGroup.add(nut(gurtX, gurtY - ROL_GURT_H / 2 + 0.020, gurtX, gurtY + ROL_GURT_H / 2 - 0.020, gurtZ + 0.011, sealMat));
 
-    const wickB = 0.180, wickD = 0.045;
-    const wickX = (spec.rollSeite === 'links') ? -ROL_SCHIENE_W - wickB / 2 - 0.010 : FW + ROL_SCHIENE_W + wickB / 2 + 0.010;
-    const wickY = baseY + 0.350;
+    const wickW = 0.135, wickH = 0.180, wickD = 0.038;
+    const wickX = (spec.rollSeite === 'links') ? -ROL_SCHIENE_W - wickW / 2 - 0.015 : FW + ROL_SCHIENE_W + wickW / 2 + 0.015;
+    const wickY = baseY + 0.380;
     const wickZ = fzc + wickD / 2;
-    winGroup.add(bx(wickX, wickY, wickZ, wickB, wickB, wickD, frameMat));
+    winGroup.add(bx(wickX, wickY, wickZ, wickW, wickH, wickD, frameMat));
     const wfz = wickZ + wickD / 2;
-    const wxL = wickX - wickB / 2 + 0.010, wxR = wickX + wickB / 2 - 0.010;
-    const wyB = wickY - wickB / 2 + 0.010, wyT = wickY + wickB / 2 - 0.010;
+    const wxL = wickX - wickW / 2 + 0.006, wxR = wickX + wickW / 2 - 0.006;
+    const wyB = wickY - wickH / 2 + 0.006, wyT = wickY + wickH / 2 - 0.006;
     winGroup.add(nut(wxL, wyB, wxR, wyB, wfz, subtleNutMat));
     winGroup.add(nut(wxL, wyT, wxR, wyT, wfz, subtleNutMat));
     winGroup.add(nut(wxL, wyB, wxL, wyT, wfz, subtleNutMat));
     winGroup.add(nut(wxR, wyB, wxR, wyT, wfz, subtleNutMat));
-    const slot = new THREE.Mesh(new THREE.BoxGeometry(0.060, 0.008, 0.012), sealMat);
-    slot.position.set(wickX, wickY + wickB / 2 - 0.020, wfz - 0.004);
+    winGroup.add(nut(wxL, wickY + wickH / 2 - 0.030, wxR, wickY + wickH / 2 - 0.030, wfz, sealMat));
+    const slot = new THREE.Mesh(new THREE.BoxGeometry(0.030, 0.010, 0.014), sealMat);
+    slot.position.set(wickX, wickY + wickH / 2 - 0.016, wfz - 0.005);
     winGroup.add(slot);
-    const bandLen = wickB - 0.040;
-    const band = new THREE.Mesh(new THREE.BoxGeometry(0.024, bandLen, 0.002), sealMat);
-    band.position.set(wickX, wickY + wickB / 2 - 0.020 - bandLen / 2, wfz + 0.003);
+    const bandLen = wickH * 0.55;
+    const band = new THREE.Mesh(new THREE.BoxGeometry(0.022, bandLen, 0.002), spacerMat);
+    band.position.set(wickX, wickY + wickH / 2 - 0.016 - bandLen / 2 + 0.040, wfz + 0.005);
     winGroup.add(band);
+    const haken = new THREE.Mesh(new THREE.BoxGeometry(0.022, 0.025, 0.010), frameMat);
+    haken.position.set(wickX, wickY - wickH / 2 + 0.012, wfz - 0.003);
+    winGroup.add(haken);
   }
 }
 
