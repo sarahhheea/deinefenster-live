@@ -121,7 +121,7 @@ const FIXED_KATEGORIEN = {
 /* ─── Sub-Kategorie aus Sheet (z.B. "fenster-1fluegel") auf Hauptgruppe mappen ─── */
 function kategorieZuGruppe(kat) {
   if (!kat) return '';
-  if (kat.startsWith('fenster-') || ['festelement','kellerfenster','rundfenster'].includes(kat)) return 'fenster';
+  if (kat.startsWith('fenster-') || ['festelement','kellerfenster','rundfenster','rundbogenfenster','stichbogenfenster'].includes(kat)) return 'fenster';
   if (kat.startsWith('balkontuer-')) return 'balkontuer';
   if (kat === 'haustuer' || kat.startsWith('haustuer-')) return 'haustuer';
   if (kat.startsWith('schiebetuer-')) return 'schiebetuer';
@@ -144,6 +144,7 @@ function deriveBauartTags(kat) {
   if (kat === 'kellerfenster') tags.push('kellerfenster-typ');
   if (kat === 'rundfenster') tags.push('rundfenster-typ');
   if (kat === 'rundbogenfenster') tags.push('rundbogenfenster-typ');
+  if (kat === 'stichbogenfenster') tags.push('stichbogenfenster-typ');
   if (kat === 'schiebetuer-psk') tags.push('parallel-schiebe-kipp');
   if (kat === 'schiebetuer-hst') tags.push('hebe-schiebe');
   return tags;
@@ -1427,7 +1428,8 @@ function eigenschaftAnzeige(code) {
     'mit-rollo': 'Mit Rollladen',
     'kellerfenster-typ': 'Kellerfenster',
     'rundfenster-typ': 'Rundes Fenster',
-    'rundbogenfenster-typ': 'Rundbogenfenster'
+    'rundbogenfenster-typ': 'Rundbogenfenster',
+    'stichbogenfenster-typ': 'Stichbogenfenster'
   };
   return map[code] || code;
 }
