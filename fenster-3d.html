@@ -283,10 +283,12 @@ const GH = SH - 2 * FST - 2 * SBW;  // 0.956
 // Flügel steht 5mm vor dem Blendrahmen hervor (Falz)
 const SASH_DZ = 0.022;   // 22 mm Aufkantung — starke 3D-Trennung Rahmen|Flügel
 
+const pivotGroup = new THREE.Group();  // Wrapper — rotiert für Innen/Außen-Ansicht
 const winGroup  = new THREE.Group();
 const sashGroup = new THREE.Group();   // Flügel — rotiert um linke Scharnier-Achse zum Öffnen
 sashGroup.position.set(x0, 0, 0);      // Pivot = linker Scharnier-Rand (x0 in winGroup-Koords)
 winGroup.add(sashGroup);
+pivotGroup.add(winGroup);
 
 let glassObjects   = [];
 let handleObjects  = [];   // Hebel/Rosette/Achse — Click-Targets fürs Öffnen
@@ -603,9 +605,9 @@ function buildWindow(spec) {
 
 buildWindow();
 
-// Fenster auf Welt-Origin zentrieren
+// Fenster auf Welt-Origin zentrieren (winGroup ist child von pivotGroup)
 winGroup.position.set(-FW / 2, -FH / 2, 0);
-scene.add(winGroup);
+scene.add(pivotGroup);
 
 // setSide: 'r' = Griff rechts (Standard), 'l' = Griff links (gespiegelt)
 function setSide(s) {
@@ -617,15 +619,15 @@ function setSide(s) {
     winGroup.position.x = -FW / 2;
   }
 }
-// setView: 'innen' = Standard mit Griff sichtbar, 'aussen' = Modell um 180° gedreht, Griff/Scharniere ausgeblendet
+// setView: 'innen' = Standard mit Griff sichtbar, 'aussen' = pivotGroup um 180° gedreht, Griff/Scharniere weg
 let _currentView = 'innen';
 function setView(v) {
   _currentView = (v === 'aussen' || v === 'aus') ? 'aussen' : 'innen';
-  winGroup.rotation.y = (_currentView === 'aussen') ? Math.PI : 0;
+  pivotGroup.rotation.y = (_currentView === 'aussen') ? Math.PI : 0;
   // Griffe + Scharniere bei Außenansicht ausblenden (von außen nicht sichtbar)
   const hideOnOutside = (_currentView === 'aussen');
   handleObjects.forEach(m => { m.visible = !hideOnOutside; });
-  winGroup.traverse(node => {
+  pivotGroup.traverse(node => {
     if (node.userData && node.userData.isHinge) node.visible = !hideOnOutside;
   });
 }
