@@ -154,21 +154,22 @@ const _embed = new URLSearchParams(location.search).has('embed');
 scene.background = new THREE.Color(_embed ? 0x0a1530 : 0xffffff);
 
 const camera = new THREE.PerspectiveCamera(16, 1, 0.1, 60);
-// HST 2.4m breit × 2.1m hoch — Kamera weit zurück, leicht versetzt für 3D-Tiefe
-camera.position.set(0.65, 0.10, 14.0);
+// HST 2.4m breit × 2.1m hoch — zentriert (X=0) mit großzügigem Abstand
+camera.position.set(0, 0.05, 12.0);
 
 const orb = new OrbitControls(camera, canvasEl);
 orb.target.set(0, 0, 0);
-orb.enablePan = false;
+orb.enablePan = false;          // kein Pan/Wegschieben
+orb.enableZoom = true;
 orb.enableDamping = true;
 orb.dampingFactor = 0.08;
-orb.minDistance = 5.0;
-orb.maxDistance = 22.0;
-// Frei drehbar — von oben bis fast unten, fast 360° rundherum
-orb.minPolarAngle = Math.PI * 0.10;
-orb.maxPolarAngle = Math.PI * 0.85;
-orb.minAzimuthAngle = -Math.PI * 0.85;
-orb.maxAzimuthAngle =  Math.PI * 0.85;
+orb.minDistance = 9.0;          // nicht zu nah ranzoomen
+orb.maxDistance = 15.0;         // nicht weiter wegzoomen
+// Eingeschränkte Drehung: Produkt aus relevanten Winkeln sichtbar, kein "Wegdrehen"
+orb.minPolarAngle = Math.PI * 0.30;   // 54° von oben — kein extremer Aufblick
+orb.maxPolarAngle = Math.PI * 0.70;   // 126° — kein extremer Untersicht
+orb.minAzimuthAngle = -Math.PI * 0.30;  // ±54° horizontal — frontal-orientiert
+orb.maxAzimuthAngle =  Math.PI * 0.30;
 orb.update();
 
 // ══════════════════════════════════════════════
