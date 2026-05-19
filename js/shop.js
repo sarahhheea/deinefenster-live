@@ -1214,15 +1214,14 @@ function oeffneDetail(id) {
           <span class="text-3xl font-extrabold text-primary">${formatPreis(p.preis_eur)}</span>
         </div>
         <button id="detailAddBtn" class="bg-primary text-white px-5 py-3 rounded-full text-sm font-bold hover:bg-primary-d transition-colors flex items-center gap-1.5">
-          <span class="material-symbols-outlined" style="font-size:18px">add_shopping_cart</span>
-          In den Warenkorb
+          <span class="material-symbols-outlined" style="font-size:18px">send</span>
+          Anfrage senden
         </button>
       </div>
     </div>`;
   detail.querySelector('#detailAddBtn').addEventListener('click', () => {
-    addToCart(id);
     schliesseDetail();
-    oeffneCart();
+    oeffneAnfrageModal(p);
   });
   // Bilder-Carousel-Setup (nur wenn mehrere Bilder)
   if (hatMehrere) setupCarousel(bilderListe.length);
@@ -1291,6 +1290,118 @@ function schliesseDetail() {
   document.getElementById('detailOverlay').classList.remove('open');
   document.body.style.overflow = '';
 }
+
+/* ─── Anfrage-Modal: Produkt-spezifische Anfrage via Web3Forms ─── */
+const SHOP_WEB3FORMS_KEY = '440a94ff-9f42-46af-bf3d-47013dbd8f5f';
+
+function oeffneAnfrageModal(p) {
+  document.getElementById('anfrageProduktId').value = p.id;
+  document.getElementById('anfrageProduktTitel').value = p.titel;
+  // Nachricht vorausfüllen mit Produkt-Daten
+  const lines = [
+    `Hallo,`,
+    ``,
+    `ich interessiere mich für folgendes Produkt aus Ihrem Lager-Shop:`,
+    ``,
+    `Produkt: ${p.titel}`,
+    `Artikel-Nr.: ${p.id}`,
+    `Maße: ${p.breite_mm} × ${p.hoehe_mm} mm`,
+    `Zustand: ${p.zustand === 'gebraucht' ? 'Gebraucht' : 'Neu'}`,
+    `Preis: ${formatPreis(p.preis_eur)}`,
+    p.standnummer ? `Standnummer: ${p.standnummer}` : '',
+    ``,
+    `Ist dieses Produkt noch verfügbar? Bitte um Rückmeldung.`,
+    ``,
+    `Vielen Dank!`
+  ].filter(Boolean).join('\n');
+  document.getElementById('anfrageNachricht').value = lines;
+  // Status zurücksetzen
+  const st = document.getElementById('anfrageStatus');
+  st.classList.add('hidden');
+  st.textContent = '';
+  const btn = document.getElementById('anfrageSubmitBtn');
+  btn.disabled = false;
+  btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px">send</span> Anfrage senden';
+
+  document.getElementById('anfrageModal').classList.add('open');
+  document.getElementById('anfrageOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('anfrageName').focus(), 80);
+}
+
+function schliesseAnfrageModal() {
+  document.getElementById('anfrageModal').classList.remove('open');
+  document.getElementById('anfrageOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+async function sendeAnfrage(ev) {
+  ev.preventDefault();
+  const form = ev.target;
+  const status = document.getElementById('anfrageStatus');
+  const btn = document.getElementById('anfrageSubmitBtn');
+
+  const name = form.name.value.trim();
+  const email = form.email.value.trim();
+  const dse = form.dse.checked;
+  if (!name || !email || !dse) {
+    status.textContent = 'Bitte Name, E-Mail und Datenschutz-Zustimmung ausfüllen.';
+    status.style.cssText = 'padding:10px 14px;border-radius:8px;font-size:13px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.35);color:#fca5a5;';
+    status.classList.remove('hidden');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px">hourglass_empty</span> Wird gesendet …';
+
+  const payload = {
+    access_key: SHOP_WEB3FORMS_KEY,
+    subject: `Lager-Anfrage · ${form.produkt_titel.value}`,
+    from_name: 'DeineFenster.de Shop-Anfrage',
+    botcheck: '',
+    Name: name,
+    Email: email,
+    Telefon: form.telefon.value.trim() || '—',
+    Produkt: form.produkt_titel.value,
+    'Artikel-Nr': form.produkt_id.value,
+    Nachricht: form.nachricht.value,
+    'Datenschutz-Zustimmung': dse ? 'Ja, akzeptiert' : 'Nein'
+  };
+
+  try {
+    const res = await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      status.textContent = 'Danke! Ihre Anfrage ist bei uns angekommen — wir melden uns so schnell wie möglich zurück.';
+      status.style.cssText = 'padding:10px 14px;border-radius:8px;font-size:13px;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.35);color:#86efac;';
+      status.classList.remove('hidden');
+      btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px">check</span> Gesendet';
+      setTimeout(schliesseAnfrageModal, 2500);
+    } else {
+      throw new Error(data.message || 'Unbekannter Fehler');
+    }
+  } catch (err) {
+    status.textContent = 'Senden fehlgeschlagen. Bitte direkt per WhatsApp (0171 7263776) oder E-Mail (info@baustoffchrist.de) melden.';
+    status.style.cssText = 'padding:10px 14px;border-radius:8px;font-size:13px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.35);color:#fca5a5;';
+    status.classList.remove('hidden');
+    btn.disabled = false;
+    btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px">send</span> Erneut versuchen';
+  }
+}
+
+// Listener registrieren (bei DOMContentLoaded)
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('anfrageForm');
+  if (form) form.addEventListener('submit', sendeAnfrage);
+  const closeBtn = document.getElementById('anfrageCloseBtn');
+  if (closeBtn) closeBtn.addEventListener('click', schliesseAnfrageModal);
+  const overlay = document.getElementById('anfrageOverlay');
+  if (overlay) overlay.addEventListener('click', schliesseAnfrageModal);
+});
 
 /* ─── Schema.org Product Markup für SEO + AEO/GEO ─── */
 function rendereSchemaOrg(produkte) {

@@ -1337,6 +1337,73 @@ input[type="range"].range-clean::-moz-range-thumb {
   <div id="detailContent" class="flex-1 overflow-y-auto"></div>
 </aside>
 
+<!-- ─────────────────────────────────── ANFRAGE-MODAL ─────────────────────────────────── -->
+<div id="anfrageOverlay" class="overlay"></div>
+<aside id="anfrageModal" class="drawer" style="width: 540px;">
+  <header class="flex items-center justify-between px-6 py-5" style="border-bottom:1px solid rgba(118,169,250,0.12);">
+    <h3 class="text-xl font-extrabold tracking-tight pr-4" style="color:#e8eeff;">Anfrage senden</h3>
+    <button id="anfrageCloseBtn" style="width:36px;height:36px;border-radius:8px;background:rgba(118,169,250,0.1);border:1px solid rgba(118,169,250,0.2);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#76a9fa;" aria-label="Schließen">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+  </header>
+  <div class="flex-1 overflow-y-auto px-6 py-5">
+    <div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.35);border-radius:10px;padding:14px 16px;margin-bottom:18px;color:rgba(232,238,255,0.85);font-size:13px;line-height:1.5;">
+      <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;">
+        <span class="material-symbols-outlined" style="color:#fbbf24;font-size:18px;flex-shrink:0;margin-top:1px;">info</span>
+        <strong style="color:#fbbf24;">Wichtiger Hinweis</strong>
+      </div>
+      <ul style="margin:0;padding-left:24px;list-style:disc;">
+        <li>Der Bestand ändert sich täglich.</li>
+        <li>Ihre Anfrage ist <strong>unverbindlich</strong>.</li>
+        <li>Wir versuchen rechtzeitig zu antworten.</li>
+        <li>Wir können nicht versprechen, dass alle angefragten Elemente noch vorhanden sind — die Produktanzeige dient zur Veranschaulichung, eine Anfrage ist aber jederzeit möglich.</li>
+      </ul>
+    </div>
+
+    <form id="anfrageForm" autocomplete="on" novalidate>
+      <input type="hidden" name="produkt_id" id="anfrageProduktId"/>
+      <input type="hidden" name="produkt_titel" id="anfrageProduktTitel"/>
+
+      <label class="block mb-3">
+        <span style="display:block;font-size:12px;font-weight:700;color:rgba(232,238,255,0.75);margin-bottom:5px;">Ihr Name *</span>
+        <input type="text" name="name" id="anfrageName" required class="input-clean w-full px-3 py-2.5 text-sm" style="background:rgba(118,169,250,0.05);border:1px solid rgba(118,169,250,0.18);border-radius:8px;color:#e8eeff;" placeholder="Vor- und Nachname"/>
+      </label>
+
+      <label class="block mb-3">
+        <span style="display:block;font-size:12px;font-weight:700;color:rgba(232,238,255,0.75);margin-bottom:5px;">E-Mail *</span>
+        <input type="email" name="email" id="anfrageEmail" required class="input-clean w-full px-3 py-2.5 text-sm" style="background:rgba(118,169,250,0.05);border:1px solid rgba(118,169,250,0.18);border-radius:8px;color:#e8eeff;" placeholder="ihre@email.de"/>
+      </label>
+
+      <label class="block mb-3">
+        <span style="display:block;font-size:12px;font-weight:700;color:rgba(232,238,255,0.75);margin-bottom:5px;">Telefon <span style="color:rgba(232,238,255,0.45);font-weight:500;">(optional)</span></span>
+        <input type="tel" name="telefon" id="anfrageTelefon" class="input-clean w-full px-3 py-2.5 text-sm" style="background:rgba(118,169,250,0.05);border:1px solid rgba(118,169,250,0.18);border-radius:8px;color:#e8eeff;" placeholder="0171 12345678"/>
+      </label>
+
+      <label class="block mb-4">
+        <span style="display:block;font-size:12px;font-weight:700;color:rgba(232,238,255,0.75);margin-bottom:5px;">Ihre Nachricht</span>
+        <textarea name="nachricht" id="anfrageNachricht" rows="7" class="input-clean w-full px-3 py-2.5 text-sm" style="background:rgba(118,169,250,0.05);border:1px solid rgba(118,169,250,0.18);border-radius:8px;color:#e8eeff;resize:vertical;font-family:Manrope,sans-serif;line-height:1.5;"></textarea>
+      </label>
+
+      <label class="flex items-start gap-2 mb-4" style="font-size:12px;color:rgba(232,238,255,0.7);">
+        <input type="checkbox" name="dse" id="anfrageDse" required style="margin-top:2px;flex-shrink:0;"/>
+        <span>Ich habe die <a href="datenschutz.html" target="_blank" style="color:#76a9fa;text-decoration:underline;">Datenschutzerklärung</a> gelesen und stimme der Verarbeitung meiner Daten zur Bearbeitung der Anfrage zu.</span>
+      </label>
+
+      <div id="anfrageStatus" class="hidden mb-3" style="padding:10px 14px;border-radius:8px;font-size:13px;"></div>
+
+      <button type="submit" id="anfrageSubmitBtn" class="w-full flex items-center justify-center gap-2 px-5 py-3 text-sm font-bold" style="background:#225eaa;color:#fff;border-radius:10px;border:none;cursor:pointer;">
+        <span class="material-symbols-outlined" style="font-size:18px;">send</span>
+        Anfrage senden
+      </button>
+
+      <p style="margin-top:12px;font-size:11px;color:rgba(232,238,255,0.45);text-align:center;">
+        Oder direkt: <a href="https://wa.me/491717263776" target="_blank" rel="noopener" style="color:#25D366;font-weight:700;">WhatsApp 0171 7263776</a>
+        · <a href="mailto:info@baustoffchrist.de" style="color:#76a9fa;font-weight:700;">info@baustoffchrist.de</a>
+      </p>
+    </form>
+  </div>
+</aside>
+
 <!-- ═══════════════════════════════════════════════════════════════════════
      SEO-CONTENT-BLOCK (interner Hinweis.05.2026 — Phase 2 Content-Tiefe)
      Long-Tail-Keywords: „Drutex Fenster gebraucht kaufen", „sofort lieferbar",
@@ -1583,7 +1650,7 @@ input[type="range"].range-clean::-moz-range-thumb {
 </a>
 
 <script src="js/sheets-config.js" defer></script>
-<script src="js/shop.js?v=2026-05-18-bauart" defer></script>
+<script src="js/shop.js?v=2026-05-19-anfrage" defer></script>
 
 <script src="js/chatbot.js" defer></script>
 <link rel="stylesheet" href="css/cookie-banner.css">
