@@ -956,58 +956,23 @@
       '', 'Datum: ' + datum,
     ].join('\n');
     try {
-      const autoBody = [
-        'Hallo ' + name + ',',
-        '',
-        'vielen Dank für Ihre Anfrage über DeineFenster.de.',
-        'Wir haben Ihre Nachricht erhalten und melden uns innerhalb von 1–2 Werktagen bei Ihnen.',
-        '',
-        'Ihre Anfrage-Nummer: ' + offerId,
-        '',
-        '── Ihre Nachricht ──',
-        msg,
-        '────────────────────',
-        '',
-        'Bei dringenden Fragen erreichen Sie uns auch direkt:',
-        'Telefon: 03381 7039998',
-        'WhatsApp: 0171 7263776',
-        'Adresse: Fensterhandel Christ, Werner-Seelenbinder-Straße 76, 14772 Brandenburg an der Havel',
-        '',
-        'Öffnungszeiten: Mo–Fr 09:00–17:00 Uhr · Sa 09:00–12:00 Uhr',
-        '',
-        'Viele Grüße',
-        'Ihr Team von DeineFenster.de',
-        'Fensterhandel Christ · Inhaber Kersten Christ',
-        '',
-        '──',
-        'Diese E-Mail wurde automatisch generiert. Sie wird beantwortet, sobald wir Ihre Anfrage bearbeitet haben.'
-      ].join('\n');
-      await fetch('https://api.web3forms.com/submit', {
+      // Cloudflare Worker (Resend) — schickt interne Mail an info@baustoffchrist
+      // + Bestätigungsmail an den Kunden
+      const res = await fetch('https://deinefenster-email.sarahchrist.workers.dev', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          access_key: WEB3FORMS_KEY,
+          customer_email: email,
           subject: '[DeineFenster.de] Kontaktanfrage von ' + name,
-          from_name: 'DeineFenster.de Kontaktformular',
-          replyto: email,
-          'Anfrage-Nr': offerId,
-          'Name': name,
-          'E-Mail': email,
-          'Telefon': tel || '–',
-          'Nachricht': msg,
-          'Datum': datum,
-          // Bestätigungsmail an den Kunden (Web3Forms Autoresponse)
-          autoresponse: {
-            subject: 'Wir haben Ihre Anfrage erhalten — DeineFenster.de',
-            from_name: 'DeineFenster.de · Fensterhandel Christ',
-            message: autoBody
-          }
+          text: internalText,
+          confirmation: { name: name, offerId: offerId },
         }),
       });
+      if (!res.ok) throw new Error('worker-' + res.status);
       ok.classList.remove('hidden');
       document.getElementById('kontakt-form').reset();
     } catch(ex) {
-      err.textContent = 'Fehler beim Senden. Bitte versuchen Sie es erneut oder rufen Sie uns an.';
+      err.textContent = 'Fehler beim Senden. Bitte versuchen Sie es erneut oder rufen Sie uns an: 03381 7039998';
       err.classList.remove('hidden');
     }
     btn.disabled = false; btnTxt.textContent = 'Nachricht senden';
