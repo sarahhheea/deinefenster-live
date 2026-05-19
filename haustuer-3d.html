@@ -1502,6 +1502,13 @@ window.addEventListener('message', (e) => {
   renderer.render(scene, camera);
 })();
 </script>
-<script src="js/chatbot.js" defer></script>
+<script>
+  // Chatbot nur außerhalb des Embed-Modus laden (im Konfigurator-iframe stört er das 3D)
+  if (!new URLSearchParams(location.search).has('embed')) {
+    const s = document.createElement('script');
+    s.src = 'js/chatbot.js'; s.defer = true;
+    document.body.appendChild(s);
+  }
+</script>
 </body>
 </html>

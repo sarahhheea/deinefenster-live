@@ -7833,25 +7833,51 @@ function upSidebar() {
     }
   }
 
-  // Auswahl-Detail-Liste (Sarah-UX-Fix 30.04.2026: klare Label-Wert-Liste statt Pills)
+  // Auswahl-Detail-Liste — alle Schritte/Eigenschaften pro Produkt
   const rowsList=[];
   if(S.prod)            rowsList.push(['Produkt',  P.prod[S.prod].name]);
+  if(S.prod==='haustuere' && S.tuerModell) {
+    const mEl = document.querySelector('#s-tm .pc[data-m="'+S.tuerModell+'"] .pc-name');
+    rowsList.push(['Türmodell', mEl ? mEl.textContent.trim() : S.tuerModell]);
+  }
   if(S.fluegel)         rowsList.push(['Aufteilung', P.fluegel[S.fluegel]?.name||S.fluegel]);
   if(S.bMm&&S.hMm)      rowsList.push(['Maße',     S.bMm+' × '+S.hMm+' mm']);
-  if(S.oeff1)           rowsList.push(['Öffnung',  P.oeff_sash[S.oeff1]?.name||S.oeff1]);
+  if(S.oeff1) {
+    const oLabel = (S.oeff1==='dreh-l') ? 'Dreh-Links (DIN-Links)'
+                 : (S.oeff1==='dreh-r') ? 'Dreh-Rechts (DIN-Rechts)'
+                 : (P.oeff_sash[S.oeff1]?.name||S.oeff1);
+    rowsList.push(['Öffnung',  oLabel]);
+  }
   if(S.profil)          rowsList.push(['Profil',   P.profil?.[S.profil]?.name||S.profil]);
   if(S.glas)            rowsList.push(['Verglasung', P.glas[S.glas]?.name||S.glas]);
   if(S.schall&&S.schall!=='ohne') rowsList.push(['Schallschutz', P.schall[S.schall]?.name||S.schall]);
-  if(S.sicherGlas&&S.sicherGlas!=='kein') rowsList.push(['Sicherheit', P.sicherGlas[S.sicherGlas]?.name?.split('(')[0]?.trim()||S.sicherGlas]);
+  if(S.sicherGlas&&S.sicherGlas!=='kein') rowsList.push(['Sicherheitsglas', P.sicherGlas[S.sicherGlas]?.name?.split('(')[0]?.trim()||S.sicherGlas]);
   if(S.fa)              rowsList.push(['Farbe außen', P.fa[S.fa]?.name||S.fa]);
   if(S.fi)              rowsList.push(['Farbe innen', P.fi[S.fi]?.name||S.fi]);
   if(S.fd)              rowsList.push(['Dichtung', P.fd?.[S.fd]?.name||S.fd]);
   if(S.glasdekor&&S.glasdekor!=='klar') rowsList.push(['Glas-Dekor', P.glasdekor[S.glasdekor]?.name||S.glasdekor]);
+  // Griffe / Beschlag — produktspezifisch
+  if(S.prod==='haustuere') {
+    if(S.tuerGriffInnen)  rowsList.push(['Griff innen',  P.tuerGriffInnen?.[S.tuerGriffInnen]?.name||S.tuerGriffInnen]);
+    if(S.tuerGriffAussen) rowsList.push(['Griff außen',  P.tuerGriffAussen?.[S.tuerGriffAussen]?.name||S.tuerGriffAussen]);
+  } else if(S.prod==='hst') {
+    if(S.hstGriff)        rowsList.push(['Griff',        P.hstGriff?.[S.hstGriff]?.name||S.hstGriff]);
+  } else if(S.griff) {
+    rowsList.push(['Griff', P.griff?.[S.griff]?.name||S.griff]);
+  }
+  if(S.sicher&&S.sicher!=='ohne') rowsList.push(['Einbruchschutz', P.sicher?.[S.sicher]?.name||S.sicher]);
+  if(S.rahmenVerbreit&&S.rahmenVerbreit!=='ohne')
+    rowsList.push(['Rahmenverbreiterung', P.rahmenVerbreit?.[S.rahmenVerbreit]?.name||S.rahmenVerbreit]);
   if(S.spro&&S.sproTyp&&S.sproTyp!=='keine') rowsList.push(['Sprossen', P.sproTyp?.[S.sproTyp]?.name||S.sproTyp]);
-  if(S.roll&&S.roll!=='ohne') rowsList.push(['Rolladen', P.roll[S.roll]?.name||S.roll]);
+  if(S.roll&&S.roll!=='ohne') {
+    rowsList.push(['Rolladen', P.roll[S.roll]?.name||S.roll]);
+    if(S.rollKasten) rowsList.push(['Kastenhöhe', P.rollKasten?.[S.rollKasten]?.name||S.rollKasten]);
+  }
+  if(S.prod==='balkontuer' && S.balkonSchwelle && S.balkonSchwelle!=='standard')
+    rowsList.push(['Schwelle', P.balkonSchwelle?.[S.balkonSchwelle]?.name||S.balkonSchwelle]);
   if(S.prod==='hst') {
     if(S.hstSchwelle==='null') rowsList.push(['Schwelle', 'Null-Schwelle (DIN 18040)']);
-    if(S.hstTeilung) rowsList.push(['Teilung', S.hstTeilung]);
+    if(S.hstTeilung) rowsList.push(['Teilung', P.hstTeilung?.[S.hstTeilung]?.name||S.hstTeilung]);
     if(S.hstLauf) rowsList.push(['Laufrichtung', S.hstLauf==='links'?'Links öffnend':'Rechts öffnend']);
   }
   // Stück-Anzahl IMMER ganz oben anzeigen (Sarah-Wunsch v8 30.04.2026)
