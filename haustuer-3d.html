@@ -368,7 +368,8 @@ const DW = 1.000;   // Türbreite
 const DH = 2.100;   // Türhöhe
 const DD = 0.070;   // Türtiefe
 
-const doorGroup = new THREE.Group();
+const doorGroup  = new THREE.Group();  // schwenkbares Türblatt + Beschlag
+const frameGroup = new THREE.Group();  // Zarge (statisch, schwenkt NICHT)
 
 // ── Hilfsfunktion: Rechteck-Strip ──────────────────
 function strip(x, y, w, h, d, mat) {
@@ -511,35 +512,38 @@ let _curView  = (new URLSearchParams(location.search).get('view') === 'innen') ?
 // buildDoor — baut Türgeometrie für gewähltes Modell
 // ══════════════════════════════════════════════
 function buildDoor(modelKey) {
-  while (doorGroup.children.length > 0) {
-    const c = doorGroup.children[0];
-    if (c.geometry) c.geometry.dispose();
-    doorGroup.remove(c);
-  }
+  // doorGroup (Türblatt + Beschlag) + frameGroup (Zarge) leeren
+  [doorGroup, frameGroup].forEach(g => {
+    while (g.children.length > 0) {
+      const c = g.children[0];
+      if (c.geometry) c.geometry.dispose();
+      g.remove(c);
+    }
+  });
   glassObjects = [];
 
   const model = MODELLE[modelKey] || MODELLE['colorado-inox'];
   const panels = model.panels || [];
   const modelStrips = model.strips || [];
 
-  // ── Zarge (3-stufig) ──────────────────────────────
+  // ── Zarge (3-stufig) — IN frameGroup, schwenkt NICHT ──
   const z1w = 0.043, z1d = 0.032;
-  doorGroup.add(strip(0,             DH - z1w,  DW,           z1w, z1d));
-  doorGroup.add(strip(0,             0,         DW,           z1w, z1d));
-  doorGroup.add(strip(0,             z1w,       z1w,  DH - 2*z1w, z1d));
-  doorGroup.add(strip(DW - z1w,      z1w,       z1w,  DH - 2*z1w, z1d));
+  frameGroup.add(strip(0,             DH - z1w,  DW,           z1w, z1d));
+  frameGroup.add(strip(0,             0,         DW,           z1w, z1d));
+  frameGroup.add(strip(0,             z1w,       z1w,  DH - 2*z1w, z1d));
+  frameGroup.add(strip(DW - z1w,      z1w,       z1w,  DH - 2*z1w, z1d));
 
   const z2off = z1w + 0.009, z2w = 0.021, z2d = 0.018;
-  doorGroup.add(strip(z2off,             DH - z2off - z2w, DW - 2*z2off,            z2w, z2d));
-  doorGroup.add(strip(z2off,             z2off,             DW - 2*z2off,            z2w, z2d));
-  doorGroup.add(strip(z2off,             z2off + z2w,       z2w, DH - 2*(z2off+z2w), z2d));
-  doorGroup.add(strip(DW - z2off - z2w,  z2off + z2w,       z2w, DH - 2*(z2off+z2w), z2d));
+  frameGroup.add(strip(z2off,             DH - z2off - z2w, DW - 2*z2off,            z2w, z2d));
+  frameGroup.add(strip(z2off,             z2off,             DW - 2*z2off,            z2w, z2d));
+  frameGroup.add(strip(z2off,             z2off + z2w,       z2w, DH - 2*(z2off+z2w), z2d));
+  frameGroup.add(strip(DW - z2off - z2w,  z2off + z2w,       z2w, DH - 2*(z2off+z2w), z2d));
 
   const z3off = z2off + z2w + 0.006, z3w = 0.009, z3d = 0.007;
-  doorGroup.add(strip(z3off,             DH - z3off - z3w, DW - 2*z3off,            z3w, z3d));
-  doorGroup.add(strip(z3off,             z3off,             DW - 2*z3off,            z3w, z3d));
-  doorGroup.add(strip(z3off,             z3off + z3w,       z3w, DH - 2*(z3off+z3w), z3d));
-  doorGroup.add(strip(DW - z3off - z3w,  z3off + z3w,       z3w, DH - 2*(z3off+z3w), z3d));
+  frameGroup.add(strip(z3off,             DH - z3off - z3w, DW - 2*z3off,            z3w, z3d));
+  frameGroup.add(strip(z3off,             z3off,             DW - 2*z3off,            z3w, z3d));
+  frameGroup.add(strip(z3off,             z3off + z3w,       z3w, DH - 2*(z3off+z3w), z3d));
+  frameGroup.add(strip(DW - z3off - z3w,  z3off + z3w,       z3w, DH - 2*(z3off+z3w), z3d));
 
   // ── Türblatt mit Glasausschnitten ──────────────────
   {
@@ -807,9 +811,14 @@ buildDoor(_urlModel);
 
 // Pivot-Group für Tür-Öffnen-Animation (Bandkante = Drehachse).
 // doorGroup → doorPivot → scene. Pivot sitzt auf der Bandkante.
+// frameGroup (Zarge) wird DIREKT zur scene hinzugefügt — bleibt also stehen,
+// auch wenn das Türblatt schwenkt.
 const doorPivot = new THREE.Group();
 doorPivot.add(doorGroup);
 scene.add(doorPivot);
+scene.add(frameGroup);
+// Zarge bleibt zentriert (symmetrisch — keine Spiegelung nötig)
+frameGroup.position.set(-DW/2, 0, 0);
 
 // setSide — DIN-Konvention:
 //   'r' = DIN-Rechts: Bänder RECHTS, Griff LINKS (von außen gesehen).
