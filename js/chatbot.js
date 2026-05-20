@@ -141,6 +141,30 @@ const RULES = [
     answer: '✅ <strong>Es gibt keine Mindestbestellmenge</strong> — du kannst auch nur <strong>ein einzelnes Fenster</strong> bestellen. Bedenke aber: bei kleinen Bestellungen sind die Versandkosten relativ hoch (200 € bei 5–9 Elementen, einzelnes Fenster fällt darunter). <strong>Tipp:</strong> bei wenigen Elementen lohnt sich oft die <strong>Selbstabholung</strong> bei uns in Brandenburg — kostenlos.'
   },
 
+  // ── Bewertungen ─────────────────────────────────────────────────────────────
+  {
+    keys: ['bewertung','bewertungen','erfahrungen','referenzen','rezension','rezensionen','google bewertung','wie seid ihr bewertet','sterne','reviews','feedback kunden','kundenstimmen','seriös','vertrauen','wie zufrieden','was sagen kunden'],
+    answer: '⭐ Unsere Google-Bewertungen kannst du dir direkt anschauen:<br><br><a href="https://www.google.com/maps?cid=9402028850820563054" target="_blank" rel="noopener" style="display:inline-block;margin-top:4px;padding:7px 14px;background:rgba(118,169,250,0.15);border:1px solid rgba(118,169,250,0.3);border-radius:8px;color:#76a9fa;text-decoration:none;font-weight:700;font-size:12px;">→ Bewertungen Fensterhandel Christ (Google)</a><br><br>Eine Auswahl findest du auch auf unserer <a href="index.html#bewertungen">Startseite im Bewertungsbereich</a>.'
+  },
+
+  // ── Farbproben / Muster ─────────────────────────────────────────────────────
+  {
+    keys: ['farbprobe','farbproben','farbmuster','muster zuschicken','probe schicken','schickt ihr muster','farbmuster bestellen','fenstermuster','probestück','probestücke','probefenster','musterstück'],
+    answer: '🎨 <strong>Wir verschicken keine Farbproben.</strong> Alle 41 Farben & Holzdekore kannst du dir aber in der <a href="farben-vorschau.html">Farben-Vorschau</a> und direkt im <a href="konfigurator.html">3D-Konfigurator</a> am Fenster anzeigen lassen. Bei Unsicherheit zu einer bestimmten Farbe: kurz per <a href="https://wa.me/491717263776" target="_blank">WhatsApp</a> fragen — wir helfen weiter.'
+  },
+
+  // ── Ersatzteile ─────────────────────────────────────────────────────────────
+  {
+    keys: ['ersatzteil','ersatzteile','dichtung kaufen','dichtung bestellen','beschlag ersatz','griff ersatz','ersatzdichtung','ersatzbeschlag','reparaturteile','nachkaufen','teile nachkaufen'],
+    answer: '🔧 <strong>Ersatzteile verkaufen wir nicht</strong> (keine Dichtungen, Beschläge oder Griffe als Einzelteile). Bei Defekten innerhalb der Garantiezeit (10 Jahre Profil / 5 Jahre Beschlag) Foto per <a href="https://wa.me/491717263776" target="_blank">WhatsApp</a> schicken — wir prüfen den Garantiefall mit Drutex.'
+  },
+
+  // ── Sammelbestellung / Nachbarn dazuholen ───────────────────────────────────
+  {
+    keys: ['sammelbestellung','zusammen bestellen','mit nachbar','nachbarn dazu','aufträge zusammenlegen','bestellungen zusammen','gemeinsam bestellen','zwei aufträge','separate aufträge','bestellgemeinschaft'],
+    answer: '📦 <strong>Sammelbestellungen mit Nachbarn sind nicht möglich</strong> — die versandkostenfrei-Grenze (4.000 € oder 10 Elemente) gilt pro Auftrag, nicht pro Lieferadresse. Jeder Auftrag wird einzeln gefertigt, abgerechnet und geliefert.'
+  },
+
   // ── PSK vs HST ───────────────────────────────────────────────────────────────
   {
     keys: ['psk unterschied','hst unterschied','unterschied hebeschiebe','unterschied psk','parallel schiebe kipp','welche schiebetür besser','psk oder hst','welches system besser'],
@@ -370,9 +394,13 @@ ZAHLUNG: Vollständige Überweisung nach Angebotserhalt → dann Bestellung bei 
 
 ANGEBOT: Gültig 3 Tage (Drutex-Materialpreise schwanken). Nach Ablauf neues Angebot anfordern. Nach Überweisung KEINE nachträglichen Änderungen mehr — Maße/Farbe/Profil vor Zahlung prüfen.
 
-BESTELLMENGE: Keine Mindestbestellmenge — auch 1 einzelnes Fenster möglich. Aber Versandkosten bei wenigen Elementen relativ hoch — Selbstabholung in Brandenburg dann oft sinnvoller.
+BESTELLMENGE: Keine Mindestbestellmenge — auch 1 einzelnes Fenster möglich. Aber Versandkosten bei wenigen Elementen relativ hoch — Selbstabholung in Brandenburg dann oft sinnvoller. Sammelbestellungen mit Nachbarn NICHT möglich — versandkostenfrei-Grenze gilt pro Auftrag.
 
 TERMIN: Außerhalb Hofverkauf (Fr 10-17) kann man nach Termin FRAGEN — keine Garantie. Anruf 03381/214837 oder WhatsApp.
+
+NICHT IM ANGEBOT: Keine Farbproben/Muster verschicken (41 Farben digital im Konfigurator ansehen). Keine Ersatzteile (Dichtungen/Beschläge/Griffe) — nur Garantiefälle abwickeln. Keine Sammelbestellungen.
+
+BEWERTUNGEN: Google-Bewertungen unter https://www.google.com/maps?cid=9402028850820563054 — bei Frage zu Bewertungen/Erfahrungen darauf verweisen.
 
 FÖRDERUNG: BAFA BEG EM bis 15% Zuschuss (IGLO Energy + Edge). Antrag VOR Bestellung auf bafa.de! KfW 458 gilt nicht mehr für Einzelmaßnahmen. §35a EStG: 20% Handwerkerlohn steuerlich absetzbar (nicht Material).
 
