@@ -2639,36 +2639,35 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   }
 
   /* ── 3-SPALTEN-CARDS (Desktop) — Kundenwunsch 20.05.2026 ──
-     Vorheriges „3D ohne Kasten" (17.05.) wird durch echte 3-Spalten-Card-Trennung ersetzt.
-     Jede Spalte als eigene Card → visuell klar abgegrenzt. */
+     v3: sichtbare Borders auf 40% Alpha + kräftigere Shadows. */
   @media (min-width: 1024px) {
     html body #kfg-main {
-      gap: 20px !important;
-      padding-top: 20px !important;
-      padding-bottom: 28px !important;
+      gap: 22px !important;
+      padding-top: 22px !important;
+      padding-bottom: 30px !important;
     }
     /* Linke Spalte (Step-Navigation) als Card */
     html body #kfg-nav {
       background: #0e1830 !important;
-      border: 1px solid rgba(118,169,250,0.18) !important;
+      border: 1px solid rgba(118,169,250,0.32) !important;
       border-radius: 14px !important;
       padding: 18px 14px !important;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.32) !important;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.38) !important;
     }
     /* Mittlere Spalte (Steps) als Card */
     html body #steps {
       background: #0e1830 !important;
-      border: 1px solid rgba(118,169,250,0.18) !important;
+      border: 1px solid rgba(118,169,250,0.32) !important;
       border-radius: 14px !important;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.32) !important;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.38) !important;
       overflow: hidden !important;
     }
     /* Rechte Spalte (Vorschau + Auswahl + CTA) als Card */
     html body #sidebar-wrap {
       background: #0e1830 !important;
-      border: 1px solid rgba(118,169,250,0.18) !important;
+      border: 1px solid rgba(118,169,250,0.32) !important;
       border-radius: 14px !important;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.32) !important;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.38) !important;
     }
     /* 3D-Frame im Desktop-Layout AKTIV (überschreibt das alte „transparent/no-border") */
     html body #prev-wrap.sb-preview-frame {
@@ -2687,36 +2686,35 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
      prominente Check-Icons. Sarah-Feedback „bam bam" → mehr Kontrast. */
   .sb-section-eyebrow {
     font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 12px; font-weight: 800;
-    letter-spacing: 0.18em; text-transform: uppercase;
-    color: #76a9fa;
+    font-size: 13px; font-weight: 800;
+    letter-spacing: 0.20em; text-transform: uppercase;
+    color: #a8c8ff;
     margin: 0 0 14px;
     padding-bottom: 12px;
-    border-bottom: 2px solid rgba(118,169,250,0.28);
+    border-bottom: 2px solid rgba(118,169,250,0.42);
     display: flex; align-items: center; gap: 10px;
   }
   .sb-section-eyebrow::before {
     content: '';
     display: inline-block;
-    width: 4px; height: 14px;
+    width: 5px; height: 16px;
     background: linear-gradient(180deg, #76a9fa, #c9a84c);
     border-radius: 2px;
     flex-shrink: 0;
   }
-  .sb-section-eyebrow--top { margin-top: 26px; }
+  .sb-section-eyebrow--top { margin-top: 24px; }
 
-  /* Preview-Toolbar — Header-Bar oben am 3D-Frame, gehört visuell zum Frame */
+  /* Preview-Toolbar — schmaler Header-Bar oben am 3D-Frame */
   .sb-preview-toolbar {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     width: 100%;
     align-items: center;
-    padding: 10px 12px;
+    padding: 7px 10px;
     background: #0a1426;
     border: 2px solid rgba(118,169,250,0.32);
     border-bottom: 1px solid rgba(118,169,250,0.18);
     border-radius: 14px 14px 0 0;
-    box-shadow: 0 -2px 12px rgba(0,0,0,0.20) inset;
   }
 
   /* 3D-Vorschau Frame — sitzt unter der Toolbar, bildet mit ihr eine Einheit.
@@ -11439,27 +11437,9 @@ async function submitSkizze(e) {
     }
   };
 
-  // ── Summary-HTML in die rechte Sidebar einfügen (nach #chips, vor den Buttons) ──
-  function injectSummaryBlock() {
-    const sidebar = document.getElementById('sidebar');
-    if (!sidebar || document.getElementById('kfg-sum-rows')) return;
-    const chips = document.getElementById('chips');
-    const summaryBlock = document.createElement('div');
-    summaryBlock.id = 'kfg-sum-block';
-    summaryBlock.style.cssText = 'padding:14px 0 0;display:none;'; // wird per heroSelectProd sichtbar
-    summaryBlock.innerHTML = `
-      <div style="font-size:9px;font-weight:700;letter-spacing:0.18em;color:rgba(118,169,250,0.6);text-transform:uppercase;margin-bottom:10px;font-family:Manrope,sans-serif;display:flex;align-items:center;gap:8px;">
-        <span style="flex:1;height:1px;background:rgba(118,169,250,0.15);display:block;"></span>Ihre Konfiguration<span style="flex:1;height:1px;background:rgba(118,169,250,0.15);display:block;"></span>
-      </div>
-      <div id="kfg-sum-rows" style="display:flex;flex-direction:column;">
-        <div style="color:rgba(232,238,255,0.35);font-size:12px;font-family:Manrope,sans-serif;">Noch nichts konfiguriert.</div>
-      </div>`;
-    if (chips && chips.nextSibling) {
-      sidebar.insertBefore(summaryBlock, chips.nextSibling);
-    } else {
-      sidebar.appendChild(summaryBlock);
-    }
-  }
+  // ── Summary-Block deaktiviert (2026-05-20): ersetzt durch Eyebrow „IHRE AUSWAHL"
+  //     + #chips-Rendering oben — vermeidet doppelten „Ihre Konfiguration"-Header. ──
+  function injectSummaryBlock() { /* no-op */ }
 
   // ── Summary nach jedem openS() aufrufen ──
   const _origOpenS = window.openS;
