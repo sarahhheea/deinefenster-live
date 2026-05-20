@@ -145,6 +145,16 @@
     .hero-blob-3 { width:300px;height:300px; background:rgba(34,94,170,0.12); top:30%;left:-100px; animation:blob-move 10s ease-in-out infinite 3s; }
     .hero-grid { position:absolute;inset:0; background-image:linear-gradient(rgba(118,169,250,0.032) 1px,transparent 1px),linear-gradient(90deg,rgba(118,169,250,0.032) 1px,transparent 1px); background-size:48px 48px; pointer-events:none; }
 
+    /* Foto-Slideshow im Hero-Hintergrund */
+    .ak-show { position:absolute; inset:0; z-index:0; overflow:hidden; }
+    .ak-slide { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity 1.4s ease-in-out; }
+    .ak-slide.is-active { opacity:1; }
+    .ak-overlay { position:absolute; inset:0; z-index:1; background:linear-gradient(120deg,rgba(6,14,30,0.94) 0%,rgba(10,21,48,0.82) 45%,rgba(10,21,48,0.55) 100%); pointer-events:none; }
+    .ak-overlay-bottom { position:absolute; left:0; right:0; bottom:0; height:33%; z-index:1; background:linear-gradient(to top,#0a1225,transparent); pointer-events:none; }
+    @media (prefers-reduced-motion: reduce) {
+      .ak-slide { transition:none; }
+    }
+
     .hero-t1{animation:fadeInUp .7s ease both .05s;}
     .hero-t2{animation:fadeInUp .7s ease both .2s;}
     .hero-t3{animation:fadeInUp .7s ease both .35s;}
@@ -634,12 +644,21 @@
 </div>
 
 <!-- HERO -->
-<section style="position:relative;padding:56px 24px 80px;overflow:hidden;min-height:560px;background:linear-gradient(135deg,#060e1e 0%,#0b1a36 55%,#0a1530 100%);">
-  <div class="hero-grid"></div>
-  <div class="hero-blob hero-blob-1"></div>
-  <div class="hero-blob hero-blob-2"></div>
-  <div class="hero-blob hero-blob-3"></div>
-  <div class="max-w-[1200px] mx-auto" style="position:relative;z-index:1;">
+<section style="position:relative;padding:56px 24px 80px;overflow:hidden;min-height:560px;background:#060e1e;">
+  <!-- Foto-Slideshow im Hintergrund (echte Sanierungsobjekte) -->
+  <div id="ankaufShow" class="ak-show" aria-hidden="true">
+    <img class="ak-slide is-active" src="/img/ankauf-show/01-plattenbau-strasse.jpg" alt="" fetchpriority="high" decoding="async">
+    <img class="ak-slide" src="/img/ankauf-show/02-plattenbau-front.jpg" alt="" loading="lazy" decoding="async">
+    <img class="ak-slide" src="/img/ankauf-show/03-innen-container.jpg" alt="" loading="lazy" decoding="async">
+    <img class="ak-slide" src="/img/ankauf-show/04-innen-leer.jpg" alt="" loading="lazy" decoding="async">
+  </div>
+  <div class="ak-overlay"></div>
+  <div class="ak-overlay-bottom"></div>
+  <div class="hero-grid" style="z-index:2;"></div>
+  <div class="hero-blob hero-blob-1" style="z-index:2;"></div>
+  <div class="hero-blob hero-blob-2" style="z-index:2;"></div>
+  <div class="hero-blob hero-blob-3" style="z-index:2;"></div>
+  <div class="max-w-[1200px] mx-auto" style="position:relative;z-index:3;">
     <div style="max-width:780px;">
       <div class="flex gap-3 mb-6 flex-wrap hero-t1">
         <span class="badge-blue">Kunststofffenster</span>
@@ -927,6 +946,19 @@
 </footer>
 
 <script>
+  // Foto-Slideshow Hero (Crossfade alle 5.5s, pausiert bei reduced-motion)
+  (function(){
+    const slides = document.querySelectorAll('#ankaufShow .ak-slide');
+    if (slides.length < 2) return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    let current = 0;
+    setInterval(() => {
+      slides[current].classList.remove('is-active');
+      current = (current + 1) % slides.length;
+      slides[current].classList.add('is-active');
+    }, 5500);
+  })();
+
   const navbar = document.getElementById('navbar');
   window.addEventListener('scroll', () => {
     navbar.style.background = window.scrollY > 60 ? 'rgba(6,14,30,0.98)' : 'rgba(6,14,30,0.85)';
