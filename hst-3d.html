@@ -449,60 +449,60 @@ function buildWindow() {
   // Schiebeflügel (vordere Spur) — verschiebt sich entlang X beim Öffnen
   const slidePanel = buildPanel(slideGroup, X_SLIDE, TRACK_FRONT_Z + SASH_DEPTH/2, true);
 
-  // ── DRUTEX IGLO-HS GRIFF — Aluminium-Bügelgriff (eckig) ──
-  // Recherchiert aus Drutex-Spec: "Aluminiumgriff innen, außen eingelassener Griff".
-  // Innen: vertikaler Bügel mit eckigem Profil (~28×24mm), 2 kurze waagrechte Arme.
-  // Länge ~1.3m, sitzt nahe der Mitten-Stulp-Kante des Schiebeflügels.
-  const BAR_X    = 0.028;                                // Bar-Breite (entlang X, schmal)
-  const BAR_Z    = 0.024;                                // Bar-Tiefe (perpendicular zur Tür)
-  const BAR_LEN  = Math.min(1.300, SH * 0.62);          // ~1.3m oder 62% der Flügelhöhe
-  const GRIP_CX  = X_SLIDE + FST * 0.55;                 // auf linkem Profil des Schiebeflügels
-  const GRIP_CY  = y0 + SH / 2;                          // vertikale Mitte
-  const DOOR_FZ  = TRACK_FRONT_Z + SASH_DEPTH/2 + 0.001;
-  const ARM_LEN  = 0.060;                                // Arm-Länge senkrecht zur Tür (60mm)
-  const BAR_CZ   = DOOR_FZ + ARM_LEN + BAR_Z/2;          // Z-Mitte des Bügels
+  // ── DRUTEX IGLO-HS GRIFF — 1:1 nach Sarah-Foto 20.05.2026 ──
+  // Asymmetrisch: kurze Edelstahl-Kappe oben, dünner Stab in der Mitte,
+  // deutlich längerer Sockel unten (Lift-Schloss-Modul mit Drücker-Mechanik).
+  const BAR_X         = 0.018;                              // Stab-Breite (schlank)
+  const BAR_Z         = 0.020;                              // Stab-Tiefe vor der Tür
+  const BAR_LEN       = 0.150;                              // ~150mm dünner Stab in der Mitte
+  const TOP_CAP_Y     = 0.022;                              // kurze obere Kappe (~22mm)
+  const TOP_CAP_X     = 0.026;
+  const TOP_CAP_Z     = 0.034;
+  const BOT_LOCK_Y    = 0.085;                              // langer Sockel unten (~85mm)
+  const BOT_LOCK_X    = 0.032;
+  const BOT_LOCK_Z    = 0.040;
+  const ARM_FRONT_Z   = 0.040;                              // Halterungs-Tiefe vor Türfläche
 
-  // 1) Vertikaler Bügel (eckiges Alu-Profil)
+  // Position: an der Schließkante des Schiebeflügels (außen, gegen Bewegungsrichtung
+  // = wo Drutex IGLO-HS den Drücker setzt). Standard-Drückerhöhe vertikal.
+  const GRIP_CX  = X_SLIDE + PANEL_W - FST * 0.55;
+  const HANDLE_TOTAL = TOP_CAP_Y + BAR_LEN + BOT_LOCK_Y;    // ~257mm Gesamt-Höhe
+  // Lift-Modul (Sockel) sitzt auf Standard-Drückerhöhe ~1050mm — Mitte des Sockels
+  const BOT_LOCK_CY   = y0 + Math.min(1.050, SH * 0.45);
+  const BAR_CY        = BOT_LOCK_CY + BOT_LOCK_Y/2 + BAR_LEN/2;
+  const TOP_CAP_CY    = BAR_CY + BAR_LEN/2 + TOP_CAP_Y/2;
+  const DOOR_FZ       = TRACK_FRONT_Z + SASH_DEPTH/2 + 0.001;
+  const BAR_CZ        = DOOR_FZ + ARM_FRONT_Z + BAR_Z/2;
+
+  // 1) Dünner vertikaler Stab in der Mitte
   const bar = new THREE.Mesh(
     new THREE.BoxGeometry(BAR_X, BAR_LEN, BAR_Z),
     hstGriffMat
   );
-  bar.position.set(GRIP_CX, GRIP_CY, BAR_CZ);
+  bar.position.set(GRIP_CX, BAR_CY, BAR_CZ);
   bar.castShadow = true;
   bar.userData.isHandle = true;
   slideGroup.add(bar); handleObjects.push(bar);
 
-  // 2) Zwei waagrechte Arme — sitzen ~140mm innerhalb der Bügel-Enden
-  const ARM_X        = 0.030;
-  const ARM_Y        = 0.024;
-  const ARM_INSET    = 0.140;
-  [GRIP_CY + BAR_LEN/2 - ARM_INSET,
-   GRIP_CY - BAR_LEN/2 + ARM_INSET].forEach(ay => {
-    const arm = new THREE.Mesh(
-      new THREE.BoxGeometry(ARM_X, ARM_Y, ARM_LEN),
-      hstGriffMat
-    );
-    arm.position.set(GRIP_CX, ay, DOOR_FZ + ARM_LEN/2);
-    arm.castShadow = true;
-    arm.userData.isHandle = true;
-    slideGroup.add(arm); handleObjects.push(arm);
-  });
+  // 2) Kurze Kappe oben (Stab-Endkappe)
+  const topCap = new THREE.Mesh(
+    new THREE.BoxGeometry(TOP_CAP_X, TOP_CAP_Y, TOP_CAP_Z),
+    hstGriffMat
+  );
+  topCap.position.set(GRIP_CX, TOP_CAP_CY, DOOR_FZ + TOP_CAP_Z/2);
+  topCap.castShadow = true;
+  topCap.userData.isHandle = true;
+  slideGroup.add(topCap); handleObjects.push(topCap);
 
-  // 3) Abdeckkappen oben + unten am Bügel — leicht abgesetzte Endplatten
-  const CAP_X = BAR_X + 0.0015;
-  const CAP_Y = 0.006;
-  const CAP_Z = BAR_Z + 0.0015;
-  [GRIP_CY + BAR_LEN/2 + CAP_Y/2,
-   GRIP_CY - BAR_LEN/2 - CAP_Y/2].forEach(cy => {
-    const cap = new THREE.Mesh(
-      new THREE.BoxGeometry(CAP_X, CAP_Y, CAP_Z),
-      hstGriffMat
-    );
-    cap.position.set(GRIP_CX, cy, BAR_CZ);
-    cap.castShadow = true;
-    cap.userData.isHandle = true;
-    slideGroup.add(cap); handleObjects.push(cap);
-  });
+  // 3) Langer Sockel unten (Lift-Schloss-Modul) — deutlich höher + leicht dicker
+  const botLock = new THREE.Mesh(
+    new THREE.BoxGeometry(BOT_LOCK_X, BOT_LOCK_Y, BOT_LOCK_Z),
+    hstGriffMat
+  );
+  botLock.position.set(GRIP_CX, BOT_LOCK_CY, DOOR_FZ + BOT_LOCK_Z/2);
+  botLock.castShadow = true;
+  botLock.userData.isHandle = true;
+  slideGroup.add(botLock); handleObjects.push(botLock);
 
   // ── MUSCHELGRIFF außen (eingelassen, auf Rückseite des Schiebeflügels) ──
   // Drutex-Standard: außen sitzt kein Bügel sondern eine eingelassene Muschel.
@@ -514,7 +514,7 @@ function buildWindow() {
     new THREE.BoxGeometry(muschelW, muschelH, muschelD),
     sealMat
   );
-  muschel.position.set(GRIP_CX, GRIP_CY, TRACK_FRONT_Z - muschelD/2 - 0.001);
+  muschel.position.set(GRIP_CX, BAR_CY, TRACK_FRONT_Z - muschelD/2 - 0.001);
   slideGroup.add(muschel);
 }
 
