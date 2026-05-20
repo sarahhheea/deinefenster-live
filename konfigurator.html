@@ -2669,16 +2669,40 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       border-radius: 14px !important;
       box-shadow: 0 8px 28px rgba(0,0,0,0.38) !important;
     }
-    /* 3D-Frame im Desktop-Layout AKTIV (überschreibt das alte „transparent/no-border") */
+    /* 3D-Frame im Desktop-Layout AKTIV — kompakter damit Auswahl-Liste darunter immer sichtbar */
     html body #prev-wrap.sb-preview-frame {
       background: #0a1426 !important;
       border: 2px solid rgba(118,169,250,0.32) !important;
-      border-radius: 12px !important;
+      border-top: none !important;
+      border-radius: 0 0 12px 12px !important;
       box-shadow: 0 8px 24px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.04) !important;
-      height: 56vh !important;
-      min-height: 400px !important;
-      max-height: 580px !important;
+      height: 38vh !important;
+      min-height: 280px !important;
+      max-height: 420px !important;
     }
+    /* Sidebar-Sticky: Komponenten haben fixe Höhen, nur die Auswahl-Liste scrollt intern */
+    html body #sidebar-wrap {
+      max-height: calc(100vh - 76px) !important;
+      overflow: hidden !important;
+    }
+    html body #sidebar {
+      max-height: 100% !important;
+      overflow: hidden !important;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 0 !important;
+    }
+    /* Auswahl-Liste: max-height + scrollbar damit Liste sichtbar bleibt UND CTA unten dranklebt */
+    html body #chips {
+      max-height: 240px !important;
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      flex-shrink: 1 !important;
+      scrollbar-width: thin !important;
+      scrollbar-color: rgba(118,169,250,0.30) transparent !important;
+    }
+    html body #chips::-webkit-scrollbar { width: 5px !important; }
+    html body #chips::-webkit-scrollbar-thumb { background: rgba(118,169,250,0.30) !important; border-radius: 3px !important; }
   }
 
   /* ── RECHTE SIDEBAR — Mono-Sektionen + Preview-Frame + CTA (2026-05-20 v2) ──
@@ -6255,16 +6279,26 @@ function haustuerSVG(variant) {
   return `<img src="img/haustuer-karten/${file}.png?v=20260519" alt="${variant}" loading="lazy" style="width:100%;height:auto;max-height:240px;object-fit:contain;display:block;border-radius:6px"/>`;
 }
 
+// Flügelaufteilungs-Thumbnails verwenden dieselben v3-Master wie die Live-Vorschau —
+// einheitlicher weißer Rahmen + helles, klares Glas.
 const FLUEGEL_KARTEN_IMG = {
-  '1-fluegel':'01_1-fluegel','2-fluegel':'02_2-fluegel','3-fluegel':'03_3-fluegel',
-  '1-oberlicht':'04_1-oberlicht','2-oberlicht':'05_2-oberlicht','3-oberlicht':'06_3-oberlicht',
-  '1-unterlicht':'07_1-unterlicht','2-unterlicht':'08_2-unterlicht','3-unterlicht':'09_3-unterlicht',
-  '1-ober-unter':'10_1-ober-unter','2-ober-unter':'11_2-ober-unter','3-ober-unter':'12_3-ober-unter'
+  '1-fluegel':   'img/fenster_standard_v3.png',
+  '2-fluegel':   'img/fenster_2fluegel_v3.png',
+  '3-fluegel':   'img/fenster_3fluegel_v3.png',
+  '1-oberlicht': 'img/fenster_oberlicht_v3.png',
+  '2-oberlicht': 'img/fenster_2fluegel_oberlicht_v3.png',
+  '3-oberlicht': 'img/fenster_3fluegel_oberlicht_v3.png',
+  '1-unterlicht':'img/fenster_unterlicht_v3.png',
+  '2-unterlicht':'img/fenster_2fluegel_unterlicht_v3.png',
+  '3-unterlicht':'img/fenster_3fluegel_unterlicht_v3.png',
+  '1-ober-unter':'img/fenster_ober_unter_v3.png',
+  '2-ober-unter':'img/fenster_2fluegel_ober_unter_v3.png',
+  '3-ober-unter':'img/fenster_3fluegel_ober_unter_v3.png'
 };
 function fluegelImg(v) {
-  const file = FLUEGEL_KARTEN_IMG[v];
-  if (!file) return windowSVG(v, null);
-  return `<img src="img/fluegel-karten/${file}.png" alt="${P.fluegel[v]?.name||v}" loading="lazy" style="width:100%;height:auto;max-height:280px;object-fit:contain;display:block"/>`;
+  const src = FLUEGEL_KARTEN_IMG[v];
+  if (!src) return windowSVG(v, null);
+  return `<img src="${src}" alt="${P.fluegel[v]?.name||v}" loading="lazy" style="width:100%;height:auto;max-height:280px;object-fit:contain;display:block"/>`;
 }
 
 const ANSCHLAG_KARTEN_IMG = {
