@@ -345,9 +345,10 @@ function autoVorauswahlGroesse() {
   rendereVorschau();
 }
 
-/* ─── Zustand-Auswahl (Neu / Gebraucht / Vermessen / Sonderposten) ─── */
+/* ─── Zustand-Auswahl (Neu / Gebraucht / Vermessen / Sonderposten / Ohne Angabe) ─── */
+const ZUSTAND_BTN_IDS = ['zustandNeu', 'zustandGebraucht', 'zustandVermessen', 'zustandSonderposten', 'zustandOhneAngabe'];
 function bindeZustandHandler() {
-  ['zustandNeu', 'zustandGebraucht', 'zustandVermessen', 'zustandSonderposten'].forEach(id => {
+  ZUSTAND_BTN_IDS.forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     el.addEventListener('click', () => {
@@ -360,7 +361,7 @@ function bindeZustandHandler() {
 }
 
 function setZustandUI() {
-  ['zustandNeu', 'zustandGebraucht', 'zustandVermessen', 'zustandSonderposten'].forEach(id => {
+  ZUSTAND_BTN_IDS.forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     el.classList.toggle('selected', el.dataset.zustand === STATE.zustand);
@@ -372,9 +373,10 @@ function setZustandUI() {
   }
 }
 
-/* ─── Material-Auswahl (Kunststoff / Holz / Aluminium) ─── */
+/* ─── Material-Auswahl (Kunststoff / Holz / Aluminium / Ohne Angabe) ─── */
+const MATERIAL_BTN_IDS = ['materialKunststoff', 'materialHolz', 'materialAluminium', 'materialOhneAngabe'];
 function bindeMaterialHandler() {
-  ['materialKunststoff', 'materialHolz', 'materialAluminium'].forEach(id => {
+  MATERIAL_BTN_IDS.forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     el.addEventListener('click', () => {
@@ -387,15 +389,15 @@ function bindeMaterialHandler() {
 }
 
 function setMaterialUI() {
-  ['materialKunststoff', 'materialHolz', 'materialAluminium'].forEach(id => {
+  MATERIAL_BTN_IDS.forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     el.classList.toggle('selected', el.dataset.material === STATE.material);
   });
 }
 
-/* ─── Glasart-Auswahl (Klarglas / Chinchilla / Milchglas / Sicherheitsglas / Schallschutzglas) ─── */
-const GLASART_BTN_IDS = ['glasartKlarglas', 'glasartChinchilla', 'glasartMilchglas', 'glasartSicherheitsglas', 'glasartSchallschutzglas'];
+/* ─── Glasart-Auswahl (Klarglas / Chinchilla / Milchglas / Sicherheitsglas / Schallschutzglas / Ohne Angabe) ─── */
+const GLASART_BTN_IDS = ['glasartKlarglas', 'glasartChinchilla', 'glasartMilchglas', 'glasartSicherheitsglas', 'glasartSchallschutzglas', 'glasartOhneAngabe'];
 
 function bindeGlasartHandler() {
   GLASART_BTN_IDS.forEach(id => {
@@ -428,7 +430,14 @@ function rendereKategorien() {
       </div>
       <h3 class="text-sm font-bold leading-tight">${escapeHtml(k.label)}</h3>
     </button>
-  `).join('');
+  `).join('') + `
+    <button type="button" class="kat-karte" data-kat="ohne-angabe">
+      <div class="icon-wrap">
+        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">help</span>
+      </div>
+      <h3 class="text-sm font-bold leading-tight">Ohne Angabe</h3>
+    </button>
+  `;
 
   grid.querySelectorAll('.kat-karte').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -596,7 +605,9 @@ function resetFormular() {
 
 function goToStep2() {
   if (!STATE.kategorie) return;
-  const label = KATEGORIEN_LIVE.find(k => k.key === STATE.kategorie)?.label || STATE.kategorie;
+  const label = STATE.kategorie === 'ohne-angabe'
+    ? 'Ohne Angabe'
+    : (KATEGORIEN_LIVE.find(k => k.key === STATE.kategorie)?.label || STATE.kategorie);
   document.getElementById('gewaehlteKategorie').textContent = label;
   document.getElementById('step1').classList.add('hidden');
   document.getElementById('step2').classList.remove('hidden');
@@ -745,7 +756,8 @@ function rendereVorschau() {
   const system = document.getElementById('formSystem').value || 'IGLO 5 Classic';
   const verglasung = document.getElementById('formVerglasung').value;
   const rc = '';
-  const beschr = document.getElementById('formBeschreibung').value || (STATE.kategorie ? KATEGORIEN_LIVE.find(k=>k.key===STATE.kategorie)?.label + ' direkt aus dem Lager.' : 'Lagerware – sofort lieferbar.');
+  const katLabel = STATE.kategorie === 'ohne-angabe' ? 'Lagerware' : (KATEGORIEN_LIVE.find(k=>k.key===STATE.kategorie)?.label || '');
+  const beschr = document.getElementById('formBeschreibung').value || (STATE.kategorie ? katLabel + ' direkt aus dem Lager.' : 'Lagerware – sofort lieferbar.');
   // Hauptbild: erst neue (Bilder), dann bestehende (bilderBestand), sonst Default
   const echtesBild = STATE.bilder[0] || STATE.bilderBestand[0] || null;
   const bild = echtesBild || 'img/fenster_standard.png';
