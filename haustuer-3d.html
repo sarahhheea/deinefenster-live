@@ -134,6 +134,29 @@
   }
   .glass-btn.active { border-color: #1e3a8a; color: #1e3a8a; background: #f0f5ff; }
   .glass-btn:hover { border-color: #93a8d4; }
+
+  /* ── Mobile (≤768px): vertikal stacken statt 3-Spalten-Layout ── */
+  @media (max-width: 768px) {
+    .layout { flex-direction: column; height: auto; min-height: calc(100vh - 40px); }
+    .ref-panel {
+      width: 100%; min-width: 0;
+      max-height: 200px;
+      border-right: none;
+      border-bottom: 1px solid #d8d8d8;
+      padding: 8px;
+      flex-direction: row; align-items: center; gap: 10px;
+    }
+    .ref-panel img { max-height: 140px; max-width: 50%; }
+    .ref-nav { width: auto; flex-direction: column; gap: 4px; margin-top: 0; }
+    .ref-nav button { padding: 6px 10px; min-width: 90px; }
+    .ref-label, .ref-model-name { font-size: 9px; }
+    #threeCanvas { width: 100% !important; height: 55vh !important; min-height: 320px; }
+    .controls {
+      width: 100%; min-width: 0;
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.07);
+      max-height: none;
+    }
+  }
 </style>
 <script>
   // Embed-Class IMMER setzen sobald HTML parsed wird (vor Module-Script-Load)
@@ -1371,8 +1394,18 @@ document.querySelectorAll('#viewBtns .glass-btn').forEach(btn => {
 // ══════════════════════════════════════════════
 function resize() {
   const embed = new URLSearchParams(location.search).has('embed');
-  const w = embed ? window.innerWidth  : window.innerWidth  - 290 - 252;
-  const h = embed ? window.innerHeight : window.innerHeight - 40;
+  const isMobile = window.innerWidth < 768;
+  let w, h;
+  if (embed) {
+    w = window.innerWidth;
+    h = window.innerHeight;
+  } else if (isMobile) {
+    w = window.innerWidth;
+    h = Math.max(window.innerHeight * 0.55, 320);
+  } else {
+    w = window.innerWidth - 290 - 252;
+    h = window.innerHeight - 40;
+  }
   renderer.setSize(w, h);
   camera.aspect = w / h;
   camera.updateProjectionMatrix();

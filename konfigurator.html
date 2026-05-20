@@ -2327,25 +2327,34 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       animation: none !important;
     }
 
-    /* Neuer Schritt-Titel-Bereich oben in #steps */
+    /* Neuer Schritt-Titel-Bereich oben in #steps — konsistente Hülle für ALLE Steps */
     #kfg-step-hdr {
-      padding: 18px 28px;
+      padding: 18px 28px 16px;
       border-bottom: 1px solid rgba(255,255,255,0.07);
       margin-bottom: 0;
       min-height: 76px;
       display: flex; flex-direction: column; justify-content: center;
+      gap: 4px;
+    }
+    .kfg-step-eyebrow {
+      font-family: 'Manrope', sans-serif;
+      font-size: 10.5px; font-weight: 700;
+      letter-spacing: 0.24em; text-transform: uppercase;
+      color: rgba(118,169,250,0.72);
+      margin: 0; line-height: 1;
     }
     #kfg-step-title-text {
       font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 20px; font-weight: 800;
+      font-size: 22px; font-weight: 800;
       letter-spacing: -0.025em;
       color: rgba(238,242,255,0.97);
-      line-height: 1.2; margin: 0 0 4px;
+      line-height: 1.2; margin: 2px 0 4px;
     }
     #kfg-step-desc-text {
       font-family: 'Manrope', sans-serif;
-      font-size: 12.5px; color: rgba(200,215,255,0.50);
-      margin: 0; line-height: 1.4;
+      font-size: 13px; font-weight: 500;
+      color: rgba(200,215,255,0.62);
+      margin: 0; line-height: 1.45;
     }
     /* Alle 3 Header (links Step-Item, mitte Title, rechts Toggle) auf gleicher Y-Linie
        Rechts hat einen ::before "IHRE KONFIGURATION" Label über dem Sidebar-Card (≈38px) +
@@ -2578,35 +2587,55 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   }
   #s1.hero-done { display: none !important; }
 
-  /* ── MOBILE: Step-Nav als horizontale Pille oben (< 768px) ──
-     3-Panel-Layout greift erst ab 768px. Darunter zeigen wir die Nav
-     als kompakten horizontalen Scroll-Strip — gleicher Inhalt, neues Format.
-     Aktivierung: Klasse .kfg-nav--mobile-strip vom JS gesetzt, sobald Produkt gewählt. */
+  /* ── MOBILE-STEP-HEADER (< 768px) — kompakt + Progress-Bar ──
+     Ersetzt die alte scrollbare Pille (zeigte nur 3 von 13 Items).
+     Nur 1 sichtbarer Step + visuelle Fortschritts-Anzeige.
+     Default versteckt — wird per JS-Klasse .msb-show sichtbar sobald erster Step offen. */
+  #mobile-step-bar { display: none; }
   @media (max-width: 767px) {
-    #kfg-nav.kfg-nav--mobile-strip {
-      display: block !important;
+    #mobile-step-bar.msb-show {
+      display: block;
       position: sticky; top: 54px; z-index: 50;
-      width: 100%; padding: 8px 12px;
-      background: rgba(6,14,30,0.96); backdrop-filter: blur(8px);
-      border-bottom: 1px solid rgba(118,169,250,0.12);
-      overflow-x: auto; overflow-y: hidden;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
+      width: 100%;
+      padding: 12px 16px 10px;
+      background: rgba(6,14,30,0.96);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(118,169,250,0.14);
     }
-    #kfg-nav.kfg-nav--mobile-strip::-webkit-scrollbar { display: none; }
-    #kfg-nav.kfg-nav--mobile-strip .kfg-nav-header { display: none; }
-    #kfg-nav.kfg-nav--mobile-strip #kfg-nav-inner { width: max-content; }
-    #kfg-nav.kfg-nav--mobile-strip #kfg-nav-list {
-      display: flex; flex-direction: row; gap: 6px; align-items: center;
+    #mobile-step-bar .msb-top {
+      display: flex; flex-direction: column; gap: 3px;
     }
-    #kfg-nav.kfg-nav--mobile-strip .ksnav-item {
-      flex-direction: row; padding: 6px 10px; margin: 0;
-      background: rgba(255,255,255,0.04); border-radius: 16px;
-      white-space: nowrap;
+    #mobile-step-bar .msb-eyebrow {
+      font-family: 'Manrope', sans-serif;
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.22em; text-transform: uppercase;
+      color: rgba(118,169,250,0.7);
     }
-    #kfg-nav.kfg-nav--mobile-strip .ksnav-num { width: 18px; height: 18px; font-size: 9.5px; }
-    #kfg-nav.kfg-nav--mobile-strip .ksnav-lbl { font-size: 11.5px; max-width: 110px; }
-    #kfg-nav.kfg-nav--mobile-strip .ksnav-active::after { display: none; }
+    #mobile-step-bar .msb-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 16px; font-weight: 700;
+      color: rgba(255,255,255,0.96);
+      line-height: 1.2;
+    }
+    #mobile-step-bar .msb-progress {
+      margin-top: 10px;
+      height: 3px; width: 100%;
+      background: rgba(255,255,255,0.08);
+      border-radius: 2px; overflow: hidden;
+    }
+    #mobile-step-bar .msb-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #76a9fa, #c9a84c);
+      border-radius: 2px;
+      transition: width 0.45s cubic-bezier(0.16,1,0.3,1);
+    }
+    /* Alte Mobile-Strip-Pille ausblenden — Mobile-Step-Bar übernimmt */
+    #kfg-nav.kfg-nav--mobile-strip { display: none !important; }
+  }
+
+  /* ── MOBILE: Alt-Step-Nav (entfernt 2026-05-20, ersetzt durch #mobile-step-bar) ── */
+  @media (max-width: 767px) {
+    #kfg-nav.kfg-nav--mobile-strip { display: none !important; }
   }
 </style>
 
@@ -3198,11 +3227,22 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   </div>
 </div>
 
+<!-- ════ MOBILE-STEP-HEADER (nur < 768px) — kompakt + Progress-Bar ════
+     Default: hidden. JS macht sichtbar (msb-show) sobald erster Step offen. -->
+<div id="mobile-step-bar">
+  <div class="msb-top">
+    <div class="msb-eyebrow">SCHRITT <span id="msb-num"></span> VON <span id="msb-total"></span></div>
+    <div class="msb-title" id="msb-title"></div>
+  </div>
+  <div class="msb-progress"><div class="msb-progress-fill" id="msb-progress-fill" style="width:0%"></div></div>
+</div>
+
 <!-- ════ STEPS CENTER ════ -->
 <div id="steps" class="lg:col-span-3" style="border-radius:6px;overflow:hidden;box-shadow:0 4px 24px rgba(26,41,66,0.10),0 1px 3px rgba(26,41,66,0.06);border:1px solid rgba(26,41,66,0.08)">
 
 <!-- Schritt-Titel (Desktop 3-Panel) — wird per JS befüllt -->
 <div id="kfg-step-hdr" style="display:none">
+  <div id="kfg-step-eyebrow" class="kfg-step-eyebrow">SCHRITT <span id="kfg-step-eyebrow-num"></span> VON <span id="kfg-step-eyebrow-total"></span></div>
   <h2 id="kfg-step-title-text"></h2>
   <p id="kfg-step-desc-text"></p>
 </div>
@@ -5178,7 +5218,17 @@ function buildNav() {
   list.innerHTML = '';
   let visNum = 1;
   let openFound = false;
+  let activeIndex = 0;
+  let activeLabel = '';
+  let totalVis = 0;
   const checkSvg = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3.5L13 5"/></svg>';
+
+  // ── Erst zählen wie viele Steps für aktuelles Produkt aktiv sind ──
+  allSc.forEach(sc => {
+    if (sc.id === 's1') return;
+    if (sc.style.display === 'none') return;
+    totalVis++;
+  });
 
   allSc.forEach(sc => {
     if (sc.id === 's1') return; // Produkttyp via Hero gewählt — nicht in Nav
@@ -5189,7 +5239,7 @@ function buildNav() {
     const isOpen = sc.classList.contains('open');
 
     let state = 'ksnav-pending';
-    if (isOpen) { state = 'ksnav-active'; openFound = true; }
+    if (isOpen) { state = 'ksnav-active'; openFound = true; activeIndex = visNum; activeLabel = label; }
     else if (!openFound) { state = 'ksnav-done'; }
 
     const div = document.createElement('div');
@@ -5199,6 +5249,35 @@ function buildNav() {
     list.appendChild(div);
     visNum++;
   });
+
+  // ── Mobile-Step-Bar synchronisieren ──
+  const msbBar = document.getElementById('mobile-step-bar');
+  const msbNum = document.getElementById('msb-num');
+  const msbTotal = document.getElementById('msb-total');
+  const msbTitle = document.getElementById('msb-title');
+  const msbFill = document.getElementById('msb-progress-fill');
+  // Total IMMER setzen wenn sichtbare Steps existieren (auch bei Produktwechsel)
+  if (msbTotal && totalVis > 0) msbTotal.textContent = totalVis;
+  if (msbBar) {
+    if (activeIndex > 0) {
+      msbBar.classList.add('msb-show');
+      if (msbNum)   msbNum.textContent   = activeIndex;
+      if (msbTitle) msbTitle.textContent = activeLabel;
+      if (msbFill) {
+        const pct = totalVis > 0 ? Math.round((activeIndex / totalVis) * 100) : 0;
+        msbFill.style.width = pct + '%';
+      }
+    } else {
+      // Kein offener Step → Bar verstecken (z.B. Hero-Screen vor Produktwahl)
+      msbBar.classList.remove('msb-show');
+    }
+  }
+
+  // ── Desktop-Step-Eyebrow synchronisieren ──
+  const ebNum = document.getElementById('kfg-step-eyebrow-num');
+  const ebTotal = document.getElementById('kfg-step-eyebrow-total');
+  if (ebTotal && totalVis > 0) ebTotal.textContent = totalVis;
+  if (ebNum && activeIndex > 0) ebNum.textContent = activeIndex;
 }
 
 function openS(n) {
