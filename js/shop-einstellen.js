@@ -27,7 +27,11 @@ const KATEGORIEN = [
   { key: 'schiebetuer-rollo',          label: 'Schiebetür mit Rollo',             icon: 'roller_shades' },
   { key: 'fenster-oberlicht',          label: 'Fenster mit Oberlicht',            icon: 'space_dashboard' },
   { key: 'fenster-unterlicht',         label: 'Fenster mit Unterlicht',           icon: 'vertical_split' },
-  { key: 'fenster-sprossen',           label: 'Fenster mit Sprossen',             icon: 'window_open' }
+  { key: 'fenster-sprossen',           label: 'Fenster mit Sprossen',             icon: 'window_open' },
+  { key: 'dachfenster',                label: 'Dachfenster',                      icon: 'skylight' },
+  { key: 'garagentor',                 label: 'Garagentor',                       icon: 'garage' },
+  { key: 'daemmung',                   label: 'Dämmung',                          icon: 'layers' },
+  { key: 'baumaterialien',             label: 'Baumaterialien',                   icon: 'construction' }
 ];
 
 // interner Hinweis.04.2026 v2: Gruppierte Eigenschaften für übersichtlichere Auswahl
