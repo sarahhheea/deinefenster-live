@@ -89,8 +89,8 @@ const RULES = [
 
   // ── Lieferzeit ──────────────────────────────────────────────────────────────
   {
-    keys: ['lieferzeit','wann kommt','wann liefert','geliefert','lieferung','liefern','zustellung','wann fertig','dauert die lieferung','wie lange dauert','abholen','selbst abholen','abholung','lager abholen'],
-    answer: '📦 <strong>Lieferzeiten:</strong><br><br>• <strong>Drutex Maßfenster (Neuware)</strong>: ca. <strong>2 Wochen</strong> ab unserem Bestelldatum beim Werk — nach deiner Zahlung<br>• <strong>Deutschlandweit</strong> per Spedition — kostenlos ab 4.000 € oder 10 Elementen (sonst 200 €)<br>• <strong>Selbstabholung</strong>: möglich — Bestellung ins Lager, selbst abholen<br>• <strong>Gebrauchte & Lagerware</strong>: nur Selbstabholung in Brandenburg, kein Versand'
+    keys: ['lieferzeit','wann kommt','wann liefert','geliefert','lieferung','liefern','zustellung','wann fertig','dauert die lieferung','wie lange dauert','abholen','selbst abholen','abholung','lager abholen','wie lange bis','wie lange brauchts','wann da','wann ist es da','wann hab ich','wann bekomme ich'],
+    answer: '📦 <strong>Lieferzeit: ca. 2 Wochen</strong> ab Bestellbestätigung bei Drutex — nach deinem Zahlungseingang. Feste Regel, kein „kommt drauf an".<br><br><strong>Versand deutschlandweit per Spedition:</strong><br>• <strong>Kostenlos</strong> ab 4.000 € Auftragswert <em>oder</em> ab 10 Fensterelementen<br>• <strong>200 €</strong> Pauschale bei 5–9 Elementen<br>• <strong>300 €</strong> bei einzelner Hebe-Schiebetür<br>• <strong>Selbstabholung</strong> kostenlos — Bestellung ins Lager Brandenburg<br><br><strong>Gebraucht- & Lagerware:</strong> nur Selbstabholung freitags 10–17 Uhr, kein Versand.'
   },
 
   // ── Einbau ──────────────────────────────────────────────────────────────────
@@ -270,7 +270,7 @@ const RULES = [
   // ── Konfigurator / Bestellung ───────────────────────────────────────────────
   {
     keys: ['konfigurator','online bestellen','bestellen','konfigurieren','zusammenstellen','wie bestelle','wie kann ich bestellen','ablauf','bestellvorgang','wie läuft das','wie geht das','wie geht eine bestellung'],
-    answer: '🪟 <strong>Bestellablauf:</strong><br><br><strong>1. Konfigurieren</strong> → Maße, Profil, Farbe, Verglasung wählen<br><strong>2. Anfrage senden</strong> → wir erhalten deine Konfiguration per E-Mail<br><strong>3. Angebot erhalten</strong> → individueller Preis + Lieferbedingungen von uns<br><strong>4. Überweisen</strong> → nach Zahlung bestellen wir bei Drutex<br><strong>5. Lieferung</strong> → ca. <strong>2 Wochen</strong> ab Bestelldatum beim Werk<br><br><a href="konfigurator.html" style="display:inline-block;margin-top:6px;padding:7px 14px;background:rgba(118,169,250,0.15);border:1px solid rgba(118,169,250,0.3);border-radius:8px;color:#76a9fa;text-decoration:none;font-weight:700;font-size:12px;">→ Jetzt konfigurieren</a>'
+    answer: '🪟 <strong>Bestellablauf:</strong><br><br><strong>1. Konfigurieren</strong> → Maße, Profil, Farbe, Verglasung wählen<br><strong>2. Anfrage senden</strong> → wir erhalten deine Konfiguration per E-Mail<br><strong>3. Angebot erhalten</strong> → individueller Preis + Lieferbedingungen von uns<br><strong>4. Überweisen</strong> → nach Zahlung bestellen wir bei Drutex<br><strong>5. Lieferung</strong> → ca. <strong>2 Wochen</strong> ab Bestellbestätigung bei Drutex<br><br><a href="konfigurator.html" style="display:inline-block;margin-top:6px;padding:7px 14px;background:rgba(118,169,250,0.15);border:1px solid rgba(118,169,250,0.3);border-radius:8px;color:#76a9fa;text-decoration:none;font-weight:700;font-size:12px;">→ Jetzt konfigurieren</a>'
   },
 
   // ── Kontakt ──────────────────────────────────────────────────────────────────
@@ -334,7 +334,7 @@ PRODUKTE: Nur Drutex PVC-Fenster (neu+Maß) + Gebrauchtware (Freitag vor Ort, Se
 
 PROFILE: IGLO Energy (7-Kammer, 82mm, Uw 0,71, BAFA-förderfähig) | IGLO Edge (Uw 0,66, Premium) | IGLO 5 Classic (Uw 0,83, kein BAFA). Klasse A, EN 12608. Garantie: 10J Profil + 5J Beschlag.
 
-LIEFERUNG: Kostenlos ab 4.000€ oder 10 Elemente. Sonst 200€ (5-9 Elemente), HST einzeln 300€. Gebrauchte/Lager: nur Selbstabholung. Ca. 2 Wochen Lieferzeit ab Bestelldatum beim Werk.
+LIEFERUNG: FESTE REGEL: ca. 2 Wochen Lieferzeit ab Bestellbestätigung bei Drutex (nach Zahlungseingang). Versandkosten: KOSTENLOS ab 4.000€ Auftragswert ODER ab 10 Fensterelementen. Sonst 200€ Pauschale (5-9 Elemente). Einzelne Hebe-Schiebetür 300€. Selbstabholung im Lager Brandenburg kostenlos. Gebrauchte/Lager: nur Selbstabholung, kein Versand. Niemals "kommt drauf an" — Regel ist klar.
 
 ZAHLUNG: Vollständige Überweisung nach Angebotserhalt → dann Bestellung bei Drutex. Keine Anzahlung, keine Ratenzahlung. Vor-Ort (freitags): Bar/EC/PayPal.
 
