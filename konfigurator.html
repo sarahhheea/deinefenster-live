@@ -2638,45 +2638,56 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
     #kfg-nav.kfg-nav--mobile-strip { display: none !important; }
   }
 
-  /* ── RECHTE SIDEBAR — Mono-Sektionen + Preview-Frame + CTA (2026-05-20) ── */
+  /* ── RECHTE SIDEBAR — Mono-Sektionen + Preview-Frame + CTA (2026-05-20 v2) ──
+     Verstärkte visuelle Hierarchie: größere Eyebrows, dickere Trenner,
+     prominente Check-Icons. Sarah-Feedback „bam bam" → mehr Kontrast. */
   .sb-section-eyebrow {
-    font-family: 'Manrope', sans-serif;
-    font-size: 10.5px; font-weight: 700;
-    letter-spacing: 0.24em; text-transform: uppercase;
-    color: rgba(118,169,250,0.72);
-    margin: 0 0 10px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid rgba(118,169,250,0.16);
-    display: flex; align-items: center; gap: 8px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 12px; font-weight: 800;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: #76a9fa;
+    margin: 0 0 14px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid rgba(118,169,250,0.28);
+    display: flex; align-items: center; gap: 10px;
   }
-  .sb-section-eyebrow--top { margin-top: 22px; }
+  .sb-section-eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 4px; height: 14px;
+    background: linear-gradient(180deg, #76a9fa, #c9a84c);
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .sb-section-eyebrow--top { margin-top: 26px; }
 
-  /* 3D-Vorschau Frame — klar abgegrenzt.
-     Höhere Spezifität (#prev-wrap.sb-preview-frame) + !important nötig, um
-     bestehende ID+!important Overrides (Z.897, Z.1128) zu schlagen. */
+  /* 3D-Vorschau Frame — klar abgegrenzt, deutlichere Border + Shadow.
+     Spezifität #prev-wrap.sb-preview-frame + !important nötig wegen alter ID-Overrides. */
   #prev-wrap.sb-preview-frame {
-    background: #0f1c30 !important;
-    border: 1px solid rgba(118,169,250,0.22) !important;
-    border-radius: 12px !important;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.28), inset 0 0 0 1px rgba(255,255,255,0.02) !important;
+    background: #0a1426 !important;
+    border: 2px solid rgba(118,169,250,0.32) !important;
+    border-radius: 14px !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.40), 0 0 0 1px rgba(118,169,250,0.10), inset 0 1px 0 rgba(255,255,255,0.04) !important;
     overflow: hidden !important;
   }
 
-  /* Selection-Summary: Check-Icon + ColorDot */
+  /* Selection-Summary: Check-Icon (Gold, größer) + ColorDot */
   .sb-row-check {
     display: inline-flex; align-items: center; justify-content: center;
-    width: 14px; height: 14px; flex-shrink: 0;
+    width: 18px; height: 18px; flex-shrink: 0;
     border-radius: 50%;
-    background: rgba(201,168,76,0.18);
+    background: rgba(201,168,76,0.22);
     color: #c9a84c;
-    margin-right: 8px;
+    margin-right: 10px;
+    box-shadow: inset 0 0 0 1px rgba(201,168,76,0.30);
   }
-  .sb-row-check svg { width: 9px; height: 9px; }
+  .sb-row-check svg { width: 11px; height: 11px; }
   .sb-color-dot {
-    display: inline-block; width: 12px; height: 12px;
-    border-radius: 3px; vertical-align: middle;
-    margin-right: 6px; flex-shrink: 0;
-    border: 1px solid rgba(255,255,255,0.18);
+    display: inline-block; width: 14px; height: 14px;
+    border-radius: 4px; vertical-align: middle;
+    margin-right: 8px; flex-shrink: 0;
+    border: 1.5px solid rgba(255,255,255,0.22);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.30);
   }
 
   /* Sidebar-CTA — primärer Anker */
@@ -8085,11 +8096,11 @@ function upSidebar() {
           const notLast = idx < rowsList.length - 1;
           const hex = colorHexFor(label);
           const dot = hex ? `<span class="sb-color-dot" style="background:${hex}" aria-hidden="true"></span>` : '';
-          return `<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 4px;${notLast?'border-bottom:1px solid rgba(255,255,255,0.06)':''};${changed?'background:rgba(118,169,250,0.08);margin:0 -4px;padding-left:8px;padding-right:8px;border-radius:6px':''};transition:background .3s ease">
-            <span style="display:inline-flex;align-items:center;color:rgba(255,255,255,0.55);font-weight:500;font-size:12.5px;font-family:Manrope,sans-serif;flex-shrink:0;letter-spacing:.01em">
+          return `<div style="display:flex;justify-content:space-between;align-items:center;gap:14px;padding:11px 6px;${notLast?'border-bottom:1px solid rgba(255,255,255,0.08)':''};${changed?'background:rgba(118,169,250,0.10);margin:0 -6px;padding-left:10px;padding-right:10px;border-radius:8px':''};transition:background .3s ease">
+            <span style="display:inline-flex;align-items:center;color:rgba(255,255,255,0.62);font-weight:600;font-size:13.5px;font-family:Manrope,sans-serif;flex-shrink:0;letter-spacing:.01em">
               <span class="sb-row-check" aria-hidden="true">${checkIconSvg}</span>${label}
             </span>
-            <span style="display:inline-flex;align-items:center;color:${changed?'#a8c8ff':'rgba(255,255,255,0.95)'};font-weight:${changed?'700':'600'};font-size:12.5px;font-family:Manrope,sans-serif;text-align:right;line-height:1.35">${dot}${value}</span>
+            <span style="display:inline-flex;align-items:center;color:${changed?'#a8c8ff':'rgba(255,255,255,0.96)'};font-weight:${changed?'800':'700'};font-size:13.5px;font-family:Manrope,sans-serif;text-align:right;line-height:1.35">${dot}${value}</span>
           </div>`;
         }).join('')}
       </div>`;
