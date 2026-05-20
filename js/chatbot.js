@@ -111,6 +111,36 @@ const RULES = [
     answer: 'Bei selbst gemessenen Maßen liegt das Risiko bei dir — Fenster werden mm-genau gefertigt. Fehler im Angebot <strong>vor</strong> der Überweisung melden — dann korrigieren wir kostenlos. Nach Zahlungseingang und Produktionsstart nicht mehr möglich.'
   },
 
+  // ── Angebot-Gültigkeit ──────────────────────────────────────────────────────
+  {
+    keys: ['angebot gültig','wie lange gültig','angebot läuft','gültigkeit','angebot abgelaufen','noch gültig','angebot frist','wie lange angebot','angebot zeit','angebotsfrist'],
+    answer: '🕒 <strong>Angebote sind 3 Tage gültig.</strong> Grund: Drutex-Materialpreise schwanken — danach müssen wir neu kalkulieren. Wenn dein Angebot abgelaufen ist, fordere einfach kurz ein neues an: <a href="https://wa.me/491717263776" target="_blank">WhatsApp 0171 7263776</a>.'
+  },
+
+  // ── Rechnung / MwSt ─────────────────────────────────────────────────────────
+  {
+    keys: ['rechnung','mehrwertsteuer','mwst','mwst.','steuer','umsatzsteuer','19%','19 prozent','vorsteuer','quittung','beleg'],
+    answer: '🧾 Du bekommst <strong>automatisch eine Rechnung mit ausgewiesener Mehrwertsteuer</strong> (19 %). Per E-Mail nach Zahlungseingang. Für Firmenkunden mit Vorsteuerabzug problemlos verwendbar.'
+  },
+
+  // ── Bestellung nachträglich ändern ──────────────────────────────────────────
+  {
+    keys: ['nachträglich ändern','bestellung ändern','farbe ändern','maße ändern','änderung','umentscheiden','umentschieden','noch ändern','kann ich ändern','umbestellen','ändern nach bestellung'],
+    answer: '⚠️ <strong>Nach der Überweisung sind keine Änderungen mehr möglich</strong> — sobald wir bei Drutex bestellt haben, läuft die Maßanfertigung. Maße, Farbe und Profil also <strong>vor</strong> der Zahlung in Ruhe prüfen. Fehler im Angebot vor dem Überweisen entdeckt? Sofort melden, dann korrigieren wir kostenlos.'
+  },
+
+  // ── Beratungstermin / Showroom ──────────────────────────────────────────────
+  {
+    keys: ['beratungstermin','termin machen','termin','besuch außerhalb','außerhalb freitag','wochentags','beraten lassen','beratung vor ort','vorbeikommen außerhalb','außerhalb öffnungszeit','außerhalb des hofverkauf','andere zeit','außer freitag'],
+    answer: '📅 Außerhalb vom Hofverkauf (Fr 10–17 Uhr) kannst du <strong>nach einem Termin fragen</strong> — Garantie können wir aber nicht geben. Einfach kurz anrufen: <a href="tel:+493381214837">03381 / 214 83 73</a> (Mo–Fr 10–18 Uhr) oder per <a href="https://wa.me/491717263776" target="_blank">WhatsApp</a> nachfragen.'
+  },
+
+  // ── Mindestbestellmenge / 1 Fenster ─────────────────────────────────────────
+  {
+    keys: ['mindestbestellmenge','mindestbestellung','mindestbestellwert','nur ein fenster','einzelnes fenster','einzelfenster','ein einziges','wenig bestellen','kleinbestellung','klein bestellung','nur 1 fenster','nur eins'],
+    answer: '✅ <strong>Es gibt keine Mindestbestellmenge</strong> — du kannst auch nur <strong>ein einzelnes Fenster</strong> bestellen. Bedenke aber: bei kleinen Bestellungen sind die Versandkosten relativ hoch (200 € bei 5–9 Elementen, einzelnes Fenster fällt darunter). <strong>Tipp:</strong> bei wenigen Elementen lohnt sich oft die <strong>Selbstabholung</strong> bei uns in Brandenburg — kostenlos.'
+  },
+
   // ── PSK vs HST ───────────────────────────────────────────────────────────────
   {
     keys: ['psk unterschied','hst unterschied','unterschied hebeschiebe','unterschied psk','parallel schiebe kipp','welche schiebetür besser','psk oder hst','welches system besser'],
@@ -336,7 +366,13 @@ PROFILE: IGLO Energy (7-Kammer, 82mm, Uw 0,71, BAFA-förderfähig) | IGLO Edge (
 
 LIEFERUNG: FESTE REGEL: ca. 2 Wochen Lieferzeit ab Bestellbestätigung bei Drutex (nach Zahlungseingang). Versandkosten: KOSTENLOS ab 4.000€ Auftragswert ODER ab 10 Fensterelementen. Sonst 200€ Pauschale (5-9 Elemente). Einzelne Hebe-Schiebetür 300€. Selbstabholung im Lager Brandenburg kostenlos. Gebrauchte/Lager: nur Selbstabholung, kein Versand. Niemals "kommt drauf an" — Regel ist klar.
 
-ZAHLUNG: Vollständige Überweisung nach Angebotserhalt → dann Bestellung bei Drutex. Keine Anzahlung, keine Ratenzahlung. Vor-Ort (freitags): Bar/EC/PayPal.
+ZAHLUNG: Vollständige Überweisung nach Angebotserhalt → dann Bestellung bei Drutex. Keine Anzahlung, keine Ratenzahlung. Vor-Ort (freitags): Bar/EC/PayPal. Rechnung mit ausgewiesener MwSt 19% automatisch nach Zahlungseingang per E-Mail.
+
+ANGEBOT: Gültig 3 Tage (Drutex-Materialpreise schwanken). Nach Ablauf neues Angebot anfordern. Nach Überweisung KEINE nachträglichen Änderungen mehr — Maße/Farbe/Profil vor Zahlung prüfen.
+
+BESTELLMENGE: Keine Mindestbestellmenge — auch 1 einzelnes Fenster möglich. Aber Versandkosten bei wenigen Elementen relativ hoch — Selbstabholung in Brandenburg dann oft sinnvoller.
+
+TERMIN: Außerhalb Hofverkauf (Fr 10-17) kann man nach Termin FRAGEN — keine Garantie. Anruf 03381/214837 oder WhatsApp.
 
 FÖRDERUNG: BAFA BEG EM bis 15% Zuschuss (IGLO Energy + Edge). Antrag VOR Bestellung auf bafa.de! KfW 458 gilt nicht mehr für Einzelmaßnahmen. §35a EStG: 20% Handwerkerlohn steuerlich absetzbar (nicht Material).
 
