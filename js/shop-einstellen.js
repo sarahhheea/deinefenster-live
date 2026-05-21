@@ -135,7 +135,8 @@ const STATE = {
   draft: {},
   user: null,
   editMode: false,
-  editId: null
+  editId: null,
+  hideBadges: { verglasung: false, lager: false }
 };
 
 // Welche Kategorien haben Größen-Klassen?
@@ -753,9 +754,13 @@ function rendereVorschau() {
   const bild = echtesBild || 'img/fenster_standard.png';
   const istSymbolbild = !echtesBild;
 
-  const lagerBadge = lager <= 1
-    ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold" style="background:#fff4dc;color:#b87f00">Nur ${lager} verfügbar</span>`
-    : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold" style="background:#e3f5e9;color:#0a8a3a">${lager} auf Lager</span>`;
+  const xBtn = (target) => `<button type="button" class="badge-x" data-clear="${target}" title="Ausblenden" style="margin-left:4px;display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:9999px;background:rgba(0,0,0,0.15);color:inherit;font-size:10px;line-height:1;cursor:pointer;border:0">×</button>`;
+  const verglasungBadge = (verglasung && !STATE.hideBadges?.verglasung)
+    ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary-fixed text-on-primary-fixed">${verglasung}-Verglasung${xBtn('verglasung')}</span>`
+    : '';
+  const lagerBadge = STATE.hideBadges?.lager ? '' : (lager <= 1
+    ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold" style="background:#fff4dc;color:#b87f00">Nur ${lager} verfügbar${xBtn('lager')}</span>`
+    : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold" style="background:#e3f5e9;color:#0a8a3a">${lager} auf Lager${xBtn('lager')}</span>`);
   const rcBadge = rc ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold" style="background:rgba(201,168,76,0.16);color:#8e6d10">${rc}</span>` : '';
 
   const html = `
@@ -765,7 +770,7 @@ function rendereVorschau() {
     </div>
     <div class="p-4">
       <div class="flex flex-wrap gap-1 mb-2">
-        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary-fixed text-on-primary-fixed">${verglasung}-Verglasung</span>
+        ${verglasungBadge}
         ${rcBadge}
         ${lagerBadge}
       </div>
@@ -785,6 +790,21 @@ function rendereVorschau() {
     </div>
   `;
   document.getElementById('vorschauKarte').innerHTML = html;
+  document.querySelectorAll('#vorschauKarte .badge-x').forEach(b => {
+    b.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const target = b.dataset.clear;
+      if (target === 'verglasung') {
+        const sel = document.getElementById('formVerglasung');
+        if (sel) sel.value = '';
+        STATE.hideBadges.verglasung = true;
+      } else if (target === 'lager') {
+        STATE.hideBadges.lager = true;
+      }
+      saveDraft();
+      rendereVorschau();
+    });
+  });
 }
 
 /* ─── Veröffentlichen → in Google Sheets speichern ─── */
@@ -797,13 +817,8 @@ async function veroeffentlichen() {
   const sonderpreisAktiv = !!document.getElementById('formSonderpreis')?.checked;
   const exportModell    = !!document.getElementById('formExport')?.checked;
 
-  if (!STATE.kategorie || !titel || !breite || !hoehe || !preis) {
-    showSnackbar('Bitte Pflichtfelder ausfüllen: Kategorie, Titel, Maße, Preis', 'error');
-    return;
-  }
-  if (!standnummer) {
-    showSnackbar('Standnummer ist Pflicht — bitte eintragen (z.B. A-12)', 'error');
-    document.getElementById('formStandnummer')?.focus();
+  if (!STATE.kategorie || !titel || !preis) {
+    showSnackbar('Bitte mindestens Kategorie, Titel und Preis ausfüllen', 'error');
     return;
   }
 
@@ -854,8 +869,8 @@ async function veroeffentlichen() {
       material: (STATE.material && STATE.material !== 'keine') ? STATE.material : null,
       glasart: (STATE.glasart && STATE.glasart !== 'keine') ? STATE.glasart : null,
       system: STATE.zustand === 'neu' ? (document.getElementById('formSystem').value || null) : null,
-      breite_mm: breite,
-      hoehe_mm: hoehe,
+      breite_mm: breite || null,
+      hoehe_mm: hoehe || null,
       preis_eur: preis,
       sonderpreis_eur: sonderpreisAktiv ? preis : null,
       groesse_klasse: KATEGORIEN_MIT_GROESSE.has(STATE.kategorie) && STATE.groesseKlasse ? STATE.groesseKlasse : null,
@@ -867,7 +882,7 @@ async function veroeffentlichen() {
       rc_klasse: rc,
       eigenschaften: Array.from(new Set(eigArr)),
       lagerbestand: parseInt(document.getElementById('formLager').value, 10) || 1,
-      standnummer,
+      standnummer: standnummer || null,
       bilder: alleBilder,
       beschreibung: document.getElementById('formBeschreibung').value.trim() || '',
       aktiv: true
