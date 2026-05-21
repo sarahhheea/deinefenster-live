@@ -9830,6 +9830,8 @@ function _renderBalkontuer3d() {
   const _side  = (S.oeff1 === 'dreh-l' || S.oeff1 === 'dk-l') ? 'l' : 'r';
   const _layout = S.fluegel || '1-fluegel';
   const _sashes = [S.oeff1, S.oeff2].filter(Boolean);
+  // BUG-FIX 2026-05-21: _view fehlte komplett, fuehrte zu ReferenceError beim Klick auf Balkontuer
+  const _view  = (typeof previewView !== 'undefined' && previewView === 'aus') ? 'aussen' : 'innen';
   // 2-Flügel → multi-Variante, sonst 1-Flügel-Standard
   const _isMulti = /^2-/.test(_layout);
   const _src3d = _isMulti ? 'balkontuer-3d-multi.html' : 'balkontuer-3d.html';
