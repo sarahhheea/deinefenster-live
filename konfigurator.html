@@ -6361,6 +6361,9 @@ function buildFluegel() {
   let opts;
   if (S.prod === 'haustuere') {
     // Fix W3: Haustür-spezifische Varianten statt generische Flügelaufteilungen
+    // Layout: 1-Flügel-Slot schmaler (Portrait, 1 Türelement), Mehrteiler-Slots breiter
+    // (Landscape, 2 Elemente) — damit die HAUSTÜR auf allen Karten gleich groß wirkt.
+    grid.style.gridTemplateColumns = '1fr 1.7fr 1.7fr 1.7fr';
     opts = [
       {v:'1-fluegel',    svg:'1-fluegel',     add:0  },
       {v:'seitenteil-l', svg:'seitenteil-l',  add:0},
@@ -6374,6 +6377,8 @@ function buildFluegel() {
       </div>`).join('');
     return;
   }
+  // Andere Produkte: Standard-Grid (2/3 cols) wiederherstellen
+  grid.style.gridTemplateColumns = '';
   // Sarah-Update 02.05.2026: Balkontür nur 1- und 2-flügelig (Branchen-Standard).
   if (S.prod === 'balkontuer') {
     opts = [
