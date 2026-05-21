@@ -4491,9 +4491,8 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
 <div id="sidebar-wrap" class="lg:col-span-2">
   <div id="sidebar" style="padding:18px 22px">
 
-    <!-- VIEW TOOLBAR — Innen/Außen-Ansicht-Wechsel klar beschriftet -->
+    <!-- VIEW TOOLBAR — Innen/Außen-Toggle mit Icons (Label entfernt) -->
     <div class="sb-preview-toolbar">
-      <span style="font-family:'Manrope',sans-serif;font-size:11px;font-weight:700;color:rgba(118,169,250,0.85);letter-spacing:0.10em;text-transform:uppercase;margin-right:4px;white-space:nowrap;flex-shrink:0">Ansicht</span>
       <div style="display:flex;gap:4px;flex:1;background:rgba(255,255,255,0.06);padding:3px;border-radius:8px;border:1px solid rgba(255,255,255,0.08)">
         <button id="view-btn-inn" class="view-btn active" style="flex:1;padding:7px 10px;font-size:12.5px;font-weight:700;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;gap:5px" onclick="setPreviewView('inn')" title="Innenansicht — wie das Fenster von innen aussieht"><i class="ms" style="font-size:14px">home</i>Innen</button>
         <button id="view-btn-aus" class="view-btn" style="flex:1;padding:7px 10px;font-size:12.5px;font-weight:700;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;gap:5px" onclick="setPreviewView('aus')" title="Außenansicht — wie das Fenster von der Straße aussieht"><i class="ms" style="font-size:14px">villa</i>Außen</button>
@@ -8138,7 +8137,7 @@ function upSidebar() {
   }
   if(S.fluegel && isTouched('fluegel')) rowsList.push(['Aufteilung', P.fluegel[S.fluegel]?.name||S.fluegel]);
   if(S.bMm && S.hMm && (isTouched('bMm') || isTouched('hMm'))) rowsList.push(['Maße', S.bMm+' × '+S.hMm+' mm']);
-  if(S.oeff1 && isTouched('oeff1')) {
+  if(S.oeff1 && (isTouched('oeff1') || isTouched('oeff2') || isTouched('oeff3'))) {
     const oLabel = (S.oeff1==='dreh-l') ? 'Dreh-Links (DIN-Links)'
                  : (S.oeff1==='dreh-r') ? 'Dreh-Rechts (DIN-Rechts)'
                  : (P.oeff_sash[S.oeff1]?.name||S.oeff1);
@@ -8151,33 +8150,33 @@ function upSidebar() {
   if(S.fa && isTouched('fa')) rowsList.push(['Farbe außen', P.fa[S.fa]?.name||S.fa]);
   if(S.fi && isTouched('fi')) rowsList.push(['Farbe innen', P.fi[S.fi]?.name||S.fi]);
   if(S.fd && isTouched('fd')) rowsList.push(['Dichtung', P.fd?.[S.fd]?.name||S.fd]);
-  if(S.glasdekor&&S.glasdekor!=='klar') rowsList.push(['Glas-Dekor', P.glasdekor[S.glasdekor]?.name||S.glasdekor]);
-  // Griffe / Beschlag — produktspezifisch
+  if(S.glasdekor && S.glasdekor!=='klar' && isTouched('glasdekor')) rowsList.push(['Glas-Dekor', P.glasdekor[S.glasdekor]?.name||S.glasdekor]);
+  // Griffe / Beschlag — produktspezifisch, nur wenn User selber gewaehlt
   if(S.prod==='haustuere') {
-    if(S.tuerGriffInnen)  rowsList.push(['Griff innen',  P.tuerGriffInnen?.[S.tuerGriffInnen]?.name||S.tuerGriffInnen]);
-    if(S.tuerGriffAussen) rowsList.push(['Griff außen',  P.tuerGriffAussen?.[S.tuerGriffAussen]?.name||S.tuerGriffAussen]);
+    if(S.tuerGriffInnen  && isTouched('tuerGriffInnen'))  rowsList.push(['Griff innen',  P.tuerGriffInnen?.[S.tuerGriffInnen]?.name||S.tuerGriffInnen]);
+    if(S.tuerGriffAussen && isTouched('tuerGriffAussen')) rowsList.push(['Griff außen',  P.tuerGriffAussen?.[S.tuerGriffAussen]?.name||S.tuerGriffAussen]);
   } else if(S.prod==='hst') {
-    if(S.hstGriff)        rowsList.push(['Griff',        P.hstGriff?.[S.hstGriff]?.name||S.hstGriff]);
-  } else if(S.griff) {
+    if(S.hstGriff && isTouched('hstGriff')) rowsList.push(['Griff', P.hstGriff?.[S.hstGriff]?.name||S.hstGriff]);
+  } else if(S.griff && isTouched('griff')) {
     rowsList.push(['Griff', P.griff?.[S.griff]?.name||S.griff]);
   }
-  if(S.sicher&&S.sicher!=='ohne') rowsList.push(['Einbruchschutz', P.sicher?.[S.sicher]?.name||S.sicher]);
-  if(S.rahmenVerbreit&&S.rahmenVerbreit!=='ohne')
+  if(S.sicher && S.sicher!=='ohne' && isTouched('sicher')) rowsList.push(['Einbruchschutz', P.sicher?.[S.sicher]?.name||S.sicher]);
+  if(S.rahmenVerbreit && S.rahmenVerbreit!=='ohne' && isTouched('rahmenVerbreit'))
     rowsList.push(['Rahmenverbreiterung', P.rahmenVerbreit?.[S.rahmenVerbreit]?.name||S.rahmenVerbreit]);
-  if(S.spro&&S.sproTyp&&S.sproTyp!=='keine') rowsList.push(['Sprossen', P.sproTyp?.[S.sproTyp]?.name||S.sproTyp]);
-  if(S.roll&&S.roll!=='ohne') {
+  if(S.spro && S.sproTyp && S.sproTyp!=='keine' && isTouched('sproTyp')) rowsList.push(['Sprossen', P.sproTyp?.[S.sproTyp]?.name||S.sproTyp]);
+  if(S.roll && S.roll!=='ohne' && isTouched('roll')) {
     rowsList.push(['Rolladen', P.roll[S.roll]?.name||S.roll]);
-    if(S.rollKasten) rowsList.push(['Kastenhöhe', P.rollKasten?.[S.rollKasten]?.name||S.rollKasten]);
+    if(S.rollKasten && isTouched('rollKasten')) rowsList.push(['Kastenhöhe', P.rollKasten?.[S.rollKasten]?.name||S.rollKasten]);
   }
-  if(S.prod==='balkontuer' && S.balkonSchwelle && S.balkonSchwelle!=='standard')
+  if(S.prod==='balkontuer' && S.balkonSchwelle && S.balkonSchwelle!=='standard' && isTouched('balkonSchwelle'))
     rowsList.push(['Schwelle', P.balkonSchwelle?.[S.balkonSchwelle]?.name||S.balkonSchwelle]);
   if(S.prod==='hst') {
-    if(S.hstSchwelle==='null') rowsList.push(['Schwelle', 'Null-Schwelle (DIN 18040)']);
-    if(S.hstTeilung) rowsList.push(['Teilung', P.hstTeilung?.[S.hstTeilung]?.name||S.hstTeilung]);
-    if(S.hstLauf) rowsList.push(['Laufrichtung', S.hstLauf==='links'?'Links öffnend':'Rechts öffnend']);
+    if(S.hstSchwelle==='null' && isTouched('hstSchwelle')) rowsList.push(['Schwelle', 'Null-Schwelle (DIN 18040)']);
+    if(S.hstTeilung && isTouched('hstTeilung')) rowsList.push(['Teilung', P.hstTeilung?.[S.hstTeilung]?.name||S.hstTeilung]);
+    if(S.hstLauf && isTouched('hstLauf')) rowsList.push(['Laufrichtung', S.hstLauf==='links'?'Links öffnend':'Rechts öffnend']);
   }
-  // Stück-Anzahl IMMER ganz oben anzeigen (Sarah-Wunsch v8 30.04.2026)
-  if(S.prod && S.qty) rowsList.unshift(['Stückzahl', S.qty + '×']);
+  // Stueckzahl nur wenn User sie aktiv geaendert hat (Default qty=1 nicht zeigen)
+  if(S.prod && S.qty && (S.qty > 1 || isTouched('qty'))) rowsList.unshift(['Stückzahl', S.qty + '×']);
   // Konfigurationsübersicht unter dem Vorschaubild (Sarah 06.05.2026)
   // Geänderte Zeilen kurz aufleuchten lassen
   if (!upSidebar._prev) upSidebar._prev = {};
@@ -9699,9 +9698,11 @@ function _hintTextForProd(prod) {
 function _show3dHint(visible) {
   const hint = document.getElementById('prev-3d-hint');
   const txt  = document.getElementById('prev-3d-hint-text');
+  // Dismiss-Flag: User hat das 3D-Modell schon bewegt, Hint nicht mehr noetig
+  const dismissed = (typeof sessionStorage !== 'undefined') && sessionStorage.getItem('_3dHintDismissed') === '1';
   if (hint) {
-    hint.style.display = visible ? 'flex' : 'none';
-    if (visible && txt) {
+    hint.style.display = (visible && !dismissed) ? 'flex' : 'none';
+    if (visible && !dismissed && txt) {
       const _prod = (typeof S !== 'undefined') ? S.prod : null;
       txt.textContent = _hintTextForProd(_prod);
     }
@@ -10759,6 +10760,21 @@ function renderSkPreview() {
   `).join('');
 }
 function skRemove(idx) { skizzeImages.splice(idx, 1); renderSkPreview(); }
+
+// 3D-Hint dismiss bei erster Interaktion mit der Vorschau (mousedown/touch/wheel auf prev-wrap)
+document.addEventListener('DOMContentLoaded', () => {
+  const prev = document.getElementById('prev-wrap');
+  if (prev) {
+    const dismissHint = () => {
+      try { sessionStorage.setItem('_3dHintDismissed', '1'); } catch(e) {}
+      const hint = document.getElementById('prev-3d-hint');
+      if (hint) hint.style.display = 'none';
+    };
+    prev.addEventListener('mousedown', dismissHint, { once: true });
+    prev.addEventListener('touchstart', dismissHint, { once: true, passive: true });
+    prev.addEventListener('wheel', dismissHint, { once: true, passive: true });
+  }
+});
 
 document.addEventListener('DOMContentLoaded', () => {
   const fi = document.getElementById('sk-files');
