@@ -693,7 +693,7 @@
       box-shadow:none!important;
     }
     .sc.open .badge{background:#5d97e8!important;color:#fff!important;}
-    .sc.done .badge{background:rgba(93,151,232,0.25)!important;color:rgba(255,255,255,0.7)!important;}
+    .sc.done .badge{background:#4d88ff!important;color:#ffffff!important;}
 
     /* ── Section Body: einheitliches Dunkel, kein Gradient ── */
     .sb{
@@ -1859,8 +1859,9 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
     color: rgba(255,255,255,0.55) !important;
   }
   .sc.open .badge { background: #4d88ff !important; color: #fff !important; box-shadow: 0 2px 8px rgba(77,136,255,0.45) !important; }
-  .sc.done .badge { background: rgba(77,136,255,0.18) !important; color: rgba(130,185,255,0.90) !important; }
-  .sc.done .sh { border-left: 3px solid rgba(77,136,255,0.28) !important; padding-left: 19px !important; }
+  .sc.done .badge { background: #4d88ff !important; color: #ffffff !important; box-shadow: 0 2px 6px rgba(77,136,255,0.35) !important; }
+  .sc.done .badge .ms { color: #ffffff !important; }
+  .sc.done .sh { border-left: 3px solid #4d88ff !important; padding-left: 19px !important; }
 
   /* ── 4. STEP BODY ── */
   .sb {
@@ -10753,17 +10754,26 @@ function renderSkPreview() {
 }
 function skRemove(idx) { skizzeImages.splice(idx, 1); renderSkPreview(); }
 
-// 3D-Hint dismiss bei erster Interaktion mit der Vorschau (mousedown/touch/wheel auf prev-wrap)
+// 3D-Hint dismiss erst wenn das Modell WIRKLICH bewegt wurde (postMessage vom iframe)
 document.addEventListener('DOMContentLoaded', () => {
+  const dismissHint = () => {
+    try { sessionStorage.setItem('_3dHintDismissed', '1'); } catch(e) {}
+    const hint = document.getElementById('prev-3d-hint');
+    if (hint) hint.style.display = 'none';
+  };
+  window.addEventListener('message', (e) => {
+    if (e && e.data && e.data.type === '3d-rotated') dismissHint();
+  });
+  // Fallback für Maus außerhalb des iframes (z.B. Rand der Vorschau-Box)
   const prev = document.getElementById('prev-wrap');
   if (prev) {
-    const dismissHint = () => {
-      try { sessionStorage.setItem('_3dHintDismissed', '1'); } catch(e) {}
-      const hint = document.getElementById('prev-3d-hint');
-      if (hint) hint.style.display = 'none';
-    };
-    prev.addEventListener('mousedown', dismissHint, { once: true });
-    prev.addEventListener('touchstart', dismissHint, { once: true, passive: true });
+    let downX = 0, downY = 0, isDown = false;
+    prev.addEventListener('pointerdown', (e) => { isDown = true; downX = e.clientX; downY = e.clientY; }, { passive: true });
+    prev.addEventListener('pointermove', (e) => {
+      if (!isDown) return;
+      if (Math.abs(e.clientX - downX) + Math.abs(e.clientY - downY) > 12) { dismissHint(); isDown = false; }
+    }, { passive: true });
+    prev.addEventListener('pointerup', () => { isDown = false; }, { passive: true });
     prev.addEventListener('wheel', dismissHint, { once: true, passive: true });
   }
 });

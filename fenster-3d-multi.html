@@ -1102,5 +1102,22 @@ function updateSashAnimation() {
     document.body.appendChild(s);
   }
 </script>
+<script>
+/* Bridge: dismiss Parent-Hint wenn User 3D wirklich bewegt */
+(function(){
+  if (window.parent === window) return;
+  var dX=0, dY=0, isDown=false, fired=false;
+  window.addEventListener('pointerdown', function(e){ isDown=true; fired=false; dX=e.clientX; dY=e.clientY; }, {passive:true,capture:true});
+  window.addEventListener('pointermove', function(e){
+    if (!isDown || fired) return;
+    if (Math.abs(e.clientX-dX) + Math.abs(e.clientY-dY) > 12) {
+      try { window.parent.postMessage({type:'3d-rotated'}, '*'); } catch(_){}
+      fired = true;
+    }
+  }, {passive:true,capture:true});
+  window.addEventListener('pointerup', function(){ isDown=false; }, {passive:true,capture:true});
+  window.addEventListener('wheel', function(){ try{ window.parent.postMessage({type:'3d-rotated'},'*'); }catch(_){}}, {passive:true,once:true,capture:true});
+})();
+</script>
 </body>
 </html>
