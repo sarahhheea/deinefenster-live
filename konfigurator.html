@@ -165,8 +165,13 @@
     /* Aktive Sektion: linker 3px Akzent-Border in Brand-Hellblau (DeineFenster-eigene Markierung) */
     .sc.open .sh{background:var(--c-header-bg-open);padding-left:19px;box-shadow:inset 3px 0 0 var(--c-header-accent)}
     /* Sektion-Body: weiß, dezente Trennlinie zum Header */
-    .sb{display:none;padding:20px 22px 24px;background:#152238;color:rgba(255,255,255,.88);border-top:2px solid var(--c-header-accent)}
+    .sb{display:none;padding:14px 18px 18px;background:#152238;color:rgba(255,255,255,.88);border-top:2px solid var(--c-header-accent)}
     .sc.open .sb{display:block;animation:sb-fade .35s var(--ease)}
+    /* Sticky Weiter-Button: bleibt an der Unterkante des aktiven Schritts kleben.
+       Gilt für alle direkten Buttons mit Klasse "step-next" oder Buttons direkt im sb mit w-full. */
+    .sb > button.step-next,
+    .sb > button.w-full[onclick*="openS"],
+    .sb > button.w-full[onclick*="finishFarbe"]{position:sticky;bottom:0;z-index:5;box-shadow:0 -10px 16px -8px rgba(21,34,56,0.95);}
     /* ── Dark-Sektion-Body: alle Kinder-Elemente auf Dunkel umschalten ── */
     .sb .oc{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.12);color:rgba(255,255,255,.88)}
     .sb .oc:hover{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.28)}
@@ -408,7 +413,9 @@
     .sb .farb-section-head .ms{color:#76a9fa;font-size:15px}
     .sb .farb-section-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:800;color:rgba(118,169,250,0.85);text-transform:uppercase;letter-spacing:.08em}
     .sb .farb-section-count{font-size:11px;font-weight:600;color:rgba(232,238,255,0.45);margin-left:auto}
-    .sb .farb-section-items{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start}
+    /* Farb-Items als Grid statt flex-wrap → gleichmäßige Reihen, kein „Treppen"-Look */
+    .sb .farb-section-items{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:10px;align-items:start}
+    .sb .farb-section-items .fp-item{width:auto}
 
     /* BELIEBTESTE — größere Tiles */
     .sb .fp-item.fp-big{width:108px;padding:10px 6px}
@@ -3737,25 +3744,25 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
     <i class="ms chev">expand_more</i>
   </div>
   <div class="sb">
-    <!-- Tabs als Pillen (2026-05-19) — übersichtlicher fürs Auge -->
+    <!-- Tabs als Pillen — Innenfarbe steht zuerst (Kunde sieht Raum-Innenseite öfter) -->
     <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap">
-      <button type="button" class="farb-tab" data-tab="fa" onclick="switchFarbTab('fa')">
-        <i class="ms" style="font-size:15px">wb_sunny</i> Außenfarbe
-      </button>
       <button type="button" class="farb-tab active" data-tab="fi" onclick="switchFarbTab('fi')">
         <i class="ms" style="font-size:15px">home</i> Innenfarbe
+      </button>
+      <button type="button" class="farb-tab" data-tab="fa" onclick="switchFarbTab('fa')">
+        <i class="ms" style="font-size:15px">wb_sunny</i> Außenfarbe
       </button>
       <button type="button" class="farb-tab" data-tab="fd" onclick="switchFarbTab('fd')">
         <i class="ms" style="font-size:15px">line_weight</i> Dichtung
       </button>
     </div>
+    <!-- Tab-Content: Innenfarbe (zuerst) -->
+    <div class="farb-tab-content active" data-tab-content="fi">
+      <div class="fp-grid" id="fp-innen"></div>
+    </div>
     <!-- Tab-Content: Außenfarbe -->
     <div class="farb-tab-content" data-tab-content="fa">
       <div class="fp-grid" id="fp-aussen"></div>
-    </div>
-    <!-- Tab-Content: Innenfarbe -->
-    <div class="farb-tab-content active" data-tab-content="fi">
-      <div class="fp-grid" id="fp-innen"></div>
     </div>
     <!-- Tab-Content: Dichtungsfarbe -->
     <div class="farb-tab-content" data-tab-content="fd">
