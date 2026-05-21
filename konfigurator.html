@@ -3555,12 +3555,12 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   </div>
 </div>
 
-<!-- ── SCHRITT 3: FLÜGELAUFTEILUNG ───────────────── -->
+<!-- ── SCHRITT 3: FLÜGELAUFTEILUNG / TÜRAUFBAU (label dynamic per Produkt) ───── -->
 <div class="sc" id="s3">
   <div class="sh" onclick="tog(3)">
     <div class="badge" id="b3">3</div>
     <div class="flex-1">
-      <div class="slabel">Flügelaufteilung</div>
+      <div class="slabel" id="s3-label">Flügelaufteilung</div>
       <div class="sdesc" id="d3">Wie viele Flügel?</div>
     </div>
     <i class="ms chev">expand_more</i>
@@ -5503,6 +5503,19 @@ function pickProd(el) {
   S.profil = null; S.fluegel = null; S.oeff1 = null; S.oeff2 = null; S.oeff3 = null;
   document.getElementById('d1').textContent = P.prod[S.prod].name;
   mkDone(1);
+  // BUG-FIX 2026-05-21: Hero-Overlay ausblenden auch bei direkt-pickProd (war nur in heroSelectProd)
+  // Sonst blockt Hero alle weiteren Klicks.
+  const _hero = document.getElementById('prod-hero');
+  if (_hero) _hero.style.display = 'none';
+  const _s1 = document.getElementById('s1');
+  if (_s1) _s1.classList.add('hero-done');
+  // CONS-1 FIX 2026-05-21: Step-3-Label produktspezifisch (Haustuer = Tueraufbau, Fenster = Fluegelaufteilung)
+  const _s3lbl = document.getElementById('s3-label');
+  if (_s3lbl) {
+    if (S.prod === 'haustuere') _s3lbl.textContent = 'Türaufbau';
+    else if (S.prod === 'hst') _s3lbl.textContent = 'Aufteilung';
+    else _s3lbl.textContent = 'Flügelaufteilung';
+  }
 
   // Step-Nav sichtbar machen sobald ein Produkt gewählt ist (defensive: auch wenn
   // pickProd ohne Hero-Path getriggert wird).
@@ -6071,20 +6084,26 @@ function finishAnzahl() {
 // ── MASSE ────────────────────────────────────────────
 function onMass() {
   if (window._touched) { window._touched.add('bMm'); window._touched.add('hMm'); }
-  const b = parseInt(document.getElementById('ib').value)||0;
-  const h = parseInt(document.getElementById('ih').value)||0;
-  // Fix I: produkt-spezifische Grenzen nutzen statt fester Universal-Werte
+  const ibEl = document.getElementById('ib');
+  const ihEl = document.getElementById('ih');
+  const b = parseInt(ibEl.value)||0;
+  const h = parseInt(ihEl.value)||0;
   const pr = S.prod ? P.prod[S.prod] : null;
   const bMin = pr?.bMin || 300, bMax = pr?.bMax || 4000;
   const hMin = pr?.hMin || 300, hMax = pr?.hMax || 3000;
   const bValid = (b >= bMin && b <= bMax);
   const hValid = (h >= hMin && h <= hMax);
+  // KRIT-3 FIX 2026-05-21: State IMMER updaten — vorher: bei out-of-range wurde nichts uebernommen
+  if (b > 0) S.bMm = b;
+  if (h > 0) S.hMm = h;
+  // KEINE rote Warnbox (Kundenwunsch: weg). Nur dezenter Border-Tint via Brand-Hellblau.
+  ibEl.style.borderColor = (b === 0 || bValid) ? '' : 'rgba(118,169,250,0.45)';
+  ihEl.style.borderColor = (h === 0 || hValid) ? '' : 'rgba(118,169,250,0.45)';
   if (bValid && hValid) {
-    S.bMm=b; S.hMm=h;
     document.getElementById('d5').textContent = b+' × '+h+' mm';
     mkDone(5);
-    enforceRollKastenRule();  // R1: ab 1750mm Höhe nur 215er Kasten
-    buildOeffSash();          // R2: Dreh-Kipp-Verfügbarkeit bei Breitenänderung neu prüfen
+    enforceRollKastenRule();
+    buildOeffSash();
   }
   drawPrev(); upSidebar();
 }
@@ -9830,9 +9849,7 @@ function _renderBalkontuer3d() {
   const _side  = (S.oeff1 === 'dreh-l' || S.oeff1 === 'dk-l') ? 'l' : 'r';
   const _layout = S.fluegel || '1-fluegel';
   const _sashes = [S.oeff1, S.oeff2].filter(Boolean);
-  // BUG-FIX 2026-05-21: _view fehlte komplett, fuehrte zu ReferenceError beim Klick auf Balkontuer
-  const _view  = (typeof previewView !== 'undefined' && previewView === 'aus') ? 'aussen' : 'innen';
-  // 2-Flügel → multi-Variante, sonst 1-Flügel-Standard
+  // BUG-FIX 2026-05-21 v2: _view inline berechnen statt const (closure-safe in async onload)
   const _isMulti = /^2-/.test(_layout);
   const _src3d = _isMulti ? 'balkontuer-3d-multi.html' : 'balkontuer-3d.html';
 
@@ -9852,7 +9869,7 @@ function _renderBalkontuer3d() {
         roll:       S.roll       || 'ohne',
         rollKasten: S.rollKasten || '175',
         rollSeite:  S.rollSeite  || 'rechts',
-        view:  _view,
+        view:  (typeof previewView !== 'undefined' && previewView === 'aus') ? 'aussen' : 'innen',
         color: isWood ? null : _ck,
         wood:  isWood ? _ck  : null,
         glass: S.glasdekor || 'klar',
@@ -9869,7 +9886,7 @@ function _renderBalkontuer3d() {
         roll:       S.roll       || 'ohne',
         rollKasten: S.rollKasten || '175',
         rollSeite:  S.rollSeite  || 'rechts',
-        view:  _view,
+        view:  (typeof previewView !== 'undefined' && previewView === 'aus') ? 'aussen' : 'innen',
         color: isWood ? null : _ck,
         wood:  isWood ? _ck  : null,
         glass: S.glasdekor || 'klar',
