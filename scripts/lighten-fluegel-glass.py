@@ -13,19 +13,21 @@ DST_TOP    = np.array([175, 196, 215], dtype=np.float32)  # heller Top-Reflex
 DST_BOTTOM = np.array([122, 150, 178], dtype=np.float32)  # ruhiger Bottom-Ton
 
 # Toleranz, wie weit ein Pixel von SRC sein darf, damit es als "Glas" zählt.
-# Niedrig genug, damit Rahmen/Griff/Schatten nicht erwischt werden.
-TOL = 38
+TOL = 26
 
 def lighten(img: Image.Image) -> Image.Image:
     arr = np.array(img.convert("RGBA"), dtype=np.float32)
     rgb = arr[..., :3]
     a   = arr[..., 3:4]
     h, w, _ = arr.shape
+    R, G, B = rgb[..., 0], rgb[..., 1], rgb[..., 2]
 
-    # 1) Maske: alle Pixel die "nahe Navy-Glas" sind
+    # 1) Maske: Pixel nahe Navy-Glas UND klarer Blau-Stich (sonst Rahmen erwischt)
     diff = rgb - SRC_RGB[None, None, :]
     dist = np.sqrt((diff * diff).sum(axis=2))
-    mask = dist < TOL  # bool
+    blue_dominant = (B > R + 8) & (B > G + 4)   # Glas hat blauen Stich
+    bright_enough = (R + G + B) > 100           # nicht der fast-schwarze Rahmen
+    mask = (dist < TOL) & blue_dominant & bright_enough
 
     if not mask.any():
         return img
@@ -43,10 +45,15 @@ def lighten(img: Image.Image) -> Image.Image:
     band = np.clip(1.0 - np.abs((X + Y) - 0.55) * 4.0, 0.0, 1.0) * 0.18
     target = target + band[..., None] * (255.0 - target)
 
-    # 4) Sanfter Blend per Distanz (am Rand des Glas-Bereichs weicher Übergang)
-    edge_w = 14.0
-    blend = np.clip((TOL - dist) / edge_w, 0.0, 1.0)
-    blend = blend[..., None]  # (h,w,1)
+    # 4) Harter Blend nur auf Glas-Maske, dünne Soft-Edge (3px) damit Rahmen NICHT mit aufgehellt wird
+    base = mask.astype(np.float32)
+    # 3px Soft-Edge via Box-Blur Approximation
+    from scipy.ndimage import uniform_filter
+    try:
+        soft = uniform_filter(base, size=3)
+    except Exception:
+        soft = base
+    blend = soft[..., None]  # (h,w,1)
 
     rgb_new = rgb * (1.0 - blend) + target * blend
     out = np.concatenate([np.clip(rgb_new, 0, 255), a], axis=2).astype(np.uint8)
