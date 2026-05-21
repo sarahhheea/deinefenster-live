@@ -1602,7 +1602,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       <a href="kontakt.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Kontakt</a>
     </div>
     <div class="flex items-center gap-3 md:gap-6">
-      <a href="konfigurator.html" class="hidden md:block px-5 py-1.5 rounded-full font-semibold text-xs tracking-wide transition-all duration-200" style="background:#225eaa;color:#fff;letter-spacing:0.02em;">Angebot anfragen</a>
+      <a href="mailto:info@baustoffchrist.de?subject=Angebot%20anfragen&body=Guten%20Tag%2C%0A%0Aich%20interessiere%20mich%20f%C3%BCr%20ein%20Angebot.%0A%0AProdukt%3A%20%0AMa%C3%9Fe%20(B%20x%20H)%3A%20%0AAnzahl%3A%20%0AAusf%C3%BChrung%2FWunsch%3A%20%0A%0AVielen%20Dank%21" class="hidden md:inline-flex items-center gap-1.5 px-5 py-1.5 rounded-full font-semibold text-xs tracking-wide transition-all duration-200" style="background:#225eaa;color:#fff;letter-spacing:0.02em;"><span class="material-symbols-outlined" style="font-size:14px">mail</span> Angebot anfragen</a>
       <button id="menuBtn" class="md:hidden text-white p-1" aria-label="Menü öffnen">
         <span class="material-symbols-outlined text-3xl" id="menuIcon">menu</span>
       </button>
@@ -4202,8 +4202,20 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
           </div>
         </div>
       </div>
+      <!-- Rolladen mit Gurtwickler -->
+      <div class="oc" id="roll-card-gurt" style="flex-direction:column;align-items:stretch;padding:14px;gap:0" data-v="gurt" onclick="pick(this,'roll')">
+        <img src="img/rolladen-gurt.png" alt="Aufsatz-Rolladen mit Gurtwickler" style="width:100%;height:140px;object-fit:contain;background:#f4f6fb;border-radius:8px;margin-bottom:12px;display:block;padding:6px" loading="lazy" decoding="async">
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <div class="ora" style="margin-top:2px;flex-shrink:0"></div>
+          <div>
+            <div class="olabel">Rolladen mit Gurtwickler</div>
+            <div class="osub">Mechanisch · Gurtwickler an der Wand</div>
+            <div class="oprice p-add">+ 195 €/Stück</div>
+          </div>
+        </div>
+      </div>
       <!-- Motorrolladen -->
-      <div class="oc" style="flex-direction:column;align-items:stretch;padding:14px;gap:0" data-v="motor" onclick="pick(this,'roll')">
+      <div class="oc" id="roll-card-motor" style="flex-direction:column;align-items:stretch;padding:14px;gap:0" data-v="motor" onclick="pick(this,'roll')">
         <img src="img/rolladen-elektrisch.png" alt="Motorrolladen elektrisch" style="width:100%;height:140px;object-fit:contain;background:#f4f6fb;border-radius:8px;margin-bottom:12px;display:block;padding:6px" loading="lazy" decoding="async">
         <div style="display:flex;align-items:flex-start;gap:10px">
           <div class="ora" style="margin-top:2px;flex-shrink:0"></div>
@@ -4214,6 +4226,10 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
           </div>
         </div>
       </div>
+    </div>
+    <div id="roll-hst-hint" class="info mt-3 hidden">
+      <i class="ms f" style="color:#225eaa;font-size:20px;flex-shrink:0">info</i>
+      <div style="font-size:13px">Bei Schiebetüren ist nur der <strong>Motorrolladen</strong> möglich — die Tür-Konstruktion lässt keinen Gurtwickler zu.</div>
     </div>
     <div id="roll-seite" class="hidden">
       <div class="sec-t">Gurt-Montageseite</div>
@@ -4227,18 +4243,10 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       </div>
     </div>
 
-    <!-- Fix W8 (21.04.2026): Rolladen-Details (Kasten + Insektenschutz) — nur wenn Rolladen gewählt -->
-    <div id="roll-details" class="hidden">
-      <div class="sec-t">Kastenhöhe</div>
-      <div id="roll-kasten-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        <!-- wird dynamisch von buildRollKastenOptions() gefüllt: Fenster/Balkon 175+215, HST nur 225 -->
-      </div>
-      <div id="roll-kasten-info" class="info mt-2 hidden">
-        <i class="ms f" style="color:#d97706;font-size:20px;flex-shrink:0">info</i>
-        <div style="font-size:13px">Bei Fensterhöhen ab <strong>1750 mm</strong> ist der 175 mm-Kasten technisch nicht mehr geeignet (Panzerweg zu kurz). Der Konfigurator wählt automatisch 215 mm.</div>
-      </div>
-
-      <!-- Inhaberin-Korrektur 21.04.2026: Insektenschutz wird NICHT angeboten — Block entfernt -->
+    <!-- Sarah 21.05.2026: Kastenhöhe wird AUTOMATISCH gesetzt (175 < 1750 mm, 215 ab 1750 mm, HST 225) — keine UI mehr -->
+    <div id="roll-kasten-auto-hint" class="info mt-3 hidden">
+      <i class="ms f" style="color:#225eaa;font-size:20px;flex-shrink:0">info</i>
+      <div style="font-size:13px"><strong id="roll-kasten-auto-text">Kastenhöhe 175 mm</strong> — automatisch nach Fensterhöhe gewählt.</div>
     </div>
     <button type="button" onclick="openS(12)" class="w-full mt-4 flex items-center justify-center gap-2 font-bold py-3 rounded-full text-white text-sm" style="background:var(--c-primary);font-family:'Plus Jakarta Sans',sans-serif">
       <i class="ms">arrow_forward</i> Weiter zu den Sprossen
@@ -5606,7 +5614,8 @@ function pickProd(el) {
   }
   buildFarbePicker();  // Re-render mit produkt-spezifischem Filter
   enforceGlasRule();  // Sarah-Vorgabe 21.04.2026: HST nur 3-fach
-  buildRollKastenOptions();  // Sarah-Vorgabe 21.04.2026: HST nur 225er Kasten
+  autoSetRollKasten();  // Sarah 21.05.2026: Kasten automatisch nach Produkt + Höhe
+  enforceRollAntriebRule();  // Sarah 21.05.2026: bei HST kein Gurt, nur Motor
   drawPrev(); upSidebar();
   // Sarah-Fix 22.04.2026 (v3): Sprung zu Schritt 2 ist jetzt GANZ OBEN in pickProd erledigt —
   // dadurch kann er nicht mehr durch eine Exception in buildProfil/buildFluegel etc. abgewürgt werden.
@@ -5943,23 +5952,27 @@ function pick(el, key) {
     }
   }
   if (key==='griff')    { document.getElementById('d9').textContent = P.griff[v]?.name||v; mkDone(9); setTimeout(()=>openS(10),200); }
-  if (key==='roll')  {
-    document.getElementById('d11').textContent = P.roll[v]?.name||v; mkDone(11);
-    document.getElementById('roll-seite').classList.toggle('hidden', v==='ohne'||v==='motor');
-    // Fix W8 (21.04.2026): Rolladen-Details nur zeigen wenn Rolladen gewählt
-    const rd = document.getElementById('roll-details');
-    if (rd) rd.classList.toggle('hidden', v==='ohne');
-    // FIX BUG 3: nur bei "Kein Rolladen" auto-advance zu Sprossen.
-    // Bei Gurt/Motor muss der User erst Gurt-Seite + Kastenhöhe wählen (im selben Schritt).
-    if (v==='ohne') setTimeout(()=>openS(12), 200);
-  }
-  if (key==='rollKasten') {
-    // Detail-Beschreibung in Schritt 11 erweitern
-    const parts = [P.roll[S.roll]?.name || ''];
-    if (S.rollKasten !== '175') parts.push(S.rollKasten+' mm Kasten');
-    document.getElementById('d11').textContent = parts.filter(Boolean).join(' · ');
-    // FIX: nach Kastenhöhe-Wahl immer zu Sprossen weiter (rollKasten ist letzter Sub-Step)
+  if (key==='rollSeite') {
+    // Gurt-Seite gewählt → weiter zu Sprossen
     setTimeout(()=>openS(12), 200);
+  }
+  if (key==='roll')  {
+    // Sarah 21.05.2026: Kastenhöhe automatisch nach Produkt + Höhe setzen
+    if (typeof autoSetRollKasten === 'function') autoSetRollKasten();
+    // Beschreibung mit ggf. Kasten-Detail
+    const parts = [P.roll[v]?.name || v];
+    if (v !== 'ohne' && S.rollKasten) parts.push(S.rollKasten + ' mm Kasten');
+    document.getElementById('d11').textContent = parts.filter(Boolean).join(' · ');
+    mkDone(11);
+    // Gurt-Seite nur bei Gurtwickler zeigen
+    document.getElementById('roll-seite').classList.toggle('hidden', v !== 'gurt');
+    // Kasten-Hinweis zeigen wenn Rolladen aktiv (außer ohne)
+    const hint = document.getElementById('roll-kasten-auto-hint');
+    if (hint) hint.classList.toggle('hidden', v === 'ohne');
+    const hintTxt = document.getElementById('roll-kasten-auto-text');
+    if (hintTxt && S.rollKasten) hintTxt.textContent = 'Kastenhöhe ' + S.rollKasten + ' mm';
+    // Bei Gurt: warten auf Gurt-Seiten-Wahl. Sonst auto-weiter
+    if (v !== 'gurt') setTimeout(()=>openS(12), 200);
   }
   if (key==='sicher'){
     document.getElementById('d10').textContent = P.sicher[v]?.name||v; mkDone(10);
@@ -6198,35 +6211,41 @@ function enforceGlasRule() {
   }
 }
 
-// Sarah-Regel (21.04.2026): Kastenhöhe 175 mm ist nur bis Fensterhöhe 1750 mm zulässig.
-// Ab 1750 mm muss 215 mm gewählt sein. Wir disablen die 175-Option visuell und
-// wechseln automatisch auf 215 wenn nötig.
-function enforceRollKastenRule() {
-  const grid = document.getElementById('roll-kasten-grid');
-  const info = document.getElementById('roll-kasten-info');
-  if (!grid) return;
-  // Bei HST gibt's nur 225 — die 1750er Regel gilt dort nicht
-  if (S.prod === 'hst') { if (info) info.classList.add('hidden'); return; }
-  const needsBig = S.hMm >= 1750;
-  const card175 = grid.querySelector('[data-v="175"]');
-  const card215 = grid.querySelector('[data-v="215"]');
-  if (!card175 || !card215) return;
-  if (needsBig) {
-    card175.classList.add('oc-disabled');
-    card175.style.opacity = '0.45';
-    card175.style.pointerEvents = 'none';
-    card175.classList.remove('sel');
-    if (S.rollKasten === '175') {
-      S.rollKasten = '215';
-      card215.classList.add('sel');
-    }
-    if (info) info.classList.remove('hidden');
+// Sarah 21.05.2026: Kastenhöhe wird AUTOMATISCH gesetzt (keine UI mehr).
+// Fenster/Balkontür <1750 mm → 175 · ≥1750 mm → 215 · HST immer 225.
+function autoSetRollKasten() {
+  if (S.prod === 'hst') S.rollKasten = '225';
+  else if ((S.hMm || 0) >= 1750) S.rollKasten = '215';
+  else S.rollKasten = '175';
+  const txt = document.getElementById('roll-kasten-auto-text');
+  if (txt) txt.textContent = 'Kastenhöhe ' + S.rollKasten + ' mm';
+}
+
+// Bei HST: nur Motor möglich, Gurt-Card disablen + Hinweis zeigen.
+// Bei Fenster/Balkontür: alle drei Optionen aktiv.
+function enforceRollAntriebRule() {
+  const gurt = document.getElementById('roll-card-gurt');
+  const hint = document.getElementById('roll-hst-hint');
+  if (!gurt) return;
+  if (S.prod === 'hst') {
+    gurt.classList.add('oc-disabled');
+    gurt.style.opacity = '0.4';
+    gurt.style.pointerEvents = 'none';
+    gurt.classList.remove('sel');
+    if (S.roll === 'gurt') S.roll = 'motor';
+    if (hint) hint.classList.remove('hidden');
   } else {
-    card175.classList.remove('oc-disabled');
-    card175.style.opacity = '';
-    card175.style.pointerEvents = '';
-    if (info) info.classList.add('hidden');
+    gurt.classList.remove('oc-disabled');
+    gurt.style.opacity = '';
+    gurt.style.pointerEvents = '';
+    if (hint) hint.classList.add('hidden');
   }
+}
+
+// Kompatibilität: alte Aufrufe von enforceRollKastenRule() führen jetzt Auto-Set aus.
+function enforceRollKastenRule() {
+  autoSetRollKasten();
+  enforceRollAntriebRule();
 }
 
 // ── FLÜGELAUFTEILUNG & ÖFFNUNGSART ────────────────────
