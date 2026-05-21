@@ -282,8 +282,9 @@
     /* Selected: subtiler Glow um die Tür ohne Rahmen */
     #s-tm .pc.sel .pc-img{outline:none;box-shadow:0 0 0 3px var(--c-primary), 0 8px 24px rgba(34,94,170,.18);border-radius:8px}
 
-    /* FLÜGEL IMAGE CARD (.fk) — kompakte Bild-Auswahl für Flügelaufteilung */
-    .fk{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:0;border:1.5px solid var(--c-border);border-radius:10px;padding:6px 4px 8px;cursor:pointer;background:var(--c-bg);transition:border-color var(--t-fast) var(--ease),background var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease);text-align:center;min-width:0}
+    /* FLÜGEL IMAGE CARD (.fk) — kompakte Bild-Auswahl für Flügelaufteilung
+       Border: Anthrazit (RAL 7016 Look) damit der Karten-Rand zur Farbe des Fensterrahmens auf dem Bild passt */
+    .fk{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:0;border:1.5px solid #383E42;border-radius:10px;padding:6px 4px 8px;cursor:pointer;background:var(--c-bg);transition:border-color var(--t-fast) var(--ease),background var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease);text-align:center;min-width:0}
     .fk:hover{border-color:var(--c-primary);background:var(--c-primary-tint)}
     .fk.sel{border-color:var(--c-primary);background:var(--c-primary-tint);box-shadow:0 0 0 2px var(--c-ring)}
     .fk.sel::after{content:'check_circle';position:absolute;top:4px;right:4px;font-family:'Material Symbols Outlined';font-variation-settings:'FILL' 1;font-size:15px;color:var(--c-primary);background:#fff;border-radius:50%;line-height:1;z-index:2}
@@ -4422,12 +4423,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       <div id="hero-badges" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px"></div>
     </div>
 
-    <!-- Empty-State wenn noch nichts konfiguriert -->
-    <div id="empty-state-hint" class="rounded-xl p-5 mb-4 text-center" style="background:var(--c-bg-soft);border:1px dashed rgba(0,0,0,.10)">
-      <i class="ms" style="font-size:40px;color:rgba(0,0,0,.10);display:block;margin-bottom:6px">info</i>
-      <div style="font-weight:700;color:var(--c-text-soft)">Konfigurieren Sie zuerst ein Produkt (Schritt 1–12)</div>
-      <div style="font-size:13px;color:var(--c-text-soft);margin-top:4px">Hier erscheint dann Ihre Konfiguration zusammengefasst.</div>
-    </div>
+    <!-- Empty-State entfernt 2026-05-21: Liste stockt automatisch auf wenn User waehlt — kein Platzhalter noetig -->
 
     <!-- BLOCK 3: ALLE DETAILS (einklappbar) -->
     <div class="rounded-xl mb-4" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.10)">
@@ -5496,6 +5492,7 @@ function pickProd(el) {
   document.querySelectorAll('.pc').forEach(c=>c.classList.remove('sel'));
   el.classList.add('sel');
   S.prod = el.dataset.p;
+  if (window._touched) window._touched.add('prod');
   S.profil = null; S.fluegel = null; S.oeff1 = null; S.oeff2 = null; S.oeff3 = null;
   document.getElementById('d1').textContent = P.prod[S.prod].name;
   mkDone(1);
@@ -5848,6 +5845,10 @@ function pickTuerModell(el) {
 }
 
 // ── GENERIC RADIO PICK ───────────────────────────────
+// Touch-Tracking: welche Felder hat User AKTIV gewaehlt? (Liste stockt nur dann auf)
+if (!window._touched) window._touched = new Set();
+function isTouched(k) { return window._touched && window._touched.has(k); }
+
 function pick(el, key) {
   // find sibling options in nearest grid/container
   el.closest('.grid, .glass-grid, [id$="-grid"], #spro-dicke .grid, #roll-seite .grid')
@@ -5855,6 +5856,7 @@ function pick(el, key) {
   el.classList.add('sel');
   const v = el.dataset.v;
   S[key] = v;
+  window._touched.add(key);
 
   // Side effects
   if (key==='glas' || key==='schall' || key==='sicherGlas') {
@@ -8106,28 +8108,29 @@ function upSidebar() {
     }
   }
 
-  // Auswahl-Detail-Liste — alle Schritte/Eigenschaften pro Produkt
+  // Auswahl-Detail-Liste — nur Items die User AKTIV gewaehlt hat (touched-Filter).
+  // Defaults bleiben unsichtbar bis User selber etwas klickt — Liste stockt logisch auf.
   const rowsList=[];
-  if(S.prod)            rowsList.push(['Produkt',  P.prod[S.prod].name]);
-  if(S.prod==='haustuere' && S.tuerModell) {
+  if(S.prod && isTouched('prod')) rowsList.push(['Produkt',  P.prod[S.prod].name]);
+  if(S.prod==='haustuere' && S.tuerModell && isTouched('tuerModell')) {
     const mEl = document.querySelector('#s-tm .pc[data-m="'+S.tuerModell+'"] .pc-name');
     rowsList.push(['Türmodell', mEl ? mEl.textContent.trim() : S.tuerModell]);
   }
-  if(S.fluegel)         rowsList.push(['Aufteilung', P.fluegel[S.fluegel]?.name||S.fluegel]);
-  if(S.bMm&&S.hMm)      rowsList.push(['Maße',     S.bMm+' × '+S.hMm+' mm']);
-  if(S.oeff1) {
+  if(S.fluegel && isTouched('fluegel')) rowsList.push(['Aufteilung', P.fluegel[S.fluegel]?.name||S.fluegel]);
+  if(S.bMm && S.hMm && (isTouched('bMm') || isTouched('hMm'))) rowsList.push(['Maße', S.bMm+' × '+S.hMm+' mm']);
+  if(S.oeff1 && isTouched('oeff1')) {
     const oLabel = (S.oeff1==='dreh-l') ? 'Dreh-Links (DIN-Links)'
                  : (S.oeff1==='dreh-r') ? 'Dreh-Rechts (DIN-Rechts)'
                  : (P.oeff_sash[S.oeff1]?.name||S.oeff1);
     rowsList.push(['Öffnung',  oLabel]);
   }
-  if(S.profil)          rowsList.push(['Profil',   P.profil?.[S.profil]?.name||S.profil]);
-  if(S.glas)            rowsList.push(['Verglasung', P.glas[S.glas]?.name||S.glas]);
-  if(S.schall&&S.schall!=='ohne') rowsList.push(['Schallschutz', P.schall[S.schall]?.name||S.schall]);
-  if(S.sicherGlas&&S.sicherGlas!=='kein') rowsList.push(['Sicherheitsglas', P.sicherGlas[S.sicherGlas]?.name?.split('(')[0]?.trim()||S.sicherGlas]);
-  if(S.fa)              rowsList.push(['Farbe außen', P.fa[S.fa]?.name||S.fa]);
-  if(S.fi)              rowsList.push(['Farbe innen', P.fi[S.fi]?.name||S.fi]);
-  if(S.fd)              rowsList.push(['Dichtung', P.fd?.[S.fd]?.name||S.fd]);
+  if(S.profil && isTouched('profil')) rowsList.push(['Profil', P.profil?.[S.profil]?.name||S.profil]);
+  if(S.glas && isTouched('glas')) rowsList.push(['Verglasung', P.glas[S.glas]?.name||S.glas]);
+  if(S.schall && S.schall!=='ohne' && isTouched('schall')) rowsList.push(['Schallschutz', P.schall[S.schall]?.name||S.schall]);
+  if(S.sicherGlas && S.sicherGlas!=='kein' && isTouched('sicherGlas')) rowsList.push(['Sicherheitsglas', P.sicherGlas[S.sicherGlas]?.name?.split('(')[0]?.trim()||S.sicherGlas]);
+  if(S.fa && isTouched('fa')) rowsList.push(['Farbe außen', P.fa[S.fa]?.name||S.fa]);
+  if(S.fi && isTouched('fi')) rowsList.push(['Farbe innen', P.fi[S.fi]?.name||S.fi]);
+  if(S.fd && isTouched('fd')) rowsList.push(['Dichtung', P.fd?.[S.fd]?.name||S.fd]);
   if(S.glasdekor&&S.glasdekor!=='klar') rowsList.push(['Glas-Dekor', P.glasdekor[S.glasdekor]?.name||S.glasdekor]);
   // Griffe / Beschlag — produktspezifisch
   if(S.prod==='haustuere') {
