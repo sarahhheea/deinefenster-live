@@ -2260,8 +2260,9 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
      Links: Schritt-Nav | Mitte: Inhalt | Rechts: Preview
      ══════════════════════════════════════════════════ */
   @media (min-width: 768px) {
-    /* Kein Body-Scroll — alles in den 3 Panels */
-    body { overflow: hidden !important; }
+    /* Body MUSS scrollen — Step-Inhalte (z.B. Farben mit 4 Tabs) sind teils 4000+ px hoch.
+       Frueheres overflow:hidden war vom alten Full-Viewport-3-Panel-Layout (entfernt 2026-05-21). */
+    body { overflow: auto !important; }
 
     /* ── CSS-VARIABLEN-OVERRIDE: alles dunkel in 3-Panel-Modus ── */
     #kfg-main {
@@ -4484,13 +4485,14 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
 <div id="sidebar-wrap" class="lg:col-span-2">
   <div id="sidebar" style="padding:18px 22px">
 
-    <!-- VIEW TOOLBAR — sitzt oben am 3D-Frame als Header-Bar (visuell gehört es zum Frame) -->
+    <!-- VIEW TOOLBAR — Innen/Außen-Ansicht-Wechsel klar beschriftet -->
     <div class="sb-preview-toolbar">
+      <span style="font-family:'Manrope',sans-serif;font-size:11px;font-weight:700;color:rgba(118,169,250,0.85);letter-spacing:0.10em;text-transform:uppercase;margin-right:4px;white-space:nowrap;flex-shrink:0">Ansicht</span>
       <div style="display:flex;gap:4px;flex:1;background:rgba(255,255,255,0.06);padding:3px;border-radius:8px;border:1px solid rgba(255,255,255,0.08)">
-        <button id="view-btn-inn" class="view-btn active" style="flex:1;padding:7px 10px;font-size:12.5px;font-weight:600;border-radius:6px" onclick="setPreviewView('inn')">Innen</button>
-        <button id="view-btn-aus" class="view-btn" style="flex:1;padding:7px 10px;font-size:12.5px;font-weight:600;border-radius:6px" onclick="setPreviewView('aus')">Außen</button>
+        <button id="view-btn-inn" class="view-btn active" style="flex:1;padding:7px 10px;font-size:12.5px;font-weight:700;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;gap:5px" onclick="setPreviewView('inn')" title="Innenansicht — wie das Fenster von innen aussieht"><i class="ms" style="font-size:14px">home</i>Innen</button>
+        <button id="view-btn-aus" class="view-btn" style="flex:1;padding:7px 10px;font-size:12.5px;font-weight:700;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;gap:5px" onclick="setPreviewView('aus')" title="Außenansicht — wie das Fenster von der Straße aussieht"><i class="ms" style="font-size:14px">villa</i>Außen</button>
       </div>
-      <button id="window-open-btn" type="button" onclick="toggleFensterOpen()"
+      <button id="window-open-btn" type="button" onclick="toggleFensterOpen()" title="Fenster geöffnet / geschlossen darstellen"
         style="flex-shrink:0;padding:7px 12px;font-size:12px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;border-radius:8px;background:linear-gradient(135deg,#2765c8,#1a4fa0);color:#fff;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(34,94,170,0.30);white-space:nowrap">
         <i class="ms" style="font-size:14px">open_in_full</i>Öffnen
       </button>
