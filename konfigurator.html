@@ -6287,7 +6287,8 @@ const HAUSTUER_KARTEN_IMG = {
 function haustuerSVG(variant) {
   const file = HAUSTUER_KARTEN_IMG[variant];
   if (!file) return '';
-  return `<img src="img/haustuer-karten/${file}.png?v=20260519" alt="${variant}" loading="lazy" style="width:100%;height:auto;max-height:240px;object-fit:contain;display:block;border-radius:6px"/>`;
+  // Gleiche Dimensions + Stil wie fluegelImg() — einheitliche Karten-Optik.
+  return `<img src="img/haustuer-karten/${file}.png?v=20260521" alt="${variant}" loading="lazy" style="width:100%;height:auto;max-height:280px;object-fit:contain;display:block"/>`;
 }
 
 // Flügelaufteilungs-Thumbnails: anthrazit-Rahmen-Variante aus fluegel-karten/
@@ -6367,20 +6368,19 @@ function buildFluegel() {
   if (!grid) return;
   let opts;
   if (S.prod === 'haustuere') {
-    // Fix W3: Haustür-spezifische Varianten statt generische Flügelaufteilungen
-    // Layout: 1-Flügel-Slot schmaler (Portrait, 1 Türelement), Mehrteiler-Slots breiter
-    // (Landscape, 2 Elemente) — damit die HAUSTÜR auf allen Karten gleich groß wirkt.
-    grid.style.gridTemplateColumns = '1fr 1.7fr 1.7fr 1.7fr';
+    // Haustür-Karten: gleiche Optik wie die Fenster-Flügelaufteilung — `.fk` Klasse,
+    // gleiche Karten-Größe, gleicher Hover/Sel-State, einheitliches Grid.
+    grid.style.gridTemplateColumns = '';
     opts = [
-      {v:'1-fluegel',    svg:'1-fluegel',     add:0  },
-      {v:'seitenteil-l', svg:'seitenteil-l',  add:0},
-      {v:'seitenteil-r', svg:'seitenteil-r',  add:0},
-      {v:'2-fluegel',    svg:'2-fluegel',     add:0 },
+      {v:'1-fluegel',    add:0  },
+      {v:'seitenteil-l', add:0},
+      {v:'seitenteil-r', add:0},
+      {v:'2-fluegel',    add:0 },
     ];
     grid.innerHTML = opts.map(o=>`
-      <div class="oc flex-col items-center text-center p-2 gap-1${S.fluegel===o.v?' sel':''}" style="flex-direction:column;align-items:center;padding:10px 6px;" data-v="${o.v}" onclick="pickFluegel(this)">
-        ${haustuerSVG(o.svg)}
-        <div class="olabel" style="font-size:12px;margin-top:4px">${P.fluegel[o.v].name}</div>
+      <div class="fk${S.fluegel===o.v?' sel':''}" data-v="${o.v}" onclick="pickFluegel(this)" style="padding:8px 6px 10px">
+        ${haustuerSVG(o.v)}
+        <div class="fk-label" style="margin-top:7px">${P.fluegel[o.v].name}</div>
       </div>`).join('');
     return;
   }
