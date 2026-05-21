@@ -2316,26 +2316,35 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       background: transparent !important;
     }
 
-    /* ── ALLE .sh komplett verstecken — Titel kommt von #kfg-step-hdr ── */
-    #steps .sh { display: none !important; }
-
-    /* Step-Body: Accordion-Box-Styles entfernen */
+    /* ── Akkordeon zurueck: ALLE Step-Headers sichtbar mit aktuellem Wert daneben ──
+       (Frueheres display:none war vom alten 3-Panel-Layout — User soll JEDEN Step
+       als Pille sehen, mit Label + aktuellem Wert daneben.) */
+    #steps .sh {
+      display: flex !important;
+      padding: 11px 16px !important;
+      align-items: center !important;
+      gap: 10px !important;
+    }
+    /* Aktiver Step: Header etwas prominenter, Body sichtbar drunter */
     #steps .sc.open > .sb {
       display: block !important;
       background: transparent !important;
-      border-top: none !important;
-      padding: 0 28px 48px !important;
+      border-top: 1px solid rgba(118,169,250,0.10) !important;
+      padding: 18px 22px 24px !important;
       animation: none !important;
     }
-
-    /* Neuer Schritt-Titel-Bereich oben in #steps — konsistente Hülle für ALLE Steps */
+    /* Collapsed Step .sdesc zeigt den aktuellen Wert klarer — Brand-Hellblau */
+    #steps .sc:not(.open) .sdesc {
+      color: rgba(168,200,255,0.95) !important;
+      font-weight: 600 !important;
+    }
+    /* Doppelter Title-Bereich oben in #steps — nicht mehr noetig, Header sind sichtbar */
     #kfg-step-hdr {
-      padding: 18px 28px 16px;
+      padding: 14px 28px 12px;
       border-bottom: 1px solid rgba(255,255,255,0.07);
       margin-bottom: 0;
-      min-height: 76px;
-      display: flex; flex-direction: column; justify-content: center;
-      gap: 4px;
+      min-height: 0;
+      display: none;
     }
     .kfg-step-eyebrow {
       font-family: 'Manrope', sans-serif;
