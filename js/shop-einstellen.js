@@ -201,8 +201,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 /* ─── Edit-Mode: Produkt ins Formular laden ─── */
 async function ladeProduktInsFormular(p) {
   STATE.zustand = p.zustand || 'neu';
-  STATE.material = p.material || 'kunststoff';
-  STATE.glasart = p.glasart || 'klarglas';
+  STATE.material = p.material || 'keine';
+  STATE.glasart = p.glasart || 'keine';
   STATE.kategorie = p.kategorie_key;
   STATE.groesseKlasse = p.groesse_klasse || '';
   STATE.bilderBestand = Array.isArray(p.bilder) ? [...p.bilder] : [];
@@ -374,7 +374,7 @@ function setZustandUI() {
 }
 
 /* ─── Material-Auswahl (Kunststoff / Holz / Aluminium) ─── */
-const MATERIAL_BTN_IDS = ['materialKunststoff', 'materialHolz', 'materialAluminium'];
+const MATERIAL_BTN_IDS = ['materialKunststoff', 'materialHolz', 'materialAluminium', 'materialKeine'];
 function bindeMaterialHandler() {
   MATERIAL_BTN_IDS.forEach(id => {
     const el = document.getElementById(id);
@@ -397,7 +397,7 @@ function setMaterialUI() {
 }
 
 /* ─── Glasart-Auswahl (Klarglas / Chinchilla / Milchglas / Sicherheitsglas / Schallschutzglas) ─── */
-const GLASART_BTN_IDS = ['glasartKlarglas', 'glasartChinchilla', 'glasartMilchglas', 'glasartSicherheitsglas', 'glasartSchallschutzglas'];
+const GLASART_BTN_IDS = ['glasartKlarglas', 'glasartChinchilla', 'glasartMilchglas', 'glasartSicherheitsglas', 'glasartSchallschutzglas', 'glasartKeine'];
 
 function bindeGlasartHandler() {
   GLASART_BTN_IDS.forEach(id => {
@@ -851,19 +851,19 @@ async function veroeffentlichen() {
       titel,
       kategorie_key: STATE.kategorie,
       zustand: STATE.zustand,
-      material: STATE.material || 'kunststoff',
-      glasart: STATE.glasart || 'klarglas',
-      system: STATE.zustand === 'neu' ? document.getElementById('formSystem').value : null,
+      material: (STATE.material && STATE.material !== 'keine') ? STATE.material : null,
+      glasart: (STATE.glasart && STATE.glasart !== 'keine') ? STATE.glasart : null,
+      system: STATE.zustand === 'neu' ? (document.getElementById('formSystem').value || null) : null,
       breite_mm: breite,
       hoehe_mm: hoehe,
       preis_eur: preis,
       sonderpreis_eur: sonderpreisAktiv ? preis : null,
       groesse_klasse: KATEGORIEN_MIT_GROESSE.has(STATE.kategorie) && STATE.groesseKlasse ? STATE.groesseKlasse : null,
       export_modell: exportModell,
-      farbe: document.getElementById('formFarbe').value,
-      verglasung,
+      farbe: document.getElementById('formFarbe').value || null,
+      verglasung: verglasung || null,
       u_wert: null,
-      oeffnungsart: document.getElementById('formOeffnungsart')?.value || 'dreh-kipp-rechts',
+      oeffnungsart: document.getElementById('formOeffnungsart')?.value || null,
       rc_klasse: rc,
       eigenschaften: Array.from(new Set(eigArr)),
       lagerbestand: parseInt(document.getElementById('formLager').value, 10) || 1,
