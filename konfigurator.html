@@ -367,16 +367,18 @@
 
     /* FARBE PICKER (Sarah-Refactor 24.04.2026: einheitliche Selected-Sprache) */
     .fp-grid{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start}
-    .fp-item{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;width:86px;padding:8px;border-radius:var(--r-md);transition:background var(--t-fast) var(--ease);background:transparent;border:1px solid transparent}
-    .fp-item:hover{background:var(--c-primary-tint)}
-    .fp-swatch{width:52px;height:52px;border-radius:50%;border:1px solid var(--c-border);transition:all var(--t-fast) var(--ease);flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.08);position:relative;display:flex;align-items:center;justify-content:center;background-clip:padding-box}
-    .fp-item:hover .fp-swatch{transform:scale(1.06)}
-    .fp-item.sel{background:transparent;border-color:var(--c-primary);box-shadow:0 0 0 2px var(--c-ring)}
-    .fp-item.sel .fp-swatch{border-color:var(--c-primary)}
-    .fp-check-dot{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:22px;height:22px;border-radius:50%;background:#fff;display:none;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+    /* Premium Farb-Picker — größere Tiles, klare Hierarchie, eleganter Hover/Sel */
+    .fp-item{display:flex;flex-direction:column;align-items:center;gap:9px;cursor:pointer;width:auto;padding:10px 6px 12px;border-radius:12px;transition:background .22s ease,transform .22s ease;background:transparent;border:1px solid transparent;position:relative}
+    .fp-item:hover{transform:translateY(-2px)}
+    .fp-swatch{width:60px;height:60px;border-radius:50%;border:2px solid rgba(255,255,255,0.12);transition:all .22s ease;flex-shrink:0;box-shadow:0 4px 14px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.12);position:relative;display:flex;align-items:center;justify-content:center;background-clip:padding-box}
+    .fp-item:hover .fp-swatch{transform:scale(1.06);box-shadow:0 6px 18px rgba(0,0,0,.42),0 0 0 1px rgba(118,169,250,.35),inset 0 1px 0 rgba(255,255,255,.18)}
+    .fp-item.sel{background:transparent;border-color:transparent;box-shadow:none}
+    .fp-item.sel .fp-swatch{border-color:#76a9fa;box-shadow:0 0 0 3px rgba(118,169,250,.32),0 4px 14px rgba(0,0,0,.32)}
+    .fp-check-dot{position:absolute;top:-4px;right:-4px;width:22px;height:22px;border-radius:50%;background:#76a9fa;border:2px solid #0a1530;display:none;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+    .fp-check-dot .ms{color:#fff!important;font-size:13px!important;line-height:1!important}
     .fp-item.sel .fp-check-dot{display:flex}
-    .fp-name{font-size:11px;color:var(--c-text);text-align:center;width:100%;line-height:1.25;word-break:break-word;font-weight:600}
-    .fp-item.sel .fp-name{color:var(--c-primary);font-weight:700}
+    .fp-name{font-size:11.5px;color:rgba(232,238,255,.78);text-align:center;width:100%;line-height:1.3;word-break:break-word;font-weight:600;letter-spacing:-.005em}
+    .fp-item.sel .fp-name{color:#fff;font-weight:700}
 
     /* FARB-TABS — Pillen-Style auf dunklem Sektion-Body */
     /* Farb-Tab Karten — Außen / Innen / Dichtung */
@@ -394,28 +396,36 @@
     .farb-tab-content{display:none}
     .farb-tab-content.active{display:block}
 
-    /* FARB-PICKER auf dunklem Sektion-Body (.sb) — bessere Lesbarkeit */
-    .sb .fp-item{background:transparent}
-    .sb .fp-item:hover{background:rgba(118,169,250,0.10)}
-    .sb .fp-item.sel{background:rgba(118,169,250,0.15);border-color:#76a9fa;box-shadow:0 0 0 2px rgba(118,169,250,.25)}
-    .sb .fp-swatch{border-color:rgba(255,255,255,0.18);box-shadow:0 2px 8px rgba(0,0,0,.4)}
-    .sb .fp-name{color:rgba(232,238,255,0.88)}
-    .sb .fp-item.sel .fp-name{color:#76a9fa}
+    /* FARB-PICKER auf dunklem Sektion-Body (.sb) — Overrides für dunkles Theme */
+    .sb .fp-item{background:transparent;border-color:transparent}
+    .sb .fp-item:hover{background:transparent}
+    .sb .fp-item.sel{background:transparent;border-color:transparent;box-shadow:none}
+    .sb .fp-swatch{border-color:rgba(255,255,255,0.14)}
+    .sb .fp-name{color:rgba(232,238,255,.78)}
+    .sb .fp-item.sel .fp-name{color:#fff}
 
-    /* FARB-GRUPPEN-HEADER auf dunklem Theme */
-    .sb .farb-section{margin-bottom:22px}
-    .sb .farb-section-head{display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(118,169,250,0.18)}
-    .sb .farb-section-head .ms{color:#76a9fa;font-size:15px}
-    .sb .farb-section-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:800;color:rgba(118,169,250,0.85);text-transform:uppercase;letter-spacing:.08em}
-    .sb .farb-section-count{font-size:11px;font-weight:600;color:rgba(232,238,255,0.45);margin-left:auto}
-    /* Farb-Items als Grid statt flex-wrap → gleichmäßige Reihen, kein „Treppen"-Look */
-    .sb .farb-section-items{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:10px;align-items:start}
-    .sb .farb-section-items .fp-item{width:auto}
+    /* FARB-GRUPPEN auf dunklem Theme — klare Hierarchie, mehr Luft */
+    .sb .farb-section{margin-bottom:32px}
+    .sb .farb-section-head{display:flex;align-items:center;gap:10px;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid rgba(118,169,250,0.16)}
+    .sb .farb-section-head .ms{color:#76a9fa;font-size:18px}
+    .sb .farb-section-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:800;color:#e7eefc;letter-spacing:-.005em;text-transform:none}
+    .sb .farb-section-count{font-size:11.5px;font-weight:600;color:rgba(232,238,255,0.42);margin-left:auto;letter-spacing:.02em}
+    /* Farb-Items als Grid — gleichmäßige Reihen, mehr Atem */
+    .sb .farb-section-items{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:14px 8px;align-items:start}
 
-    /* BELIEBTESTE — größere Tiles */
-    .sb .fp-item.fp-big{width:108px;padding:10px 6px}
-    .sb .fp-item.fp-big .fp-swatch{width:62px;height:62px}
-    .sb .fp-item.fp-big .fp-name{font-size:12px}
+    /* BELIEBTESTE-Sektion — visuell hervorgehoben mit subtilem Hintergrund */
+    .sb .farb-section.beliebt{background:linear-gradient(180deg,rgba(118,169,250,.06),rgba(118,169,250,.02));border:1px solid rgba(118,169,250,.14);border-radius:14px;padding:18px 16px 22px;margin-bottom:32px}
+    .sb .farb-section.beliebt .farb-section-head{padding-bottom:14px;border-bottom-color:rgba(118,169,250,.20)}
+    .sb .farb-section.beliebt .farb-section-title{color:#fff}
+    .sb .farb-section.beliebt .farb-section-head .ms{color:#c9a84c}
+    .sb .farb-section.beliebt .farb-section-items{grid-template-columns:repeat(auto-fill,minmax(100px,1fr))}
+    .sb .fp-item.fp-big{padding:10px 6px 12px}
+    .sb .fp-item.fp-big .fp-swatch{width:74px;height:74px}
+    .sb .fp-item.fp-big .fp-name{font-size:12.5px}
+    /* Preis-Pillen — subtil, nicht aufdringlich */
+    .sb .fp-price-inc, .sb .fp-price-add{font-size:10.5px;font-weight:700;letter-spacing:.01em;line-height:1.2;padding:2px 7px;border-radius:99px}
+    .sb .fp-price-inc{color:rgba(134,239,172,.85);background:rgba(34,197,94,.10);border:1px solid rgba(34,197,94,.18)}
+    .sb .fp-price-add{color:rgba(251,191,36,.92);background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.20)}
 
     /* GLAS-AUSWAHL — größere Karten mit SVG-Visualisierung */
     .glass-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
@@ -799,11 +809,7 @@
     .sb .farb-tab.active{background:rgba(34,94,170,0.22)!important;border-color:#76a9fa!important;}
     .sb [style*="border-bottom:1px solid rgba(0,0,0"]{border-bottom-color:rgba(255,255,255,0.08)!important;}
 
-    /* ── Farb-Picker ── */
-    .sb .fp-name{color:rgba(255,255,255,0.68)!important;}
-    .sb .fp-item.sel .fp-name{color:#76a9fa!important;font-weight:700!important;}
-    .sb .fp-item:hover{background:rgba(255,255,255,0.05)!important;border-color:rgba(93,151,232,0.35)!important;}
-    .sb .fp-item.sel{background:transparent!important;border-color:#5d97e8!important;box-shadow:0 0 0 1px rgba(93,151,232,0.35)!important;}
+    /* ── Farb-Picker — Override-Blöcke entfernt zugunsten des Premium-CSS (Zeile ~370ff) ── */
 
     /* ── Griff-Optionen — vereinheitlicht mit .oc, schmaler ── */
     .sb .griff-opt{background:rgba(255,255,255,0.05)!important;border:1px solid rgba(255,255,255,0.12)!important;border-radius:12px!important;padding:10px 8px!important;gap:4px!important;color:#ffffff!important;}
@@ -814,11 +820,7 @@
     .sb .griff-opt .osub{color:rgba(255,255,255,0.85)!important;font-size:11px!important;line-height:1.3!important;}
     .sb .griff-opt .oprice{font-size:11px!important;margin-top:4px!important;}
 
-    /* ── Farb-Picker — schmaler, kompakter ── */
-    .sb .fp-item{width:74px!important;padding:6px!important;}
-    .sb .fp-swatch{width:46px!important;height:46px!important;}
-    .sb .fp-name{font-size:10.5px!important;color:#ffffff!important;font-weight:600!important;}
-    .sb .fp-grid{gap:10px!important;}
+    /* (entfernt — alter kompakter Farb-Picker-Block, ersetzt durch Premium-Variante) */
 
     /* ── Qty-Buttons ── */
     .sb .qbtn{background:rgba(255,255,255,0.05)!important;border-color:rgba(255,255,255,0.12)!important;}
@@ -1964,14 +1966,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   .sb .qbtn:hover { background: rgba(77,136,255,0.12) !important; border-color: #4d88ff !important; color: #7eb5ff !important; }
   #qv { font-size: 40px !important; font-weight: 800 !important; color: #7eb5ff !important; letter-spacing: -0.03em !important; }
 
-  /* ── 11. FARB-PICKER ── */
-  .sb .fp-item { border-radius: 14px !important; padding: 10px !important; width: 82px !important; }
-  .sb .fp-item:hover { background: rgba(255,255,255,0.06) !important; }
-  .sb .fp-item.sel   { background: rgba(77,136,255,0.07) !important; border-color: #4d88ff !important; box-shadow: 0 0 0 1px rgba(77,136,255,0.28) !important; }
-  .sb .fp-swatch { width: 48px !important; height: 48px !important; }
-  .sb .fp-name { font-size: 10.5px !important; color: rgba(255,255,255,0.60) !important; font-weight: 600 !important; }
-  .sb .fp-item.sel .fp-name { color: #7eb5ff !important; font-weight: 700 !important; }
-  /* Alter Pillen-Stil entfernt — neue Karten-Klassen sind oben definiert */
+  /* ── 11. FARB-PICKER — alter Block entfernt, Premium-CSS aus Zeile ~370ff ist die Single Source of Truth ── */
 
   /* ── 12. SEKTION-TITEL ── */
   .sb .sec-t {
@@ -7875,10 +7870,11 @@ function buildFarbePicker() {
       .filter(k => table[k] && !istBlocked(k))
       .map(k => farbItemHtml(k, table[k], key, true))
       .join('');
-    html += `<div class="farb-section">
+    html += `<div class="farb-section beliebt">
       <div class="farb-section-head">
         <i class="ms f">star</i>
-        <span class="farb-section-title">Beliebteste — 1 Klick zum Ziel</span>
+        <span class="farb-section-title">Beliebteste Farben</span>
+        <span class="farb-section-count">1 Klick zum Ziel</span>
       </div>
       <div class="farb-section-items">${beliebtItems}</div>
     </div>`;
@@ -7903,12 +7899,14 @@ function buildFarbePicker() {
 function farbItemHtml(k, v, key, isBig) {
   const name = shortFarbName(v);
   const bigCls = isBig ? ' fp-big' : '';
+  const priceCls = v.add > 0 ? 'fp-price-add' : 'fp-price-inc';
+  const priceTxt = v.add > 0 ? `+${v.add}€` : 'inkl.';
   return `<div class="fp-item${bigCls} ${S[key]===k?'sel':''}" data-v="${k}" onclick="pickColor(this,'${key}')">
     <div class="fp-swatch" style="background:${v.hex};border-color:${v.border||'#ccc'}">
-      <div class="fp-check-dot"><i class="ms f" style="font-size:14px;color:#225eaa;line-height:1">check</i></div>
+      <div class="fp-check-dot"><i class="ms f">check</i></div>
     </div>
     <div class="fp-name">${name}</div>
-    ${v.add>0?`<div style="font-size:11px;color:#fbbf24;font-weight:700">+${v.add}€</div>`:`<div style="font-size:11px;color:#86efac;font-weight:700">inkl.</div>`}
+    <div class="${priceCls}">${priceTxt}</div>
   </div>`;
 }
 
