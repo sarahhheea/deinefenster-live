@@ -392,6 +392,36 @@ input[type="range"].range-clean::-moz-range-thumb {
   .filter-sidebar.open { transform: translateX(0); }
 }
 
+/* ─── Mobile-Compact: Hero + Hinweise zusammenstauchen, damit Suchleiste sichtbar ist ─── */
+@media (max-width: 767px) {
+  .schaufenster-bar > div { padding-top: 5px !important; padding-bottom: 5px !important; font-size: 10.5px !important; }
+  .schaufenster-bar .material-symbols-outlined { font-size: 13px !important; }
+
+  .shop-hero-inner { padding-top: 14px !important; padding-bottom: 12px !important; }
+  .shop-hero-label-row { margin-bottom: 6px !important; gap: 8px !important; }
+  #shopHeaderLabel { font-size: 9px !important; letter-spacing: 0.16em !important; }
+
+  #shopHeaderTitle { font-size: 1.15rem !important; line-height: 1.2 !important; margin-bottom: 4px !important; }
+
+  /* Description auf 2 Zeilen kürzen (Text bleibt im DOM für SEO) */
+  #shopHeaderDesc {
+    font-size: 11.5px !important;
+    line-height: 1.5 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+
+  .shop-availability-note { padding-top: 8px !important; }
+  .shop-availability-note > div { padding: 9px 12px !important; gap: 9px !important; border-radius: 9px !important; border-width: 1px !important; align-items: center !important; }
+  .shop-availability-note > div > p { font-size: 11.5px !important; line-height: 1.5 !important; }
+  .shop-availability-note > div > .material-symbols-outlined { font-size: 17px !important; margin-top: 0 !important; }
+  .shop-availability-note .mobile-hide { display: none !important; }
+  .shop-availability-note .desktop-hide { display: inline !important; }
+}
+.shop-availability-note .desktop-hide { display: none; }
+
 /* Produkt-Karten */
 .karte {
   background: var(--c-bg-raised);
@@ -706,11 +736,6 @@ input[type="range"].range-clean::-moz-range-thumb {
         <span class="material-symbols-outlined" style="font-size:12px;font-variation-settings:'FILL' 1">call</span>
         03381 / 2148373
       </a>
-      <span class="topbar-dot">·</span>
-      <a href="mailto:info@baustoffchrist.de" class="topbar-phone">
-        <span class="material-symbols-outlined" style="font-size:12px;font-variation-settings:'FILL' 1">mail</span>
-        info@baustoffchrist.de
-      </a>
       <a href="https://wa.me/491717263776" target="_blank" rel="noopener" class="topbar-whatsapp">
         <span class="material-symbols-outlined" style="font-size:13px;font-variation-settings:'FILL' 1">chat</span>
         WhatsApp
@@ -984,7 +1009,7 @@ input[type="range"].range-clean::-moz-range-thumb {
       <a href="kontakt.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Kontakt</a>
     </div>
     <div class="flex items-center gap-3 md:gap-6">
-      <a href="mailto:info@baustoffchrist.de?subject=Angebot%20anfragen&body=Guten%20Tag%2C%0A%0Aich%20interessiere%20mich%20f%C3%BCr%20ein%20Angebot.%0A%0AProdukt%3A%20%0AMa%C3%9Fe%20(B%20x%20H)%3A%20%0AAnzahl%3A%20%0AAusf%C3%BChrung%2FWunsch%3A%20%0A%0AVielen%20Dank%21" class="hidden md:inline-flex items-center gap-1.5 px-5 py-1.5 rounded-full font-semibold text-xs tracking-wide transition-all duration-200" style="background:#225eaa;color:#fff;letter-spacing:0.02em;"><span class="material-symbols-outlined" style="font-size:14px">mail</span> Angebot anfragen</a>
+      <a href="/kontakt.html#kontakt-form" class="hidden md:inline-flex items-center gap-1.5 px-5 py-1.5 rounded-full font-semibold text-xs tracking-wide transition-all duration-200" style="background:#225eaa;color:#fff;letter-spacing:0.02em;"><span class="material-symbols-outlined" style="font-size:14px">mail</span> Angebot anfragen</a>
       <button id="menuBtn" class="md:hidden text-white p-1" aria-label="Menü öffnen">
         <span class="material-symbols-outlined text-3xl" id="menuIcon">menu</span>
       </button>
@@ -1039,7 +1064,7 @@ input[type="range"].range-clean::-moz-range-thumb {
 </div>
 
 <!-- Schaufenster-Hinweis -->
-<div style="background:rgba(118,169,250,0.07);border-bottom:1px solid rgba(118,169,250,0.18);">
+<div class="schaufenster-bar" style="background:rgba(118,169,250,0.07);border-bottom:1px solid rgba(118,169,250,0.18);">
   <div class="max-w-[1440px] mx-auto px-6 md:px-12 py-2 flex items-center gap-2.5" style="font-size:12px;color:rgba(232,238,255,0.65);">
     <span class="material-symbols-outlined shrink-0" style="font-size:15px;color:#76a9fa">storefront</span>
     <span><strong style="color:rgba(232,238,255,0.85);font-weight:600;">Schaufenster:</strong> Einfach vorbeikommen, Fenster anschauen und direkt mitnehmen. Kein Verlade-Service.</span>
@@ -1056,9 +1081,9 @@ input[type="range"].range-clean::-moz-range-thumb {
   <div class="absolute top-0 right-0 pointer-events-none" style="width:600px;height:500px;background:radial-gradient(ellipse at top right,rgba(118,169,250,0.12),transparent 65%);filter:blur(60px);"></div>
   <div class="absolute bottom-0 left-0 pointer-events-none" style="width:400px;height:300px;background:radial-gradient(ellipse at bottom left,rgba(34,94,170,0.10),transparent 70%);filter:blur(50px);"></div>
 
-  <div class="relative z-10 max-w-[1440px] mx-auto px-6 md:px-12" style="padding-top:28px;padding-bottom:24px;">
+  <div class="relative z-10 shop-hero-inner max-w-[1440px] mx-auto px-6 md:px-12" style="padding-top:28px;padding-bottom:24px;">
     <!-- Label-Zeile -->
-    <div class="flex items-center gap-3 mb-3">
+    <div class="flex items-center gap-3 mb-3 shop-hero-label-row">
       <span style="width:18px;height:1px;background:#76a9fa;display:inline-block;flex-shrink:0;"></span>
       <span id="shopHeaderLabel" style="font-size:10px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:#76a9fa;text-shadow:0 0 10px rgba(118,169,250,0.4);">Lager · Brandenburg a.d.H.</span>
       <span style="color:rgba(255,255,255,0.2);font-size:10px;">·</span>
@@ -1077,7 +1102,7 @@ input[type="range"].range-clean::-moz-range-thumb {
 </header>
 
 <!-- SHOP-HINWEIS (interner Hinweis.05.2026): Bestand wechselt täglich, kein Warenkorb-Online-Kauf -->
-<div class="max-w-[1440px] mx-auto px-6 md:px-12 pt-3">
+<div class="max-w-[1440px] mx-auto px-6 md:px-12 pt-3 shop-availability-note">
   <div role="note" aria-label="Hinweis zur Verfügbarkeit"
        style="display:flex;gap:13px;align-items:flex-start;padding:13px 16px;border-radius:11px;
               background:rgba(245,158,11,0.10);border:1.5px solid rgba(245,158,11,0.40);">
@@ -1085,12 +1110,12 @@ input[type="range"].range-clean::-moz-range-thumb {
           style="font-size:21px;color:#fbbf24;flex-shrink:0;line-height:1;margin-top:1px">info</span>
     <p style="font-family:'Manrope',sans-serif;font-size:13px;line-height:1.6;color:#fde68a;margin:0">
       <strong style="color:#fff;font-weight:800">Tagesaktueller Bestand.</strong>
-      Im Shop gibt es <strong style="color:#fff">keinen Warenkorb und keinen Online-Kauf</strong> &mdash;
+      <span class="mobile-hide">Im Shop gibt es <strong style="color:#fff">keinen Warenkorb und keinen Online-Kauf</strong> &mdash;
       Artikel kommen rein und raus. Bitte vor Anfahrt kurz prüfen, ob Ihr Wunsch-Fenster noch verfügbar ist:
       per <a href="https://wa.me/4917172663776" target="_blank" rel="noopener"
              style="color:#fff;text-decoration:underline;font-weight:700">WhatsApp</a>,
       Anruf <a href="tel:+4917172663776" style="color:#fff;text-decoration:underline;font-weight:700">0171 7263776</a>
-      oder einfach vorbeikommen und im Hof aussuchen &mdash; Öffnungszeiten siehe Footer.
+      oder einfach vorbeikommen und im Hof aussuchen &mdash; Öffnungszeiten siehe Footer.</span><span class="desktop-hide">Kein Online-Kauf &mdash; vorher per <a href="https://wa.me/4917172663776" target="_blank" rel="noopener" style="color:#fff;text-decoration:underline;font-weight:700">WhatsApp</a> oder <a href="tel:+4917172663776" style="color:#fff;text-decoration:underline;font-weight:700">Anruf</a> Verfügbarkeit prüfen.</span>
     </p>
   </div>
 </div>
