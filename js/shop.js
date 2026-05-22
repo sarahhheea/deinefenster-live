@@ -700,9 +700,13 @@ function rendere() {
 }
 
 function karteHtml(p) {
-  const lagerBadge = p.lagerbestand <= 1
-    ? `<span class="pill is-warning">Nur ${p.lagerbestand} verfügbar</span>`
-    : `<span class="pill is-success">${p.lagerbestand} auf Lager</span>`;
+  const istNeu = (p.zustand || 'neu') === 'neu';
+  // Bei neuen Drutex-Produkten: keinen Knappheits-Badge — Drutex liefert nach, "Nur 1 verfuegbar" verunsichert nur.
+  const lagerBadge = istNeu
+    ? ''
+    : (p.lagerbestand <= 1
+        ? `<span class="pill is-warning">Nur ${p.lagerbestand} verfügbar</span>`
+        : `<span class="pill is-success">${p.lagerbestand} auf Lager</span>`);
   const rcBadge = p.rc_klasse ? `<span class="pill is-gold">${p.rc_klasse}</span>` : '';
   const verglasungBadge = `<span class="pill is-primary">${p.verglasung}-Verglasung</span>`;
   const zustandBadge = p.zustand === 'gebraucht' ? `<span class="pill is-warning">Gebraucht</span>` : '';
@@ -1192,9 +1196,11 @@ function oeffneDetail(id) {
       <div class="flex flex-wrap gap-1.5">
         <span class="pill is-primary">${p.verglasung}-Verglasung</span>
         ${p.rc_klasse ? `<span class="pill is-gold">${p.rc_klasse}</span>` : ''}
-        ${p.lagerbestand <= 1
-          ? `<span class="pill is-warning">Nur ${p.lagerbestand} verfügbar</span>`
-          : `<span class="pill is-success">${p.lagerbestand} auf Lager</span>`}
+        ${(p.zustand || 'neu') === 'neu'
+          ? ''
+          : (p.lagerbestand <= 1
+              ? `<span class="pill is-warning">Nur ${p.lagerbestand} verfügbar</span>`
+              : `<span class="pill is-success">${p.lagerbestand} auf Lager</span>`)}
       </div>
       <div class="grid grid-cols-2 gap-2 text-xs">
         <div class="bg-bg-soft rounded-lg px-3 py-2"><span class="block text-[10px] text-ink-soft">Breite</span><span class="font-bold text-ink">${p.breite_mm} mm</span></div>
