@@ -4510,9 +4510,10 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
     <div id="prev-wrap" class="w-full sb-preview-frame" style="position:relative;width:100%;flex-shrink:0;overflow:hidden">
       <!-- 3D-Interaktivitäts-Hinweis (unten zentriert, nur bei aktiver 3D-Vorschau sichtbar)
            interner Hinweis.05.2026: produkt-spezifischer Text + dezenter Maus-Bob -->
-      <div id="prev-3d-hint" style="display:none;position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:20;background:rgba(8,14,28,0.85);backdrop-filter:blur(10px);border:1px solid rgba(118,169,250,0.32);color:rgba(232,238,255,0.96);font-family:'Manrope',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.01em;padding:8px 14px;border-radius:999px;box-shadow:0 6px 18px rgba(0,0,0,0.45);pointer-events:none;align-items:center;gap:9px;white-space:nowrap">
+      <div id="prev-3d-hint" style="display:none;position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:20;background:rgba(8,14,28,0.85);backdrop-filter:blur(10px);border:1px solid rgba(118,169,250,0.32);color:rgba(232,238,255,0.96);font-family:'Manrope',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.01em;padding:8px 14px;border-radius:999px;box-shadow:0 6px 18px rgba(0,0,0,0.45);pointer-events:auto;align-items:center;gap:9px;white-space:nowrap">
         <i class="ms hint-mouse-icon" style="font-size:16px;color:#76a9fa">mouse</i>
         <span id="prev-3d-hint-text">Bewegen Sie das 3D-Modell mit der Maus</span>
+        <button type="button" id="prev-3d-hint-close" onclick="try{sessionStorage.setItem('_3dHintDismissed','1')}catch(e){};this.parentElement.style.display='none';" title="Ausblenden" style="margin-left:4px;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:9999px;background:rgba(255,255,255,0.12);color:#ffffff;border:0;cursor:pointer;font-size:14px;line-height:1;padding:0;font-family:inherit">×</button>
       </div>
       <!-- 3D-Vorschau für Haustür (iframe, embed-Modus) -->
       <div id="haus3d-wrap" style="display:none;position:absolute;inset:0;z-index:10;border-radius:var(--r-md);overflow:hidden">
@@ -5569,7 +5570,6 @@ function pickProd(el) {
   // Sarah-Fix 22.04.2026 (v3): Schritt 2 SOFORT öffnen & scrollen — BEVOR die build*-Funktionen
   // laufen. Damit ist der Sprung garantiert, selbst wenn irgendwo später eine Exception auftritt.
   // (Schritt 1 zu, Schritt 2 auf, manueller Scroll mit Offset — in dieser Reihenfolge.)
-  const _s1 = document.getElementById('s1');
   const _s2 = document.getElementById('s2');
   if (_s1) _s1.classList.remove('open');
   if (_s2) _s2.classList.add('open');
