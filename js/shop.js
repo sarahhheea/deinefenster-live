@@ -180,7 +180,7 @@ async function loadProdukte() {
         export_modell: !!p.export_modell,
         standnummer: p.standnummer || null,
         farbe: p.farbe || 'weiss',
-        verglasung: p.verglasung || '2-fach',
+        verglasung: p.verglasung || null,
         u_wert: p.u_wert || null,
         oeffnungsart: p.oeffnungsart || 'dreh-kipp',
         rc_klasse: p.rc_klasse || null,
@@ -708,7 +708,10 @@ function karteHtml(p) {
         ? `<span class="pill is-warning">Nur ${p.lagerbestand} verfügbar</span>`
         : `<span class="pill is-success">${p.lagerbestand} auf Lager</span>`);
   const rcBadge = p.rc_klasse ? `<span class="pill is-gold">${p.rc_klasse}</span>` : '';
-  const verglasungBadge = `<span class="pill is-primary">${p.verglasung}-Verglasung</span>`;
+  // Verglasungs-Badge nur bei Produkten mit Glas (Fenster/Balkontür/Haustür/Schiebetür) — NICHT bei Dämmung/Baumaterialien/Garagentor
+  const NO_GLAS_KATS = new Set(['daemmung','baumaterialien','garagentor-gebraucht']);
+  const verglasungBadge = (p.verglasung && !NO_GLAS_KATS.has(p.kategorie_key))
+    ? `<span class="pill is-primary">${p.verglasung}-Verglasung</span>` : '';
   const zustandBadge = p.zustand === 'gebraucht' ? `<span class="pill is-warning">Gebraucht</span>` : '';
   const sonderpreisBadge = p.sonderpreis_eur ? `<span class="pill is-warning">Sonderpreis *</span>` : '';
   const exportBadge = p.export_modell ? `<span class="pill is-primary">Export *</span>` : '';
@@ -1194,7 +1197,7 @@ function oeffneDetail(id) {
     ${carouselHTML}
     <div class="p-6 space-y-4">
       <div class="flex flex-wrap gap-1.5">
-        <span class="pill is-primary">${p.verglasung}-Verglasung</span>
+        ${(p.verglasung && !['daemmung','baumaterialien','garagentor-gebraucht'].includes(p.kategorie_key)) ? `<span class="pill is-primary">${p.verglasung}-Verglasung</span>` : ''}
         ${p.rc_klasse ? `<span class="pill is-gold">${p.rc_klasse}</span>` : ''}
         ${(p.zustand || 'neu') === 'neu'
           ? ''
