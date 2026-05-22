@@ -4598,8 +4598,8 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
     <!-- PRICE BREAKDOWN — VERSTECKT (redundant zur Auswahl-Liste); zeigt nur Lieferkosten direkt im Total -->
     <div id="sb-price" style="display:none"></div>
 
-    <!-- TOTAL BADGE — Preis-Box -->
-    <div id="conf-price-box" class="rounded-xl text-center" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:12px 14px;flex-shrink:0">
+    <!-- TOTAL BADGE — Preis-Box (versteckt bis User wirklich konfiguriert hat) -->
+    <div id="conf-price-box" class="rounded-xl text-center" style="display:none;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:12px 14px;flex-shrink:0">
       <div style="color:rgba(255,255,255,.40);font-size:10.5px;margin-bottom:3px;display:flex;align-items:center;justify-content:center;gap:6px;font-family:Manrope,sans-serif;text-transform:uppercase;letter-spacing:.07em">
         <span>Persönliches Angebot</span>
         <span id="sb-qty-badge" style="display:none;background:rgba(255,255,255,.15);padding:1px 7px;border-radius:8px;font-weight:700;color:rgba(255,255,255,0.80)"></span>
@@ -4610,9 +4610,9 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       <div id="sb-shipping" style="color:rgba(255,255,255,.40);font-size:10.5px;margin-top:4px;border-top:1px solid rgba(255,255,255,.08);padding-top:4px;display:none;font-family:Manrope,sans-serif"></div>
     </div>
 
-    <!-- Sidebar-CTA: Anker zum Bestellübersicht-CTA in der Mitte (gleiche Semantik) -->
+    <!-- Sidebar-CTA: erst sichtbar nach mind. 2 echten Auswahlen (sonst Fehlklick-Risiko) -->
     <a href="bestelluebersicht.html" onclick="if(typeof saveCurrentBeforeOverview==='function')saveCurrentBeforeOverview()"
-       id="sb-cta-finish" class="sb-cta-finish">
+       id="sb-cta-finish" class="sb-cta-finish" style="display:none">
       <i class="ms" style="font-size:18px">arrow_forward</i>
       <span>Zur Bestellübersicht</span>
     </a>
@@ -8226,6 +8226,14 @@ function upSidebar() {
   if(S.prod && S.qty && (S.qty > 1 || isTouched('qty'))) rowsList.unshift(['Stückzahl', S.qty + '×']);
   // Konfigurationsübersicht unter dem Vorschaubild (Sarah 06.05.2026)
   // Geänderte Zeilen kurz aufleuchten lassen
+  // CTA + Preis-Box erst sichtbar wenn User mind. 2 Schritte aktiv gewaehlt hat (Produkt + 1 weiterer)
+  // Verhindert Fehlklicks auf Zur Bestelluebersicht bevor wirklich konfiguriert wurde.
+  const _touchedCount = (window._touched && window._touched.size) || 0;
+  const _priceBox = document.getElementById('conf-price-box');
+  const _ctaBtn   = document.getElementById('sb-cta-finish');
+  if (_priceBox) _priceBox.style.display = (_touchedCount >= 2) ? '' : 'none';
+  if (_ctaBtn)   _ctaBtn.style.display   = (_touchedCount >= 2) ? '' : 'none';
+
   if (!upSidebar._prev) upSidebar._prev = {};
   const prevVals = upSidebar._prev;
   const newVals = Object.fromEntries(rowsList);
