@@ -22,7 +22,7 @@
           if (!cancelled && document.visibilityState === 'visible') {
             location.href = fallback;
           }
-        }, 1500);
+        }, 2500);
       });
     });
   }
