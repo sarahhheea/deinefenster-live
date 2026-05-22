@@ -172,11 +172,6 @@
         <span class="material-symbols-outlined" style="font-size:12px;font-variation-settings:'FILL' 1">call</span>
         03381 / 2148373
       </a>
-      <span class="topbar-dot">·</span>
-      <a href="mailto:info@baustoffchrist.de" class="topbar-phone">
-        <span class="material-symbols-outlined" style="font-size:12px;font-variation-settings:'FILL' 1">mail</span>
-        info@baustoffchrist.de
-      </a>
       <a href="https://wa.me/491717263776" target="_blank" rel="noopener" class="topbar-whatsapp">
         <span class="material-symbols-outlined" style="font-size:13px;font-variation-settings:'FILL' 1">chat</span>
         WhatsApp
@@ -450,7 +445,7 @@
       <a href="kontakt.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Kontakt</a>
     </div>
     <div class="flex items-center gap-3 md:gap-6">
-      <a href="mailto:info@baustoffchrist.de?subject=Angebot%20anfragen&body=Guten%20Tag%2C%0A%0Aich%20interessiere%20mich%20f%C3%BCr%20ein%20Angebot.%0A%0AProdukt%3A%20%0AMa%C3%9Fe%20(B%20x%20H)%3A%20%0AAnzahl%3A%20%0AAusf%C3%BChrung%2FWunsch%3A%20%0A%0AVielen%20Dank%21" class="hidden md:inline-flex items-center gap-1.5 px-5 py-1.5 rounded-full font-semibold text-xs tracking-wide transition-all duration-200" style="background:#225eaa;color:#fff;letter-spacing:0.02em;"><span class="material-symbols-outlined" style="font-size:14px">mail</span> Angebot anfragen</a>
+      <a href="/kontakt.html#kontakt-form" class="hidden md:inline-flex items-center gap-1.5 px-5 py-1.5 rounded-full font-semibold text-xs tracking-wide transition-all duration-200" style="background:#225eaa;color:#fff;letter-spacing:0.02em;"><span class="material-symbols-outlined" style="font-size:14px">mail</span> Angebot anfragen</a>
       <button id="menuBtn" class="md:hidden text-white p-1" aria-label="Menü öffnen">
         <span class="material-symbols-outlined text-3xl" id="menuIcon">menu</span>
       </button>
@@ -946,6 +941,60 @@
 <script>
 (function(){
   const WEB3FORMS_KEY = '440a94ff-9f42-46af-bf3d-47013dbd8f5f';
+
+  // Prefill Nachrichtenfeld aus ?produkt=... — kommt von CTAs auf anderen Seiten
+  const PRODUKT_LABEL = {
+    kunststofffenster: 'Kunststofffenster',
+    balkontuer: 'Balkontür',
+    haustuer: 'Haustür',
+    schiebetuer: 'Schiebetür (HST)',
+    rollladen: 'Rollladen',
+    daemmung: 'Dämmung',
+    garagentor: 'Garagentor',
+    fenster: 'Fenster'
+  };
+  try {
+    const params = new URLSearchParams(location.search);
+    const slug = params.get('produkt');
+    const msgEl = document.getElementById('kf-msg');
+    if (slug && msgEl && !msgEl.value.trim()) {
+      const label = PRODUKT_LABEL[slug] || slug;
+      msgEl.value = 'Guten Tag,\n\nich interessiere mich für ein Angebot für ' + label + '.\n\nMaße (B × H):\nAnzahl:\nAusführung / Wunsch:\n\nVielen Dank!';
+      msgEl.setAttribute('data-prefilled', '1');
+    }
+    if (slug || location.hash === '#kontakt-form') {
+      // History-State umschreiben: Hash raus, damit Browser-Default-Scroll
+      // nicht mit unserer Logik kollidiert, und Reloads sauber bleiben.
+      try { history.replaceState(null, '', location.pathname + (slug ? '?produkt='+encodeURIComponent(slug) : '')); } catch(e){}
+      const form = document.getElementById('kontakt-form');
+      if (form) {
+        const scrollNow = () => {
+          const y = form.getBoundingClientRect().top + window.scrollY - 80;
+          window.scrollTo(0, y);
+        };
+        // GSAP/ScrollTrigger und Bild-Lazy-Load ändern die Page-Höhe mehrfach
+        // nach dem ersten Render. Wir scrollen daher in einem Interval bis
+        // das Form sichtbar ist — max 4s, dann Stop.
+        let attempts = 0;
+        scrollNow();
+        const iv = setInterval(() => {
+          attempts++;
+          scrollNow();
+          const r = form.getBoundingClientRect();
+          // Stop wenn Form-Top im Viewport-Top-Bereich (50–120 px) ist
+          if (r.top > 50 && r.top < 120) { clearInterval(iv); }
+          if (attempts >= 20) { clearInterval(iv); }
+        }, 200);
+        if (slug) {
+          setTimeout(() => {
+            const nameEl = document.getElementById('kf-name');
+            if (nameEl) nameEl.focus({preventScroll:true});
+          }, 900);
+        }
+      }
+    }
+  } catch(e){}
+
   document.getElementById('kontakt-form').addEventListener('submit', async function(e){
     e.preventDefault();
     const name  = document.getElementById('kf-name').value.trim();
