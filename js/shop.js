@@ -1036,17 +1036,17 @@ function leereCart() {
 function updateCartUI() {
   const total = STATE.warenkorb.reduce((s, e) => s + e.menge, 0);
   const badgeNav = document.getElementById('cartBadgeNav');
-  if (total > 0) {
-    badgeNav.textContent = total;
-    badgeNav.classList.remove('hidden');
-  } else {
-    badgeNav.classList.add('hidden');
+  if (badgeNav) {
+    if (total > 0) { badgeNav.textContent = total; badgeNav.classList.remove('hidden'); }
+    else { badgeNav.classList.add('hidden'); }
   }
-  document.getElementById('cartTitleCount').textContent = total ? `(${total})` : '';
+  const titleCount = document.getElementById('cartTitleCount');
+  if (titleCount) titleCount.textContent = total ? `(${total})` : '';
 
   const itemsEl = document.getElementById('cartItems');
   const emptyEl = document.getElementById('cartEmptyState');
   const footerEl = document.getElementById('cartFooter');
+  if (!itemsEl || !emptyEl || !footerEl) return;
   if (STATE.warenkorb.length === 0) {
     itemsEl.classList.add('hidden');
     emptyEl.classList.remove('hidden');
