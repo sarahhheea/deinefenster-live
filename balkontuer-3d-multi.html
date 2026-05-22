@@ -1171,8 +1171,12 @@ if (new URLSearchParams(location.search).has('embed')) {
 
 // Initial-Build NACH FARBEN-Definition
 {
-  const _urlLayout = new URLSearchParams(location.search).get('layout') || '1-fluegel';
-  buildWindow({ layout: _urlLayout, sashes: ['dk-r'] });
+  const _qs = new URLSearchParams(location.search);
+  const _urlLayout = _qs.get('layout') || '1-fluegel';
+  const _urlRoll = _qs.get('roll') || 'ohne';
+  const _urlKasten = _qs.get('rollKasten') || '175';
+  const _urlRseite = _qs.get('rollSeite') || 'rechts';
+  buildWindow({ layout: _urlLayout, sashes: ['dk-r'], roll: _urlRoll, rollKasten: _urlKasten, rollSeite: _urlRseite });
 }
 
 // postMessage-Bridge: Konfigurator schickt Farb/Glas/Layout-Änderungen

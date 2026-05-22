@@ -613,7 +613,14 @@ function buildWindow(spec) {
   _addRolladen(spec);
 }
 
-buildWindow();
+{
+  const _qs = new URLSearchParams(location.search);
+  buildWindow({
+    roll: _qs.get('roll') || 'ohne',
+    rollKasten: _qs.get('rollKasten') || '175',
+    rollSeite: _qs.get('rollSeite') || 'rechts'
+  });
+}
 
 // Fenster auf Welt-Origin zentrieren
 winGroup.position.set(-FW / 2, -FH / 2, 0);
