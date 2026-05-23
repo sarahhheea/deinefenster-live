@@ -1,4 +1,8 @@
-$KEY = "re_5o5JYMky_MXfQoo7vAZoaNMn4KzLrNyht"
+$KEY = $env:RESEND_API_KEY  # NIEMALS hardcoden — Key aus Environment-Variable holen
+if (-not $KEY) {
+    Write-Host "FEHLER: RESEND_API_KEY nicht gesetzt. Setze die Env-Variable bevor du das Script ausführst." -ForegroundColor Red
+    exit 1
+}
 $headers = @{ "Authorization" = "Bearer $KEY"; "Content-Type" = "application/json" }
 
 Write-Host "Füge Domain deinefenster.de zu Resend hinzu..." -ForegroundColor Cyan

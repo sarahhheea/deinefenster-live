@@ -16,11 +16,11 @@ Vorher waren 4 sensible Werte direkt im Frontend-Code öffentlich lesbar:
 
 ### 1. Resend-Key revoken (1 Min)
 
-https://resend.com/api-keys → den alten Key (beginnt mit `re_5o5JYMky_…`) löschen. Du brauchst Resend nicht mehr — der Mail-Versand läuft jetzt direkt über Web3Forms.
+https://resend.com/api-keys → alten kompromittierten Key löschen. Status 22.05.2026: alter Key bereits revoked. Aktive Keys sind nur in Resend-Dashboard sichtbar, NICHT in dieser Datei.
 
 ### 2. GitHub-Token revoken (1 Min)
 
-https://github.com/settings/tokens → den alten Token (beginnt mit `gho_FVoOt…`) revoken.
+https://github.com/settings/tokens → alten Classic-Token „MacBook" (kein Ablaufdatum) löschen. Status 22.05.2026: erledigt.
 
 ⚠ **Achtung:** Der Shop-Admin (`shop-einstellen.html`) braucht aktuell den Token, um Inserate hinzuzufügen. Solange du den Shop nutzt, ist das ein Sicherheitsproblem (Token wäre wieder im Frontend, wenn wir ihn da reintun) — siehe „Shop-Backend" unten.
 

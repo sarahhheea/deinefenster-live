@@ -5,7 +5,7 @@
 
 ## ✅ Was bereits erledigt ist
 - Resend-Konto aktiv
-- API Key erstellt: `re_5o5JYMky_...`
+- API Key erstellt: `[REDACTED_REVOKED_KEY]`
 - Test-Mail erfolgreich gesendet (ID: d676c09b-7059-4bb2-a3a2-48d477d8f161)
 - Domain `deinefenster.de` in Resend angelegt → DNS-Einträge bereit
 
@@ -71,7 +71,7 @@ Gehe zu deinem Domain-Anbieter (IONOS / Strato / Namecheap / etc.) → DNS-Verwa
 | URL | `https://api.resend.com/emails` |
 | Method | `POST` |
 | Header 1 Name | `Authorization` |
-| Header 1 Wert | `Bearer re_5o5JYMky_MXfQoo7vAZoaNMn4KzLrNyht` |
+| Header 1 Wert | `Bearer <RESEND_API_KEY>` (aus Resend-Dashboard, NICHT in dieser Datei hardcoden) |
 | Header 2 Name | `Content-Type` |
 | Header 2 Wert | `application/json` |
 | Body Type | `Raw` |
@@ -82,7 +82,7 @@ Gehe zu deinem Domain-Anbieter (IONOS / Strato / Namecheap / etc.) → DNS-Verwa
 {
   "from": "DeineFenster.de <info@deinefenster.de>",
   "to": ["{{1.kunde_email}}"],
-  "reply_to": "sarahchrist@aol.com",
+  "reply_to": "info@deinefenster.de",
   "subject": "Ihre Anfrage bei DeineFenster.de – {{1.produkt}}",
   "html": "HIER_KUNDE_HTML_EINFÜGEN"
 }
@@ -96,7 +96,7 @@ Gleiche Einstellungen, nur anderer Body:
 ```json
 {
   "from": "DeineFenster.de <info@deinefenster.de>",
-  "to": ["sarahchrist@aol.com"],
+  "to": ["<EMPFAENGER_EMAIL>"],
   "reply_to": "{{1.kunde_email}}",
   "subject": "🔔 Neue Anfrage: {{1.produkt}} – {{1.kunde_name}}",
   "html": "HIER_SARAH_HTML_EINFÜGEN"
@@ -135,7 +135,7 @@ Gleiche Einstellungen, nur anderer Body:
 ## SCHRITT 4: Volltest
 
 1. Öffne `konfigurator.html` → Fenster konfigurieren → Angebot absenden
-2. Prüfe `sarahchrist@aol.com`:
+2. Prüfe das eingerichtete Empfangs-Postfach:
    - ✅ Kunden-Bestätigung (von info@deinefenster.de)
    - ✅ Sarah-Benachrichtigung mit allen Details
 
@@ -143,8 +143,12 @@ Gleiche Einstellungen, nur anderer Body:
 
 ## Wichtig: API Key sichern
 
-Dein Resend API Key: `re_5o5JYMky_MXfQoo7vAZoaNMn4KzLrNyht`
+**Resend API Key NICHT in dieser Datei speichern.**
 
-⚠️ **Nur in Make.com eintragen. Niemals in HTML-Dateien!**
-Nach dem Make.com Setup: Erstelle sicherheitshalber einen neuen Key auf resend.com/api-keys
-und ersetze den alten in Make.com.
+Workflow:
+1. Lege Key direkt im Resend-Dashboard an (https://resend.com/api-keys)
+2. Kopiere ihn DIREKT in Make.com (Header-Wert)
+3. Schließe das Dashboard-Tab — Key nicht in Notizen, Mails oder Markdown speichern
+
+⚠️ **Niemals in HTML-Dateien, niemals in Markdown im Repo, niemals in Slack/E-Mail!**
+Wenn ein Key versehentlich exponiert wurde: bei resend.com/api-keys revoken + neuen erstellen.

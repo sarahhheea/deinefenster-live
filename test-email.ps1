@@ -5,7 +5,7 @@
 
 # ── HIER EINTRAGEN ──────────────────────────────────────────
 $API_KEY   = "re_HIER_DEINEN_API_KEY_EINTRAGEN"   # z.B. re_aBcDeFgH...
-$AN_EMAIL  = "sarahchrist@aol.com"                  # Wer bekommt die Test-Mail?
+$AN_EMAIL  = "test@example.com"                     # Wer bekommt die Test-Mail? — vor Ausführung ersetzen
 # ────────────────────────────────────────────────────────────
 
 # Prüfen ob API Key eingetragen
