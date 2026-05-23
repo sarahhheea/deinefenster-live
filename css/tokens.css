@@ -1,0 +1,273 @@
+/* ════════════════════════════════════════════════════════════════════
+   DeineFenster.de — Brand-Tokens (Single-Source-of-Truth)
+   Stand: 2026-05-23
+   ════════════════════════════════════════════════════════════════════
+
+   Diese Datei kodifiziert die Brand-Identity in CSS Custom Properties.
+   Quelle: STYLE-GUIDE.md Sektionen 2, 4, 11, 14.
+   Master-Page-Referenz: ueber-drutex.html
+
+   REGEL FÜR ENTWICKLUNG:
+   - Keine ad-hoc HEX-Werte mehr — nutze var(--c-...)
+   - Keine ad-hoc Pixel-Spacings — nutze var(--space-...)
+   - Keine ad-hoc Schriftgrößen — nutze var(--text-...)
+   - Bei jedem inline-style: prüfen ob Token existiert.
+   - Linter (scripts/style-lint.py) flaggt Verstöße im Pre-Push.
+
+   Diese Datei wird in ALLEN HTML-Seiten als ERSTES CSS geladen,
+   noch vor tailwind.css und global-design.css.
+   ════════════════════════════════════════════════════════════════════ */
+
+:root {
+
+  /* ──────────────────────────────────────────────────────────────
+     FARBEN — Brand-Palette
+     ────────────────────────────────────────────────────────────── */
+
+  /* Primär — CTAs, aktive States */
+  --c-primary:        #225eaa;
+  --c-primary-d:      #1a4a87;   /* Hover-State */
+  --c-primary-light:  #d6e3ff;   /* Light-Tint auf dunklem Grund */
+
+  /* Akzent — Brand-Signature-Hellblau */
+  --c-accent:         #76a9fa;   /* Eyebrow, Step-Active, Fraunces-Akzent */
+  --c-accent-d:       #5a8be0;   /* Hover für Akzent-Elemente */
+
+  /* Status */
+  --c-gold:           #c9a84c;   /* Completed-State, Achievement-Signale */
+  --c-gold-text:      #1a1408;   /* Text auf Gold-Background */
+  --c-success:        #4ade80;   /* WhatsApp-Grün, positive Bestätigung */
+  --c-warn:           #fbbf24;   /* Amber-Warnung (Hinweis-Box) */
+  --c-error:          #ef4444;   /* Rot — Fehler, Pflicht-Hinweis */
+
+  /* Navigation */
+  --c-nav:            #112455;   /* Topbar-Hintergrund */
+
+  /* Dunkle Surfaces (Konfigurator-Standard, Brand-Default) */
+  --c-bg:             #060e1e;   /* Page-Hintergrund tiefste Tiefe */
+  --c-bg-2:           #0a1530;   /* Section-Background Variante 1 */
+  --c-bg-3:           #0f1c30;   /* Section-Background Variante 2, Card-BG */
+  --c-bg-4:           #0a1225;   /* Mega-Menu-Background */
+
+  /* Helle Surfaces (NICHT für Konfigurator — nur Karten auf hellem Grund) */
+  --c-surface:        #f9f9ff;
+  --c-surface-hi:     #f1f3ff;
+  --c-on-surface:     #161c27;   /* Text auf hellem Background */
+  --c-on-surface-v:   #424751;   /* Sekundärer Text auf hellem Background */
+
+  /* Borders */
+  --c-border-light:   #c2c6d3;            /* Border auf hellen Surfaces */
+  --c-border-subtle:  rgba(255,255,255,0.08);   /* Subtle auf dunkel */
+  --c-border-brand:   rgba(118,169,250,0.12);   /* Brand-tint Border */
+  --c-border-strong:  rgba(118,169,250,0.32);   /* Stronger Brand-Border */
+
+  /* Text auf dunklem Background */
+  --c-text-primary:    rgba(255,255,255,0.97);
+  --c-text-secondary:  rgba(255,255,255,0.68);
+  --c-text-tertiary:   rgba(255,255,255,0.52);
+  --c-text-muted:      rgba(255,255,255,0.38);
+
+  /* Status-Farben (Sidebar/Step-Nav — siehe konfigurator) */
+  --c-step-pending-bg:      rgba(255,255,255,0.06);
+  --c-step-pending-text:    rgba(255,255,255,0.58);
+  --c-step-pending-border:  rgba(255,255,255,0.18);
+  --c-step-active-bg:       var(--c-accent);
+  --c-step-active-text:     #0a1530;
+  --c-step-active-glow:     rgba(118,169,250,0.22);
+  --c-step-done-bg:         var(--c-gold);
+  --c-step-done-text:       var(--c-gold-text);
+  --c-step-done-glow:       rgba(201,168,76,0.18);
+
+
+  /* ──────────────────────────────────────────────────────────────
+     SPACING — Pflicht-Skala, keine anderen Werte erlaubt
+     Multiples of 4px, rem-basiert für Skalierbarkeit
+     ────────────────────────────────────────────────────────────── */
+
+  --space-0:    0;
+  --space-xs:   0.25rem;   /* 4px  — Inline-Gaps zwischen Mini-Elementen */
+  --space-sm:   0.5rem;    /* 8px  — Form-Row-Gaps, Icon-Text-Gaps */
+  --space-md:   1rem;      /* 16px — Card-Padding, Section-Innenabstände */
+  --space-lg:   1.5rem;    /* 24px — Section-Gaps, Container-Padding-Mobile */
+  --space-xl:   2rem;      /* 32px — Section-Gaps groß */
+  --space-2xl:  3rem;      /* 48px — Container-Padding-Desktop, Hero-Inner */
+  --space-3xl:  5rem;      /* 80px — Section-Padding Mobile (vertikal) */
+  --space-4xl:  8rem;      /* 128px — Section-Padding Desktop (vertikal) */
+
+  /* Container */
+  --container-max:           1440px;
+  --container-px-mobile:     var(--space-lg);    /* 24px */
+  --container-px-desktop:    var(--space-2xl);   /* 48px */
+  --container-px-hero:       5rem;               /* 80px Desktop-Hero */
+
+  /* Section-Vertical-Rhythm */
+  --section-y:           var(--space-3xl);   /* 80px Mobile Standard */
+  --section-y-desktop:   var(--space-4xl);   /* 128px Desktop Standard */
+  --section-y-compact:   3.5rem;             /* 56px Mobile Compact */
+  --section-y-compact-d: 4rem;               /* 64px Desktop Compact */
+
+
+  /* ──────────────────────────────────────────────────────────────
+     TYPOGRAFIE
+     Mobile-First mit clamp() für automatische Responsivität
+     ────────────────────────────────────────────────────────────── */
+
+  /* Font-Stacks */
+  --font-display:  'Plus Jakarta Sans', sans-serif;   /* Headlines */
+  --font-body:     'Manrope', sans-serif;             /* Body-Text */
+  --font-accent:   'Fraunces', serif;                 /* Italic-Akzent in Headlines */
+
+  /* Schrift-Skala (responsive via clamp) */
+  --text-h1-hero:    clamp(2.5rem, 8.5vw, 7.5rem);    /* 40-120px — Master-Hero */
+  --text-h1-sub:     clamp(2rem, 6vw, 5rem);          /* 32-80px — Sub-Page-Hero */
+  --text-h2:         clamp(1.75rem, 5vw, 4rem);       /* 28-64px — Section-Headlines */
+  --text-h3:         clamp(1.125rem, 2.5vw, 1.5rem);  /* 18-24px — Card-Titles */
+  --text-h4:         clamp(1rem, 2vw, 1.25rem);       /* 16-20px — Sub-Headlines */
+  --text-lead:       clamp(1rem, 1.5vw, 1.125rem);    /* 16-18px — Hero-Lead-Body */
+  --text-body:       0.9375rem;                        /* 15px — Standard-Body */
+  --text-body-sm:    0.875rem;                         /* 14px — Sekundär-Body */
+  --text-caption:    0.8125rem;                        /* 13px — Captions, Disclaimers */
+  --text-mono-eb:    0.6875rem;                        /* 11px — Mono-Eyebrow */
+  --text-mono-lbl:   0.625rem;                         /* 10px — Mono-Label */
+
+  /* Font-Weights */
+  --weight-normal:     400;
+  --weight-medium:     500;
+  --weight-semibold:   600;
+  --weight-bold:       700;
+  --weight-extrabold:  800;
+  --weight-black:      900;
+
+  /* Letter-Spacing */
+  --tracking-tightest:  -0.04em;   /* Master-H1-Hero */
+  --tracking-tight:     -0.02em;   /* Sub-Page-H1, H2 */
+  --tracking-normal:    0;
+  --tracking-eyebrow:   0.32em;    /* Hero-Eyebrow (Master-Pattern) */
+  --tracking-mono:      0.24em;    /* Mono-Eyebrow Standard */
+  --tracking-label:     0.20em;    /* Mono-Label */
+
+  /* Line-Heights */
+  --leading-tight:    1.05;
+  --leading-snug:     1.2;
+  --leading-normal:   1.5;
+  --leading-relaxed:  1.65;
+
+
+  /* ──────────────────────────────────────────────────────────────
+     BORDER-RADIUS
+     ────────────────────────────────────────────────────────────── */
+
+  --radius-sm:    0.375rem;   /* 6px  — Inputs, kleine Buttons */
+  --radius-md:    0.625rem;   /* 10px — Cards, Standard-Buttons */
+  --radius-lg:    0.875rem;   /* 14px — Highlight-Cards, Hinweis-Boxen */
+  --radius-xl:    1.25rem;    /* 20px — Hero-Cards, große Container */
+  --radius-2xl:   2rem;       /* 32px — Sehr große Container */
+  --radius-pill:  9999px;     /* Pills, Badges, Pill-Buttons */
+
+
+  /* ──────────────────────────────────────────────────────────────
+     SCHATTEN
+     ────────────────────────────────────────────────────────────── */
+
+  --shadow-sm:           0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md:           0 4px 12px rgba(0,0,0,0.1);
+  --shadow-lg:           0 12px 32px rgba(0,0,0,0.18);
+  --shadow-xl:           0 24px 64px rgba(0,0,0,0.32);
+  --shadow-glow-accent:  0 0 0 4px rgba(118,169,250,0.15);
+  --shadow-glow-gold:    0 0 0 4px rgba(201,168,76,0.15);
+  --shadow-focus:        0 0 0 3px rgba(118,169,250,0.5);   /* A11y Focus-Ring */
+
+
+  /* ──────────────────────────────────────────────────────────────
+     Z-INDEX-SKALA (kein Overlap-Wirrwarr)
+     ────────────────────────────────────────────────────────────── */
+
+  --z-base:        1;
+  --z-elevated:    10;
+  --z-sticky:      30;
+  --z-overlay:     40;
+  --z-nav:         50;
+  --z-modal:       100;
+  --z-toast:       1000;
+
+
+  /* ──────────────────────────────────────────────────────────────
+     ACCESSIBILITY (BFSG ab 28.06.2025)
+     ────────────────────────────────────────────────────────────── */
+
+  --tap-min:           44px;     /* Mindestgröße für Touch-Ziele */
+  --focus-outline:     2px solid var(--c-accent);
+  --focus-offset:      2px;
+
+
+  /* ──────────────────────────────────────────────────────────────
+     ANIMATIONS — konsistente Übergänge
+     ────────────────────────────────────────────────────────────── */
+
+  --transition-fast:    150ms;
+  --transition-base:    250ms;
+  --transition-slow:    400ms;
+  --ease-out:           cubic-bezier(0.16, 1, 0.3, 1);     /* Standard-Easing */
+  --ease-in-out:        cubic-bezier(0.45, 0, 0.55, 1);    /* Hover-Easing */
+
+
+  /* ──────────────────────────────────────────────────────────────
+     HERO-OVERLAYS (Master-Pattern aus ueber-drutex.html)
+     ────────────────────────────────────────────────────────────── */
+
+  --hero-overlay:      linear-gradient(120deg,
+                          rgba(6,14,30,0.92) 0%,
+                          rgba(10,21,48,0.75) 45%,
+                          rgba(10,21,48,0.35) 100%);
+
+  --hero-bottom-fade:  linear-gradient(to top,
+                          var(--c-bg-2) 0%,
+                          transparent 100%);
+
+  --hero-side-stroke:  linear-gradient(to bottom,
+                          transparent,
+                          rgba(118,169,250,0.4),
+                          transparent);
+
+
+  /* ──────────────────────────────────────────────────────────────
+     BREAKPOINTS (Referenz — CSS @media kann keine Variablen nutzen,
+     diese Werte sind als Konstanten für JS und als Doku gemeint)
+     ────────────────────────────────────────────────────────────── */
+
+  /*
+     Mobile-First:
+       Default        →  390px Mobile
+       md (768px)     →  Tablet
+       lg (1024px)    →  Small-Desktop
+       xl (1280px)    →  Standard-Desktop
+       2xl (1440px)   →  Large-Desktop
+  */
+
+}
+
+
+/* ════════════════════════════════════════════════════════════════════
+   GLOBAL FOCUS-INDIKATOR (BFSG-Pflicht)
+   Alle interaktiven Elemente bekommen einen sichtbaren Focus-Ring.
+   ════════════════════════════════════════════════════════════════════ */
+
+*:focus-visible {
+  outline: var(--focus-outline);
+  outline-offset: var(--focus-offset);
+  border-radius: var(--radius-sm);
+}
+
+
+/* ════════════════════════════════════════════════════════════════════
+   MOTION-PREFERENCES (A11y)
+   ════════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

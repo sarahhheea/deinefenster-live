@@ -1,0 +1,561 @@
+/* ════════════════════════════════════════════════════════════════════
+   DeineFenster.de — Component-Klassen
+   Stand: 2026-05-23
+
+   Diese Klassen sind die Pflicht-Bausteine für alle Seiten.
+   Alle Werte kommen aus tokens.css — keine ad-hoc HEX/Pixel.
+
+   USAGE:
+     <button class="df-btn df-btn-primary">Angebot anfordern</button>
+     <section class="df-section">…</section>
+     <div class="df-card">…</div>
+     <div class="df-notice df-notice-info">…</div>
+
+   Naming: `df-` Prefix verhindert Konflikte mit Tailwind/anderen Klassen.
+   Mobile-First: alle Werte starten Mobile, @media (min-width: 768px) → Desktop.
+   ════════════════════════════════════════════════════════════════════ */
+
+
+/* ╔════════════════════════════════════════════════════════════════╗
+   ║ BUTTONS — 3 Varianten + Größen                                ║
+   ╚════════════════════════════════════════════════════════════════╝ */
+
+.df-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  min-height: var(--tap-min);   /* BFSG */
+  padding: 0 var(--space-lg);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-body);
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition:
+    background var(--transition-base) var(--ease-out),
+    color var(--transition-base) var(--ease-out),
+    transform var(--transition-fast) var(--ease-out),
+    border-color var(--transition-base) var(--ease-out);
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.df-btn:hover { transform: translateY(-1px); }
+.df-btn:active { transform: translateY(0); }
+.df-btn:disabled,
+.df-btn[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* — Primary — */
+.df-btn-primary {
+  background: var(--c-primary);
+  color: #fff;
+  box-shadow: var(--shadow-md);
+}
+.df-btn-primary:hover {
+  background: var(--c-primary-d);
+  box-shadow: var(--shadow-lg);
+}
+
+/* — Secondary (Outline auf Dunkel) — */
+.df-btn-secondary {
+  background: transparent;
+  color: var(--c-accent);
+  border-color: var(--c-border-strong);
+}
+.df-btn-secondary:hover {
+  background: rgba(118,169,250,0.08);
+  border-color: var(--c-accent);
+  color: #fff;
+}
+
+/* — Ghost (minimal, nur Text+Underline-on-Hover) — */
+.df-btn-ghost {
+  background: transparent;
+  color: var(--c-text-secondary);
+  padding: 0 var(--space-md);
+  min-height: var(--tap-min);
+}
+.df-btn-ghost:hover {
+  color: var(--c-accent);
+  background: rgba(118,169,250,0.04);
+}
+
+/* — Größen-Varianten — */
+.df-btn-sm { min-height: 36px; padding: 0 var(--space-md); font-size: var(--text-body-sm); }
+.df-btn-lg { min-height: 52px; padding: 0 var(--space-xl); font-size: 1.0625rem; }
+
+
+/* ╔════════════════════════════════════════════════════════════════╗
+   ║ SECTION — Standard-Layout-Container                            ║
+   ╚════════════════════════════════════════════════════════════════╝ */
+
+.df-section {
+  width: 100%;
+  padding: var(--section-y) 0;
+  background: var(--c-bg);
+  color: var(--c-text-primary);
+}
+
+@media (min-width: 768px) {
+  .df-section { padding: var(--section-y-desktop) 0; }
+}
+
+/* Section-Background-Varianten (alternierend für Rhythmus) */
+.df-section-bg-1 { background: var(--c-bg); }      /* #060e1e tiefste */
+.df-section-bg-2 { background: var(--c-bg-2); }    /* #0a1530 */
+.df-section-bg-3 { background: var(--c-bg-3); }    /* #0f1c30 */
+
+/* Compact-Variante (Stats-Strips, Marquees) */
+.df-section-compact {
+  padding: var(--section-y-compact) 0;
+}
+@media (min-width: 768px) {
+  .df-section-compact { padding: var(--section-y-compact-d) 0; }
+}
+
+/* Inner Container — innerhalb von .df-section */
+.df-container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 var(--container-px-mobile);
+}
+@media (min-width: 768px) {
+  .df-container { padding: 0 var(--container-px-desktop); }
+}
+
+
+/* ╔════════════════════════════════════════════════════════════════╗
+   ║ SECTION-HEADLINE — Master-Pattern (Eyebrow + H2 mit Akzent)    ║
+   ╚════════════════════════════════════════════════════════════════╝ */
+
+.df-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+.df-eyebrow::before {
+  content: "";
+  display: block;
+  width: 2.5rem;          /* 40px */
+  height: 1px;
+  background: var(--c-accent);
+}
+@media (min-width: 768px) {
+  .df-eyebrow::before { width: 4rem; }   /* 64px Desktop */
+}
+.df-eyebrow-text {
+  font-family: var(--font-body);
+  font-size: var(--text-mono-eb);
+  font-weight: var(--weight-bold);
+  color: var(--c-accent);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-eyebrow);
+}
+
+/* H2-Section-Headline mit optionalem Fraunces-Italic-Akzent */
+.df-section-title {
+  font-family: var(--font-display);
+  font-size: var(--text-h2);
+  font-weight: var(--weight-extrabold);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  color: var(--c-text-primary);
+  margin: 0 0 var(--space-lg) 0;
+  max-width: 720px;
+}
+.df-section-title-accent {
+  font-family: var(--font-accent);
+  font-weight: var(--weight-medium);
+  font-style: italic;
+  color: var(--c-accent);
+  letter-spacing: -0.02em;
+}
+
+/* Lead-Paragraph unter Headline */
+.df-section-lead {
+  font-family: var(--font-body);
+  font-size: var(--text-lead);
+  line-height: var(--leading-relaxed);
+  color: var(--c-text-secondary);
+  max-width: 640px;
+  margin: 0 0 var(--space-xl) 0;
+}
+
+
+/* ╔════════════════════════════════════════════════════════════════╗
+   ║ HERO — Master-Pattern aus ueber-drutex.html                    ║
+   ╚════════════════════════════════════════════════════════════════╝ */
+
+.df-hero {
+  position: relative;
+  width: 100%;
+  min-height: 600px;
+  height: 95vh;
+  display: flex;
+  align-items: center;
+  background: var(--c-bg);
+  overflow: hidden;
+}
+
+/* Hero-Background (Foto/Video) */
+.df-hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-base);
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+}
+
+/* Hero-Overlay (Dunkler Verlauf für Text-Kontrast) */
+.df-hero-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-elevated);
+  background: var(--hero-overlay);
+  pointer-events: none;
+}
+
+/* Hero-Bottom-Fade (smoother Übergang zur nächsten Section) */
+.df-hero-fade {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 33%;
+  background: var(--hero-bottom-fade);
+  z-index: var(--z-elevated);
+  pointer-events: none;
+}
+
+/* Hero-Content (über Overlay) */
+.df-hero-content {
+  position: relative;
+  z-index: var(--z-overlay);
+  width: 100%;
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 var(--container-px-mobile);
+}
+@media (min-width: 768px) {
+  .df-hero-content { padding: 0 var(--container-px-hero); }
+}
+
+/* Hero-H1 (Master-Signature mit Fraunces-Akzent) */
+.df-hero-title {
+  font-family: var(--font-display);
+  font-size: var(--text-h1-hero);
+  font-weight: var(--weight-black);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tightest);
+  color: #fff;
+  max-width: 900px;
+  margin: 0 0 var(--space-xl) 0;
+}
+.df-hero-title-accent {
+  display: block;
+  font-family: var(--font-accent);
+  font-weight: var(--weight-medium);
+  font-style: italic;
+  color: var(--c-accent);
+  letter-spacing: var(--tracking-tight);
+}
+
+/* Hero-Lead unter H1 */
+.df-hero-lead {
+  font-family: var(--font-body);
+  font-size: var(--text-lead);
+  line-height: var(--leading-relaxed);
+  color: var(--c-text-primary);
+  max-width: 580px;
+  margin: 0 0 var(--space-xl) 0;
+}
+
+
+/* ╔════════════════════════════════════════════════════════════════╗
+   ║ CARD                                                           ║
+   ╚════════════════════════════════════════════════════════════════╝ */
+
+.df-card {
+  background: var(--c-bg-3);
+  border: 1px solid var(--c-border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  transition: border-color var(--transition-base) var(--ease-out),
+              transform var(--transition-base) var(--ease-out);
+}
+
+@media (min-width: 768px) {
+  .df-card { padding: var(--space-xl); }
+}
+
+.df-card:hover {
+  border-color: var(--c-border-strong);
+}
+
+/* Highlight-Variante mit linker Akzent-Border */
+.df-card-highlight {
+  background: var(--c-bg-3);
+  border: 1px solid var(--c-border-subtle);
+  border-left: 4px solid var(--c-accent);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+}
+
+/* Card-Title */
+.df-card-title {
+  font-family: var(--font-display);
+  font-size: var(--text-h3);
+  font-weight: var(--weight-bold);
+  color: var(--c-text-primary);
+  margin: 0 0 var(--space-sm) 0;
+}
+
+.df-card-body {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-relaxed);
+  color: var(--c-text-secondary);
+  margin: 0;
+}
+
+
+/* ╔════════════════════════════════════════════════════════════════╗
+   ║ NOTICE-BOX (3 Varianten: Info, Warn, Success)                  ║
+   ╚════════════════════════════════════════════════════════════════╝ */
+
+.df-notice {
+  display: flex;
+  gap: var(--space-md);
+  align-items: flex-start;
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-md);
+  border: 1.5px solid;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-relaxed);
+}
+.df-notice > .material-symbols-outlined {
+  flex-shrink: 0;
+  font-size: 1.25rem;
+  margin-top: 0.125rem;
+}
+.df-notice strong { color: #fff; font-weight: var(--weight-extrabold); }
+
+.df-notice-info {
+  background: rgba(118,169,250,0.08);
+  border-color: rgba(118,169,250,0.30);
+  color: var(--c-text-primary);
+}
+.df-notice-info > .material-symbols-outlined { color: var(--c-accent); }
+
+.df-notice-warn {
+  background: rgba(245,158,11,0.10);
+  border-color: rgba(245,158,11,0.40);
+  color: #fde68a;
+}
+.df-notice-warn > .material-symbols-outlined { color: var(--c-warn); }
+
+.df-notice-success {
+  background: rgba(34,197,94,0.10);
+  border-color: rgba(34,197,94,0.30);
+  color: #bbf7d0;
+}
+.df-notice-success > .material-symbols-outlined { color: var(--c-success); }
+
+.df-notice-error {
+  background: rgba(239,68,68,0.10);
+  border-color: rgba(239,68,68,0.30);
+  color: #fca5a5;
+}
+.df-notice-error > .material-symbols-outlined { color: var(--c-error); }
+
+
+/* ╔════════════════════════════════════════════════════════════════╗
+   ║ PILL-BADGE (Mono-Eyebrow Premium)                              ║
+   ╚════════════════════════════════════════════════════════════════╝ */
+
+.df-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: rgba(118,169,250,0.10);
+  border: 1px solid rgba(118,169,250,0.20);
+  border-radius: var(--radius-pill);
+  color: var(--c-accent);
+  font-family: var(--font-body);
+  font-size: var(--text-mono-eb);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-mono);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.df-pill > .material-symbols-outlined {
+  font-size: 0.875rem;
+  font-variation-settings: 'FILL' 1;
+}
+
+
+/* ╔════════════════════════════════════════════════════════════════╗
+   ║ STAT-CARD (Zahl + Label + optional Beschreibung)               ║
+   ╚════════════════════════════════════════════════════════════════╝ */
+
+.df-stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-lg) 0;
+}
+.df-stat-value {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: var(--weight-extrabold);
+  line-height: var(--leading-tight);
+  color: var(--c-text-primary);
+  letter-spacing: var(--tracking-tight);
+}
+.df-stat-label {
+  font-family: var(--font-body);
+  font-size: var(--text-mono-lbl);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-label);
+  color: var(--c-accent);
+}
+
+
+/* ╔════════════════════════════════════════════════════════════════╗
+   ║ INPUT-FIELD                                                    ║
+   ╚════════════════════════════════════════════════════════════════╝ */
+
+.df-input {
+  display: block;
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: 0 var(--space-md);
+  background: var(--c-bg-2);
+  border: 1px solid var(--c-border-subtle);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  color: var(--c-text-primary);
+  transition: border-color var(--transition-base) var(--ease-out);
+  -webkit-appearance: none;
+  appearance: none;
+}
+.df-input::placeholder {
+  color: var(--c-text-tertiary);
+}
+.df-input:hover {
+  border-color: var(--c-border-strong);
+}
+.df-input:focus {
+  outline: none;
+  border-color: var(--c-accent);
+  box-shadow: var(--shadow-focus);
+}
+.df-input[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Label über Input */
+.df-label {
+  display: block;
+  margin-bottom: var(--space-sm);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--c-text-primary);
+}
+
+
+/* ╔════════════════════════════════════════════════════════════════╗
+   ║ FAQ-DETAILS (Akkordeon — existiert auch in global-design.css   ║
+   ║ als .faq-details, hier als df-Variante für neue Pages)         ║
+   ╚════════════════════════════════════════════════════════════════╝ */
+
+.df-faq {
+  background: var(--c-bg-3);
+  border: 1px solid var(--c-border-subtle);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: border-color var(--transition-base) var(--ease-out);
+}
+.df-faq[open] {
+  border-color: var(--c-border-strong);
+}
+.df-faq-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-body);
+  color: var(--c-text-primary);
+  min-height: var(--tap-min);
+}
+.df-faq-summary::-webkit-details-marker { display: none; }
+.df-faq-summary::after {
+  content: "+";
+  font-size: 1.25rem;
+  color: var(--c-accent);
+  transition: transform var(--transition-base) var(--ease-out);
+}
+.df-faq[open] > .df-faq-summary::after {
+  transform: rotate(45deg);
+}
+.df-faq-body {
+  padding: 0 var(--space-lg) var(--space-lg);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-relaxed);
+  color: var(--c-text-secondary);
+}
+
+
+/* ╔════════════════════════════════════════════════════════════════╗
+   ║ UTILITY-KLASSEN (häufige Layout-Helpers)                       ║
+   ╚════════════════════════════════════════════════════════════════╝ */
+
+/* Grid mit Auto-Fit, Mindestbreite-Kontrolle */
+.df-grid {
+  display: grid;
+  gap: var(--space-lg);
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+@media (min-width: 768px) {
+  .df-grid { gap: var(--space-xl); }
+}
+
+/* Flex-Row (z.B. für CTAs nebeneinander) */
+.df-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  align-items: center;
+}
+
+/* Visually-Hidden (Screen-Reader only) */
+.df-sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
