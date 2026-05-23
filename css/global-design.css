@@ -336,3 +336,31 @@ div[style*="background:#0f1c30"] {
   text-transform: uppercase;
   color: #76a9fa;
 }
+
+/* ════════════════════════════════════════════════════════════
+   Mobile-UX-Fixes 2026-05-23 (aus 3-Agent Audit)
+   ════════════════════════════════════════════════════════════ */
+
+/* P0: WhatsApp-Float global ausblenden — Topbar hat schon WhatsApp oben rechts,
+   Float-Button unten links kollidierte mit Mobile-Bottom-Bar + Chatbot. */
+.df-wa-float { display: none !important; }
+
+/* P0: Anchor-Scroll-Offset für Kontaktformular — Topbar (44) + Navbar (~58) = ~102px
+   ohne diese Regel landet der Browser-Default-Scroll genau unter der Topbar. */
+#kontakt-form,
+form#kontakt-form,
+[id="kontakt-form"] {
+  scroll-margin-top: 120px;
+}
+
+/* P1: Tap-Targets in Topbar auf 44px (BFSG/WCAG 2.5.5) */
+@media (max-width: 767px) {
+  #topbar { height: 48px !important; }
+  #navbar { top: 48px !important; }
+  .topbar-phone,
+  .topbar-whatsapp {
+    min-height: 44px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+  }
+}
