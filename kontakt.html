@@ -990,9 +990,13 @@
       // nicht mit unserer Logik kollidiert, und Reloads sauber bleiben.
       try { history.replaceState(null, '', location.pathname + (slug ? '?produkt='+encodeURIComponent(slug) : '')); } catch(e){}
       const form = document.getElementById('kontakt-form');
-      if (form) {
+      // Scroll auf die ganze Form-Section (mit Headline + Eyebrow), nicht
+      // direkt aufs <form> — sonst landet User mitten in den Feldern ohne
+      // den Kontext "Direkt anfragen — wir antworten schnell".
+      const scrollTarget = form ? (form.closest('section') || form) : null;
+      if (scrollTarget) {
         const scrollNow = () => {
-          const y = form.getBoundingClientRect().top + window.scrollY - 80;
+          const y = scrollTarget.getBoundingClientRect().top + window.scrollY - 100;
           window.scrollTo(0, y);
         };
         // GSAP/ScrollTrigger und Bild-Lazy-Load ändern die Page-Höhe mehrfach
@@ -1003,9 +1007,9 @@
         const iv = setInterval(() => {
           attempts++;
           scrollNow();
-          const r = form.getBoundingClientRect();
-          // Stop wenn Form-Top im Viewport-Top-Bereich (50–120 px) ist
-          if (r.top > 50 && r.top < 120) { clearInterval(iv); }
+          const r = scrollTarget.getBoundingClientRect();
+          // Stop wenn Section-Top im Viewport-Top-Bereich (70–140 px) ist
+          if (r.top > 70 && r.top < 140) { clearInterval(iv); }
           if (attempts >= 20) { clearInterval(iv); }
         }, 200);
         if (slug) {
