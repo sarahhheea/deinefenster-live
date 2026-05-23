@@ -900,6 +900,18 @@
       section > video { display: none; }
       section > video + div[style*="background-image"] { z-index: 0; }
     }
+    /* Hero Mobile-Fix: gleichmäßig dunkler Overlay statt 120deg-Verlauf,
+       damit Text auf Foto-Hintergrund konsistent lesbar bleibt. */
+    @media (max-width: 767px) {
+      section.relative > div.absolute[style*="120deg"] {
+        background: linear-gradient(180deg,
+          rgba(6,14,30,0.92) 0%,
+          rgba(6,14,30,0.78) 50%,
+          rgba(10,21,48,0.65) 100%) !important;
+      }
+      .hero-headline { font-size: 1.55rem !important; line-height: 1.15 !important; }
+      .hero-sub { font-size: 0.92rem !important; }
+    }
   </style>
 
   <!-- Content -->
@@ -907,7 +919,7 @@
     <div class="max-w-2xl">
       <!-- H1 -->
       <h1 class="hero-headline hero-anim df-section-title text-white" data-hero="1" style="font-weight:900;font-size:clamp(1.9rem,4.2vw,3.4rem);text-shadow:0 2px 24px rgba(0,0,0,0.55);max-width:none;line-height:1.05;margin-bottom:var(--space-md);">
-        Türen und Fensterhandel Christ.<br/>
+        <span class="hidden md:inline">Türen und Fensterhandel Christ.</span><span class="md:hidden">Fensterhandel Christ.</span><br/>
         <span class="df-section-title-accent" style="filter:drop-shadow(0 2px 22px rgba(118,169,250,0.45));">Wir lieben Fenster.</span>
       </h1>
 
