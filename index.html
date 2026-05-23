@@ -432,6 +432,13 @@
   .cta-glow::after { content: ''; position: absolute; inset: -2px; border-radius: inherit; background: linear-gradient(135deg, rgba(34,94,170,0.4), rgba(118,169,250,0.2)); opacity: 0; transition: opacity 0.4s ease; z-index: -1; }
   .cta-glow:hover::after { opacity: 1; }
 
+  /* Sichtbarer Keyboard-Focus auf allen Hero-CTAs (Impeccable-Audit P2) */
+  .hero-btns a:focus-visible {
+    outline: 2px solid #76a9fa;
+    outline-offset: 3px;
+    box-shadow: 0 0 0 4px rgba(118,169,250,0.25);
+  }
+
   /* ── Link-Pfeil Animation ── */
   .arrow-slide { display: inline-block; transition: transform 0.3s ease; }
   .hover-lift:hover .arrow-slide, .faq-hover:hover .arrow-slide { transform: translateX(4px); }
@@ -857,13 +864,17 @@
 
 <!-- Hero Section — Foto Lagerhof + blauer Overlay (Video-Variante als Fallback unten auskommentiert) -->
 <section class="relative w-full flex items-start md:items-center overflow-hidden" style="min-height:560px;height:auto;padding-top:96px;padding-bottom:48px">
-  <!-- Foto-Hintergrund: Lagerhof Christ mit gestapelten Drutex-Fenstern -->
-  <img class="absolute inset-0 z-0 w-full h-full object-cover"
-       src="/img/hero-fensterhandel.jpg"
-       alt=""
-       aria-hidden="true"
-       fetchpriority="high"
-       decoding="async">
+  <!-- Foto-Hintergrund: Lagerhof Christ — WebP mit Mobile-Variante (74% kleiner) -->
+  <picture class="absolute inset-0 z-0 w-full h-full">
+    <source media="(max-width:768px)" type="image/webp" srcset="/img/hero-fensterhandel-mobile.webp">
+    <source type="image/webp" srcset="/img/hero-fensterhandel.webp">
+    <img class="w-full h-full object-cover"
+         src="/img/hero-fensterhandel.jpg"
+         alt=""
+         aria-hidden="true"
+         fetchpriority="high"
+         decoding="async">
+  </picture>
   <!--
     Alternative Drutex-Firmen-Animation — bei Bedarf wieder einsetzen:
     video class="absolute inset-0 z-0 w-full h-full object-cover"
