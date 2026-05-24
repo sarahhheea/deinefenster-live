@@ -1007,12 +1007,21 @@
         scrollNow();
         // GSAP-Tweens auf der Form-Section sofort fertig animieren —
         // bei Programm-Scroll bleibt der scrollTrigger sonst mittendrin stehen
-        // (Sarah-Bug 24.05.2026: Headline überlappte Subtitle wegen pausierter Animation).
+        // (Sarah-Bug 24.05.2026: Headline + Email-Feld blieben transparent wegen pausierter Animation).
         const completeTweens = () => {
           try {
-            if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.refresh();
+            if (typeof ScrollTrigger !== 'undefined') {
+              ScrollTrigger.refresh();
+              // ALLE ScrollTrigger-Animationen sofort komplettieren — sicherer als
+              // nur einzelne Elemente, da der Stagger Children-Tweens unabhängig erstellt.
+              ScrollTrigger.getAll().forEach(st => {
+                if (st.animation) st.animation.progress(1);
+              });
+            }
             if (typeof gsap !== 'undefined') {
-              scrollTarget.querySelectorAll('h1, h2, h3, p, form, .grid, [data-anim]').forEach(el => {
+              // Zusätzlich: gsap.getTweensOf für alle Form-Section-Elemente
+              // (Belt-and-Suspenders gegen kaskadierte Animation-Reste)
+              scrollTarget.querySelectorAll('*').forEach(el => {
                 const tweens = gsap.getTweensOf(el);
                 tweens.forEach(t => t.progress(1));
               });
