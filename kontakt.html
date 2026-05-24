@@ -1005,13 +1005,29 @@
         // das Form sichtbar ist — max 4s, dann Stop.
         let attempts = 0;
         scrollNow();
+        // GSAP-Tweens auf der Form-Section sofort fertig animieren —
+        // bei Programm-Scroll bleibt der scrollTrigger sonst mittendrin stehen
+        // (Sarah-Bug 24.05.2026: Headline überlappte Subtitle wegen pausierter Animation).
+        const completeTweens = () => {
+          try {
+            if (typeof ScrollTrigger !== 'undefined') ScrollTrigger.refresh();
+            if (typeof gsap !== 'undefined') {
+              scrollTarget.querySelectorAll('h1, h2, h3, p, form, .grid, [data-anim]').forEach(el => {
+                const tweens = gsap.getTweensOf(el);
+                tweens.forEach(t => t.progress(1));
+              });
+            }
+          } catch(e){}
+        };
+        setTimeout(completeTweens, 100);
+        setTimeout(completeTweens, 600);
         const iv = setInterval(() => {
           attempts++;
           scrollNow();
           const r = scrollTarget.getBoundingClientRect();
           // Stop wenn Section-Top im Viewport-Top-Bereich (70–140 px) ist
-          if (r.top > 70 && r.top < 140) { clearInterval(iv); }
-          if (attempts >= 20) { clearInterval(iv); }
+          if (r.top > 70 && r.top < 140) { clearInterval(iv); completeTweens(); }
+          if (attempts >= 20) { clearInterval(iv); completeTweens(); }
         }, 200);
         if (slug) {
           setTimeout(() => {
