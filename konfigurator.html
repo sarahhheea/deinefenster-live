@@ -266,13 +266,16 @@
     /* Live-Vorschau cleanen — Overlays im Bild raus, sieht aus wie Produktkarte (Sarah-Wunsch 28.04.2026) */
     #prev-color-strip{display:none !important}
     #prev-dim-label{display:none !important}
-    /* Türmodell-Karten: Studio-PNGs sind vorgerendert mit dunkelblauem BG (img/drutex-tueren/studio/).
-       Karten brauchen daher nur einen sauberen Container — kein Multiply/Scale/Gradient nötig. */
-    #s-tm .pc{padding:0;overflow:hidden;border-radius:12px;background:transparent}
+    /* Türmodell-Karten: Studio-Look exakt wie Fenster-Karten (Step 1).
+       PNGs sind transparent (nur Tür + Bodenschatten) — Karten-Container liefert den Studio-Gradient.
+       Gradient matched fenster-anthrazit.png (oben dunkel #0d1f35, unten heller #22466b). */
+    #s-tm .pc{padding:0;overflow:hidden;border-radius:12px;
+      background:radial-gradient(ellipse at 50% 82%, rgba(46,90,140,0.25) 0%, transparent 60%),
+                 linear-gradient(180deg, #0d1f35 0%, #15304a 50%, #22466b 100%);}
     #s-tm .pc-img{
       width:100%;height:160px;
       background:transparent;padding:0;border:none;
-      object-fit:cover;object-position:center;
+      object-fit:contain;object-position:center bottom;
       display:block;
     }
     @media(min-width:1024px){#s-tm .pc-img{height:200px}}
@@ -2152,9 +2155,9 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   #s1 .pc.sel::after { content: 'check_circle' !important; font-family: 'Material Symbols Outlined' !important; font-variation-settings: 'FILL' 1 !important; font-size: 22px !important; color: #4d88ff !important; position: absolute !important; top: 12px !important; right: 12px !important; background: rgba(5,5,15,0.72) !important; border-radius: 50% !important; width: 28px !important; height: 28px !important; display: grid !important; place-items: center !important; line-height: 1 !important; z-index: 6 !important; background-image: none !important; }
   #s1 .pc:not(.sel)::after { content: '' !important; position: absolute !important; top: 0 !important; left: 8% !important; right: 8% !important; height: 1px !important; background: rgba(255,255,255,0.05) !important; background-image: none !important; font-size: 0 !important; }
 
-  /* ── 17. TÜRMODELL-KARTEN ── vorgerenderte Studio-PNGs (img/drutex-tueren/studio/) */
-  #s-tm .pc { background: transparent !important; border: none !important; border-radius: 12px !important; overflow: hidden !important; transition: all 0.22s ease !important; }
-  #s-tm .pc-img { mix-blend-mode: normal !important; object-fit: cover !important; object-position: center !important; transform: none !important; width: 100% !important; }
+  /* ── 17. TÜRMODELL-KARTEN ── Studio-Look exakt wie Fenster-Karten Step 1 */
+  #s-tm .pc { background: radial-gradient(ellipse at 50% 82%, rgba(46,90,140,0.25) 0%, transparent 60%), linear-gradient(180deg, #0d1f35 0%, #15304a 50%, #22466b 100%) !important; border: none !important; border-radius: 12px !important; overflow: hidden !important; transition: all 0.22s ease !important; }
+  #s-tm .pc-img { mix-blend-mode: normal !important; object-fit: contain !important; object-position: center bottom !important; transform: none !important; width: 100% !important; }
   #s-tm .pc:hover { transform: translateY(-4px) !important; box-shadow: 0 8px 24px rgba(0,0,0,0.30) !important; }
   #s-tm .pc.sel  { box-shadow: 0 0 0 2px #4d88ff, 0 8px 24px rgba(77,136,255,0.30) !important; }
   #s-tm .pc-name { font-size: 12.5px !important; color: rgba(255,255,255,0.90) !important; }
