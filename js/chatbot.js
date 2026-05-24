@@ -576,7 +576,7 @@ const QUICK_CHIPS = [
 // ─── HTML ──────────────────────────────────────────────────────────────────────
 (function injectHTML() {
   document.body.insertAdjacentHTML('beforeend', `
-    <div id="df-chat-label" role="button" tabindex="0" aria-label="KI-Chatbot öffnen">
+    <div id="df-chat-label" role="button" tabindex="0" aria-label="Fragen? Ich helfe! KI-Chatbot öffnen">
       <span id="df-chat-label-dot"></span>
       Fragen? Ich helfe!
       <span id="df-chat-label-ki">KI</span>
@@ -669,7 +669,7 @@ if (!IS_AI_MODE) {
   const chatWin = document.getElementById('df-chat-window');
   const chatLabel = document.getElementById('df-chat-label');
   if (chatBtn)   chatBtn.setAttribute('aria-label', 'Fenster-Assistent öffnen');
-  if (chatLabel) chatLabel.setAttribute('aria-label', 'Fenster-Assistent öffnen');
+  if (chatLabel) chatLabel.setAttribute('aria-label', 'Fragen? Ich helfe! Fenster-Assistent öffnen');
   if (chatWin)   chatWin.setAttribute('aria-label', 'DeineFenster Fenster-Assistent');
 }
 
