@@ -368,7 +368,8 @@
     .sec-t:first-child{margin-top:0}
 
     /* FARBE PICKER — Material-Card-Layout (Update 22.05.2026: grosse Cards mit echter Material-Vorschau) */
-    .fp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:12px;align-items:flex-start}
+    /* .fp-grid hostet .farb-section-Blöcke — sollte block sein, nicht grid (sonst landen Sections nebeneinander) */
+    .fp-grid{display:block}
     .fp-item{position:relative;background:#0e1a30;border:2px solid rgba(118,169,250,0.16);border-radius:10px;cursor:pointer;overflow:hidden;transition:all .2s ease;display:flex;flex-direction:column;min-width:0}
     .fp-item:hover{transform:translateY(-3px);border-color:rgba(118,169,250,0.50);box-shadow:0 8px 22px rgba(0,0,0,.45)}
     .fp-item.sel{border-color:#76a9fa;box-shadow:0 0 0 2px rgba(118,169,250,.42),0 6px 18px rgba(0,0,0,.5)}
@@ -2012,6 +2013,16 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
     .step-group::after { display: none !important; }
     /* 3D-Vorschau auf Mobile ausblenden — verwirrt, Zusammenfassung am Ende reicht */
     #sidebar-wrap { display: none !important; }
+  }
+  /* Mobile (<768px): Step-Body padding kleiner + Karten-Grid min 130 für 2 Spalten */
+  @media (max-width: 767px) {
+    .sb { padding: 16px 14px 20px !important; }
+    .farb-section.beliebt { padding: 14px 12px 18px !important; }
+    .sb .farb-section-items,
+    .sb .farb-section.beliebt .farb-section-items {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 10px !important;
+    }
   }
 
   /* ── 15. PROGRESS BAR ── */
