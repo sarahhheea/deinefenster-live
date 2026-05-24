@@ -4280,6 +4280,9 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
         <strong>Balkontür-Set automatisch inklusive:</strong> Schnäpper + Griffmuschel außen (ohne Aufpreis). Bei Wahl "PZ beidseitig" in Schritt 9 entfällt das Balkontür-Set (PZ übernimmt die Funktion).
       </div>
     </div>
+    <button type="button" onclick="openS(10)" class="w-full mt-4 flex items-center justify-center gap-2 font-bold py-3 rounded-full text-white text-sm" style="background:var(--c-primary);font-family:'Plus Jakarta Sans',sans-serif">
+      <i class="ms">arrow_forward</i> Weiter zum Einbruchschutz
+    </button>
   </div>
 </div>
 
@@ -4301,6 +4304,9 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       <i class="ms f" style="color:var(--c-primary);font-size:20px;flex-shrink:0">info</i>
       <div>Die Farbkreise zeigen links die <strong>Innenseite</strong>, rechts klein die <strong>Außenseite</strong>. Mit Schloss von innen = von innen abschließbar. Mit Schloss innen + außen = beidseitig abschließbar (Profilzylinder).</div>
     </div>
+    <button type="button" onclick="openS(10)" class="w-full mt-4 flex items-center justify-center gap-2 font-bold py-3 rounded-full text-white text-sm" style="background:var(--c-primary);font-family:'Plus Jakarta Sans',sans-serif">
+      <i class="ms">arrow_forward</i> Weiter zum Einbruchschutz
+    </button>
   </div>
 </div>
 
@@ -4322,6 +4328,9 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       <i class="ms f" style="color:var(--c-primary);font-size:20px;flex-shrink:0">info</i>
       <div>Drücker öffnen von innen, Stoßgriffe sind feste Griffe zum Ziehen außen. Bei Haustüren ist der Profilzylinder standardmäßig inklusive.</div>
     </div>
+    <button type="button" onclick="openS(10)" class="w-full mt-4 flex items-center justify-center gap-2 font-bold py-3 rounded-full text-white text-sm" style="background:var(--c-primary);font-family:'Plus Jakarta Sans',sans-serif">
+      <i class="ms">arrow_forward</i> Weiter zum Einbruchschutz
+    </button>
   </div>
 </div>
 
@@ -4597,6 +4606,9 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       </div>
 
     </div>
+    <button type="button" onclick="openS(13)" class="w-full mt-4 flex items-center justify-center gap-2 font-bold py-3 rounded-full text-white text-sm" style="background:var(--c-primary);font-family:'Plus Jakarta Sans',sans-serif">
+      <i class="ms">arrow_forward</i> Weiter zur Zusammenfassung
+    </button>
   </div>
 </div>
 
@@ -5660,10 +5672,28 @@ function buildNav() {
   if (ebNum && activeIndex > 0) ebNum.textContent = activeIndex;
 }
 
+// Visuelle Reihenfolge aller Konfigurator-Steps (matched HTML-Order Z.3692-4605)
+const STEP_ORDER = ['2','3','4','5','-anzahl','-tm','6','7','8','9','-balk','9s','9t','10','11','12','-rv','13'];
+
+function findNextVisibleStep(currentN) {
+  const idx = STEP_ORDER.indexOf(String(currentN));
+  if (idx === -1) return null;
+  for (let j = idx + 1; j < STEP_ORDER.length; j++) {
+    const c = document.getElementById('s' + STEP_ORDER[j]);
+    if (c && c.style.display !== 'none') return STEP_ORDER[j];
+  }
+  return null;
+}
+
 function openS(n) {
   const c = document.getElementById('s'+n);
   if (!c) return; // defensive — Step kann ausgeblendet sein (display:none)
-  if (c.style.display === 'none') return; // inline-hidden = nicht für dieses Produkt
+  // QA-Bugfix 2026-05-24: bei Auto-Skip versuche den nächsten sichtbaren Step (Dead-Lock-Vermeidung)
+  if (c.style.display === 'none') {
+    const next = findNextVisibleStep(n);
+    if (next !== null) return openS(next);
+    return;
+  }
   closeOtherSections(c);
   if (!c.classList.contains('open')) c.classList.add('open');
   buildNav(); // linke Nav-Highlights aktualisieren
