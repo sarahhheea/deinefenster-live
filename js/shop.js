@@ -39,6 +39,9 @@ const LS_KEY = 'deinefenster_warenkorb_v1';
 /* ─── Init ─── */
 document.addEventListener('DOMContentLoaded', async () => {
   loadCart();
+  initShopTabs();
+  initShopSticky();
+  updateOpenStatus();
   await checkAuth();
   await loadProdukte();
   baueFilterSidebar();
@@ -47,6 +50,83 @@ document.addEventListener('DOMContentLoaded', async () => {
   rendere();
   updateCartUI();
 });
+
+/* ─── Tab-Navigation für Shop-Hero-Card (BFSG-konform mit Tastatur) ─── */
+function initShopTabs() {
+  const tablist = document.querySelector('.shop-tablist');
+  if (!tablist) return;
+  const tabs = Array.from(tablist.querySelectorAll('.shop-tab'));
+  const panels = Array.from(document.querySelectorAll('.shop-tab-panel'));
+  function activate(idx) {
+    tabs.forEach((tab, i) => {
+      const active = i === idx;
+      tab.setAttribute('aria-selected', active ? 'true' : 'false');
+      tab.setAttribute('tabindex', active ? '0' : '-1');
+    });
+    panels.forEach((panel, i) => {
+      panel.setAttribute('aria-hidden', i === idx ? 'false' : 'true');
+    });
+  }
+  tabs.forEach((tab, idx) => {
+    tab.addEventListener('click', () => { activate(idx); tab.focus(); });
+    tab.addEventListener('keydown', (e) => {
+      let nextIdx = null;
+      if (e.key === 'ArrowRight') nextIdx = (idx + 1) % tabs.length;
+      if (e.key === 'ArrowLeft')  nextIdx = (idx - 1 + tabs.length) % tabs.length;
+      if (e.key === 'Home')       nextIdx = 0;
+      if (e.key === 'End')        nextIdx = tabs.length - 1;
+      if (nextIdx !== null) {
+        e.preventDefault();
+        activate(nextIdx);
+        tabs[nextIdx].focus();
+      }
+    });
+  });
+}
+
+/* ─── Sticky-Mini-Bar: sichtbar wenn Hero-Card aus Viewport scrollt ─── */
+function initShopSticky() {
+  const heroCard = document.getElementById('shopHeroCard');
+  const stickyBar = document.getElementById('shopStickyBar');
+  if (!heroCard || !stickyBar || !('IntersectionObserver' in window)) return;
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          stickyBar.classList.remove('is-visible');
+        } else if (entry.boundingClientRect.top < 0) {
+          stickyBar.classList.add('is-visible');
+        }
+      });
+    },
+    { rootMargin: '0px', threshold: 0 }
+  );
+  observer.observe(heroCard);
+}
+
+/* ─── Open-Status: Lager nur Freitag 10–17 Uhr ─── */
+function updateOpenStatus() {
+  const badge = document.getElementById('shopOpenBadge');
+  const text = document.getElementById('shopOpenText');
+  if (!badge || !text) return;
+  const now = new Date();
+  const day = now.getDay();   // 0=So, 5=Fr
+  const hour = now.getHours();
+  const istFreitagOffen = day === 5 && hour >= 10 && hour < 17;
+  if (istFreitagOffen) {
+    text.textContent = 'Jetzt geöffnet bis 17 Uhr — vor Anfahrt kurz Verfügbarkeit prüfen';
+    badge.classList.remove('shop-open-badge--closed');
+    badge.classList.add('shop-open-badge--open');
+  } else {
+    const daysUntilFr = day === 5 ? (hour >= 17 ? 7 : 0) : (5 - day + 7) % 7;
+    const next = new Date(now);
+    next.setDate(now.getDate() + daysUntilFr);
+    const fmt = new Intl.DateTimeFormat('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit' });
+    text.textContent = `Geschlossen — nächste Öffnung: ${fmt.format(next)}, 10–17 Uhr`;
+    badge.classList.add('shop-open-badge--closed');
+    badge.classList.remove('shop-open-badge--open');
+  }
+}
 
 /* ─── URL-Parameter Filter (z.B. shop.html?zustand=gebraucht oder ?cat=daemmung) ─── */
 function applyUrlFilter() {
@@ -581,24 +661,28 @@ function gefilterteProdukte() {
 /* ─── Shop-Header dynamisch je nach Zustand-Filter ─── */
 const SHOP_HEADERS = {
   default: {
-    label: 'Direkt vor Ort · Brandenburg an der Havel',
-    title: 'Unser Lagerbestand — Drutex Ware direkt zum Mitnehmen',
-    desc: 'Originale <strong>Drutex-Kunststofffenster, Balkontüren und Haustüren</strong> in gängigen Maßen — neu, gebraucht und falsch vermessen. Alles zur Selbstabholung vor Ort in Brandenburg an der Havel. <strong>Bitte Helfer und Transporter mitbringen. Öffnungszeiten beachten.</strong>'
+    label: 'Lager · Brandenburg a.d.H.',
+    title: 'Drutex sofort ab Lager —',
+    titleAccent: 'selbst abholen.',
+    desc: 'Originale <strong>Drutex-Kunststofffenster, Balkontüren und Haustüren</strong> in gängigen Maßen — neu, gebraucht und falsch vermessen. <strong>Tagesaktueller Bestand. Kein Online-Warenkorb.</strong> Vor Anfahrt bitte Verfügbarkeit kurz prüfen. <strong>Helfer + Transporter mitbringen</strong> — kein Verlade-Service.'
   },
   neu: {
-    label: 'Neuware · Brandenburg an der Havel',
-    title: 'Drutex Neuware ab Lager — ungeöffnet, direkt zum Mitnehmen',
-    desc: 'Originale <strong>Drutex-Kunststofffenster, Balkontüren und Haustüren</strong> in gängigen Maßen — neu, ungeöffnet, ab Lager. Zur Selbstabholung vor Ort in Brandenburg an der Havel. <strong>Bitte Öffnungszeiten beachten.</strong>'
+    label: 'Neuware · Brandenburg a.d.H.',
+    title: 'Drutex Neuware ab Lager —',
+    titleAccent: 'ungeöffnet, sofort mit.',
+    desc: 'Originale <strong>Drutex-Kunststofffenster, Balkontüren und Haustüren</strong> in gängigen Maßen — neu, ungeöffnet, ab Lager. Selbstabholung vor Ort in Brandenburg an der Havel. <strong>Helfer + Transporter mitbringen.</strong>'
   },
   gebraucht: {
-    label: 'Gebrauchtware · Brandenburg an der Havel',
-    title: 'Gebrauchte Fenster & Türen direkt vor Ort abholen',
-    desc: 'Gebrauchte <strong>Fenster, Balkontüren und Haustüren</strong> — geprüft, funktional und zu fairen Preisen. Nachhaltig kaufen: Gut erhaltene Fenster weiterverwenden schont Ressourcen und schützt die Umwelt. Zur Selbstabholung vor Ort. <strong>Bitte Helfer und Transporter mitbringen. Öffnungszeiten beachten.</strong>'
+    label: 'Gebrauchtware · Brandenburg a.d.H.',
+    title: 'Gebrauchte Fenster & Türen —',
+    titleAccent: 'direkt vor Ort abholen.',
+    desc: 'Gebrauchte <strong>Fenster, Balkontüren und Haustüren</strong> — geprüft, funktional, zu fairen Preisen. Nachhaltig: gut erhaltene Fenster weiterverwenden statt entsorgen. <strong>Helfer + Transporter mitbringen.</strong>'
   },
   vermessen: {
-    label: 'Falsch vermessen · Bis zu 50 % unter Neupreis · Brandenburg',
-    title: 'Falsch vermessen — Ihr Gewinn. Neuware zum halben Preis.',
-    desc: 'Maßgefertigte <strong>Neuware</strong> — unbenutzt, einwandfreie Qualität — die durch einen Aufmaßfehler nicht gepasst hat. Für Sie bedeutet das: <strong>ein fabrikneues Fenster für ca. 50 % unter Neupreis.</strong> Kein Kompromiss bei Qualität. Zur Selbstabholung vor Ort in Brandenburg an der Havel. <strong>Bitte Helfer und Transporter mitbringen. Öffnungszeiten beachten.</strong>'
+    label: 'Falsch vermessen · bis 50 % unter Neupreis',
+    title: 'Falsch vermessen —',
+    titleAccent: 'Ihr Gewinn.',
+    desc: 'Maßgefertigte <strong>Neuware</strong> — unbenutzt, einwandfreie Qualität — durch Aufmaßfehler nicht gepasst. Für Sie: <strong>fabrikneues Fenster für ca. 50 % unter Neupreis.</strong> Selbstabholung in Brandenburg an der Havel.'
   }
 };
 
@@ -609,10 +693,13 @@ function aktualisiereShopHeader() {
   const title = document.getElementById('shopHeaderTitle');
   const desc  = document.getElementById('shopHeaderDesc');
   if (label) label.textContent = h.label;
-  if (title) title.textContent = h.title;
+  if (title) {
+    title.innerHTML = `${h.title}<br/><span class="shop-hero-title-accent">${h.titleAccent}</span>`;
+  }
   if (desc)  desc.innerHTML = h.desc;
   const hinweis = document.getElementById('gebrauchtHinweis');
-  if (hinweis) hinweis.classList.remove('hidden');
+  if (hinweis && zustand === 'gebraucht') hinweis.classList.remove('hidden');
+  else if (hinweis) hinweis.classList.add('hidden');
 }
 
 /* ─── Render-Pipeline ─── */
@@ -741,6 +828,18 @@ function karteHtml(p) {
     : '';
   const archivStyle = istArchiviert ? 'opacity:0.55;filter:saturate(0.6)' : '';
 
+  // Quick-WhatsApp-Pille: 1-Klick zur Anfrage direkt von der Karte
+  const waText = encodeURIComponent(`Hallo, ist "${p.titel}" (${p.breite_mm}×${p.hoehe_mm} mm, ${formatPreis(p.preis_eur)}) noch verfügbar?`);
+  const waQuick = istArchiviert ? '' : `
+    <a href="https://wa.me/491717263776?text=${waText}" target="_blank" rel="noopener"
+       class="shop-card-wa-quick"
+       onclick="event.stopPropagation()"
+       aria-label="Per WhatsApp anfragen"
+       title="WhatsApp-Anfrage zu diesem Produkt">
+      <span class="material-symbols-outlined">chat</span>
+      <span>Anfragen</span>
+    </a>`;
+
   return `
     <article class="karte" data-action="detail" data-id="${p.id}" style="${archivStyle}">
       <div class="karte-bild-wrap" style="position:relative">
@@ -749,6 +848,7 @@ function karteHtml(p) {
         ${archivBadge}
         ${druckIcon}
         ${aktionMenu}
+        ${waQuick}
       </div>
       <div class="p-4 flex flex-col flex-1">
         <div class="flex flex-wrap gap-1.5 mb-2">${standBadge}${zustandBadge}${sonderpreisBadge}${exportBadge}${groesseBadge}${verglasungBadge}${rcBadge}${lagerBadge}</div>
