@@ -727,20 +727,11 @@ function buildInnenBeschlag() {
   // Stadium-Shape: voller Halbkreis oben + unten (Eckradius = halbe Breite)
   const plShape = roundedRectShape(PLATE_W, PLATE_H, PLATE_W / 2);
 
-  // Loch 1: Drücker-Spindel — rund, Ø22mm (Hals Ø19mm geht durch, 1.5mm Spiel)
+  // DEBUG v7.2: HOLES KOMPLETT AUSKOMMENTIERT — Plate solid, sollte pink sein wenn Triangulation klappt
   const SPINDLE_R   = 0.011;
-  const localHandleY = KY_HANDLE - plateY;  // shape ist auf (0,0) zentriert
-  const spindleHole = new THREE.Path();
-  spindleHole.absarc(0, localHandleY, SPINDLE_R, 0, Math.PI * 2, true);
-  plShape.holes.push(spindleHole);
-
-  // Loch 2: PZ-Zylinder — nur RUNDES Loch in Plate (Ø20mm)
-  // Das Schlüsselloch sitzt auf der PZ-Stirnfläche, NICHT in der Plate (das ist die echte Anatomie!)
+  const localHandleY = KY_HANDLE - plateY;
   const PZ_HOLE_R   = 0.010;
   const localLockY  = KY_LOCK - plateY;
-  const pzHole = new THREE.Path();
-  pzHole.absarc(0, localLockY, PZ_HOLE_R, 0, Math.PI * 2, true);
-  plShape.holes.push(pzHole);
 
   // Plate: clean extrude OHNE Bevel — echtes Beschlag-Vorbild hat klare Kanten
   // DoubleSide PFLICHT: doorGroup.scale.x=-1 (DIN-Rechts-Mirror) flippt die Triangle-
