@@ -428,6 +428,31 @@
     .sb .farb-section.beliebt .farb-section-items{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
     .sb .fp-item.fp-big .fp-name{font-size:12.5px}
 
+    /* FARB-AKKORDEONS (Außen + Innen) — Sarah-Refactor 24.05.2026
+       Single-Open: nur 1 Kategorie zur Zeit offen → kein langes Scrollen.
+       Header zeigt gewählte Farbe als Punkt rechts wenn aus dieser Gruppe selektiert. */
+    .farb-akko{margin-bottom:14px;border:1px solid rgba(118,169,250,0.18);border-radius:12px;overflow:hidden;background:rgba(255,255,255,0.02);transition:border-color var(--t-fast) var(--ease)}
+    .farb-akko.open{border-color:rgba(118,169,250,0.32)}
+    .farb-akko-head{display:flex;align-items:center;gap:10px;padding:13px 16px;cursor:pointer;user-select:none;transition:background var(--t-fast) var(--ease);outline:none}
+    .farb-akko-head:hover{background:rgba(118,169,250,0.06)}
+    .farb-akko-head:focus-visible{box-shadow:var(--focus-ring) inset}
+    .farb-akko.open .farb-akko-head{background:rgba(118,169,250,0.10);border-bottom:1px solid rgba(118,169,250,0.16)}
+    .farb-akko-icon{color:#76a9fa;font-size:18px;flex-shrink:0}
+    .farb-akko-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:800;color:#e7eefc;letter-spacing:-.005em;flex:1;min-width:0}
+    .farb-akko-count{font-size:11.5px;font-weight:600;color:rgba(232,238,255,0.50);letter-spacing:.02em;flex-shrink:0}
+    .farb-akko-sel{display:none;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:rgba(232,238,255,0.92);flex-shrink:0;max-width:140px}
+    .farb-akko-sel-dot{width:14px;height:14px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.35);background-size:cover;background-position:center;background-repeat:no-repeat;flex-shrink:0}
+    .farb-akko-sel-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+    .farb-akko-arrow{color:#76a9fa;font-size:20px;transition:transform var(--t-norm) var(--ease);margin-left:4px;flex-shrink:0}
+    .farb-akko.open .farb-akko-arrow{transform:rotate(180deg)}
+    .farb-akko-body{max-height:0;overflow:hidden;transition:max-height var(--t-norm) var(--ease)}
+    .farb-akko.open .farb-akko-body{max-height:3600px}
+    .farb-akko-body-inner{padding:16px}
+    @media(prefers-reduced-motion:reduce){
+      .farb-akko-body{transition:none}
+      .farb-akko-arrow{transition:none}
+    }
+
     /* GLAS-AUSWAHL — größere Karten mit SVG-Visualisierung */
     .glass-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
     .glass-card{position:relative;display:flex;gap:14px;padding:14px;background:rgba(118,169,250,0.05);border:1.5px solid rgba(118,169,250,0.18);border-radius:12px;cursor:pointer;transition:all .18s ease;align-items:center}
@@ -2240,37 +2265,38 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   /* Mobile-Picker: Disclaimer + H2 + 4 Karten — alles im First-View */
   @media (max-width: 767px) {
     #prod-hero {
-      padding: 10px 10px 10px !important;
-      gap: 10px !important;
+      padding: 5px 8px 6px !important;
+      gap: 4px !important;
       top: calc(97px + env(safe-area-inset-top, 0px)) !important;
       justify-content: flex-start !important;
     }
-    /* Disclaimer — kompakt aber Text nicht abgeschnitten */
+    /* Disclaimer maximal kompakt: 1-zeilig */
     #prod-hero .hero-disclaimer {
-      padding: 9px 12px !important;
-      font-size: 11px !important;
-      line-height: 1.35 !important;
-      gap: 8px !important;
-      align-items: flex-start !important;
+      padding: 5px 9px !important;
+      font-size: 10px !important;
+      line-height: 1.25 !important;
+      gap: 6px !important;
+      align-items: center !important;
     }
-    #prod-hero .hero-disclaimer .ms { font-size: 15px !important; margin-top: 1px !important; }
-    #prod-hero .hero-disclaimer .hd-body strong.hd-title { font-size: 11.5px !important; margin: 0 0 1px 0 !important; display: block !important; }
-    #prod-hero .hero-head { max-width: 100% !important; margin: 0 !important; padding: 2px 0 !important; }
+    #prod-hero .hero-disclaimer .ms { font-size: 13px !important; margin-top: 0 !important; }
+    #prod-hero .hero-disclaimer .hd-body strong.hd-title { font-size: 10px !important; margin: 0 !important; display: inline !important; }
+    /* H2 kompakt — auf 1 Zeile */
+    #prod-hero .hero-head { max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
     #prod-hero .hero-eyebrow { display: none !important; }
     #prod-hero h1, #prod-hero h2 {
-      font-size: 18px !important;
+      font-size: 14px !important;
       margin: 0 !important;
-      line-height: 1.15 !important;
+      line-height: 1.1 !important;
     }
-    /* br BLEIBT — 'konfigurieren?' kommt auf eigener Zeile */
-    #prod-hero h2 span { font-size: 18px !important; }
+    #prod-hero h2 br { display: none !important; }
+    #prod-hero h2 span { font-size: 14px !important; }
     #prod-hero .hero-sub { display: none !important; }
-    /* Karten — nahtlos: Bild deckt Kasten komplett, keine sichtbaren Rahmen */
-    #prod-hero .hero-grid { gap: 6px !important; }
-    #prod-hero .hcard { border-radius: 12px !important; overflow: hidden !important; }
+    /* Karten — nahtlos, Bilder bleiben gross */
+    #prod-hero .hero-grid { gap: 5px !important; }
+    #prod-hero .hcard { border-radius: 10px !important; overflow: hidden !important; }
     #prod-hero .hcard-img-wrap {
       aspect-ratio: auto !important;
-      height: 195px !important;
+      height: 180px !important;
       padding: 0 !important;
       background: #0a1530 !important;
     }
@@ -2280,18 +2306,18 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       height: 100% !important;
       object-position: center !important;
     }
-    #prod-hero .hcard-info { padding: 4px 10px 6px !important; }
+    #prod-hero .hcard-info { padding: 3px 8px 4px !important; }
     #prod-hero .hcard-name-top {
-      font-size: 13px !important;
+      font-size: 11.5px !important;
       font-weight: 700 !important;
-      padding: 6px 10px 2px !important;
+      padding: 4px 8px 1px !important;
       letter-spacing: -0.01em !important;
     }
     #prod-hero .hcard-cta {
-      font-size: 9.5px !important;
-      letter-spacing: 0.06em !important;
+      font-size: 8.5px !important;
+      letter-spacing: 0.05em !important;
     }
-    #prod-hero .hcard-cta svg { width: 11px !important; height: 11px !important; }
+    #prod-hero .hcard-cta svg { width: 10px !important; height: 10px !important; }
     #mobile-bottom-bar { display: none !important; }
   }
   #prod-hero .hcard {
