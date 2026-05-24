@@ -10246,8 +10246,11 @@ function _renderBalkontuer3d() {
   if (!wrap || !frame) return;
   _show3dHint(true);
 
-  // 3D zeigt Innenansicht (Griff sichtbar) → Innenfarbe S.fi
-  const _ck    = HAUS3D_COLOR_MAP[S.fi] || HAUS3D_COLOR_MAP[S.fa] || 'anthrazitgrau';
+  // Sarah-Fix 24.05.2026: View-abhängige Farbe — bei Außen-Ansicht S.fa, sonst S.fi.
+  // Vorher: immer S.fi → Außenfarbe-Auswahl hatte keinen visuellen Effekt im 3D-Modell.
+  const _view  = (typeof previewView !== 'undefined' && previewView === 'aus') ? 'aussen' : 'innen';
+  const _farb  = (_view === 'aussen') ? (S.fa || S.fi) : (S.fi || S.fa);
+  const _ck    = HAUS3D_COLOR_MAP[_farb] || HAUS3D_COLOR_MAP[S.fi] || 'anthrazitgrau';
   const isWood = HAUS3D_WOOD_KEYS.has(_ck);
   const _side  = (S.oeff1 === 'dreh-l' || S.oeff1 === 'dk-l') ? 'l' : 'r';
   const _layout = S.fluegel || '1-fluegel';
@@ -10387,7 +10390,10 @@ function _renderHaustuer3d(previewView) {
   const _mdl   = S.tuerModell || 'florida-lr-inox';
   const _side  = (S.oeff1 === 'dreh-l') ? 'l' : 'r';
   const _view  = (previewView === 'inn') ? 'innen' : 'aussen';
-  const _ck    = HAUS3D_COLOR_MAP[S.fa] || 'anthrazitgrau';
+  // Sarah-Fix 24.05.2026: View-abhängige Farbe — bei Innen-Ansicht S.fi, sonst S.fa.
+  // Vorher: immer S.fa → Innenfarbe-Auswahl hatte keinen visuellen Effekt im 3D-Modell.
+  const _farb  = (_view === 'innen') ? (S.fi || S.fa) : (S.fa || S.fi);
+  const _ck    = HAUS3D_COLOR_MAP[_farb] || HAUS3D_COLOR_MAP[S.fa] || 'anthrazitgrau';
   const isWood = HAUS3D_WOOD_KEYS.has(_ck);
 
   const _isLoaded = haus3dFrame.src.includes('haustuer-3d');
