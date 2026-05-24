@@ -127,6 +127,8 @@ function updateOpenStatus() {
     badge.classList.remove('shop-open-badge--open');
   }
 }
+// Auto-Refresh alle 60 Sekunden — Badge springt um wenn Freitag 10 Uhr beginnt/17 Uhr endet
+setInterval(updateOpenStatus, 60000);
 
 /* ─── URL-Parameter Filter (z.B. shop.html?zustand=gebraucht oder ?cat=daemmung) ─── */
 function applyUrlFilter() {
