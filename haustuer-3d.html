@@ -757,49 +757,37 @@ function buildInnenBeschlag() {
   nutHole.position.set(KX, KY_HANDLE, DD + PLATE_THK + ROSETTE_THK + 0.0015);
   doorGroup.add(nutHole);
 
-  // KLINKE (Lever): Roxx-Bügelgriff Innenseite (Kundenwunsch 2026-05-19).
-  // Charakteristik: kurze, fast vertikale Aufwärtsphase aus der Rosette,
-  // kompakter 90°-Radius am Oberteil, langer fast horizontaler Hebelstab
-  // Richtung Bandseite, Tip leicht nach unten geneigt. Glatter Rundstab.
-  const LEVER_R       = 0.0110;  // ~22mm Durchmesser, gebürstetes Edelstahl
-  const LEVER_BASE_Z  = DD + PLATE_THK + ROSETTE_THK + 0.0015;
-  const LEVER_Y_TOP   = KY_HANDLE + 0.028;  // Höhe des horizontalen Hebelstabs
+  // KLINKE: Standard Drutex-Innendrücker (Hoppe-Stil L-Form).
+  // Charakteristik: kurzer Hals senkrecht zur Tür (Z-Achse), 90°-Bogen,
+  // dann gerader Hebel PARALLEL zur Türfläche (Z konstant).
+  // Material: gebürstetes Edelstahl (handleMat).
+  const LEVER_R         = 0.0095;  // ~19mm Durchmesser, schlanker Hoppe-Stil
+  const LEVER_BASE_Z    = DD + PLATE_THK + ROSETTE_THK + 0.001;
+  const LEVER_NECK_LEN  = 0.025;   // Hals 25mm aus der Tür raus
+  const LEVER_BAR_LEN   = 0.110;   // Hebel 110mm zur Türmitte
+  const LEVER_FRONT_Z   = LEVER_BASE_Z + LEVER_NECK_LEN;
 
+  // L-Form: Hals (entlang Z) → 90°-Bogen → Hebel (entlang -X), beides auf gleicher Y-Höhe
   const leverPath = new THREE.CatmullRomCurve3([
-    // 0: Austritt aus Rosette (am Sockel)
-    new THREE.Vector3(KX,           KY_HANDLE,           LEVER_BASE_Z),
-    // 1: Kurzer Hals, fast vertikal hoch
-    new THREE.Vector3(KX - 0.001,   KY_HANDLE + 0.012,   LEVER_BASE_Z + 0.006),
-    new THREE.Vector3(KX - 0.004,   KY_HANDLE + 0.022,   LEVER_BASE_Z + 0.012),
-    // 2: 90°-Radius (Oberteil)
-    new THREE.Vector3(KX - 0.015,   LEVER_Y_TOP,         LEVER_BASE_Z + 0.022),
-    new THREE.Vector3(KX - 0.030,   LEVER_Y_TOP,         LEVER_BASE_Z + 0.026),
-    // 3: Horizontaler Hebelstab (lang, Richtung Bandseite)
-    new THREE.Vector3(KX - 0.058,   LEVER_Y_TOP - 0.001, LEVER_BASE_Z + 0.026),
-    new THREE.Vector3(KX - 0.090,   LEVER_Y_TOP - 0.004, LEVER_BASE_Z + 0.024),
-    // 4: Tip absinkend
-    new THREE.Vector3(KX - 0.118,   LEVER_Y_TOP - 0.012, LEVER_BASE_Z + 0.020),
-    new THREE.Vector3(KX - 0.135,   LEVER_Y_TOP - 0.022, LEVER_BASE_Z + 0.016),
-  ], false, 'catmullrom', 0.45);
-  const leverGeom = new THREE.TubeGeometry(leverPath, 96, LEVER_R, 24, false);
+    new THREE.Vector3(KX,                       KY_HANDLE, LEVER_BASE_Z),
+    new THREE.Vector3(KX,                       KY_HANDLE, LEVER_BASE_Z + 0.010),
+    new THREE.Vector3(KX,                       KY_HANDLE, LEVER_BASE_Z + 0.018),
+    new THREE.Vector3(KX - 0.005,               KY_HANDLE, LEVER_FRONT_Z - 0.002),
+    new THREE.Vector3(KX - 0.015,               KY_HANDLE, LEVER_FRONT_Z),
+    new THREE.Vector3(KX - 0.035,               KY_HANDLE, LEVER_FRONT_Z),
+    new THREE.Vector3(KX - 0.065,               KY_HANDLE, LEVER_FRONT_Z),
+    new THREE.Vector3(KX - LEVER_BAR_LEN,       KY_HANDLE, LEVER_FRONT_Z),
+  ], false, 'catmullrom', 0.5);
+  const leverGeom = new THREE.TubeGeometry(leverPath, 80, LEVER_R, 20, false);
   const lever = new THREE.Mesh(leverGeom, handleMat);
   lever.castShadow = true;
   doorGroup.add(lever);
 
-  // Endkappe (rundet den Hebelabschluss)
-  const tipCap = new THREE.Mesh(new THREE.SphereGeometry(LEVER_R, 24, 16), handleMat);
-  tipCap.position.set(KX - 0.135, LEVER_Y_TOP - 0.022, LEVER_BASE_Z + 0.016);
+  // Endkappe (gerundet)
+  const tipCap = new THREE.Mesh(new THREE.SphereGeometry(LEVER_R, 20, 14), handleMat);
+  tipCap.position.set(KX - LEVER_BAR_LEN, KY_HANDLE, LEVER_FRONT_Z);
   tipCap.castShadow = true;
   doorGroup.add(tipCap);
-
-  // Übergang Rosette → Lever (kleiner konischer Sockel, breiter weil Bügel dicker)
-  const stem = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.012, 0.016, 0.008, 28), handleMat
-  );
-  stem.rotation.x = Math.PI / 2;
-  stem.position.set(KX, KY_HANDLE, DD + PLATE_THK + ROSETTE_THK + 0.004);
-  stem.castShadow = true;
-  doorGroup.add(stem);
 }
 
 function setModel(key) {
