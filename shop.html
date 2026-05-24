@@ -631,50 +631,59 @@ input[type="range"].range-clean::-moz-range-thumb {
   .karte, .drawer, .overlay, .filter-sidebar { transition: none !important; }
 }
 
-/* ── SHOP HERO-CARD (Refactor 2026-05-24) ── */
+/* ── SHOP HERO-CARD (Refactor 2026-05-24, v2 mobile-first kompakt) ── */
 .shop-hero-card {
   background: linear-gradient(180deg, #0a1225 0%, #0f1c30 100%);
   border: 1px solid rgba(118,169,250,0.18);
-  border-radius: 16px;
-  padding: 28px 28px 24px;
-  margin: 80px auto 0;
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin: 72px auto 0;
   max-width: 1440px;
   position: relative;
 }
 @media (max-width: 768px) {
   .shop-hero-card {
-    padding: 22px 18px 18px;
+    padding: 14px 16px;
     border-radius: 12px;
-    margin-top: 70px;
+    margin-top: 64px;
   }
+}
+.shop-hero-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 .shop-hero-eyebrow {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 14px;
+  gap: 10px;
   font-size: 10.5px;
   font-weight: 700;
-  letter-spacing: 0.24em;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
   color: rgba(118,169,250,0.85);
 }
 .shop-hero-eyebrow::before {
   content: '';
   display: inline-block;
-  width: 22px;
+  width: 18px;
   height: 1px;
   background: #76a9fa;
   flex-shrink: 0;
 }
 .shop-hero-title {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: clamp(1.6rem, 3.2vw, 2.4rem);
+  font-size: clamp(1.15rem, 2.2vw, 1.6rem);
   font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
   color: #e8eeff;
-  margin: 0 0 20px;
+  margin: 0;
+  flex: 1;
+  min-width: 200px;
 }
 .shop-hero-title-accent {
   font-family: 'Fraunces', serif;
@@ -682,88 +691,111 @@ input[type="range"].range-clean::-moz-range-thumb {
   font-style: italic;
   color: #76a9fa;
 }
-.shop-tablist {
+.shop-hero-bottom {
   display: flex;
-  gap: 6px;
-  border-bottom: 1px solid rgba(118,169,250,0.12);
-  margin-bottom: 18px;
-  overflow-x: auto;
-  scrollbar-width: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
 }
-.shop-tablist::-webkit-scrollbar { display: none; }
-.shop-tab {
-  background: transparent;
-  border: none;
-  padding: 11px 16px;
+.shop-hero-info-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: rgba(118,169,250,0.10);
+  border: 1px solid rgba(118,169,250,0.25);
+  border-radius: 999px;
   font-family: 'Manrope', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: #76a9fa;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  min-height: 40px;
+  flex-shrink: 0;
+}
+.shop-hero-info-toggle:hover {
+  background: rgba(118,169,250,0.18);
+  border-color: rgba(118,169,250,0.4);
+}
+.shop-hero-info-toggle .material-symbols-outlined {
+  font-size: 16px;
+  transition: transform 0.2s;
+}
+.shop-hero-info[open] .shop-hero-info-toggle .material-symbols-outlined.chev {
+  transform: rotate(180deg);
+}
+.shop-hero-info { margin: 0; }
+.shop-hero-info > summary {
+  list-style: none;
+  cursor: pointer;
+  display: inline-block;
+}
+.shop-hero-info > summary::-webkit-details-marker { display: none; }
+.shop-hero-info-content {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(118,169,250,0.12);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+@media (min-width: 768px) {
+  .shop-hero-info-content { grid-template-columns: 1fr 1fr; gap: 16px 24px; }
+}
+.shop-info-section {
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  line-height: 1.6;
+  color: rgba(232,238,255,0.75);
+}
+.shop-info-section h4 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: rgba(232,238,255,0.55);
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
-  white-space: nowrap;
-  transition: color 0.2s, border-color 0.2s;
-  min-height: 44px;
-}
-.shop-tab:hover { color: rgba(232,238,255,0.85); }
-.shop-tab[aria-selected="true"] {
   color: #76a9fa;
-  border-bottom-color: #76a9fa;
+  margin: 0 0 6px 0;
 }
-.shop-tab:focus-visible {
-  outline: 2px solid #76a9fa;
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-.shop-tab-panel {
-  display: none;
-  font-family: 'Manrope', sans-serif;
-  font-size: 14px;
-  line-height: 1.65;
-  color: rgba(232,238,255,0.78);
-}
-.shop-tab-panel[aria-hidden="false"] { display: block; }
-.shop-tab-panel strong { color: #e8eeff; font-weight: 700; }
-.shop-tab-panel a { color: #76a9fa; text-decoration: underline; }
-.shop-hero-ctas {
+.shop-info-section p, .shop-info-section ul { margin: 0; }
+.shop-info-section ul { padding-left: 18px; }
+.shop-info-section strong { color: #e8eeff; font-weight: 700; }
+.shop-info-section a { color: #76a9fa; text-decoration: underline; }
+.shop-info-ctas {
+  margin-top: 12px;
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 16px;
+  gap: 8px;
+  grid-column: 1 / -1;
 }
-.shop-hero-cta {
+.shop-info-cta {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 11px 18px;
+  gap: 6px;
+  padding: 9px 16px;
   border-radius: 999px;
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 12.5px;
   text-decoration: none;
-  min-height: 44px;
-  transition: transform 0.15s, box-shadow 0.15s;
+  min-height: 40px;
 }
-.shop-hero-cta:hover { transform: translateY(-1px); }
-.shop-hero-cta--wa { background: #25D366; color: #fff; box-shadow: 0 6px 18px rgba(37,211,102,0.30); }
-.shop-hero-cta--wa:hover { box-shadow: 0 10px 22px rgba(37,211,102,0.40); }
-.shop-hero-cta--tel { background: #225eaa; color: #fff; box-shadow: 0 6px 18px rgba(34,94,170,0.30); }
-.shop-hero-cta--tel:hover { background: #1a4a87; box-shadow: 0 10px 22px rgba(34,94,170,0.40); }
-.shop-hero-cta--mail { background: transparent; color: #76a9fa; border: 1.5px solid rgba(118,169,250,0.5); }
-.shop-hero-cta--mail:hover { background: rgba(118,169,250,0.08); }
+.shop-info-cta--wa { background: #25D366; color: #fff; }
+.shop-info-cta--tel { background: #225eaa; color: #fff; }
+.shop-info-cta--mail { background: transparent; color: #76a9fa; border: 1.5px solid rgba(118,169,250,0.5); }
+.shop-info-cta .material-symbols-outlined { font-size: 15px; }
 .shop-open-badge {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 5px 12px;
+  gap: 6px;
+  padding: 4px 10px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  margin-bottom: 12px;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
 }
 .shop-open-badge--open {
   background: rgba(74,222,128,0.15);
@@ -852,33 +884,62 @@ input[type="range"].range-clean::-moz-range-thumb {
   line-height: 1.5;
 }
 .shop-pangv-mini a { color: rgba(118,169,250,0.7); text-decoration: underline; }
-.shop-card-wa-quick {
-  position: absolute;
-  top: 8px;
-  left: 8px;
+/* Karten-CTA-Footer: WhatsApp groß, Details klein */
+.shop-card-cta-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+.shop-card-cta-wa {
+  flex: 1;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 7px 12px;
+  padding: 11px 12px;
   background: #25D366;
   color: #fff;
-  border-radius: 999px;
+  border-radius: 10px;
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-weight: 700;
-  font-size: 11px;
+  font-size: 13px;
   text-decoration: none;
-  box-shadow: 0 4px 12px rgba(37,211,102,0.4);
-  z-index: 5;
-  transition: transform 0.15s, box-shadow 0.15s;
-  min-height: 32px;
+  box-shadow: 0 4px 10px rgba(37,211,102,0.30);
+  transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+  min-height: 44px;
+  border: none;
+  cursor: pointer;
 }
-.shop-card-wa-quick:hover {
+.shop-card-cta-wa:hover {
+  background: #1da851;
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(37,211,102,0.5);
+  box-shadow: 0 6px 14px rgba(37,211,102,0.40);
 }
-.shop-card-wa-quick .material-symbols-outlined { font-size: 14px; }
-@media (max-width: 640px) {
-  .shop-card-wa-quick { padding: 6px 10px; font-size: 10px; }
+.shop-card-cta-wa .material-symbols-outlined { font-size: 16px; }
+.shop-card-cta-details {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 11px 14px;
+  background: transparent;
+  color: #76a9fa;
+  border: 1.5px solid rgba(118,169,250,0.35);
+  border-radius: 10px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  min-height: 44px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.shop-card-cta-details:hover { background: rgba(118,169,250,0.08); border-color: rgba(118,169,250,0.6); }
+.shop-card-cta-details .material-symbols-outlined { font-size: 16px; }
+@media (max-width: 480px) {
+  .shop-card-cta-wa { font-size: 12px; padding: 10px 8px; }
+  .shop-card-cta-details { padding: 10px 10px; }
+  .shop-card-cta-details span:not(.material-symbols-outlined) { display: none; }
 }
 /* ── END SHOP HERO-CARD ── */
 </style>
@@ -1346,102 +1407,77 @@ input[type="range"].range-clean::-moz-range-thumb {
   </div>
 </div>
 
-<!-- HERO-CARD (Refactor 2026-05-24) -->
+<!-- HERO-CARD v2 — kompakter Inserat-Header (Refactor 2026-05-24) -->
 <div class="max-w-[1440px] mx-auto px-6 md:px-12">
 <header id="shopHeroCard" class="shop-hero-card">
-  <!-- Eyebrow -->
-  <div class="shop-hero-eyebrow">
-    <span id="shopHeaderLabel">Lager · Brandenburg a.d.H.</span>
-    <span style="color:rgba(255,255,255,0.2);">·</span>
-    <span style="letter-spacing:normal;text-transform:none;font-weight:600;color:rgba(232,238,255,0.65);"><span id="produktAnzahl" style="color:#e8eeff;font-weight:700;">–</span> Produkte verfügbar</span>
-  </div>
-
-  <!-- Open-Status (JS aktualisiert) -->
-  <div id="shopOpenBadge" class="shop-open-badge shop-open-badge--closed">
-    <span class="shop-open-dot" aria-hidden="true"></span>
-    <span id="shopOpenText">Geöffnet nur Freitag 10–17 Uhr</span>
-  </div>
-
-  <!-- Headline -->
-  <h1 id="shopHeaderTitle" class="shop-hero-title">
-    Drutex sofort ab Lager —<br/>
-    <span class="shop-hero-title-accent">selbst abholen.</span>
-  </h1>
-
-  <!-- Tab-Navigation -->
-  <div class="shop-tablist" role="tablist" aria-label="Shop-Hinweise">
-    <button class="shop-tab" role="tab" aria-selected="true" aria-controls="tab-hinweis" id="tab-btn-hinweis" data-tab="hinweis" tabindex="0">Hinweis</button>
-    <button class="shop-tab" role="tab" aria-selected="false" aria-controls="tab-verfuegbarkeit" id="tab-btn-verfuegbarkeit" data-tab="verfuegbarkeit" tabindex="-1">Verfügbarkeit</button>
-    <button class="shop-tab" role="tab" aria-selected="false" aria-controls="tab-preise" id="tab-btn-preise" data-tab="preise" tabindex="-1">Preise</button>
-    <button class="shop-tab" role="tab" aria-selected="false" aria-controls="tab-anfahrt" id="tab-btn-anfahrt" data-tab="anfahrt" tabindex="-1">Anfahrt</button>
-  </div>
-
-  <!-- Tab-Panels -->
-  <div class="shop-tab-panel" role="tabpanel" id="tab-hinweis" aria-labelledby="tab-btn-hinweis" aria-hidden="false">
-    <p id="shopHeaderDesc" style="margin:0;max-width:760px;">
-      Originale <strong>Drutex-Kunststofffenster, Balkontüren und Haustüren</strong> in gängigen Maßen — neu, gebraucht und falsch vermessen. <strong>Tagesaktueller Bestand. Kein Online-Warenkorb.</strong> Vor Anfahrt bitte Verfügbarkeit kurz prüfen. <strong>Helfer + Transporter mitbringen</strong> — kein Verlade-Service.
-    </p>
-    <div class="shop-hero-ctas">
-      <a href="https://wa.me/491717263776?text=Hallo,%20ich%20m%C3%B6chte%20die%20Verf%C3%BCgbarkeit%20pr%C3%BCfen." target="_blank" rel="noopener" class="shop-hero-cta shop-hero-cta--wa">
-        <span class="material-symbols-outlined" style="font-size:16px">chat</span>
-        WhatsApp prüfen
-      </a>
-      <a href="tel:+4933812148373" class="shop-hero-cta shop-hero-cta--tel">
-        <span class="material-symbols-outlined" style="font-size:16px">call</span>
-        03381 2148373
-      </a>
-      <a href="mailto:info@baustoffchrist.de?subject=Anfrage%20Lager-Shop" class="shop-hero-cta shop-hero-cta--mail">
-        <span class="material-symbols-outlined" style="font-size:16px">mail</span>
-        E-Mail anfragen
-      </a>
+  <!-- Top-Zeile: Eyebrow links + Open-Badge rechts -->
+  <div class="shop-hero-top">
+    <div class="shop-hero-eyebrow">
+      <span id="shopHeaderLabel">Lager · Brandenburg a.d.H.</span>
+      <span style="color:rgba(255,255,255,0.2);">·</span>
+      <span style="letter-spacing:normal;text-transform:none;font-weight:600;color:rgba(232,238,255,0.65);"><span id="produktAnzahl" style="color:#e8eeff;font-weight:700;">–</span> Produkte</span>
+    </div>
+    <div id="shopOpenBadge" class="shop-open-badge shop-open-badge--closed">
+      <span class="shop-open-dot" aria-hidden="true"></span>
+      <span id="shopOpenText">Geöffnet nur Freitag 10–17 Uhr</span>
     </div>
   </div>
 
-  <div class="shop-tab-panel" role="tabpanel" id="tab-verfuegbarkeit" aria-labelledby="tab-btn-verfuegbarkeit" aria-hidden="true">
-    <p style="margin:0;max-width:760px;">
-      Bestand wechselt — Artikel kommen rein und raus. <strong>Bitte vor Anfahrt kurz Verfügbarkeit prüfen:</strong>
-    </p>
-    <ul style="margin:10px 0 0;padding-left:20px;list-style:disc;">
-      <li>WhatsApp <a href="https://wa.me/491717263776" target="_blank" rel="noopener">0171 7263776</a> — schnellste Antwort</li>
-      <li>Telefon <a href="tel:+4933812148373">03381 2148373</a> während Öffnungszeit Freitag 10–17 Uhr</li>
-      <li>E-Mail <a href="mailto:info@baustoffchrist.de">info@baustoffchrist.de</a> — Antwort innerhalb 24h werktags</li>
-    </ul>
-    <p style="margin:10px 0 0;font-size:12.5px;color:rgba(232,238,255,0.55);">
-      Reservierung max. 48h ab Zusage. Bei mehreren Anfragen gilt First-Come-First-Served.
-    </p>
-  </div>
+  <!-- Bottom-Zeile: H1 + Info-Toggle als Disclosure -->
+  <details id="shopHeroInfo" class="shop-hero-info">
+    <summary>
+      <div class="shop-hero-bottom">
+        <h1 id="shopHeaderTitle" class="shop-hero-title">
+          Drutex sofort ab Lager — <span class="shop-hero-title-accent">selbst abholen.</span>
+        </h1>
+        <span class="shop-hero-info-toggle" aria-label="So läuft der Shop">
+          <span class="material-symbols-outlined">info</span>
+          So läuft's
+          <span class="material-symbols-outlined chev">expand_more</span>
+        </span>
+      </div>
+    </summary>
 
-  <div class="shop-tab-panel" role="tabpanel" id="tab-preise" aria-labelledby="tab-btn-preise" aria-hidden="true">
-    <p style="margin:0;max-width:760px;">
-      Alle Preise im Shop sind <strong>Endpreise inkl. der gesetzlichen Mehrwertsteuer von 19 %</strong> und verstehen sich <strong>zzgl. Versandkosten</strong> bei Lieferung.
-    </p>
-    <ul style="margin:10px 0 0;padding-left:20px;list-style:disc;">
-      <li><strong>Selbstabholung</strong> in 14772 Brandenburg an der Havel <strong>kostenfrei</strong></li>
-      <li><strong>Versand neuer Drutex-Ware</strong> deutschlandweit möglich — Kosten je nach Stückzahl/Produktart, werden im individuellen Angebot ausgewiesen</li>
-      <li><strong>Gebrauchte Fenster</strong> nur per Selbstabholung — kein Versand</li>
-    </ul>
-    <p style="margin:10px 0 0;">
-      <a href="agb.html#versand">Details zu Versand &amp; Lieferung in den AGB</a>
-    </p>
-  </div>
-
-  <div class="shop-tab-panel" role="tabpanel" id="tab-anfahrt" aria-labelledby="tab-btn-anfahrt" aria-hidden="true">
-    <p style="margin:0;max-width:760px;">
-      <strong>Türen und Fensterhandel Christ</strong><br/>
-      Fohrder Landstraße 13<br/>
-      14772 Brandenburg an der Havel
-    </p>
-    <p style="margin:10px 0 0;">
-      <strong>Öffnungszeiten Lager-Shop:</strong> nur Freitag 10–17 Uhr<br/>
-      Telefon <a href="tel:+4933812148373">03381 2148373</a> · WhatsApp <a href="https://wa.me/491717263776" target="_blank" rel="noopener">0171 7263776</a>
-    </p>
-    <p style="margin:10px 0 0;">
-      <a href="https://www.google.com/maps/search/?api=1&amp;query=Fohrder+Landstra%C3%9Fe+13%2C+14772+Brandenburg+an+der+Havel" target="_blank" rel="noopener">In Google Maps öffnen ↗</a>
-    </p>
-  </div>
+    <!-- Inhalt (aufgeklappt): 4 Mini-Sektionen statt Tabs -->
+    <div class="shop-hero-info-content">
+      <div class="shop-info-section" id="shopHeaderDescWrap">
+        <h4>So läuft's hier</h4>
+        <p id="shopHeaderDesc">
+          Originale <strong>Drutex-Kunststofffenster, Balkontüren und Haustüren</strong> — neu, gebraucht und falsch vermessen. <strong>Tagesaktueller Bestand. Kein Online-Warenkorb.</strong> Vor Anfahrt bitte Verfügbarkeit prüfen. <strong>Helfer + Transporter mitbringen.</strong>
+        </p>
+      </div>
+      <div class="shop-info-section">
+        <h4>Verfügbarkeit prüfen</h4>
+        <ul>
+          <li>WhatsApp <a href="https://wa.me/491717263776" target="_blank" rel="noopener">0171 7263776</a> — schnellste Antwort</li>
+          <li>Tel <a href="tel:+4933812148373">03381 2148373</a> Fr 10–17 Uhr</li>
+          <li>E-Mail <a href="mailto:info@baustoffchrist.de">info@baustoffchrist.de</a> — Antwort werktags 24h</li>
+        </ul>
+      </div>
+      <div class="shop-info-section">
+        <h4>Preise</h4>
+        <p>Alle Preise <strong>inkl. 19 % MwSt.</strong>, <strong>zzgl. Versand</strong> bei Lieferung. Selbstabholung in Brandenburg an der Havel <strong>kostenfrei</strong>. Versand neuer Drutex-Ware deutschlandweit möglich. Gebrauchtware nur Abholung. <a href="agb.html#versand">Details</a></p>
+      </div>
+      <div class="shop-info-section">
+        <h4>Anfahrt</h4>
+        <p>Fohrder Landstraße 13, 14772 Brandenburg an der Havel<br/>Nur Freitag 10–17 Uhr — <a href="https://www.google.com/maps/search/?api=1&amp;query=Fohrder+Landstra%C3%9Fe+13%2C+14772+Brandenburg+an+der+Havel" target="_blank" rel="noopener">Google Maps ↗</a></p>
+      </div>
+      <div class="shop-info-ctas">
+        <a href="https://wa.me/491717263776?text=Hallo,%20ich%20m%C3%B6chte%20die%20Verf%C3%BCgbarkeit%20pr%C3%BCfen." target="_blank" rel="noopener" class="shop-info-cta shop-info-cta--wa">
+          <span class="material-symbols-outlined">chat</span> WhatsApp prüfen
+        </a>
+        <a href="tel:+4933812148373" class="shop-info-cta shop-info-cta--tel">
+          <span class="material-symbols-outlined">call</span> 03381 2148373
+        </a>
+        <a href="mailto:info@baustoffchrist.de?subject=Anfrage%20Lager-Shop" class="shop-info-cta shop-info-cta--mail">
+          <span class="material-symbols-outlined">mail</span> E-Mail anfragen
+        </a>
+      </div>
+    </div>
+  </details>
 </header>
 
-<!-- Gebraucht-Filter-Hinweis (bleibt erhalten, nur dezenter integriert) -->
+<!-- Gebraucht-Filter-Hinweis (nur sichtbar wenn Filter gesetzt) -->
 <div id="gebrauchtHinweis" class="hidden mt-3 flex items-start gap-2.5 rounded-lg px-3 py-2" style="background:rgba(239,68,68,0.15);border:1.5px solid rgba(239,68,68,0.4);">
   <span class="material-symbols-outlined mt-0.5 flex-shrink-0" style="font-size:16px;color:#fca5a5;">warning</span>
   <p class="text-xs leading-snug" style="color:#fca5a5;"><strong>Kein Verlade-Service.</strong> Bitte ausreichend Helfer &amp; geeignetes Fahrzeug mitbringen.</p>
@@ -2062,7 +2098,7 @@ input[type="range"].range-clean::-moz-range-thumb {
 </a>
 
 <script src="js/sheets-config.js" defer></script>
-<script src="js/shop.js?v=2026-05-19-anfrage" defer></script>
+<script src="js/shop.js?v=2026-05-24-hero-v2" defer></script>
 
 <script src="js/chatbot.js" defer></script>
 <link rel="stylesheet" href="css/cookie-banner.css">

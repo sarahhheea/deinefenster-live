@@ -828,17 +828,22 @@ function karteHtml(p) {
     : '';
   const archivStyle = istArchiviert ? 'opacity:0.55;filter:saturate(0.6)' : '';
 
-  // Quick-WhatsApp-Pille: 1-Klick zur Anfrage direkt von der Karte
+  // Anfrage-CTA-Reihe: WhatsApp groß als Haupt-Action, Details klein als Sekundär
   const waText = encodeURIComponent(`Hallo, ist "${p.titel}" (${p.breite_mm}×${p.hoehe_mm} mm, ${formatPreis(p.preis_eur)}) noch verfügbar?`);
-  const waQuick = istArchiviert ? '' : `
-    <a href="https://wa.me/491717263776?text=${waText}" target="_blank" rel="noopener"
-       class="shop-card-wa-quick"
-       onclick="event.stopPropagation()"
-       aria-label="Per WhatsApp anfragen"
-       title="WhatsApp-Anfrage zu diesem Produkt">
-      <span class="material-symbols-outlined">chat</span>
-      <span>Anfragen</span>
-    </a>`;
+  const ctaRow = istArchiviert ? '' : `
+        <div class="shop-card-cta-row">
+          <a href="https://wa.me/491717263776?text=${waText}" target="_blank" rel="noopener"
+             class="shop-card-cta-wa"
+             onclick="event.stopPropagation()"
+             aria-label="Per WhatsApp anfragen">
+            <span class="material-symbols-outlined">chat</span>
+            Anfragen
+          </a>
+          <button type="button" class="shop-card-cta-details" aria-label="Details ansehen">
+            <span class="material-symbols-outlined">open_in_new</span>
+            <span>Details</span>
+          </button>
+        </div>`;
 
   return `
     <article class="karte" data-action="detail" data-id="${p.id}" style="${archivStyle}">
@@ -848,22 +853,18 @@ function karteHtml(p) {
         ${archivBadge}
         ${druckIcon}
         ${aktionMenu}
-        ${waQuick}
       </div>
       <div class="p-4 flex flex-col flex-1">
         <div class="flex flex-wrap gap-1.5 mb-2">${standBadge}${zustandBadge}${sonderpreisBadge}${exportBadge}${groesseBadge}${verglasungBadge}${rcBadge}${lagerBadge}</div>
         <h3 class="text-sm font-bold leading-snug line-clamp-2 mb-1 text-ink">${escapeHtml(p.titel)}</h3>
         <p class="text-[11px] text-ink-soft mb-1">${escapeHtml(p.system)} · ${p.breite_mm} × ${p.hoehe_mm} mm</p>
         <p class="text-[11px] text-ink-soft mb-3 line-clamp-2">${nl2br(p.beschreibung)}</p>
-        <div class="mt-auto flex items-end justify-between gap-2">
+        <div class="mt-auto">
           <div>
             ${p.sonderpreis_eur ? '<span class="text-[10px] text-ink-soft block">Sonderpreis</span>' : (p.export_modell ? '<span class="text-[10px] text-ink-soft block">Export</span>' : (p.zustand === 'gebraucht' ? '' : '<span class="text-[10px] text-ink-soft block">ab</span>'))}
             <span class="text-xl font-extrabold text-primary leading-none">${formatPreis(p.preis_eur)}<span class="text-sm">${preisStern}</span></span>
           </div>
-          <button data-action="detail" data-id="${p.id}" class="bg-primary/10 text-primary px-3 py-2 rounded-full text-xs font-bold hover:bg-primary/20 transition-colors flex items-center gap-1">
-            <span class="material-symbols-outlined" style="font-size:14px">open_in_new</span>
-            <span class="hidden sm:inline">Details</span>
-          </button>
+          ${ctaRow}
         </div>
       </div>
     </article>`;
