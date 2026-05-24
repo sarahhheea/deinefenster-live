@@ -743,8 +743,13 @@ function buildInnenBeschlag() {
   plShape.holes.push(pzHole);
 
   // Plate: clean extrude OHNE Bevel — echtes Beschlag-Vorbild hat klare Kanten
+  // Eigenes Material: weniger metalness als handleMat damit die flache +Z-Front-Fläche
+  // nicht nur dunkle Umgebung spiegelt sondern auch direktes Licht hell zurückgibt.
+  const plateMat = new THREE.MeshStandardMaterial({
+    color: 0xd6d9dc, roughness: 0.58, metalness: 0.42, envMapIntensity: 1.0
+  });
   const plGeom = new THREE.ExtrudeGeometry(plShape, { depth: PLATE_THK, bevelEnabled: false });
-  const plate = new THREE.Mesh(plGeom, handleMat);
+  const plate = new THREE.Mesh(plGeom, plateMat);
   plate.position.set(KX, plateY, DD + 0.001);
   plate.castShadow = true;
   doorGroup.add(plate);
