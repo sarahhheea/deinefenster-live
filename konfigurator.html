@@ -403,9 +403,35 @@
     .farb-tab-sub{font-size:10.5px;font-weight:500;color:rgba(255,255,255,0.65);line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .farb-tab-swatch{width:22px;height:22px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.30);flex-shrink:0;background:rgba(255,255,255,0.06);transition:all var(--t-fast) var(--ease);position:relative}
     .farb-tab.has-value .farb-tab-swatch{border-color:rgba(255,255,255,0.55);box-shadow:0 0 0 2px rgba(118,169,250,0.20)}
-    .farb-tab.has-value::after{content:'check';font-family:'Material Symbols Outlined';font-variation-settings:'FILL' 1;position:absolute;top:-5px;right:-5px;width:16px;height:16px;background:#4d88ff;color:#fff;border-radius:50%;font-size:11px;display:flex;align-items:center;justify-content:center;border:2px solid #0e1e3a}
+    /* Sarah-Fix 24.05.2026: Tab-Check-Haken entfernt — Defaults setzten S immer → 3 Haken gleichzeitig sichtbar = irreführend.
+       Der gefärbte Swatch-Kreis zeigt schon dass die Farbe gesetzt ist, der Haken war redundant. */
     .farb-tab-content{display:none}
     .farb-tab-content.active{display:block}
+
+    /* RESPONSIVE — Sarah-Fix 24.05.2026: Bei halb-offenem Browser (~600-1280px) ist der Konfigurator-Content-Bereich schmal
+       (Sidebar+Vorschau-Layout). Tabs würden sonst cramen. Icon + Sub-Text + kleinere Paddings ab 1280px, vertikales Stack ab 520px. */
+    @media (max-width:1280px){
+      .farb-tabs-wrap{gap:6px !important}
+      .farb-tab{padding:10px 12px;gap:8px;justify-content:space-between}
+      .farb-tab-ico{display:none}   /* Icon weg bei narrow widths — schafft Platz für Label */
+      .farb-tab-sub{display:none}
+      .farb-tab-label{font-size:12.5px}
+      .farb-tab-swatch{width:18px;height:18px}
+      .farb-akko-head{padding:11px 13px;gap:8px}
+      .farb-akko-title{font-size:12px;line-height:1.25}
+      .farb-akko-sel{max-width:110px;font-size:11px}
+      .farb-akko-count{font-size:11px}
+      .farb-akko-icon{font-size:16px !important}
+    }
+    @media (max-width:520px){
+      .farb-tabs-wrap{grid-template-columns:1fr !important}
+      .farb-tab{justify-content:space-between}
+      .farb-tab-ico{display:flex}    /* bei phone-portrait wieder zeigen — pro Tab eine ganze Zeile */
+      .farb-tab-sub{display:block;font-size:10.5px}
+      .farb-tab-label{font-size:13.5px}
+      .farb-tab-swatch{width:20px;height:20px}
+      .farb-akko-sel{max-width:90px}
+    }
 
     /* FARB-GRUPPEN auf dunklem Theme — klare Hierarchie, mehr Luft */
     .sb .farb-section{margin-bottom:32px}
