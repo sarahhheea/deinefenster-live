@@ -746,10 +746,8 @@ function buildInnenBeschlag() {
   // DoubleSide PFLICHT: doorGroup.scale.x=-1 (DIN-Rechts-Mirror) flippt die Triangle-
   // Winding der flachen ExtrudeGeometry → ohne DoubleSide wäre die Front-Face komplett
   // unsichtbar (nur Extrude-Kanten würden rendern). Lever ist Tube, hat das Problem nicht.
-  const plateMat = new THREE.MeshStandardMaterial({
-    color: 0xd6d9dc, roughness: 0.58, metalness: 0.42, envMapIntensity: 1.0,
-    side: THREE.DoubleSide
-  });
+  // TEST v7.1: MeshBasicMaterial in HOT PINK — wenn man das nicht sieht, ist die Geometrie das Problem
+  const plateMat = new THREE.MeshBasicMaterial({ color: 0xff00aa, side: THREE.DoubleSide });
   const plGeom = new THREE.ExtrudeGeometry(plShape, { depth: PLATE_THK, bevelEnabled: false });
   const plate = new THREE.Mesh(plGeom, plateMat);
   plate.position.set(KX, plateY, DD + 0.001);
