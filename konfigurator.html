@@ -271,7 +271,7 @@
        multipliziert weiß × blau = blau (weißer Rand wird unsichtbar),
        dunkle Tür × blau = sehr dunkler Schatten (Tür voll sichtbar).
        Kundenwunsch 24.05.2026: keine weißen Ränder, Tür komplett sichtbar in blauer Box. */
-    #s-tm .pc{padding:0;overflow:hidden;border-radius:12px;background:linear-gradient(135deg,#0f2553 0%,#1a3556 60%,#15304a 100%)}
+    #s-tm .pc{padding:0;overflow:hidden;border-radius:12px;background:linear-gradient(180deg,#2970d4 0%,#1e3a8a 100%)}
     #s-tm .pc-img{
       width:100%;height:160px;
       background:transparent;padding:0;border:none;
@@ -2131,7 +2131,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   #s1 .pc:not(.sel)::after { content: '' !important; position: absolute !important; top: 0 !important; left: 8% !important; right: 8% !important; height: 1px !important; background: rgba(255,255,255,0.05) !important; background-image: none !important; font-size: 0 !important; }
 
   /* ── 17. TÜRMODELL-KARTEN ── Look wie Fenster-Studio-Karten (Kundenwunsch 24.05.2026) */
-  #s-tm .pc { background: linear-gradient(135deg,#0f2553 0%,#1a3556 60%,#15304a 100%) !important; border: none !important; border-radius: 12px !important; overflow: hidden !important; transition: all 0.22s ease !important; }
+  #s-tm .pc { background: linear-gradient(180deg,#2970d4 0%,#1e3a8a 100%) !important; border: none !important; border-radius: 12px !important; overflow: hidden !important; transition: all 0.22s ease !important; }
   #s-tm .pc-img { mix-blend-mode: multiply !important; object-fit: contain !important; object-position: center !important; transform: none !important; width: 100% !important; }
   #s-tm .pc:hover { transform: translateY(-4px) !important; box-shadow: 0 8px 24px rgba(0,0,0,0.30) !important; }
   #s-tm .pc.sel  { box-shadow: 0 0 0 2px #4d88ff, 0 8px 24px rgba(77,136,255,0.30) !important; }
@@ -8005,6 +8005,16 @@ const FARB_GRUPPEN = {
   ],
 };
 
+// Reverse-Map: Farb-Key → Gruppen-Name (für Akkordeon-Header "selected dot")
+// Generiert aus FARB_GRUPPEN — bei Änderung an FARB_GRUPPEN automatisch synchron.
+const FARB_KEY_TO_GRUPPE = (() => {
+  const map = {};
+  Object.entries(FARB_GRUPPEN).forEach(([grpName, keys]) => {
+    keys.forEach(k => { map[k] = grpName; });
+  });
+  return map;
+})();
+
 // Kürzere Display-Namen (ohne RAL-Code)
 function shortFarbName(v) {
   return (v.name || '').replace(/\s*\([^)]*\)\s*$/, '').trim();
@@ -8020,15 +8030,21 @@ function buildFarbePicker() {
   const istBlocked = (k) =>
     (istHaustuer && HAUSTUER_FARB_BLOCKLIST.has(k)) ||
     (istFenster2fl && FENSTER_FARB_BLOCKLIST.has(k));
+
   ['fa','fi','fd'].forEach(key => {
     const table = P[key], grid = document.getElementById('fp-'+{fa:'aussen',fi:'innen',fd:'dicht'}[key]);
     if (!grid) return;
-    // Dichtungsfarbe hat nur 2 Optionen — flach (kein Filter — Dichtungs-Farben sind eh nur weiss/schwarz)
+
+    // Dichtungs-Tab: nur 2 Optionen — kein Akkordeon nötig,
+    // aber Karten MÜSSEN in .farb-section-items damit sie normale Größe haben
+    // (Sarah-Fix 24.05.2026: vorher waren sie als Direct-Children des fp-grid riesig).
     if (key === 'fd') {
-      grid.innerHTML = Object.entries(table).map(([k,v])=>farbItemHtml(k,v,key)).join('');
+      const items = Object.entries(table).map(([k,v])=>farbItemHtml(k,v,key)).join('');
+      grid.innerHTML = `<div class="farb-section-items">${items}</div>`;
       return;
     }
-    // fa/fi: Beliebteste-Block + 3 Sektionen (immer offen, übersichtlicher Kundenwunsch 2026-05-19)
+
+    // fa/fi: Beliebteste-Block oben (unverändert) + 3 Single-Open-Akkordeons darunter (Sarah-Refactor 24.05.2026)
     let html = '';
     const beliebtItems = FARB_BELIEBTESTE
       .filter(k => table[k] && !istBlocked(k))
@@ -8042,22 +8058,41 @@ function buildFarbePicker() {
       </div>
       <div class="farb-section-items">${beliebtItems}</div>
     </div>`;
-    // 3 Sektionen — alle immer offen, keine Akkordeons
-    Object.entries(FARB_GRUPPEN).forEach(([grpName, grpKeys]) => {
+
+    // 3 Akkordeons — erste Kategorie offen, andere zu (Single-Open-Pattern)
+    Object.entries(FARB_GRUPPEN).forEach(([grpName, grpKeys], idx) => {
       const filtered = grpKeys.filter(k => table[k] && !istBlocked(k));
       if (!filtered.length) return;
       const items = filtered.map(k => farbItemHtml(k, table[k], key)).join('');
-      html += `<div class="farb-section">
-        <div class="farb-section-head">
-          <i class="ms f">palette</i>
-          <span class="farb-section-title">${grpName}</span>
-          <span class="farb-section-count">${filtered.length} Farben</span>
+      const openCls = idx === 0 ? ' open' : '';
+      const ariaExp = idx === 0 ? 'true' : 'false';
+      // HTML-Escape für & in "Farbig & Sonder" (data-attribute + Lookup-Konsistenz mit updateAkkoSelectedDot)
+      const grpAttr = grpName.replace(/&/g, '&amp;');
+      html += `<div class="farb-akko${openCls}" data-gruppe="${grpAttr}">
+        <div class="farb-akko-head" role="button" tabindex="0" aria-expanded="${ariaExp}"
+             onclick="toggleFarbAkko(this)"
+             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleFarbAkko(this);}">
+          <i class="ms f farb-akko-icon">palette</i>
+          <span class="farb-akko-title">${grpName}</span>
+          <span class="farb-akko-sel" aria-hidden="true">
+            <span class="farb-akko-sel-dot"></span>
+            <span class="farb-akko-sel-name"></span>
+          </span>
+          <span class="farb-akko-count">${filtered.length} Farben</span>
+          <i class="ms farb-akko-arrow">expand_more</i>
         </div>
-        <div class="farb-section-items">${items}</div>
+        <div class="farb-akko-body">
+          <div class="farb-akko-body-inner">
+            <div class="farb-section-items">${items}</div>
+          </div>
+        </div>
       </div>`;
     });
     grid.innerHTML = html;
   });
+
+  // Nach Render: vorhandene Auswahl als Selected-Dot im jeweiligen Header anzeigen
+  ['fa','fi'].forEach(updateAkkoSelectedDot);
 }
 
 // Drutex CDN-Texturen — echte Material-Vorschau pro Farbe (Update 22.05.2026)
@@ -8130,13 +8165,54 @@ function farbItemHtml(k, v, key, isBig) {
   </div>`;
 }
 
-function toggleFarbGruppe(header) {
-  const content = header.nextElementSibling;
-  const arrow = header.querySelector('.farb-grp-arrow');
-  const isOpen = content.style.display !== 'none';
-  content.style.display = isOpen ? 'none' : 'flex';
-  content.style.padding = isOpen ? '0 16px' : '12px 16px 16px';
-  if (arrow) arrow.style.transform = `rotate(${isOpen ? 0 : 180}deg)`;
+// Sarah-Refactor 24.05.2026: Single-Open-Akkordeon für Farb-Kategorien.
+// Klick auf einen Header schließt alle anderen Akkordeons im selben Tab-Content.
+function toggleFarbAkko(headerEl) {
+  const akko = headerEl.parentElement;
+  const tabContent = akko.closest('.farb-tab-content');
+  if (!tabContent) return;
+  const wasOpen = akko.classList.contains('open');
+  tabContent.querySelectorAll('.farb-akko.open').forEach(a => {
+    a.classList.remove('open');
+    const head = a.querySelector('.farb-akko-head');
+    if (head) head.setAttribute('aria-expanded', 'false');
+  });
+  if (!wasOpen) {
+    akko.classList.add('open');
+    headerEl.setAttribute('aria-expanded', 'true');
+  }
+}
+
+// Zeigt im Header der Gruppe, aus der die aktuell gewählte Farbe stammt,
+// einen kleinen Farbpunkt + Namen rechts neben dem Titel.
+// Andere Gruppen-Header zeigen die normale Anzahl-Badge.
+function updateAkkoSelectedDot(key) {
+  const v = S[key];
+  const tabContent = document.querySelector('[data-tab-content="' + key + '"]');
+  if (!tabContent) return;
+  const gruppe = v ? FARB_KEY_TO_GRUPPE[v] : null;
+  const gruppeAttr = gruppe ? gruppe.replace(/&/g, '&amp;') : null;
+  tabContent.querySelectorAll('.farb-akko').forEach(akko => {
+    const sel = akko.querySelector('.farb-akko-sel');
+    const dot = akko.querySelector('.farb-akko-sel-dot');
+    const nameEl = akko.querySelector('.farb-akko-sel-name');
+    const countEl = akko.querySelector('.farb-akko-count');
+    if (!sel || !dot || !nameEl || !countEl) return;
+    if (gruppeAttr && akko.dataset.gruppe === gruppeAttr) {
+      const colorObj = P[key][v];
+      if (!colorObj) { sel.style.display = 'none'; countEl.style.display = ''; return; }
+      const url = SWATCH_URL_MAP[v];
+      dot.style.cssText = url
+        ? 'background-image:url(\'' + url + '\');background-color:' + colorObj.hex + ';'
+        : 'background-color:' + colorObj.hex + ';';
+      nameEl.textContent = shortFarbName(colorObj);
+      sel.style.display = 'flex';
+      countEl.style.display = 'none';
+    } else {
+      sel.style.display = 'none';
+      countEl.style.display = '';
+    }
+  });
 }
 
 // Sarah-Upgrade 21.04.2026: Tab-Wechsel zwischen Außen-/Innen-/Dichtungs-Farbe
@@ -8145,6 +8221,7 @@ function switchFarbTab(tab) {
   document.querySelectorAll('.farb-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
   document.querySelectorAll('.farb-tab-content').forEach(c => c.classList.toggle('active', c.dataset.tabContent === tab));
   updateFarbTabSwatches();
+  if (tab === 'fa' || tab === 'fi') updateAkkoSelectedDot(tab);
   // Haustür: Toggle bleibt konstant — User steuert Innen/Außen selbst
   if (S.prod !== 'haustuere') {
     if (tab === 'fa') setPreviewView('aus');
@@ -8193,6 +8270,7 @@ function pickColor(el, key) {
   if (key==='fa') { document.getElementById('d6').textContent='A: '+(P.fa[S.fa]?.name||S.fa)+' / I: '+(P.fi[S.fi]?.name||S.fi); mkDone(6); }
   if (key==='fi') { document.getElementById('d6').textContent='A: '+(P.fa[S.fa]?.name||S.fa)+' / I: '+(P.fi[S.fi]?.name||S.fi); }
   updateFarbTabSwatches();
+  updateAkkoSelectedDot(key);
   vorschauAktualisieren();
   drawPrev(); upSidebar();
 }
