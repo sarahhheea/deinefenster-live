@@ -266,16 +266,24 @@
     /* Live-Vorschau cleanen — Overlays im Bild raus, sieht aus wie Produktkarte (Sarah-Wunsch 28.04.2026) */
     #prev-color-strip{display:none !important}
     #prev-dim-label{display:none !important}
-    /* Türmodell-Karten: matched Öffnungsart-Karten-Pattern (Step 3).
-       PNG ist transparent (nur Tür + Schatten), Karte hat KEINEN Background — Tür sitzt direkt auf Site-BG. */
-    #s-tm .pc{padding:0;border-radius:12px;background:transparent}
+    /* ── KARTEN-GRÖSSEN-TOKEN (Single-Source 2026-05-24) ─────────────────────────────
+       Konfigurator-Karten (#s-tm Türmodell, .fk Flügelaufteilung, .pc Step 1)
+       nutzen einheitliche Karten-Maße. Wenn ändern: HIER ändern, nicht ad-hoc. */
+    :root {
+      --card-img-aspect: 4 / 5;          /* PNG-Bild-Format in der Karte */
+      --card-pad: 12px 8px 14px;         /* Innen-Padding der Karte */
+      --card-radius: 12px;               /* Border-Radius */
+      --card-name-size: 14px;            /* Schrift unter dem Bild */
+      --card-name-mtop: 10px;            /* Abstand Bild → Name */
+    }
+    /* Türmodell-Karten: nutzen Karten-Tokens — PNG transparent, Bild im 4/5-Format */
+    #s-tm .pc{padding:0;border-radius:var(--card-radius);background:transparent}
     #s-tm .pc-img{
-      width:100%;height:170px;
+      width:100%;height:auto;aspect-ratio:var(--card-img-aspect);
       background:transparent;padding:0;border:none;
       object-fit:contain;object-position:center;
       display:block;
     }
-    @media(min-width:1024px){#s-tm .pc-img{height:210px}}
     /* Selected: dezenter Blau-Outline am Karten-Container */
     #s-tm .pc.sel{box-shadow:0 0 0 2px var(--c-primary), 0 8px 24px rgba(34,94,170,.30)}
     #s-tm .pc.sel .pc-img{outline:none;box-shadow:none}
@@ -2144,12 +2152,12 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   #s1 .pc.sel::after { content: 'check_circle' !important; font-family: 'Material Symbols Outlined' !important; font-variation-settings: 'FILL' 1 !important; font-size: 22px !important; color: #4d88ff !important; position: absolute !important; top: 12px !important; right: 12px !important; background: rgba(5,5,15,0.72) !important; border-radius: 50% !important; width: 28px !important; height: 28px !important; display: grid !important; place-items: center !important; line-height: 1 !important; z-index: 6 !important; background-image: none !important; }
   #s1 .pc:not(.sel)::after { content: '' !important; position: absolute !important; top: 0 !important; left: 8% !important; right: 8% !important; height: 1px !important; background: rgba(255,255,255,0.05) !important; background-image: none !important; font-size: 0 !important; }
 
-  /* ── 17. TÜRMODELL-KARTEN ── 1:1 wie Flügel-Karten (Step 2 .fk Pattern) */
-  #s-tm .pc { background: rgba(255,255,255,0.03) !important; border: 1px solid rgba(255,255,255,0.08) !important; border-radius: 12px !important; padding: 12px 8px 14px !important; transition: all 0.20s ease !important; }
+  /* ── 17. TÜRMODELL-KARTEN ── 1:1 wie Flügel-Karten (.fk Pattern), nutzt Karten-Tokens aus :root */
+  #s-tm .pc { background: rgba(255,255,255,0.03) !important; border: 1px solid rgba(255,255,255,0.08) !important; border-radius: var(--card-radius) !important; padding: var(--card-pad) !important; transition: all 0.20s ease !important; }
   #s-tm .pc:hover { background: rgba(77,136,255,0.07) !important; border-color: rgba(77,136,255,0.45) !important; transform: translateY(-3px) !important; box-shadow: 0 6px 20px rgba(0,0,0,0.35) !important; }
   #s-tm .pc.sel  { background: rgba(77,136,255,0.10) !important; border-color: #4d88ff !important; box-shadow: 0 0 0 1px rgba(77,136,255,0.25) !important; }
-  #s-tm .pc-img  { mix-blend-mode: normal !important; object-fit: contain !important; object-position: center !important; transform: none !important; width: 100% !important; }
-  #s-tm .pc-name { font-size: 14px !important; color: rgba(255,255,255,0.92) !important; font-weight: 600 !important; margin-top: 10px !important; line-height: 1.35 !important; }
+  #s-tm .pc-img  { mix-blend-mode: normal !important; aspect-ratio: var(--card-img-aspect) !important; height: auto !important; object-fit: contain !important; object-position: center !important; transform: none !important; width: 100% !important; }
+  #s-tm .pc-name { font-size: var(--card-name-size) !important; color: rgba(255,255,255,0.92) !important; font-weight: 600 !important; margin-top: var(--card-name-mtop) !important; line-height: 1.35 !important; }
   #s-tm .pc-from { font-size: 13px !important; margin-top: 4px !important; color: rgba(77,136,255,0.80) !important; }
 
   /* ── 18. GRIFF-OPTIONEN — vereinheitlicht mit .oc Karten ── */
@@ -2320,12 +2328,15 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       width: 100% !important;
       height: 100% !important;
       object-position: center !important;
-      /* Kunde-Wunsch: Bild rein-zoomen damit der eingebrannte Studio-Rand
-         im PNG aus der sichtbaren Karte rausfällt — Produkt nimmt
-         die ganze Kartenfläche ein. */
-      transform: scale(1.55) !important;
+      /* Kunde-Wunsch: Bild leicht rein-zoomen damit Studio-Rand rausfällt,
+         aber nicht zu stark (sonst werden hochkante Produkte wie Balkontür
+         seitlich abgeschnitten) */
+      transform: scale(1.18) !important;
       transform-origin: center center !important;
     }
+    /* Konfigurieren-CTA voll-opake hellblau auf Mobile — klar Click-Einladung */
+    #prod-hero .hcard-cta { color: #76a9fa !important; opacity: 1 !important; }
+    #prod-hero .hcard-cta svg { color: #76a9fa !important; }
     #prod-hero .hcard-info { padding: 3px 8px 4px !important; }
     #prod-hero .hcard-name-top {
       font-size: 11.5px !important;
@@ -2402,7 +2413,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
     display: flex; align-items: center; gap: 5px;
     font-family: 'Manrope', sans-serif;
     font-size: 10.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
-    color: rgba(118,169,250,0.55);
+    color: #76a9fa;  /* voll-opake Brand-Akzent, klar zum Klicken einladend */
     transition: color 0.2s ease, gap 0.2s ease;
     margin-top: 2px;
   }
@@ -3835,7 +3846,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
          Vollbilder mit Rahmen, Griff, Beschlägen — wie im Drutex-Katalog. -->
 
     <div class="sec-t">IGLO Energy · Mit Edelstahl-Deko (Inox)</div>
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
       <div class="pc" data-m="florida-lr-inox" onclick="pickTuerModell(this)">
         <img class="pc-img" src="img/drutex-tueren/studio/florida-lr-inox.png?v=20260524" alt="Florida (L/R) · Inox" loading="lazy"/>
         <div class="pc-name">Florida (L/R) · Inox</div>
