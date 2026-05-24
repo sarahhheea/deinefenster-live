@@ -727,25 +727,34 @@ function buildInnenBeschlag() {
   // Stadium-Shape: voller Halbkreis oben + unten (Eckradius = halbe Breite)
   const plShape = roundedRectShape(PLATE_W, PLATE_H, PLATE_W / 2);
 
-  // DEBUG v7.2: HOLES KOMPLETT AUSKOMMENTIERT — Plate solid, sollte pink sein wenn Triangulation klappt
+  // Loch 1: Drücker-Spindel — rund, Ø22mm
   const SPINDLE_R   = 0.011;
   const localHandleY = KY_HANDLE - plateY;
+  const spindleHole = new THREE.Path();
+  spindleHole.absarc(0, localHandleY, SPINDLE_R, 0, Math.PI * 2, true);
+  plShape.holes.push(spindleHole);
+
+  // Loch 2: PZ-Zylinder — rundes Loch
   const PZ_HOLE_R   = 0.010;
   const localLockY  = KY_LOCK - plateY;
+  const pzHole = new THREE.Path();
+  pzHole.absarc(0, localLockY, PZ_HOLE_R, 0, Math.PI * 2, true);
+  plShape.holes.push(pzHole);
 
   // Plate: clean extrude OHNE Bevel — echtes Beschlag-Vorbild hat klare Kanten
   // DoubleSide PFLICHT: doorGroup.scale.x=-1 (DIN-Rechts-Mirror) flippt die Triangle-
   // Winding der flachen ExtrudeGeometry → ohne DoubleSide wäre die Front-Face komplett
   // unsichtbar (nur Extrude-Kanten würden rendern). Lever ist Tube, hat das Problem nicht.
-  // DEBUG v7.3: force-render-always
-  const plateMat = new THREE.MeshBasicMaterial({ color: 0xff00aa, side: THREE.DoubleSide, depthTest: false, depthWrite: false });
+  // Plate: silbern, DoubleSide weil doorGroup.scale.x=-1 die Winding flippt
+  const plateMat = new THREE.MeshStandardMaterial({
+    color: 0xd6d9dc, roughness: 0.55, metalness: 0.55, envMapIntensity: 1.4,
+    side: THREE.DoubleSide
+  });
   const plGeom = new THREE.ExtrudeGeometry(plShape, { depth: PLATE_THK, bevelEnabled: false });
   const plate = new THREE.Mesh(plGeom, plateMat);
   plate.position.set(KX, plateY, DD + 0.001);
-  plate.renderOrder = 999;
-  plate.frustumCulled = false;
+  plate.castShadow = true;
   doorGroup.add(plate);
-  console.log('DEBUG plate:', {pos: plate.position, geomVerts: plGeom.attributes.position.count, plateY, KX});
 
   // PZ-Zylinder-Stirnfläche: silberner Disc füllt das runde Plate-Loch
   // (etwas zurückgesetzt damit man Tiefe sieht — wie ein eingelassener Zylinder)
