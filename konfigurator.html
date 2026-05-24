@@ -2654,27 +2654,39 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
     }
     #mobile-step-bar .msb-eyebrow {
       font-family: 'Manrope', sans-serif;
-      font-size: 10px; font-weight: 700;
+      font-size: 11px; font-weight: 800;
       letter-spacing: 0.22em; text-transform: uppercase;
-      color: rgba(118,169,250,0.7);
+      color: #76a9fa;
     }
     #mobile-step-bar .msb-title {
       font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 16px; font-weight: 700;
-      color: rgba(255,255,255,0.96);
+      font-size: 17px; font-weight: 800;
+      color: #ffffff;
       line-height: 1.2;
+      letter-spacing: -0.01em;
     }
     #mobile-step-bar .msb-progress {
-      margin-top: 10px;
-      height: 3px; width: 100%;
-      background: rgba(255,255,255,0.08);
-      border-radius: 2px; overflow: hidden;
+      margin-top: 12px;
+      height: 5px; width: 100%;
+      background: rgba(255,255,255,0.10);
+      border-radius: 3px; overflow: hidden;
     }
+    /* Fortschritt: startet Brand-Blau, wird gegen Ende Gold (per CSS via Fill-Hintergrund
+       der vom Fortschritts-JS auf die aktuelle Breite gesetzt wird). Wir nutzen
+       background-attachment:fixed-ähnlichen Trick mit großem Gradient damit der
+       Fill je nach width andere Position des Gradients zeigt. */
     #mobile-step-bar .msb-progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, #76a9fa, #c9a84c);
-      border-radius: 2px;
+      /* Brand-Blau → Gold-Übergang skaliert mit Fill-Breite — bei niedrigem
+         Fortschritt überwiegend Blau, je voller umso mehr Gold gegen Ende */
+      background: linear-gradient(90deg, #76a9fa 0%, #76a9fa 55%, #c9a84c 100%);
+      border-radius: 3px;
       transition: width 0.45s cubic-bezier(0.16,1,0.3,1);
+      box-shadow: 0 0 12px rgba(118,169,250,0.45);
+    }
+    /* Sticky-Bar selbst optisch heller: dezenter Akzent-Border unten statt nur transparent */
+    #mobile-step-bar.msb-show {
+      box-shadow: 0 1px 0 rgba(118,169,250,0.20), 0 4px 12px rgba(0,0,0,0.30) !important;
     }
     /* Alte Mobile-Strip-Pille ausblenden — Mobile-Step-Bar übernimmt */
     #kfg-nav.kfg-nav--mobile-strip { display: none !important; }
