@@ -2232,21 +2232,46 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
     position: relative; z-index: 1;
   }
   @media (max-width: 900px) { #prod-hero .hero-grid { grid-template-columns: repeat(2,1fr); } }
-  /* Mobile-Fix (Kundenwunsch): H2 voll lesbar + alle 4 Karten auf einen
-     Schlag sichtbar. Disclaimer raus, Hero-Head kompakter, Karten kürzer. */
+  /* Mobile-Fix (Kundenwunsch): Disclaimer + H2 + alle 4 Karten auf einen
+     Schlag im Viewport — kein Scrolling nötig. */
   @media (max-width: 767px) {
-    #prod-hero { padding: 16px 14px 24px !important; gap: 14px !important; top: calc(97px + env(safe-area-inset-top, 0px)) !important; }
-    #prod-hero .hero-disclaimer { display: none !important; }
-    #prod-hero .hero-eyebrow { margin-bottom: 10px !important; font-size: 9px !important; }
-    #prod-hero h1, #prod-hero h2 { font-size: 22px !important; margin-bottom: 6px !important; }
-    #prod-hero .hero-sub { font-size: 12px !important; padding: 0 !important; line-height: 1.4 !important; }
-    #prod-hero .hero-grid { gap: 10px !important; }
-    #prod-hero .hcard-img-wrap { aspect-ratio: 1 / 1 !important; }
-    #prod-hero .hcard-info { padding: 8px 10px 10px !important; }
-    #prod-hero .hcard-name { font-size: 13px !important; }
-    #prod-hero .hcard-cta { font-size: 10.5px !important; }
-    /* Sticky-Anfragen-Button auf Picker-Screen weg — nichts zum Anfragen ohne Auswahl */
+    #prod-hero {
+      padding: 10px 12px 14px !important;
+      gap: 10px !important;
+      top: calc(97px + env(safe-area-inset-top, 0px)) !important;
+      justify-content: flex-start !important;
+    }
+    /* Disclaimer kompakt: kleiner Padding, kleinerer Text — bleibt sichtbar */
+    #prod-hero .hero-disclaimer {
+      padding: 8px 12px !important;
+      font-size: 11px !important;
+      line-height: 1.35 !important;
+      gap: 8px !important;
+    }
+    #prod-hero .hero-disclaimer .ms { font-size: 16px !important; }
+    #prod-hero .hero-disclaimer .hd-body strong.hd-title { font-size: 11.5px !important; margin-bottom: 1px !important; display: block; }
+    /* Hero-Head super-kompakt */
+    #prod-hero .hero-head { max-width: 100% !important; }
+    #prod-hero .hero-eyebrow { margin-bottom: 4px !important; font-size: 9px !important; gap: 6px !important; }
+    #prod-hero .hero-eyebrow::before, #prod-hero .hero-eyebrow::after { width: 18px !important; }
+    #prod-hero h1, #prod-hero h2 {
+      font-size: 19px !important;
+      margin-bottom: 4px !important;
+      line-height: 1.1 !important;
+    }
+    #prod-hero h2 br { display: none !important; }  /* zwingt H2 in eine Zeile-Block (statt 2 Zeilen) */
+    #prod-hero .hero-sub { font-size: 11.5px !important; padding: 0 !important; line-height: 1.35 !important; }
+    /* Karten: nur Bild + Name, KEIN CTA-Block (das ganze Card ist klickbar) */
+    #prod-hero .hero-grid { gap: 8px !important; }
+    #prod-hero .hcard-img-wrap { aspect-ratio: 5 / 4 !important; }
+    #prod-hero .hcard-info { padding: 6px 8px 7px !important; }
+    #prod-hero .hcard-name-top { font-size: 12px !important; padding: 6px 8px 4px !important; }
+    #prod-hero .hcard-cta { display: none !important; }
+    /* Sticky-Anfragen-Button auf Picker weg */
     #mobile-bottom-bar { display: none !important; }
+    /* Floating WhatsApp auf Picker-Screen weg (lenkt von Produktwahl ab) */
+    body > a[href*="wa.me"][class*="floating"],
+    .df-wa-float { display: none !important; }
   }
   #prod-hero .hcard {
     border-radius: 16px; overflow: hidden;
