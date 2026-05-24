@@ -712,57 +712,71 @@ function buildInnenBeschlag() {
     doorGroup.add(hinge);
   });
 
-  // Drücker 30A + Langschild RECHTS innen
+  // Schmalrahmen-Langschild (Stadium-Form, EINE Plate für Drücker + PZ).
+  // Echtes Beschlag-Vorbild: oval, Halbkreis-Enden, Drücker-Hals geht durch
+  // ein rundes Loch in der Plate (KEINE separate aufgesetzte Rosette).
   const KX = DW - 0.065;
   const KY_HANDLE = 1.050;
   const KY_LOCK   = 0.962;  // DIN 18252: 88mm PZ-Achsabstand zum Drücker
-  const PLATE_W = 0.045, PLATE_H = 0.240, PLATE_THK = 0.003;
+  const PLATE_W   = 0.048;  // 48mm Schmalrahmen-Schild
+  const PLATE_H   = 0.225;  // 225mm Höhe (DIN-Standard)
+  const PLATE_THK = 0.004;  // 4mm Materialstärke
 
-  const plateY = (KY_HANDLE + KY_LOCK) / 2 + 0.005;
-  const plShape = roundedRectShape(PLATE_W, PLATE_H, 0.008);
-  const plGeom  = new THREE.ExtrudeGeometry(plShape, { depth: PLATE_THK, bevelEnabled: false });
+  const plateY = (KY_HANDLE + KY_LOCK) / 2;  // exakt zwischen Drücker und PZ
+
+  // Stadium-Shape: voller Halbkreis oben + unten (Eckradius = halbe Breite)
+  const plShape = roundedRectShape(PLATE_W, PLATE_H, PLATE_W / 2);
+
+  // Loch 1: Drücker-Spindel — rund, Ø22mm (Hals Ø19mm geht durch, 1.5mm Spiel)
+  const SPINDLE_R   = 0.011;
+  const localHandleY = KY_HANDLE - plateY;  // shape ist auf (0,0) zentriert
+  const spindleHole = new THREE.Path();
+  spindleHole.absarc(0, localHandleY, SPINDLE_R, 0, Math.PI * 2, true);
+  plShape.holes.push(spindleHole);
+
+  // Loch 2: PZ-Zylinder — rund, Ø17mm (Standard-Profilzylinder)
+  const PZ_HOLE_R   = 0.0085;
+  const localLockY  = KY_LOCK - plateY;
+  const pzHole = new THREE.Path();
+  pzHole.absarc(0, localLockY, PZ_HOLE_R, 0, Math.PI * 2, true);
+  plShape.holes.push(pzHole);
+
+  const plGeom = new THREE.ExtrudeGeometry(plShape, {
+    depth: PLATE_THK,
+    bevelEnabled: true,
+    bevelSize: 0.0006,
+    bevelThickness: 0.0006,
+    bevelSegments: 2
+  });
   const plate = new THREE.Mesh(plGeom, handleMat);
-  plate.position.set(KX - PLATE_W / 2, plateY - PLATE_H / 2, DD + 0.001);
+  plate.position.set(KX, plateY, DD + 0.001);  // shape ist zentriert → position = world center
   plate.castShadow = true;
   doorGroup.add(plate);
 
-  // PZ-Zylinder dunkle Öffnung
-  const pzDark = new THREE.MeshStandardMaterial({ color: 0x0a0a0a, roughness: 0.95 });
-  const pz = new THREE.Mesh(new THREE.CylinderGeometry(0.0085, 0.0085, 0.004, 24), pzDark);
-  pz.rotation.x = Math.PI / 2;
-  pz.position.set(KX, KY_LOCK, DD + PLATE_THK + 0.002);
-  doorGroup.add(pz);
+  // PZ-Zylinder-Stirnseite (silberner Disc hinter dem Loch, leicht eingelassen)
+  const pzFaceMat = new THREE.MeshStandardMaterial({
+    color: 0xb8bcc0, roughness: 0.5, metalness: 0.85
+  });
+  const pzFace = new THREE.Mesh(
+    new THREE.CylinderGeometry(PZ_HOLE_R - 0.0003, PZ_HOLE_R - 0.0003, 0.0025, 24),
+    pzFaceMat
+  );
+  pzFace.rotation.x = Math.PI / 2;
+  pzFace.position.set(KX, KY_LOCK, DD + PLATE_THK * 0.5);
+  doorGroup.add(pzFace);
 
-  const pzSlot = new THREE.Mesh(new THREE.BoxGeometry(0.011, 0.003, 0.002), pzDark);
-  pzSlot.position.set(KX, KY_LOCK - 0.005, DD + PLATE_THK + 0.003);
+  // Schlüsselloch-Schlitz auf der PZ-Stirnseite (dunkler horizontaler Schlitz)
+  const slotMat = new THREE.MeshStandardMaterial({ color: 0x080808, roughness: 0.95 });
+  const pzSlot = new THREE.Mesh(new THREE.BoxGeometry(0.010, 0.0022, 0.001), slotMat);
+  pzSlot.position.set(KX, KY_LOCK, DD + PLATE_THK * 0.5 + 0.0015);
   doorGroup.add(pzSlot);
-
-  // Drücker-Rosette — größer & prominenter (typische Drutex-Innenklinke, Hoppe-Stil)
-  const ROSETTE_R   = 0.024;
-  const ROSETTE_THK = 0.006;
-  const rosette = new THREE.Mesh(
-    new THREE.CylinderGeometry(ROSETTE_R, ROSETTE_R, ROSETTE_THK, 28), handleMat
-  );
-  rosette.rotation.x = Math.PI / 2;
-  rosette.position.set(KX, KY_HANDLE, DD + PLATE_THK + ROSETTE_THK / 2 + 0.0005);
-  rosette.castShadow = true;
-  doorGroup.add(rosette);
-
-  // Innere Nuss/Vierkant-Aufnahme (kleine dunkle Bohrung) — Detail an der Rosette
-  const nutHole = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.005, 0.005, 0.002, 12),
-    new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.9 })
-  );
-  nutHole.rotation.x = Math.PI / 2;
-  nutHole.position.set(KX, KY_HANDLE, DD + PLATE_THK + ROSETTE_THK + 0.0015);
-  doorGroup.add(nutHole);
 
   // KLINKE: Standard Drutex-Innendrücker (Hoppe-Stil L-Form).
   // Charakteristik: kurzer Hals senkrecht zur Tür (Z-Achse), 90°-Bogen,
   // dann gerader Hebel PARALLEL zur Türfläche (Z konstant).
   // Material: gebürstetes Edelstahl (handleMat).
   const LEVER_R         = 0.0095;  // ~19mm Durchmesser, schlanker Hoppe-Stil
-  const LEVER_BASE_Z    = DD + PLATE_THK + ROSETTE_THK + 0.001;
+  const LEVER_BASE_Z    = DD + PLATE_THK + 0.0005;  // Hals tritt direkt aus Plate aus (kein Rosetten-Aufsatz)
   const LEVER_NECK_LEN  = 0.025;   // Hals 25mm aus der Tür raus
   const LEVER_BAR_LEN   = 0.110;   // Hebel 110mm zur Türmitte
   const LEVER_FRONT_Z   = LEVER_BASE_Z + LEVER_NECK_LEN;
