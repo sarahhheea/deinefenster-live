@@ -266,17 +266,13 @@
     /* Live-Vorschau cleanen — Overlays im Bild raus, sieht aus wie Produktkarte (Sarah-Wunsch 28.04.2026) */
     #prev-color-strip{display:none !important}
     #prev-dim-label{display:none !important}
-    /* Türmodell-Karten: Look wie Fenster-Studio-Karten (dunkelblauer Background).
-       Drutex-JPGs haben weißen Hintergrund eingebrannt — mix-blend-mode:multiply
-       multipliziert weiß × blau = blau (weißer Rand wird unsichtbar),
-       dunkle Tür × blau = sehr dunkler Schatten (Tür voll sichtbar).
-       Kundenwunsch 24.05.2026: keine weißen Ränder, Tür komplett sichtbar in blauer Box. */
-    #s-tm .pc{padding:0;overflow:hidden;border-radius:12px;background:linear-gradient(180deg,#2970d4 0%,#1e3a8a 100%)}
+    /* Türmodell-Karten: Studio-PNGs sind vorgerendert mit dunkelblauem BG (img/drutex-tueren/studio/).
+       Karten brauchen daher nur einen sauberen Container — kein Multiply/Scale/Gradient nötig. */
+    #s-tm .pc{padding:0;overflow:hidden;border-radius:12px;background:transparent}
     #s-tm .pc-img{
       width:100%;height:160px;
       background:transparent;padding:0;border:none;
-      object-fit:contain;object-position:center;
-      mix-blend-mode:multiply;
+      object-fit:cover;object-position:center;
       display:block;
     }
     @media(min-width:1024px){#s-tm .pc-img{height:200px}}
@@ -2130,9 +2126,9 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   #s1 .pc.sel::after { content: 'check_circle' !important; font-family: 'Material Symbols Outlined' !important; font-variation-settings: 'FILL' 1 !important; font-size: 22px !important; color: #4d88ff !important; position: absolute !important; top: 12px !important; right: 12px !important; background: rgba(5,5,15,0.72) !important; border-radius: 50% !important; width: 28px !important; height: 28px !important; display: grid !important; place-items: center !important; line-height: 1 !important; z-index: 6 !important; background-image: none !important; }
   #s1 .pc:not(.sel)::after { content: '' !important; position: absolute !important; top: 0 !important; left: 8% !important; right: 8% !important; height: 1px !important; background: rgba(255,255,255,0.05) !important; background-image: none !important; font-size: 0 !important; }
 
-  /* ── 17. TÜRMODELL-KARTEN ── Look wie Fenster-Studio-Karten (Kundenwunsch 24.05.2026) */
-  #s-tm .pc { background: linear-gradient(180deg,#2970d4 0%,#1e3a8a 100%) !important; border: none !important; border-radius: 12px !important; overflow: hidden !important; transition: all 0.22s ease !important; }
-  #s-tm .pc-img { mix-blend-mode: multiply !important; object-fit: contain !important; object-position: center !important; transform: none !important; width: 100% !important; }
+  /* ── 17. TÜRMODELL-KARTEN ── vorgerenderte Studio-PNGs (img/drutex-tueren/studio/) */
+  #s-tm .pc { background: transparent !important; border: none !important; border-radius: 12px !important; overflow: hidden !important; transition: all 0.22s ease !important; }
+  #s-tm .pc-img { mix-blend-mode: normal !important; object-fit: cover !important; object-position: center !important; transform: none !important; width: 100% !important; }
   #s-tm .pc:hover { transform: translateY(-4px) !important; box-shadow: 0 8px 24px rgba(0,0,0,0.30) !important; }
   #s-tm .pc.sel  { box-shadow: 0 0 0 2px #4d88ff, 0 8px 24px rgba(77,136,255,0.30) !important; }
   #s-tm .pc-name { font-size: 12.5px !important; color: rgba(255,255,255,0.90) !important; }
@@ -3818,59 +3814,59 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
     <div class="sec-t">IGLO Energy · Mit Edelstahl-Deko (Inox)</div>
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
       <div class="pc" data-m="florida-lr-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/florida-inox-lr_antracyt.jpg" alt="Florida (L/R) · Inox" loading="lazy"/>
+        <img class="pc-img" src="img/drutex-tueren/studio/florida-lr-inox.png?v=20260524" alt="Florida (L/R) · Inox" loading="lazy"/>
         <div class="pc-name">Florida (L/R) · Inox</div>
       </div>
       <div class="pc" data-m="montana-2-lr-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/montana-inox-2-lr_antracyt.jpg" alt="Montana 2 L/R · Inox" loading="lazy"/>
+        <img class="pc-img" src="img/drutex-tueren/studio/montana-2-lr-inox.png?v=20260524" alt="Montana 2 L/R · Inox" loading="lazy"/>
         <div class="pc-name">Montana 2 L/R · Inox</div>
       </div>
       <div class="pc" data-m="montana-3-lr-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/montana-inox-3-lr_antracyt.jpg" alt="Montana 3 L/R · Inox" loading="lazy"/>
+        <img class="pc-img" src="img/drutex-tueren/studio/montana-3-lr-inox.png?v=20260524" alt="Montana 3 L/R · Inox" loading="lazy"/>
         <div class="pc-name">Montana 3 L/R · Inox</div>
       </div>
       <div class="pc" data-m="ohio-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/ohio-inox_antracyt.jpg" alt="Ohio · Inox" loading="lazy"/>
+        <img class="pc-img" src="img/drutex-tueren/studio/ohio-inox.png?v=20260524" alt="Ohio · Inox" loading="lazy"/>
         <div class="pc-name">Ohio · Inox</div>
       </div>
       <div class="pc" data-m="colorado-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/colorado-inox_antracyt.jpg" alt="Colorado · Inox" loading="lazy"/>
+        <img class="pc-img" src="img/drutex-tueren/studio/colorado-inox.png?v=20260524" alt="Colorado · Inox" loading="lazy"/>
         <div class="pc-name">Colorado · Inox</div>
       </div>
       <div class="pc" data-m="alaska-2-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/alaska-inox-2_antracyt.jpg" alt="Alaska 2 · Inox" loading="lazy"/>
+        <img class="pc-img" src="img/drutex-tueren/studio/alaska-2-inox.png?v=20260524" alt="Alaska 2 · Inox" loading="lazy"/>
         <div class="pc-name">Alaska 2 · Inox</div>
       </div>
       <div class="pc" data-m="alaska-1-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/alaska-inox-1_antracyt.jpg" alt="Alaska 1 · Inox" loading="lazy"/>
+        <img class="pc-img" src="img/drutex-tueren/studio/alaska-1-inox.png?v=20260524" alt="Alaska 1 · Inox" loading="lazy"/>
         <div class="pc-name">Alaska 1 · Inox</div>
       </div>
       <div class="pc" data-m="montana-1-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/montana-inox-1_antracyt.jpg" alt="Montana 1 · Inox" loading="lazy"/>
+        <img class="pc-img" src="img/drutex-tueren/studio/montana-1-inox.png?v=20260524" alt="Montana 1 · Inox" loading="lazy"/>
         <div class="pc-name">Montana 1 · Inox</div>
       </div>
       <div class="pc" data-m="nebraska-lcr-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/nebraska-inox-lcr_antracyt.jpg" alt="Nebraska (L/C/R) · Inox" loading="lazy"/>
+        <img class="pc-img" src="img/drutex-tueren/studio/nebraska-lcr-inox.png?v=20260524" alt="Nebraska (L/C/R) · Inox" loading="lazy"/>
         <div class="pc-name">Nebraska (L/C/R) · Inox</div>
       </div>
       <div class="pc" data-m="pennsylvania-1-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pennsylvania-inox-1_antracyt.jpg" alt="Pennsylvania 1 · Inox" loading="lazy"/>
+        <img class="pc-img" src="img/drutex-tueren/studio/pennsylvania-1-inox.png?v=20260524" alt="Pennsylvania 1 · Inox" loading="lazy"/>
         <div class="pc-name">Pennsylvania 1 · Inox</div>
       </div>
       <div class="pc" data-m="texas-c-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/texas-inox-c_antracyt.jpg" alt="Texas (Mittig) · Inox" loading="lazy"/>
+        <img class="pc-img" src="img/drutex-tueren/studio/texas-c-inox.png?v=20260524" alt="Texas (Mittig) · Inox" loading="lazy"/>
         <div class="pc-name">Texas (Mittig) · Inox</div>
       </div>
       <div class="pc" data-m="texas-lr-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/texas-inox-lr_antracyt.jpg" alt="Texas (L/R) · Inox" loading="lazy"/>
+        <img class="pc-img" src="img/drutex-tueren/studio/texas-lr-inox.png?v=20260524" alt="Texas (L/R) · Inox" loading="lazy"/>
         <div class="pc-name">Texas (L/R) · Inox</div>
       </div>
       <div class="pc" data-m="pennsylvania-2-lr-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pennsylvania-inox-2-lr_antracyt.jpg" alt="Pennsylvania 2 L/R · Inox" loading="lazy"/>
+        <img class="pc-img" src="img/drutex-tueren/studio/pennsylvania-2-lr-inox.png?v=20260524" alt="Pennsylvania 2 L/R · Inox" loading="lazy"/>
         <div class="pc-name">Pennsylvania 2 L/R · Inox</div>
       </div>
       <div class="pc" data-m="pennsylvania-3-lr-inox" onclick="pickTuerModell(this)">
-        <img class="pc-img" src="img/drutex-tueren/pennsylvania-inox-3-lr_antracyt.jpg" alt="Pennsylvania 3 L/R · Inox" loading="lazy"/>
+        <img class="pc-img" src="img/drutex-tueren/studio/pennsylvania-3-lr-inox.png?v=20260524" alt="Pennsylvania 3 L/R · Inox" loading="lazy"/>
         <div class="pc-name">Pennsylvania 3 L/R · Inox</div>
       </div>
       <a href="kontakt.html" class="pc" style="text-decoration:none;border:2px dashed rgba(34,94,170,0.35);background:rgba(34,94,170,0.04);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:120px;">
