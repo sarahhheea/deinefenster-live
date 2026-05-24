@@ -659,44 +659,10 @@ function gefilterteProdukte() {
 }
 
 /* ─── Shop-Header dynamisch je nach Zustand-Filter ─── */
-const SHOP_HEADERS = {
-  default: {
-    label: 'Lager · Brandenburg a.d.H.',
-    title: 'Drutex sofort ab Lager —',
-    titleAccent: 'selbst abholen.',
-    desc: 'Originale <strong>Drutex-Kunststofffenster, Balkontüren und Haustüren</strong> in gängigen Maßen — neu, gebraucht und falsch vermessen. <strong>Tagesaktueller Bestand. Kein Online-Warenkorb.</strong> Vor Anfahrt bitte Verfügbarkeit kurz prüfen. <strong>Helfer + Transporter mitbringen</strong> — kein Verlade-Service.'
-  },
-  neu: {
-    label: 'Neuware · Brandenburg a.d.H.',
-    title: 'Drutex Neuware ab Lager —',
-    titleAccent: 'ungeöffnet, sofort mit.',
-    desc: 'Originale <strong>Drutex-Kunststofffenster, Balkontüren und Haustüren</strong> in gängigen Maßen — neu, ungeöffnet, ab Lager. Selbstabholung vor Ort in Brandenburg an der Havel. <strong>Helfer + Transporter mitbringen.</strong>'
-  },
-  gebraucht: {
-    label: 'Gebrauchtware · Brandenburg a.d.H.',
-    title: 'Gebrauchte Fenster & Türen —',
-    titleAccent: 'direkt vor Ort abholen.',
-    desc: 'Gebrauchte <strong>Fenster, Balkontüren und Haustüren</strong> — geprüft, funktional, zu fairen Preisen. Nachhaltig: gut erhaltene Fenster weiterverwenden statt entsorgen. <strong>Helfer + Transporter mitbringen.</strong>'
-  },
-  vermessen: {
-    label: 'Falsch vermessen · bis 50 % unter Neupreis',
-    title: 'Falsch vermessen —',
-    titleAccent: 'Ihr Gewinn.',
-    desc: 'Maßgefertigte <strong>Neuware</strong> — unbenutzt, einwandfreie Qualität — durch Aufmaßfehler nicht gepasst. Für Sie: <strong>fabrikneues Fenster für ca. 50 % unter Neupreis.</strong> Selbstabholung in Brandenburg an der Havel.'
-  }
-};
-
+// SHOP_HEADERS-Logik entfernt: H1 + Sub bleiben statisch allgemein (Sarah-Entscheidung 24.05.2026).
+// aktualisiereShopHeader steuert nur noch den Gebraucht-Filter-Hinweis.
 function aktualisiereShopHeader() {
   const zustand = STATE.filter.zustand.size ? [...STATE.filter.zustand][0] : 'default';
-  const h = SHOP_HEADERS[zustand] || SHOP_HEADERS.default;
-  const label = document.getElementById('shopHeaderLabel');
-  const title = document.getElementById('shopHeaderTitle');
-  const desc  = document.getElementById('shopHeaderDesc');
-  if (label) label.textContent = h.label;
-  if (title) {
-    title.innerHTML = `${h.title}<br/><span class="shop-hero-title-accent">${h.titleAccent}</span>`;
-  }
-  if (desc)  desc.innerHTML = h.desc;
   const hinweis = document.getElementById('gebrauchtHinweis');
   if (hinweis && zustand === 'gebraucht') hinweis.classList.remove('hidden');
   else if (hinweis) hinweis.classList.add('hidden');
