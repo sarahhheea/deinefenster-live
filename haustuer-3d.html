@@ -724,8 +724,9 @@ function buildInnenBeschlag() {
 
   const plateY = (KY_HANDLE + KY_LOCK) / 2;  // exakt zwischen Drücker und PZ
 
-  // Stadium-Shape: voller Halbkreis oben + unten (Eckradius = halbe Breite)
-  const plShape = roundedRectShape(PLATE_W, PLATE_H, PLATE_W / 2);
+  // Schmalrahmen-Schild: stark abgerundete Ecken (aber NICHT exakt = w/2, das gibt
+  // degenerierte Zero-Length-Lines in roundedRectShape → earcut-Triangulation failed)
+  const plShape = roundedRectShape(PLATE_W, PLATE_H, PLATE_W * 0.48);
 
   // Loch 1: Drücker-Spindel — rund, Ø22mm
   const SPINDLE_R   = 0.011;
