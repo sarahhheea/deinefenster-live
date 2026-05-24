@@ -734,42 +734,45 @@ function buildInnenBeschlag() {
   spindleHole.absarc(0, localHandleY, SPINDLE_R, 0, Math.PI * 2, true);
   plShape.holes.push(spindleHole);
 
-  // Loch 2: PZ-Zylinder — rund, Ø17mm (Standard-Profilzylinder)
+  // Loch 2: PZ-Profilzylinder — klassische Bowling-Pin-Silhouette
+  // (runder Zylinderkörper oben Ø17mm + Schlüsselbart-Schlitz 4×8mm unten in EINEM Cutout)
   const PZ_HOLE_R   = 0.0085;
+  const PZ_SLOT_W   = 0.004;
+  const PZ_SLOT_H   = 0.009;
   const localLockY  = KY_LOCK - plateY;
-  const pzHole = new THREE.Path();
-  pzHole.absarc(0, localLockY, PZ_HOLE_R, 0, Math.PI * 2, true);
-  plShape.holes.push(pzHole);
+  const halfSlotW   = PZ_SLOT_W / 2;
+  // Schnittpunkt-Winkel zwischen Schlitz-Seite und Kreis: y_int = -√(r²-x²)
+  const yAtSlotEdge = -Math.sqrt(PZ_HOLE_R * PZ_HOLE_R - halfSlotW * halfSlotW);
+  const angAtSlot   = Math.atan2(yAtSlotEdge, halfSlotW);  // negativer Winkel im 4. Quadranten
 
-  const plGeom = new THREE.ExtrudeGeometry(plShape, {
-    depth: PLATE_THK,
-    bevelEnabled: true,
-    bevelSize: 0.0006,
-    bevelThickness: 0.0006,
-    bevelSegments: 2
-  });
+  const pzPath = new THREE.Path();
+  pzPath.moveTo(halfSlotW, localLockY + yAtSlotEdge);
+  pzPath.lineTo(halfSlotW, localLockY + yAtSlotEdge - PZ_SLOT_H);
+  pzPath.lineTo(-halfSlotW, localLockY + yAtSlotEdge - PZ_SLOT_H);
+  pzPath.lineTo(-halfSlotW, localLockY + yAtSlotEdge);
+  // Großer Bogen CCW: vom linken Schnittpunkt durch oben zum rechten
+  pzPath.absarc(0, localLockY, PZ_HOLE_R, Math.PI - angAtSlot, angAtSlot, true);
+  plShape.holes.push(pzPath);
+
+  // Plate: clean extrude OHNE Bevel — echtes Beschlag-Vorbild hat klare Kanten
+  const plGeom = new THREE.ExtrudeGeometry(plShape, { depth: PLATE_THK, bevelEnabled: false });
   const plate = new THREE.Mesh(plGeom, handleMat);
-  plate.position.set(KX, plateY, DD + 0.001);  // shape ist zentriert → position = world center
+  plate.position.set(KX, plateY, DD + 0.001);
   plate.castShadow = true;
   doorGroup.add(plate);
 
-  // PZ-Zylinder-Stirnseite (silberner Disc hinter dem Loch, leicht eingelassen)
+  // PZ-Cylinder-Stirn-Hint: kleiner silberner Disc HINTER dem Kreisteil des Bowling-Pin-Lochs
+  // (gibt visuelle Tiefe — durch den Schlitz unten sieht man die dunkle Tür dahinter)
   const pzFaceMat = new THREE.MeshStandardMaterial({
-    color: 0xb8bcc0, roughness: 0.5, metalness: 0.85
+    color: 0x9ea2a6, roughness: 0.6, metalness: 0.7
   });
   const pzFace = new THREE.Mesh(
-    new THREE.CylinderGeometry(PZ_HOLE_R - 0.0003, PZ_HOLE_R - 0.0003, 0.0025, 24),
+    new THREE.CylinderGeometry(PZ_HOLE_R - 0.0005, PZ_HOLE_R - 0.0005, 0.002, 24),
     pzFaceMat
   );
   pzFace.rotation.x = Math.PI / 2;
   pzFace.position.set(KX, KY_LOCK, DD + PLATE_THK * 0.5);
   doorGroup.add(pzFace);
-
-  // Schlüsselloch-Schlitz auf der PZ-Stirnseite (dunkler horizontaler Schlitz)
-  const slotMat = new THREE.MeshStandardMaterial({ color: 0x080808, roughness: 0.95 });
-  const pzSlot = new THREE.Mesh(new THREE.BoxGeometry(0.010, 0.0022, 0.001), slotMat);
-  pzSlot.position.set(KX, KY_LOCK, DD + PLATE_THK * 0.5 + 0.0015);
-  doorGroup.add(pzSlot);
 
   // KLINKE: Standard Drutex-Innendrücker (Hoppe-Stil L-Form).
   // Charakteristik: kurzer Hals senkrecht zur Tür (Z-Achse), 90°-Bogen,
