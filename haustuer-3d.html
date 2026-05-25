@@ -733,27 +733,16 @@ function buildInnenBeschlag() {
   const localLockY   = KY_LOCK - plateY;
   const plShape = roundedRectShape(PLATE_W, PLATE_H, PLATE_W * 0.48);
 
-  // ShapeGeometry: flache 2D-Plane mit zuverlaessigen +Z Normals.
-  // DoubleSide weil doorGroup.scale.x=-1 die Winding flippt.
-  const plateMat = new THREE.MeshStandardMaterial({
-    color: 0xc8ccd0, roughness: 0.62, metalness: 0.30, envMapIntensity: 1.0,
-    side: THREE.DoubleSide
-  });
+  // Plate: nutze EXAKT handleMat wie der Lever (der ja silber rendert).
+  // ShapeGeometry produziert eine 2D-Flache mit konsistent +Z Normals.
+  // doorGroup.scale.x=-1 flippt zwar Winding — aber Three.js erkennt das
+  // (negative determinant) und togglet FrontFace automatisch im Rasterizer.
+  // Solange Normals nicht manuell gescaled werden, bleibt Lighting korrekt.
   const plGeom = new THREE.ShapeGeometry(plShape);
-  const plate = new THREE.Mesh(plGeom, plateMat);
-  plate.position.set(KX, plateY, DD + 0.0015);  // 1.5mm vor Tuerblatt
+  const plate = new THREE.Mesh(plGeom, handleMat);
+  plate.position.set(KX, plateY, DD + 0.0015);
   plate.castShadow = true;
   doorGroup.add(plate);
-
-  // DEBUG v12: HUGE RED CUBE at plate position to verify rendering
-  const debugCube = new THREE.Mesh(
-    new THREE.BoxGeometry(0.08, 0.05, 0.05),
-    new THREE.MeshBasicMaterial({ color: 0xff0000 })
-  );
-  debugCube.position.set(KX, plateY, DD + 0.05);  // 5cm in front
-  doorGroup.add(debugCube);
-  window._debugDoorGroup = doorGroup;  // expose for inspection
-  window._debugPlate = plate;
 
   // PZ-Zylinder-Stirnfläche: silberner Disc füllt das runde Plate-Loch
   // (etwas zurückgesetzt damit man Tiefe sieht — wie ein eingelassener Zylinder)
