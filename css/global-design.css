@@ -364,3 +364,57 @@ form#kontakt-form,
     align-items: center !important;
   }
 }
+
+/* ── TRUST-MARQUEE-BAR (Single-Source 2026-05-25) ─────────────────────────────
+   Sticht unter Hero auf allen Landing/Hub-Pages — hellblauer Tint matched
+   STYLE-GUIDE Master-Pattern (ueber-drutex.html). Animation = unendlicher
+   Scroll, Inhalt im HTML 2× wiederholen für nahtlosen Loop.
+   Wenn du den Stil änderst: HIER ändern, nicht ad-hoc pro Page. */
+.marquee-bar {
+  background: rgba(118,169,250,0.06);
+  border-top: 1px solid rgba(118,169,250,0.12);
+  border-bottom: 1px solid rgba(118,169,250,0.12);
+  padding: 14px 0;
+  overflow: hidden;
+  position: relative;
+}
+.marquee-bar .marquee-track-anim {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  width: max-content;
+  animation: marqueeScroll 50s linear infinite;
+  white-space: nowrap;
+  font-family: 'Manrope', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  color: rgba(255,255,255,0.45);
+}
+.marquee-bar .marquee-track-anim .dot {
+  color: #76a9fa;
+  font-size: 14px;
+}
+@keyframes marqueeScroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-bar .marquee-track-anim { animation: none !important; }
+}
+@media (max-width: 640px) {
+  .marquee-bar { padding: 10px 0; }
+  .marquee-bar .marquee-track-anim { gap: 28px; font-size: 10px; letter-spacing: 0.2em; }
+}
+
+/* ── HERO-HÖHE Standard (Single-Source 2026-05-25) ─────────────────────────
+   Alle Hub/Landing-Pages nutzen --hero-height. Master-Brand-Page (ueber-drutex)
+   nutzt --hero-height-brand für 95vh. Funnel/Conversion-Pages (kontakt, konfig)
+   bleiben 50-60vh — siehe STYLE-GUIDE Per-Page-Mapping. */
+:root {
+  --hero-height: 90vh;
+  --hero-height-min: 560px;
+  --hero-height-brand: 95vh;
+  --hero-height-brand-min: 600px;
+}
