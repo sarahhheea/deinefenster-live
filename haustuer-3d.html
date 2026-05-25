@@ -712,48 +712,72 @@ function buildInnenBeschlag() {
     doorGroup.add(hinge);
   });
 
-  // ROSETTEN-GARNITUR: 2 runde silberne Rosetten (Drueckerrosette + PZ-Rosette).
-  // Cylinder-Geometrie rendert zuverlaessig (gleiche Pipeline wie der silberne Lever).
-  // Flache ShapeGeometry hatte einen unfixbaren Three.js-Render-Bug mit dem Mirror.
-  const KX = DW - 0.090;  // 90mm vom rechten Tuerrand — frei von Zarge-Profilkanten
+  // SCHMALRAHMEN-LANGSCHILD: schmale Stadium-Plate aus 2 Cylindern (Top/Bottom-Caps)
+  // + zentrale Box. Eigenes plateMat (matter eloxiert, weniger chrome) fuer Realismus.
+  const KX = DW - 0.090;
   const KY_HANDLE = 1.050;
-  const KY_LOCK   = 0.962;  // DIN 18252: 88mm PZ-Achsabstand zum Drücker
+  const KY_LOCK   = 0.962;  // DIN 18252: 88mm PZ-Achsabstand
 
-  const ROSETTE_R    = 0.027;   // 54mm Rosetten-Durchmesser (Standard-Hoppe)
-  const ROSETTE_THK  = 0.005;   // 5mm Materialstaerke
-  // Z-Position deutlich vor den Drutex-Inox-Strips (DD+0.004 bis DD+0.012)
-  const ROSETTE_Z_BASE = DD + 0.013;  // 13mm vor Tuerflaeche — keine Strip-Kollision
+  const PLATE_W = 0.032;     // 32mm Schmalrahmen-Standard
+  const PLATE_R = 0.016;     // Halbkreis-Endenradius = halbe Breite
+  const PLATE_TOTAL_LEN = 0.220;  // 220mm Gesamtlaenge
+  const PLATE_BOX_LEN   = PLATE_TOTAL_LEN - 2 * PLATE_R;  // zentrale Box-Hoehe
+  const PLATE_THK = 0.005;
+  const PLATE_Z_BASE = DD + 0.013;
+  const plateY = (KY_HANDLE + KY_LOCK) / 2;
 
-  // Drueckerrosette (rund um Spindel-Achse, Y = 1050mm)
-  const handleRosette = new THREE.Mesh(
-    new THREE.CylinderGeometry(ROSETTE_R, ROSETTE_R, ROSETTE_THK, 32),
-    handleMat
+  // Mattes Aluminium-Eloxiert-Material fuer Plate (weniger glaenzend als Lever-Chrome)
+  const plateMat = new THREE.MeshStandardMaterial({
+    color: 0xb4b7ba, roughness: 0.68, metalness: 0.55, envMapIntensity: 0.85
+  });
+
+  // 1) Zentrale Box (Hauptkoerper der Plate)
+  const plateBox = new THREE.Mesh(
+    new THREE.BoxGeometry(PLATE_W, PLATE_BOX_LEN, PLATE_THK),
+    plateMat
   );
-  handleRosette.rotation.x = Math.PI / 2;
-  handleRosette.position.set(KX, KY_HANDLE, ROSETTE_Z_BASE + ROSETTE_THK / 2);
-  handleRosette.castShadow = true;
-  doorGroup.add(handleRosette);
+  plateBox.position.set(KX, plateY, PLATE_Z_BASE + PLATE_THK / 2);
+  plateBox.castShadow = true;
+  plateBox.receiveShadow = true;
+  doorGroup.add(plateBox);
 
-  // PZ-Rosette (rund um PZ-Zylinder, Y = 962mm)
-  const pzRosette = new THREE.Mesh(
-    new THREE.CylinderGeometry(ROSETTE_R, ROSETTE_R, ROSETTE_THK, 32),
-    handleMat
+  // 2) Top-Cap (Halbkreis-Ende oben)
+  const plateTop = new THREE.Mesh(
+    new THREE.CylinderGeometry(PLATE_R, PLATE_R, PLATE_THK, 32),
+    plateMat
   );
-  pzRosette.rotation.x = Math.PI / 2;
-  pzRosette.position.set(KX, KY_LOCK, ROSETTE_Z_BASE + ROSETTE_THK / 2);
-  pzRosette.castShadow = true;
-  doorGroup.add(pzRosette);
+  plateTop.rotation.x = Math.PI / 2;
+  plateTop.position.set(KX, plateY + PLATE_BOX_LEN / 2, PLATE_Z_BASE + PLATE_THK / 2);
+  plateTop.castShadow = true;
+  plateTop.receiveShadow = true;
+  doorGroup.add(plateTop);
 
-  // VERBINDUNGS-PLATTE zwischen Drueckerrosette und PZ-Rosette (Schmalrahmen-Langschild-Look).
-  // BoxGeometry, gleiches Material — bildet zusammen mit den beiden Cylinder-Rosetten die
-  // klassische Stadium-Form (zwei Halbkreise verbunden durch Rechteck).
-  const connectorBox = new THREE.Mesh(
-    new THREE.BoxGeometry(2 * ROSETTE_R, KY_HANDLE - KY_LOCK, ROSETTE_THK),
-    handleMat
+  // 3) Bottom-Cap (Halbkreis-Ende unten)
+  const plateBottom = new THREE.Mesh(
+    new THREE.CylinderGeometry(PLATE_R, PLATE_R, PLATE_THK, 32),
+    plateMat
   );
-  connectorBox.position.set(KX, (KY_HANDLE + KY_LOCK) / 2, ROSETTE_Z_BASE + ROSETTE_THK / 2);
-  connectorBox.castShadow = true;
-  doorGroup.add(connectorBox);
+  plateBottom.rotation.x = Math.PI / 2;
+  plateBottom.position.set(KX, plateY - PLATE_BOX_LEN / 2, PLATE_Z_BASE + PLATE_THK / 2);
+  plateBottom.castShadow = true;
+  plateBottom.receiveShadow = true;
+  doorGroup.add(plateBottom);
+
+  // 4) Sub-Drueckerrosette: erhabener Disc um den Hebel-Hals (mechanischer Look)
+  const SUB_ROSETTE_R = 0.014;   // 28mm, etwas schmaler als Plate
+  const SUB_ROSETTE_THK = 0.004; // 4mm proud vor der Plate
+  const subRosette = new THREE.Mesh(
+    new THREE.CylinderGeometry(SUB_ROSETTE_R, SUB_ROSETTE_R, SUB_ROSETTE_THK, 32),
+    plateMat
+  );
+  subRosette.rotation.x = Math.PI / 2;
+  subRosette.position.set(KX, KY_HANDLE, PLATE_Z_BASE + PLATE_THK + SUB_ROSETTE_THK / 2);
+  subRosette.castShadow = true;
+  doorGroup.add(subRosette);
+
+  // alte ROSETTE_* Variablen-Namen weiter unten unterstuetzen:
+  const ROSETTE_Z_BASE = PLATE_Z_BASE;
+  const ROSETTE_THK    = PLATE_THK + SUB_ROSETTE_THK;  // Lever-Anschluss-Hoehe
 
   // PZ-Zylinder-Stirnflaeche (dunkel, in der Mitte der PZ-Rosette)
   const PZ_HOLE_R = 0.0085;
@@ -800,25 +824,27 @@ function buildInnenBeschlag() {
   const LEVER_BAR_LEN   = 0.110;   // Hebel 110mm zur Türmitte
   const LEVER_FRONT_Z   = LEVER_BASE_Z + LEVER_NECK_LEN;
 
-  // L-Form: Hals (entlang Z) → 90°-Bogen → Hebel (entlang -X), beides auf gleicher Y-Höhe
+  // SCHWANENHALS-Form: Hals (Z hoch) -> 90°-Bogen -> Hebel mit sanftem Y-Aufwaerts-Bogen
+  // (wie im echten Hoppe-Foto: Spitze leicht ueber Hals-Basis)
   const leverPath = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(KX,                       KY_HANDLE, LEVER_BASE_Z),
-    new THREE.Vector3(KX,                       KY_HANDLE, LEVER_BASE_Z + 0.010),
-    new THREE.Vector3(KX,                       KY_HANDLE, LEVER_BASE_Z + 0.018),
-    new THREE.Vector3(KX - 0.005,               KY_HANDLE, LEVER_FRONT_Z - 0.002),
-    new THREE.Vector3(KX - 0.015,               KY_HANDLE, LEVER_FRONT_Z),
-    new THREE.Vector3(KX - 0.035,               KY_HANDLE, LEVER_FRONT_Z),
-    new THREE.Vector3(KX - 0.065,               KY_HANDLE, LEVER_FRONT_Z),
-    new THREE.Vector3(KX - LEVER_BAR_LEN,       KY_HANDLE, LEVER_FRONT_Z),
+    new THREE.Vector3(KX,                       KY_HANDLE,             LEVER_BASE_Z),
+    new THREE.Vector3(KX,                       KY_HANDLE,             LEVER_BASE_Z + 0.010),
+    new THREE.Vector3(KX,                       KY_HANDLE,             LEVER_BASE_Z + 0.018),
+    new THREE.Vector3(KX - 0.005,               KY_HANDLE,             LEVER_FRONT_Z - 0.002),
+    new THREE.Vector3(KX - 0.018,               KY_HANDLE + 0.001,     LEVER_FRONT_Z),
+    new THREE.Vector3(KX - 0.045,               KY_HANDLE + 0.004,     LEVER_FRONT_Z),
+    new THREE.Vector3(KX - 0.075,               KY_HANDLE + 0.008,     LEVER_FRONT_Z),
+    new THREE.Vector3(KX - 0.095,               KY_HANDLE + 0.010,     LEVER_FRONT_Z),
+    new THREE.Vector3(KX - LEVER_BAR_LEN,       KY_HANDLE + 0.009,     LEVER_FRONT_Z),
   ], false, 'catmullrom', 0.5);
-  const leverGeom = new THREE.TubeGeometry(leverPath, 80, LEVER_R, 20, false);
+  const leverGeom = new THREE.TubeGeometry(leverPath, 96, LEVER_R, 20, false);
   const lever = new THREE.Mesh(leverGeom, handleMat);
   lever.castShadow = true;
   doorGroup.add(lever);
 
-  // Endkappe (gerundet)
+  // Endkappe (gerundet, an der hochgewoelbten Spitze)
   const tipCap = new THREE.Mesh(new THREE.SphereGeometry(LEVER_R, 20, 14), handleMat);
-  tipCap.position.set(KX - LEVER_BAR_LEN, KY_HANDLE, LEVER_FRONT_Z);
+  tipCap.position.set(KX - LEVER_BAR_LEN, KY_HANDLE + 0.009, LEVER_FRONT_Z);
   tipCap.castShadow = true;
   doorGroup.add(tipCap);
 }
