@@ -2328,15 +2328,14 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
     #kfg-main { padding-top: 0 !important; padding-bottom: 0 !important; }
     #mobile-step-bar.msb-show { margin-bottom: 6px !important; padding: 18px 18px 14px !important; }
     /* scroll-margin-top: wenn openS() / scrollIntoView den Step zum Top
-       scrollt, soll er unter der Sticky-Step-Bar landen, nicht versteckt
-       darunter. 160 = Topbar 44 + Mainnav 53 + Step-Bar ~50 + Luft 13 */
-    .sc { scroll-margin-top: 160px; }
+       scrollt, soll er unter der Sticky-Step-Bar landen.
+       Topbar 44 + Mainnav 53 + Luft 16 + Step-Bar ~80 + Luft 8 = ~200 */
+    .sc { scroll-margin-top: 200px; }
     /* Mobile: Spacer muss komplette Nav-Hoehe abdecken (Topbar+Mainnav)
-       inkl. iPhone-Notch (safe-area-inset-top). Vorher 54px / 97px - dann
-       war Step-Bar 'SCHRITT 1 VON 14' weiter unter der Nav versteckt bis
-       User scrollt. */
+       inkl. iPhone-Notch + Extra-Luft (16px) damit Step-Bar 'SCHRITT 1
+       VON 14' nicht an der Nav-Kante klebt sondern klar darunter steht. */
     .navbar-spacer {
-      height: calc(97px + env(safe-area-inset-top, 0px)) !important;
+      height: calc(113px + env(safe-area-inset-top, 0px)) !important;
     }
     /* H2 kompakt — auf 1 Zeile */
     #prod-hero .hero-head { max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
@@ -2806,11 +2805,11 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   @media (max-width: 767px) {
     #mobile-step-bar.msb-show {
       display: block;
-      /* Sticky-Top: 10px Puffer unter der Nav-Kante damit der Eyebrow
+      /* Sticky-Top: 16px Puffer unter der Nav-Kante damit der Eyebrow
          'SCHRITT X VON 14' klar sichtbar ist (vorher direkt an der Kante,
          optisch verkappt). */
       position: sticky;
-      top: calc(97px + env(safe-area-inset-top, 0px));
+      top: calc(113px + env(safe-area-inset-top, 0px));
       z-index: 50;
       width: 100%;
       padding: 18px 18px 14px;
