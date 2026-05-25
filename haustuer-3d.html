@@ -744,6 +744,17 @@ function buildInnenBeschlag() {
   pzRosette.castShadow = true;
   doorGroup.add(pzRosette);
 
+  // VERBINDUNGS-PLATTE zwischen Drueckerrosette und PZ-Rosette (Schmalrahmen-Langschild-Look).
+  // BoxGeometry, gleiches Material — bildet zusammen mit den beiden Cylinder-Rosetten die
+  // klassische Stadium-Form (zwei Halbkreise verbunden durch Rechteck).
+  const connectorBox = new THREE.Mesh(
+    new THREE.BoxGeometry(2 * ROSETTE_R, KY_HANDLE - KY_LOCK, ROSETTE_THK),
+    handleMat
+  );
+  connectorBox.position.set(KX, (KY_HANDLE + KY_LOCK) / 2, ROSETTE_Z_BASE + ROSETTE_THK / 2);
+  connectorBox.castShadow = true;
+  doorGroup.add(connectorBox);
+
   // PZ-Zylinder-Stirnflaeche (dunkel, in der Mitte der PZ-Rosette)
   const PZ_HOLE_R = 0.0085;
   const pzCylMat = new THREE.MeshStandardMaterial({
