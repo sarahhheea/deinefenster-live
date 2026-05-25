@@ -715,13 +715,14 @@ function buildInnenBeschlag() {
   // ROSETTEN-GARNITUR: 2 runde silberne Rosetten (Drueckerrosette + PZ-Rosette).
   // Cylinder-Geometrie rendert zuverlaessig (gleiche Pipeline wie der silberne Lever).
   // Flache ShapeGeometry hatte einen unfixbaren Three.js-Render-Bug mit dem Mirror.
-  const KX = DW - 0.065;
+  const KX = DW - 0.090;  // 90mm vom rechten Tuerrand — frei von Zarge-Profilkanten
   const KY_HANDLE = 1.050;
   const KY_LOCK   = 0.962;  // DIN 18252: 88mm PZ-Achsabstand zum Drücker
-  const PLATE_THK = 0.005;  // wird vom Lever-Code weiter unten gebraucht
 
   const ROSETTE_R    = 0.027;   // 54mm Rosetten-Durchmesser (Standard-Hoppe)
   const ROSETTE_THK  = 0.005;   // 5mm Materialstaerke
+  // Z-Position deutlich vor den Drutex-Inox-Strips (DD+0.004 bis DD+0.012)
+  const ROSETTE_Z_BASE = DD + 0.013;  // 13mm vor Tuerflaeche — keine Strip-Kollision
 
   // Drueckerrosette (rund um Spindel-Achse, Y = 1050mm)
   const handleRosette = new THREE.Mesh(
@@ -729,7 +730,7 @@ function buildInnenBeschlag() {
     handleMat
   );
   handleRosette.rotation.x = Math.PI / 2;
-  handleRosette.position.set(KX, KY_HANDLE, DD + ROSETTE_THK / 2 + 0.001);
+  handleRosette.position.set(KX, KY_HANDLE, ROSETTE_Z_BASE + ROSETTE_THK / 2);
   handleRosette.castShadow = true;
   doorGroup.add(handleRosette);
 
@@ -739,7 +740,7 @@ function buildInnenBeschlag() {
     handleMat
   );
   pzRosette.rotation.x = Math.PI / 2;
-  pzRosette.position.set(KX, KY_LOCK, DD + ROSETTE_THK / 2 + 0.001);
+  pzRosette.position.set(KX, KY_LOCK, ROSETTE_Z_BASE + ROSETTE_THK / 2);
   pzRosette.castShadow = true;
   doorGroup.add(pzRosette);
 
@@ -753,7 +754,7 @@ function buildInnenBeschlag() {
     pzCylMat
   );
   pzFace.rotation.x = Math.PI / 2;
-  pzFace.position.set(KX, KY_LOCK, DD + ROSETTE_THK + 0.002);
+  pzFace.position.set(KX, KY_LOCK, ROSETTE_Z_BASE + ROSETTE_THK + 0.001);
   doorGroup.add(pzFace);
 
   // SCHLUESSELLOCH auf der PZ-Stirnflaeche (Bowling-Pin: rund + Schlitz)
@@ -761,7 +762,7 @@ function buildInnenBeschlag() {
   const KEY_ROUND_R  = 0.0025;
   const KEY_SLOT_W   = 0.0018;
   const KEY_SLOT_H   = 0.004;
-  const keyFrontZ    = DD + ROSETTE_THK + 0.0033;
+  const keyFrontZ    = ROSETTE_Z_BASE + ROSETTE_THK + 0.0025;
 
   const keyRound = new THREE.Mesh(
     new THREE.CylinderGeometry(KEY_ROUND_R, KEY_ROUND_R, 0.0008, 24),
@@ -783,7 +784,7 @@ function buildInnenBeschlag() {
   // dann gerader Hebel PARALLEL zur Türfläche (Z konstant).
   // Material: gebürstetes Edelstahl (handleMat).
   const LEVER_R         = 0.0095;  // ~19mm Durchmesser, schlanker Hoppe-Stil
-  const LEVER_BASE_Z    = DD + ROSETTE_THK + 0.0005;  // Hals tritt aus der Drueckerrosette aus
+  const LEVER_BASE_Z    = ROSETTE_Z_BASE + ROSETTE_THK + 0.0005;  // Hals tritt aus der Drueckerrosette aus
   const LEVER_NECK_LEN  = 0.025;   // Hals 25mm aus der Tür raus
   const LEVER_BAR_LEN   = 0.110;   // Hebel 110mm zur Türmitte
   const LEVER_FRONT_Z   = LEVER_BASE_Z + LEVER_NECK_LEN;
