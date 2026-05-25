@@ -276,6 +276,26 @@
       --card-name-size: 14px;            /* Schrift unter dem Bild */
       --card-name-mtop: 10px;            /* Abstand Bild → Name */
     }
+    /* Haustür-Außengriff-Karten (s9t): gleicher Look wie Türmodell-Karten */
+    #s9t .pc.griff-pc {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--card-radius, 12px);
+      padding: 12px 8px 14px;
+      transition: all 0.20s ease;
+      cursor: pointer;
+    }
+    #s9t .pc.griff-pc:hover {
+      background: rgba(77,136,255,0.07);
+      border-color: rgba(77,136,255,0.45);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+    }
+    #s9t .pc.griff-pc.sel {
+      background: rgba(77,136,255,0.10);
+      border-color: #4d88ff;
+      box-shadow: 0 0 0 1px rgba(77,136,255,0.25);
+    }
     /* Türmodell-Karten: nutzen Karten-Tokens — PNG transparent, Bild im 4/5-Format */
     #s-tm .pc{padding:0;border-radius:var(--card-radius);background:transparent}
     #s-tm .pc-img{
@@ -5262,33 +5282,28 @@ const P = {
     'drueck-olive':  { name:'Haustür-Klinke Olive',  add:0, swatch:'#6b7a3f' },
   },
   tuerGriffAussen: {
-    // Kundenwunsch 25.05.2026: 20 Drutex-Außengriff-Optionen für Haustür
-    // 4 Knauf (feststehend außen, Drücker innen)
-    'knauf-weiss':   { name:'Knauf (weiß)',   add:0, group:'Knauf',  swatch:'#f4f4f0' },
-    'knauf-braun':   { name:'Knauf (braun)',  add:0, group:'Knauf',  swatch:'#5c3218' },
-    'knauf-oliv':    { name:'Knauf (oliv)',   add:0, group:'Knauf',  swatch:'#6b7a3f' },
-    'knauf-silber':  { name:'Knauf (silber)', add:0, group:'Knauf',  swatch:'#b0b4bc' },
-    // 4 Haustürgriff Standard (klassischer Drücker-Stil außen)
-    'htg-30a':       { name:'Haustürgriff 30A (Edelstahl)', add:0, group:'Haustürgriff' },
-    'htg-weiss':     { name:'Haustürgriff (weiß)',  add:0, group:'Haustürgriff', swatch:'#f4f4f0' },
-    'htg-oliv':      { name:'Haustürgriff (oliv)',  add:0, group:'Haustürgriff', swatch:'#6b7a3f' },
-    'htg-silber':    { name:'Haustürgriff (silber)', add:0, group:'Haustürgriff', swatch:'#b0b4bc' },
-    // 3 Haustürgriff flach
-    'htg-flach-weiss':  { name:'Haustürgriff flach (weiß)',  add:0, group:'Haustürgriff flach', swatch:'#f4f4f0' },
-    'htg-flach-braun':  { name:'Haustürgriff flach (braun)', add:0, group:'Haustürgriff flach', swatch:'#5c3218' },
-    'htg-flach-silber': { name:'Haustürgriff flach (silber)', add:0, group:'Haustürgriff flach', swatch:'#b0b4bc' },
-    // 1 Sondermodell
-    'htg-r35a':      { name:'Haustürgriff R35A/2000M', add:0, group:'Haustürgriff Sonder' },
-    // 3 Stoßgriff M2 farbig
-    'stoss-m2-weiss': { name:'Stoßgriff M2 (weiß)',     add:0, group:'Stoßgriff M2', swatch:'#f4f4f0' },
-    'stoss-m2-braun': { name:'Stoßgriff M2 (braun)',    add:0, group:'Stoßgriff M2', swatch:'#5c3218' },
-    'stoss-m2-9006':  { name:'Stoßgriff M2 (RAL 9006)', add:0, group:'Stoßgriff M2', swatch:'#a5a5a5' },
-    // 5 Stoßgriff Edelstahl-Modelle
-    'stoss-p10d':    { name:'Stoßgriff P10D',           add:0, group:'Stoßgriff Edelstahl' },
-    'stoss-p45':     { name:'Stoßgriff P45 (Edelstahl)', add:0, group:'Stoßgriff Edelstahl' },
-    'stoss-q10':     { name:'Stoßgriff Q10 (Edelstahl)', add:0, group:'Stoßgriff Edelstahl' },
-    'stoss-q45r':    { name:'Stoßgriff Q45R (Edelstahl)', add:0, group:'Stoßgriff Edelstahl' },
-    'stoss-z1':      { name:'Stoßgriff Z1 (Edelstahl)',  add:0, group:'Stoßgriff Edelstahl' },
+    // Kundenwunsch 25.05.2026: 20 Drutex-Außengriff-Optionen mit echten Drutex-Bildern
+    // Bilder unter img/drutex-griffe/ (kopiert von drutex.de/de/produkte/addons/type/8/)
+    'knauf-weiss':   { name:'Knauf (weiß)',   add:0, group:'Knauf', img:'img/drutex-griffe/knauf-weiss.webp' },
+    'knauf-braun':   { name:'Knauf (braun)',  add:0, group:'Knauf', img:'img/drutex-griffe/knauf-braun.webp' },
+    'knauf-oliv':    { name:'Knauf (oliv)',   add:0, group:'Knauf', img:'img/drutex-griffe/knauf-oliv.webp' },
+    'knauf-silber':  { name:'Knauf (silber)', add:0, group:'Knauf', img:'img/drutex-griffe/knauf-silber.webp' },
+    'htg-30a':       { name:'Haustürgriff 30A (Edelstahl)', add:0, group:'Haustürgriff', img:'img/drutex-griffe/htg-30a.webp' },
+    'htg-weiss':     { name:'Haustürgriff (weiß)',  add:0, group:'Haustürgriff', img:'img/drutex-griffe/htg-weiss.webp' },
+    'htg-oliv':      { name:'Haustürgriff (oliv)',  add:0, group:'Haustürgriff', img:'img/drutex-griffe/htg-oliv.webp' },
+    'htg-silber':    { name:'Haustürgriff (silber)', add:0, group:'Haustürgriff', img:'img/drutex-griffe/htg-silber.webp' },
+    'htg-flach-weiss':  { name:'Haustürgriff flach (weiß)',  add:0, group:'Haustürgriff flach', img:'img/drutex-griffe/htg-flach-weiss.webp' },
+    'htg-flach-braun':  { name:'Haustürgriff flach (braun)', add:0, group:'Haustürgriff flach', img:'img/drutex-griffe/htg-flach-braun.webp' },
+    'htg-flach-silber': { name:'Haustürgriff flach (silber)', add:0, group:'Haustürgriff flach', img:'img/drutex-griffe/htg-flach-silber.webp' },
+    'htg-r35a':      { name:'Haustürgriff R35A/2000M', add:0, group:'Haustürgriff Sonder', img:'img/drutex-griffe/htg-r35a.webp' },
+    'stoss-m2-weiss': { name:'Stoßgriff M2 (weiß)',     add:0, group:'Stoßgriff M2', img:'img/drutex-griffe/stoss-m2-weiss.webp' },
+    'stoss-m2-braun': { name:'Stoßgriff M2 (braun)',    add:0, group:'Stoßgriff M2', img:'img/drutex-griffe/stoss-m2-braun.webp' },
+    'stoss-m2-9006':  { name:'Stoßgriff M2 (RAL 9006)', add:0, group:'Stoßgriff M2', img:'img/drutex-griffe/stoss-m2-9006.webp' },
+    'stoss-p10d':    { name:'Stoßgriff P10D',           add:0, group:'Stoßgriff Edelstahl', img:'img/drutex-griffe/stoss-p10d.webp' },
+    'stoss-p45':     { name:'Stoßgriff P45 (Edelstahl)', add:0, group:'Stoßgriff Edelstahl', img:'img/drutex-griffe/stoss-p45.webp' },
+    'stoss-q10':     { name:'Stoßgriff Q10 (Edelstahl)', add:0, group:'Stoßgriff Edelstahl', img:'img/drutex-griffe/stoss-q10.webp' },
+    'stoss-q45r':    { name:'Stoßgriff Q45R (Edelstahl)', add:0, group:'Stoßgriff Edelstahl', img:'img/drutex-griffe/stoss-q45r.webp' },
+    'stoss-z1':      { name:'Stoßgriff Z1 (Edelstahl)',  add:0, group:'Stoßgriff Edelstahl', img:'img/drutex-griffe/stoss-z1.webp' },
   },
   // Sarah-bestätigt 21.04.2026: HST-Griffe als flache Liste mit 15 Kombinationen.
   // Später: echte Drutex-Produktbilder statt Farbkreise einbauen (Design-Pass).
@@ -6002,15 +6017,15 @@ function buildTuerGriff() {
         <div class="olabel" style="font-size:13px">${v.name}</div>
       </div>
     </div>`;
+  // Außen-Karten als Bild-Karten (gleicher Stil wie #s-tm Türmodell-Karten, Master-Token aus :root)
   const aussenCard = (k, v) => {
-    const swatchHTML = v.swatch ? `<div style="width:20px;height:20px;border-radius:50%;border:2px solid #aaa;background:${v.swatch};flex-shrink:0"></div>` : `<div style="width:20px;height:20px;border-radius:3px;border:2px solid #888;background:linear-gradient(135deg,#d0d4dc,#9aa0aa);flex-shrink:0" title="Edelstahl"></div>`;
+    const imgHTML = v.img
+      ? `<img src="${v.img}" alt="${v.name}" class="griff-img" loading="lazy" style="width:100%;aspect-ratio:1/1;object-fit:contain;background:#fff;border-radius:8px;padding:6px;display:block"/>`
+      : `<div style="width:100%;aspect-ratio:1/1;background:linear-gradient(135deg,#d0d4dc,#9aa0aa);border-radius:8px"></div>`;
     return `
-    <div class="oc${S.tuerGriffAussen===k?' sel':''}" data-v="${k}" data-sk="tuerGriffAussen" onclick="pickTuerGriffOpt(this)" style="padding:10px 12px;gap:10px;align-items:center">
-      <div class="ora" style="flex-shrink:0"></div>
-      ${swatchHTML}
-      <div style="flex:1;min-width:0">
-        <div class="olabel" style="font-size:12px;line-height:1.3">${v.name}</div>
-      </div>
+    <div class="pc griff-pc${S.tuerGriffAussen===k?' sel':''}" data-v="${k}" data-sk="tuerGriffAussen" onclick="pickTuerGriffOpt(this)">
+      ${imgHTML}
+      <div class="pc-name" style="font-size:12px;margin-top:8px;line-height:1.3;text-align:center;color:rgba(255,255,255,0.92);font-weight:600">${v.name}</div>
     </div>`;
   };
   // Gruppierung außen
@@ -6021,8 +6036,8 @@ function buildTuerGriff() {
   });
   let aussenHtml = '';
   Object.entries(groupsAussen).forEach(([gn, items], idx) => {
-    aussenHtml += `<div class="col-span-full${idx>0?' mt-3':''}"><div class="sec-t" style="${idx===0?'margin-top:0':''};font-size:11px">${gn}</div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">${items.map(([k,v])=>aussenCard(k,v)).join('')}</div>
+    aussenHtml += `<div class="col-span-full${idx>0?' mt-4':''}"><div class="sec-t" style="${idx===0?'margin-top:0':''};font-size:11px">${gn}</div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">${items.map(([k,v])=>aussenCard(k,v)).join('')}</div>
     </div>`;
   });
   grid.innerHTML = `
