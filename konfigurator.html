@@ -5685,7 +5685,9 @@ function openS(n) {
     hdr.style.display = '';
   }
 
-  const STICKY_OFFSET = 72; // navbar 54px + Luft 18px
+  // Desktop: navbar 54px + Luft 18px = 72
+  // Mobile: Topbar 44px + Mainnav 53px + Sticky-Step-Bar ~50px + Luft 8px = ~155
+  const STICKY_OFFSET = window.innerWidth < 768 ? 155 : 72;
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       const rect = c.getBoundingClientRect();
