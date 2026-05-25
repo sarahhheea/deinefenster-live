@@ -739,9 +739,9 @@ function buildInnenBeschlag() {
   // (negative determinant) und togglet FrontFace automatisch im Rasterizer.
   // Solange Normals nicht manuell gescaled werden, bleibt Lighting korrekt.
   const plGeom = new THREE.ShapeGeometry(plShape);
-  const plate = new THREE.Mesh(plGeom, handleMat);
-  plate.position.set(KX, plateY, DD + 0.0015);
-  plate.castShadow = true;
+  // DEBUG v14: MeshNormalMaterial - faerbt nach Normal-Richtung (Blau=+Z, Rot=+X, Gruen=+Y)
+  const plate = new THREE.Mesh(plGeom, new THREE.MeshNormalMaterial({ side: THREE.DoubleSide }));
+  plate.position.set(KX, plateY, DD + 0.05);  // 5cm vor Tuer fuer Sichtbarkeit ohne Z-Fight
   doorGroup.add(plate);
 
   // PZ-Zylinder-Stirnfläche: silberner Disc füllt das runde Plate-Loch
