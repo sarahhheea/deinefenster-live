@@ -922,12 +922,14 @@ let _doorAnim = null;
 const DOOR_OPEN_MAG  = Math.PI / 3;   // ~ 60°
 const DOOR_ANIM_DUR  = 950;            // ms
 function _doorOpenAngle() {
-  // Griff-Kante muss zum Innenraum (+Z) schwenken.
-  // DIN-r: Pivot rechts (+DW/2), Griff links (relativ x=-DW). +Y-Rotation
-  //        bewegt -X nach +Z → korrekt.
-  // DIN-l: Pivot links (-DW/2), Griff rechts (relativ x=+DW). -Y-Rotation
-  //        bewegt +X nach +Z → korrekt.
-  return _curSide === 'r' ? +DOOR_OPEN_MAG : -DOOR_OPEN_MAG;
+  // Haustueren oeffnen STANDARD nach INNEN (DIN-Standard fuer deutsche Wohnungen).
+  // Camera sitzt bei +Z (sowohl Aussen- als auch Innenansicht).
+  // - INNEN-View zeigt Innenseite der Tuer: nach innen oeffnen = Griff-Kante schwingt zur
+  //   Kamera (+Z) = positive Rotation fuer DIN-r.
+  // - AUSSEN-View zeigt Aussenseite: nach innen oeffnen = Griff-Kante schwingt VON der
+  //   Kamera weg (-Z) = invertierte Rotation.
+  const baseAngle = _curSide === 'r' ? +DOOR_OPEN_MAG : -DOOR_OPEN_MAG;
+  return _curView === 'aussen' ? -baseAngle : baseAngle;
 }
 function setDoorOpen(open) {
   const target = !!open;
