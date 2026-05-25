@@ -2331,10 +2331,13 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
        scrollt, soll er unter der Sticky-Step-Bar landen, nicht versteckt
        darunter. 160 = Topbar 44 + Mainnav 53 + Step-Bar ~50 + Luft 13 */
     .sc { scroll-margin-top: 160px; }
-    /* Mobile: Spacer muss komplette Nav-Hoehe abdecken (Topbar+Mainnav).
-       Vorher 54px - das war Desktop-Hoehe, Step-Bar war daher unter der
-       Mobile-Nav versteckt bis User scrollt. */
-    .navbar-spacer { height: 97px !important; }
+    /* Mobile: Spacer muss komplette Nav-Hoehe abdecken (Topbar+Mainnav)
+       inkl. iPhone-Notch (safe-area-inset-top). Vorher 54px / 97px - dann
+       war Step-Bar 'SCHRITT 1 VON 14' weiter unter der Nav versteckt bis
+       User scrollt. */
+    .navbar-spacer {
+      height: calc(97px + env(safe-area-inset-top, 0px)) !important;
+    }
     /* H2 kompakt — auf 1 Zeile */
     #prod-hero .hero-head { max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
     #prod-hero .hero-eyebrow { display: none !important; }
