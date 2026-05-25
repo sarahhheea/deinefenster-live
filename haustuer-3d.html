@@ -724,38 +724,24 @@ function buildInnenBeschlag() {
 
   const plateY = (KY_HANDLE + KY_LOCK) / 2;  // exakt zwischen Drücker und PZ
 
-  // Schmalrahmen-Schild: stark abgerundete Ecken (aber NICHT exakt = w/2, das gibt
-  // degenerierte Zero-Length-Lines in roundedRectShape → earcut-Triangulation failed)
+  // Schmalrahmen-Schild als FLACHE ShapeGeometry (2D, kein Extrude-Wirrwarr).
+  // Die Holes werden VISUELL vom Hebel-Hals (Spindel) und PZ-Disc (PZ-Loch) verdeckt,
+  // sodass die Plate solid bleiben kann — aber praktisch wie mit Loechern aussieht.
+  const SPINDLE_R   = 0.011;
+  const PZ_HOLE_R   = 0.010;
+  const localHandleY = KY_HANDLE - plateY;
+  const localLockY   = KY_LOCK - plateY;
   const plShape = roundedRectShape(PLATE_W, PLATE_H, PLATE_W * 0.48);
 
-  // Loch 1: Drücker-Spindel — rund, Ø22mm
-  const SPINDLE_R   = 0.011;
-  const localHandleY = KY_HANDLE - plateY;
-  const spindleHole = new THREE.Path();
-  spindleHole.absarc(0, localHandleY, SPINDLE_R, 0, Math.PI * 2, true);
-  plShape.holes.push(spindleHole);
-
-  // Loch 2: PZ-Zylinder — rundes Loch
-  const PZ_HOLE_R   = 0.010;
-  const localLockY  = KY_LOCK - plateY;
-  const pzHole = new THREE.Path();
-  pzHole.absarc(0, localLockY, PZ_HOLE_R, 0, Math.PI * 2, true);
-  plShape.holes.push(pzHole);
-
-  // Plate: clean extrude OHNE Bevel — echtes Beschlag-Vorbild hat klare Kanten
-  // DoubleSide PFLICHT: doorGroup.scale.x=-1 (DIN-Rechts-Mirror) flippt die Triangle-
-  // Winding der flachen ExtrudeGeometry → ohne DoubleSide wäre die Front-Face komplett
-  // unsichtbar (nur Extrude-Kanten würden rendern). Lever ist Tube, hat das Problem nicht.
-  // Plate: silbern. Pre-mirror X um den doorGroup.scale.x=-1 zu kompensieren —
-  // ohne diesen Pre-Flip würden die Front-Face-Normals nach -Z zeigen (in die Tür rein,
-  // kein Licht) und nur die seitlichen Extrude-Walls wären sichtbar als „Streifen".
+  // ShapeGeometry: flache 2D-Plane mit zuverlaessigen +Z Normals.
+  // DoubleSide weil doorGroup.scale.x=-1 die Winding flippt.
   const plateMat = new THREE.MeshStandardMaterial({
-    color: 0xd6d9dc, roughness: 0.55, metalness: 0.55, envMapIntensity: 1.4
+    color: 0xc8ccd0, roughness: 0.62, metalness: 0.30, envMapIntensity: 1.0,
+    side: THREE.DoubleSide
   });
-  const plGeom = new THREE.ExtrudeGeometry(plShape, { depth: PLATE_THK, bevelEnabled: false });
-  plGeom.scale(-1, 1, 1);  // pre-flip X → world mirror flipt zurück → Normals korrekt +Z
+  const plGeom = new THREE.ShapeGeometry(plShape);
   const plate = new THREE.Mesh(plGeom, plateMat);
-  plate.position.set(KX, plateY, DD + 0.001);
+  plate.position.set(KX, plateY, DD + 0.0015);  // 1.5mm vor Tuerblatt
   plate.castShadow = true;
   doorGroup.add(plate);
 
