@@ -2305,6 +2305,10 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
        Step-Header soll naeher an die Nav ruecken */
     #kfg-main { padding-top: 0 !important; padding-bottom: 0 !important; }
     #mobile-step-bar.msb-show { margin-bottom: 6px !important; padding: 10px 16px 8px !important; }
+    /* scroll-margin-top: wenn openS() / scrollIntoView den Step zum Top
+       scrollt, soll er unter der Sticky-Step-Bar landen, nicht versteckt
+       darunter. 160 = Topbar 44 + Mainnav 53 + Step-Bar ~50 + Luft 13 */
+    .sc { scroll-margin-top: 160px; }
     /* H2 kompakt — auf 1 Zeile */
     #prod-hero .hero-head { max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
     #prod-hero .hero-eyebrow { display: none !important; }
@@ -5685,14 +5689,25 @@ function openS(n) {
     hdr.style.display = '';
   }
 
-  // Desktop: navbar 54px + Luft 18px = 72
-  // Mobile: Topbar 44px + Mainnav 53px + Sticky-Step-Bar ~50px + Luft 8px = ~155
-  const STICKY_OFFSET = window.innerWidth < 768 ? 155 : 72;
+  // scroll-margin-top im CSS (.sc) regelt den Offset:
+  //  Desktop: 80px, Mobile: 160px (Topbar+Mainnav+Sticky-Step-Bar).
+  // Wir warten 3 Frames damit Layout nach closeOtherSections + hero-done
+  // sich stabilisiert hat, sonst kann scrollIntoView zu einer Stelle
+  // springen, an der das Element nach der Animation gar nicht mehr ist.
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
-      const rect = c.getBoundingClientRect();
-      const targetY = rect.top + window.pageYOffset - STICKY_OFFSET;
-      window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
+      requestAnimationFrame(() => {
+        // Wenn s1.hero-done (frisch aus dem Hero-Picker), s2 ist erstes
+        // sichtbares Element → einfach an den Anfang scrollen.
+        const s1 = document.getElementById('s1');
+        const heroJustDone = s1 && s1.classList.contains('hero-done')
+                              && n === 2 && window.pageYOffset < 200;
+        if (heroJustDone) {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+          c.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
     });
   });
 }
