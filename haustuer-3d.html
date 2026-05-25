@@ -746,12 +746,14 @@ function buildInnenBeschlag() {
   // DoubleSide PFLICHT: doorGroup.scale.x=-1 (DIN-Rechts-Mirror) flippt die Triangle-
   // Winding der flachen ExtrudeGeometry → ohne DoubleSide wäre die Front-Face komplett
   // unsichtbar (nur Extrude-Kanten würden rendern). Lever ist Tube, hat das Problem nicht.
-  // Plate: silbern, DoubleSide weil doorGroup.scale.x=-1 die Winding flippt
+  // Plate: silbern. Pre-mirror X um den doorGroup.scale.x=-1 zu kompensieren —
+  // ohne diesen Pre-Flip würden die Front-Face-Normals nach -Z zeigen (in die Tür rein,
+  // kein Licht) und nur die seitlichen Extrude-Walls wären sichtbar als „Streifen".
   const plateMat = new THREE.MeshStandardMaterial({
-    color: 0xd6d9dc, roughness: 0.55, metalness: 0.55, envMapIntensity: 1.4,
-    side: THREE.DoubleSide
+    color: 0xd6d9dc, roughness: 0.55, metalness: 0.55, envMapIntensity: 1.4
   });
   const plGeom = new THREE.ExtrudeGeometry(plShape, { depth: PLATE_THK, bevelEnabled: false });
+  plGeom.scale(-1, 1, 1);  // pre-flip X → world mirror flipt zurück → Normals korrekt +Z
   const plate = new THREE.Mesh(plGeom, plateMat);
   plate.position.set(KX, plateY, DD + 0.001);
   plate.castShadow = true;
