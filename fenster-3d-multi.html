@@ -472,7 +472,9 @@ function buildWindow(spec) {
   }
 
   // ── Sash-Helper: erzeugt einen Flügel im Bereich (xs, ys, ws, hs) im SELBEN Stil wie 1-Flügel
-  function _addFluegel(xs, ys, ws, hs, sashState) {
+  // isStulpStandFluegel: Standfluegel einer Stulp-Konfiguration -> kein Aussen-Griff
+  // view: 'aussen' oder 'innen'
+  function _addFluegel(xs, ys, ws, hs, sashState, isStulpStandFluegel, view) {
     // Falzüberlappung — Sash überragt seinen Bereich um SOVL nach außen
     const xS = xs - SOVL, yS = ys - SOVL;
     const wS = ws + 2 * SOVL, hS = hs + 2 * SOVL;
@@ -528,6 +530,8 @@ function buildWindow(spec) {
 
     // Griff je nach sashState
     if (!sashState || sashState === 'fest') return;
+    // STULPFLUEGEL: kein aussen sichtbarer Griff (Treibstange/Reitergriff nur innen)
+    if (isStulpStandFluegel && (view === 'aussen')) return;
     const isKipp = sashState === 'kipp';
     const isLeft = sashState === 'dreh-l' || sashState === 'dk-l';   // Layman-Konvention: dk-l = Griff links
     let hx, hy;
@@ -569,12 +573,32 @@ function buildWindow(spec) {
     winGroup.add(handleStick); handleObjects.push(handleStick);
   }
 
-  // Hauptflügel
+  // Hauptflügel — mit Stulpflügel-Erkennung fuer Griff-Logik
   const sashStates = (spec.sashes || []).slice();
   while (sashStates.length < cols) sashStates.push('dk-r');
+  const sep  = spec.separator || '';   // '', 'pfosten', 'stulp', 'pfosten-stulp', 'stulp-pfosten'
+  const view = spec.view || 'aussen';
+  // Standfluegel: dreh-only-Sash adjazent zu 'stulp'-Trenner mit DK-Nachbar
+  const isStulpStand = (i) => {
+    if (!sep || !sep.includes('stulp')) return false;
+    const me = sashStates[i] || '';
+    if (me !== 'dreh-l' && me !== 'dreh-r') return false;
+    if (sashStates.length === 2) {
+      const other = sashStates[1 - i] || '';
+      return other.startsWith('dk-');
+    }
+    // 3 Fluegel: separator like 'pfosten-stulp' = sep12|sep23
+    const parts = sep.split('-');
+    const sep12 = parts[0] || '';
+    const sep23 = parts[1] || sep12;
+    if (i === 0)               return sep12 === 'stulp' && (sashStates[1] || '').startsWith('dk-');
+    if (i === sashStates.length - 1) return sep23 === 'stulp' && (sashStates[i - 1] || '').startsWith('dk-');
+    return (sep12 === 'stulp' && (sashStates[i - 1] || '').startsWith('dk-'))
+        || (sep23 === 'stulp' && (sashStates[i + 1] || '').startsWith('dk-'));
+  };
   for (let i = 0; i < cols; i++) {
     const xSash = xInnerLeft + i * (sashCellW + MULLION_T);
-    _addFluegel(xSash, mainBot, sashCellW, mainH, sashStates[i]);
+    _addFluegel(xSash, mainBot, sashCellW, mainH, sashStates[i], isStulpStand(i), view);
   }
 
   // Oberlicht (eine durchgehende Sektion oben)
@@ -1053,9 +1077,11 @@ window.addEventListener('message', (e) => {
       roll:       d.roll       !== undefined ? d.roll       : (prev.roll       || 'ohne'),
       rollKasten: d.rollKasten !== undefined ? d.rollKasten : (prev.rollKasten || '175'),
       rollSeite:  d.rollSeite  !== undefined ? d.rollSeite  : (prev.rollSeite  || 'rechts'),
+      separator:  d.separator  !== undefined ? d.separator  : (prev.separator  || ''),
+      view:       d.view       !== undefined ? d.view       : (prev.view       || 'aussen'),
     });
     // Rebuild wenn Layout, Sash oder Rolladen-State sich geaendert hat
-    if (d.layout || d.sashes || d.roll !== undefined || d.rollKasten !== undefined || d.rollSeite !== undefined) {
+    if (d.layout || d.sashes || d.roll !== undefined || d.rollKasten !== undefined || d.rollSeite !== undefined || d.separator !== undefined || d.view !== undefined) {
       buildWindow(newSpec);
     }
     if (d.wood)  setWood(d.wood);
