@@ -110,7 +110,52 @@ section:first-of-type::before { display: none; }
   transform: translateY(-1px) !important;
 }
 
-/* ── 10b. Button-Größenklassen (verhindern inline-style-Drift) ──
+/* ── 10a. Design-Tokens als CSS-Variablen (Single-Source-of-Truth) ──
+   Stand 26.05.2026: aus DESIGN.md + STYLE-GUIDE.md. Wenn etwas hiervon
+   abweicht, ist es Drift — Audit-Script meldet das. */
+:root {
+  /* Border-Radius — kanonisch 6 / 10 / 14 / 20 / 28 / 999 (pill) */
+  --r-xs: 6px;
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 20px;
+  --r-xl: 28px;
+  --r-pill: 999px;
+
+  /* Heading-Sizes — drei Stufen reichen, keine Zwischenwerte erfinden */
+  --h-display-size: clamp(2.2rem, 5vw, 3.8rem);
+  --h-section-size: clamp(1.5rem, 3vw, 2rem);
+  --h-sub-size: clamp(1.2rem, 2.5vw, 1.6rem);
+}
+
+/* ── 10b. Kanonische Heading-Klassen (verhindern inline-style-Drift) ──
+   Statt <h2 style="font-size:clamp(1.5rem,3vw,2rem);font-weight:800;..."> einfach
+   <h2 class="h-section"> nutzen. */
+.h-display {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: var(--h-display-size) !important;
+  font-weight: 800 !important;
+  line-height: 1.1 !important;
+  letter-spacing: -0.02em !important;
+  color: #fff !important;
+}
+.h-section {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: var(--h-section-size) !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+  letter-spacing: -0.01em !important;
+  color: #fff !important;
+}
+.h-sub {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: var(--h-sub-size) !important;
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+  color: #fff !important;
+}
+
+/* ── 10c. Button-Größenklassen (verhindern inline-style-Drift) ──
    Statt .btn-primary mit style="font-size:13px;padding:10px 20px" einfach
    .btn-primary.btn-sm nutzen. Drei kanonische Größen reichen für alle Use-Cases. */
 .btn-primary.btn-sm,
@@ -132,6 +177,13 @@ section:first-of-type::before { display: none; }
 .btn-secondary.btn-xl {
   font-size: 16px !important;
   padding: 16px 32px !important;
+}
+/* Block-Variante (full-width, zentriert) — verhindert inline width:100%;justify-content:center */
+.btn-primary.btn-block,
+.btn-secondary.btn-block,
+.btn-whatsapp.btn-block {
+  width: 100% !important;
+  justify-content: center !important;
 }
 
 /* ── 11. Border-Farben harmonisieren ── */

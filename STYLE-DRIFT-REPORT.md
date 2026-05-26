@@ -1,6 +1,6 @@
 # Style-Drift-Audit Report
 
-Erstellt: 2026-05-26 03:26 UTC
+Erstellt: 2026-05-26 03:48 UTC
 Quelle: `scripts/style-drift-audit.py`
 
 ## Issue-Typen (Erklärung)
@@ -24,7 +24,6 @@ Quelle: `scripts/style-drift-audit.py`
 | `drutex-haendler-brandenburg.html` | 3 |
 | `drutex-haendler-magdeburg.html` | 3 |
 | `drutex-haendler-potsdam.html` | 3 |
-| `fenster-austauschen-kosten.html` | 3 |
 | `produkte.html` | 3 |
 | `ueber-uns.html` | 3 |
 | `agb.html` | 2 |
@@ -35,6 +34,7 @@ Quelle: `scripts/style-drift-audit.py`
 | `datenschutz.html` | 2 |
 | `faq.html` | 2 |
 | `fenster-aufmass-vor-ort.html` | 2 |
+| `fenster-austauschen-kosten.html` | 2 |
 | `garagentor-gebraucht-kaufen.html` | 2 |
 | `glossar.html` | 2 |
 | `impressum.html` | 2 |
@@ -64,10 +64,10 @@ Quelle: `scripts/style-drift-audit.py`
 - kunststofffenster-kaufen.html hat 3 verschiedene Texte: "Neue Fenster", "Neues Fenster nach Maß konfigurieren &rarr;", "→ Neue Kunststofffenster nach Maß ansehen"
 
 **multi-cta** (4)
-- 6× → kontakt.html : L51:"Kontakt" | L331:"Kontakt" | L369:"Kontakt" | L825:"Anfrage schicken" | L986:"Beratung anfordern"
-- 4× → kunststofffenster-kaufen.html : L320:"Neue Fenster" | L361:"Neue Fenster" | L842:"Neues Fenster nach Maß konfigurieren &rarr;" | L877:"→ Neue Kunststofffenster nach Maß ansehen"
-- 3× → konfigurator.html : L323:"Konfigurator" | L364:"Konfigurator" | L985:"Konfigurator"
-- 3× → shop.html : L511:"Im Shop ansehen &rarr;" | L687:"Im Shop ansehen &rarr;" | L824:"Im Shop ansehen &rarr;"
+- 6× → kontakt.html : L51:"Kontakt" | L331:"Kontakt" | L369:"Kontakt" | L807:"Anfrage schicken" | L968:"Beratung anfordern"
+- 4× → kunststofffenster-kaufen.html : L320:"Neue Fenster" | L361:"Neue Fenster" | L824:"Neues Fenster nach Maß konfigurieren &rarr;" | L859:"→ Neue Kunststofffenster nach Maß ansehen"
+- 3× → konfigurator.html : L323:"Konfigurator" | L364:"Konfigurator" | L967:"Konfigurator"
+- 4× → shop.html : L417:"Alle Gebrauchtfenster im Shop &rarr;" | L493:"Im Shop ansehen &rarr;" | L669:"Im Shop ansehen &rarr;" | L806:"Im Shop ansehen &rarr;"
 
 
 ### `drutex-haendler-berlin.html` — 3 Issue(s)
@@ -110,16 +110,6 @@ Quelle: `scripts/style-drift-audit.py`
 - 4× → kontakt.html : L304:"Kontakt" | L342:"Kontakt" | L562:"Beratung anfordern" | L564:"Kontakt"
 
 
-### `fenster-austauschen-kosten.html` — 3 Issue(s)
-
-**btn-inline-style** (1)
-- L591: style="width:100%;justify-content:center;"
-
-**multi-cta** (2)
-- 5× → kontakt.html : L48:"Kontakt" | L328:"Kontakt" | L366:"Kontakt" | L697:"Beratung anfordern" | L699:"Kontakt"
-- 3× → konfigurator.html : L320:"Konfigurator" | L361:"Konfigurator" | L696:"Konfigurator"
-
-
 ### `produkte.html` — 3 Issue(s)
 
 **cta-text-drift** (1)
@@ -150,8 +140,8 @@ Quelle: `scripts/style-drift-audit.py`
 ### `anfrage.html` — 2 Issue(s)
 
 **multi-cta** (2)
-- 5× → kontakt.html : L53:"Kontakt" | L333:"Kontakt" | L371:"Kontakt" | L497:"Beratung anfordern" | L499:"Kontakt"
-- 3× → konfigurator.html : L325:"Konfigurator" | L366:"Konfigurator" | L496:"Konfigurator"
+- 5× → kontakt.html : L53:"Kontakt" | L333:"Kontakt" | L371:"Kontakt" | L488:"Beratung anfordern" | L490:"Kontakt"
+- 3× → konfigurator.html : L325:"Konfigurator" | L366:"Konfigurator" | L487:"Konfigurator"
 
 
 ### `bestelluebersicht.html` — 2 Issue(s)
@@ -194,6 +184,13 @@ Quelle: `scripts/style-drift-audit.py`
 **multi-cta** (2)
 - 5× → kontakt.html : L51:"Kontakt" | L331:"Kontakt" | L369:"Kontakt" | L665:"Beratung anfordern" | L667:"Kontakt"
 - 3× → konfigurator.html : L323:"Konfigurator" | L364:"Konfigurator" | L664:"Konfigurator"
+
+
+### `fenster-austauschen-kosten.html` — 2 Issue(s)
+
+**multi-cta** (2)
+- 5× → kontakt.html : L48:"Kontakt" | L328:"Kontakt" | L366:"Kontakt" | L697:"Beratung anfordern" | L699:"Kontakt"
+- 3× → konfigurator.html : L320:"Konfigurator" | L361:"Konfigurator" | L696:"Konfigurator"
 
 
 ### `garagentor-gebraucht-kaufen.html` — 2 Issue(s)
@@ -272,4 +269,4 @@ Quelle: `scripts/style-drift-audit.py`
 |---|---|
 | multi-cta | 58 |
 | cta-text-drift | 10 |
-| btn-inline-style | 2 |
+| btn-inline-style | 1 |
