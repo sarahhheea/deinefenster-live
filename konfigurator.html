@@ -5382,6 +5382,19 @@ function restoreEditingState() {
       const b = document.getElementById('b' + i);
       if (b && i < 13) b.innerHTML = '<i class="ms f" style="font-size:16px">check</i>';
     }
+    // Hero-Overlay (Picker "Was moechten Sie konfigurieren?") ausblenden — direkt
+    // in die Schritte des konfigurierten Produkts springen.
+    const hero = document.getElementById('prod-hero');
+    if (hero) hero.style.display = 'none';
+    const s1 = document.getElementById('s1');
+    if (s1) s1.classList.add('hero-done');
+    const nav = document.getElementById('kfg-nav');
+    if (nav) {
+      nav.style.display = '';
+      if (window.innerWidth < 768) nav.classList.add('kfg-nav--mobile-strip');
+      else nav.classList.remove('kfg-nav--mobile-strip');
+    }
+    if (typeof openS === 'function') openS(2);  // Schritt 2 (Aufteilung/Profil) oeffnen
     if (typeof upProg === 'function') upProg();
     if (typeof drawPrev === 'function') drawPrev();
     if (typeof upSidebar === 'function') upSidebar();
