@@ -307,11 +307,97 @@ div[style*="background:#0f1c30"] {
   line-height: 1;
 }
 .faq-details[open] .faq-icon { transform: rotate(45deg); }
+/* Fallback für .faq-details ohne .faq-summary/.faq-icon inner-Klassen
+   (z.B. nur <summary> ohne class): default-Marker weg + Chevron via ::after */
+.faq-details > summary:not(.faq-summary) {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 700;
+  font-size: 16px;
+  padding: 22px 24px;
+  gap: 12px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: #e8eeff;
+}
+.faq-details > summary:not(.faq-summary)::-webkit-details-marker { display: none; }
+.faq-details > summary:not(.faq-summary)::after {
+  content: 'expand_more';
+  font-family: 'Material Symbols Outlined';
+  font-size: 22px;
+  color: #76a9fa;
+  flex-shrink: 0;
+  transition: transform .25s ease;
+  line-height: 1;
+}
+.faq-details[open] > summary:not(.faq-summary)::after { transform: rotate(180deg); }
 .faq-body {
   padding: 0 24px 22px;
   color: rgba(232,238,255,0.75);
   line-height: 1.75;
   font-size: 15px;
+}
+
+/* ════════════════════════════════════════════════════════════
+   FAQ-Item Card-Style (Kundenfeedback 25.05.2026):
+   Pages mit <details class="faq-item">...</details> haben oft kein
+   lokales CSS und kriegen Safari/Browser-default mit ▸-Pfeil-Look.
+   Dieser globale Stil sorgt überall für Card-Optik + sauberen Chevron.
+   ════════════════════════════════════════════════════════════ */
+.faq-item {
+  background: #0f1c30;
+  border: 1px solid rgba(118,169,250,0.14);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color .25s, background .25s;
+}
+.faq-item + .faq-item { margin-top: 10px; }
+.faq-item:hover { border-color: rgba(118,169,250,0.30); }
+.faq-item[open] { border-color: rgba(118,169,250,0.36); background: #142847; }
+.faq-item > summary {
+  list-style: none;
+  padding: 18px 22px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+.faq-item > summary::-webkit-details-marker { display: none; }
+.faq-item > summary > h3 {
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #e8eeff;
+  line-height: 1.4;
+  flex: 1;
+  min-width: 0;
+}
+.faq-item > summary::after {
+  content: 'expand_more';
+  font-family: 'Material Symbols Outlined';
+  font-size: 22px;
+  color: #76a9fa;
+  flex-shrink: 0;
+  transition: transform .25s ease;
+  line-height: 1;
+}
+.faq-item[open] > summary::after { transform: rotate(180deg); }
+.faq-item .faq-body {
+  padding: 0 22px 22px;
+  color: rgba(232,238,255,0.78);
+  font-size: 14.5px;
+  line-height: 1.7;
+}
+.faq-item .faq-body a { color: #76a9fa; text-decoration: underline; }
+.faq-item .faq-body strong { color: #fff; font-weight: 700; }
+@media (max-width: 640px) {
+  .faq-item > summary { padding: 14px 16px; gap: 10px; }
+  .faq-item > summary > h3 { font-size: 0.95rem; }
+  .faq-item .faq-body { padding: 0 16px 16px; font-size: 13.5px; line-height: 1.6; }
 }
 
 /* Section-Label-Centered (für FAQ-Heads, Master-Pattern) */
