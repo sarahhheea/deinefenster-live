@@ -474,7 +474,10 @@ function buildWindow(spec) {
   // ── Sash-Helper: erzeugt einen Flügel im Bereich (xs, ys, ws, hs) im SELBEN Stil wie 1-Flügel
   // isStulpStandFluegel: Standfluegel einer Stulp-Konfiguration -> kein Aussen-Griff
   // view: 'aussen' oder 'innen'
-  function _addFluegel(xs, ys, ws, hs, sashState, isStulpStandFluegel, view) {
+  // isStulpBedienFluegel: Bedienfluegel einer Stulp-Konfiguration -> Griff
+  //                      sitzt zur Fenstermitte (am Stulp-Profil), nicht
+  //                      an der Aussen-Falz. Standard isLeft wird invertiert.
+  function _addFluegel(xs, ys, ws, hs, sashState, isStulpStandFluegel, view, isStulpBedienFluegel) {
     // Falzüberlappung — Sash überragt seinen Bereich um SOVL nach außen
     const xS = xs - SOVL, yS = ys - SOVL;
     const wS = ws + 2 * SOVL, hS = hs + 2 * SOVL;
@@ -533,7 +536,9 @@ function buildWindow(spec) {
     // STULPFLUEGEL: kein aussen sichtbarer Griff (Treibstange/Reitergriff nur innen)
     if (isStulpStandFluegel && (view === 'aussen')) return;
     const isKipp = sashState === 'kipp';
-    const isLeft = sashState === 'dreh-l' || sashState === 'dk-l';   // Layman-Konvention: dk-l = Griff links
+    let isLeft = sashState === 'dreh-l' || sashState === 'dk-l';   // Layman-Konvention: dk-l = Griff links
+    // Stulp-Bedienfluegel: Griff zur Mitte (Stulp-Profil), nicht zur Aussenfalz
+    if (isStulpBedienFluegel && !isKipp) isLeft = !isLeft;
     let hx, hy;
     const hbz = sfz;
     if (isKipp) {
@@ -596,9 +601,26 @@ function buildWindow(spec) {
     return (sep12 === 'stulp' && (sashStates[i - 1] || '').startsWith('dk-'))
         || (sep23 === 'stulp' && (sashStates[i + 1] || '').startsWith('dk-'));
   };
+  // Bedienfluegel: DK-Fluegel adjazent zu 'stulp'-Trenner mit dreh-only-Nachbar.
+  // Griff sitzt am STULP-PROFIL (zur Fenstermitte), nicht an der Aussenfalz.
+  const isStulpBedien = (i) => {
+    if (!sep || !sep.includes('stulp')) return false;
+    const me = sashStates[i] || '';
+    if (!me.startsWith('dk-')) return false;
+    if (sashStates.length === 2) {
+      const other = sashStates[1 - i] || '';
+      return other === 'dreh-l' || other === 'dreh-r';
+    }
+    const parts = sep.split('-');
+    const sep12 = parts[0] || '';
+    const sep23 = parts[1] || sep12;
+    if (i === 0)                     return sep12 === 'stulp' && (sashStates[1] || '').startsWith('dreh');
+    if (i === sashStates.length - 1) return sep23 === 'stulp' && (sashStates[i - 1] || '').startsWith('dreh');
+    return false;
+  };
   for (let i = 0; i < cols; i++) {
     const xSash = xInnerLeft + i * (sashCellW + MULLION_T);
-    _addFluegel(xSash, mainBot, sashCellW, mainH, sashStates[i], isStulpStand(i), view);
+    _addFluegel(xSash, mainBot, sashCellW, mainH, sashStates[i], isStulpStand(i), view, isStulpBedien(i));
   }
 
   // Oberlicht (eine durchgehende Sektion oben)
