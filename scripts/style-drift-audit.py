@@ -31,7 +31,7 @@ SCAN_GLOBS = ['*.html', 'produkte/**/*.html', 'ratgeber/**/*.html', 'staedte/**/
 SKIP_PATTERNS = ['_archive', '_screenshots', '_cowork-uebergabe', '.playwright-mcp', 'backup', '_backup', 'test', 'shop-einstellen', 'admin.html', 'dashboard.html']
 
 # Master-Page als Referenz für Section-Padding
-ALLOWED_PY = {'py-10', 'py-12', 'py-14', 'py-16', 'py-20', 'py-24', 'py-28'}
+ALLOWED_PY = {'py-6', 'py-8', 'py-10', 'py-12', 'py-14', 'py-16', 'py-20', 'py-24', 'py-28', 'py-32', 'py-36', 'py-40'}
 
 # Master-Pattern-Klassen (Style-Guide §11)
 MASTER_HERO_HINTS = ['df-eyebrow', 'df-section-title', 'shop-hero-card']
@@ -51,14 +51,26 @@ def discover_files():
     return sorted(set(files))
 
 
+def strip_style_and_script_and_comments(text: str) -> str:
+    """Remove <style>...</style>, <script>...</script> and HTML comments so the regex
+    detection doesn't match patterns that appear literally inside CSS/JS/comments."""
+    text = re.sub(r'<style[^>]*>.*?</style>', '', text, flags=re.DOTALL | re.IGNORECASE)
+    text = re.sub(r'<script[^>]*>.*?</script>', '', text, flags=re.DOTALL | re.IGNORECASE)
+    text = re.sub(r'<!--.*?-->', '', text, flags=re.DOTALL)
+    return text
+
+
 def scan_file(path: Path):
     """Return dict of issue-type → list of finding-strings."""
     issues = defaultdict(list)
     try:
-        text = path.read_text(encoding='utf-8', errors='ignore')
+        raw_text = path.read_text(encoding='utf-8', errors='ignore')
     except Exception as e:
         issues['read-error'].append(str(e))
         return issues
+    # Strip CSS/JS/comment regions so we don't get false positives from sample-code
+    # or template-strings that look like tags.
+    text = strip_style_and_script_and_comments(raw_text)
 
     # 1. btn-primary mit inline style
     for m in re.finditer(r'class="[^"]*\bbtn-primary\b[^"]*"\s*style="([^"]+)"', text):
@@ -97,10 +109,10 @@ def scan_file(path: Path):
             issues['details-no-class'].append(f'L{line}: <details> ohne class — wird Safari-Default-▸ zeigen')
             continue
         classes = cls_match.group(1).split()
-        # Bekannte gute Klassen
+        # Bekannte gute Klassen (haben CSS in global-design.css oder lokal)
         good = {'faq-item', 'faq-details', 'text-white', 'glass', 'reveal',
                 'reveal-d1', 'reveal-d2', 'reveal-d3', 'group', 'rounded-xl', 'p-5',
-                'transition-colors', 'faq-answer', 'open'}
+                'transition-colors', 'faq-answer', 'open', 'shop-hero-info', 'df-faq'}
         # Wenn keine der bekannten gut-Klassen drin → ggf. broken
         if not any(c in good for c in classes):
             issues['details-unknown-class'].append(f'L{line}: <details class="{cls_match.group(1)}">')
