@@ -27,12 +27,12 @@
     .cart-card{background:#fff;border-radius:18px;box-shadow:0 2px 8px rgba(34,94,170,.06),0 8px 24px rgba(34,94,170,.04);overflow:hidden;transition:transform .25s ease,box-shadow .25s ease;position:relative}
     .cart-card:hover{transform:translateY(-3px);box-shadow:0 4px 12px rgba(34,94,170,.08),0 16px 36px rgba(34,94,170,.12)}
     .el-badge{position:absolute;top:16px;left:16px;width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#225eaa 0%,#1e3a8a 100%);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15px;box-shadow:0 4px 12px rgba(34,94,170,.3);z-index:2}
-    .skizze-box{background:linear-gradient(180deg,#0a1530 0%,#0e1a3a 100%);padding:0;display:flex;align-items:stretch;justify-content:stretch;min-height:220px;height:220px;position:relative;overflow:hidden}
-    .cart-3d-frame{width:100%;height:100%;border:0;display:block;background:transparent;pointer-events:none}
-    /* Cart-Card: 3 Spalten Desktop (kompakt, Portrait-3D), 1 Spalte Mobile */
+    .skizze-box{background:linear-gradient(180deg,#0a1530 0%,#0e1a3a 100%);padding:12px;display:flex;align-items:center;justify-content:center;min-height:220px;height:220px;position:relative;overflow:hidden}
+    .cart-prod-img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;display:block;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.35))}
+    /* Cart-Card: 3 Spalten Desktop (kompakt), 1 Spalte Mobile */
     .cart-card-grid{display:grid;grid-template-columns:1fr;gap:0}
     @media (min-width:720px){
-      .cart-card-grid{grid-template-columns:170px 1fr auto}
+      .cart-card-grid{grid-template-columns:200px 1fr auto}
     }
     .action-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:999px;font-size:13px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;border:2px solid transparent;transition:all .2s;white-space:nowrap}
     .btn-edit{background:linear-gradient(135deg,#225eaa 0%,#1e3a8a 100%);color:#fff;border:none;box-shadow:0 4px 12px rgba(34,94,170,.25)}
@@ -832,34 +832,72 @@ const HAUS3D_WOOD_KEYS_BU = new Set([
   'schwarzbraun','macore','mahagoni'
 ]);
 
-// 3D-Skizze pro Cart-Card: iframe zum passenden Three.js-Viewer.
-// Detaillierte Specs werden nach iframe-Load via postMessage gesendet (_sendCart3dSpecs).
+// Produkt-Bild-Mappings — statische Bilder statt 3D-iframe (ordentlich, schnell, kein Beschnitt)
+const FLUEGEL_KARTEN_MAP = {
+  '1-fluegel':   'img/fluegel-karten/01_1-fluegel.png',
+  '2-fluegel':   'img/fluegel-karten/02_2-fluegel.png',
+  '3-fluegel':   'img/fluegel-karten/03_3-fluegel.png',
+  '1-oberlicht': 'img/fluegel-karten/04_1-oberlicht.png',
+  '2-oberlicht': 'img/fluegel-karten/05_2-oberlicht.png',
+  '3-oberlicht': 'img/fluegel-karten/06_3-oberlicht.png',
+  '1-unterlicht':'img/fluegel-karten/07_1-unterlicht.png',
+  '2-unterlicht':'img/fluegel-karten/08_2-unterlicht.png',
+  '3-unterlicht':'img/fluegel-karten/09_3-unterlicht.png',
+  '1-ober-unter':'img/fluegel-karten/10_1-ober-unter.png',
+  '2-ober-unter':'img/fluegel-karten/11_2-ober-unter.png',
+  '3-ober-unter':'img/fluegel-karten/12_3-ober-unter.png'
+};
+const BALKONTUER_KARTEN_MAP = {
+  '1-fluegel-dk-r':       'img/balkontuer-karten/01_1-fluegel-dk-r.png',
+  '1-fluegel-dk-l':       'img/balkontuer-karten/06_1f_dk-l.png',
+  '1-fluegel-dreh-r':     'img/balkontuer-karten/05_1f_dreh-r.png',
+  '1-fluegel-dreh-l':     'img/balkontuer-karten/07_1f_dreh-l.png',
+  '2-fluegel-stulp':      'img/balkontuer-karten/02_2-fluegel-stulp-dk-r.png',
+  '2-fluegel-pfosten':    'img/balkontuer-karten/03_2-fluegel-pfosten-dk-r.png'
+};
+const HAUSTUER_MODELL_MAP = {
+  'florida-lr-inox':        'img/drutex-tueren/florida-inox-lr_antracyt.jpg',
+  'montana-2-lr-inox':      'img/drutex-tueren/montana-inox-2-lr_antracyt.jpg',
+  'montana-3-lr-inox':      'img/drutex-tueren/montana-inox-3-lr_antracyt.jpg',
+  'ohio-inox':              'img/drutex-tueren/ohio-inox_antracyt.jpg',
+  'colorado-inox':          'img/drutex-tueren/colorado-inox_antracyt.jpg',
+  'alaska-2-inox':          'img/drutex-tueren/alaska-inox-2_antracyt.jpg',
+  'alaska-1-inox':          'img/drutex-tueren/alaska-inox-1_antracyt.jpg',
+  'montana-1-inox':         'img/drutex-tueren/montana-inox-1_antracyt.jpg',
+  'nebraska-lcr-inox':      'img/drutex-tueren/nebraska-inox-lcr_antracyt.jpg',
+  'pennsylvania-1-inox':    'img/drutex-tueren/pennsylvania-inox-1_antracyt.jpg',
+  'texas-c-inox':           'img/drutex-tueren/texas-inox-c_antracyt.jpg',
+  'texas-lr-inox':          'img/drutex-tueren/texas-inox-lr_antracyt.jpg',
+  'pennsylvania-2-lr-inox': 'img/drutex-tueren/pennsylvania-inox-2-lr_antracyt.jpg',
+  'pennsylvania-3-lr-inox': 'img/drutex-tueren/pennsylvania-inox-3-lr_antracyt.jpg'
+};
+
+// Statisches Produkt-Bild pro Cart-Card. Kein 3D, kein iframe — schnell + ordentlich + kein Beschnitt.
 function skizzeFenster(config, idx) {
   const prod = config.prod || 'kunststoff';
   const fluegel = config.fluegel || '1-fluegel';
-  const fa = config.fa || 'weiss';
-  const ck = HAUS3D_COLOR_MAP_BU[fa] || 'anthrazitgrau';
-  const isWood = HAUS3D_WOOD_KEYS_BU.has(ck);
-  const colorParam = isWood ? `wood=${encodeURIComponent(ck)}` : `color=${encodeURIComponent(ck)}`;
-  const side = (config.oeff1 === 'dreh-l' || config.oeff1 === 'dk-l') ? 'l' : 'r';
 
   let src = '';
   if (prod === 'haustuere') {
     const model = config.modell || 'florida-lr-inox';
-    src = `haustuer-3d.html?embed&view=aussen&model=${encodeURIComponent(model)}&side=${side}&${colorParam}`;
+    src = HAUSTUER_MODELL_MAP[model] || 'img/drutex-tueren/florida-inox-lr_antracyt.jpg';
   } else if (prod === 'balkontuer') {
     const isMulti = /^2-/.test(fluegel);
-    src = `${isMulti ? 'balkontuer-3d-multi.html' : 'balkontuer-3d.html'}?embed&layout=${encodeURIComponent(fluegel)}&side=${side}&${colorParam}`;
+    if (isMulti) {
+      const sep = (config.zweiteilung === 'pfosten') ? 'pfosten' : 'stulp';
+      src = BALKONTUER_KARTEN_MAP[`2-fluegel-${sep}`] || BALKONTUER_KARTEN_MAP['2-fluegel-stulp'];
+    } else {
+      const sash = config.oeff1 || 'dk-r';
+      src = BALKONTUER_KARTEN_MAP[`1-fluegel-${sash}`] || BALKONTUER_KARTEN_MAP['1-fluegel-dk-r'];
+    }
   } else if (prod === 'hst') {
-    src = `hst-3d.html?embed&side=${side}&${colorParam}`;
+    src = 'img/hst_aussen.png';
   } else {
     // kunststoff Fenster
-    const isMulti = /^[23]-/.test(fluegel);
-    src = `${isMulti ? 'fenster-3d-multi.html' : 'fenster-3d.html'}?embed&layout=${encodeURIComponent(fluegel)}&side=${side}&${colorParam}`;
+    src = FLUEGEL_KARTEN_MAP[fluegel] || FLUEGEL_KARTEN_MAP['1-fluegel'];
   }
 
-  const safeIdx = (idx === undefined) ? '' : idx;
-  return `<iframe class="cart-3d-frame" data-idx="${safeIdx}" data-prod="${prod}" src="${src}" loading="lazy" allow="autoplay"></iframe>`;
+  return `<img class="cart-prod-img" src="${src}" alt="${prod} ${fluegel}" loading="lazy"/>`;
 }
 
 // LEGACY-Stub damit alter Code nicht bricht — wird nicht mehr benutzt
@@ -1069,7 +1107,7 @@ function renderCart() {
   addAnother.classList.remove('hidden');
 
   container.innerHTML = cart.map((item, idx) => renderCartCard(item, idx)).join('');
-  _sendCart3dSpecs();  // postMessage detaillierte Specs an alle iframes nach Load
+  // (kein _sendCart3dSpecs mehr — Cart-Cards zeigen statische Bilder, keine 3D-iframes)
 
   const subtotal = cart.reduce((s, i) => s + i.subtotal, 0);
   const versand = submitCoreHelpers.calcVersand(cart);
