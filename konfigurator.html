@@ -4713,7 +4713,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
         <button type="button" id="prev-3d-hint-close" onclick="try{sessionStorage.setItem('_3dHintDismissed','1')}catch(e){};this.parentElement.style.display='none';" title="Ausblenden" style="margin-left:4px;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:9999px;background:rgba(255,255,255,0.12);color:#ffffff;border:0;cursor:pointer;font-size:14px;line-height:1;padding:0;font-family:inherit">×</button>
       </div>
       <!-- 3D-Vorschau für Haustür (iframe, embed-Modus) -->
-      <div id="haus3d-wrap" style="display:none;position:absolute;inset:0;z-index:10;border-radius:var(--r-md);overflow:hidden">
+      <div id="haus3d-wrap" style="display:none;position:absolute;inset:0;z-index:10;border-radius:var(--r-md);overflow:hidden;background:#0a1225 url('img/karten/haustuer-anthrazit.png') no-repeat center/contain">
         <iframe id="haus3d-frame" src="about:blank" style="width:100%;height:100%;border:none;display:block" allowfullscreen></iframe>
       </div>
       <!-- 3D-Vorschau für Fenster (Drutex Iglo 5) -->
@@ -5789,8 +5789,9 @@ function pickProd(el) {
   // (Klinke + 3 Scharniere) wird vom User selbst über den View-Toggle aktiviert.
   if (S.prod === 'haustuere') {
     setPreviewView('aus');
-    // Default-Farbe für Haustür: Anthrazit (Kundenwunsch)
-    if (!S._faChosen) { S.fa = 'anthrazit'; S.fi = 'anthrazit'; }
+    // Haustür IMMER Anthrazit als Start (Kundenwunsch) — kein Flackern
+    // beim Wechsel von anderem Produkt mit anderer Farbe.
+    S.fa = 'anthrazit'; S.fi = 'anthrazit';
   } else if (S.prod === 'balkontuer') {
     setPreviewView('inn');
     // Sinnvolle Standard-Maße für Balkontür (verhindert nicht-tür-ähnliche Vorschau)
