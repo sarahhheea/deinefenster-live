@@ -27,8 +27,13 @@
     .cart-card{background:#fff;border-radius:18px;box-shadow:0 2px 8px rgba(34,94,170,.06),0 8px 24px rgba(34,94,170,.04);overflow:hidden;transition:transform .25s ease,box-shadow .25s ease;position:relative}
     .cart-card:hover{transform:translateY(-3px);box-shadow:0 4px 12px rgba(34,94,170,.08),0 16px 36px rgba(34,94,170,.12)}
     .el-badge{position:absolute;top:16px;left:16px;width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#225eaa 0%,#1e3a8a 100%);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15px;box-shadow:0 4px 12px rgba(34,94,170,.3);z-index:2}
-    .skizze-box{background:linear-gradient(180deg,#0a1530 0%,#0e1a3a 100%);padding:0;display:flex;align-items:stretch;justify-content:stretch;min-height:180px;height:180px;position:relative;overflow:hidden}
+    .skizze-box{background:linear-gradient(180deg,#0a1530 0%,#0e1a3a 100%);padding:0;display:flex;align-items:stretch;justify-content:stretch;min-height:150px;height:150px;position:relative;overflow:hidden}
     .cart-3d-frame{width:100%;height:100%;border:0;display:block;background:transparent;pointer-events:none}
+    /* Cart-Card: 3 Spalten Desktop (kompakt), 1 Spalte Mobile */
+    .cart-card-grid{display:grid;grid-template-columns:1fr;gap:0}
+    @media (min-width:720px){
+      .cart-card-grid{grid-template-columns:160px 1fr auto}
+    }
     .action-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:999px;font-size:13px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;border:2px solid transparent;transition:all .2s;white-space:nowrap}
     .btn-edit{background:linear-gradient(135deg,#225eaa 0%,#1e3a8a 100%);color:#fff;border:none;box-shadow:0 4px 12px rgba(34,94,170,.25)}
     .btn-edit:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(34,94,170,.35)}
@@ -991,17 +996,17 @@ function renderCartCard(item, idx) {
 
   return `<div class="cart-card" data-idx="${idx}">
     <div class="el-badge">${idx+1}</div>
-    <div class="grid grid-cols-1 md:grid-cols-[200px_1fr_auto] gap-0">
+    <div class="cart-card-grid">
       <!-- 3D-Vorschau via iframe (Three.js) -->
       <div class="skizze-box">
         ${skizzeFenster(c, idx)}
       </div>
       <!-- Specs -->
-      <div style="padding:24px 28px;display:flex;flex-direction:column;justify-content:space-between">
+      <div style="padding:14px 18px;display:flex;flex-direction:column;justify-content:center">
         <div>
-          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:800;color:#ffffff;line-height:1.2">${c.qty || 1} × ${prodN}</div>
-          <div style="font-size:13px;color:rgba(232,238,255,0.55);margin-top:4px;font-weight:600">${profilN}</div>
-          <div style="margin-top:16px">
+          <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;font-weight:800;color:#ffffff;line-height:1.2">${c.qty || 1} × ${prodN}</div>
+          <div style="font-size:12px;color:rgba(232,238,255,0.55);margin-top:2px;font-weight:600">${profilN}</div>
+          <div style="margin-top:10px">
             <div class="spec-row"><i class="ms f">square_foot</i> <strong>${c.bMm}×${c.hMm} mm</strong> <span style="color:rgba(232,238,255,0.45);font-size:12px">(Rohbau)</span></div>
             <div class="spec-row"><i class="ms f">ac_unit</i> ${glasN}</div>
             <div class="spec-row"><i class="ms f">palette</i> Außen: <strong>${farbName}</strong></div>
@@ -1010,7 +1015,7 @@ function renderCartCard(item, idx) {
         </div>
       </div>
       <!-- Anzahl + Aktionen -->
-      <div style="padding:24px 28px;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-end;border-left:1px solid rgba(118,169,250,0.14);min-width:170px;background:rgba(6,12,28,0.40)">
+      <div style="padding:14px 18px;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-end;border-left:1px solid rgba(118,169,250,0.14);min-width:150px;background:rgba(6,12,28,0.40)">
         <div style="text-align:right;width:100%">
           <div style="font-size:11px;color:rgba(118,169,250,0.72);text-transform:uppercase;letter-spacing:0.18em;font-weight:700;font-family:'Manrope',sans-serif">Anzahl</div>
           <div style="display:flex;align-items:center;gap:6px;justify-content:flex-end;margin-top:8px">

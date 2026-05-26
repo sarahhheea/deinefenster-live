@@ -1,0 +1,43 @@
+name: Style-Drift-Audit (daily)
+
+# Läuft täglich um 5:30 UTC (7:30 deutsche Zeit) und scannt alle HTMLs
+# auf Style-Drifts gegen STYLE-GUIDE.md. Schreibt STYLE-DRIFT-REPORT.md
+# ins Repo, kein Mail (interne Konvention für Audit-Routinen).
+
+on:
+  schedule:
+    - cron: '30 5 * * *'
+  workflow_dispatch:  # manuell trigger-bar
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code auschecken
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          ref: cowork-agentenaufbau
+
+      - name: Python 3 setup
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Audit ausführen
+        run: python3 scripts/style-drift-audit.py
+
+      - name: Bei Änderung committen
+        run: |
+          git config user.name 'Style-Drift-Auditor'
+          git config user.email 'audit@deinefenster.de'
+          if git diff --quiet STYLE-DRIFT-REPORT.md; then
+            echo 'Kein neuer Drift seit gestern.'
+          else
+            git add STYLE-DRIFT-REPORT.md
+            git commit -m "audit: Style-Drift-Report aktualisiert ($(date -u +'%Y-%m-%d'))"
+            git push origin cowork-agentenaufbau
+          fi
