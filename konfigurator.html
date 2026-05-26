@@ -440,11 +440,16 @@
        (Sidebar+Vorschau-Layout). Tabs würden sonst cramen. Icon + Sub-Text + kleinere Paddings ab 1280px, vertikales Stack ab 520px. */
     @media (max-width:1280px){
       .farb-tabs-wrap{gap:6px !important}
-      .farb-tab{padding:10px 12px;gap:8px;justify-content:space-between}
+      /* Kundenfeedback 25.05.2026: "Außenfarbe"-Label war zu dicht am Swatch-Kreis
+         (justify-content:space-between gab nur ~3px Restabstand wenn Tab sehr schmal).
+         Fix: kompakteres Label (12px) + größere horizontale Tab-Padding (14px) +
+         gap:12px statt 8px + explizites min margin-left auf swatch. */
+      .farb-tab{padding:10px 14px;gap:12px;justify-content:flex-start}
       .farb-tab-ico{display:none}   /* Icon weg bei narrow widths — schafft Platz für Label */
       .farb-tab-sub{display:none}
-      .farb-tab-label{font-size:12.5px}
-      .farb-tab-swatch{width:18px;height:18px}
+      .farb-tab-label{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .farb-tab-text{flex:1 1 auto;min-width:0}
+      .farb-tab-swatch{width:18px;height:18px;margin-left:8px}
       .farb-akko-head{padding:11px 13px;gap:8px}
       .farb-akko-title{font-size:12px;line-height:1.25}
       .farb-akko-sel{max-width:110px;font-size:11px}
