@@ -27,8 +27,8 @@
     .cart-card{background:#fff;border-radius:18px;box-shadow:0 2px 8px rgba(34,94,170,.06),0 8px 24px rgba(34,94,170,.04);overflow:hidden;transition:transform .25s ease,box-shadow .25s ease;position:relative}
     .cart-card:hover{transform:translateY(-3px);box-shadow:0 4px 12px rgba(34,94,170,.08),0 16px 36px rgba(34,94,170,.12)}
     .el-badge{position:absolute;top:16px;left:16px;width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#225eaa 0%,#1e3a8a 100%);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15px;box-shadow:0 4px 12px rgba(34,94,170,.3);z-index:2}
-    .skizze-box{background:linear-gradient(180deg,#f8f9ff 0%,#eef1fb 100%);padding:28px 22px 22px;display:flex;align-items:center;justify-content:center;min-height:200px;position:relative}
-    .skizze-box::after{content:'';position:absolute;inset:12px;border-radius:10px;box-shadow:inset 0 1px 2px rgba(0,0,0,.04);pointer-events:none}
+    .skizze-box{background:linear-gradient(180deg,#0a1530 0%,#0e1a3a 100%);padding:0;display:flex;align-items:stretch;justify-content:stretch;min-height:280px;height:280px;position:relative;overflow:hidden}
+    .cart-3d-frame{width:100%;height:100%;border:0;display:block;background:transparent}
     .action-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:999px;font-size:13px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;border:2px solid transparent;transition:all .2s;white-space:nowrap}
     .btn-edit{background:linear-gradient(135deg,#225eaa 0%,#1e3a8a 100%);color:#fff;border:none;box-shadow:0 4px 12px rgba(34,94,170,.25)}
     .btn-edit:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(34,94,170,.35)}
@@ -574,7 +574,7 @@
     </div>
 
     <!-- Cart Items -->
-    <div id="cart-items-container" class="flex flex-col gap-4 mb-6"></div>
+    <div id="cart-items-container" class="flex flex-col gap-8 mb-6"></div>
 
     <!-- Add Another — solider Brand-Secondary-Button (kein dashed-outline) -->
     <div id="add-another-section" class="hidden mb-8">
@@ -799,13 +799,70 @@ function farbDisplay(k, hex) {
 }
 
 // Vereinfachte Fenster-Skizze (SVG)
-function skizzeFenster(config) {
+// Farbe-Mappings — gespiegelt aus konfigurator.html fuer iframe-Specs
+const HAUS3D_COLOR_MAP_BU = {
+  'weiss':'weiss-fx','cremeweiss':'cremeweiss','weiss-fx':'weiss-fx',
+  'achatgrau':'lichtgrau','lichtgrau':'lichtgrau','signalgrau':'grau',
+  'betongrau':'betongrau','quarzgr-gl':'quarzgrau-gl','quarzgr-sa':'quarzgrau',
+  'basaltgr-gl':'basaltgrau-gl','basaltgr-sa':'basaltgrau',
+  'schiefgr-gl':'schiefergrau-gl','schiefgr-sa':'eisengl',
+  'eisengl':'eisengl','crown-plat':'crown-plat',
+  'anthrazit':'anthrazitgrau','anthraz-gl':'anthrazit-gl','anthraz-um':'anthrazit-um',
+  'schwarz-um':'schwarz-um',
+  'alux-db':'deep-bronze','alu-gebr':'crown-plat',
+  'schoko-br':'schoko-br','braun-mar':'schoko-br',
+  'moosgruen':'moosgruen','dunkelgr':'dunkelgruen',
+  'stahlblau':'stahlblau','brillblau':'brillblau','dunkelrot':'dunkelrot',
+  'schwarzbr':'schwarzbraun','sheffield':'sheffield','winchester':'winchester',
+  'eiche-hell':'sheffield','eiche-nat':'eiche-nat','golden-oak':'golden-oak',
+  'nussbaum':'nussbaum','mooreiche':'eiche-dunkel','dunkleiche':'eiche-dunkel',
+  'siena-noce':'turner-toffee','siena-ross':'mahagoni',
+  'mahagoni':'mahagoni','macore':'macore','oregon':'oregon',
+  'douglasie':'douglasie','bergkiefer':'sheffield','teak':'nussbaum',
+  'sonder':'anthrazitgrau'
+};
+const HAUS3D_WOOD_KEYS_BU = new Set([
+  'golden-oak','sheffield','turner-oak','turner-toffee','turner-walnut',
+  'eiche-nat','winchester','oregon','douglasie','nussbaum','eiche-dunkel',
+  'schwarzbraun','macore','mahagoni'
+]);
+
+// 3D-Skizze pro Cart-Card: iframe zum passenden Three.js-Viewer.
+// Detaillierte Specs werden nach iframe-Load via postMessage gesendet (_sendCart3dSpecs).
+function skizzeFenster(config, idx) {
+  const prod = config.prod || 'kunststoff';
+  const fluegel = config.fluegel || '1-fluegel';
+  const fa = config.fa || 'weiss';
+  const ck = HAUS3D_COLOR_MAP_BU[fa] || 'anthrazitgrau';
+  const isWood = HAUS3D_WOOD_KEYS_BU.has(ck);
+  const colorParam = isWood ? `wood=${encodeURIComponent(ck)}` : `color=${encodeURIComponent(ck)}`;
+  const side = (config.oeff1 === 'dreh-l' || config.oeff1 === 'dk-l') ? 'l' : 'r';
+
+  let src = '';
+  if (prod === 'haustuere') {
+    const model = config.modell || 'florida-lr-inox';
+    src = `haustuer-3d.html?embed&view=aussen&model=${encodeURIComponent(model)}&side=${side}&${colorParam}`;
+  } else if (prod === 'balkontuer') {
+    const isMulti = /^2-/.test(fluegel);
+    src = `${isMulti ? 'balkontuer-3d-multi.html' : 'balkontuer-3d.html'}?embed&layout=${encodeURIComponent(fluegel)}&side=${side}&${colorParam}`;
+  } else if (prod === 'hst') {
+    src = `hst-3d.html?embed&side=${side}&${colorParam}`;
+  } else {
+    // kunststoff Fenster
+    const isMulti = /^[23]-/.test(fluegel);
+    src = `${isMulti ? 'fenster-3d-multi.html' : 'fenster-3d.html'}?embed&layout=${encodeURIComponent(fluegel)}&side=${side}&${colorParam}`;
+  }
+
+  const safeIdx = (idx === undefined) ? '' : idx;
+  return `<iframe class="cart-3d-frame" data-idx="${safeIdx}" data-prod="${prod}" src="${src}" loading="lazy" allow="autoplay"></iframe>`;
+}
+
+// LEGACY-Stub damit alter Code nicht bricht — wird nicht mehr benutzt
+function _skizzeFensterSvgLegacy(config) {
   const prod = config.prod;
   const fluegel = config.fluegel || '1-fluegel';
   const bMm = config.bMm || 1000, hMm = config.hMm || 1200;
   const fa = config.fa || 'weiss';
-
-  // Farbe für Rahmen
   const farbHex = ({
     'weiss':'#f4f4f0','cremeweiss':'#fdf6e3','anthrazit':'#373d3f','anthraz-gl':'#373d3f','anthraz-um':'#373d3f','schwarz-um':'#0e0e10','golden-oak':'#9b6840','nussbaum':'#6e4828','mahagoni':'#6b3a2a','achatgrau':'#b4b6a8','betongrau':'#7c7f79','signalgrau':'#9c9c9c',
   })[fa] || '#f4f4f0';
@@ -934,10 +991,10 @@ function renderCartCard(item, idx) {
 
   return `<div class="cart-card" data-idx="${idx}">
     <div class="el-badge">${idx+1}</div>
-    <div class="grid grid-cols-1 md:grid-cols-[280px_1fr_auto] gap-0">
-      <!-- Skizze mit premium Hintergrund -->
+    <div class="grid grid-cols-1 md:grid-cols-[340px_1fr_auto] gap-0">
+      <!-- 3D-Vorschau via iframe (Three.js) -->
       <div class="skizze-box">
-        ${skizzeFenster(c)}
+        ${skizzeFenster(c, idx)}
       </div>
       <!-- Specs -->
       <div style="padding:24px 28px;display:flex;flex-direction:column;justify-content:space-between">
@@ -1007,6 +1064,7 @@ function renderCart() {
   addAnother.classList.remove('hidden');
 
   container.innerHTML = cart.map((item, idx) => renderCartCard(item, idx)).join('');
+  _sendCart3dSpecs();  // postMessage detaillierte Specs an alle iframes nach Load
 
   const subtotal = cart.reduce((s, i) => s + i.subtotal, 0);
   const versand = submitCoreHelpers.calcVersand(cart);
@@ -1021,6 +1079,45 @@ function renderCart() {
 
 function saveCart() {
   try { localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart)); } catch(e){}
+}
+
+// Nach renderCart: detaillierte 3D-Specs an jede iframe schicken (Sashes/Separator/Glas etc.)
+function _sendCart3dSpecs() {
+  document.querySelectorAll('.cart-3d-frame').forEach(frame => {
+    const idx = parseInt(frame.dataset.idx, 10);
+    if (isNaN(idx) || !cart[idx]) return;
+    const c = cart[idx].config || {};
+    const fa = c.fa || 'weiss';
+    const ck = HAUS3D_COLOR_MAP_BU[fa] || 'anthrazitgrau';
+    const isWood = HAUS3D_WOOD_KEYS_BU.has(ck);
+    const sashes = [c.oeff1, c.oeff2, c.oeff3].filter(Boolean);
+    const side = (c.oeff1 === 'dreh-l' || c.oeff1 === 'dk-l') ? 'l' : 'r';
+    const sendSpecs = () => {
+      try {
+        frame.contentWindow.postMessage({
+          type: 'update',
+          layout:     c.fluegel || '1-fluegel',
+          sashes:     sashes.length ? sashes : ['dk-r'],
+          separator:  c.dreiteilung || c.zweiteilung || '',
+          oberlicht:  c.oberlichtOeff  || 'fest',
+          unterlicht: c.unterlichtOeff || 'fest',
+          roll:       c.roll       || 'ohne',
+          rollKasten: c.rollKasten || '175',
+          rollSeite:  c.rollSeite  || 'rechts',
+          view:       'aussen',
+          color:      isWood ? null : ck,
+          wood:       isWood ? ck   : null,
+          glass:      c.glasdekor || 'klar',
+          side:       side
+        }, '*');
+      } catch (_) { /* iframe nicht erreichbar */ }
+    };
+    if (frame.contentDocument && frame.contentDocument.readyState === 'complete') {
+      sendSpecs();
+    } else {
+      frame.addEventListener('load', sendSpecs, { once: true });
+    }
+  });
 }
 
 // Sarah-Fix 22.04.2026: natives confirm() durch In-App-Modal ersetzt (war blockiert/nicht sichtbar)
