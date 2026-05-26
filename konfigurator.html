@@ -2205,50 +2205,32 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
     from { opacity: 0; transform: translateY(30px); }
     to   { opacity: 1; transform: translateY(0); }
   }
-  /* Hero-Disclaimer: kompakt, links auf Höhe der Überschrift, von links eingleitet */
-  @keyframes ph-disclaimer-slide-in {
-    from { opacity: 0; transform: translateX(-120%); }
-    to   { opacity: 1; transform: translateX(0); }
-  }
-  @keyframes ph-disclaimer-slide-in-mobile {
-    from { opacity: 0; transform: translateX(-40px); }
-    to   { opacity: 1; transform: translateX(0); }
+  /* Hero-Disclaimer: kompakte zentrierte Pille unter dem Sub-Text,
+     dezenter als Floating-Karte, integriert in den Hero-Header. */
+  @keyframes ph-disclaimer-fade-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
   #prod-hero .hero-disclaimer {
-    position: absolute;
-    left: clamp(16px, 2.5vw, 36px);
-    top: clamp(105px, 14vh, 150px);
-    width: min(250px, 21vw);
-    display: flex; gap: 10px; align-items: flex-start;
-    padding: 12px 13px;
-    border-radius: 11px;
-    background: rgba(34,94,170,0.12);
-    border: 1px solid rgba(118,169,250,0.28);
-    box-shadow: 0 0 0 1px rgba(118,169,250,0.18), 0 6px 20px rgba(34,94,170,0.18);
-    z-index: 2;
-    animation: ph-disclaimer-slide-in 0.75s cubic-bezier(0.22,1,0.36,1) 0.25s both;
+    display: inline-flex; gap: 8px; align-items: center;
+    margin: 14px auto 0;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: rgba(34,94,170,0.10);
+    border: 1px solid rgba(118,169,250,0.22);
+    animation: ph-disclaimer-fade-in 0.55s cubic-bezier(0.22,1,0.36,1) 0.30s both;
   }
   #prod-hero .hero-disclaimer .ms {
-    font-size: 19px; color: #76a9fa; flex-shrink: 0; line-height: 1; margin-top: 1px;
+    font-size: 16px; color: #76a9fa; flex-shrink: 0; line-height: 1;
   }
   #prod-hero .hero-disclaimer .hd-body {
     font-family: 'Manrope', sans-serif;
-    font-size: 11.5px; line-height: 1.45; color: rgba(232,238,255,0.82); text-align: left;
+    font-size: 12.5px; line-height: 1.4;
+    color: rgba(232,238,255,0.85);
+    letter-spacing: 0.005em;
   }
-  #prod-hero .hero-disclaimer .hd-body strong.hd-title {
-    display: block; color: #fff;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-weight: 800; letter-spacing: 0.01em;
-    font-size: 12.5px; margin-bottom: 2px;
-  }
-  /* Mobile / schmale Screens: zurück in den Fluss über der Überschrift */
-  @media (max-width: 1100px) {
-    #prod-hero .hero-disclaimer {
-      position: relative; left: auto; top: auto; transform: none;
-      width: min(560px, 100%);
-      margin: 0 auto 4px;
-      animation: ph-disclaimer-slide-in-mobile 0.6s cubic-bezier(0.22,1,0.36,1) 0.15s both;
-    }
+  #prod-hero .hero-disclaimer .hd-body strong {
+    color: #fff; font-weight: 700;
   }
   #prod-hero {
     position: fixed; top: 94px; left: 0; right: 0; bottom: 0; z-index: 40;
@@ -2260,15 +2242,8 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
     overflow-y: auto; overflow-x: hidden;
     transition: transform 0.7s cubic-bezier(0.76,0,0.24,1), opacity 0.5s ease;
   }
-  /* Blueprint grid */
-  #prod-hero::before {
-    content: '';
-    position: absolute; inset: 0; pointer-events: none; z-index: 0;
-    background-image:
-      linear-gradient(rgba(118,169,250,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(118,169,250,0.03) 1px, transparent 1px);
-    background-size: 64px 64px;
-  }
+  /* Blueprint-Grid entfernt (Kundenwunsch) — wirkte wie ueberfluessige
+     Spalten/Linien oberhalb des Hero. Atmospheric glow (::after) reicht. */
   /* Atmospheric radial glow */
   #prod-hero::after {
     content: '';
@@ -3537,18 +3512,15 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
 
 <!-- ══ PRODUKT-HERO v2 ══ -->
 <div id="prod-hero">
-  <!-- Disclaimer im Hero (interner Hinweis.05.2026) — kompakte Variante, von links eingleitet -->
-  <div class="hero-disclaimer" role="note" aria-label="So funktioniert die Anfrage">
-    <i class="ms f" aria-hidden="true">mail</i>
-    <div class="hd-body">
-      <strong class="hd-title">Angebot per E-Mail — unverbindlich</strong>
-      Du konfigurierst dein Wunsch-Fenster, wir melden uns mit dem schriftlichen Angebot. Keine Kosten, kein Kaufvertrag.
-    </div>
-  </div>
   <div class="hero-head">
     <div class="hero-eyebrow">DeineFenster.de</div>
     <h2 style="font-family:inherit;font-size:inherit;font-weight:inherit;letter-spacing:inherit;line-height:inherit;color:inherit;margin:0">Was möchten Sie<br><span style="font-family:'Fraunces',serif;font-weight:500;font-style:italic;color:#76a9fa;">konfigurieren?</span></h2>
     <p class="hero-sub">Wählen Sie Ihr Produkt — wir führen Sie Schritt für Schritt durch die Konfiguration.</p>
+    <!-- Disclaimer als kompakte Pille direkt unter dem Sub-Text -->
+    <div class="hero-disclaimer" role="note" aria-label="So funktioniert die Anfrage">
+      <i class="ms f" aria-hidden="true">mail</i>
+      <div class="hd-body"><strong>Angebot per E-Mail — unverbindlich.</strong> Keine Kosten, kein Kaufvertrag.</div>
+    </div>
   </div>
   <div class="hero-grid">
 
