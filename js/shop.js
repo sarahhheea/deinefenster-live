@@ -691,7 +691,7 @@ function rendere() {
     const isGaragentor = f.has('garagentor-gebraucht');
     if ((isDaemmung || isBaumat || isGaragentor) && f.size === 1) {
       const sortiment = isDaemmung
-        ? { name: 'ISO-Verbunddämmung', detail: 'Rollenformat 4450 × 1400 mm (6,24 m² pro Rolle) · Polen-Import · neu · Preis pro Rolle' }
+        ? { name: 'ISO-Verbunddämmung', detail: 'Polen-Import · neu · Preis pro Rolle' }
         : isGaragentor
           ? { name: 'gebrauchte Garagentore', detail: 'Sektional · Schwing · Rolltor — Bestand wechselt schnell' }
           : { name: 'Baumaterialien', detail: 'Sortiment wechselt — fragen Sie was Sie suchen' };
