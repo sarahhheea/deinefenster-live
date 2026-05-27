@@ -318,6 +318,38 @@
     .fk-label{font-size:10px;font-weight:600;color:var(--c-text);line-height:1.3;margin-top:5px;letter-spacing:-.01em}
     .fk-price{font-size:10px;font-weight:700;margin-top:2px}
 
+    /* Bild-Karten — Bild bündig, kein dunkler Rand.
+       Trifft Anschlag-Cards (Step 3), Flügelaufteilung-Cards (Step 2), Haustür-Karten.
+       Nutzt :has() — Chrome 105+, Safari 15.4+, Firefox 121+. */
+    .oc:has(> img), .fk:has(> img) {
+      padding: 0 !important;
+      overflow: hidden;
+      gap: 0 !important;
+    }
+    .oc:has(> img) > img, .fk:has(> img) > img {
+      width: 100% !important;
+      height: auto !important;
+      max-height: none !important;
+      display: block !important;
+      background: transparent !important;
+      border-radius: 0 !important;
+      object-fit: contain;
+    }
+    .oc:has(> img) > .olabel,
+    .oc:has(> img) > .fk-label,
+    .fk:has(> img) > .fk-label {
+      padding: 8px 8px 4px !important;
+      margin: 0 !important;
+      text-align: center;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+    .oc:has(> img) > .fk-price,
+    .fk:has(> img) > .fk-price {
+      padding: 0 8px 10px !important;
+      margin: 0 !important;
+    }
+
     /* CHECKBOX CARD */
     .cc{position:relative;display:flex;align-items:flex-start;gap:12px;border:1px solid var(--c-border);border-radius:var(--r-md);padding:16px 18px;cursor:pointer;background:var(--c-bg);transition:border-color var(--t-fast) var(--ease),background var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease)}
     .cc:hover{border-color:var(--c-border-hover);background:var(--c-primary-tint)}
@@ -6563,7 +6595,7 @@ function haustuerSVG(variant) {
   const file = HAUSTUER_KARTEN_IMG[variant];
   if (!file) return '';
   // Gleiche Dimensions + Stil wie fluegelImg() — einheitliche Karten-Optik.
-  return `<img src="img/haustuer-karten/${file}.png?v=20260525f" alt="${variant}" loading="lazy" style="width:100%;height:auto;max-height:280px;object-fit:contain;display:block;background:#ffffff;border-radius:4px"/>`;
+  return `<img src="img/haustuer-karten/${file}.png?v=20260527f" alt="${variant}" loading="lazy" style="width:100%;height:auto;display:block"/>`;
 }
 
 // Flügelaufteilungs-Thumbnails: anthrazit-Rahmen-Variante aus fluegel-karten/
@@ -6585,7 +6617,7 @@ const FLUEGEL_KARTEN_IMG = {
 function fluegelImg(v) {
   const src = FLUEGEL_KARTEN_IMG[v];
   if (!src) return windowSVG(v, null);
-  return `<img src="${src}?v=20260521" alt="${P.fluegel[v]?.name||v}" loading="lazy" style="width:100%;height:auto;max-height:280px;object-fit:contain;display:block;background:#ffffff;border-radius:4px"/>`;
+  return `<img src="${src}?v=20260527" alt="${P.fluegel[v]?.name||v}" loading="lazy" style="width:100%;height:auto;display:block"/>`;
 }
 
 const ANSCHLAG_KARTEN_IMG = {
@@ -6599,7 +6631,7 @@ const ANSCHLAG_KARTEN_IMG = {
 function anschlagImg(v) {
   const file = ANSCHLAG_KARTEN_IMG[v];
   if (!file) return windowSVG('1-fluegel', [v]);
-  return `<img src="img/anschlag-karten/${file}.png?v=20260527" alt="${v}" loading="lazy" style="width:100%;height:auto;max-height:280px;object-fit:contain;display:block;background:#ffffff;border-radius:4px"/>`;
+  return `<img src="img/anschlag-karten/${file}.png?v=20260527" alt="${v}" loading="lazy" style="width:100%;height:auto;display:block"/>`;
 }
 
 function anschlag2fImg(v1, v2, type) {
@@ -6612,7 +6644,7 @@ function anschlag2fImg(v1, v2, type) {
   else if (type === 'pfosten' && v1 === 'dk-l'   && v2 === 'dreh-r') file = 'pfosten-dkL-drehR';
   else if (type === 'pfosten' && v1 === 'dk-l'   && v2 === 'dk-r')   file = 'pfosten-dkL-dkR';
   if (!file) return windowSVG(S.fluegel, [v1, v2]);
-  return `<img src="img/anschlag-karten-2f/${file}.png?v=20260527" alt="${v1}-${v2}-${type}" loading="lazy" style="width:100%;height:auto;max-height:280px;object-fit:contain;display:block;background:#ffffff;border-radius:4px"/>`;
+  return `<img src="img/anschlag-karten-2f/${file}.png?v=20260527" alt="${v1}-${v2}-${type}" loading="lazy" style="width:100%;height:auto;display:block"/>`;
 }
 
 function anschlag3fImg(v1, v2, v3, type) {
@@ -6623,7 +6655,7 @@ function anschlag3fImg(v1, v2, v3, type) {
   else if (type === 'pfosten-stulp'   && v1 === 'dk-l' && v2 === 'dreh-l' && v3 === 'dk-r') file = 'ps-dkL-drehL-dkR';
   else if (type === 'stulp-pfosten'   && v1 === 'dk-l' && v2 === 'dreh-r' && v3 === 'dk-r') file = 'sp-dkL-drehR-dkR';
   if (!file) return windowSVG(S.fluegel, [v1, v2, v3]);
-  return `<img src="img/anschlag-karten-3f/${file}.png?v=20260527" alt="${v1}-${v2}-${v3}-${type}" loading="lazy" style="width:100%;height:auto;max-height:280px;object-fit:contain;display:block;background:#ffffff;border-radius:4px"/>`;
+  return `<img src="img/anschlag-karten-3f/${file}.png?v=20260527" alt="${v1}-${v2}-${v3}-${type}" loading="lazy" style="width:100%;height:auto;display:block"/>`;
 }
 
 function anschlag1olImg(mainV, olV) {
@@ -6635,7 +6667,7 @@ function anschlag1olImg(mainV, olV) {
   else if (mainV === 'dk-l' && olV === 'kipp') file = 'olKipp-dk-l';
   else if (mainV === 'dk-r' && olV === 'kipp') file = 'olKipp-dk-r';
   if (!file) return olComboSVG(olV, mainV);
-  return `<img src="img/anschlag-karten-1ol/${file}.png?v=20260527" alt="${mainV}-ol${olV}" loading="lazy" style="width:100%;height:auto;max-height:280px;object-fit:contain;display:block;background:#ffffff;border-radius:4px"/>`;
+  return `<img src="img/anschlag-karten-1ol/${file}.png?v=20260527" alt="${mainV}-ol${olV}" loading="lazy" style="width:100%;height:auto;display:block"/>`;
 }
 
 function buildFluegel() {
