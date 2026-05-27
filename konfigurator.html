@@ -6563,7 +6563,7 @@ function haustuerSVG(variant) {
   const file = HAUSTUER_KARTEN_IMG[variant];
   if (!file) return '';
   // Gleiche Dimensions + Stil wie fluegelImg() — einheitliche Karten-Optik.
-  return `<img src="img/haustuer-karten/${file}.png?v=20260525f" alt="${variant}" loading="lazy" style="width:100%;height:auto;max-height:280px;object-fit:contain;display:block"/>`;
+  return `<img src="img/haustuer-karten/${file}.png?v=20260527f" alt="${variant}" loading="lazy" style="width:100%;height:auto;max-height:280px;object-fit:contain;display:block;background:#ffffff;border-radius:4px"/>`;
 }
 
 // Flügelaufteilungs-Thumbnails: anthrazit-Rahmen-Variante aus fluegel-karten/
@@ -6585,7 +6585,7 @@ const FLUEGEL_KARTEN_IMG = {
 function fluegelImg(v) {
   const src = FLUEGEL_KARTEN_IMG[v];
   if (!src) return windowSVG(v, null);
-  return `<img src="${src}?v=20260521" alt="${P.fluegel[v]?.name||v}" loading="lazy" style="width:100%;height:auto;max-height:280px;object-fit:contain;display:block"/>`;
+  return `<img src="${src}?v=20260521" alt="${P.fluegel[v]?.name||v}" loading="lazy" style="width:100%;height:auto;max-height:280px;object-fit:contain;display:block;background:#ffffff;border-radius:4px"/>`;
 }
 
 const ANSCHLAG_KARTEN_IMG = {
@@ -6597,19 +6597,45 @@ const ANSCHLAG_KARTEN_IMG = {
   'fest':   'fest'
 };
 function anschlagImg(v) {
-  return windowSVG('1-fluegel', [v]);
+  const file = ANSCHLAG_KARTEN_IMG[v];
+  if (!file) return windowSVG('1-fluegel', [v]);
+  return `<img src="img/anschlag-karten/${file}.png?v=20260527" alt="${v}" loading="lazy" style="width:100%;height:auto;max-height:280px;object-fit:contain;display:block;background:#ffffff;border-radius:4px"/>`;
 }
 
 function anschlag2fImg(v1, v2, type) {
-  return windowSVG(S.fluegel, [v1, v2]);
+  let file = null;
+  if (v1 === 'fest' && v2 === 'dk-r')                                file = 'fest-dkR';
+  else if (v1 === 'dk-l'   && v2 === 'fest')                         file = 'dkL-fest';
+  else if (type === 'stulp'   && v1 === 'dreh-l' && v2 === 'dk-r')   file = 'stulp-drehL-dkR';
+  else if (type === 'stulp'   && v1 === 'dk-l'   && v2 === 'dreh-r') file = 'stulp-dkL-drehR';
+  else if (type === 'pfosten' && v1 === 'dreh-l' && v2 === 'dk-r')   file = 'pfosten-drehL-dkR';
+  else if (type === 'pfosten' && v1 === 'dk-l'   && v2 === 'dreh-r') file = 'pfosten-dkL-drehR';
+  else if (type === 'pfosten' && v1 === 'dk-l'   && v2 === 'dk-r')   file = 'pfosten-dkL-dkR';
+  if (!file) return windowSVG(S.fluegel, [v1, v2]);
+  return `<img src="img/anschlag-karten-2f/${file}.png?v=20260527" alt="${v1}-${v2}-${type}" loading="lazy" style="width:100%;height:auto;max-height:280px;object-fit:contain;display:block;background:#ffffff;border-radius:4px"/>`;
 }
 
 function anschlag3fImg(v1, v2, v3, type) {
-  return windowSVG(S.fluegel, [v1, v2, v3]);
+  let file = null;
+  if (v1 === 'dk-l' && v2 === 'fest'   && v3 === 'dk-r')                                  file = 'dkL-fest-dkR';
+  else if (type === 'pfosten-pfosten' && v1 === 'dk-l' && v2 === 'dreh-r' && v3 === 'dk-r') file = 'pp-dkL-drehR-dkR';
+  else if (type === 'pfosten-pfosten' && v1 === 'dk-l' && v2 === 'dreh-l' && v3 === 'dk-r') file = 'pp-dkL-drehL-dkR';
+  else if (type === 'pfosten-stulp'   && v1 === 'dk-l' && v2 === 'dreh-l' && v3 === 'dk-r') file = 'ps-dkL-drehL-dkR';
+  else if (type === 'stulp-pfosten'   && v1 === 'dk-l' && v2 === 'dreh-r' && v3 === 'dk-r') file = 'sp-dkL-drehR-dkR';
+  if (!file) return windowSVG(S.fluegel, [v1, v2, v3]);
+  return `<img src="img/anschlag-karten-3f/${file}.png?v=20260527" alt="${v1}-${v2}-${v3}-${type}" loading="lazy" style="width:100%;height:auto;max-height:280px;object-fit:contain;display:block;background:#ffffff;border-radius:4px"/>`;
 }
 
 function anschlag1olImg(mainV, olV) {
-  return olComboSVG(olV, mainV);
+  let file = null;
+  if (mainV === 'fest' && olV === 'fest')      file = 'olFest-fest';
+  else if (mainV === 'dk-l' && olV === 'fest') file = 'olFest-dk-l';
+  else if (mainV === 'dk-r' && olV === 'fest') file = 'olFest-dk-r';
+  else if (mainV === 'fest' && olV === 'kipp') file = 'olKipp-fest';
+  else if (mainV === 'dk-l' && olV === 'kipp') file = 'olKipp-dk-l';
+  else if (mainV === 'dk-r' && olV === 'kipp') file = 'olKipp-dk-r';
+  if (!file) return olComboSVG(olV, mainV);
+  return `<img src="img/anschlag-karten-1ol/${file}.png?v=20260527" alt="${mainV}-ol${olV}" loading="lazy" style="width:100%;height:auto;max-height:280px;object-fit:contain;display:block;background:#ffffff;border-radius:4px"/>`;
 }
 
 function buildFluegel() {
@@ -10777,6 +10803,7 @@ async function submitForm(e) {
       subject: '[DeineFenster.de] Neue Anfrage ' + offerId + ': ' + prodName,
       text: _emailText,
       confirmation: { name: name, offerId: offerId },
+      website: '',
     })
   }).catch(() => {});
 
