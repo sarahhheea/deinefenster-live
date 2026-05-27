@@ -6597,45 +6597,19 @@ const ANSCHLAG_KARTEN_IMG = {
   'fest':   'fest'
 };
 function anschlagImg(v) {
-  const file = ANSCHLAG_KARTEN_IMG[v];
-  if (!file) return windowSVG('1-fluegel', [v]);
-  return `<img src="img/anschlag-karten/${file}.png?v=20260525" alt="${v}" loading="lazy" style="width:100%;height:auto;max-height:280px;object-fit:contain;display:block"/>`;
+  return windowSVG('1-fluegel', [v]);
 }
 
 function anschlag2fImg(v1, v2, type) {
-  let file = null;
-  if (v1 === 'fest' && v2 === 'dk-r')                                file = 'fest-dkR';
-  else if (v1 === 'dk-l'   && v2 === 'fest')                         file = 'dkL-fest';
-  else if (type === 'stulp'   && v1 === 'dreh-l' && v2 === 'dk-r')   file = 'stulp-drehL-dkR';
-  else if (type === 'stulp'   && v1 === 'dk-l'   && v2 === 'dreh-r') file = 'stulp-dkL-drehR';
-  else if (type === 'pfosten' && v1 === 'dreh-l' && v2 === 'dk-r')   file = 'pfosten-drehL-dkR';
-  else if (type === 'pfosten' && v1 === 'dk-l'   && v2 === 'dreh-r') file = 'pfosten-dkL-drehR';
-  else if (type === 'pfosten' && v1 === 'dk-l'   && v2 === 'dk-r')   file = 'pfosten-dkL-dkR';
-  if (!file) return windowSVG(S.fluegel, [v1, v2]);
-  return `<img src="img/anschlag-karten-2f/${file}.png?v=20260525" alt="${v1}-${v2}-${type}" loading="lazy" style="width:100%;height:auto;max-height:280px;object-fit:contain;display:block"/>`;
+  return windowSVG(S.fluegel, [v1, v2]);
 }
 
 function anschlag3fImg(v1, v2, v3, type) {
-  let file = null;
-  if (v1 === 'dk-l' && v2 === 'fest'   && v3 === 'dk-r')                                  file = 'dkL-fest-dkR';
-  else if (type === 'pfosten-pfosten' && v1 === 'dk-l' && v2 === 'dreh-r' && v3 === 'dk-r') file = 'pp-dkL-drehR-dkR';
-  else if (type === 'pfosten-pfosten' && v1 === 'dk-l' && v2 === 'dreh-l' && v3 === 'dk-r') file = 'pp-dkL-drehL-dkR';
-  else if (type === 'pfosten-stulp'   && v1 === 'dk-l' && v2 === 'dreh-l' && v3 === 'dk-r') file = 'ps-dkL-drehL-dkR';
-  else if (type === 'stulp-pfosten'   && v1 === 'dk-l' && v2 === 'dreh-r' && v3 === 'dk-r') file = 'sp-dkL-drehR-dkR';
-  if (!file) return windowSVG(S.fluegel, [v1, v2, v3]);
-  return `<img src="img/anschlag-karten-3f/${file}.png?v=20260525" alt="${v1}-${v2}-${v3}-${type}" loading="lazy" style="width:100%;height:auto;max-height:280px;object-fit:contain;display:block"/>`;
+  return windowSVG(S.fluegel, [v1, v2, v3]);
 }
 
 function anschlag1olImg(mainV, olV) {
-  let file = null;
-  if (mainV === 'fest' && olV === 'fest')      file = 'olFest-fest';
-  else if (mainV === 'dk-l' && olV === 'fest') file = 'olFest-dk-l';
-  else if (mainV === 'dk-r' && olV === 'fest') file = 'olFest-dk-r';
-  else if (mainV === 'fest' && olV === 'kipp') file = 'olKipp-fest';
-  else if (mainV === 'dk-l' && olV === 'kipp') file = 'olKipp-dk-l';
-  else if (mainV === 'dk-r' && olV === 'kipp') file = 'olKipp-dk-r';
-  if (!file) return olComboSVG(olV, mainV);
-  return `<img src="img/anschlag-karten-1ol/${file}.png?v=20260525" alt="${mainV}-ol${olV}" loading="lazy" style="width:100%;height:auto;max-height:280px;object-fit:contain;display:block"/>`;
+  return olComboSVG(olV, mainV);
 }
 
 function buildFluegel() {
@@ -7074,47 +7048,81 @@ function ouComboSVG(olTyp, mainTyp, ulTyp) {
 
 // Kombiniertes SVG für 1-Flügel + Oberlicht Kombi-Karten
 function olComboSVG(olTyp, mainTyp) {
-  const W=44, H=66, M=3;
-  const olH=14, sep=M+olH;
-  const mT=sep+2, mB=H-M, mL=M+2, mR=W-M-2, mCX=W/2, mCY=(mT+mB)/2;
-  let s=`<svg viewBox="0 0 ${W} ${H}" width="44" height="66" style="display:block">`;
-  s+=`<rect width="${W}" height="${H}" fill="#0c1930" rx="4"/>`;
-  s+=`<rect x="${M}" y="${M}" width="${W-2*M}" height="${H-2*M}" fill="rgba(38,88,158,0.2)" stroke="rgba(118,169,250,0.5)" stroke-width="1.4"/>`;
-  s+=`<line x1="${M}" y1="${sep}" x2="${W-M}" y2="${sep}" stroke="rgba(118,169,250,0.4)" stroke-width="1.2"/>`;
-  // Oberlicht Indikator
-  const olT=M+1,olBi=sep-1,olL=M+2,olR=W-M-2,olCX=W/2;
-  if(olTyp==='kipp'){
-    s+=`<line x1="${olL}" y1="${olBi}" x2="${olCX}" y2="${olT+1}" stroke="#76a9fa" stroke-width="1.4" stroke-linecap="round"/>`;
-    s+=`<line x1="${olR}" y1="${olBi}" x2="${olCX}" y2="${olT+1}" stroke="#76a9fa" stroke-width="1.4" stroke-linecap="round"/>`;
-    s+=`<polygon points="${olCX},${olT} ${olCX-3},${olT+6} ${olCX+3},${olT+6}" fill="#225eaa"/>`;
-  } else {
-    s+=`<line x1="${olL}" y1="${olT}" x2="${olR}" y2="${olBi}" stroke="#aaa" stroke-width="1.2"/>`;
-    s+=`<line x1="${olR}" y1="${olT}" x2="${olL}" y2="${olBi}" stroke="#aaa" stroke-width="1.2"/>`;
+  // Anthrazit Rahmen + helles Glas + dunkle Einzeichnung — selber Stil wie windowSVG()
+  const W=52, H=80, M=5, SF=3, DV=4;
+  const FRM='#404850', FHL='#525e6a', FSD='#252c34', PFO='#333a42', HDL='#606e7c';
+  const id=++_wsvgN;
+  let s=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:${W+8}px;height:auto;display:block" xmlns="http://www.w3.org/2000/svg">`;
+  s+=`<defs><linearGradient id="gs${id}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="#f2f8fc"/>
+        <stop offset="100%" stop-color="#e8f2f8"/>
+      </linearGradient></defs>`;
+  // Rahmen
+  s+=`<rect width="${W}" height="${H}" fill="${FRM}"/>`;
+  s+=`<rect x="0" y="0" width="${W}" height="1" fill="${FHL}" opacity="0.55"/>`;
+  s+=`<rect x="0" y="0" width="1" height="${H}" fill="${FHL}" opacity="0.38"/>`;
+  s+=`<rect x="0" y="${H-1}" width="${W}" height="1" fill="${FSD}" opacity="0.65"/>`;
+  s+=`<rect x="${W-1}" y="0" width="1" height="${H}" fill="${FSD}" opacity="0.48"/>`;
+
+  const gx=M, gy=M, gw=W-2*M, gh=H-2*M;
+  const olH=Math.round(gh*0.24);
+  const ulY=gy+olH+DV;
+  const ulH=gh-olH-DV;
+
+  // ── Oberlicht (kleiner Flügel oben) ───────────────────────────
+  function paneOl(){
+    let gx2=gx, gy2=gy, gw2=gw, gh2=olH;
+    if(olTyp && olTyp!=='fest'){
+      s+=`<rect x="${gx}" y="${gy}" width="${gw}" height="${olH}" fill="${FRM}"/>`;
+      s+=`<rect x="${gx}" y="${gy}" width="${gw}" height="1" fill="${FHL}" opacity="0.50"/>`;
+      s+=`<rect x="${gx}" y="${gy+olH-1}" width="${gw}" height="1" fill="${FSD}" opacity="0.58"/>`;
+      gx2=gx+SF; gy2=gy+SF; gw2=gw-SF*2; gh2=olH-SF*2;
+    }
+    s+=`<rect x="${gx2}" y="${gy2}" width="${gw2}" height="${gh2}" fill="url(#gs${id})"/>`;
+    if(olTyp==='kipp'){
+      const cx=gx2+gw2/2, cyT=gy2+1, cyB=gy2+gh2-1;
+      s+=`<line x1="${gx2+1}" y1="${cyB}" x2="${gx2+gw2-1}" y2="${cyB}" stroke="${FRM}" stroke-width="1.5" stroke-linecap="square"/>`;
+      s+=`<line x1="${gx2+1}" y1="${cyB}" x2="${cx}" y2="${cyT}" stroke="${FRM}" stroke-width="0.8" opacity="0.60" stroke-linecap="round"/>`;
+      s+=`<line x1="${gx2+gw2-1}" y1="${cyB}" x2="${cx}" y2="${cyT}" stroke="${FRM}" stroke-width="0.8" opacity="0.60" stroke-linecap="round"/>`;
+    } else if(olTyp==='fest'){
+      s+=`<line x1="${gx2+2}" y1="${gy2+2}" x2="${gx2+gw2-2}" y2="${gy2+gh2-2}" stroke="${FRM}" stroke-width="0.55" opacity="0.28"/>`;
+      s+=`<line x1="${gx2+gw2-2}" y1="${gy2+2}" x2="${gx2+2}" y2="${gy2+gh2-2}" stroke="${FRM}" stroke-width="0.55" opacity="0.28"/>`;
+    }
   }
-  // Hauptflügel Indikator
-  const sl=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#76a9fa" stroke-width="2.2" stroke-linecap="round"/>`;
-  const dl=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#76a9fa" stroke-width="1.2" stroke-linecap="round" stroke-dasharray="3,2"/>`;
-  if(mainTyp==='fest'){
-    s+=`<line x1="${mL}" y1="${mT}" x2="${mR}" y2="${mB}" stroke="#aaa" stroke-width="1.2"/>`;
-    s+=`<line x1="${mR}" y1="${mT}" x2="${mL}" y2="${mB}" stroke="#aaa" stroke-width="1.2"/>`;
-  }else if(mainTyp==='kipp'){
-    s+=sl(mL,mB,mCX,mT);s+=sl(mR,mB,mCX,mT);s+=dl(mL,mT,mR,mT);
-    s+=`<polygon points="${mCX},${mT-1} ${mCX-3},${mT+5} ${mCX+3},${mT+5}" fill="#225eaa"/>`;
-  }else if(mainTyp==='dreh-l'){
-    s+=sl(mL,mT,mL,mB);s+=dl(mL,mT,mR,mCY);s+=dl(mL,mB,mR,mCY);
-  }else if(mainTyp==='dreh-r'){
-    s+=sl(mR,mT,mR,mB);s+=dl(mR,mT,mL,mCY);s+=dl(mR,mB,mL,mCY);
-  }else if(mainTyp==='dk-l'){
-    s+=sl(mL,mT,mL,mB);s+=dl(mL,mT,mR,mCY);s+=dl(mL,mB,mR,mCY);
-    s+=dl(mR,mB,mCX,mT);s+=dl(mL,mB,mCX,mT);
-    s+=`<polygon points="${mCX},${mT-1} ${mCX-3},${mT+5} ${mCX+3},${mT+5}" fill="#225eaa"/>`;
-  }else if(mainTyp==='dk-r'){
-    s+=sl(mR,mT,mR,mB);s+=dl(mR,mT,mL,mCY);s+=dl(mR,mB,mL,mCY);
-    s+=dl(mL,mB,mCX,mT);s+=dl(mR,mB,mCX,mT);
-    s+=`<polygon points="${mCX},${mT-1} ${mCX-3},${mT+5} ${mCX+3},${mT+5}" fill="#225eaa"/>`;
+  paneOl();
+  // Trennsteg zwischen Oberlicht und Hauptflügel
+  s+=`<rect x="${gx}" y="${gy+olH}" width="${gw}" height="${DV}" fill="${PFO}"/>`;
+
+  // ── Hauptflügel ──────────────────────────────────────────────
+  function paneMain(){
+    let gx2=gx, gy2=ulY, gw2=gw, gh2=ulH;
+    const fix=!mainTyp||mainTyp==='fest';
+    if(!fix){
+      s+=`<rect x="${gx}" y="${ulY}" width="${gw}" height="${ulH}" fill="${FRM}"/>`;
+      s+=`<rect x="${gx}" y="${ulY}" width="${gw}" height="1" fill="${FHL}" opacity="0.50"/>`;
+      s+=`<rect x="${gx}" y="${ulY+ulH-1}" width="${gw}" height="1" fill="${FSD}" opacity="0.58"/>`;
+      gx2=gx+SF; gy2=ulY+SF; gw2=gw-SF*2; gh2=ulH-SF*2;
+    }
+    s+=`<rect x="${gx2}" y="${gy2}" width="${gw2}" height="${gh2}" fill="url(#gs${id})"/>`;
+    if(!mainTyp) return;
+    const cx=gx2+gw2/2, cy=gy2+gh2/2;
+    const ip=1.5, L=gx2+ip, R=gx2+gw2-ip, T=gy2+ip, B=gy2+gh2-ip;
+    const TK=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${FRM}" stroke-width="1.8" stroke-linecap="square"/>`;
+    const AR=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${FRM}" stroke-width="0.9" opacity="0.60" stroke-linecap="round"/>`;
+    const MK=(hx,hy)=>
+      `<rect x="${hx-1}" y="${hy-6}" width="2" height="11" fill="${HDL}"/>`+
+      `<rect x="${hx-4}" y="${hy-1.5}" width="8" height="2.5" fill="${HDL}"/>`;
+    if(mainTyp==='fest'){
+      s+=`<line x1="${gx2+2}" y1="${gy2+2}" x2="${gx2+gw2-2}" y2="${gy2+gh2-2}" stroke="${FRM}" stroke-width="0.55" opacity="0.28"/>`;
+      s+=`<line x1="${gx2+gw2-2}" y1="${gy2+2}" x2="${gx2+2}" y2="${gy2+gh2-2}" stroke="${FRM}" stroke-width="0.55" opacity="0.28"/>`;
+    } else if(mainTyp==='kipp'){s+=TK(L,B,R,B);s+=AR(L,B,cx,T);s+=AR(R,B,cx,T);s+=MK(cx,cy-3);
+    } else if(mainTyp==='dreh-l'){s+=TK(L,T,L,B);s+=AR(L,T,R,cy);s+=AR(L,B,R,cy);s+=MK(R-5,cy);
+    } else if(mainTyp==='dreh-r'){s+=TK(R,T,R,B);s+=AR(R,T,L,cy);s+=AR(R,B,L,cy);s+=MK(L+5,cy);
+    } else if(mainTyp==='dk-l'){s+=TK(L,T,L,B);s+=TK(L,B,R,B);s+=AR(L,T,R,cy);s+=AR(L,B,R,cy);s+=MK(R-5,cy);
+    } else if(mainTyp==='dk-r'){s+=TK(R,T,R,B);s+=TK(L,B,R,B);s+=AR(R,T,L,cy);s+=AR(R,B,L,cy);s+=MK(L+5,cy);}
   }
-  s+='</svg>';
-  return s;
+  paneMain();
+  return s+'</svg>';
 }
 
 // ── Fenster-Schema: realistisches Anthrazit-Fenster SVG ─────────────────────────
