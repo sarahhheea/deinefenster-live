@@ -4052,8 +4052,9 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   </div>
 </div>
 
-<!-- ── SCHRITT 7: VERGLASUNG (Wärme + Warme Kante + Schall + Sicherheitsglas) ── -->
-<!-- Fix K6+K7 (21.04.2026): 4 separate Entscheidungen, kombinierbar. Ornamentglas lebt in Schritt 8. -->
+<!-- ── SCHRITT 7: VERGLASUNG (Wärme + Schall + Sicherheitsglas) ──
+     Konsistenz-Refactor 27.05.2026: gleiches .glass-card Pattern wie Schritt 8 (Glasdekor).
+     SVG-Visualisierung statt Text-Wand. IDs/data-v/onclick unverändert — JS-Logik bleibt. -->
 <div class="sc" id="s7">
   <div class="sh" onclick="tog(7)">
     <div class="badge" id="b7">7</div>
@@ -4065,23 +4066,44 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   </div>
   <div class="sb">
 
-    <!-- A) WÄRMESCHUTZ — Inhaberin-Sortiment 21.04.2026: nur 2 Optionen, 3-fach incl. Warme Kante
-         Bei HST (IGLO-HS/PSK/Slide) ist nur 3-fach zulässig — 2-fach wird dynamisch deaktiviert -->
+    <!-- A) WÄRMESCHUTZ — Bei HST nur 3-fach zulässig (enforceGlasRule deaktiviert 2-fach) -->
     <div class="sec-t" style="margin-top:0">Wärmeschutz (Pflicht)</div>
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-      <div class="oc sel" id="glas-2fach" data-v="2fach" onclick="pick(this,'glas')">
-        <div class="ora"></div>
-        <div>
-          <div class="olabel">2-fach Wärmeschutz · 24 mm</div>
-          <div class="osub">Zwei Glasscheiben mit Edelgas-Füllung. Solide Wärmedämmung für übliche Wohnräume, EnEV-konform.</div>
+    <div class="glass-grid">
+      <div class="glass-card sel" id="glas-2fach" data-v="2fach" onclick="pick(this,'glas')">
+        <div class="glass-vis"><svg viewBox="0 0 130 88" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+          <defs><linearGradient id="vg-w2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e8f1f9"/><stop offset="100%" stop-color="#b3d0e6"/></linearGradient></defs>
+          <rect width="130" height="88" fill="url(#vg-w2)"/>
+          <rect x="0" y="0" width="130" height="9" fill="#225eaa"/>
+          <rect x="0" y="79" width="130" height="9" fill="#225eaa"/>
+          <rect x="44" y="9" width="6" height="70" fill="#76a9fa"/>
+          <rect x="80" y="9" width="6" height="70" fill="#76a9fa"/>
+          <rect x="46" y="14" width="1" height="60" fill="#fff" opacity="0.6"/>
+          <rect x="82" y="14" width="1" height="60" fill="#fff" opacity="0.6"/>
+        </svg></div>
+        <div class="glass-info">
+          <div class="glass-name">2-fach Wärmeschutz</div>
+          <div class="glass-desc">24 mm · Edelgas-Füllung · EnEV-konform</div>
         </div>
+        <div class="glass-check"><i class="ms f">check</i></div>
       </div>
-      <div class="oc" id="glas-3fach" data-v="3fach" onclick="pick(this,'glas')">
-        <div class="ora"></div>
-        <div>
-          <div class="olabel">3-fach Wärmeschutz · 40 mm</div>
-          <div class="osub">Drei Glasscheiben mit Warmer Kante. Niedrigster Energieverbrauch, optimal für Neubau und Sanierung — GEG 2024 konform.</div>
+      <div class="glass-card" id="glas-3fach" data-v="3fach" onclick="pick(this,'glas')">
+        <div class="glass-vis"><svg viewBox="0 0 130 88" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+          <defs><linearGradient id="vg-w3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e8f1f9"/><stop offset="100%" stop-color="#9ac4dd"/></linearGradient></defs>
+          <rect width="130" height="88" fill="url(#vg-w3)"/>
+          <rect x="0" y="0" width="130" height="9" fill="#225eaa"/>
+          <rect x="0" y="79" width="130" height="9" fill="#225eaa"/>
+          <rect x="32" y="9" width="6" height="70" fill="#76a9fa"/>
+          <rect x="62" y="9" width="6" height="70" fill="#76a9fa"/>
+          <rect x="92" y="9" width="6" height="70" fill="#76a9fa"/>
+          <rect x="34" y="14" width="1" height="60" fill="#fff" opacity="0.6"/>
+          <rect x="64" y="14" width="1" height="60" fill="#fff" opacity="0.6"/>
+          <rect x="94" y="14" width="1" height="60" fill="#fff" opacity="0.6"/>
+        </svg></div>
+        <div class="glass-info">
+          <div class="glass-name">3-fach Wärmeschutz</div>
+          <div class="glass-desc">40 mm · Warme Kante · GEG 2024 konform</div>
         </div>
+        <div class="glass-check"><i class="ms f">check</i></div>
       </div>
     </div>
     <div id="glas-hst-hint" class="info mt-2 hidden" style="background:#eff6ff;border-left:4px solid #3b82f6">
@@ -4089,75 +4111,156 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       <div style="font-size:13px">Bei Schiebetüren ist nur <strong>3-fach Verglasung</strong> möglich (Drutex-Spezifikation).</div>
     </div>
 
-    <!-- C) SCHALLSCHUTZ -->
+    <!-- B) SCHALLSCHUTZ — Wellen werden mit jedem Level mehr blockiert -->
     <div class="sec-t">Schallschutz (zusätzlich)</div>
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-      <div class="oc sel" data-v="ohne" onclick="pick(this,'schall')">
-        <div class="ora"></div>
-        <div>
-          <div class="olabel">Kein Zusatz-Schallschutz</div>
-          <div class="osub">Standard-Glas mit ca. 32 dB Dämmung — reicht für ruhige Wohnlagen ohne starken Verkehr.</div>
+    <div class="glass-grid">
+      <div class="glass-card sel" data-v="ohne" onclick="pick(this,'schall')">
+        <div class="glass-vis"><svg viewBox="0 0 130 88" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+          <defs><linearGradient id="vg-s0" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e8f1f9"/><stop offset="100%" stop-color="#bcd6e8"/></linearGradient></defs>
+          <rect width="130" height="88" fill="url(#vg-s0)"/>
+          <g transform="translate(28,44)" fill="none" stroke="#225eaa" stroke-width="2.2" stroke-linecap="round">
+            <circle cx="0" cy="0" r="7" fill="#225eaa" stroke="none"/>
+            <path d="M 12 -7 Q 20 -8 20 0 Q 20 8 12 7"/>
+            <path d="M 22 -12 Q 34 -14 34 0 Q 34 14 22 12"/>
+            <path d="M 32 -18 Q 48 -20 48 0 Q 48 20 32 18"/>
+            <path d="M 42 -24 Q 62 -26 62 0 Q 62 26 42 24" opacity="0.6"/>
+          </g>
+        </svg></div>
+        <div class="glass-info">
+          <div class="glass-name">Standard · 32 dB</div>
+          <div class="glass-desc">Ruhige Wohnlagen ohne starken Verkehr</div>
         </div>
+        <div class="glass-check"><i class="ms f">check</i></div>
       </div>
-      <div class="oc" data-v="rw-33" onclick="pick(this,'schall')">
-        <div class="ora"></div>
-        <div>
-          <div class="olabel">Schallschutz Rw 33 dB</div>
-          <div class="osub">Leichter Lärmschutz für Wohnstraßen mit gelegentlichem Verkehr.</div>
+      <div class="glass-card" data-v="rw-33" onclick="pick(this,'schall')">
+        <div class="glass-vis"><svg viewBox="0 0 130 88" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+          <defs><linearGradient id="vg-s33" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e8f1f9"/><stop offset="100%" stop-color="#aacae0"/></linearGradient></defs>
+          <rect width="130" height="88" fill="url(#vg-s33)"/>
+          <g transform="translate(28,44)" fill="none" stroke="#225eaa" stroke-width="2.2" stroke-linecap="round">
+            <circle cx="0" cy="0" r="7" fill="#225eaa" stroke="none"/>
+            <path d="M 12 -7 Q 20 -8 20 0 Q 20 8 12 7"/>
+            <path d="M 22 -12 Q 34 -14 34 0 Q 34 14 22 12"/>
+            <path d="M 32 -18 Q 48 -20 48 0 Q 48 20 32 18" opacity="0.35"/>
+          </g>
+          <rect x="84" y="14" width="4" height="60" fill="#225eaa" opacity="0.85"/>
+        </svg></div>
+        <div class="glass-info">
+          <div class="glass-name">Rw 33 dB</div>
+          <div class="glass-desc">Wohnstraßen · gelegentlicher Verkehr</div>
         </div>
+        <div class="glass-check"><i class="ms f">check</i></div>
       </div>
-      <div class="oc" data-v="rw-38" onclick="pick(this,'schall')">
-        <div class="ora"></div>
-        <div>
-          <div class="olabel">Schallschutz Rw 38 dB</div>
-          <div class="osub">Spürbare Dämpfung für Hauptstraßen, Bahnnähe oder belebte Innenstadt.</div>
+      <div class="glass-card" data-v="rw-38" onclick="pick(this,'schall')">
+        <div class="glass-vis"><svg viewBox="0 0 130 88" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+          <defs><linearGradient id="vg-s38" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e8f1f9"/><stop offset="100%" stop-color="#9ac0d8"/></linearGradient></defs>
+          <rect width="130" height="88" fill="url(#vg-s38)"/>
+          <g transform="translate(28,44)" fill="none" stroke="#225eaa" stroke-width="2.2" stroke-linecap="round">
+            <circle cx="0" cy="0" r="7" fill="#225eaa" stroke="none"/>
+            <path d="M 12 -7 Q 20 -8 20 0 Q 20 8 12 7"/>
+            <path d="M 22 -12 Q 34 -14 34 0 Q 34 14 22 12" opacity="0.35"/>
+          </g>
+          <rect x="78" y="10" width="5" height="68" fill="#225eaa" opacity="0.9"/>
+          <rect x="86" y="10" width="5" height="68" fill="#225eaa" opacity="0.9"/>
+        </svg></div>
+        <div class="glass-info">
+          <div class="glass-name">Rw 38 dB</div>
+          <div class="glass-desc">Hauptstraße · Bahn · belebte Innenstadt</div>
         </div>
+        <div class="glass-check"><i class="ms f">check</i></div>
       </div>
-      <div class="oc" data-v="rw-44" onclick="pick(this,'schall')">
-        <div class="ora"></div>
-        <div>
-          <div class="olabel">Schallschutz Rw 44 dB</div>
-          <div class="osub">Maximaler Lärmschutz für Flughafennähe, Autobahn oder stark frequentierte Strecken.</div>
+      <div class="glass-card" data-v="rw-44" onclick="pick(this,'schall')">
+        <div class="glass-vis"><svg viewBox="0 0 130 88" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+          <defs><linearGradient id="vg-s44" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e8f1f9"/><stop offset="100%" stop-color="#7faecc"/></linearGradient></defs>
+          <rect width="130" height="88" fill="url(#vg-s44)"/>
+          <g transform="translate(24,44)" fill="none" stroke="#225eaa" stroke-width="2.2" stroke-linecap="round">
+            <circle cx="0" cy="0" r="7" fill="#225eaa" stroke="none"/>
+            <path d="M 12 -7 Q 20 -8 20 0 Q 20 8 12 7" opacity="0.4"/>
+          </g>
+          <rect x="64" y="8" width="6" height="72" fill="#225eaa"/>
+          <rect x="74" y="8" width="6" height="72" fill="#225eaa"/>
+          <rect x="84" y="8" width="6" height="72" fill="#225eaa"/>
+          <path d="M 100 44 l 14 -14 v 28 z" fill="#225eaa" opacity="0.9"/>
+        </svg></div>
+        <div class="glass-info">
+          <div class="glass-name">Rw 44 dB · Maximum</div>
+          <div class="glass-desc">Flughafen · Autobahn · stark frequentiert</div>
         </div>
+        <div class="glass-check"><i class="ms f">check</i></div>
       </div>
     </div>
 
-    <!-- D) SICHERHEITSGLAS -->
+    <!-- C) SICHERHEITSGLAS — visuelle Glas-Querschnitte zeigen Aufbau & Schutz-Level -->
     <div class="sec-t">Sicherheitsglas</div>
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-      <div class="oc sel" data-v="kein" onclick="pick(this,'sicherGlas')">
-        <div class="ora"></div>
-        <div>
-          <div class="olabel">Kein Sicherheitsglas</div>
-          <div class="osub">Standard-Floatglas — ausreichend für normale Wohnsituationen ohne erhöhtes Risiko.</div>
+    <div class="glass-grid">
+      <div class="glass-card sel" data-v="kein" onclick="pick(this,'sicherGlas')">
+        <div class="glass-vis"><svg viewBox="0 0 130 88" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+          <defs><linearGradient id="vg-k0" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e8f1f9"/><stop offset="100%" stop-color="#bcd6e8"/></linearGradient></defs>
+          <rect width="130" height="88" fill="url(#vg-k0)"/>
+          <rect x="44" y="14" width="42" height="60" fill="#76a9fa" opacity="0.45" stroke="#225eaa" stroke-width="1.5"/>
+          <line x1="50" y1="20" x2="80" y2="68" stroke="#225eaa" stroke-width="0.8" opacity="0.5"/>
+        </svg></div>
+        <div class="glass-info">
+          <div class="glass-name">Standard-Floatglas</div>
+          <div class="glass-desc">Normale Wohnsituation · ohne Sicherheitsglas</div>
         </div>
+        <div class="glass-check"><i class="ms f">check</i></div>
       </div>
-      <div class="oc" data-v="esg" onclick="pick(this,'sicherGlas')">
-        <div class="ora"></div>
-        <div>
-          <div class="olabel">ESG (Einscheibensicherheitsglas)</div>
-          <div class="osub">Thermisch gehärtetes Glas. Zerbricht in kleine stumpfe Krümel statt scharfer Scherben — Verletzungsschutz.</div>
+      <div class="glass-card" data-v="esg" onclick="pick(this,'sicherGlas')">
+        <div class="glass-vis"><svg viewBox="0 0 130 88" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+          <defs><linearGradient id="vg-esg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e8f1f9"/><stop offset="100%" stop-color="#aacde2"/></linearGradient></defs>
+          <rect width="130" height="88" fill="url(#vg-esg)"/>
+          <rect x="44" y="14" width="42" height="60" fill="#76a9fa" opacity="0.4" stroke="#225eaa" stroke-width="1.5"/>
+          <g fill="#225eaa" opacity="0.85">
+            <circle cx="50" cy="22" r="1.5"/><circle cx="56" cy="28" r="1.5"/><circle cx="62" cy="22" r="1.5"/>
+            <circle cx="68" cy="30" r="1.5"/><circle cx="74" cy="22" r="1.5"/><circle cx="80" cy="28" r="1.5"/>
+            <circle cx="50" cy="38" r="1.5"/><circle cx="58" cy="42" r="1.5"/><circle cx="66" cy="38" r="1.5"/>
+            <circle cx="74" cy="44" r="1.5"/><circle cx="80" cy="38" r="1.5"/>
+            <circle cx="52" cy="54" r="1.5"/><circle cx="60" cy="58" r="1.5"/><circle cx="68" cy="54" r="1.5"/>
+            <circle cx="76" cy="58" r="1.5"/><circle cx="54" cy="68" r="1.5"/><circle cx="64" cy="66" r="1.5"/><circle cx="72" cy="68" r="1.5"/>
+          </g>
+        </svg></div>
+        <div class="glass-info">
+          <div class="glass-name">ESG · Einscheibensicherheit</div>
+          <div class="glass-desc">Zerbricht in stumpfe Krümel · Verletzungsschutz</div>
         </div>
+        <div class="glass-check"><i class="ms f">check</i></div>
       </div>
-      <div class="oc" data-v="vsg" onclick="pick(this,'sicherGlas')">
-        <div class="ora"></div>
-        <div>
-          <div class="olabel">VSG (Verbundsicherheitsglas)</div>
-          <div class="osub">Zwei Scheiben mit reißfester Folie verbunden. Bei Bruch bleiben Splitter haften — Pflicht bei großen bodentiefen Fenstern und Balkontüren.</div>
+      <div class="glass-card" data-v="vsg" onclick="pick(this,'sicherGlas')">
+        <div class="glass-vis"><svg viewBox="0 0 130 88" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+          <defs><linearGradient id="vg-vsg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e8f1f9"/><stop offset="100%" stop-color="#9ac4dd"/></linearGradient></defs>
+          <rect width="130" height="88" fill="url(#vg-vsg)"/>
+          <rect x="40" y="14" width="20" height="60" fill="#76a9fa" opacity="0.55" stroke="#225eaa" stroke-width="1.2"/>
+          <rect x="70" y="14" width="20" height="60" fill="#76a9fa" opacity="0.55" stroke="#225eaa" stroke-width="1.2"/>
+          <rect x="60" y="14" width="10" height="60" fill="#c9a84c" opacity="0.85"/>
+          <line x1="65" y1="18" x2="65" y2="70" stroke="#fff" stroke-width="0.8" opacity="0.7"/>
+        </svg></div>
+        <div class="glass-info">
+          <div class="glass-name">VSG · Verbundsicherheit</div>
+          <div class="glass-desc">Reißfeste Folie · Splitter haften · bodentief</div>
         </div>
+        <div class="glass-check"><i class="ms f">check</i></div>
       </div>
-      <div class="oc" data-v="vsg-p4a" onclick="pick(this,'sicherGlas')">
-        <div class="ora"></div>
-        <div>
-          <div class="olabel">VSG P4A (Durchwurfhemmend)</div>
-          <div class="osub">Verstärktes Sicherheitsglas, geprüft nach EN 356. Hält Wurfgegenständen stand — Pflicht für RC2/RC3 Einbruchschutz.</div>
+      <div class="glass-card" data-v="vsg-p4a" onclick="pick(this,'sicherGlas')">
+        <div class="glass-vis"><svg viewBox="0 0 130 88" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+          <defs><linearGradient id="vg-p4a" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e8f1f9"/><stop offset="100%" stop-color="#7faecc"/></linearGradient></defs>
+          <rect width="130" height="88" fill="url(#vg-p4a)"/>
+          <rect x="40" y="14" width="20" height="60" fill="#76a9fa" opacity="0.6" stroke="#225eaa" stroke-width="1.2"/>
+          <rect x="70" y="14" width="20" height="60" fill="#76a9fa" opacity="0.6" stroke="#225eaa" stroke-width="1.2"/>
+          <rect x="60" y="14" width="10" height="60" fill="#c9a84c"/>
+          <path d="M 65 8 L 80 14 L 80 36 Q 80 50 65 56 Q 50 50 50 36 L 50 14 Z" fill="#225eaa" opacity="0.92"/>
+          <path d="M 60 32 l 4 4 l 8 -10" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg></div>
+        <div class="glass-info">
+          <div class="glass-name">VSG P4A · Durchwurfhemmend</div>
+          <div class="glass-desc">EN 356 geprüft · Pflicht bei RC2/RC3</div>
         </div>
+        <div class="glass-check"><i class="ms f">check</i></div>
       </div>
     </div>
 
     <div class="info mt-3">
       <i class="ms f" style="color:var(--c-primary);font-size:20px;flex-shrink:0">info</i>
-      <div>Alle vier Aspekte (Wärme · Warme Kante · Schall · Sicherheit) sind frei kombinierbar. Drutex-Qualitätsglas in allen Varianten.</div>
+      <div>Alle drei Aspekte (Wärme · Schall · Sicherheit) sind frei kombinierbar. Drutex-Qualitätsglas in allen Varianten.</div>
     </div>
     <button type="button" onclick="openS(8)" class="w-full mt-4 flex items-center justify-center gap-2 font-bold py-3 rounded-full text-white text-sm" style="background:var(--c-primary);font-family:'Plus Jakarta Sans',sans-serif">
       <i class="ms">arrow_forward</i> Weiter zum Glasdekor
@@ -5579,7 +5682,7 @@ function addCurrentToCart() {
   saveCart();
   resetConfigForNextItem();
   upSidebar();
-  setTimeout(()=>openS(1), 200);
+  _showProductHero();
 }
 function removeFromCart(id) {
   cart = cart.filter(i => i.id !== id);
@@ -5591,10 +5694,8 @@ function clearCart() {
   saveCart();
   upSidebar();
 }
-// Zurück zur Produktauswahl — reset, Hero zeigen, body-class entfernen
-function backToProductSelect() {
-  if (S.prod && !confirm('Bisherige Auswahlen werden zurückgesetzt. Anderes Produkt wählen?')) return;
-  resetConfigForNextItem();
+// Produkt-Hero wieder zeigen (gemeinsame Logik für Back-Button + "Weiteres Element")
+function _showProductHero() {
   const hero = document.getElementById('prod-hero');
   if (hero) hero.style.display = '';
   const s1 = document.getElementById('s1');
@@ -5606,8 +5707,14 @@ function backToProductSelect() {
   const msb = document.getElementById('mobile-step-bar');
   if (msb) msb.classList.remove('msb-show');
   document.body.classList.remove('has-prod');
-  // Scroll nach oben zum Hero
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Zurück zur Produktauswahl — reset, Hero zeigen, body-class entfernen
+function backToProductSelect() {
+  if (S.prod && !confirm('Bisherige Auswahlen werden zurückgesetzt. Anderes Produkt wählen?')) return;
+  resetConfigForNextItem();
+  _showProductHero();
 }
 
 function resetConfigForNextItem() {
