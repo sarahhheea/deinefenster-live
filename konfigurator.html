@@ -352,10 +352,16 @@
 
     /* Step-Body Card-Grids: einheitliche fixe Card-Breite 165px (wie Farb-Karten).
        Greift bei allen Grids die .oc, .fk oder .glass-card als direkte Kinder haben. */
-    /* 140px-Grid NUR für Bild-Karten (Card hat direkten <img>) — z.B. Profil, Flügelaufteilung, Öffnungsart, Griffe.
-       Text-Cards (Sicherheit, Rahmenverbreiterung etc.) behalten ihren Standard-Tailwind-Grid. */
+    /* 140px-Grid für Bild-Karten — Profil, Flügelaufteilung, Griffe.
+       Wichtig: separate Rules damit ID-Selektoren auch greifen falls :has-Selektoren
+       vom Browser nicht unterstützt werden (würde sonst die ganze Rule invalidieren). */
     #profil-grid,
-    #fluegel-grid,
+    #fluegel-grid {
+      display: grid !important;
+      grid-template-columns: repeat(auto-fill, 140px) !important;
+      gap: 14px !important;
+      justify-content: start !important;
+    }
     .sb .grid:has(> .oc:has(> img)),
     .sb .grid:has(> .fk:has(> img)),
     .sb .grid:has(> .griff-opt),
