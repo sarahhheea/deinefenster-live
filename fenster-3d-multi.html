@@ -533,10 +533,11 @@ function buildWindow(spec) {
 
     // Griff je nach sashState
     if (!sashState || sashState === 'fest') return;
-    // STULPFLUEGEL: kein aussen sichtbarer Griff (Treibstange/Reitergriff nur innen)
-    if (isStulpStandFluegel && (view === 'aussen')) return;
+    // STULPFLUEGEL: kein sichtbarer Griff (auch innen) — Standflügel wird über Hauptflügel verriegelt
+    if (isStulpStandFluegel) return;
     const isKipp = sashState === 'kipp';
-    let isLeft = sashState === 'dreh-l' || sashState === 'dk-l';   // Layman-Konvention: dk-l = Griff links
+    // DIN-Konvention: 'dk-l' = Scharnier links → Griff rechts; 'dk-r' = Scharnier rechts → Griff links
+    let isLeft = sashState === 'dreh-r' || sashState === 'dk-r';
     // Stulp-Bedienfluegel: Griff zur Mitte (Stulp-Profil), nicht zur Aussenfalz
     if (isStulpBedienFluegel && !isKipp) isLeft = !isLeft;
     let hx, hy;

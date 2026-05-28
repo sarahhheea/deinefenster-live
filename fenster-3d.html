@@ -665,6 +665,69 @@ function setView(v) {
     if (node.userData && node.userData.isHinge) node.visible = !hideOnOutside;
   });
 }
+// setSashTyp: Öffnungsart-spezifisches Layout
+// 'fest'  → kein Griff, keine sichtbaren Scharniere
+// 'kipp'  → Griff oben mittig, Scharniere unten (Fenster kippt nach innen)
+// 'dreh-l'/'dreh-r'/'dk-l'/'dk-r' → Standard seitlich (Griff rechts default, side mirror)
+let _currentSashTyp = 'dk-r';
+let _handleOrigState = null;  // {pos, rot} per handleObject
+let _hingeRefs = null;         // {obj, origPos, origRot} per hinge
+function _captureOrigState() {
+  _handleOrigState = handleObjects.map(m => ({
+    pos: m.position.clone(),
+    rot: m.rotation.clone()
+  }));
+  _hingeRefs = [];
+  winGroup.traverse(node => {
+    if (node.userData && node.userData.isHinge) {
+      _hingeRefs.push({obj: node, pos: node.position.clone(), rot: node.rotation.clone()});
+    }
+  });
+}
+function setSashTyp(typ) {
+  _currentSashTyp = typ || 'dk-r';
+  if (!_handleOrigState) _captureOrigState();
+
+  // Reset zu Original-Positionen
+  handleObjects.forEach((m, i) => {
+    if (_handleOrigState[i]) {
+      m.position.copy(_handleOrigState[i].pos);
+      m.rotation.copy(_handleOrigState[i].rot);
+    }
+  });
+  _hingeRefs.forEach(h => {
+    h.obj.position.copy(h.pos);
+    h.obj.rotation.copy(h.rot);
+  });
+
+  const hideOnOutside = (_currentView === 'aussen');
+  const isFest = (typ === 'fest');
+  // Bei Fest: keine Hardware sichtbar
+  handleObjects.forEach(m => m.visible = !isFest && !hideOnOutside);
+  _hingeRefs.forEach(h => h.obj.visible = !isFest && !hideOnOutside);
+
+  if (typ === 'kipp') {
+    // Griff von Rechts-Mitte (SW-margin, SH/2) → Oben-Mitte (SW/2, SH-margin)
+    // Gleicher Offset für alle handleObjects (Schild + Tube + Olive)
+    const dxHandle = -(SW / 2 - FST * 0.52); // -x shift: nach links zur Mitte
+    const dyHandle =  (SH / 2 - FST * 0.52); // +y shift: nach oben
+    handleObjects.forEach(m => {
+      m.position.x += dxHandle;
+      m.position.y += dyHandle;
+      m.rotation.z = -Math.PI / 2; // Griff um 90° drehen (jetzt horizontal)
+    });
+    // Scharniere von Links-Seitlich (x0=0) auf Unten-Seitlich verschieben
+    // Original: position.x ≈ 0, position.y ≈ {SH-0.150, 0.150} (oben+unten links)
+    // Neu: position.x ≈ {SW-0.150, 0.150} (links+rechts unten), position.y ≈ 0
+    _hingeRefs.forEach((h, idx) => {
+      // Verteile die zwei Scharniere auf unten-links und unten-rechts
+      h.obj.position.x = (idx % 2 === 0) ? FW - 0.150 - FW/2 : 0.150 - FW/2;
+      h.obj.position.y = 0.012; // ganz unten
+      h.obj.rotation.z = Math.PI / 2; // Scharnier horizontal
+    });
+  }
+}
+
 const _urlSide = new URLSearchParams(location.search).get('side') || 'r';
 setSide(_urlSide);
 const _urlView = new URLSearchParams(location.search).get('view') || 'innen';
@@ -1114,6 +1177,7 @@ window.addEventListener('message', (e) => {
     setGlass(d.glass || 'klar');
     if (d.side) setSide(d.side);
     if (d.view) setView(d.view);
+    if (d.sashTyp) setSashTyp(d.sashTyp);
   }
 });
 
