@@ -1824,6 +1824,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
         <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none" style="background:#76a9fa;color:#001b3d">NEU</span>
       </a>
       <a href="faq.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">FAQ</a>
+      <a href="ratgeber/index.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Ratgeber</a>
       <a href="glossar.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Glossar</a>
       <a href="ueber-uns.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Über uns</a>
       <a href="kontakt.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Kontakt</a>
@@ -1862,6 +1863,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       <a href="konfigurator.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Konfigurator</a>
       <a href="shop.html" class="text-white font-semibold text-lg py-2 border-b border-white/10 flex items-center gap-2">Shop <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style="background:#76a9fa;color:#001b3d">NEU</span></a>
       <a href="faq.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">FAQ</a>
+      <a href="ratgeber/index.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Ratgeber</a>
       <a href="glossar.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Glossar</a>
       <a href="ueber-uns.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Über uns</a>
       <a href="kontakt.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Kontakt</a>
@@ -4524,7 +4526,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
     <div class="badge" id="b9s"><i class="ms" style="font-size:16px">pan_tool</i></div>
     <div class="flex-1">
       <div class="slabel">Schiebetür-Griff</div>
-      <div class="sdesc" id="d9s">Innen-Stoßgriff wählen (Außen folgt)</div>
+      <div class="sdesc" id="d9s">Innen- und Außen-Stoßgriff wählen</div>
     </div>
     <i class="ms chev">expand_more</i>
   </div>
@@ -5501,11 +5503,16 @@ const P = {
     'stoss-q45r':    { name:'Stoßgriff Q45R (Edelstahl)', add:0, group:'Stoßgriff Edelstahl', img:'img/drutex-griffe/stoss-q45r.webp' },
     'stoss-z1':      { name:'Stoßgriff Z1 (Edelstahl)',  add:0, group:'Stoßgriff Edelstahl', img:'img/drutex-griffe/stoss-z1.webp' },
   },
-  // IGLO-HS Innen-Griff = Drutex Stoßgriff M2. Genau 2 Optionen für die Innenseite.
-  // Außen-Griff folgt in einer späteren Iteration. S.hstGriff bezieht sich nur auf Innen.
+  // IGLO-HS Innen-Griff = Drutex Stoßgriff M2 (vorstehender U-Griff, 2 Farben).
   hstGriff: {
     'weiss': { name:'Stoßgriff M2 (weiß)', add:0, img:'img/drutex-griffe/stoss-m2-weiss.webp' },
     'braun': { name:'Stoßgriff M2 (braun)', add:0, img:'img/drutex-griffe/stoss-m2-braun.webp' },
+  },
+  // IGLO-HS Außen-Griff = Drutex Smart Slide (versenkter Flachgriff, 3 Farben).
+  hstGriffAussen: {
+    'silber':  { name:'Smart Slide · Silber',  fullName:'Smart Slide (Silber)',         add:0, img:'img/drutex-griffe/smart-slide-silber.webp' },
+    'ral9016': { name:'Smart Slide · Weiß',    fullName:'Smart Slide (RAL 9016 Weiß)',  add:0, img:'img/drutex-griffe/smart-slide-9016.webp' },
+    'ral9005': { name:'Smart Slide · Schwarz', fullName:'Smart Slide (RAL 9005 Schwarz)', add:0, img:'img/drutex-griffe/smart-slide-9005.webp' },
   },
 };
 
@@ -5531,7 +5538,8 @@ const S = {
   roll:'ohne', rollSeite:'rechts', rollKasten:'175',  // W8 Fix (Insekt entfernt)
   tuerGriffInnen:'drueck-weiss', tuerGriffAussen:'htg-30a',  // Sarah 21.04.2026: 4×14
   pskKammer:'iglo5',  // Sarah 21.04.2026: Kammer-System nur für PSK relevant
-  hstGriff:'weiss',  // Innen-Stoßgriff IGLO-HS
+  hstGriff:'weiss',           // Innen-Stoßgriff IGLO-HS
+  hstGriffAussen:'silber',    // Außen-Smart-Slide IGLO-HS
   sicher:'wk1',
   tuerModell: null,
   hstSchwelle:'standard', hstTeilung:'2-teilig', hstLauf:'rechts',  // Fix W9
@@ -5765,6 +5773,7 @@ function resetConfigForNextItem() {
   S.tuerModell = null;
   S.tuerGriffInnen = 'drueck-weiss'; S.tuerGriffAussen = 'htg-30a';
   S.hstGriff = 'weiss';
+  S.hstGriffAussen = 'silber';
   S.hstSchwelle = 'standard'; S.hstTeilung = '2-teilig'; S.hstLauf = 'rechts';
   S.balkonSchwelle = 'alu-20';
   S.pskKammer = 'iglo5';  // Sarah 21.04.2026
@@ -6179,13 +6188,13 @@ function buildSzButtons() {
   wrap.innerHTML = list.map(([b,h]) => `<button class="szb" onclick="setSz(${b},${h})">${b}×${h}</button>`).join('');
 }
 
-// IGLO-HS Innen-Griff — genau 2 Bild-Karten (Drutex Stoßgriff M2 weiß/braun).
-// Außen-Griff-Sektion ist Platzhalter — wird in einer späteren Iteration ergänzt.
+// IGLO-HS Griffauswahl: Innen-Stoßgriff M2 (2 Optionen) + Außen-Smart-Slide (3 Optionen).
+// Beide Sektionen mit echten Drutex-Produktfotos.
 function buildHstGriff() {
   const grid = document.getElementById('hst-griff-grid');
   if (!grid) return;
-  const innenCard = (k, v) => `
-    <div class="oc${S.hstGriff===k?' sel':''}" data-v="${k}" onclick="pickHstGriff(this)" style="flex-direction:column;align-items:stretch;text-align:center;padding:12px;gap:8px">
+  const mkCard = (k, v, selected, onclickName) => `
+    <div class="oc${selected?' sel':''}" data-v="${k}" onclick="${onclickName}(this)" style="flex-direction:column;align-items:stretch;text-align:center;padding:12px;gap:8px">
       <div style="background:#0c1930;border-radius:8px;padding:8px;display:flex;align-items:center;justify-content:center;min-height:140px">
         <img src="${v.img}" alt="${v.name}" loading="lazy" decoding="async" style="max-width:120px;max-height:140px;object-fit:contain;display:block"/>
       </div>
@@ -6197,13 +6206,12 @@ function buildHstGriff() {
   grid.innerHTML = `
     <div class="col-span-full"><div class="sec-t" style="margin-top:0">Innen-Griff</div>
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
-        ${Object.entries(P.hstGriff).map(([k,v])=>innenCard(k,v)).join('')}
+        ${Object.entries(P.hstGriff).map(([k,v])=>mkCard(k,v,S.hstGriff===k,'pickHstGriff')).join('')}
       </div>
     </div>
-    <div class="col-span-full mt-3"><div class="sec-t">Außen-Griff</div>
-      <div class="info" style="background:rgba(118,169,250,0.06);border-left:4px solid #76a9fa">
-        <i class="ms f" style="color:var(--c-primary);font-size:20px;flex-shrink:0">schedule</i>
-        <div style="font-size:13px">Die Außen-Stoßgriff-Auswahl folgt in Kürze. Falls Sie bereits eine Vorliebe haben, schreiben Sie diese gerne ins Anmerkungs-Feld am Ende.</div>
+    <div class="col-span-full mt-4"><div class="sec-t">Außen-Griff</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">
+        ${Object.entries(P.hstGriffAussen).map(([k,v])=>mkCard(k,v,S.hstGriffAussen===k,'pickHstGriffAussen')).join('')}
       </div>
     </div>`;
 }
@@ -6211,13 +6219,32 @@ function buildHstGriff() {
 function pickHstGriff(el) {
   const v = el.dataset.v;
   S.hstGriff = v;
-  document.querySelectorAll('#hst-griff-grid .oc').forEach(c => c.classList.remove('sel'));
+  // Nur die Innen-Karten deselecten (gleiches Parent-Grid)
+  el.parentElement.querySelectorAll('.oc').forEach(c => c.classList.remove('sel'));
   el.classList.add('sel');
-  document.getElementById('d9s').textContent = P.hstGriff[v]?.name || v;
+  _updateHstGriffSummary();
+  upSidebar(); drawPrev();
+}
+
+function pickHstGriffAussen(el) {
+  const v = el.dataset.v;
+  S.hstGriffAussen = v;
+  el.parentElement.querySelectorAll('.oc').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+  _updateHstGriffSummary();
+  upSidebar(); drawPrev();
+}
+
+// Header-Summary für Step 9s: kombiniert Innen + Außen
+function _updateHstGriffSummary() {
+  const innen = P.hstGriff[S.hstGriff]?.name || S.hstGriff;
+  const aussen = P.hstGriffAussen[S.hstGriffAussen]?.name || S.hstGriffAussen;
+  const d9s = document.getElementById('d9s');
+  if (d9s) d9s.textContent = `Innen: ${innen} · Außen: ${aussen}`;
   const b = document.getElementById('b9s');
   if (b) b.innerHTML = '<i class="ms f" style="font-size:16px">check</i>';
-  setTimeout(()=>openS(10), 200);
-  upSidebar(); drawPrev();
+  // Beide Auswahlen sind getroffen → mkDone
+  if (typeof mkDone === 'function') mkDone('9s');
 }
 
 // Sarah-bestätigt 21.04.2026: Haustür-Türgriff als 2-Stufen-Auswahl (Innen × Außen)
@@ -8869,7 +8896,8 @@ function upSidebar() {
     if(S.tuerGriffInnen  && isTouched('tuerGriffInnen'))  rowsList.push(['Griff innen',  P.tuerGriffInnen?.[S.tuerGriffInnen]?.name||S.tuerGriffInnen]);
     if(S.tuerGriffAussen && isTouched('tuerGriffAussen')) rowsList.push(['Griff außen',  P.tuerGriffAussen?.[S.tuerGriffAussen]?.name||S.tuerGriffAussen]);
   } else if(S.prod==='hst') {
-    if(S.hstGriff && isTouched('hstGriff')) rowsList.push(['Griff', P.hstGriff?.[S.hstGriff]?.name||S.hstGriff]);
+    if(S.hstGriff && isTouched('hstGriff')) rowsList.push(['Griff innen', P.hstGriff?.[S.hstGriff]?.name||S.hstGriff]);
+    if(S.hstGriffAussen && isTouched('hstGriffAussen')) rowsList.push(['Griff außen', P.hstGriffAussen?.[S.hstGriffAussen]?.name||S.hstGriffAussen]);
   } else if(S.griff && isTouched('griff')) {
     rowsList.push(['Griff', P.griff?.[S.griff]?.name||S.griff]);
   }
@@ -8969,7 +8997,10 @@ function upFinalSum(rows,tot) {
     // Sarah 21.04.2026: Griff produkt-spezifisch anzeigen
     ...(S.prod !== 'haustuere' && S.prod !== 'hst' ? [['Griff', S.griff?P.griff[S.griff]?.name||S.griff:'–']] : []),
     ...(S.prod === 'haustuere' ? [['Türgriff Innen', P.tuerGriffInnen[S.tuerGriffInnen]?.name||S.tuerGriffInnen], ['Türgriff Außen', P.tuerGriffAussen[S.tuerGriffAussen]?.name||S.tuerGriffAussen]] : []),
-    ...(S.prod === 'hst'       ? [['Schiebetür-Griff', S.hstGriff?P.hstGriff[S.hstGriff]?.name||S.hstGriff:'–']] : []),
+    ...(S.prod === 'hst'       ? [
+      ['Griff innen', S.hstGriff?P.hstGriff[S.hstGriff]?.name||S.hstGriff:'–'],
+      ['Griff außen', S.hstGriffAussen?P.hstGriffAussen[S.hstGriffAussen]?.name||S.hstGriffAussen:'–']
+    ] : []),
     ['Einbruchschutz', S.sicher?P.sicher[S.sicher]?.name||S.sicher:'–'],
     ...(S.prod !== 'haustuere' && S.prod !== 'hst' ? [
       ['Rolladen', S.roll==='ohne' ? 'Kein Rolladen' : (P.roll[S.roll]?.name||S.roll) + ' · Kasten '+S.rollKasten+' mm'],
