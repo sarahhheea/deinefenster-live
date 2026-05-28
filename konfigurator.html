@@ -352,20 +352,27 @@
 
     /* Step-Body Card-Grids: einheitliche fixe Card-Breite 165px (wie Farb-Karten).
        Greift bei allen Grids die .oc, .fk oder .glass-card als direkte Kinder haben. */
-    /* Fester Card-Grid für alle Auswahl-Container — greift auch ohne .grid Klasse */
+    /* 140px-Grid NUR für Bild-Karten (Card hat direkten <img>) — z.B. Profil, Flügelaufteilung, Öffnungsart, Griffe.
+       Text-Cards (Sicherheit, Rahmenverbreiterung etc.) behalten ihren Standard-Tailwind-Grid. */
     #profil-grid,
     #fluegel-grid,
-    #hst-griff-grid,
-    #tuer-griff-grid,
-    .sb .grid:has(> .oc),
-    .sb .grid:has(> .fk),
-    .sb .grid:has(> .glass-card),
-    .sb .glass-grid,
-    .sb div:has(> .oc),
-    .sb div:has(> .fk) {
+    .sb .grid:has(> .oc:has(> img)),
+    .sb .grid:has(> .fk:has(> img)),
+    .sb .grid:has(> .griff-opt),
+    .sb div:has(> .oc:has(> img)),
+    .sb div:has(> .fk:has(> img)) {
       display: grid !important;
       grid-template-columns: repeat(auto-fill, 140px) !important;
       gap: 14px !important;
+      justify-content: start !important;
+    }
+    /* Glas-Cards: horizontales Bild+Text-Layout, breitere Cards */
+    .sb .glass-grid,
+    .sb .grid:has(> .glass-card),
+    .sb div:has(> .glass-card) {
+      display: grid !important;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 280px)) !important;
+      gap: 12px !important;
       justify-content: start !important;
     }
 
