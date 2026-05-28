@@ -815,22 +815,31 @@ function setColor(key) {
   document.getElementById('currentLabel').textContent = colorObj?.name || key;
 }
 
-// Griff/Scharniere an Rahmenfarbe anpassen — bei hellen Tönen weiß-matt, sonst Chrom
+// Griff/Scharniere an Rahmenfarbe anpassen — bei hellen Tönen DEUTLICH dunkler für Sichtbarkeit
 function applyHardwareColor(frameColor, frameLum) {
-  if (frameLum >= 0.55) {
-    // Helle Rahmen: Hardware ~15 % dunkler + leichte Aluminium-Anmutung
-    // → klare Kontur zum Rahmen, wirkt aber wie pulverbeschichtetes Weiß
-    const hardwareTone = frameColor.clone().multiplyScalar(0.85);
-    handleMat.color.copy(hardwareTone);
-    handleMat.roughness = 0.32;
-    handleMat.metalness = 0.10;
-    handleMat.envMapIntensity = 0.50;
-    hingeMat.color.copy(hardwareTone);
-    hingeMat.roughness = 0.42;
-    hingeMat.metalness = 0.08;
-    hingeMat.envMapIntensity = 0.40;
+  if (frameLum >= 0.6) {
+    // Sehr helle Rahmen (Weiß, Cremeweiß): Griff in mittel-grau-Aluminium für klaren Kontrast
+    // Kein Tönen mit Rahmenfarbe — sonst zu hell und unsichtbar
+    handleMat.color.setRGB(0.43, 0.47, 0.51);
+    handleMat.roughness = 0.30;
+    handleMat.metalness = 0.55;
+    handleMat.envMapIntensity = 1.0;
+    hingeMat.color.setRGB(0.40, 0.43, 0.46);
+    hingeMat.roughness = 0.45;
+    hingeMat.metalness = 0.30;
+    hingeMat.envMapIntensity = 0.6;
+  } else if (frameLum >= 0.35) {
+    // Mittel-helle Rahmen: Aluminium-Optik mit mittlerem Kontrast
+    handleMat.color.setHex(0xb0b6bd);
+    handleMat.roughness = 0.22;
+    handleMat.metalness = 0.85;
+    handleMat.envMapIntensity = 2.0;
+    hingeMat.color.setHex(0xa8aeb4);
+    hingeMat.roughness = 0.50;
+    hingeMat.metalness = 0.10;
+    hingeMat.envMapIntensity = 1.5;
   } else {
-    // Dunkle Rahmen: Griff Chrom-Silber, Scharnierkappen leicht dunkler grau
+    // Dunkle Rahmen: Standard Chrom-Silber
     handleMat.color.setHex(0xd8dde0);
     handleMat.roughness = 0.18;
     handleMat.metalness = 0.92;
