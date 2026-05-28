@@ -217,8 +217,6 @@
           <div style="font-size:15px;font-weight:700;color:#161c27;margin-bottom:10px">Element ${idx + 1}: ${prodName(item.config.prod)}</div>
           <table width="100%" cellpadding="0" cellspacing="0">
             ${configRows(item.config).map(([k, v]) => konfRow(k, v)).join('')}
-            ${konfRow('Einzelpreis', fmt(item.unitPrice))}
-            ${konfRow('<strong>Zwischensumme</strong>', `<strong>${fmt(item.subtotal)}</strong>`)}
           </table>
         </div>`;
 
@@ -265,10 +263,7 @@
   <tr><td style="background:#fff;padding:0 36px 28px">
     <div style="background:#112455;border-radius:12px;padding:20px 24px">
     <table width="100%" cellpadding="0" cellspacing="0"><tr>
-      <td style="font-size:14px;color:rgba(255,255,255,.6)">Gesamtpreis inkl. MwSt. (kalkuliert)</td>
-      <td style="text-align:right;font-size:28px;font-weight:800;color:#fff">${tot} €</td>
-    </tr><tr>
-      <td colspan="2" style="font-size:12px;color:rgba(255,255,255,.4)">Zwischensumme ${fmt(subtotal)} + Lieferkosten ${ship.toFixed(2)} €</td>
+      <td style="font-size:14px;color:rgba(255,255,255,.85);font-weight:600">Persönliches Angebot folgt per E-Mail</td>
     </tr></table></div>
   </td></tr>
 </table></td></tr></table></body></html>`;
@@ -318,8 +313,8 @@
             <td style="padding:11px 20px;color:#1a2744;font-size:13px;font-weight:600;">${cart.length} Element${cart.length !== 1 ? 'e' : ''}</td>
           </tr>
           <tr style="background:#fcfdff;">
-            <td style="padding:11px 20px;color:#6b7a99;font-size:13px;">Richtpreis</td>
-            <td style="padding:11px 20px;color:#1a2744;font-size:13px;font-weight:600;">${tot}&nbsp;€ inkl. MwSt.</td>
+            <td style="padding:11px 20px;color:#6b7a99;font-size:13px;">Angebot</td>
+            <td style="padding:11px 20px;color:#1a2744;font-size:13px;font-weight:600;">Folgt persönlich per E-Mail</td>
           </tr>
         </table>
       </td></tr>
@@ -368,7 +363,7 @@
         ).join('\n');
         const konfigDetail = cart.map((item, idx) => {
           const rows = configRows(item.config).map(([k, v]) => `   ${k}: ${v.replace(/<[^>]+>/g, '')}`).join('\n');
-          return `═ Element ${idx + 1}: ${prodName(item.config.prod)} ═\n${rows}\n   Einzelpreis: ${fmt(item.unitPrice)}\n   Zwischensumme: ${fmt(item.subtotal)}`;
+          return `═ Element ${idx + 1}: ${prodName(item.config.prod)} ═\n${rows}`;
         }).join('\n\n');
 
         await fetch('https://api.web3forms.com/submit', {
@@ -391,7 +386,6 @@
             'Positionen (Übersicht)': positionen,
             'Konfiguration (Details)': konfigDetail,
             'Anzahl Fotos/Skizzen': (uploadedImages || []).length,
-            'Kalkulierter Preis': `${tot} €`,
           }),
         });
       } catch (e) { console.warn('Web3Forms fehlgeschlagen:', e); }
