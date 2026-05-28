@@ -350,37 +350,71 @@
     .back-to-prod .ms { font-size: 17px; line-height: 1; }
     body.has-prod .back-to-prod { display: inline-flex; }
 
-    /* Bild-Karten — Bild bündig, kein dunkler Rand.
+    /* Bild-Karten — einheitliche Größe wie Farb-Karten (.fp-item).
        Trifft Anschlag-Cards (Step 3), Flügelaufteilung-Cards (Step 2), Haustür-Karten.
        Nutzt :has() — Chrome 105+, Safari 15.4+, Firefox 121+. */
     .oc:has(> img), .fk:has(> img) {
       padding: 0 !important;
       overflow: hidden;
       gap: 0 !important;
+      background: #0e1a30 !important;
+      border: 2px solid rgba(118, 169, 250, 0.16) !important;
+      border-radius: 10px !important;
+    }
+    .oc:has(> img):hover, .fk:has(> img):hover {
+      transform: translateY(-3px);
+      border-color: rgba(118, 169, 250, 0.50) !important;
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45);
+    }
+    .oc:has(> img).sel, .fk:has(> img).sel {
+      border-color: #76a9fa !important;
+      box-shadow: 0 0 0 2px rgba(118, 169, 250, 0.42), 0 6px 18px rgba(0, 0, 0, 0.5);
     }
     .oc:has(> img) > img, .fk:has(> img) > img {
       width: 100% !important;
+      aspect-ratio: 1.05 !important;
       height: auto !important;
       max-height: none !important;
       display: block !important;
-      background: transparent !important;
+      background: #ffffff !important;
       border-radius: 0 !important;
-      object-fit: contain;
+      object-fit: contain !important;
     }
     .oc:has(> img) > .olabel,
     .oc:has(> img) > .fk-label,
     .fk:has(> img) > .fk-label {
-      padding: 8px 8px 4px !important;
+      padding: 10px 8px !important;
       margin: 0 !important;
+      font-size: 11.5px !important;
+      font-weight: 600;
+      color: rgba(232, 238, 255, 0.92);
+      background: #0e1a30;
       text-align: center;
+      min-height: 46px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1.3;
+      letter-spacing: -0.005em;
       overflow-wrap: anywhere;
       word-break: break-word;
     }
+    .oc:has(> img).sel > .olabel,
+    .oc:has(> img).sel > .fk-label,
+    .fk:has(> img).sel > .fk-label { color: #ffffff; font-weight: 700; }
     .oc:has(> img) > .fk-price,
     .fk:has(> img) > .fk-price {
-      padding: 0 8px 10px !important;
+      padding: 6px 8px !important;
       margin: 0 !important;
+      background: #3b4a66;
+      color: #ffffff;
+      font-size: 10.5px;
+      font-weight: 700;
+      text-align: center;
+      letter-spacing: 0.02em;
     }
+    .oc:has(> img).sel > .fk-price,
+    .fk:has(> img).sel > .fk-price { background: #225eaa; }
 
     /* CHECKBOX CARD */
     .cc{position:relative;display:flex;align-items:flex-start;gap:12px;border:1px solid var(--c-border);border-radius:var(--r-md);padding:16px 18px;cursor:pointer;background:var(--c-bg);transition:border-color var(--t-fast) var(--ease),background var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease)}
