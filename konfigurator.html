@@ -382,7 +382,8 @@
     }
     .oc:has(> img) > .olabel,
     .oc:has(> img) > .fk-label,
-    .fk:has(> img) > .fk-label {
+    .fk:has(> img) > .fk-label,
+    .oc:has(> img) > div:not(.fk-price) {
       padding: 10px 8px !important;
       margin: 0 !important;
       font-size: 11.5px !important;
@@ -394,11 +395,16 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      flex-direction: column;
+      gap: 2px;
       line-height: 1.3;
       letter-spacing: -0.005em;
       overflow-wrap: anywhere;
       word-break: break-word;
     }
+    .oc:has(> img) .ora { display: none !important; }
+    .oc:has(> img) .olabel { font-size: 11.5px; font-weight: 600; color: #fff; line-height: 1.3; }
+    .oc:has(> img) .osub  { font-size: 10.5px; font-weight: 500; color: rgba(232,238,255,0.55); line-height: 1.3; margin-top: 1px; }
     .oc:has(> img).sel > .olabel,
     .oc:has(> img).sel > .fk-label,
     .fk:has(> img).sel > .fk-label { color: #ffffff; font-weight: 700; }
@@ -3799,7 +3805,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
     <i class="ms chev">expand_more</i>
   </div>
   <div class="sb">
-    <div id="profil-grid" class="grid grid-cols-2 gap-2">
+    <div id="profil-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px">
       <!-- filled by JS based on product -->
     </div>
     <!-- Inhaberin-Vorgabe 21.04.2026: PSK-Schiebetür braucht zusätzlich Kammer-System-Auswahl -->
@@ -4611,25 +4617,19 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
         </div>
       </div>
       <!-- Rolladen mit Gurtwickler -->
-      <div class="oc" id="roll-card-gurt" style="flex-direction:column;align-items:stretch;padding:14px;gap:0" data-v="gurt" onclick="pick(this,'roll')">
-        <img src="img/rolladen-gurt.png" alt="Aufsatz-Rolladen mit Gurtwickler" style="width:100%;height:140px;object-fit:cover;border-radius:8px;margin-bottom:12px;display:block" loading="lazy" decoding="async">
-        <div style="display:flex;align-items:flex-start;gap:10px">
-          <div class="ora" style="margin-top:2px;flex-shrink:0"></div>
-          <div>
-            <div class="olabel">Rolladen mit Gurtwickler</div>
-            <div class="osub">Mechanisch · Gurtwickler an der Wand</div>
-          </div>
+      <div class="oc" id="roll-card-gurt" data-v="gurt" onclick="pick(this,'roll')">
+        <img src="img/rolladen-gurt.png" alt="Aufsatz-Rolladen mit Gurtwickler" loading="lazy" decoding="async">
+        <div>
+          <div class="olabel">Rolladen mit Gurtwickler</div>
+          <div class="osub">Mechanisch · Gurtwickler an der Wand</div>
         </div>
       </div>
       <!-- Motorrolladen -->
-      <div class="oc" id="roll-card-motor" style="flex-direction:column;align-items:stretch;padding:14px;gap:0" data-v="motor" onclick="pick(this,'roll')">
-        <img src="img/rolladen-elektrisch.png" alt="Motorrolladen elektrisch" style="width:100%;height:140px;object-fit:cover;border-radius:8px;margin-bottom:12px;display:block" loading="lazy" decoding="async">
-        <div style="display:flex;align-items:flex-start;gap:10px">
-          <div class="ora" style="margin-top:2px;flex-shrink:0"></div>
-          <div>
-            <div class="olabel">Motorrolladen</div>
-            <div class="osub">Elektrisch · App/Schalter · Smart-Home-fähig</div>
-          </div>
+      <div class="oc" id="roll-card-motor" data-v="motor" onclick="pick(this,'roll')">
+        <img src="img/rolladen-elektrisch.png" alt="Motorrolladen elektrisch" loading="lazy" decoding="async">
+        <div>
+          <div class="olabel">Motorrolladen</div>
+          <div class="osub">Elektrisch · App/Schalter · Smart-Home-fähig</div>
         </div>
       </div>
     </div>
@@ -4688,25 +4688,19 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
         </div>
       </div>
       <!-- Aufgeklebte Sprossen beidseitig -->
-      <div class="oc" style="flex-direction:column;align-items:stretch;padding:14px;gap:0" data-v="aufgeklebt" onclick="pick(this,'sproTyp')">
-        <img src="img/sprossen-aufgesetzt.png" alt="Aufgeklebte Sprossen" style="width:100%;height:140px;object-fit:cover;background:rgba(255,255,255,0.04);border-radius:8px;margin-bottom:12px;display:block" loading="lazy" decoding="async">
-        <div style="display:flex;align-items:flex-start;gap:10px">
-          <div class="ora" style="margin-top:2px;flex-shrink:0"></div>
-          <div>
-            <div class="olabel">Aufgeklebte Sprossen</div>
-            <div class="osub">Beidseitig auf Glas geklebt — Auswahl 27, 45 oder 65 mm Breite.</div>
-          </div>
+      <div class="oc" data-v="aufgeklebt" onclick="pick(this,'sproTyp')">
+        <img src="img/sprossen-aufgesetzt.png" alt="Aufgeklebte Sprossen" loading="lazy" decoding="async">
+        <div>
+          <div class="olabel">Aufgeklebte Sprossen</div>
+          <div class="osub">Beidseitig auf Glas — 27, 45 oder 65 mm</div>
         </div>
       </div>
       <!-- Sprossen im Scheibenzwischenraum (SZR) -->
-      <div class="oc" style="flex-direction:column;align-items:stretch;padding:14px;gap:0" data-v="szr" onclick="pick(this,'sproTyp')">
-        <img src="img/sprossen-innenliegend.png" alt="Sprossen im Scheibenzwischenraum" style="width:100%;height:140px;object-fit:cover;background:rgba(255,255,255,0.04);border-radius:8px;margin-bottom:12px;display:block" loading="lazy" decoding="async">
-        <div style="display:flex;align-items:flex-start;gap:10px">
-          <div class="ora" style="margin-top:2px;flex-shrink:0"></div>
-          <div>
-            <div class="olabel">Sprossen im Scheibenzwischenraum</div>
-            <div class="osub">Zwischen den Scheiben — leicht zu reinigen. Auswahl 18, 26 oder 45 mm Breite.</div>
-          </div>
+      <div class="oc" data-v="szr" onclick="pick(this,'sproTyp')">
+        <img src="img/sprossen-innenliegend.png" alt="Sprossen im Scheibenzwischenraum" loading="lazy" decoding="async">
+        <div>
+          <div class="olabel">Sprossen im Zwischenraum</div>
+          <div class="osub">Zwischen den Scheiben — 18, 26 oder 45 mm</div>
         </div>
       </div>
     </div>
@@ -8261,8 +8255,7 @@ function pvProfileSVG(key) {
     'iglo-hs':    'img/iglo5_profil.png',
   };
   const photoUrl = profilePhotos[key] || profilePhotos['iglo5'];
-  return `<img src="${photoUrl}" alt="Profilquerschnitt ${key}"
-    style="width:100%;height:130px;object-fit:contain;object-position:center;display:block;border-radius:8px;background:#f4f5f8;margin-bottom:6px"/ loading="lazy" decoding="async">`;
+  return `<img src="${photoUrl}" alt="Profilquerschnitt ${key}" loading="lazy" decoding="async"/>`;
 
   // Cross-section diagram for each profile type (fallback / supplemental)
   const W=170, H=72;
