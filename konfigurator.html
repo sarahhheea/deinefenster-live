@@ -3835,8 +3835,9 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
     <i class="ms chev">expand_more</i>
   </div>
   <div class="sb">
-    <!-- Fix V5 (21.04.2026): Größen-Hinweis nach Drutex-Richtwerten für IGLO 5 / IGLO Energy -->
-    <div class="info mb-3">
+    <!-- Fix V5 (21.04.2026): Größen-Hinweis nach Drutex-Richtwerten für IGLO 5 / IGLO Energy.
+         Bei IGLO-HS irrelevant (2 Flügel fix) → wird via JS in buildFluegel ausgeblendet. -->
+    <div id="fluegel-richtwerte-info" class="info mb-3">
       <i class="ms f" style="color:var(--c-primary);font-size:20px;flex-shrink:0">lightbulb</i>
       <div style="font-size:13px">
         <strong>Drutex-Richtwerte:</strong> 1 Flügel bis ca. 1400 mm Breite · 2 Flügel 1200–2400 mm · 3 Flügel 1800–3000 mm. Pro Flügel maximal ca. 2,5 m² Glasfläche. Ober-/Unterlicht typisch ab Raumhöhe 2300 mm sinnvoll. Sondermaße auf Anfrage.
@@ -6304,7 +6305,7 @@ function applyStepVisibility() {
   const rules = {
     's-tm':  { show: S.prod === 'haustuere',           openIf: true  }, // Türmodell
     's-balk':{ show: S.prod === 'balkontuer',          openIf: false }, // Balkontür-Spezifika (Sarah 21.04.2026)
-    's3':    { show: S.prod !== 'hst' }, // HST hat immer 2-Flügel-Aufteilung, Oberlicht/Unterlicht passt nicht. Sarah-Korrektur 21.04.2026
+    's3':    { show: S.prod !== 'hst' || S.profil === 'iglo-hs' }, // HST sonst ohne Aufteilung; bei IGLO-HS zeigt Step 3 die rechts/links-öffnend-Karten (Sarah 27.05.2026)
     's-rv':  { show: !!S.prod,                         openIf: false }, // Rahmenverbreiterung (Sarah-Wunsch 21.04.2026: bei allen Produkten)
     'glasdekor-haustuer-hint': { show: S.prod === 'haustuere', openIf: false, isHint: true }, // Hinweis für Glasdekor bei Haustür
     's9':    { show: S.prod !== 'haustuere' && S.prod !== 'hst', resetState: () => { /* Fenstergriffe nur bei Fenster/Balkon */ } },
@@ -6465,8 +6466,15 @@ function pick(el, key) {
     // Sarah-Vorgabe 21.04.2026: PSK-Block / IGLO Slide / IGLO-HS Info-Block togglen
     if (S.prod === 'hst') {
       updateHstProfilBlocks();
-      // Wenn PSK gewählt: nicht automatisch zu Schritt 3 springen (erst Kammer-Auswahl), sonst weiter zu Schritt 4
-      if (v !== 'iglo-psk') setTimeout(()=>openS(4), 200);
+      if (v === 'iglo-hs') {
+        // IGLO-HS: Step 3 sichtbar machen + Karten neu bauen + dorthin springen
+        applyStepVisibility();
+        buildFluegel();
+        setTimeout(()=>openS(3), 200);
+      } else if (v !== 'iglo-psk') {
+        // IGLO Slide: direkt zu Schritt 4 (PSK braucht erst Kammer-Auswahl)
+        setTimeout(()=>openS(4), 200);
+      }
     } else {
       setTimeout(()=>openS(3), 200);
     }
@@ -6820,6 +6828,41 @@ function fluegelImg(v) {
   return `<img src="${src}?v=20260527" alt="${P.fluegel[v]?.name||v}" loading="lazy" style="width:100%;height:auto;display:block"/>`;
 }
 
+// IGLO-HS Schiebetür: Frontansicht mit Fest- und Schiebe-Flügel, grüner Pfeil zeigt Schieberichtung.
+// richtung='rechts' = Schiebeflügel rechts, schiebt nach links auf.
+// richtung='links'  = Schiebeflügel links, schiebt nach rechts auf.
+function hsSchiebeSVG(richtung) {
+  const schiebt = richtung === 'rechts';
+  // X-Kreuz markiert den aktiven Schiebeflügel
+  const xMarker = schiebt
+    ? `<line x1="100" y1="14" x2="186" y2="116" stroke="rgba(255,255,255,0.42)" stroke-width="1"/>
+       <line x1="186" y1="14" x2="100" y2="116" stroke="rgba(255,255,255,0.42)" stroke-width="1"/>`
+    : `<line x1="14" y1="14" x2="100" y2="116" stroke="rgba(255,255,255,0.42)" stroke-width="1"/>
+       <line x1="100" y1="14" x2="14" y2="116" stroke="rgba(255,255,255,0.42)" stroke-width="1"/>`;
+  // Griff auf dem Schiebeflügel (vertikale Stange)
+  const griff = schiebt
+    ? `<rect x="142" y="50" width="3" height="30" fill="rgba(255,255,255,0.78)" rx="1"/>`
+    : `<rect x="55"  y="50" width="3" height="30" fill="rgba(255,255,255,0.78)" rx="1"/>`;
+  // Grüner Pfeil – schiebt = nach links bzw. nach rechts
+  const pfeil = schiebt
+    ? `<g stroke="#22c55e" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+         <line x1="130" y1="65" x2="70" y2="65"/>
+         <polyline points="80,57 70,65 80,73"/>
+       </g>`
+    : `<g stroke="#22c55e" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+         <line x1="70" y1="65" x2="130" y2="65"/>
+         <polyline points="120,57 130,65 120,73"/>
+       </g>`;
+  return `<svg viewBox="0 0 200 130" preserveAspectRatio="xMidYMid meet" style="width:100%;max-width:200px;display:block;margin:0 auto" xmlns="http://www.w3.org/2000/svg">
+    <rect x="6" y="6" width="188" height="118" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.55)" stroke-width="2.4" rx="1"/>
+    <rect x="14" y="14" width="86" height="102" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.32)" stroke-width="1.2"/>
+    <rect x="100" y="14" width="86" height="102" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.32)" stroke-width="1.2"/>
+    ${xMarker}
+    ${griff}
+    ${pfeil}
+  </svg>`;
+}
+
 const ANSCHLAG_KARTEN_IMG = {
   'dreh-l': 'dreh-links',
   'dreh-r': 'dreh-rechts',
@@ -6874,6 +6917,28 @@ function buildFluegel() {
   const grid = document.getElementById('fluegel-grid');
   if (!grid) return;
   let opts;
+  // IGLO-HS: nur 2 Varianten (rechts/links öffnend) statt 12 Fenster-Aufteilungen.
+  // Sarah-Vorgabe 27.05.2026: IGLO-HS hat immer 2 Flügel (1 fest + 1 Schiebeflügel) —
+  // die einzige sinnvolle Wahl ist auf welcher Seite der Schiebeflügel sitzt.
+  const rwInfo = document.getElementById('fluegel-richtwerte-info');
+  if (S.prod === 'hst' && S.profil === 'iglo-hs') {
+    if (rwInfo) rwInfo.style.display = 'none';
+    grid.style.gridTemplateColumns = '1fr 1fr';
+    const variants = [
+      { v: 'rechts', name: 'Rechts öffnend', sub: 'Schiebeflügel rechts · schiebt nach links' },
+      { v: 'links',  name: 'Links öffnend',  sub: 'Schiebeflügel links · schiebt nach rechts' },
+    ];
+    grid.innerHTML = variants.map(o => `
+      <div class="fk${S.hstLauf===o.v?' sel':''}" data-v="${o.v}" onclick="pickHsLauf(this)" style="padding:14px 12px 16px;display:flex;flex-direction:column;align-items:stretch;gap:0">
+        ${hsSchiebeSVG(o.v)}
+        <div class="fk-label" style="margin-top:12px;text-align:center;font-weight:800">${o.name}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.55);text-align:center;margin-top:3px">${o.sub}</div>
+      </div>
+    `).join('');
+    return;
+  }
+  // Bei anderen Produkten: Richtwerte-Info wieder einblenden
+  if (rwInfo) rwInfo.style.display = '';
   if (S.prod === 'haustuere') {
     // Haustür-Karten: `.fk`-Stil (gleicher Hover/Sel wie Fenster-Flügelaufteilung).
     // Mehrteiler-Slots 1.7× breiter — damit die Tür auf Seitenteil/2-Flügel-Karten
@@ -6975,6 +7040,25 @@ function pickFluegel(el) {
   setTimeout(()=>openS(4), 200);
   vorschauAktualisieren();
   drawPrev(); upSidebar();
+}
+
+// IGLO-HS rechts/links öffnend wählen (Sarah-Vorgabe 27.05.2026).
+// Setzt nur S.hstLauf — S.fluegel bleibt '2-fluegel', S.hstTeilung auf '2-teilig' fest.
+function pickHsLauf(el) {
+  document.querySelectorAll('#fluegel-grid .fk').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+  S.hstLauf = el.dataset.v;
+  S.hstTeilung = '2-teilig';
+  S.fluegel = '2-fluegel';
+  const d3 = document.getElementById('d3');
+  if (d3) d3.textContent = S.hstLauf === 'rechts' ? 'Rechts öffnend' : 'Links öffnend';
+  mkDone(3);
+  // Schwellentyp + 3D-Vorschau aktualisieren, dann weiter zu Schritt 4
+  if (typeof buildOeffSash === 'function') buildOeffSash();
+  if (typeof vorschauAktualisieren === 'function') vorschauAktualisieren();
+  if (typeof drawPrev === 'function') drawPrev();
+  if (typeof upSidebar === 'function') upSidebar();
+  setTimeout(() => openS(4), 200);
 }
 
 // Kombiniertes SVG für 3-Flügel + Oberlicht Kombi-Karten
@@ -7530,14 +7614,19 @@ function buildOeffSash() {
           <div style="flex:1"><div class="olabel" style="font-size:13px">${opt.name}</div><div class="osub" style="font-size:11px">${opt.sub}</div></div>
         </div>
       </div>`;
+    // IGLO-HS: Teilung + Laufrichtung wurden in Step 3 (Aufteilung) gewählt — hier nur Schwelle.
+    // Sarah-Vorgabe 27.05.2026: IGLO-HS hat nur 2-teilig, Lauf ist in den 2 Karten von Step 3 enthalten.
+    const isHs = S.profil === 'iglo-hs';
     wrap.innerHTML = `
       <div class="sec-t" style="margin-top:0">Schwellentyp</div>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${schwelleOpts.map(o=>mkCard(o,'hstSchwelle')).join('')}</div>
-      <div class="sec-t">Teilung</div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${teilungOpts.map(o=>mkCard(o,'hstTeilung')).join('')}</div>
-      <div class="sec-t">Laufrichtung</div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${laufOpts.map(o=>mkCard(o,'hstLauf')).join('')}</div>
-      <div class="info mt-3"><i class="ms f" style="color:#225eaa;font-size:20px;flex-shrink:0">info</i><div>Hebe-Schiebe-Tür Drutex IGLO-HS · Öffnung durch Heben und Gleiten. Null-Schwelle empfohlen bei barrierefreiem Ausbau.</div></div>`;
+      ${isHs ? '' : `
+        <div class="sec-t">Teilung</div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${teilungOpts.map(o=>mkCard(o,'hstTeilung')).join('')}</div>
+        <div class="sec-t">Laufrichtung</div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${laufOpts.map(o=>mkCard(o,'hstLauf')).join('')}</div>
+      `}
+      <div class="info mt-3"><i class="ms f" style="color:#225eaa;font-size:20px;flex-shrink:0">info</i><div>Hebe-Schiebe-Tür · Öffnung durch Heben und Gleiten. Null-Schwelle empfohlen bei barrierefreiem Ausbau.</div></div>`;
     return;
   }
   const sashCount = getSashCount();
