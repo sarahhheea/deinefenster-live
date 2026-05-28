@@ -350,6 +350,18 @@
     .back-to-prod .ms { font-size: 17px; line-height: 1; }
     body.has-prod .back-to-prod { display: inline-flex; }
 
+    /* Step-Body Card-Grids: einheitliche fixe Card-Breite 165px (wie Farb-Karten).
+       Greift bei allen Grids die .oc, .fk oder .glass-card als direkte Kinder haben. */
+    .sb .grid:has(> .oc),
+    .sb .grid:has(> .fk),
+    .sb .grid:has(> .glass-card),
+    .sb .glass-grid {
+      display: grid !important;
+      grid-template-columns: repeat(auto-fill, 165px) !important;
+      gap: 14px !important;
+      justify-content: start;
+    }
+
     /* Bild-Karten — einheitliche Größe wie Farb-Karten (.fp-item).
        Trifft Anschlag-Cards (Step 3), Flügelaufteilung-Cards (Step 2), Haustür-Karten.
        Nutzt :has() — Chrome 105+, Safari 15.4+, Firefox 121+. */
@@ -372,13 +384,14 @@
     }
     .oc:has(> img) > img, .fk:has(> img) > img {
       width: 100% !important;
-      aspect-ratio: 1.05 !important;
+      aspect-ratio: 1 !important;
       height: auto !important;
       max-height: none !important;
       display: block !important;
-      background: #ffffff !important;
+      background: transparent !important;
       border-radius: 0 !important;
-      object-fit: contain !important;
+      object-fit: cover !important;
+      object-position: center center !important;
     }
     .oc:has(> img) > .olabel,
     .oc:has(> img) > .fk-label,
@@ -3805,7 +3818,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
     <i class="ms chev">expand_more</i>
   </div>
   <div class="sb">
-    <div id="profil-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px">
+    <div id="profil-grid" style="display:grid;grid-template-columns:repeat(auto-fill,165px);gap:14px">
       <!-- filled by JS based on product -->
     </div>
     <!-- Inhaberin-Vorgabe 21.04.2026: PSK-Schiebetür braucht zusätzlich Kammer-System-Auswahl -->
@@ -3849,7 +3862,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
         <strong>Drutex-Richtwerte:</strong> 1 Flügel bis ca. 1400 mm Breite · 2 Flügel 1200–2400 mm · 3 Flügel 1800–3000 mm. Pro Flügel maximal ca. 2,5 m² Glasfläche. Ober-/Unterlicht typisch ab Raumhöhe 2300 mm sinnvoll. Sondermaße auf Anfrage.
       </div>
     </div>
-    <div id="fluegel-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-2">
+    <div id="fluegel-grid" style="display:grid;grid-template-columns:repeat(auto-fill,165px);gap:14px;margin-top:8px">
       <!-- filled by JS -->
     </div>
     <button type="button" onclick="openS(4)" class="w-full mt-4 flex items-center justify-center gap-2 font-bold py-3 rounded-full text-white text-sm" style="background:var(--c-primary);font-family:'Plus Jakarta Sans',sans-serif">
@@ -4278,22 +4291,6 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
         <div class="glass-info">
           <div class="glass-name">VSG · Verbundsicherheit</div>
           <div class="glass-desc">Reißfeste Folie · Splitter haften · bodentief</div>
-        </div>
-        <div class="glass-check"><i class="ms f">check</i></div>
-      </div>
-      <div class="glass-card" data-v="vsg-p4a" onclick="pick(this,'sicherGlas')">
-        <div class="glass-vis"><svg viewBox="0 0 130 88" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
-          <defs><linearGradient id="vg-p4a" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e8f1f9"/><stop offset="100%" stop-color="#7faecc"/></linearGradient></defs>
-          <rect width="130" height="88" fill="url(#vg-p4a)"/>
-          <rect x="40" y="14" width="20" height="60" fill="#76a9fa" opacity="0.6" stroke="#225eaa" stroke-width="1.2"/>
-          <rect x="70" y="14" width="20" height="60" fill="#76a9fa" opacity="0.6" stroke="#225eaa" stroke-width="1.2"/>
-          <rect x="60" y="14" width="10" height="60" fill="#c9a84c"/>
-          <path d="M 65 8 L 80 14 L 80 36 Q 80 50 65 56 Q 50 50 50 36 L 50 14 Z" fill="#225eaa" opacity="0.92"/>
-          <path d="M 60 32 l 4 4 l 8 -10" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg></div>
-        <div class="glass-info">
-          <div class="glass-name">VSG P4A · Durchwurfhemmend</div>
-          <div class="glass-desc">EN 356 geprüft · Pflicht bei RC2/RC3</div>
         </div>
         <div class="glass-check"><i class="ms f">check</i></div>
       </div>
@@ -5229,7 +5226,6 @@ const P = {
     'kein':    { name:'Kein Sicherheitsglas',              add:0   },
     'esg':     { name:'ESG (Einscheibensicherheitsglas)',  add:0  },
     'vsg':     { name:'VSG (Verbundsicherheitsglas)',      add:0  },
-    'vsg-p4a': { name:'VSG P4A (Durchwurfhemmend)',        add:0 },
   },
   oeff: {
     // Fenster + Balkontür
@@ -6410,11 +6406,11 @@ function pick(el, key) {
     }
     // Regel R3 umgekehrt: wenn User Sicherheitsglas wegnimmt obwohl RC2/RC3 gewählt, Warnung + Auto-Rückkehr
     if (key==='sicherGlas' && v === 'kein' && (S.sicher === 'rc2' || S.sicher === 'rc3')) {
-      // Zurück auf VSG P4A setzen (Pflicht laut EN 1627)
-      S.sicherGlas = 'vsg-p4a';
+      // Zurück auf VSG setzen (Pflicht laut EN 1627)
+      S.sicherGlas = 'vsg';
       document.querySelectorAll('#s7 [data-v]').forEach(elx => {
-        if (['kein','esg','vsg','vsg-p4a'].includes(elx.dataset.v)) {
-          elx.classList.toggle('sel', elx.dataset.v === 'vsg-p4a');
+        if (['kein','esg','vsg'].includes(elx.dataset.v)) {
+          elx.classList.toggle('sel', elx.dataset.v === 'vsg');
         }
       });
       const warn = document.getElementById('r3-reverse-warn') || (() => {
@@ -6427,7 +6423,7 @@ function pick(el, key) {
         sb.appendChild(elw);
         return elw;
       })();
-      if (warn) warn.innerHTML = `<i class="ms f" style="color:#dc2626;font-size:20px;flex-shrink:0">block</i><div style="font-size:13px"><strong>Sicherheitsglas ist bei RC${S.sicher==='rc2'?'2':'3'} Pflicht</strong> (EN 1627). Das Glas wurde automatisch auf VSG P4A zurückgesetzt. Wenn Sie kein Sicherheitsglas wollen, wählen Sie in Schritt 10 die Widerstandsklasse "WK1 Standard".</div>`;
+      if (warn) warn.innerHTML = `<i class="ms f" style="color:#dc2626;font-size:20px;flex-shrink:0">block</i><div style="font-size:13px"><strong>Sicherheitsglas ist bei RC${S.sicher==='rc2'?'2':'3'} Pflicht</strong> (EN 1627). Das Glas wurde automatisch auf VSG zurückgesetzt. Wenn Sie kein Sicherheitsglas wollen, wählen Sie in Schritt 10 die Widerstandsklasse "WK1 Standard".</div>`;
       setTimeout(() => { const w = document.getElementById('r3-reverse-warn'); if (w) w.remove(); }, 8000);
     }
     // Zusammengesetzte Beschreibung für Schritt 7 (Verglasung)
@@ -6498,18 +6494,16 @@ function pick(el, key) {
   }
   if (key==='sicher'){
     document.getElementById('d10').textContent = P.sicher[v]?.name||v; mkDone(10);
-    // Regel R3 (DRUTEX-REGELN.md, EN 1627): RC2/RC3 zwingend mit VSG P4A.
-    if ((v === 'rc2' || v === 'rc3') && S.sicherGlas !== 'vsg-p4a') {
-      S.sicherGlas = 'vsg-p4a';
-      // UI in Schritt 7 aktualisieren (Sicherheitsglas-Block)
+    // Regel R3 (EN 1627): RC2/RC3 zwingend mit VSG.
+    if ((v === 'rc2' || v === 'rc3') && S.sicherGlas !== 'vsg') {
+      S.sicherGlas = 'vsg';
       document.querySelectorAll('#s7 [data-v]').forEach(el=>{
-        if (el.dataset.v === 'kein' || el.dataset.v === 'esg' || el.dataset.v === 'vsg' || el.dataset.v === 'vsg-p4a') {
-          el.classList.toggle('sel', el.dataset.v === 'vsg-p4a');
+        if (el.dataset.v === 'kein' || el.dataset.v === 'esg' || el.dataset.v === 'vsg') {
+          el.classList.toggle('sel', el.dataset.v === 'vsg');
         }
       });
-      // Hinweis als temporäres Toast oben zeigen (kurze Notiz via d7-Update)
       const d7 = document.getElementById('d7');
-      if (d7) d7.textContent = (d7.textContent||'') + ' · VSG P4A (durch RC gesetzt)';
+      if (d7) d7.textContent = (d7.textContent||'') + ' · VSG (durch RC gesetzt)';
     }
     setTimeout(()=>_nextAfterRC(),200);
   }
