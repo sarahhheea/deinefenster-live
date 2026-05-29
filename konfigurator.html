@@ -10752,7 +10752,16 @@ function _renderFenster3d() {
 
   // Layout-Spec für die 3D-Vorschau (alle 12 Aufteilungen, Griff je Öffnungsart)
   const _layout = S.fluegel || '1-fluegel';
-  const _sashes = [S.oeff1, S.oeff2, S.oeff3].filter(Boolean);
+  let _sashes = [S.oeff1, S.oeff2, S.oeff3].filter(Boolean);
+  // Default-Öffnungsart wenn Schritt Öffnungsart noch nicht gewählt:
+  // Standard-Drutex-Pfosten-Layout → Griffe zur Mitte (matcht die Karten-Bilder).
+  // 2-Flügel: L=DK-L (Griff rechts) + R=DK-R (Griff links) → beide Griffe am Pfosten
+  // 3-Flügel: L=DK-L + M=fest + R=DK-R
+  if (_sashes.length === 0) {
+    if (/^2-/.test(_layout)) _sashes = ['dk-l', 'dk-r'];
+    else if (/^3-/.test(_layout)) _sashes = ['dk-l', 'fest', 'dk-r'];
+    else _sashes = ['dk-r'];
+  }
   const _oberlicht  = S.oberlichtOeff  || 'fest';
   const _unterlicht = S.unterlichtOeff || 'fest';
   // 1-Flügel-Aufteilungen → alte fenster-3d.html (ursprünglicher Look)
