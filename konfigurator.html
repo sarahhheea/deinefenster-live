@@ -281,9 +281,13 @@
       background: rgba(255,255,255,0.03);
       border: 1px solid rgba(255,255,255,0.08);
       border-radius: var(--card-radius, 12px);
-      padding: 12px 8px 14px;
+      padding: 0 0 12px;
+      overflow: hidden;
       transition: all 0.20s ease;
       cursor: pointer;
+    }
+    #s9t .pc.griff-pc .griff-img {
+      border-radius: var(--card-radius, 12px) var(--card-radius, 12px) 0 0 !important;
     }
     #s9t .pc.griff-pc:hover {
       background: rgba(77,136,255,0.07);
@@ -6225,10 +6229,10 @@ function buildTuerGriff() {
         <div class="olabel" style="font-size:13px">${v.name}</div>
       </div>
     </div>`;
-  // Außen-Karten als Bild-Karten (gleicher Stil wie #s-tm Türmodell-Karten, Master-Token aus :root)
+  // Außen-Karten als Bild-Karten — Bild füllt die Karte ohne weißen Rand drumherum
   const aussenCard = (k, v) => {
     const imgHTML = v.img
-      ? `<img src="${v.img}" alt="${v.name}" class="griff-img" loading="lazy" style="width:100%;aspect-ratio:1/1;object-fit:contain;background:#fff;border-radius:8px;padding:6px;display:block"/>`
+      ? `<img src="${v.img}" alt="${v.name}" class="griff-img" loading="lazy" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px;display:block"/>`
       : `<div style="width:100%;aspect-ratio:1/1;background:linear-gradient(135deg,#d0d4dc,#9aa0aa);border-radius:8px"></div>`;
     return `
     <div class="pc griff-pc${S.tuerGriffAussen===k?' sel':''}" data-v="${k}" data-sk="tuerGriffAussen" onclick="pickTuerGriffOpt(this)">
