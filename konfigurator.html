@@ -7238,6 +7238,19 @@ function ul3ComboSVG(oeff1, oeff2, oeff3, sep12, sep23, ulTyp) {
 
 // Kombiniertes SVG für 2-Flügel + Unterlicht Kombi-Karten
 function ul2ComboSVG(oeff1, oeff2, sepType, ulTyp) {
+  // Konfigurator-Karte als Bild (Kundenwunsch 29.05.2026): echte Drutex-Optik statt SVG-Symbol —
+  // konsistent zu 1-Flügel+Unterlicht und 2-Flügel+Oberlicht.
+  // Bilder unter img/anschlag-karten-2f-ul/. Naming: {sep}-{v1Slug}-{v2Slug}-{ulSuf}.png.
+  const SLUG = { 'dreh-l':'drehL', 'dreh-r':'drehR', 'dk-l':'dkL', 'dk-r':'dkR', 'fest':'fest' };
+  const ulSuf = ulTyp === 'kipp' ? 'ulKipp' : 'ulFest';
+  const sepPrefix = sepType === 'pfosten' ? 'pfosten-' : (sepType === 'stulp' ? 'stulp-' : '');
+  const fname = `${sepPrefix}${SLUG[oeff1]||oeff1}-${SLUG[oeff2]||oeff2}-${ulSuf}`;
+  const master = 'pfosten-dkL-dkR-ulFest';
+  return `<img src="img/anschlag-karten-2f-ul/${fname}.png?v=20260529" alt="${fname}" onerror="this.onerror=null;this.src='img/anschlag-karten-2f-ul/${master}.png?v=20260529'" loading="lazy" style="width:100%;height:auto;max-height:90px;object-fit:contain;display:block;border-radius:4px;background:#0c1930"/>`;
+}
+
+// Legacy-SVG (Fallback-Referenz, nicht mehr aktiv verdrahtet)
+function ul2ComboSVG_legacy(oeff1, oeff2, sepType, ulTyp) {
   const W=62, H=74, M=3;
   const ulH=13, sep2Y=H-M-ulH;
   const mT=M+2, mB=sep2Y-2, mMid=W/2, CY=(mT+mB)/2;
