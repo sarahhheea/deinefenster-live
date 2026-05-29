@@ -5427,10 +5427,10 @@ const P = {
   // Standard-Drutex-Sortiment — Preise marktüblich, Sarah zu verifizieren.
   // Sarah-bestätigt 21.04.2026: Haustür-Türgriffe als 2-stufige Auswahl (Innen + Außen)
   tuerGriffInnen: {
-    'drueck-weiss':  { name:'Haustür-Klinke Weiß',   add:0, swatch:'#f4f4f0' },
-    'drueck-silber': { name:'Haustür-Klinke Silber', add:0, swatch:'#b0b4bc' },
-    'drueck-braun':  { name:'Haustür-Klinke Braun',  add:0, swatch:'#5c3218' },
-    'drueck-olive':  { name:'Haustür-Klinke Olive',  add:0, swatch:'#6b7a3f' },
+    'drueck-weiss':  { name:'Haustür-Klinke Weiß',   add:0, swatch:'#f4f4f0', img:'img/drutex-griffe/klinke-innen-weiss.webp' },
+    'drueck-silber': { name:'Haustür-Klinke Silber', add:0, swatch:'#b0b4bc', img:'img/drutex-griffe/klinke-innen-silber.webp' },
+    'drueck-braun':  { name:'Haustür-Klinke Braun',  add:0, swatch:'#5c3218', img:'img/drutex-griffe/klinke-innen-braun.webp' },
+    'drueck-olive':  { name:'Haustür-Klinke Olive',  add:0, swatch:'#6b7a3f', img:'img/drutex-griffe/klinke-innen-olive.webp' },
   },
   tuerGriffAussen: {
     // Kundenwunsch 25.05.2026: 20 Drutex-Außengriff-Optionen mit echten Drutex-Bildern
@@ -6205,14 +6205,18 @@ function _updateHstGriffSummary() {
 function buildTuerGriff() {
   const grid = document.getElementById('tuer-griff-grid');
   if (!grid) return;
-  const innenCard = (k, v) => `
-    <div class="oc${S.tuerGriffInnen===k?' sel':''}" data-v="${k}" data-sk="tuerGriffInnen" onclick="pickTuerGriffOpt(this)" style="padding:10px 12px;gap:10px;align-items:center">
-      <div class="ora" style="flex-shrink:0"></div>
-      <div style="width:20px;height:20px;border-radius:50%;border:2px solid #aaa;background:${v.swatch};flex-shrink:0"></div>
-      <div style="flex:1">
-        <div class="olabel" style="font-size:13px">${v.name}</div>
-      </div>
+  // Innen-Karten als Bild-Karten — gleicher Stil wie Außen-Karten (.pc.griff-pc),
+  // echte Drutex-Klinken-Bilder statt nur Farbpunkt-Swatch
+  const innenCard = (k, v) => {
+    const imgHTML = v.img
+      ? `<img src="${v.img}" alt="${v.name}" class="griff-img" loading="lazy" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px;display:block"/>`
+      : `<div style="width:100%;aspect-ratio:1/1;background:${v.swatch||'#444'};border-radius:8px"></div>`;
+    return `
+    <div class="pc griff-pc${S.tuerGriffInnen===k?' sel':''}" data-v="${k}" data-sk="tuerGriffInnen" onclick="pickTuerGriffOpt(this)">
+      ${imgHTML}
+      <div class="pc-name" style="font-size:12px;margin-top:8px;line-height:1.3;text-align:center;color:rgba(255,255,255,0.92);font-weight:600">${v.name}</div>
     </div>`;
+  };
   // Außen-Karten als Bild-Karten — Bild füllt die Karte ohne weißen Rand drumherum
   const aussenCard = (k, v) => {
     const imgHTML = v.img
@@ -6238,7 +6242,7 @@ function buildTuerGriff() {
   });
   grid.innerHTML = `
     <div class="col-span-full"><div class="sec-t" style="margin-top:0">Innen-Griff</div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${Object.entries(P.tuerGriffInnen).map(([k,v])=>innenCard(k,v)).join('')}</div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">${Object.entries(P.tuerGriffInnen).map(([k,v])=>innenCard(k,v)).join('')}</div>
     </div>
     <div class="col-span-full mt-4"><div class="sec-t" style="font-size:14px;color:#225eaa">Außen-Griff</div>
       ${aussenHtml}
