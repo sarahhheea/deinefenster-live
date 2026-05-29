@@ -6891,6 +6891,17 @@ function anschlag1olImg(mainV, olV) {
   return `<img src="img/anschlag-karten-1ol/${file}.png?v=20260527" alt="${mainV}-ol${olV}" loading="lazy" style="width:100%;height:auto;display:block"/>`;
 }
 
+// 1-Flügel + Unterlicht — Foto-Karte mit Anschlag-Linien (Kundenwunsch 29.05.2026)
+// Hauptflügel: fest/kipp/dreh-l/dreh-r/dk-l/dk-r × Unterlicht: fest/kipp = 12 Karten
+function anschlag1ulImg(mainV, ulV) {
+  const valid = ['fest','kipp','dreh-l','dreh-r','dk-l','dk-r'];
+  if (!valid.includes(mainV) || !['fest','kipp'].includes(ulV)) {
+    return typeof ulComboSVG === 'function' ? ulComboSVG(mainV, ulV) : '';
+  }
+  const ulLabel = ulV === 'kipp' ? 'ulKipp' : 'ulFest';
+  return `<img src="img/anschlag-karten-1ul/${ulLabel}-${mainV}.png?v=20260529" alt="${mainV}-ul${ulV}" loading="lazy" style="width:100%;height:auto;display:block"/>`;
+}
+
 // ── GRIFF-WAHL: Modell + Farbe + Abschließbar ─────────
 const GRIFF_MODEL_DESC = {
   mistral:  'Klassisch elegant, abgerundet',
@@ -8147,7 +8158,7 @@ function buildOeffSash() {
         const pAdd = m.add===0?'inkl.':(m.add>0?`+ ${m.add} €`:`− ${Math.abs(m.add)} €`);
         const ulLbl = ul==='kipp' ? 'UL-Kipp' : 'UL-Fest';
         html += `<div class="oc${isSel?' sel':''}" data-v1="${m.v}" data-ul="${ul}" onclick="pickOeffCombo(this)" style="flex-direction:column;align-items:center;text-align:center;padding:8px 4px;gap:2px">
-          ${ulComboSVG(m.v,ul)}
+          ${anschlag1ulImg(m.v,ul)}
           <div class="olabel" style="font-size:10px;line-height:1.2;font-weight:700">${m.name}</div>
           <div class="osub" style="font-size:10px">${ulLbl}</div>
         </div>`;
