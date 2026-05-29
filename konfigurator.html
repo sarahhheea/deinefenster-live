@@ -372,16 +372,17 @@
       gap: 14px !important;
       justify-content: start !important;
     }
-    /* Glas-Cards: horizontales Bild+Text-Layout, breitere Cards */
+    /* Glas-Cards: horizontales Bild+Text-Layout — Karten fließen nebeneinander
+       (1 Karte bei sehr schmaler Steps-Spalte, 2-3 Karten ab ~500px Steps) */
     .sb .glass-grid,
     .sb .grid:has(> .glass-card),
     .sb div:has(> .glass-card) {
       display: grid !important;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 280px)) !important;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)) !important;
       gap: 12px !important;
-      justify-content: start !important;
+      justify-content: stretch !important;
     }
-    /* Text-Cards mit Beschreibung (Sicher, Rahmenverbreiterung, Schwellen) — Cards brauchen mind. 200px für Text */
+    /* Text-Cards mit Beschreibung (Sicher, Rahmenverbreiterung, Schwellen) */
     #s10 .sb .grid,
     #s-rv .sb .grid,
     #s-balk .sb .grid,
@@ -1357,13 +1358,15 @@
     /* ── Produkt-Hero Overlay ── */
     #prod-hero { background: #0a1225 !important; }
 
-    /* ── Drei gleich große Spalten + 3D ohne Kasten (Sarah-Wunsch 17.05.2026 nachts) ── */
+    /* ── Drei Spalten — Mitte fließt, Rechts capped (Kundenwunsch 29.05.2026) ──
+       Rechts: min 360px (Tabs + 3D), max 480px (kein Whitespace mehr).
+       Mitte bekommt den Rest → Karten 2- bis 4-spaltig je nach Bildschirm. */
     @media (min-width: 1024px) {
-      /* Schmal links, breit mitte+rechts (Sarah-Anpassung 17.05.2026) */
       html body #kfg-main {
         display: grid !important;
-        grid-template-columns: 220px 1fr 1fr !important;
+        grid-template-columns: 220px minmax(380px, 1fr) minmax(320px, 460px) !important;
         grid-template-areas: "nav steps preview" !important;
+        gap: 16px !important;
       }
       html body #kfg-nav      { grid-area: nav !important; width: auto !important; }
       html body #steps        { grid-area: steps !important; flex: none !important; max-width: none !important; }
@@ -2047,6 +2050,9 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   }
   #prev-3d-hint {
     animation: hint-pill-pulse 1.55s ease-in-out infinite !important;
+    max-width: calc(100% - 28px) !important;
+    white-space: normal !important;
+    text-align: center !important;
   }
   #prev-3d-hint .hint-mouse-icon {
     animation: hint-drag-shake 1.4s ease-in-out infinite !important;
