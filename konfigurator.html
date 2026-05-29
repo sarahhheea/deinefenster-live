@@ -5380,12 +5380,12 @@ const P = {
     'pz-beid':  { name:'PZ beidseitig',    add:0, col:'#b0b4bc' },
   },
   griffColor: {
-    'weiss':     { name:'Weiß (RAL 9016)',     hex:'#f4f4f0', code:'f1'      },
-    'schwarz':   { name:'Schwarz (RAL 9005)',  hex:'#1a1a1a', code:'f9'      },
-    'anthrazit': { name:'Anthrazit (RAL 7016)',hex:'#373d3f', code:'k-7016'  },
-    'silber':    { name:'Edelstahl',           hex:'#c8ccd4', code:'f2'      },
-    'gold':      { name:'Tytan Gold (F4)',     hex:'#c8a020', code:'f4'      },
-    'braun':     { name:'Braun (RAL 8019)',    hex:'#3d2a23', code:'k-8019'  },
+    'weiss':     { name:'Weiß (RAL 9016)',      hex:'#f4f4f0' },
+    'cremeweiss':{ name:'Cremeweiß (RAL 9001)', hex:'#fdf6e3' },
+    'schwarz':   { name:'Schwarz (RAL 9005)',   hex:'#1a1a1a' },
+    'anthrazit': { name:'Anthrazit (RAL 7016)', hex:'#373d3f' },
+    'gold':      { name:'Tytan Gold',           hex:'#c8a020' },
+    'braun':     { name:'Braun (RAL 8019)',     hex:'#3d2a23' },
   },
   roll: {
     'ohne':   { name:'Kein Rolladen',          add:0   },
@@ -6900,55 +6900,43 @@ const GRIFF_MODEL_DESC = {
   hoppe:    'Premium · Geräusch-Feedback',
   'pz-beid':'Schloss innen + außen · Profilzylinder',
 };
-// Drutex-URL-Mapping pro Modell × Farbe × Locked (Drutex-URLs sind inkonsistent)
-const DR = 'https://www.drutex.eu/media/_upload/dodatki/klamki-okna/';
+// Drutex liefert die Bilder als WebP über base64-codierten Pfad.
+// Helper: nimmt Dateiname und baut die echte WebP-URL.
+function drGW(filename) {
+  const path = '/media/_upload/dodatki/klamki-okna/' + filename;
+  return 'https://www.drutex.eu/media/webp/80/' + btoa(path) + '.webp';
+}
+// Mapping pro Modell × Farbe × Locked — nur verifizierte Drutex-Dateien
 const GRIFF_URLS = {
   mistral: {
-    weiss:    { std:DR+'klamka-mistral-35mm-f1.png',       lock:DR+'klamka-mistralklucz-35mm-k-9016.png' },
-    schwarz:  { std:DR+'klamka-mistral-35mm-f9.png',       lock:DR+'klamka-mistralklucz-35mm-k-9005.png' },
-    anthrazit:{ std:DR+'klamka-mistral-35mm-k-7016.png',   lock:DR+'klamka-mistralklucz-35mm-k-7016.png' },
-    silber:   { std:DR+'klamka-mistral-35mm-f2.png',       lock:DR+'klamka-mistralklucz-35mm-k-9001.png' },
-    gold:     { std:DR+'klamka-mistral-35mm-tytan-f9.png', lock:DR+'klamka-mistralklucz-35mm-tytan-f9.png' },
-    braun:    { std:DR+'klamka-mistral-35mm-f8.png',       lock:DR+'klamka-mistralklucz-35mm-k-8019.png' },
+    weiss:    { std:drGW('klamka-mistral-35mm-k-9016.png'), lock:drGW('klamka-mistralklucz-35mm-k-9016.png') },
+    schwarz:  { std:drGW('klamka-mistral-35mm-k-9005.png'), lock:drGW('klamka-mistralklucz-35mm-k-9005.png') },
+    anthrazit:{ std:drGW('klamka-mistral-35mm-k-7016.png'), lock:drGW('klamka-mistralklucz-35mm-k-7016.png') },
+    silber:   { std:drGW('klamka-mistral-35mm-f1.png'),     lock:drGW('klamka-mistralklucz-35mm-k-9001.png') },
+    gold:     { std:drGW('klamka-mistral-35mm-f9.png'),     lock:drGW('klamka-mistralklucz-35mm-f9.png') },
+    cremeweiss:{std:drGW('klamka-mistral-35mm-k-9001.png'), lock:drGW('klamka-mistralklucz-35mm-k-9001.png') },
   },
   nevada: {
-    weiss:    { std:DR+'klamka-nevada-35mm-f1.png',         lock:DR+'klamka-nevada-klucz-35mm-k-9016.png' },
-    schwarz:  { std:DR+'klamka-nevada-35mm-f9.png',         lock:DR+'klamka-nevada-klucz-35mm-k-9005.png' },
-    anthrazit:{ std:DR+'klamka-nevada-35mm-k-7016.png',     lock:DR+'klamka-nevada-klucz-35mm-k-7016.png' },
-    silber:   { std:DR+'klamka-nevada-35mm-f2.png',         lock:DR+'klamka-nevada-klucz-35mm-k-9001.png' },
-    gold:     { std:DR+'klamka-nevada-35mm-f4.png',         lock:DR+'klamka-nevada-klucz-35mm-f9.png' },
-    braun:    { std:DR+'klamka-nevada-35mm-f8.png',         lock:DR+'klamka-nevada-klucz-35mm-k-8019.png' },
+    weiss:    { std:drGW('klamka-nevada-35mm-biala.png'),    lock:drGW('klamka-nevada-klucz-35mm-k-9016.png') },
+    schwarz:  { std:drGW('klamka-nevada-35mm-k-9005.png'),   lock:drGW('klamka-nevada-klucz-35mm-k-9005.png') },
+    anthrazit:{ std:drGW('klamka-nevada-35mm-k-7016.png'),   lock:drGW('klamka-nevada-klucz-35mm-k-7016.png') },
+    cremeweiss:{std:drGW('klamka-nevada-35mm-k-9001.png'),   lock:drGW('klamka-nevada-klucz-35mm-k-9001.png') },
+    gold:     { std:drGW('klamka-nevada-35mm-f4.png'),       lock:drGW('klamka-nevada-klucz-35mm-f9.png') },
+    braun:    { std:drGW('klamka-nevada-35mm-k-8019.png'),   lock:null },
   },
   dublin: {
-    weiss:    { std:DR+'klamki_dublin/klamka_okienna_dublin_-_biaa_ral9016.png',     lock:DR+'klamki_dublin/klamka_okienna_dublin_-_z_kluczem_biaa_ral9016.png' },
-    schwarz:  { std:DR+'klamki_dublin/klamka_okienna_dublin_-_czarna_ral9005.png',   lock:DR+'klamki_dublin/klamka_okienna_dublin_-_z_kluczem_czarna_ral9005.png' },
-    anthrazit:{ std:DR+'klamki_dublin/klamka_okienna_dublin_-_antracyt_ral7016.png', lock:DR+'klamki_dublin/klamka_okienna_dublin_-_z_kluczem_antracyt_ral7016.png' },
-    silber:   { std:DR+'klamki_dublin/klamka_okienna_dublin_-_srebrna.png',          lock:DR+'klamki_dublin/klamka_okienna_dublin_-_z_kluczem_srebrna.png' },
-    braun:    { std:DR+'klamki_dublin/klamka_okienna_dublin_-_brazowa_ral8019.png',  lock:null },
-  },
-  kwadrat: {
-    weiss:    { std:DR+'kwadrat/klamka-kwadrat-35mm-f1.png',     lock:DR+'kwadrat/klamka-kwadratklucz-35mm-k-9016.png' },
-    schwarz:  { std:DR+'kwadrat/klamka-kwadrat-35mm-f9.png',     lock:DR+'kwadrat/klamka-kwadratklucz-35mm-k-9005.png' },
-    anthrazit:{ std:DR+'kwadrat/klamka-kwadrat-35mm-k-7016.png', lock:DR+'kwadrat/klamka-kwadratklucz-35mm-k-7016.png' },
-    silber:   { std:DR+'kwadrat/klamka-kwadrat-35mm-f2.png',     lock:DR+'kwadrat/klamka-kwadratklucz-35mm-k-9001.png' },
-    gold:     { std:DR+'kwadrat/klamka-kwadrat-35mm-f4.png',     lock:DR+'kwadrat/klamka-kwadratklucz-35mm-tytan-f9.png' },
-    braun:    { std:DR+'kwadrat/klamka-kwadrat-35mm-k-8019.png', lock:DR+'kwadrat/klamka-kwadratklucz-35mm-k-8019.png' },
-  },
-  hoppe: {
-    weiss:    { std:DR+'klamka-secustik-35mm-f1.png',  lock:DR+'klamka-secustik-klucz-35mm-f1.png' },
-    schwarz:  { std:DR+'klamka-secustik-35mm-f9.png',  lock:DR+'klamka-secustik-klucz-35mm-f9.png' },
-    silber:   { std:DR+'klamka-secustik-35mm-f2.png',  lock:DR+'klamka-secustik-klucz-35mm-f2.png' },
-    gold:     { std:DR+'klamka-secustik-35mm-f4.png',  lock:null },
-    braun:    { std:DR+'klamka-secustik-35mm-f8.png',  lock:null },
+    weiss:    { std:drGW('klamki_dublin/klamka_okienna_dublin_-_biaa_ral9016.png'),     lock:null },
+    anthrazit:{ std:drGW('klamki_dublin/klamka_okienna_dublin_-_antracyt_ral7016.png'), lock:null },
+    braun:    { std:drGW('klamki_dublin/klamka_okienna_dublin_-_brazowa_ral8019.png'),  lock:null },
   },
   'pz-beid': {
-    weiss:    { std:DR+'klamka-nevada-klucz-35mm-k-9016.png', lock:DR+'klamka-nevada-klucz-35mm-k-9016.png' },
-    schwarz:  { std:DR+'klamka-nevada-klucz-35mm-k-9005.png', lock:DR+'klamka-nevada-klucz-35mm-k-9005.png' },
-    anthrazit:{ std:DR+'klamka-nevada-klucz-35mm-k-7016.png', lock:DR+'klamka-nevada-klucz-35mm-k-7016.png' },
-    silber:   { std:DR+'klamka-nevada-klucz-35mm-k-9001.png', lock:DR+'klamka-nevada-klucz-35mm-k-9001.png' },
+    weiss:    { std:drGW('klamka-nevada-klucz-35mm-k-9016.png'), lock:drGW('klamka-nevada-klucz-35mm-k-9016.png') },
+    schwarz:  { std:drGW('klamka-nevada-klucz-35mm-k-9005.png'), lock:drGW('klamka-nevada-klucz-35mm-k-9005.png') },
+    anthrazit:{ std:drGW('klamka-nevada-klucz-35mm-k-7016.png'), lock:drGW('klamka-nevada-klucz-35mm-k-7016.png') },
+    cremeweiss:{std:drGW('klamka-nevada-klucz-35mm-k-9001.png'), lock:drGW('klamka-nevada-klucz-35mm-k-9001.png') },
   },
 };
-const GRIFF_FALLBACK = DR+'klamka-mistral-35mm-f1.png';
+const GRIFF_FALLBACK = drGW('klamka-mistral-35mm-k-9016.png');
 function griffImgUrl(modell, colorKey, locked) {
   const m = GRIFF_URLS[modell];
   if (!m) return GRIFF_FALLBACK;
@@ -6959,7 +6947,7 @@ function griffImgUrl(modell, colorKey, locked) {
 function buildGriffModels() {
   const g = document.getElementById('griff-model-grid');
   if (!g) return;
-  const models = ['mistral','nevada','dublin','kwadrat','hoppe','pz-beid'];
+  const models = ['mistral','nevada','dublin','pz-beid'];
   g.innerHTML = models.map(m => `
     <div class="griff-opt ${S.griff===m?'sel':''}" data-v="${m}" onclick="pickGriffModel('${m}')">
       <img src="${griffImgUrl(m, S.griffColor, S.griffLocked)}" width="50" height="65"
