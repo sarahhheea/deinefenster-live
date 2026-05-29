@@ -352,15 +352,15 @@
 
     /* Step-Body Card-Grids: einheitliche fixe Card-Breite 165px (wie Farb-Karten).
        Greift bei allen Grids die .oc, .fk oder .glass-card als direkte Kinder haben. */
-    /* 140px-Grid für Bild-Karten — Profil, Flügelaufteilung, Griffe.
-       Wichtig: separate Rules damit ID-Selektoren auch greifen falls :has-Selektoren
-       vom Browser nicht unterstützt werden (würde sonst die ganze Rule invalidieren). */
+    /* Bild-Karten füllen Container in gleichen Spalten (wie Step 4 Öffnungsart) —
+       auto-fit + minmax sorgt für 2-4 Spalten je nach Breite, Karten dehnen sich.
+       Trifft: Profil (Step 2), Flügelaufteilung (Step 3), Anschlag, Griff-Karten. */
     #profil-grid,
     #fluegel-grid {
       display: grid !important;
-      grid-template-columns: repeat(auto-fill, 140px) !important;
-      gap: 14px !important;
-      justify-content: center !important;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)) !important;
+      gap: 12px !important;
+      justify-content: stretch !important;
     }
     .sb .grid:has(> .oc:has(> img)),
     .sb .grid:has(> .fk:has(> img)),
@@ -368,9 +368,9 @@
     .sb div:has(> .oc:has(> img)),
     .sb div:has(> .fk:has(> img)) {
       display: grid !important;
-      grid-template-columns: repeat(auto-fill, 140px) !important;
-      gap: 14px !important;
-      justify-content: center !important;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)) !important;
+      gap: 12px !important;
+      justify-content: stretch !important;
     }
     /* Glas-Cards: horizontales Bild+Text-Layout — Karten fließen nebeneinander
        (1 Karte bei sehr schmaler Steps-Spalte, 2-3 Karten ab ~500px Steps) */
