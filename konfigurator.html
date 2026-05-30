@@ -4409,6 +4409,24 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       <!-- gefüllt von buildGriffColors() -->
     </div>
 
+    <div class="sec-t" style="margin-top:18px">3. Standard oder abschließbar</div>
+    <div class="grid grid-cols-2 gap-2">
+      <div class="oc" id="griff-lock-no" onclick="pickGriffLock(false)" style="padding:12px 14px;cursor:pointer">
+        <div class="ora" style="margin-top:1px"></div>
+        <div>
+          <div class="olabel">Standard-Griff</div>
+          <div class="osub">Ohne Schloss · alltagstauglich</div>
+        </div>
+      </div>
+      <div class="oc" id="griff-lock-yes" onclick="pickGriffLock(true)" style="padding:12px 14px;cursor:pointer">
+        <div class="ora" style="margin-top:1px"></div>
+        <div>
+          <div class="olabel">Abschließbarer Griff</div>
+          <div class="osub">Griff mit Schlüssel-Schloss · Kindersicherung &amp; mehr Einbruchschutz</div>
+        </div>
+      </div>
+    </div>
+
     <button type="button" onclick="openS(10)" class="w-full mt-4 flex items-center justify-center gap-2 font-bold py-3 rounded-full text-white text-sm" style="background:var(--c-primary);font-family:'Plus Jakarta Sans',sans-serif">
       <i class="ms">arrow_forward</i> Weiter zum Einbruchschutz
     </button>
@@ -7036,9 +7054,9 @@ function buildFluegel() {
   if (rwInfo) rwInfo.style.display = '';
   if (S.prod === 'haustuere') {
     // Haustür-Karten: `.fk`-Stil (gleicher Hover/Sel wie Fenster-Flügelaufteilung).
-    // Mehrteiler-Slots 1.7× breiter — damit die Tür auf Seitenteil/2-Flügel-Karten
-    // optisch ungefähr so groß wirkt wie auf der 1-Flügel-Karte.
-    grid.style.gridTemplateColumns = '1fr 1.7fr 1.7fr 1.7fr';
+    // Bilder sind auf EINHEITLICHE Höhe normalisiert; Spaltenbreiten proportional zur
+    // Produktbreite (1 : 1.69 : 1.69 : 1.83) → alle Türen rendern exakt gleich groß.
+    grid.style.gridTemplateColumns = '1fr 1.69fr 1.69fr 1.83fr';
     opts = [
       {v:'1-fluegel',    add:0  },
       {v:'seitenteil-l', add:0},
