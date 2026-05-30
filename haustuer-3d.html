@@ -474,7 +474,14 @@ function roundedRectShape(w, h, r) {
 // ══════════════════════════════════════════════
 const MODELLE = {
   'colorado-inox': {
-    panels: [{x:0.285, y:0.430, w:0.220, h:1.340}]
+    // 5 quadratische Gläser, mittig gestapelt — Glasrahmen verschmelzen zum durchgehenden Inox-Band
+    panels: [
+      {x:0.400, y:1.395, w:0.200, h:0.175},
+      {x:0.400, y:1.190, w:0.200, h:0.175},
+      {x:0.400, y:0.985, w:0.200, h:0.175},
+      {x:0.400, y:0.780, w:0.200, h:0.175},
+      {x:0.400, y:0.575, w:0.200, h:0.175},
+    ]
   },
   'montana-1-inox': {
     panels: [{x:0.400, y:0.320, w:0.185, h:1.460}]
@@ -484,76 +491,139 @@ const MODELLE = {
     // Strips von y=359–1935mm (h=1576mm), Glaseinheit y=359–1712mm (h=1353mm)
     // Strips 223mm HÖHER als Glasfeld — so im Original-Design
     // GFW=0.040 → Glas-Loch: x=0.405 (=0.365+0.040), w=0.190 (=0.595-0.405)
-    panels: [{x:0.405, y:0.399, w:0.190, h:1.273}],
+    panels: [{x:0.405, y:0.360, w:0.190, h:1.355}],
     // Links: unten=359mm (=Glasrahmen-UK), oben=1935mm (+223mm über Glasrahmen-OK)
     // Rechts: unten=136mm (-223mm unter Glasrahmen-UK), oben=1712mm (=Glasrahmen-OK)
     strips: [{x:0.256, y:0.359, w:0.041, h:1.616}, {x:0.704, y:0.096, w:0.040, h:1.616}]
   },
   'montana-3-lr-inox': {
+    // Großes Glasfeld links + Spalte aus 6 SOLIDEN Inox-Blöcken rechts (kein Glas)
     panels: [
       {x:0.275, y:0.235, w:0.175, h:1.565},  // Großes Glasfeld links
-      {x:0.610, y:1.590, w:0.125, h:0.120},  // Kleinfenster 1 (oben)
-      {x:0.610, y:1.330, w:0.125, h:0.120},  // Kleinfenster 2
-      {x:0.610, y:1.070, w:0.125, h:0.120},  // Kleinfenster 3
-      {x:0.610, y:0.810, w:0.125, h:0.120},  // Kleinfenster 4
-      {x:0.610, y:0.550, w:0.125, h:0.120},  // Kleinfenster 5 (unten)
+    ],
+    strips: [
+      {x:0.617, y:1.675, w:0.072, h:0.135},  // Inox-Riegel 1 (oben, senkrecht)
+      {x:0.617, y:1.415, w:0.072, h:0.135},  // Inox-Riegel 2
+      {x:0.617, y:1.155, w:0.072, h:0.135},  // Inox-Riegel 3
+      {x:0.617, y:0.895, w:0.072, h:0.135},  // Inox-Riegel 4
+      {x:0.617, y:0.635, w:0.072, h:0.135},  // Inox-Riegel 5
+      {x:0.617, y:0.375, w:0.072, h:0.135},  // Inox-Riegel 6 (unten)
     ]
   },
   'florida-lr-inox': {
     panels: [{x:0.390, y:0.165, w:0.200, h:1.750}]
   },
   'ohio-inox': {
+    // 3 Quadrate gleichmäßig verteilt + 2 lange Inox-Streifen über volle Höhe
     panels: [
-      {x:0.385, y:1.590, w:0.230, h:0.198},
-      {x:0.385, y:1.245, w:0.230, h:0.198},
-      {x:0.385, y:0.900, w:0.230, h:0.198},
+      {x:0.385, y:1.3175, w:0.230, h:0.205},
+      {x:0.385, y:0.8975, w:0.230, h:0.205},
+      {x:0.385, y:0.4775, w:0.230, h:0.205},
     ],
-    strips: [{x:0.270, y:0.880, w:0.050, h:1.130}, {x:0.680, y:0.880, w:0.050, h:1.130}]
+    strips: [{x:0.275, y:0.330, w:0.050, h:1.440}, {x:0.675, y:0.330, w:0.050, h:1.440}]
   },
   'alaska-1-inox': {
+    // 3 Quadrate mittig auf der Tür zentriert, gleichmäßig gespreizt (Zentren 1.45 / 1.00 / 0.55)
     panels: [
-      {x:0.390, y:1.640, w:0.220, h:0.210},
-      {x:0.390, y:1.270, w:0.220, h:0.210},
-      {x:0.390, y:0.900, w:0.220, h:0.210},
+      {x:0.390, y:1.345, w:0.220, h:0.210},
+      {x:0.390, y:0.895, w:0.220, h:0.210},
+      {x:0.390, y:0.445, w:0.220, h:0.210},
     ]
   },
   'alaska-2-inox': {
+    // 5 Quadrate mittig zentriert (Zentren 1.58 / 1.29 / 1.00 / 0.71 / 0.42)
     panels: [
-      {x:0.390, y:1.750, w:0.220, h:0.195},
-      {x:0.390, y:1.480, w:0.220, h:0.195},
-      {x:0.390, y:1.210, w:0.220, h:0.195},
-      {x:0.390, y:0.940, w:0.220, h:0.195},
-      {x:0.390, y:0.670, w:0.220, h:0.195},
+      {x:0.390, y:1.4825, w:0.220, h:0.195},
+      {x:0.390, y:1.1925, w:0.220, h:0.195},
+      {x:0.390, y:0.9025, w:0.220, h:0.195},
+      {x:0.390, y:0.6125, w:0.220, h:0.195},
+      {x:0.390, y:0.3225, w:0.220, h:0.195},
     ]
   },
   'nebraska-lcr-inox': {
+    // 5 quadratische Gläser mittig gestapelt auf durchgehendem Inox-Band (Glasrahmen verschmelzen)
     panels: [
-      {x:0.360, y:1.720, w:0.220, h:0.195},
-      {x:0.360, y:1.490, w:0.220, h:0.195},
-      {x:0.360, y:1.260, w:0.220, h:0.195},
-      {x:0.360, y:1.030, w:0.220, h:0.195},
-      {x:0.360, y:0.800, w:0.220, h:0.195},
-    ],
-    strips: [{x:0.150, y:0.780, w:0.075, h:1.160}]
+      {x:0.400, y:1.470, w:0.200, h:0.175},
+      {x:0.400, y:1.235, w:0.200, h:0.175},
+      {x:0.400, y:1.000, w:0.200, h:0.175},
+      {x:0.400, y:0.765, w:0.200, h:0.175},
+      {x:0.400, y:0.530, w:0.200, h:0.175},
+    ]
   },
   'pennsylvania-1-inox': {
-    panels: [
-      {x:0.230, y:1.635, w:0.540, h:0.185},
-      {x:0.230, y:0.360, w:0.215, h:1.235},
-      {x:0.555, y:0.360, w:0.215, h:1.235},
-    ]
+    whiteGlass: true,
+    // Y-/Martini-Form: breites flaches Dreieck oben (Spitze unten) + 2 lange, fast senkrechte Glas-Schenkel,
+    // deren schräge Oberkanten das V unter der Dreiecksspitze bilden. Füllt fast die ganze Türhöhe.
+    shapeFn: (T) => {
+      const tri = new T.Shape();   // breites, flaches Dreieck oben (Spitze unten)
+      tri.moveTo(0.368, 1.760); tri.lineTo(0.632, 1.760); tri.lineTo(0.500, 1.605); tri.closePath();
+      // linker Schenkel: fast senkrechter Glas-Balken, nur leicht nach unten/außen geneigt
+      const left = new T.Shape();
+      left.moveTo(0.476, 1.540);   // innen-oben (V-Apex)
+      left.lineTo(0.384, 1.460);   // außen-oben
+      left.lineTo(0.374, 0.360);   // außen-unten (nur leicht nach links)
+      left.lineTo(0.466, 0.360);   // innen-unten
+      left.closePath();
+      // rechter Schenkel: Spiegelbild um x=0.50
+      const right = new T.Shape();
+      right.moveTo(0.524, 1.540);
+      right.lineTo(0.616, 1.460);
+      right.lineTo(0.626, 0.360);
+      right.lineTo(0.534, 0.360);
+      right.closePath();
+      return [tri, left, right];
+    }
   },
   'pennsylvania-2-lr-inox': {
-    panels: [
-      {x:0.375, y:1.580, w:0.175, h:0.170},
-      {x:0.400, y:1.355, w:0.175, h:0.170},
-      {x:0.370, y:1.130, w:0.175, h:0.170},
-      {x:0.400, y:0.905, w:0.175, h:0.170},
-      {x:0.370, y:0.680, w:0.175, h:0.170},
-    ]
+    whiteGlass: true,
+    // Filmstreifen: durchgehendes S-Wellen-Inox-Band, 5 große WEISSE Glaskacheln auf der Wellen-Mittellinie.
+    // Kacheln zentriert auf cx(y) berechnet (folgen exakt der Welle), lassen schmalen Inox-Rand stehen.
+    tiles: [
+      {x:0.413, y:1.510, w:0.170, h:0.170},
+      {x:0.368, y:1.195, w:0.170, h:0.170},
+      {x:0.411, y:0.880, w:0.170, h:0.170},
+      {x:0.481, y:0.565, w:0.170, h:0.170},
+      {x:0.478, y:0.250, w:0.170, h:0.170},
+    ],
+    inoxShapeFn: (T) => {
+      const cx = (y) => 0.515 + 0.062 * Math.sin((y - 0.25) / 1.55 * 2 * Math.PI + 0.55);  // S-Welle, Achse 0.515
+      const hw = 0.108, N = 40, y0 = 0.230, y1 = 1.790;  // schlankes durchgehendes Inox-Band (Filmstreifen, umschließt Kacheln knapp)
+      const r = new T.Shape();
+      r.moveTo(cx(y0) - hw, y0);
+      for (let i = 1; i <= N; i++) { const y = y0 + (y1 - y0) * i / N; r.lineTo(cx(y) - hw, y); }
+      for (let i = 0; i <= N; i++) { const y = y1 - (y1 - y0) * i / N; r.lineTo(cx(y) + hw, y); }
+      r.closePath();
+      return [r];
+    }
   },
   'pennsylvania-3-lr-inox': {
-    panels: [{x:0.230, y:0.200, w:0.385, h:1.710}]
+    whiteGlass: true,
+    // Großes Glasfeld: linke Kante gerade mit Stufe oben-links, rechte Kante leicht konkav (Sichel).
+    // Breiter und höher als zuvor — füllt das Türblatt-Zentrum wie in der Referenz.
+    shapeFn: (T) => {
+      const s = new T.Shape();
+      s.moveTo(0.330, 0.330);
+      s.lineTo(0.330, 1.555);   // linke Kante gerade hoch bis Schulter
+      s.lineTo(0.430, 1.555);   // Stufe nach rechts (Inox-Schulter oben-links)
+      s.lineTo(0.430, 1.760);   // hoch zur Oberkante
+      s.lineTo(0.700, 1.760);   // Oberkante (Kopf, breitester Punkt)
+      s.bezierCurveTo(0.672, 1.300, 0.660, 0.760, 0.668, 0.330);  // rechte Kante nur LEICHT konkav (sanfte Sichel)
+      s.closePath();
+      return [s];
+    },
+    // zwei dünne dunkle Akzent-Linien innen rechts im Glas (lange Sichel + kurze Linie unten)
+    darkLineFn: (T) => {
+      const bez = (t,a,b,c,d) => { const u=1-t; return u*u*u*a + 3*u*u*t*b + 3*u*t*t*c + t*t*t*d; };
+      const curve = (P, w) => {
+        const N = 28, sh = new T.Shape(), R = [];
+        for (let i = 0; i <= N; i++) { const t=i/N; const x=bez(t,P[0][0],P[1][0],P[2][0],P[3][0]); const y=bez(t,P[0][1],P[1][1],P[2][1],P[3][1]); i?sh.lineTo(x-w,y):sh.moveTo(x-w,y); R.push([x+w,y]); }
+        for (let i = R.length-1; i >= 0; i--) sh.lineTo(R[i][0], R[i][1]);
+        sh.closePath(); return sh;
+      };
+      const lang = curve([[0.620,1.660],[0.560,1.150],[0.575,0.640],[0.612,0.430]], 0.006);  // lange Sichel
+      const kurz = curve([[0.560,0.760],[0.575,0.640],[0.588,0.540],[0.598,0.470]], 0.005);   // kurze Linie unten
+      return [lang, kurz];
+    }
   },
   'texas-c-inox':  {panels: [{x:0.413, y:0.235, w:0.175, h:1.580}]},
   'texas-lr-inox': {panels: [{x:0.413, y:0.235, w:0.175, h:1.580}]},
@@ -564,6 +634,42 @@ let _curColor = 'anthrazitgrau';
 let _curWood  = null;
 let _curGlass = 'klar';
 let _curView  = (new URLSearchParams(location.search).get('view') === 'innen') ? 'innen' : 'aussen';
+
+// Schrumpft eine Kontur um konstante Randbreite d (Meter) — pro Achse, damit hohe Formen nicht verzerren
+function insetShape(shape, d) {
+  const pts = shape.getPoints(90);
+  let minx = Infinity, maxx = -Infinity, miny = Infinity, maxy = -Infinity;
+  pts.forEach(p => { minx = Math.min(minx, p.x); maxx = Math.max(maxx, p.x); miny = Math.min(miny, p.y); maxy = Math.max(maxy, p.y); });
+  const cx = (minx + maxx) / 2, cy = (miny + maxy) / 2;
+  const fx = Math.max(0.1, 1 - 2 * d / (maxx - minx)), fy = Math.max(0.1, 1 - 2 * d / (maxy - miny));
+  const s2 = new THREE.Shape();
+  pts.forEach((p, i) => { const x = cx + (p.x - cx) * fx, y = cy + (p.y - cy) * fy; i ? s2.lineTo(x, y) : s2.moveTo(x, y); });
+  s2.closePath(); return s2;
+}
+
+// Echter, GLEICHMÄSSIGER Inward-Offset einer Kontur um Distanz d (konstante Rahmenbreite überall)
+function offsetShape(shape, d) {
+  let pts = shape.getPoints(120).map(p => ({x: p.x, y: p.y}));
+  if (pts.length > 1) { const a = pts[0], b = pts[pts.length - 1]; if (Math.abs(a.x - b.x) < 1e-6 && Math.abs(a.y - b.y) < 1e-6) pts.pop(); }
+  const n = pts.length;
+  let area = 0; for (let i = 0; i < n; i++) { const a = pts[i], b = pts[(i + 1) % n]; area += a.x * b.y - b.x * a.y; }
+  const ccw = area > 0;
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const prev = pts[(i - 1 + n) % n], cur = pts[i], next = pts[(i + 1) % n];
+    let e1x = cur.x - prev.x, e1y = cur.y - prev.y; const l1 = Math.hypot(e1x, e1y) || 1;
+    let e2x = next.x - cur.x, e2y = next.y - cur.y; const l2 = Math.hypot(e2x, e2y) || 1;
+    let n1x, n1y, n2x, n2y;
+    if (ccw) { n1x = -e1y / l1; n1y = e1x / l1; n2x = -e2y / l2; n2y = e2x / l2; }
+    else { n1x = e1y / l1; n1y = -e1x / l1; n2x = e2y / l2; n2y = -e2x / l2; }
+    let bx = n1x + n2x, by = n1y + n2y; const bl = Math.hypot(bx, by) || 1; bx /= bl; by /= bl;
+    const cosang = Math.max(0.4, bx * n1x + by * n1y);
+    out.push([cur.x + bx * d / cosang, cur.y + by * d / cosang]);
+  }
+  const s2 = new THREE.Shape();
+  out.forEach((p, i) => i ? s2.lineTo(p[0], p[1]) : s2.moveTo(p[0], p[1]));
+  s2.closePath(); return s2;
+}
 
 // ══════════════════════════════════════════════
 // buildDoor — baut Türgeometrie für gewähltes Modell
@@ -582,6 +688,8 @@ function buildDoor(modelKey) {
   const model = MODELLE[modelKey] || MODELLE['colorado-inox'];
   const panels = model.panels || [];
   const modelStrips = model.strips || [];
+  const customShapes = model.shapeFn ? model.shapeFn(THREE) : [];   // Glasformen (Y/Sichel)
+  const inoxShapes   = model.inoxShapeFn ? model.inoxShapeFn(THREE) : []; // solide Inox-Bänder (Welle)
 
   // ── Zarge (3-stufig) — IN frameGroup, schwenkt NICHT ──
   const z1w = 0.043, z1d = 0.032;
@@ -615,6 +723,8 @@ function buildDoor(modelKey) {
       hole.closePath();
       s.holes.push(hole);
     });
+    // Custom-Glasformen als Löcher (Y / Sichel)
+    customShapes.forEach(sh => s.holes.push(sh));
     const body = new THREE.Mesh(
       new THREE.ExtrudeGeometry(s, {
         depth: DD,
@@ -657,11 +767,63 @@ function buildDoor(modelKey) {
       m.castShadow = true; m.receiveShadow = true;
       return m;
     };
-    doorGroup.add(gf(p.x + p.w/2,         p.y + p.h + GFW/2, p.w + GFW*2, GFW));
-    doorGroup.add(gf(p.x + p.w/2,         p.y - GFW/2,       p.w + GFW*2, GFW));
-    doorGroup.add(gf(p.x - GFW/2,         p.y + p.h/2,       GFW,         p.h));
-    doorGroup.add(gf(p.x + p.w + GFW/2,   p.y + p.h/2,       GFW,         p.h));
+    if (!model.noPanelFrame) {
+      doorGroup.add(gf(p.x + p.w/2,         p.y + p.h + GFW/2, p.w + GFW*2, GFW));
+      doorGroup.add(gf(p.x + p.w/2,         p.y - GFW/2,       p.w + GFW*2, GFW));
+      doorGroup.add(gf(p.x - GFW/2,         p.y + p.h/2,       GFW,         p.h));
+      doorGroup.add(gf(p.x + p.w + GFW/2,   p.y + p.h/2,       GFW,         p.h));
+    }
   });
+
+  // ── Custom-Glasformen (Y / Sichel): Glas + Inox-Rahmenring ──
+  // Deko-Glas: weiß-matt (wie flache Zeichnung) wenn model.whiteGlass, sonst normales Glas
+  const decoGlass = model.whiteGlass
+    ? new THREE.MeshStandardMaterial({ color: 0xf3f6f9, roughness: 0.85, metalness: 0.0, emissive: 0xe2e9ef, emissiveIntensity: 0.55 })
+    : glassMat;
+  customShapes.forEach(sh => {
+    const inset = offsetShape(sh, 0.028);  // gleichmäßiger Rahmen (konstante Breite)
+    const back = new THREE.Mesh(new THREE.ShapeGeometry(inset), glBackMat);
+    back.position.z = 0.004; doorGroup.add(back);
+    const glass = new THREE.Mesh(new THREE.ShapeGeometry(inset), decoGlass);
+    glass.position.z = DD / 2; doorGroup.add(glass); glassObjects.push(glass);
+    // Inox-Ring = Außenkontur minus Innenkontur
+    const ring = new THREE.Shape();
+    sh.getPoints(90).forEach((p, i) => i ? ring.lineTo(p.x, p.y) : ring.moveTo(p.x, p.y)); ring.closePath();
+    const h = new THREE.Path();
+    inset.getPoints(90).forEach((p, i) => i ? h.lineTo(p.x, p.y) : h.moveTo(p.x, p.y)); h.closePath();
+    ring.holes.push(h);
+    const frame = new THREE.Mesh(new THREE.ShapeGeometry(ring), glFrameMat);
+    frame.position.z = DD - 0.003; frame.castShadow = true; doorGroup.add(frame);
+  });
+
+  // ── Solide Inox-Bänder (Welle) auf der Türfront — beidseitig (Wicklung egal) ──
+  if (inoxShapes.length) {
+    // gebürstetes Mittel-Silber (matter) — kontrastiert gegen die hellweißen Glaskacheln
+    const inoxBandMat = new THREE.MeshStandardMaterial({ color: 0x9aa3aa, roughness: 0.45, metalness: 0.55, envMapIntensity: 1.2, side: THREE.DoubleSide });
+    inoxShapes.forEach(sh => {
+      const m = new THREE.Mesh(new THREE.ShapeGeometry(sh, 64), inoxBandMat);
+      m.position.z = DD + 0.006; m.castShadow = true; doorGroup.add(m);  // vor der Bevel-Front
+    });
+  }
+
+  // ── Glas-Kacheln auf der Front (z.B. Fenster auf dem Wellen-Band) ──
+  (model.tiles || []).forEach(t => {
+    const fr = new THREE.Mesh(new THREE.PlaneGeometry(t.w + 0.024, t.h + 0.024), glFrameMat);
+    fr.position.set(t.x + t.w/2, t.y + t.h/2, DD + 0.0080); doorGroup.add(fr);  // Inox-Rahmen
+    const back = new THREE.Mesh(new THREE.PlaneGeometry(t.w, t.h), glBackMat);
+    back.position.set(t.x + t.w/2, t.y + t.h/2, DD + 0.0085); doorGroup.add(back);
+    const g = new THREE.Mesh(new THREE.PlaneGeometry(t.w - 0.006, t.h - 0.006), decoGlass);
+    g.position.set(t.x + t.w/2, t.y + t.h/2, DD + 0.009); doorGroup.add(g); glassObjects.push(g);  // vor dem Band
+  });
+
+  // ── Dunkle Akzent-Linie auf dem Glas (z.B. Sichel bei pennsylvania-3) ──
+  if (model.darkLineFn) {
+    const darkMat = new THREE.MeshStandardMaterial({ color: 0x0d111a, roughness: 0.5, metalness: 0.2 });
+    model.darkLineFn(THREE).forEach(sh => {
+      const m = new THREE.Mesh(new THREE.ShapeGeometry(sh, 40), darkMat);
+      m.position.z = DD / 2 + 0.006; m.renderOrder = 6; doorGroup.add(m);
+    });
+  }
 
   // ── Dekorative Edelstahl-Strips ───────────────────
   modelStrips.forEach(st => {
