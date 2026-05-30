@@ -4421,7 +4421,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       <div class="oc" id="griff-lock-yes" onclick="pickGriffLock(true)" style="padding:12px 14px;cursor:pointer">
         <div class="ora" style="margin-top:1px"></div>
         <div>
-          <div class="olabel">Abschließbar</div>
+          <div class="olabel">Abschließbarer Griff</div>
           <div class="osub">Mit Schlüssel · Kindersicherung &amp; Einbruchschutz</div>
         </div>
       </div>
@@ -6960,11 +6960,15 @@ function griffImgUrl(modell, colorKey, locked) {
 function buildGriffModels() {
   const g = document.getElementById('griff-model-grid');
   if (!g) return;
-  const models = ['mistral','nevada','dublin','pz-beid'];
+  // PZ beidseitig (Schloss innen + außen) gibt es nur bei Türen (Balkon-/Haus-/Schiebetür),
+  // NICHT bei Fenstern. Bei Fenstern macht der Griff abschließbar über den Toggle "3. Abschließbar".
+  const models = ['mistral','nevada','dublin'];
+  if (S.prod !== 'kunststoff') models.push('pz-beid');
+  if (!models.includes(S.griff)) S.griff = models[0];   // PZ-Reset bei Produktwechsel
   g.innerHTML = models.map(m => `
     <div class="griff-opt ${S.griff===m?'sel':''}" data-v="${m}" onclick="pickGriffModel('${m}')">
-      <img src="${griffImgUrl(m, S.griffColor, S.griffLocked)}" width="50" height="65"
-           style="object-fit:contain;display:block" loading="lazy"
+      <img src="${griffImgUrl(m, S.griffColor, S.griffLocked)}" width="90" height="118"
+           style="object-fit:contain;display:block;margin:0 auto" loading="lazy"
            onerror="if(!this._fb){this._fb=1;this.src=GRIFF_FALLBACK;}else{this.style.opacity='0.3';}"/>
       <div class="olabel">${P.griff[m].name}</div>
       <div class="osub">${GRIFF_MODEL_DESC[m]||''}</div>
