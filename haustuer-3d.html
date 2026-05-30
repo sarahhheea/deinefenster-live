@@ -550,124 +550,11 @@ const MODELLE = {
       {x:0.400, y:0.530, w:0.200, h:0.175},
     ]
   },
-  'pennsylvania-1-inox': {
-    whiteGlass: true,
-    // Material-Zonen wie Referenz (vermessen): 2 BREITE Schenkel + Dreieck oben — alle Inox-Rahmen + WEISSES Glas.
-    // Im Dreieck ein dünner silberner Quersteg nahe der Oberkante (teilt einen schmalen Glasstreifen ab).
-    shapeFn: (T) => {
-      const left = new T.Shape();
-      left.moveTo(0.252, 0.285);   // außen-unten
-      left.lineTo(0.252, 1.565);   // außen-oben (gerade hoch)
-      left.lineTo(0.372, 1.565);   // innen-oben (Oberkante horizontal)
-      left.lineTo(0.452, 1.420);   // innen-Schulter (V-Flanke)
-      left.lineTo(0.452, 0.285);   // innen-unten
-      left.closePath();
-      const right = new T.Shape();
-      right.moveTo(0.748, 0.285);
-      right.lineTo(0.748, 1.565);
-      right.lineTo(0.628, 1.565);
-      right.lineTo(0.548, 1.420);
-      right.lineTo(0.548, 0.285);
-      right.closePath();
-      const tri = new T.Shape();   // gefülltes weißes Glas-Dreieck (Spitze unten) mit Inox-Rahmen
-      tri.moveTo(0.268, 1.795); tri.lineTo(0.732, 1.795); tri.lineTo(0.500, 1.582); tri.closePath();
-      return [left, right, tri];
-    },
-    inoxShapeFn: (T) => {   // dünner silberner Quersteg nahe der Dreiecks-Oberkante
-      const bar = new T.Shape();
-      bar.moveTo(0.378, 1.708); bar.lineTo(0.622, 1.708); bar.lineTo(0.622, 1.728); bar.lineTo(0.378, 1.728); bar.closePath();
-      return [bar];
-    }
-  },
-  'pennsylvania-2-lr-inox': {
-    whiteGlass: true,
-    // Echter Filmstreifen: 2 geschwungene Inox-SCHIENEN + 5 WEISSE Glasquadrate (trapezförmig, der Welle folgend).
-    // Wellen-Mittellinie aus Referenz vermessen, Catmull-Rom-geglättet.
-    _cx: null,  // wird unten gesetzt (geteilte Mittellinien-Funktion)
-    shapeFn: (T) => {   // 5 der Welle folgende Vierecke = Silberrahmen + weißes Glas (gescherte „Quadrate")
-      const P = [[1.620,0.528],[1.568,0.538],[1.388,0.562],[1.207,0.546],[1.027,0.496],[0.936,0.479],[0.756,0.481],[0.575,0.494],[0.330,0.502]];
-      const n = P.length;
-      const cx = (y) => { if (y>=P[0][0]) return P[0][1]; if (y<=P[n-1][0]) return P[n-1][1];
-        let i=0; while (i<n-1 && !(y<=P[i][0]&&y>=P[i+1][0])) i++;
-        const p0=P[Math.max(0,i-1)][1],p1=P[i][1],p2=P[i+1][1],p3=P[Math.min(n-1,i+2)][1];
-        const t=(P[i][0]-y)/(P[i][0]-P[i+1][0]),t2=t*t,t3=t2*t;
-        return 0.5*(2*p1+(-p0+p2)*t+(2*p0-5*p1+4*p2-p3)*t2+(-p0+3*p1-3*p2+p3)*t3); };
-      const centers = [1.505, 1.240, 0.975, 0.710, 0.445], hh = 0.123, hw_in = 0.172;
-      return centers.map(yc => {
-        const yt = yc+hh, yb = yc-hh, ct = cx(yt), cb = cx(yb);
-        const s = new T.Shape();
-        s.moveTo(ct-hw_in, yt); s.lineTo(ct+hw_in, yt); s.lineTo(cb+hw_in, yb); s.lineTo(cb-hw_in, yb); s.closePath();
-        return s;
-      });
-    },
-    inoxShapeFn: (T) => {   // zwei geschwungene Inox-Schienen entlang der gemessenen Mittellinie, dazwischen dunkel
-      const P = [[1.620,0.528],[1.568,0.538],[1.388,0.562],[1.207,0.546],[1.027,0.496],[0.936,0.479],[0.756,0.481],[0.575,0.494],[0.330,0.502]];
-      const n = P.length;
-      const cx = (y) => {   // Catmull-Rom-Glättung durch die gemessenen Stützpunkte
-        if (y >= P[0][0]) return P[0][1];
-        if (y <= P[n-1][0]) return P[n-1][1];
-        let i = 0; while (i < n-1 && !(y <= P[i][0] && y >= P[i+1][0])) i++;
-        const p0 = P[Math.max(0,i-1)][1], p1 = P[i][1], p2 = P[i+1][1], p3 = P[Math.min(n-1,i+2)][1];
-        const t = (P[i][0]-y)/(P[i][0]-P[i+1][0]), t2 = t*t, t3 = t2*t;
-        return 0.5*(2*p1 + (-p0+p2)*t + (2*p0-5*p1+4*p2-p3)*t2 + (-p0+3*p1-3*p2+p3)*t3);
-      };
-      const hw = 0.188, rw = 0.013, N = 72, y0 = 0.310, y1 = 1.625;
-      const rail = (sgn) => {
-        const s = new T.Shape();
-        for (let i = 0; i <= N; i++) { const y = y0 + (y1 - y0) * i / N; s[i ? 'lineTo' : 'moveTo'](cx(y) + sgn * hw - rw, y); }
-        for (let i = N; i >= 0; i--) { const y = y0 + (y1 - y0) * i / N; s.lineTo(cx(y) + sgn * hw + rw, y); }
-        s.closePath(); return s;
-      };
-      return [rail(-1), rail(1)];
-    }
-  },
-  'pennsylvania-3-lr-inox': {
-    whiteGlass: true,
-    // Material-Zonen wie Referenz: ganze Außenform = INOX (Silber), darin links ein weißes Glas-RECHTECK.
-    // Die geschwungene Sichel rechts (zwischen Glas-Rechteck und konkaver Außenkante) ist Metall mit 2 dunklen Linien.
-    inoxShapeFn: (T) => {   // gefüllte Silber-Außenform (aus Referenz vermessen): Stufe oben-links, Haken oben-rechts, rechte Kante konkav
-      const s = new T.Shape();
-      s.moveTo(0.235, 0.310);   // unten-links
-      s.lineTo(0.235, 1.680);   // linke Kante hoch bis Stufen-Shelf
-      s.lineTo(0.415, 1.680);   // Stufe nach rechts (Shelf)
-      s.lineTo(0.415, 1.785);   // hoch zur Oberkante
-      s.lineTo(0.580, 1.790);   // Oberkante
-      s.bezierCurveTo(0.720, 1.802, 0.762, 1.784, 0.748, 1.740);  // Haken/Spitze oben-rechts
-      s.bezierCurveTo(0.600, 1.300, 0.600, 0.700, 0.742, 0.310);  // rechte Kante konkav (Mitte ~0.636 schmal, oben+unten breit)
-      s.closePath();
-      return [s];
-    },
-    glassInsetFn: (T) => {   // weißes Glas-Rechteck LINKS (aus Referenz vermessen, x0.255–0.525) mit Stufe oben-links
-      const g = new T.Shape();
-      const r = 0.018;
-      g.moveTo(0.255, 0.355 + r);
-      g.lineTo(0.255, 1.555);                               // linke Kante hoch bis Stufe
-      g.lineTo(0.350, 1.555);                               // Stufen-Schulter
-      g.lineTo(0.350, 1.648 - r);
-      g.quadraticCurveTo(0.350, 1.648, 0.350 + r, 1.648);   // runde obere Stufen-Ecke
-      g.lineTo(0.525 - r, 1.648);                           // Oberkante
-      g.quadraticCurveTo(0.525, 1.648, 0.525, 1.648 - r);   // runde Ecke oben-rechts
-      g.lineTo(0.525, 0.355 + r);                           // gerade rechte Kante (Silber-Sichel beginnt rechts)
-      g.quadraticCurveTo(0.525, 0.355, 0.525 - r, 0.355);   // runde Ecke unten-rechts
-      g.lineTo(0.255 + r, 0.355);                           // Unterkante
-      g.quadraticCurveTo(0.255, 0.355, 0.255, 0.355 + r);   // runde Ecke unten-links
-      g.closePath();
-      return [g];
-    },
-    // zwei dünne dunkle Akzent-Linien auf der Silber-Sichel (rechts)
-    darkLineFn: (T) => {
-      const bez = (t,a,b,c,d) => { const u=1-t; return u*u*u*a + 3*u*u*t*b + 3*u*t*t*c + t*t*t*d; };
-      const curve = (P, w) => {
-        const N = 28, sh = new T.Shape(), R = [];
-        for (let i = 0; i <= N; i++) { const t=i/N; const x=bez(t,P[0][0],P[1][0],P[2][0],P[3][0]); const y=bez(t,P[0][1],P[1][1],P[2][1],P[3][1]); i?sh.lineTo(x-w,y):sh.moveTo(x-w,y); R.push([x+w,y]); }
-        for (let i = R.length-1; i >= 0; i--) sh.lineTo(R[i][0], R[i][1]);
-        sh.closePath(); return sh;
-      };
-      const lang = curve([[0.690,1.700],[0.628,1.150],[0.628,0.680],[0.690,0.430]], 0.006);  // lange Linie folgt der konkaven Sichel
-      const kurz = curve([[0.600,0.860],[0.605,0.740],[0.608,0.640],[0.605,0.560]], 0.005);   // kurze, fast senkrechte Linie mittig-unten
-      return [lang, kurz];
-    }
-  },
+  // Pennsylvania 1/2/3: Motiv als pixelgenaues Decal direkt aus der Drutex-Katalogvorlage (img/haustuer-motiv/*).
+  // Silber + weißes Glas mit transparentem Hintergrund → 1:1-Optik; Türfarbe scheint durch. Spiegelt mit der Tür-Hand.
+  'pennsylvania-1-inox':    { decalTexture: 'img/haustuer-motiv/pennsylvania-1.png' },
+  'pennsylvania-2-lr-inox': { decalTexture: 'img/haustuer-motiv/pennsylvania-2.png' },
+  'pennsylvania-3-lr-inox': { decalTexture: 'img/haustuer-motiv/pennsylvania-3.png' },
   'texas-c-inox':  {panels: [{x:0.413, y:0.235, w:0.175, h:1.580}]},
   'texas-lr-inox': {panels: [{x:0.413, y:0.235, w:0.175, h:1.580}]},
 };
@@ -787,6 +674,20 @@ function buildDoor(modelKey) {
     );
     body.castShadow = true; body.receiveShadow = true;
     doorGroup.add(body);
+  }
+
+  // ── Motiv-Decal: exaktes Katalog-Motiv (Silber+weißes Glas) als flaches Overlay, Rest transparent ──
+  // Pixelgenau aus der Drutex-Vorlage extrahiert → 1:1-Optik; Türfarbe scheint durch die transparenten Stellen.
+  if (model.decalTexture) {
+    texLoader.load(model.decalTexture, (tex) => {
+      tex.colorSpace = THREE.SRGBColorSpace;
+      tex.anisotropy = 8; tex.minFilter = THREE.LinearMipmapLinearFilter;
+      const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, alphaTest: 0.05, depthWrite: false });
+      const plane = new THREE.Mesh(new THREE.PlaneGeometry(DW, DH), mat);
+      plane.position.set(DW / 2, DH / 2, DD + 0.014);
+      plane.renderOrder = 5;
+      doorGroup.add(plane);
+    });
   }
 
   // ── Profilnut ─────────────────────────────────────
