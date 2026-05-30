@@ -203,11 +203,13 @@ const FIXED_KATEGORIEN = {
 /* ─── Sub-Kategorie aus Sheet (z.B. "fenster-1fluegel") auf Hauptgruppe mappen ─── */
 function kategorieZuGruppe(kat) {
   if (!kat) return '';
-  if (kat.startsWith('fenster-') || ['festelement','kellerfenster','rundfenster','rundbogenfenster','stichbogenfenster'].includes(kat)) return 'fenster';
+  if (kat.startsWith('fenster-') || ['festelement','kellerfenster','rundfenster','rundbogenfenster','stichbogenfenster','dachfenster'].includes(kat)) return 'fenster';
   if (kat.startsWith('balkontuer-')) return 'balkontuer';
   if (kat === 'haustuer' || kat.startsWith('haustuer-')) return 'haustuer';
   if (kat.startsWith('schiebetuer-')) return 'schiebetuer';
-  if (['daemmung','baumaterialien','garagentor-gebraucht'].includes(kat)) return kat;
+  // Einstell-Formular speichert den Schlüssel 'garagentor' — Shop-Hauptgruppe heißt aber 'garagentor-gebraucht'. Beide akzeptieren.
+  if (kat === 'garagentor' || kat === 'garagentor-gebraucht') return 'garagentor-gebraucht';
+  if (['daemmung','baumaterialien'].includes(kat)) return kat;
   return '';
 }
 
