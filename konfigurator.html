@@ -4476,7 +4476,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
     </div>
     <div class="info mt-3">
       <i class="ms f" style="color:var(--c-primary);font-size:20px;flex-shrink:0">info</i>
-      <div>Drutex Stoßgriff M2 — Standard-Innengriff für IGLO-HS Schiebetüren. Wählen Sie die Farbe passend zu Ihrer Rahmen- oder Wohnungs-Ausstattung.</div>
+      <div>Drutex IGLO-HS: innen der versenkte Smart-Slide-Flachgriff, außen der Stoßgriff M2 (Bügel). Wählen Sie jeweils die Farbe passend zu Ihrer Ausstattung.</div>
     </div>
     <button type="button" onclick="openS(10)" class="w-full mt-4 flex items-center justify-center gap-2 font-bold py-3 rounded-full text-white text-sm" style="background:var(--c-primary);font-family:'Plus Jakarta Sans',sans-serif">
       <i class="ms">arrow_forward</i> Weiter zum Einbruchschutz
@@ -5459,16 +5459,16 @@ const P = {
     'stoss-q45r':    { name:'Stoßgriff Q45R (Edelstahl)', add:0, group:'Stoßgriff Edelstahl', img:'img/drutex-griffe/stoss-q45r.webp' },
     'stoss-z1':      { name:'Stoßgriff Z1 (Edelstahl)',  add:0, group:'Stoßgriff Edelstahl', img:'img/drutex-griffe/stoss-z1.webp' },
   },
-  // IGLO-HS Innen-Griff = Drutex Stoßgriff M2 (vorstehender U-Griff, 2 Farben).
+  // IGLO-HS INNEN-Griff = Drutex Smart Slide (versenkter Flachgriff, 3 Farben).
   hstGriff: {
-    'weiss': { name:'Stoßgriff M2 (weiß)', add:0, img:'img/drutex-griffe/stoss-m2-weiss.webp' },
-    'braun': { name:'Stoßgriff M2 (braun)', add:0, img:'img/drutex-griffe/stoss-m2-braun.webp' },
-  },
-  // IGLO-HS Außen-Griff = Drutex Smart Slide (versenkter Flachgriff, 3 Farben).
-  hstGriffAussen: {
     'silber':  { name:'Smart Slide · Silber',  fullName:'Smart Slide (Silber)',         add:0, img:'img/drutex-griffe/smart-slide-silber.webp' },
     'ral9016': { name:'Smart Slide · Weiß',    fullName:'Smart Slide (RAL 9016 Weiß)',  add:0, img:'img/drutex-griffe/smart-slide-9016.webp' },
     'ral9005': { name:'Smart Slide · Schwarz', fullName:'Smart Slide (RAL 9005 Schwarz)', add:0, img:'img/drutex-griffe/smart-slide-9005.webp' },
+  },
+  // IGLO-HS AUSSEN-Griff = Drutex Stoßgriff M2 (vorstehender U-Bügelgriff, 2 Farben).
+  hstGriffAussen: {
+    'weiss': { name:'Stoßgriff M2 (weiß)', add:0, img:'img/drutex-griffe/stoss-m2-weiss.webp' },
+    'braun': { name:'Stoßgriff M2 (braun)', add:0, img:'img/drutex-griffe/stoss-m2-braun.webp' },
   },
 };
 
@@ -5494,8 +5494,8 @@ const S = {
   roll:'ohne', rollSeite:'rechts', rollKasten:'175',  // W8 Fix (Insekt entfernt)
   tuerGriffInnen:'drueck-weiss', tuerGriffAussen:'htg-30a',  // Sarah 21.04.2026: 4×14
   pskKammer:'iglo5',  // Sarah 21.04.2026: Kammer-System nur für PSK relevant
-  hstGriff:'weiss',           // Innen-Stoßgriff IGLO-HS
-  hstGriffAussen:'silber',    // Außen-Smart-Slide IGLO-HS
+  hstGriff:'silber',          // Innen = Smart Slide IGLO-HS
+  hstGriffAussen:'weiss',     // Außen = Stoßgriff M2 IGLO-HS
   sicher:'wk1',
   tuerModell: null,
   hstSchwelle:'standard', hstTeilung:'2-teilig', hstLauf:'rechts',  // Fix W9
@@ -5728,8 +5728,8 @@ function resetConfigForNextItem() {
   S.sicher = 'wk1'; S.schall = 'ohne'; S.sicherGlas = 'kein';
   S.tuerModell = null;
   S.tuerGriffInnen = 'drueck-weiss'; S.tuerGriffAussen = 'htg-30a';
-  S.hstGriff = 'weiss';
-  S.hstGriffAussen = 'silber';
+  S.hstGriff = 'silber';
+  S.hstGriffAussen = 'weiss';
   S.hstSchwelle = 'standard'; S.hstTeilung = '2-teilig'; S.hstLauf = 'rechts';
   S.balkonSchwelle = 'alu-20';
   S.pskKammer = 'iglo5';  // Sarah 21.04.2026
@@ -6145,16 +6145,14 @@ function buildSzButtons() {
   wrap.innerHTML = list.map(([b,h]) => `<button class="szb" onclick="setSz(${b},${h})">${b}×${h}</button>`).join('');
 }
 
-// IGLO-HS Griffauswahl: Innen-Stoßgriff M2 (2 Optionen) + Außen-Smart-Slide (3 Optionen).
-// Beide Sektionen mit echten Drutex-Produktfotos.
+// IGLO-HS Griffauswahl: Innen = Smart Slide Flachgriff (3 Optionen) + Außen = Stoßgriff M2 Bügel (2 Optionen).
+// Beide Sektionen mit echten Drutex-Produktfotos (Bild füllt die Karte, kein Rahmen-Kasten).
 function buildHstGriff() {
   const grid = document.getElementById('hst-griff-grid');
   if (!grid) return;
   const mkCard = (k, v, selected, onclickName) => `
-    <div class="oc${selected?' sel':''}" data-v="${k}" onclick="${onclickName}(this)" style="flex-direction:column;align-items:stretch;text-align:center;padding:12px;gap:8px">
-      <div style="background:#0c1930;border-radius:8px;padding:8px;display:flex;align-items:center;justify-content:center;min-height:140px">
-        <img src="${v.img}" alt="${v.name}" loading="lazy" decoding="async" style="max-width:120px;max-height:140px;object-fit:contain;display:block"/>
-      </div>
+    <div class="oc${selected?' sel':''}" data-v="${k}" onclick="${onclickName}(this)" style="flex-direction:column;align-items:stretch;text-align:center;padding:10px;gap:8px">
+      <img src="${v.img}" alt="${v.name}" loading="lazy" decoding="async" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:10px;display:block"/>
       <div style="display:flex;align-items:center;justify-content:center;gap:8px">
         <div class="ora" style="flex-shrink:0"></div>
         <div class="olabel" style="font-size:13px;font-weight:700">${v.name}</div>
@@ -10672,7 +10670,7 @@ function _renderHst3d() {
     : (HAUS3D_COLOR_MAP[S.fi] || HAUS3D_COLOR_MAP[S.fa] || 'anthrazitgrau');
   const isWood = HAUS3D_WOOD_KEYS.has(_ck);
   const _side  = (S.oeff1 === 'dreh-l' || S.oeff1 === 'dk-l') ? 'l' : 'r';
-  const _grip  = S.hstGriff || 'weiss';
+  const _grip  = S.hstGriffAussen || 'weiss';  // 3D zeigt den Bügel-Stoßgriff = Außen-Griff → dessen Farbe (weiss/braun) steuert die 3D-Griff-Farbe
 
   wrap.style.display = 'block';
 
@@ -11187,7 +11185,7 @@ async function submitForm(e) {
   if (S.prod === 'haustuere') {
     griffName = `Innen: ${P.tuerGriffInnen[S.tuerGriffInnen]?.name||S.tuerGriffInnen} / Außen: ${P.tuerGriffAussen[S.tuerGriffAussen]?.name||S.tuerGriffAussen}`;
   } else if (S.prod === 'hst') {
-    griffName = P.hstGriff[S.hstGriff]?.name || S.hstGriff;
+    griffName = `Innen: ${P.hstGriff[S.hstGriff]?.name||S.hstGriff} / Außen: ${P.hstGriffAussen[S.hstGriffAussen]?.name||S.hstGriffAussen}`;
   } else {
     griffName = P.griff[S.griff]?.name||S.griff;
   }
@@ -11224,7 +11222,7 @@ async function submitForm(e) {
     dichtung:    fdName,
     sprossen:    sproStr,
     griff:       S.prod === 'haustuere' ? ('Innen: ' + (P.tuerGriffInnen[S.tuerGriffInnen]?.name || S.tuerGriffInnen) + ' / Außen: ' + (P.tuerGriffAussen[S.tuerGriffAussen]?.name || S.tuerGriffAussen))
-                 : S.prod === 'hst'       ? (P.hstGriff[S.hstGriff]?.name || S.hstGriff)
+                 : S.prod === 'hst'       ? ('Innen: ' + (P.hstGriff[S.hstGriff]?.name || S.hstGriff) + ' / Außen: ' + (P.hstGriffAussen[S.hstGriffAussen]?.name || S.hstGriffAussen))
                  : griffName,
     shutter:     rollName,
     sicherheit:  sicherName,
