@@ -940,11 +940,44 @@
     /* Hero Mobile-Fix: gleichmäßig dunkler Overlay statt 120deg-Verlauf,
        damit Text auf Foto-Hintergrund konsistent lesbar bleibt. */
     @media (max-width: 767px) {
+      /* Mobile: Hof-Foto bleibt fast vollständig sichtbar.
+         Nur dezentes Abdunkeln oben (hinter H1) + unten (hinter Buttons),
+         Bildmitte bleibt klar. Lesbarkeit kommt aus Text-Schatten, nicht Schleier. */
       section.relative > div.absolute[style*="120deg"] {
         background: linear-gradient(180deg,
-          rgba(6,14,30,0.92) 0%,
-          rgba(6,14,30,0.78) 50%,
-          rgba(10,21,48,0.65) 100%) !important;
+          rgba(6,14,30,0.58) 0%,
+          rgba(6,14,30,0.32) 18%,
+          rgba(6,14,30,0.10) 40%,
+          rgba(6,14,30,0.06) 62%,
+          rgba(6,14,30,0.34) 100%) !important;
+      }
+      /* Akzentzeile (hellblau-kursiv) über hellem Himmel lesbar halten */
+      .hero-headline .df-section-title-accent {
+        filter: none !important;
+        text-shadow: 0 2px 16px rgba(0,0,0,0.92), 0 1px 4px rgba(0,0,0,0.9) !important;
+      }
+      /* Bottom-Fade zurücknehmen, sonst frisst er das untere Foto-Drittel */
+      section.relative > div.absolute.bottom-0[class*="h-1/3"] {
+        height: 26% !important;
+        background: linear-gradient(to top, rgba(10,21,48,0.72) 0%, transparent 100%) !important;
+      }
+      /* Text-Lesbarkeit lokal über Schatten sichern (Overlay ist jetzt leicht) */
+      .hero-headline { text-shadow: 0 2px 18px rgba(0,0,0,0.9), 0 1px 4px rgba(0,0,0,0.85) !important; }
+      .hero-sub { text-shadow: 0 1px 4px rgba(0,0,0,0.95), 0 2px 14px rgba(0,0,0,0.8) !important; }
+      .hero-trust a, .hero-trust span { text-shadow: 0 1px 7px rgba(0,0,0,0.9) !important; }
+      /* iPhone-Sperrbildschirm-Stil: Milchglas-Buttons, Foto scheint durch */
+      .hero-btns a {
+        backdrop-filter: blur(18px) saturate(150%) !important;
+        -webkit-backdrop-filter: blur(18px) saturate(150%) !important;
+        background: rgba(255,255,255,0.13) !important;
+        border: 1px solid rgba(255,255,255,0.45) !important;
+        box-shadow: 0 6px 24px rgba(0,0,0,0.32) !important;
+        text-shadow: 0 1px 5px rgba(0,0,0,0.7) !important;
+      }
+      /* Primär-CTA leicht blau getönt für Hierarchie, bleibt aber glasig */
+      .hero-btns a.cta-glow {
+        background: rgba(34,94,170,0.42) !important;
+        border: 1px solid rgba(168,201,255,0.7) !important;
       }
       .hero-headline { font-size: 1.55rem !important; line-height: 1.15 !important; }
       .hero-sub { font-size: 0.92rem !important; }
@@ -956,6 +989,14 @@
       section.relative.w-full {
         padding-top: calc(140px + env(safe-area-inset-top, 0px)) !important;
         padding-bottom: 64px !important;
+      }
+    }
+    /* Fallback: Browser ohne Milchglas-Support -> kräftigere Deckung,
+       damit der weiße Button-Text auf hellem Foto lesbar bleibt */
+    @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+      @media (max-width: 767px) {
+        .hero-btns a { background: rgba(10,20,48,0.86) !important; }
+        .hero-btns a.cta-glow { background: rgba(34,94,170,0.92) !important; }
       }
     }
   </style>
