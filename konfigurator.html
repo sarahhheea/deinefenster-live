@@ -2825,11 +2825,13 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
     }
 
     /* ── Profil-Bilder: dunkler Navy-Hintergrund ── */
-    #profil-grid .oc img {
+    #profil-grid .oc img,
+    #psk-kammer-grid .oc img {
       background: rgba(8,18,50,0.90) !important;
       border-radius: 10px !important;
       padding: 8px !important;
     }
+    #psk-kammer-grid .oc img { width: 100%; height: auto; display: block; }
 
     /* ── Flügel / Optionskarten: Bilder auf dunklem Träger ── */
     .sb .fk img, .sb .fk svg { background: transparent !important; }
@@ -3944,13 +3946,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
     <div id="profil-grid" style="display:grid;grid-template-columns:repeat(auto-fill, 140px);gap:14px">
       <!-- filled by JS based on product -->
     </div>
-    <!-- Inhaberin-Vorgabe 21.04.2026: PSK-Schiebetür braucht zusätzlich Kammer-System-Auswahl -->
-    <div id="psk-kammer-block" class="hidden mt-4">
-      <div class="sec-t" style="margin-top:0">Kammer-System für PSK</div>
-      <div id="psk-kammer-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        <!-- von buildPskKammer() gefüllt -->
-      </div>
-    </div>
+    <!-- PSK-System-Auswahl wurde in eigenen Schritt s-psk ausgelagert (Kundenwunsch 31.05.2026) -->
     <!-- Info-Hinweis für IGLO Slide / IGLO-HS: keine extra Kammer-Auswahl -->
     <div id="hst-eigensystem-info" class="info mt-3 hidden" style="background:#eff6ff;border-left:4px solid #3b82f6">
       <i class="ms f" style="color:var(--c-primary);font-size:20px;flex-shrink:0">info</i>
@@ -3960,9 +3956,30 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       <i class="ms f" style="color:var(--c-primary);font-size:20px;flex-shrink:0">eco</i>
       <div>Höhere Kammerzahl = bessere Wärmedämmung. GEG 2024 konform je nach Profil und Verglasung.</div>
     </div>
-    <button type="button" onclick="openS(3)" class="w-full mt-4 flex items-center justify-center gap-2 font-bold py-3 rounded-full text-white text-sm" style="background:var(--c-primary);font-family:'Plus Jakarta Sans',sans-serif">
-      <i class="ms">arrow_forward</i> Weiter zur Flügelaufteilung
+    <button type="button" onclick="openS(findNextVisibleStep('2')||3)" class="w-full mt-4 flex items-center justify-center gap-2 font-bold py-3 rounded-full text-white text-sm" style="background:var(--c-primary);font-family:'Plus Jakarta Sans',sans-serif">
+      <i class="ms">arrow_forward</i> Weiter
     </button>
+  </div>
+</div>
+
+<!-- ── SCHRITT PSK-SYSTEM (nur Schiebetür PSK) — eigener Schritt nach Typ-Wahl (Kundenwunsch 31.05.2026) ── -->
+<div class="sc" id="s-psk" style="display:none">
+  <div class="sh" onclick="tog('-psk')">
+    <div class="badge" id="b-psk">2</div>
+    <div class="flex-1">
+      <div class="slabel">PSK-System</div>
+      <div class="sdesc" id="d-psk">Welches PSK-System?</div>
+    </div>
+    <i class="ms chev">expand_more</i>
+  </div>
+  <div class="sb">
+    <div id="psk-kammer-grid" style="display:grid;grid-template-columns:repeat(auto-fill, 200px);gap:14px">
+      <!-- von buildPskKammer() gefüllt -->
+    </div>
+    <div class="info mt-3">
+      <i class="ms f" style="color:var(--c-primary);font-size:20px;flex-shrink:0">eco</i>
+      <div>Höhere Kammerzahl = bessere Wärmedämmung. IGLO 5 Classic PSK für die Modernisierung, IGLO Energy PSK für Neubau und höchste Dämmung.</div>
+    </div>
   </div>
 </div>
 
@@ -5255,8 +5272,8 @@ const P = {
   // Sarah-Vorgabe 21.04.2026: PSK-Schiebetür hat zusätzlich Kammer-System-Auswahl.
   // IGLO Slide und IGLO-HS sind eigene Systeme ohne weitere Unter-Auswahl.
   pskKammer: {
-    'iglo5':       { name:'IGLO 5 Kammer Klassik', add:0,  sub:'5-Kammer · 70 mm · Uw 0,83 · Standard' },
-    'iglo-energy': { name:'IGLO Energy',           add:0, sub:'7-Kammer · 82 mm · Uw 0,71 · Premium-Wärmeschutz' },
+    'iglo5':       { name:'IGLO 5 Classic PSK', add:0,  sub:'5-Kammer · 70 mm · Uw 0,83 · Standard' },
+    'iglo-energy': { name:'IGLO Energy PSK',     add:0, sub:'7-Kammer · 82 mm · Uw 0,71 · Premium-Wärmeschutz' },
   },
   fa: { // Außenfarbe
     'weiss':       { name:'Weiß (RAL 9016)',                    add:0,   hex:'#f4f4f0', border:'#d0d0c8' },
@@ -5892,7 +5909,7 @@ function buildNav() {
 }
 
 // Visuelle Reihenfolge aller Konfigurator-Steps (matched HTML-Order Z.3692-4605)
-const STEP_ORDER = ['2','3','4','5','-anzahl','-tm','6','7','8','9','-balk','9s','9t','10','11','12','-rv','13'];
+const STEP_ORDER = ['2','-psk','3','4','5','-anzahl','-tm','6','7','8','9','-balk','9s','9t','10','11','12','-rv','13'];
 
 function findNextVisibleStep(currentN) {
   const idx = STEP_ORDER.indexOf(String(currentN));
@@ -6311,7 +6328,8 @@ function applyStepVisibility() {
   const rules = {
     's-tm':  { show: S.prod === 'haustuere',           openIf: true  }, // Türmodell
     's-balk':{ show: S.prod === 'balkontuer',          openIf: false }, // Balkontür-Spezifika (Sarah 21.04.2026)
-    's3':    { show: S.prod !== 'hst' || S.profil === 'iglo-hs' }, // HST sonst ohne Aufteilung; bei IGLO-HS zeigt Step 3 die rechts/links-öffnend-Karten (Sarah 27.05.2026)
+    's-psk': { show: S.prod === 'hst' && S.profil === 'iglo-psk' }, // PSK-System-Schritt (Classic/Energy) — eigener Schritt nach Typ-Wahl (Kundenwunsch 31.05.2026)
+    's3':    { show: S.prod !== 'hst' || S.profil === 'iglo-hs' || S.profil === 'iglo-psk' }, // HST sonst ohne Aufteilung; IGLO-HS + PSK zeigen Step 3 die Links/Rechts-Karten
     's-rv':  { show: !!S.prod,                         openIf: false }, // Rahmenverbreiterung (Sarah-Wunsch 21.04.2026: bei allen Produkten)
     'glasdekor-haustuer-hint': { show: S.prod === 'haustuere', openIf: false, isHint: true }, // Hinweis für Glasdekor bei Haustür
     's9':    { show: S.prod !== 'haustuere' && S.prod !== 'hst', resetState: () => { /* Fenstergriffe nur bei Fenster/Balkon */ } },
@@ -6472,13 +6490,21 @@ function pick(el, key) {
     // Sarah-Vorgabe 21.04.2026: PSK-Block / IGLO Slide / IGLO-HS Info-Block togglen
     if (S.prod === 'hst') {
       updateHstProfilBlocks();
+      applyStepVisibility();
+      // Schritt 4 (Schiebetür-Spezifika) immer mit aktuellem Profil-Kontext neu aufbauen
+      // (PSK: ohne Laufrichtung · Slide: mit · IGLO-HS: nur Schwelle)
+      if (typeof buildOeffSash === 'function') buildOeffSash();
       if (v === 'iglo-hs') {
         // IGLO-HS: Step 3 sichtbar machen + Karten neu bauen + dorthin springen
-        applyStepVisibility();
         buildFluegel();
         setTimeout(()=>openS(3), 200);
-      } else if (v !== 'iglo-psk') {
-        // IGLO Slide: direkt zu Schritt 4 (PSK braucht erst Kammer-Auswahl)
+      } else if (v === 'iglo-psk') {
+        // PSK: eigener System-Schritt (Classic/Energy) zuerst, danach Links/Rechts
+        buildPskKammer();
+        buildFluegel();
+        setTimeout(()=>openS('-psk'), 200);
+      } else {
+        // IGLO Slide: direkt zu Schritt 4
         setTimeout(()=>openS(4), 200);
       }
     } else {
@@ -6635,15 +6661,12 @@ function onMassBlur() {
 function buildPskKammer() {
   const grid = document.getElementById('psk-kammer-grid');
   if (!grid) return;
+  // Eigener Schritt s-psk: große Karten im Profil-Karten-Stil (mit Profil-Querschnitt-SVG)
   grid.innerHTML = Object.entries(P.pskKammer).map(([k, v]) => `
-    <div class="oc${S.pskKammer===k?' sel':''}" data-v="${k}" onclick="pickPskKammer(this)" style="flex-direction:column;align-items:flex-start;padding:12px 14px;gap:4px">
-      <div style="display:flex;align-items:flex-start;gap:10px;width:100%">
-        <div class="ora" style="margin-top:3px;flex-shrink:0"></div>
-        <div style="flex:1">
-          <div class="olabel" style="font-size:14px">${v.name}</div>
-          <div class="osub" style="font-size:12px;margin-top:2px">${v.sub}</div>
-        </div>
-      </div>
+    <div class="oc${S.pskKammer===k?' sel':''}" data-v="${k}" onclick="pickPskKammer(this)" style="flex-direction:column;align-items:stretch;gap:6px;padding:12px;text-align:center">
+      ${typeof pvProfileSVG==='function' ? pvProfileSVG(k) : ''}
+      <div class="olabel" style="font-size:14px;margin-top:4px">${v.name}</div>
+      <div class="osub" style="font-size:12px">${v.sub}</div>
     </div>`).join('');
 }
 
@@ -6652,36 +6675,34 @@ function pickPskKammer(el) {
   S.pskKammer = v;
   el.parentElement.querySelectorAll('.oc').forEach(c => c.classList.remove('sel'));
   el.classList.add('sel');
-  // Nach Kammer-Wahl: direkt zu Schritt 4 (HST-Spezifika: Schwelle/Teilung/Laufrichtung)
-  setTimeout(() => openS(4), 200);
+  const d = document.getElementById('d-psk');
+  if (d) d.textContent = P.pskKammer[v]?.name || v;
+  mkDone('-psk');
+  // Nach System-Wahl: weiter zu Schritt 3 (PSK-Links / PSK-Rechts)
+  if (typeof applyStepVisibility === 'function') applyStepVisibility();
+  if (typeof buildFluegel === 'function') buildFluegel();
+  if (typeof buildOeffSash === 'function') buildOeffSash(); // Schritt 4 mit PSK-Kontext (ohne Laufrichtung) neu aufbauen
+  setTimeout(() => openS(3), 200);
   upSidebar(); drawPrev();
 }
 
-// Toggle welche Blöcke unter Profil-Grid sichtbar sind (je nach gewähltem Schiebetür-Typ)
+// Toggle Info-Block (IGLO Slide / IGLO-HS = Eigensysteme ohne Unter-Auswahl).
+// PSK-System hat einen eigenen Schritt (s-psk), daher hier kein Inline-Block mehr.
 function updateHstProfilBlocks() {
-  const pskBlock = document.getElementById('psk-kammer-block');
   const infoBlock = document.getElementById('hst-eigensystem-info');
   const infoName = document.getElementById('hst-eigensystem-name');
-  if (!pskBlock || !infoBlock) return;
-  if (S.prod !== 'hst') {
-    pskBlock.classList.add('hidden');
+  if (!infoBlock) return;
+  if (S.prod !== 'hst' || S.profil === 'iglo-psk') {
     infoBlock.classList.add('hidden');
     return;
   }
-  if (S.profil === 'iglo-psk') {
-    pskBlock.classList.remove('hidden');
-    infoBlock.classList.add('hidden');
-    buildPskKammer();
-  } else if (S.profil === 'iglo-slide') {
-    pskBlock.classList.add('hidden');
+  if (S.profil === 'iglo-slide') {
     infoBlock.classList.remove('hidden');
     if (infoName) infoName.textContent = 'IGLO Slide';
   } else if (S.profil === 'iglo-hs') {
-    pskBlock.classList.add('hidden');
     infoBlock.classList.remove('hidden');
     if (infoName) infoName.textContent = 'IGLO-HS Schiebetür';
   } else {
-    pskBlock.classList.add('hidden');
     infoBlock.classList.add('hidden');
   }
 }
@@ -6867,6 +6888,34 @@ function hsSchiebeSVG(richtung) {
   </svg>`;
 }
 
+// PSK-Schematik: Anthrazit-Rahmen, helles Glas, Kipp-Diagonalen auf dem aktiven Flügel,
+// grüner Schiebe-Pfeil. Ansicht von Innen. richtung='rechts' = Schiebeflügel rechts
+// (X + Griff rechts, schiebt nach links → Pfeil links). richtung='links' = spiegelverkehrt.
+function pskSchiebeSVG(richtung) {
+  const schiebt = richtung === 'rechts';
+  const xMarker = schiebt
+    ? `<line x1="100" y1="16" x2="184" y2="114" stroke="#6b7480" stroke-width="1.4"/>
+       <line x1="184" y1="16" x2="100" y2="114" stroke="#6b7480" stroke-width="1.4"/>`
+    : `<line x1="16" y1="16" x2="100" y2="114" stroke="#6b7480" stroke-width="1.4"/>
+       <line x1="100" y1="16" x2="16" y2="114" stroke="#6b7480" stroke-width="1.4"/>`;
+  const griff = schiebt
+    ? `<rect x="143" y="52" width="3.5" height="28" fill="#dde3ec" rx="1.5"/>`
+    : `<rect x="53.5" y="52" width="3.5" height="28" fill="#dde3ec" rx="1.5"/>`;
+  const pfeil = schiebt
+    ? `<g stroke="#22c55e" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none">
+         <line x1="128" y1="65" x2="72" y2="65"/><polyline points="82,56 72,65 82,74"/>
+       </g>`
+    : `<g stroke="#22c55e" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none">
+         <line x1="72" y1="65" x2="128" y2="65"/><polyline points="118,56 128,65 118,74"/>
+       </g>`;
+  return `<svg viewBox="0 0 200 130" preserveAspectRatio="xMidYMid meet" style="width:100%;max-width:210px;display:block;margin:0 auto" xmlns="http://www.w3.org/2000/svg">
+    <rect x="5" y="5" width="190" height="120" rx="3" fill="#2f343c" stroke="#5b6470" stroke-width="1.6"/>
+    <rect x="14" y="14" width="86" height="102" fill="rgba(216,228,242,0.85)" stroke="#5b6470" stroke-width="1.4"/>
+    <rect x="100" y="14" width="86" height="102" fill="rgba(216,228,242,0.85)" stroke="#5b6470" stroke-width="1.4"/>
+    ${xMarker}${griff}${pfeil}
+  </svg>`;
+}
+
 // IGLO-HS Schiebe-Karte: echtes Produktbild (Anthrazit + blaues Glas, Navy-BG) mit
 // dunklem Richtungspfeil als Overlay. Bild bleibt clean & als Produktkarte nutzbar.
 // richtung='rechts' = Schiebefluegel rechts, schiebt nach links auf -> Pfeil zeigt links.
@@ -6899,6 +6948,15 @@ function anschlagImg(v) {
   const file = ANSCHLAG_KARTEN_IMG[v];
   if (!file) return windowSVG('1-fluegel', [v]);
   return `<img src="img/anschlag-karten/${file}.png?v=20260530f" alt="${v}" loading="lazy" style="width:100%;height:auto;display:block"/>`;
+}
+
+// Haustuer-Oeffnungsart: echtes einfluegliges Tuerbild (Anthrazit + blaues Glas, Griff)
+// mit eingezeichnetem DIN-Anschlag-Dreieck -- statt der Fenster-Schemakarte.
+const ANSCHLAG_TUER_IMG = { 'dreh-l': 'dreh-links', 'dreh-r': 'dreh-rechts' };
+function tuerAnschlagImg(v) {
+  const file = ANSCHLAG_TUER_IMG[v];
+  if (!file) return anschlagImg(v);
+  return `<img src="img/anschlag-karten-tuer/${file}.png?v=20260531b" alt="Haustuer ${v}" loading="lazy" style="width:100%;height:auto;display:block"/>`;
 }
 
 function anschlag2fImg(v1, v2, type) {
@@ -7103,6 +7161,24 @@ function buildFluegel() {
     `).join('');
     return;
   }
+  // PSK: zwei Karten PSK-Links / PSK-Rechts mit Schematik-Zeichnung (Kundenwunsch 31.05.2026)
+  if (S.prod === 'hst' && S.profil === 'iglo-psk') {
+    if (rwInfo) rwInfo.style.display = 'none';
+    grid.style.gridTemplateColumns = '1fr 1fr';
+    const variants = [
+      { v: 'links',  name: 'PSK-Links',  sub: 'Schiebeflügel links · schiebt nach rechts' },
+      { v: 'rechts', name: 'PSK-Rechts', sub: 'Schiebeflügel rechts · schiebt nach links' },
+    ];
+    grid.innerHTML = variants.map(o => `
+      <div class="fk${S.hstLauf===o.v?' sel':''}" data-v="${o.v}" onclick="pickHsLauf(this)" style="padding:14px 12px 16px;display:flex;flex-direction:column;align-items:stretch;gap:0">
+        ${pskSchiebeSVG(o.v)}
+        <div class="fk-label" style="margin-top:12px;text-align:center;font-weight:800">${o.name}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.55);text-align:center;margin-top:3px">${o.sub}</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.42);text-align:center;margin-top:6px">· Ansicht von Innen</div>
+      </div>
+    `).join('');
+    return;
+  }
   // Bei anderen Produkten: Richtwerte-Info wieder einblenden
   if (rwInfo) rwInfo.style.display = '';
   if (S.prod === 'haustuere') {
@@ -7217,7 +7293,9 @@ function pickHsLauf(el) {
   S.hstTeilung = '2-teilig';
   S.fluegel = '2-fluegel';
   const d3 = document.getElementById('d3');
-  if (d3) d3.textContent = S.hstLauf === 'rechts' ? 'Rechts öffnend' : 'Links öffnend';
+  if (d3) d3.textContent = S.profil === 'iglo-psk'
+    ? (S.hstLauf === 'rechts' ? 'PSK-Rechts' : 'PSK-Links')
+    : (S.hstLauf === 'rechts' ? 'Rechts öffnend' : 'Links öffnend');
   mkDone(3);
   // Schwellentyp + 3D-Vorschau aktualisieren, dann weiter zu Schritt 4
   if (typeof buildOeffSash === 'function') buildOeffSash();
@@ -7825,19 +7903,22 @@ function buildOeffSash() {
           <div style="flex:1"><div class="olabel" style="font-size:13px">${opt.name}</div><div class="osub" style="font-size:11px">${opt.sub}</div></div>
         </div>
       </div>`;
-    // IGLO-HS: Teilung + Laufrichtung wurden in Step 3 (Aufteilung) gewählt — hier nur Schwelle.
-    // Sarah-Vorgabe 27.05.2026: IGLO-HS hat nur 2-teilig, Lauf ist in den 2 Karten von Step 3 enthalten.
+    // IGLO-HS: Teilung + Laufrichtung in Step 3 gewählt — hier nur Schwelle.
+    // PSK: Laufrichtung (PSK-Links/Rechts) ebenfalls in Step 3 — hier nur Schwelle + Teilung. (Kundenwunsch 31.05.2026)
     const isHs = S.profil === 'iglo-hs';
+    const isPsk = S.profil === 'iglo-psk';
     wrap.innerHTML = `
       <div class="sec-t" style="margin-top:0">Schwellentyp</div>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${schwelleOpts.map(o=>mkCard(o,'hstSchwelle')).join('')}</div>
       ${isHs ? '' : `
         <div class="sec-t">Teilung</div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${teilungOpts.map(o=>mkCard(o,'hstTeilung')).join('')}</div>
+      `}
+      ${(isHs || isPsk) ? '' : `
         <div class="sec-t">Laufrichtung</div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${laufOpts.map(o=>mkCard(o,'hstLauf')).join('')}</div>
       `}
-      <div class="info mt-3"><i class="ms f" style="color:#225eaa;font-size:20px;flex-shrink:0">info</i><div>Hebe-Schiebe-Tür · Öffnung durch Heben und Gleiten. Null-Schwelle empfohlen bei barrierefreiem Ausbau.</div></div>`;
+      <div class="info mt-3"><i class="ms f" style="color:#225eaa;font-size:20px;flex-shrink:0">info</i><div>${isPsk ? 'Parallel-Schiebe-Kipp-Tür · der Flügel kippt zum Lüften und gleitet parallel zum Öffnen. Laufrichtung im Schritt Aufteilung gewählt.' : 'Hebe-Schiebe-Tür · Öffnung durch Heben und Gleiten. Null-Schwelle empfohlen bei barrierefreiem Ausbau.'}</div></div>`;
     return;
   }
   const sashCount = getSashCount();
@@ -8309,7 +8390,7 @@ function buildOeffSash() {
         const disabledStyle = opt.disabled ? ';opacity:0.45;pointer-events:none;cursor:not-allowed' : '';
         const onClickAttr = opt.disabled ? '' : `onclick="pickOeff(this,${i+1})"`;
         html+=`<div class="oc${sel?' sel':''}" data-v="${opt.v}" data-sash="${i+1}" ${onClickAttr} style="flex-direction:column;align-items:center;text-align:center;padding:8px 6px 10px;gap:3px${disabledStyle}">
-          ${anschlagImg(opt.v)}
+          ${S.prod==='haustuere' ? tuerAnschlagImg(opt.v) : anschlagImg(opt.v)}
           <div class="olabel" style="font-size:14px;font-weight:600;margin-top:8px">${opt.name}</div>
           <div class="osub" style="font-size:12px">${opt.sub}</div>
         </div>`;
@@ -9103,9 +9184,10 @@ function upSidebar() {
   if(S.prod==='balkontuer' && S.balkonSchwelle && S.balkonSchwelle!=='standard' && isTouched('balkonSchwelle'))
     rowsList.push(['Schwelle', P.balkonSchwelle?.[S.balkonSchwelle]?.name||S.balkonSchwelle]);
   if(S.prod==='hst') {
+    if(S.profil==='iglo-psk' && P.pskKammer[S.pskKammer]) rowsList.push(['PSK-System', P.pskKammer[S.pskKammer].name]);
     if(S.hstSchwelle==='null' && isTouched('hstSchwelle')) rowsList.push(['Schwelle', 'Null-Schwelle (DIN 18040)']);
     if(S.hstTeilung && isTouched('hstTeilung')) rowsList.push(['Teilung', P.hstTeilung?.[S.hstTeilung]?.name||S.hstTeilung]);
-    if(S.hstLauf && isTouched('hstLauf')) rowsList.push(['Laufrichtung', S.hstLauf==='links'?'Links öffnend':'Rechts öffnend']);
+    if(S.hstLauf && isTouched('hstLauf')) rowsList.push(['Laufrichtung', S.profil==='iglo-psk' ? (S.hstLauf==='links'?'PSK-Links':'PSK-Rechts') : (S.hstLauf==='links'?'Links öffnend':'Rechts öffnend')]);
   }
   // Stueckzahl nur wenn User sie aktiv geaendert hat (Default qty=1 nicht zeigen)
   if(S.prod && S.qty && (S.qty > 1 || isTouched('qty'))) rowsList.unshift(['Stückzahl', S.qty + '×']);
@@ -9173,9 +9255,10 @@ function upFinalSum(rows,tot) {
     ['Glasdekor', S.glasdekor?P.glasdekor[S.glasdekor]?.name||S.glasdekor:'Klarglas'],
     ...(S.prod==='haustuere' ? [['Türmodell', S.tuerModell||'–']] : []),
     ...(S.prod==='hst' ? [
+      ...(S.profil==='iglo-psk' ? [['PSK-System', P.pskKammer[S.pskKammer]?.name||S.pskKammer]] : []),
       ['Schwellentyp', P.hstSchwelle[S.hstSchwelle]?.name||S.hstSchwelle],
       ['Teilung',      P.hstTeilung[S.hstTeilung]?.name||S.hstTeilung],
-      ['Laufrichtung', P.hstLauf[S.hstLauf]?.name||S.hstLauf],
+      ['Laufrichtung', S.profil==='iglo-psk' ? (S.hstLauf==='links'?'PSK-Links':'PSK-Rechts') : (P.hstLauf[S.hstLauf]?.name||S.hstLauf)],
     ] : []),
     ...(S.prod==='balkontuer' ? [
       ['Schwelle', P.balkonSchwelle[S.balkonSchwelle]?.name||S.balkonSchwelle],
@@ -11328,6 +11411,10 @@ async function submitForm(e) {
     'Anzahl:      ' + S.qty + ' Stück',
     'Maße:        ' + S.bMm + ' × ' + S.hMm + ' mm (Rohbaumaß)',
     'Profil:      ' + profilName,
+    ...(S.prod==='hst' && S.profil==='iglo-psk' ? [
+      'PSK-System:  ' + (P.pskKammer[S.pskKammer]?.name||S.pskKammer),
+      'Laufrichtung:' + (S.hstLauf==='links'?'PSK-Links':'PSK-Rechts'),
+    ] : []),
     'Glasart:     ' + glasName,
     'Öffnungsart: ' + oeffName,
     'Außenfarbe:  ' + faName,
@@ -11547,8 +11634,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
             const profEl = document.querySelector(`#s2 [data-v="${urlProfil}"]`);
             if (profEl) {
               profEl.click();
-              // Zu Schritt 3 (Flügel/Maße) springen
-              setTimeout(() => openS(3), 350);
+              // PSK landet auf dem System-Schritt, sonst direkt Schritt 3
+              setTimeout(() => openS(urlProfil === 'iglo-psk' ? '-psk' : 3), 350);
             } else {
               setTimeout(() => openS(2), 200);
             }
