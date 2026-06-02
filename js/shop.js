@@ -30,7 +30,7 @@ const STATE = {
     preisBis: null,
     suche: ''
   },
-  sortierung: 'neueste',    // Standard: zuletzt eingestellte Inserate oben (Kundenwunsch 02.06.2026)
+  sortierung: 'relevanz',
   warenkorb: [],            // [{id, menge}]
 };
 
@@ -244,14 +244,12 @@ async function loadProdukte() {
     STATE.kategorienListe = Object.entries(STATE.kategorien)
       .map(([key, label]) => ({ key, label }));
 
-    const sheetsProdukte = (data.produkte || []).map((p, i) => {
+    const sheetsProdukte = (data.produkte || []).map(p => {
       const kat = p.kategorie || p.kategorie_key || '';
       const baseEig = Array.isArray(p.eigenschaften) ? p.eigenschaften : [];
       const bauart = deriveBauartTags(kat).filter(t => !baseEig.includes(t));
       return {
         id: String(p.id),
-        _ord: i,   // Sheet-Zeilenreihenfolge — zuletzt eingestelltes Inserat = höchster Index
-        _idn: Number(p.id) || 0,
         titel: p.titel || '',
         kategorie: kat,
         system: p.system || '',
@@ -636,11 +634,6 @@ function gefilterteProdukte() {
 
   // Sortierung
   switch (STATE.sortierung) {
-    case 'neueste':
-      // Zuletzt in den Shop eingestelltes Inserat zuerst (Sheet-Zeilenreihenfolge,
-      // Fallback inkrementelle id falls Reihenfolge mal gleich)
-      result.sort((a, b) => (b._ord - a._ord) || (b._idn - a._idn));
-      break;
     case 'preis-auf':
       result.sort((a, b) => a.preis_eur - b.preis_eur);
       break;
