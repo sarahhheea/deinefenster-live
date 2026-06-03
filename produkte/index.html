@@ -498,6 +498,37 @@ body.scrolled .burger{color:var(--text)}
 .ctablock .ctabtns{display:flex;flex-wrap:wrap;gap:var(--s4)}
 .ctablock .ghost-d{display:inline-flex;align-items:center;gap:8px;font-weight:700;color:#bcd6ff;border:1px solid rgba(118,169,250,.55);border-radius:var(--pill);padding:14px 26px;transition:background .2s,transform .2s}
 .ctablock .ghost-d:hover{background:rgba(118,169,250,.12);transform:translateY(-2px)}
+
+/* ── Produkt-Auswahl: Kategorie-Tabs + Video-Header + Profil-Zeilen (Sarah 03.06.) ── */
+.cat-tabs{position:sticky;top:calc(var(--banner-h,0px) + 106px);z-index:40;background:rgba(251,252,254,.92);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+.cat-tabs .wrap{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+.cat-tabs .wrap::-webkit-scrollbar{display:none}
+.cat-tab{display:flex;flex-direction:column;align-items:center;gap:3px;padding:11px 20px;border-bottom:3px solid transparent;color:var(--soft);font-family:var(--font-display);font-weight:700;font-size:.82rem;white-space:nowrap;transition:color .2s,border-color .2s}
+.cat-tab .material-symbols-outlined{font-size:21px}
+.cat-tab:hover{color:var(--acc-text)}
+.cat-tab.active{color:var(--acc-text);border-bottom-color:var(--acc)}
+.cat-block{padding-block:clamp(30px,3.6vw,56px)}
+.cat-video{position:relative;height:clamp(200px,24vw,300px);border-radius:var(--r);overflow:hidden;border:1px solid var(--border)}
+.cat-video video,.cat-video>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cat-video::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,rgba(8,16,36,.88) 0%,rgba(10,21,48,.62) 48%,rgba(10,21,48,.12) 100%)}
+.cat-video-text{position:absolute;inset:0;z-index:1;display:flex;flex-direction:column;justify-content:center;padding:0 clamp(22px,4vw,52px);color:#fff;max-width:780px}
+.cat-num{font-size:.66rem;font-weight:800;letter-spacing:.28em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:8px}
+.cat-video-text h2{color:#fff;font-family:var(--font-display);font-weight:800;font-size:clamp(1.55rem,3.4vw,2.7rem);line-height:1.02;letter-spacing:-.02em;margin:0}
+.cat-video-text h2 .accent{font-family:var(--font-accent);font-style:italic;font-weight:500;color:#bcd6ff;display:block}
+.cat-video-text p{color:rgba(255,255,255,.82);font-size:.86rem;margin-top:10px;margin-bottom:0}
+.cat-profiles{display:flex;flex-direction:column;gap:10px;margin-top:var(--s6)}
+.profile-item{display:flex;align-items:center;gap:16px;padding:15px 20px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);transition:border-color .2s,transform .2s,box-shadow .2s}
+.profile-item:hover{border-color:var(--acc);transform:translateY(-2px);box-shadow:var(--shadow)}
+.profile-item.feat{border-color:rgba(118,169,250,.6);background:linear-gradient(120deg,rgba(118,169,250,.15),transparent 72%);box-shadow:inset 4px 0 0 var(--acc-text)}
+.pi-main{flex:1;min-width:0}
+.pi-tag{display:block;font-size:.64rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--acc-text)}
+.pi-name{display:block;font-family:var(--font-display);font-weight:800;font-size:1.04rem;color:var(--text);line-height:1.2;margin-top:2px;overflow-wrap:break-word}
+.pi-specs{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.pi-spec{font-size:.72rem;font-weight:700;color:var(--soft);background:var(--surface);border-radius:6px;padding:4px 9px;white-space:nowrap}
+.pi-go{flex-shrink:0;display:inline-flex;align-items:center;gap:5px;font-family:var(--font-display);font-weight:700;font-size:.85rem;color:var(--acc-text);transition:gap .2s}
+.profile-item:hover .pi-go{gap:9px}
+.pi-go .material-symbols-outlined{font-size:18px}
+@media(max-width:760px){.pi-specs{display:none}.profile-item{gap:10px;padding:14px 16px}.cat-tab{padding:11px 15px}}
 </style>
 </head>
 <body>
@@ -652,145 +683,163 @@ body.scrolled .burger{color:var(--text)}
   <span class="ti" aria-hidden="true">Lieferung deutschlandweit</span><span class="sep" aria-hidden="true">✦</span>
 </div></section>
 
-<!-- ===== 01 KATEGORIEN-ÜBERSICHT ===== -->
-<section><div class="wrap">
+<!-- ===== 01 INTRO + KATEGORIE-AUSWAHL ===== -->
+<section style="padding-bottom:var(--s5)"><div class="wrap">
   <div class="sec-head">
-    <span class="eyebrow">Sortiment im Überblick</span>
-    <h2>Vier Kategorien, <span class="accent">ein Hersteller.</span></h2>
+    <span class="eyebrow">Sortiment</span>
+    <h2>Erst Kategorie, <span class="accent">dann Profil.</span></h2>
   </div>
-  <p class="lead" style="max-width:60ch;margin-bottom:var(--s7)">Alles von Drutex aus dem Werk in Bytów. Von günstig bis Passivhaus-Premium — jedes Produkt online konfigurierbar oder per E-Mail anfragbar.</p>
-  <div class="prodgrid">
-    <a class="pcard" href="#fenster">
-      <div class="pimg"><img src="/img/drutex-extern/media__upload_sections_box_menu_okna-drutex.jpg" alt="Drutex Kunststofffenster der IGLO-Serie" loading="lazy"></div>
-      <div class="pbody">
-        <span class="eyebrow">01 · 5 Profile</span>
-        <h3>Kunststofffenster</h3>
-        <p>IGLO Light bis IGLO Edge — 70 bis 82 mm Bautiefe, Uw bis 0,66 W/(m²K).</p>
-        <span class="ghost">Ansehen</span>
-      </div>
-    </a>
-    <a class="pcard" href="#balkontuer">
-      <div class="pimg"><img src="/img/drutex-extern/media__versions_sections_inspirations_okno-iglo-energy_inspiration_section.jpg" alt="Drutex Balkontür im hellen Wohnraum" loading="lazy"></div>
-      <div class="pbody">
-        <span class="eyebrow">02 · barrierearm</span>
-        <h3>Balkontüren</h3>
-        <p>Verstärkte Beschläge, Niedrigschwelle ab 20 mm, optional RC2.</p>
-        <span class="ghost">Ansehen</span>
-      </div>
-    </a>
-    <a class="pcard" href="#haustueren">
-      <div class="pimg"><img src="/img/drutex-extern/media__upload_sections_box_menu_d-art-line-drutex.jpg" alt="Drutex Haustür D-ART Line" loading="lazy"></div>
-      <div class="pbody">
-        <span class="eyebrow">03 · RC2 serienmäßig</span>
-        <h3>Haustüren</h3>
-        <p>5-Punkt-Verriegelung, über 30 Designs, Ud bis 0,87 W/(m²K).</p>
-        <span class="ghost">Ansehen</span>
-      </div>
-    </a>
-    <a class="pcard" href="#schiebetuer">
-      <div class="pimg"><img src="/img/drutex-extern/media__upload_sections_box_menu_systemy-tarasowe-drutex.jpg" alt="Drutex Hebe-Schiebe-System IGLO HS auf der Terrasse" loading="lazy"></div>
-      <div class="pbody">
-        <span class="eyebrow">04 · bis 6.500 mm</span>
-        <h3>Schiebetüren</h3>
-        <p>Hebe-Schiebe und PSK, Null-Schwelle nach DIN 18040, bis 400 kg Flügel.</p>
-        <span class="ghost">Ansehen</span>
-      </div>
-    </a>
-  </div>
+  <p class="lead" style="max-width:60ch">Alles von Drutex aus eigener Fertigung. Wählen Sie eine Kategorie — darunter sehen Sie alle passenden IGLO-Profile mit ihren Kennwerten.</p>
 </div></section>
 
-<!-- ===== 02 KUNSTSTOFFFENSTER ===== -->
-<section class="alt" id="fenster" style="scroll-margin-top:90px"><div class="wrap">
-  <div class="sec-head">
-    <span class="eyebrow">Kunststofffenster · 5 IGLO-Profile</span>
-    <h2>Von günstig bis <span class="accent">Passivhaus.</span></h2>
-  </div>
-  <p class="lead" style="max-width:62ch">Alle Profile sind maßgefertigt, RAL-Klasse A zertifiziert (mindestens 2,8 mm Außenwandstärke) und werden direkt aus Polen geliefert. Lebensdauer 40 bis 50 Jahre bei minimalem Pflegeaufwand.</p>
-  <div class="trio" style="margin-top:var(--s6)">
-    <a class="tcard" href="/produkte/kunststofffenster/iglo-light.html"><span class="tk">Light</span><h3>IGLO Light</h3><p>Schlanke Einsteigerlinie · 5 Kammern · 70 mm · Uw ≥ 1,1. Für Mietobjekte und Modernisierung.</p></a>
-    <a class="tcard" href="/produkte/kunststofffenster/iglo-5-classic.html"><span class="tk">Classic</span><h3>IGLO 5 Classic</h3><p>Meistgekaufter Allrounder · 5 Kammern · 70 mm · Uw 0,83 · BAFA-förderfähig.</p></a>
-    <a class="tcard" href="/produkte/kunststofffenster/iglo-ext.html"><span class="tk">EXT</span><h3>IGLO EXT</h3><p>Erhöhter Wärmeschutz · 6 Kammern · 75 mm · Uw 0,76 · für große Formate.</p></a>
-    <a class="tcard" href="/produkte/kunststofffenster/iglo-energy.html"><span class="tk">Energy</span><h3>IGLO Energy ★</h3><p>Meistverkauftes Premium-Profil · 7 Kammern · 82 mm · Uw 0,71 · KfW-fähig.</p></a>
-    <a class="tcard" href="/produkte/kunststofffenster/iglo-edge.html"><span class="tk">Edge</span><h3>IGLO Edge</h3><p>Flaggschiff · 7 Kammern · 82 mm · Uw 0,66 · schmale Ansichtsbreiten, bester U-Wert.</p></a>
-    <a class="tcard" href="/konfigurator.html"><span class="tk">→</span><h3>Konfigurieren</h3><p>Profil, Maße, Verglasung und Farbe online wählen und unverbindlich anfragen.</p></a>
-  </div>
-  <div class="subhero-cta" style="margin-top:var(--s7)">
-    <a class="btn-primary" href="/konfigurator.html">Fenster konfigurieren &amp; anfragen →</a>
-    <a class="ghost" href="#fenster-vergleich" style="color:var(--acc-text)">Alle 5 Profile vergleichen ↓</a>
-  </div>
-</div></section>
+<div class="cat-tabs"><div class="wrap">
+  <a class="cat-tab" href="#fenster"><span class="material-symbols-outlined" aria-hidden="true">window</span>Fenster</a>
+  <a class="cat-tab" href="#balkontuer"><span class="material-symbols-outlined" aria-hidden="true">balcony</span>Balkontüren</a>
+  <a class="cat-tab" href="#haustueren"><span class="material-symbols-outlined" aria-hidden="true">door_front</span>Haustüren</a>
+  <a class="cat-tab" href="#schiebetuer"><span class="material-symbols-outlined" aria-hidden="true">door_sliding</span>Schiebetüren</a>
+</div></div>
 
-<!-- ===== 03 BALKONTÜREN ===== -->
-<section id="balkontuer" style="scroll-margin-top:90px"><div class="wrap">
-  <div class="sec-head">
-    <span class="eyebrow">Balkontüren</span>
-    <h2>Barrierearm, dicht, <span class="accent">langlebig.</span></h2>
-  </div>
-  <div class="about2">
-    <div>
-      <p class="lead">Eine Balkontür muss täglichem Gebrauch standhalten, dicht schließen und auch nach 20 Jahren leicht öffnen. Drutex baut Balkontüren auf den IGLO-Profilen, ergänzt um verstärkte Beschläge, niedrige Schwellen und stabilere Aluminium-Bodenprofile.</p>
-      <p>Verfügbar als Dreh-Kipp-Balkontür, Dreh-Tür mit Festverglasung oder Hebe-Schiebe-System. Standard mit 2-fach-Verglasung (Ug 1,0 W/(m²K)), Mehrfachverriegelung und Pilzkopfzapfen. Optional RC2-Einbruchschutz und niveaugleiche Schwelle.</p>
-      <div class="minigrid">
-        <div class="minitile"><b>20 mm</b><span>Niedrigschwelle ab</span></div>
-        <div class="minitile"><b>RC2</b><span>optionaler Schutz</span></div>
-        <div class="minitile"><b>Uw 0,71</b><span>IGLO Energy</span></div>
-        <div class="minitile"><b>Uw 0,83</b><span>IGLO 5 Classic</span></div>
-      </div>
-    </div>
-    <div class="svc">
-      <a class="svc-item" href="/produkte/balkontueren/iglo-5-classic.html"><span class="svc-ic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="1"/><path d="M12 2v20"/></svg></span><div><h3>IGLO 5 Classic Balkontür</h3><p>Ein- oder zweiflügelig · Alu-Schwelle · 70 mm Profil · sehr gutes Preis-Leistungs-Verhältnis.</p></div></a>
-      <a class="svc-item" href="/produkte/balkontueren/iglo-energy.html"><span class="svc-ic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h7l-1 8 10-12h-7z"/></svg></span><div><h3>IGLO Energy Balkontür</h3><p>Premium · 82 mm · Uw 0,71 · passivhaus-tauglich, KfW-förderfähig.</p></div></a>
+<!-- ===== Kategorie: Fenster ===== -->
+<section class="cat-block alt" id="fenster" style="scroll-margin-top:calc(var(--banner-h,0px) + 180px)"><div class="wrap">
+  <div class="cat-video">
+    <video autoplay muted loop playsinline preload="metadata" poster="/img/produkte/kategorie/kunststofffenster.jpg" aria-label="Drutex IGLO Kunststofffenster nach Maß">
+      <source src="/video/drutex/iglo-energy.mp4" type="video/mp4">
+      <img src="/img/produkte/kategorie/kunststofffenster.jpg" alt="Drutex IGLO Kunststofffenster nach Maß">
+    </video>
+    <div class="cat-video-text">
+      <span class="cat-num">01 &mdash; Kategorie</span>
+      <h2>Kunststofffenster.<span class="accent">5 IGLO-Profile.</span></h2>
+      <p>RAL-Klasse A &middot; maßgefertigt &middot; BAFA-förderfähig</p>
     </div>
   </div>
-  <div class="subhero-cta" style="margin-top:var(--s7)">
-    <a class="btn-primary" href="/konfigurator.html">Balkontür konfigurieren →</a>
+  <div class="cat-profiles">
+      <a class="profile-item" href="/produkte/kunststofffenster/iglo-light.html">
+        <span class="pi-main"><span class="pi-tag">Einsteiger</span><span class="pi-name">IGLO Light</span></span>
+        <span class="pi-specs"><span class="pi-spec">Uw 0,88</span><span class="pi-spec">5 Kammern</span><span class="pi-spec">70 mm</span></span>
+        <span class="pi-go">Ansehen <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></span>
+      </a>
+      <a class="profile-item" href="/produkte/kunststofffenster/iglo-ext.html">
+        <span class="pi-main"><span class="pi-tag">Nach außen öffnend</span><span class="pi-name">IGLO EXT</span></span>
+        <span class="pi-specs"><span class="pi-spec">Uw 0,89</span><span class="pi-spec">5 Kammern</span><span class="pi-spec">70 mm</span></span>
+        <span class="pi-go">Ansehen <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></span>
+      </a>
+      <a class="profile-item" href="/produkte/kunststofffenster/iglo-5-classic.html">
+        <span class="pi-main"><span class="pi-tag">Preis-Leistung</span><span class="pi-name">IGLO 5 Classic</span></span>
+        <span class="pi-specs"><span class="pi-spec">Uw bis 0,83</span><span class="pi-spec">5 Kammern</span><span class="pi-spec">70 mm</span></span>
+        <span class="pi-go">Ansehen <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></span>
+      </a>
+      <a class="profile-item feat" href="/produkte/kunststofffenster/iglo-energy.html">
+        <span class="pi-main"><span class="pi-tag">Passivhaus</span><span class="pi-name">IGLO Energy</span></span>
+        <span class="pi-specs"><span class="pi-spec">Uw bis 0,71</span><span class="pi-spec">7 Kammern</span><span class="pi-spec">82 mm</span></span>
+        <span class="pi-go">Ansehen <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></span>
+      </a>
+      <a class="profile-item" href="/produkte/kunststofffenster/iglo-edge.html">
+        <span class="pi-main"><span class="pi-tag">Premium</span><span class="pi-name">IGLO Edge</span></span>
+        <span class="pi-specs"><span class="pi-spec">Uw ab 0,66</span><span class="pi-spec">7 Kammern</span><span class="pi-spec">82 mm</span></span>
+        <span class="pi-go">Ansehen <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></span>
+      </a>
+  </div>
+  <div class="subhero-cta" style="margin-top:var(--s6)">
+    <a class="btn-primary" href="/konfigurator.html?prod=kunststoff">Fenster konfigurieren &amp; anfragen →</a>
   </div>
 </div></section>
 
-<!-- ===== 04 HAUSTÜREN ===== -->
-<section class="dark" id="haustueren" style="scroll-margin-top:90px"><div class="wrap">
-  <div class="sec-head">
-    <span class="eyebrow">Haustüren</span>
-    <h2>Der erste Eindruck — <span class="accent">und sicher.</span></h2>
+<!-- ===== Kategorie: Balkontüren ===== -->
+<section class="cat-block" id="balkontuer" style="scroll-margin-top:calc(var(--banner-h,0px) + 180px)"><div class="wrap">
+  <div class="cat-video">
+    <video autoplay muted loop playsinline preload="metadata" poster="/img/produkte/kategorie/balkontuer.jpg" aria-label="Drutex Balkontür im hellen Wohnraum">
+      <source src="/video/drutex/iglo-energy.mp4" type="video/mp4">
+      <img src="/img/produkte/kategorie/balkontuer.jpg" alt="Drutex Balkontür im hellen Wohnraum">
+    </video>
+    <div class="cat-video-text">
+      <span class="cat-num">02 &mdash; Kategorie</span>
+      <h2>Balkontüren.<span class="accent">Barrierearm &amp; dicht.</span></h2>
+      <p>Niedrigschwelle ab 20 mm &middot; verstärkte Beschläge &middot; optional RC2</p>
+    </div>
   </div>
-  <p class="lead" style="max-width:62ch">Die Haustür ist die Visitenkarte Ihres Hauses und gleichzeitig die kritischste Sicherheitsbarriere. Drutex bietet PVC-Haustüren auf IGLO-Profilbasis und die Premium-Aluminium-Linie D-ART Line mit über 30 Designs.</p>
-  <div class="bento" style="margin-top:var(--s6)">
-    <a class="bcell bcell-photo bcell-wide" href="/produkte/haustueren/iglo-energy.html">
-      <img src="/img/drutex-extern/media__upload_sections_box_menu_d-art-line-drutex.jpg" alt="Drutex Haustür D-ART Line in moderner Fassade" loading="lazy">
-      <span class="bcell-photo-cap"><b>D-ART Line &amp; IGLO</b><small>Über 30 Designs · RC2 serienmäßig · Ud bis 0,87 W/(m²K)</small></span>
-    </a>
-    <div class="bcell"><span class="bc-ic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg></span><b>RC2 serienmäßig</b><p>Anbohrgeschützter Profilzylinder, 5-Punkt-Verriegelung, Pilzkopfzapfen. Optional RC3 mit P5A-Sicherheitsglas.</p></div>
-    <div class="bcell"><span class="bc-ic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><b>Ud bis 0,87</b><p>Passivhaus-taugliche Wärmedämmung. PVC auf IGLO 5 Classic oder Premium IGLO Energy.</p></div>
-    <a class="bcell" href="/produkte/haustueren/iglo-5-classic.html"><span class="bc-ic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="1"/><circle cx="15" cy="12" r="1"/></svg></span><b>IGLO 5 Classic Tür</b><p>5-Kammer-Türprofil, über 50 Design-Modelle, BAFA-förderfähig.</p></a>
-    <a class="bcell" href="/produkte/haustueren/iglo-energy.html"><span class="bc-ic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h7l-1 8 10-12h-7z"/></svg></span><b>IGLO Energy Tür</b><p>Premium 7-Kammer, Ud 0,8, KfW-förderfähig. Fingerprint &amp; Motorschloss optional.</p></a>
+  <div class="cat-profiles">
+      <a class="profile-item" href="/produkte/balkontueren/iglo-5-classic.html">
+        <span class="pi-main"><span class="pi-tag">Preis-Leistung</span><span class="pi-name">IGLO 5 Classic Balkontür</span></span>
+        <span class="pi-specs"><span class="pi-spec">Uw ab 0,83</span><span class="pi-spec">5 Kammern</span><span class="pi-spec">70 mm</span></span>
+        <span class="pi-go">Ansehen <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></span>
+      </a>
+      <a class="profile-item feat" href="/produkte/balkontueren/iglo-energy.html">
+        <span class="pi-main"><span class="pi-tag">Passivhaus</span><span class="pi-name">IGLO Energy Balkontür</span></span>
+        <span class="pi-specs"><span class="pi-spec">Uw ab 0,71</span><span class="pi-spec">7 Kammern</span><span class="pi-spec">82 mm</span></span>
+        <span class="pi-go">Ansehen <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></span>
+      </a>
   </div>
-  <div class="subhero-cta" style="margin-top:var(--s7)">
+  <div class="subhero-cta" style="margin-top:var(--s6)">
+    <a class="btn-primary" href="/konfigurator.html?prod=balkontuer">Balkontür konfigurieren →</a>
+  </div>
+</div></section>
+
+<!-- ===== Kategorie: Haustüren ===== -->
+<section class="cat-block alt" id="haustueren" style="scroll-margin-top:calc(var(--banner-h,0px) + 180px)"><div class="wrap">
+  <div class="cat-video">
+    <video autoplay muted loop playsinline preload="metadata" poster="/img/drutex-extern/media__upload_sections_box_menu_d-art-line-drutex.jpg" aria-label="Drutex Haustür in moderner Fassade">
+      <source src="/video/drutex/werk-firma.mp4" type="video/mp4">
+      <img src="/img/drutex-extern/media__upload_sections_box_menu_d-art-line-drutex.jpg" alt="Drutex Haustür in moderner Fassade">
+    </video>
+    <div class="cat-video-text">
+      <span class="cat-num">03 &mdash; Kategorie</span>
+      <h2>Haustüren.<span class="accent">Sicher &amp; präsent.</span></h2>
+      <p>RC2 serienmäßig &middot; 5-Punkt-Verriegelung &middot; Ud bis 0,87 W/(m²K)</p>
+    </div>
+  </div>
+  <div class="cat-profiles">
+      <a class="profile-item" href="/produkte/haustueren/iglo-5-classic.html">
+        <span class="pi-main"><span class="pi-tag">Preis-Leistung</span><span class="pi-name">IGLO 5 Classic Haustür</span></span>
+        <span class="pi-specs"><span class="pi-spec">5 Kammern</span><span class="pi-spec">70 mm</span><span class="pi-spec">RC2</span></span>
+        <span class="pi-go">Ansehen <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></span>
+      </a>
+      <a class="profile-item feat" href="/produkte/haustueren/iglo-energy.html">
+        <span class="pi-main"><span class="pi-tag">Premium</span><span class="pi-name">IGLO Energy Haustür</span></span>
+        <span class="pi-specs"><span class="pi-spec">7 Kammern</span><span class="pi-spec">82 mm</span><span class="pi-spec">Ud bis 0,8</span></span>
+        <span class="pi-go">Ansehen <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></span>
+      </a>
+  </div>
+  <div class="subhero-cta" style="margin-top:var(--s6)">
     <a class="btn-primary" href="/kontakt.html">Haustür anfragen →</a>
   </div>
 </div></section>
 
-<!-- ===== 05 SCHIEBETÜREN ===== -->
-<section id="schiebetuer" style="scroll-margin-top:90px"><div class="wrap">
-  <div class="sec-head">
-    <span class="eyebrow">Schiebetüren (HST)</span>
-    <h2>Großflächig — <span class="accent">bis 6.500 mm.</span></h2>
+<!-- ===== Kategorie: Schiebetüren ===== -->
+<section class="cat-block" id="schiebetuer" style="scroll-margin-top:calc(var(--banner-h,0px) + 180px)"><div class="wrap">
+  <div class="cat-video">
+    <video autoplay muted loop playsinline preload="metadata" poster="/img/produkte/kategorie/schiebetuer.jpg" aria-label="Drutex Hebe-Schiebe-System IGLO HS auf der Terrasse">
+      <source src="/video/drutex/iglo-hs.mp4" type="video/mp4">
+      <img src="/img/produkte/kategorie/schiebetuer.jpg" alt="Drutex Hebe-Schiebe-System IGLO HS auf der Terrasse">
+    </video>
+    <div class="cat-video-text">
+      <span class="cat-num">04 &mdash; Kategorie</span>
+      <h2>Schiebetüren.<span class="accent">Großflächig bis 6.500 mm.</span></h2>
+      <p>Hebe-Schiebe &amp; PSK &middot; Null-Schwelle nach DIN 18040</p>
+    </div>
   </div>
-  <p class="lead" style="max-width:62ch">Vier Systeme: vom kompakten PSK für Balkone bis zum monumentalen IGLO HS mit 400 kg Flügelgewicht und Null-Schwelle nach DIN 18040. Wärmewerte bis Uw 0,71 W/(m²K) mit 3-fach-Verglasung.</p>
-  <div class="prodgrid" style="margin-top:var(--s6)">
-    <a class="pcard" href="/produkte/hebe-schiebetueren/iglo-hs.html">
-      <div class="pbody"><span class="eyebrow">★ Bestseller</span><h3>IGLO HS</h3><p>Hebe-Schiebe-Tür · bis 6.500 mm · 400 kg Flügel · Null-Schwelle DIN 18040 · Uw 0,71.</p><span class="ghost">Ansehen</span></div>
-    </a>
-    <a class="pcard" href="/produkte/hebe-schiebetueren/iglo-energy-psk.html">
-      <div class="pbody"><span class="eyebrow">PSK · Passivhaus</span><h3>IGLO Energy PSK</h3><p>Parallel-Schiebe-Kipp · 82 mm · MACO SKB-S · Uw 0,71 · KfW-förderfähig.</p><span class="ghost">Ansehen</span></div>
-    </a>
-    <a class="pcard" href="/produkte/hebe-schiebetueren/iglo-5-classic-psk.html">
-      <div class="pbody"><span class="eyebrow">PSK · Standard</span><h3>IGLO 5 Classic PSK</h3><p>Parallel-Schiebe-Kipp · 70 mm · MACO SKB-S · Uw 0,81 · BAFA-förderfähig.</p><span class="ghost">Ansehen</span></div>
-    </a>
-    <a class="pcard" href="/produkte/hebe-schiebetueren/iglo-slide.html">
-      <div class="pbody"><span class="eyebrow">schlank · günstig</span><h3>IGLO Slide</h3><p>Schlanke Standard-Schiebe-Lösung · bis ~4.000 mm · Siegenia · Ug 1,1.</p><span class="ghost">Ansehen</span></div>
-    </a>
+  <div class="cat-profiles">
+      <a class="profile-item feat" href="/produkte/hebe-schiebetueren/iglo-hs.html">
+        <span class="pi-main"><span class="pi-tag">Hebe-Schiebe</span><span class="pi-name">IGLO HS</span></span>
+        <span class="pi-specs"><span class="pi-spec">Uw 0,71</span><span class="pi-spec">bis 6.500 mm</span><span class="pi-spec">Null-Schwelle</span></span>
+        <span class="pi-go">Ansehen <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></span>
+      </a>
+      <a class="profile-item" href="/produkte/hebe-schiebetueren/iglo-energy-psk.html">
+        <span class="pi-main"><span class="pi-tag">PSK Passivhaus</span><span class="pi-name">IGLO Energy PSK</span></span>
+        <span class="pi-specs"><span class="pi-spec">Uw 0,65</span><span class="pi-spec">82 mm</span><span class="pi-spec">MACO SKB-S</span></span>
+        <span class="pi-go">Ansehen <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></span>
+      </a>
+      <a class="profile-item" href="/produkte/hebe-schiebetueren/iglo-5-classic-psk.html">
+        <span class="pi-main"><span class="pi-tag">PSK Standard</span><span class="pi-name">IGLO 5 Classic PSK</span></span>
+        <span class="pi-specs"><span class="pi-spec">Uw 0,81</span><span class="pi-spec">70 mm</span><span class="pi-spec">MACO SKB-S</span></span>
+        <span class="pi-go">Ansehen <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></span>
+      </a>
+      <a class="profile-item" href="/produkte/hebe-schiebetueren/iglo-slide.html">
+        <span class="pi-main"><span class="pi-tag">PSK günstig</span><span class="pi-name">IGLO Slide</span></span>
+        <span class="pi-specs"><span class="pi-spec">Uw 1,1</span><span class="pi-spec">82 mm</span><span class="pi-spec">Siegenia</span></span>
+        <span class="pi-go">Ansehen <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></span>
+      </a>
   </div>
-  <div class="subhero-cta" style="margin-top:var(--s7)">
+  <div class="subhero-cta" style="margin-top:var(--s6)">
     <a class="btn-primary" href="/kontakt.html">Schiebetür anfragen →</a>
   </div>
 </div></section>
@@ -1097,6 +1146,19 @@ body.scrolled .burger{color:var(--text)}
       btn.addEventListener('mouseleave', function(){ btn.style.transform = ''; });
     });
   }
+</script>
+
+<script>
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.cat-tab'));
+  if(!tabs.length||!('IntersectionObserver' in window))return;
+  var map={}, secs=[];
+  tabs.forEach(function(t){var id=t.getAttribute('href').slice(1);map[id]=t;var s=document.getElementById(id);if(s)secs.push(s);});
+  var io=new IntersectionObserver(function(es){
+    es.forEach(function(e){if(e.isIntersecting){tabs.forEach(function(x){x.classList.remove('active');});var t=map[e.target.id];if(t)t.classList.add('active');}});
+  },{rootMargin:'-45% 0px -50% 0px',threshold:0});
+  secs.forEach(function(s){io.observe(s);});
+})();
 </script>
 </body>
 </html>
