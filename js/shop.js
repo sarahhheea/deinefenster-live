@@ -135,7 +135,7 @@ function applyUrlFilter() {
   const params = new URLSearchParams(window.location.search);
   const zustand = params.get('zustand');
   let scrollNeeded = false;
-  if (zustand === 'gebraucht' || zustand === 'neu') {
+  if (zustand === 'gebraucht' || zustand === 'neu' || zustand === 'vermessen') {
     STATE.filter.zustand.add(zustand);
     const cb = document.querySelector(`.filter-zustand[value="${zustand}"]`);
     if (cb) cb.checked = true;
