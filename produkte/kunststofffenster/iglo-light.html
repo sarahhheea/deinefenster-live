@@ -194,6 +194,35 @@ body.scrolled .burger{color:var(--text)}
 .ctablock .ctabtns{display:flex;flex-wrap:wrap;gap:var(--s4)}
 .ctablock .ghost-d{display:inline-flex;align-items:center;gap:8px;font-weight:700;color:#bcd6ff;border:1px solid rgba(118,169,250,.55);border-radius:var(--pill);padding:14px 26px;transition:background .2s,transform .2s}
 .ctablock .ghost-d:hover{background:rgba(118,169,250,.12);transform:translateY(-2px)}
+
+/* ── Farb-Showcase „Wunschfarbe" (hell, 2-spaltig: alles auf einen Blick) ── */
+.pf-card{display:grid;grid-template-columns:1fr;gap:clamp(20px,3vw,40px);align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:clamp(16px,2.4vw,30px);box-shadow:var(--shadow)}
+@media(min-width:900px){.pf-card{grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr)}}
+.pf-preview{position:relative;width:100%;aspect-ratio:764/685;max-height:min(50vh,480px);margin:0 auto;background:#fff;border:1px solid var(--border);border-radius:calc(var(--r) - 2px);overflow:hidden}
+/* Kompakte Sektion: Vorschau + Farben + Button auf EINEN Bildschirm */
+.pf-section{padding-block:clamp(36px,4vw,60px)}
+.pf-section .sec-head{margin-bottom:var(--s6)}
+.pf-section .sec-head h2{font-size:clamp(1.75rem,3.2vw,2.6rem)}
+.pf-img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center;transition:opacity .25s var(--ease)}
+.pf-img.is-loading{opacity:.4}
+.pf-badge{position:absolute;left:14px;bottom:14px;display:inline-flex;align-items:center;gap:7px;background:rgba(20,24,29,.82);color:#fff;font-family:var(--font-display);font-weight:700;font-size:.8rem;padding:7px 14px;border-radius:var(--pill);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.pf-badge::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--acc)}
+.pf-panel{display:flex;flex-direction:column;gap:var(--s5);min-width:0}
+.pf-hint{font-size:.92rem;color:var(--soft);line-height:1.5;margin:0}
+.pf-swatches{display:grid;grid-template-columns:repeat(8,1fr);gap:8px}
+@media(min-width:1200px){.pf-swatches{grid-template-columns:repeat(9,1fr);gap:9px}}
+.pf-swatch{position:relative;aspect-ratio:1;padding:0;border:2px solid transparent;border-radius:50%;background:none;cursor:pointer;transition:transform .16s var(--ease),border-color .16s,box-shadow .16s}
+.pf-dot{display:block;width:100%;height:100%;border-radius:50%;background-size:cover;background-position:center;box-shadow:inset 0 0 0 1px rgba(8,21,46,.14)}
+.pf-swatch:hover,.pf-swatch:focus-visible{transform:scale(1.16);border-color:var(--acc);box-shadow:0 6px 16px rgba(34,94,170,.28);outline:none;z-index:3}
+.pf-swatch.is-active{border-color:var(--acc-text);box-shadow:0 0 0 2px var(--acc-text)}
+.pf-name{position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);white-space:nowrap;background:rgba(20,24,29,.92);color:#fff;font-size:11px;font-weight:600;padding:4px 9px;border-radius:6px;opacity:0;pointer-events:none;transition:opacity .15s;z-index:6}
+.pf-swatch:hover .pf-name,.pf-swatch:focus-visible .pf-name{opacity:1}
+.pf-cta{margin-top:var(--s2)}
+.pf-cta a{display:inline-flex;align-items:center;gap:8px;background:var(--acc-text);color:#fff;font-family:var(--font-display);font-weight:700;font-size:.95rem;padding:13px 26px;border-radius:var(--pill);transition:background .2s,transform .2s}
+.pf-cta a:hover{background:var(--acc-strong);transform:translateY(-2px)}
+.pf-cta a .material-symbols-outlined{font-size:19px}
+@media(max-width:899px){.pf-preview{max-height:44vh}}
+@media(max-width:460px){.pf-swatches{grid-template-columns:repeat(7,1fr)}}
 </style>
 </head>
 <body>
@@ -314,7 +343,10 @@ body.scrolled .burger{color:var(--text)}
 <!-- ===== SUB-HERO ===== -->
 <header class="subhero">
   <div class="subhero-bg">
-    <img src="/img/produkte/kategorie/kunststofffenster.jpg" alt="Drutex IGLO Light Kunststofffenster nach Maß" fetchpriority="high">
+    <video autoplay muted loop playsinline preload="auto" poster="/img/produkte/kategorie/kunststofffenster.jpg" aria-label="Drutex IGLO Light Profilsystem im Überblick">
+      <source src="/video/drutex/iglo-energy.mp4" type="video/mp4">
+      <img src="/img/produkte/kategorie/kunststofffenster.jpg" alt="Drutex IGLO Light Kunststofffenster nach Maß">
+    </video>
   </div>
   <div class="wrap">
     <span class="eyebrow">Kunststofffenster · IGLO Light</span>
@@ -436,17 +468,220 @@ body.scrolled .burger{color:var(--text)}
 </div></section>
 
 <!-- ===== 05 GALERIE ===== -->
-<section><div class="wrap">
+<section class="pf-section"><div class="wrap">
   <div class="sec-head">
     <span class="eyebrow">Im Überblick</span>
     <h2>IGLO Light <span class="accent">in Ihrer Wunschfarbe.</span></h2>
   </div>
-  <p class="lead" style="max-width:60ch;margin-bottom:var(--s7)">41 Drutex-Farben und Holzoptiken als hochwertige Folienbeschichtung — von Weiß FX über Anthrazitgrau bis zu Holzdekoren. Maße, Farbe, Verglasung und Beschlag wählen Sie im Konfigurator.</p>
-  <div class="gallery">
-    <a class="gcard gbig" href="/konfigurator.html?prod=kunststoff"><img src="/img/produkte/kategorie/kunststofffenster.jpg" alt="Drutex IGLO Light Kunststofffenster nach Maß" loading="lazy"><span class="gcap">IGLO Light · im Konfigurator nach Maß wählen</span></a>
-    <a class="gcard" href="/produkte.html"><img src="/img/produkte/kategorie/balkontuer.jpg" alt="Drutex Balkontür im IGLO-Profilsystem" loading="lazy"><span class="gcap">Auch als Balkontür</span></a>
-    <a class="gcard" href="/produkte.html"><img src="/img/produkte/kategorie/schiebetuer.jpg" alt="Drutex Hebe-Schiebetür im IGLO-Profilsystem" loading="lazy"><span class="gcap">Auch als Hebe-Schiebetür</span></a>
+    <div class="pf-card">
+    <div class="pf-preview">
+      <img class="pf-img" src="/img/profil-farben/weiss-fx__frame.webp" alt="Drutex IGLO Light Kunststofffenster in Weiß FX" width="764" height="685"/>
+      <span class="pf-badge"><span class="pf-badge-name">Weiß FX</span></span>
+    </div>
+    <div class="pf-panel">
+      <p class="pf-hint">Über 40 Drutex-Farben — fahren Sie mit der Maus über eine Farbe (am Handy: antippen). Das Fenster links wechselt sofort, Klick fixiert die Auswahl.</p>
+      <div class="pf-swatches" role="group" aria-label="Fensterfarbe wählen">
+      <button type="button" class="pf-swatch is-active" title="Weiß FX" data-name="Weiß FX" data-frame="/img/profil-farben/weiss-fx__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/weiss-fx__dot.webp')"></span>
+        <span class="pf-name">Weiß FX</span>
+      </button>
+      <button type="button" class="pf-swatch" title="White Sand U-Matt" data-name="White Sand U-Matt" data-frame="/img/profil-farben/white-sand-u-matt__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/white-sand-u-matt__dot.webp')"></span>
+        <span class="pf-name">White Sand U-Matt</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Crown Platin" data-name="Crown Platin" data-frame="/img/profil-farben/crown-platin__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/crown-platin__dot.webp')"></span>
+        <span class="pf-name">Crown Platin</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Cremeweiß" data-name="Cremeweiß" data-frame="/img/profil-farben/cremeweiss__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/cremeweiss__dot.webp')"></span>
+        <span class="pf-name">Cremeweiß</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Pyrit" data-name="Pyrit" data-frame="/img/profil-farben/pyrit__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/pyrit__dot.webp')"></span>
+        <span class="pf-name">Pyrit</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Sheffield Oak Light" data-name="Sheffield Oak Light" data-frame="/img/profil-farben/sheffield-oak-light__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/sheffield-oak-light__dot.webp')"></span>
+        <span class="pf-name">Sheffield Oak Light</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Eiche Natur" data-name="Eiche Natur" data-frame="/img/profil-farben/eiche-natur__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/eiche-natur__dot.webp')"></span>
+        <span class="pf-name">Eiche Natur</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Lichtgrau" data-name="Lichtgrau" data-frame="/img/profil-farben/lichtgrau__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/lichtgrau__dot.webp')"></span>
+        <span class="pf-name">Lichtgrau</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Grau" data-name="Grau" data-frame="/img/profil-farben/grau__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/grau__dot.webp')"></span>
+        <span class="pf-name">Grau</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Betongrau" data-name="Betongrau" data-frame="/img/profil-farben/betongrau__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/betongrau__dot.webp')"></span>
+        <span class="pf-name">Betongrau</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Quarzgrau" data-name="Quarzgrau" data-frame="/img/profil-farben/quarzgrau__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/quarzgrau__dot.webp')"></span>
+        <span class="pf-name">Quarzgrau</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Quarzgrau glatt" data-name="Quarzgrau glatt" data-frame="/img/profil-farben/quarzgrau-glatt__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/quarzgrau-glatt__dot.webp')"></span>
+        <span class="pf-name">Quarzgrau glatt</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Basaltgrau" data-name="Basaltgrau" data-frame="/img/profil-farben/basaltgrau__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/basaltgrau__dot.webp')"></span>
+        <span class="pf-name">Basaltgrau</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Basaltgrau Glatt" data-name="Basaltgrau Glatt" data-frame="/img/profil-farben/basaltgrau-glatt__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/basaltgrau-glatt__dot.webp')"></span>
+        <span class="pf-name">Basaltgrau Glatt</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Eisenglimmer Schiefer" data-name="Eisenglimmer Schiefer" data-frame="/img/profil-farben/eisenglimmer-schiefer__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/eisenglimmer-schiefer__dot.webp')"></span>
+        <span class="pf-name">Eisenglimmer Schiefer</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Schiefergrau Glatt" data-name="Schiefergrau Glatt" data-frame="/img/profil-farben/schiefergrau-glatt__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/schiefergrau-glatt__dot.webp')"></span>
+        <span class="pf-name">Schiefergrau Glatt</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Graphit-Sandfarben" data-name="Graphit-Sandfarben" data-frame="/img/profil-farben/graphit-sandfarben__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/graphit-sandfarben__dot.webp')"></span>
+        <span class="pf-name">Graphit-Sandfarben</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Anthrazitgrau" data-name="Anthrazitgrau" data-frame="/img/profil-farben/anthrazitgrau__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/anthrazitgrau__dot.webp')"></span>
+        <span class="pf-name">Anthrazitgrau</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Anthrazit Glatt" data-name="Anthrazit Glatt" data-frame="/img/profil-farben/anthrazit-glatt__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/anthrazit-glatt__dot.webp')"></span>
+        <span class="pf-name">Anthrazit Glatt</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Anthrazitgrau Ulti-Matt" data-name="Anthrazitgrau Ulti-Matt" data-frame="/img/profil-farben/anthrazitgrau-ulti-matt__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/anthrazitgrau-ulti-matt__dot.webp')"></span>
+        <span class="pf-name">Anthrazitgrau Ulti-Matt</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Jet Black" data-name="Jet Black" data-frame="/img/profil-farben/jet-black__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/jet-black__dot.webp')"></span>
+        <span class="pf-name">Jet Black</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Schwarz Ulti-Matt" data-name="Schwarz Ulti-Matt" data-frame="/img/profil-farben/schwarz-ulti-matt__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/schwarz-ulti-matt__dot.webp')"></span>
+        <span class="pf-name">Schwarz Ulti-Matt</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Golden Oak" data-name="Golden Oak" data-frame="/img/profil-farben/goldenoak__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/goldenoak__dot.webp')"></span>
+        <span class="pf-name">Golden Oak</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Turner Oak" data-name="Turner Oak" data-frame="/img/profil-farben/turner-oak__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/turner-oak__dot.webp')"></span>
+        <span class="pf-name">Turner Oak</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Turner Oak Toffee" data-name="Turner Oak Toffee" data-frame="/img/profil-farben/turner-oak-toffee__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/turner-oak-toffee__dot.webp')"></span>
+        <span class="pf-name">Turner Oak Toffee</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Turner Oak Walnut" data-name="Turner Oak Walnut" data-frame="/img/profil-farben/turner-oak-walnut__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/turner-oak-walnut__dot.webp')"></span>
+        <span class="pf-name">Turner Oak Walnut</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Winchester" data-name="Winchester" data-frame="/img/profil-farben/winchester__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/winchester__dot.webp')"></span>
+        <span class="pf-name">Winchester</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Oregon" data-name="Oregon" data-frame="/img/profil-farben/oregon__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/oregon__dot.webp')"></span>
+        <span class="pf-name">Oregon</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Streifen Douglasie" data-name="Streifen Douglasie" data-frame="/img/profil-farben/streifen-douglasie__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/streifen-douglasie__dot.webp')"></span>
+        <span class="pf-name">Streifen Douglasie</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Nussbaum" data-name="Nussbaum" data-frame="/img/profil-farben/nussbaum__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/nussbaum__dot.webp')"></span>
+        <span class="pf-name">Nussbaum</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Eiche Dunkel" data-name="Eiche Dunkel" data-frame="/img/profil-farben/eiche-dunkel__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/eiche-dunkel__dot.webp')"></span>
+        <span class="pf-name">Eiche Dunkel</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Schwarzbraun" data-name="Schwarzbraun" data-frame="/img/profil-farben/schwarzbraun__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/schwarzbraun__dot.webp')"></span>
+        <span class="pf-name">Schwarzbraun</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Macore" data-name="Macore" data-frame="/img/profil-farben/macore__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/macore__dot.webp')"></span>
+        <span class="pf-name">Macore</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Mahagoni" data-name="Mahagoni" data-frame="/img/profil-farben/mahogoni__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/mahogoni__dot.webp')"></span>
+        <span class="pf-name">Mahagoni</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Schokobraun" data-name="Schokobraun" data-frame="/img/profil-farben/schockobraun__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/schockobraun__dot.webp')"></span>
+        <span class="pf-name">Schokobraun</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Shine deep bronze" data-name="Shine deep bronze" data-frame="/img/profil-farben/shine-deep-bronze__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/shine-deep-bronze__dot.webp')"></span>
+        <span class="pf-name">Shine deep bronze</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Moosgrün" data-name="Moosgrün" data-frame="/img/profil-farben/moosgruen__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/moosgruen__dot.webp')"></span>
+        <span class="pf-name">Moosgrün</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Dunkelgrün" data-name="Dunkelgrün" data-frame="/img/profil-farben/dunkelgruen__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/dunkelgruen__dot.webp')"></span>
+        <span class="pf-name">Dunkelgrün</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Dunkelrot" data-name="Dunkelrot" data-frame="/img/profil-farben/dunkelrot__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/dunkelrot__dot.webp')"></span>
+        <span class="pf-name">Dunkelrot</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Brillantblau" data-name="Brillantblau" data-frame="/img/profil-farben/brylantowo-niebieski__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/brylantowo-niebieski__dot.webp')"></span>
+        <span class="pf-name">Brillantblau</span>
+      </button>
+      <button type="button" class="pf-swatch" title="Stahlblau" data-name="Stahlblau" data-frame="/img/profil-farben/stahlblau__frame.webp">
+        <span class="pf-dot" style="background-image:url('/img/profil-farben/stahlblau__dot.webp')"></span>
+        <span class="pf-name">Stahlblau</span>
+      </button>
+      </div>
+      <div class="pf-cta">
+        <a href="/konfigurator.html?prod=kunststoff"><span class="material-symbols-outlined" aria-hidden="true">tune</span>Im Konfigurator nach Maß wählen</a>
+      </div>
+    </div>
   </div>
+  <script>
+  (function(){
+    var img=document.querySelector('.pf-img'); if(!img) return;
+    var badge=document.querySelector('.pf-badge-name');
+    var sw=document.querySelectorAll('.pf-swatch');
+    var fixedSrc=img.getAttribute('src'), fixedName=badge?badge.textContent:'';
+    var cache={};
+    function show(src,name){
+      if(img.getAttribute('src')===src){ if(badge&&name)badge.textContent=name; return; }
+      img.classList.add('is-loading');
+      if(cache[src]){ img.src=src; if(badge&&name)badge.textContent=name; img.classList.remove('is-loading'); return; }
+      var pre=new Image();
+      pre.onload=function(){cache[src]=1; img.src=src; if(badge&&name)badge.textContent=name; img.classList.remove('is-loading');};
+      pre.onerror=function(){img.classList.remove('is-loading');};
+      pre.src=src;
+    }
+    sw.forEach(function(b){
+      var src=b.dataset.frame, name=b.dataset.name; if(!src) return;
+      b.addEventListener('mouseenter',function(){show(src,name);});
+      b.addEventListener('focus',function(){show(src,name);});
+      b.addEventListener('mouseleave',function(){show(fixedSrc,fixedName);});
+      b.addEventListener('blur',function(){show(fixedSrc,fixedName);});
+      b.addEventListener('click',function(){
+        fixedSrc=src; fixedName=name; show(src,name);
+        sw.forEach(function(x){x.classList.remove('is-active');});
+        b.classList.add('is-active');
+        img.alt='Drutex IGLO Light Kunststofffenster in '+name;
+      });
+    });
+  })();
+  </script>
 </div></section>
 
 <!-- ===== 06 FAQ ===== -->
