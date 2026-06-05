@@ -1270,7 +1270,7 @@ function oeffneDetail(id) {
     <div class="p-6 space-y-4">
       <div class="flex items-center justify-between gap-2 -mt-1">
         <span class="text-[11px] text-ink-soft inline-flex items-center gap-1"><span class="material-symbols-outlined" style="font-size:15px">zoom_in</span>Bild antippen zum Vergrößern</span>
-        <button id="detailShareBtn" type="button" class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full transition-colors" style="color:#225eaa;background:rgba(34,94,170,0.09);"><span class="material-symbols-outlined" style="font-size:16px">share</span>Teilen</button>
+        <button id="detailShareBtn" type="button" class="inline-flex items-center gap-1.5 text-sm font-bold px-4 py-2 rounded-full transition-colors shadow-sm hover:opacity-90" style="color:#fff;background:#225eaa;"><span class="material-symbols-outlined" style="font-size:18px">share</span>Link teilen</button>
       </div>
       <div class="flex flex-wrap gap-1.5">
         ${(p.verglasung && !['daemmung','baumaterialien','garagentor-gebraucht'].includes(p.kategorie_key)) ? `<span class="pill is-primary">${p.verglasung}-Verglasung</span>` : ''}
