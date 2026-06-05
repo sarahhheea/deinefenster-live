@@ -243,11 +243,15 @@ footer a:hover{color:#fff}
 
 @media(max-width:860px){
   .nav-links{display:none}
-  .util{font-size:.72rem}
+  /* Mobile: Util-Topbar ganz ausblenden - alle Links liegen im Hamburger (mnav). Verhindert Ueberlauf + abgeschnittene Telefonnummer. */
+  .util{display:none}
+  :root{--nav-h:68px}
+  nav.main{top:var(--banner-h,0px)!important}   /* schlaegt die inline body[style] +38px-Regel auf Mobile, da die Util-Leiste entfaellt - sonst 38px Loch unter dem Banner */
+  input,textarea,select{font-size:16px!important}   /* verhindert iOS-Auto-Zoom beim Antippen von Formularfeldern (Felder <16px lassen Safari reinzoomen -> Seite springt); !important schlaegt klassenbasierte 0.95rem-Regeln */
   .util .wrap > a:first-child{display:none}        /* lange Adresse auf Handy ausblenden */
   .util .right{margin-left:auto}
   .hero{min-height:0}
-  .hero .wrap{padding-top:118px;padding-bottom:var(--s7)}   /* Platz für fixe Util+Nav unter dem Banner */
+  .hero .wrap{padding-top:80px;padding-bottom:var(--s7)}   /* Platz für fixe Util+Nav unter dem Banner */
   .hero-bg::after{background:
      radial-gradient(140% 120% at 50% 35%, transparent 50%, rgba(8,14,30,.4) 100%),
      linear-gradient(180deg,rgba(8,14,30,.7) 0%,rgba(8,14,30,.42) 40%,rgba(8,14,30,.2) 66%,var(--bg) 100%)}
