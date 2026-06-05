@@ -49,6 +49,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   applyUrlFilter();
   rendere();
   updateCartUI();
+  oeffneDeepLinkProdukt();
 });
 
 /* ─── Tab-Navigation für Shop-Hero-Card (BFSG-konform mit Tastatur) ─── */
@@ -1267,6 +1268,10 @@ function oeffneDetail(id) {
   detail.innerHTML = `
     ${carouselHTML}
     <div class="p-6 space-y-4">
+      <div class="flex items-center justify-between gap-2 -mt-1">
+        <span class="text-[11px] text-ink-soft inline-flex items-center gap-1"><span class="material-symbols-outlined" style="font-size:15px">zoom_in</span>Bild antippen zum Vergrößern</span>
+        <button id="detailShareBtn" type="button" class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full transition-colors" style="color:#225eaa;background:rgba(34,94,170,0.09);"><span class="material-symbols-outlined" style="font-size:16px">share</span>Teilen</button>
+      </div>
       <div class="flex flex-wrap gap-1.5">
         ${(p.verglasung && !['daemmung','baumaterialien','garagentor-gebraucht'].includes(p.kategorie_key)) ? `<span class="pill is-primary">${p.verglasung}-Verglasung</span>` : ''}
         ${p.rc_klasse ? `<span class="pill is-gold">${p.rc_klasse}</span>` : ''}
@@ -1305,9 +1310,26 @@ function oeffneDetail(id) {
   });
   // Bilder-Carousel-Setup (nur wenn mehrere Bilder)
   if (hatMehrere) setupCarousel(bilderListe.length);
+  // Teilen-Button
+  const shareBtn = detail.querySelector('#detailShareBtn');
+  if (shareBtn) shareBtn.addEventListener('click', () => teileProdukt(p));
+  // Bild antippen → große Vollbild-Ansicht (startet beim aktuell sichtbaren Bild)
+  const carouselEl = detail.querySelector('#bilderCarousel');
+  if (carouselEl) {
+    carouselEl.style.cursor = 'zoom-in';
+    carouselEl.addEventListener('click', (e) => {
+      if (e.target.closest('.carousel-btn') || e.target.closest('.carousel-dot')) return; // Pfeile/Punkte nicht abfangen
+      const slides = Array.from(carouselEl.querySelectorAll('.carousel-slide'));
+      const aktiv  = carouselEl.querySelector('.carousel-slide.is-active');
+      const startIdx = Math.max(0, slides.indexOf(aktiv));
+      oeffneLightbox(bilderListe, startIdx, p.titel);
+    });
+  }
   document.getElementById('detailModal').classList.add('open');
   document.getElementById('detailOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
+  // Deep-Link in der Adresszeile setzen — Kunde/Inhaber kann die URL direkt kopieren/teilen
+  try { history.replaceState(null, '', location.pathname + '?produkt=' + encodeURIComponent(id)); } catch (e) {}
 }
 
 /* ─── Bilder-Carousel im Detail-Modal ─── */
@@ -1369,6 +1391,106 @@ function schliesseDetail() {
   document.getElementById('detailModal').classList.remove('open');
   document.getElementById('detailOverlay').classList.remove('open');
   document.body.style.overflow = '';
+  // Deep-Link-Parameter aus der Adresse entfernen (sauberer Zustand)
+  try { if (location.search.indexOf('produkt=') !== -1) history.replaceState(null, '', location.pathname); } catch (e) {}
+}
+
+/* ─── Bild-Lightbox (Vollbild beim Antippen) + Teilen + Deep-Link ─── */
+let _lbBilder = [], _lbIdx = 0;
+function ensureLightboxStyles() {
+  if (document.getElementById('lbStyles')) return;
+  const s = document.createElement('style');
+  s.id = 'lbStyles';
+  s.textContent = `
+    #lightbox{position:fixed;inset:0;z-index:9999;background:rgba(8,10,20,0.94);display:none;
+      align-items:center;justify-content:center;padding:24px}
+    #lightbox.open{display:flex}
+    #lightbox img{max-width:96vw;max-height:88vh;object-fit:contain;border-radius:8px;
+      box-shadow:0 12px 60px rgba(0,0,0,0.6);user-select:none;-webkit-user-select:none}
+    .lb-close{position:absolute;top:16px;right:20px;width:46px;height:46px;border:none;border-radius:50%;
+      background:rgba(255,255,255,0.14);color:#fff;font-size:28px;cursor:pointer;display:flex;
+      align-items:center;justify-content:center;line-height:1}
+    .lb-close:hover{background:rgba(255,255,255,0.26)}
+    .lb-nav{position:absolute;top:50%;transform:translateY(-50%);width:54px;height:54px;border:none;
+      border-radius:50%;background:rgba(255,255,255,0.14);color:#fff;font-size:30px;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;line-height:1}
+    .lb-nav:hover{background:rgba(255,255,255,0.26)}
+    .lb-prev{left:16px}.lb-next{right:16px}
+    .lb-count{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);color:#fff;font-size:13px;
+      background:rgba(0,0,0,0.4);padding:5px 12px;border-radius:20px;font-family:Manrope,sans-serif}
+    #shopToast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:#225eaa;
+      color:#fff;padding:12px 22px;border-radius:30px;font-size:14px;font-weight:700;font-family:Manrope,sans-serif;
+      box-shadow:0 8px 30px rgba(0,0,0,0.3);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:10000}
+    #shopToast.show{opacity:1;transform:translateX(-50%) translateY(0)}`;
+  document.head.appendChild(s);
+}
+function _lbRender() {
+  const box = document.getElementById('lightbox');
+  if (!box) return;
+  const mehrere = _lbBilder.length > 1;
+  box.querySelector('img').src = _lbBilder[_lbIdx];
+  const cnt = box.querySelector('.lb-count');
+  if (cnt) cnt.textContent = mehrere ? `${_lbIdx + 1} / ${_lbBilder.length}` : '';
+  box.querySelectorAll('.lb-nav').forEach(b => b.style.display = mehrere ? 'flex' : 'none');
+}
+function oeffneLightbox(bilder, startIdx, titel) {
+  ensureLightboxStyles();
+  _lbBilder = (bilder && bilder.length) ? bilder : [];
+  if (!_lbBilder.length) return;
+  _lbIdx = Math.min(Math.max(0, startIdx || 0), _lbBilder.length - 1);
+  let box = document.getElementById('lightbox');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'lightbox';
+    box.innerHTML = `
+      <button class="lb-close" type="button" aria-label="Schließen">&times;</button>
+      <button class="lb-nav lb-prev" type="button" aria-label="Vorheriges Bild">&#8249;</button>
+      <img alt=""/>
+      <button class="lb-nav lb-next" type="button" aria-label="Nächstes Bild">&#8250;</button>
+      <div class="lb-count"></div>`;
+    document.body.appendChild(box);
+    box.querySelector('img').onerror = function () { this.src = 'img/fenster_standard.png'; };
+    box.querySelector('.lb-close').addEventListener('click', schliesseLightbox);
+    box.querySelector('.lb-prev').addEventListener('click', e => { e.stopPropagation(); _lbIdx = (_lbIdx - 1 + _lbBilder.length) % _lbBilder.length; _lbRender(); });
+    box.querySelector('.lb-next').addEventListener('click', e => { e.stopPropagation(); _lbIdx = (_lbIdx + 1) % _lbBilder.length; _lbRender(); });
+    box.addEventListener('click', e => { if (e.target === box) schliesseLightbox(); });
+    document.addEventListener('keydown', _lbKeys);
+  }
+  box.querySelector('img').alt = titel || '';
+  _lbRender();
+  box.classList.add('open');
+}
+function schliesseLightbox() { const b = document.getElementById('lightbox'); if (b) b.classList.remove('open'); }
+function _lbKeys(e) {
+  const b = document.getElementById('lightbox');
+  if (!b || !b.classList.contains('open')) return;
+  if (e.key === 'Escape') schliesseLightbox();
+  if (e.key === 'ArrowLeft'  && _lbBilder.length > 1) { _lbIdx = (_lbIdx - 1 + _lbBilder.length) % _lbBilder.length; _lbRender(); }
+  if (e.key === 'ArrowRight' && _lbBilder.length > 1) { _lbIdx = (_lbIdx + 1) % _lbBilder.length; _lbRender(); }
+}
+function teileProdukt(p) {
+  const url = location.origin + location.pathname + '?produkt=' + encodeURIComponent(p.id);
+  if (navigator.share) {
+    navigator.share({ title: p.titel || 'Produkt', text: (p.titel || '') + ' – DeineFenster.de', url }).catch(() => {});
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(() => zeigeToast('Link kopiert ✓')).catch(() => zeigeToast(url));
+  } else {
+    zeigeToast(url);
+  }
+}
+function zeigeToast(text) {
+  ensureLightboxStyles();
+  let t = document.getElementById('shopToast');
+  if (!t) { t = document.createElement('div'); t.id = 'shopToast'; document.body.appendChild(t); }
+  t.textContent = text;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+function oeffneDeepLinkProdukt() {
+  const pid = new URLSearchParams(location.search).get('produkt');
+  if (!pid) return;
+  if (STATE.produkte && STATE.produkte.some(x => x.id === pid)) oeffneDetail(pid);
 }
 
 /* ─── Anfrage-Modal: Produkt-spezifische Anfrage via Web3Forms ─── */
