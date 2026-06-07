@@ -757,14 +757,27 @@ function rendere() {
   });
 }
 
+// "Nur 1 verfügbar" nur bei echten Einzelstücken zeigen.
+// Erkennung über das gepflegte Merkmal "Einzelstück" (in eigenschaften/Titel/Beschreibung).
+// Ungepflegte Gebraucht-Inserate haben standardmäßig lagerbestand 1 — das ist KEIN echtes Einzelstück.
+function istEinzelstueck(p) {
+  const eig = Array.isArray(p.eigenschaften) ? p.eigenschaften.join(' ') : '';
+  const text = `${eig} ${p.titel || ''} ${p.beschreibung || ''}`.toLowerCase();
+  return text.includes('einzelst');
+}
+
+// Bestands-Badge zentral: neu = kein Badge; echtes Einzelstück = "Nur 1 verfügbar";
+// >1 explizit gepflegt = Stückzahl; sonst (ungepflegtes Gebraucht-Inserat) = kein irreführendes Badge.
+function lagerBadgeHtml(p) {
+  if ((p.zustand || 'neu') === 'neu') return '';
+  if (istEinzelstueck(p)) return `<span class="pill is-warning">Nur 1 verfügbar</span>`;
+  if (p.lagerbestand > 1) return `<span class="pill is-success">${p.lagerbestand} auf Lager</span>`;
+  return '';
+}
+
 function karteHtml(p) {
   const istNeu = (p.zustand || 'neu') === 'neu';
-  // Bei neuen Drutex-Produkten: keinen Knappheits-Badge — Drutex liefert nach, "Nur 1 verfuegbar" verunsichert nur.
-  const lagerBadge = istNeu
-    ? ''
-    : (p.lagerbestand <= 1
-        ? `<span class="pill is-warning">Nur ${p.lagerbestand} verfügbar</span>`
-        : `<span class="pill is-success">${p.lagerbestand} auf Lager</span>`);
+  const lagerBadge = lagerBadgeHtml(p);
   const rcBadge = p.rc_klasse ? `<span class="pill is-gold">${p.rc_klasse}</span>` : '';
   // Verglasungs-Badge nur bei Produkten mit Glas (Fenster/Balkontür/Haustür/Schiebetür) — NICHT bei Dämmung/Baumaterialien/Garagentor
   const NO_GLAS_KATS = new Set(['daemmung','baumaterialien','garagentor-gebraucht']);
@@ -1275,11 +1288,7 @@ function oeffneDetail(id) {
       <div class="flex flex-wrap gap-1.5">
         ${(p.verglasung && !['daemmung','baumaterialien','garagentor-gebraucht'].includes(p.kategorie_key)) ? `<span class="pill is-primary">${p.verglasung}-Verglasung</span>` : ''}
         ${p.rc_klasse ? `<span class="pill is-gold">${p.rc_klasse}</span>` : ''}
-        ${(p.zustand || 'neu') === 'neu'
-          ? ''
-          : (p.lagerbestand <= 1
-              ? `<span class="pill is-warning">Nur ${p.lagerbestand} verfügbar</span>`
-              : `<span class="pill is-success">${p.lagerbestand} auf Lager</span>`)}
+        ${lagerBadgeHtml(p)}
       </div>
       <div class="grid grid-cols-2 gap-2 text-xs">
         <div class="bg-bg-soft rounded-lg px-3 py-2"><span class="block text-[10px] text-ink-soft">Breite</span><span class="font-bold text-ink">${p.breite_mm} mm</span></div>
