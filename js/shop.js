@@ -757,13 +757,14 @@ function rendere() {
   });
 }
 
-// Bestands-Badge zentral. Gebrauchtware ist physisch immer ein Einzelstück → "Nur X verfügbar".
-// Neue Drutex-Ware: KEIN Knappheits-Badge (nachbestellbar; falsche Verknappung wäre UWG-relevant).
+// Bestands-Badge zentral. "Nur X verfügbar" auf jedem Einzelprodukt (neu + gebraucht).
+// AUSNAHME: Sammel-Inserate (Beschreibung listet mehrere Größen/Preise, zeigen "ab") —
+// dort wäre "Nur 1 verfügbar" ein Widerspruch, also kein Knappheits-Badge.
 function lagerBadgeHtml(p) {
-  if ((p.zustand || 'neu') === 'neu') return '';
-  return p.lagerbestand <= 1
-    ? `<span class="pill is-warning">Nur ${p.lagerbestand} verfügbar</span>`
-    : `<span class="pill is-success">${p.lagerbestand} auf Lager</span>`;
+  if (istSammelInserat(p)) return '';
+  return p.lagerbestand > 1
+    ? `<span class="pill is-success">${p.lagerbestand} auf Lager</span>`
+    : `<span class="pill is-warning">Nur ${p.lagerbestand} verfügbar</span>`;
 }
 
 // "ab" vor dem Preis nur bei Sammel-Inseraten (Beschreibung listet mehrere Maße/Preise,
