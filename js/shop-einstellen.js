@@ -580,6 +580,12 @@ function resetFormular() {
   document.getElementById('formFarbe').value = 'weiss';
   document.getElementById('formVerglasung').value = '2-fach';
   document.querySelectorAll('.eig-check').forEach(c => { c.checked = false; });
+  // Felder, die beim Bearbeiten gesetzt werden, MÜSSEN hier zurück — sonst sickern
+  // Export-/Sonderpreis-Häkchen, Standnummer und Öffnungsart ins nächste neue Inserat durch.
+  const _exp = document.getElementById('formExport'); if (_exp) _exp.checked = false;
+  const _sp = document.getElementById('formSonderpreis'); if (_sp) _sp.checked = false;
+  const _st = document.getElementById('formStandnummer'); if (_st) _st.value = '';
+  const _oa = document.getElementById('formOeffnungsart'); if (_oa) _oa.value = '';
   STATE.bilder = [];
   STATE.zustand = 'neu';
   STATE.material = 'kunststoff';
