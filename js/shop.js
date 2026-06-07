@@ -757,22 +757,23 @@ function rendere() {
   });
 }
 
-// "Nur 1 verfügbar" nur bei echten Einzelstücken zeigen.
-// Erkennung über das gepflegte Merkmal "Einzelstück" (in eigenschaften/Titel/Beschreibung).
-// Ungepflegte Gebraucht-Inserate haben standardmäßig lagerbestand 1 — das ist KEIN echtes Einzelstück.
-function istEinzelstueck(p) {
-  const eig = Array.isArray(p.eigenschaften) ? p.eigenschaften.join(' ') : '';
-  const text = `${eig} ${p.titel || ''} ${p.beschreibung || ''}`.toLowerCase();
-  return text.includes('einzelst');
-}
-
-// Bestands-Badge zentral: neu = kein Badge; echtes Einzelstück = "Nur 1 verfügbar";
-// >1 explizit gepflegt = Stückzahl; sonst (ungepflegtes Gebraucht-Inserat) = kein irreführendes Badge.
+// Bestands-Badge zentral. Gebrauchtware ist physisch immer ein Einzelstück → "Nur X verfügbar".
+// Neue Drutex-Ware: KEIN Knappheits-Badge (nachbestellbar; falsche Verknappung wäre UWG-relevant).
 function lagerBadgeHtml(p) {
   if ((p.zustand || 'neu') === 'neu') return '';
-  if (istEinzelstueck(p)) return `<span class="pill is-warning">Nur 1 verfügbar</span>`;
-  if (p.lagerbestand > 1) return `<span class="pill is-success">${p.lagerbestand} auf Lager</span>`;
-  return '';
+  return p.lagerbestand <= 1
+    ? `<span class="pill is-warning">Nur ${p.lagerbestand} verfügbar</span>`
+    : `<span class="pill is-success">${p.lagerbestand} auf Lager</span>`;
+}
+
+// "ab" vor dem Preis nur bei Sammel-Inseraten (Beschreibung listet mehrere Maße/Preise,
+// z.B. "1000 x 600 = 195 Euro, 1000 x 700 = 200 Euro …"). Bei einem Einzelprodukt mit
+// genau einem Preis ist "ab" irreführend → kein "ab".
+function istSammelInserat(p) {
+  const b = p.beschreibung || '';
+  const masse = new Set(b.match(/\d{2,4}\s*[x×]\s*\d{2,4}/gi) || []).size;
+  const euro = (b.match(/€|euro/gi) || []).length;
+  return masse >= 3 || euro >= 3;
 }
 
 function karteHtml(p) {
@@ -845,7 +846,7 @@ function karteHtml(p) {
         <p class="text-[11px] text-ink-soft mb-3 line-clamp-2">${nl2br(p.beschreibung)}</p>
         <div class="mt-auto">
           <div>
-            ${p.sonderpreis_eur ? '<span class="text-[10px] text-ink-soft block">Sonderpreis</span>' : (p.export_modell ? '<span class="text-[10px] text-ink-soft block">Export</span>' : (p.zustand === 'gebraucht' ? '' : '<span class="text-[10px] text-ink-soft block">ab</span>'))}
+            ${p.sonderpreis_eur ? '<span class="text-[10px] text-ink-soft block">Sonderpreis</span>' : (p.export_modell ? '<span class="text-[10px] text-ink-soft block">Export</span>' : (istSammelInserat(p) ? '<span class="text-[10px] text-ink-soft block">ab</span>' : ''))}
             <span class="text-xl font-extrabold text-primary leading-none">${formatPreis(p.preis_eur)}<span class="text-sm">${preisStern}</span></span>
           </div>
           ${ctaRow}
@@ -1304,7 +1305,7 @@ function oeffneDetail(id) {
       </div>
       <div class="pt-4 border-t border-border-soft flex items-end justify-between gap-3">
         <div>
-          <span class="block text-[11px] text-ink-soft">Preis ab Lager</span>
+          <span class="block text-[11px] text-ink-soft">${istSammelInserat(p) ? 'Preis ab' : 'Preis'}</span>
           <span class="text-3xl font-extrabold text-primary">${formatPreis(p.preis_eur)}</span>
         </div>
         <button id="detailAddBtn" class="bg-primary text-white px-5 py-3 rounded-full text-sm font-bold hover:bg-primary-d transition-colors flex items-center gap-1.5">
