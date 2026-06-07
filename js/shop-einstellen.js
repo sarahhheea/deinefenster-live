@@ -119,12 +119,9 @@ const EIGENSCHAFTEN_GRUPPEN = [
 const EIGENSCHAFTEN = EIGENSCHAFTEN_GRUPPEN.flatMap(g => g.items);
 
 /* ─── Mehrfach-Auswahl-Felder (Chips) ───────────────────────────────────
-   Inhaberin-Wunsch 07.06.2026: Farbe, Glasart, Verglasung und Öffnungsart
-   sollen mehrfach anklickbar sein (ein Fenster kann z.B. außen anthrazit +
-   innen weiß sein, oder mehrere Öffnungsarten bei mehrflügeligen Elementen).
-   Material und Drutex-System bleiben Einfach-Auswahl (ein Fenster = ein
-   Material / ein System). Werte werden als Arrays gespeichert; der Shop ist
-   abwärtskompatibel (akzeptiert alte Einzelwerte UND neue Listen). */
+   Inhaberin-Wunsch 07.06.2026: ALLE Reiter mehrfach anklickbar + bei jedem
+   können eigene Werte hinzugefügt werden. Werte werden als Arrays gespeichert;
+   der Shop ist abwärtskompatibel (akzeptiert alte Einzelwerte UND neue Listen). */
 const CHIP_FELDER = {
   farbe: {
     stateKey: 'farben', containerId: 'chipsFarbe',
@@ -160,6 +157,17 @@ const CHIP_FELDER = {
       { v: 'hebe-schiebe', l: 'Hebe-Schiebe' },
       { v: 'drehfluegel', l: 'Drehflügel (Haustür)' }
     ]
+  },
+  system: {
+    stateKey: 'systeme', containerId: 'chipsSystem',
+    options: [
+      { v: 'IGLO 5 Classic', l: 'IGLO 5 Classic' }, { v: 'IGLO Energy', l: 'IGLO Energy' },
+      { v: 'IGLO Light', l: 'IGLO Light' }, { v: 'IGLO EXT', l: 'IGLO EXT' },
+      { v: 'IGLO EDGE', l: 'IGLO EDGE' }, { v: 'IGLO 5 Classic Tür', l: 'IGLO 5 Classic Tür' },
+      { v: 'IGLO Energy Tür', l: 'IGLO Energy Tür' }, { v: 'IGLO 5 Classic PSK', l: 'IGLO 5 Classic PSK' },
+      { v: 'IGLO Energy PSK', l: 'IGLO Energy PSK' }, { v: 'IGLO Slide', l: 'IGLO Slide' },
+      { v: 'IGLO-HS', l: 'IGLO-HS' }
+    ]
   }
 };
 const OEFFNUNGSART_LABEL = Object.fromEntries(CHIP_FELDER.oeffnungsart.options.map(o => [o.v, o.l]));
@@ -171,14 +179,18 @@ const FARBE_LABEL = {
 
 const STATE = {
   typ: null,        // 'vermessen' oder 'sonderposten'
-  zustand: 'neu',  // 'neu' | 'gebraucht' | 'vermessen' | 'sonderposten'
-  material: 'kunststoff', // 'kunststoff' | 'holz' | 'aluminium' — Einfach-Auswahl
+  // Inhaberin-Wunsch 07.06.2026: ALLE Reiter mehrfach wählbar + eigene Werte hinzufügbar
+  zustaende: ['neu'],  // Mehrfach: 'neu' | 'gebraucht' | 'vermessen' | 'sonderposten'
+  materialien: ['kunststoff'], // Mehrfach: 'kunststoff' | 'holz' | 'aluminium'
   glasarten: [],       // Mehrfach: 'klarglas' | 'chinchilla' | 'milchglas' | ... — Shop-Filter
   farben: [],          // Mehrfach: 'weiss' | 'anthrazit' | ...
   verglasungen: [],    // Mehrfach: '2-fach' | '3-fach'
   oeffnungsarten: [],  // Mehrfach: 'dreh-kipp-rechts' | 'fest' | ...
+  systeme: [],         // Mehrfach: 'IGLO 5 Classic' | ...
+  kategorien: [],      // Mehrfach: 'fenster-1fluegel' | ... (steuert Shop-Gruppe)
   customEigenschaften: [], // von der Familie selbst angelegte Eigenschaften (persistent)
-  kategorie: null,
+  customWerte: {},     // pro Feld selbst angelegte Werte: { farbe:[...], zustand:[...], ... }
+  kategorie: null,     // (Alt, für Größen-/Vorschau-Logik = erste gewählte Kategorie)
   groesseKlasse: '',
   bilder: [],          // Array von DataURLs (neue Bilder, Base64 für Vorschau)
   bilderBestand: [],   // Array von Storage-URLs (bestehende Bilder beim Bearbeiten)
@@ -234,6 +246,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   ladeCustomEigenschaften();
+  ladeCustomWerte();
   rendereKategorien();
   rendereEigenschaften();
   initChipFelder();
@@ -246,7 +259,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   setZustandUI();
   setMaterialUI();
   setGlasartUI();
-  Object.keys(CHIP_FELDER).forEach(k => { if (k !== 'glasart') rendereChipFeld(k); });
+  setKategorieUI();
+  Object.keys(CHIP_FELDER).forEach(k => rendereChipFeld(k));
+  Object.keys(CARD_FELDER).forEach(k => rendereCustomKarten(k));
   setGroesseUI();
   setEditModeUI();
   rendereVorschau();
@@ -254,18 +269,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 /* ─── Edit-Mode: Produkt ins Formular laden ─── */
 async function ladeProduktInsFormular(p) {
-  STATE.zustand = p.zustand || 'neu';
-  STATE.material = (Array.isArray(p.material) ? p.material[0] : p.material) || 'keine';
+  STATE.zustaende = _alsArray(p.zustand); if (!STATE.zustaende.length) STATE.zustaende = ['neu'];
+  STATE.materialien = _alsArray(p.material);
   STATE.glasarten = _alsArray(p.glasart);       // String (alt) ODER Array (neu)
   STATE.farben = _alsArray(p.farbe);
   STATE.verglasungen = _alsArray(p.verglasung);
   STATE.oeffnungsarten = _alsArray(p.oeffnungsart);
-  STATE.kategorie = p.kategorie_key;
+  STATE.systeme = _alsArray(p.system);
+  // Mehrfach-Kategorien bevorzugen; Altdaten ohne kategorie_keys über Primär laden
+  STATE.kategorien = _alsArray(p.kategorie_keys);
+  if (!STATE.kategorien.length) STATE.kategorien = _alsArray(p.kategorie_key);
+  STATE.kategorie = STATE.kategorien[0] || null;  // Primär für Größen-/Vorschau-Logik
   STATE.groesseKlasse = p.groesse_klasse || '';
   STATE.bilderBestand = Array.isArray(p.bilder) ? [...p.bilder] : [];
   STATE.bilder = [];
-  // Unbekannte (selbst angelegte) Eigenschaften als Custom-Chips registrieren
+  // Unbekannte (selbst angelegte) Werte je Feld als Custom-Chips registrieren
   registriereCustomAusEigenschaften(p.eigenschaften || []);
+  registriereCustomWerteAusProdukt(p);
 
   // Felder befüllen — passiert im DOM nachdem rendereKategorien fertig ist
   setTimeout(() => {
@@ -277,25 +297,20 @@ async function ladeProduktInsFormular(p) {
     setVal('formSonderpreis', p.sonderpreis_eur);
     setVal('formLager', p.lagerbestand);
     setVal('formStandnummer', p.standnummer);
-    setVal('formSystem', Array.isArray(p.system) ? p.system[0] : p.system);
     setVal('formBeschreibung', p.beschreibung);
     const exp = document.getElementById('formExport'); if (exp) exp.checked = !!p.export_modell;
     rendereEigenschaften(); // Custom-Chips mitrendern
     (p.eigenschaften || []).forEach(e => {
-      const el = document.querySelector(`.eig-check[value="${e}"]`);
+      const el = [...document.querySelectorAll('.eig-check')].find(c => c.value === e);
       if (el) el.checked = true;
     });
-    // Mehrfach-Chip-Felder rendern (Glasart läuft über Step-1-Karten)
-    setGlasartUI();
-    Object.keys(CHIP_FELDER).forEach(k => { if (k !== 'glasart') rendereChipFeld(k); });
-    // Kategorie vorauswählen
-    const sel = document.querySelector(`.kat-karte[data-kat="${p.kategorie_key}"]`);
-    if (sel) sel.classList.add('selected');
-    document.getElementById('weiterZuStep2').disabled = false;
+    // Alle Mehrfach-Felder rendern (Karten-UI + Chips + eigene Werte)
+    setZustandUI(); setMaterialUI(); setGlasartUI(); setKategorieUI();
+    Object.keys(CHIP_FELDER).forEach(k => rendereChipFeld(k));
+    Object.keys(CARD_FELDER).forEach(k => rendereCustomKarten(k));
     // Direkt zu Schritt 2 springen
     goToStep2();
     rendereBildVorschau();
-    setZustandUI();
     setGroesseUI();
     rendereVorschau();
   }, 80);
@@ -412,7 +427,7 @@ function bindeZustandHandler() {
     const el = document.getElementById(id);
     if (!el) return;
     el.addEventListener('click', () => {
-      STATE.zustand = el.dataset.zustand;
+      toggleInArray(STATE.zustaende, el.dataset.zustand);
       setZustandUI();
       saveDraft();
       rendereVorschau();
@@ -424,12 +439,12 @@ function setZustandUI() {
   ZUSTAND_BTN_IDS.forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
-    el.classList.toggle('selected', el.dataset.zustand === STATE.zustand);
+    el.classList.toggle('selected', STATE.zustaende.includes(el.dataset.zustand));
   });
-  // Drutex-System nur bei "neu" anzeigen
+  // Drutex-System nur anzeigen wenn Neuware dabei ist
   const sysWrap = document.getElementById('formSystemWrap');
   if (sysWrap) {
-    sysWrap.style.display = STATE.zustand === 'neu' ? '' : 'none';
+    sysWrap.style.display = STATE.zustaende.includes('neu') ? '' : 'none';
   }
 }
 
@@ -440,7 +455,9 @@ function bindeMaterialHandler() {
     const el = document.getElementById(id);
     if (!el) return;
     el.addEventListener('click', () => {
-      STATE.material = el.dataset.material;
+      const v = el.dataset.material;
+      if (v === 'keine') STATE.materialien = [];     // "Keine Angabe" exklusiv
+      else toggleInArray(STATE.materialien, v);
       setMaterialUI();
       saveDraft();
       rendereVorschau();
@@ -452,7 +469,9 @@ function setMaterialUI() {
   MATERIAL_BTN_IDS.forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
-    el.classList.toggle('selected', el.dataset.material === STATE.material);
+    const v = el.dataset.material;
+    const sel = v === 'keine' ? STATE.materialien.length === 0 : STATE.materialien.includes(v);
+    el.classList.toggle('selected', sel);
   });
 }
 
@@ -485,43 +504,182 @@ function setGlasartUI() {
   });
 }
 
-/* ─── Generische Mehrfach-Chip-Felder (Farbe / Verglasung / Öffnungsart) ─── */
+/* ─── Mehrfach-Auswahl: Chips + eigene Werte (alle Reiter) ───────────────── */
 function toggleInArray(arr, val) {
   const i = arr.indexOf(val);
   if (i >= 0) arr.splice(i, 1); else arr.push(val);
   return arr;
 }
 
+// Karten-Felder (Schritt 1, Icons im HTML) → Mehrfach + eigene Werte als Chips darunter
+const CARD_FELDER = {
+  kategorie: { stateKey: 'kategorien',  customContainer: 'customKategorie' },
+  zustand:   { stateKey: 'zustaende',   customContainer: 'customZustand' },
+  material:  { stateKey: 'materialien', customContainer: 'customMaterial' },
+  glasart:   { stateKey: 'glasarten',   customContainer: 'customGlasart' }
+};
+// Feld → STATE-Array-Schlüssel (einheitlich für alle Reiter)
+const FELD_STATEKEY = {
+  kategorie: 'kategorien', zustand: 'zustaende', material: 'materialien',
+  glasart: 'glasarten', system: 'systeme', farbe: 'farben',
+  verglasung: 'verglasungen', oeffnungsart: 'oeffnungsarten'
+};
+
+/* eigene Werte pro Feld — bleiben für nächste Inserate gespeichert */
+const CUSTOM_WERTE_KEY = 'deinefenster_custom_werte_v1';
+function ladeCustomWerte() {
+  try { STATE.customWerte = JSON.parse(localStorage.getItem(CUSTOM_WERTE_KEY)) || {}; }
+  catch (e) { STATE.customWerte = {}; }
+  if (!STATE.customWerte || typeof STATE.customWerte !== 'object') STATE.customWerte = {};
+}
+function speichereCustomWerte() {
+  try { localStorage.setItem(CUSTOM_WERTE_KEY, JSON.stringify(STATE.customWerte)); } catch (e) {}
+}
+function customWerteFuer(feldKey) {
+  if (!Array.isArray(STATE.customWerte[feldKey])) STATE.customWerte[feldKey] = [];
+  return STATE.customWerte[feldKey];
+}
+function vordefinierteLabels(feldKey) {
+  if (feldKey === 'kategorie') return KATEGORIEN_LIVE.map(k => k.label);
+  if (feldKey === 'zustand')   return ['Neu', 'Gebraucht', 'Vermessen', 'Sonderposten'];
+  if (feldKey === 'material')  return ['Kunststoff', 'Holz', 'Aluminium', 'Keine Angabe'];
+  if (CHIP_FELDER[feldKey])    return CHIP_FELDER[feldKey].options.map(o => o.l);
+  return [];
+}
+function vordefinierteWerte(feldKey) {
+  if (feldKey === 'kategorie') return KATEGORIEN_LIVE.map(k => k.key);
+  if (feldKey === 'zustand')   return ['neu', 'gebraucht', 'vermessen', 'sonderposten'];
+  if (feldKey === 'material')  return ['kunststoff', 'holz', 'aluminium', 'keine'];
+  if (CHIP_FELDER[feldKey])    return CHIP_FELDER[feldKey].options.map(o => o.v);
+  return [];
+}
+// Wert → Anzeige-Label (eigene Werte: Label == Wert)
+function labelFuer(feldKey, val) {
+  const werte = vordefinierteWerte(feldKey), labels = vordefinierteLabels(feldKey);
+  const i = werte.indexOf(val);
+  return i >= 0 ? labels[i] : val;
+}
+// Beim Bearbeiten: gespeicherte Werte, die nicht in der Standard-Liste sind, als eigene Chips registrieren
+function registriereCustomWerteAusProdukt(p) {
+  const map = {
+    kategorie: p.kategorie_key, zustand: p.zustand, material: p.material,
+    glasart: p.glasart, system: p.system, farbe: p.farbe,
+    verglasung: p.verglasung, oeffnungsart: p.oeffnungsart
+  };
+  Object.keys(map).forEach(feldKey => {
+    const vordef = new Set(vordefinierteWerte(feldKey));
+    _alsArray(map[feldKey]).forEach(v => {
+      if (!vordef.has(v) && !customWerteFuer(feldKey).some(c => c === v)) {
+        customWerteFuer(feldKey).push(v);
+      }
+    });
+  });
+  speichereCustomWerte();
+}
+function addCustomWert(feldKey, text) {
+  const t = (text || '').trim().replace(/\s+/g, ' ');
+  if (!t) return false;
+  const stateKey = FELD_STATEKEY[feldKey];
+  const liste = customWerteFuer(feldKey);
+  if (vordefinierteLabels(feldKey).some(l => l.toLowerCase() === t.toLowerCase())) {
+    showSnackbar('Das gibt es schon zur Auswahl', 'error'); return false;
+  }
+  if (!liste.some(c => c.toLowerCase() === t.toLowerCase())) { liste.push(t); speichereCustomWerte(); }
+  if (!STATE[stateKey].includes(t)) STATE[stateKey].push(t); // direkt auswählen
+  return true;
+}
+
+// gemeinsames Chip-Markup
+function chipBtn(feldKey, val, label, aktiv, loeschbar) {
+  return `<button type="button" class="chip-toggle${aktiv ? ' selected' : ''}" data-chip-feld="${feldKey}" data-chip-val="${escapeHtml(val)}" aria-pressed="${aktiv}">${escapeHtml(label)}${loeschbar ? `<span class="chip-del" data-del-feld="${feldKey}" data-del-val="${escapeHtml(val)}" title="eigenen Wert löschen" aria-label="löschen">×</span>` : ''}</button>`;
+}
+function addBtnHtml(feldKey) {
+  return `<button type="button" class="chip-add" data-add-feld="${feldKey}"><span style="font-size:15px">＋</span> hinzufügen</button>`;
+}
+
+// Chip-Felder (Schritt 2): vordefiniert + eigene + Hinzufügen in EINEM Container
 function rendereChipFeld(feldKey) {
   const cfg = CHIP_FELDER[feldKey];
   const wrap = document.getElementById(cfg.containerId);
   if (!wrap) return;
-  const ausgewaehlt = STATE[cfg.stateKey] || [];
-  wrap.innerHTML = cfg.options.map(o => {
-    const aktiv = ausgewaehlt.includes(o.v);
-    return `<button type="button" class="chip-toggle${aktiv ? ' selected' : ''}" data-chip-feld="${feldKey}" data-chip-val="${o.v}" aria-pressed="${aktiv}">${escapeHtml(o.l)}</button>`;
-  }).join('');
+  const sel = STATE[cfg.stateKey] || [];
+  const html = cfg.options.map(o => chipBtn(feldKey, o.v, o.l, sel.includes(o.v), false)).join('')
+    + customWerteFuer(feldKey).map(c => chipBtn(feldKey, c, c, sel.includes(c), true)).join('')
+    + addBtnHtml(feldKey);
+  wrap.innerHTML = html;
 }
 
-function bindeChipFeld(feldKey) {
-  const cfg = CHIP_FELDER[feldKey];
-  const wrap = document.getElementById(cfg.containerId);
+// Karten-Felder (Schritt 1): nur eigene Werte + Hinzufügen in den customContainer
+function rendereCustomKarten(feldKey) {
+  const cfg = CARD_FELDER[feldKey];
+  const wrap = document.getElementById(cfg.customContainer);
   if (!wrap) return;
-  wrap.addEventListener('click', e => {
-    const btn = e.target.closest('[data-chip-val]');
-    if (!btn) return;
-    toggleInArray(STATE[cfg.stateKey], btn.dataset.chipVal);
+  const sel = STATE[cfg.stateKey] || [];
+  wrap.innerHTML = customWerteFuer(feldKey).map(c => chipBtn(feldKey, c, c, sel.includes(c), true)).join('')
+    + addBtnHtml(feldKey);
+}
+
+// Feld nach Änderung neu zeichnen (Chips ODER Karten-UI + Custom-Zeile)
+function rerenderFeld(feldKey) {
+  if (CHIP_FELDER[feldKey] && document.getElementById(CHIP_FELDER[feldKey].containerId)) {
     rendereChipFeld(feldKey);
-    saveDraft();
-    rendereVorschau();
+  }
+  if (feldKey === 'glasart') { setGlasartUI(); rendereCustomKarten('glasart'); }
+  if (feldKey === 'zustand') { setZustandUI(); rendereCustomKarten('zustand'); }
+  if (feldKey === 'material') { setMaterialUI(); rendereCustomKarten('material'); }
+  if (feldKey === 'kategorie') { setKategorieUI(); rendereCustomKarten('kategorie'); }
+}
+
+// EIN delegierter Klick-Handler für alle Chip-/Add-/Lösch-Aktionen
+function initChipFelder() {
+  // Chip-Container rendern + jeweils delegiert behandeln passiert global unten
+  Object.keys(CHIP_FELDER).forEach(k => {
+    if (document.getElementById(CHIP_FELDER[k].containerId)) rendereChipFeld(k);
+  });
+  Object.keys(CARD_FELDER).forEach(k => rendereCustomKarten(k));
+
+  document.addEventListener('click', e => {
+    const delBtn = e.target.closest('[data-del-feld]');
+    if (delBtn) {
+      e.stopPropagation();
+      const f = delBtn.dataset.delFeld, v = delBtn.dataset.delVal, sk = FELD_STATEKEY[f];
+      STATE.customWerte[f] = customWerteFuer(f).filter(c => c !== v);
+      const i = STATE[sk].indexOf(v); if (i >= 0) STATE[sk].splice(i, 1);
+      speichereCustomWerte(); rerenderFeld(f); saveDraft(); rendereVorschau();
+      return;
+    }
+    const addBtn = e.target.closest('[data-add-feld]');
+    if (addBtn) { oeffneAddInput(addBtn); return; }
+    const chip = e.target.closest('[data-chip-val]');
+    if (chip && !e.target.closest('[data-del-feld]')) {
+      const f = chip.dataset.chipFeld, sk = FELD_STATEKEY[f];
+      toggleInArray(STATE[sk], chip.dataset.chipVal);
+      rerenderFeld(f); saveDraft(); rendereVorschau();
+    }
   });
 }
 
-function initChipFelder() {
-  Object.keys(CHIP_FELDER).forEach(k => {
-    if (k === 'glasart') return; // Glasart läuft über die Step-1-Karten
-    rendereChipFeld(k);
-    bindeChipFeld(k);
+// Inline-Eingabe an Stelle des "+ hinzufügen"-Buttons öffnen
+function oeffneAddInput(addBtn) {
+  const feldKey = addBtn.dataset.addFeld;
+  const ph = feldKey === 'kategorie' ? 'z.B. Wintergarten'
+    : feldKey === 'farbe' ? 'z.B. Moosgrün'
+    : feldKey === 'system' ? 'z.B. IGLO Classic'
+    : 'eigenen Wert eintippen';
+  const span = document.createElement('span');
+  span.className = 'inline-flex items-center gap-1';
+  span.innerHTML = `<input type="text" maxlength="40" placeholder="${ph}" autocomplete="off" class="px-3 py-2 rounded-xl bg-surface-container-low border border-outline-variant focus:border-primary focus:outline-none text-sm" style="min-width:150px"/>
+    <button type="button" class="bg-primary text-white px-3 py-2 rounded-xl font-bold text-sm" data-add-save="${feldKey}">OK</button>
+    <button type="button" class="px-2 py-2 text-sm text-on-surface-variant" data-add-cancel="1" aria-label="Abbrechen">×</button>`;
+  addBtn.replaceWith(span);
+  const input = span.querySelector('input');
+  input.focus();
+  const speichern = () => { if (addCustomWert(feldKey, input.value)) { rerenderFeld(feldKey); saveDraft(); rendereVorschau(); } else { input.focus(); } };
+  span.querySelector('[data-add-save]').addEventListener('click', speichern);
+  span.querySelector('[data-add-cancel]').addEventListener('click', () => rerenderFeld(feldKey));
+  input.addEventListener('keydown', ev => {
+    if (ev.key === 'Enter') { ev.preventDefault(); speichern(); }
+    else if (ev.key === 'Escape') { ev.preventDefault(); rerenderFeld(feldKey); }
   });
 }
 
@@ -539,22 +697,27 @@ function rendereKategorien() {
 
   grid.querySelectorAll('.kat-karte').forEach(btn => {
     btn.addEventListener('click', () => {
-      grid.querySelectorAll('.kat-karte').forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-      STATE.kategorie = btn.dataset.kat;
-      document.getElementById('weiterZuStep2').disabled = false;
+      toggleInArray(STATE.kategorien, btn.dataset.kat);
+      // Primär-Kategorie (erste gewählte) steuert Größen-/Vorschau-Logik
+      STATE.kategorie = STATE.kategorien[0] || null;
+      setKategorieUI();
       saveDraft();
       setGroesseUI();
       autoVorauswahlGroesse();
     });
   });
 
-  // Falls Draft hatte: vorauswählen
-  if (STATE.kategorie) {
-    const sel = grid.querySelector(`.kat-karte[data-kat="${STATE.kategorie}"]`);
-    if (sel) sel.classList.add('selected');
-    document.getElementById('weiterZuStep2').disabled = false;
-  }
+  setKategorieUI();
+}
+
+// Markiert gewählte Kategorie-Karten + schaltet "Weiter" frei (≥1 gewählt)
+function setKategorieUI() {
+  const grid = document.getElementById('kategorieGrid');
+  if (grid) grid.querySelectorAll('.kat-karte').forEach(b => {
+    b.classList.toggle('selected', STATE.kategorien.includes(b.dataset.kat));
+  });
+  const weiter = document.getElementById('weiterZuStep2');
+  if (weiter) weiter.disabled = (STATE.kategorien.length === 0);
 }
 
 function rendereEigenschaften() {
@@ -695,7 +858,7 @@ function bindeFormHandler() {
   document.getElementById('kategorieWechseln').addEventListener('click', goToStep1);
 
   // Live-Vorschau bei jedem Input
-  ['formTitel','formBreite','formHoehe','formPreis','formLager','formSystem','formBeschreibung','formStandnummer'].forEach(id => {
+  ['formTitel','formBreite','formHoehe','formPreis','formLager','formBeschreibung','formStandnummer'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     el.addEventListener('input', () => { rendereVorschau(); saveDraft(); });
@@ -789,7 +952,6 @@ function resetFormular() {
     const el = document.getElementById(id); if (el) el.value = '';
   });
   document.getElementById('formLager').value = '1';
-  document.getElementById('formSystem').value = 'IGLO 5 Classic';
   document.querySelectorAll('.eig-check').forEach(c => { c.checked = false; });
   // Felder, die beim Bearbeiten gesetzt werden, MÜSSEN hier zurück — sonst sickern
   // Export-/Sonderpreis-Häkchen und Standnummer ins nächste neue Inserat durch.
@@ -797,30 +959,34 @@ function resetFormular() {
   const _sp = document.getElementById('formSonderpreis'); if (_sp) _sp.checked = false;
   const _st = document.getElementById('formStandnummer'); if (_st) _st.value = '';
   STATE.bilder = [];
-  STATE.zustand = 'neu';
-  STATE.material = 'kunststoff';
-  // Mehrfach-Auswahl-Felder leeren
+  // Mehrfach-Auswahl-Felder zurücksetzen
+  STATE.zustaende = ['neu'];
+  STATE.materialien = ['kunststoff'];
   STATE.glasarten = [];
   STATE.farben = [];
   STATE.verglasungen = [];
   STATE.oeffnungsarten = [];
+  STATE.systeme = [];
+  STATE.kategorien = [];
+  STATE.kategorie = null;
   setZustandUI();
   setMaterialUI();
   setGlasartUI();
-  Object.keys(CHIP_FELDER).forEach(k => { if (k !== 'glasart') rendereChipFeld(k); });
+  setKategorieUI();
+  Object.keys(CHIP_FELDER).forEach(k => rendereChipFeld(k));
+  Object.keys(CARD_FELDER).forEach(k => rendereCustomKarten(k));
   rendereBildVorschau();
   document.getElementById('autoErkanntHinweis').classList.add('hidden');
   // Zurück zu Schritt 0
-  STATE.kategorie = null;
-  document.querySelectorAll('.kat-karte').forEach(b => b.classList.remove('selected'));
   document.getElementById('weiterZuStep2').disabled = true;
   goToStep1();
   rendereVorschau();
 }
 
 function goToStep2() {
-  if (!STATE.kategorie) return;
-  const label = KATEGORIEN_LIVE.find(k => k.key === STATE.kategorie)?.label || STATE.kategorie;
+  if (!STATE.kategorien.length) return;
+  const labels = STATE.kategorien.map(k => KATEGORIEN_LIVE.find(x => x.key === k)?.label || k);
+  const label = labels.length === 1 ? labels[0] : `${labels[0]} +${labels.length - 1} weitere`;
   document.getElementById('gewaehlteKategorie').textContent = label;
   document.getElementById('step1').classList.add('hidden');
   document.getElementById('step2').classList.remove('hidden');
@@ -966,7 +1132,7 @@ function rendereVorschau() {
   const hoehe = document.getElementById('formHoehe').value || '–';
   const preis = parseInt(document.getElementById('formPreis').value, 10) || 0;
   const lager = parseInt(document.getElementById('formLager').value, 10) || 1;
-  const system = document.getElementById('formSystem').value || 'IGLO 5 Classic';
+  const system = STATE.systeme.length ? STATE.systeme.join(' · ') : 'IGLO 5 Classic';
   const rc = '';
   const beschr = document.getElementById('formBeschreibung').value || (STATE.kategorie ? KATEGORIEN_LIVE.find(k=>k.key===STATE.kategorie)?.label + ' direkt aus dem Lager.' : 'Lagerware – sofort lieferbar.');
   // Hauptbild: erst neue (Bilder), dann bestehende (bilderBestand), sonst Default
@@ -979,12 +1145,13 @@ function rendereVorschau() {
   const verglasungBadge = STATE.verglasungen.map(v =>
     `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary-fixed text-on-primary-fixed">${escapeHtml(v)}-Verglasung${xBtn('verglasung', v)}</span>`
   ).join('');
-  // Gewählte Eigenschaften sichtbar machen (Farbe / Glasart / Öffnungsart)
-  const _lbl = (feldKey, val) => (CHIP_FELDER[feldKey].options.find(o => o.v === val)?.l) || val;
+  // Gewählte Werte sichtbar machen (Material / Farbe / Glasart / Öffnungsart / System)
   const auswahlTags = [
-    ...STATE.farben.map(v => _lbl('farbe', v)),
-    ...STATE.glasarten.map(v => _lbl('glasart', v)),
-    ...STATE.oeffnungsarten.map(v => _lbl('oeffnungsart', v))
+    ...STATE.materialien.filter(v => v !== 'keine').map(v => labelFuer('material', v)),
+    ...STATE.farben.map(v => labelFuer('farbe', v)),
+    ...STATE.glasarten.map(v => labelFuer('glasart', v)),
+    ...STATE.oeffnungsarten.map(v => labelFuer('oeffnungsart', v)),
+    ...STATE.systeme.map(v => labelFuer('system', v))
   ];
   const auswahlZeile = auswahlTags.length
     ? `<div class="flex flex-wrap gap-1 mt-2">${auswahlTags.map(t => `<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold" style="background:#eef2fb;color:#334155">${escapeHtml(t)}</span>`).join('')}</div>`
@@ -1050,7 +1217,7 @@ async function veroeffentlichen() {
   const sonderpreisAktiv = !!document.getElementById('formSonderpreis')?.checked;
   const exportModell    = !!document.getElementById('formExport')?.checked;
 
-  if (!STATE.kategorie || !titel || !preis) {
+  if (!STATE.kategorien.length || !titel || !preis) {
     showSnackbar('Bitte mindestens Kategorie, Titel und Preis ausfüllen', 'error');
     return;
   }
@@ -1094,13 +1261,17 @@ async function veroeffentlichen() {
 
     btn.innerHTML = '<span class="material-symbols-outlined animate-spin" style="font-size:18px">progress_activity</span> Speichere Inserat…';
 
+    const materialien = STATE.materialien.filter(m => m && m !== 'keine');
+    const systemAktiv = STATE.zustaende.includes('neu') && STATE.systeme.length;
     const eintrag = {
       titel,
-      kategorie_key: STATE.kategorie,
-      zustand: STATE.zustand,
-      material: (STATE.material && STATE.material !== 'keine') ? STATE.material : null,
+      // Primär-Kategorie (für Shop-Gruppierung) + vollständige Liste (für Mehrfach-Filter)
+      kategorie_key: STATE.kategorien[0] || null,
+      kategorie_keys: [...STATE.kategorien],
+      zustand: [...STATE.zustaende],
+      material: materialien.length ? materialien : null,
       glasart: STATE.glasarten.length ? [...STATE.glasarten] : null,
-      system: STATE.zustand === 'neu' ? (document.getElementById('formSystem').value || null) : null,
+      system: systemAktiv ? [...STATE.systeme] : null,
       breite_mm: breite || null,
       hoehe_mm: hoehe || null,
       preis_eur: preis,
@@ -1154,19 +1325,19 @@ function dataURLToBlob(dataUrl) {
 /* ─── Draft Auto-Save ─── */
 function saveDraft() {
   const draft = {
-    zustand: STATE.zustand,
-    material: STATE.material,
+    zustaende: [...STATE.zustaende],
+    materialien: [...STATE.materialien],
     glasarten: [...STATE.glasarten],
     farben: [...STATE.farben],
     verglasungen: [...STATE.verglasungen],
     oeffnungsarten: [...STATE.oeffnungsarten],
-    kategorie: STATE.kategorie,
+    systeme: [...STATE.systeme],
+    kategorien: [...STATE.kategorien],
     titel: document.getElementById('formTitel')?.value || '',
     breite: document.getElementById('formBreite')?.value || '',
     hoehe: document.getElementById('formHoehe')?.value || '',
     preis: document.getElementById('formPreis')?.value || '',
     lager: document.getElementById('formLager')?.value || '',
-    system: document.getElementById('formSystem')?.value || '',
     beschreibung: document.getElementById('formBeschreibung')?.value || '',
     eigenschaften: Array.from(document.querySelectorAll('.eig-check:checked')).map(c => c.value),
     standnummer: document.getElementById('formStandnummer')?.value || ''
@@ -1179,27 +1350,30 @@ function ladeDraft() {
     const raw = localStorage.getItem(DRAFT_KEY);
     if (!raw) return;
     const d = JSON.parse(raw);
-    if (d.zustand) STATE.zustand = d.zustand;
-    if (d.material) STATE.material = d.material;
     // Mehrfach-Felder (mit Abwärtskompatibilität zu altem Einzel-Draft)
+    STATE.zustaende = _alsArray(d.zustaende != null ? d.zustaende : d.zustand); if (!STATE.zustaende.length) STATE.zustaende = ['neu'];
+    STATE.materialien = _alsArray(d.materialien != null ? d.materialien : d.material); if (!STATE.materialien.length && d.materialien == null && d.material == null) STATE.materialien = ['kunststoff'];
     STATE.glasarten = _alsArray(d.glasarten != null ? d.glasarten : d.glasart);
     STATE.farben = _alsArray(d.farben != null ? d.farben : d.farbe);
     STATE.verglasungen = _alsArray(d.verglasungen != null ? d.verglasungen : d.verglasung);
     STATE.oeffnungsarten = _alsArray(d.oeffnungsarten != null ? d.oeffnungsarten : d.oeffnungsart);
-    if (d.kategorie) STATE.kategorie = d.kategorie;
+    STATE.systeme = _alsArray(d.systeme != null ? d.systeme : d.system);
+    STATE.kategorien = _alsArray(d.kategorien != null ? d.kategorien : d.kategorie);
+    STATE.kategorie = STATE.kategorien[0] || null;
     const setIfPresent = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
     setIfPresent('formTitel', d.titel);
     setIfPresent('formBreite', d.breite);
     setIfPresent('formHoehe', d.hoehe);
     setIfPresent('formPreis', d.preis);
     setIfPresent('formLager', d.lager);
-    setIfPresent('formSystem', d.system);
     setIfPresent('formBeschreibung', d.beschreibung);
     setIfPresent('formStandnummer', d.standnummer);
     // Custom-Eigenschaften aus dem Draft registrieren, dann Chips/Checkboxen neu aufbauen
     registriereCustomAusEigenschaften(d.eigenschaften || []);
     rendereEigenschaften();
-    Object.keys(CHIP_FELDER).forEach(k => { if (k !== 'glasart') rendereChipFeld(k); });
+    setKategorieUI();
+    Object.keys(CHIP_FELDER).forEach(k => rendereChipFeld(k));
+    Object.keys(CARD_FELDER).forEach(k => rendereCustomKarten(k));
     if (Array.isArray(d.eigenschaften)) {
       d.eigenschaften.forEach(e => {
         const el = [...document.querySelectorAll('.eig-check')].find(c => c.value === e);

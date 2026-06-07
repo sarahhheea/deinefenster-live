@@ -182,6 +182,13 @@ if (typeof tailwind !== 'undefined') tailwind.config = {
   .chip-toggle.selected::before {
     content: '✓'; font-size: 12px; font-weight: 800;
   }
+  /* kleines × an selbst angelegten Chips (zum Löschen des eigenen Wertes) */
+  .chip-del {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 16px; height: 16px; margin-left: 2px; border-radius: 9999px;
+    background: rgba(0,0,0,0.18); color: inherit; font-size: 11px; line-height: 1;
+  }
+  .chip-del:hover { background: rgba(0,0,0,0.35); }
   /* "+ Eigenschaft hinzufügen"-Chip */
   .chip-add {
     display: inline-flex; align-items: center; gap: 4px;
@@ -316,12 +323,14 @@ if (typeof tailwind !== 'undefined') tailwind.config = {
     <div class="flex items-center gap-3 mb-1">
       <div class="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white font-bold text-sm">1</div>
       <h2 class="text-xl md:text-2xl font-extrabold" style="color:#1d1d1f">Welche Kategorie?</h2>
+      <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full" style="background:#e8eeff;color:#225eaa">mehrere möglich</span>
     </div>
-    <p class="text-sm mb-5 ml-11" style="color:#4b5563">Hauptkategorie wählen. Eigenschaften & Maße kommen im nächsten Schritt.</p>
+    <p class="text-sm mb-5 ml-11" style="color:#4b5563">Eine oder mehrere antippen. Eigenes per „hinzufügen". Eigenschaften & Maße kommen im nächsten Schritt.</p>
 
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 ml-11" id="kategorieGrid">
       <!-- Befüllt von JS -->
     </div>
+    <div id="customKategorie" class="flex flex-wrap gap-2 ml-11 mt-3"></div>
   </div>
 
   <!-- ─── Block 2: Zustand ─── -->
@@ -329,8 +338,9 @@ if (typeof tailwind !== 'undefined') tailwind.config = {
     <div class="flex items-center gap-3 mb-1">
       <div class="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white font-bold text-sm">2</div>
       <h2 class="text-xl md:text-2xl font-extrabold" style="color:#1d1d1f">Zustand wählen</h2>
+      <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full" style="background:#e8eeff;color:#225eaa">mehrere möglich</span>
     </div>
-    <p class="text-sm mb-5 ml-11" style="color:#4b5563">Bei Gebrauchtware, Vermessen und Sonderposten wird das Drutex-System nicht abgefragt.</p>
+    <p class="text-sm mb-5 ml-11" style="color:#4b5563">Nur wenn „Neu" dabei ist, wird das Drutex-System abgefragt.</p>
 
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 ml-11">
       <button type="button" id="zustandNeu" class="kat-karte" data-zustand="neu" style="padding:18px 14px">
@@ -354,6 +364,7 @@ if (typeof tailwind !== 'undefined') tailwind.config = {
         <p class="text-[11px] mt-0.5" style="color:#4b5563">Sonderangebot</p>
       </button>
     </div>
+    <div id="customZustand" class="flex flex-wrap gap-2 ml-11 mt-3"></div>
   </div>
 
   <!-- ─── Block 3: Material ─── -->
@@ -361,8 +372,9 @@ if (typeof tailwind !== 'undefined') tailwind.config = {
     <div class="flex items-center gap-3 mb-1">
       <div class="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white font-bold text-sm">3</div>
       <h2 class="text-xl md:text-2xl font-extrabold" style="color:#1d1d1f">Material wählen</h2>
+      <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full" style="background:#e8eeff;color:#225eaa">mehrere möglich</span>
     </div>
-    <p class="text-sm mb-5 ml-11" style="color:#4b5563">Aus welchem Material ist das Fenster bzw. die Tür? Wird im Shop als Filter angezeigt. Bei Artikeln ohne Material (z.B. Dämmung) „Keine Angabe" wählen.</p>
+    <p class="text-sm mb-5 ml-11" style="color:#4b5563">Du kannst mehrere antippen (z.B. Holz-Alu) oder eigenes hinzufügen. Bei Artikeln ohne Material (z.B. Dämmung) „Keine Angabe" wählen.</p>
 
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 ml-11">
       <button type="button" id="materialKunststoff" class="kat-karte" data-material="kunststoff" style="padding:18px 14px">
@@ -386,6 +398,7 @@ if (typeof tailwind !== 'undefined') tailwind.config = {
         <p class="text-[11px] mt-0.5" style="color:#4b5563">z.B. Dämmung</p>
       </button>
     </div>
+    <div id="customMaterial" class="flex flex-wrap gap-2 ml-11 mt-3"></div>
   </div>
 
   <!-- ─── Block 4: Glasart ─── -->
@@ -429,6 +442,7 @@ if (typeof tailwind !== 'undefined') tailwind.config = {
         <p class="text-[11px] mt-0.5" style="color:#4b5563">z.B. Dämmung</p>
       </button>
     </div>
+    <div id="customGlasart" class="flex flex-wrap gap-2 ml-11 mt-3"></div>
   </div>
 
   <!-- ─── Action ─── -->
@@ -583,24 +597,14 @@ if (typeof tailwind !== 'undefined') tailwind.config = {
       <!-- System + Farbe + Verglasung -->
       <div class="bg-white rounded-2xl border border-outline-variant p-5">
         <h4 class="text-sm font-bold mb-3">System &amp; Aussehen</h4>
-        <!-- Drutex-System: Einfach-Auswahl, nur bei NEUWARE sichtbar (siehe shop-einstellen.js) -->
-        <label id="formSystemWrap" class="block mb-4">
-          <span class="block text-xs font-semibold text-on-surface-variant mb-1">Drutex-System</span>
-          <select id="formSystem" class="w-full px-3 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant focus:border-primary focus:outline-none text-sm">
-            <option value="">Keine Angabe</option>
-            <option value="IGLO 5 Classic">IGLO 5 Classic</option>
-            <option value="IGLO Energy">IGLO Energy</option>
-            <option value="IGLO Light">IGLO Light</option>
-            <option value="IGLO EXT">IGLO EXT</option>
-            <option value="IGLO EDGE">IGLO EDGE</option>
-            <option value="IGLO 5 Classic Tür">IGLO 5 Classic Tür</option>
-            <option value="IGLO Energy Tür">IGLO Energy Tür</option>
-            <option value="IGLO 5 Classic PSK">IGLO 5 Classic PSK</option>
-            <option value="IGLO Energy PSK">IGLO Energy PSK</option>
-            <option value="IGLO Slide">IGLO Slide</option>
-            <option value="IGLO-HS">IGLO-HS</option>
-          </select>
-        </label>
+        <!-- Drutex-System: Mehrfach-Chips, nur bei NEUWARE sichtbar (siehe shop-einstellen.js) -->
+        <div id="formSystemWrap" class="mb-4">
+          <div class="flex items-baseline justify-between mb-1">
+            <span class="block text-xs font-semibold text-on-surface-variant">Drutex-System</span>
+            <span class="text-[11px] text-on-surface-variant">mehrere möglich</span>
+          </div>
+          <div id="chipsSystem" class="flex flex-wrap gap-2"></div>
+        </div>
 
         <div class="mb-4">
           <div class="flex items-baseline justify-between mb-1">
@@ -685,7 +689,7 @@ if (typeof tailwind !== 'undefined') tailwind.config = {
 </div>
 
 <script src="js/sheets-config.js" defer></script>
-<script src="js/shop-einstellen.js?v=2026-06-07-multi" defer></script>
+<script src="js/shop-einstellen.js?v=2026-06-07-allmulti" defer></script>
 
 <!-- Cloudflare Web Analytics (cookieless, DSGVO-konform) --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "2cf67e72370843bc8998180837703d02"}'></script><!-- End Cloudflare Web Analytics -->
 </body>

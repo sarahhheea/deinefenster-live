@@ -261,13 +261,17 @@ async function loadProdukte() {
       const kat = p.kategorie || p.kategorie_key || '';
       const baseEig = Array.isArray(p.eigenschaften) ? p.eigenschaften : [];
       const bauart = deriveBauartTags(kat).filter(t => !baseEig.includes(t));
+      const matArr = _asArr(p.material).map(x => String(x).toLowerCase());
+      const zustArr = _asArr(p.zustand);
+      const katKeys = _asArr(p.kategorie_keys);
       return {
         id: String(p.id),
         titel: p.titel || '',
-        kategorie: kat,
-        system: p.system || '',
-        zustand: p.zustand || 'neu',
-        material: (p.material || 'kunststoff').toLowerCase(),
+        kategorie: kat,                                  // Primär-Kategorie (Gruppierung/Anzeige)
+        kategorie_keys: katKeys.length ? katKeys : (kat ? [kat] : []), // alle (Mehrfach-Filter)
+        system: _asArr(p.system).join(' · '),
+        zustand: zustArr.length ? zustArr : ['neu'],     // Mehrfach
+        material: matArr.length ? matArr : ['kunststoff'], // Mehrfach
         // Mehrfach-Felder → immer Array (alte Einzelwerte werden mit eingepackt)
         glasart: (_asArr(p.glasart).map(x => String(x).toLowerCase())).length ? _asArr(p.glasart).map(x => String(x).toLowerCase()) : ['klarglas'],
         breite_mm: Number(p.breite_mm) || 0,
@@ -317,9 +321,14 @@ async function loadProdukteFromJson() {
       const kat = p.kategorie || p.kategorie_key || '';
       const baseEig = Array.isArray(p.eigenschaften) ? p.eigenschaften : [];
       const bauart = deriveBauartTags(kat).filter(t => !baseEig.includes(t));
+      const katKeys = _asArr(p.kategorie_keys);
       return {
         ...p, kategorie: kat, eigenschaften: [...baseEig, ...bauart],
+        kategorie_keys: katKeys.length ? katKeys : (kat ? [kat] : []),
+        system: _asArr(p.system).join(' · '),
         // Mehrfach-Felder vereinheitlichen (abwärtskompatibel zu Einzelwerten)
+        zustand: _asArr(p.zustand).length ? _asArr(p.zustand) : ['neu'],
+        material: _asArr(p.material).map(x => String(x).toLowerCase()).length ? _asArr(p.material).map(x => String(x).toLowerCase()) : ['kunststoff'],
         glasart: _asArr(p.glasart).map(x => String(x).toLowerCase()),
         farbe: _asArr(p.farbe),
         verglasung: _asArr(p.verglasung),
@@ -368,7 +377,7 @@ function baueFilterSidebar() {
   const katWrap = document.getElementById('filterKategorien');
   const ORDER = ['fenster', 'balkontuer', 'haustuer', 'schiebetuer', 'daemmung', 'baumaterialien', 'garagentor-gebraucht'];
   const renderItem = (key, label) => {
-    const count = STATE.produkte.filter(p => kategorieZuGruppe(p.kategorie) === key).length;
+    const count = STATE.produkte.filter(p => _asArr(p.kategorie_keys).some(k => kategorieZuGruppe(k) === key)).length;
     return `
       <label class="filter-option">
         <span class="flex items-center gap-2"><input type="checkbox" class="check filter-kategorie" value="${key}"/><span>${escapeHtml(label)}</span></span>
@@ -409,13 +418,13 @@ function baueFilterSidebar() {
   }).join('');
 
   // Counts für Verglasung, RC, Zustand, Größe, Sonderpreis, Export (statisch im HTML)
-  setCountAttr('zustand-neu', STATE.produkte.filter(p => (p.zustand || 'neu') === 'neu').length);
-  setCountAttr('zustand-gebraucht', STATE.produkte.filter(p => p.zustand === 'gebraucht').length);
+  setCountAttr('zustand-neu', STATE.produkte.filter(p => _asArr(p.zustand).includes('neu')).length);
+  setCountAttr('zustand-gebraucht', STATE.produkte.filter(p => _asArr(p.zustand).includes('gebraucht')).length);
   setCountAttr('zustand-vermessen', STATE.produkte.filter(p => (p.eigenschaften || []).includes('vermessen')).length);
-  setCountAttr('zustand-sonderposten', STATE.produkte.filter(p => p.zustand === 'sonderposten').length);
-  setCountAttr('material-kunststoff', STATE.produkte.filter(p => (p.material || 'kunststoff') === 'kunststoff').length);
-  setCountAttr('material-holz', STATE.produkte.filter(p => p.material === 'holz').length);
-  setCountAttr('material-aluminium', STATE.produkte.filter(p => p.material === 'aluminium').length);
+  setCountAttr('zustand-sonderposten', STATE.produkte.filter(p => _asArr(p.zustand).includes('sonderposten')).length);
+  setCountAttr('material-kunststoff', STATE.produkte.filter(p => _asArr(p.material).includes('kunststoff')).length);
+  setCountAttr('material-holz', STATE.produkte.filter(p => _asArr(p.material).includes('holz')).length);
+  setCountAttr('material-aluminium', STATE.produkte.filter(p => _asArr(p.material).includes('aluminium')).length);
   setCountAttr('glasart-klarglas', STATE.produkte.filter(p => _asArr(p.glasart).includes('klarglas')).length);
   setCountAttr('glasart-chinchilla', STATE.produkte.filter(p => _asArr(p.glasart).includes('chinchilla')).length);
   setCountAttr('glasart-milchglas', STATE.produkte.filter(p => _asArr(p.glasart).includes('milchglas')).length);
@@ -586,20 +595,20 @@ function gefilterteProdukte() {
   const f = STATE.filter;
 
   let result = STATE.produkte.filter(p => {
-    // Zustand (neu / gebraucht / vermessen — exklusiv)
+    // Zustand (neu / gebraucht / vermessen — Produkt kann jetzt mehrere haben)
     if (f.zustand.size) {
       if (f.zustand.has('vermessen')) {
         if (!(p.eigenschaften || []).includes('vermessen')) return false;
       } else {
-        if (!f.zustand.has(p.zustand || 'neu')) return false;
+        if (!_hatTreffer(p.zustand, f.zustand)) return false;
       }
     }
-    // Material (Kunststoff / Holz / Aluminium — mehrere kombinierbar)
-    if (f.material.size && !f.material.has(p.material || 'kunststoff')) return false;
+    // Material (mehrere Filter UND mehrere Produkt-Werte kombinierbar)
+    if (f.material.size && !_hatTreffer(p.material, f.material)) return false;
     // Glasart (mehrere Filter UND mehrere Produkt-Werte kombinierbar)
     if (f.glasart.size && !_hatTreffer(p.glasart, f.glasart)) return false;
-    // Kategorie (Hauptgruppe matched alle Sub-Kategorien via kategorieZuGruppe)
-    if (f.kategorien.size && !f.kategorien.has(kategorieZuGruppe(p.kategorie))) return false;
+    // Kategorie (Hauptgruppe matched alle gewählten Kategorien des Produkts via kategorieZuGruppe)
+    if (f.kategorien.size && !_asArr(p.kategorie_keys).some(k => f.kategorien.has(kategorieZuGruppe(k)))) return false;
     // Größen-Klasse
     if (f.groesse.size && (!p.groesse_klasse || !f.groesse.has(p.groesse_klasse))) return false;
     // Sonderpreis
@@ -798,14 +807,14 @@ function istSammelInserat(p) {
 }
 
 function karteHtml(p) {
-  const istNeu = (p.zustand || 'neu') === 'neu';
+  const istNeu = _asArr(p.zustand).includes('neu');
   const lagerBadge = lagerBadgeHtml(p);
   const rcBadge = p.rc_klasse ? `<span class="pill is-gold">${p.rc_klasse}</span>` : '';
   // Verglasungs-Badge nur bei Produkten mit Glas (Fenster/Balkontür/Haustür/Schiebetür) — NICHT bei Dämmung/Baumaterialien/Garagentor
   const NO_GLAS_KATS = new Set(['daemmung','baumaterialien','garagentor-gebraucht']);
   const verglasungBadge = !NO_GLAS_KATS.has(kategorieZuGruppe(p.kategorie))
     ? _asArr(p.verglasung).map(v => `<span class="pill is-primary">${v}-Verglasung</span>`).join('') : '';
-  const zustandBadge = p.zustand === 'gebraucht' ? `<span class="pill is-warning">Gebraucht</span>` : '';
+  const zustandBadge = _asArr(p.zustand).includes('gebraucht') ? `<span class="pill is-warning">Gebraucht</span>` : '';
   const sonderpreisBadge = p.sonderpreis_eur ? `<span class="pill is-warning">Sonderpreis *</span>` : '';
   const exportBadge = p.export_modell ? `<span class="pill is-primary">Export *</span>` : '';
   const groesseBadge = p.groesse_klasse ? `<span class="pill">${groesseLabel(p.groesse_klasse)}</span>` : '';
@@ -1539,7 +1548,7 @@ function oeffneAnfrageModal(p) {
     `Produkt: ${p.titel}`,
     `Artikel-Nr.: ${p.id}`,
     `Maße: ${p.breite_mm} × ${p.hoehe_mm} mm`,
-    `Zustand: ${p.zustand === 'gebraucht' ? 'Gebraucht' : 'Neu'}`,
+    `Zustand: ${_asArr(p.zustand).includes('gebraucht') ? 'Gebraucht' : 'Neu'}`,
     `Preis: ${formatPreis(p.preis_eur)}`,
     p.standnummer ? `Standnummer: ${p.standnummer}` : '',
     ``,
@@ -1650,7 +1659,7 @@ function rendereSchemaOrg(produkte) {
       'brand': { '@type': 'Brand', 'name': p.system ? p.system.split(' ')[0] : 'Drutex' },
       'width':  { '@type': 'QuantitativeValue', 'value': p.breite_mm, 'unitCode': 'MMT' },
       'height': { '@type': 'QuantitativeValue', 'value': p.hoehe_mm, 'unitCode': 'MMT' },
-      'itemCondition': p.zustand === 'gebraucht' ? 'https://schema.org/UsedCondition' : 'https://schema.org/NewCondition',
+      'itemCondition': _asArr(p.zustand).includes('gebraucht') ? 'https://schema.org/UsedCondition' : 'https://schema.org/NewCondition',
       'offers': {
         '@type': 'Offer',
         'price': p.preis_eur,
