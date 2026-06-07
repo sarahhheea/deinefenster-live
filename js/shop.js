@@ -6,6 +6,18 @@
    Stand: 27.04.2026
    ───────────────────────────────────────────────────────────────────── */
 
+/* Mehrfach-Werte (07.06.2026): Farbe/Glasart/Verglasung/Öffnungsart können seit
+   dem Inserat-Tool-Umbau Listen sein. Alte Inserate haben Einzelwerte (Strings).
+   Diese Helper machen beide Formen einheitlich nutzbar (abwärtskompatibel). */
+function _asArr(v) {
+  if (v == null || v === '') return [];
+  return (Array.isArray(v) ? v : [v]).filter(x => x != null && x !== '');
+}
+function _hatTreffer(wert, filterSet) {
+  // true, wenn irgendein Wert (String ODER Array) im Filter-Set liegt
+  return _asArr(wert).some(x => filterSet.has(x));
+}
+
 const STATE = {
   produkte: [],            // alle Produkte aus JSON
   metadaten: null,         // filter_metadaten aus JSON
@@ -256,7 +268,8 @@ async function loadProdukte() {
         system: p.system || '',
         zustand: p.zustand || 'neu',
         material: (p.material || 'kunststoff').toLowerCase(),
-        glasart: (p.glasart || 'klarglas').toLowerCase(),
+        // Mehrfach-Felder → immer Array (alte Einzelwerte werden mit eingepackt)
+        glasart: (_asArr(p.glasart).map(x => String(x).toLowerCase())).length ? _asArr(p.glasart).map(x => String(x).toLowerCase()) : ['klarglas'],
         breite_mm: Number(p.breite_mm) || 0,
         hoehe_mm: Number(p.hoehe_mm) || 0,
         preis_eur: Number(p.preis_eur) || 0,
@@ -264,10 +277,10 @@ async function loadProdukte() {
         groesse_klasse: p.groesse_klasse || null,
         export_modell: !!p.export_modell,
         standnummer: p.standnummer || null,
-        farbe: p.farbe || 'weiss',
-        verglasung: p.verglasung || null,
+        farbe: _asArr(p.farbe).length ? _asArr(p.farbe) : ['weiss'],
+        verglasung: _asArr(p.verglasung),
         u_wert: p.u_wert || null,
-        oeffnungsart: p.oeffnungsart || 'dreh-kipp',
+        oeffnungsart: _asArr(p.oeffnungsart).length ? _asArr(p.oeffnungsart) : ['dreh-kipp'],
         rc_klasse: p.rc_klasse || null,
         eigenschaften: [...baseEig, ...bauart],
         lagerbestand: Number(p.lagerbestand) || 1,
@@ -304,7 +317,14 @@ async function loadProdukteFromJson() {
       const kat = p.kategorie || p.kategorie_key || '';
       const baseEig = Array.isArray(p.eigenschaften) ? p.eigenschaften : [];
       const bauart = deriveBauartTags(kat).filter(t => !baseEig.includes(t));
-      return { ...p, kategorie: kat, eigenschaften: [...baseEig, ...bauart] };
+      return {
+        ...p, kategorie: kat, eigenschaften: [...baseEig, ...bauart],
+        // Mehrfach-Felder vereinheitlichen (abwärtskompatibel zu Einzelwerten)
+        glasart: _asArr(p.glasart).map(x => String(x).toLowerCase()),
+        farbe: _asArr(p.farbe),
+        verglasung: _asArr(p.verglasung),
+        oeffnungsart: _asArr(p.oeffnungsart)
+      };
     });
     STATE.metadaten = berechneMetadaten(STATE.produkte);
     STATE.kategorien = { ...FIXED_KATEGORIEN };
@@ -328,7 +348,7 @@ function berechneMetadaten(produkte) {
   const alleFarben = new Set(['weiss', 'anthrazit', 'golden-oak', 'nussbaum', 'schwarz', 'dunkelgruen']);
   produkte.forEach(p => {
     (p.eigenschaften || []).forEach(e => alleEig.add(e));
-    if (p.farbe) alleFarben.add(p.farbe);
+    _asArr(p.farbe).forEach(f => alleFarben.add(f));
   });
   return {
     preis_min: Math.min(...produkte.map(p => p.preis_eur || 0)),
@@ -364,7 +384,7 @@ function baueFilterSidebar() {
   const farbWrap = document.getElementById('filterFarben');
   const alleFarben = STATE.metadaten.alle_farben || [];
   farbWrap.innerHTML = alleFarben.map(f => {
-    const count = STATE.produkte.filter(p => p.farbe === f).length;
+    const count = STATE.produkte.filter(p => _asArr(p.farbe).includes(f)).length;
     if (count === 0) return '';
     return `
       <label class="filter-option">
@@ -396,13 +416,13 @@ function baueFilterSidebar() {
   setCountAttr('material-kunststoff', STATE.produkte.filter(p => (p.material || 'kunststoff') === 'kunststoff').length);
   setCountAttr('material-holz', STATE.produkte.filter(p => p.material === 'holz').length);
   setCountAttr('material-aluminium', STATE.produkte.filter(p => p.material === 'aluminium').length);
-  setCountAttr('glasart-klarglas', STATE.produkte.filter(p => (p.glasart || 'klarglas') === 'klarglas').length);
-  setCountAttr('glasart-chinchilla', STATE.produkte.filter(p => p.glasart === 'chinchilla').length);
-  setCountAttr('glasart-milchglas', STATE.produkte.filter(p => p.glasart === 'milchglas').length);
-  setCountAttr('glasart-sicherheitsglas', STATE.produkte.filter(p => p.glasart === 'sicherheitsglas').length);
-  setCountAttr('glasart-schallschutzglas', STATE.produkte.filter(p => p.glasart === 'schallschutzglas').length);
-  setCountAttr('verglasung-2-fach', STATE.produkte.filter(p => p.verglasung === '2-fach').length);
-  setCountAttr('verglasung-3-fach', STATE.produkte.filter(p => p.verglasung === '3-fach').length);
+  setCountAttr('glasart-klarglas', STATE.produkte.filter(p => _asArr(p.glasart).includes('klarglas')).length);
+  setCountAttr('glasart-chinchilla', STATE.produkte.filter(p => _asArr(p.glasart).includes('chinchilla')).length);
+  setCountAttr('glasart-milchglas', STATE.produkte.filter(p => _asArr(p.glasart).includes('milchglas')).length);
+  setCountAttr('glasart-sicherheitsglas', STATE.produkte.filter(p => _asArr(p.glasart).includes('sicherheitsglas')).length);
+  setCountAttr('glasart-schallschutzglas', STATE.produkte.filter(p => _asArr(p.glasart).includes('schallschutzglas')).length);
+  setCountAttr('verglasung-2-fach', STATE.produkte.filter(p => _asArr(p.verglasung).includes('2-fach')).length);
+  setCountAttr('verglasung-3-fach', STATE.produkte.filter(p => _asArr(p.verglasung).includes('3-fach')).length);
   setCountAttr('rc-RC2', STATE.produkte.filter(p => p.rc_klasse === 'RC2').length);
   setCountAttr('rc-RC3', STATE.produkte.filter(p => p.rc_klasse === 'RC3').length);
   setCountAttr('groesse-klein', STATE.produkte.filter(p => p.groesse_klasse === 'klein').length);
@@ -576,8 +596,8 @@ function gefilterteProdukte() {
     }
     // Material (Kunststoff / Holz / Aluminium — mehrere kombinierbar)
     if (f.material.size && !f.material.has(p.material || 'kunststoff')) return false;
-    // Glasart (Klarglas / Chinchilla / Milchglas / Sicherheitsglas / Schallschutzglas — mehrere kombinierbar)
-    if (f.glasart.size && !f.glasart.has(p.glasart || 'klarglas')) return false;
+    // Glasart (mehrere Filter UND mehrere Produkt-Werte kombinierbar)
+    if (f.glasart.size && !_hatTreffer(p.glasart, f.glasart)) return false;
     // Kategorie (Hauptgruppe matched alle Sub-Kategorien via kategorieZuGruppe)
     if (f.kategorien.size && !f.kategorien.has(kategorieZuGruppe(p.kategorie))) return false;
     // Größen-Klasse
@@ -587,9 +607,9 @@ function gefilterteProdukte() {
     // Export
     if (f.exportModell && !p.export_modell) return false;
     // Farbe
-    if (f.farben.size && !f.farben.has(p.farbe)) return false;
+    if (f.farben.size && !_hatTreffer(p.farbe, f.farben)) return false;
     // Verglasung
-    if (f.verglasung.size && !f.verglasung.has(p.verglasung)) return false;
+    if (f.verglasung.size && !_hatTreffer(p.verglasung, f.verglasung)) return false;
     // RC-Klasse
     if (f.rc.size && !f.rc.has(p.rc_klasse)) return false;
     // Eigenschaften — alle müssen vorhanden sein (UND-Logik)
@@ -623,7 +643,7 @@ function gefilterteProdukte() {
           p.beschreibung,
           STATE.kategorien[p.kategorie] || '',
           p.system,
-          p.farbe,
+          _asArr(p.farbe).join(' '),
           p.standnummer || '',
           (p.eigenschaften || []).join(' ')
         ].join(' ').toLowerCase();
@@ -783,8 +803,8 @@ function karteHtml(p) {
   const rcBadge = p.rc_klasse ? `<span class="pill is-gold">${p.rc_klasse}</span>` : '';
   // Verglasungs-Badge nur bei Produkten mit Glas (Fenster/Balkontür/Haustür/Schiebetür) — NICHT bei Dämmung/Baumaterialien/Garagentor
   const NO_GLAS_KATS = new Set(['daemmung','baumaterialien','garagentor-gebraucht']);
-  const verglasungBadge = (p.verglasung && !NO_GLAS_KATS.has(p.kategorie_key))
-    ? `<span class="pill is-primary">${p.verglasung}-Verglasung</span>` : '';
+  const verglasungBadge = !NO_GLAS_KATS.has(kategorieZuGruppe(p.kategorie))
+    ? _asArr(p.verglasung).map(v => `<span class="pill is-primary">${v}-Verglasung</span>`).join('') : '';
   const zustandBadge = p.zustand === 'gebraucht' ? `<span class="pill is-warning">Gebraucht</span>` : '';
   const sonderpreisBadge = p.sonderpreis_eur ? `<span class="pill is-warning">Sonderpreis *</span>` : '';
   const exportBadge = p.export_modell ? `<span class="pill is-primary">Export *</span>` : '';
@@ -1288,7 +1308,7 @@ function oeffneDetail(id) {
         <button id="detailShareBtn" type="button" class="inline-flex items-center gap-1.5 text-sm font-bold px-4 py-2 rounded-full transition-colors shadow-sm hover:opacity-90" style="color:#fff;background:#225eaa;"><span class="material-symbols-outlined" style="font-size:18px">share</span>Link teilen</button>
       </div>
       <div class="flex flex-wrap gap-1.5">
-        ${(p.verglasung && !['daemmung','baumaterialien','garagentor-gebraucht'].includes(p.kategorie_key)) ? `<span class="pill is-primary">${p.verglasung}-Verglasung</span>` : ''}
+        ${!['daemmung','baumaterialien','garagentor-gebraucht'].includes(kategorieZuGruppe(p.kategorie)) ? _asArr(p.verglasung).map(v => `<span class="pill is-primary">${v}-Verglasung</span>`).join('') : ''}
         ${p.rc_klasse ? `<span class="pill is-gold">${p.rc_klasse}</span>` : ''}
         ${lagerBadgeHtml(p)}
       </div>
@@ -1297,7 +1317,7 @@ function oeffneDetail(id) {
         <div class="bg-bg-soft rounded-lg px-3 py-2"><span class="block text-[10px] text-ink-soft">Höhe</span><span class="font-bold text-ink">${p.hoehe_mm} mm</span></div>
         ${standnrInfo}
         <div class="bg-bg-soft rounded-lg px-3 py-2"><span class="block text-[10px] text-ink-soft">System</span><span class="font-bold text-ink">${p.system ? escapeHtml(p.system) : '—'}</span></div>
-        ${p.oeffnungsart ? `<div class="bg-bg-soft rounded-lg px-3 py-2 col-span-2"><span class="block text-[10px] text-ink-soft">Öffnungsart</span><span class="font-bold text-ink">${escapeHtml(oeffnungsartLabel(p.oeffnungsart))}</span></div>` : ''}
+        ${_asArr(p.oeffnungsart).length ? `<div class="bg-bg-soft rounded-lg px-3 py-2 col-span-2"><span class="block text-[10px] text-ink-soft">Öffnungsart</span><span class="font-bold text-ink">${_asArr(p.oeffnungsart).map(o => escapeHtml(oeffnungsartLabel(o))).join(', ')}</span></div>` : ''}
       </div>
       <p class="text-sm text-ink-soft leading-relaxed">${nl2br(p.beschreibung)}</p>
       <div>

@@ -118,6 +118,52 @@ const EIGENSCHAFTEN_GRUPPEN = [
 // Flache Liste für Rückwärtskompatibilität (Lade-/Speicher-Logik)
 const EIGENSCHAFTEN = EIGENSCHAFTEN_GRUPPEN.flatMap(g => g.items);
 
+/* ─── Mehrfach-Auswahl-Felder (Chips) ───────────────────────────────────
+   Inhaberin-Wunsch 07.06.2026: Farbe, Glasart, Verglasung und Öffnungsart
+   sollen mehrfach anklickbar sein (ein Fenster kann z.B. außen anthrazit +
+   innen weiß sein, oder mehrere Öffnungsarten bei mehrflügeligen Elementen).
+   Material und Drutex-System bleiben Einfach-Auswahl (ein Fenster = ein
+   Material / ein System). Werte werden als Arrays gespeichert; der Shop ist
+   abwärtskompatibel (akzeptiert alte Einzelwerte UND neue Listen). */
+const CHIP_FELDER = {
+  farbe: {
+    stateKey: 'farben', containerId: 'chipsFarbe',
+    options: [
+      { v: 'weiss', l: 'Weiß' }, { v: 'anthrazit', l: 'Anthrazit' },
+      { v: 'golden-oak', l: 'Golden Oak' }, { v: 'nussbaum', l: 'Nussbaum' },
+      { v: 'schwarz', l: 'Schwarz' }, { v: 'dunkelgruen', l: 'Dunkelgrün' }
+    ]
+  },
+  verglasung: {
+    stateKey: 'verglasungen', containerId: 'chipsVerglasung',
+    options: [ { v: '2-fach', l: '2-fach' }, { v: '3-fach', l: '3-fach' } ]
+  },
+  glasart: {
+    stateKey: 'glasarten', containerId: 'chipsGlasart',
+    options: [
+      { v: 'klarglas', l: 'Klarglas' }, { v: 'chinchilla', l: 'Chinchilla' },
+      { v: 'milchglas', l: 'Milchglas' }, { v: 'sicherheitsglas', l: 'Sicherheitsglas' },
+      { v: 'schallschutzglas', l: 'Schallschutzglas' }
+    ]
+  },
+  oeffnungsart: {
+    stateKey: 'oeffnungsarten', containerId: 'chipsOeffnungsart',
+    options: [
+      { v: 'dreh-kipp-rechts', l: 'Dreh-Kipp Rechts (Griff links)' },
+      { v: 'dreh-kipp-links', l: 'Dreh-Kipp Links (Griff rechts)' },
+      { v: 'dreh-rechts', l: 'Dreh Rechts (Griff links)' },
+      { v: 'dreh-links', l: 'Dreh Links (Griff rechts)' },
+      { v: 'kipp', l: 'Nur Kipp' }, { v: 'fest', l: 'Festverglasung' },
+      { v: 'stulp', l: 'Stulp (ohne Pfosten)' },
+      { v: 'pfosten', l: 'Mittelpfosten' },
+      { v: 'psk', l: 'Parallel-Schiebe-Kipp' },
+      { v: 'hebe-schiebe', l: 'Hebe-Schiebe' },
+      { v: 'drehfluegel', l: 'Drehflügel (Haustür)' }
+    ]
+  }
+};
+const OEFFNUNGSART_LABEL = Object.fromEntries(CHIP_FELDER.oeffnungsart.options.map(o => [o.v, o.l]));
+
 const FARBE_LABEL = {
   'weiss': 'Weiß', 'anthrazit': 'Anthrazit', 'golden-oak': 'Golden Oak',
   'nussbaum': 'Nussbaum', 'schwarz': 'Schwarz', 'dunkelgruen': 'Dunkelgrün'
@@ -126,8 +172,12 @@ const FARBE_LABEL = {
 const STATE = {
   typ: null,        // 'vermessen' oder 'sonderposten'
   zustand: 'neu',  // 'neu' | 'gebraucht' | 'vermessen' | 'sonderposten'
-  material: 'kunststoff', // 'kunststoff' | 'holz' | 'aluminium' — gilt für neu UND gebraucht
-  glasart: 'klarglas', // 'klarglas' | 'chinchilla' | 'milchglas' | 'sicherheitsglas' | 'schallschutzglas' — Shop-Filter
+  material: 'kunststoff', // 'kunststoff' | 'holz' | 'aluminium' — Einfach-Auswahl
+  glasarten: [],       // Mehrfach: 'klarglas' | 'chinchilla' | 'milchglas' | ... — Shop-Filter
+  farben: [],          // Mehrfach: 'weiss' | 'anthrazit' | ...
+  verglasungen: [],    // Mehrfach: '2-fach' | '3-fach'
+  oeffnungsarten: [],  // Mehrfach: 'dreh-kipp-rechts' | 'fest' | ...
+  customEigenschaften: [], // von der Familie selbst angelegte Eigenschaften (persistent)
   kategorie: null,
   groesseKlasse: '',
   bilder: [],          // Array von DataURLs (neue Bilder, Base64 für Vorschau)
@@ -183,8 +233,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
+  ladeCustomEigenschaften();
   rendereKategorien();
   rendereEigenschaften();
+  initChipFelder();
   bindeFormHandler();
   bindeZustandHandler();
   bindeMaterialHandler();
@@ -194,6 +246,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setZustandUI();
   setMaterialUI();
   setGlasartUI();
+  Object.keys(CHIP_FELDER).forEach(k => { if (k !== 'glasart') rendereChipFeld(k); });
   setGroesseUI();
   setEditModeUI();
   rendereVorschau();
@@ -202,12 +255,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 /* ─── Edit-Mode: Produkt ins Formular laden ─── */
 async function ladeProduktInsFormular(p) {
   STATE.zustand = p.zustand || 'neu';
-  STATE.material = p.material || 'keine';
-  STATE.glasart = p.glasart || 'keine';
+  STATE.material = (Array.isArray(p.material) ? p.material[0] : p.material) || 'keine';
+  STATE.glasarten = _alsArray(p.glasart);       // String (alt) ODER Array (neu)
+  STATE.farben = _alsArray(p.farbe);
+  STATE.verglasungen = _alsArray(p.verglasung);
+  STATE.oeffnungsarten = _alsArray(p.oeffnungsart);
   STATE.kategorie = p.kategorie_key;
   STATE.groesseKlasse = p.groesse_klasse || '';
   STATE.bilderBestand = Array.isArray(p.bilder) ? [...p.bilder] : [];
   STATE.bilder = [];
+  // Unbekannte (selbst angelegte) Eigenschaften als Custom-Chips registrieren
+  registriereCustomAusEigenschaften(p.eigenschaften || []);
 
   // Felder befüllen — passiert im DOM nachdem rendereKategorien fertig ist
   setTimeout(() => {
@@ -219,16 +277,17 @@ async function ladeProduktInsFormular(p) {
     setVal('formSonderpreis', p.sonderpreis_eur);
     setVal('formLager', p.lagerbestand);
     setVal('formStandnummer', p.standnummer);
-    setVal('formSystem', p.system);
-    setVal('formFarbe', p.farbe);
-    setVal('formVerglasung', p.verglasung);
-    setVal('formOeffnungsart', p.oeffnungsart);
+    setVal('formSystem', Array.isArray(p.system) ? p.system[0] : p.system);
     setVal('formBeschreibung', p.beschreibung);
     const exp = document.getElementById('formExport'); if (exp) exp.checked = !!p.export_modell;
+    rendereEigenschaften(); // Custom-Chips mitrendern
     (p.eigenschaften || []).forEach(e => {
       const el = document.querySelector(`.eig-check[value="${e}"]`);
       if (el) el.checked = true;
     });
+    // Mehrfach-Chip-Felder rendern (Glasart läuft über Step-1-Karten)
+    setGlasartUI();
+    Object.keys(CHIP_FELDER).forEach(k => { if (k !== 'glasart') rendereChipFeld(k); });
     // Kategorie vorauswählen
     const sel = document.querySelector(`.kat-karte[data-kat="${p.kategorie_key}"]`);
     if (sel) sel.classList.add('selected');
@@ -405,7 +464,10 @@ function bindeGlasartHandler() {
     const el = document.getElementById(id);
     if (!el) return;
     el.addEventListener('click', () => {
-      STATE.glasart = el.dataset.glasart;
+      const v = el.dataset.glasart;
+      // "Keine Angabe" ist exklusiv → leert die Auswahl; sonst Mehrfach-Toggle
+      if (v === 'keine') STATE.glasarten = [];
+      else toggleInArray(STATE.glasarten, v);
       setGlasartUI();
       saveDraft();
       rendereVorschau();
@@ -417,7 +479,49 @@ function setGlasartUI() {
   GLASART_BTN_IDS.forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
-    el.classList.toggle('selected', el.dataset.glasart === STATE.glasart);
+    const v = el.dataset.glasart;
+    const sel = v === 'keine' ? STATE.glasarten.length === 0 : STATE.glasarten.includes(v);
+    el.classList.toggle('selected', sel);
+  });
+}
+
+/* ─── Generische Mehrfach-Chip-Felder (Farbe / Verglasung / Öffnungsart) ─── */
+function toggleInArray(arr, val) {
+  const i = arr.indexOf(val);
+  if (i >= 0) arr.splice(i, 1); else arr.push(val);
+  return arr;
+}
+
+function rendereChipFeld(feldKey) {
+  const cfg = CHIP_FELDER[feldKey];
+  const wrap = document.getElementById(cfg.containerId);
+  if (!wrap) return;
+  const ausgewaehlt = STATE[cfg.stateKey] || [];
+  wrap.innerHTML = cfg.options.map(o => {
+    const aktiv = ausgewaehlt.includes(o.v);
+    return `<button type="button" class="chip-toggle${aktiv ? ' selected' : ''}" data-chip-feld="${feldKey}" data-chip-val="${o.v}" aria-pressed="${aktiv}">${escapeHtml(o.l)}</button>`;
+  }).join('');
+}
+
+function bindeChipFeld(feldKey) {
+  const cfg = CHIP_FELDER[feldKey];
+  const wrap = document.getElementById(cfg.containerId);
+  if (!wrap) return;
+  wrap.addEventListener('click', e => {
+    const btn = e.target.closest('[data-chip-val]');
+    if (!btn) return;
+    toggleInArray(STATE[cfg.stateKey], btn.dataset.chipVal);
+    rendereChipFeld(feldKey);
+    saveDraft();
+    rendereVorschau();
+  });
+}
+
+function initChipFelder() {
+  Object.keys(CHIP_FELDER).forEach(k => {
+    if (k === 'glasart') return; // Glasart läuft über die Step-1-Karten
+    rendereChipFeld(k);
+    bindeChipFeld(k);
   });
 }
 
@@ -456,7 +560,7 @@ function rendereKategorien() {
 function rendereEigenschaften() {
   const wrap = document.getElementById('eigenschaftenWrap');
   // Inhaberin-Refactor 30.04.2026 v2: Gruppen-Header für übersichtliche Auswahl
-  wrap.innerHTML = EIGENSCHAFTEN_GRUPPEN.map(g => `
+  const standardGruppen = EIGENSCHAFTEN_GRUPPEN.map(g => `
     <div class="eig-gruppe" style="margin-bottom:18px">
       <div class="flex items-center gap-1.5 mb-2 pb-1.5 border-b" style="border-color:rgba(0,0,0,0.08)">
         <span class="material-symbols-outlined" style="font-size:16px;color:#225eaa">${g.icon || 'tune'}</span>
@@ -472,7 +576,116 @@ function rendereEigenschaften() {
       </div>
     </div>
   `).join('');
-  wrap.addEventListener('change', () => { rendereVorschau(); saveDraft(); });
+
+  // Eigene Eigenschaften (von der Familie selbst angelegt, bleiben gespeichert)
+  const customChips = (STATE.customEigenschaften || []).map(c => `
+    <label class="flex items-center gap-2 cursor-pointer hover:text-primary text-sm">
+      <input type="checkbox" class="filter-check eig-check" value="${escapeHtml(c)}"/>
+      <span>${escapeHtml(c)}</span>
+      <button type="button" class="eig-custom-del" data-del-custom="${escapeHtml(c)}" title="Eigenschaft löschen" aria-label="Eigenschaft löschen" style="margin-left:2px;color:#9aa1b1;font-size:14px;line-height:1;border:0;background:none;cursor:pointer">×</button>
+    </label>
+  `).join('');
+
+  const eigeneGruppe = `
+    <div class="eig-gruppe" style="margin-bottom:6px">
+      <div class="flex items-center gap-1.5 mb-2 pb-1.5 border-b" style="border-color:rgba(0,0,0,0.08)">
+        <span class="material-symbols-outlined" style="font-size:16px;color:#225eaa">add_circle</span>
+        <span class="text-[12px] font-bold uppercase tracking-wider" style="color:#225eaa;letter-spacing:0.05em">Eigene</span>
+      </div>
+      <div id="customEigGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 mb-3">${customChips}</div>
+      <div id="customEigAddRow" class="flex items-center gap-2">
+        <button type="button" id="customEigAddBtn" class="chip-add"><span style="font-size:15px">＋</span> Eigenschaft hinzufügen</button>
+      </div>
+      <p class="text-[11px] text-on-surface-variant mt-2">Fehlt eine Eigenschaft? Hier eintragen (z.B. „Null-Schwelle“). Sie bleibt für nächste Inserate gespeichert.</p>
+    </div>
+  `;
+
+  wrap.innerHTML = standardGruppen + eigeneGruppe;
+
+  // change-Listener nur einmal binden (rendereEigenschaften wird ggf. mehrfach aufgerufen)
+  if (!wrap.dataset.changeBound) {
+    wrap.addEventListener('change', e => {
+      if (e.target.classList && e.target.classList.contains('eig-check')) { rendereVorschau(); saveDraft(); }
+    });
+    wrap.dataset.changeBound = '1';
+  }
+  bindeCustomEigenschaftUI();
+}
+
+/* ─── Eigene Eigenschaften: Inline-Eingabe + Persistenz ─── */
+const CUSTOM_EIG_KEY = 'deinefenster_custom_eigenschaften_v1';
+
+function ladeCustomEigenschaften() {
+  try {
+    const raw = localStorage.getItem(CUSTOM_EIG_KEY);
+    STATE.customEigenschaften = raw ? JSON.parse(raw) : [];
+  } catch (e) { STATE.customEigenschaften = []; }
+  if (!Array.isArray(STATE.customEigenschaften)) STATE.customEigenschaften = [];
+}
+function speichereCustomEigenschaften() {
+  try { localStorage.setItem(CUSTOM_EIG_KEY, JSON.stringify(STATE.customEigenschaften)); } catch (e) {}
+}
+
+// Beim Bearbeiten: unbekannte Eigenschaften (nicht in der Standard-Liste) als Custom übernehmen
+function registriereCustomAusEigenschaften(eigArr) {
+  const bekannt = new Set(EIGENSCHAFTEN.map(e => e.key));
+  (eigArr || []).forEach(e => {
+    if (!e || bekannt.has(e) || /-verglasung$/.test(e)) return;
+    if (!STATE.customEigenschaften.includes(e)) STATE.customEigenschaften.push(e);
+  });
+  speichereCustomEigenschaften();
+}
+
+function fuegeCustomEigenschaftHinzu(text) {
+  const t = (text || '').trim().replace(/\s+/g, ' ');
+  if (!t) return false;
+  // Doppelte (case-insensitiv) vermeiden — auch gegen Standard-Labels
+  const vorhandenCustom = STATE.customEigenschaften.some(c => c.toLowerCase() === t.toLowerCase());
+  const istStandard = EIGENSCHAFTEN.some(e => e.label.toLowerCase() === t.toLowerCase());
+  if (istStandard) { showSnackbar('Diese Eigenschaft gibt es schon oben', 'error'); return false; }
+  if (!vorhandenCustom) { STATE.customEigenschaften.push(t); speichereCustomEigenschaften(); }
+  rendereEigenschaften();
+  // neu angelegte direkt anhaken (Iteration statt Selektor — robust gegen Sonderzeichen)
+  const el = [...document.querySelectorAll('.eig-check')].find(c => c.value === t);
+  if (el) el.checked = true;
+  rendereVorschau();
+  saveDraft();
+  return true;
+}
+
+function bindeCustomEigenschaftUI() {
+  const addBtn = document.getElementById('customEigAddBtn');
+  const addRow = document.getElementById('customEigAddRow');
+  if (!addBtn || !addRow) return;
+
+  addBtn.addEventListener('click', () => {
+    addRow.innerHTML = `
+      <input type="text" id="customEigInput" maxlength="40" placeholder="z.B. Null-Schwelle" autocomplete="off"
+        class="flex-1 px-3 py-2 rounded-xl bg-surface-container-low border border-outline-variant focus:border-primary focus:outline-none text-sm"/>
+      <button type="button" id="customEigSave" class="bg-primary text-white px-4 py-2 rounded-xl font-bold text-sm hover:bg-primary-d">Hinzufügen</button>
+      <button type="button" id="customEigCancel" class="px-2 py-2 text-sm text-on-surface-variant hover:text-on-surface" aria-label="Abbrechen">×</button>`;
+    const input = document.getElementById('customEigInput');
+    input.focus();
+    const speichern = () => { if (fuegeCustomEigenschaftHinzu(input.value)) { /* rendereEigenschaften baut Reihe neu */ } };
+    document.getElementById('customEigSave').addEventListener('click', speichern);
+    input.addEventListener('keydown', ev => {
+      if (ev.key === 'Enter') { ev.preventDefault(); speichern(); }
+      else if (ev.key === 'Escape') { ev.preventDefault(); rendereEigenschaften(); }
+    });
+    document.getElementById('customEigCancel').addEventListener('click', () => rendereEigenschaften());
+  });
+
+  // Löschen einer eigenen Eigenschaft (× am Chip)
+  document.getElementById('customEigGrid')?.addEventListener('click', e => {
+    const del = e.target.closest('[data-del-custom]');
+    if (!del) return;
+    const val = del.dataset.delCustom;
+    STATE.customEigenschaften = STATE.customEigenschaften.filter(c => c !== val);
+    speichereCustomEigenschaften();
+    rendereEigenschaften();
+    rendereVorschau();
+    saveDraft();
+  });
 }
 
 /* ─── Navigation Schritt 1 ↔ 2 ─── */
@@ -482,7 +695,7 @@ function bindeFormHandler() {
   document.getElementById('kategorieWechseln').addEventListener('click', goToStep1);
 
   // Live-Vorschau bei jedem Input
-  ['formTitel','formBreite','formHoehe','formPreis','formLager','formSystem','formFarbe','formVerglasung','formBeschreibung','formStandnummer','formOeffnungsart'].forEach(id => {
+  ['formTitel','formBreite','formHoehe','formPreis','formLager','formSystem','formBeschreibung','formStandnummer'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     el.addEventListener('input', () => { rendereVorschau(); saveDraft(); });
@@ -572,27 +785,29 @@ function bindeFormHandler() {
 }
 
 function resetFormular() {
-  ['formTitel','formBreite','formHoehe','formPreis','formUwert','formBeschreibung'].forEach(id => {
+  ['formTitel','formBreite','formHoehe','formPreis','formBeschreibung'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
   document.getElementById('formLager').value = '1';
   document.getElementById('formSystem').value = 'IGLO 5 Classic';
-  document.getElementById('formFarbe').value = 'weiss';
-  document.getElementById('formVerglasung').value = '2-fach';
   document.querySelectorAll('.eig-check').forEach(c => { c.checked = false; });
   // Felder, die beim Bearbeiten gesetzt werden, MÜSSEN hier zurück — sonst sickern
-  // Export-/Sonderpreis-Häkchen, Standnummer und Öffnungsart ins nächste neue Inserat durch.
+  // Export-/Sonderpreis-Häkchen und Standnummer ins nächste neue Inserat durch.
   const _exp = document.getElementById('formExport'); if (_exp) _exp.checked = false;
   const _sp = document.getElementById('formSonderpreis'); if (_sp) _sp.checked = false;
   const _st = document.getElementById('formStandnummer'); if (_st) _st.value = '';
-  const _oa = document.getElementById('formOeffnungsart'); if (_oa) _oa.value = '';
   STATE.bilder = [];
   STATE.zustand = 'neu';
   STATE.material = 'kunststoff';
-  STATE.glasart = 'klarglas';
+  // Mehrfach-Auswahl-Felder leeren
+  STATE.glasarten = [];
+  STATE.farben = [];
+  STATE.verglasungen = [];
+  STATE.oeffnungsarten = [];
   setZustandUI();
   setMaterialUI();
   setGlasartUI();
+  Object.keys(CHIP_FELDER).forEach(k => { if (k !== 'glasart') rendereChipFeld(k); });
   rendereBildVorschau();
   document.getElementById('autoErkanntHinweis').classList.add('hidden');
   // Zurück zu Schritt 0
@@ -752,7 +967,6 @@ function rendereVorschau() {
   const preis = parseInt(document.getElementById('formPreis').value, 10) || 0;
   const lager = parseInt(document.getElementById('formLager').value, 10) || 1;
   const system = document.getElementById('formSystem').value || 'IGLO 5 Classic';
-  const verglasung = document.getElementById('formVerglasung').value;
   const rc = '';
   const beschr = document.getElementById('formBeschreibung').value || (STATE.kategorie ? KATEGORIEN_LIVE.find(k=>k.key===STATE.kategorie)?.label + ' direkt aus dem Lager.' : 'Lagerware – sofort lieferbar.');
   // Hauptbild: erst neue (Bilder), dann bestehende (bilderBestand), sonst Default
@@ -760,9 +974,20 @@ function rendereVorschau() {
   const bild = echtesBild || 'img/fenster_standard.png';
   const istSymbolbild = !echtesBild;
 
-  const xBtn = (target) => `<button type="button" class="badge-x" data-clear="${target}" title="Ausblenden" style="margin-left:4px;display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:9999px;background:rgba(0,0,0,0.15);color:inherit;font-size:10px;line-height:1;cursor:pointer;border:0">×</button>`;
-  const verglasungBadge = (verglasung && !STATE.hideBadges?.verglasung)
-    ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary-fixed text-on-primary-fixed">${verglasung}-Verglasung${xBtn('verglasung')}</span>`
+  const xBtn = (target, val) => `<button type="button" class="badge-x" data-clear="${target}" data-val="${escapeHtml(val || '')}" title="Entfernen" style="margin-left:4px;display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:9999px;background:rgba(0,0,0,0.15);color:inherit;font-size:10px;line-height:1;cursor:pointer;border:0">×</button>`;
+  // Mehrere Verglasungen → je ein Badge (mit × zum Entfernen)
+  const verglasungBadge = STATE.verglasungen.map(v =>
+    `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary-fixed text-on-primary-fixed">${escapeHtml(v)}-Verglasung${xBtn('verglasung', v)}</span>`
+  ).join('');
+  // Gewählte Eigenschaften sichtbar machen (Farbe / Glasart / Öffnungsart)
+  const _lbl = (feldKey, val) => (CHIP_FELDER[feldKey].options.find(o => o.v === val)?.l) || val;
+  const auswahlTags = [
+    ...STATE.farben.map(v => _lbl('farbe', v)),
+    ...STATE.glasarten.map(v => _lbl('glasart', v)),
+    ...STATE.oeffnungsarten.map(v => _lbl('oeffnungsart', v))
+  ];
+  const auswahlZeile = auswahlTags.length
+    ? `<div class="flex flex-wrap gap-1 mt-2">${auswahlTags.map(t => `<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold" style="background:#eef2fb;color:#334155">${escapeHtml(t)}</span>`).join('')}</div>`
     : '';
   const lagerBadge = STATE.hideBadges?.lager ? '' : (lager <= 1
     ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold" style="background:#fff4dc;color:#b87f00">Nur ${lager} verfügbar${xBtn('lager')}</span>`
@@ -783,6 +1008,7 @@ function rendereVorschau() {
       <h3 class="text-sm font-bold leading-snug line-clamp-2 mb-1">${escapeHtml(titel)}</h3>
       <p class="text-[11px] text-on-surface-variant">${escapeHtml(system)} · ${breite} × ${hoehe} mm</p>
       <p class="text-[11px] text-on-surface-variant line-clamp-2 mt-1">${escapeHtml(beschr)}</p>
+      ${auswahlZeile}
       <div class="mt-3 flex items-end justify-between">
         <div>
           <span class="text-[10px] text-on-surface-variant block">ab</span>
@@ -801,9 +1027,10 @@ function rendereVorschau() {
       e.stopPropagation();
       const target = b.dataset.clear;
       if (target === 'verglasung') {
-        const sel = document.getElementById('formVerglasung');
-        if (sel) sel.value = '';
-        STATE.hideBadges.verglasung = true;
+        // genau diese Verglasung aus der Mehrfach-Auswahl entfernen
+        const i = STATE.verglasungen.indexOf(b.dataset.val);
+        if (i >= 0) STATE.verglasungen.splice(i, 1);
+        rendereChipFeld('verglasung');
       } else if (target === 'lager') {
         STATE.hideBadges.lager = true;
       }
@@ -836,9 +1063,8 @@ async function veroeffentlichen() {
   try {
     // Eigenschaften zusammenstellen
     const eigArr = Array.from(document.querySelectorAll('.eig-check:checked')).map(c => c.value);
-    const verglasung = document.getElementById('formVerglasung').value;
-    if (verglasung === '2-fach') eigArr.push('2-fach-verglasung');
-    if (verglasung === '3-fach') eigArr.push('3-fach-verglasung');
+    // Verglasungen zusätzlich als Such-/Filter-Tags ins Eigenschaften-Array (Shop-Filter nutzt beides)
+    STATE.verglasungen.forEach(v => { eigArr.push(`${v}-verglasung`); });
     const rc = null;
 
     // Bilder zu Google Drive hochladen
@@ -873,7 +1099,7 @@ async function veroeffentlichen() {
       kategorie_key: STATE.kategorie,
       zustand: STATE.zustand,
       material: (STATE.material && STATE.material !== 'keine') ? STATE.material : null,
-      glasart: (STATE.glasart && STATE.glasart !== 'keine') ? STATE.glasart : null,
+      glasart: STATE.glasarten.length ? [...STATE.glasarten] : null,
       system: STATE.zustand === 'neu' ? (document.getElementById('formSystem').value || null) : null,
       breite_mm: breite || null,
       hoehe_mm: hoehe || null,
@@ -881,10 +1107,10 @@ async function veroeffentlichen() {
       sonderpreis_eur: sonderpreisAktiv ? preis : null,
       groesse_klasse: KATEGORIEN_MIT_GROESSE.has(STATE.kategorie) && STATE.groesseKlasse ? STATE.groesseKlasse : null,
       export_modell: exportModell,
-      farbe: document.getElementById('formFarbe').value || null,
-      verglasung: verglasung || null,
+      farbe: STATE.farben.length ? [...STATE.farben] : null,
+      verglasung: STATE.verglasungen.length ? [...STATE.verglasungen] : null,
       u_wert: null,
-      oeffnungsart: document.getElementById('formOeffnungsart')?.value || null,
+      oeffnungsart: STATE.oeffnungsarten.length ? [...STATE.oeffnungsarten] : null,
       rc_klasse: rc,
       eigenschaften: Array.from(new Set(eigArr)),
       lagerbestand: parseInt(document.getElementById('formLager').value, 10) || 1,
@@ -930,7 +1156,10 @@ function saveDraft() {
   const draft = {
     zustand: STATE.zustand,
     material: STATE.material,
-    glasart: STATE.glasart,
+    glasarten: [...STATE.glasarten],
+    farben: [...STATE.farben],
+    verglasungen: [...STATE.verglasungen],
+    oeffnungsarten: [...STATE.oeffnungsarten],
     kategorie: STATE.kategorie,
     titel: document.getElementById('formTitel')?.value || '',
     breite: document.getElementById('formBreite')?.value || '',
@@ -938,14 +1167,9 @@ function saveDraft() {
     preis: document.getElementById('formPreis')?.value || '',
     lager: document.getElementById('formLager')?.value || '',
     system: document.getElementById('formSystem')?.value || '',
-    farbe: document.getElementById('formFarbe')?.value || '',
-    verglasung: document.getElementById('formVerglasung')?.value || '',
-    uwert: document.getElementById('formUwert')?.value || '',
     beschreibung: document.getElementById('formBeschreibung')?.value || '',
-    rc: document.querySelector('input[name="formRC"]:checked')?.value || '',
     eigenschaften: Array.from(document.querySelectorAll('.eig-check:checked')).map(c => c.value),
-    standnummer: document.getElementById('formStandnummer')?.value || '',
-    oeffnungsart: document.getElementById('formOeffnungsart')?.value || ''
+    standnummer: document.getElementById('formStandnummer')?.value || ''
   };
   try { localStorage.setItem(DRAFT_KEY, JSON.stringify(draft)); } catch (e) {}
 }
@@ -957,7 +1181,11 @@ function ladeDraft() {
     const d = JSON.parse(raw);
     if (d.zustand) STATE.zustand = d.zustand;
     if (d.material) STATE.material = d.material;
-    if (d.glasart) STATE.glasart = d.glasart;
+    // Mehrfach-Felder (mit Abwärtskompatibilität zu altem Einzel-Draft)
+    STATE.glasarten = _alsArray(d.glasarten != null ? d.glasarten : d.glasart);
+    STATE.farben = _alsArray(d.farben != null ? d.farben : d.farbe);
+    STATE.verglasungen = _alsArray(d.verglasungen != null ? d.verglasungen : d.verglasung);
+    STATE.oeffnungsarten = _alsArray(d.oeffnungsarten != null ? d.oeffnungsarten : d.oeffnungsart);
     if (d.kategorie) STATE.kategorie = d.kategorie;
     const setIfPresent = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
     setIfPresent('formTitel', d.titel);
@@ -966,19 +1194,15 @@ function ladeDraft() {
     setIfPresent('formPreis', d.preis);
     setIfPresent('formLager', d.lager);
     setIfPresent('formSystem', d.system);
-    setIfPresent('formFarbe', d.farbe);
-    setIfPresent('formVerglasung', d.verglasung);
-    setIfPresent('formUwert', d.uwert);
     setIfPresent('formBeschreibung', d.beschreibung);
     setIfPresent('formStandnummer', d.standnummer);
-    setIfPresent('formOeffnungsart', d.oeffnungsart);
-    if (d.rc) {
-      const rcEl = document.querySelector(`input[name="formRC"][value="${d.rc}"]`);
-      if (rcEl) rcEl.checked = true;
-    }
+    // Custom-Eigenschaften aus dem Draft registrieren, dann Chips/Checkboxen neu aufbauen
+    registriereCustomAusEigenschaften(d.eigenschaften || []);
+    rendereEigenschaften();
+    Object.keys(CHIP_FELDER).forEach(k => { if (k !== 'glasart') rendereChipFeld(k); });
     if (Array.isArray(d.eigenschaften)) {
       d.eigenschaften.forEach(e => {
-        const el = document.querySelector(`.eig-check[value="${e}"]`);
+        const el = [...document.querySelectorAll('.eig-check')].find(c => c.value === e);
         if (el) el.checked = true;
       });
     }
@@ -997,6 +1221,13 @@ function showSnackbar(text, type = 'info') {
 }
 
 /* ─── Helper ─── */
+// String (alte Daten) ODER Array (neue Mehrfach-Daten) → sauberes Array
+function _alsArray(v) {
+  if (v == null || v === '') return [];
+  const arr = Array.isArray(v) ? v : [v];
+  return arr.filter(x => x != null && x !== '' && x !== 'keine');
+}
+
 function escapeHtml(str) {
   if (str == null) return '';
   return String(str)
