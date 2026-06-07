@@ -1120,7 +1120,8 @@ body.scrolled .burger{color:var(--text)}
       showBox(err); return;
     }
     btn.disabled = true; btnTxt.textContent = 'Wird gesendet …';
-    const offerId = 'KT-' + Date.now().toString().slice(-6);
+    const _d = new Date();
+    const offerId = 'KT-' + (_d.getFullYear().toString().slice(2) + String(_d.getMonth()+1).padStart(2,'0') + String(_d.getDate()).padStart(2,'0')) + '-' + Math.random().toString(36).slice(2,6).toUpperCase();
     const datum   = new Date().toLocaleDateString('de-DE');
     const internalText = [
       'Kontaktanfrage über DeineFenster.de',
@@ -1131,6 +1132,13 @@ body.scrolled .burger{color:var(--text)}
       '', 'Nachricht:', msg,
       '', 'Datum: ' + datum,
     ].join('\n');
+    // Detail-Block für die Kunden-Bestätigung: zeigt seine Nachricht zurück
+    const esc = (s) => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const detailsHtml =
+      '<table width="100%" cellpadding="0" cellspacing="0" style="margin-top:6px;">' +
+        '<tr><td style="padding:9px 0;border-bottom:1px solid #f0eadd;font-size:13px;color:#8a8273;width:32%;vertical-align:top;">Telefon</td><td style="padding:9px 0;border-bottom:1px solid #f0eadd;font-size:13px;color:#1a2336;">' + esc(tel || '–') + '</td></tr>' +
+        '<tr><td style="padding:9px 0;font-size:13px;color:#8a8273;vertical-align:top;">Ihre Nachricht</td><td style="padding:9px 0;font-size:13px;color:#1a2336;line-height:1.6;white-space:pre-wrap;">' + esc(msg) + '</td></tr>' +
+      '</table>';
     try {
       // Cloudflare Worker (Resend) — schickt interne Mail an info@baustoffchrist
       // + Bestätigungsmail an den Kunden
@@ -1141,7 +1149,7 @@ body.scrolled .burger{color:var(--text)}
           customer_email: email,
           subject: '[DeineFenster.de] Kontaktanfrage von ' + name,
           text: internalText,
-          confirmation: { name: name, offerId: offerId },
+          confirmation: { name: name, offerId: offerId, detailsHtml: detailsHtml },
         }),
       });
       if (!res.ok) throw new Error('worker-' + res.status);

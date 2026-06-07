@@ -9,12 +9,20 @@
   'use strict';
 
   const CART_STORAGE_KEY = 'df_cart_v1';
-  // Web3Forms: Access-Key darf laut Hersteller im Frontend stehen.
-  // Er identifiziert nur das Formular und liefert die Mail an die
-  // im Web3Forms-Dashboard hinterlegte Adresse (info@baustoffchrist.de).
-  // Bei Spam → in web3forms.com/dashboard rotieren + diese Zeile updaten.
-  const WEB3FORMS_KEY = '440a94ff-9f42-46af-bf3d-47013dbd8f5f';
+  // Mailversand läuft über den Cloudflare Worker (Resend): interne Mail
+  // ans Team + automatische Bestätigung an den Kunden. Kein Web3Forms mehr.
   const TEAM_EMAIL = 'info@baustoffchrist.de';
+
+  // Eindeutige Anfrage-Nummer: PREFIX-JJMMTT-XXXX (Datum + 4 Zufallszeichen).
+  // Pro Anfrage praktisch nur einmal vergeben, gut dem Kunden zuordenbar.
+  function genOfferId(prefix) {
+    const d = new Date();
+    const ymd = d.getFullYear().toString().slice(2) +
+      String(d.getMonth() + 1).padStart(2, '0') +
+      String(d.getDate()).padStart(2, '0');
+    const rnd = Math.random().toString(36).slice(2, 6).toUpperCase();
+    return prefix + '-' + ymd + '-' + rnd;
+  }
 
   function fmt(n) {
     return Number(n).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '\u00a0€';
@@ -173,7 +181,7 @@
       const ship = calcVersand(cart);
       const tot = (subtotal + ship).toFixed(2);
       const datum = new Date().toLocaleDateString('de-DE');
-      const offerId = 'DF-' + Date.now().toString().slice(-6);
+      const offerId = genOfferId('DF');
 
       const deal = {
         id: Date.now(),
@@ -268,127 +276,57 @@
   </td></tr>
 </table></td></tr></table></body></html>`;
 
-      // Kunden-Email (Bestätigung)
-      const vorname = formData.name.split(' ')[0];
-      const kundenHtml = `<!DOCTYPE html>
-<html lang="de"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#f4f6f9;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f9;padding:40px 0;">
-<tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
-  <tr><td style="background:linear-gradient(135deg,#225eaa 0%,#1e3a8a 100%);padding:36px 40px 30px;">
-    <table width="100%" cellpadding="0" cellspacing="0"><tr>
-      <td><table cellpadding="0" cellspacing="0"><tr>
-        <td style="background:rgba(255,255,255,0.15);border-radius:10px;padding:12px;width:48px;height:48px;text-align:center;vertical-align:middle;"><span style="font-size:28px;line-height:1;">🪟</span></td>
-        <td style="padding-left:14px;vertical-align:middle;">
-          <div style="color:#ffffff;font-size:22px;font-weight:800;letter-spacing:-0.5px;line-height:1.1;">Deine<span style="color:#7eb8f7;">Fenster</span></div>
-          <div style="color:rgba(255,255,255,0.65);font-size:10px;font-weight:600;letter-spacing:2px;margin-top:3px;">.DE &nbsp;·&nbsp; DRUTEX FACHHANDEL</div>
-        </td>
-      </tr></table></td>
-      <td align="right" style="vertical-align:middle;">
-        <div style="background:rgba(255,255,255,0.15);border-radius:20px;padding:6px 14px;">
-          <span style="color:#ffffff;font-size:11px;font-weight:600;letter-spacing:1px;">ANFRAGE EINGEGANGEN</span>
-        </div>
-      </td>
-    </tr></table>
-  </td></tr>
-  <tr><td style="background:#edfaf3;border-bottom:1px solid #c3eed8;padding:16px 40px;">
-    <table cellpadding="0" cellspacing="0"><tr>
-      <td style="width:28px;font-size:20px;">✅</td>
-      <td style="padding-left:10px;color:#166534;font-size:13px;font-weight:600;">Vielen Dank – Ihre Anfrage ist bei uns eingegangen!</td>
-    </tr></table>
-  </td></tr>
-  <tr><td style="padding:36px 40px;">
-    <p style="color:#1a2744;font-size:16px;font-weight:700;margin:0 0 6px;">Hallo ${vorname},</p>
-    <p style="color:#4a5568;font-size:15px;line-height:1.7;margin:0 0 28px;">wir haben Ihre Anfrage erhalten und melden uns so schnell wie möglich bei Ihnen — in der Regel innerhalb von <strong style="color:#225eaa;">24 Stunden</strong>.</p>
-    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8faff;border:1px solid #dce8f7;border-radius:10px;overflow:hidden;margin-bottom:28px;">
-      <tr><td style="background:#225eaa;padding:12px 20px;">
-        <span style="color:#ffffff;font-size:12px;font-weight:700;letter-spacing:1px;">IHRE ANFRAGE</span>
-        <span style="color:rgba(255,255,255,0.7);font-size:11px;margin-left:12px;">${offerId}</span>
-      </td></tr>
-      <tr><td style="padding:0;">
-        <table width="100%" cellpadding="0" cellspacing="0">
-          <tr style="border-bottom:1px solid #e8f0fb;">
-            <td style="padding:11px 20px;color:#6b7a99;font-size:13px;width:140px;">Positionen</td>
-            <td style="padding:11px 20px;color:#1a2744;font-size:13px;font-weight:600;">${cart.length} Element${cart.length !== 1 ? 'e' : ''}</td>
-          </tr>
-          <tr style="background:#fcfdff;">
-            <td style="padding:11px 20px;color:#6b7a99;font-size:13px;">Angebot</td>
-            <td style="padding:11px 20px;color:#1a2744;font-size:13px;font-weight:600;">Folgt persönlich per E-Mail</td>
-          </tr>
-        </table>
-      </td></tr>
-    </table>
-    <p style="color:#1a2744;font-size:14px;font-weight:700;margin:0 0 14px;">Was passiert als Nächstes?</p>
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
-      <tr><td style="padding-bottom:12px;"><table cellpadding="0" cellspacing="0"><tr>
-        <td style="width:32px;height:32px;background:#e8f0fb;border-radius:50%;text-align:center;vertical-align:middle;font-size:14px;font-weight:800;color:#225eaa;">1</td>
-        <td style="padding-left:12px;color:#4a5568;font-size:13px;line-height:1.5;">Wir prüfen Ihre Konfiguration und erstellen ein verbindliches Angebot.</td>
-      </tr></table></td></tr>
-      <tr><td style="padding-bottom:12px;"><table cellpadding="0" cellspacing="0"><tr>
-        <td style="width:32px;height:32px;background:#e8f0fb;border-radius:50%;text-align:center;vertical-align:middle;font-size:14px;font-weight:800;color:#225eaa;">2</td>
-        <td style="padding-left:12px;color:#4a5568;font-size:13px;line-height:1.5;">Wir melden uns telefonisch oder per E-Mail mit Ihrem persönlichen Angebot.</td>
-      </tr></table></td></tr>
-      <tr><td><table cellpadding="0" cellspacing="0"><tr>
-        <td style="width:32px;height:32px;background:#e8f0fb;border-radius:50%;text-align:center;vertical-align:middle;font-size:14px;font-weight:800;color:#225eaa;">3</td>
-        <td style="padding-left:12px;color:#4a5568;font-size:13px;line-height:1.5;">Nach Ihrer Freigabe beginnt die Produktion – direkt beim Hersteller Drutex.</td>
-      </tr></table></td></tr>
-    </table>
-    <table width="100%" cellpadding="0" cellspacing="0" style="background:#1a2744;border-radius:10px;overflow:hidden;">
-      <tr><td style="padding:20px 24px;">
-        <p style="color:rgba(255,255,255,0.6);font-size:11px;font-weight:700;letter-spacing:1.5px;margin:0 0 10px;">SIE MÖCHTEN DIREKT SPRECHEN?</p>
-        <table cellpadding="0" cellspacing="0"><tr>
-          <td style="padding-right:24px;"><a href="tel:033812148373" style="color:#7eb8f7;font-size:15px;font-weight:700;text-decoration:none;">📞 03381 / 214 83 73</a><div style="color:rgba(255,255,255,0.4);font-size:11px;margin-top:3px;">Mo–Fr · 08:00–17:00 Uhr</div></td>
-          <td><a href="mailto:info@baustoffchrist.de" style="color:#7eb8f7;font-size:13px;text-decoration:none;">✉ info@baustoffchrist.de</a></td>
-        </tr></table>
-      </td></tr>
-    </table>
-  </td></tr>
-  <tr><td style="background:#f8faff;border-top:1px solid #e8f0fb;padding:20px 40px;">
-    <table width="100%" cellpadding="0" cellspacing="0"><tr>
-      <td style="color:#9aa5b4;font-size:11px;line-height:1.7;"><strong style="color:#4a5568;">Fensterhandel Christ GmbH</strong><br>Niemöllerstraße 10 · 14772 Brandenburg an der Havel<br>Diese E-Mail wurde automatisch versendet · ${datum}</td>
-      <td align="right" style="vertical-align:top;"><a href="https://deinefenster.de" style="color:#225eaa;font-size:11px;font-weight:700;text-decoration:none;">deinefenster.de</a></td>
-    </tr></table>
-  </td></tr>
-</table>
-</td></tr></table>
-</body></html>`;
+      // ── Detail-Zeilen für die Kunden-Bestätigung — "edel & warm" Stil ──
+      // Serifen-Titel + Hairline-Zeilen. configRows enthält keine € (Hausregel).
+      // Die 'Produkt'-Zeile entfällt, da Menge + Name schon im Titel stehen.
+      const kundenDetailsHtml = cart.map((item) => {
+        const rows = configRows(item.config)
+          .filter(([k]) => k !== 'Produkt')
+          .map(([k, v]) =>
+            `<tr><td style="padding:9px 0;border-bottom:1px solid #f0eadd;font-size:13px;color:#8a8273;width:44%;vertical-align:top;">${k}</td><td style="padding:9px 0;border-bottom:1px solid #f0eadd;font-size:13px;color:#1a2336;">${v}</td></tr>`
+          ).join('');
+        return `
+        <div style="font-family:Georgia,'Times New Roman',serif;font-size:16px;color:#225eaa;margin:24px 0 2px;">${prodName(item.config.prod)} <span style="color:#b0a791;font-size:13px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">· ${item.qty} Stück</span></div>
+        <table width="100%" cellpadding="0" cellspacing="0">${rows}</table>`;
+      }).join('');
 
-      // ── Mail an Inhaberin über Web3Forms (direkt, kein Worker) ────────────
-      // Kunden bekommen keine automatische Auto-Reply — Inhaberin antwortet
-      // persönlich. Web3Forms Free hat keine Auto-Reply.
+      // ── Klartext-Fallback der internen Mail (falls HTML nicht rendert) ──
+      const positionen = cart.map((item, idx) =>
+        `${idx + 1}. ${item.qty}× ${item.summary || (item.config && item.config.prod) || '–'}`
+      ).join('\n');
+      const konfigDetail = cart.map((item, idx) => {
+        const rows = configRows(item.config).map(([k, v]) => `   ${k}: ${v.replace(/<[^>]+>/g, '')}`).join('\n');
+        return `═ Element ${idx + 1}: ${prodName(item.config.prod)} ═\n${rows}`;
+      }).join('\n\n');
+      const internalText = [
+        `Neue Anfrage ${offerId} — DeineFenster.de`, '',
+        `Name:    ${formData.name}`,
+        `E-Mail:  ${formData.email}`,
+        `Telefon: ${formData.phone || '–'}`,
+        `Ort/PLZ: ${formData.ort}`,
+        `Straße:  ${formData.strasse || '–'}`,
+        `Wunsch-Liefertermin: ${formData.wunschLiefertermin || '–'}`,
+        `Anmerkungen: ${formData.notiz || '–'}`,
+        `Fotos/Skizzen: ${(uploadedImages || []).length}`, '',
+        positionen, '', konfigDetail,
+      ].join('\n');
+
+      // ── Cloudflare Worker (Resend): interne Mail (schönes HTML) an das
+      // Team + automatische Bestätigungsmail mit allen Eigenschaften an
+      // den Kunden. Ein Dienst, kostenlos, kein Web3Forms mehr nötig. ──
       try {
-        const positionen = cart.map((item, idx) =>
-          `${idx + 1}. ${item.qty}× ${item.summary || (item.config && item.config.prod) || '–'}`
-        ).join('\n');
-        const konfigDetail = cart.map((item, idx) => {
-          const rows = configRows(item.config).map(([k, v]) => `   ${k}: ${v.replace(/<[^>]+>/g, '')}`).join('\n');
-          return `═ Element ${idx + 1}: ${prodName(item.config.prod)} ═\n${rows}`;
-        }).join('\n\n');
-
-        await fetch('https://api.web3forms.com/submit', {
+        await fetch('https://deinefenster-email.sarahchrist.workers.dev', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            access_key: WEB3FORMS_KEY,
+            customer_email: formData.email,
             subject: `🔔 Neue Anfrage ${offerId} — DeineFenster.de`,
-            from_name: 'DeineFenster.de Konfigurator',
-            replyto: formData.email,
-            'Anfrage-Nr': offerId,
-            'Datum': datum,
-            'Name': formData.name,
-            'E-Mail': formData.email,
-            'Telefon': formData.phone || '–',
-            'PLZ & Ort': formData.ort,
-            'Strasse': formData.strasse || '–',
-            'Anmerkungen': formData.notiz || '–',
-            'Wunsch-Liefertermin': formData.wunschLiefertermin || '–',
-            'Positionen (Übersicht)': positionen,
-            'Konfiguration (Details)': konfigDetail,
-            'Anzahl Fotos/Skizzen': (uploadedImages || []).length,
+            html: sarahHtml,
+            text: internalText,
+            confirmation: { name: formData.name, offerId: offerId, detailsHtml: kundenDetailsHtml },
           }),
         });
-      } catch (e) { console.warn('Web3Forms fehlgeschlagen:', e); }
+      } catch (e) { console.warn('Mailversand fehlgeschlagen:', e); }
 
       // Cart + Bilder löschen nach erfolgreichem Versand
       try {
