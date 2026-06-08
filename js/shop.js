@@ -1352,16 +1352,16 @@ function oeffneDetail(id) {
         <h4 class="text-sm font-bold mb-2 text-ink">Eigenschaften</h4>
         <ul class="text-xs space-y-1 text-ink">${eigList || '<li class="text-ink-soft">Keine besonderen Eigenschaften eingetragen</li>'}</ul>
       </div>
-      <div class="pt-4 border-t border-border-soft flex items-end justify-between gap-3">
-        <div>
-          <span class="block text-[11px] text-ink-soft">${istSammelInserat(p) ? 'Preis ab' : 'Preis'}</span>
-          <span class="text-3xl font-extrabold text-primary">${formatPreis(p.preis_eur)}</span>
-        </div>
-        <button id="detailAddBtn" class="bg-primary text-white px-5 py-3 rounded-full text-sm font-bold hover:bg-primary-d transition-colors flex items-center gap-1.5">
-          <span class="material-symbols-outlined" style="font-size:18px">send</span>
-          Anfrage senden
-        </button>
+    </div>
+    <div class="shop-detail-cta">
+      <div>
+        <span class="block text-[11px] text-ink-soft">${istSammelInserat(p) ? 'Preis ab' : 'Preis'}</span>
+        <span class="text-2xl font-extrabold text-primary leading-none">${formatPreis(p.preis_eur)}</span>
       </div>
+      <button id="detailAddBtn" class="bg-primary text-white px-6 py-3 rounded-full text-sm font-bold hover:bg-primary-d transition-colors inline-flex items-center gap-1.5 whitespace-nowrap">
+        <span class="material-symbols-outlined" style="font-size:18px">send</span>
+        Anfrage senden
+      </button>
     </div>`;
   detail.querySelector('#detailAddBtn').addEventListener('click', () => {
     schliesseDetail();
