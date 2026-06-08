@@ -784,6 +784,12 @@ function rendere() {
   gridEl.querySelectorAll('[data-action="detail"]').forEach(card => {
     card.addEventListener('click', () => oeffneDetail(card.dataset.id));
   });
+  gridEl.querySelectorAll('[data-action="teilen"]').forEach(btn => {
+    btn.addEventListener('click', e => { e.stopPropagation(); const p = STATE.produkte.find(x => x.id === btn.dataset.id); if (p) teileProdukt(p); });
+  });
+  gridEl.querySelectorAll('[data-action="kundendruck"]').forEach(btn => {
+    btn.addEventListener('click', e => { e.stopPropagation(); const p = STATE.produkte.find(x => x.id === btn.dataset.id); if (p) druckeProduktblatt(p); });
+  });
 }
 
 // Bestands-Badge zentral. "Nur X verfügbar" auf jedem Einzelprodukt (neu + gebraucht).
@@ -854,9 +860,19 @@ function karteHtml(p) {
             <span class="material-symbols-outlined">chat</span>
             Anfragen
           </a>
-          <button type="button" class="shop-card-cta-details" aria-label="Details ansehen">
+        </div>
+        <div class="shop-card-cta-row" style="margin-top:6px">
+          <button type="button" class="shop-card-cta-details" style="flex:1" aria-label="Details ansehen">
             <span class="material-symbols-outlined">open_in_new</span>
             <span>Details</span>
+          </button>
+          <button type="button" class="shop-card-cta-details" style="flex:1" data-action="teilen" data-id="${p.id}" aria-label="Teilen" title="Teilen">
+            <span class="material-symbols-outlined">share</span>
+            <span>Teilen</span>
+          </button>
+          <button type="button" class="shop-card-cta-details" style="flex:1" data-action="kundendruck" data-id="${p.id}" aria-label="Drucken" title="Drucken">
+            <span class="material-symbols-outlined">print</span>
+            <span>Drucken</span>
           </button>
         </div>`;
 
@@ -1314,7 +1330,10 @@ function oeffneDetail(id) {
     <div class="p-6 space-y-4">
       <div class="flex items-center justify-between gap-2 -mt-1">
         <span class="text-[11px] text-ink-soft inline-flex items-center gap-1"><span class="material-symbols-outlined" style="font-size:15px">zoom_in</span>Bild antippen zum Vergrößern</span>
-        <button id="detailShareBtn" type="button" class="inline-flex items-center gap-1.5 text-sm font-bold px-4 py-2 rounded-full transition-colors shadow-sm hover:opacity-90" style="color:#fff;background:#225eaa;"><span class="material-symbols-outlined" style="font-size:18px">share</span>Link teilen</button>
+        <div class="inline-flex items-center gap-2">
+          <button id="detailPrintBtn" type="button" class="inline-flex items-center gap-1.5 text-sm font-bold px-4 py-2 rounded-full transition-colors shadow-sm hover:opacity-90" style="color:#225eaa;background:#eef4ff;border:1px solid #cfe0ff;"><span class="material-symbols-outlined" style="font-size:18px">print</span>Drucken</button>
+          <button id="detailShareBtn" type="button" class="inline-flex items-center gap-1.5 text-sm font-bold px-4 py-2 rounded-full transition-colors shadow-sm hover:opacity-90" style="color:#fff;background:#225eaa;"><span class="material-symbols-outlined" style="font-size:18px">share</span>Teilen</button>
+        </div>
       </div>
       <div class="flex flex-wrap gap-1.5">
         ${!['daemmung','baumaterialien','garagentor-gebraucht'].includes(kategorieZuGruppe(p.kategorie)) ? _asArr(p.verglasung).map(v => `<span class="pill is-primary">${v}-Verglasung</span>`).join('') : ''}
@@ -1353,6 +1372,8 @@ function oeffneDetail(id) {
   // Teilen-Button
   const shareBtn = detail.querySelector('#detailShareBtn');
   if (shareBtn) shareBtn.addEventListener('click', () => teileProdukt(p));
+  const printBtn = detail.querySelector('#detailPrintBtn');
+  if (printBtn) printBtn.addEventListener('click', () => druckeProduktblatt(p));
   // Bild antippen → große Vollbild-Ansicht (startet beim aktuell sichtbaren Bild)
   const carouselEl = detail.querySelector('#bilderCarousel');
   if (carouselEl) {
@@ -1517,6 +1538,68 @@ function teileProdukt(p) {
   } else {
     zeigeToast(url);
   }
+}
+// Kunden-Druckblatt: sauberes A4-Produktblatt zum Mitnehmen / dem Fahrer mitgeben
+function druckeProduktblatt(p) {
+  if (!p) return;
+  const e = s => escapeHtml(String(s == null ? '' : s));
+  const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+  const arr = a => _asArr(a).filter(Boolean).join(', ');
+  const url = location.origin + location.pathname + '?produkt=' + encodeURIComponent(p.id);
+  const bild = p.bild || (p.bilder && p.bilder[0]) || '';
+  const masse = (p.breite_mm && p.hoehe_mm) ? (p.breite_mm + ' × ' + p.hoehe_mm + ' mm') : '';
+  const oeff = _asArr(p.oeffnungsart).map(o => oeffnungsartLabel(o)).join(', ');
+  const row = (l, v) => v ? ('<tr><td class="l">' + l + '</td><td class="v">' + v + '</td></tr>') : '';
+  const standBig = p.standnummer
+    ? '<div class="stand"><span class="stand-l">Lagerplatz / Standnummer</span><span class="stand-v">' + e(p.standnummer) + '</span></div>'
+    : '';
+  const rows = row('Artikel-Nr.', e(p.id))
+    + row('Maße (B × H)', e(masse))
+    + row('Zustand', e(cap(arr(p.zustand))))
+    + row('Material', e(cap(arr(p.material))))
+    + row('Verglasung', e(arr(p.verglasung)))
+    + row('Farbe', e(cap(arr(p.farbe))))
+    + row('Öffnungsart', e(oeff))
+    + row('System', e(p.system || ''));
+  const html = '<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"><title>'
+    + e(p.titel || 'Produkt') + ' – DeineFenster.de</title><style>'
+    + '@page{size:A4;margin:16mm}*{box-sizing:border-box}'
+    + 'body{font-family:Arial,Helvetica,sans-serif;color:#14233f;margin:0;line-height:1.5}'
+    + '.head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #225eaa;padding-bottom:10px;margin-bottom:18px}'
+    + '.brand{font-size:22px;font-weight:800;color:#225eaa}.brand i{color:#14233f;font-style:normal}'
+    + '.firm{font-size:11px;text-align:right;color:#3b4a63;line-height:1.45}'
+    + 'h1{font-size:20px;margin:0 0 14px}.top{display:flex;gap:18px;margin-bottom:8px}'
+    + '.foto{width:46%;max-width:320px}.foto img{width:100%;border:1px solid #d6deea;border-radius:8px}'
+    + '.foto .sym{font-size:10px;color:#6b7790;margin-top:4px;display:block}'
+    + '.info{flex:1}table{border-collapse:collapse;width:100%;font-size:13px}'
+    + 'td{padding:6px 8px;border-bottom:1px solid #e6ebf3;vertical-align:top}'
+    + 'td.l{color:#6b7790;width:42%}td.v{font-weight:700}'
+    + '.stand{margin:14px 0;padding:10px 14px;background:#eef4ff;border:1px solid #cfe0ff;border-radius:8px}'
+    + '.stand-l{display:block;font-size:10px;color:#6b7790;text-transform:uppercase;letter-spacing:.04em}'
+    + '.stand-v{font-size:22px;font-weight:800;color:#225eaa}'
+    + '.preis{font-size:30px;font-weight:800;color:#225eaa;margin:6px 0 2px}'
+    + '.preis-hint{font-size:11px;color:#3b4a63;margin-bottom:6px}'
+    + '.desc{font-size:12.5px;color:#2a3650;margin:10px 0;white-space:pre-line}'
+    + '.foot{margin-top:18px;border-top:1px solid #d6deea;padding-top:10px;font-size:11px;color:#3b4a63}'
+    + '.foot b{color:#14233f}</style></head>'
+    + '<body onload="window.focus();window.print();">'
+    + '<div class="head"><div class="brand">DeineFenster<i>.de</i></div>'
+    + '<div class="firm"><b>Türen und Fensterhandel Christ</b><br>Fohrder Landstraße 13<br>14772 Brandenburg an der Havel<br>Tel. 03381 / 2148373 · WhatsApp 0171 7263776</div></div>'
+    + '<h1>' + e(p.titel || 'Produkt') + '</h1><div class="top">'
+    + (bild ? '<div class="foto"><img src="' + e(bild) + '" alt=""><span class="sym">Abbildung ähnlich (Symbolbild)</span></div>' : '')
+    + '<div class="info"><table>' + rows + '</table>'
+    + '<div class="preis">' + e(formatPreis(p.sonderpreis_eur || p.preis_eur)) + '</div>'
+    + '<div class="preis-hint">inkl. 19 % MwSt., zzgl. Versandkosten bei Lieferung · Selbstabholung in Brandenburg a. d. Havel kostenfrei</div>'
+    + standBig + '</div></div>'
+    + (p.beschreibung ? '<div class="desc">' + e(p.beschreibung) + '</div>' : '')
+    + '<div class="foot"><b>Verfügbarkeit bitte vorab prüfen</b> — WhatsApp 0171 7263776 oder Angebot per E-Mail. '
+    + 'Lagerverkauf vor Ort: freitags 10–17 Uhr, Fohrder Landstraße 13, Brandenburg a. d. Havel.<br>Online ansehen: ' + e(url) + '</div>'
+    + '</body></html>';
+  const w = window.open('', '_blank', 'width=840,height=1000');
+  if (!w) { zeigeToast('Bitte Pop-ups erlauben zum Drucken'); return; }
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
 }
 function zeigeToast(text) {
   ensureLightboxStyles();
