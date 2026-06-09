@@ -7366,11 +7366,16 @@ function wizGo(i){
   if(!isCards){
     // Fenster-Vorschau nur EINMAL in die Bühne legen (danach nie verschoben → kein Flackern)
     const pw=document.getElementById('prev-wrap'), st=document.getElementById('wiz-stage');
-    if(pw&&st&&!st.contains(pw)){ _movePrevTo('wiz-stage'); const f3=document.getElementById('fenster3d-frame'); if(f3)f3.src='about:blank'; if(typeof setPreviewView==='function')setPreviewView('aus'); if(typeof drawPrev==='function')drawPrev(); }
+    if(pw&&st&&!st.contains(pw)){ _movePrevTo('wiz-stage'); const f3=document.getElementById('fenster3d-frame'); if(f3)f3.src='about:blank'; if(typeof setPreviewView==='function')setPreviewView('inn'); if(typeof drawPrev==='function')drawPrev(); }
   }
   document.getElementById('wiz-title').innerHTML=s.title;
   document.getElementById('wiz-sub').innerHTML=s.sub||'';
   wizCrumbs(); wizRenderPanel();
+  // Vorschau: Fenster/Balkontür standardmäßig Innenansicht (mit Griff); nur der Farbe-Schritt folgt seinem Außen/Innen-Tab
+  if(!isCards && (S.prod==='kunststoff'||S.prod==='balkontuer') && typeof setPreviewView==='function' && typeof previewView!=='undefined'){
+    const _want=(s.key==='farbe')?((typeof wizFarbTab!=='undefined'&&wizFarbTab==='fa')?'aus':'inn'):'inn';
+    if(previewView!==_want) setPreviewView(_want);
+  }
   if(s.key==='kontakt'&&typeof renderBildPreview==='function')renderBildPreview();
   const nb=document.querySelector('#wiz-nextbtn span'); if(nb)nb.textContent=(s.key==='angebot')?'Weiter zur Anfrage':(s.key==='kontakt')?'Angebot absenden':'Weiter';
   const db=document.getElementById('wiz-dim-b'); if(db)db.textContent=(S.bMm||1000)+' mm';
