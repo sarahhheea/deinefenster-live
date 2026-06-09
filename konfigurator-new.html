@@ -7400,12 +7400,13 @@ function _wizPrev(){ if(typeof vorschauAktualisieren==='function')vorschauAktual
 function _wizPills(items,curVal,fn){ return '<div class="wiz-pills">'+items.map(function(it){return '<button type="button" class="wiz-pill'+(it[0]===curVal?' sel':'')+'" onclick="'+fn+'(\''+it[0]+'\')">'+it[1]+'</button>';}).join('')+'</div>'; }
 function wizSet(key,val){ S[key]=val; if(window._touched)window._touched.add(key); _wizPrev(); wizRenderPanel(); }
 // FARBE
-function wizPickFarbTab(t){ wizFarbTab=t; if(typeof setPreviewView==='function')setPreviewView(t==='fa'?'aus':'inn'); wizRenderPanel(); }
+function wizPickFarbTab(t){ wizFarbTab=t; const v=(S.prod==='haustuere'&&t==='fa')?'aus':'inn'; if(typeof setPreviewView==='function')setPreviewView(v); else _wizPrev(); wizRenderPanel(); }
 function wizPickFarb(k){ const key=wizFarbTab; S[key]=k; if(window._touched)window._touched.add(key);
   if(key==='fa'&&P.fa[k])previewState.aussenFarbe=P.fa[k].hex||'#F4F4F0';
   if(key==='fi'&&P.fi[k])previewState.innenFarbe=P.fi[k].hex||'#F4F4F0';
-  if(typeof setPreviewView==='function')setPreviewView(key==='fa'?'aus':'inn');
-  _wizPrev(); wizRenderPanel(); }
+  // Fenster/Balkon/Schiebe: immer Innenseite (mit Griff); nur Haustür zeigt im Außen-Tab die Außenseite (Türdesign)
+  const v=(S.prod==='haustuere'&&key==='fa')?'aus':'inn'; if(typeof setPreviewView==='function')setPreviewView(v); else _wizPrev();
+  wizRenderPanel(); }
 function wizRenderFarbe(){
   const tab=wizFarbTab, table=P[tab]||{}, cur=S[tab];
   let h='<div class="wiz-tabs"><button type="button" class="wiz-tab'+(tab==='fa'?' sel':'')+'" onclick="wizPickFarbTab(\'fa\')">Außen</button><button type="button" class="wiz-tab'+(tab==='fi'?' sel':'')+'" onclick="wizPickFarbTab(\'fi\')">Innen</button></div>';
@@ -12514,7 +12515,9 @@ function _renderFenster3d() {
 
   // View-abhängige Farbe: Außenansicht → S.fa (ohne Griff), Innenansicht → S.fi (mit Griff)
   const _view  = (previewView === 'aus') ? 'aussen' : 'innen';
-  const _farb  = (_view === 'aussen') ? S.fa : S.fi;
+  // Innenansicht zeigt im Farbe-Schritt die gerade gewählte Farbe (Außen- oder Innen-Tab), sonst die Innenfarbe
+  const _onFarbe = (typeof wizIdx!=='undefined' && typeof WIZ_STEPS!=='undefined' && WIZ_STEPS[wizIdx] && WIZ_STEPS[wizIdx].key==='farbe');
+  const _farb  = (_view === 'aussen') ? S.fa : ((_onFarbe && typeof wizFarbTab!=='undefined') ? (S[wizFarbTab]||S.fi) : S.fi);
   const _ck    = HAUS3D_COLOR_MAP[_farb] || HAUS3D_COLOR_MAP[S.fa] || HAUS3D_COLOR_MAP[S.fi] || 'anthrazitgrau';
   const isWood = HAUS3D_WOOD_KEYS.has(_ck);
   // Drutex-Standard: Scharnier-Seite → Griff auf gegenüberliegender Seite
