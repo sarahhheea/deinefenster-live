@@ -6268,6 +6268,9 @@ function _showProductHero() {
 function backToProductSelect() {
   if (S.prod && !confirm('Bisherige Auswahlen werden zurückgesetzt. Anderes Produkt wählen?')) return;
   resetConfigForNextItem();
+  // Wizard-Overlay schließen, sonst überdeckt es die Produktauswahl (sonst "führt ins Nichts")
+  const w = document.getElementById('cfg-wizard'); if (w) w.style.display = 'none';
+  if (typeof _faMovePrevBack === 'function') _faMovePrevBack();
   _showProductHero();
 }
 
