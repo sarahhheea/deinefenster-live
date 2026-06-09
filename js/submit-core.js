@@ -65,6 +65,25 @@
     '1-ober-unter':'1 Flügel + Ober- & Unterlicht','2-ober-unter':'2 Flügel + Ober- & Unterlicht','3-ober-unter':'3 Flügel + Ober- & Unterlicht',
     'seitenteil-l':'Haustür + Seitenteil links','seitenteil-r':'Haustür + Seitenteil rechts',
   };
+  // Öffnungsart pro Flügel (aus S.oeff1/oeff2/oeff3 im Konfigurator)
+  const OEFF_NAMES = {
+    'fest':'Fest (nicht öffenbar)','kipp':'Kipp',
+    'dreh-l':'Dreh links','dreh-r':'Dreh rechts',
+    'dk-l':'Dreh-Kipp links','dk-r':'Dreh-Kipp rechts',
+  };
+  // Trenner zwischen Flügeln (S.zweiteilung / S.dreiteilung)
+  const TRENN_NAMES = { 'pfosten':'Pfosten','stulp':'Stulp' };
+  function trennLabel(sep) {
+    if (!sep) return '';
+    return String(sep).split('-').map(s => TRENN_NAMES[s] || s).join(' + ');
+  }
+  function sashCountFromFluegel(f) {
+    f = f || '1-fluegel';
+    if (f.indexOf('3-') === 0) return 3;
+    if (f.indexOf('2-') === 0) return 2;
+    return 1;
+  }
+  function oeffName(v) { return OEFF_NAMES[v] || v || '–'; }
   const FARB_NAMES = {
     'weiss':'Weiß','cremeweiss':'Cremeweiß','weiss-fx':'Weiß FX',
     'anthrazit':'Anthrazitgrau','anthraz-gl':'Anthrazitgrau Glatt','anthraz-um':'Anthrazitgrau Ulti-Matt',
@@ -121,6 +140,21 @@
       ['Flügelaufteilung', FLUEGEL_NAMES[c.fluegel] || c.fluegel || '–'],
       ['Verglasung', glasName(c.glas)],
     ];
+    // Öffnungsart pro Flügel + Trennung (Pfosten/Stulp) — war bisher nicht in der Anfrage
+    if (c.prod === 'haustuere') {
+      if (c.oeff1) rows.push(['Anschlag (DIN)', c.oeff1 === 'dreh-l' ? 'DIN links' : c.oeff1 === 'dreh-r' ? 'DIN rechts' : oeffName(c.oeff1)]);
+    } else if (c.prod !== 'hst') {
+      const n = sashCountFromFluegel(c.fluegel);
+      const labels = n === 1 ? [''] : n === 2 ? ['Links', 'Rechts'] : ['Links', 'Mitte', 'Rechts'];
+      const oeffs = [c.oeff1, c.oeff2, c.oeff3].slice(0, n);
+      const parts = oeffs.map((o, i) => (labels[i] ? labels[i] + ': ' : '') + oeffName(o));
+      rows.push(['Öffnungsart', parts.join(' · ')]);
+      const trenn = n === 2 ? c.zweiteilung : n === 3 ? c.dreiteilung : '';
+      if (trenn) rows.push(['Trennung Flügel', trennLabel(trenn)]);
+      const f = c.fluegel || '';
+      if (f.indexOf('oberlicht') > -1 || f.indexOf('ober-unter') > -1) rows.push(['Oberlicht', oeffName(c.oberlichtOeff || 'fest')]);
+      if (f.indexOf('unterlicht') > -1 || f.indexOf('ober-unter') > -1) rows.push(['Unterlicht', oeffName(c.unterlichtOeff || 'fest')]);
+    }
     if (c.schall && c.schall !== 'ohne') rows.push(['Schallschutz', SCHALL_NAMES[c.schall] || c.schall]);
     if (c.sicherGlas && c.sicherGlas !== 'kein') rows.push(['Sicherheitsglas', SICHERGLAS_NAMES[c.sicherGlas] || c.sicherGlas]);
     if (c.glasdekor && c.glasdekor !== 'klar') rows.push(['Glasdekor', GLASDEKOR_NAMES[c.glasdekor] || c.glasdekor]);
