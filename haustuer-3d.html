@@ -378,12 +378,14 @@ front.position.set(0, 1, 10); scene.add(front);
 // ── SpotLight für Stoßgriff ──────────────────────────
 // Zielt genau auf Bar-Mitte in Weltkoordinaten: X=-0.38, Y=1.24, Z=0.11
 // Erzeugt das silberne Highlight auf dem Chrome-Stab
-const chromeLight = new THREE.SpotLight(0xffffff, 4.0, 12, Math.PI / 8, 0.35);
+// Spotlights aus: erzeugten einen Hotspot oben am Stoßgriff → Silber sah oben heller aus als
+// unten (ungleichmäßig). Gleichmäßiges, diffuses Silber kommt jetzt aus Ambient + Key.
+const chromeLight = new THREE.SpotLight(0xffffff, 0.0, 12, Math.PI / 8, 0.35);
 chromeLight.position.set(-1.6, 2.5, 5);
 chromeLight.target.position.set(-0.385, 1.21, 0.10);
 scene.add(chromeLight); scene.add(chromeLight.target);
 
-const chromeLight2 = new THREE.SpotLight(0xffffff, 2.5, 10, Math.PI / 7, 0.4);
+const chromeLight2 = new THREE.SpotLight(0xffffff, 0.0, 10, Math.PI / 7, 0.4);
 chromeLight2.position.set(0.4, 1.8, 5);
 chromeLight2.target.position.set(-0.385, 1.21, 0.10);
 scene.add(chromeLight2); scene.add(chromeLight2.target);
@@ -406,16 +408,14 @@ const frameMat  = new THREE.MeshStandardMaterial({ color: 0x232729, roughness: 0
 const grooveMat = new THREE.MeshStandardMaterial({ color: 0x181b1d, roughness: 0.68 });
 // Chrome/Edelstahl: leicht breiteres Highlight (roughness 0.18) damit Stab als
 // SILBER sichtbar ist, nicht als dunkler Spiegel. Metalness 0.92 = Minimalanteil Diffus.
-// Gebürstetes Edelstahl: definiertes Mittelsilber (nicht near-white) damit es auch auf
-// WEISSER Tür klar sichtbar ist; geringere envMapIntensity → spiegelt helle Umgebung nicht zu Weiß.
-const chromeMat    = new THREE.MeshStandardMaterial({ color: 0xacb3b9, roughness: 0.30, metalness: 0.80, envMapIntensity: 1.3 });
-// Bracket-Kopf: gebürstetes Silber, gut sichtbar vor heller UND dunkler Tür
-const bracketMat   = new THREE.MeshStandardMaterial({ color: 0xb6bdc3, roughness: 0.26, metalness: 0.62, envMapIntensity: 1.5 });
-// Bandscharniere (WALA AXM Drutex-Standard): Aluminium-eloxiert silber, matter als Chrom.
-const hingeMat     = new THREE.MeshStandardMaterial({ color: 0xafb4b9, roughness: 0.42, metalness: 0.58, envMapIntensity: 1.2 });
-// Drücker 30A + Langschild: gebürstetes Edelstahl, etwas matter als Stoßgriff-Chrome.
-const handleMat    = new THREE.MeshStandardMaterial({ color: 0xb2b8be, roughness: 0.42, metalness: 0.78, envMapIntensity: 1.2 });
-const glFrameMat= new THREE.MeshStandardMaterial({ color: 0xacb2b8, roughness: 0.28, metalness: 0.62, envMapIntensity: 1.3 });  // Silber/Edelstahl Glas-Einfassung — definiert sichtbar
+// Mattes, diffuses Edelstahl-Silber: niedrige metalness + höhere roughness + niedrige envMapIntensity
+// → spiegelt den hell-oben/dunkel-unten-Verlauf der Umgebung NICHT mehr, Silber wirkt gleichmäßig
+// von oben bis unten (Kundenwunsch: kein Licht-Verlauf auf dem Silber, v.a. Stoßgriff).
+const chromeMat    = new THREE.MeshStandardMaterial({ color: 0xb4babf, roughness: 0.55, metalness: 0.30, envMapIntensity: 0.45 });
+const bracketMat   = new THREE.MeshStandardMaterial({ color: 0xb8bec4, roughness: 0.52, metalness: 0.32, envMapIntensity: 0.50 });
+const hingeMat     = new THREE.MeshStandardMaterial({ color: 0xb0b5ba, roughness: 0.55, metalness: 0.30, envMapIntensity: 0.45 });
+const handleMat    = new THREE.MeshStandardMaterial({ color: 0xb4babf, roughness: 0.52, metalness: 0.34, envMapIntensity: 0.50 });
+const glFrameMat= new THREE.MeshStandardMaterial({ color: 0xb2b8be, roughness: 0.54, metalness: 0.30, envMapIntensity: 0.45 });  // Silber/Edelstahl Glas-Einfassung — gleichmäßig matt
 const glassMat  = new THREE.MeshPhysicalMaterial({
   color: 0x3a5267, metalness: 0, roughness: 0.10,
   transmission: 0.90, thickness: 0.02, ior: 1.5, transparent: true,
