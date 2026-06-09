@@ -10,7 +10,7 @@
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f0f2f5; overflow: hidden; }
-  /* Embed-Modus (im Konfigurator-iframe): exakt gleicher Solid-Blau wie Fenster-3D (Sarah-Wunsch 17.05.2026)
+  /* Embed-Modus (im Konfigurator-iframe): exakt gleicher Solid-Blau wie Fenster-3D (Kundenwunsch 17.05.2026)
      Greift wenn ?embed in URL ODER body.embed Klasse gesetzt — höhere Spezifizität gegen Fallbacks */
   html.is-embed body,
   html body.embed { background: #0a1530 !important; }
@@ -319,11 +319,13 @@ const scene = new THREE.Scene();
 // Im Embed-Modus dunkler Hintergrund (passt zum Konfigurator-Dark-Glass),
 // in der Standalone-Sandbox bleibt es hell.
 const _isEmbed = new URLSearchParams(location.search).has('embed');
-// Sarah-Wunsch 17.05.2026: exakt gleicher Solid-Blau wie Fenster-3D (#0a1530) statt Verlauf
-scene.background = new THREE.Color(_isEmbed ? 0x0a1530 : 0xf0f2f5);
+// Kundenwunsch 17.05.2026: exakt gleicher Solid-Blau wie Fenster-3D (#0a1530) statt Verlauf
+const _bgLight = new URLSearchParams(location.search).get('bg')==='light';
+scene.background = new THREE.Color(_isEmbed ? (_bgLight ? 0xeef3fb : 0x0a1530) : 0xf0f2f5);
+if(_bgLight){var _s=document.createElement('style');_s.textContent='html.is-embed body,html body.embed{background:#eef3fb !important}';document.head.appendChild(_s);}
 
 const camera = new THREE.PerspectiveCamera(18, 1, 0.1, 50);
-camera.position.set(0, 1.05, 8.5);  // gleicher Abstand wie Fenster-3D (Sarah-Wunsch 17.05.): proportionaler Atemraum oben/unten/links/rechts
+camera.position.set(0, 1.05, 8.5);  // gleicher Abstand wie Fenster-3D (Kundenwunsch 17.05.): proportionaler Atemraum oben/unten/links/rechts
 
 const orb = new OrbitControls(camera, canvasEl);
 orb.target.set(0, 1.05, 0);
@@ -1583,7 +1585,7 @@ const _urlColor = new URLSearchParams(location.search).get('color');
 if (_urlColor) { setColor(_urlColor); setRefPhoto(_urlColor); }
 else { setColor('anthrazitgrau'); setRefPhoto('anthrazitgrau'); }
 
-// ── Ansicht-Buttons (Außen / Innen) — Sarah-Wunsch 16.05.2026 ──
+// ── Ansicht-Buttons (Außen / Innen) — Kundenwunsch 16.05.2026 ──
 document.querySelectorAll('#viewBtns .glass-btn').forEach(btn => {
   // Initial-Sync mit URL-Param
   btn.classList.toggle('active', btn.dataset.view === _curView);
@@ -1691,7 +1693,7 @@ if (_modelSel) {
 }
 
 // postMessage-Bridge: Konfigurator schickt Farb/Holz/Glas-Änderungen
-// ── 3D-Kamera-Animation (Sarah-Wunsch 16.05.2026 v3) ──
+// ── 3D-Kamera-Animation (Kundenwunsch 16.05.2026 v3) ──
 // Sanftes "Drüberfahren" der Kamera passend zum aktuellen Konfigurations-Schritt
 const CAMERA_PRESETS = {
   default: { pos: [0, 1.05, 8.5],  target: [0, 1.05, 0] },

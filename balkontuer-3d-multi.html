@@ -151,7 +151,9 @@ const scene = new THREE.Scene();
 // Im Konfigurator-Embed-Modus dunkler Hintergrund (passt zum Konfi-Theme),
 // sonst Standard weiß (für Standalone-Ansicht)
 const _embed = new URLSearchParams(location.search).has('embed');
-scene.background = new THREE.Color(_embed ? 0x0a1530 : 0xffffff);
+const _bgLight = new URLSearchParams(location.search).get('bg')==='light';
+scene.background = new THREE.Color(_embed ? (_bgLight ? 0xeef3fb : 0x0a1530) : 0xffffff);
+if(_bgLight){var _s=document.createElement('style');_s.textContent='html.is-embed body,html body.embed{background:#eef3fb !important}';document.head.appendChild(_s);}
 
 const camera = new THREE.PerspectiveCamera(15, 1, 0.1, 50);
 // Balkontür ist 2.1m hoch — Kamera weiter zurück und etwas höher
@@ -702,7 +704,7 @@ function buildWindow(spec) {
   const capH = 0.009;
   const ringH = 0.0028;
 
-  // 2 Scharniere — oben + unten (wie Fenster). Sarah-Wunsch 18.05.2026: kein Mittel-Scharnier.
+  // 2 Scharniere — oben + unten (wie Fenster). Kundenwunsch 18.05.2026: kein Mittel-Scharnier.
   // Oben: 220mm vom Top  ·  Unten: 220mm über Schwelle
   [ FH - 0.220, SCH_H + 0.200 ].forEach(hy => {
     const roll = new THREE.Mesh(
@@ -901,7 +903,7 @@ function setColor(key) {
   frameMat.needsUpdate = true;
   sashMat.needsUpdate  = true;
 
-  // Griff + Scharniere folgen Rahmenfarbe (Sarah-Vorgabe 16.05.2026):
+  // Griff + Scharniere folgen Rahmenfarbe (interne Vorgabe 16.05.2026):
   // Bei hellen/weißen Tönen → Kunststoff in Rahmenfarbe (kein Chrom)
   // Bei dunklen Farben + Edelstahl-Optik → silbern wie real
   applyHardwareColor(c.clone(), lum);

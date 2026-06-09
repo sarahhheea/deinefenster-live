@@ -185,7 +185,9 @@ const scene = new THREE.Scene();
 // Im Konfigurator-Embed-Modus dunkler Hintergrund (passt zum Konfi-Theme),
 // sonst Standard weiß (für Standalone-Ansicht)
 const _embed = new URLSearchParams(location.search).has('embed');
-scene.background = new THREE.Color(_embed ? 0x0a1530 : 0xffffff);
+const _bgLight = new URLSearchParams(location.search).get('bg')==='light';
+scene.background = new THREE.Color(_embed ? (_bgLight ? 0xeef3fb : 0x0a1530) : 0xffffff);
+if(_bgLight){var _s=document.createElement('style');_s.textContent='html.is-embed body,html body.embed{background:#eef3fb !important}';document.head.appendChild(_s);}
 
 const camera = new THREE.PerspectiveCamera(16, 1, 0.1, 60);
 // HST 2.4m breit × 2.1m hoch — zentriert (X=0) mit großzügigem Abstand
@@ -286,7 +288,7 @@ const hingeMat  = new THREE.MeshStandardMaterial({ color: 0xbabfc2, roughness: 0
 // Alu-Schiene unten — eloxiertes Aluminium, deutliches Profil mit Laufschienen
 const schieneMat = new THREE.MeshStandardMaterial({ color: 0xc4c8cd, roughness: 0.38, metalness: 0.70, envMapIntensity: 1.6 });
 // HST-Griff (Aluminium-Profil, eckig) — Drutex IGLO-HS Standard: Weiß/Braun/Silber wählbar
-// Default: Weiß (Sarah-Konfigurator-Default 'weiss-std')
+// Default: Weiß (Konfigurator-Default 'weiss-std')
 const hstGriffMat = new THREE.MeshStandardMaterial({ color: 0xf4f4f0, roughness: 0.42, metalness: 0.32, envMapIntensity: 1.6 });
 // Alte chromeMat bleibt als Fallback für andere Metallteile (Schlüsselzylinder etc.)
 const chromeMat   = new THREE.MeshStandardMaterial({ color: 0xc4c8cc, roughness: 0.28, metalness: 0.85, envMapIntensity: 2.0 });
@@ -483,7 +485,7 @@ function buildWindow() {
   // Schiebeflügel (vordere Spur) — verschiebt sich entlang X beim Öffnen
   const slidePanel = buildPanel(slideGroup, X_SLIDE, TRACK_FRONT_Z + SASH_DEPTH/2, true);
 
-  // ── DRUTEX IGLO-HS GRIFF — 1:1 nach Sarah-Foto 20.05.2026 ──
+  // ── DRUTEX IGLO-HS GRIFF — 1:1 nach Referenzfoto 20.05.2026 ──
   // Asymmetrisch: kurze Edelstahl-Kappe oben, dünner Stab in der Mitte,
   // deutlich längerer Sockel unten (Lift-Schloss-Modul mit Drücker-Mechanik).
   const BAR_X         = 0.018;                              // Stab-Breite (schlank)
@@ -705,7 +707,7 @@ function setColor(key) {
   frameMat.needsUpdate = true;
   sashMat.needsUpdate  = true;
 
-  // Griff + Scharniere folgen Rahmenfarbe (Sarah-Vorgabe 16.05.2026):
+  // Griff + Scharniere folgen Rahmenfarbe (interne Vorgabe 16.05.2026):
   // Bei hellen/weißen Tönen → Kunststoff in Rahmenfarbe (kein Chrom)
   // Bei dunklen Farben + Edelstahl-Optik → silbern wie real
   applyHardwareColor(c.clone(), lum);

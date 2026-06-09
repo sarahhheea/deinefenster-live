@@ -185,7 +185,9 @@ const scene = new THREE.Scene();
 // Im Konfigurator-Embed-Modus dunkler Hintergrund (passt zum Konfi-Theme),
 // sonst Standard weiß (für Standalone-Ansicht)
 const _embed = new URLSearchParams(location.search).has('embed');
-scene.background = new THREE.Color(_embed ? 0x0a1530 : 0xffffff);
+const _bgLight = new URLSearchParams(location.search).get('bg')==='light';
+scene.background = new THREE.Color(_embed ? (_bgLight ? 0xf4f7fc : 0x0a1530) : 0xffffff);
+if(_bgLight){var _s=document.createElement('style');_s.textContent='html.is-embed body,html body.embed{background:#f4f7fc !important}';document.head.appendChild(_s);}
 
 const camera = new THREE.PerspectiveCamera(15, 1, 0.1, 50);
 // Leicht versetzt für sichtbare 3D-Tiefe (statt komplett frontal-flach)
@@ -282,7 +284,7 @@ const subtleNutMat = new THREE.MeshStandardMaterial({ color: 0xdcdcdc, roughness
 const spacerMat = new THREE.MeshStandardMaterial({ color: 0x22262a, roughness: 0.55, metalness: 0.45 });
 const handleMat = new THREE.MeshStandardMaterial({ color: 0xd8dde0, roughness: 0.18, metalness: 0.92, envMapIntensity: 2.5 });
 const hingeMat  = new THREE.MeshStandardMaterial({ color: 0xbabfc2, roughness: 0.55, metalness: 0.05 });
-// Glas: hellblau-reflektiv wie echtes Produktfoto (Sarah-Wunsch 18.05.2026)
+// Glas: hellblau-reflektiv wie echtes Produktfoto (Kundenwunsch 18.05.2026)
 const glassMat  = new THREE.MeshStandardMaterial({
   color: 0x3a5267, metalness: 0.18, roughness: 0.06, envMapIntensity: 1.1,
 });
@@ -867,7 +869,7 @@ function setColor(key) {
   frameMat.needsUpdate = true;
   sashMat.needsUpdate  = true;
 
-  // Griff + Scharniere folgen Rahmenfarbe (Sarah-Vorgabe 16.05.2026):
+  // Griff + Scharniere folgen Rahmenfarbe (interne Vorgabe 16.05.2026):
   // Bei hellen/weißen Tönen → Kunststoff in Rahmenfarbe (kein Chrom)
   // Bei dunklen Farben + Edelstahl-Optik → silbern wie real
   applyHardwareColor(c.clone(), lum);
