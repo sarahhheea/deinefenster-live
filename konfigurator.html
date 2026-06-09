@@ -5978,7 +5978,7 @@ const P = {
   // Kunden-bestätigt 21.04.2026: Kastenhöhen — Fenster/Balkon: 175/215, HST: nur 225
   rollKasten: {
     '175': { name:'Kastenhöhe 175 mm', add:0,  prods:['kunststoff','balkontuer'] },
-    '215': { name:'Kastenhöhe 215 mm', add:0, prods:['kunststoff','balkontuer'] },
+    '215': { name:'Kastenhöhe 215 mm', add:0, prods:['kunststoff','balkontuer','hst'] },
     '225': { name:'Kastenhöhe 225 mm', add:0, prods:['hst'] },
   },
   // Kunden-Korrektur 21.04.2026: Insektenschutz wird NICHT angeboten — Option entfernt
@@ -7128,7 +7128,7 @@ const WIZ_ALL=[
   {key:'glas', gilt:ALL, title:'Wählen Sie die <span>Verglasung</span>', sub:'2-fach oder 3-fach Wärmeschutz.', render:wizRenderGlas, layout:'cards'},
   {key:'masse', gilt:ALL, title:'Geben Sie die <span>Maße</span> an', sub:'Rohbaumaß in Millimetern.', render:wizRenderMasse, layout:'cards'},
   {key:'anzahl', gilt:ALL, title:'Wählen Sie die <span>Anzahl</span>', sub:'Wie viele Stück dieser Konfiguration benötigen Sie?', render:wizRenderAnzahl, layout:'cards'},
-  {key:'tuer', gilt:['haustuere'], title:'Wählen Sie das <span>Türmodell</span>', sub:'Ihr Haustür-Design — die Vorschau zeigt es sofort.', render:wizRenderTuermodell, layout:'cards'},
+  {key:'tuer', gilt:['haustuere'], title:'Wählen Sie das <span>Türmodell</span>', sub:'Ihr Haustür-Design — die Vorschau links zeigt es sofort.', render:wizRenderTuermodell},
   {key:'farbe', gilt:ALL, title:'Wählen Sie die <span>Farbe</span>', sub:'Außen- und Innenfarbe — die Vorschau zeigt Ihre Wahl sofort.', render:wizRenderFarbe},
   {key:'glasdekor', gilt:ALL, title:'Wählen Sie das <span>Glas-Motiv</span>', sub:'Ornamentglas für Sichtschutz — „Klarglas" = normales durchsichtiges Glas.', render:wizRenderGlasdekor},
   {key:'schall', gilt:['kunststoff','balkontuer','hst'], title:'Schall- &amp; <span>Sicherheitsglas</span>', sub:'Optional: zusätzlicher Schallschutz und Sicherheitsglas.', render:wizRenderSchall},
@@ -7369,13 +7369,15 @@ function wizGo(i){
   if(!isCards){
     // Fenster-Vorschau nur EINMAL in die Bühne legen (danach nie verschoben → kein Flackern)
     const pw=document.getElementById('prev-wrap'), st=document.getElementById('wiz-stage');
-    if(pw&&st&&!st.contains(pw)){ _movePrevTo('wiz-stage'); const f3=document.getElementById('fenster3d-frame'); if(f3)f3.src='about:blank'; if(typeof setPreviewView==='function')setPreviewView('inn'); if(typeof drawPrev==='function')drawPrev(); }
+    if(pw&&st&&!st.contains(pw)){ _movePrevTo('wiz-stage'); const f3=document.getElementById('fenster3d-frame'); if(f3)f3.src='about:blank'; if(typeof setPreviewView==='function')setPreviewView(S.prod==='haustuere'?'aus':'inn'); if(typeof drawPrev==='function')drawPrev(); }
   }
   document.getElementById('wiz-title').innerHTML=s.title;
   document.getElementById('wiz-sub').innerHTML=s.sub||'';
   wizCrumbs(); wizRenderPanel();
-  // KEINE Ansichtsumschaltung beim Schrittwechsel → kein Flackern. Ansicht wird einmal (innen) gesetzt und bleibt;
+  // KEINE Ansichtsumschaltung beim Schrittwechsel → kein Flackern. Ansicht wird einmal gesetzt und bleibt;
   // nur der Farbe-Schritt ändert die Ansicht aktiv per Außen/Innen-Tab (Nutzeraktion).
+  // Ausnahme: Haustür-Türmodell-Schritt zeigt immer die Außenseite (Modell + Stoßgriff sichtbar).
+  if(s.key==='tuer' && typeof setPreviewView==='function' && typeof previewView!=='undefined' && previewView!=='aus') setPreviewView('aus');
   if(s.key==='kontakt'&&typeof renderBildPreview==='function')renderBildPreview();
   const nb=document.querySelector('#wiz-nextbtn span'); if(nb)nb.textContent=(s.key==='angebot')?'Weiter zur Anfrage':(s.key==='kontakt')?'Angebot absenden':'Weiter';
   const db=document.getElementById('wiz-dim-b'); if(db)db.textContent=(S.bMm||1000)+' mm';
@@ -7480,12 +7482,18 @@ function wizSetLock(v){ S.griffLocked=(v==='true'); if(window._touched)window._t
 // ROLLADEN
 function wizRenderRoll(){
   const imgs={ohne:'',gurt:'img/rolladen-gurt.png',motor:'img/rolladen-elektrisch.png'};
-  let h='<div class="wiz-cards">'+Object.keys(P.roll).map(function(k){
+  // Schiebetüren: nur Motorrolladen — Gurtwickler raus (Tür-Konstruktion lässt keinen zu)
+  const isHst = (S.prod==='hst');
+  if(isHst){ if(S.roll==='gurt')S.roll='motor'; if(typeof autoSetRollKasten==='function')autoSetRollKasten(); }
+  const rollKeys = Object.keys(P.roll).filter(function(k){ return isHst ? k!=='gurt' : true; });
+  let h='';
+  if(isHst){ h+='<div class="wiz-hint" style="margin-bottom:14px">Bei Schiebetüren ist nur der <strong>Motorrolladen</strong> möglich — die Tür-Konstruktion lässt keinen Gurtwickler zu.</div>'; }
+  h+='<div class="wiz-cards">'+rollKeys.map(function(k){
     const im=imgs[k]?'<div class="wiz-gbox"><img src="'+imgs[k]+'" alt="'+P.roll[k].name+'" loading="lazy"></div>':'<div class="wiz-gbox wiz-gbox-empty">Kein Rolladen</div>';
     return '<div class="wiz-card'+(k===S.roll?' sel':'')+'" onclick="wizSetRoll(\''+k+'\')">'+im+'<div class="wiz-cn">'+P.roll[k].name+'</div></div>';
   }).join('')+'</div>';
   if(S.roll==='gurt'){ h+='<div class="wiz-group" style="margin-top:16px"><div class="wiz-gt">Gurt-Seite</div>'+_wizPills([['links','Links'],['rechts','Rechts']],S.rollSeite,'wizSetRollSeite')+'</div>'; }
-  if(S.roll&&S.roll!=='ohne'){ h+='<div class="wiz-hint">Kastenhöhe '+(S.rollKasten||'175')+' mm — automatisch nach Fensterhöhe gewählt.</div>'; }
+  if(S.roll&&S.roll!=='ohne'){ h+='<div class="wiz-hint">Kastenhöhe '+(S.rollKasten||'175')+' mm — '+(isHst?'nach System':'automatisch nach Fensterhöhe')+' gewählt.</div>'; }
   return h;
 }
 function wizSetRoll(v){ S.roll=v; if(window._touched)window._touched.add('roll'); if(typeof autoSetRollKasten==='function')autoSetRollKasten(); _wizPrev(); wizRenderPanel(); }
@@ -8342,7 +8350,8 @@ function enforceGlasRule() {
 // Kunde 21.05.2026: Kastenhöhe wird AUTOMATISCH gesetzt (keine UI mehr).
 // Fenster/Balkontür <1750 mm → 175 · ≥1750 mm → 215 · HST immer 225.
 function autoSetRollKasten() {
-  if (S.prod === 'hst') S.rollKasten = '225';
+  // Schiebetüren: Hebe-Schiebe (HS) = 225 mm, PSK + IGLO Slide = 215 mm
+  if (S.prod === 'hst') S.rollKasten = (S.profil === 'iglo-hs') ? '225' : '215';
   else if ((S.hMm || 0) >= 1750) S.rollKasten = '215';
   else S.rollKasten = '175';
   const txt = document.getElementById('roll-kasten-auto-text');

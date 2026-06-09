@@ -7128,7 +7128,7 @@ const WIZ_ALL=[
   {key:'glas', gilt:ALL, title:'Wählen Sie die <span>Verglasung</span>', sub:'2-fach oder 3-fach Wärmeschutz.', render:wizRenderGlas, layout:'cards'},
   {key:'masse', gilt:ALL, title:'Geben Sie die <span>Maße</span> an', sub:'Rohbaumaß in Millimetern.', render:wizRenderMasse, layout:'cards'},
   {key:'anzahl', gilt:ALL, title:'Wählen Sie die <span>Anzahl</span>', sub:'Wie viele Stück dieser Konfiguration benötigen Sie?', render:wizRenderAnzahl, layout:'cards'},
-  {key:'tuer', gilt:['haustuere'], title:'Wählen Sie das <span>Türmodell</span>', sub:'Ihr Haustür-Design — die Vorschau zeigt es sofort.', render:wizRenderTuermodell, layout:'cards'},
+  {key:'tuer', gilt:['haustuere'], title:'Wählen Sie das <span>Türmodell</span>', sub:'Ihr Haustür-Design — die Vorschau links zeigt es sofort.', render:wizRenderTuermodell},
   {key:'farbe', gilt:ALL, title:'Wählen Sie die <span>Farbe</span>', sub:'Außen- und Innenfarbe — die Vorschau zeigt Ihre Wahl sofort.', render:wizRenderFarbe},
   {key:'glasdekor', gilt:ALL, title:'Wählen Sie das <span>Glas-Motiv</span>', sub:'Ornamentglas für Sichtschutz — „Klarglas" = normales durchsichtiges Glas.', render:wizRenderGlasdekor},
   {key:'schall', gilt:['kunststoff','balkontuer','hst'], title:'Schall- &amp; <span>Sicherheitsglas</span>', sub:'Optional: zusätzlicher Schallschutz und Sicherheitsglas.', render:wizRenderSchall},
@@ -7369,13 +7369,15 @@ function wizGo(i){
   if(!isCards){
     // Fenster-Vorschau nur EINMAL in die Bühne legen (danach nie verschoben → kein Flackern)
     const pw=document.getElementById('prev-wrap'), st=document.getElementById('wiz-stage');
-    if(pw&&st&&!st.contains(pw)){ _movePrevTo('wiz-stage'); const f3=document.getElementById('fenster3d-frame'); if(f3)f3.src='about:blank'; if(typeof setPreviewView==='function')setPreviewView('inn'); if(typeof drawPrev==='function')drawPrev(); }
+    if(pw&&st&&!st.contains(pw)){ _movePrevTo('wiz-stage'); const f3=document.getElementById('fenster3d-frame'); if(f3)f3.src='about:blank'; if(typeof setPreviewView==='function')setPreviewView(S.prod==='haustuere'?'aus':'inn'); if(typeof drawPrev==='function')drawPrev(); }
   }
   document.getElementById('wiz-title').innerHTML=s.title;
   document.getElementById('wiz-sub').innerHTML=s.sub||'';
   wizCrumbs(); wizRenderPanel();
-  // KEINE Ansichtsumschaltung beim Schrittwechsel → kein Flackern. Ansicht wird einmal (innen) gesetzt und bleibt;
+  // KEINE Ansichtsumschaltung beim Schrittwechsel → kein Flackern. Ansicht wird einmal gesetzt und bleibt;
   // nur der Farbe-Schritt ändert die Ansicht aktiv per Außen/Innen-Tab (Nutzeraktion).
+  // Ausnahme: Haustür-Türmodell-Schritt zeigt immer die Außenseite (Modell + Stoßgriff sichtbar).
+  if(s.key==='tuer' && typeof setPreviewView==='function' && typeof previewView!=='undefined' && previewView!=='aus') setPreviewView('aus');
   if(s.key==='kontakt'&&typeof renderBildPreview==='function')renderBildPreview();
   const nb=document.querySelector('#wiz-nextbtn span'); if(nb)nb.textContent=(s.key==='angebot')?'Weiter zur Anfrage':(s.key==='kontakt')?'Angebot absenden':'Weiter';
   const db=document.getElementById('wiz-dim-b'); if(db)db.textContent=(S.bMm||1000)+' mm';
