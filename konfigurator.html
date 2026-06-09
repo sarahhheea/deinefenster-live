@@ -4285,7 +4285,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   @media (max-width:640px){ #cfg-wizard .wiz-next{min-width:0;padding:14px 24px} }
   #cfg-wizard .wiz-next svg{width:16px;height:16px}
   #cfg-wizard .wiz-hint{background:#f3f6fb;border:1px solid #e6ebf3;border-radius:10px;padding:12px 18px;font-size:13px;color:#5a6b80;font-family:'Manrope',sans-serif;margin:16px auto 0;max-width:560px;text-align:center;line-height:1.45}
-  @media(max-width:820px){#cfg-wizard .wiz-body{grid-template-columns:1fr}#cfg-wizard .wiz-stage{position:static}#cfg-wizard .wiz-stage #prev-wrap{height:300px !important}}
+  @media(max-width:820px){#cfg-wizard .wiz-body{grid-template-columns:1fr}#cfg-wizard .wiz-stage{position:sticky;top:0;z-index:6;background:#f4f7fc;padding:6px 0 8px;box-shadow:0 4px 10px rgba(20,40,80,.05)}#cfg-wizard .wiz-stage #prev-wrap{height:200px !important;width:160px !important}#cfg-wizard .wiz-dim-b,#cfg-wizard .wiz-dim-h{display:none}}
 </style>
 <div id="cfg-wizard" class="img-hero" style="display:none">
   <nav class="wiz-steps" id="wiz-crumbs" aria-label="Konfigurations-Schritte"></nav>
@@ -7374,11 +7374,8 @@ function wizGo(i){
   document.getElementById('wiz-title').innerHTML=s.title;
   document.getElementById('wiz-sub').innerHTML=s.sub||'';
   wizCrumbs(); wizRenderPanel();
-  // Vorschau: Fenster/Balkontür standardmäßig Innenansicht (mit Griff); nur der Farbe-Schritt folgt seinem Außen/Innen-Tab
-  if(!isCards && (S.prod==='kunststoff'||S.prod==='balkontuer') && typeof setPreviewView==='function' && typeof previewView!=='undefined'){
-    const _want=(s.key==='farbe')?((typeof wizFarbTab!=='undefined'&&wizFarbTab==='fa')?'aus':'inn'):'inn';
-    if(previewView!==_want) setPreviewView(_want);
-  }
+  // KEINE Ansichtsumschaltung beim Schrittwechsel → kein Flackern. Ansicht wird einmal (innen) gesetzt und bleibt;
+  // nur der Farbe-Schritt ändert die Ansicht aktiv per Außen/Innen-Tab (Nutzeraktion).
   if(s.key==='kontakt'&&typeof renderBildPreview==='function')renderBildPreview();
   const nb=document.querySelector('#wiz-nextbtn span'); if(nb)nb.textContent=(s.key==='angebot')?'Weiter zur Anfrage':(s.key==='kontakt')?'Angebot absenden':'Weiter';
   const db=document.getElementById('wiz-dim-b'); if(db)db.textContent=(S.bMm||1000)+' mm';
