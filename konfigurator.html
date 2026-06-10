@@ -6578,6 +6578,12 @@ const PROFIL_HERO_SPEC = {
   'iglo-slide':  'Nur schieben, schlank · Wintergarten & unbeheizt',
   'iglo-hs':     'Anheben + schieben · große Terrassenfronten',
 };
+// Haustür-Profile: gleiche Karten-Logik wie Fenster, gleiche Querschnitt-Bilder.
+// IGLO 5 Tür nutzt das iglo5-Querschnittbild, IGLO Energy Tür das iglo-energy-Bild.
+const HAUSTUER_PROFIL_KEYS = ['iglo5-tuer','iglo-e-tuer'];
+const HAUSTUER_PROFIL_IMG  = { 'iglo5-tuer':'iglo5', 'iglo-e-tuer':'iglo-energy' };
+const HAUSTUER_PROFIL_NAME = { 'iglo5-tuer':'IGLO 5 Classic Tür', 'iglo-e-tuer':'IGLO Energy Tür' };
+const HAUSTUER_PROFIL_SPEC = { 'iglo5-tuer':'5-Kammer · 70 mm · Ud 1,0', 'iglo-e-tuer':'7-Kammer · 82 mm · Ud 0,8' };
 // Bewegungs-Pfeil je Schiebetür-System (zeigt das Öffnungs-Prinzip)
 const HST_ARROW = { 'iglo-psk':'↕↔', 'iglo-slide':'↔', 'iglo-hs':'↑↔' };
 // Stichpunkte je System: was es kann / der Unterschied (UWG-sicher, ohne harte Specs)
@@ -6588,7 +6594,8 @@ const HST_FEAT = {
 };
 function profilHeroName(key){
   return ({'iglo5':'IGLO 5 Classic','iglo-energy':'IGLO Energy','iglo-edge':'IGLO Edge',
-           'iglo-psk':'PSK Schiebetür','iglo-slide':'IGLO Slide','iglo-hs':'IGLO-HS Schiebetür'})[key] || key;
+           'iglo-psk':'PSK Schiebetür','iglo-slide':'IGLO Slide','iglo-hs':'IGLO-HS Schiebetür',
+           'iglo5-tuer':'IGLO 5 Classic Tür','iglo-e-tuer':'IGLO Energy Tür'})[key] || key;
 }
 function buildProfilHero() {
   const g = document.getElementById('ph-grid');
@@ -7290,6 +7297,12 @@ function wizRenderProfil(){
     var hstOrder=['iglo-psk','iglo-hs'];
     return '<div class="wiz-cards">'+hstOrder.map(function(k){
       return '<div class="wiz-card wiz-card-hst'+(k===S.profil?' sel':'')+'" onclick="wizPickProfil(\''+k+'\')"><img src="img/karten/profil/'+k+'.png?v=20260609c" alt="'+profilHeroName(k)+'" loading="lazy"><div class="wiz-cn wiz-cn-hst">'+profilHeroName(k)+' <span class="hst-arrow">'+HST_ARROW[k]+'</span></div><ul class="hst-feat">'+HST_FEAT[k].map(function(f){return '<li>'+f+'</li>';}).join('')+'</ul></div>';
+    }).join('')+'</div>';
+  }
+  // Haustür: gleiche Bild-Karten wie Fenster (gleicher Kasten), gleiche Querschnitt-Profilbilder
+  if(S.prod==='haustuere'){
+    return '<div class="wiz-cards">'+HAUSTUER_PROFIL_KEYS.map(function(k){
+      return '<div class="wiz-card'+(k===S.profil?' sel':'')+'" onclick="wizPickProfil(\''+k+'\')"><img src="img/karten/profil/'+HAUSTUER_PROFIL_IMG[k]+'.png?v=20260608u" alt="'+HAUSTUER_PROFIL_NAME[k]+' Profil-Querschnitt" loading="lazy"><div class="wiz-cn">'+HAUSTUER_PROFIL_NAME[k]+'</div><div class="wiz-csub">'+HAUSTUER_PROFIL_SPEC[k]+'</div></div>';
     }).join('')+'</div>';
   }
   const keys=Object.keys(P.profil).filter(function(k){return P.profil[k].prods&&P.profil[k].prods.indexOf(S.prod)>=0;});
