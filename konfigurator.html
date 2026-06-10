@@ -6576,6 +6576,13 @@ const PROFIL_HERO_SPEC = {
   'iglo-slide':  'Nur schieben, schlank · Wintergarten & unbeheizt',
   'iglo-hs':     'Anheben + schieben · große Terrassenfronten',
 };
+// Querschnitt-Karten für Haustür & Balkontür: nutzen die baugleichen Fenster-Profilbilder
+const PROFIL_CARD_IMG = {
+  'iglo5':       { img:'iglo5',       name:'IGLO 5 Classic',  spec:'5-Kammer · 70 mm · Uw 0,83' },
+  'iglo-energy': { img:'iglo-energy', name:'IGLO Energy',     spec:'7-Kammer · 82 mm · Uw 0,71' },
+  'iglo5-tuer':  { img:'iglo5',       name:'IGLO 5 Tür',      spec:'5-Kammer · 70 mm · Ud 1,0' },
+  'iglo-e-tuer': { img:'iglo-energy', name:'IGLO Energy Tür', spec:'7-Kammer · 82 mm · Ud 0,8' },
+};
 // Bewegungs-Pfeil je Schiebetür-System (zeigt das Öffnungs-Prinzip)
 const HST_ARROW = { 'iglo-psk':'↕↔', 'iglo-slide':'↔', 'iglo-hs':'↑↔' };
 // Stichpunkte je System: was es kann / der Unterschied (UWG-sicher, ohne harte Specs)
@@ -6586,6 +6593,7 @@ const HST_FEAT = {
 };
 function profilHeroName(key){
   return ({'iglo5':'IGLO 5 Classic','iglo-energy':'IGLO Energy','iglo-edge':'IGLO Edge',
+           'iglo5-tuer':'IGLO 5 Tür','iglo-e-tuer':'IGLO Energy Tür',
            'iglo-psk':'PSK Schiebetür','iglo-slide':'IGLO Slide','iglo-hs':'IGLO-HS Schiebetür'})[key] || key;
 }
 function buildProfilHero() {
@@ -7290,7 +7298,13 @@ function wizRenderProfil(){
       return '<div class="wiz-card wiz-card-hst'+(k===S.profil?' sel':'')+'" onclick="wizPickProfil(\''+k+'\')"><img src="img/karten/profil/'+k+'.png?v=20260609c" alt="'+profilHeroName(k)+'" loading="lazy"><div class="wiz-cn wiz-cn-hst">'+profilHeroName(k)+' <span class="hst-arrow">'+HST_ARROW[k]+'</span></div><ul class="hst-feat">'+HST_FEAT[k].map(function(f){return '<li>'+f+'</li>';}).join('')+'</ul></div>';
     }).join('')+'</div>';
   }
+  // Haustür & Balkontür: gleiche Querschnitt-Karten wie beim Fenster (Profil-System ist baugleich)
   const keys=Object.keys(P.profil).filter(function(k){return P.profil[k].prods&&P.profil[k].prods.indexOf(S.prod)>=0;});
+  if(keys.length&&keys.every(function(k){return PROFIL_CARD_IMG[k];})){
+    return '<div class="wiz-cards">'+keys.map(function(k){var c=PROFIL_CARD_IMG[k];
+      return '<div class="wiz-card'+(k===S.profil?' sel':'')+'" onclick="wizPickProfil(\''+k+'\')"><img src="img/karten/profil/'+c.img+'.png?v=20260608u" alt="'+c.name+' Profil-Querschnitt" loading="lazy"><div class="wiz-cn">'+c.name+'</div><div class="wiz-csub">'+c.spec+'</div></div>';
+    }).join('')+'</div>';
+  }
   return '<div style="max-width:620px;margin:0 auto">'+_wizPills(keys.map(function(k){return [k,P.profil[k].name];}),S.profil,'wizPickProfil')+'</div>';
 }
 function wizPickProfil(k){ S.profil=k; if(window._touched)window._touched.add('profil'); const d2=document.getElementById('d2'); if(d2)d2.textContent=profilHeroName(k); if(typeof mkDone==='function')mkDone(2); if(typeof wizRebuildSteps==='function'){wizRebuildSteps(); wizCrumbs();} wizRenderPanel(); }
