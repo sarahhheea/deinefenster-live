@@ -178,7 +178,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 3));   // max Schärfe
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 0.95;   // mehr Kontrast — Mittel-/Schattenbereiche dunkler
+renderer.toneMappingExposure = 1.02;   // etwas heller, damit Weiß knackig wirkt (Realismus-Pass)
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 
 const scene = new THREE.Scene();
@@ -221,7 +221,7 @@ eL2.position.set(-2, 1, 3); envSc.add(eL2);
 scene.environment = pmremGen.fromScene(envSc, 0.04).texture;
 
 // Ambient — gerade genug damit Außen-/Seitenflächen sichtbar, aber Schatten erhalten
-scene.add(new THREE.AmbientLight(0xffffff, 0.70));
+scene.add(new THREE.AmbientLight(0xffffff, 0.48));  // weniger Grundhelligkeit → Schatten/Profil-Relief sichtbar (mehr Tiefe)
 
 // Key-Licht maximal stark → starke Schatten an Profilkanten = max. 3D-Tiefe
 const keyLight = new THREE.DirectionalLight(0xffffff, 3.5);
@@ -232,6 +232,7 @@ keyLight.shadow.camera.near = 1; keyLight.shadow.camera.far = 14;
 keyLight.shadow.camera.left = -1.4; keyLight.shadow.camera.right = 1.4;
 keyLight.shadow.camera.top = 1.8; keyLight.shadow.camera.bottom = -1.8;
 keyLight.shadow.bias = -0.001;
+keyLight.shadow.radius = 5;   // weiche, aber sichtbare Schlagschatten → Tiefe unter Griff/Bändern
 scene.add(keyLight);
 
 // Fill von links — hebt Schatten leicht auf
@@ -285,8 +286,11 @@ const spacerMat = new THREE.MeshStandardMaterial({ color: 0x22262a, roughness: 0
 const handleMat = new THREE.MeshStandardMaterial({ color: 0xd8dde0, roughness: 0.18, metalness: 0.92, envMapIntensity: 2.5 });
 const hingeMat  = new THREE.MeshStandardMaterial({ color: 0xbabfc2, roughness: 0.55, metalness: 0.05 });
 // Glas: hellblau-reflektiv wie echtes Produktfoto (Kundenwunsch 18.05.2026)
+// Helles, realistisch reflektierendes Isolierglas (Innenansicht): kühl-hell statt dunkelblau,
+// niedrige Rauheit + envMap → dezenter Reflex-Verlauf wie im echten Produktfoto.
 const glassMat  = new THREE.MeshStandardMaterial({
-  color: 0x3a5267, metalness: 0.18, roughness: 0.06, envMapIntensity: 1.1,
+  color: 0xe6edf1, metalness: 0.06, roughness: 0.05, envMapIntensity: 2.4,
+  transparent: true, opacity: 0.86,
 });
 
 // ══════════════════════════════════════════════
@@ -854,14 +858,14 @@ function setColor(key) {
 
   frameMat.color.copy(c);
   sashMat.color.copy(c);
-  grooveMat.color.copy(c).multiplyScalar(0.62);
-  subtleNutMat.color.copy(c).multiplyScalar(0.88);   // subtile Tiefenlinie folgt Rahmenfarbe
-  sealMat.color.copy(c).multiplyScalar(0.62);          // Falz-Schatten — dunkler als Nut, nicht schwarz
+  grooveMat.color.copy(c).multiplyScalar(0.50);
+  subtleNutMat.color.copy(c).multiplyScalar(0.70);   // Profil-Vertiefungslinie deutlich dunkler → mehr Tiefe
+  sealMat.color.copy(c).multiplyScalar(0.42);          // Falz-Schatten dunkler für klares Relief
 
   const isGlatt    = key.endsWith('-gl');
   const isUltiMatt = key.endsWith('-um');
-  const roughness  = isUltiMatt ? 0.97 : isGlatt ? 0.20 : 0.74;
-  const envInt     = isUltiMatt ? 0.02 : isGlatt ? 0.85 : 0.08;
+  const roughness  = isUltiMatt ? 0.97 : isGlatt ? 0.20 : 0.55;
+  const envInt     = isUltiMatt ? 0.02 : isGlatt ? 0.85 : 0.22;
 
   frameMat.roughness = sashMat.roughness = roughness;
   frameMat.metalness = sashMat.metalness = 0;
@@ -869,7 +873,7 @@ function setColor(key) {
   frameMat.needsUpdate = true;
   sashMat.needsUpdate  = true;
 
-  // Griff + Scharniere folgen Rahmenfarbe (interne Vorgabe 16.05.2026):
+  // Griff + Scharniere folgen Rahmenfarbe (Kunde-Vorgabe 16.05.2026):
   // Bei hellen/weißen Tönen → Kunststoff in Rahmenfarbe (kein Chrom)
   // Bei dunklen Farben + Edelstahl-Optik → silbern wie real
   applyHardwareColor(c.clone(), lum);
@@ -880,14 +884,16 @@ function setColor(key) {
 // Griff/Scharniere an Rahmenfarbe anpassen — bei hellen Tönen DEUTLICH dunkler für Sichtbarkeit
 function applyHardwareColor(frameColor, frameLum) {
   if (frameLum >= 0.6) {
-    // Sehr helle Rahmen (Weiß, Cremeweiß): Griff in mittel-grau-Aluminium für klaren Kontrast
-    handleMat.color.setRGB(0.43, 0.47, 0.51);
-    handleMat.roughness = 0.30;
-    handleMat.metalness = 0.55;
-    handleMat.envMapIntensity = 1.0;
-    hingeMat.color.setRGB(0.40, 0.43, 0.46);
-    hingeMat.roughness = 0.45;
-    hingeMat.metalness = 0.30;
+    // Sehr helle/weiße Rahmen: Griff/Scharniere in WEISSEM Kunststoff wie im Foto, aber
+    // leicht abgetönt (helles Grau-Weiß) + dezenter Kunststoff-Glanz → Schatten + Kantenglanz
+    // geben Tiefe, sodass man Griff/Bänder klar erkennt (nicht weiß-auf-weiß verwaschen).
+    handleMat.color.copy(frameColor).multiplyScalar(0.62);
+    handleMat.roughness = 0.38;
+    handleMat.metalness = 0.0;
+    handleMat.envMapIntensity = 0.7;
+    hingeMat.color.copy(frameColor).multiplyScalar(0.58);
+    hingeMat.roughness = 0.40;
+    hingeMat.metalness = 0.0;
     hingeMat.envMapIntensity = 0.6;
   } else if (frameLum >= 0.35) {
     // Mittel-helle Rahmen: Aluminium-Optik mit mittlerem Kontrast
