@@ -1766,13 +1766,6 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
                     <div class="mega-system-desc">Parallel-Schiebe-Kipp · bis 2400 mm breit · kompakt</div>
                   </div>
                 </a>
-                <a href="produkte/hebe-schiebetueren/iglo-slide.html" class="mega-system">
-                  <div class="mega-system-icon"><span class="material-symbols-outlined" aria-hidden="true">swap_horiz</span></div>
-                  <div>
-                    <div class="mega-system-label">IGLO Slide</div>
-                    <div class="mega-system-desc">Mittlere Schiebetür · bis 4000 mm · komfortabel</div>
-                  </div>
-                </a>
                 <a href="produkte/hebe-schiebetueren/iglo-5-classic-psk.html" class="mega-system">
                   <div class="mega-system-icon"><span class="material-symbols-outlined" aria-hidden="true">door_sliding</span></div>
                   <div>
@@ -5789,9 +5782,8 @@ const P = {
     'iglo-edge':     { name:'IGLO Edge · 7-Kammer · 82 mm · Uw 0,66',       add:0,  prods:['kunststoff'] },
     'iglo5-tuer':    { name:'IGLO 5 Tür · 5-Kammer · Ud 1,0',               add:0,   prods:['haustuere'] },
     'iglo-e-tuer':   { name:'IGLO Energy Tür · 7-Kammer · 82 mm · Ud 0,8',  add:0,  prods:['haustuere'] },
-    // Kunden-Korrektur 21.04.2026: 3 Schiebetür-Varianten — Reihenfolge: PSK, Slide, IGLO-HS
+    // 2 Schiebetür-Varianten — Reihenfolge: PSK, IGLO-HS (Kundenwunsch 10.06.2026: IGLO Slide entfernt)
     'iglo-psk':      { name:'PSK Schiebetür',     add:0,   prods:['hst'] },
-    'iglo-slide':    { name:'IGLO Slide',         add:0, prods:['hst'] },
     'iglo-hs':       { name:'IGLO-HS Schiebetür', add:0,   prods:['hst'] },
   },
   // Kunden-Vorgabe 21.04.2026: PSK-Schiebetür hat zusätzlich Kammer-System-Auswahl.
@@ -7293,7 +7285,7 @@ function wizRenderProfil(){
   }
   // Schiebetür: Bild-Karten mit Öffnungs-Pfeil + Unterschieds-Text (PSK / IGLO Slide / IGLO-HS)
   if(S.prod==='hst'){
-    var hstOrder=['iglo-psk','iglo-slide','iglo-hs'];
+    var hstOrder=['iglo-psk','iglo-hs'];
     return '<div class="wiz-cards">'+hstOrder.map(function(k){
       return '<div class="wiz-card wiz-card-hst'+(k===S.profil?' sel':'')+'" onclick="wizPickProfil(\''+k+'\')"><img src="img/karten/profil/'+k+'.png?v=20260609c" alt="'+profilHeroName(k)+'" loading="lazy"><div class="wiz-cn wiz-cn-hst">'+profilHeroName(k)+' <span class="hst-arrow">'+HST_ARROW[k]+'</span></div><ul class="hst-feat">'+HST_FEAT[k].map(function(f){return '<li>'+f+'</li>';}).join('')+'</ul></div>';
     }).join('')+'</div>';
@@ -7360,7 +7352,7 @@ function pskKippSchiebeCard(v){
   var mir=(v==='links');
   var name=(v==='links')?'Kipp-Schiebe Links':'Kipp-Schiebe Rechts';
   var sub=(v==='links')?'Schiebeflügel links · öffnet nach rechts':'Schiebeflügel rechts · öffnet nach links';
-  var paths='<path d="M 680,490 L 777,290 L 874,490 Z"/><line x1="865" y1="575" x2="690" y2="575"/><polyline points="740,535 690,575 740,615"/>';
+  var paths='<line x1="865" y1="440" x2="690" y2="440"/><polyline points="740,400 690,440 740,480"/>';
   var ov='<svg viewBox="0 0 1200 896" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%'+(mir?';transform:scaleX(-1)':'')+'" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#fff" stroke-width="20">'+paths+'</g><g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#225eaa" stroke-width="9">'+paths+'</g></svg>';
   return '<div class="wiz-card'+sel+'" onclick="wizSetHstLauf(\''+v+'\')"><div style="position:relative;width:100%;line-height:0;border-radius:10px;overflow:hidden"><img src="img/karten/hst-fluegel/2-teilig.png?v=20260610psk" alt="'+name+'" loading="lazy" style="width:100%;height:auto;aspect-ratio:auto;object-fit:fill;display:block;border-radius:0;padding:0">'+ov+'</div><div class="wiz-cn">'+name+'</div><div class="wiz-csub">'+sub+'</div></div>';
 }
