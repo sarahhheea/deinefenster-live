@@ -144,7 +144,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 3));   // max Schärfe
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 0.95;   // mehr Kontrast — Mittel-/Schattenbereiche dunkler
+renderer.toneMappingExposure = 1.02;   // etwas heller, damit Weiß knackig wirkt (Realismus-Pass)
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 
 const scene = new THREE.Scene();
@@ -188,7 +188,7 @@ eL2.position.set(-2, 1, 3); envSc.add(eL2);
 scene.environment = pmremGen.fromScene(envSc, 0.04).texture;
 
 // Ambient — gerade genug damit Außen-/Seitenflächen sichtbar, aber Schatten erhalten
-scene.add(new THREE.AmbientLight(0xffffff, 0.70));
+scene.add(new THREE.AmbientLight(0xffffff, 0.48));  // weniger Grundhelligkeit → Schatten/Profil-Relief sichtbar (mehr Tiefe)
 
 // Key-Licht maximal stark → starke Schatten an Profilkanten = max. 3D-Tiefe
 const keyLight = new THREE.DirectionalLight(0xffffff, 3.5);
@@ -199,6 +199,7 @@ keyLight.shadow.camera.near = 1; keyLight.shadow.camera.far = 18;
 keyLight.shadow.camera.left = -1.4; keyLight.shadow.camera.right = 1.4;
 keyLight.shadow.camera.top = 2.6; keyLight.shadow.camera.bottom = -2.6;
 keyLight.shadow.bias = -0.001;
+keyLight.shadow.radius = 5;   // weiche, aber sichtbare Schlagschatten → Tiefe unter Griff/Bändern
 scene.add(keyLight);
 
 // Fill von links — hebt Schatten leicht auf
@@ -253,9 +254,11 @@ const handleMat = new THREE.MeshStandardMaterial({ color: 0xd8dde0, roughness: 0
 const hingeMat  = new THREE.MeshStandardMaterial({ color: 0xbabfc2, roughness: 0.55, metalness: 0.05 });
 // Alu-Schwelle — eloxiertes Aluminium, leicht heller und matter als Hebel-Stahl
 const schwelleMat = new THREE.MeshStandardMaterial({ color: 0xc2c6cb, roughness: 0.42, metalness: 0.65, envMapIntensity: 1.4 });
-// Glas: reflektiv-hellblau wie echtes Produktfoto — kein transmission-Effekt
+// Glas: helles, realistisch reflektierendes Isolierglas (Innenansicht) — wie beim Fenster-Renderer:
+// kühl-hell statt dunkelblau, niedrige Rauheit + envMap → dezenter Reflex-Verlauf wie im Produktfoto.
 const glassMat  = new THREE.MeshStandardMaterial({
-  color: 0x3a5267, metalness: 0.18, roughness: 0.06, envMapIntensity: 1.1,
+  color: 0xe6edf1, metalness: 0.06, roughness: 0.05, envMapIntensity: 2.4,
+  transparent: true, opacity: 0.86,
 });
 
 // ══════════════════════════════════════════════
@@ -458,18 +461,29 @@ function buildWindow(spec) {
   const sashYTop = FH - FRT;
   const sashH = sashYTop - sashYBot;
 
-  // Vertikaler Pfosten bei 2-Flügel
-  const sashCellW = (usableW - (cols - 1) * MULLION_T) / cols;
-  for (let i = 1; i < cols; i++) {
-    const xMull = xInnerLeft + i * sashCellW + (i - 1) * MULLION_T + MULLION_T/2;
-    winGroup.add(bx(xMull, (sashYBot + sashYTop)/2, fzc, MULLION_T, sashH, FD, frameMat));
+  // Stulp-Erkennung VOR Pfosten-Bau (Stulp hat KEINEN Mittelpfosten — Flügel treffen sich direkt)
+  const _sep = spec.separator || '';
+  const _isStulp = _sep === 'stulp' && cols === 2;
+
+  // Vertikaler Pfosten nur bei echtem Pfosten-Layout (NICHT bei Stulp)
+  // Flügelbreiten: bei Stulp gleich breit ohne Pfosten-Abzug, sonst mit Pfosten dazwischen
+  const sashCellW = _isStulp
+    ? usableW / cols
+    : (usableW - (cols - 1) * MULLION_T) / cols;
+  if (!_isStulp) {
+    for (let i = 1; i < cols; i++) {
+      const xMull = xInnerLeft + i * sashCellW + (i - 1) * MULLION_T + MULLION_T/2;
+      winGroup.add(bx(xMull, (sashYBot + sashYTop)/2, fzc, MULLION_T, sashH, FD, frameMat));
+    }
   }
 
   // ── Sash-Helper: erzeugt einen Balkontür-Flügel im Bereich (xs, ys, ws, hs)
   // isStulpStandFluegel: true wenn dies der Standflügel einer Stulp-Konfiguration ist
   // (Stulpflügel hat real KEINEN aussen sichtbaren Griff — nur Innen-Reitergriff/Treibstange)
   // view: 'aussen' oder 'innen' — Griff am Stulpflügel nur bei innen zeigen
-  function _addFluegel(xs, ys, ws, hs, sashState, isStulpStandFluegel, view) {
+  // handleEdgeOverride: bei Stulp-Gangflügel 'inner-left'/'inner-right' → Griff auf den
+  // mittigen Stulp-Stiel (NICHT auf die Außenkante, NICHT aufs Glas)
+  function _addFluegel(xs, ys, ws, hs, sashState, isStulpStandFluegel, view, handleEdgeOverride, hingeEdge) {
     // Falzüberlappung — Sash überragt seinen Bereich um SOVL nach außen
     const xS = xs - SOVL, yS = ys;   // unten kein Falz (Sash sitzt auf Alu-Schwelle)
     const wS = ws + 2 * SOVL, hS = hs + SOVL;
@@ -520,12 +534,37 @@ function buildWindow(spec) {
     winGroup.add(bx(gcx - gw/2 - SBW/2, gcy, sbz, SBW, gh, sbd, spacerMat));
     winGroup.add(bx(gcx + gw/2 + SBW/2, gcy, sbz, SBW, gh, sbd, spacerMat));
 
+    // SCHARNIERE (weiße Eckband-Walzen) — auf der Außenkante dieses Flügels.
+    // hingeEdge: 'left' = Bänder am linken Stiel, 'right' = am rechten Stiel.
+    {
+      const rollR = 0.0120, rollH = 0.128;
+      const rollZ_abs = sfz + 0.009;
+      const capR = rollR * 1.10, capH = 0.009, ringH = 0.0028;
+      const rollX_abs = (hingeEdge === 'right') ? (xS + wS - FST * 0.5) : (xS + FST * 0.5);
+      [ ys + hs - 0.220, ys + 0.200 ].forEach(byh => {
+        const roll = new THREE.Mesh(new THREE.CylinderGeometry(rollR, rollR, rollH, 30), hingeMat);
+        roll.position.set(rollX_abs, byh, rollZ_abs); roll.castShadow = true; winGroup.add(roll);
+        const capTop = new THREE.Mesh(new THREE.CylinderGeometry(capR * 0.85, capR, capH, 28), hingeMat);
+        capTop.position.set(rollX_abs, byh + rollH/2 + capH/2 - 0.002, rollZ_abs); capTop.castShadow = true; winGroup.add(capTop);
+        const capBot = new THREE.Mesh(new THREE.CylinderGeometry(capR, capR * 0.85, capH, 28), hingeMat);
+        capBot.position.set(rollX_abs, byh - rollH/2 - capH/2 + 0.002, rollZ_abs); capBot.castShadow = true; winGroup.add(capBot);
+        const midRing = new THREE.Mesh(new THREE.CylinderGeometry(rollR * 1.04, rollR * 1.04, ringH, 30), hingeMat);
+        midRing.position.set(rollX_abs, byh, rollZ_abs); midRing.castShadow = true; winGroup.add(midRing);
+        const fuge = new THREE.Mesh(new THREE.CylinderGeometry(rollR * 1.045, rollR * 1.045, 0.0006, 30), sealMat);
+        fuge.position.set(rollX_abs, byh, rollZ_abs); winGroup.add(fuge);
+      });
+    }
+
     // Griff je nach sashState
     if (!sashState || sashState === 'fest') return;
-    // STULPFLÜGEL: kein aussen sichtbarer Griff (nur Innen-Reitergriff)
-    if (isStulpStandFluegel && (view === 'aussen')) return;
+    // STANDFLÜGEL (Stulp): komplett grifflos — er wird nur über den Gangflügel mitbewegt
+    if (isStulpStandFluegel) return;
     const isKipp = sashState === 'kipp';
-    const isLeft = sashState === 'dreh-l' || sashState === 'dk-l';   // Layman-Konvention: dk-l = Griff links
+    // Griff-Seite: bei Stulp-Gangflügel zwingend auf den mittleren Stulp-Stiel (Override),
+    // sonst nach sashState (dk-l = links). isLeft = Griff sitzt am linken Flügel-Stiel.
+    const isLeft = handleEdgeOverride
+      ? (handleEdgeOverride === 'inner-left')
+      : (sashState === 'dreh-l' || sashState === 'dk-l');
     let hx, hy;
     const hbz = sfz;
     if (isKipp) {
@@ -537,7 +576,7 @@ function buildWindow(spec) {
     }
     // Rosette
     const rosette = new THREE.Mesh(
-      new THREE.CapsuleGeometry(0.015, 0.070, 6, 22),
+      new THREE.CapsuleGeometry(0.020, 0.094, 6, 22),
       handleMat
     );
     if (isKipp) rosette.rotation.z = Math.PI / 2;
@@ -548,7 +587,7 @@ function buildWindow(spec) {
     winGroup.add(rosette); handleObjects.push(rosette);
     // Olive-Stab
     const handleStick = new THREE.Mesh(
-      new THREE.CapsuleGeometry(0.0115, 0.090, 8, 22),
+      new THREE.CapsuleGeometry(0.016, 0.118, 8, 22),
       handleMat
     );
     if (isKipp) {
@@ -566,19 +605,28 @@ function buildWindow(spec) {
   // Sash-States anwenden — Stulpflügel-Erkennung fuer Griff-Logik
   const sashStates = (spec.sashes || []).slice();
   while (sashStates.length < cols) sashStates.push('dk-r');
-  const sep  = spec.separator || '';
   const view = spec.view || 'aussen';
-  // Bei Stulp: der Flügel mit nur 'dreh-*' (ohne Kipp) ist der Standflügel
-  const isStulpConfig = sep === 'stulp' && sashStates.length === 2;
-  const isStulpStand = (i) => {
-    if (!isStulpConfig) return false;
-    const me = sashStates[i] || '', other = sashStates[1 - i] || '';
-    return me.startsWith('dreh') && other.startsWith('dk');
-  };
+  // Bei Stulp (2-Flügel, kein Pfosten): linker Flügel = Standflügel (grifflos),
+  // rechter Flügel = Gangflügel mit GENAU EINEM Griff auf dem mittigen Stulp-Stiel.
   for (let i = 0; i < cols; i++) {
-    const xSash = xInnerLeft + i * (sashCellW + MULLION_T);
-    _addFluegel(xSash, sashYBot, sashCellW, sashH, sashStates[i], isStulpStand(i), view);
+    // Bei Stulp stossen die Flügel direkt aneinander (kein Pfosten-Gap)
+    const xSash = _isStulp
+      ? xInnerLeft + i * sashCellW
+      : xInnerLeft + i * (sashCellW + MULLION_T);
+    let isStand = false, handleEdge = null, hingeEdge;
+    if (_isStulp) {
+      isStand = (i === 0);                 // linker = Standflügel → grifflos
+      if (i === 1) handleEdge = 'inner-left';  // Gangflügel: Griff am mittleren Stulp-Stiel (linke Kante)
+      hingeEdge = (i === 0) ? 'left' : 'right';  // Bänder auf den Außenkanten beider Flügel
+    } else {
+      // Standard-Flügel: Bänder gegenüber der Griffseite
+      const st = sashStates[i] || '';
+      const handleLeft = st === 'dreh-l' || st === 'dk-l';
+      hingeEdge = handleLeft ? 'right' : 'left';
+    }
+    _addFluegel(xSash, sashYBot, sashCellW, sashH, sashStates[i], isStand, view, handleEdge, hingeEdge);
   }
+  _addRolladen(spec);
   return;
 
   // ── ALTER 1-Flügel-Code unten — wird nicht mehr ausgeführt, bleibt für Referenz ──
@@ -633,7 +681,7 @@ function buildWindow(spec) {
 
   // 1) Schild — Pille hochkant 30×100×7 mm
   const rosette = new THREE.Mesh(
-    new THREE.CapsuleGeometry(0.015, 0.070, 6, 22),
+    new THREE.CapsuleGeometry(0.020, 0.094, 6, 22),
     handleMat
   );
   rosette.scale.set(1.0, 1.0, 0.47);
@@ -888,14 +936,14 @@ function setColor(key) {
 
   frameMat.color.copy(c);
   sashMat.color.copy(c);
-  grooveMat.color.copy(c).multiplyScalar(0.62);
-  subtleNutMat.color.copy(c).multiplyScalar(0.88);   // subtile Tiefenlinie folgt Rahmenfarbe
-  sealMat.color.copy(c).multiplyScalar(0.62);          // Falz-Schatten — dunkler als Nut, nicht schwarz
+  grooveMat.color.copy(c).multiplyScalar(0.50);
+  subtleNutMat.color.copy(c).multiplyScalar(0.70);   // Profil-Vertiefungslinie deutlich dunkler → mehr Tiefe
+  sealMat.color.copy(c).multiplyScalar(0.42);          // Falz-Schatten dunkler für klares Relief
 
   const isGlatt    = key.endsWith('-gl');
   const isUltiMatt = key.endsWith('-um');
-  const roughness  = isUltiMatt ? 0.97 : isGlatt ? 0.20 : 0.74;
-  const envInt     = isUltiMatt ? 0.02 : isGlatt ? 0.85 : 0.08;
+  const roughness  = isUltiMatt ? 0.97 : isGlatt ? 0.20 : 0.55;
+  const envInt     = isUltiMatt ? 0.02 : isGlatt ? 0.85 : 0.22;
 
   frameMat.roughness = sashMat.roughness = roughness;
   frameMat.metalness = sashMat.metalness = 0;
@@ -903,7 +951,7 @@ function setColor(key) {
   frameMat.needsUpdate = true;
   sashMat.needsUpdate  = true;
 
-  // Griff + Scharniere folgen Rahmenfarbe (interne Vorgabe 16.05.2026):
+  // Griff + Scharniere folgen Rahmenfarbe (Kunde-Vorgabe 16.05.2026):
   // Bei hellen/weißen Tönen → Kunststoff in Rahmenfarbe (kein Chrom)
   // Bei dunklen Farben + Edelstahl-Optik → silbern wie real
   applyHardwareColor(c.clone(), lum);
@@ -914,15 +962,17 @@ function setColor(key) {
 // Griff/Scharniere an Rahmenfarbe anpassen — bei hellen Tönen weiß-matt, sonst Chrom
 function applyHardwareColor(frameColor, frameLum) {
   if (frameLum >= 0.6) {
-    // Sehr helle Rahmen (Weiß, Cremeweiß): Griff in mittel-grau-Aluminium für klaren Kontrast
-    handleMat.color.setRGB(0.43, 0.47, 0.51);
-    handleMat.roughness = 0.30;
-    handleMat.metalness = 0.55;
-    handleMat.envMapIntensity = 1.0;
-    hingeMat.color.setRGB(0.40, 0.43, 0.46);
+    // Sehr helle/weiße Rahmen: Griff/Scharniere in WEISSEM Kunststoff wie im Foto, aber
+    // leicht abgetönt (helles Grau-Weiß) + dezenter Kunststoff-Glanz → Schatten + Kantenglanz
+    // geben Tiefe, sodass man Griff/Bänder klar erkennt (nicht weiß-auf-weiß verwaschen).
+    handleMat.color.copy(frameColor).multiplyScalar(0.42);
+    handleMat.roughness = 0.45;
+    handleMat.metalness = 0.0;
+    handleMat.envMapIntensity = 0.15;
+    hingeMat.color.copy(frameColor).multiplyScalar(0.40);
     hingeMat.roughness = 0.45;
-    hingeMat.metalness = 0.30;
-    hingeMat.envMapIntensity = 0.6;
+    hingeMat.metalness = 0.0;
+    hingeMat.envMapIntensity = 0.12;
   } else if (frameLum >= 0.35) {
     // Mittel-helle Rahmen: Aluminium-Optik mit mittlerem Kontrast
     handleMat.color.setHex(0xb0b6bd);
@@ -1102,18 +1152,18 @@ function setGlass(key) {
   cleanGlassMaps();
 
   if (key === 'klar') {
-    glassMat.color.set(0xdae8f0); glassMat.roughness = 0.04;
-    glassMat.metalness = 0.10; glassMat.envMapIntensity = 0.8;
+    glassMat.color.set(0xa6c8de); glassMat.roughness = 0.06;
+    glassMat.metalness = 0.12; glassMat.envMapIntensity = 0.9;
   } else if (key === 'satinato') {
-    glassMat.color.set(0xe8eef0); glassMat.roughness = 0.90;
+    glassMat.color.set(0xc4d8e2); glassMat.roughness = 0.90;
     glassMat.metalness = 0; glassMat.envMapIntensity = 0.1;
   } else if (key === 'chinchilla') {
-    glassMat.color.set(0xddeef5); glassMat.roughness = 0.18;
+    glassMat.color.set(0xb6d4e4); glassMat.roughness = 0.18;
     glassMat.metalness = 0.05; glassMat.envMapIntensity = 0.4;
     glassMat.normalMap   = buildNormalTex(chinchillaHeight, 3.0, 5, 16);
     glassMat.normalScale = new THREE.Vector2(1.2, 1.2);
   } else if (key === 'master-carre') {
-    glassMat.color.set(0xddeef5); glassMat.roughness = 0.08;
+    glassMat.color.set(0xb6d4e4); glassMat.roughness = 0.08;
     glassMat.metalness = 0.08; glassMat.envMapIntensity = 0.6;
     glassMat.normalMap   = buildNormalTex(masterCarreHeight, 3.0, 3, 11);
     glassMat.normalScale = new THREE.Vector2(1.2, 1.2);
