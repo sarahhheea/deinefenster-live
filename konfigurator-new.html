@@ -7146,7 +7146,7 @@ const WIZ_ALL=[
   {key:'schall', gilt:['kunststoff','balkontuer','hst'], title:'Schall- &amp; <span>Sicherheitsglas</span>', sub:'Optional: zusätzlicher Schallschutz und Sicherheitsglas.', render:wizRenderSchall},
   {key:'griff', gilt:['kunststoff','balkontuer'], title:'Welcher <span>Griff</span>?', sub:'Modell, Farbe und Ausführung Ihres Fenstergriffs.', render:wizRenderGriff},
   {key:'griffhaus', gilt:['haustuere'], title:'Welcher <span>Türgriff</span>?', sub:'Innen-Klinke und Außengriff Ihrer Haustür.', render:wizRenderTuergriff},
-  {key:'griffhst', gilt:['hst'], title:'Welcher <span>Schiebegriff</span>?', sub:'Innen Smart Slide, außen Stoßgriff.', render:wizRenderSchiebegriff},
+  {key:'griffhst', gilt:['hst'], title:'Welcher <span>Schiebegriff</span>?', sub:'Smart-Slide-Flachgriff — Farbe wählen.', render:wizRenderSchiebegriff},
   {key:'balk', gilt:['balkontuer'], title:'Wählen Sie die <span>Schwelle</span>', sub:'Boden-Schwelle Ihrer Balkontür.', render:wizRenderBalkSchwelle, layout:'cards'},
   {key:'hstschwelle', gilt:['hst'], title:'Wählen Sie die <span>Schwelle</span>', sub:'Standard oder barrierefreie Null-Schwelle.', render:wizRenderHstSchwelle, layout:'cards'},
   {key:'rolladen', gilt:['kunststoff','balkontuer','hst'], title:'Wählen Sie den <span>Rolladen</span>', sub:'Sonnen- und Sichtschutz — optional.', render:wizRenderRoll},
@@ -7174,8 +7174,8 @@ function wizRenderTuergriff(){
   '</div>';
 }
 function wizRenderSchiebegriff(){
-  let h='<div class="wiz-group"><div class="wiz-gt">Innen (Smart Slide)</div><div class="wiz-cards">'+Object.keys(P.hstGriff).map(function(k){const o=P.hstGriff[k];return '<div class="wiz-card wiz-card-opt'+(k===S.hstGriff?' sel':'')+'" onclick="wizSet(\'hstGriff\',\''+k+'\')"><div class="wiz-sym"><img src="'+o.img+'" alt="'+o.name+'" loading="lazy"></div><div class="wiz-cn">'+o.name+'</div></div>';}).join('')+'</div></div>';
-  h+='<div class="wiz-group"><div class="wiz-gt">Außen (Stoßgriff)</div><div class="wiz-cards">'+Object.keys(P.hstGriffAussen).map(function(k){const o=P.hstGriffAussen[k];return '<div class="wiz-card wiz-card-opt'+(k===S.hstGriffAussen?' sel':'')+'" onclick="wizSet(\'hstGriffAussen\',\''+k+'\')"><div class="wiz-sym"><img src="'+o.img+'" alt="'+o.name+'" loading="lazy"></div><div class="wiz-cn">'+o.name+'</div></div>';}).join('')+'</div></div>';
+  // IGLO-HS: nur der innere Smart-Slide-Flachgriff ist wählbar (außen sitzt eine eingelassene Muschel).
+  let h='<div class="wiz-group"><div class="wiz-gt">Smart Slide (Flachgriff)</div><div class="wiz-cards">'+Object.keys(P.hstGriff).map(function(k){const o=P.hstGriff[k];return '<div class="wiz-card wiz-card-opt'+(k===S.hstGriff?' sel':'')+'" onclick="wizSet(\'hstGriff\',\''+k+'\')"><div class="wiz-sym"><img src="'+o.img+'" alt="'+o.name+'" loading="lazy"></div><div class="wiz-cn">'+o.name+'</div></div>';}).join('')+'</div></div>';
   return h;
 }
 function wizRenderBalkSchwelle(){ return _wizPills(Object.keys(P.balkonSchwelle).map(function(k){return [k,P.balkonSchwelle[k].name];}),S.balkonSchwelle,'wizSetBalkSchwelle')+'<div class="wiz-hint">'+((P.balkonSchwelle[S.balkonSchwelle]||{}).sub||'')+'</div>'; }
@@ -7413,6 +7413,20 @@ function wizCrumbs(){
 function wizCrumbLabel(k){return {profil:'Profil',psk:'PSK',tuer:'Türmodell',fluegel:'Aufteilung',anschlag:'Öffnung',glas:'Glas',masse:'Maße',farbe:'Farbe',glasdekor:'Motiv',schall:'Schall',griff:'Griff',griffhaus:'Türgriff',griffhst:'Griff',balk:'Schwelle',hstschwelle:'Schwelle',rolladen:'Rolladen',sprossen:'Sprossen',sicherheit:'Sicherheit',anzahl:'Anzahl',angebot:'Übersicht',kontakt:'Anfrage'}[k]||k;}
 function wizNext(){ if(WIZ_STEPS[wizIdx].key==='kontakt'){ if(typeof d2submit==='function')d2submit({preventDefault:function(){}}); return; } if(wizIdx>=WIZ_STEPS.length-1){ wizFinish(); return; } wizGo(wizIdx+1); window.scrollTo({top:0,behavior:'auto'}); }
 function wizBack(){ if(wizIdx<=0){ wizExitToProd(); return; } wizGo(wizIdx-1); window.scrollTo({top:0,behavior:'auto'}); }
+// Auto-Advance: nach Auswahl einer Karte direkt zum nächsten Schritt — nur bei eindeutigen Einfach-Auswahl-Schritten.
+// Nicht bei: Farbe (Kundenwunsch), Maße/Anzahl (Eingabe), Schall/Griff/Rolladen/Sprossen (Mehrfach-/Detailauswahl).
+const WIZ_AUTONEXT = new Set(['profil','psk','fluegel','anschlag','glas','tuer','balk','hstschwelle','glasdekor','sicherheit']);
+document.addEventListener('click', function(e){
+  const panel = document.getElementById('wiz-panel');
+  if(!panel || !panel.contains(e.target)) return;
+  const sel = e.target.closest('[onclick]');
+  if(!sel || !panel.contains(sel)) return;
+  const oc = sel.getAttribute('onclick') || '';
+  if(!/wiz(Pick|Set)/.test(oc) || /Farb|Tab/.test(oc)) return;   // nur Auswahl, nie Farbe/Tabs
+  const key = (typeof WIZ_STEPS !== 'undefined' && WIZ_STEPS[wizIdx]) ? WIZ_STEPS[wizIdx].key : '';
+  if(!WIZ_AUTONEXT.has(key)) return;
+  setTimeout(function(){ if(WIZ_STEPS[wizIdx] && WIZ_STEPS[wizIdx].key === key) wizNext(); }, 280);
+}, true);
 function wizExitToProd(){ const w=document.getElementById('cfg-wizard'); if(w)w.style.display='none'; _faMovePrevBack(); const hero=document.getElementById('prod-hero'); if(hero)hero.style.display=''; const s1=document.getElementById('s1'); if(s1)s1.classList.remove('hero-done'); window.scrollTo({top:0,behavior:'auto'}); }
 function wizFinish(){ const w=document.getElementById('cfg-wizard'); if(w)w.style.display='none'; _faMovePrevBack(); const nav=document.getElementById('kfg-nav'); if(nav){nav.style.display=''; if(window.innerWidth<768)nav.classList.add('kfg-nav--mobile-strip'); else nav.classList.remove('kfg-nav--mobile-strip');} if(window.openDetailPhase){window.openDetailPhase(); if(window.D2&&typeof D2.gotoSection==='function')D2.gotoSection('anfrage');} }
 function _wizPrev(){ if(typeof vorschauAktualisieren==='function')vorschauAktualisieren(); if(typeof drawPrev==='function')drawPrev(); if(typeof upSidebar==='function')upSidebar(); }
@@ -7815,14 +7829,9 @@ function buildHstGriff() {
       </div>
     </div>`;
   grid.innerHTML = `
-    <div class="col-span-full"><div class="sec-t" style="margin-top:0">Innen-Griff</div>
+    <div class="col-span-full"><div class="sec-t" style="margin-top:0">Smart-Slide-Flachgriff</div>
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
         ${Object.entries(P.hstGriff).map(([k,v])=>mkCard(k,v,S.hstGriff===k,'pickHstGriff')).join('')}
-      </div>
-    </div>
-    <div class="col-span-full mt-4"><div class="sec-t">Außen-Griff</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">
-        ${Object.entries(P.hstGriffAussen).map(([k,v])=>mkCard(k,v,S.hstGriffAussen===k,'pickHstGriffAussen')).join('')}
       </div>
     </div>`;
 }
@@ -12948,7 +12957,7 @@ async function submitForm(e) {
   if (S.prod === 'haustuere') {
     griffName = `Innen: ${P.tuerGriffInnen[S.tuerGriffInnen]?.name||S.tuerGriffInnen} / Außen: ${P.tuerGriffAussen[S.tuerGriffAussen]?.name||S.tuerGriffAussen}`;
   } else if (S.prod === 'hst') {
-    griffName = `Innen: ${P.hstGriff[S.hstGriff]?.name||S.hstGriff} / Außen: ${P.hstGriffAussen[S.hstGriffAussen]?.name||S.hstGriffAussen}`;
+    griffName = `${P.hstGriff[S.hstGriff]?.name||S.hstGriff}`;
   } else {
     griffName = P.griff[S.griff]?.name||S.griff;
   }
@@ -12985,7 +12994,7 @@ async function submitForm(e) {
     dichtung:    fdName,
     sprossen:    sproStr,
     griff:       S.prod === 'haustuere' ? ('Innen: ' + (P.tuerGriffInnen[S.tuerGriffInnen]?.name || S.tuerGriffInnen) + ' / Außen: ' + (P.tuerGriffAussen[S.tuerGriffAussen]?.name || S.tuerGriffAussen))
-                 : S.prod === 'hst'       ? ('Innen: ' + (P.hstGriff[S.hstGriff]?.name || S.hstGriff) + ' / Außen: ' + (P.hstGriffAussen[S.hstGriffAussen]?.name || S.hstGriffAussen))
+                 : S.prod === 'hst'       ? (P.hstGriff[S.hstGriff]?.name || S.hstGriff)
                  : griffName,
     shutter:     rollName,
     sicherheit:  sicherName,
@@ -14775,7 +14784,7 @@ const SECTIONS=[
  {id:'glasdekor',t:'Glasdekor',gilt:['kunststoff','balkontuer','haustuere','hst'],sum:()=>curName(P.glasdekor,S.glasdekor),body:()=>hint('Ornamentglas für Sichtschutz (z. B. Bad).')+tiles('glasdekor',Object.keys(GD_IMG).map(k=>({key:k,name:P.glasdekor[k].name,img:'img/glasdekor/'+GD_IMG[k]+'.webp'})))},
  {id:'griff',t:'Fenstergriff',gilt:['kunststoff','balkontuer'],sum:()=>`${curName(P.griff,S.griff)} · ${curName(P.griffColor,S.griffColor)}`,body:()=>`<div class="d2sub">Modell</div>`+pills('griff',Object.keys(P.griff).map(k=>[k,P.griff[k].name]))+`<div class="d2sub">Farbe</div>`+swatches('griffColor',P.griffColor)+`<div style="margin-top:16px"><button type="button" class="d2tgl ${S.griffLocked?'on':''}" onclick="D2.toggleKey('griffLocked')"><span class="kn"></span>Abschließbarer Griff</button></div>`},
  {id:'griffhaus',t:'Türgriff',gilt:['haustuere'],sum:()=>`${curName(P.tuerGriffInnen,S.tuerGriffInnen)} / ${curName(P.tuerGriffAussen,S.tuerGriffAussen)}`,body:()=>`<div class="d2sub">Innen (Klinke)</div>`+tiles('tuerGriffInnen',Object.keys(P.tuerGriffInnen).map(k=>({key:k,name:P.tuerGriffInnen[k].name,img:P.tuerGriffInnen[k].img})))+`<div class="d2sub">Außen (Griff)</div>`+tiles('tuerGriffAussen',Object.keys(P.tuerGriffAussen).map(k=>({key:k,name:P.tuerGriffAussen[k].name,img:P.tuerGriffAussen[k].img})))},
- {id:'griffhst',t:'Schiebegriff',gilt:['hst'],sum:()=>`${curName(P.hstGriff,S.hstGriff)} / ${curName(P.hstGriffAussen,S.hstGriffAussen)}`,body:()=>`<div class="d2sub">Innen (Smart Slide)</div>`+tiles('hstGriff',Object.keys(P.hstGriff).map(k=>({key:k,name:P.hstGriff[k].name,img:P.hstGriff[k].img})))+`<div class="d2sub">Außen (Stoßgriff M2)</div>`+tiles('hstGriffAussen',Object.keys(P.hstGriffAussen).map(k=>({key:k,name:P.hstGriffAussen[k].name,img:P.hstGriffAussen[k].img})))},
+ {id:'griffhst',t:'Schiebegriff',gilt:['hst'],sum:()=>`${curName(P.hstGriff,S.hstGriff)}`,body:()=>`<div class="d2sub">Smart Slide (Flachgriff)</div>`+tiles('hstGriff',Object.keys(P.hstGriff).map(k=>({key:k,name:P.hstGriff[k].name,img:P.hstGriff[k].img})))},
  {id:'balk',t:'Schwelle',gilt:['balkontuer'],sum:()=>curName(P.balkonSchwelle,S.balkonSchwelle),body:()=>pills('balkonSchwelle',Object.keys(P.balkonSchwelle).map(k=>[k,P.balkonSchwelle[k].name,P.balkonSchwelle[k].sub]))},
  {id:'hstschwelle',t:'Schwelle',gilt:['hst'],sum:()=>curName(P.hstSchwelle,S.hstSchwelle),body:()=>pills('hstSchwelle',Object.keys(P.hstSchwelle).map(k=>[k,P.hstSchwelle[k].name]))},
  {id:'farbe',t:'Farbe & Oberfläche',gilt:['kunststoff','balkontuer','haustuere','hst'],sum:()=>`${P.fa[S.fa]?.name||'–'} außen · ${P.fi[S.fi]?.name||'–'} innen`,body:()=>hint('Außen sieht man von der Straße, innen vom Raum. Über 40 Farben & Holzdekore.')+`<div class="d2sub">Außenfarbe</div>`+colorTiles('fa')+`<div class="d2sub">Innenfarbe</div>`+colorTiles('fi')+`<div class="d2sub">Dichtung</div>`+pills('fd',Object.keys(P.fd).map(k=>[k,P.fd[k].name.replace('Dichtung ','')]))},
@@ -14934,7 +14943,7 @@ function d2submit(e){
   else if(S.oeff1)oeffName=cnt===1?(P.oeff_sash[S.oeff1]?.name||S.oeff1):[S.oeff1,S.oeff2,S.oeff3].slice(0,cnt).map(o=>P.oeff_sash[o]?.name||o).join(' / '); else oeffName='–';
   let griffName;
   if(S.prod==='haustuere')griffName=`Innen: ${curName(P.tuerGriffInnen,S.tuerGriffInnen)} / Außen: ${curName(P.tuerGriffAussen,S.tuerGriffAussen)}`;
-  else if(S.prod==='hst')griffName=`Innen: ${curName(P.hstGriff,S.hstGriff)} / Außen: ${curName(P.hstGriffAussen,S.hstGriffAussen)}`;
+  else if(S.prod==='hst')griffName=`${curName(P.hstGriff,S.hstGriff)}`;
   else griffName=`${curName(P.griff,S.griff)} (${curName(P.griffColor,S.griffColor)})${S.griffLocked?' · abschließbar':''}`;
   const rollName=(S.prod!=='haustuere'&&S.roll!=='ohne')?`${P.roll[S.roll].name} · Kasten ${S.rollKasten} mm`:'Kein Rolladen';
   const sicherName=P.sicher[S.sicher]?.name||S.sicher;
