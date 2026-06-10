@@ -4288,12 +4288,13 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   @media (max-width:640px){ #cfg-wizard .wiz-nav{grid-template-columns:1fr auto;gap:8px} #cfg-wizard .wiz-nav-left{justify-content:flex-start} }
   #cfg-wizard .wiz-back{padding:14px 24px;border-radius:999px;border:1px solid rgba(34,94,170,.25);background:#fff;font-weight:700;cursor:pointer;color:#14233f;font-family:'Plus Jakarta Sans',sans-serif;white-space:nowrap}
   #cfg-wizard .wiz-otherprod{display:inline-flex;align-items:center;gap:6px;padding:14px 18px;border-radius:999px;border:1px solid rgba(34,94,170,.25);background:#fff;font-weight:700;cursor:pointer;color:#225eaa;font-family:'Plus Jakarta Sans',sans-serif;white-space:nowrap}
+  #cfg-wizard .wiz-articles{justify-self:end;text-decoration:none}
   #cfg-wizard .wiz-otherprod:hover{background:#eef4ff;border-color:rgba(118,169,250,.5)}
   #cfg-wizard .wiz-otherprod .ms{font-size:17px;line-height:1}
   /* Alter, dezenter Top-Button entfällt — "Anderes Produkt" sitzt jetzt sichtbar im Footer neben Zurück */
   body.has-prod .back-to-prod{display:none !important}
   @media (max-width:520px){ #cfg-wizard .wiz-otherprod span{display:none} }
-  #cfg-wizard .wiz-next{display:flex;align-items:center;justify-content:center;gap:10px;font-weight:800;padding:14px 56px;min-width:300px;border-radius:999px;color:#fff;background:var(--c-primary);border:0;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;flex-shrink:0}
+  #cfg-wizard .wiz-next{display:flex;align-items:center;justify-content:center;gap:10px;font-weight:800;font-size:15.5px;padding:17px 66px;min-width:330px;border-radius:999px;color:#fff;background:var(--c-primary);border:0;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;flex-shrink:0}
   @media (max-width:640px){ #cfg-wizard .wiz-next{min-width:0;padding:14px 24px} }
   #cfg-wizard .wiz-next svg{width:16px;height:16px}
   #cfg-wizard .wiz-hint{background:#f3f6fb;border:1px solid #e6ebf3;border-radius:10px;padding:12px 18px;font-size:13px;color:#5a6b80;font-family:'Manrope',sans-serif;margin:16px auto 0;max-width:560px;text-align:center;line-height:1.45}
@@ -4316,6 +4317,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
         <button type="button" class="wiz-back" onclick="wizBack()">‹ Zurück</button>
       </div>
       <button type="button" class="wiz-next" id="wiz-nextbtn" onclick="wizNext()"><span>Weiter</span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></button>
+      <a href="bestelluebersicht.html" class="wiz-otherprod wiz-articles" onclick="if(typeof saveCurrentBeforeOverview==='function')saveCurrentBeforeOverview()"><i class="ms f" aria-hidden="true">list_alt</i><span>Meine Artikel ansehen</span></a>
     </div>
   </div>
 </div>
@@ -7343,7 +7345,10 @@ function wizRenderAnschlag(){
     };
     return '<div class="wiz-cards">'+din('dreh-l','innen')+din('dreh-r','innen')+din('dreh-l','aussen')+din('dreh-r','aussen')+'</div>';
   }
-  if(S.prod==='hst'){ return '<div style="max-width:560px;margin:0 auto">'+_wizPills(Object.keys(P.hstLauf).map(function(k){return [k,P.hstLauf[k].name];}),S.hstLauf||'rechts','wizSetHstLauf')+'</div>'; }
+  if(S.prod==='hst'){
+    if(S.profil==='iglo-psk'){ return '<div class="wiz-cards">'+pskKippSchiebeCard('links')+pskKippSchiebeCard('rechts')+'</div>'; }
+    return '<div style="max-width:560px;margin:0 auto">'+_wizPills(Object.keys(P.hstLauf).map(function(k){return [k,P.hstLauf[k].name];}),S.hstLauf||'rechts','wizSetHstLauf')+'</div>';
+  }
   const set=ANSCHLAG_SETS[S.fluegel]||[];
   if(!set.length) return '<div class="wiz-hint">Für diese Aufteilung wird die Öffnungsart im nächsten Schritt festgelegt.</div>';
   if(S.anschlagIdx==null){ S.anschlagIdx=set.findIndex(function(o){ return o.oeff&&o.oeff[0]===S.oeff1&&(o.oeff[1]||null)===(S.oeff2||null)&&(o.oeff[2]||null)===(S.oeff3||null); }); }
@@ -7351,6 +7356,15 @@ function wizRenderAnschlag(){
     const sel=(idx===S.anschlagIdx)?' sel':'';
     return '<div class="wiz-card'+sel+'" onclick="wizPickAnschlag('+idx+')"><img src="img/karten/'+o.img+'.png?v=20260608u" alt="'+o.name+'" loading="lazy"><div class="wiz-cn">'+o.name+'</div></div>';
   }).join('')+'</div>';
+}
+function pskKippSchiebeCard(v){
+  var sel=(S.hstLauf===v)?' sel':'';
+  var mir=(v==='links');
+  var name=(v==='links')?'Kipp-Schiebe Links':'Kipp-Schiebe Rechts';
+  var sub=(v==='links')?'Schiebeflügel links · öffnet nach rechts':'Schiebeflügel rechts · öffnet nach links';
+  var paths='<path d="M 680,490 L 777,290 L 874,490 Z"/><line x1="865" y1="575" x2="690" y2="575"/><polyline points="740,535 690,575 740,615"/>';
+  var ov='<svg viewBox="0 0 1200 896" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%'+(mir?';transform:scaleX(-1)':'')+'" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#fff" stroke-width="20">'+paths+'</g><g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#225eaa" stroke-width="9">'+paths+'</g></svg>';
+  return '<div class="wiz-card'+sel+'" onclick="wizSetHstLauf(\''+v+'\')"><div style="position:relative;width:100%;line-height:0;border-radius:10px;overflow:hidden"><img src="img/karten/hst-fluegel/2-teilig.png?v=20260610psk" alt="'+name+'" loading="lazy" style="width:100%;height:auto;aspect-ratio:auto;object-fit:fill;display:block;border-radius:0;padding:0">'+ov+'</div><div class="wiz-cn">'+name+'</div><div class="wiz-csub">'+sub+'</div></div>';
 }
 function wizPickAnschlag(idx){ S.anschlagIdx=idx; const o=(ANSCHLAG_SETS[S.fluegel]||[])[idx]; if(o){ S.oeff1=o.oeff[0]||null; S.oeff2=o.oeff[1]||null; S.oeff3=o.oeff[2]||null; S.oberlichtOeff=o.ol||null; S.unterlichtOeff=o.ul||null; } if(window._touched)window._touched.add('oeff1'); if(typeof buildOeffSash==='function')buildOeffSash(); if(typeof mkDone==='function')mkDone(4); wizRenderPanel(); }
 function wizRenderGlas(){
