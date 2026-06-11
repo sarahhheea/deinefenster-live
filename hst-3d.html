@@ -178,7 +178,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 3));   // max Schärfe
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 0.95;   // mehr Kontrast — Mittel-/Schattenbereiche dunkler
+renderer.toneMappingExposure = 1.02;   // Realismus-Pass — angeglichen an Fenster-Renderer
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 
 const scene = new THREE.Scene();
@@ -186,26 +186,36 @@ const scene = new THREE.Scene();
 // sonst Standard weiß (für Standalone-Ansicht)
 const _embed = new URLSearchParams(location.search).has('embed');
 const _bgLight = new URLSearchParams(location.search).get('bg')==='light';
-scene.background = new THREE.Color(_embed ? (_bgLight ? 0xeef3fb : 0x0a1530) : 0xffffff);
-if(_bgLight){var _s=document.createElement('style');_s.textContent='html.is-embed body,html body.embed{background:#eef3fb !important}';document.head.appendChild(_s);}
+scene.background = new THREE.Color(_embed ? (_bgLight ? 0xf4f7fc : 0x0a1530) : 0xffffff);
+if(_bgLight){var _s=document.createElement('style');_s.textContent='html.is-embed body,html body.embed{background:#f4f7fc !important}';document.head.appendChild(_s);}
+
+// System-Param: hs (Hebe-Schiebe) | psk (Parallel-Schiebe-Kipp). slide = Fallback → wie hs.
+const _SYS = (function(){
+  const s = (new URLSearchParams(location.search).get('system') || 'hs').toLowerCase();
+  return s === 'psk' ? 'psk' : 'hs';   // alles außer psk = hs (inkl. slide-Fallback)
+})();
+const IS_PSK = (_SYS === 'psk');
 
 const camera = new THREE.PerspectiveCamera(16, 1, 0.1, 60);
 // HST 2.4m breit × 2.1m hoch — zentriert (X=0) mit großzügigem Abstand
-camera.position.set(0, 0.05, 12.0);
+camera.position.set(0, 0.05, 9.2);   // näher → Tür füllt den Rahmen wie ein echtes Produktfoto
 
 const orb = new OrbitControls(camera, canvasEl);
 orb.target.set(0, 0, 0);
+orb.enableRotate = true;        // drehbar — Kunde will das Modell selbst drehen
+orb.rotateSpeed = 0.7;          // etwas ruhiger als Default
 orb.enablePan = false;          // kein Pan/Wegschieben
 orb.enableZoom = true;
+orb.zoomSpeed = 0.6;            // dezentes Zoom
 orb.enableDamping = true;
 orb.dampingFactor = 0.08;
-orb.minDistance = 9.0;          // nicht zu nah ranzoomen
-orb.maxDistance = 15.0;         // nicht weiter wegzoomen
-// Eingeschränkte Drehung: Produkt aus relevanten Winkeln sichtbar, kein "Wegdrehen"
-orb.minPolarAngle = Math.PI * 0.30;   // 54° von oben — kein extremer Aufblick
-orb.maxPolarAngle = Math.PI * 0.70;   // 126° — kein extremer Untersicht
-orb.minAzimuthAngle = -Math.PI * 0.30;  // ±54° horizontal — frontal-orientiert
-orb.maxAzimuthAngle =  Math.PI * 0.30;
+orb.minDistance = 7.5;          // nicht zu nah ranzoomen
+orb.maxDistance = 14.0;         // nicht weiter wegzoomen
+// Frontnahe Drehung: Produkt aus relevanten Winkeln sichtbar, kein Überschlagen/Wegdrehen
+orb.minPolarAngle = Math.PI * 0.15;   // ~27° von oben — leichter Aufblick erlaubt
+orb.maxPolarAngle = Math.PI * 0.62;   // ~112° — leichte Untersicht, kein Überschlag
+orb.minAzimuthAngle = -Math.PI * 0.20;  // ±36° horizontal — frontnah, dreht nicht weg
+orb.maxAzimuthAngle =  Math.PI * 0.20;
 orb.update();
 
 // ══════════════════════════════════════════════
@@ -222,7 +232,7 @@ eL2.position.set(-2, 1, 3); envSc.add(eL2);
 scene.environment = pmremGen.fromScene(envSc, 0.04).texture;
 
 // Ambient — gerade genug damit Außen-/Seitenflächen sichtbar, aber Schatten erhalten
-scene.add(new THREE.AmbientLight(0xffffff, 0.70));
+scene.add(new THREE.AmbientLight(0xffffff, 0.48));  // Realismus-Pass: weniger Grundhelligkeit → Profil-Relief sichtbar
 
 // Key-Licht maximal stark → starke Schatten an Profilkanten = max. 3D-Tiefe
 const keyLight = new THREE.DirectionalLight(0xffffff, 3.5);
@@ -233,6 +243,7 @@ keyLight.shadow.camera.near = 1; keyLight.shadow.camera.far = 22;
 keyLight.shadow.camera.left = -2.8; keyLight.shadow.camera.right = 2.8;
 keyLight.shadow.camera.top = 2.6; keyLight.shadow.camera.bottom = -2.6;
 keyLight.shadow.bias = -0.001;
+keyLight.shadow.radius = 5;   // weiche, aber sichtbare Schlagschatten → Tiefe (Fenster-Niveau)
 scene.add(keyLight);
 
 // Fill von links — hebt Schatten leicht auf
@@ -244,9 +255,9 @@ const frontLight = new THREE.DirectionalLight(0xffffff, 0.35);
 frontLight.position.set(0, 3, 10); scene.add(frontLight);
 
 // Spotlight für Stoßgriff-Highlight (HST: Bügel in Bildmitte nach Centering)
-const handleSpot = new THREE.SpotLight(0xffffff, 3.5, 14, Math.PI / 8, 0.16);
-handleSpot.position.set(1.5, 0.6, 6.5);
-handleSpot.target.position.set(0.0, 0.0, 0.18);
+const handleSpot = new THREE.SpotLight(0xffffff, 3.5, 14, Math.PI / 7, 0.16);
+handleSpot.position.set(0.5, 0.8, 6.5);
+handleSpot.target.position.set(-0.1, 0.0, 0.20);   // Begegnungskante (Griff sitzt nahe Mitte)
 scene.add(handleSpot); scene.add(handleSpot.target);
 
 // Rim-/Backlight — hellt Rückseite und Seitenflächen auf
@@ -288,28 +299,71 @@ const hingeMat  = new THREE.MeshStandardMaterial({ color: 0xbabfc2, roughness: 0
 // Alu-Schiene unten — eloxiertes Aluminium, deutliches Profil mit Laufschienen
 const schieneMat = new THREE.MeshStandardMaterial({ color: 0xc4c8cd, roughness: 0.38, metalness: 0.70, envMapIntensity: 1.6 });
 // HST-Griff (Aluminium-Profil, eckig) — Drutex IGLO-HS Standard: Weiß/Braun/Silber wählbar
-// Default: Weiß (Konfigurator-Default 'weiss-std')
+// Default: Weiß (Kunde-Konfigurator-Default 'weiss-std')
 const hstGriffMat = new THREE.MeshStandardMaterial({ color: 0xf4f4f0, roughness: 0.42, metalness: 0.32, envMapIntensity: 1.6 });
 // Alte chromeMat bleibt als Fallback für andere Metallteile (Schlüsselzylinder etc.)
 const chromeMat   = new THREE.MeshStandardMaterial({ color: 0xc4c8cc, roughness: 0.28, metalness: 0.85, envMapIntensity: 2.0 });
-// Glas: reflektiv-hellblau wie echtes Produktfoto — kein transmission-Effekt
+// Glas: helles, leicht BLAUES Isolierglas mit vertikalem Himmel-Verlauf (Canvas-Map).
+// Wirkt wie echte Glasreflexion: oben heller/kühler, unten etwas tiefer-blau + dezente
+// diagonale Reflexstreifen. Niedrige Roughness + envMap → realistischer Glanz, nicht spiegelnd.
 const glassMat  = new THREE.MeshStandardMaterial({
-  color: 0x3a5267, metalness: 0.18, roughness: 0.06, envMapIntensity: 1.1,
+  color: 0xffffff, metalness: 0.10, roughness: 0.09, envMapIntensity: 0.7,
+  transparent: true, opacity: 0.90,
 });
+
+// ── Canvas-Gradient für Isolierglas-Reflexion ──────────
+// Vertikaler Himmel-Verlauf (oben hell → unten kühler/dunkler) + 2 weiche diagonale Glanzstreifen.
+function buildGlassGradientTex() {
+  const W = 256, H = 512;
+  const cvs = document.createElement('canvas'); cvs.width = W; cvs.height = H;
+  const ctx = cvs.getContext('2d');
+  // Vertikaler Himmel-Verlauf (deutlicher blau als zuvor)
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0.00, '#e6f1f9');   // oben: heller Himmel
+  g.addColorStop(0.28, '#cfe5f3');
+  g.addColorStop(0.60, '#b6d6ec');   // Mitte: klares Hellblau
+  g.addColorStop(1.00, '#94bcdc');   // unten: kühler/tiefer Himmel
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  // Dezente diagonale Reflexstreifen (weiches Streiflicht) — heller Hauptstreif oben
+  ctx.globalCompositeOperation = 'lighter';
+  [[-0.05, 0.22, 0.22], [0.40, 0.74, 0.09]].forEach(([cx, cy, alpha]) => {
+    ctx.save();
+    ctx.translate(cx * W, cy * H);
+    ctx.rotate(-0.62);
+    const sg = ctx.createLinearGradient(-W*0.5, 0, W*0.5, 0);
+    sg.addColorStop(0.00, 'rgba(255,255,255,0)');
+    sg.addColorStop(0.50, 'rgba(255,255,255,' + alpha + ')');
+    sg.addColorStop(1.00, 'rgba(255,255,255,0)');
+    ctx.fillStyle = sg;
+    ctx.fillRect(-W*0.6, -H*0.7, W*1.2, H*1.4);
+    ctx.restore();
+  });
+  ctx.globalCompositeOperation = 'source-over';
+  const tex = new THREE.CanvasTexture(cvs);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
+  tex.minFilter = THREE.LinearFilter;
+  return tex;
+}
+const _glassGradientTex = buildGlassGradientTex();
 
 // ══════════════════════════════════════════════
 // HST-KONSTANTEN — Drutex IGLO-HS (Hebe-Schiebetür)
 // 1 unit = 1 m · 2400 × 2100 × 176 mm · 2-spurige Alu-Schiene 40mm
 // 2 Flügel: links Festflügel, rechts Schiebeflügel (verschiebt sich nach links beim Öffnen)
 // ══════════════════════════════════════════════
-const FW   = 2.400;   // Außenbreite gesamt
-const FH   = 2.100;   // Außenhöhe gesamt
-const FD   = 0.176;   // Rahmentiefe — HST braucht 2 Spuren hintereinander
+// ── System-abhängige Proportionen & Schwelle ──
+// HS/HST: sehr breit + raumhoch + flache Alu-Bodenschiene (fast schwellenlos).
+// PSK:    kompakter (schmaler + niedriger) + sichtbar erhöhte Schwelle (~50mm).
+const FW   = IS_PSK ? 1.900 : 2.400;   // Außenbreite gesamt — PSK kompakter
+const FH   = IS_PSK ? 1.700 : 2.100;   // Außenhöhe gesamt — PSK weniger raumhoch
+const FD   = 0.176;   // Rahmentiefe — beide brauchen 2 Spuren hintereinander
 
 const FRT  = 0.072;   // Blendrahmen oben/seitlich
-const SCH_H = 0.040;  // Alu-Schiene unten 40mm
+// Schwelle unten: HS = flache Alu-Schiene 40mm; PSK = erhöhte Schwelle ~50mm (deutlicher Block)
+const SCH_H = IS_PSK ? 0.050 : 0.040;
 const SOVL = 0.020;   // Falzüberdeckung
-const FST  = 0.078;   // Flügel-Profilbreite (HST-Sash etwas breiter als Fenster)
+const FST  = 0.078;   // Flügel-Profilbreite (Sash etwas breiter als Fenster)
 
 // Z-Versatz der beiden Spuren (Fest hinten, Schiebe vorne)
 const TRACK_BACK_Z  = FD * 0.30;       // hintere Schiene (Festflügel)
@@ -349,10 +403,24 @@ let handleObjects  = [];   // Hebel/Rosette/Achse — Click-Targets fürs Öffne
 let _curColor = 'anthrazitgrau';
 let _curWood  = null;
 let _curGlass = 'klar';
+let _hwFrameLum = 0.5;     // zuletzt gesetzte Rahmen-Helligkeit (steuert weiß vs. silber Griff)
+let _curGripKey = 'weiss-std';
 let sashOpen  = false;
 let sashAnim  = 0;         // 0 = zu, 1 = ganz auf
 // HST: Schiebeflügel verschiebt sich entlang X — keine Drehöffnung
 const SLIDE_OPEN_DX = -(PANEL_W * 0.85);   // 85% der Flügel-Breite nach links
+
+// Standalone-Header an System anpassen (Embed-Header ist ohnehin ausgeblendet)
+(function(){
+  const tag = document.querySelector('.header .model-tag');
+  const h1  = document.querySelector('.header h1');
+  if (IS_PSK) {
+    if (h1)  h1.textContent  = 'Parallel-Schiebe-Kipp 3D Konfigurator';
+    if (tag) tag.textContent = 'Drutex IGLO 5 PSK · Drehgriff · erhöhte Schwelle';
+  } else {
+    if (tag) tag.textContent = 'Drutex IGLO-HS · Hebe-Stangengriff · Alu-Schiene';
+  }
+})();
 
 // ── Helper: Box zentriert an (cx,cy,cz) ──────────────
 function bx(cx, cy, cz, w, h, d, mat) {
@@ -414,21 +482,32 @@ function buildWindow() {
   winGroup.add(bx(FRT/2,         sideCy,         fzc, FRT,          sideH,       FD, frameMat));
   winGroup.add(bx(FW - FRT/2,    sideCy,         fzc, FRT,          sideH,       FD, frameMat));
 
-  // ── Alu-Schiene unten — 2-spurig sichtbar (Hebe-Schiebe-Schiene) ──
-  // Hauptkörper
-  winGroup.add(bx(FW/2, SCH_H/2, fzc, FW, SCH_H, FD, schieneMat));
-  // Sichtbare Laufschiene 1 (hinten — Festflügel-Spur)
+  // ── Schwelle unten — system-abhängig ──
   const railZ1 = TRACK_BACK_Z;
   const railZ2 = TRACK_FRONT_Z;
-  const railH = 0.006;     // sichtbare Erhebung
-  const railW = 0.018;
-  winGroup.add(bx(FW/2, SCH_H + railH/2, railZ1, FW - 0.020, railH, railW, schieneMat));
-  winGroup.add(bx(FW/2, SCH_H + railH/2, railZ2, FW - 0.020, railH, railW, schieneMat));
-  // Dunkle Rille zwischen den Schienen
-  const grooveZ = (railZ1 + railZ2) / 2;
-  winGroup.add(bx(FW/2, SCH_H - 0.001, grooveZ, FW - 0.020, 0.0018, 0.014, sealMat));
-  // Profil-Linie auf Schiene (vorne) für Tiefenwirkung
-  winGroup.add(bx(FW/2, SCH_H - 0.002, ffz - 0.004, FW - 0.020, 0.0014, 0.0014, sealMat));
+  if (IS_PSK) {
+    // PSK: sichtbar ERHÖHTE Schwelle (~50mm) — Kunststoff-Block in Rahmenfarbe (nicht barrierefrei).
+    // Optisches Erkennungsmerkmal vs. flacher HS-Schiene.
+    winGroup.add(bx(FW/2, SCH_H/2, fzc, FW, SCH_H, FD, frameMat));
+    // Abgeschrägte Oberkante als dunklere Tiefenlinie + schmale Alu-Laufnut obendrauf
+    winGroup.add(bx(FW/2, SCH_H - 0.003, grooveZSafe(railZ1, railZ2), FW - 0.020, 0.0040, 0.016, sealMat));
+    winGroup.add(bx(FW/2, SCH_H + 0.002, railZ2, FW - 0.030, 0.006, 0.012, schieneMat));
+    // Vordere Profil-Linie der Schwelle für Tiefenwirkung
+    winGroup.add(bx(FW/2, SCH_H * 0.5, ffz - 0.004, FW - 0.020, 0.0016, 0.0016, subtleNutMat));
+  } else {
+    // HS/HST: flache 2-spurige Alu-Bodenschiene (fast schwellenlos).
+    winGroup.add(bx(FW/2, SCH_H/2, fzc, FW, SCH_H, FD, schieneMat));
+    const railH = 0.006;     // sichtbare Erhebung
+    const railW = 0.018;
+    winGroup.add(bx(FW/2, SCH_H + railH/2, railZ1, FW - 0.020, railH, railW, schieneMat));
+    winGroup.add(bx(FW/2, SCH_H + railH/2, railZ2, FW - 0.020, railH, railW, schieneMat));
+    // Dunkle Rille zwischen den Schienen
+    const grooveZ = (railZ1 + railZ2) / 2;
+    winGroup.add(bx(FW/2, SCH_H - 0.001, grooveZ, FW - 0.020, 0.0018, 0.014, sealMat));
+    // Profil-Linie auf Schiene (vorne) für Tiefenwirkung
+    winGroup.add(bx(FW/2, SCH_H - 0.002, ffz - 0.004, FW - 0.020, 0.0014, 0.0014, sealMat));
+  }
+  function grooveZSafe(a,b){ return (a+b)/2; }
 
   // Profilnut Blendrahmen — Top + Seiten innen/außen
   const fni = FRT - 0.012;
@@ -485,60 +564,220 @@ function buildWindow() {
   // Schiebeflügel (vordere Spur) — verschiebt sich entlang X beim Öffnen
   const slidePanel = buildPanel(slideGroup, X_SLIDE, TRACK_FRONT_Z + SASH_DEPTH/2, true);
 
-  // ── DRUTEX IGLO-HS GRIFF — 1:1 nach Referenzfoto 20.05.2026 ──
-  // Asymmetrisch: kurze Edelstahl-Kappe oben, dünner Stab in der Mitte,
-  // deutlich längerer Sockel unten (Lift-Schloss-Modul mit Drücker-Mechanik).
-  const BAR_X         = 0.018;                              // Stab-Breite (schlank)
-  const BAR_Z         = 0.020;                              // Stab-Tiefe vor der Tür
-  const BAR_LEN       = 0.150;                              // ~150mm dünner Stab in der Mitte
-  const TOP_CAP_Y     = 0.022;                              // kurze obere Kappe (~22mm)
-  const TOP_CAP_X     = 0.026;
-  const TOP_CAP_Z     = 0.034;
-  const BOT_LOCK_Y    = 0.085;                              // langer Sockel unten (~85mm)
-  const BOT_LOCK_X    = 0.032;
-  const BOT_LOCK_Z    = 0.040;
-  const ARM_FRONT_Z   = 0.040;                              // Halterungs-Tiefe vor Türfläche
+  // ── GRIFF — system-abhängig auf dem SCHIEBEFLÜGEL an der Begegnungskante (mittig), Hüfthöhe ──
+  // Begegnungskante = Innenkante des Schiebeflügels (zum Festflügel hin). slide ist rechts → linke Kante.
+  const GRIP_CX  = X_SLIDE + FST * 0.55;                    // an der mittleren Begegnungskante
+  const DOOR_FZ  = TRACK_FRONT_Z + SASH_DEPTH/2 + 0.001;
+  // Standard-Drückerhöhe ~1050mm (gekappt auf Flügelhöhe)
+  const HIP_CY   = y0 + Math.min(1.050, SH * 0.45);
 
-  // Position: an der Schließkante des Schiebeflügels (außen, gegen Bewegungsrichtung
-  // = wo Drutex IGLO-HS den Drücker setzt). Standard-Drückerhöhe vertikal.
-  const GRIP_CX  = X_SLIDE + PANEL_W - FST * 0.55;
-  const HANDLE_TOTAL = TOP_CAP_Y + BAR_LEN + BOT_LOCK_Y;    // ~257mm Gesamt-Höhe
-  // Lift-Modul (Sockel) sitzt auf Standard-Drückerhöhe ~1050mm — Mitte des Sockels
-  const BOT_LOCK_CY   = y0 + Math.min(1.050, SH * 0.45);
-  const BAR_CY        = BOT_LOCK_CY + BOT_LOCK_Y/2 + BAR_LEN/2;
-  const TOP_CAP_CY    = BAR_CY + BAR_LEN/2 + TOP_CAP_Y/2;
-  const DOOR_FZ       = TRACK_FRONT_Z + SASH_DEPTH/2 + 0.001;
-  const BAR_CZ        = DOOR_FZ + ARM_FRONT_Z + BAR_Z/2;
+  if (IS_PSK) {
+    // ── PSK-DREHGRIFF — sieht aus wie ein (etwas größerer) FENSTERGRIFF ──
+    // Verifiziert an echten Produktbildern (GU PSK-Drehgriff K-12920 / Siegenia SI-LINE 200):
+    // ein gebogener Hoppe-L-Hebel auf einer mittleren, abgerundeten Platte/Rosette (~150mm),
+    // Hebel zeigt in Schließstellung nach UNTEN. KEINE Griffmuschel, KEIN langer Zug-Bügel.
+    // Hebel-Geometrie 1:1 vom guten Fenstergriff (fenster-3d.html: Tube-Curve + Olive).
+    const SHIELD_LEN = 0.150;   // ~150mm mittlere Platte (größer als Fenster-Rosette, klar kürzer als HS-Bügel)
+    const SHIELD_W   = 0.038;   // ~38mm breit
+    const SHIELD_Z   = DOOR_FZ + 0.006;
+    // deutlich zur Flügelmitte gerückt, damit der Griff frei auf weißem Flügel sitzt (nicht auf der dunklen Kante)
+    const SHIELD_CX  = GRIP_CX + 0.062;
+    const SHIELD_CY  = HIP_CY;   // Platte mittig auf Drückerhöhe
+    // Hebel-Nabe etwa in Plattenmitte (Fenstergriff-typisch), Hebel hängt darunter
+    const hubCY = SHIELD_CY + 0.020;
 
-  // 1) Dünner vertikaler Stab in der Mitte
-  const bar = new THREE.Mesh(
-    new THREE.BoxGeometry(BAR_X, BAR_LEN, BAR_Z),
-    hstGriffMat
-  );
-  bar.position.set(GRIP_CX, BAR_CY, BAR_CZ);
-  bar.castShadow = true;
-  bar.userData.isHandle = true;
-  slideGroup.add(bar); handleObjects.push(bar);
+    // 1) Mittlere Platte — abgerundete Kapsel, leicht erhaben
+    const shield = new THREE.Mesh(
+      new THREE.CapsuleGeometry(SHIELD_W/2, SHIELD_LEN - SHIELD_W, 6, 24),
+      hstGriffMat
+    );
+    shield.scale.set(1.0, 1.0, 0.55);
+    shield.position.set(SHIELD_CX, SHIELD_CY, SHIELD_Z + 0.006);
+    shield.castShadow = true; shield.userData.isHandle = true;
+    slideGroup.add(shield); handleObjects.push(shield);
+    // 1a) dünne dunkle Fuge rund um die Platte → hebt weiße Platte vom weißen Flügel ab
+    const shieldBack = new THREE.Mesh(
+      new THREE.BoxGeometry(SHIELD_W + 0.006, SHIELD_LEN + 0.006, 0.004),
+      sealMat
+    );
+    shieldBack.position.set(SHIELD_CX, SHIELD_CY, SHIELD_Z + 0.002);
+    slideGroup.add(shieldBack);
+    // 1b) zwei dezente Schraub-Punkte oben/unten an der Platte
+    [SHIELD_CY + SHIELD_LEN/2 - 0.018, SHIELD_CY - SHIELD_LEN/2 + 0.018].forEach(sy => {
+      const sc = new THREE.Mesh(new THREE.CylinderGeometry(0.0032, 0.0032, 0.004, 16), sealMat);
+      sc.rotation.x = Math.PI/2;
+      sc.position.set(SHIELD_CX, sy, SHIELD_Z + 0.013);
+      slideGroup.add(sc);
+    });
 
-  // 2) Kurze Kappe oben (Stab-Endkappe)
-  const topCap = new THREE.Mesh(
-    new THREE.BoxGeometry(TOP_CAP_X, TOP_CAP_Y, TOP_CAP_Z),
-    hstGriffMat
-  );
-  topCap.position.set(GRIP_CX, TOP_CAP_CY, DOOR_FZ + TOP_CAP_Z/2);
-  topCap.castShadow = true;
-  topCap.userData.isHandle = true;
-  slideGroup.add(topCap); handleObjects.push(topCap);
+    // 2) Rosetten-Nabe (Drücker-Lagerung) — kleine erhabene Scheibe auf der Platte
+    const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.014, 24), hstGriffMat);
+    hub.rotation.x = Math.PI/2;
+    hub.position.set(SHIELD_CX, hubCY, SHIELD_Z + 0.014);
+    hub.castShadow = true; hub.userData.isHandle = true;
+    slideGroup.add(hub); handleObjects.push(hub);
 
-  // 3) Langer Sockel unten (Lift-Schloss-Modul) — deutlich höher + leicht dicker
-  const botLock = new THREE.Mesh(
-    new THREE.BoxGeometry(BOT_LOCK_X, BOT_LOCK_Y, BOT_LOCK_Z),
-    hstGriffMat
-  );
-  botLock.position.set(GRIP_CX, BOT_LOCK_CY, DOOR_FZ + BOT_LOCK_Z/2);
-  botLock.castShadow = true;
-  botLock.userData.isHandle = true;
-  slideGroup.add(botLock); handleObjects.push(botLock);
+    // 3) Fenstergriff-Hebel als durchgehender gebogener Tube: aus der Nabe nach vorne,
+    //    dann diagonal nach UNTEN+AUSSEN gebogen (Schließstellung, klassischer Hoppe-L).
+    const z0 = SHIELD_Z + 0.014;
+    const levPts = [
+      new THREE.Vector3(SHIELD_CX,          hubCY,          z0 + 0.002),
+      new THREE.Vector3(SHIELD_CX,          hubCY,          z0 + 0.018),
+      new THREE.Vector3(SHIELD_CX + 0.010,  hubCY - 0.010,  z0 + 0.026),
+      new THREE.Vector3(SHIELD_CX + 0.028,  hubCY - 0.034,  z0 + 0.028),
+      new THREE.Vector3(SHIELD_CX + 0.044,  hubCY - 0.064,  z0 + 0.028),
+      new THREE.Vector3(SHIELD_CX + 0.056,  hubCY - 0.094,  z0 + 0.028),
+    ];
+    const levCurve = new THREE.CatmullRomCurve3(levPts, false, 'centripetal', 0.5);
+    const lSegs = 56, rSegs = 20;
+    const levGeo = new THREE.TubeGeometry(levCurve, lSegs, 0.0115, rSegs, false);
+    const lp = levGeo.attributes.position;
+    for (let i = 0; i <= lSegs; i++) {
+      const t = i / lSegs;
+      const pt = levCurve.getPointAt(t);
+      const sf = 1.0 - 0.16 * Math.pow(t, 1.4);
+      for (let j = 0; j <= rSegs; j++) {
+        const idx = i * (rSegs + 1) + j;
+        lp.setX(idx, pt.x + (lp.getX(idx) - pt.x) * sf);
+        lp.setY(idx, pt.y + (lp.getY(idx) - pt.y) * sf);
+        lp.setZ(idx, pt.z + (lp.getZ(idx) - pt.z) * sf);
+      }
+    }
+    lp.needsUpdate = true; levGeo.computeVertexNormals();
+    const lever = new THREE.Mesh(levGeo, hstGriffMat);
+    lever.castShadow = true; lever.userData.isHandle = true;
+    slideGroup.add(lever); handleObjects.push(lever);
+
+    // 4) Olive — fließender Halbkugel-Abschluss am Hebel-Ende (unten/außen)
+    const olive = new THREE.Mesh(new THREE.SphereGeometry(0.0115 * 0.84, 24, 18), hstGriffMat);
+    olive.position.set(SHIELD_CX + 0.056, hubCY - 0.094, z0 + 0.028);
+    olive.castShadow = true; olive.userData.isHandle = true;
+    slideGroup.add(olive); handleObjects.push(olive);
+
+    // 5) Schließzylinder-Andeutung UNTEN auf der Platte (PSK mit Aussperrsicherung)
+    const cylCY = SHIELD_CY - SHIELD_LEN/2 + 0.026;
+    const cylRing = new THREE.Mesh(new THREE.CylinderGeometry(0.0078, 0.0078, 0.006, 24), hstGriffMat);
+    cylRing.rotation.x = Math.PI/2;
+    cylRing.position.set(SHIELD_CX, cylCY, SHIELD_Z + 0.013);
+    cylRing.castShadow = true;
+    slideGroup.add(cylRing);
+    const cylSlot = new THREE.Mesh(new THREE.CylinderGeometry(0.0044, 0.0044, 0.004, 20), sealMat);
+    cylSlot.rotation.x = Math.PI/2;
+    cylSlot.position.set(SHIELD_CX, cylCY, SHIELD_Z + 0.016);
+    slideGroup.add(cylSlot);
+  } else {
+    // ── HS-DREHGRIFF (Hebe-Schiebe) — GU Dirigent mit Griffmuschel ──
+    // Verifiziert an echten Produktbildern: ein kurzer Hebel-Ansatz an einer Nabe + eine LANGE,
+    // FLACHE senkrechte Zug-Stange (~230mm) die nach OBEN ragt und am oberen Ende kurz zur Tür
+    // zurück abknickt (Hockeyschläger-Kopf) — zum Greifen/Ziehen der schweren Schiebetür. Darunter
+    // auf der Platte eine eingelassene ovale GRIFFMUSCHEL (dunkle Mulde) + Schließzylinder.
+    // GENAU diese lange Stange + Muschel unterscheidet die HS klar von der kompakten PSK.
+    const SHIELD_LEN = 0.150;   // ~150mm Grundplatte (trägt Nabe, Muschel, Zylinder)
+    const SHIELD_W   = 0.040;   // ~40mm breit
+    const SHIELD_Z   = DOOR_FZ + 0.006;
+    const SHIELD_CX  = GRIP_CX + 0.062;   // wie PSK frei auf den Flügel gerückt
+    // Platte sitzt etwas tiefer; die lange Stange ragt nach oben über die Platte hinaus
+    const SHIELD_CY  = HIP_CY - 0.020;
+    const BAR_THICK  = 0.009;   // flache Stange (rechteckiger Querschnitt) — kein runder Tube
+    const BAR_W      = 0.026;   // ~26mm breit (flacher Bügel)
+    const BAR_LEN    = 0.230;   // ~230mm hohe Zug-Stange (HS-Erkennungsmerkmal)
+    const barZ       = SHIELD_Z + 0.014 + BAR_THICK/2;
+
+    // 1) Grundplatte — abgerundete Kapsel
+    const shield = new THREE.Mesh(
+      new THREE.CapsuleGeometry(SHIELD_W/2, SHIELD_LEN - SHIELD_W, 6, 24),
+      hstGriffMat
+    );
+    shield.scale.set(1.0, 1.0, 0.55);
+    shield.position.set(SHIELD_CX, SHIELD_CY, SHIELD_Z + 0.006);
+    shield.castShadow = true; shield.userData.isHandle = true;
+    slideGroup.add(shield); handleObjects.push(shield);
+    // 1a) dünne dunkle Fuge rund um die Platte
+    const shieldBack = new THREE.Mesh(
+      new THREE.BoxGeometry(SHIELD_W + 0.006, SHIELD_LEN + 0.006, 0.004),
+      sealMat
+    );
+    shieldBack.position.set(SHIELD_CX, SHIELD_CY, SHIELD_Z + 0.002);
+    slideGroup.add(shieldBack);
+    // 1b) zwei dezente Schraub-Punkte oben/unten an der Platte
+    [SHIELD_CY + SHIELD_LEN/2 - 0.016, SHIELD_CY - SHIELD_LEN/2 + 0.016].forEach(sy => {
+      const sc = new THREE.Mesh(new THREE.CylinderGeometry(0.0032, 0.0032, 0.004, 16), sealMat);
+      sc.rotation.x = Math.PI/2;
+      sc.position.set(SHIELD_CX, sy, SHIELD_Z + 0.013);
+      slideGroup.add(sc);
+    });
+
+    // 2) Nabe (Drücker-Lagerung) — etwas oberhalb der Plattenmitte; hier setzt die Stange an
+    const hubCY = SHIELD_CY + 0.018;
+    const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.014, 24), hstGriffMat);
+    hub.rotation.x = Math.PI/2;
+    hub.position.set(SHIELD_CX, hubCY, SHIELD_Z + 0.014);
+    hub.castShadow = true; hub.userData.isHandle = true;
+    slideGroup.add(hub); handleObjects.push(hub);
+
+    // 3) Kurzer Hebel-Ansatz: aus der Nabe seitlich nach AUSSEN, dann knickt es in die lange
+    //    Stange nach oben (Knie-Stück). Flacher Quader.
+    const knee = new THREE.Mesh(
+      new THREE.BoxGeometry(0.030, BAR_W, BAR_THICK),
+      hstGriffMat
+    );
+    knee.position.set(SHIELD_CX + 0.015, hubCY, barZ);
+    knee.castShadow = true; knee.userData.isHandle = true;
+    slideGroup.add(knee); handleObjects.push(knee);
+
+    // 4) LANGE senkrechte Zug-Stange — flacher Quader, ragt von der Nabe weit nach OBEN
+    const barCX = SHIELD_CX + 0.028;          // Stange außen versetzt (wie am echten Griff)
+    const barCY = hubCY + BAR_LEN/2 - 0.010;  // Unterkante ~an der Nabe, ragt nach oben
+    const bar = new THREE.Mesh(
+      new THREE.BoxGeometry(BAR_W, BAR_LEN, BAR_THICK),
+      hstGriffMat
+    );
+    bar.position.set(barCX, barCY, barZ);
+    bar.castShadow = true; bar.userData.isHandle = true;
+    slideGroup.add(bar); handleObjects.push(bar);
+
+    // 5) Hockeyschläger-Kopf: am oberen Ende knickt die Stange kurz zur TÜR-Mitte zurück (nach -X)
+    //    → bildet ein umgekehrtes L, in der frontalen Ansicht klar als HS-Zug-Bügel lesbar.
+    const CAP_LEN = 0.034;
+    const barTopY = barCY + BAR_LEN/2;
+    const topCap = new THREE.Mesh(
+      new THREE.BoxGeometry(CAP_LEN, BAR_W, BAR_THICK),
+      hstGriffMat
+    );
+    topCap.position.set(barCX - CAP_LEN/2 + BAR_W/2, barTopY - BAR_W/2, barZ);
+    topCap.castShadow = true; topCap.userData.isHandle = true;
+    slideGroup.add(topCap); handleObjects.push(topCap);
+    // 5a) kleine Endkappe am Bügel-Kopf (leicht zur Tür zurückgesetzt → Tiefe)
+    const capEnd = new THREE.Mesh(
+      new THREE.BoxGeometry(BAR_W, BAR_W, BAR_THICK),
+      hstGriffMat
+    );
+    capEnd.position.set(barCX - CAP_LEN + BAR_W, barTopY - BAR_W/2, barZ - 0.006);
+    capEnd.castShadow = true; capEnd.userData.isHandle = true;
+    slideGroup.add(capEnd); handleObjects.push(capEnd);
+
+    // 6) Eingelassene ovale GRIFFMUSCHEL im UNTEREN Teil der Platte (HS-Erkennungsmerkmal)
+    const muschelCY = SHIELD_CY - 0.030;
+    const muschel = new THREE.Mesh(
+      new THREE.CapsuleGeometry(0.011, 0.034, 4, 18),
+      sealMat
+    );
+    muschel.scale.set(1.0, 1.0, 0.28);
+    muschel.position.set(SHIELD_CX, muschelCY, SHIELD_Z + 0.009);
+    slideGroup.add(muschel);
+
+    // 7) Schließzylinder-Andeutung ganz unten auf der Platte
+    const cylCY = SHIELD_CY - SHIELD_LEN/2 + 0.022;
+    const cylRing = new THREE.Mesh(new THREE.CylinderGeometry(0.0072, 0.0072, 0.006, 24), hstGriffMat);
+    cylRing.rotation.x = Math.PI/2;
+    cylRing.position.set(SHIELD_CX, cylCY, SHIELD_Z + 0.013);
+    cylRing.castShadow = true;
+    slideGroup.add(cylRing);
+    const cylSlot = new THREE.Mesh(new THREE.CylinderGeometry(0.0040, 0.0040, 0.004, 20), sealMat);
+    cylSlot.rotation.x = Math.PI/2;
+    cylSlot.position.set(SHIELD_CX, cylCY, SHIELD_Z + 0.016);
+    slideGroup.add(cylSlot);
+  }
 
   // ── MUSCHELGRIFF außen (eingelassen, auf Rückseite des Schiebeflügels) ──
   // Drutex-Standard: außen sitzt kein Bügel sondern eine eingelassene Muschel.
@@ -550,7 +789,7 @@ function buildWindow() {
     new THREE.BoxGeometry(muschelW, muschelH, muschelD),
     sealMat
   );
-  muschel.position.set(GRIP_CX, BAR_CY, TRACK_FRONT_Z - muschelD/2 - 0.001);
+  muschel.position.set(GRIP_CX, HIP_CY, TRACK_FRONT_Z - muschelD/2 - 0.001);
   slideGroup.add(muschel);
 }
 
@@ -559,6 +798,29 @@ buildWindow();
 // Fenster auf Welt-Origin zentrieren
 winGroup.position.set(-FW / 2, -FH / 2, 0);
 scene.add(winGroup);
+
+// ── Weicher Kontakt-/Schlagschatten unter der Tür ──
+// Radial-Gradient-Plane direkt unter dem Element → erdet das Produkt, gibt Tiefe.
+(function addContactShadow(){
+  const W = 256, H = 256;
+  const cvs = document.createElement('canvas'); cvs.width = W; cvs.height = H;
+  const ctx = cvs.getContext('2d');
+  // breiter, flacher Schatten (ellipsenförmig über X gestreckt)
+  const g = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, W/2);
+  g.addColorStop(0.00, 'rgba(20,28,40,0.40)');
+  g.addColorStop(0.45, 'rgba(20,28,40,0.22)');
+  g.addColorStop(1.00, 'rgba(20,28,40,0)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  const tex = new THREE.CanvasTexture(cvs);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false });
+  const plane = new THREE.Mesh(new THREE.PlaneGeometry(FW * 1.5, FW * 0.55), mat);
+  plane.rotation.x = -Math.PI / 2;
+  plane.position.set(0, -FH/2 + 0.004, 0.04);
+  plane.renderOrder = -1;
+  // nur im hellen/Standalone-Hintergrund sinnvoll (auf dunklem Konfi-BG würde er verschwinden)
+  if (_bgLight || !_embed) scene.add(plane);
+})();
 
 // setSide: 'r' = Griff rechts (Standard), 'l' = Griff links (gespiegelt)
 function setSide(s) {
@@ -692,14 +954,15 @@ function setColor(key) {
 
   frameMat.color.copy(c);
   sashMat.color.copy(c);
-  grooveMat.color.copy(c).multiplyScalar(0.62);
-  subtleNutMat.color.copy(c).multiplyScalar(0.88);   // subtile Tiefenlinie folgt Rahmenfarbe
-  sealMat.color.copy(c).multiplyScalar(0.62);          // Falz-Schatten — dunkler als Nut, nicht schwarz
+  grooveMat.color.copy(c).multiplyScalar(0.50);        // Realismus-Pass: tiefere Profil-Rillen
+  subtleNutMat.color.copy(c).multiplyScalar(0.70);     // subtile Tiefenlinie folgt Rahmenfarbe
+  sealMat.color.copy(c).multiplyScalar(0.42);          // Falz-Schatten — deutlich dunkler für Tiefe
 
   const isGlatt    = key.endsWith('-gl');
   const isUltiMatt = key.endsWith('-um');
-  const roughness  = isUltiMatt ? 0.97 : isGlatt ? 0.20 : 0.74;
-  const envInt     = isUltiMatt ? 0.02 : isGlatt ? 0.85 : 0.08;
+  // Standard-PVC: dezenter Satin-Glanz (nicht stumpf-matt) — Realismus-Pass.
+  const roughness  = isUltiMatt ? 0.97 : isGlatt ? 0.20 : 0.56;
+  const envInt     = isUltiMatt ? 0.02 : isGlatt ? 0.85 : 0.22;
 
   frameMat.roughness = sashMat.roughness = roughness;
   frameMat.metalness = sashMat.metalness = 0;
@@ -707,26 +970,31 @@ function setColor(key) {
   frameMat.needsUpdate = true;
   sashMat.needsUpdate  = true;
 
-  // Griff + Scharniere folgen Rahmenfarbe (interne Vorgabe 16.05.2026):
+  // Griff + Scharniere folgen Rahmenfarbe (Kunde-Vorgabe 16.05.2026):
   // Bei hellen/weißen Tönen → Kunststoff in Rahmenfarbe (kein Chrom)
   // Bei dunklen Farben + Edelstahl-Optik → silbern wie real
   applyHardwareColor(c.clone(), lum);
+  // Griff-Finish neu auswerten (weiß-Kunststoff bei hellem Rahmen vs. echte Farbe)
+  if (typeof setHstGriff === 'function') setHstGriff(_curGripKey);
 
   document.getElementById('currentLabel').textContent = colorObj?.name || key;
 }
 
 // Griff/Scharniere an Rahmenfarbe anpassen — bei hellen Tönen DEUTLICH dunkler für Sichtbarkeit
 function applyHardwareColor(frameColor, frameLum) {
+  // _hwFrameLum merken, damit setHstGriff bei hellem Rahmen weißen Kunststoff statt Silber zeigt
+  _hwFrameLum = frameLum;
   if (frameLum >= 0.6) {
-    // Sehr helle Rahmen (Weiß, Cremeweiß): Griff in mittel-grau-Aluminium für klaren Kontrast
-    handleMat.color.setRGB(0.43, 0.47, 0.51);
-    handleMat.roughness = 0.30;
-    handleMat.metalness = 0.55;
-    handleMat.envMapIntensity = 1.0;
-    hingeMat.color.setRGB(0.40, 0.43, 0.46);
+    // Sehr helle/weiße Rahmen: Griff/Hardware in WEISSEM Kunststoff (1:1 wie Fenster-Renderer),
+    // leicht abgetönt → Schatten + Kantenglanz geben Tiefe, klar sichtbar (nicht silbern).
+    handleMat.color.copy(frameColor).multiplyScalar(0.42);
+    handleMat.roughness = 0.45;
+    handleMat.metalness = 0.0;
+    handleMat.envMapIntensity = 0.15;
+    hingeMat.color.copy(frameColor).multiplyScalar(0.40);
     hingeMat.roughness = 0.45;
-    hingeMat.metalness = 0.30;
-    hingeMat.envMapIntensity = 0.6;
+    hingeMat.metalness = 0.0;
+    hingeMat.envMapIntensity = 0.12;
   } else if (frameLum >= 0.35) {
     // Mittel-helle Rahmen: Aluminium-Optik mit mittlerem Kontrast
     handleMat.color.setHex(0xb0b6bd);
@@ -749,6 +1017,16 @@ function applyHardwareColor(frameColor, frameLum) {
   }
   handleMat.needsUpdate = true;
   hingeMat.needsUpdate = true;
+  // HST/PSK-Griff (hstGriffMat) an Rahmenhelligkeit koppeln: heller Rahmen → weiß-grauer Kunststoff
+  if (frameLum >= 0.6) {
+    // Echte HS/PSK-Griffe sind ALUMINIUM (kein mattes Plastik): gebürstetes Silber mit Glanz
+    // → wirkt wie echte Hardware + hebt sich klar vom weißen Flügel ab.
+    hstGriffMat.color.setHex(0xb6babf);
+    hstGriffMat.roughness = 0.34;
+    hstGriffMat.metalness = 0.82;
+    hstGriffMat.envMapIntensity = 1.5;
+    hstGriffMat.needsUpdate = true;
+  }
 }
 
 function setWood(key) {
@@ -896,9 +1174,12 @@ function buildNormalTex(heightFn, strength, repeatX, repeatY) {
 }
 
 function cleanGlassMaps() {
-  ['map', 'roughnessMap', 'normalMap'].forEach(k => {
+  // normalMap/roughnessMap werden pro Glasart neu erzeugt → disposen.
+  // map ist die GETEILTE Gradient-Textur (_glassGradientTex) → niemals disposen, nur lösen.
+  ['roughnessMap', 'normalMap'].forEach(k => {
     if (glassMat[k]) { glassMat[k].dispose(); glassMat[k] = null; }
   });
+  glassMat.map = null;
 }
 
 function setGlass(key) {
@@ -906,19 +1187,33 @@ function setGlass(key) {
   cleanGlassMaps();
 
   if (key === 'klar') {
-    glassMat.color.set(0xdae8f0); glassMat.roughness = 0.04;
-    glassMat.metalness = 0.10; glassMat.envMapIntensity = 0.8;
+    // Klares Isolierglas: blauer Himmel-Verlauf als Map + leichter Glanz.
+    glassMat.color.set(0xffffff);
+    glassMat.map = _glassGradientTex;
+    glassMat.roughness = 0.09;
+    glassMat.metalness = 0.10; glassMat.envMapIntensity = 0.7;
+    glassMat.opacity = 0.90;
   } else if (key === 'satinato') {
-    glassMat.color.set(0xe8eef0); glassMat.roughness = 0.90;
-    glassMat.metalness = 0; glassMat.envMapIntensity = 0.1;
+    // Mattglas: Verlauf bleibt (leicht blau), aber stark gestreut → milchig.
+    glassMat.color.set(0xeef4f8);
+    glassMat.map = _glassGradientTex;
+    glassMat.roughness = 0.90;
+    glassMat.metalness = 0; glassMat.envMapIntensity = 0.12;
+    glassMat.opacity = 0.94;
   } else if (key === 'chinchilla') {
-    glassMat.color.set(0xddeef5); glassMat.roughness = 0.18;
-    glassMat.metalness = 0.05; glassMat.envMapIntensity = 0.4;
+    glassMat.color.set(0xffffff);
+    glassMat.map = _glassGradientTex;
+    glassMat.roughness = 0.18;
+    glassMat.metalness = 0.05; glassMat.envMapIntensity = 0.55;
+    glassMat.opacity = 0.92;
     glassMat.normalMap   = buildNormalTex(chinchillaHeight, 3.0, 5, 16);
     glassMat.normalScale = new THREE.Vector2(1.2, 1.2);
   } else if (key === 'master-carre') {
-    glassMat.color.set(0xddeef5); glassMat.roughness = 0.08;
-    glassMat.metalness = 0.08; glassMat.envMapIntensity = 0.6;
+    glassMat.color.set(0xffffff);
+    glassMat.map = _glassGradientTex;
+    glassMat.roughness = 0.08;
+    glassMat.metalness = 0.08; glassMat.envMapIntensity = 0.7;
+    glassMat.opacity = 0.92;
     glassMat.normalMap   = buildNormalTex(masterCarreHeight, 3.0, 3, 11);
     glassMat.normalScale = new THREE.Vector2(1.2, 1.2);
   }
@@ -1006,18 +1301,31 @@ if (new URLSearchParams(location.search).has('embed')) {
 // Akzeptiert den hstGriff-Key aus konfigurator P.hstGriff (z.B. 'weiss-std', 'braun-si', 'ws-sia')
 function setHstGriff(key) {
   if (!key) return;
-  // Innen-Seite des Griffs bestimmen: Präfix vor erstem '-'
+  _curGripKey = key;
   const k = String(key).toLowerCase();
-  let innen = '#f4f4f0';   // weiß default
-  if (k.startsWith('braun'))      innen = '#5c3218';
-  else if (k.startsWith('silber'))innen = '#b0b4bc';
-  else if (k.startsWith('weiss') || k.startsWith('ws') || k.startsWith('wb')) innen = '#f4f4f0';
-  hstGriffMat.color.set(innen);
-  // Braun und Weiß sind beschichtetes Alu (matter), Silber ist eloxiertes Alu (matt-metallisch)
   const isSilber = k.startsWith('silber');
-  hstGriffMat.metalness = isSilber ? 0.65 : 0.25;
-  hstGriffMat.roughness = isSilber ? 0.36 : 0.55;
-  hstGriffMat.envMapIntensity = isSilber ? 2.0 : 1.0;
+  const isBraun  = k.startsWith('braun');
+  // Bei hellem/weißem Rahmen + weißem Griff: weiß-grauer Kunststoff (Tiefe statt weiß-auf-weiß).
+  // Sonst echte Finish-Farbe (Braun/Silber explizit, Weiß default).
+  if (!isSilber && !isBraun && _hwFrameLum >= 0.6) {
+    // Weißer Rahmen + Standard-Griff: gebürstetes ALUMINIUM (echte HS/PSK-Hardware),
+    // hebt sich klar vom weißen Flügel ab — kein verwaschenes Plastik.
+    hstGriffMat.color.setHex(0xc2c6cb);
+    hstGriffMat.metalness = 0.80;
+    hstGriffMat.roughness = 0.34;
+    hstGriffMat.envMapIntensity = 1.5;
+  } else if (isBraun) {
+    hstGriffMat.color.set('#5c3218');
+    hstGriffMat.metalness = 0.0;
+    hstGriffMat.roughness = 0.45;
+    hstGriffMat.envMapIntensity = 0.4;
+  } else {
+    // Silber-Finish ODER dunkler Rahmen → gebürstetes Aluminium
+    hstGriffMat.color.setHex(0xc2c6cb);
+    hstGriffMat.metalness = 0.80;
+    hstGriffMat.roughness = 0.34;
+    hstGriffMat.envMapIntensity = 1.5;
+  }
   hstGriffMat.needsUpdate = true;
 }
 
