@@ -7356,11 +7356,15 @@ function wizRenderAnschlag(){
       const dash=(richtung==='aussen')?' stroke-dasharray="22 15"':'';
       const sel=(S.oeff1===oeff1&&(S.tuerOeffnung||'innen')===richtung)?' sel':'';
       const lbl=(richtung==='innen'?'Nach innen':'Nach au\u00dfen')+' \u00b7 '+(oeff1==='dreh-l'?'links':'rechts');
-      // DIN-Dreieck nur über die Glasfläche (Glaskante im Bild: x 191–703, y 70–1046, leichter Inset wegen Strichstärke)
-      const svg='<svg viewBox="0 0 896 1200" preserveAspectRatio="none"><g stroke="#243042" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"'+dash+'><line x1="198" y1="558" x2="697" y2="80"/><line x1="198" y1="558" x2="697" y2="1036"/></g></svg>';
-      return '<div class="wiz-card'+sel+'" onclick="wizSetTuerOeff(\''+oeff1+'\',\''+richtung+'\')"><div class="hac-vis'+mir+'"><img src="img/karten/haus-fluegel/1-fluegel.png?v=20260609c" alt="'+lbl+'" loading="lazy"><div class="hac-ovl">'+svg+'</div></div><div class="wiz-cn">'+lbl+'</div></div>';
+      return '<div class="wiz-card'+sel+'" onclick="wizSetTuerOeff(\''+oeff1+'\',\''+richtung+'\')"><div class="hac-vis'+mir+'"><img src="img/karten/haus-fluegel/1-fluegel.png?v=20260609c" alt="'+lbl+'" loading="lazy"></div><div class="wiz-cn">'+lbl+'</div></div>';
     };
-    return '<div class="wiz-cards">'+din('dreh-l','innen')+din('dreh-r','innen')+din('dreh-l','aussen')+din('dreh-r','aussen')+'</div>';
+    const hilfe='<div class="wiz-hint" style="max-width:820px;margin:0 auto 22px;text-align:left;line-height:1.6">'+
+      '<strong>So finden Sie Ihre Öffnungsrichtung:</strong> Stellen Sie sich auf die Seite, zu der die Tür aufgeht. '+
+      'Eine <strong>nach innen</strong> öffnende Tür betrachten Sie von innen, eine <strong>nach außen</strong> öffnende von außen. '+
+      'Sitzen die Bänder (Scharniere) dann auf der <strong>linken</strong> Seite, wählen Sie eine Links-Variante; sitzen sie <strong>rechts</strong>, eine Rechts-Variante. '+
+      'Sie sind unsicher? Kein Problem: Notieren Sie es einfach in der Anfrage, wir klären die Richtung gemeinsam mit Ihnen.'+
+      '</div>';
+    return hilfe+'<div class="wiz-cards">'+din('dreh-l','innen')+din('dreh-r','innen')+din('dreh-l','aussen')+din('dreh-r','aussen')+'</div>';
   }
   if(S.prod==='hst'){
     if(S.profil==='iglo-psk'){ return '<div class="wiz-cards">'+pskKippSchiebeCard('links')+pskKippSchiebeCard('rechts')+'</div>'; }
