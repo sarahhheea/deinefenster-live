@@ -7274,6 +7274,7 @@ function wizStart(){
   if(window._touched){window._touched.delete('fa');window._touched.delete('fi');}
   if(!S.glasdekor)S.glasdekor='klar';
   if(!S.griff)S.griff='mistral'; if(!S.griffColor)S.griffColor='weiss';
+  if(typeof applyFensterLimits==='function')applyFensterLimits();
   WIZ_STEPS=buildWizSteps(prod);
   const w=document.getElementById('cfg-wizard'); if(w)w.style.display='flex';
   wizGo(0);
@@ -7323,7 +7324,28 @@ function wizRenderFluegel(){
     return '<div class="wiz-card'+(v===S.fluegel?' sel':'')+'" onclick="wizPickFluegel(\''+v+'\')">'+fluegelImg(v)+'<div class="wiz-cn">'+name+'</div></div>';
   }).join('')+'</div>';
 }
-function wizPickFluegel(v){ S.fluegel=v; S.anschlagIdx=null; if(window._touched)window._touched.add('fluegel'); if(typeof _applyDefaultSashStates==='function')_applyDefaultSashStates(v); if(typeof previewState!=='undefined')previewState.fluegel=(v==='stulp')?2:(parseInt(v.charAt(0))||1); const d3=document.getElementById('d3'); if(d3)d3.textContent=(P.fluegel[v]&&P.fluegel[v].name)||v; if(typeof buildOeffSash==='function')buildOeffSash(); if(typeof buildFarbePicker==='function')buildFarbePicker(); if(typeof mkDone==='function')mkDone(3); wizRenderPanel(); }
+// Maßgrenzen je Fenster-Aufteilung. Einflügler marktüblich 500–1500 × 500–1900 mm;
+// pro zusätzlichem Flügel steigt die Breite (Dreh-Kipp-Flügel ~1500 mm max), Ober-/Unterlicht hebt die Höhe.
+function fensterLimitsFor(fl){
+  fl=fl||'1-fluegel';
+  var sash=parseInt(fl.charAt(0))||1;
+  var hasOL=/oberlicht|ober-unter/.test(fl), hasUL=/unterlicht|ober-unter/.test(fl);
+  var bMin=sash>=3?1200:(sash===2?800:500);
+  var bMax=sash>=3?4000:(sash===2?2700:1500);
+  var hMin=500, hMax=1900;
+  if(hasOL&&hasUL){ hMin=1300; hMax=2700; }
+  else if(hasOL||hasUL){ hMin=900; hMax=2400; }
+  return {bMin:bMin,bMax:bMax,hMin:hMin,hMax:hMax};
+}
+function applyFensterLimits(){
+  if((S.prod||'kunststoff')!=='kunststoff') return;
+  var L=fensterLimitsFor(S.fluegel);
+  P.prod.kunststoff.bMin=L.bMin; P.prod.kunststoff.bMax=L.bMax;
+  P.prod.kunststoff.hMin=L.hMin; P.prod.kunststoff.hMax=L.hMax;
+  if(S.bMm) S.bMm=Math.max(L.bMin,Math.min(L.bMax,S.bMm));
+  if(S.hMm) S.hMm=Math.max(L.hMin,Math.min(L.hMax,S.hMm));
+}
+function wizPickFluegel(v){ S.fluegel=v; S.anschlagIdx=null; if(typeof applyFensterLimits==='function')applyFensterLimits(); if(window._touched)window._touched.add('fluegel'); if(typeof _applyDefaultSashStates==='function')_applyDefaultSashStates(v); if(typeof previewState!=='undefined')previewState.fluegel=(v==='stulp')?2:(parseInt(v.charAt(0))||1); const d3=document.getElementById('d3'); if(d3)d3.textContent=(P.fluegel[v]&&P.fluegel[v].name)||v; if(typeof buildOeffSash==='function')buildOeffSash(); if(typeof buildFarbePicker==='function')buildFarbePicker(); if(typeof mkDone==='function')mkDone(3); wizRenderPanel(); }
 function wizSetOeff1(v){ S.oeff1=v; if(window._touched)window._touched.add('oeff1'); _wizPrev(); wizRenderPanel(); }
 function wizSetHstLauf(v){ S.hstLauf=v; if(window._touched)window._touched.add('hstLauf'); _wizPrev(); wizRenderPanel(); }
 function wizSetTuerOeff(o,r){ S.oeff1=o; S.tuerOeffnung=r; if(window._touched){window._touched.add('oeff1');window._touched.add('tuerOeffnung');} _wizPrev(); wizRenderPanel(); }
@@ -7371,6 +7393,7 @@ function wizRenderGlas(){
 }
 function wizPickEarly(key,v){ S[key]=v; if(window._touched)window._touched.add(key); wizRenderPanel(); }
 function wizRenderMasse(){
+  if(typeof applyFensterLimits==='function')applyFensterLimits();
   const pr=S.prod?P.prod[S.prod]:null;
   const b=S.bMm||(pr&&pr.bDef)||1000, h=S.hMm||(pr&&pr.hDef)||1200;
   const bMin=(pr&&pr.bMin)||300,bMax=(pr&&pr.bMax)||4000,hMin=(pr&&pr.hMin)||300,hMax=(pr&&pr.hMax)||3000;
