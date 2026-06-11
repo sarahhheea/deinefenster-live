@@ -5202,15 +5202,15 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
           </div>
         </div>
       </div>
-      <!-- Aufgeklebte Sprossen beidseitig -->
-      <div class="oc" style="flex-direction:column;align-items:stretch;padding:14px;gap:0" data-v="aufgeklebt" onclick="pick(this,'sproTyp')">
+      <!-- Aufgesetzte Sprossen beidseitig -->
+      <div class="oc" style="flex-direction:column;align-items:stretch;padding:14px;gap:0" data-v="aufgesetzt" onclick="pick(this,'sproTyp')">
         <div style="height:140px;background:rgba(255,255,255,0.04);border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;overflow:hidden">
-          <img src="img/sprossen-aufgesetzt.png" alt="Aufgeklebte Sprossen" loading="lazy" decoding="async" style="max-height:140px;max-width:100%;width:auto;object-fit:contain;display:block">
+          <img src="img/sprossen-aufgesetzt.png" alt="Aufgesetzte Sprossen" loading="lazy" decoding="async" style="max-height:140px;max-width:100%;width:auto;object-fit:contain;display:block">
         </div>
         <div style="display:flex;align-items:flex-start;gap:10px">
           <div class="ora" style="margin-top:2px;flex-shrink:0"></div>
           <div>
-            <div class="olabel">Aufgeklebte Sprossen</div>
+            <div class="olabel">Aufgesetzte Sprossen</div>
             <div class="osub">Beidseitig auf Glas — 27, 45 oder 65 mm</div>
           </div>
         </div>
@@ -5927,13 +5927,13 @@ const P = {
     'master-carre': { name:'Master Carré',   add:0 },
   },
   // Kunden-bestätigt 21.04.2026: konkretes Sprossen-Sortiment
-  // Aufgeklebt beidseitig: 27 / 45 / 65 mm · Scheibenzwischenraum (SZR): 18 / 26 / 45 mm
+  // Aufgesetzt beidseitig: 27 / 45 / 65 mm · Scheibenzwischenraum (SZR): 18 / 26 / 45 mm
   sproAdd: {
-    'aufgeklebt': { '27': 30, '45': 42, '65': 55 },
+    'aufgesetzt': { '27': 30, '45': 42, '65': 55 },
     'szr':        { '18': 45, '26': 52, '45': 62 },
   },
   sproDickenPerTyp: {
-    'aufgeklebt': ['27','45','65'],
+    'aufgesetzt': ['27','45','65'],
     'szr':        ['18','26','45'],
   },
   griff: {
@@ -7144,7 +7144,7 @@ const WIZ_ALL=[
   {key:'balk', gilt:['balkontuer'], title:'Wählen Sie die <span>Schwelle</span>', sub:'Boden-Schwelle Ihrer Balkontür.', render:wizRenderBalkSchwelle, layout:'cards'},
   {key:'hstschwelle', gilt:['hst'], title:'Wählen Sie die <span>Schwelle</span>', sub:'Standard oder barrierefreie Null-Schwelle.', render:wizRenderHstSchwelle, layout:'cards'},
   {key:'rolladen', gilt:['kunststoff','balkontuer','hst'], title:'Wählen Sie den <span>Rolladen</span>', sub:'Sonnen- und Sichtschutz — optional.', render:wizRenderRoll},
-  {key:'sprossen', gilt:['kunststoff','balkontuer'], title:'Wählen Sie die <span>Sprossen</span>', sub:'Klassische Optik — aufgeklebt oder im Scheibenzwischenraum.', render:wizRenderSpro},
+  {key:'sprossen', gilt:['kunststoff','balkontuer'], title:'Wählen Sie die <span>Sprossen</span>', sub:'Klassische Optik — aufgesetzt oder im Scheibenzwischenraum.', render:wizRenderSpro},
   {key:'sicherheit', gilt:ALL, title:'Wählen Sie den <span>Einbruchschutz</span>', sub:'Wie sicher soll es sein?', render:wizRenderSicher},
   {key:'angebot', gilt:ALL, title:'Ihre <span>Übersicht</span>', sub:'Alles auf einen Blick — dann zur Anfrage.', render:wizRenderAngebot},
   {key:'kontakt', gilt:ALL, title:'Ihre <span>Anfrage</span>', sub:'Kontaktdaten eingeben — kostenlos & unverbindlich absenden.', render:wizRenderKontakt, layout:'cards'},
@@ -7563,7 +7563,7 @@ function wizSetRoll(v){ S.roll=v; if(window._touched)window._touched.add('roll')
 function wizSetRollSeite(v){ wizSet('rollSeite',v); }
 // SPROSSEN
 function wizRenderSpro(){
-  const types=[['keine','Ohne Sprossen',''],['aufgeklebt','Aufgeklebt','img/sprossen-aufgesetzt.png'],['szr','Im Glas (SZR)','img/sprossen-innenliegend.png']];
+  const types=[['keine','Ohne Sprossen',''],['aufgesetzt','Aufgesetzt','img/sprossen-aufgesetzt.png'],['szr','Im Glas (SZR)','img/sprossen-innenliegend.png']];
   let h='<div class="wiz-cards">'+types.map(function(t){
     const im=t[2]?'<img src="'+t[2]+'" alt="'+t[1]+'" loading="lazy">':'<div class="wiz-noimg">Ohne Sprossen</div>';
     return '<div class="wiz-card'+(t[0]===S.sproTyp?' sel':'')+'" onclick="wizSetSproTyp(\''+t[0]+'\')">'+im+'<div class="wiz-cn">'+t[1]+'</div></div>';
@@ -7815,12 +7815,12 @@ function pickBalkonSchwelle(el) {
   upSidebar(); drawPrev();
 }
 
-// Kunden-bestätigt 21.04.2026: dynamische Sprossendicken je Typ (aufgeklebt: 27/45/65 · szr: 18/26/45)
+// Kunden-bestätigt 21.04.2026: dynamische Sprossendicken je Typ (aufgesetzt: 27/45/65 · szr: 18/26/45)
 function buildSprossenDicken(typ) {
   const grid = document.getElementById('spro-dicke-grid');
   const labelEl = document.getElementById('spro-dicke-label');
   if (!grid || !typ || !P.sproDickenPerTyp[typ]) return;
-  labelEl.textContent = typ === 'aufgeklebt' ? 'Sprossendicke (aufgeklebt beidseitig)' : 'Sprossendicke (Scheibenzwischenraum)';
+  labelEl.textContent = typ === 'aufgesetzt' ? 'Sprossendicke (aufgesetzt beidseitig)' : 'Sprossendicke (Scheibenzwischenraum)';
   const dicken = P.sproDickenPerTyp[typ];
   grid.innerHTML = dicken.map(d => `
     <div class="oc${S.sproDicke===d?' sel':''}" data-v="${d}" onclick="pick(this,'sproDicke')" style="flex-direction:column;align-items:flex-start;padding:10px 12px;gap:4px">
@@ -8205,7 +8205,7 @@ function pick(el, key) {
     setTimeout(()=>_nextAfterRC(),200);
   }
   if (key==='sproTyp'){
-    document.getElementById('d12').textContent = v==='keine'?'Ohne Sprossen':v==='aufgeklebt'?'Aufgeklebte Sprossen':'Sprossen im Scheibenzwischenraum';
+    document.getElementById('d12').textContent = v==='keine'?'Ohne Sprossen':v==='aufgesetzt'?'Aufgesetzte Sprossen':'Sprossen im Scheibenzwischenraum';
     mkDone(12);
     const show = v!=='keine';
     document.getElementById('spro-dicke').classList.toggle('hidden',!show);
@@ -8220,7 +8220,7 @@ function pick(el, key) {
   }
   if (key==='sproDicke') {
     mkDone(12);
-    document.getElementById('d12').textContent = (S.sproTyp==='aufgeklebt'?'Aufgeklebt':'SZR') + ' ' + v + ' mm';
+    document.getElementById('d12').textContent = (S.sproTyp==='aufgesetzt'?'Aufgesetzt':'SZR') + ' ' + v + ' mm';
     // FIX BUG 5: nach Sprossendicke-Wahl zu Zusammenfassung weitergehen
     setTimeout(()=>openS(13), 200);
   }
@@ -10635,7 +10635,7 @@ function calcUnit() {
   if (S.fa && P.fa[S.fa])           price += P.fa[S.fa].add;
   if (S.fi && P.fi[S.fi])           price += P.fi[S.fi].add;
   if (S.fd && P.fd[S.fd])           price += P.fd[S.fd].add;
-  // Kunden-bestätigt 21.04.2026: Sprossen-Preis nach Typ (aufgeklebt/szr) × Dicke
+  // Kunden-bestätigt 21.04.2026: Sprossen-Preis nach Typ (aufgesetzt/szr) × Dicke
   if (S.sproTyp !== 'keine' && S.sproDicke && P.sproAdd[S.sproTyp] && P.sproAdd[S.sproTyp][S.sproDicke]) {
     price += P.sproAdd[S.sproTyp][S.sproDicke];
   }
@@ -10719,7 +10719,7 @@ function upSidebar() {
       if(S.sproTyp==='keine') return [];
       const a = P.sproAdd[S.sproTyp]?.[S.sproDicke] || 0;
       if (a === 0) return [];
-      const typLabel = S.sproTyp==='aufgeklebt'?'Aufgeklebt':'SZR';
+      const typLabel = S.sproTyp==='aufgesetzt'?'Aufgesetzt':'SZR';
       return [{l:`${typLabel} Sprossen ${S.sproDicke} mm`, v:'+ '+fmt(a), sub:true}];
     })(),
     // Griff — produkt-abhängig
@@ -13152,7 +13152,7 @@ const OPTIONS_HINTS = {
   's-balk':   'Standard-Schwelle · Niedrige Schwelle · Set wählen',
   's10':      'WK1 · WK2 · WK3 — Einbruchschutz nach DIN',
   's11':      'Ohne · Aufsatz-Rolladen · Vorbau-Rolladen',
-  's12':      'Ohne · Aufgeklebt · Im Scheibenzwischenraum',
+  's12':      'Ohne · Aufgesetzt · Im Scheibenzwischenraum',
   's-rv':     'Optional — für Mauerwerksanpassung',
 };
 
@@ -13193,7 +13193,7 @@ function initSectionLabels() {
   // Sprossen — Default keine
   if (S.sproTyp) {
     const txt = S.sproTyp === 'keine' ? 'Ohne Sprossen' :
-                S.sproTyp === 'aufgeklebt' ? 'Aufgeklebte Sprossen' :
+                S.sproTyp === 'aufgesetzt' ? 'Aufgesetzte Sprossen' :
                 'Sprossen im Scheibenzwischenraum';
     setDesc('#s12', 'd12', txt);
   }
@@ -14826,7 +14826,7 @@ const SECTIONS=[
  {id:'hstschwelle',t:'Schwelle',gilt:['hst'],sum:()=>curName(P.hstSchwelle,S.hstSchwelle),body:()=>pills('hstSchwelle',Object.keys(P.hstSchwelle).map(k=>[k,P.hstSchwelle[k].name]))},
  {id:'farbe',t:'Farbe & Oberfläche',gilt:['kunststoff','balkontuer','haustuere','hst'],sum:()=>`${P.fa[S.fa]?.name||'–'} außen · ${P.fi[S.fi]?.name||'–'} innen`,body:()=>hint('Außen sieht man von der Straße, innen vom Raum. Über 40 Farben & Holzdekore.')+`<div class="d2sub">Außenfarbe</div>`+colorTiles('fa')+`<div class="d2sub">Innenfarbe</div>`+colorTiles('fi')+`<div class="d2sub">Dichtung</div>`+pills('fd',Object.keys(P.fd).map(k=>[k,P.fd[k].name.replace('Dichtung ','')]))},
  {id:'roll',t:'Rolladen',gilt:['kunststoff','balkontuer','hst'],sum:()=>S.roll==='ohne'?'Ohne':`${P.roll[S.roll].name} · Kasten ${S.rollKasten} mm`,body:()=>{let h=pills('roll',Object.keys(P.roll).map(k=>[k,P.roll[k].name]));if(S.roll!=='ohne'){const ks=Object.keys(P.rollKasten).filter(k=>P.rollKasten[k].prods.includes(S.prod));h+=`<div class="d2sub">Kastenhöhe</div>`+pills('rollKasten',ks.map(k=>[k,P.rollKasten[k].name]))+`<div class="d2sub">Gurt-/Motorseite</div>`+pills('rollSeite',[['rechts','Rechts'],['links','Links']]);}return h;}},
- {id:'sprossen',t:'Sprossen',gilt:['kunststoff','balkontuer'],sum:()=>S.sproTyp==='keine'?'Ohne':`${S.sproTyp==='aufgeklebt'?'Aufgeklebt':'SZR'} ${S.sproDicke} mm`,body:()=>{let h=pills('sproTyp',[['keine','Ohne'],['aufgeklebt','Aufgeklebt'],['szr','Im Glas (SZR)']]);if(S.sproTyp!=='keine'){const ds=P.sproDickenPerTyp[S.sproTyp]||[];h+=`<div class="d2sub">Breite</div>`+pills('sproDicke',ds.map(d=>[d,d+' mm']));}return h;}},
+ {id:'sprossen',t:'Sprossen',gilt:['kunststoff','balkontuer'],sum:()=>S.sproTyp==='keine'?'Ohne':`${S.sproTyp==='aufgesetzt'?'Aufgesetzt':'SZR'} ${S.sproDicke} mm`,body:()=>{let h=pills('sproTyp',[['keine','Ohne'],['aufgesetzt','Aufgesetzt'],['szr','Im Glas (SZR)']]);if(S.sproTyp!=='keine'){const ds=P.sproDickenPerTyp[S.sproTyp]||[];h+=`<div class="d2sub">Breite</div>`+pills('sproDicke',ds.map(d=>[d,d+' mm']));}return h;}},
  {id:'sicher',t:'Einbruchschutz',gilt:['kunststoff','balkontuer','haustuere','hst'],sum:()=>curName(P.sicher,S.sicher),body:()=>{const n=(S.sicher==='rc2'||S.sicher==='rc3')?`<div class="d2warn">${IWARN}<span>RC2/RC3 enthält automatisch Verbundsicherheitsglas (VSG).</span></div>`:'';return hint('Pilzkopfverriegelung. WK1 ist Standard.')+pills('sicher',Object.keys(P.sicher).map(k=>[k,P.sicher[k].name]))+n;}},
  {id:'anfrage',t:'Unverbindliche Anfrage',gilt:['kunststoff','balkontuer','haustuere','hst'],req:true,sum:()=>'Kontaktdaten eingeben',body:()=>`${hint('Wir erstellen Ihr persönliches Angebot — kostenlos und unverbindlich.')}
    <form class="d2frm" id="d2-form" onsubmit="return D2.submit(event)" novalidate>
