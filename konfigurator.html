@@ -7270,6 +7270,8 @@ function wizStart(){
   if(!S.glas)S.glas=(prod==='hst')?'3fach':'2fach';
   // Start immer mit weißem Produkt (Kundenwunsch 07.06.2026)
   S.fa='weiss'; S.fi='weiss'; if(typeof previewState!=='undefined'){previewState.aussenFarbe='#f4f4f0';previewState.innenFarbe='#f4f4f0';}
+  // Farb-Flags zuruecksetzen, damit die Innenansicht-Vorschau bei neuem Produkt nicht faelschlich Weiss erzwingt
+  if(window._touched){window._touched.delete('fa');window._touched.delete('fi');}
   if(!S.glasdekor)S.glasdekor='klar';
   if(!S.griff)S.griff='mistral'; if(!S.griffColor)S.griffColor='weiss';
   WIZ_STEPS=buildWizSteps(prod);
@@ -12439,10 +12441,12 @@ function _renderHst3d() {
   const _sys   = (S.profil || '').replace(/^iglo-/, '') || 'hs';
   // Ansicht aus Konfigurator-Toggle (Innen/Außen-Buttons in Schritt 2)
   const _viewKey = (typeof previewState !== 'undefined' && previewState.ansicht === 'aussen') ? 'aussen' : 'innen';
-  // 3D: bei Innenansicht S.fi, bei Außenansicht S.fa
+  // 3D: bei Innenansicht S.fi, bei Aussenansicht S.fa - Innenfarbe nur erzwingen wenn bewusst gewaehlt,
+  // sonst gewaehlte Aussenfarbe spiegeln, damit die Farbe in der Vorschau nicht verschwindet (durchgaengige Vorschau)
+  const _innerFarb = (window._touched && window._touched.has && window._touched.has('fi')) ? (S.fi||S.fa) : (S.fa||S.fi);
   const _ck    = _viewKey === 'aussen'
     ? (HAUS3D_COLOR_MAP[S.fa] || HAUS3D_COLOR_MAP[S.fi] || 'anthrazitgrau')
-    : (HAUS3D_COLOR_MAP[S.fi] || HAUS3D_COLOR_MAP[S.fa] || 'anthrazitgrau');
+    : (HAUS3D_COLOR_MAP[_innerFarb] || HAUS3D_COLOR_MAP[S.fa] || 'anthrazitgrau');
   const isWood = HAUS3D_WOOD_KEYS.has(_ck);
   const _side  = (S.oeff1 === 'dreh-l' || S.oeff1 === 'dk-l') ? 'l' : 'r';
   const _grip  = S.hstGriffAussen || 'weiss';  // 3D zeigt den Bügel-Stoßgriff = Außen-Griff → dessen Farbe (weiss/braun) steuert die 3D-Griff-Farbe
@@ -12496,7 +12500,9 @@ function _renderBalkontuer3d() {
   // Kunden-Fix 24.05.2026: View-abhängige Farbe — bei Außen-Ansicht S.fa, sonst S.fi.
   // Vorher: immer S.fi → Außenfarbe-Auswahl hatte keinen visuellen Effekt im 3D-Modell.
   const _view  = (typeof previewView !== 'undefined' && previewView === 'aus') ? 'aussen' : 'innen';
-  const _farb  = (_view === 'aussen') ? (S.fa || S.fi) : (S.fi || S.fa);
+  // Innenfarbe nur erzwingen wenn bewusst gewaehlt; sonst gewaehlte Aussenfarbe spiegeln (durchgaengige Vorschau)
+  const _innerFarb = (window._touched && window._touched.has && window._touched.has('fi')) ? (S.fi||S.fa) : (S.fa||S.fi);
+  const _farb  = (_view === 'aussen') ? (S.fa || S.fi) : _innerFarb;
   const _ck    = HAUS3D_COLOR_MAP[_farb] || HAUS3D_COLOR_MAP[S.fi] || 'anthrazitgrau';
   const isWood = HAUS3D_WOOD_KEYS.has(_ck);
   const _side  = (S.oeff1 === 'dreh-l' || S.oeff1 === 'dk-l') ? 'l' : 'r';
@@ -12564,7 +12570,10 @@ function _renderFenster3d() {
   const _view  = (previewView === 'aus') ? 'aussen' : 'innen';
   // Innenansicht zeigt im Farbe-Schritt die gerade gewählte Farbe (Außen- oder Innen-Tab), sonst die Innenfarbe
   const _onFarbe = (typeof wizIdx!=='undefined' && typeof WIZ_STEPS!=='undefined' && WIZ_STEPS[wizIdx] && WIZ_STEPS[wizIdx].key==='farbe');
-  const _farb  = (_view === 'aussen') ? S.fa : ((_onFarbe && typeof wizFarbTab!=='undefined') ? (S[wizFarbTab]||S.fi) : S.fi);
+  // Innenfarbe nur erzwingen wenn der Kunde sie bewusst gewaehlt hat; sonst die gewaehlte Aussenfarbe spiegeln,
+  // damit die Farbe sichtbar bleibt sobald der Farbe-Schritt verlassen wird (Kundenwunsch: durchgaengige Vorschau)
+  const _innerFarb = (window._touched && window._touched.has && window._touched.has('fi')) ? (S.fi||S.fa) : (S.fa||S.fi);
+  const _farb  = (_view === 'aussen') ? S.fa : ((_onFarbe && typeof wizFarbTab!=='undefined') ? (S[wizFarbTab]||S.fi) : _innerFarb);
   const _ck    = HAUS3D_COLOR_MAP[_farb] || HAUS3D_COLOR_MAP[S.fa] || HAUS3D_COLOR_MAP[S.fi] || 'anthrazitgrau';
   const isWood = HAUS3D_WOOD_KEYS.has(_ck);
   // Drutex-Standard: Scharnier-Seite → Griff auf gegenüberliegender Seite
