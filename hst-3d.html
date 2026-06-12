@@ -577,7 +577,7 @@ function buildWindow() {
     // ein gebogener Hoppe-L-Hebel auf einer mittleren, abgerundeten Platte/Rosette (~150mm),
     // Hebel zeigt in Schließstellung nach UNTEN. KEINE Griffmuschel, KEIN langer Zug-Bügel.
     // Hebel-Geometrie 1:1 vom guten Fenstergriff (fenster-3d.html: Tube-Curve + Olive).
-    const SHIELD_LEN = 0.150;   // ~150mm mittlere Platte (größer als Fenster-Rosette, klar kürzer als HS-Bügel)
+    const SHIELD_LEN = 0.105;   // kompakte NEVADA-Rosette; Hebel hängt frei darunter
     const SHIELD_W   = 0.038;   // ~38mm breit
     const SHIELD_Z   = DOOR_FZ + 0.006;
     // deutlich zur Flügelmitte gerückt, damit der Griff frei auf weißem Flügel sitzt (nicht auf der dunklen Kante)
@@ -622,11 +622,11 @@ function buildWindow() {
     const z0 = SHIELD_Z + 0.014;
     const levPts = [
       new THREE.Vector3(SHIELD_CX,          hubCY,          z0 + 0.002),
-      new THREE.Vector3(SHIELD_CX,          hubCY,          z0 + 0.018),
-      new THREE.Vector3(SHIELD_CX + 0.010,  hubCY - 0.010,  z0 + 0.026),
-      new THREE.Vector3(SHIELD_CX + 0.028,  hubCY - 0.034,  z0 + 0.028),
-      new THREE.Vector3(SHIELD_CX + 0.044,  hubCY - 0.064,  z0 + 0.028),
-      new THREE.Vector3(SHIELD_CX + 0.056,  hubCY - 0.094,  z0 + 0.028),
+      new THREE.Vector3(SHIELD_CX,          hubCY,          z0 + 0.020),
+      new THREE.Vector3(SHIELD_CX + 0.012,  hubCY - 0.014,  z0 + 0.028),
+      new THREE.Vector3(SHIELD_CX + 0.024,  hubCY - 0.048,  z0 + 0.030),
+      new THREE.Vector3(SHIELD_CX + 0.026,  hubCY - 0.090,  z0 + 0.030),
+      new THREE.Vector3(SHIELD_CX + 0.022,  hubCY - 0.128,  z0 + 0.030),
     ];
     const levCurve = new THREE.CatmullRomCurve3(levPts, false, 'centripetal', 0.5);
     const lSegs = 56, rSegs = 20;
@@ -650,7 +650,7 @@ function buildWindow() {
 
     // 4) Olive — fließender Halbkugel-Abschluss am Hebel-Ende (unten/außen)
     const olive = new THREE.Mesh(new THREE.SphereGeometry(0.0115 * 0.84, 24, 18), hstGriffMat);
-    olive.position.set(SHIELD_CX + 0.056, hubCY - 0.094, z0 + 0.028);
+    olive.position.set(SHIELD_CX + 0.022, hubCY - 0.128, z0 + 0.030);
     olive.castShadow = true; olive.userData.isHandle = true;
     slideGroup.add(olive); handleObjects.push(olive);
 
@@ -666,40 +666,35 @@ function buildWindow() {
     cylSlot.position.set(SHIELD_CX, cylCY, SHIELD_Z + 0.016);
     slideGroup.add(cylSlot);
   } else {
-    // ── HS-DREHGRIFF (Hebe-Schiebe) — GU Dirigent mit Griffmuschel ──
-    // Verifiziert an echten Produktbildern: ein kurzer Hebel-Ansatz an einer Nabe + eine LANGE,
-    // FLACHE senkrechte Zug-Stange (~230mm) die nach OBEN ragt und am oberen Ende kurz zur Tür
-    // zurück abknickt (Hockeyschläger-Kopf) — zum Greifen/Ziehen der schweren Schiebetür. Darunter
-    // auf der Platte eine eingelassene ovale GRIFFMUSCHEL (dunkle Mulde) + Schließzylinder.
-    // GENAU diese lange Stange + Muschel unterscheidet die HS klar von der kompakten PSK.
-    const SHIELD_LEN = 0.150;   // ~150mm Grundplatte (trägt Nabe, Muschel, Zylinder)
-    const SHIELD_W   = 0.040;   // ~40mm breit
+    // ── HS-DREHGRIFF (Hebe-Schiebe) — Drutex-Standard: HOHER geschwungener Hebel ──
+    // 1:1 an echtem Drutex-HST-Innengriff modelliert (weißer HST-Drehgriff, Referenzbild):
+    // schmale senkrechte Rosette + EIN großer, ergonomisch geschwungener Hebel, der von der
+    // Nabe nach OBEN steigt, nach außen baucht und am oberen Ende zur Tür zurück biegt.
+    // KEINE Griffmuschel innen (die sitzt außen als Muschelgriff). Klar größer als der PSK-Hebel.
+    const SHIELD_LEN = 0.082;   // kurze schmale Rosette (Hebel dominiert klar)
+    const SHIELD_W   = 0.032;
     const SHIELD_Z   = DOOR_FZ + 0.006;
-    const SHIELD_CX  = GRIP_CX + 0.062;   // wie PSK frei auf den Flügel gerückt
-    // Platte sitzt etwas tiefer; die lange Stange ragt nach oben über die Platte hinaus
-    const SHIELD_CY  = HIP_CY - 0.020;
-    const BAR_THICK  = 0.009;   // flache Stange (rechteckiger Querschnitt) — kein runder Tube
-    const BAR_W      = 0.026;   // ~26mm breit (flacher Bügel)
-    const BAR_LEN    = 0.230;   // ~230mm hohe Zug-Stange (HS-Erkennungsmerkmal)
-    const barZ       = SHIELD_Z + 0.014 + BAR_THICK/2;
+    const SHIELD_CX  = GRIP_CX + 0.062;
+    const SHIELD_CY  = HIP_CY;
+    const hubCY      = SHIELD_CY;           // Nabe in Rosettenmitte, Hebel setzt sauber an
 
-    // 1) Grundplatte — abgerundete Kapsel
+    // 1) schmale senkrechte Rosette — FLACHE Platte (kein 3D-Pillen-Look)
     const shield = new THREE.Mesh(
       new THREE.CapsuleGeometry(SHIELD_W/2, SHIELD_LEN - SHIELD_W, 6, 24),
       hstGriffMat
     );
-    shield.scale.set(1.0, 1.0, 0.55);
-    shield.position.set(SHIELD_CX, SHIELD_CY, SHIELD_Z + 0.006);
+    shield.scale.set(1.0, 1.0, 0.26);
+    shield.position.set(SHIELD_CX, SHIELD_CY, SHIELD_Z + 0.004);
     shield.castShadow = true; shield.userData.isHandle = true;
     slideGroup.add(shield); handleObjects.push(shield);
-    // 1a) dünne dunkle Fuge rund um die Platte
+    // 1a) dünne dunkle Fuge rund um die Rosette → hebt weiße Rosette vom weißen Flügel ab
     const shieldBack = new THREE.Mesh(
       new THREE.BoxGeometry(SHIELD_W + 0.006, SHIELD_LEN + 0.006, 0.004),
       sealMat
     );
     shieldBack.position.set(SHIELD_CX, SHIELD_CY, SHIELD_Z + 0.002);
     slideGroup.add(shieldBack);
-    // 1b) zwei dezente Schraub-Punkte oben/unten an der Platte
+    // 1b) Schraub-Punkte oben/unten
     [SHIELD_CY + SHIELD_LEN/2 - 0.016, SHIELD_CY - SHIELD_LEN/2 + 0.016].forEach(sy => {
       const sc = new THREE.Mesh(new THREE.CylinderGeometry(0.0032, 0.0032, 0.004, 16), sealMat);
       sc.rotation.x = Math.PI/2;
@@ -707,76 +702,49 @@ function buildWindow() {
       slideGroup.add(sc);
     });
 
-    // 2) Nabe (Drücker-Lagerung) — etwas oberhalb der Plattenmitte; hier setzt die Stange an
-    const hubCY = SHIELD_CY + 0.018;
-    const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.014, 24), hstGriffMat);
+    // 2) Nabe (Drücker-Lagerung) mittig auf der Rosette
+    const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.017, 0.017, 0.014, 24), hstGriffMat);
     hub.rotation.x = Math.PI/2;
     hub.position.set(SHIELD_CX, hubCY, SHIELD_Z + 0.014);
     hub.castShadow = true; hub.userData.isHandle = true;
     slideGroup.add(hub); handleObjects.push(hub);
 
-    // 3) Kurzer Hebel-Ansatz: aus der Nabe seitlich nach AUSSEN, dann knickt es in die lange
-    //    Stange nach oben (Knie-Stück). Flacher Quader.
-    const knee = new THREE.Mesh(
-      new THREE.BoxGeometry(0.030, BAR_W, BAR_THICK),
-      hstGriffMat
-    );
-    knee.position.set(SHIELD_CX + 0.015, hubCY, barZ);
-    knee.castShadow = true; knee.userData.isHandle = true;
-    slideGroup.add(knee); handleObjects.push(knee);
+    // 3) HOHER geschwungener Hebel als durchgehender Tube: von der Nabe nach OBEN,
+    //    nach außen bauchend, am oberen Ende zur Tür zurück biegend (echte HST-Form).
+    const z0 = SHIELD_Z + 0.014;
+    const levPts = [
+      new THREE.Vector3(SHIELD_CX,         hubCY,          z0 + 0.002),
+      new THREE.Vector3(SHIELD_CX + 0.006, hubCY + 0.018,  z0 + 0.026),
+      new THREE.Vector3(SHIELD_CX + 0.018, hubCY + 0.082,  z0 + 0.040),
+      new THREE.Vector3(SHIELD_CX + 0.022, hubCY + 0.152,  z0 + 0.042),
+      new THREE.Vector3(SHIELD_CX + 0.018, hubCY + 0.216,  z0 + 0.040),
+      new THREE.Vector3(SHIELD_CX + 0.009, hubCY + 0.262,  z0 + 0.032),
+    ];
+    const levCurve = new THREE.CatmullRomCurve3(levPts, false, 'centripetal', 0.5);
+    const lSegs = 72, rSegs = 22;
+    const levGeo = new THREE.TubeGeometry(levCurve, lSegs, 0.0145, rSegs, false);
+    const lp = levGeo.attributes.position;
+    for (let i = 0; i <= lSegs; i++) {
+      const t = i / lSegs;
+      const pt = levCurve.getPointAt(t);
+      const sf = 1.0 - 0.14 * Math.pow(t, 1.3);   // zum Ende leicht verjüngt
+      for (let j = 0; j <= rSegs; j++) {
+        const idx = i * (rSegs + 1) + j;
+        lp.setX(idx, pt.x + (lp.getX(idx) - pt.x) * sf);
+        lp.setY(idx, pt.y + (lp.getY(idx) - pt.y) * sf);
+        lp.setZ(idx, pt.z + (lp.getZ(idx) - pt.z) * sf);
+      }
+    }
+    lp.needsUpdate = true; levGeo.computeVertexNormals();
+    const lever = new THREE.Mesh(levGeo, hstGriffMat);
+    lever.castShadow = true; lever.userData.isHandle = true;
+    slideGroup.add(lever); handleObjects.push(lever);
 
-    // 4) LANGE senkrechte Zug-Stange — flacher Quader, ragt von der Nabe weit nach OBEN
-    const barCX = SHIELD_CX + 0.010;          // knapp über der Platte (ein zusammenhängendes Teil, nicht schwebend)
-    const barCY = hubCY + BAR_LEN/2 - 0.010;  // Unterkante ~an der Nabe, ragt nach oben
-    const bar = new THREE.Mesh(
-      new THREE.BoxGeometry(BAR_W, BAR_LEN, BAR_THICK),
-      hstGriffMat
-    );
-    bar.position.set(barCX, barCY, barZ);
-    bar.castShadow = true; bar.userData.isHandle = true;
-    slideGroup.add(bar); handleObjects.push(bar);
-
-    // 5) Hockeyschläger-Kopf: am oberen Ende knickt die Stange kurz zur TÜR-Mitte zurück (nach -X)
-    //    → bildet ein umgekehrtes L, in der frontalen Ansicht klar als HS-Zug-Bügel lesbar.
-    const CAP_LEN = 0.034;
-    const barTopY = barCY + BAR_LEN/2;
-    const topCap = new THREE.Mesh(
-      new THREE.BoxGeometry(CAP_LEN, BAR_W, BAR_THICK),
-      hstGriffMat
-    );
-    topCap.position.set(barCX - CAP_LEN/2 + BAR_W/2, barTopY - BAR_W/2, barZ);
-    topCap.castShadow = true; topCap.userData.isHandle = true;
-    slideGroup.add(topCap); handleObjects.push(topCap);
-    // 5a) kleine Endkappe am Bügel-Kopf (leicht zur Tür zurückgesetzt → Tiefe)
-    const capEnd = new THREE.Mesh(
-      new THREE.BoxGeometry(BAR_W, BAR_W, BAR_THICK),
-      hstGriffMat
-    );
-    capEnd.position.set(barCX - CAP_LEN + BAR_W, barTopY - BAR_W/2, barZ - 0.006);
-    capEnd.castShadow = true; capEnd.userData.isHandle = true;
-    slideGroup.add(capEnd); handleObjects.push(capEnd);
-
-    // 6) Eingelassene ovale GRIFFMUSCHEL im UNTEREN Teil der Platte (HS-Erkennungsmerkmal)
-    const muschelCY = SHIELD_CY - 0.030;
-    const muschel = new THREE.Mesh(
-      new THREE.CapsuleGeometry(0.011, 0.034, 4, 18),
-      sealMat
-    );
-    muschel.scale.set(1.0, 1.0, 0.28);
-    muschel.position.set(SHIELD_CX, muschelCY, SHIELD_Z + 0.009);
-    slideGroup.add(muschel);
-
-    // 7) Schließzylinder-Andeutung ganz unten auf der Platte
-    const cylCY = SHIELD_CY - SHIELD_LEN/2 + 0.022;
-    const cylRing = new THREE.Mesh(new THREE.CylinderGeometry(0.0072, 0.0072, 0.006, 24), hstGriffMat);
-    cylRing.rotation.x = Math.PI/2;
-    cylRing.position.set(SHIELD_CX, cylCY, SHIELD_Z + 0.013);
-    cylRing.castShadow = true;
-    slideGroup.add(cylRing);
-    const cylSlot = new THREE.Mesh(new THREE.CylinderGeometry(0.0040, 0.0040, 0.004, 20), sealMat);
-    cylSlot.rotation.x = Math.PI/2;
-    cylSlot.position.set(SHIELD_CX, cylCY, SHIELD_Z + 0.016);
-    slideGroup.add(cylSlot);
+    // 4) abgerundeter Abschluss am oberen Hebel-Ende
+    const cap = new THREE.Mesh(new THREE.SphereGeometry(0.0145 * 0.88, 24, 18), hstGriffMat);
+    cap.position.set(SHIELD_CX + 0.009, hubCY + 0.262, z0 + 0.032);
+    cap.castShadow = true; cap.userData.isHandle = true;
+    slideGroup.add(cap); handleObjects.push(cap);
   }
 
   // ── MUSCHELGRIFF außen (eingelassen, auf Rückseite des Schiebeflügels) ──
