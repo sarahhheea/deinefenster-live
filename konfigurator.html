@@ -5945,7 +5945,6 @@ const P = {
     'kreuz':  { name:'Kreuz · 4 Felder',    v:1, h:1 },
     'feld6':  { name:'6 Felder',            v:2, h:1 },
     'feld9':  { name:'9 Felder',            v:2, h:2 },
-    'feld12': { name:'12 Felder',           v:3, h:2 },
   },
   griff: {
     // 3-stufige Auswahl: Modell + Farbe + Abschließbar (S.griff = Modell-Key)
@@ -7588,7 +7587,12 @@ function wizRenderSpro(){
     // Reihenfolge (Kundenwunsch 12.06.2026): Art → Aufteilung (bildlich) → Dicke
     h+='<div class="wiz-group" style="margin-top:16px"><div class="wiz-gt">Aufteilung</div><div class="wiz-cards">'+Object.keys(P.sproRaster).map(function(k){
       const r=P.sproRaster[k];
-      return '<div class="wiz-card'+(k===S.sproRaster?' sel':'')+'" onclick="wizSetSproRaster(\''+k+'\')"><div class="wiz-vis">'+_sproRasterIcon(r.v,r.h)+'</div><div class="wiz-cn">'+r.name+'</div></div>';
+      // Bei aufgesetzten Sprossen echtes Produktfoto (direkt in der Karte = object-fit:contain, kein Crop),
+      // sonst (SZR) das Raster-Symbol in der Vis-Box.
+      const vis = (S.sproTyp==='aufgesetzt')
+        ? '<img src="img/karten/sprossen/sprossen-aufgesetzt-'+k+'.png?v=20260612" alt="'+r.name+'" loading="lazy" decoding="async">'
+        : '<div class="wiz-vis">'+_sproRasterIcon(r.v,r.h)+'</div>';
+      return '<div class="wiz-card'+(k===S.sproRaster?' sel':'')+'" onclick="wizSetSproRaster(\''+k+'\')">'+vis+'<div class="wiz-cn">'+r.name+'</div></div>';
     }).join('')+'</div></div>';
     h+='<div class="wiz-group" style="margin-top:16px"><div class="wiz-gt">Breite</div>'+_wizPills(dk.map(function(d){return [d,d+' mm'];}),S.sproDicke,'wizSetSproDicke')+'</div>';
   }
