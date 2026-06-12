@@ -7583,11 +7583,12 @@ function wizRenderSpro(){
   }).join('')+'</div>';
   if(S.sproTyp&&S.sproTyp!=='keine'){
     const dk=(P.sproDickenPerTyp&&P.sproDickenPerTyp[S.sproTyp])||[];
-    h+='<div class="wiz-group" style="margin-top:16px"><div class="wiz-gt">Breite</div>'+_wizPills(dk.map(function(d){return [d,d+' mm'];}),S.sproDicke,'wizSetSproDicke')+'</div>';
+    // Reihenfolge (Kundenwunsch 12.06.2026): Art → Aufteilung (bildlich) → Dicke
     h+='<div class="wiz-group" style="margin-top:16px"><div class="wiz-gt">Aufteilung</div><div class="wiz-cards">'+Object.keys(P.sproRaster).map(function(k){
       const r=P.sproRaster[k];
       return '<div class="wiz-card'+(k===S.sproRaster?' sel':'')+'" onclick="wizSetSproRaster(\''+k+'\')"><div class="wiz-vis">'+_sproRasterIcon(r.v,r.h)+'</div><div class="wiz-cn">'+r.name+'</div></div>';
     }).join('')+'</div></div>';
+    h+='<div class="wiz-group" style="margin-top:16px"><div class="wiz-gt">Breite</div>'+_wizPills(dk.map(function(d){return [d,d+' mm'];}),S.sproDicke,'wizSetSproDicke')+'</div>';
   }
   return h;
 }
