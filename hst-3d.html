@@ -223,6 +223,7 @@ orb.update();
 // ══════════════════════════════════════════════
 const pmremGen = new THREE.PMREMGenerator(renderer);
 pmremGen.compileEquirectangularShader();
+// Neutrales Szenen-Env aus Licht (für Rahmen/Glas — unverändert, keine Farb-Regression)
 const envSc = new THREE.Scene();
 envSc.add(new THREE.AmbientLight(0xffffff, 4.0));
 const eL1 = new THREE.DirectionalLight(0xffffff, 4.0);
@@ -230,6 +231,31 @@ eL1.position.set(1, 2, 3); envSc.add(eL1);
 const eL2 = new THREE.DirectionalLight(0xffffff, 3.0);
 eL2.position.set(-2, 1, 3); envSc.add(eL2);
 scene.environment = pmremGen.fromScene(envSc, 0.04).texture;
+
+// Kontrastreiche STUDIO-Umgebung (Gradient + Softbox-Band) — NUR für den Griff (eigene envMap).
+// Gibt Metall/Lack echte Reflex-Verläufe → kein „Knete"-Look, ohne Rahmen/Glas zu verändern.
+function _makeStudioEnvTex(){
+  const c = document.createElement('canvas'); c.width = 1024; c.height = 512;
+  const g = c.getContext('2d');
+  const grad = g.createLinearGradient(0, 0, 0, 512);
+  grad.addColorStop(0.00, '#dfe4ea');
+  grad.addColorStop(0.34, '#c6cdd5');
+  grad.addColorStop(0.52, '#a7afb9');
+  grad.addColorStop(0.68, '#878f99');
+  grad.addColorStop(1.00, '#5c636b');
+  g.fillStyle = grad; g.fillRect(0, 0, 1024, 512);
+  // helle Softbox-Bänder (Reflex-Streifen auf gekrümmten Metallflächen) — lokal, kein globales Auswaschen
+  function band(y0, y1, a){ const b = g.createLinearGradient(0, y0, 0, y1);
+    b.addColorStop(0,'rgba(255,255,255,0)'); b.addColorStop(0.5,'rgba(255,255,255,'+a+')'); b.addColorStop(1,'rgba(255,255,255,0)');
+    g.fillStyle = b; g.fillRect(0, y0, 1024, y1 - y0); }
+  band(70, 140, 0.92);
+  band(205, 245, 0.35);
+  const t = new THREE.CanvasTexture(c);
+  t.mapping = THREE.EquirectangularReflectionMapping;
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+const _handleEnv = pmremGen.fromEquirectangular(_makeStudioEnvTex()).texture;
 
 // Ambient — gerade genug damit Außen-/Seitenflächen sichtbar, aber Schatten erhalten
 scene.add(new THREE.AmbientLight(0xffffff, 0.48));  // Realismus-Pass: weniger Grundhelligkeit → Profil-Relief sichtbar
@@ -300,7 +326,9 @@ const hingeMat  = new THREE.MeshStandardMaterial({ color: 0xbabfc2, roughness: 0
 const schieneMat = new THREE.MeshStandardMaterial({ color: 0xc4c8cd, roughness: 0.38, metalness: 0.70, envMapIntensity: 1.6 });
 // HST-Griff (Aluminium-Profil, eckig) — Drutex IGLO-HS Standard: Weiß/Braun/Silber wählbar
 // Default: Weiß (Kunde-Konfigurator-Default 'weiss-std')
-const hstGriffMat = new THREE.MeshStandardMaterial({ color: 0xf4f4f0, roughness: 0.42, metalness: 0.32, envMapIntensity: 1.6 });
+// MeshPhysicalMaterial mit Klarlack-Schicht (clearcoat) → echte lackierte/polierte Hardware-Oberfläche statt mattem „Knete"-Look
+const hstGriffMat = new THREE.MeshPhysicalMaterial({ color: 0xa9afb6, roughness: 0.33, metalness: 0.55, envMapIntensity: 1.2, clearcoat: 0.7, clearcoatRoughness: 0.14 });
+hstGriffMat.envMap = _handleEnv;   // eigene kontrastreiche Studio-Reflexion nur für den Griff
 // Alte chromeMat bleibt als Fallback für andere Metallteile (Schlüsselzylinder etc.)
 const chromeMat   = new THREE.MeshStandardMaterial({ color: 0xc4c8cc, roughness: 0.28, metalness: 0.85, envMapIntensity: 2.0 });
 // Glas: helles, leicht BLAUES Isolierglas mit vertikalem Himmel-Verlauf (Canvas-Map).
@@ -989,10 +1017,10 @@ function applyHardwareColor(frameColor, frameLum) {
   if (frameLum >= 0.6) {
     // Echte HS/PSK-Griffe sind ALUMINIUM (kein mattes Plastik): gebürstetes Silber mit Glanz
     // → wirkt wie echte Hardware + hebt sich klar vom weißen Flügel ab.
-    hstGriffMat.color.setHex(0xb6babf);
-    hstGriffMat.roughness = 0.44;
-    hstGriffMat.metalness = 0.78;
-    hstGriffMat.envMapIntensity = 1.0;
+    hstGriffMat.color.setHex(0xa9afb6);
+    hstGriffMat.roughness = 0.34;
+    hstGriffMat.metalness = 0.55;
+    hstGriffMat.envMapIntensity = 1.2;
     hstGriffMat.needsUpdate = true;
   }
 }
@@ -1278,10 +1306,10 @@ function setHstGriff(key) {
   if (!isSilber && !isBraun && _hwFrameLum >= 0.6) {
     // Weißer Rahmen + Standard-Griff: gebürstetes ALUMINIUM (echte HS/PSK-Hardware),
     // hebt sich klar vom weißen Flügel ab — kein verwaschenes Plastik.
-    hstGriffMat.color.setHex(0xc2c6cb);
-    hstGriffMat.metalness = 0.78;
-    hstGriffMat.roughness = 0.44;
-    hstGriffMat.envMapIntensity = 1.0;
+    hstGriffMat.color.setHex(0xa9afb6);
+    hstGriffMat.metalness = 0.55;
+    hstGriffMat.roughness = 0.34;
+    hstGriffMat.envMapIntensity = 1.2;
   } else if (isBraun) {
     hstGriffMat.color.set('#5c3218');
     hstGriffMat.metalness = 0.0;
@@ -1289,10 +1317,10 @@ function setHstGriff(key) {
     hstGriffMat.envMapIntensity = 0.4;
   } else {
     // Silber-Finish ODER dunkler Rahmen → gebürstetes Aluminium
-    hstGriffMat.color.setHex(0xc2c6cb);
-    hstGriffMat.metalness = 0.78;
-    hstGriffMat.roughness = 0.44;
-    hstGriffMat.envMapIntensity = 1.0;
+    hstGriffMat.color.setHex(0xa9afb6);
+    hstGriffMat.metalness = 0.55;
+    hstGriffMat.roughness = 0.34;
+    hstGriffMat.envMapIntensity = 1.2;
   }
   hstGriffMat.needsUpdate = true;
 }

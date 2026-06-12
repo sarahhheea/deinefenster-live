@@ -12507,7 +12507,7 @@ function _renderHst3d() {
   wrap.style.display = 'block';
 
   // Bei System-Wechsel kompletten Reload erzwingen (verschiedene Geometrie)
-  const expectedSrc = `/hst-3d.html?embed&v=20260611d&bg=light&system=${_sys}&color=${_ck}&side=${_side}&view=${_viewKey}&grip=${_grip}`;
+  const expectedSrc = `/hst-3d.html?embed&v=20260611e&bg=light&system=${_sys}&color=${_ck}&side=${_side}&view=${_viewKey}&grip=${_grip}`;
   const currentSys  = (frame.src.match(/[?&]system=([^&]+)/) || [])[1];
   const _needsReload = !frame.src.includes('hst-3d') || currentSys !== _sys;
 
@@ -14825,7 +14825,7 @@ function d2Hst(){ const w=document.getElementById('d2-hst3d-wrap'),f=document.ge
   const sys=(S.profil||'').replace(/^iglo-/,'')||'hs'; const vk=(pv==='aus')?'aussen':'innen';
   const ck=vk==='aussen'?(HAUS3D_COLOR_MAP[S.fa]||HAUS3D_COLOR_MAP[S.fi]||'anthrazitgrau'):(HAUS3D_COLOR_MAP[S.fi]||HAUS3D_COLOR_MAP[S.fa]||'anthrazitgrau'); const wood=HAUS3D_WOOD_KEYS.has(ck);
   const side=(S.oeff1==='dreh-l'||S.oeff1==='dk-l')?'l':'r'; const grip=S.hstGriffAussen||'weiss'; w.style.display='block';
-  const exp=`/hst-3d.html?embed&bg=light&v=20260611d&system=${sys}&color=${ck}&side=${side}&view=${vk}&grip=${grip}`; const cur=(f.src.match(/[?&]system=([^&]+)/)||[])[1];
+  const exp=`/hst-3d.html?embed&bg=light&v=20260611e&system=${sys}&color=${ck}&side=${side}&view=${vk}&grip=${grip}`; const cur=(f.src.match(/[?&]system=([^&]+)/)||[])[1];
   const pl={type:'update',color:wood?null:ck,wood:wood?ck:null,glass:S.glasdekor||'klar',side,view:vk,hstGriff:grip};
   if(!f.src.includes('hst-3d')||cur!==sys){ f.src=exp; f.onload=()=>{const cw=f.contentWindow;if(!cw)return;cw.dispatchEvent(new Event('resize'));cw.postMessage(pl,'*');}; } else f.contentWindow&&f.contentWindow.postMessage(pl,'*'); }
 function d2Haus(){ const w=document.getElementById('d2-haus3d-wrap'),f=document.getElementById('d2-haus3d-frame'); if(!w||!f)return; showHint(true);
