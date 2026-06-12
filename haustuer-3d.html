@@ -420,6 +420,12 @@ const glassMat  = new THREE.MeshPhysicalMaterial({
   color: 0x3a5267, metalness: 0, roughness: 0.10,
   transmission: 0.90, thickness: 0.02, ior: 1.5, transparent: true,
 });
+// Echtes glänzendes Klarglas, hell (Seitenteil + Vollglas-Türen) — Kundenwunsch 11.06.: „ein Glas, kein Bild"
+// niedrige roughness = scharfe Umgebungs-Spiegelung (Hell-oben/dunkler-unten-Verlauf) → wirkt wie Glas, nicht wie flaches Brett
+const brightBackMat  = new THREE.MeshStandardMaterial({ color: 0xeef3f7, roughness: 0.92 });
+const brightGlassMat = new THREE.MeshPhysicalMaterial({ color: 0xc4d6e4, metalness: 0, roughness: 0.05, transmission: 0.88, thickness: 0.04, ior: 1.5, transparent: true, envMapIntensity: 1.25 });
+// Helles Satin-/Mattglas (Drutex-Standard bei gemusterten Modellen — milchig-weiß, hell) — Kundenwunsch 11.06.
+const satinGlassMat  = new THREE.MeshStandardMaterial({ color: 0xeef3f7, roughness: 0.52, metalness: 0, emissive: 0xdfeaf2, emissiveIntensity: 0.42 });
 
 // ══════════════════════════════════════════════
 // DOOR CONSTANTS — 1:1 vom Referenzfoto
@@ -428,9 +434,12 @@ const glassMat  = new THREE.MeshPhysicalMaterial({
 const DW = 1.000;   // Türbreite
 const DH = 2.100;   // Türhöhe
 const DD = 0.070;   // Türtiefe
+const ST_W = DW * 0.38;   // Seitenteil-Breite (~38% der Tür — Drutex/Branchen-Proportion)
 
 const doorGroup  = new THREE.Group();  // schwenkbares Türblatt + Beschlag
 const frameGroup = new THREE.Group();  // Zarge (statisch, schwenkt NICHT)
+const seitenteilGroup = new THREE.Group();  // festes Seitenteil (Glasfeld, schwenkt NICHT)
+const rootGroup  = new THREE.Group();  // hält Tür+Zarge+Seitenteil → erlaubt Gesamt-Zentrierung
 
 // ── Hilfsfunktion: Rechteck-Strip ──────────────────
 function strip(x, y, w, h, d, mat) {
@@ -477,6 +486,13 @@ function roundedRectShape(w, h, r) {
 // strips = sichtbare Edelstahl-Dekor-Stäbe
 // ══════════════════════════════════════════════
 const MODELLE = {
+  // Vollglas-Tür: ein großes helles Glasfeld mit Rahmen-Rand (Kundenwunsch 11.06.2026)
+  'vollglas-inox': {
+    brightGlass: true,
+    noPanelFrame: true,            // randloses Glas (keine Silber-Einfassung) — Vollglas-Referenz
+    longHandle: true,              // langer runder Stoßgriff ~80% Türhöhe
+    panels: [{x:0.090, y:0.100, w:0.820, h:1.900}],
+  },
   'colorado-inox': {
     // 5 quadratische Gläser, mittig gestapelt — Glasrahmen verschmelzen zum durchgehenden Inox-Band
     panels: [
@@ -515,6 +531,7 @@ const MODELLE = {
     ]
   },
   'florida-lr-inox': {
+    satinGlass: true,
     panels: [{x:0.390, y:0.165, w:0.200, h:1.750}]
   },
   'ohio-inox': {
@@ -564,6 +581,7 @@ const MODELLE = {
 };
 
 let glassObjects = [];
+let _curModel = null;   // aktuell gebautes Türmodell (für Beschlag-Varianten wie langer Vollglas-Griff)
 let _curColor = 'anthrazitgrau';
 let _curWood  = null;
 let _curGlass = 'klar';
@@ -608,6 +626,92 @@ function offsetShape(shape, d) {
 // ══════════════════════════════════════════════
 // buildDoor — baut Türgeometrie für gewähltes Modell
 // ══════════════════════════════════════════════
+// ── Seitenteil (festes Glasfeld neben der Tür) ────────────────────────
+// side: 'l' (links), 'r' (rechts), '2' (beidseitig), 'none'
+// Baut in rootGroup-Koordinaten: Tür steht zentriert bei x∈[-DW/2, DW/2].
+// Geteilter Pfosten = Tür-Zarge (kein doppelter Rahmen auf der Tür-Seite).
+function buildSeitenteil(side) {
+  while (seitenteilGroup.children.length > 0) {
+    const c = seitenteilGroup.children[0];
+    if (c.geometry) c.geometry.dispose();
+    seitenteilGroup.remove(c);
+  }
+  if (!side || side === 'none') return;
+
+  const z1w = 0.043, z1d = 0.032;
+  const z2off = z1w + 0.009, z2w = 0.021, z2d = 0.018;
+  const z3off = z2off + z2w + 0.006, z3w = 0.009, z3d = 0.007;
+  const stages = [
+    { zw: z1w, zd: z1d, off: 0 },
+    { zw: z2w, zd: z2d, off: z2off },
+    { zw: z3w, zd: z3d, off: z3off },
+  ];
+  const GFW = 0.040, GFD = DD + 0.010;
+  // Helles Licht-Glas (modul-global, geteilt mit Vollglas-Türen)
+  const stGlBackMat = brightBackMat;
+  const stGlassMat  = brightGlassMat;
+  const gf = (x, y, w, h) => {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, GFD), glFrameMat);
+    m.position.set(x, y, GFD / 2);
+    m.castShadow = true; m.receiveShadow = true;
+    return m;
+  };
+
+  // ein Seitenteil; outer = Seite des Außenrahmens ('l' oder 'r'),
+  // die andere Seite ist der geteilte Pfosten (= Tür-Zarge), bekommt KEINEN Rahmen.
+  function panel(x0, outer) {
+    const x1 = x0 + ST_W;
+    // 3-stufiger Rahmen: oben+unten über die Breite, Außen-Vertikale nur auf outer-Seite
+    stages.forEach(s => {
+      const li = (outer === 'l') ? s.off : 0;
+      const ri = (outer === 'r') ? s.off : 0;
+      const innerW = ST_W - li - ri;
+      seitenteilGroup.add(strip(x0 + li, DH - s.off - s.zw, innerW, s.zw, s.zd)); // oben
+      seitenteilGroup.add(strip(x0 + li, s.off,            innerW, s.zw, s.zd));  // unten
+      if (outer === 'l') seitenteilGroup.add(strip(x0 + s.off,            s.off + s.zw, s.zw, DH - 2*(s.off + s.zw), s.zd));
+      else               seitenteilGroup.add(strip(x1 - s.off - s.zw,     s.off + s.zw, s.zw, DH - 2*(s.off + s.zw), s.zd));
+    });
+    // Innenbereich (nach Stufe-1-Rahmen)
+    const innerL = x0 + (outer === 'l' ? z1w : 0);
+    const innerR = x1 - (outer === 'r' ? z1w : 0);
+    const innerB = z1w, innerT = DH - z1w;
+    // Glasfeld + Silberrahmen (wie Tür-Panels)
+    const p = { x: innerL + GFW, y: innerB + GFW, w: (innerR - innerL) - 2*GFW, h: (innerT - innerB) - 2*GFW };
+    const backing = new THREE.Mesh(new THREE.PlaneGeometry(p.w, p.h), stGlBackMat);
+    backing.position.set(p.x + p.w/2, p.y + p.h/2, 0.002);
+    seitenteilGroup.add(backing);
+    const gm = new THREE.Mesh(new THREE.PlaneGeometry(p.w - 0.008, p.h - 0.008), stGlassMat);
+    gm.position.set(p.x + p.w/2, p.y + p.h/2, DD/2);
+    seitenteilGroup.add(gm);  // eigenes helles Glas, NICHT in glassObjects (bleibt hell)
+    seitenteilGroup.add(gf(p.x + p.w/2,       p.y + p.h + GFW/2, p.w + GFW*2, GFW));
+    seitenteilGroup.add(gf(p.x + p.w/2,       p.y - GFW/2,       p.w + GFW*2, GFW));
+    seitenteilGroup.add(gf(p.x - GFW/2,       p.y + p.h/2,       GFW,         p.h));
+    seitenteilGroup.add(gf(p.x + p.w + GFW/2, p.y + p.h/2,       GFW,         p.h));
+  }
+
+  if (side === 'l' || side === '2') panel(-DW/2 - ST_W, 'l');
+  if (side === 'r' || side === '2') panel( DW/2,        'r');
+}
+
+// Seitenteil bauen + Gesamtanlage zentrieren + Kamera an Breite anpassen
+function applySeitenteil(side) {
+  _curSeitenteil = (side === 'l' || side === 'r' || side === '2') ? side : 'none';
+  buildSeitenteil(_curSeitenteil);
+  // Zentrierung: Gesamtmitte auf x=0
+  rootGroup.position.x = (_curSeitenteil === 'l') ?  ST_W/2
+                        : (_curSeitenteil === 'r') ? -ST_W/2
+                        : 0;
+  // Kamera proportional zurücksetzen, damit das breitere Element ganz im Bild ist
+  const TOT_W = (_curSeitenteil === '2') ? DW + 2*ST_W
+              : (_curSeitenteil === 'none') ? DW : DW + ST_W;
+  camera.position.z = 8.5 * (TOT_W / DW);
+  orb.maxDistance = Math.max(12, camera.position.z + 1);
+  orb.update();
+  // Griff natürlich auf die Seite WEG vom (einzelnen) Seitenteil stellen — sonst klebt er am Pfosten
+  if (_curSeitenteil === 'l' && typeof setSide === 'function') setSide('r');
+  else if (_curSeitenteil === 'r' && typeof setSide === 'function') setSide('l');
+}
+
 function buildDoor(modelKey) {
   // doorGroup (Türblatt + Beschlag) + frameGroup (Zarge) leeren
   [doorGroup, frameGroup].forEach(g => {
@@ -620,6 +724,7 @@ function buildDoor(modelKey) {
   glassObjects = [];
 
   const model = MODELLE[modelKey] || MODELLE['colorado-inox'];
+  _curModel = model;
   const panels = model.panels || [];
   const modelStrips = model.strips || [];
   let customShapes = model.shapeFn ? model.shapeFn(THREE) : [];   // Glasformen mit Inox-Rahmen (Schenkel)
@@ -705,19 +810,23 @@ function buildDoor(modelKey) {
   const GFW = 0.040;  // gemessen: 40-42mm Glasrahmen-Breite im Referenzfoto
   const GFD = DD + 0.010;
   const glBackMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 });
+  const _bright = !!model.brightGlass;   // Vollglas-Türen: helles Klarglas
+  const _satin  = !_bright && (model.satinGlass !== false);  // Standard: helles Satin-/Mattglas (Drutex-Optik) für alle gemusterten Modelle
+  const _backMat  = (_bright || _satin) ? brightBackMat : glBackMat;
+  const _glassUse = _bright ? brightGlassMat : (_satin ? satinGlassMat : glassMat);
   panels.forEach(p => {
     // Weißer Hintergrund hinter Glas (simulates interior light)
-    const backing = new THREE.Mesh(new THREE.PlaneGeometry(p.w, p.h), glBackMat);
+    const backing = new THREE.Mesh(new THREE.PlaneGeometry(p.w, p.h), _backMat);
     backing.position.set(p.x + p.w/2, p.y + p.h/2, 0.002);
     doorGroup.add(backing);
 
     const gm = new THREE.Mesh(
       new THREE.PlaneGeometry(p.w - 0.008, p.h - 0.008),
-      glassMat
+      _glassUse
     );
     gm.position.set(p.x + p.w/2, p.y + p.h/2, DD/2);
     doorGroup.add(gm);
-    glassObjects.push(gm);
+    if (!_bright && !_satin) glassObjects.push(gm);   // helles Glas bleibt hell (nicht von setGlass überschrieben)
 
     const gf = (x, y, w, h) => {
       const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, GFD), glFrameMat);
@@ -826,26 +935,49 @@ function buildDoor(modelKey) {
 
 // AUSSEN-BESCHLAG: Stoßgriff (Drutex Z1/Q-Serie, eckig) + Schloss-Langschild
 function buildAussenBeschlag() {
-  const HX    = 0.115;
-  const BAR_W = 0.026;
-  const BAR_D = 0.040;
-  const BAR_B = 0.670;
-  const BAR_T = 1.740;
-  const BAR_L = BAR_T - BAR_B;
+  if (_curModel && _curModel.longHandle) {
+    // ── Vollglas: langer runder Edelstahl-Stoßgriff (~80% Türhöhe) auf 2 Standoffs ──
+    // Helles, mattes Edelstahl-Silber (gleichmäßig, kein dunkler Spiegel) — Kundenwunsch 11.06.: Griff wirkte zu dünn/dunkel
+    const inoxMat = new THREE.MeshStandardMaterial({ color: 0xcdd2d6, roughness: 0.42, metalness: 0.12, envMapIntensity: 0.30 });
+    const HXg = 0.090, R = 0.017, yB = 0.300, yT = 1.920, Lg = yT - yB, zBar = DD + 0.070;
+    const barG = new THREE.Mesh(new THREE.CylinderGeometry(R, R, Lg, 28), inoxMat);
+    barG.position.set(HXg, yB + Lg / 2, zBar);
+    barG.castShadow = true;
+    doorGroup.add(barG);
+    [yB, yT].forEach(cy => {                                  // runde Endkappen
+      const cap = new THREE.Mesh(new THREE.SphereGeometry(R, 20, 14), inoxMat);
+      cap.position.set(HXg, cy, zBar);
+      doorGroup.add(cap);
+    });
+    [yB + 0.120, yT - 0.120].forEach(sy => {                  // 2 Standoffs (Tür→Griff), deutlich sichtbar
+      const so = new THREE.Mesh(new THREE.CylinderGeometry(0.011, 0.011, 0.070, 18), inoxMat);
+      so.rotation.x = Math.PI / 2;
+      so.position.set(HXg, sy, DD + 0.035);
+      so.castShadow = true;
+      doorGroup.add(so);
+    });
+  } else {
+    const HX    = 0.115;
+    const BAR_W = 0.026;
+    const BAR_D = 0.040;
+    const BAR_B = 0.670;
+    const BAR_T = 1.740;
+    const BAR_L = BAR_T - BAR_B;
 
-  const bar = new THREE.Mesh(new THREE.BoxGeometry(BAR_W, BAR_L, BAR_D), chromeMat);
-  bar.position.set(HX, BAR_B + BAR_L / 2, DD + BAR_D / 2);
-  bar.castShadow = true;
-  doorGroup.add(bar);
+    const bar = new THREE.Mesh(new THREE.BoxGeometry(BAR_W, BAR_L, BAR_D), chromeMat);
+    bar.position.set(HX, BAR_B + BAR_L / 2, DD + BAR_D / 2);
+    bar.castShadow = true;
+    doorGroup.add(bar);
 
-  const AW = 0.016, AH = 0.014, AD = BAR_D + 0.002;
-  const AX = HX - BAR_W / 2 - AW / 2;
-  [BAR_T - 0.110, BAR_B + 0.110].forEach(bracketY => {
-    const arm = new THREE.Mesh(new THREE.BoxGeometry(AW, AH, AD), bracketMat);
-    arm.position.set(AX, bracketY, DD + AD / 2);
-    arm.castShadow = true;
-    doorGroup.add(arm);
-  });
+    const AW = 0.016, AH = 0.014, AD = BAR_D + 0.002;
+    const AX = HX - BAR_W / 2 - AW / 2;
+    [BAR_T - 0.110, BAR_B + 0.110].forEach(bracketY => {
+      const arm = new THREE.Mesh(new THREE.BoxGeometry(AW, AH, AD), bracketMat);
+      arm.position.set(AX, bracketY, DD + AD / 2);
+      arm.castShadow = true;
+      doorGroup.add(arm);
+    });
+  }
 
   const LX = 0.082, LY = 1.110;
   const lsShape = roundedRectShape(0.024, 0.072, 0.012);
@@ -1054,6 +1186,8 @@ const MODEL_PHOTOS = {
 // Startup: Modell + Seite aus URL-Param
 const _urlModel = new URLSearchParams(location.search).get('model') || 'florida-lr-inox';
 const _urlSide  = new URLSearchParams(location.search).get('side')  || 'r';
+const _urlSeitenteil = new URLSearchParams(location.search).get('seitenteil') || 'none';
+let _curSeitenteil = 'none';
 buildDoor(_urlModel);
 
 // Pivot-Group für Tür-Öffnen-Animation (Bandkante = Drehachse).
@@ -1062,8 +1196,10 @@ buildDoor(_urlModel);
 // auch wenn das Türblatt schwenkt.
 const doorPivot = new THREE.Group();
 doorPivot.add(doorGroup);
-scene.add(doorPivot);
-scene.add(frameGroup);
+rootGroup.add(doorPivot);
+rootGroup.add(frameGroup);
+rootGroup.add(seitenteilGroup);
+scene.add(rootGroup);
 // Zarge bleibt zentriert (symmetrisch — keine Spiegelung nötig)
 frameGroup.position.set(-DW/2, 0, 0);
 
@@ -1126,6 +1262,8 @@ function setDoorOpen(open) {
 }
 
 setSide(_urlSide);
+// Seitenteil aus URL bauen + zentrieren + Kamera + Griff weg vom Seitenteil (nach setSide-Setup)
+applySeitenteil(_urlSeitenteil);
 
 
 // ══════════════════════════════════════════════
@@ -1216,7 +1354,7 @@ const FARBEN = {
     { key:'eisengl',       name:'Eisenglimmer Schiefer',hex:'#424949',swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5LzIwMTcvbHVwa293eS1uLmpwZw==.webp' },
     { key:'schiefgrau-gl', name:'Schiefergrau Glatt',  hex:'#404747', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5LzIwMTcvbHVwa293eS1nbGFka2ktbi5qcGc=.webp' },
     { key:'graphit-sand',  name:'Graphit-Sandfarben',  hex:'#595b51', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvZ3JhZml0b3d5X3BpYXNrb3dhbnkuanBn.webp' },
-    { key:'anthrazitgrau', name:'Anthrazitgrau',       hex:'#242426', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvYW50cmFjeXQuanBn.webp' },
+    { key:'anthrazitgrau', name:'Anthrazitgrau',       hex:'#3a4045', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvYW50cmFjeXQuanBn.webp' },
     { key:'anthrazit-gl',  name:'Anthrazit Glatt',     hex:'#252527', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvYW50cnljeXQwZ2xhZGtpLmpwZw==.webp' },
     { key:'anthrazit-um',  name:'Anthrazit Ulti-Matt', hex:'#2f3231', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L29rbGVpbnkvYW50cmFjdXRfdWx0aS1tYXR0X3d3dy5qcGc=.webp' },
     { key:'jet-black',     name:'Jet Black',           hex:'#262829', swatchUrl:CDN+'L21lZGlhL191cGxvYWQva29sb3J5L2pldC1ibGFjay5qcGc=.webp' },
@@ -1733,6 +1871,7 @@ window.addEventListener('message', (e) => {
   if (d.type === 'setGlass') setGlass(d.key);
   if (d.type === 'setModel') setModel(d.key);
   if (d.type === 'setSide')  setSide(d.key);
+  if (d.type === 'setSeitenteil') applySeitenteil(d.key);
   if (d.type === 'toggleOpen') setDoorOpen(!_doorOpen);
   if (d.type === 'setOpen')    setDoorOpen(!!d.open);
   if (d.type === 'cameraFocus') focusCamera(d.focus || 'default');
@@ -1749,6 +1888,7 @@ window.addEventListener('message', (e) => {
     if (d.view) _curView = (d.view === 'innen') ? 'innen' : 'aussen';
     buildDoor(d.model);
     setSide(d.side || 'r');
+    applySeitenteil(d.seitenteil || 'none');
     if (d.wood)  setWood(d.wood);
     else         setColor(d.color || 'anthrazitgrau');
     setGlass(d.glass || 'klar');

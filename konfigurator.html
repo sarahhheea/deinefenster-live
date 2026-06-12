@@ -5911,6 +5911,7 @@ const P = {
     // Fix W3 (21.04.2026): Haustür-spezifische Aufteilungen
     'seitenteil-l': { name:'Haustür + Seitenteil links',     add:0 },
     'seitenteil-r': { name:'Haustür + Seitenteil rechts',    add:0 },
+    'seitenteil-2': { name:'Haustür + Seitenteil beidseitig', add:0 },
   },
   oeff_sash: {
     'fest':   { name:'Festverglasung',   add:-15 },
@@ -7162,7 +7163,7 @@ function buildWizSteps(prod){ return WIZ_ALL.filter(function(s){ return s.gilt.i
 let WIZ_STEPS = buildWizSteps('kunststoff');
 function wizRebuildSteps(){ const ck=WIZ_STEPS[wizIdx]&&WIZ_STEPS[wizIdx].key; WIZ_STEPS=buildWizSteps(S.prod||'kunststoff'); let ni=WIZ_STEPS.findIndex(function(s){return s.key===ck;}); if(ni<0)ni=Math.min(wizIdx,WIZ_STEPS.length-1); wizIdx=Math.max(0,ni); }
 // Türmodelle (Studio-Bilder, vorhanden) — finale Auswahl/Bilder folgen in Phase 2
-const WIZ_DOORS=['florida-lr-inox','montana-2-lr-inox','montana-3-lr-inox','ohio-inox','colorado-inox','alaska-2-inox','alaska-1-inox','montana-1-inox','nebraska-lcr-inox','pennsylvania-1-inox','texas-c-inox','texas-lr-inox'].map(function(k){return {key:k,name:k.replace(/-inox$/,'').replace(/-lr$|-lcr$|-c$/,'').replace(/-/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();}).trim(),img:'img/drutex-tueren/studio/'+k+'.png?v=20260524'};});
+const WIZ_DOORS=['vollglas-inox','florida-lr-inox','montana-2-lr-inox','montana-3-lr-inox','ohio-inox','colorado-inox','alaska-2-inox','alaska-1-inox','montana-1-inox','nebraska-lcr-inox','pennsylvania-1-inox','texas-c-inox','texas-lr-inox'].map(function(k){return {key:k,name:k.replace(/-inox$/,'').replace(/-lr$|-lcr$|-c$/,'').replace(/-/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();}).trim(),img:'img/drutex-tueren/studio/'+k+'.png?v=20260611'};});
 function wizRenderPsk(){ return '<div class="wiz-cards">'+Object.keys(P.pskKammer).map(function(k){ var o=P.pskKammer[k]; return '<div class="wiz-card'+(k===S.pskKammer?' sel':'')+'" onclick="wizSetPsk(\''+k+'\')"><img src="img/karten/profil/'+k+'.png?v=20260609c" alt="'+o.name+'" loading="lazy"><div class="wiz-cn">'+o.name+'</div><div class="wiz-csub">'+(o.sub||'')+'</div></div>'; }).join('')+'</div>'; }
 function wizSetPsk(v){ wizSet('pskKammer',v); }
 function wizRenderTuermodell(){ return '<div class="wiz-cards">'+WIZ_DOORS.map(function(d){return '<div class="wiz-card'+(d.key===S.tuerModell?' sel':'')+'" onclick="wizSet(\'tuerModell\',\''+d.key+'\')"><div class="wiz-gbox"><img src="'+d.img+'" alt="'+d.name+'" loading="lazy"></div><div class="wiz-cn">'+d.name+'</div></div>';}).join('')+'</div>'; }
@@ -7275,7 +7276,7 @@ function wizStart(){
   else { if(!_profilOkForProd(prod))S.profil='iglo5'; }
   if(!S.fluegel)S.fluegel='1-fluegel';
   if(prod==='balkontuer'&&['1-fluegel','2-fluegel','stulp'].indexOf(S.fluegel)<0)S.fluegel='1-fluegel';
-  if(prod==='haustuere'&&['1-fluegel','2-fluegel','seitenteil-l','seitenteil-r'].indexOf(S.fluegel)<0)S.fluegel='1-fluegel';
+  if(prod==='haustuere'&&['1-fluegel','2-fluegel','seitenteil-l','seitenteil-r','seitenteil-2'].indexOf(S.fluegel)<0)S.fluegel='1-fluegel';
   if(!S.glas)S.glas=(prod==='hst')?'3fach':'2fach';
   // Start immer mit weißem Produkt (Kundenwunsch 07.06.2026)
   S.fa='weiss'; S.fi='weiss'; if(typeof previewState!=='undefined'){previewState.aussenFarbe='#f4f4f0';previewState.innenFarbe='#f4f4f0';}
@@ -7311,7 +7312,7 @@ function wizPickProfil(k){ S.profil=k; if(window._touched)window._touched.add('p
 const BALKON_FLUEGEL=[['1-fluegel','1 Flügel','1-fluegel.png'],['2-fluegel','2 Flügel · Pfosten','2-fluegel.png'],['stulp','2 Flügel · Stulp','stulp.png']];
 const HST_FLUEGEL=[['2-teilig','2-teilig · fest + Schiebe','2-teilig.png'],['3-teilig','3-teilig','3-teilig.png']];
 function wizPickHstTeilung(v){ S.hstTeilung=v; S.fluegel=(v==='3-teilig')?'3-fluegel':'2-fluegel'; if(window._touched){window._touched.add('hstTeilung');window._touched.add('fluegel');} if(typeof previewState!=='undefined')previewState.fluegel=(v==='3-teilig')?3:2; _wizPrev(); wizRenderPanel(); }
-const HAUS_FLUEGEL=[['1-fluegel','1-Flügel','1-fluegel'],['seitenteil-l','1-Flügel + Seitenteil','seitenteil'],['2-fluegel','2-Flügel','2-fluegel']];
+const HAUS_FLUEGEL=[['1-fluegel','1-Flügel','1-fluegel'],['seitenteil-l','Seitenteil links','seitenteil-links'],['seitenteil-r','Seitenteil rechts','seitenteil-rechts'],['seitenteil-2','Seitenteil beidseitig','seitenteil-beidseitig'],['2-fluegel','2-Flügel','2-fluegel']];
 function wizRenderFluegel(){
   if(S.prod==='haustuere'){
     return '<div class="wiz-cards">'+HAUS_FLUEGEL.map(function(o){
@@ -12728,6 +12729,7 @@ function _renderHaustuer3d(previewView) {
 
   const _mdl   = S.tuerModell || 'florida-lr-inox';
   const _side  = (S.oeff1 === 'dreh-l') ? 'r' : 'l';  // DIN-Fix 30.05: DIN-Rechts (Standard, Griff links) = Katalog-Hand side=l; DIN-Links = side=r
+  const _seitenteil = (S.fluegel === 'seitenteil-l') ? 'l' : (S.fluegel === 'seitenteil-r') ? 'r' : (S.fluegel === 'seitenteil-2') ? '2' : 'none';
   const _view  = (previewView === 'inn') ? 'innen' : 'aussen';
   // Kunden-Fix 24.05.2026: View-abhängige Farbe — bei Innen-Ansicht S.fi, sonst S.fa.
   // Vorher: immer S.fa → Innenfarbe-Auswahl hatte keinen visuellen Effekt im 3D-Modell.
@@ -12735,15 +12737,18 @@ function _renderHaustuer3d(previewView) {
   const _ck    = HAUS3D_COLOR_MAP[_farb] || HAUS3D_COLOR_MAP[S.fa] || 'anthrazitgrau';
   const isWood = HAUS3D_WOOD_KEYS.has(_ck);
 
-  const _isLoaded = haus3dFrame.src.includes('haustuer-3d');
+  // Seitenteil-Wechsel erzwingt iframe-Neuladen (sicherer als postMessage-Timing);
+  // Farbe/Modell/Glas laufen weiter per postMessage ohne Reload.
+  const _curST = (haus3dFrame.src.match(/[?&]seitenteil=([^&]+)/) || [])[1];
+  const _isLoaded = haus3dFrame.src.includes('haustuer-3d') && _curST === _seitenteil;
   if (!_isLoaded) {
-    haus3dFrame.src = `haustuer-3d.html?embed&bg=light&v=20260609c&model=${_mdl}&side=${_side}&view=${_view}&${isWood ? 'wood' : 'color'}=${_ck}`;
+    haus3dFrame.src = `haustuer-3d.html?embed&bg=light&v=20260611s&model=${_mdl}&side=${_side}&seitenteil=${_seitenteil}&view=${_view}&${isWood ? 'wood' : 'color'}=${_ck}`;
     haus3dFrame.onload = () => {
       const cw = haus3dFrame.contentWindow;
       if (!cw) return;
       cw.postMessage({
         type: 'update',
-        model: _mdl, side: _side, view: _view,
+        model: _mdl, side: _side, seitenteil: _seitenteil, view: _view,
         color: isWood ? null : _ck,
         wood:  isWood ? _ck  : null,
         glass: S.glasdekor || 'klar'
@@ -12754,7 +12759,7 @@ function _renderHaustuer3d(previewView) {
     if (cw) {
       cw.postMessage({
         type: 'update',
-        model: _mdl, side: _side, view: _view,
+        model: _mdl, side: _side, seitenteil: _seitenteil, view: _view,
         color: isWood ? null : _ck,
         wood:  isWood ? _ck  : null,
         glass: S.glasdekor || 'klar'
@@ -14068,8 +14073,8 @@ async function submitSkizze(e) {
   function drawHaustuer(S, view) {
     const bMm=S.bMm||1000, hMm=S.hMm||2100, isAussen=view==='aus';
     const fl=S.fluegel||'1-fluegel';
-    const hasST_L=fl==='seitenteil-l', hasST_R=fl==='seitenteil-r';
-    const ST_W=Math.round(bMm*0.25);
+    const hasST_L=fl==='seitenteil-l'||fl==='seitenteil-2', hasST_R=fl==='seitenteil-r'||fl==='seitenteil-2';
+    const ST_W=Math.round(bMm*(fl==='seitenteil-2'?0.22:0.25));
     const hasRoll=S.roll&&S.roll!=='ohne', rollH=hasRoll?ROLLO_H:0, totalH=hMm+rollH;
     const fCol=colorOf(isAussen?S.fa:S.fi,isAussen?'fa':'fi')||'#373d3f';
     const isDark=!fCol.startsWith('#f')&&!fCol.startsWith('#fd')&&!fCol.startsWith('#ed')&&!fCol.startsWith('#c5');
