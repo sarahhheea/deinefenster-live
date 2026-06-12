@@ -5936,6 +5936,15 @@ const P = {
     'aufgesetzt': ['27','45','65'],
     'szr':        ['18','26','45'],
   },
+  // Sprossen-Aufteilung (Raster) je Flügel · v = senkrechte, h = waagerechte Sprossen
+  sproRaster: {
+    'senk2':  { name:'Senkrecht 2-teilig', v:1, h:0 },
+    'waag2':  { name:'Waagerecht 2-teilig', v:0, h:1 },
+    'kreuz':  { name:'Kreuz · 4 Felder',    v:1, h:1 },
+    'feld6':  { name:'6 Felder',            v:2, h:1 },
+    'feld9':  { name:'9 Felder',            v:2, h:2 },
+    'feld12': { name:'12 Felder',           v:3, h:2 },
+  },
   griff: {
     // 3-stufige Auswahl: Modell + Farbe + Abschließbar (S.griff = Modell-Key)
     'mistral':  { name:'Mistral',          add:0, col:'#b0b4bc' },
@@ -6287,7 +6296,7 @@ function resetConfigForNextItem() {
   S.oeff1 = null; S.oeff2 = null; S.oeff3 = null;
   S.glasdekor = 'klar';
   S.fa = 'weiss'; S.fi = 'weiss'; S.fd = 'schwarz';
-  S.sproTyp = 'keine'; S.sproDicke = '18';
+  S.sproTyp = 'keine'; S.sproDicke = '18'; S.sproRaster = 'kreuz';
   S.griff = 'mistral'; S.griffColor = 'weiss'; S.griffLocked = false;
   S.roll = 'ohne'; S.rollSeite = 'rechts'; S.rollKasten = '175';
   S.sicher = 'wk1'; S.schall = 'ohne'; S.sicherGlas = 'kein';
@@ -7230,7 +7239,7 @@ function wizRenderAngebot(){
     row('Schallschutz', sh(nm('schall',S.schall))),
     row('Sicherheitsglas', nm('sicherGlas',S.sicherGlas)),
     row('Rolladen', S.roll==='ohne'?'Kein':nm('roll',S.roll)),
-    row('Sprossen', S.sproTyp==='keine'?'Ohne':(S.sproTyp+' '+S.sproDicke+' mm')),
+    row('Sprossen', S.sproTyp==='keine'?'Ohne':(S.sproTyp+' '+S.sproDicke+' mm · '+((P.sproRaster[S.sproRaster]||{}).name||''))),
     row('Sicherheit', nm('sicher',S.sicher))
   ];
   const inCart=(typeof cart!=='undefined')?cart:[];
@@ -7572,11 +7581,26 @@ function wizRenderSpro(){
     const im=t[2]?'<img src="'+t[2]+'" alt="'+t[1]+'" loading="lazy">':'<div class="wiz-noimg">Ohne Sprossen</div>';
     return '<div class="wiz-card'+(t[0]===S.sproTyp?' sel':'')+'" onclick="wizSetSproTyp(\''+t[0]+'\')">'+im+'<div class="wiz-cn">'+t[1]+'</div></div>';
   }).join('')+'</div>';
-  if(S.sproTyp&&S.sproTyp!=='keine'){ const dk=(P.sproDickenPerTyp&&P.sproDickenPerTyp[S.sproTyp])||[]; h+='<div class="wiz-group" style="margin-top:16px"><div class="wiz-gt">Breite</div>'+_wizPills(dk.map(function(d){return [d,d+' mm'];}),S.sproDicke,'wizSetSproDicke')+'</div>'; }
+  if(S.sproTyp&&S.sproTyp!=='keine'){
+    const dk=(P.sproDickenPerTyp&&P.sproDickenPerTyp[S.sproTyp])||[];
+    h+='<div class="wiz-group" style="margin-top:16px"><div class="wiz-gt">Breite</div>'+_wizPills(dk.map(function(d){return [d,d+' mm'];}),S.sproDicke,'wizSetSproDicke')+'</div>';
+    h+='<div class="wiz-group" style="margin-top:16px"><div class="wiz-gt">Aufteilung</div><div class="wiz-cards">'+Object.keys(P.sproRaster).map(function(k){
+      const r=P.sproRaster[k];
+      return '<div class="wiz-card'+(k===S.sproRaster?' sel':'')+'" onclick="wizSetSproRaster(\''+k+'\')"><div class="wiz-vis">'+_sproRasterIcon(r.v,r.h)+'</div><div class="wiz-cn">'+r.name+'</div></div>';
+    }).join('')+'</div></div>';
+  }
   return h;
+}
+// Kleines Fenster-Icon mit dem gewählten Sprossen-Raster (gleiche Logik wie 3D-Vorschau)
+function _sproRasterIcon(v,h){
+  let lines='';
+  for(let i=1;i<=v;i++){ const x=(5+90*i/(v+1)).toFixed(1); lines+='<line x1="'+x+'" y1="5" x2="'+x+'" y2="75" stroke="#225eaa" stroke-width="3" stroke-linecap="round"/>'; }
+  for(let j=1;j<=h;j++){ const y=(5+70*j/(h+1)).toFixed(1); lines+='<line x1="5" y1="'+y+'" x2="95" y2="'+y+'" stroke="#225eaa" stroke-width="3" stroke-linecap="round"/>'; }
+  return '<svg viewBox="0 0 100 80" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="94" height="74" rx="4" fill="#eaf1fb" stroke="#225eaa" stroke-width="3"/>'+lines+'</svg>';
 }
 function wizSetSproTyp(v){ S.sproTyp=v; if(window._touched)window._touched.add('sproTyp'); if(v!=='keine'){ const dk=(P.sproDickenPerTyp&&P.sproDickenPerTyp[v])||[]; if(dk.length&&dk.indexOf(S.sproDicke)<0)S.sproDicke=dk[0]; } _wizPrev(); wizRenderPanel(); }
 function wizSetSproDicke(v){ wizSet('sproDicke',v); }
+function wizSetSproRaster(v){ S.sproRaster=v; if(window._touched)window._touched.add('sproRaster'); _wizPrev(); wizRenderPanel(); }
 // SICHERHEIT
 // Schutzschild-Symbol — n = Schutzstufe 1..3 (gefüllte Balken)
 function _sicherSym(n){
@@ -10945,7 +10969,7 @@ function upFinalSum(rows,tot) {
     ...(S.prod !== 'haustuere' && S.prod !== 'hst' ? [
       ['Rolladen', S.roll==='ohne' ? 'Kein Rolladen' : (P.roll[S.roll]?.name||S.roll) + ' · Kasten '+S.rollKasten+' mm'],
     ] : []),
-    ...(S.prod !== 'haustuere' ? [['Sprossen', S.sproTyp==='keine'?'Ohne':S.sproTyp+' '+S.sproDicke+' mm']] : []),
+    ...(S.prod !== 'haustuere' ? [['Sprossen', S.sproTyp==='keine'?'Ohne':S.sproTyp+' '+S.sproDicke+' mm · '+((P.sproRaster[S.sproRaster]||{}).name||'')]] : []),
   ];
   const sumRows = document.getElementById('sum-rows');
   if (sumRows) sumRows.innerHTML = items.map(([k,v])=>
@@ -12546,7 +12570,7 @@ function _renderBalkontuer3d() {
     const _roll = S.roll || 'ohne';
     const _kasten = S.rollKasten || '175';
     const _rseite = S.rollSeite || 'rechts';
-    frame.src = `/${_src3d}?embed&v=20260610g&bg=light&color=${_ck}&side=${_side}&layout=${_layout}&roll=${_roll}&rollKasten=${_kasten}&rollSeite=${_rseite}`;
+    frame.src = `/${_src3d}?embed&v=20260611spro&bg=light&color=${_ck}&side=${_side}&layout=${_layout}&roll=${_roll}&rollKasten=${_kasten}&rollSeite=${_rseite}`;
     frame.onload = () => {
       const cw = frame.contentWindow;
       if (!cw) return;
@@ -12559,6 +12583,8 @@ function _renderBalkontuer3d() {
         roll:       S.roll       || 'ohne',
         rollKasten: S.rollKasten || '175',
         rollSeite:  S.rollSeite  || 'rechts',
+        sproTyp:    S.sproTyp    || 'keine',
+        sproRaster: S.sproRaster || 'kreuz',
         view:  (typeof previewView !== 'undefined' && previewView === 'aus') ? 'aussen' : 'innen',
         color: isWood ? null : _ck,
         wood:  isWood ? _ck  : null,
@@ -12577,6 +12603,8 @@ function _renderBalkontuer3d() {
         roll:       S.roll       || 'ohne',
         rollKasten: S.rollKasten || '175',
         rollSeite:  S.rollSeite  || 'rechts',
+        sproTyp:    S.sproTyp    || 'keine',
+        sproRaster: S.sproRaster || 'kreuz',
         view:  (typeof previewView !== 'undefined' && previewView === 'aus') ? 'aussen' : 'innen',
         color: isWood ? null : _ck,
         wood:  isWood ? _ck  : null,
@@ -12637,7 +12665,7 @@ function _renderFenster3d() {
   // iframe neu laden wenn sich die Quelle ändert (1-Flügel ↔ Multi)
   const _wantsReload = !frame.src.includes(_src3d);
   if (_wantsReload) {
-    frame.src = `/${_src3d}?embed&v=20260610g&bg=light&color=${_ck}&side=${_side}&layout=${_layout}`;
+    frame.src = `/${_src3d}?embed&v=20260611spro&bg=light&color=${_ck}&side=${_side}&layout=${_layout}`;
     frame.onload = () => {
       const cw = frame.contentWindow;
       if (!cw) return;
@@ -12654,6 +12682,8 @@ function _renderFenster3d() {
         roll:       S.roll       || 'ohne',
         rollKasten: S.rollKasten || '175',
         rollSeite:  S.rollSeite  || 'rechts',
+        sproTyp:    S.sproTyp    || 'keine',
+        sproRaster: S.sproRaster || 'kreuz',
         view:  _view,
         color: isWood ? null : _ck,
         wood:  isWood ? _ck  : null,
@@ -12675,6 +12705,8 @@ function _renderFenster3d() {
         roll:       S.roll       || 'ohne',
         rollKasten: S.rollKasten || '175',
         rollSeite:  S.rollSeite  || 'rechts',
+        sproTyp:    S.sproTyp    || 'keine',
+        sproRaster: S.sproRaster || 'kreuz',
         view:  _view,
         color: isWood ? null : _ck,
         wood:  isWood ? _ck  : null,
@@ -12924,8 +12956,16 @@ function drawPrev() {
       const sw  = inn ? '0.7' : '2.2';
       const col = inn ? 'rgba(80,130,160,0.65)' : 'rgba(255,255,255,0.95)';
       const flt2 = inn ? '' : 'filter="url(#sp-glow)"';
-      svg += `<line x1="${cx}" y1="${z.y + 1.5}" x2="${cx}" y2="${z.y + z.h - 1.5}" stroke="${col}" stroke-width="${sw}" stroke-linecap="round" ${flt2}/>`;
-      svg += `<line x1="${z.x + 1.5}" y1="${cy}" x2="${z.x + z.w - 1.5}" y2="${cy}" stroke="${col}" stroke-width="${sw}" stroke-linecap="round" ${flt2}/>`;
+      // Aufteilung (Raster) je Glasfeld: nv senkrechte + nh waagerechte Sprossen, gleichmäßig verteilt
+      const r = (P.sproRaster && P.sproRaster[S.sproRaster]) || { v:1, h:1 };
+      for (let i = 1; i <= r.v; i++) {
+        const x = z.x + z.w * i / (r.v + 1);
+        svg += `<line x1="${x}" y1="${z.y + 1.5}" x2="${x}" y2="${z.y + z.h - 1.5}" stroke="${col}" stroke-width="${sw}" stroke-linecap="round" ${flt2}/>`;
+      }
+      for (let j = 1; j <= r.h; j++) {
+        const y = z.y + z.h * j / (r.h + 1);
+        svg += `<line x1="${z.x + 1.5}" y1="${y}" x2="${z.x + z.w - 1.5}" y2="${y}" stroke="${col}" stroke-width="${sw}" stroke-linecap="round" ${flt2}/>`;
+      }
     }
 
     // Kunden-Entscheidung 29.04.2026 (abends): Blaue Öffnungs-Pfeile entfernt.
@@ -13006,7 +13046,7 @@ async function submitForm(e) {
   const rollName = (S.prod!=='haustuere' && S.prod!=='hst' && S.roll!=='ohne')
     ? `${P.roll[S.roll]?.name||S.roll} · Kasten ${S.rollKasten} mm` : 'Kein Rolladen';
   const sicherName = P.sicher[S.sicher]?.name||S.sicher;
-  const sproStr    = S.sproTyp==='keine'?'Ohne':S.sproTyp+' '+S.sproDicke+' mm';
+  const sproStr    = S.sproTyp==='keine'?'Ohne':S.sproTyp+' '+S.sproDicke+' mm · '+((P.sproRaster[S.sproRaster]||{}).name||'');
   // Zusätzliche Felder für vollständige Bestellung
   const schallName  = S.schall && S.schall !== 'ohne' ? (P.schall[S.schall]?.name||S.schall) : 'Kein Zusatz';
   const sicherGlasName = S.sicherGlas && S.sicherGlas !== 'kein' ? (P.sicherGlas[S.sicherGlas]?.name||S.sicherGlas) : 'Kein';
@@ -14988,7 +15028,7 @@ function d2submit(e){
   else griffName=`${curName(P.griff,S.griff)} (${curName(P.griffColor,S.griffColor)})${S.griffLocked?' · abschließbar':''}`;
   const rollName=(S.prod!=='haustuere'&&S.roll!=='ohne')?`${P.roll[S.roll].name} · Kasten ${S.rollKasten} mm`:'Kein Rolladen';
   const sicherName=P.sicher[S.sicher]?.name||S.sicher;
-  const sproStr=(S.prod==='kunststoff'||S.prod==='balkontuer')?(S.sproTyp==='keine'?'Ohne':`${S.sproTyp} ${S.sproDicke} mm`):'Ohne';
+  const sproStr=(S.prod==='kunststoff'||S.prod==='balkontuer')?(S.sproTyp==='keine'?'Ohne':`${S.sproTyp} ${S.sproDicke} mm · ${(P.sproRaster[S.sproRaster]||{}).name||''}`):'Ohne';
   const tuerModellName=S.prod==='haustuere'?(S.tuerModell||'noch offen'):null;
   const offerId='DF-'+Date.now().toString().slice(-6);
   const deal={id:Date.now(),offer_id:offerId,name,email,phone:tel,ort,strasse:str,produkt:prodName,dimensions:S.bMm+'x'+S.hMm,profile:profilName,glass:glasName,opening:oeffName,color:faName+' / '+fiName,farbe_aussen:faName,farbe_innen:fiName,dichtung:fdName,sprossen:sproStr,griff:griffName,shutter:rollName,sicherheit:sicherName,glasdekor:P.glasdekor[S.glasdekor]?.name||S.glasdekor,anzahl:S.qty,tuermodell:tuerModellName,cart_items:(typeof cart!=='undefined'?cart.map(function(i){return i.summary;}):[]),cart_count:(typeof cart!=='undefined'?cart.length:0),attachments:(typeof uploadedImages!=='undefined'?uploadedImages.map(function(i){return i.name;}):[]),attachment_count:(typeof uploadedImages!=='undefined'?uploadedImages.length:0),date:datum,notes:notiz,lieferart:lieferart,versand:versandText,status:'new'};

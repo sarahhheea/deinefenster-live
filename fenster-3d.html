@@ -339,6 +339,14 @@ let sashOpen  = false;
 let sashAnim  = 0;         // 0 = zu, 1 = ganz auf
 const SASH_OPEN_ANGLE = Math.PI / 4;   // 45° Drehöffnung
 
+// ── Sprossen (Aufteilung) ────────────────────────────
+let _sproTyp    = 'keine';   // keine | aufgeklebt | szr
+let _sproRaster = 'kreuz';
+const SPRO_RASTER = {
+  'senk2': {v:1,h:0}, 'waag2': {v:0,h:1}, 'kreuz': {v:1,h:1},
+  'feld6': {v:2,h:1}, 'feld9': {v:2,h:2}, 'feld12': {v:3,h:2},
+};
+
 // ── Helper: Box zentriert an (cx,cy,cz) ──────────────
 function bx(cx, cy, cz, w, h, d, mat) {
   const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat || frameMat);
@@ -515,6 +523,23 @@ function buildWindow(spec) {
   sashGroup.add(bx(gcx, gcy - GH/2 - SBW/2, sbz, GW + SBW * 2, SBW, sbd, spacerMat));
   sashGroup.add(bx(gcx - GW/2 - SBW/2, gcy, sbz, SBW, GH, sbd, spacerMat));
   sashGroup.add(bx(gcx + GW/2 + SBW/2, gcy, sbz, SBW, GH, sbd, spacerMat));
+
+  // ── Sprossen (Aufteilung) — dünne Stäbe in der Glasebene ──
+  if (_sproTyp && _sproTyp !== 'keine') {
+    const _r  = SPRO_RASTER[_sproRaster] || { v:1, h:1 };
+    const _inn = _sproTyp === 'szr';
+    const _bw  = _inn ? 0.010 : 0.020;          // Sprossenbreite (SZR schmaler)
+    const _bd  = _inn ? 0.008 : 0.018;          // Tiefe — aufgeklebt steht beidseitig vor
+    const _bm  = _inn ? spacerMat : frameMat;   // SZR silbern, aufgeklebt in Rahmenfarbe
+    for (let i = 1; i <= _r.v; i++) {
+      const bxc = gcx + (i / (_r.v + 1) - 0.5) * GW;
+      sashGroup.add(bx(bxc, gcy, szc, _bw, GH, _bd, _bm));
+    }
+    for (let j = 1; j <= _r.h; j++) {
+      const byc = gcy + (j / (_r.h + 1) - 0.5) * GH;
+      sashGroup.add(bx(gcx, byc, szc, GW, _bw, _bd, _bm));
+    }
+  }
 
   // DK-GRIFF — Schild + durchgehender Tube + Schulter + Olive
   const hx  = sx(x0 + SW - FST * 0.52);
@@ -1182,8 +1207,13 @@ window.addEventListener('message', (e) => {
       rollKasten: d.rollKasten !== undefined ? d.rollKasten : (prev.rollKasten || '175'),
       rollSeite:  d.rollSeite  !== undefined ? d.rollSeite  : (prev.rollSeite  || 'rechts'),
     };
-    // Nur Rebuild wenn Rolladen-State sich geändert hat
-    if (newSpec.roll !== prev.roll || newSpec.rollKasten !== prev.rollKasten || newSpec.rollSeite !== prev.rollSeite) {
+    // Sprossen-State übernehmen (löst ebenfalls Rebuild aus)
+    const _sproChanged = (d.sproTyp    !== undefined && d.sproTyp    !== _sproTyp)
+                      || (d.sproRaster !== undefined && d.sproRaster !== _sproRaster);
+    if (d.sproTyp    !== undefined) _sproTyp    = d.sproTyp;
+    if (d.sproRaster !== undefined) _sproRaster = d.sproRaster;
+    // Nur Rebuild wenn Rolladen- oder Sprossen-State sich geändert hat
+    if (newSpec.roll !== prev.roll || newSpec.rollKasten !== prev.rollKasten || newSpec.rollSeite !== prev.rollSeite || _sproChanged) {
       buildWindow(newSpec);
     } else {
       _lastSpec = newSpec;

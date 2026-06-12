@@ -321,6 +321,14 @@ let sashOpen  = false;
 let sashAnim  = 0;         // 0 = zu, 1 = ganz auf
 const SASH_OPEN_ANGLE = Math.PI / 4;   // 45° Drehöffnung
 
+// ── Sprossen (Aufteilung) ────────────────────────────
+let _sproTyp    = 'keine';
+let _sproRaster = 'kreuz';
+const SPRO_RASTER = {
+  'senk2': {v:1,h:0}, 'waag2': {v:0,h:1}, 'kreuz': {v:1,h:1},
+  'feld6': {v:2,h:1}, 'feld9': {v:2,h:2}, 'feld12': {v:3,h:2},
+};
+
 // ── Helper: Box zentriert an (cx,cy,cz) ──────────────
 function bx(cx, cy, cz, w, h, d, mat) {
   const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat || frameMat);
@@ -589,6 +597,23 @@ function buildWindow(spec) {
     winGroup.add(bx(gcx, gcy - gh/2 - SBW/2, sbz, gw + SBW * 2, SBW, sbd, spacerMat));
     winGroup.add(bx(gcx - gw/2 - SBW/2, gcy, sbz, SBW, gh, sbd, spacerMat));
     winGroup.add(bx(gcx + gw/2 + SBW/2, gcy, sbz, SBW, gh, sbd, spacerMat));
+
+    // ── Sprossen (Aufteilung) — dünne Stäbe je Glasfeld ──
+    if (_sproTyp && _sproTyp !== 'keine') {
+      const _r  = SPRO_RASTER[_sproRaster] || { v:1, h:1 };
+      const _inn = _sproTyp === 'szr';
+      const _bw  = _inn ? 0.010 : 0.020;
+      const _bd  = _inn ? 0.008 : 0.018;
+      const _bm  = _inn ? spacerMat : sashMat;
+      for (let i = 1; i <= _r.v; i++) {
+        const _bxc = gcx + (i / (_r.v + 1) - 0.5) * gw;
+        winGroup.add(bx(_bxc, gcy, szc, _bw, gh, _bd, _bm));
+      }
+      for (let j = 1; j <= _r.h; j++) {
+        const _byc = gcy + (j / (_r.h + 1) - 0.5) * gh;
+        winGroup.add(bx(gcx, _byc, szc, gw, _bw, _bd, _bm));
+      }
+    }
 
     // Fest: kein Beschlag, keine Bänder
     if (!sashState || sashState === 'fest') return;
@@ -1194,8 +1219,12 @@ window.addEventListener('message', (e) => {
       separator:  d.separator  !== undefined ? d.separator  : (prev.separator  || ''),
       view:       d.view       !== undefined ? d.view       : (prev.view       || 'aussen'),
     });
-    // Rebuild wenn Layout, Sash oder Rolladen-State sich geaendert hat
-    if (d.layout || d.sashes || d.roll !== undefined || d.rollKasten !== undefined || d.rollSeite !== undefined || d.separator !== undefined || d.view !== undefined) {
+    const _sproChanged = (d.sproTyp    !== undefined && d.sproTyp    !== _sproTyp)
+                      || (d.sproRaster !== undefined && d.sproRaster !== _sproRaster);
+    if (d.sproTyp    !== undefined) _sproTyp    = d.sproTyp;
+    if (d.sproRaster !== undefined) _sproRaster = d.sproRaster;
+    // Rebuild wenn Layout, Sash, Rolladen- oder Sprossen-State sich geaendert hat
+    if (d.layout || d.sashes || d.roll !== undefined || d.rollKasten !== undefined || d.rollSeite !== undefined || d.separator !== undefined || d.view !== undefined || _sproChanged) {
       buildWindow(newSpec);
     }
     if (d.wood)  setWood(d.wood);
