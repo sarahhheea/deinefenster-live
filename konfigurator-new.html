@@ -6578,6 +6578,8 @@ const PROFIL_HERO_SPEC = {
   'iglo-slide':  'Nur schieben, schlank · Wintergarten & unbeheizt',
   'iglo-hs':     'Anheben + schieben · große Terrassenfronten',
 };
+// Profil-Querschnitt-Bild je Profil-Key. Tür-/Balkon-Profile nutzen DIESELBEN Fenster-Querschnitte.
+const PROFIL_IMG = { 'iglo5':'iglo5', 'iglo-energy':'iglo-energy', 'iglo-edge':'iglo-edge', 'iglo5-tuer':'iglo5', 'iglo-e-tuer':'iglo-energy' };
 // Bewegungs-Pfeil je Schiebetür-System (zeigt das Öffnungs-Prinzip)
 const HST_ARROW = { 'iglo-psk':'↕↔', 'iglo-slide':'↔', 'iglo-hs':'↑↔' };
 // Stichpunkte je System: was es kann / der Unterschied (UWG-sicher, ohne harte Specs)
@@ -7293,6 +7295,16 @@ function wizRenderProfil(){
     }).join('')+'</div>';
   }
   const keys=Object.keys(P.profil).filter(function(k){return P.profil[k].prods&&P.profil[k].prods.indexOf(S.prod)>=0;});
+  // Balkontür + Haustür: gleiche Bild-Karten wie das Fenster (Querschnitt-Profilbilder + gleicher Button-Stil).
+  if(S.prod==='balkontuer'||S.prod==='haustuere'){
+    return '<div class="wiz-cards">'+keys.map(function(k){
+      var img=PROFIL_IMG[k]||k;
+      var parts=(P.profil[k].name||k).split('·');
+      var titel=parts.shift().trim();
+      var sub=parts.join(' · ').replace(/\s+·\s+/g,' · ').trim();
+      return '<div class="wiz-card'+(k===S.profil?' sel':'')+'" onclick="wizPickProfil(\''+k+'\')"><img src="img/karten/profil/'+img+'.png?v=20260612a" alt="'+titel+' Profil-Querschnitt" loading="lazy"><div class="wiz-cn">'+titel+'</div><div class="wiz-csub">'+sub+'</div></div>';
+    }).join('')+'</div>';
+  }
   return '<div style="max-width:620px;margin:0 auto">'+_wizPills(keys.map(function(k){return [k,P.profil[k].name];}),S.profil,'wizPickProfil')+'</div>';
 }
 function wizPickProfil(k){ S.profil=k; if(window._touched)window._touched.add('profil'); const d2=document.getElementById('d2'); if(d2)d2.textContent=profilHeroName(k); if(typeof mkDone==='function')mkDone(2); if(typeof wizRebuildSteps==='function'){wizRebuildSteps(); wizCrumbs();} wizRenderPanel(); }
