@@ -281,7 +281,7 @@ const frontLight = new THREE.DirectionalLight(0xffffff, 0.35);
 frontLight.position.set(0, 3, 10); scene.add(frontLight);
 
 // Spotlight für Stoßgriff-Highlight (HST: Bügel in Bildmitte nach Centering)
-const handleSpot = new THREE.SpotLight(0xffffff, 3.5, 14, Math.PI / 7, 0.16);
+const handleSpot = new THREE.SpotLight(0xffffff, 0.0, 10, Math.PI / 9, 0.16);
 handleSpot.position.set(0.5, 0.8, 6.5);
 handleSpot.target.position.set(-0.1, 0.0, 0.20);   // Begegnungskante (Griff sitzt nahe Mitte)
 scene.add(handleSpot); scene.add(handleSpot.target);
@@ -334,9 +334,11 @@ const chromeMat   = new THREE.MeshStandardMaterial({ color: 0xc4c8cc, roughness:
 // Glas: helles, leicht BLAUES Isolierglas mit vertikalem Himmel-Verlauf (Canvas-Map).
 // Wirkt wie echte Glasreflexion: oben heller/kühler, unten etwas tiefer-blau + dezente
 // diagonale Reflexstreifen. Niedrige Roughness + envMap → realistischer Glanz, nicht spiegelnd.
+// Glas 1:1 wie die anderen Produkte (fenster-3d / balkontuer-3d): sauberes, gleichmäßiges
+// blaugraues Isolierglas OHNE Himmel-Gradient-Map — Reflexe kommen aus dem Szenen-Env.
 const glassMat  = new THREE.MeshStandardMaterial({
-  color: 0xffffff, metalness: 0.10, roughness: 0.09, envMapIntensity: 0.7,
-  transparent: true, opacity: 0.90,
+  color: 0xe6edf1, metalness: 0.06, roughness: 0.05, envMapIntensity: 2.4,
+  transparent: true, opacity: 0.86,
 });
 
 // ── Canvas-Gradient für Isolierglas-Reflexion ──────────
@@ -1183,12 +1185,13 @@ function setGlass(key) {
   cleanGlassMaps();
 
   if (key === 'klar') {
-    // Klares Isolierglas: blauer Himmel-Verlauf als Map + leichter Glanz.
-    glassMat.color.set(0xffffff);
-    glassMat.map = _glassGradientTex;
-    glassMat.roughness = 0.09;
-    glassMat.metalness = 0.10; glassMat.envMapIntensity = 0.7;
-    glassMat.opacity = 0.90;
+    // Klares Isolierglas — 1:1 wie Fenster/Balkontür (gleiche Werte), KEINE Himmel-Map.
+    // (Der frühere „Sonnen"-Fleck kam vom handleSpot, der ist jetzt aus → sauberes Glas.)
+    glassMat.color.set(0xe6edf1);
+    glassMat.map = null;
+    glassMat.roughness = 0.05;
+    glassMat.metalness = 0.06; glassMat.envMapIntensity = 2.4;
+    glassMat.opacity = 0.86;
   } else if (key === 'satinato') {
     // Mattglas: Verlauf bleibt (leicht blau), aber stark gestreut → milchig.
     glassMat.color.set(0xeef4f8);
