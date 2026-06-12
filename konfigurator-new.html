@@ -7125,7 +7125,7 @@ function griffToGlasdekor(){ _grClose(function(){ if(typeof openGlasdekorHero===
 function griffToSchall(){ _grClose(function(){ if(typeof openSchallHero==='function')openSchallHero(); }); }
 
 // ════════ DURCHGEHENDER WIZARD (Bild fix, kein iframe-Flackern, alle 8 Detail-Schritte) ════════
-let wizIdx=0, wizFarbTab='fa';
+let wizIdx=0, wizFarbTab='fi';
 // Schritt-Registry — gilt = für welche Produkte; cond = zusätzliche Bedingung.
 const ALL='kunststoff,balkontuer,haustuere,hst'.split(',');
 const WIZ_ALL=[
@@ -7260,7 +7260,7 @@ function wizAddAnother(){
 }
 function _profilOkForProd(p){ return S.profil && P.profil[S.profil] && P.profil[S.profil].prods && P.profil[S.profil].prods.indexOf(p)>=0; }
 function wizStart(){
-  wizIdx=0; wizFarbTab='fa';
+  wizIdx=0; wizFarbTab='fi';
   const prod=S.prod||'kunststoff';
   // Profil-Default je Produkt (zurücksetzen, falls vom Vorgänger-Produkt unpassend)
   if(prod==='haustuere'){ if(!_profilOkForProd('haustuere'))S.profil='iglo5-tuer'; if(!S.oeff1)S.oeff1='dreh-r'; if(!S.tuerOeffnung)S.tuerOeffnung='innen'; }
@@ -7460,7 +7460,21 @@ function wizPickFarb(k){ const key=wizFarbTab; S[key]=k; if(window._touched)wind
   wizRenderPanel(); }
 function wizRenderFarbe(){
   const tab=wizFarbTab, table=P[tab]||{}, cur=S[tab];
-  let h='<div class="wiz-tabs"><button type="button" class="wiz-tab'+(tab==='fa'?' sel':'')+'" onclick="wizPickFarbTab(\'fa\')">Außen</button><button type="button" class="wiz-tab'+(tab==='fi'?' sel':'')+'" onclick="wizPickFarbTab(\'fi\')">Innen</button></div>';
+  const isInnen=(tab==='fi');
+  // Reihenfolge: ZUERST Innen (im Raum), DANN Außen (von der Straße). Klare Trennung + Perspektive.
+  const curInnenName=(P.fi[S.fi]&&P.fi[S.fi].name)||'–';
+  const curAussenName=(P.fa[S.fa]&&P.fa[S.fa].name)||'–';
+  let h='<div class="wiz-tabs">'+
+    '<button type="button" class="wiz-tab'+(isInnen?' sel':'')+'" onclick="wizPickFarbTab(\'fi\')" style="display:flex;flex-direction:column;line-height:1.3;padding-top:8px;padding-bottom:8px">'+
+      '<span style="display:block"><strong>1 · Innen</strong></span><span style="display:block;font-size:11px;font-weight:400;opacity:.72">im Raum · '+curInnenName.split('(')[0].trim()+'</span></button>'+
+    '<button type="button" class="wiz-tab'+(!isInnen?' sel':'')+'" onclick="wizPickFarbTab(\'fa\')" style="display:flex;flex-direction:column;line-height:1.3;padding-top:8px;padding-bottom:8px">'+
+      '<span style="display:block"><strong>2 · Außen</strong></span><span style="display:block;font-size:11px;font-weight:400;opacity:.72">von der Straße · '+curAussenName.split('(')[0].trim()+'</span></button>'+
+  '</div>';
+  h+='<div style="text-align:center;font-size:13.5px;color:#41506b;margin:4px auto 14px;max-width:560px;line-height:1.45">'+
+     (isInnen
+       ? 'Schritt 1: <strong>Innenfarbe</strong> — die Seite, die Sie <strong>im Raum</strong> sehen.'
+       : 'Schritt 2: <strong>Außenfarbe</strong> — die Seite, die man <strong>von der Straße</strong> sieht.')+
+     '</div>';
   h+='<div class="wiz-swgrid">'+Object.keys(table).map(function(k){const o=table[k];return '<div class="wiz-sw'+(k===cur?' sel':'')+'" title="'+o.name+'" onclick="wizPickFarb(\''+k+'\')"><div class="wiz-chip" style="background:'+o.hex+';border-color:'+(o.border||'rgba(0,0,0,.12)')+'"></div><div class="wiz-swn">'+o.name+'</div></div>';}).join('')+'</div>';
   return h;
 }
