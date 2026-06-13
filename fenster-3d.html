@@ -291,6 +291,8 @@ const sealMat   = new THREE.MeshStandardMaterial({ color: 0x1a1c1e, roughness: 0
 // Subtile Nut-Linie — nur Tiefenwirkung, kein schwarzer Strich
 const subtleNutMat = new THREE.MeshStandardMaterial({ color: 0xdcdcdc, roughness: 0.65 });
 const spacerMat = new THREE.MeshStandardMaterial({ color: 0x22262a, roughness: 0.55, metalness: 0.45 });
+// Innenliegende Sprossen (SZR): helles, leicht silbriges Aluprofil — subtil, sitzt zwischen den Scheiben
+const sproInnenMat = new THREE.MeshStandardMaterial({ color: 0xc7ccd3, roughness: 0.5, metalness: 0.35 });
 const handleMat = new THREE.MeshStandardMaterial({ color: 0xd8dde0, roughness: 0.18, metalness: 0.92, envMapIntensity: 2.5 });
 const hingeMat  = new THREE.MeshStandardMaterial({ color: 0xbabfc2, roughness: 0.55, metalness: 0.05 });
 // Glas: hellblau-reflektiv wie echtes Produktfoto (Kundenwunsch 18.05.2026)
@@ -532,20 +534,33 @@ function buildWindow(spec) {
   sashGroup.add(bx(gcx - GW/2 - SBW/2, gcy, sbz, SBW, GH, sbd, spacerMat));
   sashGroup.add(bx(gcx + GW/2 + SBW/2, gcy, sbz, SBW, GH, sbd, spacerMat));
 
-  // ── Sprossen (Aufteilung) — dünne Stäbe in der Glasebene ──
+  // ── Sprossen (Aufteilung) — realistisch je Art ───────
+  //  • Innenliegend (SZR): dünne, flache, silbrige Stäbe IN der Glasebene (zwischen den Scheiben) → subtil
+  //  • Aufgesetzt: kräftige Stäbe ERHABEN auf der Glasfront (innen + außen), Rahmenfarbe, werfen Schatten → klar sichtbar
   if (_sproTyp && _sproTyp !== 'keine') {
-    const _r  = SPRO_RASTER[_sproRaster] || { v:1, h:1 };
+    const _r   = SPRO_RASTER[_sproRaster] || { v:1, h:1 };
     const _inn = _sproTyp === 'szr';
-    const _bw  = _inn ? 0.010 : 0.020;          // Sprossenbreite (SZR schmaler)
-    const _bd  = _inn ? 0.008 : 0.018;          // Tiefe — aufgeklebt steht beidseitig vor
-    const _bm  = _inn ? spacerMat : frameMat;   // SZR silbern, aufgeklebt in Rahmenfarbe
+    const _gz  = szc + 0.002;                    // Glasmitte (Scheibe sitzt hier)
+    const _bw  = _inn ? 0.011 : 0.024;           // Breite: aufgesetzt deutlich kräftiger
+    const _bd  = _inn ? 0.004 : 0.013;           // Tiefe
+    const _bm  = _inn ? sproInnenMat : frameMat; // innen silbrig, aufgesetzt in Rahmenfarbe
+    const _prof = 0.006;                          // wie weit aufgesetzte Sprosse vor dem Glas steht
+    // Z-Lagen: innen = nur Glasmitte; aufgesetzt = vorne (Raumseite) + hinten (Außenseite)
+    const _zs = _inn ? [_gz] : [_gz + _prof + _bd/2, _gz - _prof - _bd/2];
+    function sproBar(cx, cy, w, h){
+      _zs.forEach(function(z){
+        const m = bx(cx, cy, z, w, h, _bd, _bm);
+        if (!_inn) m.castShadow = true;          // nur aufgesetzte werfen Schatten
+        sashGroup.add(m);
+      });
+    }
     for (let i = 1; i <= _r.v; i++) {
       const bxc = gcx + (i / (_r.v + 1) - 0.5) * GW;
-      sashGroup.add(bx(bxc, gcy, szc, _bw, GH, _bd, _bm));
+      sproBar(bxc, gcy, _bw, GH);
     }
     for (let j = 1; j <= _r.h; j++) {
       const byc = gcy + (j / (_r.h + 1) - 0.5) * GH;
-      sashGroup.add(bx(gcx, byc, szc, GW, _bw, _bd, _bm));
+      sproBar(gcx, byc, GW, _bw);
     }
   }
 

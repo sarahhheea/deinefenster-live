@@ -292,6 +292,8 @@ const sealMat   = new THREE.MeshStandardMaterial({ color: 0x1a1c1e, roughness: 0
 // Subtile Nut-Linie — nur Tiefenwirkung, kein schwarzer Strich
 const subtleNutMat = new THREE.MeshStandardMaterial({ color: 0xdcdcdc, roughness: 0.65 });
 const spacerMat = new THREE.MeshStandardMaterial({ color: 0x22262a, roughness: 0.55, metalness: 0.45 });
+// Innenliegende Sprossen (SZR): helles, leicht silbriges Aluprofil — subtil, sitzt zwischen den Scheiben
+const sproInnenMat = new THREE.MeshStandardMaterial({ color: 0xc7ccd3, roughness: 0.5, metalness: 0.35 });
 const handleMat = new THREE.MeshStandardMaterial({ color: 0xd8dde0, roughness: 0.18, metalness: 0.92, envMapIntensity: 2.5 });
 const hingeMat  = new THREE.MeshStandardMaterial({ color: 0xbabfc2, roughness: 0.55, metalness: 0.05 });
 // Alu-Schwelle — eloxiertes Aluminium, leicht heller und matter als Hebel-Stahl
@@ -544,20 +546,27 @@ function buildWindow(spec) {
   sashGroup.add(bx(gcx - GW/2 - SBW/2, gcy, sbz, SBW, GH, sbd, spacerMat));
   sashGroup.add(bx(gcx + GW/2 + SBW/2, gcy, sbz, SBW, GH, sbd, spacerMat));
 
-  // ── Sprossen (Aufteilung) — dünne Stäbe in der Glasebene ──
+  // ── Sprossen (Aufteilung) — realistisch je Art ──
+  //  innenliegend (SZR): dünn/flach/silbrig in der Glasebene · aufgesetzt: kräftig/erhaben auf der Glasfront
   if (_sproTyp && _sproTyp !== 'keine') {
-    const _r  = SPRO_RASTER[_sproRaster] || { v:1, h:1 };
+    const _r   = SPRO_RASTER[_sproRaster] || { v:1, h:1 };
     const _inn = _sproTyp === 'szr';
-    const _bw  = _inn ? 0.010 : 0.020;
-    const _bd  = _inn ? 0.008 : 0.018;
-    const _bm  = _inn ? spacerMat : frameMat;
+    const _gz  = szc + 0.002;
+    const _bw  = _inn ? 0.011 : 0.024;
+    const _bd  = _inn ? 0.004 : 0.013;
+    const _bm  = _inn ? sproInnenMat : frameMat;
+    const _prof = 0.006;
+    const _zs  = _inn ? [_gz] : [_gz + _prof + _bd/2, _gz - _prof - _bd/2];
+    const _sproBar = function(cx, cy, w, h){
+      _zs.forEach(function(z){ const m = bx(cx, cy, z, w, h, _bd, _bm); if(!_inn) m.castShadow = true; sashGroup.add(m); });
+    };
     for (let i = 1; i <= _r.v; i++) {
       const _bxc = gcx + (i / (_r.v + 1) - 0.5) * GW;
-      sashGroup.add(bx(_bxc, gcy, szc, _bw, GH, _bd, _bm));
+      _sproBar(_bxc, gcy, _bw, GH);
     }
     for (let j = 1; j <= _r.h; j++) {
       const _byc = gcy + (j / (_r.h + 1) - 0.5) * GH;
-      sashGroup.add(bx(gcx, _byc, szc, GW, _bw, _bd, _bm));
+      _sproBar(gcx, _byc, GW, _bw);
     }
   }
 
