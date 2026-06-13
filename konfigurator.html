@@ -4187,6 +4187,26 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   #cfg-wizard .wiz-tabs{display:flex;gap:8px;margin-bottom:14px}
   #cfg-wizard .wiz-tab{flex:1;padding:10px;border-radius:999px;border:1px solid rgba(34,94,170,.2);background:#fff;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;color:#14233f}
   #cfg-wizard .wiz-tab.sel{background:var(--c-primary);color:#fff;border-color:var(--c-primary)}
+  /* Gerahmtes Farb-Panel — trennt Innen/Außen klar (Innen=blau, Außen=bronze) */
+  #cfg-wizard .wiz-farb-panel{border:2px solid var(--c-primary);border-radius:16px;padding:12px 12px 6px;margin-top:2px;background:#fff;box-shadow:0 4px 16px rgba(20,40,80,.06)}
+  #cfg-wizard .wiz-farb-panel.is-aussen{border-color:#b1742b}
+  #cfg-wizard .wiz-farb-head{background:rgba(34,94,170,.07);border-radius:11px;padding:10px 12px;margin-bottom:12px}
+  #cfg-wizard .wiz-farb-panel.is-aussen .wiz-farb-head{background:rgba(177,116,43,.09)}
+  #cfg-wizard .wiz-farb-step{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--c-primary);background:rgba(34,94,170,.12);padding:3px 9px;border-radius:999px;font-family:'Plus Jakarta Sans',sans-serif}
+  #cfg-wizard .wiz-farb-panel.is-aussen .wiz-farb-step{color:#9c6322;background:rgba(177,116,43,.15)}
+  #cfg-wizard .wiz-farb-titlerow{display:flex;align-items:center;gap:11px;margin-top:8px}
+  #cfg-wizard .wiz-farb-ic{font-size:26px;color:var(--c-primary);flex-shrink:0}
+  #cfg-wizard .wiz-farb-panel.is-aussen .wiz-farb-ic{color:#b1742b}
+  #cfg-wizard .wiz-farb-tt{min-width:0}
+  #cfg-wizard .wiz-farb-name{font-weight:800;font-size:16px;color:#14233f;font-family:'Plus Jakarta Sans',sans-serif;line-height:1.2}
+  #cfg-wizard .wiz-farb-sub{font-size:12px;color:#5a6a85;font-family:'Manrope',sans-serif;line-height:1.3}
+  #cfg-wizard .wiz-farb-cur{margin-left:auto;display:flex;align-items:center;gap:7px;background:#fff;border:1px solid #e6ebf3;border-radius:999px;padding:4px 11px 4px 5px;flex-shrink:0}
+  #cfg-wizard .wiz-farb-curchip{width:20px;height:20px;border-radius:50%;border:1px solid rgba(0,0,0,.15);flex-shrink:0}
+  #cfg-wizard .wiz-farb-curname{font-size:12px;font-weight:700;color:#14233f;font-family:'Manrope',sans-serif;white-space:nowrap}
+  @media(max-width:560px){
+    #cfg-wizard .wiz-farb-cur{margin-left:0;margin-top:8px;width:100%;justify-content:flex-start}
+    #cfg-wizard .wiz-farb-titlerow{flex-wrap:wrap}
+  }
   #cfg-wizard .wiz-pills{display:flex;flex-wrap:wrap;gap:8px}
   #cfg-wizard .wiz-pill{padding:10px 16px;border-radius:999px;border:1px solid rgba(34,94,170,.2);background:#fff;font-weight:700;cursor:pointer;font-family:'Manrope',sans-serif;color:#14233f;font-size:13px}
   #cfg-wizard .wiz-pill.sel{background:var(--c-primary);color:#fff;border-color:var(--c-primary)}
@@ -7510,12 +7530,24 @@ function wizRenderFarbe(){
     '<button type="button" class="wiz-tab'+(!isInnen?' sel':'')+'" onclick="wizPickFarbTab(\'fa\')" style="display:flex;flex-direction:column;line-height:1.3;padding-top:8px;padding-bottom:8px">'+
       '<span style="display:block"><strong>2 · Außen</strong></span><span style="display:block;font-size:11px;font-weight:400;opacity:.72">von der Straße · '+curAussenName.split('(')[0].trim()+'</span></button>'+
   '</div>';
-  h+='<div style="text-align:center;font-size:13.5px;color:#41506b;margin:4px auto 14px;max-width:560px;line-height:1.45">'+
-     (isInnen
-       ? 'Schritt 1: <strong>Innenfarbe</strong> — die Seite, die Sie <strong>im Raum</strong> sehen.'
-       : 'Schritt 2: <strong>Außenfarbe</strong> — die Seite, die man <strong>von der Straße</strong> sieht.')+
+  // Gerahmtes Panel je Seite — visuell klar getrennt (Innen = blau, Außen = warm/bronze).
+  const sideObj=(P[tab]&&P[tab][cur])||null;
+  const curHex=(sideObj&&sideObj.hex)||'#F4F4F0';
+  const curName=(sideObj&&sideObj.name)||'noch keine gewählt';
+  h+='<div class="wiz-farb-panel '+(isInnen?'is-innen':'is-aussen')+'">'+
+       '<div class="wiz-farb-head">'+
+         '<span class="wiz-farb-step">Schritt '+(isInnen?'1':'2')+' von 2</span>'+
+         '<div class="wiz-farb-titlerow">'+
+           '<i class="ms wiz-farb-ic">'+(isInnen?'meeting_room':'villa')+'</i>'+
+           '<div class="wiz-farb-tt">'+
+             '<div class="wiz-farb-name">'+(isInnen?'Innenfarbe':'Außenfarbe')+'</div>'+
+             '<div class="wiz-farb-sub">'+(isInnen?'die Seite, die Sie im Raum sehen':'die Seite, die man von der Straße sieht')+'</div>'+
+           '</div>'+
+           '<div class="wiz-farb-cur"><span class="wiz-farb-curchip" style="background:'+curHex+'"></span><span class="wiz-farb-curname">'+curName+'</span></div>'+
+         '</div>'+
+       '</div>'+
+       '<div class="wiz-swgrid">'+Object.keys(table).map(function(k){const o=table[k];return '<div class="wiz-sw'+(k===cur?' sel':'')+'" title="'+o.name+'" onclick="wizPickFarb(\''+k+'\')"><div class="wiz-chip" style="background:'+o.hex+';border-color:'+(o.border||'rgba(0,0,0,.12)')+'"></div><div class="wiz-swn">'+o.name+'</div></div>';}).join('')+'</div>'+
      '</div>';
-  h+='<div class="wiz-swgrid">'+Object.keys(table).map(function(k){const o=table[k];return '<div class="wiz-sw'+(k===cur?' sel':'')+'" title="'+o.name+'" onclick="wizPickFarb(\''+k+'\')"><div class="wiz-chip" style="background:'+o.hex+';border-color:'+(o.border||'rgba(0,0,0,.12)')+'"></div><div class="wiz-swn">'+o.name+'</div></div>';}).join('')+'</div>';
   return h;
 }
 // GLASDEKOR
