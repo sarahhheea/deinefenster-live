@@ -38,7 +38,14 @@
     letter-spacing: 0.5px;
   }
 
-  .layout { display: flex; height: calc(100vh - 40px); }
+  .layout { display: flex; height: calc(100vh - 40px); position: relative; }
+  .roll-label {
+    position: absolute; top: 14px; left: 50%; transform: translateX(-50%); z-index: 20;
+    background: rgba(34,94,170,0.95); color: #fff; font-weight: 700;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-size: 13px;
+    padding: 6px 16px; border-radius: 999px; letter-spacing: 0.3px;
+    box-shadow: 0 4px 14px rgba(20,40,80,0.28); pointer-events: none; white-space: nowrap;
+  }
 
   #threeCanvas { flex: 1; display: block; cursor: grab; }
   #threeCanvas:active { cursor: grabbing; }
@@ -105,6 +112,7 @@
 
 <div class="layout">
   <canvas id="threeCanvas"></canvas>
+  <div id="rollLabel" class="roll-label" style="display:none">Rollladen</div>
 
   <div class="controls">
     <div class="current-label" id="currentLabel">Anthrazitgrau</div>
@@ -370,9 +378,9 @@ function _addRolladen(spec) {
   const fzc = FD / 2;
 
   // Kasten
-  winGroup.add(bx(FW / 2, kastenY, kastenZ, FW, kastenH, kastenD, frameMat));
+  winGroup.add(bx(FW / 2, kastenY, kastenZ, FW + 2 * ROL_SCHIENE_W, kastenH, kastenD, frameMat));
   const kastenFront = kastenZ + kastenD / 2;
-  const kxL = 0.012, kxR = FW - 0.012;
+  const kxL = -ROL_SCHIENE_W + 0.012, kxR = FW + ROL_SCHIENE_W - 0.012;
   const kyB = FH + 0.012, kyT = FH + kastenH - 0.012;
   winGroup.add(nut(kxL, kyB, kxR, kyB, kastenFront, subtleNutMat));
   winGroup.add(nut(kxL, kyT, kxR, kyT, kastenFront, subtleNutMat));
@@ -627,6 +635,14 @@ function buildWindow(spec) {
     _addFluegel(xSash, sashYBot, sashCellW, sashH, sashStates[i], isStand, view, handleEdge, hingeEdge);
   }
   _addRolladen(spec);
+  // Bei Rollladen: Kasten oben voll ins Bild — Tür + Kasten gemeinsam zentrieren, Kamera etwas weiter weg
+  {
+    const _kH = _rollKastenH(spec);
+    winGroup.position.y = -(FH + _kH) / 2;
+    camera.position.z = _kH ? 13.5 * (FH + _kH) / FH * 1.06 : 13.5;
+    if (typeof orb !== 'undefined' && orb && orb.update) orb.update();
+    _updateRollLabel(spec);
+  }
   return;
 
   // ── ALTER 1-Flügel-Code unten — wird nicht mehr ausgeführt, bleibt für Referenz ──
@@ -800,8 +816,22 @@ function buildWindow(spec) {
 
 // Initial-Build folgt weiter unten NACH FARBEN-Definition
 
-// Fenster auf Welt-Origin zentrieren
-winGroup.position.set(-FW / 2, -FH / 2, 0);
+function _rollKastenH(spec){
+  return (spec && spec.roll && spec.roll !== 'ohne')
+    ? ((parseInt(spec.rollKasten, 10) || 175) / 1000) : 0;
+}
+function _updateRollLabel(spec){
+  const lab = document.getElementById('rollLabel');
+  if (!lab) return;
+  if (spec && spec.roll && spec.roll !== 'ohne') {
+    lab.textContent = 'Rollladen · ' + (spec.roll === 'motor' ? 'Motor' : 'Gurt');
+    lab.style.display = '';
+  } else { lab.style.display = 'none'; }
+}
+
+// Tür auf Welt-Origin zentrieren (y wird in buildWindow gesetzt)
+winGroup.position.x = -FW / 2;
+winGroup.position.z = 0;
 scene.add(winGroup);
 
 // setSide: 'r' = Griff rechts (Standard), 'l' = Griff links (gespiegelt)

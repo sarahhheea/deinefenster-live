@@ -4257,6 +4257,17 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   #cfg-wizard .hac-ovl{position:absolute;inset:0;pointer-events:none}
   #cfg-wizard .hac-ovl svg{width:100%;height:100%;display:block}
   #cfg-wizard .wiz-badge{display:inline-block;font-size:10px;font-weight:800;color:#fff;background:var(--c-primary);border-radius:999px;padding:2px 9px;margin-top:6px;letter-spacing:.4px;font-family:'Manrope',sans-serif}
+  /* Rolladen-Karten: größer, Kasten-Bild sichtbar, Typ-Symbol + Auswahl-Häkchen */
+  #cfg-wizard .wiz-roll-card{width:248px;position:relative;padding-bottom:12px}
+  #cfg-wizard .wiz-roll-card .wiz-gbox{background:#f4f7fc}
+  #cfg-wizard .wiz-roll-vis{position:relative}
+  #cfg-wizard .wiz-roll-card .wiz-roll-vis img{width:100%;height:100%;object-fit:contain;padding:6px}
+  #cfg-wizard .wiz-roll-ic{position:absolute;left:8px;bottom:8px;width:38px;height:38px;border-radius:50%;background:var(--c-primary);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 9px rgba(20,40,80,.22)}
+  #cfg-wizard .wiz-roll-ic .ms{font-size:22px}
+  #cfg-wizard .wiz-roll-check{position:absolute;top:9px;right:9px;z-index:2;width:30px;height:30px;border-radius:50%;background:#1f9d55;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 9px rgba(20,40,80,.22)}
+  #cfg-wizard .wiz-roll-check .ms{font-size:20px;font-weight:700}
+  #cfg-wizard .wiz-roll-card .wiz-cn{font-size:14px;margin-top:10px}
+  #cfg-wizard .wiz-roll-card .wiz-csub{font-size:11.5px;line-height:1.4;padding:0 6px;margin-top:4px}
   /* kompakte Optionskarten (Schall/Sicherheit): Symbol/Produkt im Querformat-Kasten */
   #cfg-wizard .wiz-card-opt{width:200px}
   #cfg-wizard .wiz-card-opt .wiz-sym{width:100%;height:108px;border-radius:10px;background:#eef2f8;display:flex;align-items:center;justify-content:center;overflow:hidden}
@@ -7620,6 +7631,12 @@ function wizSetLock(v){ S.griffLocked=(v==='true'); if(window._touched)window._t
 // ROLLADEN
 function wizRenderRoll(){
   const imgs={ohne:'',gurt:'img/rolladen-gurt.webp',motor:'img/rolladen-elektrisch.webp'};
+  // Kennzeichnung je Rolladen-Art (Bild bleibt, Symbol + Beschreibung machen den Unterschied sichtbar)
+  const META={
+    ohne:  {ic:'block',         sub:'Ohne Rollladen'},
+    gurt:  {ic:'back_hand',     sub:'Mit Gurtwickler &middot; per Hand, Gurt an der Innenseite'},
+    motor: {ic:'settings_remote', sub:'Elektrisch &middot; per Schalter/Funk, kein Gurt'}
+  };
   // Schiebetüren: nur Motorrolladen — Gurtwickler raus (Tür-Konstruktion lässt keinen zu)
   const isHst = (S.prod==='hst');
   if(isHst){ if(S.roll==='gurt')S.roll='motor'; if(typeof autoSetRollKasten==='function')autoSetRollKasten(); }
@@ -7627,8 +7644,16 @@ function wizRenderRoll(){
   let h='';
   if(isHst){ h+='<div class="wiz-hint" style="margin-bottom:14px">Bei Schiebetüren ist nur der <strong>Motorrolladen</strong> möglich — die Tür-Konstruktion lässt keinen Gurtwickler zu.</div>'; }
   h+='<div class="wiz-cards">'+rollKeys.map(function(k){
-    const im=imgs[k]?'<div class="wiz-gbox"><img src="'+imgs[k]+'" alt="'+P.roll[k].name+'" loading="lazy"></div>':'<div class="wiz-gbox wiz-gbox-empty">Kein Rolladen</div>';
-    return '<div class="wiz-card'+(k===S.roll?' sel':'')+'" onclick="wizSetRoll(\''+k+'\')">'+im+'<div class="wiz-cn">'+P.roll[k].name+'</div></div>';
+    const m=META[k]||{ic:'',sub:''}; const sel=(k===S.roll);
+    const vis = imgs[k]
+      ? '<div class="wiz-gbox wiz-roll-vis"><img src="'+imgs[k]+'" alt="'+P.roll[k].name+'" loading="lazy">'+(m.ic?'<span class="wiz-roll-ic"><i class="ms">'+m.ic+'</i></span>':'')+'</div>'
+      : '<div class="wiz-gbox wiz-gbox-empty"><i class="ms" style="font-size:32px;color:#9aa7b5">block</i><span style="display:block;margin-top:4px">Kein Rolladen</span></div>';
+    return '<div class="wiz-card wiz-roll-card'+(sel?' sel':'')+'" onclick="wizSetRoll(\''+k+'\')">'+
+      (sel?'<span class="wiz-roll-check"><i class="ms">check</i></span>':'')+
+      vis+
+      '<div class="wiz-cn">'+P.roll[k].name+'</div>'+
+      (m.sub?'<div class="wiz-csub">'+m.sub+'</div>':'')+
+    '</div>';
   }).join('')+'</div>';
   if(S.roll==='gurt'){ h+='<div class="wiz-group" style="margin-top:16px"><div class="wiz-gt">Gurt-Seite</div>'+_wizPills([['links','Links'],['rechts','Rechts']],S.rollSeite,'wizSetRollSeite')+'</div>'; }
   if(S.roll&&S.roll!=='ohne'){ h+='<div class="wiz-hint">Kastenhöhe '+(S.rollKasten||'175')+' mm — '+(isHst?'nach System':'automatisch nach Fensterhöhe')+' gewählt.</div>'; }
@@ -12638,7 +12663,7 @@ function _renderBalkontuer3d() {
     const _roll = S.roll || 'ohne';
     const _kasten = S.rollKasten || '175';
     const _rseite = S.rollSeite || 'rechts';
-    frame.src = `/${_src3d}?embed&v=20260611spro&bg=light&color=${_ck}&side=${_side}&layout=${_layout}&roll=${_roll}&rollKasten=${_kasten}&rollSeite=${_rseite}`;
+    frame.src = `/${_src3d}?embed&v=20260613roll&bg=light&color=${_ck}&side=${_side}&layout=${_layout}&roll=${_roll}&rollKasten=${_kasten}&rollSeite=${_rseite}`;
     frame.onload = () => {
       const cw = frame.contentWindow;
       if (!cw) return;
@@ -12733,7 +12758,7 @@ function _renderFenster3d() {
   // iframe neu laden wenn sich die Quelle ändert (1-Flügel ↔ Multi)
   const _wantsReload = !frame.src.includes(_src3d);
   if (_wantsReload) {
-    frame.src = `/${_src3d}?embed&v=20260611spro&bg=light&color=${_ck}&side=${_side}&layout=${_layout}`;
+    frame.src = `/${_src3d}?embed&v=20260613roll&bg=light&color=${_ck}&side=${_side}&layout=${_layout}`;
     frame.onload = () => {
       const cw = frame.contentWindow;
       if (!cw) return;

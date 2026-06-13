@@ -40,7 +40,14 @@
     letter-spacing: 0.5px;
   }
 
-  .layout { display: flex; height: calc(100vh - 40px); }
+  .layout { display: flex; height: calc(100vh - 40px); position: relative; }
+  .roll-label {
+    position: absolute; top: 14px; left: 50%; transform: translateX(-50%); z-index: 20;
+    background: rgba(34,94,170,0.95); color: #fff; font-weight: 700;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-size: 13px;
+    padding: 6px 16px; border-radius: 999px; letter-spacing: 0.3px;
+    box-shadow: 0 4px 14px rgba(20,40,80,0.28); pointer-events: none; white-space: nowrap;
+  }
 
   #threeCanvas { flex: 1; display: block; cursor: grab; }
   #threeCanvas:active { cursor: grabbing; }
@@ -139,6 +146,7 @@
 
 <div class="layout">
   <canvas id="threeCanvas"></canvas>
+  <div id="rollLabel" class="roll-label" style="display:none">Rollladen</div>
 
   <div class="controls">
     <div class="current-label" id="currentLabel">Anthrazitgrau</div>
@@ -394,11 +402,11 @@ function _addRolladen(spec) {
   const fzc = FD / 2;
 
   // ── Rollladenkasten ──
-  winGroup.add(bx(FW / 2, kastenY, kastenZ, FW, kastenH, kastenD, frameMat));
+  winGroup.add(bx(FW / 2, kastenY, kastenZ, FW + 2 * ROL_SCHIENE_W, kastenH, kastenD, frameMat));
 
   // Profilnut umlaufend auf Vorderfläche des Kastens
   const kastenFront = kastenZ + kastenD / 2;
-  const kxL = 0.012, kxR = FW - 0.012;
+  const kxL = -ROL_SCHIENE_W + 0.012, kxR = FW + ROL_SCHIENE_W - 0.012;
   const kyB = FH + 0.012, kyT = FH + kastenH - 0.012;
   winGroup.add(nut(kxL, kyB, kxR, kyB, kastenFront, subtleNutMat));
   winGroup.add(nut(kxL, kyT, kxR, kyT, kastenFront, subtleNutMat));
@@ -666,12 +674,40 @@ function buildWindow(spec) {
 
   // ── Rollladen (falls konfiguriert) ──
   _addRolladen(spec);
+
+  // Bei Rollladen: Gruppe nach unten schieben, damit der Kasten OBEN voll im Bild ist
+  // (sonst würde der Kasten oben abgeschnitten). Zentriert Fenster+Kasten gemeinsam.
+  const _kH = _rollKastenH(spec);
+  winGroup.position.y = -(FH + _kH) / 2;
+  // Kamera etwas weiter weg, damit der höhere Aufbau (Fenster + Kasten) mit Rand ins Bild passt
+  camera.position.z = _kH ? 5.0 * (FH + _kH) / FH * 1.06 : 5.0;
+  if (typeof orb !== 'undefined' && orb && orb.update) orb.update();
+
+  // Label-Overlay "Rollladen · Gurt/Motor"
+  _updateRollLabel(spec);
+}
+
+// Kasten-Höhe in Metern (0 wenn kein Rollladen) — für die Bild-Zentrierung
+function _rollKastenH(spec){
+  return (spec && spec.roll && spec.roll !== 'ohne')
+    ? ((parseInt(spec.rollKasten, 10) || 175) / 1000) : 0;
+}
+function _updateRollLabel(spec){
+  const lab = document.getElementById('rollLabel');
+  if (!lab) return;
+  if (spec && spec.roll && spec.roll !== 'ohne') {
+    lab.textContent = 'Rollladen · ' + (spec.roll === 'motor' ? 'Motor' : 'Gurt');
+    lab.style.display = '';
+  } else {
+    lab.style.display = 'none';
+  }
 }
 
 buildWindow();
 
-// Fenster auf Welt-Origin zentrieren (winGroup ist child von pivotGroup)
-winGroup.position.set(-FW / 2, -FH / 2, 0);
+// Fenster auf Welt-Origin zentrieren (winGroup ist child von pivotGroup) — y wird in buildWindow gesetzt
+winGroup.position.x = -FW / 2;
+winGroup.position.z = 0;
 scene.add(pivotGroup);
 
 // setSide: 'r' = Griff rechts (Standard), 'l' = Griff links (gespiegelt)

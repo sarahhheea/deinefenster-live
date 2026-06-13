@@ -38,7 +38,14 @@
     letter-spacing: 0.5px;
   }
 
-  .layout { display: flex; height: calc(100vh - 40px); }
+  .layout { display: flex; height: calc(100vh - 40px); position: relative; }
+  .roll-label {
+    position: absolute; top: 14px; left: 50%; transform: translateX(-50%); z-index: 20;
+    background: rgba(34,94,170,0.95); color: #fff; font-weight: 700;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-size: 13px;
+    padding: 6px 16px; border-radius: 999px; letter-spacing: 0.3px;
+    box-shadow: 0 4px 14px rgba(20,40,80,0.28); pointer-events: none; white-space: nowrap;
+  }
 
   #threeCanvas { flex: 1; display: block; cursor: grab; }
   #threeCanvas:active { cursor: grabbing; }
@@ -105,6 +112,7 @@
 
 <div class="layout">
   <canvas id="threeCanvas"></canvas>
+  <div id="rollLabel" class="roll-label" style="display:none">Rollladen</div>
 
   <div class="controls">
     <div class="current-label" id="currentLabel">Anthrazitgrau</div>
@@ -161,6 +169,21 @@ if(_bgLight){var _s=document.createElement('style');_s.textContent='html.is-embe
 const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 50);
 camera.position.set(0, 0, 8.0);
 
+// Rollladenkasten-Höhe (m) des aktuellen Builds — für Rahmung + Zentrierung
+let _rollKH = 0;
+function _rollKastenH(spec){
+  return (spec && spec.roll && spec.roll !== 'ohne')
+    ? ((parseInt(spec.rollKasten, 10) || 175) / 1000) : 0;
+}
+function _updateRollLabel(spec){
+  const lab = document.getElementById('rollLabel');
+  if (!lab) return;
+  if (spec && spec.roll && spec.roll !== 'ohne') {
+    lab.textContent = 'Rollladen · ' + (spec.roll === 'motor' ? 'Motor' : 'Gurt');
+    lab.style.display = '';
+  } else { lab.style.display = 'none'; }
+}
+
 // Rahmt die ortho-Kamera exakt auf FW×FH (+Rand) und zentriert — deterministisch,
 // unabhängig von vorherigem State oder erster Frame-Größe.
 function frameCamera() {
@@ -169,7 +192,7 @@ function frameCamera() {
   const h = embed ? window.innerHeight : window.innerHeight - 40;
   const aspect = Math.max(w / Math.max(h, 1), 0.0001);
   const margin = 1.14;                 // 14% Luft rundherum
-  const halfH = (FH / 2) * margin;
+  const halfH = ((FH + _rollKH) / 2) * margin;   // Rollladenkasten oben mit einrahmen
   const halfW = (FW / 2) * margin;
   // Fenster komplett sichtbar in beiden Achsen
   let viewH = halfH, viewW = halfH * aspect;
@@ -398,9 +421,9 @@ function _addRolladen(spec) {
   const fzc = FD / 2;
 
   // Kasten
-  winGroup.add(bx(FW / 2, kastenY, kastenZ, FW, kastenH, kastenD, frameMat));
+  winGroup.add(bx(FW / 2, kastenY, kastenZ, FW + 2 * ROL_SCHIENE_W, kastenH, kastenD, frameMat));
   const kastenFront = kastenZ + kastenD / 2;
-  const kxL = 0.012, kxR = FW - 0.012;
+  const kxL = -ROL_SCHIENE_W + 0.012, kxR = FW + ROL_SCHIENE_W - 0.012;
   const kyB = FH + 0.012, kyT = FH + kastenH - 0.012;
   winGroup.add(nut(kxL, kyB, kxR, kyB, kastenFront, subtleNutMat));
   winGroup.add(nut(kxL, kyT, kxR, kyT, kastenFront, subtleNutMat));
@@ -742,11 +765,13 @@ function buildWindow(spec) {
   // Zentrierung + Kamera deterministisch an die aktuelle Breite FW anpassen.
   // winGroup wird hier (mit DEM FW dieses Builds) zentriert — kein Rückgriff auf
   // einen veralteten Modul-FW mehr.
-  winGroup.position.y = -FH / 2;
+  _rollKH = _rollKastenH(spec);
+  winGroup.position.y = -(FH + _rollKH) / 2;   // Fenster + Kasten gemeinsam zentrieren
   setSide(spec.side || 'r');     // setzt position.x = ∓FW/2 (zentriert in X)
-  frameCamera();                 // ortho-Frustum exakt auf FW×FH
+  frameCamera();                 // ortho-Frustum auf FW×(FH+Kasten)
   orb.target.set(0, 0, 0);
   orb.update();
+  _updateRollLabel(spec);
 }
 
 // Initial-Build folgt weiter unten NACH FARBEN-Definition (setColor braucht die Tabelle)
