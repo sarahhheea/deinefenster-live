@@ -6104,7 +6104,7 @@ const S = {
   fa:'anthrazit', fi:'anthrazit', fd:'schwarz',
   sproTyp:'keine', sproDicke:'27',  // Kunden-bestätigt 21.04.2026: neue Dicken
   griff:'mistral', griffColor:'weiss', griffLocked:false,
-  roll:'ohne', rollSeite:'rechts', rollKasten:'175', panzerFarbe:'grau',  // W8 Fix (Insekt entfernt)
+  roll:'ohne', rollSeite:'rechts', rollKasten:'175', panzerFarbe:'weiss',  // W8 Fix (Insekt entfernt)
   tuerGriffInnen:'drueck-weiss', tuerGriffAussen:'htg-30a',  // Kunde 21.04.2026: 4×14
   pskKammer:'iglo5',  // Kunde 21.04.2026: Kammer-System nur für PSK relevant
   hstGriff:'silber',          // Innen = Smart Slide IGLO-HS
@@ -6323,7 +6323,7 @@ function _showProductHero() {
 
 // Zurück zur Produktauswahl — reset, Hero zeigen, body-class entfernen
 function backToProductSelect() {
-  if (S.prod && !confirm('Bisherige Auswahlen werden zurückgesetzt. Anderes Produkt wählen?')) return;
+  // Kein Bestätigungs-Dialog mehr (Kundenwunsch) — direkt zurück zur Produktauswahl
   resetConfigForNextItem();
   // Wizard-Overlay schließen, sonst überdeckt es die Produktauswahl (sonst "führt ins Nichts")
   const w = document.getElementById('cfg-wizard'); if (w) w.style.display = 'none';
@@ -6340,7 +6340,7 @@ function resetConfigForNextItem() {
   S.fa = 'weiss'; S.fi = 'weiss'; S.fd = 'schwarz';
   S.sproTyp = 'keine'; S.sproDicke = '18'; S.sproRaster = 'kreuz';
   S.griff = 'mistral'; S.griffColor = 'weiss'; S.griffLocked = false;
-  S.roll = 'ohne'; S.rollSeite = 'rechts'; S.rollKasten = '175'; S.panzerFarbe = 'grau';
+  S.roll = 'ohne'; S.rollSeite = 'rechts'; S.rollKasten = '175'; S.panzerFarbe = 'weiss';
   S.sicher = 'wk1'; S.schall = 'ohne'; S.sicherGlas = 'kein';
   S.tuerModell = null;
   S.tuerGriffInnen = 'drueck-weiss'; S.tuerGriffAussen = 'htg-30a';
@@ -7315,7 +7315,7 @@ function wizStart(){
   // Neuanfang = wirklich Neuanfang: alle Zusatz-/Detail-Optionen auf Standard,
   // damit nichts vom vorher konfigurierten Produkt übrig bleibt (z.B. alte Sprossen).
   S.sproTyp='keine'; S.sproDicke='18'; S.sproRaster='kreuz';
-  S.roll='ohne'; S.rollSeite='rechts'; S.rollKasten='175'; S.panzerFarbe='grau';
+  S.roll='ohne'; S.rollSeite='rechts'; S.rollKasten='175'; S.panzerFarbe='weiss';
   S.schall='ohne'; S.sicher='wk1'; S.sicherGlas='kein';
   S.glasdekor='klar'; S.griffLocked=false;
   if(window._touched){['sproTyp','sproDicke','sproRaster','roll','rollSeite','rollKasten','panzerFarbe','schall','sicher','sicherGlas','glasdekor','griffLocked'].forEach(function(k){window._touched.delete(k);});}
@@ -7681,7 +7681,7 @@ function wizRenderRoll(){
   if(S.roll==='gurt'){ h+='<div class="wiz-group" style="margin-top:18px"><div class="wiz-gt">Antriebsseite <span style="font-weight:400;color:#6a7a8f;font-size:12px">(wo der Gurt sitzt)</span></div>'+_wizPills([['links','Links'],['rechts','Rechts']],S.rollSeite,'wizSetRollSeite')+'</div>'; }
   // 3. Kastenfarbe — Farbe von Kasten + Schienen (Drutex-Standardfarben)
   if(S.roll&&S.roll!=='ohne'){
-    if(!S.panzerFarbe||!PANZER_FARBEN[S.panzerFarbe])S.panzerFarbe='grau';
+    if(!S.panzerFarbe||!PANZER_FARBEN[S.panzerFarbe])S.panzerFarbe='weiss';
     const pzSel=S.panzerFarbe;
     h+='<div class="wiz-group" style="margin-top:18px"><div class="wiz-gt">Panzerfarbe <span style="font-weight:400;color:#6a7a8f;font-size:12px">(Rollladen-Lamellen)</span></div>'+
       '<div class="wiz-swgrid">'+Object.keys(PANZER_FARBEN).map(function(k){const o=PANZER_FARBEN[k];return '<div class="wiz-sw'+(k===pzSel?' sel':'')+'" title="'+o.name+'" onclick="wizSetPanzerFarbe(\''+k+'\')"><div class="wiz-chip" style="background:'+o.hex+';border-color:'+(o.border||'rgba(0,0,0,.12)')+'"></div><div class="wiz-swn">'+o.name+'</div></div>';}).join('')+'</div>';
@@ -7708,7 +7708,7 @@ const PANZER_FARBEN = {
 };
 function wizSetRoll(v){ S.roll=v; if(window._touched)window._touched.add('roll'); if(typeof autoSetRollKasten==='function')autoSetRollKasten(); _wizPrev(); wizRenderPanel(); }
 function wizSetPanzerFarbe(v){ S.panzerFarbe=v; if(window._touched)window._touched.add('panzerFarbe'); _wizPrev(); wizRenderPanel(); }
-function _panzerHex(){ return (S.panzerFarbe&&PANZER_FARBEN[S.panzerFarbe])?PANZER_FARBEN[S.panzerFarbe].hex:'#8d9094'; }
+function _panzerHex(){ return (S.panzerFarbe&&PANZER_FARBEN[S.panzerFarbe])?PANZER_FARBEN[S.panzerFarbe].hex:'#f1f1ec'; }
 function wizSetRollSeite(v){ wizSet('rollSeite',v); }
 // SPROSSEN
 function wizRenderSpro(){
@@ -12724,7 +12724,7 @@ function _renderBalkontuer3d() {
     const _roll = S.roll || 'ohne';
     const _kasten = S.rollKasten || '175';
     const _rseite = S.rollSeite || 'rechts';
-    frame.src = `/${_src3d}?embed&v=20260614vw&bg=light&color=${_ck}&side=${_side}&layout=${_layout}&roll=${_roll}&rollKasten=${_kasten}&rollSeite=${_rseite}`;
+    frame.src = `/${_src3d}?embed&v=20260614w2&bg=light&color=${_ck}&side=${_side}&layout=${_layout}&roll=${_roll}&rollKasten=${_kasten}&rollSeite=${_rseite}`;
     frame.onload = () => {
       const cw = frame.contentWindow;
       if (!cw) return;
@@ -12821,7 +12821,7 @@ function _renderFenster3d() {
   // iframe neu laden wenn sich die Quelle ändert (1-Flügel ↔ Multi)
   const _wantsReload = !frame.src.includes(_src3d);
   if (_wantsReload) {
-    frame.src = `/${_src3d}?embed&v=20260614vw&bg=light&color=${_ck}&side=${_side}&layout=${_layout}&view=${_view}`;
+    frame.src = `/${_src3d}?embed&v=20260614w2&bg=light&color=${_ck}&side=${_side}&layout=${_layout}&view=${_view}`;
     frame.onload = () => {
       const cw = frame.contentWindow;
       if (!cw) return;
