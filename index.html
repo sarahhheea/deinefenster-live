@@ -538,6 +538,40 @@ body.scrolled .burger{color:var(--text)}
 .hk-cta{margin-top:8px;font-weight:700;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.35)}
 @media(max-width:960px){.hero-kacheln{grid-template-columns:1fr 1fr}}@media(max-width:600px){.hero-kacheln{grid-template-columns:1fr;gap:7px;margin-top:18px}.hk{padding:12px 15px;background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;border-color:rgba(255,255,255,.28)}.hk-t{font-size:1.05rem;text-shadow:0 1px 4px rgba(0,0,0,.55)}.hk-arrow{text-shadow:0 1px 4px rgba(0,0,0,.55)}}
 </style>
+<style>
+/* Hero kleiner + Inhalt zuerst (nur Startseite, ueberschreibt globales .hero) */
+.hero{min-height:82vh;min-height:82svh}
+.hero .wrap{padding-top:128px;padding-bottom:104px}
+/* H1 etwas ruhiger, nimmt das "Erschlagende" raus */
+.hero-text h1{font-size:clamp(2.1rem,1.4rem + 2.1vw,3.4rem)}
+.hero-text{max-width:840px}
+/* etwas staerkerer Scrim, damit Headline + Button klar lesbar sind */
+.hero-bg::after{background:
+   linear-gradient(180deg,rgba(0,0,0,.50) 0%,rgba(0,0,0,.14) 16%,transparent 30%),
+   linear-gradient(0deg,rgba(0,0,0,.50) 0%,rgba(0,0,0,.18) 26%,transparent 46%),
+   linear-gradient(100deg,rgba(0,0,0,.66) 0%,rgba(0,0,0,.44) 34%,rgba(0,0,0,.14) 62%,transparent 84%)}
+/* EIN klarer Haupt-Button im Hero */
+.hero-btns{display:flex;flex-wrap:wrap;gap:14px;margin-top:30px}
+.hbtn{display:inline-flex;align-items:center;gap:9px;font-family:var(--font-display);font-weight:800;font-size:1.05rem;border-radius:var(--pill);padding:15px 30px;transition:transform .2s,box-shadow .2s,background .2s;line-height:1}
+.hbtn-primary{background:var(--acc);color:#0a1530;box-shadow:0 12px 30px -8px rgba(118,169,250,.7),0 0 0 1px rgba(255,255,255,.18) inset}
+.hbtn-primary:hover{transform:translateY(-2px);box-shadow:0 18px 40px -10px rgba(118,169,250,.85)}
+.hbtn-primary span{font-size:1.25rem;transition:transform .2s}
+.hbtn-primary:hover span{transform:translateX(4px)}
+.hbtn-ghost{color:#fff;border:1.5px solid rgba(255,255,255,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.hbtn-ghost:hover{background:rgba(255,255,255,.14);transform:translateY(-2px)}
+@media(max-width:600px){.hbtn{flex:1 1 100%;justify-content:center}}
+
+/* Die 3 Wege — heller Block direkt unter dem Hero (Inhalt zuerst) */
+.wege{background:var(--bg);padding:clamp(34px,5vw,64px) 0}
+.wege-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(14px,1.6vw,22px)}
+.wege-c{display:flex;flex-direction:column;gap:7px;padding:24px 26px;border-radius:18px;background:#fff;border:1px solid #e3eaf6;box-shadow:0 10px 30px -18px rgba(8,21,46,.4);transition:transform .22s,box-shadow .22s,border-color .22s}
+.wege-c:hover{transform:translateY(-4px);border-color:rgba(118,169,250,.55);box-shadow:0 22px 46px -22px rgba(8,21,46,.5),0 0 0 1px rgba(118,169,250,.35)}
+.wege-t{display:flex;align-items:center;justify-content:space-between;gap:12px;font-family:var(--font-display);font-weight:800;font-size:1.18rem;color:var(--ink);letter-spacing:-.01em;line-height:1.2}
+.wege-ar{color:var(--acc-text);font-weight:400;font-size:1.4rem;line-height:1;flex-shrink:0;transition:transform .2s}
+.wege-c:hover .wege-ar{transform:translateX(4px)}
+.wege-d{font-size:.94rem;color:var(--soft);line-height:1.5}
+@media(max-width:760px){.wege-grid{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
 
@@ -670,16 +704,9 @@ body.scrolled .burger{color:var(--text)}
   <div class="wrap"><div class="hero-text">
     <h1>10.000 Fenster. <span class="accent">Vor Ort in Brandenburg a.&nbsp;d.&nbsp;Havel.</span></h1>
     <p class="lead">Reinkommen, aussuchen, mitnehmen &mdash; oder nach Ma&szlig; bestellen.</p>
-        <div class="hero-kacheln">
-      <a class="hk" href="shop.html?zustand=gebraucht">
-        <span class="hk-t">Gebrauchte Fenster<span class="hk-arrow">&rarr;</span></span>
-      </a>
-      <a class="hk" href="shop.html?zustand=neu">
-        <span class="hk-t">Neue Fenster im Lager<span class="hk-arrow">&rarr;</span></span>
-      </a>
-      <a class="hk" href="konfigurator.html">
-        <span class="hk-t">Fenster &amp; T&uuml;ren nach Ma&szlig;<span class="hk-arrow">&rarr;</span></span>
-      </a>
+    <div class="hero-btns">
+      <a class="hbtn hbtn-primary" href="shop.html">Lager ansehen <span aria-hidden="true">&rarr;</span></a>
+      <a class="hbtn hbtn-ghost" href="/anfrage.html">Angebot anfragen</a>
     </div>
   </div></div>
 
@@ -701,6 +728,24 @@ body.scrolled .burger{color:var(--text)}
   <span class="ti" aria-hidden="true">Offizieller Drutex-Partner</span><span class="sep" aria-hidden="true">✦</span>
 </div></section>
 </header>
+
+<!-- Die 3 Wege — heller Block direkt unter dem Hero (Inhalt zuerst) -->
+<section class="wege"><div class="wrap">
+  <div class="wege-grid">
+    <a class="wege-c" href="shop.html?zustand=gebraucht">
+      <span class="wege-t">Gebrauchte Fenster <span class="wege-ar" aria-hidden="true">&rarr;</span></span>
+      <span class="wege-d">5000 St&uuml;ck vor Ort &middot; sofort zur Abholung im Hofverkauf.</span>
+    </a>
+    <a class="wege-c" href="shop.html?zustand=neu">
+      <span class="wege-t">Neue Fenster im Lager <span class="wege-ar" aria-hidden="true">&rarr;</span></span>
+      <span class="wege-d">5000 neue Fenster sofort verf&uuml;gbar &middot; deutschlandweite Lieferung.</span>
+    </a>
+    <a class="wege-c" href="konfigurator.html">
+      <span class="wege-t">Fenster &amp; T&uuml;ren nach Ma&szlig; <span class="wege-ar" aria-hidden="true">&rarr;</span></span>
+      <span class="wege-d">Im Konfigurator selbst zusammenstellen &middot; Angebot per Mail.</span>
+    </a>
+  </div>
+</div></section>
 
 <!-- Neu & Gebraucht / Hofverkauf -->
 <section class="alt"><div class="wrap">
@@ -1155,10 +1200,8 @@ body.scrolled .burger{color:var(--text)}
     gsap.registerPlugin(ScrollTrigger);
     var heroEl = document.querySelector('.hero');
     if (heroEl) {
-      var tl = gsap.timeline({ scrollTrigger: { trigger: '.hero', start: 'top top', end: '+=130%', scrub: 0.6, pin: true, anticipatePin: 1 } });
-      tl.to('.hero-bg', { scale: 1.22, ease: 'none' }, 0)
-        .to('.hero > .wrap', { autoAlpha: 0, y: -40, ease: 'none' }, 0)
-        .to('.hero .trustbar', { autoAlpha: 0, ease: 'none' }, 0);
+      var tl = gsap.timeline({ scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: 0.6 } });
+      tl.to('.hero-bg', { scale: 1.12, ease: 'none' }, 0);
 
       // dezenter Maus-Mitlauf des Videos (nur Desktop-Cursor)
       if (matchMedia('(pointer:fine)').matches) {
