@@ -7169,7 +7169,7 @@ function griffToGlasdekor(){ _grClose(function(){ if(typeof openGlasdekorHero===
 function griffToSchall(){ _grClose(function(){ if(typeof openSchallHero==='function')openSchallHero(); }); }
 
 // ════════ DURCHGEHENDER WIZARD (Bild fix, kein iframe-Flackern, alle 8 Detail-Schritte) ════════
-let wizIdx=0, wizFarbTab='fi';
+let wizIdx=0, wizFarbTab='fa';
 // Schritt-Registry — gilt = für welche Produkte; cond = zusätzliche Bedingung.
 const ALL='kunststoff,balkontuer,haustuere,hst'.split(',');
 const WIZ_ALL=[
@@ -7304,7 +7304,14 @@ function wizAddAnother(){
 }
 function _profilOkForProd(p){ return S.profil && P.profil[S.profil] && P.profil[S.profil].prods && P.profil[S.profil].prods.indexOf(p)>=0; }
 function wizStart(){
-  wizIdx=0; wizFarbTab='fi';
+  wizIdx=0; wizFarbTab='fa';   // Außenfarbe zuerst (Kundenwunsch)
+  // Neuanfang = wirklich Neuanfang: alle Zusatz-/Detail-Optionen auf Standard,
+  // damit nichts vom vorher konfigurierten Produkt übrig bleibt (z.B. alte Sprossen).
+  S.sproTyp='keine'; S.sproDicke='18'; S.sproRaster='kreuz';
+  S.roll='ohne'; S.rollSeite='rechts'; S.rollKasten='175';
+  S.schall='ohne'; S.sicher='wk1'; S.sicherGlas='kein';
+  S.glasdekor='klar'; S.griffLocked=false;
+  if(window._touched){['sproTyp','sproDicke','sproRaster','roll','rollSeite','rollKasten','schall','sicher','sicherGlas','glasdekor','griffLocked'].forEach(function(k){window._touched.delete(k);});}
   const prod=S.prod||'kunststoff';
   // Profil-Default je Produkt (zurücksetzen, falls vom Vorgänger-Produkt unpassend)
   if(prod==='haustuere'){ if(!_profilOkForProd('haustuere'))S.profil='iglo5-tuer'; if(!S.oeff1)S.oeff1='dreh-r'; if(!S.tuerOeffnung)S.tuerOeffnung='innen'; }
@@ -7471,6 +7478,8 @@ function wizMassInput(){
 function wizGo(i){
   wizIdx=Math.max(0,Math.min(WIZ_STEPS.length-1,i));
   const s=WIZ_STEPS[wizIdx];
+  // Farbe-Schritt immer zuerst auf Außen (Kundenwunsch) — vor dem Rendern setzen
+  if(s.key==='farbe') wizFarbTab='fa';
   const isCards=(s.layout==='cards');
   const body=document.querySelector('#cfg-wizard .wiz-body');
   if(body)body.classList.toggle('cards-mode', isCards);
@@ -7538,14 +7547,14 @@ function wizPickFarb(k){ const key=wizFarbTab; S[key]=k; if(window._touched)wind
 function wizRenderFarbe(){
   const tab=wizFarbTab, table=P[tab]||{}, cur=S[tab];
   const isInnen=(tab==='fi');
-  // Reihenfolge: ZUERST Innen (im Raum), DANN Außen (von der Straße). Klare Trennung + Perspektive.
+  // Reihenfolge: ZUERST Außen (von der Straße, ohne Griff/Scharniere), DANN Innen (im Raum). Kundenwunsch.
   const curInnenName=(P.fi[S.fi]&&P.fi[S.fi].name)||'–';
   const curAussenName=(P.fa[S.fa]&&P.fa[S.fa].name)||'–';
   let h='<div class="wiz-tabs">'+
-    '<button type="button" class="wiz-tab'+(isInnen?' sel':'')+'" onclick="wizPickFarbTab(\'fi\')" style="display:flex;flex-direction:column;line-height:1.3;padding-top:8px;padding-bottom:8px">'+
-      '<span style="display:block"><strong>1 · Innen</strong></span><span style="display:block;font-size:11px;font-weight:400;opacity:.72">im Raum · '+curInnenName.split('(')[0].trim()+'</span></button>'+
     '<button type="button" class="wiz-tab'+(!isInnen?' sel':'')+'" onclick="wizPickFarbTab(\'fa\')" style="display:flex;flex-direction:column;line-height:1.3;padding-top:8px;padding-bottom:8px">'+
-      '<span style="display:block"><strong>2 · Außen</strong></span><span style="display:block;font-size:11px;font-weight:400;opacity:.72">von der Straße · '+curAussenName.split('(')[0].trim()+'</span></button>'+
+      '<span style="display:block"><strong>1 · Außen</strong></span><span style="display:block;font-size:11px;font-weight:400;opacity:.72">von der Straße · '+curAussenName.split('(')[0].trim()+'</span></button>'+
+    '<button type="button" class="wiz-tab'+(isInnen?' sel':'')+'" onclick="wizPickFarbTab(\'fi\')" style="display:flex;flex-direction:column;line-height:1.3;padding-top:8px;padding-bottom:8px">'+
+      '<span style="display:block"><strong>2 · Innen</strong></span><span style="display:block;font-size:11px;font-weight:400;opacity:.72">im Raum · '+curInnenName.split('(')[0].trim()+'</span></button>'+
   '</div>';
   // Gerahmtes Panel je Seite — visuell klar getrennt (Innen = blau, Außen = warm/bronze).
   const sideObj=(P[tab]&&P[tab][cur])||null;
@@ -7553,7 +7562,7 @@ function wizRenderFarbe(){
   const curName=(sideObj&&sideObj.name)||'noch keine gewählt';
   h+='<div class="wiz-farb-panel '+(isInnen?'is-innen':'is-aussen')+'">'+
        '<div class="wiz-farb-head">'+
-         '<span class="wiz-farb-step">Schritt '+(isInnen?'1':'2')+' von 2</span>'+
+         '<span class="wiz-farb-step">Schritt '+(isInnen?'2':'1')+' von 2</span>'+
          '<div class="wiz-farb-titlerow">'+
            '<i class="ms wiz-farb-ic">'+(isInnen?'meeting_room':'villa')+'</i>'+
            '<div class="wiz-farb-tt">'+
