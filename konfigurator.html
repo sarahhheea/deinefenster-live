@@ -12441,6 +12441,18 @@ function setPreviewView(v) {
   document.getElementById('view-btn-inn').classList.toggle('active', v==='inn');
   vorschauAktualisieren();
   drawPrev();
+  // Ansicht direkt + zuverlaessig ans 3D-iframe schicken (auch ohne Reload) — behebt "erst Innenbild"
+  var _v3d = (v === 'aus') ? 'aussen' : 'innen';
+  var _post3dView = function(){
+    ['fenster3d-frame','balkon3d-frame','hst3d-frame','haus3d-frame'].forEach(function(id){
+      var fr = document.getElementById(id);
+      if (fr && fr.contentWindow && fr.src && fr.src.indexOf('about:blank') < 0) {
+        try { fr.contentWindow.postMessage({ type: 'setView', view: _v3d }, '*'); } catch(e){}
+      }
+    });
+  };
+  _post3dView();
+  setTimeout(_post3dView, 300);
 }
 
 // DIN-Anschlag: 'links' = Standard (Klinke links, Scharniere rechts)
@@ -12712,7 +12724,7 @@ function _renderBalkontuer3d() {
     const _roll = S.roll || 'ohne';
     const _kasten = S.rollKasten || '175';
     const _rseite = S.rollSeite || 'rechts';
-    frame.src = `/${_src3d}?embed&v=20260614pz5&bg=light&color=${_ck}&side=${_side}&layout=${_layout}&roll=${_roll}&rollKasten=${_kasten}&rollSeite=${_rseite}`;
+    frame.src = `/${_src3d}?embed&v=20260614vw&bg=light&color=${_ck}&side=${_side}&layout=${_layout}&roll=${_roll}&rollKasten=${_kasten}&rollSeite=${_rseite}`;
     frame.onload = () => {
       const cw = frame.contentWindow;
       if (!cw) return;
@@ -12809,7 +12821,7 @@ function _renderFenster3d() {
   // iframe neu laden wenn sich die Quelle ändert (1-Flügel ↔ Multi)
   const _wantsReload = !frame.src.includes(_src3d);
   if (_wantsReload) {
-    frame.src = `/${_src3d}?embed&v=20260614pz5&bg=light&color=${_ck}&side=${_side}&layout=${_layout}`;
+    frame.src = `/${_src3d}?embed&v=20260614vw&bg=light&color=${_ck}&side=${_side}&layout=${_layout}&view=${_view}`;
     frame.onload = () => {
       const cw = frame.contentWindow;
       if (!cw) return;
