@@ -7483,10 +7483,13 @@ function wizGo(i){
   document.getElementById('wiz-title').innerHTML=s.title;
   document.getElementById('wiz-sub').innerHTML=s.sub||'';
   wizCrumbs(); wizRenderPanel();
-  // KEINE Ansichtsumschaltung beim Schrittwechsel → kein Flackern. Ansicht wird einmal gesetzt und bleibt;
-  // nur der Farbe-Schritt ändert die Ansicht aktiv per Außen/Innen-Tab (Nutzeraktion).
-  // Ausnahme: Haustür-Türmodell-Schritt zeigt immer die Außenseite (Modell + Stoßgriff sichtbar).
-  if(s.key==='tuer' && typeof setPreviewView==='function' && typeof previewView!=='undefined' && previewView!=='aus') setPreviewView('aus');
+  // Ansicht je Schritt: Farbe-Schritt richtet sich nach Außen/Innen-Tab (Außen = Außenseite ohne Griff/Scharniere),
+  // Haustür-Türmodell immer Außen; ALLE anderen Schritte immer Innen (mit Griff + Scharnieren).
+  // Nur umschalten wenn nötig → kein Flackern bei Schritten die ohnehin Innen sind.
+  if(typeof setPreviewView==='function' && typeof previewView!=='undefined'){
+    const _wantView = (s.key==='farbe') ? ((wizFarbTab==='fa')?'aus':'inn') : (s.key==='tuer' ? 'aus' : 'inn');
+    if(previewView!==_wantView) setPreviewView(_wantView);
+  }
   if(s.key==='kontakt'&&typeof renderBildPreview==='function')renderBildPreview();
   const nb=document.querySelector('#wiz-nextbtn span'); if(nb)nb.textContent=(s.key==='angebot')?'Weiter zur Anfrage':(s.key==='kontakt')?'Angebot absenden':'Weiter';
   const db=document.getElementById('wiz-dim-b'); if(db)db.textContent=(S.bMm||1000)+' mm';
@@ -7525,12 +7528,12 @@ function _wizPrev(){ if(typeof vorschauAktualisieren==='function')vorschauAktual
 function _wizPills(items,curVal,fn){ return '<div class="wiz-pills">'+items.map(function(it){return '<button type="button" class="wiz-pill'+(it[0]===curVal?' sel':'')+'" onclick="'+fn+'(\''+it[0]+'\')">'+it[1]+'</button>';}).join('')+'</div>'; }
 function wizSet(key,val){ S[key]=val; if(window._touched)window._touched.add(key); _wizPrev(); wizRenderPanel(); }
 // FARBE
-function wizPickFarbTab(t){ wizFarbTab=t; const v=(S.prod==='haustuere'&&t==='fa')?'aus':'inn'; if(typeof setPreviewView==='function')setPreviewView(v); else _wizPrev(); wizRenderPanel(); }
+function wizPickFarbTab(t){ wizFarbTab=t; const v=(t==='fa')?'aus':'inn'; if(typeof setPreviewView==='function')setPreviewView(v); else _wizPrev(); wizRenderPanel(); }
 function wizPickFarb(k){ const key=wizFarbTab; S[key]=k; if(window._touched)window._touched.add(key);
   if(key==='fa'&&P.fa[k])previewState.aussenFarbe=P.fa[k].hex||'#F4F4F0';
   if(key==='fi'&&P.fi[k])previewState.innenFarbe=P.fi[k].hex||'#F4F4F0';
-  // Fenster/Balkon/Schiebe: immer Innenseite (mit Griff); nur Haustür zeigt im Außen-Tab die Außenseite (Türdesign)
-  const v=(S.prod==='haustuere'&&key==='fa')?'aus':'inn'; if(typeof setPreviewView==='function')setPreviewView(v); else _wizPrev();
+  // Außen-Tab zeigt die Außenseite (ohne Griff/Scharniere), Innen-Tab die Innenseite — beim Schrittwechsel wieder innen (siehe wizGo)
+  const v=(key==='fa')?'aus':'inn'; if(typeof setPreviewView==='function')setPreviewView(v); else _wizPrev();
   wizRenderPanel(); }
 function wizRenderFarbe(){
   const tab=wizFarbTab, table=P[tab]||{}, cur=S[tab];
