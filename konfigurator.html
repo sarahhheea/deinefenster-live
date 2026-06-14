@@ -7679,14 +7679,14 @@ function wizRenderRoll(){
   // Nutzerfreundliche Reihenfolge: 1. Antrieb (Karten oben) → 2. Antriebsseite → 3. Kastenfarbe
   // 2. Antriebsseite (nur Gurtwickler) — direkt nach der Auswahl, damit man danach gleich die Farbe sieht
   if(S.roll==='gurt'){ h+='<div class="wiz-group" style="margin-top:18px"><div class="wiz-gt">Antriebsseite <span style="font-weight:400;color:#6a7a8f;font-size:12px">(wo der Gurt sitzt)</span></div>'+_wizPills([['links','Links'],['rechts','Rechts']],S.rollSeite,'wizSetRollSeite')+'</div>'; }
-  // 3. Panzerfarbe — Farbe der Rollladen-Lamellen (Drutex-Standardfarben). Kasten + Schienen folgen automatisch der Fensterfarbe.
+  // 3. Kastenfarbe — Farbe von Kasten + Schienen (Drutex-Standardfarben)
   if(S.roll&&S.roll!=='ohne'){
     if(!S.panzerFarbe||!PANZER_FARBEN[S.panzerFarbe])S.panzerFarbe='grau';
     const pzSel=S.panzerFarbe;
-    h+='<div class="wiz-group" style="margin-top:18px"><div class="wiz-gt">Panzerfarbe <span style="font-weight:400;color:#6a7a8f;font-size:12px">(Rollladen-Lamellen)</span></div>'+
+    h+='<div class="wiz-group" style="margin-top:18px"><div class="wiz-gt">Kastenfarbe <span style="font-weight:400;color:#6a7a8f;font-size:12px">(Kasten &amp; Schienen)</span></div>'+
       '<div class="wiz-swgrid">'+Object.keys(PANZER_FARBEN).map(function(k){const o=PANZER_FARBEN[k];return '<div class="wiz-sw'+(k===pzSel?' sel':'')+'" title="'+o.name+'" onclick="wizSetPanzerFarbe(\''+k+'\')"><div class="wiz-chip" style="background:'+o.hex+';border-color:'+(o.border||'rgba(0,0,0,.12)')+'"></div><div class="wiz-swn">'+o.name+'</div></div>';}).join('')+'</div>';
     const pzName=(PANZER_FARBEN[pzSel]&&PANZER_FARBEN[pzSel].name)||pzSel;
-    h+='<div class="wiz-hint" style="margin-top:8px">Gewählt: <strong>'+pzName+'</strong> &middot; Kasten &amp; Schienen automatisch in Fensterfarbe</div></div>';
+    h+='<div class="wiz-hint" style="margin-top:8px">Gewählt: <strong>'+pzName+'</strong></div></div>';
   }
   if(S.roll&&S.roll!=='ohne'){ h+='<div class="wiz-hint">Kastenhöhe '+(S.rollKasten||'175')+' mm — '+(isHst?'nach System':'automatisch nach Fensterhöhe')+' gewählt.</div>'; }
   return h;
@@ -12712,7 +12712,7 @@ function _renderBalkontuer3d() {
     const _roll = S.roll || 'ohne';
     const _kasten = S.rollKasten || '175';
     const _rseite = S.rollSeite || 'rechts';
-    frame.src = `/${_src3d}?embed&v=20260614pz&bg=light&color=${_ck}&side=${_side}&layout=${_layout}&roll=${_roll}&rollKasten=${_kasten}&rollSeite=${_rseite}`;
+    frame.src = `/${_src3d}?embed&v=20260614kf2&bg=light&color=${_ck}&side=${_side}&layout=${_layout}&roll=${_roll}&rollKasten=${_kasten}&rollSeite=${_rseite}`;
     frame.onload = () => {
       const cw = frame.contentWindow;
       if (!cw) return;
@@ -12809,7 +12809,7 @@ function _renderFenster3d() {
   // iframe neu laden wenn sich die Quelle ändert (1-Flügel ↔ Multi)
   const _wantsReload = !frame.src.includes(_src3d);
   if (_wantsReload) {
-    frame.src = `/${_src3d}?embed&v=20260614pz&bg=light&color=${_ck}&side=${_side}&layout=${_layout}`;
+    frame.src = `/${_src3d}?embed&v=20260614kf2&bg=light&color=${_ck}&side=${_side}&layout=${_layout}`;
     frame.onload = () => {
       const cw = frame.contentWindow;
       if (!cw) return;
@@ -13195,7 +13195,7 @@ async function submitForm(e) {
   // Rolladen nur bei Fenster/Balkontür
   const _kfName = (S.panzerFarbe && PANZER_FARBEN[S.panzerFarbe]) ? PANZER_FARBEN[S.panzerFarbe].name : '–';
   const rollName = (S.prod!=='haustuere' && S.prod!=='hst' && S.roll!=='ohne')
-    ? `${P.roll[S.roll]?.name||S.roll} · Kasten ${S.rollKasten} mm · Panzerfarbe ${_kfName}` : 'Kein Rolladen';
+    ? `${P.roll[S.roll]?.name||S.roll} · Kasten ${S.rollKasten} mm · Kastenfarbe ${_kfName}` : 'Kein Rolladen';
   const sicherName = P.sicher[S.sicher]?.name||S.sicher;
   const sproStr    = S.sproTyp==='keine'?'Ohne':S.sproTyp+' '+S.sproDicke+' mm · '+((P.sproRaster[S.sproRaster]||{}).name||'');
   // Zusätzliche Felder für vollständige Bestellung
@@ -15180,7 +15180,7 @@ function d2submit(e){
   else if(S.prod==='hst')griffName=`${curName(P.hstGriff,S.hstGriff)}`;
   else griffName=`${curName(P.griff,S.griff)} (${curName(P.griffColor,S.griffColor)})${S.griffLocked?' · abschließbar':''}`;
   const _kfName=(S.panzerFarbe&&PANZER_FARBEN[S.panzerFarbe])?PANZER_FARBEN[S.panzerFarbe].name:'–';
-  const rollName=(S.prod!=='haustuere'&&S.roll!=='ohne')?`${P.roll[S.roll].name} · Kasten ${S.rollKasten} mm · Panzerfarbe ${_kfName}`:'Kein Rolladen';
+  const rollName=(S.prod!=='haustuere'&&S.roll!=='ohne')?`${P.roll[S.roll].name} · Kasten ${S.rollKasten} mm · Kastenfarbe ${_kfName}`:'Kein Rolladen';
   const sicherName=P.sicher[S.sicher]?.name||S.sicher;
   const sproStr=(S.prod==='kunststoff'||S.prod==='balkontuer')?(S.sproTyp==='keine'?'Ohne':`${S.sproTyp} ${S.sproDicke} mm · ${(P.sproRaster[S.sproRaster]||{}).name||''}`):'Ohne';
   const tuerModellName=S.prod==='haustuere'?(S.tuerModell||'noch offen'):null;
