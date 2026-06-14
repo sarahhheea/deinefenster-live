@@ -7493,10 +7493,12 @@ function wizGo(i){
   document.getElementById('wiz-sub').innerHTML=s.sub||'';
   wizCrumbs(); wizRenderPanel();
   // Ansicht je Schritt: Farbe-Schritt richtet sich nach Außen/Innen-Tab (Außen = Außenseite ohne Griff/Scharniere),
-  // Haustür-Türmodell immer Außen; ALLE anderen Schritte immer Innen (mit Griff + Scharnieren).
-  // Nur umschalten wenn nötig → kein Flackern bei Schritten die ohnehin Innen sind.
+  // Haustür-Türmodell immer Außen. ALLE anderen Schritte: zuletzt gewählte Ansicht BEIBEHALTEN —
+  // wer außen Anthrazit gewählt hat, sieht außen Anthrazit weiter (kein verwirrender Sprung auf Innen/Weiß).
   if(typeof setPreviewView==='function' && typeof previewView!=='undefined'){
-    const _wantView = (s.key==='farbe') ? ((wizFarbTab==='fa')?'aus':'inn') : (s.key==='tuer' ? 'aus' : 'inn');
+    let _wantView = previewView;   // Standard: beibehalten
+    if(s.key==='farbe') _wantView = (wizFarbTab==='fa')?'aus':'inn';
+    else if(s.key==='tuer') _wantView = 'aus';
     if(previewView!==_wantView) setPreviewView(_wantView);
   }
   if(s.key==='kontakt'&&typeof renderBildPreview==='function')renderBildPreview();
