@@ -4258,7 +4258,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   #cfg-wizard .hac-ovl svg{width:100%;height:100%;display:block}
   #cfg-wizard .wiz-badge{display:inline-block;font-size:10px;font-weight:800;color:#fff;background:var(--c-primary);border-radius:999px;padding:2px 9px;margin-top:6px;letter-spacing:.4px;font-family:'Manrope',sans-serif}
   /* Rolladen-Karten: größer, Kasten-Bild sichtbar, Typ-Symbol + Auswahl-Häkchen */
-  #cfg-wizard .wiz-roll-card{width:248px;position:relative;padding-bottom:12px}
+  #cfg-wizard .wiz-roll-card{width:208px;position:relative;padding-bottom:10px}
   #cfg-wizard .wiz-roll-card .wiz-gbox{background:#f4f7fc}
   #cfg-wizard .wiz-roll-vis{position:relative}
   #cfg-wizard .wiz-roll-card .wiz-roll-vis img{width:100%;height:100%;object-fit:contain;padding:6px}
@@ -7676,7 +7676,10 @@ function wizRenderRoll(){
       (m.sub?'<div class="wiz-csub">'+m.sub+'</div>':'')+
     '</div>';
   }).join('')+'</div>';
-  // Kastenfarbe — Kasten + Schienen, Default "wie Fensterrahmen" (Drutex: 43 Renolit-Farben = Fensterpalette)
+  // Nutzerfreundliche Reihenfolge: 1. Antrieb (Karten oben) → 2. Antriebsseite → 3. Kastenfarbe
+  // 2. Antriebsseite (nur Gurtwickler) — direkt nach der Auswahl, damit man danach gleich die Farbe sieht
+  if(S.roll==='gurt'){ h+='<div class="wiz-group" style="margin-top:18px"><div class="wiz-gt">Antriebsseite <span style="font-weight:400;color:#6a7a8f;font-size:12px">(wo der Gurt sitzt)</span></div>'+_wizPills([['links','Links'],['rechts','Rechts']],S.rollSeite,'wizSetRollSeite')+'</div>'; }
+  // 3. Kastenfarbe — Kasten + Schienen, Default "wie Fensterrahmen" (Drutex: 43 Renolit-Farben = Fensterpalette)
   if(S.roll&&S.roll!=='ohne'){
     if(!S.rollKastenFarbe)S.rollKastenFarbe='rahmen';
     const kfSel=S.rollKastenFarbe;
@@ -7688,7 +7691,6 @@ function wizRenderRoll(){
     const kfName=(kfSel==='rahmen')?'wie Fensterrahmen':((P.fa[kfSel]&&P.fa[kfSel].name)||kfSel);
     h+='<div class="wiz-hint" style="margin-top:8px">Gewählt: <strong>'+kfName+'</strong></div></div>';
   }
-  if(S.roll==='gurt'){ h+='<div class="wiz-group" style="margin-top:16px"><div class="wiz-gt">Gurt-Seite</div>'+_wizPills([['links','Links'],['rechts','Rechts']],S.rollSeite,'wizSetRollSeite')+'</div>'; }
   if(S.roll&&S.roll!=='ohne'){ h+='<div class="wiz-hint">Kastenhöhe '+(S.rollKasten||'175')+' mm — '+(isHst?'nach System':'automatisch nach Fensterhöhe')+' gewählt.</div>'; }
   return h;
 }
