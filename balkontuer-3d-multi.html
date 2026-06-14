@@ -404,10 +404,22 @@ function _addRolladen(spec) {
   winGroup.add(bx(FW + ROL_SCHIENE_W / 2, schieneY, schieneZ, ROL_SCHIENE_W, schieneH, ROL_SCHIENE_D, _panzMat));
 
   // Endschiene
-  const endY = FH - ROL_END_H / 2;
-  const endZ = fzc + 0.020;
-  winGroup.add(bx(FW / 2, endY, endZ, FW, ROL_END_H, ROL_SCHIENE_D, _panzMat));
-  winGroup.add(nut(0.020, FH - 0.002, FW - 0.020, FH - 0.002, endZ + ROL_SCHIENE_D / 2 + 0.001, subtleNutMat));
+  // ── Panzer (Lamellen-Vorhang, ca. zur Haelfte heruntergelassen) ──
+  const _pzZ   = fzc + 0.034;          // vor dem Glas, zwischen den Schienen
+  const _pzW   = FW - 0.006;           // knapp innerhalb der Schienen
+  const _pzTop = FH - 0.004;           // direkt unter dem Kasten
+  const _pzBot = FH * 0.50;            // bedeckt das obere halbe Fenster
+  const _pzPitch = 0.044;              // Lamellen-Raster (Hoehe inkl. Fuge)
+  const _pzSlatH = 0.035;              // sichtbare Lamellenhoehe (9 mm Fuge -> klarere Linien)
+  const _pzSlatD = 0.016;              // Lamellentiefe
+  // dunkles Backing -> Fugen wirken dunkel, kein Durchblick aufs Glas
+  winGroup.add(bx(FW / 2, (_pzTop + _pzBot) / 2, _pzZ - 0.006, _pzW, _pzTop - _pzBot, 0.006, spacerMat));
+  // kraeftige Endleiste unten
+  winGroup.add(bx(FW / 2, _pzBot + ROL_END_H / 2, _pzZ, _pzW, ROL_END_H, _pzSlatD + 0.004, _panzMat));
+  // Lamellen gestapelt nach oben bis unter den Kasten
+  for (let _ly = _pzBot + ROL_END_H + _pzPitch / 2; _ly + _pzSlatH / 2 <= _pzTop; _ly += _pzPitch) {
+    winGroup.add(bx(FW / 2, _ly, _pzZ, _pzW, _pzSlatH, _pzSlatD, _panzMat));
+  }
 }
 
 // ══════════════════════════════════════════════
