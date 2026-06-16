@@ -6203,52 +6203,46 @@ function restoreEditingState() {
     const item = JSON.parse(itemJson);
     // Config aus Snapshot in S zurückschreiben
     Object.assign(S, item.config);
-    editingItemId = itemId;
-    // UI aufbauen
-    if (typeof applyStepVisibility === 'function') applyStepVisibility();
-    if (typeof buildProfil === 'function') buildProfil();
-    if (typeof buildFluegel === 'function') buildFluegel();
-    if (typeof buildOeffSash === 'function') buildOeffSash();
-    if (typeof buildSzButtons === 'function') buildSzButtons();
-    if (S.prod === 'haustuere' && typeof buildTuerGriff === 'function') buildTuerGriff();
-    if (S.prod === 'hst' && typeof buildHstGriff === 'function') buildHstGriff();
-    if (S.prod === 'balkontuer' && typeof buildBalkonSchwelle === 'function') buildBalkonSchwelle();
-    // Input-Felder füllen
-    const ib = document.getElementById('ib'); if (ib) ib.value = S.bMm;
-    const ih = document.getElementById('ih'); if (ih) ih.value = S.hMm;
-    const qv = document.getElementById('qv'); if (qv) qv.textContent = S.qty;
-    // Produkt-Kachel markieren + alle Schritte als done markieren
-    document.querySelectorAll('.pc').forEach(c => c.classList.remove('sel'));
-    const prodCard = document.querySelector(`.pc[data-p="${S.prod}"]`);
-    if (prodCard) prodCard.classList.add('sel');
-    for (let i = 1; i <= 13; i++) {
-      if (done) done.add(i);
-      const b = document.getElementById('b' + i);
-      if (b && i < 13) b.innerHTML = '<i class="ms f" style="font-size:16px">check</i>';
+
+    // Das bearbeitete Element aus dem Warenkorb ziehen — es ist jetzt die
+    // "aktuelle" Konfiguration im Wizard. Beim Abschluss / „Weiteres Produkt
+    // hinzufügen" / „Meine Artikel ansehen" wird es regulär wieder hinzugefügt.
+    if (itemId && typeof cart !== 'undefined' && Array.isArray(cart)) {
+      cart = cart.filter(it => it.id !== itemId);
+      if (typeof saveCart === 'function') saveCart();
+      if (typeof upSidebar === 'function') upSidebar();
     }
-    // Hero-Overlay (Picker "Was moechten Sie konfigurieren?") ausblenden — direkt
-    // in die Schritte des konfigurierten Produkts springen.
+    editingItemId = null;
+    try { localStorage.removeItem('df_editing_item'); localStorage.removeItem('df_editing_id'); } catch(e){}
+
+    // Vorschau-Farben aus der geladenen Konfiguration übernehmen
+    if (window._touched) { window._touched.add('fa'); window._touched.add('fi'); }
+    if (typeof previewState !== 'undefined' && typeof P !== 'undefined') {
+      if (P.fa && P.fa[S.fa]) previewState.aussenFarbe = P.fa[S.fa].hex || '#f4f4f0';
+      if (P.fi && P.fi[S.fi]) previewState.innenFarbe = P.fi[S.fi].hex || '#f4f4f0';
+    }
+
+    // In den EINHEITLICHEN hellen Wizard wechseln (NICHT ins alte Akkordeon) —
+    // ohne die geladene Konfiguration zurückzusetzen, daher NICHT wizStart().
+    // FIX: vorher baute der Edit-Pfad das veraltete Akkordeon-UI auf.
+    if (typeof buildWizSteps === 'function') WIZ_STEPS = buildWizSteps(S.prod);
+    if (typeof wizIdx !== 'undefined') wizIdx = 0;
+    if (typeof wizFarbTab !== 'undefined') wizFarbTab = 'fa';
+    if (typeof applyFensterLimits === 'function') applyFensterLimits();
     const hero = document.getElementById('prod-hero');
     if (hero) hero.style.display = 'none';
     const s1 = document.getElementById('s1');
     if (s1) s1.classList.add('hero-done');
-    document.body.classList.add('has-prod');
-    const nav = document.getElementById('kfg-nav');
-    if (nav) {
-      nav.style.display = '';
-      if (window.innerWidth < 768) nav.classList.add('kfg-nav--mobile-strip');
-      else nav.classList.remove('kfg-nav--mobile-strip');
-    }
-    if (typeof openS === 'function') openS(2);  // Schritt 2 (Aufteilung/Profil) oeffnen
-    if (typeof upProg === 'function') upProg();
-    if (typeof drawPrev === 'function') drawPrev();
-    if (typeof upSidebar === 'function') upSidebar();
+    const w = document.getElementById('cfg-wizard');
+    if (w) w.style.display = 'flex';
+    if (typeof wizGo === 'function') wizGo(0);
+    window.scrollTo({ top: 0, behavior: 'auto' });
     // Hinweis anzeigen dass gerade bearbeitet wird
     setTimeout(() => {
       const editBanner = document.createElement('div');
       editBanner.id = 'edit-banner';
       editBanner.style.cssText = `position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#f59e0b;color:#fff;padding:12px 24px;border-radius:999px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;box-shadow:0 6px 20px rgba(245,158,11,0.4);z-index:100;display:flex;align-items:center;gap:10px`;
-      editBanner.innerHTML = `<i class="ms">edit</i> Bearbeitungs-Modus — Änderungen speichern mit „Zur Bestellübersicht"`;
+      editBanner.innerHTML = `<i class="ms">edit</i> Bearbeitungs-Modus — Änderungen sichern mit „Meine Artikel ansehen"`;
       document.body.appendChild(editBanner);
       setTimeout(() => { if (editBanner.parentNode) editBanner.remove(); }, 7000);
     }, 500);
@@ -13560,28 +13554,25 @@ document.addEventListener('DOMContentLoaded', ()=>{
     const urlProd   = p.get('prod');
     const urlProfil = p.get('profil');
 
-    // Produkt vorwählen (Produkt-Cards nutzen data-p, nicht data-v)
-    if (urlProd) {
-      const prodEl = document.querySelector(`#s1 [data-p="${urlProd}"]`);
-      if (prodEl) {
-        prodEl.click();
-        // Schritt 1 als fertig markieren
-        setTimeout(() => {
-          // Profil vorwählen (Schritt 2)
-          if (urlProfil) {
-            const profEl = document.querySelector(`#s2 [data-v="${urlProfil}"]`);
-            if (profEl) {
-              profEl.click();
-              // PSK landet auf dem System-Schritt, sonst direkt Schritt 3
-              setTimeout(() => openS(urlProfil === 'iglo-psk' ? '-psk' : 3), 350);
-            } else {
-              setTimeout(() => openS(2), 200);
-            }
-          } else {
-            setTimeout(() => openS(2), 200);
-          }
-        }, 200);
+    // Produkt vorwählen → in den EINHEITLICHEN hellen Wizard (gleicher Weg wie
+    // Klick auf eine Produktkarte). FIX: vorher führte ?prod= ins alte Akkordeon,
+    // d.h. wer von der Bestellübersicht/Produktseite ein (weiteres) Produkt
+    // konfigurierte, landete in einer anderen, veralteten Oberfläche.
+    const WIZ_PRODS = ['kunststoff','balkontuer','haustuere','hst'];
+    if (urlProd && WIZ_PRODS.indexOf(urlProd) >= 0 && typeof heroSelectProd === 'function') {
+      heroSelectProd(urlProd);
+      // Profil aus URL vorwählen und den Profil-Schritt überspringen
+      if (urlProfil && typeof P !== 'undefined' && P.profil && P.profil[urlProfil]) {
+        S.profil = urlProfil;
+        if (typeof buildWizSteps === 'function') WIZ_STEPS = buildWizSteps(S.prod);
+        if (typeof wizGo === 'function' && typeof WIZ_STEPS !== 'undefined') {
+          const pi = WIZ_STEPS.findIndex(s => s.key === 'profil' || s.key === 'psk');
+          wizGo(pi >= 0 ? Math.min(pi + 1, WIZ_STEPS.length - 1) : 0);
+        }
       }
+    } else if (urlProd) {
+      // Unbekanntes/Legacy-Produkt (z.B. ?prod=rollladen): Produktauswahl-Hero
+      // stehen lassen, damit der Kunde nicht in einer leeren Ansicht landet.
     } else if (urlProfil) {
       // Legacy: nur ?profil= ohne ?prod=
       const profEl = document.querySelector(`[data-v="${urlProfil}"]`);
