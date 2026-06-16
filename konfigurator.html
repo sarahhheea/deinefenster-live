@@ -15198,6 +15198,11 @@ const D2={
   submit(e){ return d2submit(e); }
 };
 window.D2=D2;
+// FIX 16.06.: d2submit global erreichbar machen. Der Wizard (wizNext, anderer
+// Script-Block) ruft am Schritt 'kontakt' bare d2submit() auf — die Funktion lag
+// aber gekapselt in dieser IIFE und war unerreichbar, sodass "Angebot absenden"
+// im Wizard nichts tat (kein Versand). Jetzt erreichbar → Anfrage wird gesendet.
+window.d2submit=d2submit;
 
 /* ---- Eintritt in die Detail-Phase ---- */
 window.openDetailPhase=function(){
@@ -15221,6 +15226,48 @@ window.d2Back=function(){
 };
 
 /* ---- Anfrage absenden (df_deals + Worker-Mail + danke.html) ---- */
+// Voll-Detail-Text EINES Produkts (aus einem beliebigen Konfig-Datensatz c).
+// Wird für das aktuelle Produkt UND jedes Warenkorb-Produkt genutzt, damit die
+// Firma in der Mail ALLE Produkte mit vollen Details sieht (nicht nur Kurzzeile).
+function prodDetailLines(c){
+  c=c||{};
+  const sc=(function(){const m=(c.fluegel||'1').match(/^(\d)/);return m?+m[1]:1;})();
+  const prodName=P.prod[c.prod]?.name||c.prod||'–';
+  const profilName=P.profil[c.profil]?.name||c.profil||'–';
+  const glasName=P.glas[c.glas]?.name||c.glas||'–';
+  const faName=P.fa[c.fa]?.name||c.fa||'–', fiName=P.fi[c.fi]?.name||c.fi||'–', fdName=P.fd[c.fd]?.name||c.fd||'–';
+  let oeffName;
+  if(c.prod==='hst'||c.prod==='haustuere')oeffName=P.oeff_sash[c.oeff1]?.name||c.oeff1||'–';
+  else if(c.oeff1)oeffName=sc===1?(P.oeff_sash[c.oeff1]?.name||c.oeff1):[c.oeff1,c.oeff2,c.oeff3].slice(0,sc).map(o=>P.oeff_sash[o]?.name||o).join(' / ');
+  else oeffName='–';
+  let griffName;
+  if(c.prod==='haustuere')griffName='Innen: '+curName(P.tuerGriffInnen,c.tuerGriffInnen)+' / Außen: '+curName(P.tuerGriffAussen,c.tuerGriffAussen);
+  else if(c.prod==='hst')griffName=curName(P.hstGriff,c.hstGriff);
+  else griffName=curName(P.griff,c.griff)+' ('+curName(P.griffColor,c.griffColor)+')'+(c.griffLocked?' · abschließbar':'');
+  const _kf=(c.panzerFarbe&&PANZER_FARBEN[c.panzerFarbe])?PANZER_FARBEN[c.panzerFarbe].name:'–';
+  const rollName=(c.prod!=='haustuere'&&c.roll&&c.roll!=='ohne')?(P.roll[c.roll].name+' · Kasten '+c.rollKasten+' mm · Panzerfarbe '+_kf):'Kein Rolladen';
+  const sicherName=P.sicher[c.sicher]?.name||c.sicher||'–';
+  const sproStr=(c.prod==='kunststoff'||c.prod==='balkontuer')?((!c.sproTyp||c.sproTyp==='keine')?'Ohne':(c.sproTyp+' '+c.sproDicke+' mm · '+((P.sproRaster[c.sproRaster]||{}).name||''))):'Ohne';
+  const lines=[
+    'Produkt:     '+prodName,
+    'Anzahl:      '+(c.qty||1)+' Stück',
+    'Maße:        '+(c.bMm||'–')+' × '+(c.hMm||'–')+' mm (Rohbaumaß)',
+    'Profil:      '+profilName,
+    'Glasart:     '+glasName,
+    'Öffnungsart: '+oeffName,
+    'Aufteilung:  '+(P.fluegel[c.fluegel]?.name||c.fluegel||'–'),
+    'Glasdekor:   '+(P.glasdekor[c.glasdekor]?.name||c.glasdekor||'–'),
+    'Außenfarbe:  '+faName,
+    'Innenfarbe:  '+fiName,
+    'Dichtung:    '+fdName,
+    'Griff:       '+griffName,
+    'Sprossen:    '+sproStr,
+    'Rolladen:    '+rollName,
+    'Sicherheit:  '+sicherName
+  ];
+  if(c.prod==='haustuere')lines.push('Türmodell:   '+(c.tuerModell||'noch offen'));
+  return lines;
+}
 function d2submit(e){
   e.preventDefault();
   const err=document.getElementById('d2-ferr'); const g=id=>(document.getElementById(id)?.value||'').trim();
@@ -15251,10 +15298,35 @@ function d2submit(e){
   const deal={id:Date.now(),offer_id:offerId,name,email,phone:tel,ort,strasse:str,produkt:prodName,dimensions:S.bMm+'x'+S.hMm,profile:profilName,glass:glasName,opening:oeffName,color:faName+' / '+fiName,farbe_aussen:faName,farbe_innen:fiName,dichtung:fdName,sprossen:sproStr,griff:griffName,shutter:rollName,sicherheit:sicherName,glasdekor:P.glasdekor[S.glasdekor]?.name||S.glasdekor,anzahl:S.qty,tuermodell:tuerModellName,cart_items:(typeof cart!=='undefined'?cart.map(function(i){return i.summary;}):[]),cart_count:(typeof cart!=='undefined'?cart.length:0),attachments:(typeof uploadedImages!=='undefined'?uploadedImages.map(function(i){return i.name;}):[]),attachment_count:(typeof uploadedImages!=='undefined'?uploadedImages.length:0),date:datum,notes:notiz,lieferart:lieferart,versand:versandText,status:'new'};
   try{const ex=JSON.parse(localStorage.getItem('df_deals')||'[]');ex.unshift(deal);localStorage.setItem('df_deals',JSON.stringify(ex));}catch(e){}
   try{sessionStorage.setItem('df_anfrage',JSON.stringify({offerId,prodName,name,email,tel,ort,breite:S.bMm,hoehe:S.hMm,anzahl:S.qty,farbaussen:S.fa,farbinnen:S.fi,glas:S.glas,oeff:S.oeff1,profil:S.profil}));}catch(e){}
-  const txt=['Neue Anfrage über DeineFenster.de','══════════════════════════════════════════','','KONTAKTDATEN','Name:        '+name,'Telefon:     '+(tel||'–'),'E-Mail:      '+email,'Versand:     '+versandText,'','KONFIGURATION','Angebots-Nr: '+offerId,'Produkt:     '+prodName,'Anzahl:      '+S.qty+' Stück','Maße:        '+S.bMm+' × '+S.hMm+' mm (Rohbaumaß)','Profil:      '+profilName,'Glasart:     '+glasName,'Öffnungsart: '+oeffName,'Aufteilung:  '+(P.fluegel[S.fluegel]?.name||S.fluegel),'Glasdekor:   '+(P.glasdekor[S.glasdekor]?.name||S.glasdekor),'Außenfarbe:  '+faName,'Innenfarbe:  '+fiName,'Dichtung:    '+fdName,'Griff:       '+griffName,'Sprossen:    '+sproStr,'Rolladen:    '+rollName,'Sicherheit:  '+sicherName].concat(tuerModellName?['Türmodell:   '+tuerModellName]:[]).concat(['','Datum:       '+datum]).concat(notiz?['','Anmerkungen: '+notiz]:[]).concat((typeof cart!=='undefined'&&cart.length)?['','WEITERE PRODUKTE IN DER ANFRAGE ('+cart.length+'):'].concat(cart.map(function(i){return '· '+(i.summary||'Produkt');})):[]).concat((typeof uploadedImages!=='undefined'&&uploadedImages.length)?['','Fotos beigefügt: '+uploadedImages.length+' ('+uploadedImages.map(function(i){return i.name;}).join(', ')+')']:[]).join('\n');
+  // Alle Produkte der Anfrage = Warenkorb-Positionen + das aktuelle (zuletzt konfigurierte) Produkt.
+  // Jedes Produkt kommt mit VOLLEN Details in die Firmen-Mail (nicht nur Kurzzeile).
+  const _allCfgs=(typeof cart!=='undefined'?cart.map(function(i){return i.config;}):[]).concat([S]);
+  const _multi=_allCfgs.length>1;
+  let _tp=['Neue Anfrage über DeineFenster.de','══════════════════════════════════════════','','KONTAKTDATEN','Name:        '+name,'Telefon:     '+(tel||'–'),'E-Mail:      '+email,'Versand:     '+versandText,'','Angebots-Nr: '+offerId];
+  if(_multi)_tp.push('','ANFRAGE MIT '+_allCfgs.length+' PRODUKTEN');
+  _allCfgs.forEach(function(c,i){
+    _tp.push('', _multi?('── PRODUKT '+(i+1)+' von '+_allCfgs.length+' ──'):'KONFIGURATION');
+    _tp=_tp.concat(prodDetailLines(c));
+  });
+  _tp.push('','Datum:       '+datum);
+  if(notiz)_tp.push('','Anmerkungen: '+notiz);
+  if(typeof uploadedImages!=='undefined'&&uploadedImages.length)_tp.push('','Fotos beigefügt: '+uploadedImages.length+' ('+uploadedImages.map(function(i){return i.name;}).join(', ')+')');
+  const txt=_tp.join('\n');
   const fotoAtts=(typeof uploadedImages!=='undefined'?uploadedImages:[]).map(function(im){ const b64=((im.data||'').split(',')[1])||''; return { filename:(im.name||'foto.jpg'), content:b64 }; }).filter(function(a){ return a.content; });
-  fetch('https://deinefenster-email.sarahchrist.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({customer_email:email,subject:'[DeineFenster.de] Neue Anfrage '+offerId+': '+prodName,text:txt,confirmation:{name,offerId},attachments:fotoAtts,website:''})}).catch(()=>{});
-  window.location.href='danke.html?prod='+encodeURIComponent(prodName)+'&imgs=0&offer='+encodeURIComponent(offerId);
+  // Senden und ERST bei Erfolg zur Danke-Seite. Schlägt der Versand fehl, bleibt der
+  // Kunde im Formular und bekommt einen klaren Hinweis (statt falscher "Danke"-Seite).
+  fetch('https://deinefenster-email.sarahchrist.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({customer_email:email,subject:'[DeineFenster.de] Neue Anfrage '+offerId+': '+prodName,text:txt,confirmation:{name,offerId},attachments:fotoAtts,website:''})})
+    .then(function(r){ return r.json().catch(function(){return {};}).then(function(d){ return {ok:r.ok,data:d}; }); })
+    .then(function(res){
+      if(res.ok){ window.location.href='danke.html?prod='+encodeURIComponent(prodName)+'&imgs=0&offer='+encodeURIComponent(offerId); }
+      else { throw new Error((res.data&&res.data.error)||'Senden fehlgeschlagen.'); }
+    })
+    .catch(function(ex){
+      if(btn){btn.disabled=false;} if(_stx){_stx.textContent='Kostenloses Angebot anfordern';}
+      if(_nbtn){_nbtn.disabled=false;} if(_nbs){_nbs.textContent='Angebot absenden';}
+      err.textContent=(ex&&ex.message&&/anruf|Anfragen|03381/i.test(ex.message))?ex.message:'Senden hat gerade nicht geklappt. Bitte erneut versuchen — oder rufen Sie uns an: 03381 / 214 83 73.';
+      err.classList.remove('d2hide');
+    });
   return false;
 }
 window.addEventListener('message',ev=>{ if(ev.data&&ev.data.type==='modelMoved'){try{sessionStorage.setItem('_3dHintDismissed','1');}catch(e){}const h=document.getElementById('d2-hint');if(h)h.style.display='none';} });
