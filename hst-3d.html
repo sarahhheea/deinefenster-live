@@ -696,85 +696,57 @@ function buildWindow() {
     cylSlot.position.set(SHIELD_CX, cylCY, SHIELD_Z + 0.016);
     slideGroup.add(cylSlot);
   } else {
-    // ── HS-DREHGRIFF (Hebe-Schiebe) — Drutex-Standard: HOHER geschwungener Hebel ──
-    // 1:1 an echtem Drutex-HST-Innengriff modelliert (weißer HST-Drehgriff, Referenzbild):
-    // schmale senkrechte Rosette + EIN großer, ergonomisch geschwungener Hebel, der von der
-    // Nabe nach OBEN steigt, nach außen baucht und am oberen Ende zur Tür zurück biegt.
-    // KEINE Griffmuschel innen (die sitzt außen als Muschelgriff). Klar größer als der PSK-Hebel.
-    const SHIELD_LEN = 0.082;   // kurze schmale Rosette (Hebel dominiert klar)
-    const SHIELD_W   = 0.032;
-    const SHIELD_Z   = DOOR_FZ + 0.006;
-    const SHIELD_CX  = GRIP_CX + 0.062;
-    const SHIELD_CY  = HIP_CY;
-    const hubCY      = SHIELD_CY;           // Nabe in Rosettenmitte, Hebel setzt sauber an
+    // ── SMART-SLIDE Innengriff (flach, eingelassen) — echtes Drutex IGLO-HS Produkt ──
+    // Senkrechte flache Platte mit länglicher Griffmulde in der Mitte (Referenz: smart-slide-9016).
+    // Kein Hebel: bündige Platte, in der Mitte eine eingelassene Mulde (sichtbare Tiefe).
+    const rr = (w, h, r) => {
+      const s = new THREE.Shape();
+      const x = -w / 2, y = -h / 2;
+      s.moveTo(x + r, y);
+      s.lineTo(x + w - r, y); s.quadraticCurveTo(x + w, y, x + w, y + r);
+      s.lineTo(x + w, y + h - r); s.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      s.lineTo(x + r, y + h); s.quadraticCurveTo(x, y + h, x, y + h - r);
+      s.lineTo(x, y + r); s.quadraticCurveTo(x, y, x + r, y);
+      return s;
+    };
+    const SS_W = 0.048, SS_H = 0.212, SS_R = 0.010;   // Platte ~48×212 mm, leicht runde Ecken (rechteckiger)
+    const SS_PROUD = 0.009;                            // steht ~9 mm vor dem Flügel
+    const M_W = 0.021, M_H = 0.124, M_R = 0.0085;      // Griffmulde ~21×124 mm
+    const SS_CX = GRIP_CX + 0.055;                     // auf dem Schiebeflügel, etwas zur Mitte
+    const SS_CY = HIP_CY;
+    const SS_ZF = DOOR_FZ;                              // Flügel-Vorderfläche
 
-    // 1) schmale senkrechte Rosette — FLACHE Platte (kein 3D-Pillen-Look)
-    const shield = new THREE.Mesh(
-      new THREE.CapsuleGeometry(SHIELD_W/2, SHIELD_LEN - SHIELD_W, 6, 24),
-      hstGriffMat
-    );
-    shield.scale.set(1.0, 1.0, 0.26);
-    shield.position.set(SHIELD_CX, SHIELD_CY, SHIELD_Z + 0.004);
-    shield.castShadow = true; shield.userData.isHandle = true;
-    slideGroup.add(shield); handleObjects.push(shield);
-    // 1a) dünne dunkle Fuge rund um die Rosette → hebt weiße Rosette vom weißen Flügel ab
-    const shieldBack = new THREE.Mesh(
-      new THREE.BoxGeometry(SHIELD_W + 0.006, SHIELD_LEN + 0.006, 0.004),
-      sealMat
-    );
-    shieldBack.position.set(SHIELD_CX, SHIELD_CY, SHIELD_Z + 0.002);
-    slideGroup.add(shieldBack);
-    // 1b) Schraub-Punkte oben/unten
-    [SHIELD_CY + SHIELD_LEN/2 - 0.016, SHIELD_CY - SHIELD_LEN/2 + 0.016].forEach(sy => {
-      const sc = new THREE.Mesh(new THREE.CylinderGeometry(0.0032, 0.0032, 0.004, 16), sealMat);
-      sc.rotation.x = Math.PI/2;
-      sc.position.set(SHIELD_CX, sy, SHIELD_Z + 0.013);
+    // 1) Mulden-Boden (dunkler, tief zurückgesetzt) — sorgt für sichtbare Tiefe in der Mulde
+    const muldeMat = new THREE.MeshStandardMaterial({ color: 0x80868d, roughness: 0.6, metalness: 0.2, envMap: _handleEnv, envMapIntensity: 0.5 });
+    const floorGeo = new THREE.ExtrudeGeometry(rr(M_W - 0.001, M_H - 0.001, M_R), { depth: 0.0025, bevelEnabled: false, curveSegments: 14 });
+    floorGeo.translate(SS_CX, SS_CY, SS_ZF + 0.0005);   // Boden tief unten → Mulde wirkt ~6 mm tief
+    const muldeFloor = new THREE.Mesh(floorGeo, muldeMat);
+    muldeFloor.receiveShadow = true;
+    slideGroup.add(muldeFloor);
+
+    // 2) Platte als Rahmen (außen rund, innen Loch = Mulde) → das Loch wirkt eingelassen
+    const plateShape = rr(SS_W, SS_H, SS_R);
+    plateShape.holes.push(rr(M_W, M_H, M_R));
+    const plateGeo = new THREE.ExtrudeGeometry(plateShape, {
+      depth: SS_PROUD, bevelEnabled: true, bevelThickness: 0.0015, bevelSize: 0.0015, bevelSegments: 2, curveSegments: 18
+    });
+    plateGeo.translate(SS_CX, SS_CY, SS_ZF);
+    const plate = new THREE.Mesh(plateGeo, hstGriffMat);
+    plate.castShadow = true; plate.userData.isHandle = true;
+    slideGroup.add(plate); handleObjects.push(plate);
+
+    // 3) dünne dunkle Fuge hinter der Platte → hebt die (weiße) Platte vom Flügel ab
+    const ssBack = new THREE.Mesh(new THREE.BoxGeometry(SS_W + 0.005, SS_H + 0.005, 0.003), sealMat);
+    ssBack.position.set(SS_CX, SS_CY, SS_ZF - 0.0014);
+    slideGroup.add(ssBack);
+
+    // 4) zwei dezente Schraub-Punkte oben/unten auf der Platte
+    [SS_CY + SS_H/2 - 0.016, SS_CY - SS_H/2 + 0.016].forEach(sy => {
+      const sc = new THREE.Mesh(new THREE.CylinderGeometry(0.0026, 0.0026, 0.004, 16), sealMat);
+      sc.rotation.x = Math.PI / 2;
+      sc.position.set(SS_CX, sy, SS_ZF + SS_PROUD - 0.001);
       slideGroup.add(sc);
     });
-
-    // 2) Nabe (Drücker-Lagerung) mittig auf der Rosette
-    const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.017, 0.017, 0.014, 24), hstGriffMat);
-    hub.rotation.x = Math.PI/2;
-    hub.position.set(SHIELD_CX, hubCY, SHIELD_Z + 0.014);
-    hub.castShadow = true; hub.userData.isHandle = true;
-    slideGroup.add(hub); handleObjects.push(hub);
-
-    // 3) HOHER geschwungener Hebel als durchgehender Tube: von der Nabe nach OBEN,
-    //    nach außen bauchend, am oberen Ende zur Tür zurück biegend (echte HST-Form).
-    const z0 = SHIELD_Z + 0.014;
-    const levPts = [
-      new THREE.Vector3(SHIELD_CX,         hubCY,          z0 + 0.002),
-      new THREE.Vector3(SHIELD_CX + 0.006, hubCY + 0.018,  z0 + 0.026),
-      new THREE.Vector3(SHIELD_CX + 0.018, hubCY + 0.082,  z0 + 0.040),
-      new THREE.Vector3(SHIELD_CX + 0.022, hubCY + 0.152,  z0 + 0.042),
-      new THREE.Vector3(SHIELD_CX + 0.018, hubCY + 0.216,  z0 + 0.040),
-      new THREE.Vector3(SHIELD_CX + 0.009, hubCY + 0.262,  z0 + 0.032),
-    ];
-    const levCurve = new THREE.CatmullRomCurve3(levPts, false, 'centripetal', 0.5);
-    const lSegs = 72, rSegs = 22;
-    const levGeo = new THREE.TubeGeometry(levCurve, lSegs, 0.0145, rSegs, false);
-    const lp = levGeo.attributes.position;
-    for (let i = 0; i <= lSegs; i++) {
-      const t = i / lSegs;
-      const pt = levCurve.getPointAt(t);
-      const sf = 1.0 - 0.14 * Math.pow(t, 1.3);   // zum Ende leicht verjüngt
-      for (let j = 0; j <= rSegs; j++) {
-        const idx = i * (rSegs + 1) + j;
-        lp.setX(idx, pt.x + (lp.getX(idx) - pt.x) * sf);
-        lp.setY(idx, pt.y + (lp.getY(idx) - pt.y) * sf);
-        lp.setZ(idx, pt.z + (lp.getZ(idx) - pt.z) * sf);
-      }
-    }
-    lp.needsUpdate = true; levGeo.computeVertexNormals();
-    const lever = new THREE.Mesh(levGeo, hstGriffMat);
-    lever.castShadow = true; lever.userData.isHandle = true;
-    slideGroup.add(lever); handleObjects.push(lever);
-
-    // 4) abgerundeter Abschluss am oberen Hebel-Ende
-    const cap = new THREE.Mesh(new THREE.SphereGeometry(0.0145 * 0.88, 24, 18), hstGriffMat);
-    cap.position.set(SHIELD_CX + 0.009, hubCY + 0.262, z0 + 0.032);
-    cap.castShadow = true; cap.userData.isHandle = true;
-    slideGroup.add(cap); handleObjects.push(cap);
   }
 
   // ── MUSCHELGRIFF außen (eingelassen, auf Rückseite des Schiebeflügels) ──
@@ -1281,6 +1253,25 @@ setHstGriff(_urlGrip || 'weiss-std');
 // ══════════════════════════════════════════════
 // RESIZE + RENDER LOOP
 // ══════════════════════════════════════════════
+// Kamera so setzen, dass die GANZE Tür immer in den Rahmen passt — egal ob die Vorschau
+// breit oder hochkant ist. Fit an Breite UND Höhe (je nach Seitenverhältnis) → kein Rauszoomen nötig.
+function fitCameraToDoor() {
+  const margin = 1.10;                      // etwas Luft rundherum
+  const fovV = camera.fov * Math.PI / 180;
+  const fovH = 2 * Math.atan(Math.tan(fovV / 2) * camera.aspect);
+  const distH = (FH / 2) / Math.tan(fovV / 2);   // Distanz, damit die Höhe passt
+  const distW = (FW / 2) / Math.tan(fovH / 2);   // Distanz, damit die Breite passt
+  const dist = Math.max(distH, distW) * margin;
+  // Blickrichtung beibehalten (falls gedreht), nur den Abstand auf den Fit-Wert setzen
+  const dir = camera.position.clone().sub(orb.target);
+  if (dir.lengthSq() < 1e-6) dir.set(0, 0.05, 1);
+  dir.setLength(dist);
+  camera.position.copy(orb.target).add(dir);
+  orb.minDistance = dist * 0.82;            // Zoom bleibt nah am Fit → bleibt zentriert
+  orb.maxDistance = dist * 1.45;
+  camera.updateProjectionMatrix();
+  orb.update();
+}
 function resize() {
   const embed = new URLSearchParams(location.search).has('embed');
   const w = embed ? window.innerWidth  : window.innerWidth  - 252;
@@ -1288,6 +1279,7 @@ function resize() {
   renderer.setSize(w, h);
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
+  fitCameraToDoor();
 }
 window.addEventListener('resize', resize);
 resize();
