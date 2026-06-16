@@ -390,10 +390,10 @@ function baueFilterSidebar() {
     .map(k => renderItem(k, STATE.kategorien[k]))
     .join('');
 
-  // Farben
+  // Farben — in Unterkategorien gruppiert (Inhaberin-Wunsch 16.06.2026: Uni-Farben / Holzdekore / Sonstige)
   const farbWrap = document.getElementById('filterFarben');
   const alleFarben = STATE.metadaten.alle_farben || [];
-  farbWrap.innerHTML = alleFarben.map(f => {
+  const farbOption = (f) => {
     const count = STATE.produkte.filter(p => _asArr(p.farbe).includes(f)).length;
     if (count === 0) return '';
     return `
@@ -401,7 +401,24 @@ function baueFilterSidebar() {
         <span class="flex items-center gap-2"><input type="checkbox" class="check filter-farbe" value="${f}"/><span>${farbeAnzeige(f)}</span></span>
         <span class="count">${count}</span>
       </label>`;
-  }).join('');
+  };
+  const FARB_GRUPPEN = [
+    { titel: 'Uni-Farben', werte: ['weiss', 'anthrazit', 'grau', 'schwarz', 'dunkelgruen'] },
+    { titel: 'Holzdekore', werte: ['golden-oak', 'nussbaum', 'holzdekor'] },
+    { titel: 'Sonstige',   werte: ['farbig'] }
+  ];
+  const inGruppen = new Set(FARB_GRUPPEN.flatMap(g => g.werte));
+  let farbHtml = '', ersteGruppe = true;
+  // Unterüberschrift nutzt dieselbe Klasse wie die Block-Titel (theme-sicher), nur kleiner
+  const addFarbGruppe = (titel, opts) => {
+    if (!opts) return;  // leere Gruppe ganz überspringen
+    farbHtml += `<div class="filter-block-title" style="font-size:10px;opacity:.7;margin:${ersteGruppe ? '0' : '12px'} 0 6px">${titel}</div>` + opts;
+    ersteGruppe = false;
+  };
+  FARB_GRUPPEN.forEach(g => addFarbGruppe(g.titel, g.werte.map(farbOption).join('')));
+  // selbst angelegte / unbekannte Farben ans Ende
+  addFarbGruppe('Weitere', alleFarben.filter(f => !inGruppen.has(f)).map(farbOption).join(''));
+  farbWrap.innerHTML = farbHtml;
 
   // Eigenschaften (nur die, die mindestens 1 Produkt hat)
   const eigWrap = document.getElementById('filterEigenschaften');
