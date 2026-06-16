@@ -4432,7 +4432,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
         <button type="button" class="wiz-back" onclick="wizBack()">‹ Zurück</button>
         <button type="button" class="wiz-next" id="wiz-nextbtn" onclick="wizNext()"><span>Weiter</span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></button>
       </div>
-      <a href="bestelluebersicht.html" class="wiz-otherprod wiz-articles" onclick="if(typeof saveCurrentBeforeOverview==='function')saveCurrentBeforeOverview()"><i class="ms f" aria-hidden="true">list_alt</i><span>Meine Artikel ansehen</span></a>
+      <a href="#" class="wiz-otherprod wiz-articles" onclick="return wizGoOverview()"><i class="ms f" aria-hidden="true">list_alt</i><span>Meine Artikel ansehen</span></a>
     </div>
   </div>
 </div>
@@ -5515,7 +5515,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
     </button>
 
     <!-- FINALER CTA: Zur Bestellübersicht (absenden passiert dort) -->
-    <a href="bestelluebersicht.html" onclick="saveCurrentBeforeOverview()"
+    <a href="#" onclick="return wizGoOverview()"
       class="w-full flex items-center justify-center gap-3 text-white font-black py-5 px-6 rounded-full text-lg"
       style="background:linear-gradient(135deg,var(--c-primary) 0%,var(--c-primary-dark) 100%);font-family:'Plus Jakarta Sans',sans-serif;box-shadow:0 6px 20px rgba(34,94,170,0.35);text-decoration:none">
       <i class="ms" style="font-size:24px">grid_view</i>
@@ -5653,7 +5653,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
     </div>
 
     <!-- Sidebar-CTA: erst sichtbar nach mind. 2 echten Auswahlen (sonst Fehlklick-Risiko) -->
-    <a href="bestelluebersicht.html" onclick="if(typeof saveCurrentBeforeOverview==='function')saveCurrentBeforeOverview()"
+    <a href="#" onclick="return wizGoOverview()"
        id="sb-cta-finish" class="sb-cta-finish" style="display:none">
       <i class="ms" style="font-size:18px">arrow_forward</i>
       <span>Zur Bestellübersicht</span>
@@ -6199,6 +6199,22 @@ let done = new Set();
 
 // Kunden-Vorgabe 21.04.2026 (Variante C): Bestellübersicht-Integration
 // Wenn User zur Bestellübersicht wechselt, current config ggf. in Cart pushen
+// „Meine Artikel ansehen" / „zur Bestellübersicht" → in den Wizard-Übersicht-Schritt springen
+// (ersetzt die alte dunkle bestelluebersicht.html). Kein Cart-Push: der Übersicht-Schritt zeigt
+// Cart + aktuelle Konfiguration getrennt, der Anfrage-Versand nimmt beides mit.
+function wizGoOverview() {
+  try { editingItemId = null; localStorage.removeItem('df_editing_item'); localStorage.removeItem('df_editing_id'); } catch(e){}
+  var eb = document.getElementById('edit-banner'); if (eb) eb.style.display = 'none';
+  var idx = (typeof WIZ_STEPS !== 'undefined' && WIZ_STEPS) ? WIZ_STEPS.findIndex(function(s){ return s.key === 'angebot'; }) : -1;
+  if (idx >= 0 && typeof wizGo === 'function') {
+    var w = document.getElementById('cfg-wizard'); if (w && w.style.display === 'none') w.style.display = '';
+    wizGo(idx);
+    if (typeof window.scrollTo === 'function') window.scrollTo({ top: 0, behavior: 'auto' });
+  } else {
+    window.location.href = 'konfigurator.html';
+  }
+  return false;
+}
 function saveCurrentBeforeOverview() {
   if (S.prod && (!editingItemId || editingItemId === 'new')) {
     // Aktuelle Konfiguration in Cart hinzufügen BEVOR User zur Übersicht wechselt
@@ -6268,6 +6284,35 @@ function restoreEditingState() {
       setTimeout(() => { if (editBanner.parentNode) editBanner.remove(); }, 7000);
     }, 500);
   } catch(e) { console.warn('Edit-State konnte nicht geladen werden', e); }
+}
+
+// Direkter Aufruf der (entfernten) Bestellübersicht → ?overview=1 öffnet den Wizard-Übersicht-Schritt.
+// Nur aktiv wenn der Param gesetzt ist; ohne Warenkorb bleibt der normale Konfigurator-Start.
+function handleOverviewParam() {
+  const params = new URLSearchParams(window.location.search);
+  if (!params.has('overview')) return;
+  try {
+    if (typeof cart !== 'undefined' && Array.isArray(cart) && cart.length) {
+      // Letzten Warenkorb-Artikel als „aktuelle" Konfiguration laden (wie der Edit-Pfad),
+      // damit der Übersicht-Schritt ihn zeigt statt einer leeren Default-Konfiguration.
+      const last = cart[cart.length - 1];
+      if (last && last.config) {
+        Object.assign(S, last.config);
+        cart = cart.filter(it => it.id !== last.id);
+        if (typeof saveCart === 'function') saveCart();
+        if (typeof buildWizSteps === 'function') WIZ_STEPS = buildWizSteps(S.prod);
+        if (window._touched) { window._touched.add('fa'); window._touched.add('fi'); }
+        if (typeof previewState !== 'undefined' && typeof P !== 'undefined') {
+          if (P.fa && P.fa[S.fa]) previewState.aussenFarbe = P.fa[S.fa].hex || '#f4f4f0';
+          if (P.fi && P.fi[S.fi]) previewState.innenFarbe = P.fi[S.fi].hex || '#f4f4f0';
+        }
+      }
+      const hero = document.getElementById('prod-hero'); if (hero) hero.style.display = 'none';
+      const s1 = document.getElementById('s1'); if (s1) s1.classList.add('hero-done');
+      const w = document.getElementById('cfg-wizard'); if (w) w.style.display = 'flex';
+      setTimeout(() => { if (typeof wizGoOverview === 'function') wizGoOverview(); }, 60);
+    }
+  } catch(e) { console.warn('Overview-Param konnte nicht verarbeitet werden', e); }
 }
 
 // Auf URL-Params reagieren (scrolltoform, edit, weiter)
@@ -13561,6 +13606,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   // Kunden-Vorgabe 21.04.2026 (Variante C): URL-Params für Bestellübersicht-Flow
   handleUrlParams();
   restoreEditingState();
+  handleOverviewParam();
 
   // Kunden-Wunsch 21.04.2026: Bild-Upload-Event-Listener (File-Input + Drag-Drop)
   const fileInput = document.getElementById('bild-file-input');
