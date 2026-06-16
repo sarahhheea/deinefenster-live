@@ -7257,8 +7257,9 @@ const ALL='kunststoff,balkontuer,haustuere,hst'.split(',');
 const WIZ_ALL=[
   {key:'profil', gilt:ALL, title:'Wählen Sie das <span>Profil</span>', sub:'Das Drutex-System für Ihr Produkt.', render:wizRenderProfil, layout:'cards'},
   {key:'psk', gilt:['hst'], cond:()=>S.profil==='iglo-psk', title:'Wählen Sie das <span>PSK-System</span>', sub:'Kammer-System Ihrer Parallel-Schiebe-Kipp-Tür.', render:wizRenderPsk, layout:'cards'},
+  {key:'hslauf', gilt:['hst'], cond:()=>S.profil==='iglo-hs', title:'In welche Richtung läuft die <span>Schiebetür</span>?', sub:'HebeSchiebe links oder rechts — Ansicht von innen.', render:wizRenderHsLauf, layout:'cards'},
   {key:'fluegel', gilt:['kunststoff','balkontuer','haustuere','hst'], cond:()=>S.prod!=='hst'||S.profil==='iglo-hs'||S.profil==='iglo-psk', title:'Wählen Sie die <span>Aufteilung</span>', sub:'Wie viele Flügel und welche Aufteilung?', render:wizRenderFluegel, layout:'cards'},
-  {key:'anschlag', gilt:ALL, title:'Wählen Sie die <span>Öffnungsart</span>', sub:'In welche Richtung öffnet es?', render:wizRenderAnschlag, layout:'cards'},
+  {key:'anschlag', gilt:ALL, cond:()=>!(S.prod==='hst'&&S.profil==='iglo-hs'), title:'Wählen Sie die <span>Öffnungsart</span>', sub:'In welche Richtung öffnet es?', render:wizRenderAnschlag, layout:'cards'},
   {key:'glas', gilt:ALL, title:'Wählen Sie die <span>Verglasung</span>', sub:'2-fach oder 3-fach Wärmeschutz.', render:wizRenderGlas, layout:'cards'},
   {key:'masse', gilt:ALL, title:'Geben Sie die <span>Maße</span> an', sub:'Rohbaumaß in Millimetern.', render:wizRenderMasse, layout:'cards'},
   {key:'anzahl', gilt:ALL, title:'Wählen Sie die <span>Anzahl</span>', sub:'Wie viele Stück dieser Konfiguration benötigen Sie?', render:wizRenderAnzahl, layout:'cards'},
@@ -7535,6 +7536,18 @@ function pskKippSchiebeCard(v){
   var ov='<svg viewBox="0 0 1200 896" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%'+(mir?';transform:scaleX(-1)':'')+'" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#fff" stroke-width="20">'+paths+'</g><g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#225eaa" stroke-width="9">'+paths+'</g></svg>';
   return '<div class="wiz-card'+sel+'" onclick="wizSetHstLauf(\''+v+'\')"><div style="position:relative;width:100%;line-height:0;border-radius:10px;overflow:hidden"><img src="img/karten/hst-fluegel/2-teilig.webp?v=20260610psk" alt="'+name+'" loading="lazy" style="width:100%;height:auto;aspect-ratio:auto;object-fit:fill;display:block;border-radius:0;padding:0">'+ov+'</div><div class="wiz-cn">'+name+'</div><div class="wiz-csub">'+sub+'</div></div>';
 }
+// Iglo HS — Laufrichtung als große Bild-Karten (HebeSchiebe Links/Rechts, Pfeil-Overlay, Ansicht von innen).
+// Gleiches Muster wie pskKippSchiebeCard: Schiebetür-Bild + Pfeil; links gespiegelt → Pfeil zeigt nach rechts.
+function hsLaufCard(v){
+  var sel=(S.hstLauf===v)?' sel':'';
+  var mir=(v==='links');
+  var name=(v==='links')?'HebeSchiebe-Links':'HebeSchiebe-Rechts';
+  var sub='Ansicht von innen';
+  var paths='<line x1="865" y1="440" x2="690" y2="440"/><polyline points="740,400 690,440 740,480"/>';
+  var ov='<svg viewBox="0 0 1200 896" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%'+(mir?';transform:scaleX(-1)':'')+'" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#fff" stroke-width="20">'+paths+'</g><g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#225eaa" stroke-width="9">'+paths+'</g></svg>';
+  return '<div class="wiz-card'+sel+'" onclick="wizSetHstLauf(\''+v+'\')"><div style="position:relative;width:100%;line-height:0;border-radius:10px;overflow:hidden"><img src="img/karten/hst-fluegel/2-teilig.webp?v=20260610psk" alt="'+name+'" loading="lazy" style="width:100%;height:auto;aspect-ratio:auto;object-fit:fill;display:block;border-radius:0;padding:0">'+ov+'</div><div class="wiz-cn">'+name+'</div><div class="wiz-csub">'+sub+'</div></div>';
+}
+function wizRenderHsLauf(){ return '<div class="wiz-cards">'+hsLaufCard('links')+hsLaufCard('rechts')+'</div>'; }
 function wizPickAnschlag(idx){ S.anschlagIdx=idx; const o=(ANSCHLAG_SETS[S.fluegel]||[])[idx]; if(o){ S.oeff1=o.oeff[0]||null; S.oeff2=o.oeff[1]||null; S.oeff3=o.oeff[2]||null; S.oberlichtOeff=o.ol||null; S.unterlichtOeff=o.ul||null; } if(window._touched)window._touched.add('oeff1'); if(typeof buildOeffSash==='function')buildOeffSash(); if(typeof mkDone==='function')mkDone(4); wizRenderPanel(); }
 function wizRenderGlas(){
   const hst=(S.prod==='hst');
@@ -7605,12 +7618,12 @@ function wizCrumbs(){
     return '<div class="wiz-st '+cls+'" onclick="wizGo('+i+')"><div class="wiz-st-dot">'+inner+'</div><div class="wiz-st-lb">'+wizCrumbLabel(s.key)+'</div></div>';
   }).join('');
 }
-function wizCrumbLabel(k){return {profil:'Profil',psk:'PSK',tuer:'Türmodell',fluegel:'Aufteilung',anschlag:'Öffnung',glas:'Glas',masse:'Maße',farbe:'Farbe',glasdekor:'Motiv',schall:'Schall',griff:'Griff',griffhaus:'Türgriff',griffhst:'Griff',balk:'Schwelle',hstschwelle:'Schwelle',rolladen:'Rolladen',sprossen:'Sprossen',sicherheit:'Sicherheit',anzahl:'Anzahl',angebot:'Übersicht',kontakt:'Anfrage'}[k]||k;}
+function wizCrumbLabel(k){return {profil:'Profil',psk:'PSK',hslauf:'Laufrichtung',tuer:'Türmodell',fluegel:'Aufteilung',anschlag:'Öffnung',glas:'Glas',masse:'Maße',farbe:'Farbe',glasdekor:'Motiv',schall:'Schall',griff:'Griff',griffhaus:'Türgriff',griffhst:'Griff',balk:'Schwelle',hstschwelle:'Schwelle',rolladen:'Rolladen',sprossen:'Sprossen',sicherheit:'Sicherheit',anzahl:'Anzahl',angebot:'Übersicht',kontakt:'Anfrage'}[k]||k;}
 function wizNext(){ if(WIZ_STEPS[wizIdx].key==='kontakt'){ if(typeof d2submit==='function')d2submit({preventDefault:function(){}}); return; } if(wizIdx>=WIZ_STEPS.length-1){ wizFinish(); return; } wizGo(wizIdx+1); window.scrollTo({top:0,behavior:'auto'}); }
 function wizBack(){ if(wizIdx<=0){ wizExitToProd(); return; } wizGo(wizIdx-1); window.scrollTo({top:0,behavior:'auto'}); }
 // Auto-Advance: nach Auswahl einer Karte direkt zum nächsten Schritt — nur bei eindeutigen Einfach-Auswahl-Schritten.
 // Nicht bei: Farbe (Kundenwunsch), Maße/Anzahl (Eingabe), Schall/Griff/Rolladen/Sprossen (Mehrfach-/Detailauswahl).
-const WIZ_AUTONEXT = new Set(['profil','psk','fluegel','anschlag','glas','tuer','balk','hstschwelle','glasdekor','sicherheit']);
+const WIZ_AUTONEXT = new Set(['profil','psk','hslauf','fluegel','anschlag','glas','tuer','balk','hstschwelle','glasdekor','sicherheit']);
 document.addEventListener('click', function(e){
   const panel = document.getElementById('wiz-panel');
   if(!panel || !panel.contains(e.target)) return;
@@ -12735,7 +12748,8 @@ function _renderHst3d() {
     ? (HAUS3D_COLOR_MAP[S.fa] || HAUS3D_COLOR_MAP[S.fi] || 'anthrazitgrau')
     : (HAUS3D_COLOR_MAP[_innerFarb] || HAUS3D_COLOR_MAP[S.fa] || 'anthrazitgrau');
   const isWood = HAUS3D_WOOD_KEYS.has(_ck);
-  const _side  = (S.oeff1 === 'dreh-l' || S.oeff1 === 'dk-l') ? 'l' : 'r';
+  // HST: Seite aus der Laufrichtung (hstLauf) ableiten — links→l, rechts→r; Fallback auf oeff1.
+  const _side  = (S.hstLauf === 'links') ? 'l' : (S.hstLauf === 'rechts') ? 'r' : ((S.oeff1 === 'dreh-l' || S.oeff1 === 'dk-l') ? 'l' : 'r');
   const _grip  = S.hstGriffAussen || 'weiss';  // 3D zeigt den Bügel-Stoßgriff = Außen-Griff → dessen Farbe (weiss/braun) steuert die 3D-Griff-Farbe
 
   wrap.style.display = 'block';
