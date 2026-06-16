@@ -4293,22 +4293,28 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   #cfg-wizard .hst-feat{list-style:none;margin:8px 0 4px;padding:0;text-align:left;display:inline-block}
   #cfg-wizard .hst-feat li{font-size:11.5px;color:#5a6b7e;font-family:'Manrope',sans-serif;line-height:1.55;padding-left:17px;position:relative}
   #cfg-wizard .hst-feat li::before{content:'✓';position:absolute;left:0;top:0;color:var(--c-primary);font-weight:800;font-size:10.5px}
-  /* Türgriffe: zwei klar getrennte Gruppen UNTEREINANDER (innen = nur Klinken, außen = alle),
-     jede über die volle Panel-Breite mit sauber umbrechenden Karten — kein gequetschtes 4-Spalten-Raster. */
-  #cfg-wizard .wiz-griffstack{max-width:1160px;margin:0 auto}
-  #cfg-wizard .wiz-griffstack .wiz-group{margin-bottom:26px}
-  #cfg-wizard .wiz-griffstack .wiz-gt{text-align:left;margin-bottom:12px;font-size:15px}
-  #cfg-wizard .wiz-griffstack .wiz-gt small{font-weight:600;color:#5a6a85;font-size:12.5px}
-  #cfg-wizard .wiz-griffstack .wiz-cards{justify-content:flex-start;gap:14px}
-  /* Kartenbreite kommt vom globalen 182px-Maß (.wiz-body:not(.cards-mode) … .wiz-card) → 3/Reihe auf Desktop. */
-  /* dunkler Kasten passend zum Foto-Hintergrund (kein "Bild im Bild") */
-  #cfg-wizard .wiz-griffstack .wiz-card-opt .wiz-sym{height:150px;background:#3a3a3c;border-radius:12px}
-  #cfg-wizard .wiz-griffstack .wiz-card-opt .wiz-sym img{width:100%;height:100%;object-fit:cover;object-position:center 42%;padding:0;border-radius:0}
-  /* Mobil: 2 Griffe pro Reihe statt 1 — überschreibt das globale 182px gezielt (höhere Spezifität nötig). */
+  /* Türgriffe: innen + außen NEBENEINANDER, aber klar getrennt — links schmale Innen-Spalte
+     (4 Klinken untereinander), rechts breite Außen-Spalte (20 Griffe, 2 pro Reihe). */
+  #cfg-wizard .wiz-griff2col{display:flex;gap:22px;align-items:flex-start;max-width:1160px;margin:0 auto}
+  #cfg-wizard .wiz-griff2col .wiz-griffcol.is-innen{flex:0 0 172px;min-width:0}
+  #cfg-wizard .wiz-griff2col .wiz-griffcol.is-aussen{flex:1 1 auto;min-width:0;border-left:1px solid #e6ebf3;padding-left:22px}
+  #cfg-wizard .wiz-griff2col .wiz-gt{text-align:left;margin-bottom:12px;font-size:15px}
+  #cfg-wizard .wiz-griff2col .wiz-gt small{display:block;font-weight:600;color:#5a6a85;font-size:12px;margin-top:2px}
+  #cfg-wizard .wiz-griff2col .wiz-cards{justify-content:flex-start;gap:12px}
+  /* dunkler Foto-Kasten passend zum Bild-Hintergrund (kein "Bild im Bild") */
+  #cfg-wizard .wiz-griff2col .wiz-card-opt .wiz-sym{height:140px;background:#3a3a3c;border-radius:12px}
+  #cfg-wizard .wiz-griff2col .wiz-card-opt .wiz-sym img{width:100%;height:100%;object-fit:cover;object-position:center 42%;padding:0;border-radius:0}
+  /* Kartenbreiten — höhere Spezifität als globales .wiz-card{width:182px}: innen 1/Reihe, außen 2/Reihe */
+  #cfg-wizard .wiz-body:not(.cards-mode) .wiz-panel .wiz-griff2col .is-innen .wiz-cards .wiz-card-opt{width:100%;box-sizing:border-box}
+  #cfg-wizard .wiz-body:not(.cards-mode) .wiz-panel .wiz-griff2col .is-aussen .wiz-cards .wiz-card-opt{width:calc(50% - 8px);box-sizing:border-box}
+  /* Handy: untereinander, beide Spalten volle Breite mit 2 Griffen pro Reihe */
   @media(max-width:760px){
-    #cfg-wizard .wiz-body:not(.cards-mode) .wiz-panel .wiz-griffstack .wiz-cards .wiz-card-opt{width:46%;box-sizing:border-box}
-    #cfg-wizard .wiz-griffstack .wiz-cards{justify-content:center}
-    #cfg-wizard .wiz-griffstack .wiz-card-opt .wiz-sym{height:120px}
+    #cfg-wizard .wiz-griff2col{flex-direction:column;gap:24px}
+    #cfg-wizard .wiz-griff2col .wiz-griffcol.is-innen{flex:none;width:100%}
+    #cfg-wizard .wiz-griff2col .wiz-griffcol.is-aussen{border-left:0;padding-left:0;width:100%}
+    #cfg-wizard .wiz-body:not(.cards-mode) .wiz-panel .wiz-griff2col .is-innen .wiz-cards .wiz-card-opt{width:calc(50% - 8px)}
+    #cfg-wizard .wiz-griff2col .wiz-cards{justify-content:center}
+    #cfg-wizard .wiz-griff2col .wiz-card-opt .wiz-sym{height:120px}
   }
   #cfg-wizard .wiz-card-dis{opacity:.5;cursor:not-allowed}
   /* Foto-Karten (Glas-Motiv): Bild füllt die Box randlos */
@@ -7277,9 +7283,9 @@ function wizRenderTuergriff(){
   function griffCards(obj, sel, sk){
     return Object.keys(obj).map(function(k){const o=obj[k];return '<div class="wiz-card wiz-card-opt'+(k===sel?' sel':'')+'" onclick="wizSet(\''+sk+'\',\''+k+'\')"><div class="wiz-sym"><img src="'+o.img+'" alt="'+o.name+'" loading="lazy"></div><div class="wiz-cn">'+o.name+'</div></div>';}).join('');
   }
-  return '<div class="wiz-griffstack">'+
-    '<div class="wiz-group"><div class="wiz-gt">Türgriff innen <small>— die Klinke im Raum</small></div><div class="wiz-cards">'+griffCards(P.tuerGriffInnen,S.tuerGriffInnen,'tuerGriffInnen')+'</div></div>'+
-    '<div class="wiz-group"><div class="wiz-gt">Türgriff außen <small>— der Griff von der Straße</small></div><div class="wiz-cards">'+griffCards(P.tuerGriffAussen,S.tuerGriffAussen,'tuerGriffAussen')+'</div></div>'+
+  return '<div class="wiz-griff2col">'+
+    '<div class="wiz-griffcol is-innen"><div class="wiz-gt">Türgriff innen <small>— die Klinke im Raum</small></div><div class="wiz-cards">'+griffCards(P.tuerGriffInnen,S.tuerGriffInnen,'tuerGriffInnen')+'</div></div>'+
+    '<div class="wiz-griffcol is-aussen"><div class="wiz-gt">Türgriff außen <small>— der Griff von der Straße</small></div><div class="wiz-cards">'+griffCards(P.tuerGriffAussen,S.tuerGriffAussen,'tuerGriffAussen')+'</div></div>'+
   '</div>';
 }
 function wizRenderSchiebegriff(){
