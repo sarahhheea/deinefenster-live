@@ -6159,10 +6159,17 @@ const P = {
     'ral9016': { name:'Smart Slide · Weiß',    fullName:'Smart Slide (RAL 9016 Weiß)',  add:0, img:'img/drutex-griffe/smart-slide-9016.webp' },
     'ral9005': { name:'Smart Slide · Schwarz', fullName:'Smart Slide (RAL 9005 Schwarz)', add:0, img:'img/drutex-griffe/smart-slide-9005.webp' },
   },
-  // IGLO-HS AUSSEN-Griff = Drutex Stoßgriff M2 (vorstehender U-Bügelgriff, 2 Farben).
+  // IGLO-HS AUSSEN-Griff = Drutex Stoßgriff M2 (vorstehender U-Bügelgriff, 3 Farben).
   hstGriffAussen: {
-    'weiss': { name:'Stoßgriff M2 (weiß)', add:0, img:'img/drutex-griffe/stoss-m2-weiss.webp' },
-    'braun': { name:'Stoßgriff M2 (braun)', add:0, img:'img/drutex-griffe/stoss-m2-braun.webp' },
+    'weiss':     { name:'Stoßgriff M2 (weiß)', add:0, img:'img/drutex-griffe/stoss-m2-weiss.webp' },
+    'braun':     { name:'Stoßgriff M2 (braun)', add:0, img:'img/drutex-griffe/stoss-m2-braun.webp' },
+    'anthrazit': { name:'Stoßgriff M2 (anthrazit)', add:0, img:'img/drutex-griffe/stoss-m2-9006.webp' },
+  },
+  // IGLO-HS Schloss-Option (abschließbarer Griff) — Funktions-Wahl, kein eigenes Produktfoto.
+  hstSchloss: {
+    'ohne':         { name:'Ohne Schloss', sub:'Standard-Griff', add:0 },
+    'innen':        { name:'Abschließbar von innen', sub:'Zylinder innen', add:0 },
+    'innen-aussen': { name:'Abschließbar innen + außen', sub:'Zylinder beidseitig', add:0 },
   },
 };
 
@@ -6190,6 +6197,7 @@ const S = {
   pskKammer:'iglo5',  // Kunde 21.04.2026: Kammer-System nur für PSK relevant
   hstGriff:'silber',          // Innen = Smart Slide IGLO-HS
   hstGriffAussen:'weiss',     // Außen = Stoßgriff M2 IGLO-HS
+  hstSchloss:'ohne',          // IGLO-HS Schloss-Option
   sicher:'wk1',
   tuerModell: null,
   hstSchwelle:'standard', hstTeilung:'2-teilig', hstLauf:'rechts',  // Fix W9
@@ -6466,6 +6474,7 @@ function resetConfigForNextItem() {
   S.tuerGriffInnen = 'drueck-weiss'; S.tuerGriffAussen = 'htg-30a';
   S.hstGriff = 'silber';
   S.hstGriffAussen = 'weiss';
+  S.hstSchloss = 'ohne';
   S.hstSchwelle = 'standard'; S.hstTeilung = '2-teilig'; S.hstLauf = 'rechts';
   S.balkonSchwelle = 'alu-20';
   S.pskKammer = 'iglo5';  // Kunde 21.04.2026
@@ -7345,9 +7354,19 @@ function wizRenderTuergriff(){
   '</div>';
 }
 function wizRenderSchiebegriff(){
-  // IGLO-HS: nur der innere Smart-Slide-Flachgriff ist wählbar (außen sitzt eine eingelassene Muschel).
-  let h='<div class="wiz-group"><div class="wiz-gt">Smart Slide (Flachgriff)</div><div class="wiz-cards">'+Object.keys(P.hstGriff).map(function(k){const o=P.hstGriff[k];return '<div class="wiz-card wiz-card-opt'+(k===S.hstGriff?' sel':'')+'" onclick="wizSet(\'hstGriff\',\''+k+'\')"><div class="wiz-sym"><img src="'+o.img+'" alt="'+o.name+'" loading="lazy"></div><div class="wiz-cn">'+o.name+'</div></div>';}).join('')+'</div></div>';
-  return h;
+  // IGLO-HS Griff-Auswahl: Innengriff-Farbe (Smart Slide) + Außengriff-Farbe (Stoßgriff M2) + Schloss-Option.
+  var hint='<small style="font-weight:600;color:#5a6a85;font-size:12px">';
+  function colorCards(obj, sel, key){
+    return Object.keys(obj).map(function(k){const o=obj[k];return '<div class="wiz-card wiz-card-opt'+(k===sel?' sel':'')+'" onclick="wizSet(\''+key+'\',\''+k+'\')"><div class="wiz-sym"><img src="'+o.img+'" alt="'+o.name+'" loading="lazy"></div><div class="wiz-cn">'+o.name+'</div></div>';}).join('');
+  }
+  var SCHLOSS_IC={'ohne':'lock_open','innen':'lock','innen-aussen':'vpn_key'};
+  function schlossCards(){
+    return Object.keys(P.hstSchloss).map(function(k){const o=P.hstSchloss[k];return '<div class="wiz-card wiz-card-opt'+(k===S.hstSchloss?' sel':'')+'" onclick="wizSet(\'hstSchloss\',\''+k+'\')"><div class="wiz-sym" style="background:#eef2f8;display:flex;align-items:center;justify-content:center"><i class="ms" style="font-size:46px;color:var(--c-primary)">'+(SCHLOSS_IC[k]||'lock')+'</i></div><div class="wiz-cn">'+o.name+'</div><div class="wiz-csub">'+(o.sub||'')+'</div></div>';}).join('');
+  }
+  return ''+
+    '<div class="wiz-group"><div class="wiz-gt">Innengriff '+hint+'— Smart Slide (im Raum)</small></div><div class="wiz-cards">'+colorCards(P.hstGriff,S.hstGriff,'hstGriff')+'</div></div>'+
+    '<div class="wiz-group"><div class="wiz-gt">Außengriff '+hint+'— Stoßgriff M2 (von der Straße)</small></div><div class="wiz-cards">'+colorCards(P.hstGriffAussen,S.hstGriffAussen,'hstGriffAussen')+'</div></div>'+
+    '<div class="wiz-group"><div class="wiz-gt">Abschließbar?</div><div class="wiz-cards">'+schlossCards()+'</div></div>';
 }
 function wizRenderBalkSchwelle(){ return _wizPills(Object.keys(P.balkonSchwelle).map(function(k){return [k,P.balkonSchwelle[k].name];}),S.balkonSchwelle,'wizSetBalkSchwelle')+'<div class="wiz-hint">'+((P.balkonSchwelle[S.balkonSchwelle]||{}).sub||'')+'</div>'; }
 function wizSetBalkSchwelle(v){ wizSet('balkonSchwelle',v); }
@@ -7403,7 +7422,7 @@ function wizRenderAngebot(){
     row('Glas', sh(nm('glas',S.glas))),
     row('Farbe', farbe),
     row('Motiv', nm('glasdekor',S.glasdekor)),
-    row('Griff', (typeof griffSummary==='function')?griffSummary():nm('griff',S.griff)),
+    row('Griff', S.prod==='hst' ? hstGriffSummary() : ((typeof griffSummary==='function')?griffSummary():nm('griff',S.griff))),
     row('Schallschutz', sh(nm('schall',S.schall))),
     row('Sicherheitsglas', nm('sicherGlas',S.sicherGlas)),
     row('Rolladen', S.roll==='ohne'?'Kein':nm('roll',S.roll)),
@@ -9102,6 +9121,12 @@ function pickGriffLock(locked) {
   updateGriffLockUI();
   document.getElementById('d9').textContent = griffSummary();
   refreshDescriptions();
+}
+function hstGriffSummary() {
+  const inn = P.hstGriff[S.hstGriff]?.name || S.hstGriff;
+  const aus = P.hstGriffAussen[S.hstGriffAussen]?.name || S.hstGriffAussen;
+  const sch = (S.hstSchloss && S.hstSchloss !== 'ohne') ? (' · ' + (P.hstSchloss[S.hstSchloss]?.name || S.hstSchloss)) : '';
+  return 'Innen: ' + inn + ' · Außen: ' + aus + sch;
 }
 function griffSummary() {
   if (S.griff === 'pz-beid') return 'PZ beidseitig · Profilzylinder';
@@ -11145,7 +11170,9 @@ function upSidebar() {
     if(S.tuerGriffInnen  && isTouched('tuerGriffInnen'))  rowsList.push(['Griff innen',  P.tuerGriffInnen?.[S.tuerGriffInnen]?.name||S.tuerGriffInnen]);
     if(S.tuerGriffAussen && isTouched('tuerGriffAussen')) rowsList.push(['Griff außen',  P.tuerGriffAussen?.[S.tuerGriffAussen]?.name||S.tuerGriffAussen]);
   } else if(S.prod==='hst') {
-    if(S.hstGriff && isTouched('hstGriff')) rowsList.push(['Griff', P.hstGriff?.[S.hstGriff]?.name||S.hstGriff]);
+    if(S.hstGriff) rowsList.push(['Griff innen', P.hstGriff?.[S.hstGriff]?.name||S.hstGriff]);
+    if(S.hstGriffAussen) rowsList.push(['Griff außen', P.hstGriffAussen?.[S.hstGriffAussen]?.name||S.hstGriffAussen]);
+    if(S.hstSchloss && S.hstSchloss!=='ohne') rowsList.push(['Schloss', P.hstSchloss?.[S.hstSchloss]?.name||S.hstSchloss]);
   } else if(S.griff && isTouched('griff')) {
     rowsList.push(['Griff', P.griff?.[S.griff]?.name||S.griff]);
   }
@@ -11248,7 +11275,9 @@ function upFinalSum(rows,tot) {
     ...(S.prod !== 'haustuere' && S.prod !== 'hst' ? [['Griff', S.griff?P.griff[S.griff]?.name||S.griff:'–']] : []),
     ...(S.prod === 'haustuere' ? [['Türgriff Innen', P.tuerGriffInnen[S.tuerGriffInnen]?.name||S.tuerGriffInnen], ['Türgriff Außen', P.tuerGriffAussen[S.tuerGriffAussen]?.name||S.tuerGriffAussen]] : []),
     ...(S.prod === 'hst'       ? [
-      ['Griff', S.hstGriff?P.hstGriff[S.hstGriff]?.name||S.hstGriff:'–']
+      ['Griff innen', S.hstGriff?P.hstGriff[S.hstGriff]?.name||S.hstGriff:'–'],
+      ['Griff außen', S.hstGriffAussen?P.hstGriffAussen[S.hstGriffAussen]?.name||S.hstGriffAussen:'–'],
+      ...(S.hstSchloss && S.hstSchloss!=='ohne' ? [['Schloss', P.hstSchloss[S.hstSchloss]?.name||S.hstSchloss]] : [])
     ] : []),
     ['Einbruchschutz', S.sicher?P.sicher[S.sicher]?.name||S.sicher:'–'],
     ...(S.prod !== 'haustuere' && S.prod !== 'hst' ? [
@@ -12798,12 +12827,14 @@ function _renderHst3d() {
   const isWood = HAUS3D_WOOD_KEYS.has(_ck);
   // HST: Seite aus der Laufrichtung (hstLauf) ableiten — links→l, rechts→r; Fallback auf oeff1.
   const _side  = (S.hstLauf === 'links') ? 'l' : (S.hstLauf === 'rechts') ? 'r' : ((S.oeff1 === 'dreh-l' || S.oeff1 === 'dk-l') ? 'l' : 'r');
-  const _grip  = S.hstGriffAussen || 'weiss';  // 3D zeigt den Bügel-Stoßgriff = Außen-Griff → dessen Farbe (weiss/braun) steuert die 3D-Griff-Farbe
+  // 3D-Innenansicht zeigt den Smart-Slide-Innengriff → dessen Farbe (Innengriff-Wahl) steuert die 3D-Griff-Farbe
+  const _gripMap = { silber:'silber', ral9016:'weiss', ral9005:'schwarz' };
+  const _grip  = _gripMap[S.hstGriff] || 'weiss';
 
   wrap.style.display = 'block';
 
   // Bei System-Wechsel kompletten Reload erzwingen (verschiedene Geometrie)
-  const expectedSrc = `/hst-3d.html?embed&v=20260616hs&bg=light&system=${_sys}&color=${_ck}&side=${_side}&view=${_viewKey}&grip=${_grip}`;
+  const expectedSrc = `/hst-3d.html?embed&v=20260616hs2&bg=light&system=${_sys}&color=${_ck}&side=${_side}&view=${_viewKey}&grip=${_grip}`;
   const currentSys  = (frame.src.match(/[?&]system=([^&]+)/) || [])[1];
   const _needsReload = !frame.src.includes('hst-3d') || currentSys !== _sys;
 

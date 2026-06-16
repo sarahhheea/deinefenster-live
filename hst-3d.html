@@ -1294,11 +1294,18 @@ function setHstGriff(key) {
   if (!key) return;
   _curGripKey = key;
   const k = String(key).toLowerCase();
-  const isSilber = k.startsWith('silber');
-  const isBraun  = k.startsWith('braun');
+  const isSilber  = k.startsWith('silber');
+  const isBraun   = k.startsWith('braun');
+  const isSchwarz = k.startsWith('schwarz');
   // Bei hellem/weißem Rahmen + weißem Griff: weiß-grauer Kunststoff (Tiefe statt weiß-auf-weiß).
-  // Sonst echte Finish-Farbe (Braun/Silber explizit, Weiß default).
-  if (!isSilber && !isBraun && _hwFrameLum >= 0.6) {
+  // Sonst echte Finish-Farbe (Schwarz/Braun/Silber explizit, Weiß default).
+  if (isSchwarz) {
+    // Schwarzer Smart-Slide (RAL 9005) — matt-dunkler Kunststoff
+    hstGriffMat.color.setHex(0x2b2e32);
+    hstGriffMat.metalness = 0.30;
+    hstGriffMat.roughness = 0.52;
+    hstGriffMat.envMapIntensity = 0.55;
+  } else if (!isSilber && !isBraun && _hwFrameLum >= 0.6) {
     // Weißer Rahmen + Standard-Griff: gebürstetes ALUMINIUM (echte HS/PSK-Hardware),
     // hebt sich klar vom weißen Flügel ab — kein verwaschenes Plastik.
     hstGriffMat.color.setHex(0xa9afb6);
