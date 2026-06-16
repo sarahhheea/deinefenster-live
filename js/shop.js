@@ -236,6 +236,7 @@ function deriveBauartTags(kat) {
   else if (kat.includes('-4fluegel')) tags.push('vierfluegelig');
   if (kat.endsWith('-rollo')) tags.push('mit-rollo');
   if (kat === 'fenster-oberlicht') tags.push('oberlicht');
+  if (kat === 'fenster-unterlicht') tags.push('unterlicht');
   if (kat === 'fenster-sprossen') tags.push('sprossen-aufgesetzt');
   if (kat === 'festelement') tags.push('festverglasung');
   if (kat === 'kellerfenster') tags.push('kellerfenster-typ');
@@ -350,11 +351,11 @@ function berechneMetadaten(produkte) {
       breite_min: 500, breite_max: 4000,
       hoehe_min: 400, hoehe_max: 2400,
       alle_eigenschaften: [],
-      alle_farben: ['weiss', 'anthrazit', 'golden-oak', 'nussbaum', 'schwarz', 'dunkelgruen']
+      alle_farben: ['weiss', 'anthrazit', 'grau', 'schwarz', 'dunkelgruen', 'golden-oak', 'nussbaum', 'holzdekor', 'farbig']
     };
   }
   const alleEig = new Set();
-  const alleFarben = new Set(['weiss', 'anthrazit', 'golden-oak', 'nussbaum', 'schwarz', 'dunkelgruen']);
+  const alleFarben = new Set(['weiss', 'anthrazit', 'grau', 'schwarz', 'dunkelgruen', 'golden-oak', 'nussbaum', 'holzdekor', 'farbig']);
   produkte.forEach(p => {
     (p.eigenschaften || []).forEach(e => alleEig.add(e));
     _asArr(p.farbe).forEach(f => alleFarben.add(f));
@@ -1799,10 +1800,13 @@ function farbeAnzeige(code) {
   const map = {
     'weiss': 'Weiß',
     'anthrazit': 'Anthrazit',
+    'grau': 'Grau',
+    'schwarz': 'Schwarz',
+    'dunkelgruen': 'Dunkelgrün',
     'golden-oak': 'Golden Oak',
     'nussbaum': 'Nussbaum',
-    'schwarz': 'Schwarz',
-    'dunkelgruen': 'Dunkelgrün'
+    'holzdekor': 'Holzdekor',
+    'farbig': 'Farbig'
   };
   return map[code] || code;
 }
@@ -1849,8 +1853,22 @@ function eigenschaftAnzeige(code) {
     'oberlicht': 'Mit Oberlicht',
     'unterlicht': 'Mit Unterlicht',
     'ober-unter-licht': 'Mit Ober- und Unterlicht',
+    'kaempfer': 'Mit Kämpfer',
     'sprossen-aufgesetzt': 'Mit Sprossen',
+    'sprossen-innen': 'Innenliegende Sprossen',
     'holzdekor': 'Holzdekor',
+    // Rollladen — gleiche Schlüssel wie im Einstell-Formular (vorher unbeschriftet)
+    'rollladen-gurtwickler': 'Mit Rollladen (Gurtwickler)',
+    'rollladen-motor': 'Mit Rollladen (Motor)',
+    // Zustand / Komfort (vorher unbeschriftet → roher Code im Filter)
+    'einzelstueck': 'Einzelstück',
+    'vermessen': 'Vermessen',
+    'beidseitig-abschliessbar': 'Beidseitig abschließbar',
+    // Farbe (Eigenschaften-Variante)
+    'farbe-weiss': 'Weiß',
+    'farbe-anthrazit': 'Anthrazit',
+    'farbe-grau': 'Grau',
+    'farbe-farbig': 'Farbig',
     'passivhaus-tauglich': 'Passivhaus-tauglich',
     '2-fach-verglasung': '2-fach-Verglasung',
     '3-fach-verglasung': '3-fach-Verglasung',
@@ -1867,5 +1885,8 @@ function eigenschaftAnzeige(code) {
     'rundbogenfenster-typ': 'Rundbogenfenster',
     'stichbogenfenster-typ': 'Stichbogenfenster'
   };
-  return map[code] || code;
+  if (map[code]) return map[code];
+  // Fallback: unbekannten Schlüssel lesbar machen statt roh anzeigen
+  // (z.B. neue Eigenschaft "null-schwelle" → "Null Schwelle")
+  return String(code).replace(/[-_]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }

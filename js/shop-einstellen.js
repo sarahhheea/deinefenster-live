@@ -4,31 +4,30 @@
    Stand: 27.04.2026
    ───────────────────────────────────────────────────────────────────── */
 
+// Kategorie = nur GRUNDTYP (Flügelzahl/Form). Zusätze wie Oberlicht, Unterlicht,
+// Rollladen, Sprossen sind KEINE eigenen Kategorien mehr — die hakt man unten als
+// Eigenschaft an. So ist „Einstellen" deckungsgleich mit dem Shop-Filter
+// (Inhaberin-Regel 16.06.2026: Grundtyp + Eigenschaften, keine Kombi-Kategorien).
 const KATEGORIEN = [
+  // ── Fenster nach Flügelzahl ──
   { key: 'fenster-1fluegel',           label: 'Einflügelig',                      icon: 'window' },
-  { key: 'fenster-1fluegel-rollo',     label: 'Einflügelig mit Rollo',            icon: 'roller_shades' },
   { key: 'fenster-2fluegel',           label: 'Zweiflügelig',                     icon: 'border_outer' },
-  { key: 'fenster-2fluegel-rollo',     label: 'Zweiflügelig mit Rollo',           icon: 'roller_shades' },
   { key: 'fenster-3fluegel',           label: 'Dreiflügelig',                     icon: 'view_column' },
-  { key: 'fenster-3fluegel-rollo',     label: 'Dreiflügelig mit Rollo',           icon: 'roller_shades' },
   { key: 'fenster-4fluegel',           label: 'Vierflügelig',                     icon: 'grid_view' },
+  // ── Fenster-Sonderformen ──
   { key: 'festelement',                label: 'Festverglasung',                   icon: 'crop_free' },
   { key: 'kellerfenster',              label: 'Kellerfenster',                    icon: 'crop_landscape' },
   { key: 'rundfenster',                label: 'Rundes Fenster',                   icon: 'circle' },
   { key: 'rundbogenfenster',           label: 'Rundbogenfenster',                 icon: 'arch' },
   { key: 'stichbogenfenster',          label: 'Stichbogenfenster',                icon: 'arch' },
+  { key: 'dachfenster',                label: 'Dachfenster',                      icon: 'skylight' },
+  // ── Türen ──
   { key: 'haustuer',                   label: 'Haustür',                          icon: 'door_front' },
   { key: 'balkontuer-1fluegel',        label: 'Balkontür einflüglig',             icon: 'deck' },
-  { key: 'balkontuer-1fluegel-rollo',  label: 'Balkontür einflüglig mit Rollo',   icon: 'roller_shades' },
   { key: 'balkontuer-2fluegel',        label: 'Balkontür zweiflüglig',            icon: 'fence' },
-  { key: 'balkontuer-2fluegel-rollo',  label: 'Balkontür zweiflüglig mit Rollo',  icon: 'roller_shades' },
   { key: 'schiebetuer-psk',            label: 'Schiebetür PSK',                   icon: 'meeting_room' },
   { key: 'schiebetuer-hst',            label: 'Hebe-Schiebetür',                  icon: 'door_sliding' },
-  { key: 'schiebetuer-rollo',          label: 'Schiebetür mit Rollo',             icon: 'roller_shades' },
-  { key: 'fenster-oberlicht',          label: 'Fenster mit Oberlicht',            icon: 'space_dashboard' },
-  { key: 'fenster-unterlicht',         label: 'Fenster mit Unterlicht',           icon: 'vertical_split' },
-  { key: 'fenster-sprossen',           label: 'Fenster mit Sprossen',             icon: 'window_open' },
-  { key: 'dachfenster',                label: 'Dachfenster',                      icon: 'skylight' },
+  // ── Sonstiges ──
   { key: 'garagentor',                 label: 'Garagentor',                       icon: 'garage' },
   { key: 'daemmung',                   label: 'Dämmung',                          icon: 'layers' },
   { key: 'baumaterialien',             label: 'Baumaterialien',                   icon: 'construction' }
@@ -44,17 +43,8 @@ const EIGENSCHAFTEN_GRUPPEN = [
       { key: 'vermessen',             label: 'Vermessen (konkrete Maße)' }
     ]
   },
-  {
-    titel: 'Farbe',
-    icon: 'palette',
-    items: [
-      { key: 'farbe-weiss',           label: 'Weiß' },
-      { key: 'farbe-anthrazit',       label: 'Anthrazit' },
-      { key: 'farbe-grau',            label: 'Grau' },
-      { key: 'farbe-farbig',          label: 'Farbig (sonstige)' },
-      { key: 'holzdekor',             label: 'Holzdekor' }
-    ]
-  },
+  // Farbe ist KEINE Eigenschaft mehr — eigener Farbe-Reiter (mit Unterkategorien)
+  // speist den echten Farbe-Filter im Shop. Vermeidet doppelte Farb-Einträge.
   {
     titel: 'Aufteilung / Glas',
     icon: 'grid_view',
@@ -125,10 +115,20 @@ const EIGENSCHAFTEN = EIGENSCHAFTEN_GRUPPEN.flatMap(g => g.items);
 const CHIP_FELDER = {
   farbe: {
     stateKey: 'farben', containerId: 'chipsFarbe',
+    // Volle Palette an EINER Stelle (vorher doppelt: Reiter + Eigenschaften-Gruppe).
+    // Unterkategorien via `gruppen` — rendereChipFeld setzt Zwischenüberschriften.
     options: [
       { v: 'weiss', l: 'Weiß' }, { v: 'anthrazit', l: 'Anthrazit' },
+      { v: 'grau', l: 'Grau' }, { v: 'schwarz', l: 'Schwarz' },
+      { v: 'dunkelgruen', l: 'Dunkelgrün' },
       { v: 'golden-oak', l: 'Golden Oak' }, { v: 'nussbaum', l: 'Nussbaum' },
-      { v: 'schwarz', l: 'Schwarz' }, { v: 'dunkelgruen', l: 'Dunkelgrün' }
+      { v: 'holzdekor', l: 'Holzdekor (sonstige)' },
+      { v: 'farbig', l: 'Farbig (sonstige)' }
+    ],
+    gruppen: [
+      { titel: 'Uni-Farben', werte: ['weiss', 'anthrazit', 'grau', 'schwarz', 'dunkelgruen'] },
+      { titel: 'Holzdekore', werte: ['golden-oak', 'nussbaum', 'holzdekor'] },
+      { titel: 'Sonstige',   werte: ['farbig'] }
     ]
   },
   verglasung: {
@@ -173,8 +173,10 @@ const CHIP_FELDER = {
 const OEFFNUNGSART_LABEL = Object.fromEntries(CHIP_FELDER.oeffnungsart.options.map(o => [o.v, o.l]));
 
 const FARBE_LABEL = {
-  'weiss': 'Weiß', 'anthrazit': 'Anthrazit', 'golden-oak': 'Golden Oak',
-  'nussbaum': 'Nussbaum', 'schwarz': 'Schwarz', 'dunkelgruen': 'Dunkelgrün'
+  'weiss': 'Weiß', 'anthrazit': 'Anthrazit', 'grau': 'Grau',
+  'schwarz': 'Schwarz', 'dunkelgruen': 'Dunkelgrün',
+  'golden-oak': 'Golden Oak', 'nussbaum': 'Nussbaum',
+  'holzdekor': 'Holzdekor (sonstige)', 'farbig': 'Farbig (sonstige)'
 };
 
 const STATE = {
@@ -603,8 +605,18 @@ function rendereChipFeld(feldKey) {
   const wrap = document.getElementById(cfg.containerId);
   if (!wrap) return;
   const sel = STATE[cfg.stateKey] || [];
-  const html = cfg.options.map(o => chipBtn(feldKey, o.v, o.l, sel.includes(o.v), false)).join('')
-    + customWerteFuer(feldKey).map(c => chipBtn(feldKey, c, c, sel.includes(c), true)).join('')
+  const labelVon = v => (cfg.options.find(o => o.v === v) || {}).l || v;
+  let html;
+  if (cfg.gruppen) {
+    // Mit Unterkategorien: jede Gruppe bekommt eine Zwischenüberschrift (w-full erzwingt Umbruch)
+    html = cfg.gruppen.map(g =>
+      `<div class="w-full text-[11px] font-semibold text-on-surface-variant mt-2 first:mt-0">${escapeHtml(g.titel)}</div>`
+      + g.werte.map(v => chipBtn(feldKey, v, labelVon(v), sel.includes(v), false)).join('')
+    ).join('');
+  } else {
+    html = cfg.options.map(o => chipBtn(feldKey, o.v, o.l, sel.includes(o.v), false)).join('');
+  }
+  html += customWerteFuer(feldKey).map(c => chipBtn(feldKey, c, c, sel.includes(c), true)).join('')
     + addBtnHtml(feldKey);
   wrap.innerHTML = html;
 }
