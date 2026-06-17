@@ -4537,9 +4537,9 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       <div class="pc" data-p="haustuere" onclick="pickProd(this)">
         <div class="pc-name pc-name-top">Haustür</div>
         <img class="pc-img"
-             src="img/karten/haustuer-anthrazit.webp"
+             src="img/karten/haustuer-weiss.webp?v=20260617w"
              loading="eager" fetchpriority="high" decoding="sync"
-             alt="Montana-1 Haustür Anthrazit mit Stoßgriff"/>
+             alt="Montana-1 Haustür Weiß mit Stoßgriff"/>
         <div class="s1-info">
           <div class="pc-chips">
             <span>RC2 Einbruch&shy;schutz</span>
@@ -5577,7 +5577,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
         <button type="button" id="prev-3d-hint-close" onclick="try{sessionStorage.setItem('_3dHintDismissed','1')}catch(e){};this.parentElement.style.display='none';" title="Ausblenden" style="margin-left:4px;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:9999px;background:rgba(255,255,255,0.12);color:#ffffff;border:0;cursor:pointer;font-size:14px;line-height:1;padding:0;font-family:inherit">×</button>
       </div>
       <!-- 3D-Vorschau für Haustür (iframe, embed-Modus) -->
-      <div id="haus3d-wrap" style="display:none;position:absolute;inset:0;z-index:10;border-radius:var(--r-md);overflow:hidden;background:#0a1225 url('img/karten/haustuer-anthrazit.webp') no-repeat center/contain">
+      <div id="haus3d-wrap" style="display:none;position:absolute;inset:0;z-index:10;border-radius:var(--r-md);overflow:hidden;background:#0a1225 url('img/karten/haustuer-weiss.webp?v=20260617w') no-repeat center/contain">
         <iframe id="haus3d-frame" src="about:blank" style="width:100%;height:100%;border:none;display:block" allowfullscreen></iframe>
       </div>
       <!-- 3D-Vorschau für Fenster (Drutex Iglo 5) -->
@@ -7570,6 +7570,8 @@ function wizPickFluegel(v){ S.fluegel=v; S.anschlagIdx=null; if(typeof applyFens
 function wizSetOeff1(v){ S.oeff1=v; if(window._touched)window._touched.add('oeff1'); _wizPrev(); wizRenderPanel(); }
 function wizSetHstLauf(v){ S.hstLauf=v; if(window._touched)window._touched.add('hstLauf'); _wizPrev(); wizRenderPanel(); }
 function wizSetTuerOeff(o,r){ S.oeff1=o; S.tuerOeffnung=r; if(window._touched){window._touched.add('oeff1');window._touched.add('tuerOeffnung');} _wizPrev(); wizRenderPanel(); }
+// 2-flügelige Haustür: Gehflügel-Seite (Griff) + Öffnungsrichtung. Beide Flügel sind Dreh.
+function wizSetTuerGeh(geh,r){ S.tuerGehfluegel=geh; S.tuerOeffnung=r; S.oeff1='dreh-l'; S.oeff2='dreh-r'; if(window._touched){window._touched.add('tuerGehfluegel');window._touched.add('tuerOeffnung');window._touched.add('oeff1');} if(typeof mkDone==='function')mkDone(4); _wizPrev(); wizRenderPanel(); }
 function wizRenderAnschlag(){
   if(S.prod==='haustuere'){
     const din=function(oeff1,richtung){
@@ -7585,6 +7587,16 @@ function wizRenderAnschlag(){
       'Sitzen die Bänder (Scharniere) dann auf der <strong>linken</strong> Seite, wählen Sie eine Links-Variante; sitzen sie <strong>rechts</strong>, eine Rechts-Variante. '+
       'Sie sind unsicher? Kein Problem: Notieren Sie es einfach in der Anfrage, wir klären die Richtung gemeinsam mit Ihnen.'+
       '</div>';
+    if(S.fluegel==='2-fluegel'){
+      const din2=function(geh,richtung){
+        const mir=(geh==='links')?' mir':'';   // links → spiegeln, Griff wandert nach links
+        const sel=(S.tuerGehfluegel===geh&&(S.tuerOeffnung||'innen')===richtung)?' sel':'';
+        const lbl=(richtung==='innen'?'Nach innen':'Nach außen')+' · Gehflügel '+geh;
+        return '<div class="wiz-card'+sel+'" onclick="wizSetTuerGeh(\''+geh+'\',\''+richtung+'\')"><div class="hac-vis'+mir+'"><img src="img/karten/haus-fluegel/2-fluegel-gf.webp?v=20260617g" alt="'+lbl+'" loading="lazy"></div><div class="wiz-cn">'+lbl+'</div></div>';
+      };
+      const hilfe2='<div class="wiz-hint" style="max-width:820px;margin:0 auto 22px;text-align:left;line-height:1.6"><strong>Zwei Flügel – welcher ist der Gehflügel?</strong> Der <strong>Gehflügel</strong> ist der täglich genutzte Flügel mit dem Griff; der zweite (Standflügel) wird oben und unten verriegelt und nur bei Bedarf geöffnet. Wählen Sie die Seite des Griffs und die Öffnungsrichtung. Unsicher? Notieren Sie es in der Anfrage – wir klären es gemeinsam.</div>';
+      return hilfe2+'<div class="wiz-cards">'+din2('rechts','innen')+din2('links','innen')+din2('rechts','aussen')+din2('links','aussen')+'</div>';
+    }
     return hilfe+'<div class="wiz-cards">'+din('dreh-l','innen')+din('dreh-r','innen')+din('dreh-l','aussen')+din('dreh-r','aussen')+'</div>';
   }
   if(S.prod==='hst'){
