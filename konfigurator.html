@@ -7519,7 +7519,12 @@ function wizPickProfil(k){ S.profil=k; if(window._touched)window._touched.add('p
   // Iglo HS hat keinen Aufteilungs-Schritt mehr → immer 2-flügelig/2-teilig festlegen, damit 3D + Angebot stimmen.
   if(k==='iglo-hs'){ S.fluegel='2-fluegel'; S.hstTeilung='2-teilig'; if(window._touched){window._touched.add('fluegel');window._touched.add('hstTeilung');} if(typeof previewState!=='undefined')previewState.fluegel=2; }
   const d2=document.getElementById('d2'); if(d2)d2.textContent=profilHeroName(k); if(typeof mkDone==='function')mkDone(2); if(typeof wizRebuildSteps==='function'){wizRebuildSteps(); wizCrumbs();} wizRenderPanel(); }
-const BALKON_FLUEGEL=[['1-fluegel','1 Flügel','1-fluegel.webp'],['2-fluegel','2 Flügel · Pfosten','2-fluegel.webp'],['stulp','2 Flügel · Stulp','stulp.webp']];
+const BALKON_FLUEGEL=[['1-fluegel','1 Flügel','1-fluegel.webp'],['2-fluegel','2 Flügel','stulp.webp']];
+// Balkontür 2-Flügel: Öffnungs-Varianten (Stulp) — DIN-Linien aufs Glas gezeichnet (Pillow), Stulp-Leiste mittig.
+const BALKON_ANSCHLAG_2F=[
+  {img:'dl-stulp-dkr', name:'Dreh links · Stulp · Dreh-Kipp rechts', oeff:['dreh-l','dk-r']},
+  {img:'dkl-stulp-dr', name:'Dreh-Kipp links · Stulp · Dreh rechts', oeff:['dk-l','dreh-r']},
+];
 const HST_FLUEGEL=[['2-teilig','2-teilig · fest + Schiebe','2-teilig.png'],['3-teilig','3-teilig','3-teilig.png']];
 function wizPickHstTeilung(v){ S.hstTeilung=v; S.fluegel=(v==='3-teilig')?'3-fluegel':'2-fluegel'; if(window._touched){window._touched.add('hstTeilung');window._touched.add('fluegel');} if(typeof previewState!=='undefined')previewState.fluegel=(v==='3-teilig')?3:2; _wizPrev(); wizRenderPanel(); }
 const HAUS_FLUEGEL=[['1-fluegel','1-Flügel','1-fluegel'],['2-fluegel','2-Flügel','2-fluegel'],['seitenteil-l','Seitenteil links','seitenteil-links'],['seitenteil-r','Seitenteil rechts','seitenteil-rechts'],['seitenteil-2','Seitenteil beidseitig','seitenteil-beidseitig']];
@@ -7572,6 +7577,12 @@ function wizSetTuerOeff(o,r){ S.oeff1=o; S.tuerOeffnung=r; if(window._touched){w
 // 2-flügelige Haustür: Gehflügel-Seite (Griff) + Öffnungsrichtung. Beide Flügel sind Dreh.
 function wizSetTuerGeh(geh,r){ S.tuerGehfluegel=geh; S.tuerOeffnung=r; S.oeff1='dreh-l'; S.oeff2='dreh-r'; if(window._touched){window._touched.add('tuerGehfluegel');window._touched.add('tuerOeffnung');window._touched.add('oeff1');} if(typeof mkDone==='function')mkDone(4); _wizPrev(); wizRenderPanel(); }
 function wizRenderAnschlag(){
+  if(S.prod==='balkontuer' && (S.fluegel==='2-fluegel'||S.fluegel==='stulp')){
+    return '<div class="wiz-cards">'+BALKON_ANSCHLAG_2F.map(function(o,idx){
+      var sel=(S.oeff1===o.oeff[0]&&(S.oeff2||null)===(o.oeff[1]||null))?' sel':'';
+      return '<div class="wiz-card'+sel+'" onclick="wizPickBalkonAnschlag('+idx+')"><img src="img/karten/balkon-anschlag-2f/'+o.img+'.webp?v=20260617balk" alt="'+o.name+'" loading="lazy" style="width:100%;height:auto;display:block"><div class="wiz-cn">'+o.name+'</div></div>';
+    }).join('')+'</div>';
+  }
   if(S.prod==='haustuere'){
     const din=function(oeff1,richtung){
       const mir=(oeff1==='dreh-r')?' mir':'';
@@ -7631,6 +7642,7 @@ function hsLaufCard(v){
   return '<div class="wiz-card'+sel+'" onclick="wizSetHstLauf(\''+v+'\')"><div style="position:relative;width:100%;line-height:0;border-radius:10px;overflow:hidden"><img src="img/karten/hst-fluegel/2-teilig.webp?v=20260610psk" alt="'+name+'" loading="lazy" style="width:100%;height:auto;aspect-ratio:auto;object-fit:fill;display:block;border-radius:0;padding:0">'+ov+'</div><div class="wiz-cn">'+name+'</div><div class="wiz-csub">'+sub+'</div></div>';
 }
 function wizRenderHsLauf(){ return '<div class="wiz-cards">'+hsLaufCard('links')+hsLaufCard('rechts')+'</div>'; }
+function wizPickBalkonAnschlag(idx){ var o=BALKON_ANSCHLAG_2F[idx]; if(!o)return; S.fluegel='stulp'; S.oeff1=o.oeff[0]; S.oeff2=o.oeff[1]||null; S.oeff3=null; if(typeof _applyDefaultSashStates==='function')_applyDefaultSashStates('stulp'); if(typeof previewState!=='undefined')previewState.fluegel=2; if(window._touched){window._touched.add('oeff1');window._touched.add('fluegel');} if(typeof buildOeffSash==='function')buildOeffSash(); if(typeof mkDone==='function')mkDone(4); wizRenderPanel(); }
 function wizPickAnschlag(idx){ S.anschlagIdx=idx; const o=(ANSCHLAG_SETS[S.fluegel]||[])[idx]; if(o){ S.oeff1=o.oeff[0]||null; S.oeff2=o.oeff[1]||null; S.oeff3=o.oeff[2]||null; S.oberlichtOeff=o.ol||null; S.unterlichtOeff=o.ul||null; } if(window._touched)window._touched.add('oeff1'); if(typeof buildOeffSash==='function')buildOeffSash(); if(typeof mkDone==='function')mkDone(4); wizRenderPanel(); }
 function wizRenderGlas(){
   const hst=(S.prod==='hst');
