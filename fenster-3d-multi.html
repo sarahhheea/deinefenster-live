@@ -115,7 +115,7 @@
   <div id="rollLabel" class="roll-label" style="display:none">Rollladen</div>
 
   <div class="controls">
-    <div class="current-label" id="currentLabel">Anthrazitgrau</div>
+    <div class="current-label" id="currentLabel">Weiß FX</div>
     <div class="section-title">Weißtöne</div>
     <div class="colors" id="whites"></div>
     <div class="section-title">Grautöne &amp; Schwarz</div>
@@ -307,7 +307,7 @@ const glassMat  = new THREE.MeshStandardMaterial({
 // 1 unit = 1 m · 1000 × 1200 × 73 mm
 // ══════════════════════════════════════════════
 let FW     = 1.000;   // Außenbreite — wird je nach Flügelzahl dynamisch gesetzt (sonst gequetscht)
-const FH   = 1.200;   // Außenhöhe
+let FH     = 1.200;   // Außenhöhe — Basis ohne Lichten; wird je nach Ober-/Unterlicht dynamisch erhöht (sonst Hauptflügel gequetscht)
 const FD   = 0.073;   // Rahmentiefe
 
 const FRT  = 0.068;   // Blendrahmen-Profilbreite
@@ -339,7 +339,7 @@ winGroup.add(sashGroup);
 
 let glassObjects   = [];
 let handleObjects  = [];   // Hebel/Rosette/Achse — Click-Targets fürs Öffnen
-let _curColor = 'anthrazitgrau';
+let _curColor = 'weiss-fx';   // Standard = Weiß (neuer weißer Konfigurator, Kundenwunsch 06/2026); Anthrazit bleibt auswählbar
 let _curWood  = null;
 let _curGlass = 'klar';
 let sashOpen  = false;
@@ -510,6 +510,15 @@ function buildWindow(spec) {
   const SASH_CELL_TARGET = 0.60;
   FW = 2 * FRT + cols * SASH_CELL_TARGET + (cols - 1) * MULLION_T;
 
+  // Höhe dynamisch: Ober-/Unterlicht ADDIEREN ihre Höhe (statt sie vom Hauptflügel
+  // wegzunehmen) → die Hauptflügel-Reihe behält ihre Höhe (~1,064 m) und wird nicht
+  // gequetscht. Pro Lichte: LICHTE_H + halber Querpfosten. (Bug "3-Flügel+Oberlicht
+  // zerquetscht", intern 06/2026.)
+  const _lichteExtra = LICHTE_H + MULLION_T / 2;
+  FH = 1.200
+     + (lay.hasOber  ? _lichteExtra : 0)
+     + (lay.hasUnter ? _lichteExtra : 0);
+
   // ── Blendrahmen — 4 Stäbe (bleiben in winGroup, statisch) ──
   winGroup.add(bx(FW/2,          FRT/2,         fzc, FW,           FRT,         FD, frameMat));
   winGroup.add(bx(FW/2,          FH - FRT/2,    fzc, FW,           FRT,         FD, frameMat));
@@ -675,7 +684,8 @@ function buildWindow(spec) {
     // DIN-Konvention (Innenansicht): 'dk-l'/'dreh-l' = Bänder LINKS, Griff rechts;
     // 'dk-r'/'dreh-r' = Bänder RECHTS, Griff links.
     let isLeft = sashState === 'dreh-r' || sashState === 'dk-r';   // = Griff links?
-    if (isKipp) isLeft = false;   // Kipp: Griff seitlich rechts (Spec: NICHT oben)
+    // Kipp: Scharniere unten, GRIFF OBEN MITTE (interne Regel 06/2026) — Griff-Position
+    // wird im Kipp-Zweig unten gesetzt; isLeft ist für Kipp irrelevant.
     // Bänder sitzen GEGENÜBER dem Griff (Anschlagseite). Bei Kipp unten (waagerecht).
     const bandOnLeft = !isLeft;   // Griff links → Bänder rechts und umgekehrt
 
@@ -712,28 +722,38 @@ function buildWindow(spec) {
     if (isStulpStandFluegel) return;
 
     // ── GRIFF (Hoppe-L-Hebel, weiß, zeigt nach unten) ──
+    // Kipp: OBEN Mitte, Rosette waagerecht, Hebel nach unten (Scharniere unten).
+    // Dreh/DK: seitlich gegenüber den Bändern, vertikal, Hebel nach unten.
     const hbz = sfz;
-    const hx = isLeft ? xS + FST * 0.52 : xS + wS - FST * 0.52;
-    const hy = yS + hS / 2;
-
     const rosette = new THREE.Mesh(
       new THREE.CapsuleGeometry(0.020, 0.094, 6, 22),
       handleMat
     );
     rosette.scale.set(1.0, 1.0, 0.47);
-    rosette.position.set(hx, hy, hbz + 0.0035);
     rosette.castShadow = true;
     rosette.userData.isHandle = true;
-    winGroup.add(rosette); handleObjects.push(rosette);
 
     const handleStick = new THREE.Mesh(
       new THREE.CapsuleGeometry(0.016, 0.118, 8, 22),
       handleMat
     );
-    const dir = isLeft ? -1 : 1;
-    handleStick.position.set(hx + dir * 0.005, hy - 0.055, hbz + 0.022);
     handleStick.castShadow = true;
     handleStick.userData.isHandle = true;
+
+    if (isKipp) {
+      const hx = xS + wS / 2;
+      const hyTop = yS + hS - FST * 0.52;
+      rosette.rotation.z = Math.PI / 2;            // Rosette waagerecht
+      rosette.position.set(hx, hyTop, hbz + 0.0035);
+      handleStick.position.set(hx, hyTop - 0.060, hbz + 0.022);   // Hebel zeigt nach unten
+    } else {
+      const hx = isLeft ? xS + FST * 0.52 : xS + wS - FST * 0.52;
+      const hy = yS + hS / 2;
+      const dir = isLeft ? -1 : 1;
+      rosette.position.set(hx, hy, hbz + 0.0035);
+      handleStick.position.set(hx + dir * 0.005, hy - 0.055, hbz + 0.022);
+    }
+    winGroup.add(rosette); handleObjects.push(rosette);
     winGroup.add(handleStick); handleObjects.push(handleStick);
   }
 
@@ -1202,8 +1222,8 @@ function buildSwatches(id, list, onSelect, defaultKey) {
   });
 }
 
-buildSwatches('whites',     FARBEN.whites,  c => setColor(c.key));
-buildSwatches('grays',      FARBEN.grays,   c => setColor(c.key), 'anthrazitgrau');
+buildSwatches('whites',     FARBEN.whites,  c => setColor(c.key), 'weiss-fx');
+buildSwatches('grays',      FARBEN.grays,   c => setColor(c.key));
 buildSwatches('colorGroup', FARBEN.colors,  c => setColor(c.key));
 buildSwatches('woods',      FARBEN.woods,   c => setWood(c.key));
 
@@ -1223,7 +1243,7 @@ buildSwatches('woods',      FARBEN.woods,   c => setWood(c.key));
 // Startzustand aus URL-Params
 const _urlColor = new URLSearchParams(location.search).get('color');
 if (_urlColor) setColor(_urlColor);
-else           setColor('anthrazitgrau');
+else           setColor('weiss-fx');
 
 const _urlGlass = new URLSearchParams(location.search).get('glass');
 if (_urlGlass) setGlass(_urlGlass);
@@ -1284,7 +1304,7 @@ window.addEventListener('message', (e) => {
       buildWindow(newSpec);
     }
     if (d.wood)  setWood(d.wood);
-    else         setColor(d.color || 'anthrazitgrau');
+    else         setColor(d.color || 'weiss-fx');
     setGlass(d.glass || 'klar');
     if (d.side) setSide(d.side);
   }
