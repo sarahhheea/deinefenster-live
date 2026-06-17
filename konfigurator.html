@@ -7522,7 +7522,7 @@ function wizPickProfil(k){ S.profil=k; if(window._touched)window._touched.add('p
 const BALKON_FLUEGEL=[['1-fluegel','1 Flügel','1-fluegel.webp'],['2-fluegel','2 Flügel · Pfosten','2-fluegel.webp'],['stulp','2 Flügel · Stulp','stulp.webp']];
 const HST_FLUEGEL=[['2-teilig','2-teilig · fest + Schiebe','2-teilig.png'],['3-teilig','3-teilig','3-teilig.png']];
 function wizPickHstTeilung(v){ S.hstTeilung=v; S.fluegel=(v==='3-teilig')?'3-fluegel':'2-fluegel'; if(window._touched){window._touched.add('hstTeilung');window._touched.add('fluegel');} if(typeof previewState!=='undefined')previewState.fluegel=(v==='3-teilig')?3:2; _wizPrev(); wizRenderPanel(); }
-const HAUS_FLUEGEL=[['1-fluegel','1-Flügel','1-fluegel'],['seitenteil-l','Seitenteil links','seitenteil-links'],['seitenteil-r','Seitenteil rechts','seitenteil-rechts'],['seitenteil-2','Seitenteil beidseitig','seitenteil-beidseitig'],['2-fluegel','2-Flügel','2-fluegel']];
+const HAUS_FLUEGEL=[['1-fluegel','1-Flügel','1-fluegel'],['2-fluegel','2-Flügel','2-fluegel'],['seitenteil-l','Seitenteil links','seitenteil-links'],['seitenteil-r','Seitenteil rechts','seitenteil-rechts'],['seitenteil-2','Seitenteil beidseitig','seitenteil-beidseitig']];
 function wizRenderFluegel(){
   if(S.prod==='haustuere'){
     return '<div class="wiz-cards">'+HAUS_FLUEGEL.map(function(o){
@@ -9208,12 +9208,12 @@ function buildFluegel() {
     // Haustür-Karten: `.fk`-Stil (gleicher Hover/Sel wie Fenster-Flügelaufteilung).
     // Bilder sind auf EINHEITLICHE Höhe normalisiert; Spaltenbreiten proportional zur
     // Produktbreite (1 : 1.69 : 1.69 : 1.83) → alle Türen rendern exakt gleich groß.
-    grid.style.gridTemplateColumns = '1fr 1.69fr 1.69fr 1.83fr';
+    grid.style.gridTemplateColumns = '1fr 1.83fr 1.69fr 1.69fr';
     opts = [
       {v:'1-fluegel',    add:0  },
+      {v:'2-fluegel',    add:0 },
       {v:'seitenteil-l', add:0},
       {v:'seitenteil-r', add:0},
-      {v:'2-fluegel',    add:0 },
     ];
     grid.innerHTML = opts.map(o=>`
       <div class="fk${S.fluegel===o.v?' sel':''}" data-v="${o.v}" onclick="pickFluegel(this)" style="padding:8px 6px 10px">
