@@ -4363,6 +4363,14 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   /* HST-Griffkarten: weißes Bildfeld (kein grauer Rand-Kasten), Bild randlos */
   #cfg-wizard .wiz-hstgr .wiz-sym{background:#fff}
   #cfg-wizard .wiz-hstgr .wiz-sym img{padding:0}
+  /* HST-Griffschritt kompakt: alle 3 Gruppen (inkl. Abschließbar) ohne Scrollen sichtbar */
+  #cfg-wizard .wiz-hstgrwrap .wiz-group{margin-bottom:8px}
+  #cfg-wizard .wiz-hstgrwrap .wiz-gt{margin-bottom:4px;font-size:12.5px}
+  #cfg-wizard .wiz-hstgrwrap .wiz-card-opt{padding:8px}
+  #cfg-wizard .wiz-hstgrwrap .wiz-card-opt .wiz-sym{height:58px}
+  #cfg-wizard .wiz-hstgrwrap .wiz-cards{gap:8px}
+  #cfg-wizard .wiz-hstgrwrap .wiz-cn{margin-top:3px;font-size:12px}
+  #cfg-wizard .wiz-hstgrwrap .wiz-csub{margin-top:1px}
   /* zwei Spalten nebeneinander (Schall | Sicherheit) mit kompakten Zeilen */
   #cfg-wizard .wiz-twocol{display:flex;gap:28px;align-items:flex-start;justify-content:center;width:100%}
   #cfg-wizard .wiz-twocol .wiz-group{flex:1;min-width:0;max-width:380px;margin:0}
@@ -7359,10 +7367,11 @@ function wizRenderSchiebegriff(){
     var imgFor=function(k){return 'img/drutex-griffe/hst-hebel'+(k==='ohne'?'':'-schloss')+'-'+col+'.webp';};
     return Object.keys(P.hstSchloss).map(function(k){const o=P.hstSchloss[k];return '<div class="wiz-card wiz-card-opt wiz-hstgr'+(k===S.hstSchloss?' sel':'')+'" onclick="wizSet(\'hstSchloss\',\''+k+'\')"><div class="wiz-sym"><img src="'+imgFor(k)+'" alt="'+o.name+'" loading="lazy"></div><div class="wiz-cn">'+o.name+'</div><div class="wiz-csub">'+(o.sub||'')+'</div></div>';}).join('');
   }
-  return ''+
+  return '<div class="wiz-hstgrwrap">'+
     '<div class="wiz-group"><div class="wiz-gt">Innengriff '+hint+'— Muschelgriff (im Raum)</small></div><div class="wiz-cards">'+colorCards(P.hstGriff,S.hstGriff,'hstGriff')+'</div></div>'+
     '<div class="wiz-group"><div class="wiz-gt">Außengriff '+hint+'— Schiebegriff (von der Straße)</small></div><div class="wiz-cards">'+colorCards(P.hstGriffAussen,S.hstGriffAussen,'hstGriffAussen')+'</div></div>'+
-    '<div class="wiz-group"><div class="wiz-gt">Abschließbar?</div><div class="wiz-cards">'+schlossCards()+'</div></div>';
+    '<div class="wiz-group"><div class="wiz-gt">Abschließbar?</div><div class="wiz-cards">'+schlossCards()+'</div></div>'+
+    '</div>';
 }
 function wizRenderBalkSchwelle(){ return _wizPills(Object.keys(P.balkonSchwelle).map(function(k){return [k,P.balkonSchwelle[k].name];}),S.balkonSchwelle,'wizSetBalkSchwelle')+'<div class="wiz-hint">'+((P.balkonSchwelle[S.balkonSchwelle]||{}).sub||'')+'</div>'; }
 function wizSetBalkSchwelle(v){ wizSet('balkonSchwelle',v); }
@@ -15028,6 +15037,13 @@ body.d2-active #detail2{display:flex !important}
 #detail2 .d2tile.sel{border-color:var(--d2accT); box-shadow:0 0 0 2px var(--d2accT)}
 #detail2 .d2tile img{width:100%; height:96px; object-fit:contain; display:block; margin-bottom:7px; background:#f6f8fc; border-radius:8px}
 #detail2 .d2-hstgr .d2tile img{background:#fff} /* HST-Griff: weißes Bildfeld, kein grauer Kasten */
+/* HST-Griffschritt kompakt: alle 3 Gruppen (inkl. Abschließbar) ohne Scrollen sichtbar */
+#detail2 .d2-hstgr .d2sub{margin:9px 0 5px}
+#detail2 .d2-hstgr .d2sub:first-child{margin-top:0}
+#detail2 .d2-hstgr .d2tile img{height:60px; margin-bottom:5px}
+#detail2 .d2-hstgr .d2tile{padding:7px}
+#detail2 .d2-hstgr .d2tg3{gap:8px}
+#detail2 .d2-hstgr .d2tile .cap{font-size:12px}
 #detail2 .d2tile .cap{font-size:13px; font-weight:600; color:var(--d2text); line-height:1.25}
 #detail2 .d2tg3{display:grid; grid-template-columns:repeat(3,1fr); gap:12px}
 /* Große Farb-Bildkacheln */
