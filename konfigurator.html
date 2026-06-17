@@ -5191,27 +5191,20 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
         <div class="ora"></div>
         <div>
           <div class="olabel">WK1 — Standard</div>
-          <div class="osub">Umlaufende Verriegelung · für alle Wohnbereiche</div>
+          <div class="osub">2 Pilzkopfverriegelungen</div>
         </div>
       </div>
       <div class="oc" data-v="rc2" onclick="pick(this,'sicher')">
         <div class="ora"></div>
         <div>
-          <div class="olabel">RC2 (WK2) — Einbruchschutz</div>
-          <div class="osub">Geprüft nach EN 1627 · Pilzkopfzapfen · Erdgeschoss</div>
-        </div>
-      </div>
-      <div class="oc" data-v="rc3" onclick="pick(this,'sicher')">
-        <div class="ora"></div>
-        <div>
-          <div class="olabel">RC3 (WK3) — Hochsicherheit</div>
-          <div class="osub">Höchste Schutzklasse für PVC · erhöhte Anforderungen</div>
+          <div class="olabel">WK2</div>
+          <div class="osub">4 Pilzkopfverriegelungen · abschließbarer Fenstergriff · Sicherheitsverglasung</div>
         </div>
       </div>
     </div>
     <div class="info mt-3">
       <i class="ms f" style="color:var(--c-primary);font-size:20px;flex-shrink:0">verified_user</i>
-      <div>RC2 wird von den meisten Versicherungen für Erdgeschoss-Fenster empfohlen und ist von vielen Versicherern anerkannt.</div>
+      <div>WK2 wird von den meisten Versicherungen für Erdgeschoss-Fenster empfohlen und ist von vielen Versicherern anerkannt.</div>
     </div>
     <button type="button" onclick="_nextAfterRC()" class="w-full mt-4 flex items-center justify-center gap-2 font-bold py-3 rounded-full text-white text-sm" style="background:var(--c-primary);font-family:'Plus Jakarta Sans',sans-serif">
       <i class="ms">arrow_forward</i> <span id="next-after-rc-text">Weiter zum Rolladen</span>
@@ -6093,9 +6086,8 @@ const P = {
     'motor':  { name:'Motorrolladen',           add:0 },
   },
   sicher: {
-    'wk1': { name:'WK1 Standard',           add:0   },
-    'rc2': { name:'RC2 Einbruchschutz WK2', add:0 },
-    'rc3': { name:'RC3 Einbruchschutz WK3', add:0 },
+    'wk1': { name:'WK1 Standard', add:0 },
+    'rc2': { name:'WK2', add:0 },
   },
   // Fix W9 (21.04.2026): HST-Spezifika (Hebe-Schiebe-Tür)
   hstSchwelle: {
@@ -7918,19 +7910,19 @@ function _sicherSym(n){
     '<path d="M65 12 L95 23 V46 C95 64 81 73 65 79 C49 73 35 64 35 46 V23 Z" fill="#ffffff" stroke="#225eaa" stroke-width="3.2" stroke-linejoin="round"/>'+bars+'</svg>';
 }
 var SICHER_META2={
-  'wk1':{name:'WK1 Standard',sub:'Grundschutz für die meisten Wohnlagen',n:1,std:true},
-  'rc2':{name:'RC2 · Einbruchschutz WK2',sub:'Geprüft gegen Aufhebeln · inkl. VSG-Glas',n:2},
-  'rc3':{name:'RC3 · Einbruchschutz WK3',sub:'Hochsicherheit · widersteht schwerem Werkzeug',n:3}
+  'wk1':{name:'WK1 Standard',sub:'2 Pilzkopfverriegelungen',n:1,std:true},
+  'rc2':{name:'WK2',sub:'4 Pilzkopfverriegelungen · abschließbarer Fenstergriff · Sicherheitsverglasung',n:2}
 };
 function wizRenderSicher(){
+  if(S.sicher==='rc3')S.sicher='rc2';
   let h='<div class="wiz-cards">'+Object.keys(P.sicher).map(function(k){
     const m=SICHER_META2[k]||{name:P.sicher[k].name,sub:'',n:1};
     return '<div class="wiz-card'+(k===S.sicher?' sel':'')+'" onclick="wizSetSicher(\''+k+'\')"><div class="wiz-vis">'+_sicherSym(m.n)+'</div><div class="wiz-cn">'+m.name+'</div><div class="wiz-csub">'+m.sub+'</div>'+(m.std?'<div class="wiz-badge">STANDARD</div>':'')+'</div>';
   }).join('')+'</div>';
-  if(S.sicher==='rc2'||S.sicher==='rc3'){ h+='<div class="wiz-hint">RC2/RC3 enthält automatisch Verbundsicherheitsglas (VSG) zum Schutz vor Glasbruch.</div>'; }
+  if(S.sicher==='rc2'){ h+='<div class="wiz-hint">WK2 enthält automatisch eine Sicherheitsverglasung (VSG) zum Schutz vor Glasbruch.</div>'; }
   return h;
 }
-function wizSetSicher(v){ S.sicher=v; if(window._touched)window._touched.add('sicher'); if(v==='rc2'||v==='rc3'){ S.sicherGlas='vsg'; } _wizPrev(); wizRenderPanel(); }
+function wizSetSicher(v){ S.sicher=v; if(window._touched)window._touched.add('sicher'); if(v==='rc2'){ S.sicherGlas='vsg'; } _wizPrev(); wizRenderPanel(); }
 // ANZAHL
 function wizRenderAnzahl(){
   return '<div class="wiz-step"><div class="wiz-step-row"><button type="button" onclick="wizQty(-1)">−</button><div class="wiz-qv" id="wiz-qv">'+(S.qty||1)+'</div><button type="button" onclick="wizQty(1)">+</button></div><div class="wiz-step-unit">Stück</div></div><div class="wiz-hint">Alle Fenster dieser Bestellung werden mit der identischen Konfiguration gefertigt.</div>';
@@ -11335,7 +11327,7 @@ function updateHero() {
   const uwMap = { 'iglo5':'Uw 0,83', 'iglo-energy':'Uw 0,71', 'iglo5-tuer':'Ud 1,0', 'iglo-e-tuer':'Ud 0,8', 'iglo-hs':'Uw 0,71', 'iglo-psk':'Uw 0,85', 'iglo-slide':'Uw 0,78' };
   if (S.profil && uwMap[S.profil]) badgeList.push(uwMap[S.profil]);
   if (S.glas === '3fach') badgeList.push('3-fach Verglasung');
-  if (S.sicher === 'rc2' || S.sicher === 'rc3') badgeList.push('Einbruchschutz ' + S.sicher.toUpperCase());
+  if (S.sicher === 'rc2') badgeList.push('Einbruchschutz ' + ((P.sicher[S.sicher] && P.sicher[S.sicher].name) || 'WK2'));
   badgeList.push('⚡ Lieferung 14 Tage');
   badgeList.push('Drutex-Qualität');
   badges.innerHTML = badgeList.map(b =>
