@@ -7327,7 +7327,6 @@ const WIZ_ALL=[
   {key:'griffhaus', gilt:['haustuere'], title:'Welcher <span>Türgriff</span>?', sub:'Innen-Klinke und Außengriff Ihrer Haustür.', render:wizRenderTuergriff},
   {key:'griffhst', gilt:['hst'], title:'Welcher <span>Schiebegriff</span>?', sub:'Innengriff, Außengriff und abschließbar wählen.', render:wizRenderSchiebegriff},
   {key:'balk', gilt:['balkontuer'], title:'Wählen Sie die <span>Schwelle</span>', sub:'Boden-Schwelle Ihrer Balkontür.', render:wizRenderBalkSchwelle, layout:'cards'},
-  {key:'hstschwelle', gilt:['hst'], title:'Wählen Sie die <span>Schwelle</span>', sub:'Standard oder barrierefreie Null-Schwelle.', render:wizRenderHstSchwelle, layout:'cards'},
   {key:'rolladen', gilt:['kunststoff','balkontuer','hst'], title:'Wählen Sie den <span>Rolladen</span>', sub:'Sonnen- und Sichtschutz — optional.', render:wizRenderRoll},
   {key:'sprossen', gilt:['kunststoff','balkontuer'], title:'Wählen Sie die <span>Sprossen</span>', sub:'Klassische Optik — aufgesetzt oder im Scheibenzwischenraum.', render:wizRenderSpro},
   {key:'sicherheit', gilt:ALL, title:'Wählen Sie den <span>Einbruchschutz</span>', sub:'Wie sicher soll es sein?', render:wizRenderSicher},
@@ -7707,7 +7706,7 @@ function wizNext(){ if(WIZ_STEPS[wizIdx].key==='kontakt'){ if(typeof d2submit===
 function wizBack(){ if(wizIdx<=0){ wizExitToProd(); return; } wizGo(wizIdx-1); window.scrollTo({top:0,behavior:'auto'}); }
 // Auto-Advance: nach Auswahl einer Karte direkt zum nächsten Schritt — nur bei eindeutigen Einfach-Auswahl-Schritten.
 // Nicht bei: Farbe (Kundenwunsch), Maße/Anzahl (Eingabe), Schall/Griff/Rolladen/Sprossen (Mehrfach-/Detailauswahl).
-const WIZ_AUTONEXT = new Set(['profil','psk','hslauf','fluegel','anschlag','glas','tuer','balk','hstschwelle','glasdekor','sicherheit']);
+const WIZ_AUTONEXT = new Set(['profil','psk','hslauf','fluegel','anschlag','glas','tuer','balk','glasdekor','sicherheit']);
 document.addEventListener('click', function(e){
   const panel = document.getElementById('wiz-panel');
   if(!panel || !panel.contains(e.target)) return;
@@ -15235,7 +15234,6 @@ const SECTIONS=[
  {id:'griffhaus',t:'Türgriff',gilt:['haustuere'],sum:()=>`${curName(P.tuerGriffInnen,S.tuerGriffInnen)} / ${curName(P.tuerGriffAussen,S.tuerGriffAussen)}`,body:()=>`<div class="d2sub">Innen (Klinke)</div>`+tiles('tuerGriffInnen',Object.keys(P.tuerGriffInnen).map(k=>({key:k,name:P.tuerGriffInnen[k].name,img:P.tuerGriffInnen[k].img})))+`<div class="d2sub">Außen (Griff)</div>`+tiles('tuerGriffAussen',Object.keys(P.tuerGriffAussen).map(k=>({key:k,name:P.tuerGriffAussen[k].name,img:P.tuerGriffAussen[k].img})))},
  {id:'griffhst',t:'Schiebegriff',gilt:['hst'],sum:()=>`${curName(P.hstGriff,S.hstGriff)} · ${curName(P.hstGriffAussen,S.hstGriffAussen)}`,body:()=>{const col=(P.hstGriffAussen[S.hstGriffAussen])?S.hstGriffAussen:'silber';return `<div class="d2-hstgr"><div class="d2sub">Innengriff (Muschelgriff)</div>`+tiles('hstGriff',Object.keys(P.hstGriff).map(k=>({key:k,name:P.hstGriff[k].name,img:P.hstGriff[k].img})))+`<div class="d2sub">Außengriff (Schiebegriff)</div>`+tiles('hstGriffAussen',Object.keys(P.hstGriffAussen).map(k=>({key:k,name:P.hstGriffAussen[k].name,img:P.hstGriffAussen[k].img})))+`<div class="d2sub">Abschließbar?</div>`+tiles('hstSchloss',Object.keys(P.hstSchloss).map(k=>({key:k,name:P.hstSchloss[k].name,img:'img/drutex-griffe/hst-hebel'+(k==='ohne'?'':'-schloss')+'-'+col+'.webp'})))+`</div>`;}},
  {id:'balk',t:'Schwelle',gilt:['balkontuer'],sum:()=>curName(P.balkonSchwelle,S.balkonSchwelle),body:()=>pills('balkonSchwelle',Object.keys(P.balkonSchwelle).map(k=>[k,P.balkonSchwelle[k].name,P.balkonSchwelle[k].sub]))},
- {id:'hstschwelle',t:'Schwelle',gilt:['hst'],sum:()=>curName(P.hstSchwelle,S.hstSchwelle),body:()=>pills('hstSchwelle',Object.keys(P.hstSchwelle).map(k=>[k,P.hstSchwelle[k].name]))},
  {id:'farbe',t:'Farbe & Oberfläche',gilt:['kunststoff','balkontuer','haustuere','hst'],sum:()=>`${P.fa[S.fa]?.name||'–'} außen · ${P.fi[S.fi]?.name||'–'} innen`,body:()=>hint('Außen sieht man von der Straße, innen vom Raum. Über 40 Farben & Holzdekore.')+`<div class="d2sub">Außenfarbe</div>`+colorTiles('fa')+`<div class="d2sub">Innenfarbe</div>`+colorTiles('fi')+`<div class="d2sub">Dichtung</div>`+pills('fd',Object.keys(P.fd).map(k=>[k,P.fd[k].name.replace('Dichtung ','')]))},
  {id:'roll',t:'Rolladen',gilt:['kunststoff','balkontuer','hst'],sum:()=>S.roll==='ohne'?'Ohne':`${P.roll[S.roll].name} · Kasten ${S.rollKasten} mm`,body:()=>{let h=pills('roll',Object.keys(P.roll).map(k=>[k,P.roll[k].name]));if(S.roll!=='ohne'){const ks=Object.keys(P.rollKasten).filter(k=>P.rollKasten[k].prods.includes(S.prod));h+=`<div class="d2sub">Kastenhöhe</div>`+pills('rollKasten',ks.map(k=>[k,P.rollKasten[k].name]))+`<div class="d2sub">Gurt-/Motorseite</div>`+pills('rollSeite',[['rechts','Rechts'],['links','Links']]);}return h;}},
  {id:'sprossen',t:'Sprossen',gilt:['kunststoff','balkontuer'],sum:()=>S.sproTyp==='keine'?'Ohne':`${S.sproTyp==='aufgesetzt'?'Aufgesetzt':'SZR'} ${S.sproDicke} mm`,body:()=>{let h=pills('sproTyp',[['keine','Ohne'],['aufgesetzt','Aufgesetzt'],['szr','Im Glas (SZR)']]);if(S.sproTyp!=='keine'){const ds=P.sproDickenPerTyp[S.sproTyp]||[];h+=`<div class="d2sub">Breite</div>`+pills('sproDicke',ds.map(d=>[d,d+' mm']));}return h;}},
@@ -15265,7 +15263,7 @@ const SECTIONS=[
 function applies(s){ if(!S.prod)return false; if(S.prod==='kunststoff'&&HERO_DONE.indexOf(s.id)>=0)return false; if(s.gilt.indexOf(S.prod)<0)return false; if(s.cond&&!s.cond())return false; return true; }
 
 /* ---- Alle Einzel-Schritte als Reiter; ein Schritt groß mit Bildern ---- */
-const STEP_ORDER=['profil','psk','tuer','fluegel','oeff','glas','farbe','glasdekor','schall','griff','griffhaus','griffhst','roll','sprossen','balk','hstschwelle','sicher','masse','anzahl','anfrage'];
+const STEP_ORDER=['profil','psk','tuer','fluegel','oeff','glas','farbe','glasdekor','schall','griff','griffhaus','griffhst','roll','sprossen','balk','sicher','masse','anzahl','anfrage'];
 const STEP_META={
   profil:{st:'Profil',q:'Welches Profil-System?'}, psk:{st:'PSK-System',q:'Welches PSK-System?'},
   tuer:{st:'Türmodell',q:'Welches Türmodell?'}, fluegel:{st:'Aufteilung',q:'Welche Aufteilung?'},
