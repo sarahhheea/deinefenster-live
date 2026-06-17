@@ -879,7 +879,7 @@ function karteHtml(p) {
             Anfragen
           </a>
         </div>
-        <div class="shop-card-cta-row" style="margin-top:6px">
+        <div class="shop-card-cta-row shop-card-cta-secondary" style="margin-top:6px">
           <button type="button" class="shop-card-cta-details" style="flex:1" aria-label="Details ansehen">
             <span class="material-symbols-outlined">open_in_new</span>
             <span>Details</span>
