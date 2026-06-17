@@ -4360,6 +4360,9 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   #cfg-wizard .wiz-card-opt .wiz-sym{width:100%;height:108px;border-radius:10px;background:#eef2f8;display:flex;align-items:center;justify-content:center;overflow:hidden}
   #cfg-wizard .wiz-card-opt .wiz-sym svg{width:78%;height:78%;display:block}
   #cfg-wizard .wiz-card-opt .wiz-sym img{width:100%;height:100%;object-fit:contain;background:transparent;border-radius:0;aspect-ratio:auto;padding:6px}
+  /* HST-Griffkarten: weißes Bildfeld (kein grauer Rand-Kasten), Bild randlos */
+  #cfg-wizard .wiz-hstgr .wiz-sym{background:#fff}
+  #cfg-wizard .wiz-hstgr .wiz-sym img{padding:0}
   /* zwei Spalten nebeneinander (Schall | Sicherheit) mit kompakten Zeilen */
   #cfg-wizard .wiz-twocol{display:flex;gap:28px;align-items:flex-start;justify-content:center;width:100%}
   #cfg-wizard .wiz-twocol .wiz-group{flex:1;min-width:0;max-width:380px;margin:0}
@@ -6153,17 +6156,17 @@ const P = {
     'stoss-p45':     { name:'Stoßgriff P45 (Edelstahl)', add:0, group:'Stoßgriff Edelstahl', img:'img/drutex-griffe/stoss-p45.webp' },
     'stoss-q10':     { name:'Stoßgriff Q10 (Edelstahl)', add:0, group:'Stoßgriff Edelstahl', img:'img/drutex-griffe/stoss-q10.webp' },
   },
-  // IGLO-HS INNEN-Griff = Drutex Smart Slide (versenkter Flachgriff, 3 Farben).
+  // IGLO-HS INNEN-Griff = Muschelgriff (versenkter Flachgriff, 3 Farben: weiß/braun/silber).
   hstGriff: {
-    'silber':  { name:'Smart Slide · Silber',  fullName:'Smart Slide (Silber)',         add:0, img:'img/drutex-griffe/smart-slide-silber.webp' },
-    'ral9016': { name:'Smart Slide · Weiß',    fullName:'Smart Slide (RAL 9016 Weiß)',  add:0, img:'img/drutex-griffe/smart-slide-9016.webp' },
-    'ral9005': { name:'Smart Slide · Schwarz', fullName:'Smart Slide (RAL 9005 Schwarz)', add:0, img:'img/drutex-griffe/smart-slide-9005.webp' },
+    'weiss':  { name:'Muschelgriff · Weiß',   fullName:'Muschelgriff (Weiß)',   add:0, img:'img/drutex-griffe/hst-muschel-weiss.webp' },
+    'braun':  { name:'Muschelgriff · Braun',  fullName:'Muschelgriff (Braun)',  add:0, img:'img/drutex-griffe/hst-muschel-braun.webp' },
+    'silber': { name:'Muschelgriff · Silber', fullName:'Muschelgriff (Silber)', add:0, img:'img/drutex-griffe/hst-muschel-silber.webp' },
   },
-  // IGLO-HS AUSSEN-Griff = Drutex Stoßgriff M2 (vorstehender U-Bügelgriff, 3 Farben).
+  // IGLO-HS AUSSEN-Griff = Schiebegriff (Hebel mit Zugstange, 3 Farben: weiß/braun/silber).
   hstGriffAussen: {
-    'weiss':     { name:'Stoßgriff M2 (weiß)', add:0, img:'img/drutex-griffe/stoss-m2-weiss.webp' },
-    'braun':     { name:'Stoßgriff M2 (braun)', add:0, img:'img/drutex-griffe/stoss-m2-braun.webp' },
-    'anthrazit': { name:'Stoßgriff M2 (anthrazit)', add:0, img:'img/drutex-griffe/stoss-m2-9006.webp' },
+    'weiss':  { name:'Schiebegriff · Weiß',   add:0, img:'img/drutex-griffe/hst-hebel-weiss.webp' },
+    'braun':  { name:'Schiebegriff · Braun',  add:0, img:'img/drutex-griffe/hst-hebel-braun.webp' },
+    'silber': { name:'Schiebegriff · Silber', add:0, img:'img/drutex-griffe/hst-hebel-silber.webp' },
   },
   // IGLO-HS Schloss-Option (abschließbarer Griff) — Funktions-Wahl, kein eigenes Produktfoto.
   hstSchloss: {
@@ -6195,8 +6198,8 @@ const S = {
   roll:'ohne', rollSeite:'rechts', rollKasten:'175', panzerFarbe:'weiss',  // W8 Fix (Insekt entfernt)
   tuerGriffInnen:'drueck-weiss', tuerGriffAussen:'htg-30a',  // Kunde 21.04.2026: 4×14
   pskKammer:'iglo5',  // Kunde 21.04.2026: Kammer-System nur für PSK relevant
-  hstGriff:'silber',          // Innen = Smart Slide IGLO-HS
-  hstGriffAussen:'weiss',     // Außen = Stoßgriff M2 IGLO-HS
+  hstGriff:'silber',          // Innen = Muschelgriff IGLO-HS
+  hstGriffAussen:'weiss',     // Außen = Schiebegriff IGLO-HS
   hstSchloss:'ohne',          // IGLO-HS Schloss-Option
   sicher:'wk1',
   tuerModell: null,
@@ -7323,7 +7326,7 @@ const WIZ_ALL=[
   {key:'schall', gilt:['kunststoff','balkontuer','hst'], title:'Schall- &amp; <span>Sicherheitsglas</span>', sub:'Optional: zusätzlicher Schallschutz und Sicherheitsglas.', render:wizRenderSchall},
   {key:'griff', gilt:['kunststoff','balkontuer'], title:'Welcher <span>Griff</span>?', sub:'Modell, Farbe und Ausführung Ihres Fenstergriffs.', render:wizRenderGriff},
   {key:'griffhaus', gilt:['haustuere'], title:'Welcher <span>Türgriff</span>?', sub:'Innen-Klinke und Außengriff Ihrer Haustür.', render:wizRenderTuergriff},
-  {key:'griffhst', gilt:['hst'], title:'Welcher <span>Schiebegriff</span>?', sub:'Smart-Slide-Flachgriff — Farbe wählen.', render:wizRenderSchiebegriff},
+  {key:'griffhst', gilt:['hst'], title:'Welcher <span>Schiebegriff</span>?', sub:'Innengriff, Außengriff und abschließbar wählen.', render:wizRenderSchiebegriff},
   {key:'balk', gilt:['balkontuer'], title:'Wählen Sie die <span>Schwelle</span>', sub:'Boden-Schwelle Ihrer Balkontür.', render:wizRenderBalkSchwelle, layout:'cards'},
   {key:'hstschwelle', gilt:['hst'], title:'Wählen Sie die <span>Schwelle</span>', sub:'Standard oder barrierefreie Null-Schwelle.', render:wizRenderHstSchwelle, layout:'cards'},
   {key:'rolladen', gilt:['kunststoff','balkontuer','hst'], title:'Wählen Sie den <span>Rolladen</span>', sub:'Sonnen- und Sichtschutz — optional.', render:wizRenderRoll},
@@ -7354,18 +7357,20 @@ function wizRenderTuergriff(){
   '</div>';
 }
 function wizRenderSchiebegriff(){
-  // IGLO-HS Griff-Auswahl: Innengriff-Farbe (Smart Slide) + Außengriff-Farbe (Stoßgriff M2) + Schloss-Option.
+  // IGLO-HS Griff-Auswahl: Innengriff-Farbe (Muschelgriff) + Außengriff-Farbe (Schiebegriff) + Schloss-Option.
   var hint='<small style="font-weight:600;color:#5a6a85;font-size:12px">';
   function colorCards(obj, sel, key){
-    return Object.keys(obj).map(function(k){const o=obj[k];return '<div class="wiz-card wiz-card-opt'+(k===sel?' sel':'')+'" onclick="wizSet(\''+key+'\',\''+k+'\')"><div class="wiz-sym"><img src="'+o.img+'" alt="'+o.name+'" loading="lazy"></div><div class="wiz-cn">'+o.name+'</div></div>';}).join('');
+    return Object.keys(obj).map(function(k){const o=obj[k];return '<div class="wiz-card wiz-card-opt wiz-hstgr'+(k===sel?' sel':'')+'" onclick="wizSet(\''+key+'\',\''+k+'\')"><div class="wiz-sym"><img src="'+o.img+'" alt="'+o.name+'" loading="lazy"></div><div class="wiz-cn">'+o.name+'</div></div>';}).join('');
   }
-  var SCHLOSS_IC={'ohne':'lock_open','innen':'lock','innen-aussen':'vpn_key'};
   function schlossCards(){
-    return Object.keys(P.hstSchloss).map(function(k){const o=P.hstSchloss[k];return '<div class="wiz-card wiz-card-opt'+(k===S.hstSchloss?' sel':'')+'" onclick="wizSet(\'hstSchloss\',\''+k+'\')"><div class="wiz-sym" style="background:#eef2f8;display:flex;align-items:center;justify-content:center"><i class="ms" style="font-size:46px;color:var(--c-primary)">'+(SCHLOSS_IC[k]||'lock')+'</i></div><div class="wiz-cn">'+o.name+'</div><div class="wiz-csub">'+(o.sub||'')+'</div></div>';}).join('');
+    // Schloss-Karten zeigen den abschließbaren Schiebegriff (Hebel mit Zylinder) in der gewählten Außen-Farbe.
+    var col=(P.hstGriffAussen[S.hstGriffAussen])?S.hstGriffAussen:'silber';
+    var imgFor=function(k){return 'img/drutex-griffe/hst-hebel'+(k==='ohne'?'':'-schloss')+'-'+col+'.webp';};
+    return Object.keys(P.hstSchloss).map(function(k){const o=P.hstSchloss[k];return '<div class="wiz-card wiz-card-opt wiz-hstgr'+(k===S.hstSchloss?' sel':'')+'" onclick="wizSet(\'hstSchloss\',\''+k+'\')"><div class="wiz-sym"><img src="'+imgFor(k)+'" alt="'+o.name+'" loading="lazy"></div><div class="wiz-cn">'+o.name+'</div><div class="wiz-csub">'+(o.sub||'')+'</div></div>';}).join('');
   }
   return ''+
-    '<div class="wiz-group"><div class="wiz-gt">Innengriff '+hint+'— Smart Slide (im Raum)</small></div><div class="wiz-cards">'+colorCards(P.hstGriff,S.hstGriff,'hstGriff')+'</div></div>'+
-    '<div class="wiz-group"><div class="wiz-gt">Außengriff '+hint+'— Stoßgriff M2 (von der Straße)</small></div><div class="wiz-cards">'+colorCards(P.hstGriffAussen,S.hstGriffAussen,'hstGriffAussen')+'</div></div>'+
+    '<div class="wiz-group"><div class="wiz-gt">Innengriff '+hint+'— Muschelgriff (im Raum)</small></div><div class="wiz-cards">'+colorCards(P.hstGriff,S.hstGriff,'hstGriff')+'</div></div>'+
+    '<div class="wiz-group"><div class="wiz-gt">Außengriff '+hint+'— Schiebegriff (von der Straße)</small></div><div class="wiz-cards">'+colorCards(P.hstGriffAussen,S.hstGriffAussen,'hstGriffAussen')+'</div></div>'+
     '<div class="wiz-group"><div class="wiz-gt">Abschließbar?</div><div class="wiz-cards">'+schlossCards()+'</div></div>';
 }
 function wizRenderBalkSchwelle(){ return _wizPills(Object.keys(P.balkonSchwelle).map(function(k){return [k,P.balkonSchwelle[k].name];}),S.balkonSchwelle,'wizSetBalkSchwelle')+'<div class="wiz-hint">'+((P.balkonSchwelle[S.balkonSchwelle]||{}).sub||'')+'</div>'; }
@@ -8193,7 +8198,7 @@ function buildHstGriff() {
       </div>
     </div>`;
   grid.innerHTML = `
-    <div class="col-span-full"><div class="sec-t" style="margin-top:0">Smart-Slide-Flachgriff</div>
+    <div class="col-span-full"><div class="sec-t" style="margin-top:0">Innengriff (Muschelgriff)</div>
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
         ${Object.entries(P.hstGriff).map(([k,v])=>mkCard(k,v,S.hstGriff===k,'pickHstGriff')).join('')}
       </div>
@@ -12827,8 +12832,8 @@ function _renderHst3d() {
   const isWood = HAUS3D_WOOD_KEYS.has(_ck);
   // HST: Seite aus der Laufrichtung (hstLauf) ableiten — links→l, rechts→r; Fallback auf oeff1.
   const _side  = (S.hstLauf === 'links') ? 'l' : (S.hstLauf === 'rechts') ? 'r' : ((S.oeff1 === 'dreh-l' || S.oeff1 === 'dk-l') ? 'l' : 'r');
-  // 3D-Innenansicht zeigt den Smart-Slide-Innengriff → dessen Farbe (Innengriff-Wahl) steuert die 3D-Griff-Farbe
-  const _gripMap = { silber:'silber', ral9016:'weiss', ral9005:'schwarz' };
+  // 3D-Innenansicht zeigt den Muschel-Innengriff → dessen Farbe (Innengriff-Wahl) steuert die 3D-Griff-Farbe
+  const _gripMap = { weiss:'weiss', braun:'braun', silber:'silber' };
   const _grip  = _gripMap[S.hstGriff] || 'weiss';
 
   wrap.style.display = 'block';
@@ -15031,6 +15036,7 @@ body.d2-active #detail2{display:flex !important}
 #detail2 .d2tile:hover{border-color:var(--d2accS2)}
 #detail2 .d2tile.sel{border-color:var(--d2accT); box-shadow:0 0 0 2px var(--d2accT)}
 #detail2 .d2tile img{width:100%; height:96px; object-fit:contain; display:block; margin-bottom:7px; background:#f6f8fc; border-radius:8px}
+#detail2 .d2-hstgr .d2tile img{background:#fff} /* HST-Griff: weißes Bildfeld, kein grauer Kasten */
 #detail2 .d2tile .cap{font-size:13px; font-weight:600; color:var(--d2text); line-height:1.25}
 #detail2 .d2tg3{display:grid; grid-template-columns:repeat(3,1fr); gap:12px}
 /* Große Farb-Bildkacheln */
@@ -15203,7 +15209,7 @@ const SECTIONS=[
  {id:'glasdekor',t:'Glasdekor',gilt:['kunststoff','balkontuer','haustuere','hst'],sum:()=>curName(P.glasdekor,S.glasdekor),body:()=>hint('Ornamentglas für Sichtschutz (z. B. Bad).')+tiles('glasdekor',Object.keys(GD_IMG).map(k=>({key:k,name:P.glasdekor[k].name,img:'img/glasdekor/'+GD_IMG[k]+'.webp'})))},
  {id:'griff',t:'Fenstergriff',gilt:['kunststoff','balkontuer'],sum:()=>`${curName(P.griff,S.griff)} · ${curName(P.griffColor,S.griffColor)}`,body:()=>`<div class="d2sub">Modell</div>`+pills('griff',Object.keys(P.griff).map(k=>[k,P.griff[k].name]))+`<div class="d2sub">Farbe</div>`+swatches('griffColor',P.griffColor)+`<div style="margin-top:16px"><button type="button" class="d2tgl ${S.griffLocked?'on':''}" onclick="D2.toggleKey('griffLocked')"><span class="kn"></span>Abschließbarer Griff</button></div>`},
  {id:'griffhaus',t:'Türgriff',gilt:['haustuere'],sum:()=>`${curName(P.tuerGriffInnen,S.tuerGriffInnen)} / ${curName(P.tuerGriffAussen,S.tuerGriffAussen)}`,body:()=>`<div class="d2sub">Innen (Klinke)</div>`+tiles('tuerGriffInnen',Object.keys(P.tuerGriffInnen).map(k=>({key:k,name:P.tuerGriffInnen[k].name,img:P.tuerGriffInnen[k].img})))+`<div class="d2sub">Außen (Griff)</div>`+tiles('tuerGriffAussen',Object.keys(P.tuerGriffAussen).map(k=>({key:k,name:P.tuerGriffAussen[k].name,img:P.tuerGriffAussen[k].img})))},
- {id:'griffhst',t:'Schiebegriff',gilt:['hst'],sum:()=>`${curName(P.hstGriff,S.hstGriff)}`,body:()=>`<div class="d2sub">Smart Slide (Flachgriff)</div>`+tiles('hstGriff',Object.keys(P.hstGriff).map(k=>({key:k,name:P.hstGriff[k].name,img:P.hstGriff[k].img})))},
+ {id:'griffhst',t:'Schiebegriff',gilt:['hst'],sum:()=>`${curName(P.hstGriff,S.hstGriff)} · ${curName(P.hstGriffAussen,S.hstGriffAussen)}`,body:()=>{const col=(P.hstGriffAussen[S.hstGriffAussen])?S.hstGriffAussen:'silber';return `<div class="d2-hstgr"><div class="d2sub">Innengriff (Muschelgriff)</div>`+tiles('hstGriff',Object.keys(P.hstGriff).map(k=>({key:k,name:P.hstGriff[k].name,img:P.hstGriff[k].img})))+`<div class="d2sub">Außengriff (Schiebegriff)</div>`+tiles('hstGriffAussen',Object.keys(P.hstGriffAussen).map(k=>({key:k,name:P.hstGriffAussen[k].name,img:P.hstGriffAussen[k].img})))+`<div class="d2sub">Abschließbar?</div>`+tiles('hstSchloss',Object.keys(P.hstSchloss).map(k=>({key:k,name:P.hstSchloss[k].name,img:'img/drutex-griffe/hst-hebel'+(k==='ohne'?'':'-schloss')+'-'+col+'.webp'})))+`</div>`;}},
  {id:'balk',t:'Schwelle',gilt:['balkontuer'],sum:()=>curName(P.balkonSchwelle,S.balkonSchwelle),body:()=>pills('balkonSchwelle',Object.keys(P.balkonSchwelle).map(k=>[k,P.balkonSchwelle[k].name,P.balkonSchwelle[k].sub]))},
  {id:'hstschwelle',t:'Schwelle',gilt:['hst'],sum:()=>curName(P.hstSchwelle,S.hstSchwelle),body:()=>pills('hstSchwelle',Object.keys(P.hstSchwelle).map(k=>[k,P.hstSchwelle[k].name]))},
  {id:'farbe',t:'Farbe & Oberfläche',gilt:['kunststoff','balkontuer','haustuere','hst'],sum:()=>`${P.fa[S.fa]?.name||'–'} außen · ${P.fi[S.fi]?.name||'–'} innen`,body:()=>hint('Außen sieht man von der Straße, innen vom Raum. Über 40 Farben & Holzdekore.')+`<div class="d2sub">Außenfarbe</div>`+colorTiles('fa')+`<div class="d2sub">Innenfarbe</div>`+colorTiles('fi')+`<div class="d2sub">Dichtung</div>`+pills('fd',Object.keys(P.fd).map(k=>[k,P.fd[k].name.replace('Dichtung ','')]))},
