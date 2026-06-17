@@ -7844,8 +7844,13 @@ function wizRenderRoll(){
     '</div>';
   }).join('')+'</div>';
   // Nutzerfreundliche Reihenfolge: 1. Antrieb (Karten oben) → 2. Antriebsseite → 3. Kastenfarbe
-  // 2. Antriebsseite (nur Gurtwickler) — direkt nach der Auswahl, damit man danach gleich die Farbe sieht
-  if(S.roll==='gurt'){ h+='<div class="wiz-group" style="margin-top:18px"><div class="wiz-gt">Antriebsseite <span style="font-weight:400;color:#6a7a8f;font-size:12px">(wo der Gurt sitzt)</span></div>'+_wizPills([['links','Links'],['rechts','Rechts']],S.rollSeite,'wizSetRollSeite')+'</div>'; }
+  // 2. Antriebs-/Motorseite — bei Gurtwickler UND Motorrolladen (Schiebetür = nur Motor)
+  if(S.roll&&S.roll!=='ohne'){
+    var _seitLbl=(S.roll==='motor')
+      ? 'Motorseite <span style="font-weight:400;color:#6a7a8f;font-size:12px">(Motor &amp; Schalter)</span>'
+      : 'Antriebsseite <span style="font-weight:400;color:#6a7a8f;font-size:12px">(wo der Gurt sitzt)</span>';
+    h+='<div class="wiz-group" style="margin-top:18px"><div class="wiz-gt">'+_seitLbl+'</div>'+_wizPills([['links','Links'],['rechts','Rechts']],S.rollSeite,'wizSetRollSeite')+'</div>';
+  }
   // 3. Kastenfarbe — Farbe von Kasten + Schienen (Drutex-Standardfarben)
   if(S.roll&&S.roll!=='ohne'){
     if(!S.panzerFarbe||!PANZER_FARBEN[S.panzerFarbe])S.panzerFarbe='weiss';
