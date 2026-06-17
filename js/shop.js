@@ -560,6 +560,12 @@ function bindeEventHandler() {
   document.getElementById('filterClose').addEventListener('click', () => {
     document.getElementById('filterSidebar').classList.remove('open');
   });
+  const fApply = document.getElementById('filterApplyMob');
+  if (fApply) fApply.addEventListener('click', () => {
+    document.getElementById('filterSidebar').classList.remove('open');
+    const g = document.getElementById('produktGrid');
+    if (g) g.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
 
   // Maße-Hinweis schließen
   document.getElementById('masseHinweisClose').addEventListener('click', () => {
@@ -724,6 +730,8 @@ function aktualisiereShopHeader() {
 function rendere() {
   const result = gefilterteProdukte();
   document.getElementById('produktAnzahl').textContent = result.length;
+  const _applyBtn = document.getElementById('filterApplyMob');
+  if (_applyBtn) _applyBtn.textContent = result.length + (result.length === 1 ? ' Ergebnis anzeigen' : ' Ergebnisse anzeigen');
   aktualisiereShopHeader();
   rendereSchemaOrg(result);
 
