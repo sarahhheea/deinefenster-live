@@ -822,6 +822,7 @@ function buildWindow(spec) {
   orb.target.set(0, 0, 0);
   orb.update();
   _updateRollLabel(spec);
+  setView(_currentView);   // Außen/Innen nach Rebuild anwenden (Griff/Scharnier ggf. ausblenden)
 }
 
 // Initial-Build folgt weiter unten NACH FARBEN-Definition (setColor braucht die Tabelle)
@@ -842,6 +843,16 @@ function setSide(s) {
 }
 const _urlSide = new URLSearchParams(location.search).get('side') || 'r';
 setSide(_urlSide);
+
+// setView: 'aussen' (Standard) = Außenseite OHNE Griff/Scharnier; 'innen' = mit Beschlag.
+// Außen braucht keine Drehung — von außen sieht man Griff + Bänder schlicht nicht.
+let _currentView = ((new URLSearchParams(location.search).get('view')) === 'innen') ? 'innen' : 'aussen';
+function setView(v){
+  _currentView = (v === 'innen' || v === 'inn') ? 'innen' : 'aussen';
+  const hide = (_currentView === 'aussen');
+  handleObjects.forEach(function(m){ if(m) m.visible = !hide; });
+  winGroup.traverse(function(node){ if (node.userData && node.userData.isHinge) node.visible = !hide; });
+}
 
 // ══════════════════════════════════════════════
 // FARBEN — alle 41 echten Drutex-Dekore
@@ -1280,6 +1291,7 @@ window.addEventListener('message', (e) => {
   if (d.type === 'setWood')  setWood(d.key);
   if (d.type === 'setGlass') setGlass(d.key);
   if (d.type === 'setSide')  setSide(d.key);
+  if (d.type === 'setView')  setView(d.view);
   if (d.type === 'toggleOpen') sashOpen = !sashOpen;
   if (d.type === 'update') {
     const prev = (_lastSpec) ? _lastSpec : {};
@@ -1300,13 +1312,14 @@ window.addEventListener('message', (e) => {
     if (d.sproTyp    !== undefined) _sproTyp    = d.sproTyp;
     if (d.sproRaster !== undefined) _sproRaster = d.sproRaster;
     // Rebuild wenn Layout, Sash, Rolladen- oder Sprossen-State sich geaendert hat
-    if (d.layout || d.sashes || d.roll !== undefined || d.rollKasten !== undefined || d.panzerHex !== undefined || d.rollSeite !== undefined || d.separator !== undefined || d.view !== undefined || _sproChanged) {
+    if (d.layout || d.sashes || d.roll !== undefined || d.rollKasten !== undefined || d.panzerHex !== undefined || d.rollSeite !== undefined || d.separator !== undefined || _sproChanged) {
       buildWindow(newSpec);
     }
     if (d.wood)  setWood(d.wood);
     else         setColor(d.color || 'weiss-fx');
     setGlass(d.glass || 'klar');
     if (d.side) setSide(d.side);
+    if (d.view) setView(d.view);
   }
 });
 

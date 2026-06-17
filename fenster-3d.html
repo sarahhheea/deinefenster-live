@@ -759,7 +759,7 @@ function setSide(s) {
   }
 }
 // setView: 'innen' = Standard mit Griff sichtbar, 'aussen' = pivotGroup um 180° gedreht, Griff/Scharniere weg
-let _currentView = 'innen';
+let _currentView = 'aussen';   // Standard: Außenseite zuerst (ohne Griff/Scharnier) — Kundenwunsch 06/2026
 function setView(v) {
   _currentView = (v === 'aussen' || v === 'aus') ? 'aussen' : 'innen';
   pivotGroup.rotation.y = (_currentView === 'aussen') ? Math.PI : 0;
@@ -835,7 +835,7 @@ function setSashTyp(typ) {
 
 const _urlSide = new URLSearchParams(location.search).get('side') || 'r';
 setSide(_urlSide);
-const _urlView = new URLSearchParams(location.search).get('view') || 'innen';
+const _urlView = new URLSearchParams(location.search).get('view') || 'aussen';
 setView(_urlView);
 
 // ══════════════════════════════════════════════
