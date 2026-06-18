@@ -4284,6 +4284,8 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   #cfg-wizard .wiz-card:hover{box-shadow:0 6px 18px rgba(20,40,80,.08)}
   #cfg-wizard .wiz-card:hover{transform:translateY(-4px)}
   #cfg-wizard .wiz-card.sel{border:2px solid var(--c-primary);padding:5px}
+  #cfg-wizard .wiz-card{position:relative}
+  #cfg-wizard .wiz-fav{position:absolute;top:8px;left:8px;z-index:2;background:#c9a84c;color:#1a1408;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:999px;box-shadow:0 2px 8px rgba(20,40,80,.18);pointer-events:none;line-height:1.2}
   #cfg-wizard .wiz-card img{width:100%;aspect-ratio:1/1;object-fit:contain;border-radius:10px;background:transparent;padding:0}
   #cfg-wizard .wiz-noimg{width:100%;aspect-ratio:1/1;border-radius:10px;background:#f7f7f7;display:flex;align-items:center;justify-content:center;color:#9aa7b5;font-family:'Manrope',sans-serif;font-size:13px;text-align:center;padding:8px}
   #cfg-wizard .wiz-cn{font-size:12.5px;margin-top:8px;font-weight:700;color:#14233f;font-family:'Manrope',sans-serif}
@@ -6877,10 +6879,10 @@ const ANSCHLAG_SETS = {
     {img:'anschlag-1f/fest', name:"Festverglasung", oeff:["fest"]},
   ],
   '2-fluegel': [
-    {img:'anschlag-2f/dkl-pfosten-dkr', name:"Dreh-Kipp links · Dreh-Kipp rechts · mit Pfosten", oeff:["dk-l", "dk-r"]},
+    {img:'anschlag-2f/dkl-pfosten-dkr', name:"Dreh-Kipp links · Dreh-Kipp rechts · mit Pfosten", oeff:["dk-l", "dk-r"], tag:"Beliebt"},
+    {img:'anschlag-2f/dl-stulp-dkr', name:"Dreh links · Stulp · Dreh-Kipp rechts", oeff:["dreh-l", "dk-r"], stulp:true, tag:"Beliebt"},
     {img:'anschlag-2f/dl-pfosten-dkr', name:"Dreh links · Dreh-Kipp rechts · mit Pfosten", oeff:["dreh-l", "dk-r"]},
     {img:'anschlag-2f/dkl-pfosten-dr', name:"Dreh-Kipp links · Dreh rechts · mit Pfosten", oeff:["dk-l", "dreh-r"]},
-    {img:'anschlag-2f/dl-stulp-dkr', name:"Dreh links · Stulp · Dreh-Kipp rechts", oeff:["dreh-l", "dk-r"], stulp:true},
     {img:'anschlag-2f/dkl-stulp-dr', name:"Dreh-Kipp links · Stulp · Dreh rechts", oeff:["dk-l", "dreh-r"], stulp:true},
     {img:'anschlag-2f/fest-dkr', name:"Fest · Dreh-Kipp rechts · mit Pfosten", oeff:["fest", "dk-r"]},
     {img:'anschlag-2f/dkl-fest', name:"Dreh-Kipp links · Fest · mit Pfosten", oeff:["dk-l", "fest"]},
@@ -7642,7 +7644,7 @@ function wizRenderAnschlag(){
   if(S.anschlagIdx==null){ S.anschlagIdx=set.findIndex(function(o){ return o.oeff&&o.oeff[0]===S.oeff1&&(o.oeff[1]||null)===(S.oeff2||null)&&(o.oeff[2]||null)===(S.oeff3||null); }); }
   return '<div class="wiz-cards">'+set.map(function(o,idx){
     const sel=(idx===S.anschlagIdx)?' sel':'';
-    return '<div class="wiz-card'+sel+'" onclick="wizPickAnschlag('+idx+')"><img src="img/karten/'+o.img+'.png?v=20260608u" alt="'+o.name+'" loading="lazy"><div class="wiz-cn">'+o.name+'</div></div>';
+    return '<div class="wiz-card'+sel+'" onclick="wizPickAnschlag('+idx+')">'+(o.tag?'<span class="wiz-fav">'+o.tag+'</span>':'')+'<img src="img/karten/'+o.img+'.png?v=20260608u" alt="'+o.name+'" loading="lazy"><div class="wiz-cn">'+o.name+'</div></div>';
   }).join('')+'</div>';
 }
 function pskKippSchiebeCard(v){
