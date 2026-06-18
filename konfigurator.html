@@ -7378,7 +7378,7 @@ function wizRenderTuergriff(){
   function shortName(n){ return (n||'').replace('Haustür-Klinke ','').replace('Haustürgriff ','').replace('Haustür-Griff ',''); }
   function col(title,subt,obj,sel,sk){
     var keys=Object.keys(obj), LIM=4, all=wizGriffMore[sk], shown=all?keys:keys.slice(0,LIM);
-    var cards=shown.map(function(k){var o=obj[k];return '<button type="button" class="wiz-grcard'+(k===sel?' sel':'')+'" onclick="wizSet(\''+sk+'\',\''+k+'\')"><span class="wiz-grimg"><img src="'+o.img+'" alt="'+o.name+'" loading="lazy"></span><span class="wiz-grnm">'+shortName(o.name)+'</span></button>';}).join('');
+    var cards=shown.map(function(k){var o=obj[k];var im=o.img.replace(/\.webp$/,'-cut.webp');return '<button type="button" class="wiz-grcard'+(k===sel?' sel':'')+'" onclick="wizSet(\''+sk+'\',\''+k+'\')"><span class="wiz-grimg"><img src="'+im+'" alt="'+o.name+'" loading="lazy"></span><span class="wiz-grnm">'+shortName(o.name)+'</span></button>';}).join('');
     var more=keys.length>LIM?'<button type="button" class="wiz-grmore" onclick="wizGriffMoreToggle(\''+sk+'\')">'+(all?'Weniger':'Alle '+keys.length+' →')+'</button>':'';
     return '<div class="wiz-grcol"><div class="wiz-grhd">'+title+'<small>'+subt+'</small></div>'+cards+more+'</div>';
   }
@@ -7746,6 +7746,17 @@ function wizGo(i){
   }
   document.getElementById('wiz-title').innerHTML=s.title;
   document.getElementById('wiz-sub').innerHTML=s.sub||'';
+  // Haustür-Griff-Schritt: saubere Studio-Tür (frontal, weiß) statt 3D-Ansicht.
+  (function(){
+    var st=document.getElementById('wiz-stage'); if(!st)return;
+    var img=document.getElementById('wiz-doorstudio');
+    if(!img){ img=document.createElement('img'); img.id='wiz-doorstudio'; img.className='wiz-doorstudio'; img.alt='Haustür'; img.setAttribute('onerror',"this.src='img/drutex-tueren/studio/montana-1-inox.webp'"); st.appendChild(img); }
+    var pw=document.getElementById('prev-wrap');
+    if(S.prod==='haustuere' && s.key==='griffhaus'){
+      img.src='img/drutex-tueren/studio/'+(S.tuerModell||'montana-1-inox')+'.webp';
+      img.style.display='block'; if(pw)pw.style.display='none';
+    } else { img.style.display='none'; if(pw)pw.style.display=''; }
+  })();
   wizCrumbs(); wizRenderPanel();
   // Ansicht je Schritt: Farbe-Schritt richtet sich nach Außen/Innen-Tab (Außen = Außenseite ohne Griff/Scharniere),
   // Haustür-Türmodell immer Außen. ALLE anderen Schritte: zuletzt gewählte Ansicht BEIBEHALTEN —
@@ -15048,6 +15059,8 @@ async function submitSkizze(e) {
   #cfg-wizard .wiz-card-opt .wiz-sym img{ object-fit:cover !important; object-position:center 44% !important; padding:0 !important; width:100% !important; height:100% !important; }
   /* Tür-Vorschau: ganze Tür in natürlicher Proportion (nicht langgezogen) */
   #cfg-wizard[data-prod="haustuere"] .wiz-body:not(.cards-mode) .wiz-stage #prev-wrap{ height:162px !important; width:120px !important; max-width:50% !important; margin:0 auto !important; aspect-ratio:auto !important; }
+  /* Saubere Studio-Tür (frontal, weiß) als Vorschau auf dem Türgriff-Schritt */
+  #cfg-wizard .wiz-doorstudio{ display:none; height:188px; width:auto; max-width:52%; margin:0 auto; object-fit:contain; }
   /* Türgriff: Innen + Außen NEBENEINANDER, ganze Klinke sichtbar */
   #cfg-wizard .wiz-grcols{ display:grid; grid-template-columns:1fr 1fr; gap:12px; max-width:520px; margin:0 auto; }
   #cfg-wizard .wiz-grcol{ display:flex; flex-direction:column; gap:8px; }
@@ -15055,8 +15068,8 @@ async function submitSkizze(e) {
   #cfg-wizard .wiz-grhd small{ font-weight:500; font-size:10.5px; color:#7a8aa0; }
   #cfg-wizard .wiz-grcard{ display:flex; flex-direction:column; align-items:center; gap:5px; border:1.5px solid #e4ebf4; border-radius:12px; padding:6px; background:#fff; cursor:pointer; }
   #cfg-wizard .wiz-grcard.sel{ border-color:var(--c-primary); box-shadow:0 0 0 3px rgba(34,94,170,.12); }
-  #cfg-wizard .wiz-grimg{ width:100%; height:82px; border-radius:9px; background:#34353a; display:flex; align-items:center; justify-content:center; overflow:hidden; }
-  #cfg-wizard .wiz-grimg img{ width:100%; height:100%; object-fit:contain; padding:3px; }
+  #cfg-wizard .wiz-grimg{ width:100%; height:82px; border-radius:9px; background:#f5f8fc; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  #cfg-wizard .wiz-grimg img{ width:100%; height:100%; object-fit:contain; padding:6px; }
   #cfg-wizard .wiz-grnm{ font-family:'Manrope',sans-serif; font-size:11.5px; font-weight:600; color:#14233f; text-align:center; line-height:1.2; }
   #cfg-wizard .wiz-grmore{ margin-top:2px; border:1px solid #d6e0ee; background:#f3f7fd; color:#225eaa; border-radius:9px; padding:9px 6px; font-weight:700; font-family:'Plus Jakarta Sans',sans-serif; cursor:pointer; font-size:12px; min-height:44px; }
   /* === STUFE 4: Bestellübersicht im Onlineshop-Stil (Warenkorb-Karten) === */
