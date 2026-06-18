@@ -7312,10 +7312,10 @@ let wizIdx=0, wizFarbTab='fa';
 // Schritt-Registry — gilt = für welche Produkte; cond = zusätzliche Bedingung.
 const ALL='kunststoff,balkontuer,haustuere,hst'.split(',');
 const WIZ_ALL=[
-  {key:'profil', gilt:ALL, title:'Wählen Sie das <span>Profil</span>', sub:'Das Drutex-System für Ihr Produkt.', render:wizRenderProfil, layout:'cards'},
-  {key:'psk', gilt:['hst'], cond:()=>S.profil==='iglo-psk', title:'Wählen Sie das <span>PSK-System</span>', sub:'Kammer-System Ihrer Parallel-Schiebe-Kipp-Tür.', render:wizRenderPsk, layout:'cards'},
-  {key:'hslauf', gilt:['hst'], cond:()=>S.profil==='iglo-hs', title:'In welche Richtung läuft die <span>Schiebetür</span>?', sub:'HebeSchiebe links oder rechts — Ansicht von innen.', render:wizRenderHsLauf, layout:'cards'},
-  {key:'fluegel', gilt:['kunststoff','balkontuer','haustuere','hst'], cond:()=>S.prod!=='hst'||S.profil==='iglo-psk', title:'Wählen Sie die <span>Aufteilung</span>', sub:'Wie viele Flügel und welche Aufteilung?', render:wizRenderFluegel, layout:'cards'},
+  {key:'profil', main:['hst'], gilt:ALL, title:'Wählen Sie das <span>Profil</span>', sub:'Das Drutex-System für Ihr Produkt.', render:wizRenderProfil, layout:'cards'},
+  {key:'psk', main:['hst'], gilt:['hst'], cond:()=>S.profil==='iglo-psk', title:'Wählen Sie das <span>PSK-System</span>', sub:'Kammer-System Ihrer Parallel-Schiebe-Kipp-Tür.', render:wizRenderPsk, layout:'cards'},
+  {key:'hslauf', main:['hst'], gilt:['hst'], cond:()=>S.profil==='iglo-hs', title:'In welche Richtung läuft die <span>Schiebetür</span>?', sub:'HebeSchiebe links oder rechts — Ansicht von innen.', render:wizRenderHsLauf, layout:'cards'},
+  {key:'fluegel', main:['hst'], gilt:['kunststoff','balkontuer','haustuere','hst'], cond:()=>S.prod!=='hst'||S.profil==='iglo-psk', title:'Wählen Sie die <span>Aufteilung</span>', sub:'Wie viele Flügel und welche Aufteilung?', render:wizRenderFluegel, layout:'cards'},
   {key:'anschlag', main:true, gilt:ALL, cond:()=>!(S.prod==='hst'&&S.profil==='iglo-hs'), title:'Wählen Sie die <span>Öffnungsart</span>', sub:'In welche Richtung öffnet es?', render:wizRenderAnschlag, layout:'cards'},
   {key:'glas', main:true, gilt:ALL, title:'Wählen Sie die <span>Verglasung</span>', sub:'2-fach oder 3-fach Wärmeschutz.', render:wizRenderGlas, layout:'cards'},
   {key:'masse', main:true, gilt:ALL, title:'Geben Sie die <span>Maße</span> an', sub:'Einbaumaß in Millimetern.', render:wizRenderMasse, layout:'cards'},
@@ -7325,9 +7325,9 @@ const WIZ_ALL=[
   {key:'glasdekor', gilt:ALL, title:'Wählen Sie das <span>Glas-Motiv</span>', sub:'Ornamentglas für Sichtschutz — „Klarglas" = normales durchsichtiges Glas.', render:wizRenderGlasdekor},
   {key:'schall', gilt:['kunststoff','balkontuer','hst'], title:'Schall- &amp; <span>Sicherheitsglas</span>', sub:'Optional: zusätzlicher Schallschutz und Sicherheitsglas.', render:wizRenderSchall},
   {key:'griff', gilt:['kunststoff','balkontuer'], title:'Welcher <span>Griff</span>?', sub:'Modell, Farbe und Ausführung Ihres Fenstergriffs.', render:wizRenderGriff},
-  {key:'griffhaus', gilt:['haustuere'], title:'Welcher <span>Türgriff</span>?', sub:'Innen-Klinke und Außengriff Ihrer Haustür.', render:wizRenderTuergriff},
-  {key:'griffhst', gilt:['hst'], title:'Welcher <span>Schiebegriff</span>?', sub:'Innengriff, Außengriff und abschließbar wählen.', render:wizRenderSchiebegriff},
-  {key:'balk', gilt:['balkontuer'], title:'Wählen Sie die <span>Schwelle</span>', sub:'Boden-Schwelle Ihrer Balkontür.', render:wizRenderBalkSchwelle, layout:'cards'},
+  {key:'griffhaus', main:['haustuere'], gilt:['haustuere'], title:'Welcher <span>Türgriff</span>?', sub:'Innen-Klinke und Außengriff Ihrer Haustür.', render:wizRenderTuergriff},
+  {key:'griffhst', main:['hst'], gilt:['hst'], title:'Welcher <span>Schiebegriff</span>?', sub:'Innengriff, Außengriff und abschließbar wählen.', render:wizRenderSchiebegriff},
+  {key:'balk', main:['balkontuer'], gilt:['balkontuer'], title:'Wählen Sie die <span>Schwelle</span>', sub:'Boden-Schwelle Ihrer Balkontür.', render:wizRenderBalkSchwelle, layout:'cards'},
   {key:'rolladen', gilt:['kunststoff','balkontuer','hst'], title:'Wählen Sie den <span>Rolladen</span>', sub:'Sonnen- und Sichtschutz — optional.', render:wizRenderRoll},
   {key:'sprossen', gilt:['kunststoff','balkontuer'], title:'Wählen Sie die <span>Sprossen</span>', sub:'Klassische Optik — aufgesetzt oder im Scheibenzwischenraum.', render:wizRenderSpro},
   {key:'sicherheit', gilt:ALL, title:'Wählen Sie den <span>Einbruchschutz</span>', sub:'Wie sicher soll es sein?', render:wizRenderSicher},
@@ -7337,11 +7337,12 @@ const WIZ_ALL=[
 ];
 // Hauptschritt-Filter: Fenster zeigt nur die wichtigen Schritte (Rest ist sinnvoll vorbelegt
 // und geht voll in die Anfrage-Mail). Andere Produkte vorerst unveraendert (folgt separat).
-const WIZ_MAINONLY=['kunststoff'];
+const WIZ_MAINONLY=['kunststoff','balkontuer','haustuere','hst'];
+function _isMain(s,prod){ return s.main===true || (Array.isArray(s.main)&&s.main.indexOf(prod)>=0); }
 function buildWizSteps(prod){
   var all = WIZ_ALL.filter(function(s){ return s.gilt.indexOf(prod)>=0 && (!s.cond||s.cond()); });
   if(WIZ_MAINONLY.indexOf(prod)>=0){
-    var mains = all.filter(function(s){ return s.main; });
+    var mains = all.filter(function(s){ return _isMain(s,prod); });
     if(mains.length>=3) return mains;
   }
   return all;
@@ -7350,7 +7351,7 @@ let WIZ_STEPS = buildWizSteps('kunststoff');
 // "Mehr anpassen": die nicht-Hauptschritte (vorbelegt) bleiben fuer Tueftler erreichbar —
 // als Akkordeon in einem eigenen optionalen Schritt. Reuse der vorhandenen Render-Funktionen.
 let wizExtraOpen=null;
-function wizExtraList(){ var prod=S.prod||'kunststoff'; return WIZ_ALL.filter(function(s){ return !s.main && s.gilt.indexOf(prod)>=0 && (!s.cond||s.cond()) && ['angebot','kontakt','extras'].indexOf(s.key)<0; }); }
+function wizExtraList(){ var prod=S.prod||'kunststoff'; return WIZ_ALL.filter(function(s){ return !_isMain(s,prod) && s.gilt.indexOf(prod)>=0 && (!s.cond||s.cond()) && ['angebot','kontakt','extras'].indexOf(s.key)<0; }); }
 function wizToggleExtra(k){ wizExtraOpen=(wizExtraOpen===k)?null:k; if(typeof wizRenderPanel==='function')wizRenderPanel(); }
 function wizRenderExtras(){
   var list=wizExtraList();
@@ -15081,6 +15082,12 @@ async function submitSkizze(e) {
     #cfg-wizard .wiz-nav-center{ display:contents !important; }
     #cfg-wizard .wiz-back{ flex:0 0 auto; min-height:50px; }
     #cfg-wizard .wiz-next{ flex:1 1 auto; justify-content:center; min-height:50px; }
+    /* Tuer-/Schiebegriff-Wähler kompakter (Innen+Außen gestapelt war sehr hoch) */
+    #cfg-wizard .wiz-griff2col{ gap:12px !important; }
+    #cfg-wizard .wiz-griff2col .wiz-griffcol{ padding:10px 10px 6px !important; }
+    #cfg-wizard .wiz-griffhead{ margin-bottom:8px !important; }
+    #cfg-wizard .wiz-griff2col .wiz-card-opt .wiz-sym{ height:86px !important; }
+    #cfg-wizard .wiz-griff2col .wiz-cards{ gap:8px !important; }
   }
 </style>
 <link rel="stylesheet" href="css/cookie-banner.css">
