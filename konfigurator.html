@@ -7929,22 +7929,24 @@ function wizSetSicherGlas(v){ wizSet('sicherGlas',v); }
 // GRIFF
 // Griff-Karten: pro Modell eine Standard- und (falls verfügbar) eine abschließbare Variante
 function _griffCards(){
-  // Kundenwunsch: nur drei feste Karten — Mistral, Mistral abschließbar, PZ beidseitig.
-  // Gilt für Fenster + Balkontür (Haustür/HST haben eigene Griff-Schritte).
-  return [
+  // Kundenwunsch: feste Karten in Weiß, keine Farbauswahl mehr.
+  // Mistral + Mistral abschließbar überall; PZ beidseitig NUR bei Türen (nicht Fenster).
+  const cards=[
     {griff:'mistral', locked:false, name:'Mistral',              sub:'Aluminium · klassisch elegant', badge:true},
     {griff:'mistral', locked:true,  name:'Mistral abschließbar', sub:'mit Schließzylinder',           badge:false},
-    {griff:'pz-beid', locked:false, name:'PZ beidseitig',        sub:'Schließzylinder innen + außen',  badge:false},
   ];
+  if(S.prod!=='kunststoff') cards.push({griff:'pz-beid', locked:false, name:'PZ beidseitig', sub:'Schließzylinder innen + außen', badge:false});
+  return cards;
 }
 function wizRenderGriff(){
-  let h='<div class="wiz-group"><div class="wiz-gt">1. Griff</div><div class="wiz-cards">'+_griffCards().map(function(e){
-    const img=(typeof griffImgUrl==='function')?griffImgUrl(e.griff,S.griffColor,e.locked):'';
+  // Griffe fest in Weiß; PZ beidseitig hat ein eigenes weißes Bild.
+  if(S.prod==='kunststoff' && S.griff==='pz-beid'){ S.griff='mistral'; S.griffLocked=false; } // PZ gibt's bei Fenster nicht
+  let h='<div class="wiz-group"><div class="wiz-gt">Griff</div><div class="wiz-cards">'+_griffCards().map(function(e){
+    const img=(typeof griffImgUrl==='function')?griffImgUrl(e.griff,'weiss',e.locked):'';
     const seld=(e.griff===S.griff && !!S.griffLocked===e.locked)?' sel':'';
     const badge=e.badge?'<div class="wiz-badge">STANDARD</div>':'';
     return '<div class="wiz-card'+seld+'" onclick="wizPickGriff(\''+e.griff+'\','+e.locked+')"><div class="wiz-gbox"><img src="'+img+'" alt="'+e.name+'"></div><div class="wiz-cn">'+e.name+'</div><div class="wiz-csub">'+e.sub+'</div>'+badge+'</div>';
   }).join('')+'</div></div>';
-  h+='<div class="wiz-group"><div class="wiz-gt">2. Farbe</div><div class="wiz-dots">'+Object.keys(P.griffColor).map(function(k){const o=P.griffColor[k];return '<div class="wiz-dot'+(k===S.griffColor?' sel':'')+'" title="'+o.name+'" style="background:'+o.hex+'" onclick="wizSet(\'griffColor\',\''+k+'\')"></div>';}).join('')+'</div></div>';
   return h;
 }
 function wizPickGriff(model,locked){ S.griff=model; S.griffLocked=!!locked; if(window._touched){window._touched.add('griff');window._touched.add('griffLocked');} _wizPrev(); wizRenderPanel(); }
@@ -9186,7 +9188,8 @@ const GRIFF_URLS = {
     braun:    { std:drGW('klamki_dublin/klamka_okienna_dublin_-_brazowa_ral8019.png'),  lock:null },
   },
   'pz-beid': {
-    weiss:    { std:drGW('klamka-nevada-klucz-35mm-k-9016.png'), lock:drGW('klamka-nevada-klucz-35mm-k-9016.png') },
+    // eigenes PZ-beidseitig-Bild (weiß), erzeugt passend zum Mistral-Look
+    weiss:    { std:drGW('klamka-pz-beidseitig-weiss.png'), lock:drGW('klamka-pz-beidseitig-weiss.png') },
     schwarz:  { std:drGW('klamka-nevada-klucz-35mm-k-9005.png'), lock:drGW('klamka-nevada-klucz-35mm-k-9005.png') },
     anthrazit:{ std:drGW('klamka-nevada-klucz-35mm-k-7016.png'), lock:drGW('klamka-nevada-klucz-35mm-k-7016.png') },
     cremeweiss:{std:drGW('klamka-nevada-klucz-35mm-k-9001.png'), lock:drGW('klamka-nevada-klucz-35mm-k-9001.png') },
