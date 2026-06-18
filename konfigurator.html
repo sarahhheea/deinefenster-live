@@ -7533,7 +7533,7 @@ function wizStart(){
   if(!S.griff)S.griff='mistral'; if(!S.griffColor)S.griffColor='weiss';
   if(typeof applyFensterLimits==='function')applyFensterLimits();
   WIZ_STEPS=buildWizSteps(prod);
-  const w=document.getElementById('cfg-wizard'); if(w)w.style.display='flex';
+  const w=document.getElementById('cfg-wizard'); if(w){w.style.display='flex'; w.setAttribute('data-prod',prod);}
   wizGo(0);
   window.scrollTo({top:0,behavior:'auto'});
 }
@@ -15044,8 +15044,14 @@ async function submitSkizze(e) {
   #cfg-wizard .wiz-close{ display:none; }
   /* Griff-Umschalter (3 Tabs) + Sektions-Hinweis */
   #cfg-wizard .wiz-tabs-3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
-  #cfg-wizard .wiz-tabs-3 .wiz-tab{ padding:10px 6px; font-size:13px; text-align:center; }
+  #cfg-wizard .wiz-tabs-3 .wiz-tab{ padding:10px 6px; font-size:13px; text-align:center; min-height:48px; }
   #cfg-wizard .wiz-griffsub{ text-align:center; font-family:'Manrope',sans-serif; font-size:12.5px; color:#5b6b80; margin:10px 0 12px; }
+  /* Griff-/Klinken-Kacheln: das Produktfoto füllt die Kachel ganz (cover) → ein sauberes Produktbild,
+     kein eingebetteter Kasten-Rand. Foto-Hintergrund = Kachel-Hintergrund (nahtlos). */
+  #cfg-wizard .wiz-card-opt .wiz-sym{ background:#34353a !important; height:98px !important; border-radius:10px !important; overflow:hidden; }
+  #cfg-wizard .wiz-card-opt .wiz-sym img{ object-fit:cover !important; object-position:center 44% !important; padding:0 !important; width:100% !important; height:100% !important; }
+  /* Tür-Vorschau im Hochformat höher zeigen, damit die GANZE Tür sichtbar ist (nicht gestaucht) */
+  #cfg-wizard[data-prod="haustuere"] .wiz-body:not(.cards-mode) .wiz-stage #prev-wrap{ height:216px !important; width:auto !important; aspect-ratio:1/1.7 !important; margin:0 auto !important; }
   /* === STUFE 4: Bestellübersicht im Onlineshop-Stil (Warenkorb-Karten) === */
   #cfg-wizard .wiz-ohead{ font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:15px; color:#14233f; margin:0 auto 12px; max-width:560px; text-align:left; }
   #cfg-wizard .wiz-ocards{ max-width:560px; margin:0 auto; display:flex; flex-direction:column; gap:12px; }
