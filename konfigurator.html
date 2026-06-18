@@ -3956,7 +3956,8 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       <div class="text-sm font-semibold text-on-surf-v mb-2">Schnellauswahl Standardmaße:</div>
       <div id="mh-quickpick" class="flex flex-wrap gap-2"></div>
     </div>
-    <button type="button" onclick="heroSelectMasse()" class="mh-next">
+    <div id="mh-error" role="alert" style="display:none;margin-top:14px;padding:11px 14px;border-radius:10px;background:#fdecec;border:1px solid #f0c2c2;color:#9a2b2b;font-family:'Manrope',sans-serif;font-size:13.5px;font-weight:600;line-height:1.4"></div>
+    <button type="button" id="mh-next-btn" onclick="heroSelectMasse()" class="mh-next">
       <span>Weiter</span>
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
     </button>
@@ -7068,22 +7069,66 @@ function verglasungToAnschlag() {
 // ── MASSE-HERO (heller Schritt nach Glas, vor Detail-Ansicht) ────────
 const MH_PRESETS = {
   kunststoff: [[600,600],[800,1000],[1000,1200],[1230,1480],[1500,1500],[2000,1400]],
-  balkontuer: [[800,2000],[900,2100],[1000,2100],[1200,2100],[1500,2200]],
+  balkontuer: [[800,2000],[900,2100],[1000,2100],[1300,2000],[1500,2100],[1700,2100],[2000,2200]],
   haustuere:  [[900,2000],[1000,2100],[1100,2200],[1200,2200],[1400,2300]],
   hst:        [[2000,2100],[2500,2100],[3000,2200],[3500,2200],[4000,2300]],
 };
+// Balkontür-Maßgrenzen sind flügelabhängig (Kundenvorgabe 18.06.2026):
+//   1-Flügel : B 500–1100 mm, H 1800–2300 mm
+//   2-Flügel : B 1300–2000 mm, H 1800–2300 mm   (gilt auch für die Stulp-Variante)
+// 3-Flügel und Ober-/Unterlicht-Varianten behalten die breiteren Produktwerte aus
+// P.prod.balkontuer. Im Ablauf wird die Flügelaufteilung VOR den Maßen gewählt,
+// daher steht S.fluegel im Maß-Schritt fest. def = gültige Standard-Vorbelegung.
+const BALKON_1FL = { bMin:500,  bMax:1100, hMin:1800, hMax:2300, bDef:900,  hDef:2100 };
+const BALKON_2FL = { bMin:1300, bMax:2000, hMin:1800, hMax:2300, bDef:1600, hDef:2100 };
 function _mhRange(){ const pr = S.prod ? P.prod[S.prod] : null;
-  return { bMin: pr?.bMin||300, bMax: pr?.bMax||4000, hMin: pr?.hMin||300, hMax: pr?.hMax||3000, pr }; }
+  if(S.prod==='balkontuer' && S.fluegel==='1-fluegel'){
+    return { bMin:BALKON_1FL.bMin, bMax:BALKON_1FL.bMax, hMin:BALKON_1FL.hMin, hMax:BALKON_1FL.hMax, bDef:BALKON_1FL.bDef, hDef:BALKON_1FL.hDef, pr };
+  }
+  if(S.prod==='balkontuer' && (S.fluegel==='2-fluegel' || S.fluegel==='stulp')){
+    return { bMin:BALKON_2FL.bMin, bMax:BALKON_2FL.bMax, hMin:BALKON_2FL.hMin, hMax:BALKON_2FL.hMax, bDef:BALKON_2FL.bDef, hDef:BALKON_2FL.hDef, pr };
+  }
+  return { bMin: pr?.bMin||300, bMax: pr?.bMax||4000, hMin: pr?.hMin||300, hMax: pr?.hMax||3000, bDef: pr?.bDef||1000, hDef: pr?.hDef||1200, pr }; }
+// Liefert eine garantiert gültige Vorbelegung: vorhandenen State behalten, falls er
+// im aktiven Bereich liegt — sonst den flügelabhängigen Default. Schreibt das Ergebnis
+// in den State, damit Anzeige und S.bMm/S.hMm immer konsistent (und gültig) sind.
+function _mhEnsureValidDefault(){
+  const { bMin, bMax, hMin, hMax, bDef, hDef } = _mhRange();
+  const b = (S.bMm && S.bMm>=bMin && S.bMm<=bMax) ? S.bMm : bDef;
+  const h = (S.hMm && S.hMm>=hMin && S.hMm<=hMax) ? S.hMm : hDef;
+  S.bMm = b; S.hMm = h;
+  return { b, h };
+}
+// Prüft die aktuellen Eingaben gegen den aktiven Bereich, zeigt eine konkrete
+// Sperr-Meldung und (de)aktiviert den Weiter-Button. Gibt true zurück wenn gültig.
+function mhValidate(){
+  const { bMin, bMax, hMin, hMax } = _mhRange();
+  const ib=document.getElementById('mh-ib'), ih=document.getElementById('mh-ih');
+  const b=parseInt(ib&&ib.value)||0, h=parseInt(ih&&ih.value)||0;
+  const errEl=document.getElementById('mh-error'), btn=document.getElementById('mh-next-btn');
+  let msg='';
+  if(b>0 && b<bMin) msg='Mindestbreite '+bMin+' mm — in diesem Maß ist keine Konfiguration möglich.';
+  else if(b>bMax) msg='Höchstbreite '+bMax+' mm — in diesem Maß ist keine Konfiguration möglich.';
+  else if(h>0 && h<hMin) msg='Mindesthöhe '+hMin+' mm — in diesem Maß ist keine Konfiguration möglich.';
+  else if(h>hMax) msg='Höchsthöhe '+hMax+' mm — in diesem Maß ist keine Konfiguration möglich.';
+  const valid = (b>=bMin && b<=bMax && h>=hMin && h<=hMax);
+  if(errEl){ if(msg){ errEl.textContent=msg; errEl.style.display=''; } else { errEl.textContent=''; errEl.style.display='none'; } }
+  if(btn){ btn.disabled=!valid; btn.style.opacity=valid?'':'.45'; btn.style.cursor=valid?'':'not-allowed'; }
+  return valid;
+}
 function buildMasseHero(){
-  const { bMin, bMax, hMin, hMax, pr } = _mhRange();
+  const { bMin, bMax, hMin, hMax } = _mhRange();
+  const def = _mhEnsureValidDefault();
   const ib = document.getElementById('mh-ib'), ih = document.getElementById('mh-ih');
-  if(ib){ ib.value = S.bMm || pr?.bDef || 1000; ib.min = bMin; ib.max = bMax; }
-  if(ih){ ih.value = S.hMm || pr?.hDef || 1200; ih.min = hMin; ih.max = hMax; }
+  if(ib){ ib.value = def.b; ib.min = bMin; ib.max = bMax; }
+  if(ih){ ih.value = def.h; ih.min = hMin; ih.max = hMax; }
   const rng = document.getElementById('mh-range');
-  if(rng) rng.textContent = 'Möglicher Bereich: Breite '+bMin+'–'+bMax+' mm, Höhe '+hMin+'–'+hMax+' mm.';
+  if(rng) rng.textContent = 'Mindestmaß: Breite '+bMin+' mm, Höhe '+hMin+' mm · Höchstmaß: Breite '+bMax+' mm, Höhe '+hMax+' mm.';
   const wrap = document.getElementById('mh-quickpick');
-  if(wrap){ const list = MH_PRESETS[S.prod] || MH_PRESETS.kunststoff;
+  if(wrap){ const list = (MH_PRESETS[S.prod] || MH_PRESETS.kunststoff)
+      .filter(function(p){ return p[0]>=bMin && p[0]<=bMax && p[1]>=hMin && p[1]<=hMax; });
     wrap.innerHTML = list.map(function(p){ return '<button type="button" class="szb" onclick="mhSetSz('+p[0]+','+p[1]+')">'+p[0]+'×'+p[1]+'</button>'; }).join(''); }
+  mhValidate();
 }
 function mhOnInput(){
   const { bMin, bMax, hMin, hMax } = _mhRange();
@@ -7091,16 +7136,18 @@ function mhOnInput(){
   const b=parseInt(ib.value)||0, h=parseInt(ih.value)||0;
   ib.style.borderColor=(b===0||(b>=bMin&&b<=bMax))?'':'rgba(118,169,250,0.45)';
   ih.style.borderColor=(h===0||(h>=hMin&&h<=hMax))?'':'rgba(118,169,250,0.45)';
+  mhValidate();
 }
 function mhSetSz(b,h){
   const ib=document.getElementById('mh-ib'), ih=document.getElementById('mh-ih');
   if(ib)ib.value=b; if(ih)ih.value=h; mhOnInput();
 }
 function heroSelectMasse(){
-  const { bMin, bMax, hMin, hMax } = _mhRange();
   const ib=document.getElementById('mh-ib'), ih=document.getElementById('mh-ih');
   let b=parseInt(ib&&ib.value)||0, h=parseInt(ih&&ih.value)||0;
-  if(b<bMin)b=bMin; if(b>bMax)b=bMax; if(h<hMin)h=hMin; if(h>hMax)h=hMax;
+  // Harte Sperre: out-of-range wird NICHT mehr still auf die Grenze geklemmt.
+  // Bei ungültigem Maß bleibt der Kunde im Maß-Schritt, mhValidate zeigt den Grund.
+  if(!mhValidate()) return;
   S.bMm=b; S.hMm=h;
   // in den bestehenden Detail-Maße-Step spiegeln, damit Anfrage/State konsistent sind
   const dib=document.getElementById('ib'), dih=document.getElementById('ih');
@@ -7671,19 +7718,36 @@ function wizRenderGlas(){
 function wizPickEarly(key,v){ S[key]=v; if(window._touched)window._touched.add(key); wizRenderPanel(); }
 function wizRenderMasse(){
   if(typeof applyFensterLimits==='function')applyFensterLimits();
-  const pr=S.prod?P.prod[S.prod]:null;
-  const b=S.bMm||(pr&&pr.bDef)||1000, h=S.hMm||(pr&&pr.hDef)||1200;
-  const bMin=(pr&&pr.bMin)||300,bMax=(pr&&pr.bMax)||4000,hMin=(pr&&pr.hMin)||300,hMax=(pr&&pr.hMax)||3000;
-  return '<div class="wiz-mass"><div class="wiz-mass-fields"><div style="flex:1"><label class="fl" for="wiz-mb">Breite (mm)</label><input class="inp" type="number" inputmode="numeric" id="wiz-mb" min="'+bMin+'" max="'+bMax+'" value="'+b+'" oninput="wizMassInput()"></div><div class="wiz-mass-x">×</div><div style="flex:1"><label class="fl" for="wiz-mh">Höhe (mm)</label><input class="inp" type="number" inputmode="numeric" id="wiz-mh" min="'+hMin+'" max="'+hMax+'" value="'+h+'" oninput="wizMassInput()"></div></div><div class="wiz-hint">Einbaumaß = Mauerwerksöffnung. Das Fenster wird ca. 10–20 mm kleiner gefertigt. Bereich: Breite '+bMin+'–'+bMax+' mm, Höhe '+hMin+'–'+hMax+' mm.</div></div>';
+  // Flügelabhängiger Bereich (Balkontür) — gleiche Quelle wie der Hero-Schritt.
+  const { bMin, bMax, hMin, hMax } = _mhRange();
+  const def=_mhEnsureValidDefault(); const b=def.b, h=def.h;
+  return '<div class="wiz-mass"><div class="wiz-mass-fields"><div style="flex:1"><label class="fl" for="wiz-mb">Breite (mm)</label><input class="inp" type="number" inputmode="numeric" id="wiz-mb" min="'+bMin+'" max="'+bMax+'" value="'+b+'" oninput="wizMassInput()"></div><div class="wiz-mass-x">×</div><div style="flex:1"><label class="fl" for="wiz-mh">Höhe (mm)</label><input class="inp" type="number" inputmode="numeric" id="wiz-mh" min="'+hMin+'" max="'+hMax+'" value="'+h+'" oninput="wizMassInput()"></div></div><div class="wiz-hint">Einbaumaß = Mauerwerksöffnung. Das Fenster wird ca. 10–20 mm kleiner gefertigt. Mindestmaß: Breite '+bMin+' mm, Höhe '+hMin+' mm · Höchstmaß: Breite '+bMax+' mm, Höhe '+hMax+' mm.</div><div id="wiz-mass-error" role="alert" style="display:none;margin-top:12px;padding:11px 14px;border-radius:10px;background:#fdecec;border:1px solid #f0c2c2;color:#9a2b2b;font-family:\'Manrope\',sans-serif;font-size:13.5px;font-weight:600;line-height:1.4"></div></div>';
+}
+// Validiert die Wizard-Maße gegen den aktiven (flügelabhängigen) Bereich,
+// zeigt eine Sperr-Meldung und (de)aktiviert den Wizard-Weiter-Button. true = gültig.
+function wizMassValidate(){
+  const { bMin, bMax, hMin, hMax } = _mhRange();
+  const ib=document.getElementById('wiz-mb'), ih=document.getElementById('wiz-mh');
+  const b=parseInt(ib&&ib.value)||0, h=parseInt(ih&&ih.value)||0;
+  const errEl=document.getElementById('wiz-mass-error'), btn=document.getElementById('wiz-nextbtn');
+  let msg='';
+  if(b>0 && b<bMin) msg='Mindestbreite '+bMin+' mm — in diesem Maß ist keine Konfiguration möglich.';
+  else if(b>bMax) msg='Höchstbreite '+bMax+' mm — in diesem Maß ist keine Konfiguration möglich.';
+  else if(h>0 && h<hMin) msg='Mindesthöhe '+hMin+' mm — in diesem Maß ist keine Konfiguration möglich.';
+  else if(h>hMax) msg='Höchsthöhe '+hMax+' mm — in diesem Maß ist keine Konfiguration möglich.';
+  const valid=(b>=bMin && b<=bMax && h>=hMin && h<=hMax);
+  if(errEl){ if(msg){ errEl.textContent=msg; errEl.style.display=''; } else { errEl.textContent=''; errEl.style.display='none'; } }
+  if(btn){ btn.disabled=!valid; btn.style.opacity=valid?'':'.45'; btn.style.cursor=valid?'':'not-allowed'; }
+  return valid;
 }
 function wizMassInput(){
-  const pr=S.prod?P.prod[S.prod]:null;
   const ib=document.getElementById('wiz-mb'), ih=document.getElementById('wiz-mh');
   let b=parseInt(ib&&ib.value)||0, h=parseInt(ih&&ih.value)||0;
-  const bMin=(pr&&pr.bMin)||300,bMax=(pr&&pr.bMax)||4000,hMin=(pr&&pr.hMin)||300,hMax=(pr&&pr.hMax)||3000;
-  if(b>0)S.bMm=Math.max(bMin,Math.min(bMax,b)); if(h>0)S.hMm=Math.max(hMin,Math.min(hMax,h));
+  // Harte Sperre statt stillem Clamp: nur gültige Werte in den State übernehmen.
+  const valid=wizMassValidate();
+  if(valid){ S.bMm=b; S.hMm=h; }
   if(window._touched){window._touched.add('bMm');window._touched.add('hMm');}
-  if(typeof mkDone==='function')mkDone(5);
+  if(typeof mkDone==='function' && valid)mkDone(5);
 }
 function wizGo(i){
   wizIdx=Math.max(0,Math.min(WIZ_STEPS.length-1,i));
@@ -7706,6 +7770,10 @@ function wizGo(i){
   document.getElementById('wiz-title').innerHTML=s.title;
   document.getElementById('wiz-sub').innerHTML=s.sub||'';
   wizCrumbs(); wizRenderPanel();
+  // Weiter-Button ist geteilt — beim Schrittwechsel wieder freigeben; der Maß-Schritt
+  // sperrt ihn ggf. selbst über wizMassValidate (harte Maß-Sperre).
+  const _nbtn=document.getElementById('wiz-nextbtn'); if(_nbtn){ _nbtn.disabled=false; _nbtn.style.opacity=''; _nbtn.style.cursor=''; }
+  if(s.key==='masse' && typeof wizMassValidate==='function') wizMassValidate();
   // Ansicht je Schritt: Farbe-Schritt richtet sich nach Außen/Innen-Tab (Außen = Außenseite ohne Griff/Scharniere),
   // Haustür-Türmodell immer Außen. ALLE anderen Schritte: zuletzt gewählte Ansicht BEIBEHALTEN —
   // wer außen Anthrazit gewählt hat, sieht außen Anthrazit weiter (kein verwirrender Sprung auf Innen/Weiß).
@@ -7731,7 +7799,7 @@ function wizCrumbs(){
   }).join('');
 }
 function wizCrumbLabel(k){return {profil:'Profil',psk:'PSK',hslauf:'Laufrichtung',tuer:'Türmodell',fluegel:'Aufteilung',anschlag:'Öffnung',glas:'Glas',masse:'Maße',farbe:'Farbe',glasdekor:'Motiv',schall:'Schall',griff:'Griff',griffhaus:'Türgriff',griffhst:'Griff',balk:'Schwelle',hstschwelle:'Schwelle',rolladen:'Rolladen',sprossen:'Sprossen',sicherheit:'Sicherheit',anzahl:'Anzahl',angebot:'Übersicht',kontakt:'Anfrage'}[k]||k;}
-function wizNext(){ if(WIZ_STEPS[wizIdx].key==='kontakt'){ if(typeof d2submit==='function')d2submit({preventDefault:function(){}}); return; } if(wizIdx>=WIZ_STEPS.length-1){ wizFinish(); return; } wizGo(wizIdx+1); window.scrollTo({top:0,behavior:'auto'}); }
+function wizNext(){ if(WIZ_STEPS[wizIdx].key==='masse' && typeof wizMassValidate==='function' && !wizMassValidate()) return; if(WIZ_STEPS[wizIdx].key==='kontakt'){ if(typeof d2submit==='function')d2submit({preventDefault:function(){}}); return; } if(wizIdx>=WIZ_STEPS.length-1){ wizFinish(); return; } wizGo(wizIdx+1); window.scrollTo({top:0,behavior:'auto'}); }
 function wizBack(){ if(wizIdx<=0){ wizExitToProd(); return; } wizGo(wizIdx-1); window.scrollTo({top:0,behavior:'auto'}); }
 // Auto-Advance: nach Auswahl einer Karte direkt zum nächsten Schritt — nur bei eindeutigen Einfach-Auswahl-Schritten.
 // Nicht bei: Farbe (Kundenwunsch), Maße/Anzahl (Eingabe), Schall/Griff/Rolladen/Sprossen (Mehrfach-/Detailauswahl).
@@ -8217,11 +8285,13 @@ function buildSzButtons() {
   if (!wrap) return;
   const presets = {
     kunststoff: [[600,600],[800,1000],[1000,1200],[1230,1480],[1500,1500],[2000,1400]],
-    balkontuer: [[800,2000],[900,2100],[1000,2100],[1200,2100],[1500,2200]],
+    balkontuer: [[800,2000],[900,2100],[1000,2100],[1300,2000],[1500,2100],[1700,2100],[2000,2200]],
     haustuere:  [[900,2000],[1000,2100],[1100,2200],[1200,2200],[1400,2300]],
     hst:        [[2000,2100],[2500,2100],[3000,2200],[3500,2200],[4000,2300]],
   };
-  const list = presets[S.prod] || presets.kunststoff;
+  const r = (typeof _mhRange==='function') ? _mhRange() : {bMin:0,bMax:1e9,hMin:0,hMax:1e9};
+  const list = (presets[S.prod] || presets.kunststoff)
+    .filter(([b,h]) => b>=r.bMin && b<=r.bMax && h>=r.hMin && h<=r.hMax);
   wrap.innerHTML = list.map(([b,h]) => `<button class="szb" onclick="setSz(${b},${h})">${b}×${h}</button>`).join('');
 }
 
