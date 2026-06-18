@@ -7370,26 +7370,22 @@ const WIZ_DOORS=['vollglas-inox','florida-lr-inox','montana-2-lr-inox','montana-
 function wizRenderPsk(){ return '<div class="wiz-cards">'+Object.keys(P.pskKammer).map(function(k){ var o=P.pskKammer[k]; return '<div class="wiz-card'+(k===S.pskKammer?' sel':'')+'" onclick="wizSetPsk(\''+k+'\')"><img src="img/karten/profil/'+k+'.png?v=20260609c" alt="'+o.name+'" loading="lazy"><div class="wiz-cn">'+o.name+'</div><div class="wiz-csub">'+(o.sub||'')+'</div></div>'; }).join('')+'</div>'; }
 function wizSetPsk(v){ wizSet('pskKammer',v); }
 function wizRenderTuermodell(){ return '<div class="wiz-cards">'+WIZ_DOORS.map(function(d){return '<div class="wiz-card'+(d.key===S.tuerModell?' sel':'')+'" onclick="wizSet(\'tuerModell\',\''+d.key+'\')"><div class="wiz-gbox"><img src="'+d.img+'" alt="'+d.name+'" loading="lazy"></div><div class="wiz-cn">'+d.name+'</div></div>';}).join('')+'</div>'; }
+var wizGriffMore={tuerGriffInnen:false,tuerGriffAussen:false};
+function wizGriffMoreToggle(sk){ wizGriffMore[sk]=!wizGriffMore[sk]; if(typeof wizRenderPanel==='function')wizRenderPanel(); }
 function wizRenderTuergriff(){
-  // Innen + Außen nebeneinander (zwei Spalten), damit man beide Türgriffe auf einen Blick sieht
-  function griffCards(obj, sel, sk){
-    return Object.keys(obj).map(function(k){const o=obj[k];return '<div class="wiz-card wiz-card-opt'+(k===sel?' sel':'')+'" onclick="wizSet(\''+sk+'\',\''+k+'\')"><div class="wiz-sym"><img src="'+o.img+'" alt="'+o.name+'" loading="lazy"></div><div class="wiz-cn">'+o.name+'</div></div>';}).join('');
+  // Innen + Außen NEBENEINANDER, ganze Klinke sichtbar. Pro Seite die wichtigsten zeigen,
+  // Rest via "Alle anzeigen" (Außen hat viele Stoßgriffe).
+  function shortName(n){ return (n||'').replace('Haustür-Klinke ','').replace('Haustürgriff ','').replace('Haustür-Griff ',''); }
+  function col(title,subt,obj,sel,sk){
+    var keys=Object.keys(obj), LIM=4, all=wizGriffMore[sk], shown=all?keys:keys.slice(0,LIM);
+    var cards=shown.map(function(k){var o=obj[k];return '<button type="button" class="wiz-grcard'+(k===sel?' sel':'')+'" onclick="wizSet(\''+sk+'\',\''+k+'\')"><span class="wiz-grimg"><img src="'+o.img+'" alt="'+o.name+'" loading="lazy"></span><span class="wiz-grnm">'+shortName(o.name)+'</span></button>';}).join('');
+    var more=keys.length>LIM?'<button type="button" class="wiz-grmore" onclick="wizGriffMoreToggle(\''+sk+'\')">'+(all?'Weniger':'Alle '+keys.length+' →')+'</button>':'';
+    return '<div class="wiz-grcol"><div class="wiz-grhd">'+title+'<small>'+subt+'</small></div>'+cards+more+'</div>';
   }
-  function head(ic,title,sub){
-    return '<div class="wiz-griffhead"><i class="ms wiz-griffic">'+ic+'</i><div class="wiz-griffht"><div class="wiz-griffhn">'+title+'</div><div class="wiz-griffhs">'+sub+'</div></div></div>';
-  }
-  // Innen/Außen als Umschalter (eine Seite sichtbar) → passt ohne Scrollen aufs Handy.
-  var inName=(P.tuerGriffInnen[S.tuerGriffInnen]&&P.tuerGriffInnen[S.tuerGriffInnen].name)||'–';
-  var auName=(P.tuerGriffAussen[S.tuerGriffAussen]&&P.tuerGriffAussen[S.tuerGriffAussen].name)||'–';
-  var isInnen=(wizGriffTab!=='aussen');
-  var h='<div class="wiz-tabs">'+
-    '<button type="button" class="wiz-tab'+(isInnen?' sel':'')+'" onclick="wizGriffTabSet(\'innen\')" style="display:flex;flex-direction:column;line-height:1.3;padding:8px"><span><strong>Innen</strong></span><span style="font-size:11px;font-weight:400;opacity:.72">Klinke im Raum · '+inName.split('(')[0].trim()+'</span></button>'+
-    '<button type="button" class="wiz-tab'+(!isInnen?' sel':'')+'" onclick="wizGriffTabSet(\'aussen\')" style="display:flex;flex-direction:column;line-height:1.3;padding:8px"><span><strong>Außen</strong></span><span style="font-size:11px;font-weight:400;opacity:.72">von der Straße · '+auName.split('(')[0].trim()+'</span></button>'+
+  return '<div class="wiz-grcols">'+
+    col('Innen','Klinke im Raum',P.tuerGriffInnen,S.tuerGriffInnen,'tuerGriffInnen')+
+    col('Außen','von der Straße',P.tuerGriffAussen,S.tuerGriffAussen,'tuerGriffAussen')+
   '</div>';
-  h+= isInnen
-    ? '<div class="wiz-cards">'+griffCards(P.tuerGriffInnen,S.tuerGriffInnen,'tuerGriffInnen')+'</div>'
-    : '<div class="wiz-cards">'+griffCards(P.tuerGriffAussen,S.tuerGriffAussen,'tuerGriffAussen')+'</div>';
-  return h;
 }
 let wizGriffTab='innen';
 function wizGriffTabSet(t){ wizGriffTab=t; if(typeof wizRenderPanel==='function')wizRenderPanel(); }
@@ -7731,7 +7727,7 @@ function wizMassInput(){
 }
 function wizGo(i){
   wizIdx=Math.max(0,Math.min(WIZ_STEPS.length-1,i));
-  wizExtraOpen=null; wizGriffTab='innen';
+  wizExtraOpen=null; wizGriffTab='innen'; if(typeof wizGriffMore!=='undefined'){wizGriffMore.tuerGriffInnen=false;wizGriffMore.tuerGriffAussen=false;}
   const s=WIZ_STEPS[wizIdx];
   // Farbe-Schritt immer zuerst auf Außen (Kundenwunsch) — vor dem Rendern setzen
   if(s.key==='farbe') wizFarbTab='fa';
@@ -15050,8 +15046,19 @@ async function submitSkizze(e) {
      kein eingebetteter Kasten-Rand. Foto-Hintergrund = Kachel-Hintergrund (nahtlos). */
   #cfg-wizard .wiz-card-opt .wiz-sym{ background:#34353a !important; height:98px !important; border-radius:10px !important; overflow:hidden; }
   #cfg-wizard .wiz-card-opt .wiz-sym img{ object-fit:cover !important; object-position:center 44% !important; padding:0 !important; width:100% !important; height:100% !important; }
-  /* Tür-Vorschau im Hochformat höher zeigen, damit die GANZE Tür sichtbar ist (nicht gestaucht) */
-  #cfg-wizard[data-prod="haustuere"] .wiz-body:not(.cards-mode) .wiz-stage #prev-wrap{ height:216px !important; width:auto !important; aspect-ratio:1/1.7 !important; margin:0 auto !important; }
+  /* Tür-Vorschau: ganze Tür in natürlicher Proportion (nicht langgezogen) */
+  #cfg-wizard[data-prod="haustuere"] .wiz-body:not(.cards-mode) .wiz-stage #prev-wrap{ height:162px !important; width:120px !important; max-width:50% !important; margin:0 auto !important; aspect-ratio:auto !important; }
+  /* Türgriff: Innen + Außen NEBENEINANDER, ganze Klinke sichtbar */
+  #cfg-wizard .wiz-grcols{ display:grid; grid-template-columns:1fr 1fr; gap:12px; max-width:520px; margin:0 auto; }
+  #cfg-wizard .wiz-grcol{ display:flex; flex-direction:column; gap:8px; }
+  #cfg-wizard .wiz-grhd{ font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:14px; color:#14233f; text-align:center; display:flex; flex-direction:column; line-height:1.15; margin-bottom:2px; }
+  #cfg-wizard .wiz-grhd small{ font-weight:500; font-size:10.5px; color:#7a8aa0; }
+  #cfg-wizard .wiz-grcard{ display:flex; flex-direction:column; align-items:center; gap:5px; border:1.5px solid #e4ebf4; border-radius:12px; padding:6px; background:#fff; cursor:pointer; }
+  #cfg-wizard .wiz-grcard.sel{ border-color:var(--c-primary); box-shadow:0 0 0 3px rgba(34,94,170,.12); }
+  #cfg-wizard .wiz-grimg{ width:100%; height:82px; border-radius:9px; background:#34353a; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  #cfg-wizard .wiz-grimg img{ width:100%; height:100%; object-fit:contain; padding:3px; }
+  #cfg-wizard .wiz-grnm{ font-family:'Manrope',sans-serif; font-size:11.5px; font-weight:600; color:#14233f; text-align:center; line-height:1.2; }
+  #cfg-wizard .wiz-grmore{ margin-top:2px; border:1px solid #d6e0ee; background:#f3f7fd; color:#225eaa; border-radius:9px; padding:9px 6px; font-weight:700; font-family:'Plus Jakarta Sans',sans-serif; cursor:pointer; font-size:12px; min-height:44px; }
   /* === STUFE 4: Bestellübersicht im Onlineshop-Stil (Warenkorb-Karten) === */
   #cfg-wizard .wiz-ohead{ font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:15px; color:#14233f; margin:0 auto 12px; max-width:560px; text-align:left; }
   #cfg-wizard .wiz-ocards{ max-width:560px; margin:0 auto; display:flex; flex-direction:column; gap:12px; }
