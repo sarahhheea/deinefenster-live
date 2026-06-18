@@ -1397,14 +1397,21 @@ function oeffneDetail(id) {
       </div>
     </div>
     <div class="shop-detail-cta">
-      <div>
+      <div class="shop-detail-cta-price">
         <span class="block text-[11px] text-ink-soft">${istSammelInserat(p) ? 'Preis ab' : 'Preis'}</span>
         <span class="text-2xl font-extrabold text-primary leading-none">${formatPreis(p.preis_eur)}</span>
       </div>
-      <button id="detailAddBtn" class="bg-primary text-white px-6 py-3 rounded-full text-sm font-bold hover:bg-primary-d transition-colors inline-flex items-center gap-1.5 whitespace-nowrap">
-        <span class="material-symbols-outlined" style="font-size:18px">send</span>
-        Anfrage senden
-      </button>
+      <div class="shop-detail-cta-btns">
+        <a href="https://wa.me/491717263776?text=${encodeURIComponent(`Hallo, ist "${p.titel}" (${p.breite_mm}×${p.hoehe_mm} mm, ${formatPreis(p.preis_eur)}, Art-Nr. ${p.id}) noch verfügbar?`)}"
+           target="_blank" rel="noopener" class="detail-cta-wa" aria-label="Per WhatsApp anfragen">
+          <span class="material-symbols-outlined" style="font-size:18px">chat</span>
+          WhatsApp
+        </a>
+        <button id="detailAddBtn" class="detail-cta-anfrage">
+          <span class="material-symbols-outlined" style="font-size:18px">mail</span>
+          Anfragen
+        </button>
+      </div>
     </div>`;
   detail.querySelector('#detailAddBtn').addEventListener('click', () => {
     schliesseDetail();
