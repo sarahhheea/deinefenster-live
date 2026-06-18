@@ -816,6 +816,9 @@ function rendere() {
   gridEl.querySelectorAll('[data-action="kundendruck"]').forEach(btn => {
     btn.addEventListener('click', e => { e.stopPropagation(); const p = STATE.produkte.find(x => x.id === btn.dataset.id); if (p) druckeProduktblatt(p); });
   });
+  gridEl.querySelectorAll('[data-action="anfrage"]').forEach(btn => {
+    btn.addEventListener('click', e => { e.stopPropagation(); const p = STATE.produkte.find(x => x.id === btn.dataset.id); if (p) oeffneAnfrageModal(p); });
+  });
 }
 
 // Bestands-Badge zentral. "Nur X verfügbar" auf jedem Einzelprodukt (neu + gebraucht).
@@ -840,19 +843,35 @@ function istSammelInserat(p) {
 
 function karteHtml(p) {
   const istNeu = _asArr(p.zustand).includes('neu');
-  const lagerBadge = lagerBadgeHtml(p);
-  const rcBadge = p.rc_klasse ? `<span class="pill is-gold">${p.rc_klasse}</span>` : '';
-  // Verglasungs-Badge nur bei Produkten mit Glas (Fenster/Balkontür/Haustür/Schiebetür) — NICHT bei Dämmung/Baumaterialien/Garagentor
+  const istGebraucht = _asArr(p.zustand).includes('gebraucht');
+  // Verglasung nur bei Produkten mit Glas (Fenster/Balkontür/Haustür/Schiebetür) — NICHT bei Dämmung/Baumaterialien/Garagentor
   const NO_GLAS_KATS = new Set(['daemmung','baumaterialien','garagentor-gebraucht']);
-  const verglasungBadge = !NO_GLAS_KATS.has(kategorieZuGruppe(p.kategorie))
-    ? _asArr(p.verglasung).map(v => `<span class="pill is-primary">${v}-Verglasung</span>`).join('') : '';
-  const zustandBadge = _asArr(p.zustand).includes('gebraucht') ? `<span class="pill is-warning">Gebraucht</span>` : '';
-  const sonderpreisBadge = p.sonderpreis_eur ? `<span class="pill is-warning">Sonderpreis *</span>` : '';
-  const exportBadge = p.export_modell ? `<span class="pill is-primary">Export *</span>` : '';
-  const groesseBadge = p.groesse_klasse ? `<span class="pill">${groesseLabel(p.groesse_klasse)}</span>` : '';
-  const standBadge = p.standnummer ? `<span class="pill" style="background:#e8f0fe;color:#225eaa;border-color:rgba(34,94,170,0.30);font-weight:800">📍 Stand ${escapeHtml(p.standnummer)}</span>` : '';
+  const verglasungTxt = !NO_GLAS_KATS.has(kategorieZuGruppe(p.kategorie))
+    ? _asArr(p.verglasung).map(v => `${v}-fach`).join(' · ') : '';
   const istMarkiert = !!p.sonderpreis_eur || !!p.export_modell;
   const preisStern = istMarkiert ? '*' : '';
+
+  // Verfügbarkeit als dezenter, aber sichtbarer Hinweis (Knappheit treibt Anfragen)
+  const verfTxt = istSammelInserat(p) ? '' :
+    (p.lagerbestand > 1 ? `${p.lagerbestand} auf Lager` : `Nur ${p.lagerbestand} verfügbar`);
+  // Gebraucht-Tag als kleine Marke aufs Bild (oben links), wie bei Kleinanzeigen die Zustandsmarke
+  const zustandTag = istGebraucht
+    ? '<span class="karte-tag karte-tag--gebraucht">Gebraucht</span>' : '';
+
+  // Kompakte Meta-Zeile: Stand · Verglasung · Verfügbarkeit (statt Pillen-Stapel)
+  const metaParts = [];
+  if (p.standnummer) metaParts.push(`<span class="karte-stand">📍 Stand ${escapeHtml(p.standnummer)}</span>`);
+  if (verglasungTxt) metaParts.push(`<span>${verglasungTxt}</span>`);
+  if (p.rc_klasse) metaParts.push(`<span>${escapeHtml(p.rc_klasse)}</span>`);
+  if (verfTxt) metaParts.push(`<span class="karte-verf">${verfTxt}</span>`);
+  const metaZeile = metaParts.length
+    ? `<div class="karte-meta">${metaParts.join('<span class="karte-meta-dot">·</span>')}</div>` : '';
+
+  // Preis-Präfix (Sonderpreis/Export/Sammel-„ab")
+  const preisPrefix = p.sonderpreis_eur
+    ? '<span class="karte-preis-tag">Sonderpreis</span>'
+    : (p.export_modell ? '<span class="karte-preis-tag">Export</span>'
+    : (istSammelInserat(p) ? '<span class="karte-preis-tag">ab</span>' : ''));
 
   // Druck-Icon + 3-Punkte-Menü nur für eingeloggte User sichtbar
   const druckIcon = STATE.loggedIn ? `
@@ -875,17 +894,15 @@ function karteHtml(p) {
     : '';
   const archivStyle = istArchiviert ? 'opacity:0.55;filter:saturate(0.6)' : '';
 
-  // Anfrage-CTA-Reihe: WhatsApp groß als Haupt-Action, Details klein als Sekundär
-  const waText = encodeURIComponent(`Hallo, ist "${p.titel}" (${p.breite_mm}×${p.hoehe_mm} mm, ${formatPreis(p.preis_eur)}) noch verfügbar?`);
+  // Haupt-Action: blauer „Anfragen"-Knopf aufs On-Site-Formular (oeffneAnfrageModal, DSGVO-konform).
+  // Sekundär (Details/Teilen/Drucken) bleibt für Desktop, am Handy ausgeblendet.
   const ctaRow = istArchiviert ? '' : `
         <div class="shop-card-cta-row">
-          <a href="https://wa.me/491717263776?text=${waText}" target="_blank" rel="noopener"
-             class="shop-card-cta-wa"
-             onclick="event.stopPropagation()"
-             aria-label="Per WhatsApp anfragen">
-            <span class="material-symbols-outlined">chat</span>
+          <button type="button" class="shop-card-cta-anfrage" data-action="anfrage" data-id="${p.id}"
+             aria-label="${escapeHtml(p.titel)} anfragen">
+            <span class="material-symbols-outlined">mail</span>
             Anfragen
-          </a>
+          </button>
         </div>
         <div class="shop-card-cta-row shop-card-cta-secondary" style="margin-top:6px">
           <button type="button" class="shop-card-cta-details" style="flex:1" aria-label="Details ansehen">
@@ -907,20 +924,20 @@ function karteHtml(p) {
       <div class="karte-bild-wrap" style="position:relative">
         <img src="${escapeHtml(p.bild)}" alt="${escapeHtml(p.titel)}" class="karte-bild w-full" loading="lazy" decoding="async" onerror="this.src='img/fenster_standard.png'"/>
         <span class="symbolbild-mini">Symbolbild</span>
+        ${zustandTag}
         ${archivBadge}
         ${druckIcon}
         ${aktionMenu}
       </div>
-      <div class="p-4 flex flex-col flex-1">
-        <div class="flex flex-wrap gap-1.5 mb-2">${standBadge}${zustandBadge}${sonderpreisBadge}${exportBadge}${groesseBadge}${verglasungBadge}${rcBadge}${lagerBadge}</div>
-        <h3 class="text-sm font-bold leading-snug line-clamp-2 mb-1 text-ink">${escapeHtml(p.titel)}</h3>
-        <p class="text-[11px] text-ink-soft mb-1">${escapeHtml(p.system)} · ${p.breite_mm} × ${p.hoehe_mm} mm</p>
-        <p class="text-[11px] text-ink-soft mb-3 line-clamp-2">${nl2br(p.beschreibung)}</p>
-        <div class="mt-auto">
-          <div>
-            ${p.sonderpreis_eur ? '<span class="text-[10px] text-ink-soft block">Sonderpreis</span>' : (p.export_modell ? '<span class="text-[10px] text-ink-soft block">Export</span>' : (istSammelInserat(p) ? '<span class="text-[10px] text-ink-soft block">ab</span>' : ''))}
-            <span class="text-xl font-extrabold text-primary leading-none">${formatPreis(p.preis_eur)}<span class="text-sm">${preisStern}</span></span>
-          </div>
+      <div class="karte-body">
+        <div class="karte-preis-row">
+          ${preisPrefix}
+          <span class="karte-preis">${formatPreis(p.preis_eur)}<span class="karte-preis-stern">${preisStern}</span></span>
+        </div>
+        <p class="karte-masse"><span class="material-symbols-outlined">straighten</span>${p.breite_mm} × ${p.hoehe_mm} mm</p>
+        <h3 class="karte-titel line-clamp-2">${escapeHtml(p.titel)}</h3>
+        ${metaZeile}
+        <div class="karte-cta-wrap">
           ${ctaRow}
         </div>
       </div>

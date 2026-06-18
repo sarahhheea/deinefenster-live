@@ -461,22 +461,65 @@ input[type="range"].range-clean::-moz-range-thumb {
   height: 100%;
 }
 #produktGrid { align-items: stretch; }
-/* Inhalts-Bereiche konsistent für gleich aussehende Karten in einer Reihe */
-.karte h3.line-clamp-2 { min-height: 2.6em; }
-.karte p.line-clamp-2 { min-height: 2.6em; }
 .karte:hover {
   border-color: var(--c-border-mid);
   background: rgba(118,169,250,0.06);
   box-shadow: 0 8px 32px rgba(34,94,170,0.18);
   transform: translateY(-2px);
 }
+/* Bild füllt die Karte randlos (Kleinanzeigen-Look) — kein blauer Rand, kein Schwimmen */
 .karte-bild {
   aspect-ratio: 4 / 3;
-  background: #f2f6fc;
-  object-fit: contain;
-  padding: 8px;
+  width: 100%;
+  background: #eef3fb;
+  object-fit: cover;
+  display: block;
 }
 .karte-bild-wrap { position: relative; }
+
+/* ── Karten-Body: klare Hierarchie Preis → Maße → Titel → Meta → Anfragen ── */
+.karte-body {
+  padding: 12px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.karte-preis-row { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+.karte-preis-tag {
+  font-size: 11px; font-weight: 600; color: var(--c-ink-soft, #5b6b85);
+  text-transform: uppercase; letter-spacing: 0.03em;
+}
+.karte-preis {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 23px; font-weight: 800; color: #225eaa; line-height: 1.05;
+}
+.karte-preis-stern { font-size: 14px; vertical-align: super; }
+.karte-masse {
+  display: flex; align-items: center; gap: 5px;
+  margin-top: 4px;
+  font-size: 14px; font-weight: 700; color: #1f2937;
+}
+.karte-masse .material-symbols-outlined { font-size: 17px; color: #225eaa; }
+.karte-titel {
+  margin-top: 6px;
+  font-size: 14px; font-weight: 600; line-height: 1.3; color: var(--c-ink, #1d2433);
+}
+.karte-meta {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 4px;
+  margin-top: 6px;
+  font-size: 12px; color: var(--c-ink-soft, #6b7890);
+}
+.karte-meta-dot { opacity: 0.5; }
+.karte-stand { color: #225eaa; font-weight: 700; }
+.karte-verf { color: #b45309; font-weight: 700; }
+.karte-cta-wrap { margin-top: auto; padding-top: 12px; }
+/* Zustands-Marke aufs Bild (oben links) */
+.karte-tag {
+  position: absolute; top: 8px; left: 8px; z-index: 3;
+  font-size: 10px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase;
+  padding: 4px 8px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+}
+.karte-tag--gebraucht { background: #b45309; color: #fff; }
 .symbolbild-mini {
   position: absolute;
   bottom: 8px;
@@ -1003,32 +1046,32 @@ input[type="range"].range-clean::-moz-range-thumb {
   gap: 6px;
   margin-top: 10px;
 }
-.shop-card-cta-wa {
+.shop-card-cta-anfrage {
   flex: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
   padding: 11px 12px;
-  background: #25D366;
+  background: #225eaa;
   color: #fff;
   border-radius: 10px;
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-weight: 700;
-  font-size: 13px;
+  font-weight: 800;
+  font-size: 14px;
   text-decoration: none;
-  box-shadow: 0 4px 10px rgba(37,211,102,0.30);
+  box-shadow: 0 4px 12px rgba(34,94,170,0.28);
   transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
   min-height: 48px;
   border: none;
   cursor: pointer;
 }
-.shop-card-cta-wa:hover {
-  background: #1da851;
+.shop-card-cta-anfrage:hover {
+  background: #1b4d8c;
   transform: translateY(-1px);
-  box-shadow: 0 6px 14px rgba(37,211,102,0.40);
+  box-shadow: 0 6px 16px rgba(34,94,170,0.38);
 }
-.shop-card-cta-wa .material-symbols-outlined { font-size: 16px; }
+.shop-card-cta-anfrage .material-symbols-outlined { font-size: 18px; }
 .shop-card-cta-details {
   display: inline-flex;
   align-items: center;
@@ -1052,12 +1095,14 @@ input[type="range"].range-clean::-moz-range-thumb {
 /* Kleinanzeigen-Stil: kompakte 2-spaltige Karten am Handy */
 @media (max-width: 640px) {
   #produktGrid { gap: 12px; }
-  .karte .p-4 { padding: 11px 12px 13px; }
-  .karte h3.line-clamp-2 { min-height: 0; font-size: 13.5px; }
-  .karte p.line-clamp-2 { display: none; }            /* Beschreibung weg — spart Platz, wie Kleinanzeigen */
+  .karte-body { padding: 10px 11px 12px; }
+  .karte-preis { font-size: 20px; }
+  .karte-masse { font-size: 13px; }
+  .karte-titel { font-size: 13px; }
+  .karte-meta { font-size: 11px; }
   .shop-card-cta-secondary { display: none; }          /* Teilen/Drucken/Details-Reihe weg (steckt im Detail) */
-  .shop-card-cta-wa { font-size: 14px; min-height: 50px; padding: 12px 10px; }
-  .shop-card-cta-wa .material-symbols-outlined { font-size: 19px; }
+  .shop-card-cta-anfrage { font-size: 14px; min-height: 50px; padding: 12px 10px; }
+  .shop-card-cta-anfrage .material-symbols-outlined { font-size: 19px; }
 }
 /* ── END SHOP HERO-CARD ── */
 
@@ -1599,7 +1644,7 @@ input[type="range"].range-clean::-moz-range-thumb {
       <a href="kontakt.html" class="nav-link text-white/80 hover:text-white transition-colors text-sm font-medium tracking-tight">Kontakt</a>
     </div>
     <div class="flex items-center gap-3 md:gap-6">
-      <a href="/anfrage.html" class=" hidden md:inline-flex items-center gap-1.5 px-5 py-1.5 rounded-full font-semibold text-xs tracking-wide transition-all duration-200" style="background:#225eaa;color:#fff;letter-spacing:0.02em;">
+      <a href="/anfrage.html" class="nav-cta-desktop hidden md:inline-flex items-center gap-1.5 px-5 py-1.5 rounded-full font-semibold text-xs tracking-wide transition-all duration-200" style="background:#225eaa;color:#fff;letter-spacing:0.02em;">
         <span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">mail</span> Angebot anfragen
       </a>
       <button id="menuBtn" class="md:hidden text-white p-1" aria-label="Menü öffnen">
@@ -1635,6 +1680,7 @@ input[type="range"].range-clean::-moz-range-thumb {
       <a href="glossar.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Glossar</a>
       <a href="ueber-uns.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Über uns</a>
       <a href="kontakt.html" class="text-white font-semibold text-lg py-2 border-b border-white/10">Kontakt</a>
+      <a href="https://wa.me/491717263776" target="_blank" rel="noopener" class="text-white font-semibold text-lg py-2 border-b border-white/10 flex items-center gap-2"><span class="material-symbols-outlined" aria-hidden="true">chat</span> WhatsApp</a>
       <a href="/anfrage.html" class=" mt-2 px-6 py-4 rounded-full font-bold text-center text-sm inline-flex items-center justify-center gap-2" style="background:#225eaa;color:#fff;">
         <span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">mail</span> Angebot anfragen
       </a>
@@ -2361,7 +2407,7 @@ input[type="range"].range-clean::-moz-range-thumb {
 </a>
 
 <script src="js/sheets-config.js" defer></script>
-<script src="js/shop.js?v=2026-06-16-farbgruppen" defer></script>
+<script src="js/shop.js?v=2026-06-18-karten-handy" defer></script>
 
 <style>
 /* ===== NAV/Topbar/Mega/Mobile auf HELL (Shop-only Override, nav.css unangetastet) 2026-06-01 ===== */
@@ -2370,6 +2416,14 @@ input[type="range"].range-clean::-moz-range-thumb {
 .topbar-link:hover, .topbar-phone:hover { color: #173f73 !important; text-shadow: none !important; }
 .topbar-dot { color: rgba(34,94,170,0.32) !important; }
 .topbar-whatsapp { box-shadow: none !important; }
+/* Am Handy oben aufräumen: WhatsApp-Pille + Hofverkauf-Zeile + Desktop-CTA raus
+   (WhatsApp & Anfrage stecken im Hamburger-Menü). !important, weil der Tailwind-Build
+   die hidden/md:-Utilities sonst überschreibt. Ergebnis: oben nur Telefon + Logo + Menü. */
+@media (max-width: 767px) {
+  .topbar-whatsapp { display: none !important; }
+  .topbar-hof { display: none !important; }
+  .nav-cta-desktop { display: none !important; }
+}
 
 #navbar { background: rgba(255,255,255,0.82) !important; border-bottom: 1px solid rgba(34,94,170,0.12) !important; }
 #navbar.scrolled { background: rgba(255,255,255,0.97) !important; }
