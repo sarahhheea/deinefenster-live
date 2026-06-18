@@ -7378,11 +7378,21 @@ function wizRenderTuergriff(){
   function head(ic,title,sub){
     return '<div class="wiz-griffhead"><i class="ms wiz-griffic">'+ic+'</i><div class="wiz-griffht"><div class="wiz-griffhn">'+title+'</div><div class="wiz-griffhs">'+sub+'</div></div></div>';
   }
-  return '<div class="wiz-griff2col">'+
-    '<div class="wiz-griffcol is-innen">'+head('meeting_room','Türgriff innen','die Klinke im Raum')+'<div class="wiz-cards">'+griffCards(P.tuerGriffInnen,S.tuerGriffInnen,'tuerGriffInnen')+'</div></div>'+
-    '<div class="wiz-griffcol is-aussen">'+head('villa','Türgriff außen','der Griff von der Straße')+'<div class="wiz-cards">'+griffCards(P.tuerGriffAussen,S.tuerGriffAussen,'tuerGriffAussen')+'</div></div>'+
+  // Innen/Außen als Umschalter (eine Seite sichtbar) → passt ohne Scrollen aufs Handy.
+  var inName=(P.tuerGriffInnen[S.tuerGriffInnen]&&P.tuerGriffInnen[S.tuerGriffInnen].name)||'–';
+  var auName=(P.tuerGriffAussen[S.tuerGriffAussen]&&P.tuerGriffAussen[S.tuerGriffAussen].name)||'–';
+  var isInnen=(wizGriffTab!=='aussen');
+  var h='<div class="wiz-tabs">'+
+    '<button type="button" class="wiz-tab'+(isInnen?' sel':'')+'" onclick="wizGriffTabSet(\'innen\')" style="display:flex;flex-direction:column;line-height:1.3;padding:8px"><span><strong>Innen</strong></span><span style="font-size:11px;font-weight:400;opacity:.72">Klinke im Raum · '+inName.split('(')[0].trim()+'</span></button>'+
+    '<button type="button" class="wiz-tab'+(!isInnen?' sel':'')+'" onclick="wizGriffTabSet(\'aussen\')" style="display:flex;flex-direction:column;line-height:1.3;padding:8px"><span><strong>Außen</strong></span><span style="font-size:11px;font-weight:400;opacity:.72">von der Straße · '+auName.split('(')[0].trim()+'</span></button>'+
   '</div>';
+  h+= isInnen
+    ? '<div class="wiz-cards">'+griffCards(P.tuerGriffInnen,S.tuerGriffInnen,'tuerGriffInnen')+'</div>'
+    : '<div class="wiz-cards">'+griffCards(P.tuerGriffAussen,S.tuerGriffAussen,'tuerGriffAussen')+'</div>';
+  return h;
 }
+let wizGriffTab='innen';
+function wizGriffTabSet(t){ wizGriffTab=t; if(typeof wizRenderPanel==='function')wizRenderPanel(); }
 function wizRenderSchiebegriff(){
   // IGLO-HS Griff-Auswahl: Innengriff-Farbe (Muschelgriff) + Außengriff-Farbe (Schiebegriff) + Schloss-Option.
   var hint='<small style="font-weight:600;color:#5a6a85;font-size:12px">';
@@ -7395,11 +7405,17 @@ function wizRenderSchiebegriff(){
     var imgFor=function(k){return 'img/drutex-griffe/hst-hebel'+(k==='ohne'?'':'-schloss')+'-'+col+'.webp';};
     return Object.keys(P.hstSchloss).map(function(k){const o=P.hstSchloss[k];return '<div class="wiz-card wiz-card-opt wiz-hstgr'+(k===S.hstSchloss?' sel':'')+'" onclick="wizSet(\'hstSchloss\',\''+k+'\')"><div class="wiz-sym"><img src="'+imgFor(k)+'" alt="'+o.name+'" loading="lazy"></div><div class="wiz-cn">'+o.name+'</div><div class="wiz-csub">'+(o.sub||'')+'</div></div>';}).join('');
   }
-  return '<div class="wiz-hstgrwrap">'+
-    '<div class="wiz-group"><div class="wiz-gt">Innengriff '+hint+'— Muschelgriff (im Raum)</small></div><div class="wiz-cards">'+colorCards(P.hstGriff,S.hstGriff,'hstGriff')+'</div></div>'+
-    '<div class="wiz-group"><div class="wiz-gt">Außengriff '+hint+'— Schiebegriff (von der Straße)</small></div><div class="wiz-cards">'+colorCards(P.hstGriffAussen,S.hstGriffAussen,'hstGriffAussen')+'</div></div>'+
-    '<div class="wiz-group"><div class="wiz-gt">Abschließbar?</div><div class="wiz-cards">'+schlossCards()+'</div></div>'+
-    '</div>';
+  // Innen/Außen/Abschließbar als Umschalter (eine Sektion sichtbar) → passt ohne Scrollen.
+  var tab=(['innen','aussen','schloss'].indexOf(wizGriffTab)>=0)?wizGriffTab:'innen';
+  var h='<div class="wiz-tabs wiz-tabs-3">'+
+    '<button type="button" class="wiz-tab'+(tab==='innen'?' sel':'')+'" onclick="wizGriffTabSet(\'innen\')">Innengriff</button>'+
+    '<button type="button" class="wiz-tab'+(tab==='aussen'?' sel':'')+'" onclick="wizGriffTabSet(\'aussen\')">Außengriff</button>'+
+    '<button type="button" class="wiz-tab'+(tab==='schloss'?' sel':'')+'" onclick="wizGriffTabSet(\'schloss\')">Abschließbar</button>'+
+  '</div>';
+  if(tab==='innen') h+='<div class="wiz-griffsub">Muschelgriff im Raum</div><div class="wiz-cards">'+colorCards(P.hstGriff,S.hstGriff,'hstGriff')+'</div>';
+  else if(tab==='aussen') h+='<div class="wiz-griffsub">Schiebegriff von der Straße</div><div class="wiz-cards">'+colorCards(P.hstGriffAussen,S.hstGriffAussen,'hstGriffAussen')+'</div>';
+  else h+='<div class="wiz-griffsub">Abschließbarer Griff mit Zylinder?</div><div class="wiz-cards">'+schlossCards()+'</div>';
+  return h;
 }
 function wizRenderBalkSchwelle(){ return _wizPills(Object.keys(P.balkonSchwelle).map(function(k){return [k,P.balkonSchwelle[k].name];}),S.balkonSchwelle,'wizSetBalkSchwelle')+'<div class="wiz-hint">'+((P.balkonSchwelle[S.balkonSchwelle]||{}).sub||'')+'</div>'; }
 function wizSetBalkSchwelle(v){ wizSet('balkonSchwelle',v); }
@@ -7715,7 +7731,7 @@ function wizMassInput(){
 }
 function wizGo(i){
   wizIdx=Math.max(0,Math.min(WIZ_STEPS.length-1,i));
-  wizExtraOpen=null;
+  wizExtraOpen=null; wizGriffTab='innen';
   const s=WIZ_STEPS[wizIdx];
   // Farbe-Schritt immer zuerst auf Außen (Kundenwunsch) — vor dem Rendern setzen
   if(s.key==='farbe') wizFarbTab='fa';
@@ -15026,6 +15042,10 @@ async function submitSkizze(e) {
   #cfg-wizard .wiz-sw2.sel .wiz-chip2{ box-shadow:0 0 0 3px #fff, 0 0 0 5px var(--c-primary); }
   #cfg-wizard .wiz-farb-more{ margin-top:14px; width:100%; max-width:520px; margin-left:auto; margin-right:auto; display:block; border:1px solid #d6e0ee; background:#f3f7fd; color:#225eaa; border-radius:11px; padding:12px; font-weight:700; font-family:'Plus Jakarta Sans',sans-serif; cursor:pointer; font-size:13.5px; }
   #cfg-wizard .wiz-close{ display:none; }
+  /* Griff-Umschalter (3 Tabs) + Sektions-Hinweis */
+  #cfg-wizard .wiz-tabs-3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+  #cfg-wizard .wiz-tabs-3 .wiz-tab{ padding:10px 6px; font-size:13px; text-align:center; }
+  #cfg-wizard .wiz-griffsub{ text-align:center; font-family:'Manrope',sans-serif; font-size:12.5px; color:#5b6b80; margin:10px 0 12px; }
   /* === STUFE 4: Bestellübersicht im Onlineshop-Stil (Warenkorb-Karten) === */
   #cfg-wizard .wiz-ohead{ font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:15px; color:#14233f; margin:0 auto 12px; max-width:560px; text-align:left; }
   #cfg-wizard .wiz-ocards{ max-width:560px; margin:0 auto; display:flex; flex-direction:column; gap:12px; }
