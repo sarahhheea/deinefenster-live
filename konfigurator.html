@@ -7832,16 +7832,13 @@ function wizSetSicherGlas(v){ wizSet('sicherGlas',v); }
 // GRIFF
 // Griff-Karten: pro Modell eine Standard- und (falls verfügbar) eine abschließbare Variante
 function _griffCards(){
-  const list=[];
-  GRIFF_HERO_MODELS.forEach(function(k){
-    const nm=(P.griff[k]&&P.griff[k].name)||k;
-    const desc=(typeof GRIFF_MODEL_DESC!=='undefined'&&GRIFF_MODEL_DESC[k])||'';
-    list.push({griff:k,locked:false,name:nm,sub:(k==='mistral'?'Aluminium · ':'')+desc,badge:(k==='mistral')});
-    // abschließbare Variante nur wenn es ein Schloss-Bild gibt
-    const hasLock=GRIFF_URLS[k]&&Object.keys(GRIFF_URLS[k]).some(function(c){return GRIFF_URLS[k][c]&&GRIFF_URLS[k][c].lock;});
-    if(hasLock) list.push({griff:k,locked:true,name:nm+' abschließbar',sub:'mit Schließzylinder',badge:false});
-  });
-  return list;
+  // Kundenwunsch: nur drei feste Karten — Mistral, Mistral abschließbar, PZ beidseitig.
+  // Gilt für Fenster + Balkontür (Haustür/HST haben eigene Griff-Schritte).
+  return [
+    {griff:'mistral', locked:false, name:'Mistral',              sub:'Aluminium · klassisch elegant', badge:true},
+    {griff:'mistral', locked:true,  name:'Mistral abschließbar', sub:'mit Schließzylinder',           badge:false},
+    {griff:'pz-beid', locked:false, name:'PZ beidseitig',        sub:'Schließzylinder innen + außen',  badge:false},
+  ];
 }
 function wizRenderGriff(){
   let h='<div class="wiz-group"><div class="wiz-gt">1. Griff</div><div class="wiz-cards">'+_griffCards().map(function(e){
