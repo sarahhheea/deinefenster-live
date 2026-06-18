@@ -337,6 +337,7 @@ const GH = SH - 2 * FST - 2 * SBW;  // 0.956
 // Flügel steht 5mm vor dem Blendrahmen hervor (Falz)
 const SASH_DZ = 0.022;   // 22 mm Aufkantung — starke 3D-Trennung Rahmen|Flügel
 
+const pivotGroup = new THREE.Group();  // Wrapper — rotiert für Innen/Außen-Ansicht (wie fenster-3d)
 const winGroup  = new THREE.Group();
 const sashGroup = new THREE.Group();   // Flügel — rotiert um linke Scharnier-Achse zum Öffnen
 sashGroup.position.set(x0, 0, 0);      // Pivot = linker Scharnier-Rand (x0 in winGroup-Koords)
@@ -678,6 +679,7 @@ function buildWindow(spec) {
     );
     roll.position.set(rollX_abs, hy, rollZ_abs);
     roll.castShadow = true;
+    roll.userData.isHinge = true;
     winGroup.add(roll);
 
     const capTop = new THREE.Mesh(
@@ -686,6 +688,7 @@ function buildWindow(spec) {
     );
     capTop.position.set(rollX_abs, hy + rollH / 2 + capH / 2 - 0.002, rollZ_abs);
     capTop.castShadow = true;
+    capTop.userData.isHinge = true;
     winGroup.add(capTop);
 
     const capBot = new THREE.Mesh(
@@ -694,6 +697,7 @@ function buildWindow(spec) {
     );
     capBot.position.set(rollX_abs, hy - rollH / 2 - capH / 2 + 0.002, rollZ_abs);
     capBot.castShadow = true;
+    capBot.userData.isHinge = true;
     winGroup.add(capBot);
 
     const midRing = new THREE.Mesh(
@@ -702,6 +706,7 @@ function buildWindow(spec) {
     );
     midRing.position.set(rollX_abs, hy, rollZ_abs);
     midRing.castShadow = true;
+    midRing.userData.isHinge = true;
     winGroup.add(midRing);
 
     const fuge = new THREE.Mesh(
@@ -710,6 +715,7 @@ function buildWindow(spec) {
     );
     fuge.position.set(rollX_abs, hy, rollZ_abs);
     fuge.castShadow = false;
+    fuge.userData.isHinge = true;
     winGroup.add(fuge);
   });
   _addRolladen(spec);
@@ -747,7 +753,8 @@ function _updateRollLabel(spec){
 // Tür auf Welt-Origin zentrieren (y wird in buildWindow gesetzt)
 winGroup.position.x = -FW / 2;
 winGroup.position.z = 0;
-scene.add(winGroup);
+pivotGroup.add(winGroup);
+scene.add(pivotGroup);
 
 // setSide: 'r' = Griff rechts (Standard), 'l' = Griff links (gespiegelt)
 function setSide(s) {
@@ -761,6 +768,21 @@ function setSide(s) {
 }
 const _urlSide = new URLSearchParams(location.search).get('side') || 'r';
 setSide(_urlSide);
+
+// setView: 'aussen' = pivotGroup 180° gedreht, Griff + Scharniere ausgeblendet (von außen nicht sichtbar);
+// 'innen' = Standard mit Griff/Scharnieren. Standard = außen zuerst (Kundenwunsch 06/2026).
+let _currentView = 'aussen';
+function setView(v) {
+  _currentView = (v === 'aussen' || v === 'aus') ? 'aussen' : 'innen';
+  pivotGroup.rotation.y = (_currentView === 'aussen') ? Math.PI : 0;
+  const hideOnOutside = (_currentView === 'aussen');
+  handleObjects.forEach(m => { m.visible = !hideOnOutside; });
+  pivotGroup.traverse(node => {
+    if (node.userData && node.userData.isHinge) node.visible = !hideOnOutside;
+  });
+}
+const _urlView = new URLSearchParams(location.search).get('view') || 'aussen';
+setView(_urlView);
 
 // ══════════════════════════════════════════════
 // FARBEN — alle 41 echten Drutex-Dekore
@@ -1196,6 +1218,7 @@ window.addEventListener('message', (e) => {
   if (d.type === 'setWood')  setWood(d.key);
   if (d.type === 'setGlass') setGlass(d.key);
   if (d.type === 'setSide')  setSide(d.key);
+  if (d.type === 'setView')  setView(d.view);
   if (d.type === 'toggleOpen') sashOpen = !sashOpen;
   if (d.type === 'update') {
     const prev = (_lastSpec) ? _lastSpec : {};
@@ -1216,6 +1239,7 @@ window.addEventListener('message', (e) => {
     else         setColor(d.color || 'anthrazitgrau');
     setGlass(d.glass || 'klar');
     if (d.side) setSide(d.side);
+    if (d.view) setView(d.view);
   }
 });
 

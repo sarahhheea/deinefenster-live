@@ -314,6 +314,7 @@ function parseLayout(key) {
 }
 let _lastSpec = null;
 
+const pivotGroup = new THREE.Group();  // Wrapper — rotiert für Innen/Außen-Ansicht (wie fenster-3d)
 const winGroup  = new THREE.Group();
 const sashGroup = new THREE.Group();   // Flügel — rotiert um linke Scharnier-Achse zum Öffnen
 sashGroup.position.set(x0, 0, 0);      // Pivot = linker Scharnier-Rand (x0 in winGroup-Koords)
@@ -853,7 +854,8 @@ function _updateRollLabel(spec){
 // Tür auf Welt-Origin zentrieren (y wird in buildWindow gesetzt)
 winGroup.position.x = -FW / 2;
 winGroup.position.z = 0;
-scene.add(winGroup);
+pivotGroup.add(winGroup);
+scene.add(pivotGroup);
 
 // setSide: 'r' = Griff rechts (Standard), 'l' = Griff links (gespiegelt)
 function setSide(s) {
@@ -867,6 +869,20 @@ function setSide(s) {
 }
 const _urlSide = new URLSearchParams(location.search).get('side') || 'r';
 setSide(_urlSide);
+
+// setView: 'aussen' = pivotGroup 180° gedreht, Griff + Scharniere ausgeblendet; 'innen' = mit Griff/Scharnieren.
+// Scharniere werden materialbasiert (hingeMat) erkannt — robust gegen Rebuild, da überall dieselbe Material-Instanz.
+let _currentView = 'aussen';
+function setView(v) {
+  _currentView = (v === 'aussen' || v === 'aus') ? 'aussen' : 'innen';
+  pivotGroup.rotation.y = (_currentView === 'aussen') ? Math.PI : 0;
+  const hideOnOutside = (_currentView === 'aussen');
+  handleObjects.forEach(m => { m.visible = !hideOnOutside; });
+  pivotGroup.traverse(node => {
+    if (node.userData && node.userData.isHandle) node.visible = !hideOnOutside;
+    if (node.material === hingeMat) node.visible = !hideOnOutside;
+  });
+}
 
 // ══════════════════════════════════════════════
 // FARBEN — alle 41 echten Drutex-Dekore
@@ -1302,6 +1318,8 @@ if (new URLSearchParams(location.search).has('embed')) {
   const _urlKasten = _qs.get('rollKasten') || '175';
   const _urlRseite = _qs.get('rollSeite') || 'rechts';
   buildWindow({ layout: _urlLayout, sashes: ['dk-r'], roll: _urlRoll, rollKasten: _urlKasten, rollSeite: _urlRseite });
+  // View aus URL anwenden NACHDEM die Meshes erzeugt wurden → erstes Bild ist schon außen (kein Flackern)
+  setView(_qs.get('view') || 'aussen');
 }
 
 // postMessage-Bridge: Konfigurator schickt Farb/Glas/Layout-Änderungen
@@ -1312,6 +1330,7 @@ window.addEventListener('message', (e) => {
   if (d.type === 'setWood')  setWood(d.key);
   if (d.type === 'setGlass') setGlass(d.key);
   if (d.type === 'setSide')  setSide(d.key);
+  if (d.type === 'setView')  setView(d.view);
   if (d.type === 'toggleOpen') sashOpen = !sashOpen;
   if (d.type === 'update') {
     const prev = (_lastSpec) ? _lastSpec : {};
@@ -1332,6 +1351,8 @@ window.addEventListener('message', (e) => {
     else         setColor(d.color || 'anthrazitgrau');
     setGlass(d.glass || 'klar');
     if (d.side) setSide(d.side);
+    // View nach (möglichem) Rebuild erneut anwenden — Meshes wurden ggf. neu erzeugt.
+    setView(newSpec.view || 'aussen');
   }
 });
 
