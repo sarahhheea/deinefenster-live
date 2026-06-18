@@ -7315,12 +7315,12 @@ const WIZ_ALL=[
   {key:'psk', gilt:['hst'], cond:()=>S.profil==='iglo-psk', title:'Wählen Sie das <span>PSK-System</span>', sub:'Kammer-System Ihrer Parallel-Schiebe-Kipp-Tür.', render:wizRenderPsk, layout:'cards'},
   {key:'hslauf', gilt:['hst'], cond:()=>S.profil==='iglo-hs', title:'In welche Richtung läuft die <span>Schiebetür</span>?', sub:'HebeSchiebe links oder rechts — Ansicht von innen.', render:wizRenderHsLauf, layout:'cards'},
   {key:'fluegel', gilt:['kunststoff','balkontuer','haustuere','hst'], cond:()=>S.prod!=='hst'||S.profil==='iglo-psk', title:'Wählen Sie die <span>Aufteilung</span>', sub:'Wie viele Flügel und welche Aufteilung?', render:wizRenderFluegel, layout:'cards'},
-  {key:'anschlag', gilt:ALL, cond:()=>!(S.prod==='hst'&&S.profil==='iglo-hs'), title:'Wählen Sie die <span>Öffnungsart</span>', sub:'In welche Richtung öffnet es?', render:wizRenderAnschlag, layout:'cards'},
-  {key:'glas', gilt:ALL, title:'Wählen Sie die <span>Verglasung</span>', sub:'2-fach oder 3-fach Wärmeschutz.', render:wizRenderGlas, layout:'cards'},
-  {key:'masse', gilt:ALL, title:'Geben Sie die <span>Maße</span> an', sub:'Einbaumaß in Millimetern.', render:wizRenderMasse, layout:'cards'},
-  {key:'anzahl', gilt:ALL, title:'Wählen Sie die <span>Anzahl</span>', sub:'Wie viele Stück dieser Konfiguration benötigen Sie?', render:wizRenderAnzahl, layout:'cards'},
-  {key:'tuer', gilt:['haustuere'], title:'Wählen Sie das <span>Türmodell</span>', sub:'Ihr Haustür-Design — die Vorschau links zeigt es sofort.', render:wizRenderTuermodell},
-  {key:'farbe', gilt:ALL, title:'Wählen Sie die <span>Farbe</span>', sub:'Außen- und Innenfarbe — die Vorschau zeigt Ihre Wahl sofort.', render:wizRenderFarbe},
+  {key:'anschlag', main:true, gilt:ALL, cond:()=>!(S.prod==='hst'&&S.profil==='iglo-hs'), title:'Wählen Sie die <span>Öffnungsart</span>', sub:'In welche Richtung öffnet es?', render:wizRenderAnschlag, layout:'cards'},
+  {key:'glas', main:true, gilt:ALL, title:'Wählen Sie die <span>Verglasung</span>', sub:'2-fach oder 3-fach Wärmeschutz.', render:wizRenderGlas, layout:'cards'},
+  {key:'masse', main:true, gilt:ALL, title:'Geben Sie die <span>Maße</span> an', sub:'Einbaumaß in Millimetern.', render:wizRenderMasse, layout:'cards'},
+  {key:'anzahl', main:true, gilt:ALL, title:'Wählen Sie die <span>Anzahl</span>', sub:'Wie viele Stück dieser Konfiguration benötigen Sie?', render:wizRenderAnzahl, layout:'cards'},
+  {key:'tuer', main:true, gilt:['haustuere'], title:'Wählen Sie das <span>Türmodell</span>', sub:'Ihr Haustür-Design — die Vorschau links zeigt es sofort.', render:wizRenderTuermodell},
+  {key:'farbe', main:true, gilt:ALL, title:'Wählen Sie die <span>Farbe</span>', sub:'Außen- und Innenfarbe — die Vorschau zeigt Ihre Wahl sofort.', render:wizRenderFarbe},
   {key:'glasdekor', gilt:ALL, title:'Wählen Sie das <span>Glas-Motiv</span>', sub:'Ornamentglas für Sichtschutz — „Klarglas" = normales durchsichtiges Glas.', render:wizRenderGlasdekor},
   {key:'schall', gilt:['kunststoff','balkontuer','hst'], title:'Schall- &amp; <span>Sicherheitsglas</span>', sub:'Optional: zusätzlicher Schallschutz und Sicherheitsglas.', render:wizRenderSchall},
   {key:'griff', gilt:['kunststoff','balkontuer'], title:'Welcher <span>Griff</span>?', sub:'Modell, Farbe und Ausführung Ihres Fenstergriffs.', render:wizRenderGriff},
@@ -7330,11 +7330,38 @@ const WIZ_ALL=[
   {key:'rolladen', gilt:['kunststoff','balkontuer','hst'], title:'Wählen Sie den <span>Rolladen</span>', sub:'Sonnen- und Sichtschutz — optional.', render:wizRenderRoll},
   {key:'sprossen', gilt:['kunststoff','balkontuer'], title:'Wählen Sie die <span>Sprossen</span>', sub:'Klassische Optik — aufgesetzt oder im Scheibenzwischenraum.', render:wizRenderSpro},
   {key:'sicherheit', gilt:ALL, title:'Wählen Sie den <span>Einbruchschutz</span>', sub:'Wie sicher soll es sein?', render:wizRenderSicher},
-  {key:'angebot', gilt:ALL, title:'Ihre <span>Übersicht</span>', sub:'Alles auf einen Blick — dann zur Anfrage.', render:wizRenderAngebot},
-  {key:'kontakt', gilt:ALL, title:'Ihre <span>Anfrage</span>', sub:'Kontaktdaten eingeben — kostenlos & unverbindlich absenden.', render:wizRenderKontakt, layout:'cards'},
+  {key:'extras', main:true, gilt:ALL, title:'Möchten Sie noch <span>mehr anpassen?</span>', sub:'Alles optional — sonst einfach auf „Weiter". Ihre Standard-Auswahl ist bereits gesetzt.', render:wizRenderExtras, layout:'cards'},
+  {key:'angebot', main:true, gilt:ALL, title:'Ihre <span>Übersicht</span>', sub:'Alles auf einen Blick — dann zur Anfrage.', render:wizRenderAngebot},
+  {key:'kontakt', main:true, gilt:ALL, title:'Ihre <span>Anfrage</span>', sub:'Kontaktdaten eingeben — kostenlos & unverbindlich absenden.', render:wizRenderKontakt, layout:'cards'},
 ];
-function buildWizSteps(prod){ return WIZ_ALL.filter(function(s){ return s.gilt.indexOf(prod)>=0 && (!s.cond||s.cond()); }); }
+// Hauptschritt-Filter: Fenster zeigt nur die wichtigen Schritte (Rest ist sinnvoll vorbelegt
+// und geht voll in die Anfrage-Mail). Andere Produkte vorerst unveraendert (folgt separat).
+const WIZ_MAINONLY=['kunststoff'];
+function buildWizSteps(prod){
+  var all = WIZ_ALL.filter(function(s){ return s.gilt.indexOf(prod)>=0 && (!s.cond||s.cond()); });
+  if(WIZ_MAINONLY.indexOf(prod)>=0){
+    var mains = all.filter(function(s){ return s.main; });
+    if(mains.length>=3) return mains;
+  }
+  return all;
+}
 let WIZ_STEPS = buildWizSteps('kunststoff');
+// "Mehr anpassen": die nicht-Hauptschritte (vorbelegt) bleiben fuer Tueftler erreichbar —
+// als Akkordeon in einem eigenen optionalen Schritt. Reuse der vorhandenen Render-Funktionen.
+let wizExtraOpen=null;
+function wizExtraList(){ var prod=S.prod||'kunststoff'; return WIZ_ALL.filter(function(s){ return !s.main && s.gilt.indexOf(prod)>=0 && (!s.cond||s.cond()) && ['angebot','kontakt','extras'].indexOf(s.key)<0; }); }
+function wizToggleExtra(k){ wizExtraOpen=(wizExtraOpen===k)?null:k; if(typeof wizRenderPanel==='function')wizRenderPanel(); }
+function wizRenderExtras(){
+  var list=wizExtraList();
+  if(!list.length) return '<p class="wiz-extras-none">Ihre Auswahl ist bereits passend vorbelegt — tippen Sie auf „Weiter".</p>';
+  return '<div class="wiz-extras">'+list.map(function(s){
+    var open=wizExtraOpen===s.key;
+    return '<div class="wiz-exrow'+(open?' open':'')+'">'
+      +'<button type="button" class="wiz-exhead" onclick="wizToggleExtra(\''+s.key+'\')"><span>'+wizCrumbLabel(s.key)+'</span><i class="ms" aria-hidden="true">'+(open?'expand_less':'expand_more')+'</i></button>'
+      +(open?'<div class="wiz-exbody">'+s.render()+'</div>':'')
+      +'</div>';
+  }).join('')+'</div>';
+}
 function wizRebuildSteps(){ const ck=WIZ_STEPS[wizIdx]&&WIZ_STEPS[wizIdx].key; WIZ_STEPS=buildWizSteps(S.prod||'kunststoff'); let ni=WIZ_STEPS.findIndex(function(s){return s.key===ck;}); if(ni<0)ni=Math.min(wizIdx,WIZ_STEPS.length-1); wizIdx=Math.max(0,ni); }
 // Türmodelle (Studio-Bilder, vorhanden) — finale Auswahl/Bilder folgen in Phase 2
 const WIZ_DOORS=['vollglas-inox','florida-lr-inox','montana-2-lr-inox','montana-3-lr-inox','ohio-inox','colorado-inox','alaska-2-inox','alaska-1-inox','montana-1-inox','nebraska-lcr-inox','pennsylvania-1-inox','texas-c-inox','texas-lr-inox'].map(function(k){return {key:k,name:k.replace(/-inox$/,'').replace(/-lr$|-lcr$|-c$/,'').replace(/-/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();}).trim(),img:'img/drutex-tueren/studio/'+k+'.png?v=20260611'};});
@@ -7681,6 +7708,7 @@ function wizMassInput(){
 }
 function wizGo(i){
   wizIdx=Math.max(0,Math.min(WIZ_STEPS.length-1,i));
+  wizExtraOpen=null;
   const s=WIZ_STEPS[wizIdx];
   // Farbe-Schritt immer zuerst auf Außen (Kundenwunsch) — vor dem Rendern setzen
   if(s.key==='farbe') wizFarbTab='fa';
@@ -7723,7 +7751,7 @@ function wizCrumbs(){
   c.innerHTML='<div class="wiz-prog"><i style="width:'+pct+'%"></i></div>'
     +'<div class="wiz-prog-txt">Schritt '+cur+' von '+n+(label?' · '+label:'')+'</div>';
 }
-function wizCrumbLabel(k){return {profil:'Profil',psk:'PSK',hslauf:'Laufrichtung',tuer:'Türmodell',fluegel:'Aufteilung',anschlag:'Öffnung',glas:'Glas',masse:'Maße',farbe:'Farbe',glasdekor:'Motiv',schall:'Schall',griff:'Griff',griffhaus:'Türgriff',griffhst:'Griff',balk:'Schwelle',hstschwelle:'Schwelle',rolladen:'Rolladen',sprossen:'Sprossen',sicherheit:'Sicherheit',anzahl:'Anzahl',angebot:'Übersicht',kontakt:'Anfrage'}[k]||k;}
+function wizCrumbLabel(k){return {profil:'Profil',psk:'PSK',hslauf:'Laufrichtung',tuer:'Türmodell',fluegel:'Aufteilung',anschlag:'Öffnung',glas:'Glas',masse:'Maße',farbe:'Farbe',glasdekor:'Motiv',schall:'Schall',griff:'Griff',griffhaus:'Türgriff',griffhst:'Griff',balk:'Schwelle',hstschwelle:'Schwelle',rolladen:'Rolladen',sprossen:'Sprossen',sicherheit:'Sicherheit',anzahl:'Anzahl',extras:'Mehr anpassen',angebot:'Übersicht',kontakt:'Anfrage'}[k]||k;}
 function wizNext(){ if(WIZ_STEPS[wizIdx].key==='kontakt'){ if(typeof d2submit==='function')d2submit({preventDefault:function(){}}); return; } if(wizIdx>=WIZ_STEPS.length-1){ wizFinish(); return; } wizGo(wizIdx+1); window.scrollTo({top:0,behavior:'auto'}); }
 function wizBack(){ if(wizIdx<=0){ wizExitToProd(); return; } wizGo(wizIdx-1); window.scrollTo({top:0,behavior:'auto'}); }
 // Auto-Advance: nach Auswahl einer Karte direkt zum nächsten Schritt — nur bei eindeutigen Einfach-Auswahl-Schritten.
@@ -14970,6 +14998,16 @@ async function submitSkizze(e) {
   body:has(#cfg-wizard[style*="flex"]) .df-wa-float{ display:none !important; }
   /* Untere Aktionsleiste: Abstand zum Home-Indicator (Notch-Geraete) */
   #cfg-wizard .wiz-navbar{ padding-bottom:env(safe-area-inset-bottom); }
+  /* "Mehr anpassen"-Akkordeon (optionaler Detail-Schritt) */
+  #cfg-wizard .wiz-extras{ max-width:560px; margin:0 auto; display:flex; flex-direction:column; gap:10px; text-align:left; }
+  #cfg-wizard .wiz-extras-none{ max-width:480px; margin:24px auto; text-align:center; color:#516079; font-family:'Manrope',sans-serif; font-size:15px; }
+  #cfg-wizard .wiz-exrow{ border:1px solid #e1e8f1; border-radius:14px; overflow:hidden; background:#fff; }
+  #cfg-wizard .wiz-exrow.open{ border-color:var(--c-primary); box-shadow:0 6px 20px rgba(34,94,170,.08); }
+  #cfg-wizard .wiz-exhead{ width:100%; min-height:54px; display:flex; align-items:center; justify-content:space-between; gap:10px; padding:14px 16px; background:#fff; border:0; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:15.5px; color:#14233f; }
+  #cfg-wizard .wiz-exrow.open .wiz-exhead{ color:var(--c-primary); }
+  #cfg-wizard .wiz-exhead .ms{ font-size:22px; color:#9bb0cc; }
+  #cfg-wizard .wiz-exbody{ padding:6px 14px 16px; border-top:1px solid #eef2f7; }
+  #cfg-wizard .wiz-exbody .wiz-cards{ gap:10px; }
 </style>
 <link rel="stylesheet" href="css/cookie-banner.css">
 <script defer src="js/cookie-banner.js"></script>
