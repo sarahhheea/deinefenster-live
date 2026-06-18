@@ -7329,13 +7329,13 @@ const WIZ_ALL=[
   {key:'rolladen', gilt:['kunststoff','balkontuer','hst'], title:'Wählen Sie den <span>Rolladen</span>', sub:'Sonnen- und Sichtschutz — optional.', render:wizRenderRoll},
   {key:'sprossen', gilt:['kunststoff','balkontuer'], title:'Wählen Sie die <span>Sprossen</span>', sub:'Klassische Optik — aufgesetzt oder im Scheibenzwischenraum.', render:wizRenderSpro},
   {key:'sicherheit', gilt:ALL, title:'Wählen Sie den <span>Einbruchschutz</span>', sub:'Wie sicher soll es sein?', render:wizRenderSicher},
-  {key:'extras', main:true, gilt:ALL, title:'Möchten Sie noch <span>mehr anpassen?</span>', sub:'Alles optional — sonst einfach auf „Weiter". Ihre Standard-Auswahl ist bereits gesetzt.', render:wizRenderExtras, layout:'cards'},
   {key:'angebot', main:true, gilt:ALL, title:'Ihre <span>Übersicht</span>', sub:'Alles auf einen Blick — dann zur Anfrage.', render:wizRenderAngebot},
   {key:'kontakt', main:true, gilt:ALL, title:'Ihre <span>Anfrage</span>', sub:'Kontaktdaten eingeben — kostenlos & unverbindlich absenden.', render:wizRenderKontakt, layout:'cards'},
 ];
 // Hauptschritt-Filter: Fenster zeigt nur die wichtigen Schritte (Rest ist sinnvoll vorbelegt
 // und geht voll in die Anfrage-Mail). Andere Produkte vorerst unveraendert (folgt separat).
-const WIZ_MAINONLY=['kunststoff','balkontuer','haustuere','hst'];
+// Kundenwunsch: ALLE Schritte sollen im Flow sein (keine Bündelung). Schnell-Sprung über die Schritt-Liste oben.
+const WIZ_MAINONLY=[];
 function _isMain(s,prod){ return s.main===true || (Array.isArray(s.main)&&s.main.indexOf(prod)>=0); }
 function buildWizSteps(prod){
   var all = WIZ_ALL.filter(function(s){ return s.gilt.indexOf(prod)>=0 && (!s.cond||s.cond()); });
@@ -7725,7 +7725,7 @@ function wizMassInput(){
 }
 function wizGo(i){
   wizIdx=Math.max(0,Math.min(WIZ_STEPS.length-1,i));
-  wizExtraOpen=null; wizGriffTab='innen'; if(typeof wizGriffMore!=='undefined'){wizGriffMore.tuerGriffInnen=false;wizGriffMore.tuerGriffAussen=false;}
+  wizExtraOpen=null; wizGriffTab='innen'; if(typeof wizStepNavOpen!=='undefined')wizStepNavOpen=false; if(typeof wizGriffMore!=='undefined'){wizGriffMore.tuerGriffInnen=false;wizGriffMore.tuerGriffAussen=false;}
   const s=WIZ_STEPS[wizIdx];
   // Farbe-Schritt immer zuerst auf Außen (Kundenwunsch) — vor dem Rendern setzen
   if(s.key==='farbe') wizFarbTab='fa';
@@ -7772,12 +7772,25 @@ function wizGo(i){
   // KEIN drawPrev beim reinen Schrittwechsel — Konfiguration unverändert, Bild bleibt ruhig stehen (kein "Bocken")
 }
 function wizRenderPanel(){ const p=document.getElementById('wiz-panel'); if(p)p.innerHTML=WIZ_STEPS[wizIdx].render(); }
+let wizStepNavOpen=false;
+function wizToggleStepNav(){ wizStepNavOpen=!wizStepNavOpen; wizCrumbs(); }
+function wizJump(i){ wizStepNavOpen=false; wizGo(i); }
 function wizCrumbs(){
   const c=document.getElementById('wiz-crumbs'); if(!c)return;
   const n=WIZ_STEPS.length, cur=Math.min(wizIdx+1,n), pct=Math.round((cur/n)*100);
   const label=(WIZ_STEPS[wizIdx]&&wizCrumbLabel(WIZ_STEPS[wizIdx].key))||'';
-  c.innerHTML='<div class="wiz-prog"><i style="width:'+pct+'%"></i></div>'
-    +'<div class="wiz-prog-txt">Schritt '+cur+' von '+n+(label?' · '+label:'')+'</div>';
+  let html='<button type="button" class="wiz-proghead" onclick="wizToggleStepNav()" aria-expanded="'+wizStepNavOpen+'" aria-label="Schritt wechseln">'
+    +'<div class="wiz-prog"><i style="width:'+pct+'%"></i></div>'
+    +'<div class="wiz-prog-txt">Schritt '+cur+' von '+n+(label?' · '+label:'')+'<i class="ms wiz-prog-caret" aria-hidden="true">'+(wizStepNavOpen?'expand_less':'expand_more')+'</i></div>'
+    +'</button>';
+  if(wizStepNavOpen){
+    html+='<div class="wiz-stepnav">'+WIZ_STEPS.map(function(s,i){
+      const st=(i<wizIdx)?'done':((i===wizIdx)?'cur':'');
+      const mark=(i<wizIdx)?'<i class="ms" aria-hidden="true">check</i>':(i+1);
+      return '<button type="button" class="wiz-stepnav-item '+st+'" onclick="wizJump('+i+')"><span class="wiz-stepnav-num">'+mark+'</span>'+wizCrumbLabel(s.key)+'</button>';
+    }).join('')+'</div>';
+  }
+  c.innerHTML=html;
 }
 function wizCrumbLabel(k){return {profil:'Profil',psk:'PSK',hslauf:'Laufrichtung',tuer:'Türmodell',fluegel:'Aufteilung',anschlag:'Öffnung',glas:'Glas',masse:'Maße',farbe:'Farbe',glasdekor:'Motiv',schall:'Schall',griff:'Griff',griffhaus:'Türgriff',griffhst:'Griff',balk:'Schwelle',hstschwelle:'Schwelle',rolladen:'Rolladen',sprossen:'Sprossen',sicherheit:'Sicherheit',anzahl:'Anzahl',extras:'Mehr anpassen',angebot:'Übersicht',kontakt:'Anfrage'}[k]||k;}
 function wizNext(){ if(WIZ_STEPS[wizIdx].key==='kontakt'){ if(typeof d2submit==='function')d2submit({preventDefault:function(){}}); return; } if(wizIdx>=WIZ_STEPS.length-1){ wizFinish(); return; } wizGo(wizIdx+1); window.scrollTo({top:0,behavior:'auto'}); }
@@ -15018,6 +15031,16 @@ async function submitSkizze(e) {
   #cfg-wizard .wiz-prog{ height:5px; background:#e7ecf3; border-radius:3px; overflow:hidden; }
   #cfg-wizard .wiz-prog>i{ display:block; height:100%; background:var(--c-primary); border-radius:3px; transition:width .25s ease; }
   #cfg-wizard .wiz-prog-txt{ margin-top:8px; font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:13.5px; color:#14233f; text-align:center; letter-spacing:.01em; }
+  /* Schnell-Sprung: auf "Schritt X von Y" tippen -> Liste aller Schritte */
+  #cfg-wizard .wiz-steps{ position:relative; }
+  #cfg-wizard .wiz-proghead{ display:block; width:100%; border:0; background:none; padding:2px 0; cursor:pointer; }
+  #cfg-wizard .wiz-prog-caret{ font-size:18px; vertical-align:middle; color:#9bb0cc; margin-left:1px; }
+  #cfg-wizard .wiz-stepnav{ position:absolute; left:50%; transform:translateX(-50%); top:calc(100% + 4px); width:min(94%,420px); max-height:62vh; overflow-y:auto; background:#fff; border:1px solid #e1e8f1; border-radius:14px; box-shadow:0 14px 44px rgba(20,40,80,.20); z-index:30; padding:6px; -webkit-overflow-scrolling:touch; }
+  #cfg-wizard .wiz-stepnav-item{ display:flex; align-items:center; gap:10px; width:100%; text-align:left; border:0; background:none; padding:10px 12px; border-radius:9px; font-family:'Plus Jakarta Sans',sans-serif; font-weight:700; font-size:14.5px; color:#14233f; cursor:pointer; min-height:46px; }
+  #cfg-wizard .wiz-stepnav-item.cur{ background:#eaf1fc; color:#225eaa; }
+  #cfg-wizard .wiz-stepnav-num{ flex:0 0 auto; width:24px; height:24px; border-radius:50%; background:#eef1f5; color:#7a8aa0; display:flex; align-items:center; justify-content:center; font-size:12.5px; font-weight:800; }
+  #cfg-wizard .wiz-stepnav-item.done .wiz-stepnav-num, #cfg-wizard .wiz-stepnav-item.cur .wiz-stepnav-num{ background:#225eaa; color:#fff; }
+  #cfg-wizard .wiz-stepnav-num .ms{ font-size:15px; }
   /* Eingaben >=16px -> verhindert iOS-Auto-Zoom beim Antippen */
   #cfg-wizard input, #cfg-wizard select, #cfg-wizard textarea{ font-size:16px !important; }
   /* Scroll-Lock hinter dem geoeffneten Wizard (kein "Steckt") + WhatsApp-Knopf im Flow ausblenden.
