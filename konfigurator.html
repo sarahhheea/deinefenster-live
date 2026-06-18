@@ -7393,12 +7393,12 @@ function wizRenderSchiebegriff(){
   // IGLO-HS Griff-Auswahl: Innengriff-Farbe (Muschelgriff) + Außengriff-Farbe (Schiebegriff) + Schloss-Option.
   var hint='<small style="font-weight:600;color:#5a6a85;font-size:12px">';
   function colorCards(obj, sel, key){
-    return Object.keys(obj).map(function(k){const o=obj[k];return '<div class="wiz-card wiz-card-opt wiz-hstgr'+(k===sel?' sel':'')+'" onclick="wizSet(\''+key+'\',\''+k+'\')"><div class="wiz-sym"><img src="'+o.img+'" alt="'+o.name+'" loading="lazy"></div><div class="wiz-cn">'+o.name+'</div></div>';}).join('');
+    return Object.keys(obj).map(function(k){const o=obj[k];var im=o.img.replace(/\.webp$/,'-cut.webp');return '<div class="wiz-card wiz-card-opt wiz-hstgr'+(k===sel?' sel':'')+'" onclick="wizSet(\''+key+'\',\''+k+'\')"><div class="wiz-sym"><img src="'+im+'" alt="'+o.name+'" loading="lazy"></div><div class="wiz-cn">'+o.name+'</div></div>';}).join('');
   }
   function schlossCards(){
     // Schloss-Karten zeigen den abschließbaren Schiebegriff (Hebel mit Zylinder) in der gewählten Außen-Farbe.
     var col=(P.hstGriffAussen[S.hstGriffAussen])?S.hstGriffAussen:'silber';
-    var imgFor=function(k){return 'img/drutex-griffe/hst-hebel'+(k==='ohne'?'':'-schloss')+'-'+col+'.webp';};
+    var imgFor=function(k){return 'img/drutex-griffe/hst-hebel'+(k==='ohne'?'':'-schloss')+'-'+col+'-cut.webp';};
     return Object.keys(P.hstSchloss).map(function(k){const o=P.hstSchloss[k];return '<div class="wiz-card wiz-card-opt wiz-hstgr'+(k===S.hstSchloss?' sel':'')+'" onclick="wizSet(\'hstSchloss\',\''+k+'\')"><div class="wiz-sym"><img src="'+imgFor(k)+'" alt="'+o.name+'" loading="lazy"></div><div class="wiz-cn">'+o.name+'</div><div class="wiz-csub">'+(o.sub||'')+'</div></div>';}).join('');
   }
   // Innen/Außen/Abschließbar als Umschalter (eine Sektion sichtbar) → passt ohne Scrollen.
@@ -15055,8 +15055,8 @@ async function submitSkizze(e) {
   #cfg-wizard .wiz-griffsub{ text-align:center; font-family:'Manrope',sans-serif; font-size:12.5px; color:#5b6b80; margin:10px 0 12px; }
   /* Griff-/Klinken-Kacheln: das Produktfoto füllt die Kachel ganz (cover) → ein sauberes Produktbild,
      kein eingebetteter Kasten-Rand. Foto-Hintergrund = Kachel-Hintergrund (nahtlos). */
-  #cfg-wizard .wiz-card-opt .wiz-sym{ background:#34353a !important; height:98px !important; border-radius:10px !important; overflow:hidden; }
-  #cfg-wizard .wiz-card-opt .wiz-sym img{ object-fit:cover !important; object-position:center 44% !important; padding:0 !important; width:100% !important; height:100% !important; }
+  #cfg-wizard .wiz-card-opt .wiz-sym{ background:#f5f8fc !important; height:92px !important; border-radius:10px !important; overflow:hidden; }
+  #cfg-wizard .wiz-card-opt .wiz-sym img{ object-fit:contain !important; padding:6px !important; width:100% !important; height:100% !important; }
   /* Tür-Vorschau: ganze Tür in natürlicher Proportion (nicht langgezogen) */
   #cfg-wizard[data-prod="haustuere"] .wiz-body:not(.cards-mode) .wiz-stage #prev-wrap{ height:162px !important; width:120px !important; max-width:50% !important; margin:0 auto !important; aspect-ratio:auto !important; }
   /* Saubere Studio-Tür (frontal, weiß) als Vorschau auf dem Türgriff-Schritt */
