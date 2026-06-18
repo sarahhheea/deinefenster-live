@@ -1780,7 +1780,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
                   <div class="mega-system-icon"><span class="material-symbols-outlined" aria-hidden="true">door_sliding</span></div>
                   <div>
                     <div class="mega-system-label">IGLO-HS</div>
-                    <div class="mega-system-desc">Große Hebe-Schiebe-Tür · bis 6500 mm · Null-Schwelle DIN 18040</div>
+                    <div class="mega-system-desc">Große Hebe-Schiebe-Tür · bis 4000 × 2300 mm · Null-Schwelle DIN 18040</div>
                   </div>
                 </a>
                 <div class="mega-panel-cta">
@@ -4559,7 +4559,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
           <div class="pc-chips">
             <span>Bodennah</span>
             <span>Uw 0,9</span>
-            <span>bis 6 m</span>
+            <span>bis 4 × 2,3 m</span>
           </div>
           <div class="pc-cta">Jetzt konfigurieren →</div>
         </div>
@@ -5869,7 +5869,7 @@ const P = {
     kunststoff: { name:'Kunststofffenster', fix:89,   sqm:210, min:99,   bMin:400,  bMax:4000, hMin:400,  hMax:3000, bDef:1000, hDef:1200 },
     balkontuer: { name:'Balkontür',          fix:145,  sqm:215, min:179,  bMin:600,  bMax:2500, hMin:1800, hMax:2400, bDef:900,  hDef:2100 },
     haustuere:  { name:'Haustür',            fix:0,    sqm:0,   min:899,  bMin:800,  bMax:1400, hMin:1800, hMax:2400, bDef:1000, hDef:2100 },
-    hst:        { name:'Schiebetür',          fix:580,  sqm:265, min:1299, bMin:1800, bMax:6500, hMin:1800, hMax:2600, bDef:2400, hDef:2100 },
+    hst:        { name:'Schiebetür',          fix:580,  sqm:265, min:1299, bMin:1800, bMax:4000, hMin:1800, hMax:2300, bDef:2400, hDef:2100 },
   },
   // Fix K6+K7 (21.04.2026): Verglasung in 3 separate Entscheidungen zerlegt
   // (Wärmeschutz / Schallschutz / Sicherheitsglas) + Warme Kante als Zusatz.
@@ -7070,7 +7070,7 @@ const MH_PRESETS = {
   kunststoff: [[600,600],[800,1000],[1000,1200],[1230,1480],[1500,1500],[2000,1400]],
   balkontuer: [[800,2000],[900,2100],[1000,2100],[1200,2100],[1500,2200]],
   haustuere:  [[900,2000],[1000,2100],[1100,2200],[1200,2200],[1400,2300]],
-  hst:        [[2000,2100],[2400,2100],[3000,2200],[3600,2400],[4500,2400],[6000,2400]],
+  hst:        [[2000,2100],[2500,2100],[3000,2200],[3500,2200],[4000,2300]],
 };
 function _mhRange(){ const pr = S.prod ? P.prod[S.prod] : null;
   return { bMin: pr?.bMin||300, bMax: pr?.bMax||4000, hMin: pr?.hMin||300, hMax: pr?.hMax||3000, pr }; }
@@ -7310,7 +7310,7 @@ const WIZ_ALL=[
   {key:'profil', gilt:ALL, title:'Wählen Sie das <span>Profil</span>', sub:'Das Drutex-System für Ihr Produkt.', render:wizRenderProfil, layout:'cards'},
   {key:'psk', gilt:['hst'], cond:()=>S.profil==='iglo-psk', title:'Wählen Sie das <span>PSK-System</span>', sub:'Kammer-System Ihrer Parallel-Schiebe-Kipp-Tür.', render:wizRenderPsk, layout:'cards'},
   {key:'hslauf', gilt:['hst'], cond:()=>S.profil==='iglo-hs', title:'In welche Richtung läuft die <span>Schiebetür</span>?', sub:'HebeSchiebe links oder rechts — Ansicht von innen.', render:wizRenderHsLauf, layout:'cards'},
-  {key:'fluegel', gilt:['kunststoff','balkontuer','haustuere','hst'], cond:()=>S.prod!=='hst'||S.profil==='iglo-psk', title:'Wählen Sie die <span>Aufteilung</span>', sub:'Wie viele Flügel und welche Aufteilung?', render:wizRenderFluegel, layout:'cards'},
+  {key:'fluegel', gilt:['kunststoff','balkontuer','haustuere','hst'], cond:()=>S.prod!=='hst', title:'Wählen Sie die <span>Aufteilung</span>', sub:'Wie viele Flügel und welche Aufteilung?', render:wizRenderFluegel, layout:'cards'},
   {key:'anschlag', gilt:ALL, cond:()=>!(S.prod==='hst'&&S.profil==='iglo-hs'), title:'Wählen Sie die <span>Öffnungsart</span>', sub:'In welche Richtung öffnet es?', render:wizRenderAnschlag, layout:'cards'},
   {key:'glas', gilt:ALL, title:'Wählen Sie die <span>Verglasung</span>', sub:'2-fach oder 3-fach Wärmeschutz.', render:wizRenderGlas, layout:'cards'},
   {key:'masse', gilt:ALL, title:'Geben Sie die <span>Maße</span> an', sub:'Einbaumaß in Millimetern.', render:wizRenderMasse, layout:'cards'},
@@ -7325,7 +7325,7 @@ const WIZ_ALL=[
   {key:'balk', gilt:['balkontuer'], title:'Wählen Sie die <span>Schwelle</span>', sub:'Boden-Schwelle Ihrer Balkontür.', render:wizRenderBalkSchwelle, layout:'cards'},
   {key:'rolladen', gilt:['kunststoff','balkontuer','hst'], title:'Wählen Sie den <span>Rolladen</span>', sub:'Sonnen- und Sichtschutz — optional.', render:wizRenderRoll},
   {key:'sprossen', gilt:['kunststoff','balkontuer'], title:'Wählen Sie die <span>Sprossen</span>', sub:'Klassische Optik — aufgesetzt oder im Scheibenzwischenraum.', render:wizRenderSpro},
-  {key:'sicherheit', gilt:ALL, title:'Wählen Sie den <span>Einbruchschutz</span>', sub:'Wie sicher soll es sein?', render:wizRenderSicher},
+  {key:'sicherheit', gilt:ALL, cond:()=>S.prod!=='hst', title:'Wählen Sie den <span>Einbruchschutz</span>', sub:'Wie sicher soll es sein?', render:wizRenderSicher},
   {key:'angebot', gilt:ALL, title:'Ihre <span>Übersicht</span>', sub:'Alles auf einen Blick — dann zur Anfrage.', render:wizRenderAngebot},
   {key:'kontakt', gilt:ALL, title:'Ihre <span>Anfrage</span>', sub:'Kontaktdaten eingeben — kostenlos & unverbindlich absenden.', render:wizRenderKontakt, layout:'cards'},
 ];
@@ -7427,7 +7427,7 @@ function wizRenderAngebot(){
     row('Sicherheitsglas', nm('sicherGlas',S.sicherGlas)),
     row('Rolladen', S.roll==='ohne'?'Kein':nm('roll',S.roll)),
     row('Sprossen', S.sproTyp==='keine'?'Ohne':(S.sproTyp+' '+S.sproDicke+' mm · '+((P.sproRaster[S.sproRaster]||{}).name||''))),
-    row('Sicherheit', nm('sicher',S.sicher))
+    (S.prod!=='hst' ? row('Sicherheit', nm('sicher',S.sicher)) : '')
   ];
   const inCart=(typeof cart!=='undefined')?cart:[];
   let h='';
@@ -7512,8 +7512,8 @@ function wizRenderProfil(){
   return '<div style="max-width:620px;margin:0 auto">'+_wizPills(keys.map(function(k){return [k,P.profil[k].name];}),S.profil,'wizPickProfil')+'</div>';
 }
 function wizPickProfil(k){ S.profil=k; if(window._touched)window._touched.add('profil');
-  // Iglo HS hat keinen Aufteilungs-Schritt mehr → immer 2-flügelig/2-teilig festlegen, damit 3D + Angebot stimmen.
-  if(k==='iglo-hs'){ S.fluegel='2-fluegel'; S.hstTeilung='2-teilig'; if(window._touched){window._touched.add('fluegel');window._touched.add('hstTeilung');} if(typeof previewState!=='undefined')previewState.fluegel=2; }
+  // IGLO-HS + PSK haben keinen Aufteilungs-Schritt mehr → immer 2-flügelig/2-teilig festlegen, damit 3D + Angebot stimmen.
+  if(k==='iglo-hs'||k==='iglo-psk'){ S.fluegel='2-fluegel'; S.hstTeilung='2-teilig'; if(window._touched){window._touched.add('fluegel');window._touched.add('hstTeilung');} if(typeof previewState!=='undefined')previewState.fluegel=2; }
   const d2=document.getElementById('d2'); if(d2)d2.textContent=profilHeroName(k); if(typeof mkDone==='function')mkDone(2); if(typeof wizRebuildSteps==='function'){wizRebuildSteps(); wizCrumbs();} wizRenderPanel(); }
 const BALKON_FLUEGEL=[['1-fluegel','1 Flügel','1-fluegel.webp'],['2-fluegel','2 Flügel','stulp.webp']];
 // Balkontür 2-Flügel: Öffnungs-Varianten (Stulp) — DIN-Linien aufs Glas gezeichnet (Pillow), Stulp-Leiste mittig.
@@ -7632,13 +7632,19 @@ function wizRenderAnschlag(){
   }).join('')+'</div>';
 }
 function pskKippSchiebeCard(v){
+  // Frontaler PSK-Render (Higgsfield, 18.06.2026). psk-rechts = Schiebe-Kipp-Flügel + Drehgriff rechts.
+  // psk-links ist das EXAKT gespiegelte psk-rechts (dieselbe Tür, nur gewendete Anschlagseite) — physikalisch
+  // ist eine PSK-Links die Spiegelung der PSK-Rechts. Darum: Overlay einmal für "rechts" definiert
+  // (Kipp-Dreieck Spitze unten + Schiebe-Pfeil über dem rechten Flügel) und für "links" per scaleX(-1)
+  // mitgespiegelt → sitzt passgenau über dem linken Flügel, Pfeil zeigt dann nach rechts.
   var sel=(S.hstLauf===v)?' sel':'';
   var mir=(v==='links');
   var name=(v==='links')?'Kipp-Schiebe Links':'Kipp-Schiebe Rechts';
-  var sub=(v==='links')?'Schiebeflügel links · öffnet nach rechts':'Schiebeflügel rechts · öffnet nach links';
-  var paths='<line x1="865" y1="440" x2="690" y2="440"/><polyline points="740,400 690,440 740,480"/>';
-  var ov='<svg viewBox="0 0 1200 896" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%'+(mir?';transform:scaleX(-1)':'')+'" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#fff" stroke-width="20">'+paths+'</g><g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#225eaa" stroke-width="9">'+paths+'</g></svg>';
-  return '<div class="wiz-card'+sel+'" onclick="wizSetHstLauf(\''+v+'\')"><div style="position:relative;width:100%;line-height:0;border-radius:10px;overflow:hidden"><img src="img/karten/hst-fluegel/2-teilig.webp?v=20260610psk" alt="'+name+'" loading="lazy" style="width:100%;height:auto;aspect-ratio:auto;object-fit:fill;display:block;border-radius:0;padding:0">'+ov+'</div><div class="wiz-cn">'+name+'</div><div class="wiz-csub">'+sub+'</div></div>';
+  var sub=(v==='links')?'Schiebeflügel links · kippt + schiebt nach rechts':'Schiebeflügel rechts · kippt + schiebt nach links';
+  var img=(v==='links')?'psk-links':'psk-rechts';
+  var paths='<path d="M660 175 L772 915 L885 175"/><path d="M850 548 L700 548"/><path d="M745 510 L700 548 L745 586"/>';
+  var ov='<svg viewBox="0 0 1100 1100" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%'+(mir?';transform:scaleX(-1)':'')+'" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#fff" stroke-width="16">'+paths+'</g><g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#225eaa" stroke-width="8">'+paths+'</g></svg>';
+  return '<div class="wiz-card'+sel+'" onclick="wizSetHstLauf(\''+v+'\')"><div style="position:relative;width:100%;line-height:0;border-radius:10px;overflow:hidden"><img src="img/karten/hst-fluegel/'+img+'.webp?v=20260618psk2" alt="'+name+'" loading="lazy" style="width:100%;height:auto;display:block">'+ov+'</div><div class="wiz-cn">'+name+'</div><div class="wiz-csub">'+sub+'</div></div>';
 }
 // Iglo HS — Laufrichtung als große Bild-Karten (HebeSchiebe Links/Rechts, Pfeil-Overlay, Ansicht von innen).
 // Gleiches Muster wie pskKippSchiebeCard: Schiebetür-Bild + Pfeil; links gespiegelt → Pfeil zeigt nach rechts.
@@ -8091,8 +8097,8 @@ function pickProd(el) {
     // Default-Farbe für Fenster-3D-Vorschau: Anthrazit (Kundenwunsch)
     if (!S._faChosen) { S.fa = 'anthrazit'; S.fi = 'anthrazit'; }
   } else if (S.prod === 'hst') {
-    // Default-Farbe für HST-3D-Vorschau: Anthrazit (Kundenwunsch)
-    if (!S._faChosen) { S.fa = 'anthrazit'; S.fi = 'anthrazit'; }
+    // Default-Farbe für HST-3D-Vorschau: Weiß innen + außen (Kundenwunsch 18.06.2026)
+    if (!S._faChosen) { S.fa = 'weiss'; S.fi = 'weiss'; }
   }
   _updateDinToggle();
 
@@ -8216,7 +8222,7 @@ function buildSzButtons() {
     kunststoff: [[600,600],[800,1000],[1000,1200],[1230,1480],[1500,1500],[2000,1400]],
     balkontuer: [[800,2000],[900,2100],[1000,2100],[1200,2100],[1500,2200]],
     haustuere:  [[900,2000],[1000,2100],[1100,2200],[1200,2200],[1400,2300]],
-    hst:        [[2000,2100],[2400,2100],[3000,2200],[3600,2400],[4500,2400],[6000,2400]],
+    hst:        [[2000,2100],[2500,2100],[3000,2200],[3500,2200],[4000,2300]],
   };
   const list = presets[S.prod] || presets.kunststoff;
   wrap.innerHTML = list.map(([b,h]) => `<button class="szb" onclick="setSz(${b},${h})">${b}×${h}</button>`).join('');
