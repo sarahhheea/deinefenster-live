@@ -7718,11 +7718,10 @@ function wizGo(i){
 function wizRenderPanel(){ const p=document.getElementById('wiz-panel'); if(p)p.innerHTML=WIZ_STEPS[wizIdx].render(); }
 function wizCrumbs(){
   const c=document.getElementById('wiz-crumbs'); if(!c)return;
-  c.innerHTML=WIZ_STEPS.map(function(s,i){
-    const cls=i<wizIdx?'done':(i===wizIdx?'cur':'');
-    const inner=i<wizIdx?'<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3.2L13 4.2"/></svg>':(i+1);
-    return '<div class="wiz-st '+cls+'" onclick="wizGo('+i+')"><div class="wiz-st-dot">'+inner+'</div><div class="wiz-st-lb">'+wizCrumbLabel(s.key)+'</div></div>';
-  }).join('');
+  const n=WIZ_STEPS.length, cur=Math.min(wizIdx+1,n), pct=Math.round((cur/n)*100);
+  const label=(WIZ_STEPS[wizIdx]&&wizCrumbLabel(WIZ_STEPS[wizIdx].key))||'';
+  c.innerHTML='<div class="wiz-prog"><i style="width:'+pct+'%"></i></div>'
+    +'<div class="wiz-prog-txt">Schritt '+cur+' von '+n+(label?' · '+label:'')+'</div>';
 }
 function wizCrumbLabel(k){return {profil:'Profil',psk:'PSK',hslauf:'Laufrichtung',tuer:'Türmodell',fluegel:'Aufteilung',anschlag:'Öffnung',glas:'Glas',masse:'Maße',farbe:'Farbe',glasdekor:'Motiv',schall:'Schall',griff:'Griff',griffhaus:'Türgriff',griffhst:'Griff',balk:'Schwelle',hstschwelle:'Schwelle',rolladen:'Rolladen',sprossen:'Sprossen',sicherheit:'Sicherheit',anzahl:'Anzahl',angebot:'Übersicht',kontakt:'Anfrage'}[k]||k;}
 function wizNext(){ if(WIZ_STEPS[wizIdx].key==='kontakt'){ if(typeof d2submit==='function')d2submit({preventDefault:function(){}}); return; } if(wizIdx>=WIZ_STEPS.length-1){ wizFinish(); return; } wizGo(wizIdx+1); window.scrollTo({top:0,behavior:'auto'}); }
@@ -14957,6 +14956,20 @@ async function submitSkizze(e) {
      komplett ausgeblendet, damit die Ansicht (besonders Mobil) sauber ist. Die Vorschau
      (#prev-wrap) wird vom Wizard in #wiz-stage uebernommen. === */
   html body #kfg-main, html body #kfg-nav{ display:none !important; }
+  /* ===== STUFE 1: App-Handy-Layout fuer den Wizard =====
+     Fortschritt als duenner Balken + "Schritt X von Y" statt 15 gequetschter Punkte. */
+  #cfg-wizard .wiz-steps{ display:block !important; max-width:680px; margin:0 auto 14px !important; width:100%; padding:0 4px; }
+  #cfg-wizard .wiz-prog{ height:5px; background:#e7ecf3; border-radius:3px; overflow:hidden; }
+  #cfg-wizard .wiz-prog>i{ display:block; height:100%; background:var(--c-primary); border-radius:3px; transition:width .25s ease; }
+  #cfg-wizard .wiz-prog-txt{ margin-top:8px; font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:13.5px; color:#14233f; text-align:center; letter-spacing:.01em; }
+  /* Eingaben >=16px -> verhindert iOS-Auto-Zoom beim Antippen */
+  #cfg-wizard input, #cfg-wizard select, #cfg-wizard textarea{ font-size:16px !important; }
+  /* Scroll-Lock hinter dem geoeffneten Wizard (kein "Steckt") + WhatsApp-Knopf im Flow ausblenden.
+     :has() greift, sobald #cfg-wizard inline display:flex gesetzt ist (nur im aktiven Flow). */
+  html:has(#cfg-wizard[style*="flex"]), body:has(#cfg-wizard[style*="flex"]){ overflow:hidden !important; }
+  body:has(#cfg-wizard[style*="flex"]) .df-wa-float{ display:none !important; }
+  /* Untere Aktionsleiste: Abstand zum Home-Indicator (Notch-Geraete) */
+  #cfg-wizard .wiz-navbar{ padding-bottom:env(safe-area-inset-bottom); }
 </style>
 <link rel="stylesheet" href="css/cookie-banner.css">
 <script defer src="js/cookie-banner.js"></script>
