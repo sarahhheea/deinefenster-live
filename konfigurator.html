@@ -7532,7 +7532,7 @@ function wizStart(){
   if(window._touched){['sproTyp','sproDicke','sproRaster','roll','rollSeite','rollKasten','panzerFarbe','schall','sicher','sicherGlas','glasdekor','griffLocked'].forEach(function(k){window._touched.delete(k);});}
   const prod=S.prod||'kunststoff';
   // Profil-Default je Produkt (zurücksetzen, falls vom Vorgänger-Produkt unpassend)
-  if(prod==='haustuere'){ if(!_profilOkForProd('haustuere'))S.profil='iglo5'; if(!S.oeff1)S.oeff1='dreh-r'; if(!S.tuerOeffnung)S.tuerOeffnung='innen'; }
+  if(prod==='haustuere'){ if(!_profilOkForProd('haustuere'))S.profil='iglo5'; if(!S.oeff1)S.oeff1='dreh-r'; if(!S.tuerOeffnung)S.tuerOeffnung='innen'; if(!S.tuerModell)S.tuerModell='vollglas-inox'; }
   else if(prod==='hst'){ if(!_profilOkForProd('hst'))S.profil='iglo-hs'; if(['2-fluegel','3-fluegel'].indexOf(S.fluegel)<0)S.fluegel='2-fluegel'; if(!S.hstTeilung)S.hstTeilung='2-teilig'; if(typeof previewState!=='undefined')previewState.fluegel=(S.hstTeilung==='3-teilig')?3:2; }
   else { if(!_profilOkForProd(prod))S.profil='iglo5'; }
   if(!S.fluegel)S.fluegel='1-fluegel';
@@ -8185,10 +8185,11 @@ function pickProd(el) {
   // entsprechende Drutex-Farb-Variante (HAUSTUER_FARB_FRAMES). Die Innenansicht
   // (Klinke + 3 Scharniere) wird vom User selbst über den View-Toggle aktiviert.
   if (S.prod === 'haustuere') {
+    // Haustür startet WEISS (Kundenwunsch 18.06.2026: wir liefern weiße Haustüren) —
+    // MUSS vor setPreviewView/erstem 3D-Load gesetzt werden, sonst baut das iframe
+    // die URL zuerst mit Anthrazit und das spätere postMessage-Weiß verliert das Timing-Rennen.
+    if (!S._faChosen) { S.fa = 'weiss'; S.fi = 'weiss'; }
     setPreviewView('aus');
-    // Haustür IMMER Anthrazit als Start (Kundenwunsch) — kein Flackern
-    // beim Wechsel von anderem Produkt mit anderer Farbe.
-    S.fa = 'anthrazit'; S.fi = 'anthrazit';
   } else if (S.prod === 'balkontuer') {
     setPreviewView('inn');
     // Sinnvolle Standard-Maße für Balkontür (verhindert nicht-tür-ähnliche Vorschau)
@@ -13235,7 +13236,7 @@ function _renderHaustuer3d(previewView) {
   if (!haus3dWrap || !haus3dFrame) return;
   _show3dHint(true);
 
-  const _mdl   = S.tuerModell || 'florida-lr-inox';
+  const _mdl   = S.tuerModell || 'vollglas-inox';
   const _side  = (S.oeff1 === 'dreh-l') ? 'r' : 'l';  // DIN-Fix 30.05: DIN-Rechts (Standard, Griff links) = Katalog-Hand side=l; DIN-Links = side=r
   const _seitenteil = (S.fluegel === 'seitenteil-l') ? 'l' : (S.fluegel === 'seitenteil-r') ? 'r' : (S.fluegel === 'seitenteil-2') ? '2' : 'none';
   const _view  = (previewView === 'inn') ? 'innen' : 'aussen';
@@ -13375,7 +13376,7 @@ function drawPrev() {
   if (haus3dWrap) {
     if (isHausAussen) {
       // Außen-Ansicht: 3D-Iframe laden und anzeigen
-      const _mdl  = S.tuerModell || 'florida-lr-inox';
+      const _mdl  = S.tuerModell || 'vollglas-inox';
       const _side = (S.oeff1 === 'dreh-l') ? 'r' : 'l';  // DIN-Fix 30.05: siehe oben
       const _isLoaded = haus3dFrame.src.includes('haustuer-3d');
       if (!_isLoaded) {
@@ -15343,7 +15344,7 @@ function d2Hst(){ const w=document.getElementById('d2-hst3d-wrap'),f=document.ge
   const pl={type:'update',color:wood?null:ck,wood:wood?ck:null,glass:S.glasdekor||'klar',side,view:vk,hstGriff:grip};
   if(!f.src.includes('hst-3d')||cur!==sys){ f.src=exp; f.onload=()=>{const cw=f.contentWindow;if(!cw)return;cw.dispatchEvent(new Event('resize'));cw.postMessage(pl,'*');}; } else f.contentWindow&&f.contentWindow.postMessage(pl,'*'); }
 function d2Haus(){ const w=document.getElementById('d2-haus3d-wrap'),f=document.getElementById('d2-haus3d-frame'); if(!w||!f)return; showHint(true);
-  const mdl=S.tuerModell||'florida-lr-inox'; const side=(S.oeff1==='dreh-l')?'r':'l'; const view=(pv==='inn')?'innen':'aussen'; const farb=(view==='innen')?(S.fi||S.fa):(S.fa||S.fi); const ck=HAUS3D_COLOR_MAP[farb]||'anthrazitgrau'; const wood=HAUS3D_WOOD_KEYS.has(ck);
+  const mdl=S.tuerModell||'vollglas-inox'; const side=(S.oeff1==='dreh-l')?'r':'l'; const view=(pv==='inn')?'innen':'aussen'; const farb=(view==='innen')?(S.fi||S.fa):(S.fa||S.fi); const ck=HAUS3D_COLOR_MAP[farb]||'anthrazitgrau'; const wood=HAUS3D_WOOD_KEYS.has(ck);
   const pl={type:'update',model:mdl,side,view,color:wood?null:ck,wood:wood?ck:null,glass:S.glasdekor||'klar'};
   if(!f.src.includes('haustuer-3d')){ f.src=`haustuer-3d.html?embed&bg=light&v=20260609c&model=${mdl}&side=${side}&view=${view}&${wood?'wood':'color'}=${ck}`; f.onload=()=>{const cw=f.contentWindow;if(!cw)return;cw.postMessage(pl,'*');}; } else f.contentWindow&&f.contentWindow.postMessage(pl,'*'); w.style.display='block'; }
 function render3D(){ ['d2-fenster3d-wrap','d2-balkon3d-wrap','d2-hst3d-wrap','d2-haus3d-wrap'].forEach(i=>{const e=document.getElementById(i);if(e)e.style.display='none';});

@@ -933,72 +933,83 @@ function buildDoor(modelKey) {
   setModelRefPhoto(modelKey);
 }
 
-// AUSSEN-BESCHLAG: Stoßgriff (Drutex Z1/Q-Serie, eckig) + Schloss-Langschild
+// AUSSEN-BESCHLAG: Klinke / Drückergarnitur (Kundenwunsch 18.06.2026 — wie auf den
+// Aufteilungs-Karten; ersetzt den früheren Stoßgriff). Spiegelbild der Innen-Klinke,
+// aber OHNE Bandscharniere (außen niemals Scharniere sichtbar). Gilt für alle Modelle.
 function buildAussenBeschlag() {
-  if (_curModel && _curModel.longHandle) {
-    // ── Vollglas: langer runder Edelstahl-Stoßgriff (~80% Türhöhe) auf 2 Standoffs ──
-    // Helles, mattes Edelstahl-Silber (gleichmäßig, kein dunkler Spiegel) — Kundenwunsch 11.06.: Griff wirkte zu dünn/dunkel
-    const inoxMat = new THREE.MeshStandardMaterial({ color: 0xcdd2d6, roughness: 0.42, metalness: 0.12, envMapIntensity: 0.30 });
-    const HXg = 0.090, R = 0.017, yB = 0.300, yT = 1.920, Lg = yT - yB, zBar = DD + 0.070;
-    const barG = new THREE.Mesh(new THREE.CylinderGeometry(R, R, Lg, 28), inoxMat);
-    barG.position.set(HXg, yB + Lg / 2, zBar);
-    barG.castShadow = true;
-    doorGroup.add(barG);
-    [yB, yT].forEach(cy => {                                  // runde Endkappen
-      const cap = new THREE.Mesh(new THREE.SphereGeometry(R, 20, 14), inoxMat);
-      cap.position.set(HXg, cy, zBar);
-      doorGroup.add(cap);
-    });
-    [yB + 0.120, yT - 0.120].forEach(sy => {                  // 2 Standoffs (Tür→Griff), deutlich sichtbar
-      const so = new THREE.Mesh(new THREE.CylinderGeometry(0.011, 0.011, 0.070, 18), inoxMat);
-      so.rotation.x = Math.PI / 2;
-      so.position.set(HXg, sy, DD + 0.035);
-      so.castShadow = true;
-      doorGroup.add(so);
-    });
-  } else {
-    const HX    = 0.115;
-    const BAR_W = 0.026;
-    const BAR_D = 0.040;
-    const BAR_B = 0.670;
-    const BAR_T = 1.740;
-    const BAR_L = BAR_T - BAR_B;
+  const AX = 0.090;          // Griffseite außen (setSide spiegelt für DIN-Links/-Rechts)
+  const KY_HANDLE = 1.050;   // DIN 18101: Drückerhöhe
+  const KY_LOCK   = 0.962;   // DIN 18252: PZ-Achse 88mm unter dem Drücker
 
-    const bar = new THREE.Mesh(new THREE.BoxGeometry(BAR_W, BAR_L, BAR_D), chromeMat);
-    bar.position.set(HX, BAR_B + BAR_L / 2, DD + BAR_D / 2);
-    bar.castShadow = true;
-    doorGroup.add(bar);
+  const PLATE_W = 0.032, PLATE_R = 0.016, PLATE_TOTAL_LEN = 0.220;
+  const PLATE_BOX_LEN = PLATE_TOTAL_LEN - 2 * PLATE_R;
+  const PLATE_THK = 0.005, PLATE_Z_BASE = DD + 0.013;
+  const plateY = (KY_HANDLE + KY_LOCK) / 2;
+  const plateMat = new THREE.MeshStandardMaterial({ color: 0xb4b7ba, roughness: 0.68, metalness: 0.55, envMapIntensity: 0.85 });
 
-    const AW = 0.016, AH = 0.014, AD = BAR_D + 0.002;
-    const AX = HX - BAR_W / 2 - AW / 2;
-    [BAR_T - 0.110, BAR_B + 0.110].forEach(bracketY => {
-      const arm = new THREE.Mesh(new THREE.BoxGeometry(AW, AH, AD), bracketMat);
-      arm.position.set(AX, bracketY, DD + AD / 2);
-      arm.castShadow = true;
-      doorGroup.add(arm);
-    });
-  }
+  // Langschild (Stadium-Form: zentrale Box + 2 Halbkreis-Enden)
+  const plateBox = new THREE.Mesh(new THREE.BoxGeometry(PLATE_W, PLATE_BOX_LEN, PLATE_THK), plateMat);
+  plateBox.position.set(AX, plateY, PLATE_Z_BASE + PLATE_THK / 2);
+  plateBox.castShadow = true; plateBox.receiveShadow = true;
+  doorGroup.add(plateBox);
+  [plateY + PLATE_BOX_LEN / 2, plateY - PLATE_BOX_LEN / 2].forEach(cy => {
+    const cap = new THREE.Mesh(new THREE.CylinderGeometry(PLATE_R, PLATE_R, PLATE_THK, 32), plateMat);
+    cap.rotation.x = Math.PI / 2;
+    cap.position.set(AX, cy, PLATE_Z_BASE + PLATE_THK / 2);
+    cap.castShadow = true; doorGroup.add(cap);
+  });
 
-  const LX = 0.082, LY = 1.110;
-  const lsShape = roundedRectShape(0.024, 0.072, 0.012);
-  const lsGeom  = new THREE.ExtrudeGeometry(lsShape, { depth: 0.007, bevelEnabled: false });
-  const lsPlate = new THREE.Mesh(lsGeom, chromeMat);
-  lsPlate.position.set(LX, LY, DD + 0.020);
-  lsPlate.castShadow = true;
-  doorGroup.add(lsPlate);
+  // Drückerrosette (erhabener Disc um den Hebel-Hals)
+  const SUB_ROSETTE_R = 0.014, SUB_ROSETTE_THK = 0.004;
+  const subRosette = new THREE.Mesh(new THREE.CylinderGeometry(SUB_ROSETTE_R, SUB_ROSETTE_R, SUB_ROSETTE_THK, 32), plateMat);
+  subRosette.rotation.x = Math.PI / 2;
+  subRosette.position.set(AX, KY_HANDLE, PLATE_Z_BASE + PLATE_THK + SUB_ROSETTE_THK / 2);
+  subRosette.castShadow = true; doorGroup.add(subRosette);
 
-  const keyCyl = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.007, 0.007, 0.009, 20), chromeMat
-  );
-  keyCyl.rotation.x = Math.PI / 2;
-  keyCyl.position.set(LX, LY + 0.014, DD + 0.029);
-  keyCyl.castShadow = true;
-  doorGroup.add(keyCyl);
+  const ROSETTE_Z_BASE = PLATE_Z_BASE;
+  const ROSETTE_THK    = PLATE_THK + SUB_ROSETTE_THK;
 
-  const darkM = new THREE.MeshStandardMaterial({ color: 0x080808, roughness: 0.95 });
-  const slot = new THREE.Mesh(new THREE.BoxGeometry(0.004, 0.009, 0.002), darkM);
-  slot.position.set(LX, LY + 0.014, DD + 0.033);
-  doorGroup.add(slot);
+  // PZ-Zylinder-Stirnfläche + Schlüsselloch (rund + Schlitz)
+  const pzCylMat = new THREE.MeshStandardMaterial({ color: 0x101012, roughness: 0.85, metalness: 0.4 });
+  const pzFace = new THREE.Mesh(new THREE.CylinderGeometry(0.0085, 0.0085, 0.003, 32), pzCylMat);
+  pzFace.rotation.x = Math.PI / 2;
+  pzFace.position.set(AX, KY_LOCK, ROSETTE_Z_BASE + ROSETTE_THK + 0.001);
+  doorGroup.add(pzFace);
+  const keyMat = new THREE.MeshStandardMaterial({ color: 0xcfd3d6, roughness: 0.5, metalness: 0.7 });
+  const KEY_ROUND_R = 0.0025, keyFrontZ = ROSETTE_Z_BASE + ROSETTE_THK + 0.0025;
+  const keyRound = new THREE.Mesh(new THREE.CylinderGeometry(KEY_ROUND_R, KEY_ROUND_R, 0.0008, 24), keyMat);
+  keyRound.rotation.x = Math.PI / 2;
+  keyRound.position.set(AX, KY_LOCK + 0.0015, keyFrontZ);
+  doorGroup.add(keyRound);
+  const keySlot = new THREE.Mesh(new THREE.BoxGeometry(0.0018, 0.004, 0.0008), keyMat);
+  keySlot.position.set(AX, KY_LOCK + 0.0015 - KEY_ROUND_R - 0.004 / 2 + 0.0008, keyFrontZ);
+  doorGroup.add(keySlot);
+
+  // KLINKE: Schwanenhals-Hebel (Hoppe-Stil), Hals senkrecht aus der Tür, dann Hebel
+  // PARALLEL zur Türfläche zur Türmitte (+x) zeigend. Gebürstetes Edelstahl (handleMat).
+  const LEVER_R        = 0.0095;
+  const LEVER_BASE_Z   = ROSETTE_Z_BASE + ROSETTE_THK + 0.0005;
+  const LEVER_NECK_LEN = 0.025, LEVER_BAR_LEN = 0.110;
+  const LEVER_FRONT_Z  = LEVER_BASE_Z + LEVER_NECK_LEN;
+  // Gerader Hebel (waagrecht): Hals senkrecht aus der Tür (+z), 90°-Bogen, dann
+  // GERADER Bar bei konstanter Höhe KY_HANDLE zur Türmitte — kein Aufwärts-Bogen
+  // (Kundenwunsch 18.06.2026: eine Klinke ist gerade, nicht gebogen).
+  const leverPath = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(AX,                 KY_HANDLE, LEVER_BASE_Z),
+    new THREE.Vector3(AX,                 KY_HANDLE, LEVER_BASE_Z + 0.010),
+    new THREE.Vector3(AX,                 KY_HANDLE, LEVER_BASE_Z + 0.018),
+    new THREE.Vector3(AX + 0.006,         KY_HANDLE, LEVER_FRONT_Z - 0.002),
+    new THREE.Vector3(AX + 0.018,         KY_HANDLE, LEVER_FRONT_Z),
+    new THREE.Vector3(AX + 0.045,         KY_HANDLE, LEVER_FRONT_Z),
+    new THREE.Vector3(AX + 0.075,         KY_HANDLE, LEVER_FRONT_Z),
+    new THREE.Vector3(AX + 0.095,         KY_HANDLE, LEVER_FRONT_Z),
+    new THREE.Vector3(AX + LEVER_BAR_LEN, KY_HANDLE, LEVER_FRONT_Z),
+  ], false, 'catmullrom', 0.5);
+  const lever = new THREE.Mesh(new THREE.TubeGeometry(leverPath, 96, LEVER_R, 20, false), handleMat);
+  lever.castShadow = true; doorGroup.add(lever);
+  const tipCap = new THREE.Mesh(new THREE.SphereGeometry(LEVER_R, 20, 14), handleMat);
+  tipCap.position.set(AX + LEVER_BAR_LEN, KY_HANDLE, LEVER_FRONT_Z);
+  tipCap.castShadow = true; doorGroup.add(tipCap);
 }
 
 // INNEN-BESCHLAG: Drücker 30A auf Langschild RECHTS + 3 WALA-AXM Bandscharniere LINKS
