@@ -3941,13 +3941,13 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
     <div class="mh-fields">
       <div>
         <label class="fl" for="mh-ib">Breite (mm)</label>
-        <input class="inp" type="number" inputmode="numeric" pattern="[0-9]*" id="mh-ib" min="300" max="4000" value="1000" placeholder="z.B. 1000" oninput="mhOnInput()">
+        <input class="inp" type="number" inputmode="numeric" pattern="[0-9]*" id="mh-ib" min="300" max="4000" value="1000" placeholder="z.B. 1000" oninput="mhOnInput()" onblur="mhBlurFill()">
         <div class="mh-min" id="mh-minb"></div>
       </div>
       <div class="mh-x">×</div>
       <div>
         <label class="fl" for="mh-ih">Höhe (mm)</label>
-        <input class="inp" type="number" inputmode="numeric" pattern="[0-9]*" id="mh-ih" min="300" max="3000" value="1200" placeholder="z.B. 1200" oninput="mhOnInput()">
+        <input class="inp" type="number" inputmode="numeric" pattern="[0-9]*" id="mh-ih" min="300" max="3000" value="1200" placeholder="z.B. 1200" oninput="mhOnInput()" onblur="mhBlurFill()">
         <div class="mh-min" id="mh-minh"></div>
       </div>
     </div>
@@ -7094,14 +7094,28 @@ function _mhRange(){ const pr = S.prod ? P.prod[S.prod] : null;
   }
   return { bMin: pr?.bMin||300, bMax: pr?.bMax||4000, hMin: pr?.hMin||300, hMax: pr?.hMax||3000, bDef: pr?.bDef||1000, hDef: pr?.hDef||1200, pr }; }
 // Liefert eine garantiert gültige Vorbelegung: vorhandenen State behalten, falls er
-// im aktiven Bereich liegt — sonst den flügelabhängigen Default. Schreibt das Ergebnis
-// in den State, damit Anzeige und S.bMm/S.hMm immer konsistent (und gültig) sind.
+// im aktiven Bereich liegt — sonst die Start-Vorbelegung. Schreibt das Ergebnis in den
+// State, damit Anzeige und S.bMm/S.hMm immer konsistent (und gültig) sind.
+// Balkontür startet bewusst auf dem MINDESTMASS (Kundenwunsch: immer zuerst aufs Minimum);
+// andere Produkte behalten ihren sinnvollen Standardwert (deren Minimum wäre zu klein).
 function _mhEnsureValidDefault(){
   const { bMin, bMax, hMin, hMax, bDef, hDef } = _mhRange();
-  const b = (S.bMm && S.bMm>=bMin && S.bMm<=bMax) ? S.bMm : bDef;
-  const h = (S.hMm && S.hMm>=hMin && S.hMm<=hMax) ? S.hMm : hDef;
+  const startB = (S.prod==='balkontuer') ? bMin : bDef;
+  const startH = (S.prod==='balkontuer') ? hMin : hDef;
+  const b = (S.bMm && S.bMm>=bMin && S.bMm<=bMax) ? S.bMm : startB;
+  const h = (S.hMm && S.hMm>=hMin && S.hMm<=hMax) ? S.hMm : startH;
   S.bMm = b; S.hMm = h;
   return { b, h };
+}
+// Leeres (oder 0) Maßfeld beim Verlassen automatisch auf das Mindestmaß setzen,
+// damit nie ein leeres Feld stehen bleibt. Zu kleine/zu große Werte werden NICHT
+// verändert — die bleiben als rote Sperre sichtbar (harte Sperre bleibt erhalten).
+function mhBlurFill(){
+  const { bMin, hMin } = _mhRange();
+  const ib=document.getElementById('mh-ib'), ih=document.getElementById('mh-ih');
+  if(ib && (ib.value==='' || parseInt(ib.value)<=0)) ib.value=bMin;
+  if(ih && (ih.value==='' || parseInt(ih.value)<=0)) ih.value=hMin;
+  if(typeof mhOnInput==='function') mhOnInput();
 }
 // Prüft die aktuellen Eingaben gegen den aktiven Bereich, zeigt eine konkrete
 // Sperr-Meldung und (de)aktiviert den Weiter-Button. Gibt true zurück wenn gültig.
@@ -7728,7 +7742,7 @@ function wizRenderMasse(){
   // Flügelabhängiger Bereich (Balkontür) — gleiche Quelle wie der Hero-Schritt.
   const { bMin, bMax, hMin, hMax } = _mhRange();
   const def=_mhEnsureValidDefault(); const b=def.b, h=def.h;
-  return '<div class="wiz-mass"><div class="wiz-mass-fields"><div style="flex:1"><label class="fl" for="wiz-mb">Breite (mm)</label><input class="inp" type="number" inputmode="numeric" id="wiz-mb" min="'+bMin+'" max="'+bMax+'" value="'+b+'" oninput="wizMassInput()"></div><div class="wiz-mass-x">×</div><div style="flex:1"><label class="fl" for="wiz-mh">Höhe (mm)</label><input class="inp" type="number" inputmode="numeric" id="wiz-mh" min="'+hMin+'" max="'+hMax+'" value="'+h+'" oninput="wizMassInput()"></div></div><div class="wiz-hint">Einbaumaß = Mauerwerksöffnung. Das Fenster wird ca. 10–20 mm kleiner gefertigt. Mindestmaß: Breite '+bMin+' mm, Höhe '+hMin+' mm · Höchstmaß: Breite '+bMax+' mm, Höhe '+hMax+' mm.</div><div id="wiz-mass-error" role="alert" style="display:none;margin-top:12px;padding:11px 14px;border-radius:10px;background:#fdecec;border:1px solid #f0c2c2;color:#9a2b2b;font-family:\'Manrope\',sans-serif;font-size:13.5px;font-weight:600;line-height:1.4"></div></div>';
+  return '<div class="wiz-mass"><div class="wiz-mass-fields"><div style="flex:1"><label class="fl" for="wiz-mb">Breite (mm)</label><input class="inp" type="number" inputmode="numeric" id="wiz-mb" min="'+bMin+'" max="'+bMax+'" value="'+b+'" oninput="wizMassInput()" onblur="wizMassBlurFill()"></div><div class="wiz-mass-x">×</div><div style="flex:1"><label class="fl" for="wiz-mh">Höhe (mm)</label><input class="inp" type="number" inputmode="numeric" id="wiz-mh" min="'+hMin+'" max="'+hMax+'" value="'+h+'" oninput="wizMassInput()" onblur="wizMassBlurFill()"></div></div><div class="wiz-hint">Einbaumaß = Mauerwerksöffnung. Das Fenster wird ca. 10–20 mm kleiner gefertigt. Mindestmaß: Breite '+bMin+' mm, Höhe '+hMin+' mm · Höchstmaß: Breite '+bMax+' mm, Höhe '+hMax+' mm.</div><div id="wiz-mass-error" role="alert" style="display:none;margin-top:12px;padding:11px 14px;border-radius:10px;background:#fdecec;border:1px solid #f0c2c2;color:#9a2b2b;font-family:\'Manrope\',sans-serif;font-size:13.5px;font-weight:600;line-height:1.4"></div></div>';
 }
 // Validiert die Wizard-Maße gegen den aktiven (flügelabhängigen) Bereich,
 // zeigt eine Sperr-Meldung und (de)aktiviert den Wizard-Weiter-Button. true = gültig.
@@ -7755,6 +7769,14 @@ function wizMassInput(){
   if(valid){ S.bMm=b; S.hMm=h; }
   if(window._touched){window._touched.add('bMm');window._touched.add('hMm');}
   if(typeof mkDone==='function' && valid)mkDone(5);
+}
+// Leeres Wizard-Maßfeld beim Verlassen auf das Mindestmaß setzen (zu klein/groß bleibt gesperrt).
+function wizMassBlurFill(){
+  const { bMin, hMin } = _mhRange();
+  const ib=document.getElementById('wiz-mb'), ih=document.getElementById('wiz-mh');
+  if(ib && (ib.value==='' || parseInt(ib.value)<=0)) ib.value=bMin;
+  if(ih && (ih.value==='' || parseInt(ih.value)<=0)) ih.value=hMin;
+  if(typeof wizMassInput==='function') wizMassInput();
 }
 function wizGo(i){
   wizIdx=Math.max(0,Math.min(WIZ_STEPS.length-1,i));
