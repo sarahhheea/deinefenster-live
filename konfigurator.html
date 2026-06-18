@@ -7576,17 +7576,6 @@ function wizSetHstLauf(v){ S.hstLauf=v; if(window._touched)window._touched.add('
 function wizSetTuerOeff(o,r){ S.oeff1=o; S.tuerOeffnung=r; if(window._touched){window._touched.add('oeff1');window._touched.add('tuerOeffnung');} _wizPrev(); wizRenderPanel(); }
 // 2-flügelige Haustür: Gehflügel-Seite (Griff) + Öffnungsrichtung. Beide Flügel sind Dreh.
 function wizSetTuerGeh(geh,r){ S.tuerGehfluegel=geh; S.tuerOeffnung=r; S.oeff1='dreh-l'; S.oeff2='dreh-r'; if(window._touched){window._touched.add('tuerGehfluegel');window._touched.add('tuerOeffnung');window._touched.add('oeff1');} if(typeof mkDone==='function')mkDone(4); _wizPrev(); wizRenderPanel(); }
-// DIN-Einzeichnung für 2-flügelige Stulptür: zwei Dreiecke mit Spitze zur Mitte
-// (Bandseite = Außenrand). Durchgezogen = nach innen öffnend, gestrichelt = nach außen.
-// Wird als Overlay über das echte Türbild gelegt (viewBox = Bildmaße 896x1200).
-function tuerDinOverlay(richtung){
-  const dash=(richtung==='aussen')?' stroke-dasharray="36 24"':'';
-  const d='M84 175 L444 600 L84 1035 M812 175 L452 600 L812 1035';
-  return '<svg class="tuer-din" viewBox="0 0 896 1200" preserveAspectRatio="xMidYMid meet">'
-    +'<path d="'+d+'" fill="none" stroke="#ffffff" stroke-width="17" stroke-linejoin="round" stroke-linecap="round"'+dash+'/>'
-    +'<path d="'+d+'" fill="none" stroke="#16335f" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"'+dash+'/>'
-    +'</svg>';
-}
 function wizRenderAnschlag(){
   if(S.prod==='balkontuer' && (S.fluegel==='2-fluegel'||S.fluegel==='stulp')){
     return '<div class="wiz-cards">'+BALKON_ANSCHLAG_2F.map(function(o,idx){
@@ -7610,12 +7599,11 @@ function wizRenderAnschlag(){
       '</div>';
     if(S.fluegel==='2-fluegel'){
       const din2=function(geh,richtung){
-        const mir=(geh==='links')?' mir':'';   // links → spiegeln, Griff wandert nach links
         const sel=(S.tuerGehfluegel===geh&&(S.tuerOeffnung||'innen')===richtung)?' sel':'';
         const lbl=(richtung==='innen'?'Ansicht von innen · nach innen öffnend':'Ansicht von außen · nach außen öffnend');
-        return '<div class="wiz-card'+sel+'" onclick="wizSetTuerGeh(\''+geh+'\',\''+richtung+'\')"><div class="hac-vis'+mir+'"><img src="img/karten/haus-fluegel/2-fluegel-gf.webp?v=20260617g" alt="'+lbl+'" loading="lazy"><div class="hac-ovl">'+tuerDinOverlay(richtung)+'</div></div><div class="wiz-cn">Dreh links · Stulp · Dreh rechts</div><div class="wiz-csub">'+lbl+'</div></div>';
+        return '<div class="wiz-card'+sel+'" onclick="wizSetTuerGeh(\''+geh+'\',\''+richtung+'\')"><div class="hac-vis"><img src="img/karten/haus-fluegel/2-fluegel.webp?v=20260609c" alt="'+lbl+'" loading="lazy"></div><div class="wiz-cn">Dreh links · Stulp · Dreh rechts</div><div class="wiz-csub">'+lbl+'</div></div>';
       };
-      const hilfe2='<div class="wiz-hint" style="max-width:820px;margin:0 auto 22px;text-align:left;line-height:1.6"><strong>Zwei Flügel – welcher ist der Gehflügel?</strong> Der <strong>Gehflügel</strong> ist der täglich genutzte Flügel mit dem Griff; der zweite (Standflügel) wird oben und unten verriegelt und nur bei Bedarf geöffnet. Wählen Sie die Seite des Griffs und die Öffnungsrichtung. Unsicher? Notieren Sie es in der Anfrage – wir klären es gemeinsam.</div>';
+      const hilfe2='<div class="wiz-hint" style="max-width:820px;margin:0 auto 22px;text-align:left;line-height:1.6"><strong>Zwei Flügel (Stulptür):</strong> Beide Flügel sind drehbar und treffen sich an einem Stulp – der <strong>Gehflügel</strong> trägt den Griff, der zweite (Standflügel) wird oben und unten verriegelt. Wählen Sie Ansicht und Öffnungsrichtung. Unsicher? Notieren Sie es in der Anfrage – wir klären es gemeinsam.</div>';
       return hilfe2+'<div class="wiz-cards">'+din2('rechts','innen')+din2('links','innen')+din2('rechts','aussen')+din2('links','aussen')+'</div>';
     }
     return hilfe+'<div class="wiz-cards">'+din('dreh-l','innen')+din('dreh-r','innen')+din('dreh-l','aussen')+din('dreh-r','aussen')+'</div>';
