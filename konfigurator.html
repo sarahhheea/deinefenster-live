@@ -4969,21 +4969,21 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
     <!-- C) SICHERHEITSGLAS — visuelle Glas-Querschnitte zeigen Aufbau & Schutz-Level -->
     <div class="sec-t">Sicherheitsglas</div>
     <div class="glass-grid">
-      <div class="glass-card sel" data-v="kein" onclick="pick(this,'sicherGlas')">
+      <div class="glass-card sel" id="sg-kein" data-v="kein" onclick="pick(this,'sicherGlas')">
         <div class="glass-vis" style="background:transparent;border:none;box-shadow:none;width:130px;height:110px"><img src="img/sicher-float.webp?v=20260529b" alt="Standard Floatglas" loading="lazy" style="width:100%;height:100%;object-fit:contain;display:block"/></div>
         <div class="glass-info">
           <div class="glass-name">Standard-Floatglas</div>
         </div>
         <div class="glass-check"><i class="ms f">check</i></div>
       </div>
-      <div class="glass-card" data-v="esg" onclick="pick(this,'sicherGlas')">
+      <div class="glass-card" id="sg-esg" data-v="esg" onclick="pick(this,'sicherGlas')">
         <div class="glass-vis" style="background:transparent;border:none;box-shadow:none;width:130px;height:110px"><img src="img/sicher-esg.webp?v=20260529b" alt="ESG Einscheibensicherheitsglas" loading="lazy" style="width:100%;height:100%;object-fit:contain;display:block"/></div>
         <div class="glass-info">
           <div class="glass-name">ESG-Sicherheitsglas</div>
         </div>
         <div class="glass-check"><i class="ms f">check</i></div>
       </div>
-      <div class="glass-card" data-v="vsg" onclick="pick(this,'sicherGlas')">
+      <div class="glass-card" id="sg-vsg" data-v="vsg" onclick="pick(this,'sicherGlas')">
         <div class="glass-vis" style="background:transparent;border:none;box-shadow:none;width:130px;height:110px"><img src="img/sicher-vsg.webp?v=20260529b" alt="VSG Verbundsicherheitsglas" loading="lazy" style="width:100%;height:100%;object-fit:contain;display:block"/></div>
         <div class="glass-info">
           <div class="glass-name">VSG-Sicherheitsglas</div>
@@ -5155,8 +5155,8 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       <i class="ms f" style="color:var(--c-primary);font-size:20px;flex-shrink:0">info</i>
       <div>Drutex IGLO-HS: der versenkte Smart-Slide-Flachgriff — wählen Sie die Farbe passend zu Ihrer Ausstattung.</div>
     </div>
-    <button type="button" onclick="openS(10)" class="w-full mt-4 flex items-center justify-center gap-2 font-bold py-3 rounded-full text-white text-sm" style="background:var(--c-primary);font-family:'Plus Jakarta Sans',sans-serif">
-      <i class="ms">arrow_forward</i> Weiter zum Einbruchschutz
+    <button type="button" onclick="openS(11)" class="w-full mt-4 flex items-center justify-center gap-2 font-bold py-3 rounded-full text-white text-sm" style="background:var(--c-primary);font-family:'Plus Jakarta Sans',sans-serif">
+      <i class="ms">arrow_forward</i> Weiter zum Rolladen
     </button>
   </div>
 </div>
@@ -8126,9 +8126,17 @@ function fluegelToProduct() {
 
 // ── PRODUKT WÄHLEN ───────────────────────────────────
 function pickProd(el) {
+  const _prevProd = S.prod;
   document.querySelectorAll('.pc').forEach(c=>c.classList.remove('sel'));
   el.classList.add('sel');
   S.prod = el.dataset.p;
+  // Schiebetür erzwingt VSG-Sicherheitsglas. Beim Wechsel WEG von der Schiebetür diesen Zwang
+  // wieder auf Standard zurücknehmen (sonst „klebt" VSG am Fenster/Balkon/Haustür). Greift NICHT
+  // bei legitim gewähltem/RC2-erzwungenem VSG anderer Produkte, da nur _prevProd==='hst' triggert.
+  if (_prevProd === 'hst' && S.prod !== 'hst' && S.sicherGlas === 'vsg') {
+    S.sicherGlas = 'kein';
+    if (window._touched) window._touched.delete('sicherGlas');
+  }
   if (window._touched) window._touched.add('prod');
   S.profil = null; S.fluegel = null; S.oeff1 = null; S.oeff2 = null; S.oeff3 = null;
   document.getElementById('d1').textContent = P.prod[S.prod].name;
@@ -8471,6 +8479,7 @@ function applyStepVisibility() {
     's9s':   { show: S.prod === 'hst',                 openIf: false }, // HST-Muschelgriff (Kunden-Wunsch 21.04.2026)
     's11':   { show: S.prod !== 'haustuere', resetState: () => { S.roll = 'ohne'; mkDone(11); } }, // Rolladen: bei Fenster/Balkon/HST, nicht Haustür (Kunde 21.04.2026)
     's12':   { show: S.prod !== 'haustuere' && S.prod !== 'hst', resetState: () => { S.sproTyp = 'keine'; mkDone(12); } }, // Sprossen (Kunden-Check: HST auch raus — Schiebetür-Sprossen untypisch)
+    's10':   { show: S.prod !== 'hst', resetState: () => { S.sicher = 'wk1'; mkDone(10); if (window._touched) window._touched.delete('sicher'); } }, // Einbruchschutz: bei Schiebetür entfernt (Kundenwunsch 18.06.2026) — gibt es dort nicht
   };
   Object.entries(rules).forEach(([id, rule]) => {
     const el = document.getElementById(id);
@@ -8881,6 +8890,26 @@ function enforceGlasRule() {
     card2.style.pointerEvents = '';
     card2.classList.remove('oc-disabled');
     if (hint) hint.classList.add('hidden');
+  }
+  // Sicherheitsglas: Bei Schiebetür (PSK + HS) NUR VSG — alle anderen Glasarten raus (Kundenwunsch 18.06.2026)
+  const sgKein = document.getElementById('sg-kein');
+  const sgEsg  = document.getElementById('sg-esg');
+  const sgVsg  = document.getElementById('sg-vsg');
+  if (sgKein && sgEsg && sgVsg) {
+    if (S.prod === 'hst') {
+      sgKein.style.display = 'none'; sgEsg.style.display = 'none';
+      sgKein.classList.remove('sel'); sgEsg.classList.remove('sel');
+      sgVsg.style.display = ''; sgVsg.classList.add('sel');
+      S.sicherGlas = 'vsg';
+      if (window._touched) window._touched.add('sicherGlas');  // VSG in Zusammenfassung + Bestellung führen
+    } else {
+      // Carryover-Reset (VSG-Zwang verlassen) passiert gezielt in pickProd beim Wechsel WEG von hst —
+      // hier nur Karten zeigen und sel-Status an den aktuellen Wert angleichen.
+      sgKein.style.display = ''; sgEsg.style.display = ''; sgVsg.style.display = '';
+      [['kein', sgKein], ['esg', sgEsg], ['vsg', sgVsg]].forEach(function (p) {
+        p[1].classList.toggle('sel', S.sicherGlas === p[0]);
+      });
+    }
   }
 }
 
@@ -11427,7 +11456,7 @@ function upFinalSum(rows,tot) {
       ['Griff außen', S.hstGriffAussen?P.hstGriffAussen[S.hstGriffAussen]?.name||S.hstGriffAussen:'–'],
       ...(S.hstSchloss && S.hstSchloss!=='ohne' ? [['Schloss', P.hstSchloss[S.hstSchloss]?.name||S.hstSchloss]] : [])
     ] : []),
-    ['Einbruchschutz', S.sicher?P.sicher[S.sicher]?.name||S.sicher:'–'],
+    ...(S.prod !== 'hst' ? [['Einbruchschutz', S.sicher?P.sicher[S.sicher]?.name||S.sicher:'–']] : []),
     ...(S.prod !== 'haustuere' && S.prod !== 'hst' ? [
       ['Rolladen', S.roll==='ohne' ? 'Kein Rolladen' : (P.roll[S.roll]?.name||S.roll) + ' · Kasten '+S.rollKasten+' mm'],
     ] : []),
@@ -13531,7 +13560,7 @@ async function submitForm(e) {
   const _kfName = (S.panzerFarbe && PANZER_FARBEN[S.panzerFarbe]) ? PANZER_FARBEN[S.panzerFarbe].name : '–';
   const rollName = (S.prod!=='haustuere' && S.prod!=='hst' && S.roll!=='ohne')
     ? `${P.roll[S.roll]?.name||S.roll} · Kasten ${S.rollKasten} mm · Panzerfarbe ${_kfName}` : 'Kein Rolladen';
-  const sicherName = P.sicher[S.sicher]?.name||S.sicher;
+  const sicherName = S.prod==='hst' ? '–' : (P.sicher[S.sicher]?.name||S.sicher); // Schiebetür ohne Einbruchschutz-Klasse (Kundenwunsch 18.06.2026)
   const sproStr    = S.sproTyp==='keine'?'Ohne':S.sproTyp+' '+S.sproDicke+' mm · '+((P.sproRaster[S.sproRaster]||{}).name||'');
   // Zusätzliche Felder für vollständige Bestellung
   const schallName  = S.schall && S.schall !== 'ohne' ? (P.schall[S.schall]?.name||S.schall) : 'Kein Zusatz';
@@ -15522,7 +15551,7 @@ function prodDetailLines(c){
   else griffName=curName(P.griff,c.griff)+' ('+curName(P.griffColor,c.griffColor)+')'+(c.griffLocked?' · abschließbar':'');
   const _kf=(c.panzerFarbe&&PANZER_FARBEN[c.panzerFarbe])?PANZER_FARBEN[c.panzerFarbe].name:'–';
   const rollName=(c.prod!=='haustuere'&&c.roll&&c.roll!=='ohne')?(P.roll[c.roll].name+' · Kasten '+c.rollKasten+' mm · Panzerfarbe '+_kf):'Kein Rolladen';
-  const sicherName=P.sicher[c.sicher]?.name||c.sicher||'–';
+  const sicherName=c.prod==='hst' ? '–' : (P.sicher[c.sicher]?.name||c.sicher||'–'); // Schiebetür ohne Einbruchschutz-Klasse (Kundenwunsch 18.06.2026)
   const sproStr=(c.prod==='kunststoff'||c.prod==='balkontuer')?((!c.sproTyp||c.sproTyp==='keine')?'Ohne':(c.sproTyp+' '+c.sproDicke+' mm · '+((P.sproRaster[c.sproRaster]||{}).name||''))):'Ohne';
   const lines=[
     'Produkt:     '+prodName,
@@ -15581,7 +15610,7 @@ function d2submit(e){
   else griffName=`${curName(P.griff,S.griff)} (${curName(P.griffColor,S.griffColor)})${S.griffLocked?' · abschließbar':''}`;
   const _kfName=(S.panzerFarbe&&PANZER_FARBEN[S.panzerFarbe])?PANZER_FARBEN[S.panzerFarbe].name:'–';
   const rollName=(S.prod!=='haustuere'&&S.roll!=='ohne')?`${P.roll[S.roll].name} · Kasten ${S.rollKasten} mm · Panzerfarbe ${_kfName}`:'Kein Rolladen';
-  const sicherName=P.sicher[S.sicher]?.name||S.sicher;
+  const sicherName=S.prod==='hst' ? '–' : (P.sicher[S.sicher]?.name||S.sicher); // Schiebetür ohne Einbruchschutz-Klasse (Kundenwunsch 18.06.2026)
   const sproStr=(S.prod==='kunststoff'||S.prod==='balkontuer')?(S.sproTyp==='keine'?'Ohne':`${S.sproTyp} ${S.sproDicke} mm · ${(P.sproRaster[S.sproRaster]||{}).name||''}`):'Ohne';
   const tuerModellName=S.prod==='haustuere'?(S.tuerModell||'noch offen'):null;
   const offerId='DF-'+Date.now().toString().slice(-6);
