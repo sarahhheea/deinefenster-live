@@ -582,6 +582,7 @@ const MODELLE = {
 
 let glassObjects = [];
 let _curModel = null;   // aktuell gebautes Türmodell (für Beschlag-Varianten wie langer Vollglas-Griff)
+let _curModelKey = 'florida-lr-inox';   // Key des aktuellen Modells (für Rebuild ohne Reset auf Default)
 let _curColor = 'anthrazitgrau';
 let _curWood  = null;
 let _curGlass = 'klar';
@@ -725,6 +726,7 @@ function buildDoor(modelKey) {
 
   const model = MODELLE[modelKey] || MODELLE['colorado-inox'];
   _curModel = model;
+  _curModelKey = (modelKey && MODELLE[modelKey]) ? modelKey : 'colorado-inox';
   const panels = model.panels || [];
   const modelStrips = model.strips || [];
   let customShapes = model.shapeFn ? model.shapeFn(THREE) : [];   // Glasformen mit Inox-Rahmen (Schenkel)
@@ -1887,11 +1889,12 @@ window.addEventListener('message', (e) => {
   if (d.type === 'setOpen')    setDoorOpen(!!d.open);
   if (d.type === 'cameraFocus') focusCamera(d.focus || 'default');
   if (d.type === 'setView') {
-    const newView = (d.key === 'innen') ? 'innen' : 'aussen';
+    // Feld 'view' ODER 'key' akzeptieren (Konfigurator sendet 'view')
+    const newView = ((d.view || d.key) === 'innen') ? 'innen' : 'aussen';
     if (newView !== _curView) {
       _curView = newView;
-      const currentModel = document.getElementById('modelSelect')?.value || 'florida-lr-inox';
-      setModel(currentModel);
+      setModel(_curModelKey);   // aktuelles Modell behalten (kein Reset auf florida)
+      setSide(_curSide);        // Griff-/Bandseite nach Rebuild neu anwenden → kein Springen
     }
   }
   if (d.type === 'update') {
