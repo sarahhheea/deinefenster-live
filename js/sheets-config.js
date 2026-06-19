@@ -84,7 +84,22 @@ async function _ghGet(path) {
     cache: 'no-store',
   });
   if (!res.ok) throw new Error('GitHub Lesefehler: ' + res.status);
-  return res.json();
+  const data = await res.json();
+  // Dateien > 1 MB: Die Contents-API liefert content LEER (encoding:"none") und
+  // JSON.parse("") würde scheitern ("JSON-Fehler" beim Speichern). Dann den echten
+  // Inhalt über die Blob-API holen (unterstützt bis 100 MB). data.sha bleibt gültig
+  // für den anschließenden Schreibvorgang.
+  if ((!data.content || data.encoding === 'none') && data.git_url) {
+    const blobRes = await fetch(`${data.git_url}?_=${Date.now()}`, {
+      headers: _authHeaders(),
+      cache: 'no-store',
+    });
+    if (!blobRes.ok) throw new Error('GitHub Blob-Lesefehler: ' + blobRes.status);
+    const blob = await blobRes.json();
+    data.content = blob.content;
+    data.encoding = blob.encoding;
+  }
+  return data;
 }
 
 async function _ghPutRaw(path, content64, sha, message) {
@@ -110,7 +125,10 @@ function _base64ToJson(b64) {
 }
 
 function _jsonToBase64(obj) {
-  const bytes  = new TextEncoder().encode(JSON.stringify(obj, null, 2));
+  // Minimiert speichern (keine Einrückung): hält die Datei klein und damit unter
+  // GitHubs 1-MB-Inline-Grenze der Contents-API — pretty-print hatte sie über die
+  // Grenze wachsen lassen und das Einstellen blockiert.
+  const bytes  = new TextEncoder().encode(JSON.stringify(obj));
   let binary   = '';
   bytes.forEach(b => (binary += String.fromCharCode(b)));
   return btoa(binary);
