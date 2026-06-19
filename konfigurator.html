@@ -7401,7 +7401,7 @@ const WIZ_ALL=[
   {key:'profil', gilt:ALL, title:'Wählen Sie das <span>Profil</span>', sub:'Das Drutex-System für Ihr Produkt.', render:wizRenderProfil, layout:'cards'},
   {key:'psk', gilt:['hst'], cond:()=>S.profil==='iglo-psk', title:'Wählen Sie das <span>PSK-System</span>', sub:'Kammer-System Ihrer Parallel-Schiebe-Kipp-Tür.', render:wizRenderPsk, layout:'cards'},
   {key:'hslauf', gilt:['hst'], cond:()=>S.profil==='iglo-hs', title:'In welche Richtung läuft die <span>Schiebetür</span>?', sub:'HebeSchiebe links oder rechts — Ansicht von innen.', render:wizRenderHsLauf, layout:'cards'},
-  {key:'fluegel', gilt:['kunststoff','balkontuer','haustuere','hst'], cond:()=>S.prod!=='hst', title:'Wählen Sie die <span>Aufteilung</span>', sub:'Wie viele Flügel und welche Aufteilung?', render:wizRenderFluegel, layout:'cards'},
+  {key:'fluegel', gilt:['kunststoff','balkontuer','haustuere','hst'], cond:()=>S.prod!=='hst' && S.prod!=='haustuere', title:'Wählen Sie die <span>Aufteilung</span>', sub:'Wie viele Flügel und welche Aufteilung?', render:wizRenderFluegel, layout:'cards'},
   {key:'anschlag', gilt:ALL, cond:()=>!(S.prod==='hst'&&S.profil==='iglo-hs'), title:'Wählen Sie die <span>Öffnungsart</span>', sub:'In welche Richtung öffnet es?', render:wizRenderAnschlag, layout:'cards'},
   {key:'glas', gilt:ALL, title:'Wählen Sie die <span>Verglasung</span>', sub:'2-fach oder 3-fach Wärmeschutz.', render:wizRenderGlas, layout:'cards'},
   {key:'masse', gilt:ALL, title:'Geben Sie die <span>Maße</span> an', sub:'Einbaumaß in Millimetern.', render:wizRenderMasse, layout:'cards'},
@@ -7688,7 +7688,7 @@ function wizStart(){
   else { if(!_profilOkForProd(prod))S.profil='iglo5'; }
   if(!S.fluegel)S.fluegel='1-fluegel';
   if(prod==='balkontuer'&&['1-fluegel','2-fluegel','stulp'].indexOf(S.fluegel)<0)S.fluegel='1-fluegel';
-  if(prod==='haustuere'&&['1-fluegel','2-fluegel','seitenteil-l','seitenteil-r','seitenteil-2'].indexOf(S.fluegel)<0)S.fluegel='1-fluegel';
+  if(prod==='haustuere')S.fluegel='1-fluegel'; // Haustür: nur 1-Flügel angeboten — Aufteilung-Schritt entfällt (Kundenwunsch)
   if(!S.glas)S.glas=(prod==='hst')?'3fach':'2fach';
   // Start immer mit weißem Produkt (Kundenwunsch 07.06.2026)
   S.fa='weiss'; S.fi='weiss'; if(typeof previewState!=='undefined'){previewState.aussenFarbe='#f4f4f0';previewState.innenFarbe='#f4f4f0';}
@@ -7753,7 +7753,7 @@ const BALKON_ANSCHLAG_1F=[
 ];
 const HST_FLUEGEL=[['2-teilig','2-teilig · fest + Schiebe','2-teilig.png'],['3-teilig','3-teilig','3-teilig.png']];
 function wizPickHstTeilung(v){ S.hstTeilung=v; S.fluegel=(v==='3-teilig')?'3-fluegel':'2-fluegel'; if(window._touched){window._touched.add('hstTeilung');window._touched.add('fluegel');} if(typeof previewState!=='undefined')previewState.fluegel=(v==='3-teilig')?3:2; _wizPrev(); wizRenderPanel(); }
-const HAUS_FLUEGEL=[['1-fluegel','1-Flügel','1-fluegel'],['2-fluegel','2-Flügel','2-fluegel'],['seitenteil-l','Seitenteil links','seitenteil-links'],['seitenteil-r','Seitenteil rechts','seitenteil-rechts'],['seitenteil-2','Seitenteil beidseitig','seitenteil-beidseitig']];
+const HAUS_FLUEGEL=[['1-fluegel','1-Flügel','1-fluegel']]; // Nur 1-Flügel-Haustür angeboten (Kundenwunsch) — 2-Flügel/Seitenteil-Varianten entfernt
 function wizRenderFluegel(){
   if(S.prod==='haustuere'){
     return '<div class="wiz-cards">'+HAUS_FLUEGEL.map(function(o){
@@ -9580,12 +9580,9 @@ function buildFluegel() {
     // Haustür-Karten: `.fk`-Stil (gleicher Hover/Sel wie Fenster-Flügelaufteilung).
     // Bilder sind auf EINHEITLICHE Höhe normalisiert; Spaltenbreiten proportional zur
     // Produktbreite (1 : 1.69 : 1.69 : 1.83) → alle Türen rendern exakt gleich groß.
-    grid.style.gridTemplateColumns = '1fr 1.83fr 1.69fr 1.69fr';
+    grid.style.gridTemplateColumns = '1fr';
     opts = [
       {v:'1-fluegel',    add:0  },
-      {v:'2-fluegel',    add:0 },
-      {v:'seitenteil-l', add:0},
-      {v:'seitenteil-r', add:0},
     ];
     grid.innerHTML = opts.map(o=>`
       <div class="fk${S.fluegel===o.v?' sel':''}" data-v="${o.v}" onclick="pickFluegel(this)" style="padding:8px 6px 10px">
