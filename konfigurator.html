@@ -7428,8 +7428,8 @@ function wizRenderKontakt(){
   const la=S.lieferart||'liefern';
   return '<form class="wiz-kform kform-wide" id="wiz-anfrage-form" onsubmit="return false" novalidate>'+
     '<div class="kf-row"><div><label class="fl" for="d2-fn">Name *</label><input class="inp" type="text" id="d2-fn" autocomplete="name"></div>'+
-    '<div><label class="fl" for="d2-fe">E-Mail *</label><input class="inp" type="email" id="d2-fe" autocomplete="email"></div>'+
-    '<div><label class="fl" for="d2-ft">Telefon</label><input class="inp" type="tel" id="d2-ft" autocomplete="tel"></div></div>'+
+    '<div><label class="fl" for="d2-fe">E-Mail *</label><input class="inp" type="email" id="d2-fe" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false"></div>'+
+    '<div><label class="fl" for="d2-ft">Telefon</label><input class="inp" type="tel" id="d2-ft" inputmode="tel" autocomplete="tel"></div></div>'+
     '<div><label class="fl">Lieferung oder Abholung?</label><div class="wiz-kf-deliv">'+
       '<button type="button" id="lf-liefer" class="wiz-deliv'+(la==="liefern"?" sel":"")+'" onclick="wizSetLieferart(\'liefern\')"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 3h15v13H1zM16 8h4l3 3v5h-7M5.5 19a2 2 0 100-4 2 2 0 000 4zm13 0a2 2 0 100-4 2 2 0 000 4z"/></svg>Lieferung zu Ihnen</button>'+
       '<button type="button" id="lf-abhol" class="wiz-deliv'+(la==="abholen"?" sel":"")+'" onclick="wizSetLieferart(\'abholen\')"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10l9-7 9 7v10a1 1 0 01-1 1h-5v-7H9v7H4a1 1 0 01-1-1z"/></svg>Abholung bei uns vor Ort</button>'+
@@ -7452,6 +7452,10 @@ function wizRenderKontakt(){
     '</div></div></div>'+
     '<label class="wiz-kchk"><input type="checkbox" id="d2-fdsgvo"><span>Ich habe die <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutzerklärung</a> gelesen und stimme der Verarbeitung meiner Daten zur Angebotserstellung zu. *</span></label>'+
     '<div id="d2-ferr" class="wiz-kerr d2hide"></div>'+
+    '<div class="wiz-kreassure">'+
+      '<div class="wiz-kreassure-row"><i class="ms" aria-hidden="true">verified</i><span><b>100 % kostenlos &amp; unverbindlich.</b> Wir melden uns innerhalb von 24 Std. mit Ihrem persönlichen Angebot.</span></div>'+
+      '<div class="wiz-kreassure-call">Lieber direkt sprechen? <a href="tel:+4933812148373">03381 / 2148373</a> · Mo–Fr 8–16 Uhr</div>'+
+    '</div>'+
   '</form>';
 }
 // Bestellübersicht im Onlineshop-Stil: jedes Produkt eine Warenkorb-Karte
@@ -15103,6 +15107,12 @@ async function submitSkizze(e) {
   #cfg-wizard .wiz-kmore-btn{ display:inline-flex; align-items:center; gap:8px; align-self:flex-start; border:1px dashed #b9cbe6; background:#f5f9ff; color:#225eaa; border-radius:11px; padding:11px 16px; font-weight:700; font-family:'Plus Jakarta Sans',sans-serif; font-size:13.5px; cursor:pointer; min-height:46px; }
   #cfg-wizard .wiz-kmore-btn .ms{ font-size:19px; }
   #cfg-wizard .wiz-kmore-btn span{ color:#7a8aa0; font-weight:500; }
+  #cfg-wizard .wiz-kreassure{ max-width:560px; margin:2px auto 0; }
+  #cfg-wizard .wiz-kreassure-row{ display:flex; align-items:flex-start; gap:9px; background:#eef5ee; border:1px solid #cfe3cf; border-radius:12px; padding:11px 13px; font-family:'Manrope',sans-serif; font-size:13px; line-height:1.4; color:#2f5d38; }
+  #cfg-wizard .wiz-kreassure-row .ms{ font-size:19px; color:#3a8a4a; flex:0 0 auto; }
+  #cfg-wizard .wiz-kreassure-row b{ color:#1f4a2a; }
+  #cfg-wizard .wiz-kreassure-call{ text-align:center; margin-top:9px; font-family:'Manrope',sans-serif; font-size:12.5px; color:#6a7a8f; }
+  #cfg-wizard .wiz-kreassure-call a{ color:var(--c-primary); font-weight:800; }
   /* Griff-Umschalter (3 Tabs) + Sektions-Hinweis */
   #cfg-wizard .wiz-tabs-3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
   #cfg-wizard .wiz-tabs-3 .wiz-tab{ padding:10px 6px; font-size:13px; text-align:center; min-height:48px; }
@@ -15115,6 +15125,9 @@ async function submitSkizze(e) {
   #cfg-wizard[data-prod="haustuere"] .wiz-body:not(.cards-mode) .wiz-stage #prev-wrap{ height:162px !important; width:120px !important; max-width:50% !important; margin:0 auto !important; aspect-ratio:auto !important; }
   /* Saubere Studio-Tür (frontal, weiß) als Vorschau auf dem Türgriff-Schritt */
   #cfg-wizard .wiz-doorstudio{ display:none; height:188px; width:auto; max-width:52%; margin:0 auto; object-fit:contain; }
+  /* "Komischer Rand" weg: dunkle Vignette + Frame-Reste der Live-Vorschau im Wizard abschalten */
+  #cfg-wizard #prev-wrap::after, #cfg-wizard #prev-wrap::before{ display:none !important; content:none !important; }
+  #cfg-wizard #prev-wrap, #cfg-wizard #prev-wrap.sb-preview-frame{ background:transparent !important; border:0 !important; box-shadow:none !important; border-radius:0 !important; }
   /* Türgriff: Innen + Außen NEBENEINANDER, ganze Klinke sichtbar */
   #cfg-wizard .wiz-grcols{ display:grid; grid-template-columns:1fr 1fr; gap:12px; max-width:520px; margin:0 auto; }
   #cfg-wizard .wiz-grcol{ display:flex; flex-direction:column; gap:8px; }
