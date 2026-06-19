@@ -6177,11 +6177,10 @@ const P = {
     'ohne':         { name:'Nicht abschließbar', sub:'Standard-Griff', add:0 },
     'innen-aussen': { name:'Abschließbar', sub:'innen + außen · Zylinder beidseitig', add:0 },
   },
-  // PSK-Griff = Fenster-Drehgriff (nur Weiß: Standard + abschließbar). Kundenwunsch 18.06.2026.
-  // Eigene Renders, ersetzt bei PSK den Muschel-/Schiebegriff (der bleibt nur für IGLO-HS).
+  // PSK-Griff = weißer Hebe-Schiebe-Griff (Schale + Bedienhebel), nur eine Variante. Kundenwunsch 19.06.2026.
+  // Eigener Render, ersetzt bei PSK den Muschel-/Schiebegriff (der bleibt nur für IGLO-HS).
   pskGriff: {
-    'weiss':    { name:'PSK-Griff Weiß',              add:0, img:'img/drutex-griffe/psk-griff-weiss.webp' },
-    'weiss-ab': { name:'PSK-Griff Weiß abschließbar', add:0, img:'img/drutex-griffe/psk-griff-weiss-ab.webp' },
+    'weiss': { name:'PSK-Griff Weiß', add:0, img:'img/drutex-griffe/psk-set-weiss.webp' },
   },
 };
 
@@ -6209,7 +6208,7 @@ const S = {
   pskKammer:'iglo5',  // Kunde 21.04.2026: Kammer-System nur für PSK relevant
   hstGriff:'silber',          // Innen = Muschelgriff IGLO-HS
   hstGriffAussen:'weiss',     // Außen = Schiebegriff IGLO-HS
-  pskGriff:'weiss',           // PSK = Fenster-Drehgriff (weiß / weiß abschließbar)
+  pskGriff:'weiss',           // PSK = weißer Hebe-Schiebe-Griff (eine Variante)
   hstSchloss:'ohne',          // IGLO-HS Schloss-Option
   sicher:'wk1',
   tuerModell: null,
@@ -7401,7 +7400,7 @@ const WIZ_ALL=[
   {key:'schall', gilt:['kunststoff','balkontuer','hst'], title:'Schall- &amp; <span>Sicherheitsglas</span>', sub:'Optional: zusätzlicher Schallschutz und Sicherheitsglas.', render:wizRenderSchall},
   {key:'griff', gilt:['kunststoff','balkontuer'], title:'Welcher <span>Griff</span>?', sub:'Modell, Farbe und Ausführung Ihres Fenstergriffs.', render:wizRenderGriff},
   {key:'griffhaus', main:['haustuere'], gilt:['haustuere'], title:'Welcher <span>Türgriff</span>?', sub:'Innen-Klinke und Außengriff Ihrer Haustür.', render:wizRenderTuergriff},
-  {key:'griffhst', main:['hst'], gilt:['hst'], title:'Welcher <span>Schiebegriff</span>?', sub:'Innengriff, Außengriff und abschließbar wählen.', render:wizRenderSchiebegriff},
+  {key:'griffhst', main:['hst'], gilt:['hst'], title:()=>S.profil==='iglo-psk'?'Welcher <span>Griff</span>?':'Welcher <span>Schiebegriff</span>?', sub:()=>S.profil==='iglo-psk'?'Ihr weißer PSK-Griff.':'Innengriff, Außengriff und abschließbar wählen.', render:wizRenderSchiebegriff},
   {key:'balk', main:['balkontuer'], gilt:['balkontuer'], title:'Wählen Sie die <span>Schwelle</span>', sub:'Boden-Schwelle Ihrer Balkontür.', render:wizRenderBalkSchwelle, layout:'cards'},
   {key:'rolladen', gilt:['kunststoff','balkontuer','hst'], title:'Wählen Sie den <span>Rolladen</span>', sub:'Sonnen- und Sichtschutz — optional.', render:wizRenderRoll},
   {key:'sprossen', gilt:['kunststoff','balkontuer'], title:'Wählen Sie die <span>Sprossen</span>', sub:'Klassische Optik — aufgesetzt oder im Scheibenzwischenraum.', render:wizRenderSpro},
@@ -7465,6 +7464,12 @@ function wizRenderTuergriff(){
 let wizGriffTab='innen';
 function wizGriffTabSet(t){ wizGriffTab=t; if(typeof wizRenderPanel==='function')wizRenderPanel(); }
 function wizRenderSchiebegriff(){
+  // PSK: ein weißer Hebe-Schiebe-Griff (Schale + Bedienhebel), keine Farb-/Schloss-Auswahl — Kundenwunsch 19.06.2026
+  if(S.profil==='iglo-psk'){
+    return '<div class="wiz-hstgrwrap"><div class="wiz-group"><div class="wiz-gt">PSK-Griff <small style="font-weight:600;color:#5a6a85;font-size:12px">— Weiß</small></div><div class="wiz-cards">'+
+      Object.keys(P.pskGriff).map(function(k){var o=P.pskGriff[k];return '<div class="wiz-card wiz-card-opt wiz-hstgr'+(k===S.pskGriff?' sel':'')+'" onclick="wizSet(\'pskGriff\',\''+k+'\')"><div class="wiz-sym"><img src="'+o.img+'" alt="'+o.name+'" loading="lazy"></div><div class="wiz-cn">'+o.name+'</div></div>';}).join('')+
+      '</div></div></div>';
+  }
   // IGLO-HS Griff-Auswahl: Innengriff-Farbe (Muschelgriff) + Außengriff-Farbe (Schiebegriff) + Schloss-Option.
   var hint='<small style="font-weight:600;color:#5a6a85;font-size:12px">';
   function colorCards(obj, sel, key){
@@ -7935,8 +7940,8 @@ function wizGo(i){
       const _iv0=(s.key==='farbe')?((wizFarbTab==='fa')?'aus':'inn'):(s.key==='tuer'?'aus':(S.prod==='haustuere'?'aus':'inn'));
       if(typeof setPreviewView==='function')setPreviewView(_iv0); if(typeof drawPrev==='function')drawPrev(); }
   }
-  document.getElementById('wiz-title').innerHTML=s.title;
-  document.getElementById('wiz-sub').innerHTML=s.sub||'';
+  document.getElementById('wiz-title').innerHTML=(typeof s.title==='function'?s.title():s.title);
+  document.getElementById('wiz-sub').innerHTML=(typeof s.sub==='function'?s.sub():(s.sub||''));
   // Haustür nutzt jetzt auf JEDEM Schritt — auch beim Türgriff — NUR das 3D-Modell.
   // Früher wurde beim Griff-Schritt eine frontale Studio-Tür STATT des 3D gezeigt; da das
   // 3D-iframe (prev-wrap) durch drawPrev/setPreviewView danach wieder eingeblendet wurde,
@@ -8513,14 +8518,14 @@ function buildHstGriff() {
       </div>
     </div>`;
   if (S.profil === 'iglo-psk') {
-    // PSK: Fenster-Drehgriff, nur Weiß (Standard + abschließbar) — Kundenwunsch 18.06.2026
+    // PSK: weißer Hebe-Schiebe-Griff, eine Variante — Kundenwunsch 19.06.2026
     grid.innerHTML = `
       <div class="col-span-full"><div class="sec-t" style="margin-top:0">PSK-Griff (Weiß)</div>
         <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
           ${Object.entries(P.pskGriff).map(([k,v])=>mkCard(k,v,S.pskGriff===k,'pickPskGriff')).join('')}
         </div>
       </div>`;
-    const d9s = document.getElementById('d9s'); if (d9s) d9s.textContent = 'PSK-Drehgriff wählen';
+    const d9s = document.getElementById('d9s'); if (d9s) d9s.textContent = 'PSK-Griff Weiß';
   } else {
     grid.innerHTML = `
       <div class="col-span-full"><div class="sec-t" style="margin-top:0">Innengriff (Muschelgriff)</div>
@@ -15776,7 +15781,7 @@ const SECTIONS=[
  {id:'glasdekor',t:'Glasdekor',gilt:['kunststoff','balkontuer','haustuere','hst'],sum:()=>curName(P.glasdekor,S.glasdekor),body:()=>hint('Ornamentglas für Sichtschutz (z. B. Bad).')+tiles('glasdekor',Object.keys(GD_IMG).map(k=>({key:k,name:P.glasdekor[k].name,img:'img/glasdekor/'+GD_IMG[k]+'.webp'})))},
  {id:'griff',t:'Fenstergriff',gilt:['kunststoff','balkontuer'],sum:()=>`${curName(P.griff,S.griff)} · ${curName(P.griffColor,S.griffColor)}`,body:()=>`<div class="d2sub">Modell</div>`+pills('griff',Object.keys(P.griff).map(k=>[k,P.griff[k].name]))+`<div class="d2sub">Farbe</div>`+swatches('griffColor',P.griffColor)+`<div style="margin-top:16px"><button type="button" class="d2tgl ${S.griffLocked?'on':''}" onclick="D2.toggleKey('griffLocked')"><span class="kn"></span>Abschließbarer Griff</button></div>`},
  {id:'griffhaus',t:'Türgriff',gilt:['haustuere'],sum:()=>`${curName(P.tuerGriffInnen,S.tuerGriffInnen)} / ${curName(P.tuerGriffAussen,S.tuerGriffAussen)}`,body:()=>`<div class="d2sub">Innen (Klinke)</div>`+tiles('tuerGriffInnen',Object.keys(P.tuerGriffInnen).map(k=>({key:k,name:P.tuerGriffInnen[k].name,img:P.tuerGriffInnen[k].img})))+`<div class="d2sub">Außen (Griff)</div>`+tiles('tuerGriffAussen',Object.keys(P.tuerGriffAussen).map(k=>({key:k,name:P.tuerGriffAussen[k].name,img:P.tuerGriffAussen[k].img})))},
- {id:'griffhst',t:'Schiebegriff',gilt:['hst'],sum:()=>`${curName(P.hstGriff,S.hstGriff)} · ${curName(P.hstGriffAussen,S.hstGriffAussen)}`,body:()=>{const col=(P.hstGriffAussen[S.hstGriffAussen])?S.hstGriffAussen:'silber';return `<div class="d2-hstgr"><div class="d2sub">Innengriff (Muschelgriff)</div>`+tiles('hstGriff',Object.keys(P.hstGriff).map(k=>({key:k,name:P.hstGriff[k].name,img:P.hstGriff[k].img})))+`<div class="d2sub">Außengriff (Schiebegriff)</div>`+tiles('hstGriffAussen',Object.keys(P.hstGriffAussen).map(k=>({key:k,name:P.hstGriffAussen[k].name,img:P.hstGriffAussen[k].img})))+`<div class="d2sub">Abschließbar?</div>`+tiles('hstSchloss',Object.keys(P.hstSchloss).map(k=>({key:k,name:P.hstSchloss[k].name,img:'img/drutex-griffe/hst-hebel'+(k==='ohne'?'':'-schloss')+'-'+col+'.webp'})))+`</div>`;}},
+ {id:'griffhst',t:'Schiebegriff',gilt:['hst'],sum:()=>S.profil==='iglo-psk'?curName(P.pskGriff,S.pskGriff):`${curName(P.hstGriff,S.hstGriff)} · ${curName(P.hstGriffAussen,S.hstGriffAussen)}`,body:()=>{if(S.profil==='iglo-psk'){return `<div class="d2-hstgr"><div class="d2sub">PSK-Griff (Weiß)</div>`+tiles('pskGriff',Object.keys(P.pskGriff).map(k=>({key:k,name:P.pskGriff[k].name,img:P.pskGriff[k].img})))+`</div>`;}const col=(P.hstGriffAussen[S.hstGriffAussen])?S.hstGriffAussen:'silber';return `<div class="d2-hstgr"><div class="d2sub">Innengriff (Muschelgriff)</div>`+tiles('hstGriff',Object.keys(P.hstGriff).map(k=>({key:k,name:P.hstGriff[k].name,img:P.hstGriff[k].img})))+`<div class="d2sub">Außengriff (Schiebegriff)</div>`+tiles('hstGriffAussen',Object.keys(P.hstGriffAussen).map(k=>({key:k,name:P.hstGriffAussen[k].name,img:P.hstGriffAussen[k].img})))+`<div class="d2sub">Abschließbar?</div>`+tiles('hstSchloss',Object.keys(P.hstSchloss).map(k=>({key:k,name:P.hstSchloss[k].name,img:'img/drutex-griffe/hst-hebel'+(k==='ohne'?'':'-schloss')+'-'+col+'.webp'})))+`</div>`;}},
  {id:'balk',t:'Schwelle',gilt:['balkontuer'],sum:()=>curName(P.balkonSchwelle,S.balkonSchwelle),body:()=>pills('balkonSchwelle',Object.keys(P.balkonSchwelle).map(k=>[k,P.balkonSchwelle[k].name,P.balkonSchwelle[k].sub]))},
  {id:'farbe',t:'Farbe & Oberfläche',gilt:['kunststoff','balkontuer','haustuere','hst'],sum:()=>`${P.fa[S.fa]?.name||'–'} außen · ${P.fi[S.fi]?.name||'–'} innen`,body:()=>hint('Außen sieht man von der Straße, innen vom Raum. Über 40 Farben & Holzdekore.')+`<div class="d2sub">Außenfarbe</div>`+colorTiles('fa')+`<div class="d2sub">Innenfarbe</div>`+colorTiles('fi')+`<div class="d2sub">Dichtung</div>`+pills('fd',Object.keys(P.fd).map(k=>[k,P.fd[k].name.replace('Dichtung ','')]))},
  {id:'roll',t:'Rolladen',gilt:['kunststoff','balkontuer','hst'],sum:()=>S.roll==='ohne'?'Ohne':`${P.roll[S.roll].name} · Kasten ${S.rollKasten} mm`,body:()=>{let h=pills('roll',Object.keys(P.roll).map(k=>[k,P.roll[k].name]));if(S.roll!=='ohne'){const ks=Object.keys(P.rollKasten).filter(k=>P.rollKasten[k].prods.includes(S.prod));h+=`<div class="d2sub">Kastenhöhe</div>`+pills('rollKasten',ks.map(k=>[k,P.rollKasten[k].name]))+`<div class="d2sub">Gurt-/Motorseite</div>`+pills('rollSeite',[['rechts','Rechts'],['links','Links']]);}return h;}},
