@@ -767,7 +767,19 @@ buildWindow();
 
 // Fenster auf Welt-Origin zentrieren
 winGroup.position.set(-FW / 2, -FH / 2, 0);
-scene.add(winGroup);
+// pivotGroup ermöglicht Innen-/Außenansicht durch 180°-Drehung (wie fenster-3d)
+const pivotGroup = new THREE.Group();
+pivotGroup.add(winGroup);
+scene.add(pivotGroup);
+// Innen-/Außenansicht: 'aussen' dreht 180° und blendet den (innenliegenden) Griff aus
+let _currentView = 'innen';
+function setView(v){
+  _currentView = (v === 'aussen' || v === 'aus') ? 'aussen' : 'innen';
+  pivotGroup.rotation.y = (_currentView === 'aussen') ? Math.PI : 0;
+  const hideOnOutside = (_currentView === 'aussen');
+  handleObjects.forEach(m => { if (m) m.visible = !hideOnOutside; });
+}
+setView(new URLSearchParams(location.search).get('view') || 'innen');
 
 // ── Weicher Kontakt-/Schlagschatten unter der Tür ──
 // Radial-Gradient-Plane direkt unter dem Element → erdet das Produkt, gibt Tiefe.
@@ -1337,13 +1349,17 @@ window.addEventListener('message', (e) => {
   if (d.type === 'setSide')     setSide(d.key);
   if (d.type === 'setHstGriff') setHstGriff(d.key);
   if (d.type === 'toggleOpen')  sashOpen = !sashOpen;
+  if (d.type === 'setView')     setView(d.view);
   if (d.type === 'update') {
     if (d.wood)  setWood(d.wood);
     else         setColor(d.color || 'anthrazitgrau');
     setGlass(d.glass || 'klar');
     if (d.side)     setSide(d.side);
     if (d.hstGriff) setHstGriff(d.hstGriff);
+    if (d.view)     setView(d.view);
   }
+  // Griff-Sichtbarkeit nach evtl. Neuaufbau erneut anwenden
+  if (typeof setView === 'function') setView(_currentView);
 });
 
 // Click-to-Open: Klick auf Griff/Hebel toggelt die Öffnung

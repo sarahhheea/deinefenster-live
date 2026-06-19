@@ -8073,10 +8073,9 @@ function wizFinish(){ const w=document.getElementById('cfg-wizard'); if(w)w.styl
 function _wizPrev(){ if(typeof vorschauAktualisieren==='function')vorschauAktualisieren(); if(typeof drawPrev==='function')drawPrev(); if(typeof upSidebar==='function')upSidebar(); if(typeof wizUpCfgList==='function')wizUpCfgList(); if(typeof wizUpViewToggle==='function')wizUpViewToggle(); }
 // ── Außen/Innen-Toggle auf der Vorschau (Label + aktiver Zustand) ──
 function wizUpViewToggle(){
-  // Innenansicht aktuell nur bei Fenster + Haustür verfügbar — Toggle nur dort zeigen
-  // (Balkontür + Schiebetür folgen, sobald deren 3D eine Innenansicht hat).
+  // Innenansicht ist für alle 4 Produkte verfügbar (Fenster, Haustür, Balkontür, Schiebetür).
   var wrap=document.getElementById('wiz-viewtoggle');
-  var supports=(S.prod==='kunststoff'||S.prod==='haustuere');
+  var supports=(S.prod==='kunststoff'||S.prod==='haustuere'||S.prod==='balkontuer'||S.prod==='hst');
   if(wrap) wrap.style.display = supports ? '' : 'none';
   var aus=document.getElementById('wiz-v-aus'), inn=document.getElementById('wiz-v-inn'), val=document.getElementById('wiz-see-val');
   if(!aus||!inn) return;
@@ -13338,7 +13337,7 @@ function _renderHst3d() {
   wrap.style.display = 'block';
 
   // Bei System-Wechsel kompletten Reload erzwingen (verschiedene Geometrie)
-  const expectedSrc = `/hst-3d.html?embed&v=20260616hs2&bg=light&system=${_sys}&color=${_ck}&side=${_side}&view=${_viewKey}&grip=${_grip}`;
+  const expectedSrc = `/hst-3d.html?embed&v=20260619hs3&bg=light&system=${_sys}&color=${_ck}&side=${_side}&view=${_viewKey}&grip=${_grip}`;
   const currentSys  = (frame.src.match(/[?&]system=([^&]+)/) || [])[1];
   const _needsReload = !frame.src.includes('hst-3d') || currentSys !== _sys;
 
@@ -15851,7 +15850,7 @@ function d2Hst(){ const w=document.getElementById('d2-hst3d-wrap'),f=document.ge
   const sys=(S.profil||'').replace(/^iglo-/,'')||'hs'; const vk=(pv==='aus')?'aussen':'innen';
   const ck=vk==='aussen'?(HAUS3D_COLOR_MAP[S.fa]||HAUS3D_COLOR_MAP[S.fi]||'anthrazitgrau'):(HAUS3D_COLOR_MAP[S.fi]||HAUS3D_COLOR_MAP[S.fa]||'anthrazitgrau'); const wood=HAUS3D_WOOD_KEYS.has(ck);
   const side=(S.oeff1==='dreh-l'||S.oeff1==='dk-l')?'l':'r'; const grip=S.hstGriffAussen||'weiss'; w.style.display='block';
-  const exp=`/hst-3d.html?embed&bg=light&v=20260611f&system=${sys}&color=${ck}&side=${side}&view=${vk}&grip=${grip}`; const cur=(f.src.match(/[?&]system=([^&]+)/)||[])[1];
+  const exp=`/hst-3d.html?embed&bg=light&v=20260619hs3&system=${sys}&color=${ck}&side=${side}&view=${vk}&grip=${grip}`; const cur=(f.src.match(/[?&]system=([^&]+)/)||[])[1];
   const pl={type:'update',color:wood?null:ck,wood:wood?ck:null,glass:S.glasdekor||'klar',side,view:vk,hstGriff:grip};
   if(!f.src.includes('hst-3d')||cur!==sys){ f.src=exp; f.onload=()=>{const cw=f.contentWindow;if(!cw)return;cw.dispatchEvent(new Event('resize'));cw.postMessage(pl,'*');}; } else f.contentWindow&&f.contentWindow.postMessage(pl,'*'); }
 function d2Haus(){ const w=document.getElementById('d2-haus3d-wrap'),f=document.getElementById('d2-haus3d-frame'); if(!w||!f)return; showHint(true);
