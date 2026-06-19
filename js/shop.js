@@ -424,8 +424,11 @@ function baueFilterSidebar() {
   const eigWrap = document.getElementById('filterEigenschaften');
   const alleEig = STATE.metadaten.alle_eigenschaften || [];
   eigWrap.innerHTML = alleEig.map(e => {
-    if (e.startsWith('rc')) return ''; // RC läuft separat
+    if (e.startsWith('rc')) return ''; // RC läuft separat (Sicherheit-Block)
     if (e.endsWith('-verglasung')) return ''; // Verglasung läuft separat
+    if (e.startsWith('farbe-') || e === 'holzdekor') return ''; // Farben laufen im Farbe-Block — nicht in Eigenschaften
+    if (/\d/.test(e)) return ''; // Zahlen-Einträge (z.B. "80 mm Rahmen") gehören nicht in Eigenschaften
+    if (e === 'vermessen') return ''; // läuft im Zustand-Block — keine Doppelung
     const count = STATE.produkte.filter(p => (p.eigenschaften || []).includes(e)).length;
     if (count === 0) return '';
     return `
