@@ -13109,7 +13109,15 @@ function _renderBalkontuer3d() {
   const _farb  = (_view === 'aussen') ? (S.fa || S.fi) : _innerFarb;
   const _ck    = HAUS3D_COLOR_MAP[_farb] || HAUS3D_COLOR_MAP[S.fi] || 'anthrazitgrau';
   const isWood = HAUS3D_WOOD_KEYS.has(_ck);
-  const _side  = (S.oeff1 === 'dreh-l' || S.oeff1 === 'dk-l') ? 'l' : 'r';
+  // Griff-/DIN-Seite — getrennt nach Flügelzahl, passend zu den Auswahl-Karten:
+  // • 1-Flügel: DIN-Richtung wie Fenster. dk-l/dreh-l = DIN-links (Scharnier links, Griff rechts) → side='r';
+  //   dk-r/dreh-r → side='l'.
+  // • 2-Flügel Stulp: Gangflügel (mit Griff) = der Dreh-Kipp-Flügel. Liegt er links (oeff1=dk-*) →
+  //   Gang links → side='l'; sonst (DK-Flügel rechts) → side='r'. Standflügel bleibt grifflos.
+  const _isZwei = (S.fluegel === '2-fluegel' || S.fluegel === 'stulp');
+  const _side  = _isZwei
+    ? ((S.oeff1 === 'dk-l' || S.oeff1 === 'dk-r') ? 'l' : 'r')
+    : ((S.oeff1 === 'dreh-l' || S.oeff1 === 'dk-l') ? 'r' : 'l');
   const _layout = S.fluegel || '1-fluegel';
   const _sashes = [S.oeff1, S.oeff2].filter(Boolean);
   // BUG-FIX 2026-05-21 v2: _view inline berechnen statt const (closure-safe in async onload)
