@@ -7571,21 +7571,39 @@ function wizRenderAngebot(){
     var farbe=sh(nm('fa',c.fa))+((c.fi&&c.fi!==c.fa)?(' / '+sh(nm('fi',c.fi))):'');
     return [ (c.bMm||'–')+'×'+(c.hMm||'–')+' mm', farbe, sh(nm('glas',c.glas)), sh(nm('profil',c.profil)) ].filter(Boolean).join(' · ');
   }
+  function specRows(c){
+    c=c||{};
+    var farbe=sh(nm('fa',c.fa))+((c.fi&&c.fi!==c.fa)?(' / innen '+sh(nm('fi',c.fi))):'');
+    var extras=[];
+    if(c.roll&&c.roll!=='ohne')extras.push('Rolladen');
+    if(c.sproTyp&&c.sproTyp!=='keine')extras.push('Sprossen');
+    if(c.schall&&c.schall!=='ohne')extras.push('Schallschutz');
+    if(c.sicherGlas&&c.sicherGlas!=='kein')extras.push('Sicherheitsglas');
+    if(c.glasdekor&&c.glasdekor!=='klar')extras.push('Glasdekor');
+    var extrasTxt=extras.length?extras.join(' · '):'Standard-Ausstattung';
+    return ''
+      +'<div class="wiz-ospec"><i class="ms" aria-hidden="true">straighten</i><b>'+(c.bMm||'–')+' × '+(c.hMm||'–')+' mm</b></div>'
+      +'<div class="wiz-ospec"><i class="ms" aria-hidden="true">view_in_ar</i>'+[sh(nm('profil',c.profil)),sh(nm('glas',c.glas))].filter(Boolean).join(' · ')+'</div>'
+      +'<div class="wiz-ospec"><i class="ms" aria-hidden="true">palette</i>Farbe: <b>'+farbe+'</b></div>'
+      +'<div class="wiz-ospec"><i class="ms" aria-hidden="true">auto_awesome</i>'+extrasTxt+'</div>';
+  }
   function card(c, opts){
     c=c||{}; opts=opts||{};
     var img=opts.thumb||WIZ_PROD_THUMB[c.prod]||WIZ_PROD_THUMB.kunststoff;
     var name=nm('prod',c.prod);
     var qty=c.qty||1;
     var act=opts.current
-      ? '<button type="button" class="wiz-oact-edit" onclick="wizGo(0)"><i class="ms" aria-hidden="true">tune</i>Ändern</button>'
-      : '<button type="button" class="wiz-oact-del" onclick="wizCartRemove(\''+opts.id+'\')"><i class="ms" aria-hidden="true">delete</i>Entfernen</button>';
+      ? '<button type="button" class="wiz-obtn wiz-obtn-edit" onclick="wizGo(0)"><i class="ms" aria-hidden="true">tune</i>Bearbeiten</button>'
+      : '<button type="button" class="wiz-obtn wiz-obtn-edit" onclick="wizEditItem(\''+opts.id+'\')"><i class="ms" aria-hidden="true">tune</i>Bearbeiten</button>'
+        +'<button type="button" class="wiz-obtn wiz-obtn-del" onclick="wizCartRemove(\''+opts.id+'\')"><i class="ms" aria-hidden="true">delete</i>Entfernen</button>';
+    // Variante B: Aktionen links · Beschreibung Mitte · Bild rechts
     return '<div class="wiz-ocard'+(opts.current?' is-current':'')+'">'
-      +'<div class="wiz-othumb"><img src="'+img+'" alt="'+name+'" loading="lazy" decoding="async"></div>'
+      +'<div class="wiz-oactions"><span class="wiz-oqty">Menge: <b>'+qty+'</b></span>'+act+'</div>'
       +'<div class="wiz-oinfo">'
-        +'<div class="wiz-oname">'+name+(opts.current?' <span class="wiz-obadge">aktuell</span>':'')+'</div>'
-        +'<div class="wiz-ospecs">'+specLine(c)+'</div>'
-        +'<div class="wiz-orow"><span class="wiz-oqty">Menge: <b>'+qty+'</b></span>'+act+'</div>'
+        +'<div class="wiz-oname">'+name+(opts.current?' <span class="wiz-obadge">AKTUELL</span>':'')+'</div>'
+        +'<div class="wiz-ospecs">'+specRows(c)+'</div>'
       +'</div>'
+      +'<div class="wiz-othumb"><img src="'+img+'" alt="'+name+'" loading="lazy" decoding="async"></div>'
     +'</div>';
   }
   var inCart=(typeof cart!=='undefined')?cart:[];
@@ -7599,6 +7617,33 @@ function wizRenderAngebot(){
   return h;
 }
 function wizCartRemove(id){ if(typeof removeFromCart==='function'){removeFromCart(id);} else if(typeof cart!=='undefined'){cart=cart.filter(function(i){return i.id!==id;}); if(typeof saveCart==='function')saveCart();} wizRenderPanel(); }
+// Gespeicherten Warenkorb-Artikel zum Bearbeiten in den Wizard laden.
+// Die aktuell offene Konfiguration wird vorher gesichert (geht nicht verloren),
+// danach wird der gewählte Artikel als „aktuelle" Konfiguration geladen + aus dem
+// Cart entfernt. Beim Zurückkehren zur Übersicht wird er regulär wieder gelistet.
+function wizEditItem(id){
+  if(typeof cart==='undefined'||!Array.isArray(cart))return false;
+  var item=cart.filter(function(i){return i.id===id;})[0];
+  if(!item||!item.config)return false;
+  // 1) aktuelle Konfiguration sichern (nur wenn ein Produkt offen ist)
+  if(S.prod&&typeof snapshotCurrentConfig==='function'){ cart.push(snapshotCurrentConfig()); }
+  // 2) gewählten Artikel aus dem Cart ziehen und als aktuelle Konfiguration laden
+  cart=cart.filter(function(i){return i.id!==id;});
+  if(typeof saveCart==='function')saveCart();
+  Object.assign(S, item.config);
+  if(window._touched){window._touched.add('fa');window._touched.add('fi');}
+  if(typeof previewState!=='undefined'&&typeof P!=='undefined'){
+    if(P.fa&&P.fa[S.fa])previewState.aussenFarbe=P.fa[S.fa].hex||'#f4f4f0';
+    if(P.fi&&P.fi[S.fi])previewState.innenFarbe=P.fi[S.fi].hex||'#f4f4f0';
+  }
+  if(typeof applyFensterLimits==='function')applyFensterLimits();
+  if(typeof buildWizSteps==='function')WIZ_STEPS=buildWizSteps(S.prod);
+  if(typeof wizFarbTab!=='undefined')wizFarbTab='fa';
+  if(typeof upSidebar==='function')upSidebar();
+  if(typeof wizGo==='function')wizGo(0);
+  window.scrollTo({top:0,behavior:'smooth'});
+  return false;
+}
 function wizAddAnother(){
   if(!S.prod){ return; }
   if(typeof snapshotCurrentConfig==='function'&&typeof cart!=='undefined'){ cart.push(snapshotCurrentConfig()); if(typeof saveCart==='function')saveCart(); if(typeof upSidebar==='function')upSidebar(); }
@@ -15353,22 +15398,39 @@ async function submitSkizze(e) {
   #cfg-wizard .wiz-grnm{ font-family:'Manrope',sans-serif; font-size:11.5px; font-weight:600; color:#14233f; text-align:center; line-height:1.2; }
   #cfg-wizard .wiz-grmore{ margin-top:2px; border:1px solid #d6e0ee; background:#f3f7fd; color:#225eaa; border-radius:9px; padding:9px 6px; font-weight:700; font-family:'Plus Jakarta Sans',sans-serif; cursor:pointer; font-size:12px; min-height:44px; }
   /* === STUFE 4: Bestellübersicht im Onlineshop-Stil (Warenkorb-Karten) === */
-  #cfg-wizard .wiz-ohead{ font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:15px; color:#14233f; margin:0 auto 12px; max-width:560px; text-align:left; }
-  #cfg-wizard .wiz-ocards{ max-width:560px; margin:0 auto; display:flex; flex-direction:column; gap:12px; }
-  #cfg-wizard .wiz-ocard{ display:flex; gap:12px; background:#fff; border:1px solid #e4ebf4; border-radius:14px; padding:12px; align-items:center; box-shadow:0 2px 10px rgba(20,40,80,.04); text-align:left; }
-  #cfg-wizard .wiz-ocard.is-current{ border-color:rgba(34,94,170,.35); }
-  #cfg-wizard .wiz-othumb{ flex:0 0 auto; width:82px; height:82px; border-radius:10px; background:#fff; border:1px solid #eef2f7; display:flex; align-items:center; justify-content:center; overflow:hidden; }
-  #cfg-wizard .wiz-othumb img{ width:100%; height:100%; object-fit:contain; padding:3px; }
-  #cfg-wizard .wiz-oinfo{ flex:1 1 auto; min-width:0; }
-  #cfg-wizard .wiz-oname{ font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:15px; color:#14233f; display:flex; align-items:center; gap:8px; }
-  #cfg-wizard .wiz-obadge{ font-size:10.5px; font-weight:700; color:#225eaa; background:#e8f0fb; border-radius:999px; padding:2px 8px; letter-spacing:.02em; }
-  #cfg-wizard .wiz-ospecs{ font-family:'Manrope',sans-serif; font-size:12.5px; color:#5b6b80; margin:4px 0 8px; line-height:1.35; }
-  #cfg-wizard .wiz-orow{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
-  #cfg-wizard .wiz-oqty{ font-family:'Manrope',sans-serif; font-size:13px; color:#14233f; }
-  #cfg-wizard .wiz-oact-edit, #cfg-wizard .wiz-oact-del{ display:inline-flex; align-items:center; gap:5px; border:0; background:none; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif; font-weight:700; font-size:13px; padding:8px 8px; border-radius:8px; min-height:40px; }
-  #cfg-wizard .wiz-oact-edit{ color:#225eaa; }
-  #cfg-wizard .wiz-oact-del{ color:#b04a4a; }
-  #cfg-wizard .wiz-oact-edit .ms, #cfg-wizard .wiz-oact-del .ms{ font-size:17px; }
+  /* ── Bestellübersicht (Variante B: Aktionen links · Beschreibung Mitte · Bild rechts) ── */
+  #cfg-wizard .wiz-ohead{ font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:15px; color:#14233f; margin:0 auto 12px; max-width:600px; text-align:left; }
+  #cfg-wizard .wiz-ocards{ max-width:600px; margin:0 auto; display:flex; flex-direction:column; gap:14px; }
+  #cfg-wizard .wiz-ocard{ display:grid; grid-template-columns:128px 1fr 150px; gap:16px; align-items:center; background:#fff; border:1px solid #e4ebf4; border-radius:16px; padding:16px; box-shadow:0 3px 14px rgba(20,40,80,.05); text-align:left; }
+  #cfg-wizard .wiz-ocard.is-current{ border-color:rgba(34,94,170,.40); box-shadow:0 4px 18px rgba(34,94,170,.10); }
+  /* Bild rechts */
+  #cfg-wizard .wiz-othumb{ height:128px; border-radius:12px; background:linear-gradient(160deg,#f1f5fb,#e8eff9); display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  #cfg-wizard .wiz-othumb img{ max-width:100%; max-height:100%; object-fit:contain; filter:drop-shadow(0 5px 14px rgba(20,40,80,.18)); }
+  /* Beschreibung Mitte */
+  #cfg-wizard .wiz-oinfo{ min-width:0; }
+  #cfg-wizard .wiz-oname{ font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:18px; color:#14233f; display:flex; align-items:center; flex-wrap:wrap; gap:7px 9px; margin:0 0 9px; }
+  #cfg-wizard .wiz-obadge{ font-family:'Plus Jakarta Sans',sans-serif; font-size:10.5px; font-weight:800; color:#225eaa; background:#e8f0fb; border-radius:999px; padding:3px 9px; letter-spacing:.03em; }
+  #cfg-wizard .wiz-ospecs{ display:flex; flex-direction:column; gap:1px; }
+  #cfg-wizard .wiz-ospec{ display:flex; align-items:center; gap:9px; font-family:'Manrope',sans-serif; font-size:13.5px; color:#46546b; padding:3px 0; line-height:1.3; }
+  #cfg-wizard .wiz-ospec .ms{ font-size:18px; color:#225eaa; flex-shrink:0; }
+  #cfg-wizard .wiz-ospec b{ color:#14233f; font-weight:700; }
+  /* Aktionen links */
+  #cfg-wizard .wiz-oactions{ display:flex; flex-direction:column; gap:9px; align-items:stretch; }
+  #cfg-wizard .wiz-oqty{ font-family:'Manrope',sans-serif; font-size:12.5px; color:#5b6b80; text-align:center; }
+  #cfg-wizard .wiz-oqty b{ color:#14233f; font-weight:700; }
+  #cfg-wizard .wiz-obtn{ display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:13.5px; padding:11px 12px; border-radius:11px; border:1.6px solid transparent; min-height:44px; }
+  #cfg-wizard .wiz-obtn .ms{ font-size:18px; }
+  #cfg-wizard .wiz-obtn-edit{ background:#225eaa; color:#fff; }
+  #cfg-wizard .wiz-obtn-del{ background:#fff; color:#b04a4a; border-color:#f0d4d4; }
+  /* Handy: Bild oben, dann Beschreibung, dann Aktionen in einer Reihe */
+  @media(max-width:560px){
+    #cfg-wizard .wiz-ocard{ grid-template-columns:1fr; gap:12px; }
+    #cfg-wizard .wiz-othumb{ order:1; height:150px; }
+    #cfg-wizard .wiz-oinfo{ order:2; }
+    #cfg-wizard .wiz-oactions{ order:3; flex-direction:row; flex-wrap:wrap; }
+    #cfg-wizard .wiz-oactions .wiz-oqty{ flex:1 0 100%; text-align:left; }
+    #cfg-wizard .wiz-oactions .wiz-obtn{ flex:1; }
+  }
   /* Auf der Uebersicht keine grosse Einzel-Vorschau — jede Karte hat ihr Thumbnail */
   #cfg-wizard .wiz-body.angebot-wide .wiz-stage{ display:none !important; }
   /* === STUFE 3: Karten-Schritte passen ohne Scrollen aufs Handy (2 pro Reihe, kompaktes Bild) === */
