@@ -4286,6 +4286,10 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   #cfg-wizard .wiz-card:hover{transform:translateY(-4px)}
   #cfg-wizard .wiz-card.sel{border:2px solid var(--c-primary);padding:5px}
   #cfg-wizard .wiz-card{position:relative}
+  /* Grüner Auswahl-Haken überall (Karten + Options-Zeilen), damit der Kunde klar sieht was gewählt ist */
+  #cfg-wizard .wiz-optrow.sel{position:relative}
+  #cfg-wizard .wiz-card.sel::after, #cfg-wizard .wiz-optrow.sel::after{content:'✓';position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:#1f9d55;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;line-height:1;box-shadow:0 3px 9px rgba(20,40,80,.22);z-index:3;font-family:'Manrope',sans-serif;pointer-events:none}
+  #cfg-wizard .wiz-pill.sel::before{content:'✓';margin-right:6px;font-weight:800}
   #cfg-wizard .wiz-fav{position:absolute;top:8px;left:8px;z-index:2;background:#c9a84c;color:#1a1408;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:999px;box-shadow:0 2px 8px rgba(20,40,80,.18);pointer-events:none;line-height:1.2}
   #cfg-wizard .wiz-card img{width:100%;aspect-ratio:1/1;object-fit:contain;border-radius:10px;background:transparent;padding:0}
   #cfg-wizard .wiz-noimg{width:100%;aspect-ratio:1/1;border-radius:10px;background:#f7f7f7;display:flex;align-items:center;justify-content:center;color:#9aa7b5;font-family:'Manrope',sans-serif;font-size:13px;text-align:center;padding:8px}
@@ -7832,7 +7836,7 @@ function wizNext(){ if(WIZ_STEPS[wizIdx].key==='masse' && typeof wizMassValidate
 function wizBack(){ if(wizIdx<=0){ wizExitToProd(); return; } wizGo(wizIdx-1); window.scrollTo({top:0,behavior:'auto'}); }
 // Auto-Advance: nach Auswahl einer Karte direkt zum nächsten Schritt — nur bei eindeutigen Einfach-Auswahl-Schritten.
 // Nicht bei: Farbe (Kundenwunsch), Maße/Anzahl (Eingabe), Schall/Griff/Rolladen/Sprossen (Mehrfach-/Detailauswahl).
-const WIZ_AUTONEXT = new Set(['profil','psk','hslauf','fluegel','anschlag','glas','tuer','balk','glasdekor','sicherheit']);
+const WIZ_AUTONEXT = new Set(['profil','psk','hslauf','fluegel','anschlag','glas','balk','glasdekor','sicherheit']);
 document.addEventListener('click', function(e){
   const panel = document.getElementById('wiz-panel');
   if(!panel || !panel.contains(e.target)) return;
@@ -7972,7 +7976,6 @@ function wizRenderRoll(){
       ? '<div class="wiz-gbox wiz-roll-vis"><img src="'+imgs[k]+'" alt="'+P.roll[k].name+'" loading="lazy">'+(m.ic?'<span class="wiz-roll-ic"><i class="ms">'+m.ic+'</i></span>':'')+'</div>'
       : '<div class="wiz-gbox wiz-gbox-empty"><i class="ms" style="font-size:32px;color:#9aa7b5">block</i><span style="display:block;margin-top:4px">Kein Rolladen</span></div>';
     return '<div class="wiz-card wiz-roll-card'+(sel?' sel':'')+'" onclick="wizSetRoll(\''+k+'\')">'+
-      (sel?'<span class="wiz-roll-check"><i class="ms">check</i></span>':'')+
       vis+
       '<div class="wiz-cn">'+P.roll[k].name+'</div>'+
       (m.sub?'<div class="wiz-csub">'+m.sub+'</div>':'')+
