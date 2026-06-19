@@ -6413,6 +6413,7 @@ function snapshotCurrentConfig() {
     unitPrice,
     qty: S.qty,
     subtotal: unitPrice * S.qty,
+    thumb: (typeof wizLastThumb!=='undefined') ? wizLastThumb : null,
     summary: `${prodName} · ${size} · ${S.qty} Stück · ${color}`
   };
 }
@@ -7438,15 +7439,17 @@ function wizRenderKontakt(){
       '<div><label class="fl" for="d2-fst">Straße & Nr.</label><input class="inp" type="text" id="d2-fst" autocomplete="street-address"></div>'+
     '</div>'+
     '<div id="lf-abhol-hint" class="wiz-khint"'+(la==="abholen"?'':' style="display:none"')+'>Abholung an unserem Lager in Brandenburg an der Havel — kostenlos. Wir melden uns zur Terminabstimmung, sobald Ihr Fenster fertig ist.</div>'+
+    '<button type="button" class="wiz-kmore-btn" onclick="var e=document.getElementById(\'kf-extra\');e.style.display=\'block\';this.style.display=\'none\';"><i class="ms" aria-hidden="true">add_circle</i>Anmerkung oder Foto hinzufügen <span>(optional)</span></button>'+
+    '<div id="kf-extra" style="display:none">'+
     '<div class="kf-row"><div><label class="fl" for="d2-fno">Anmerkungen / Hinweis</label><textarea class="inp" id="d2-fno" placeholder="z. B. Etage, Sondermaße, Rückrufzeit"></textarea></div>'+
-    '<div><label class="fl">Fotos hinzufügen (optional)</label>'+
+    '<div><label class="fl">Fotos hinzufügen</label>'+
       '<div id="bild-drop-area" style="border:1.5px dashed #225eaa;border-radius:12px;background:#f7f9ff;padding:11px;text-align:center">'+
         '<input type="file" id="bild-file-input" accept="image/*" multiple onchange="handleBildSelect(event)" style="display:none">'+
         '<label for="bild-file-input" style="display:inline-flex;align-items:center;gap:7px;cursor:pointer;background:#225eaa;color:#fff;font-weight:700;font-size:13px;padding:8px 15px;border-radius:999px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>Fotos auswählen</label>'+
         '<div style="font-size:11.5px;color:#6a7a8f;margin-top:6px">Aufmaß, altes Fenster · max. 5 Bilder, je 5 MB</div>'+
       '</div>'+
       '<div id="bild-preview" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px"></div>'+
-    '</div></div>'+
+    '</div></div></div>'+
     '<label class="wiz-kchk"><input type="checkbox" id="d2-fdsgvo"><span>Ich habe die <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutzerklärung</a> gelesen und stimme der Verarbeitung meiner Daten zur Angebotserstellung zu. *</span></label>'+
     '<div id="d2-ferr" class="wiz-kerr d2hide"></div>'+
   '</form>';
@@ -7454,6 +7457,18 @@ function wizRenderKontakt(){
 // Bestellübersicht im Onlineshop-Stil: jedes Produkt eine Warenkorb-Karte
 // (Bild + Bezeichnung + Eckdaten + Menge + Ändern/Entfernen). Mehrere Produkte gestapelt.
 const WIZ_PROD_THUMB={ kunststoff:'img/fenster_standard_v3.webp', balkontuer:'img/balkontuer_standard_v3.webp?v=20260609g', haustuere:'img/haustuer_iglo_energy_montana_weiss.webp?v=20260506-5', hst:'img/hst_standard.webp?v=20260609g' };
+// Schnappschuss der Live-3D-Vorschau (echtes konfiguriertes Produkt fürs Warenkorb-Bild).
+// 3D nutzt preserveDrawingBuffer:true + same-origin → canvas.toDataURL funktioniert.
+let wizLastThumb=null;
+function wizCaptureThumb(){
+  try{
+    var map={kunststoff:'fenster3d-frame',balkontuer:'balkon3d-frame',haustuere:'haus3d-frame',hst:'hst3d-frame'};
+    var f=document.getElementById(map[S.prod]); if(!f||!f.contentDocument) return null;
+    var c=f.contentDocument.querySelector('canvas'); if(!c||!c.width) return null;
+    var d=c.toDataURL('image/jpeg',0.82);
+    return (d&&d.length>3000)?d:null;   // zu kurz = leerer Canvas
+  }catch(e){ return null; }
+}
 function wizRenderAngebot(){
   function nm(tbl,key){ return (P[tbl]&&P[tbl][key]&&P[tbl][key].name)||key||'–'; }
   function sh(v){ return (v||'').split('·')[0].split('(')[0].trim(); }
@@ -7464,7 +7479,7 @@ function wizRenderAngebot(){
   }
   function card(c, opts){
     c=c||{}; opts=opts||{};
-    var img=WIZ_PROD_THUMB[c.prod]||WIZ_PROD_THUMB.kunststoff;
+    var img=opts.thumb||WIZ_PROD_THUMB[c.prod]||WIZ_PROD_THUMB.kunststoff;
     var name=nm('prod',c.prod);
     var qty=c.qty||1;
     var act=opts.current
@@ -7483,8 +7498,8 @@ function wizRenderAngebot(){
   var total=inCart.length+1;
   var h='<div class="wiz-ohead">'+total+' '+(total===1?'Produkt':'Produkte')+' in Ihrer Anfrage</div>';
   h+='<div class="wiz-ocards">';
-  inCart.forEach(function(it){ h+=card(it.config||{}, {id:it.id}); });
-  h+=card(S, {current:true});
+  inCart.forEach(function(it){ h+=card(it.config||{}, {id:it.id, thumb:it.thumb}); });
+  h+=card(S, {current:true, thumb:wizLastThumb});
   h+='</div>';
   h+='<button type="button" class="wiz-addmore" onclick="wizAddAnother()"><span>+</span> Weiteres Produkt hinzufügen</button>';
   return h;
@@ -7529,8 +7544,12 @@ function wizStart(){
   WIZ_STEPS=buildWizSteps(prod);
   const w=document.getElementById('cfg-wizard'); if(w){w.style.display='flex'; w.setAttribute('data-prod',prod);}
   wizGo(0);
+  // Live-3D periodisch als Schnappschuss merken (fürs echte Warenkorb-Bild)
+  try{ if(window._wizThumbTimer)clearInterval(window._wizThumbTimer);
+    window._wizThumbTimer=setInterval(function(){ var t=wizCaptureThumb(); if(t)wizLastThumb=t; },1200); }catch(e){}
   window.scrollTo({top:0,behavior:'auto'});
 }
+function wizStopThumbTimer(){ try{ if(window._wizThumbTimer){clearInterval(window._wizThumbTimer);window._wizThumbTimer=null;} }catch(e){} }
 // ── Frühe Schritte (Karten-Auswahl, kein Fenster) als render-Funktionen im selben System ──
 function wizRenderProfil(){
   // Fenster: Karten mit Profil-Bildern. Andere Produkte: Pills (keine Karten-Bilder vorhanden).
@@ -7769,6 +7788,10 @@ function wizGo(i){
   const nb=document.querySelector('#wiz-nextbtn span'); if(nb)nb.textContent=(s.key==='angebot')?'Weiter zur Anfrage':(s.key==='kontakt')?'Angebot absenden':'Weiter';
   const db=document.getElementById('wiz-dim-b'); if(db)db.textContent=(S.bMm||1000)+' mm';
   const dh=document.getElementById('wiz-dim-h'); if(dh)dh.textContent=(S.hMm||1200)+' mm';
+  // Live-3D-Schnappschuss fürs Warenkorb-Bild merken (nach kurzer Render-Pause)
+  setTimeout(function(){ var _t=wizCaptureThumb(); if(_t)wizLastThumb=_t; },700);
+  // Übersicht: sobald ein Schnappschuss da ist, Karten-Bild aktualisieren
+  if(s.key==='angebot'){ setTimeout(function(){ if(wizLastThumb && WIZ_STEPS[wizIdx] && WIZ_STEPS[wizIdx].key==='angebot') wizRenderPanel(); },600); }
   // KEIN drawPrev beim reinen Schrittwechsel — Konfiguration unverändert, Bild bleibt ruhig stehen (kein "Bocken")
 }
 function wizRenderPanel(){ const p=document.getElementById('wiz-panel'); if(p)p.innerHTML=WIZ_STEPS[wizIdx].render(); }
@@ -15070,6 +15093,16 @@ async function submitSkizze(e) {
   #cfg-wizard .wiz-sw2.sel .wiz-chip2{ box-shadow:0 0 0 3px #fff, 0 0 0 5px var(--c-primary); }
   #cfg-wizard .wiz-farb-more{ margin-top:14px; width:100%; max-width:520px; margin-left:auto; margin-right:auto; display:block; border:1px solid #d6e0ee; background:#f3f7fd; color:#225eaa; border-radius:11px; padding:12px; font-weight:700; font-family:'Plus Jakarta Sans',sans-serif; cursor:pointer; font-size:13.5px; }
   #cfg-wizard .wiz-close{ display:none; }
+  /* Anfrage-Formular kompakter (App-Gefühl): straffe Abstände, optionale Extras eingeklappt */
+  @media (max-width:767px){
+    #cfg-wizard .wiz-kform{ gap:11px !important; max-width:560px; }
+    #cfg-wizard .wiz-kform .fl{ margin-bottom:4px !important; font-size:12px !important; }
+    #cfg-wizard .wiz-kform .inp{ padding:10px 12px !important; }
+    #cfg-wizard .wiz-kform textarea.inp{ min-height:64px !important; }
+  }
+  #cfg-wizard .wiz-kmore-btn{ display:inline-flex; align-items:center; gap:8px; align-self:flex-start; border:1px dashed #b9cbe6; background:#f5f9ff; color:#225eaa; border-radius:11px; padding:11px 16px; font-weight:700; font-family:'Plus Jakarta Sans',sans-serif; font-size:13.5px; cursor:pointer; min-height:46px; }
+  #cfg-wizard .wiz-kmore-btn .ms{ font-size:19px; }
+  #cfg-wizard .wiz-kmore-btn span{ color:#7a8aa0; font-weight:500; }
   /* Griff-Umschalter (3 Tabs) + Sektions-Hinweis */
   #cfg-wizard .wiz-tabs-3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
   #cfg-wizard .wiz-tabs-3 .wiz-tab{ padding:10px 6px; font-size:13px; text-align:center; min-height:48px; }
