@@ -6178,6 +6178,12 @@ const P = {
     'ohne':         { name:'Nicht abschließbar', sub:'Standard-Griff', add:0 },
     'innen-aussen': { name:'Abschließbar', sub:'innen + außen · Zylinder beidseitig', add:0 },
   },
+  // PSK-Griff = Fenster-Drehgriff (nur Weiß: Standard + abschließbar). Kundenwunsch 18.06.2026.
+  // Eigene Renders, ersetzt bei PSK den Muschel-/Schiebegriff (der bleibt nur für IGLO-HS).
+  pskGriff: {
+    'weiss':    { name:'PSK-Griff Weiß',              add:0, img:'img/drutex-griffe/psk-griff-weiss.webp' },
+    'weiss-ab': { name:'PSK-Griff Weiß abschließbar', add:0, img:'img/drutex-griffe/psk-griff-weiss-ab.webp' },
+  },
 };
 
 function deliv(qty, prod) {
@@ -6204,6 +6210,7 @@ const S = {
   pskKammer:'iglo5',  // Kunde 21.04.2026: Kammer-System nur für PSK relevant
   hstGriff:'silber',          // Innen = Muschelgriff IGLO-HS
   hstGriffAussen:'weiss',     // Außen = Schiebegriff IGLO-HS
+  pskGriff:'weiss',           // PSK = Fenster-Drehgriff (weiß / weiß abschließbar)
   hstSchloss:'ohne',          // IGLO-HS Schloss-Option
   sicher:'wk1',
   tuerModell: null,
@@ -6482,6 +6489,7 @@ function resetConfigForNextItem() {
   S.hstGriff = 'silber';
   S.hstGriffAussen = 'weiss';
   S.hstSchloss = 'ohne';
+  S.pskGriff = 'weiss';
   S.hstSchwelle = 'standard'; S.hstTeilung = '2-teilig'; S.hstLauf = 'rechts';
   S.balkonSchwelle = 'alu-20';
   S.pskKammer = 'iglo5';  // Kunde 21.04.2026
@@ -8351,12 +8359,31 @@ function buildHstGriff() {
         <div class="olabel" style="font-size:13px;font-weight:700">${v.name}</div>
       </div>
     </div>`;
-  grid.innerHTML = `
-    <div class="col-span-full"><div class="sec-t" style="margin-top:0">Innengriff (Muschelgriff)</div>
-      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
-        ${Object.entries(P.hstGriff).map(([k,v])=>mkCard(k,v,S.hstGriff===k,'pickHstGriff')).join('')}
-      </div>
-    </div>`;
+  if (S.profil === 'iglo-psk') {
+    // PSK: Fenster-Drehgriff, nur Weiß (Standard + abschließbar) — Kundenwunsch 18.06.2026
+    grid.innerHTML = `
+      <div class="col-span-full"><div class="sec-t" style="margin-top:0">PSK-Griff (Weiß)</div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
+          ${Object.entries(P.pskGriff).map(([k,v])=>mkCard(k,v,S.pskGriff===k,'pickPskGriff')).join('')}
+        </div>
+      </div>`;
+    const d9s = document.getElementById('d9s'); if (d9s) d9s.textContent = 'PSK-Drehgriff wählen';
+  } else {
+    grid.innerHTML = `
+      <div class="col-span-full"><div class="sec-t" style="margin-top:0">Innengriff (Muschelgriff)</div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
+          ${Object.entries(P.hstGriff).map(([k,v])=>mkCard(k,v,S.hstGriff===k,'pickHstGriff')).join('')}
+        </div>
+      </div>`;
+  }
+}
+
+function pickPskGriff(el) {
+  S.pskGriff = el.dataset.v;
+  el.parentElement.querySelectorAll('.oc').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+  _updateHstGriffSummary();
+  upSidebar(); drawPrev();
 }
 
 function pickHstGriff(el) {
@@ -8378,12 +8405,16 @@ function pickHstGriffAussen(el) {
   upSidebar(); drawPrev();
 }
 
-// Header-Summary für Step 9s: kombiniert Innen + Außen
+// Header-Summary für Step 9s: PSK = ein Drehgriff, IGLO-HS = Innen + Außen
 function _updateHstGriffSummary() {
-  const innen = P.hstGriff[S.hstGriff]?.name || S.hstGriff;
-  const aussen = P.hstGriffAussen[S.hstGriffAussen]?.name || S.hstGriffAussen;
   const d9s = document.getElementById('d9s');
-  if (d9s) d9s.textContent = `Innen: ${innen} · Außen: ${aussen}`;
+  if (S.profil === 'iglo-psk') {
+    if (d9s) d9s.textContent = P.pskGriff[S.pskGriff]?.name || S.pskGriff;
+  } else {
+    const innen = P.hstGriff[S.hstGriff]?.name || S.hstGriff;
+    const aussen = P.hstGriffAussen[S.hstGriffAussen]?.name || S.hstGriffAussen;
+    if (d9s) d9s.textContent = `Innen: ${innen} · Außen: ${aussen}`;
+  }
   const b = document.getElementById('b9s');
   if (b) b.innerHTML = '<i class="ms f" style="font-size:16px">check</i>';
   // Beide Auswahlen sind getroffen → mkDone
@@ -8638,6 +8669,8 @@ function pick(el, key) {
     if (S.prod === 'hst') {
       updateHstProfilBlocks();
       applyStepVisibility();
+      // Griff-Schritt (s9s) an Profil anpassen: PSK = Drehgriff (weiß/abschließbar), IGLO-HS = Muschelgriff
+      if (typeof buildHstGriff === 'function') buildHstGriff();
       // Schritt 4 (Schiebetür-Spezifika) immer mit aktuellem Profil-Kontext neu aufbauen
       // (PSK: ohne Laufrichtung · Slide: mit · IGLO-HS: nur Schwelle)
       if (typeof buildOeffSash === 'function') buildOeffSash();
@@ -9304,6 +9337,7 @@ function pickGriffLock(locked) {
   refreshDescriptions();
 }
 function hstGriffSummary() {
+  if (S.profil === 'iglo-psk') return P.pskGriff[S.pskGriff]?.name || S.pskGriff;
   const inn = P.hstGriff[S.hstGriff]?.name || S.hstGriff;
   const aus = P.hstGriffAussen[S.hstGriffAussen]?.name || S.hstGriffAussen;
   const sch = (S.hstSchloss && S.hstSchloss !== 'ohne') ? (' · ' + (P.hstSchloss[S.hstSchloss]?.name || S.hstSchloss)) : '';
@@ -11163,7 +11197,8 @@ function calcUnit() {
     if (P.tuerGriffInnen[S.tuerGriffInnen])   price += P.tuerGriffInnen[S.tuerGriffInnen].add;
     if (P.tuerGriffAussen[S.tuerGriffAussen]) price += P.tuerGriffAussen[S.tuerGriffAussen].add;
   } else if (S.prod === 'hst') {
-    if (S.hstGriff && P.hstGriff[S.hstGriff]) price += P.hstGriff[S.hstGriff].add;
+    if (S.profil === 'iglo-psk') { if (S.pskGriff && P.pskGriff[S.pskGriff]) price += P.pskGriff[S.pskGriff].add; }
+    else if (S.hstGriff && P.hstGriff[S.hstGriff]) price += P.hstGriff[S.hstGriff].add;
   } else {
     if (S.griff && P.griff[S.griff]) price += P.griff[S.griff].add;
   }
@@ -11351,9 +11386,13 @@ function upSidebar() {
     if(S.tuerGriffInnen  && isTouched('tuerGriffInnen'))  rowsList.push(['Griff innen',  P.tuerGriffInnen?.[S.tuerGriffInnen]?.name||S.tuerGriffInnen]);
     if(S.tuerGriffAussen && isTouched('tuerGriffAussen')) rowsList.push(['Griff außen',  P.tuerGriffAussen?.[S.tuerGriffAussen]?.name||S.tuerGriffAussen]);
   } else if(S.prod==='hst') {
-    if(S.hstGriff) rowsList.push(['Griff innen', P.hstGriff?.[S.hstGriff]?.name||S.hstGriff]);
-    if(S.hstGriffAussen) rowsList.push(['Griff außen', P.hstGriffAussen?.[S.hstGriffAussen]?.name||S.hstGriffAussen]);
-    if(S.hstSchloss && S.hstSchloss!=='ohne') rowsList.push(['Schloss', P.hstSchloss?.[S.hstSchloss]?.name||S.hstSchloss]);
+    if(S.profil==='iglo-psk') {
+      rowsList.push(['Griff', P.pskGriff?.[S.pskGriff]?.name||S.pskGriff]);
+    } else {
+      if(S.hstGriff) rowsList.push(['Griff innen', P.hstGriff?.[S.hstGriff]?.name||S.hstGriff]);
+      if(S.hstGriffAussen) rowsList.push(['Griff außen', P.hstGriffAussen?.[S.hstGriffAussen]?.name||S.hstGriffAussen]);
+      if(S.hstSchloss && S.hstSchloss!=='ohne') rowsList.push(['Schloss', P.hstSchloss?.[S.hstSchloss]?.name||S.hstSchloss]);
+    }
   } else if(S.griff && isTouched('griff')) {
     rowsList.push(['Griff', P.griff?.[S.griff]?.name||S.griff]);
   }
@@ -11455,7 +11494,10 @@ function upFinalSum(rows,tot) {
     // Kunde 21.04.2026: Griff produkt-spezifisch anzeigen
     ...(S.prod !== 'haustuere' && S.prod !== 'hst' ? [['Griff', S.griff?P.griff[S.griff]?.name||S.griff:'–']] : []),
     ...(S.prod === 'haustuere' ? [['Türgriff Innen', P.tuerGriffInnen[S.tuerGriffInnen]?.name||S.tuerGriffInnen], ['Türgriff Außen', P.tuerGriffAussen[S.tuerGriffAussen]?.name||S.tuerGriffAussen]] : []),
-    ...(S.prod === 'hst'       ? [
+    ...(S.prod === 'hst' && S.profil === 'iglo-psk' ? [
+      ['Griff', P.pskGriff[S.pskGriff]?.name||S.pskGriff],
+    ] : []),
+    ...(S.prod === 'hst' && S.profil !== 'iglo-psk' ? [
       ['Griff innen', S.hstGriff?P.hstGriff[S.hstGriff]?.name||S.hstGriff:'–'],
       ['Griff außen', S.hstGriffAussen?P.hstGriffAussen[S.hstGriffAussen]?.name||S.hstGriffAussen:'–'],
       ...(S.hstSchloss && S.hstSchloss!=='ohne' ? [['Schloss', P.hstSchloss[S.hstSchloss]?.name||S.hstSchloss]] : [])
@@ -13008,9 +13050,10 @@ function _renderHst3d() {
   const isWood = HAUS3D_WOOD_KEYS.has(_ck);
   // HST: Seite aus der Laufrichtung (hstLauf) ableiten — links→l, rechts→r; Fallback auf oeff1.
   const _side  = (S.hstLauf === 'links') ? 'l' : (S.hstLauf === 'rechts') ? 'r' : ((S.oeff1 === 'dreh-l' || S.oeff1 === 'dk-l') ? 'l' : 'r');
-  // 3D-Innenansicht zeigt den Muschel-Innengriff → dessen Farbe (Innengriff-Wahl) steuert die 3D-Griff-Farbe
+  // 3D-Innenansicht zeigt den Muschel-Innengriff → dessen Farbe (Innengriff-Wahl) steuert die 3D-Griff-Farbe.
+  // PSK hat keinen Muschelgriff (sondern weißen Drehgriff) → immer weiß an die 3D-Vorschau.
   const _gripMap = { weiss:'weiss', braun:'braun', silber:'silber' };
-  const _grip  = _gripMap[S.hstGriff] || 'weiss';
+  const _grip  = (S.profil === 'iglo-psk') ? 'weiss' : (_gripMap[S.hstGriff] || 'weiss');
 
   wrap.style.display = 'block';
 
@@ -13594,6 +13637,7 @@ async function submitForm(e) {
     dichtung:    fdName,
     sprossen:    sproStr,
     griff:       S.prod === 'haustuere' ? ('Innen: ' + (P.tuerGriffInnen[S.tuerGriffInnen]?.name || S.tuerGriffInnen) + ' / Außen: ' + (P.tuerGriffAussen[S.tuerGriffAussen]?.name || S.tuerGriffAussen))
+                 : (S.prod === 'hst' && S.profil === 'iglo-psk') ? (P.pskGriff[S.pskGriff]?.name || S.pskGriff)
                  : S.prod === 'hst'       ? (P.hstGriff[S.hstGriff]?.name || S.hstGriff)
                  : griffName,
     shutter:     rollName,
@@ -15460,7 +15504,7 @@ function renderSummary(){
   const el=document.getElementById('d2-summary'); if(!el||!S.prod) return;
   const cnt=sashCount();
   let oeffN; if(S.prod==='hst'||S.prod==='haustuere')oeffN=P.oeff_sash[S.oeff1]?.name; else oeffN=[S.oeff1,S.oeff2,S.oeff3].slice(0,cnt).map(o=>P.oeff_sash[o]?.name).filter(Boolean).join(' / ');
-  const griffN=S.prod==='haustuere'?curName(P.tuerGriffAussen,S.tuerGriffAussen):S.prod==='hst'?curName(P.hstGriff,S.hstGriff):curName(P.griff,S.griff);
+  const griffN=S.prod==='haustuere'?curName(P.tuerGriffAussen,S.tuerGriffAussen):(S.prod==='hst'&&S.profil==='iglo-psk')?curName(P.pskGriff,S.pskGriff):S.prod==='hst'?curName(P.hstGriff,S.hstGriff):curName(P.griff,S.griff);
   const items=[
     ['Produkt',P.prod[S.prod]?.name,null],
     ['Profil',curName(P.profil,S.profil),'profil'],
@@ -15549,6 +15593,7 @@ function prodDetailLines(c){
   else oeffName='–';
   let griffName;
   if(c.prod==='haustuere')griffName='Innen: '+curName(P.tuerGriffInnen,c.tuerGriffInnen)+' / Außen: '+curName(P.tuerGriffAussen,c.tuerGriffAussen);
+  else if(c.prod==='hst'&&c.profil==='iglo-psk')griffName=curName(P.pskGriff,c.pskGriff);
   else if(c.prod==='hst')griffName=curName(P.hstGriff,c.hstGriff);
   else griffName=curName(P.griff,c.griff)+' ('+curName(P.griffColor,c.griffColor)+')'+(c.griffLocked?' · abschließbar':'');
   const _kf=(c.panzerFarbe&&PANZER_FARBEN[c.panzerFarbe])?PANZER_FARBEN[c.panzerFarbe].name:'–';
@@ -15608,6 +15653,7 @@ function d2submit(e){
   else if(S.oeff1)oeffName=cnt===1?(P.oeff_sash[S.oeff1]?.name||S.oeff1):[S.oeff1,S.oeff2,S.oeff3].slice(0,cnt).map(o=>P.oeff_sash[o]?.name||o).join(' / '); else oeffName='–';
   let griffName;
   if(S.prod==='haustuere')griffName=`Innen: ${curName(P.tuerGriffInnen,S.tuerGriffInnen)} / Außen: ${curName(P.tuerGriffAussen,S.tuerGriffAussen)}`;
+  else if(S.prod==='hst'&&S.profil==='iglo-psk')griffName=`${curName(P.pskGriff,S.pskGriff)}`;
   else if(S.prod==='hst')griffName=`${curName(P.hstGriff,S.hstGriff)}`;
   else griffName=`${curName(P.griff,S.griff)} (${curName(P.griffColor,S.griffColor)})${S.griffLocked?' · abschließbar':''}`;
   const _kfName=(S.panzerFarbe&&PANZER_FARBEN[S.panzerFarbe])?PANZER_FARBEN[S.panzerFarbe].name:'–';
