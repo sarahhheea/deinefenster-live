@@ -1626,10 +1626,6 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
         <span class="material-symbols-outlined" style="font-size:12px;font-variation-settings:'FILL' 1" aria-hidden="true">call</span>
         03381 / 2148373
       </a>
-      <a href="https://wa.me/491717263776" target="_blank" rel="noopener" class="topbar-whatsapp">
-        <span class="material-symbols-outlined" style="font-size:13px;font-variation-settings:'FILL' 1" aria-hidden="true">chat</span>
-        WhatsApp
-      </a>
     </div>
   </div>
 </div>
@@ -1784,7 +1780,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
                   <div class="mega-system-icon"><span class="material-symbols-outlined" aria-hidden="true">door_sliding</span></div>
                   <div>
                     <div class="mega-system-label">IGLO-HS</div>
-                    <div class="mega-system-desc">Große Hebe-Schiebe-Tür · bis 6500 mm · Null-Schwelle DIN 18040</div>
+                    <div class="mega-system-desc">Große Hebe-Schiebe-Tür · bis 4000 × 2300 mm · Null-Schwelle DIN 18040</div>
                   </div>
                 </a>
                 <div class="mega-panel-cta">
@@ -3914,9 +3910,10 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
 <!-- ── MASSE-HERO (heller Schritt nach Glas, vor Detail-Ansicht) ── -->
 <style>
   #masse-hero .mh-card{max-width:560px;width:100%;margin:0 auto;background:#fff;border:1px solid rgba(34,94,170,.12);border-radius:18px;padding:28px 26px;box-shadow:0 8px 30px rgba(20,40,80,.06)}
-  #masse-hero .mh-fields{display:flex;align-items:flex-end;gap:14px}
-  #masse-hero .mh-fields>div{flex:1}
+  #masse-hero .mh-fields{display:flex;align-items:flex-end;gap:14px;margin-bottom:22px}
+  #masse-hero .mh-fields>div{flex:1;position:relative}
   #masse-hero .mh-x{flex:0 0 auto !important;padding-bottom:12px;font-size:20px;font-weight:700;color:#94a3b8}
+  #masse-hero .mh-min{position:absolute;top:calc(100% + 5px);left:2px;font-size:12px;font-weight:700;color:var(--c-primary);white-space:nowrap;letter-spacing:.01em}
   #masse-hero .mh-next{width:100%;margin-top:22px;display:flex;align-items:center;justify-content:center;gap:10px;font-weight:800;padding:14px;border-radius:999px;color:#fff;background:var(--c-primary);font-family:'Plus Jakarta Sans',sans-serif;border:0;cursor:pointer}
   #masse-hero .mh-next svg{width:16px;height:16px}
 </style>
@@ -3942,14 +3939,17 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
     <div class="mh-fields">
       <div>
         <label class="fl" for="mh-ib">Breite (mm)</label>
-        <input class="inp" type="number" inputmode="numeric" pattern="[0-9]*" id="mh-ib" min="300" max="4000" value="1000" placeholder="z.B. 1000" oninput="mhOnInput()">
+        <input class="inp" type="number" inputmode="numeric" pattern="[0-9]*" id="mh-ib" min="300" max="4000" value="1000" placeholder="z.B. 1000" oninput="mhOnInput()" onblur="mhBlurFill()">
+        <div class="mh-min" id="mh-minb"></div>
       </div>
       <div class="mh-x">×</div>
       <div>
         <label class="fl" for="mh-ih">Höhe (mm)</label>
-        <input class="inp" type="number" inputmode="numeric" pattern="[0-9]*" id="mh-ih" min="300" max="3000" value="1200" placeholder="z.B. 1200" oninput="mhOnInput()">
+        <input class="inp" type="number" inputmode="numeric" pattern="[0-9]*" id="mh-ih" min="300" max="3000" value="1200" placeholder="z.B. 1200" oninput="mhOnInput()" onblur="mhBlurFill()">
+        <div class="mh-min" id="mh-minh"></div>
       </div>
     </div>
+    <div id="mh-minnote" style="margin-top:12px;padding:10px 13px;border-radius:10px;background:#eaf2fe;border:1px solid #c9def8;color:#1a4a86;font-family:'Manrope',sans-serif;font-size:13px;font-weight:600;line-height:1.4;display:flex;gap:8px;align-items:flex-start"><i class="ms" style="font-size:18px;flex-shrink:0">straighten</i><span id="mh-minnote-txt"></span></div>
     <div class="info mt-3">
       <i class="ms f" style="color:var(--c-primary);font-size:20px;flex-shrink:0">info</i>
       <div><strong>Einbaumaß</strong> = Mauerwerksöffnung. Das Fenster wird ca. 10–20 mm kleiner gefertigt. <span id="mh-range"></span></div>
@@ -3958,7 +3958,8 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       <div class="text-sm font-semibold text-on-surf-v mb-2">Schnellauswahl Standardmaße:</div>
       <div id="mh-quickpick" class="flex flex-wrap gap-2"></div>
     </div>
-    <button type="button" onclick="heroSelectMasse()" class="mh-next">
+    <div id="mh-error" role="alert" style="display:none;margin-top:14px;padding:11px 14px;border-radius:10px;background:#fdecec;border:1px solid #f0c2c2;color:#9a2b2b;font-family:'Manrope',sans-serif;font-size:13.5px;font-weight:600;line-height:1.4"></div>
+    <button type="button" id="mh-next-btn" onclick="heroSelectMasse()" class="mh-next">
       <span>Weiter</span>
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
     </button>
@@ -4282,6 +4283,12 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   #cfg-wizard .wiz-card:hover{box-shadow:0 6px 18px rgba(20,40,80,.08)}
   #cfg-wizard .wiz-card:hover{transform:translateY(-4px)}
   #cfg-wizard .wiz-card.sel{border:2px solid var(--c-primary);padding:5px}
+  #cfg-wizard .wiz-card{position:relative}
+  /* Grüner Auswahl-Haken überall (Karten + Options-Zeilen), damit der Kunde klar sieht was gewählt ist */
+  #cfg-wizard .wiz-optrow.sel{position:relative}
+  #cfg-wizard .wiz-card.sel::after, #cfg-wizard .wiz-optrow.sel::after{content:'✓';position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:#1f9d55;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;line-height:1;box-shadow:0 3px 9px rgba(20,40,80,.22);z-index:3;font-family:'Manrope',sans-serif;pointer-events:none}
+  #cfg-wizard .wiz-pill.sel::before{content:'✓';margin-right:6px;font-weight:800}
+  #cfg-wizard .wiz-fav{position:absolute;top:8px;left:8px;z-index:2;background:#c9a84c;color:#1a1408;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:999px;box-shadow:0 2px 8px rgba(20,40,80,.18);pointer-events:none;line-height:1.2}
   #cfg-wizard .wiz-card img{width:100%;aspect-ratio:1/1;object-fit:contain;border-radius:10px;background:transparent;padding:0}
   #cfg-wizard .wiz-noimg{width:100%;aspect-ratio:1/1;border-radius:10px;background:#f7f7f7;display:flex;align-items:center;justify-content:center;color:#9aa7b5;font-family:'Manrope',sans-serif;font-size:13px;text-align:center;padding:8px}
   #cfg-wizard .wiz-cn{font-size:12.5px;margin-top:8px;font-weight:700;color:#14233f;font-family:'Manrope',sans-serif}
@@ -4560,14 +4567,14 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
           <div class="pc-chips">
             <span>Bodennah</span>
             <span>Uw 0,9</span>
-            <span>bis 6 m</span>
+            <span>bis 4 × 2,3 m</span>
           </div>
           <div class="pc-cta">Jetzt konfigurieren →</div>
         </div>
       </div>
 
     </div>
-    <p class="text-[13px] mt-4" style="color:var(--c-text-soft)">Alle Produkte von <strong style="color:var(--c-text)">Drutex</strong> – einem der großen europäischen Fensterhersteller. Fenster-Vorschaubilder und die Schiebetür-System-Symbole sind KI-generierte Symboldarstellungen. Haustür-Bilder aus dem Drutex-Katalog. Lieferung in Drutex-Originalspezifikation.</p>
+    <p class="text-[13px] mt-4" style="color:var(--c-text-soft)">Alle Produkte von <strong style="color:var(--c-text)">Drutex</strong> – einem der großen europäischen Fensterhersteller. Fenster-Vorschaubilder und die Schiebetür-System-Symbole sind KI-generierte Symboldarstellungen. Haustür-Vorschaubilder teils aus dem Drutex-Katalog, teils KI-generierte Symboldarstellungen. Lieferung in Drutex-Originalspezifikation.</p>
   </div>
 </div>
 
@@ -4965,21 +4972,21 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
     <!-- C) SICHERHEITSGLAS — visuelle Glas-Querschnitte zeigen Aufbau & Schutz-Level -->
     <div class="sec-t">Sicherheitsglas</div>
     <div class="glass-grid">
-      <div class="glass-card sel" data-v="kein" onclick="pick(this,'sicherGlas')">
+      <div class="glass-card sel" id="sg-kein" data-v="kein" onclick="pick(this,'sicherGlas')">
         <div class="glass-vis" style="background:transparent;border:none;box-shadow:none;width:130px;height:110px"><img src="img/sicher-float.webp?v=20260529b" alt="Standard Floatglas" loading="lazy" style="width:100%;height:100%;object-fit:contain;display:block"/></div>
         <div class="glass-info">
           <div class="glass-name">Standard-Floatglas</div>
         </div>
         <div class="glass-check"><i class="ms f">check</i></div>
       </div>
-      <div class="glass-card" data-v="esg" onclick="pick(this,'sicherGlas')">
+      <div class="glass-card" id="sg-esg" data-v="esg" onclick="pick(this,'sicherGlas')">
         <div class="glass-vis" style="background:transparent;border:none;box-shadow:none;width:130px;height:110px"><img src="img/sicher-esg.webp?v=20260529b" alt="ESG Einscheibensicherheitsglas" loading="lazy" style="width:100%;height:100%;object-fit:contain;display:block"/></div>
         <div class="glass-info">
           <div class="glass-name">ESG-Sicherheitsglas</div>
         </div>
         <div class="glass-check"><i class="ms f">check</i></div>
       </div>
-      <div class="glass-card" data-v="vsg" onclick="pick(this,'sicherGlas')">
+      <div class="glass-card" id="sg-vsg" data-v="vsg" onclick="pick(this,'sicherGlas')">
         <div class="glass-vis" style="background:transparent;border:none;box-shadow:none;width:130px;height:110px"><img src="img/sicher-vsg.webp?v=20260529b" alt="VSG Verbundsicherheitsglas" loading="lazy" style="width:100%;height:100%;object-fit:contain;display:block"/></div>
         <div class="glass-info">
           <div class="glass-name">VSG-Sicherheitsglas</div>
@@ -5151,8 +5158,8 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       <i class="ms f" style="color:var(--c-primary);font-size:20px;flex-shrink:0">info</i>
       <div>Drutex IGLO-HS: der versenkte Smart-Slide-Flachgriff — wählen Sie die Farbe passend zu Ihrer Ausstattung.</div>
     </div>
-    <button type="button" onclick="openS(10)" class="w-full mt-4 flex items-center justify-center gap-2 font-bold py-3 rounded-full text-white text-sm" style="background:var(--c-primary);font-family:'Plus Jakarta Sans',sans-serif">
-      <i class="ms">arrow_forward</i> Weiter zum Einbruchschutz
+    <button type="button" onclick="openS(11)" class="w-full mt-4 flex items-center justify-center gap-2 font-bold py-3 rounded-full text-white text-sm" style="background:var(--c-primary);font-family:'Plus Jakarta Sans',sans-serif">
+      <i class="ms">arrow_forward</i> Weiter zum Rolladen
     </button>
   </div>
 </div>
@@ -5554,8 +5561,8 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
     <!-- VIEW TOOLBAR — Innen/Außen-Toggle mit Icons (Label entfernt) -->
     <div class="sb-preview-toolbar">
       <div style="display:flex;gap:4px;flex:1;background:rgba(255,255,255,0.06);padding:3px;border-radius:8px;border:1px solid rgba(255,255,255,0.08)">
-        <button id="view-btn-inn" class="view-btn active" style="flex:1;padding:7px 10px;font-size:12.5px;font-weight:700;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;gap:5px" onclick="setPreviewView('inn')" title="Innenansicht — wie das Fenster von innen aussieht"><i class="ms" style="font-size:14px">home</i>Innen</button>
-        <button id="view-btn-aus" class="view-btn" style="flex:1;padding:7px 10px;font-size:12.5px;font-weight:700;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;gap:5px" onclick="setPreviewView('aus')" title="Außenansicht — wie das Fenster von der Straße aussieht"><i class="ms" style="font-size:14px">villa</i>Außen</button>
+        <button id="view-btn-inn" class="view-btn" style="flex:1;padding:7px 10px;font-size:12.5px;font-weight:700;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;gap:5px" onclick="setPreviewView('inn')" title="Innenansicht — wie das Fenster von innen aussieht"><i class="ms" style="font-size:14px">home</i>Innen</button>
+        <button id="view-btn-aus" class="view-btn active" style="flex:1;padding:7px 10px;font-size:12.5px;font-weight:700;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;gap:5px" onclick="setPreviewView('aus')" title="Außenansicht — wie das Fenster von der Straße aussieht"><i class="ms" style="font-size:14px">villa</i>Außen</button>
       </div>
       <button id="window-open-btn" type="button" onclick="toggleFensterOpen()" title="Fenster geöffnet / geschlossen darstellen"
         style="flex-shrink:0;padding:7px 12px;font-size:12px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;border-radius:8px;background:linear-gradient(135deg,#2765c8,#1a4fa0);color:#fff;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(34,94,170,0.30);white-space:nowrap">
@@ -5870,7 +5877,7 @@ const P = {
     kunststoff: { name:'Kunststofffenster', fix:89,   sqm:210, min:99,   bMin:400,  bMax:4000, hMin:400,  hMax:3000, bDef:1000, hDef:1200 },
     balkontuer: { name:'Balkontür',          fix:145,  sqm:215, min:179,  bMin:600,  bMax:2500, hMin:1800, hMax:2400, bDef:900,  hDef:2100 },
     haustuere:  { name:'Haustür',            fix:0,    sqm:0,   min:899,  bMin:800,  bMax:1400, hMin:1800, hMax:2400, bDef:1000, hDef:2100 },
-    hst:        { name:'Schiebetür',          fix:580,  sqm:265, min:1299, bMin:1800, bMax:6500, hMin:1800, hMax:2600, bDef:2400, hDef:2100 },
+    hst:        { name:'Schiebetür',          fix:580,  sqm:265, min:1299, bMin:1800, bMax:4000, hMin:1800, hMax:2300, bDef:2400, hDef:2100 },
   },
   // Fix K6+K7 (21.04.2026): Verglasung in 3 separate Entscheidungen zerlegt
   // (Wärmeschutz / Schallschutz / Sicherheitsglas) + Warme Kante als Zusatz.
@@ -5880,11 +5887,9 @@ const P = {
     '2fach':  { name:'2-fach Wärmeschutz · 24 mm',                             add:0  },
     '3fach':  { name:'3-fach Wärmeschutz · 40 mm · Warme Kante inklusive',     add:0 },
   },
-  schall: { // Schallschutz — optional, zusätzlich zum Ug-Wert
-    'ohne':     { name:'Kein zusätzlicher Schallschutz', add:0   },
-    'rw-33':    { name:'Schallschutz Rw 33 dB',          add:0  },
-    'rw-38':    { name:'Schallschutz Rw 38 dB',          add:0  },
-    'rw-44':    { name:'Schallschutz Rw 44 dB',          add:0 },
+  schall: { // Schallschutz — nur zwei Optionen: Standard (Serienglas) oder Extra-Akustikglas
+    'ohne':     { name:'Standard-Schallschutz', add:0 },
+    'extra':    { name:'Schallschutz Rw 39 dB', add:0 },
   },
   sicherGlas: { // Sicherheitsglas — optional
     'kein':    { name:'Kein Sicherheitsglas',              add:0   },
@@ -6172,6 +6177,12 @@ const P = {
     'ohne':         { name:'Nicht abschließbar', sub:'Standard-Griff', add:0 },
     'innen-aussen': { name:'Abschließbar', sub:'innen + außen · Zylinder beidseitig', add:0 },
   },
+  // PSK-Griff = Fenster-Drehgriff (nur Weiß: Standard + abschließbar). Kundenwunsch 18.06.2026.
+  // Eigene Renders, ersetzt bei PSK den Muschel-/Schiebegriff (der bleibt nur für IGLO-HS).
+  pskGriff: {
+    'weiss':    { name:'PSK-Griff Weiß',              add:0, img:'img/drutex-griffe/psk-griff-weiss.webp' },
+    'weiss-ab': { name:'PSK-Griff Weiß abschließbar', add:0, img:'img/drutex-griffe/psk-griff-weiss-ab.webp' },
+  },
 };
 
 function deliv(qty, prod) {
@@ -6198,6 +6209,7 @@ const S = {
   pskKammer:'iglo5',  // Kunde 21.04.2026: Kammer-System nur für PSK relevant
   hstGriff:'silber',          // Innen = Muschelgriff IGLO-HS
   hstGriffAussen:'weiss',     // Außen = Schiebegriff IGLO-HS
+  pskGriff:'weiss',           // PSK = Fenster-Drehgriff (weiß / weiß abschließbar)
   hstSchloss:'ohne',          // IGLO-HS Schloss-Option
   sicher:'wk1',
   tuerModell: null,
@@ -6477,6 +6489,7 @@ function resetConfigForNextItem() {
   S.hstGriff = 'silber';
   S.hstGriffAussen = 'weiss';
   S.hstSchloss = 'ohne';
+  S.pskGriff = 'weiss';
   S.hstSchwelle = 'standard'; S.hstTeilung = '2-teilig'; S.hstLauf = 'rechts';
   S.balkonSchwelle = 'alu-20';
   S.pskKammer = 'iglo5';  // Kunde 21.04.2026
@@ -6877,10 +6890,10 @@ const ANSCHLAG_SETS = {
     {img:'anschlag-1f/fest', name:"Festverglasung", oeff:["fest"]},
   ],
   '2-fluegel': [
-    {img:'anschlag-2f/dkl-pfosten-dkr', name:"Dreh-Kipp links · Dreh-Kipp rechts · mit Pfosten", oeff:["dk-l", "dk-r"]},
+    {img:'anschlag-2f/dkl-pfosten-dkr', name:"Dreh-Kipp links · Dreh-Kipp rechts · mit Pfosten", oeff:["dk-l", "dk-r"], tag:"Beliebt"},
+    {img:'anschlag-2f/dl-stulp-dkr', name:"Dreh links · Stulp · Dreh-Kipp rechts", oeff:["dreh-l", "dk-r"], stulp:true, tag:"Beliebt"},
     {img:'anschlag-2f/dl-pfosten-dkr', name:"Dreh links · Dreh-Kipp rechts · mit Pfosten", oeff:["dreh-l", "dk-r"]},
     {img:'anschlag-2f/dkl-pfosten-dr', name:"Dreh-Kipp links · Dreh rechts · mit Pfosten", oeff:["dk-l", "dreh-r"]},
-    {img:'anschlag-2f/dl-stulp-dkr', name:"Dreh links · Stulp · Dreh-Kipp rechts", oeff:["dreh-l", "dk-r"], stulp:true},
     {img:'anschlag-2f/dkl-stulp-dr', name:"Dreh-Kipp links · Stulp · Dreh rechts", oeff:["dk-l", "dreh-r"], stulp:true},
     {img:'anschlag-2f/fest-dkr', name:"Fest · Dreh-Kipp rechts · mit Pfosten", oeff:["fest", "dk-r"]},
     {img:'anschlag-2f/dkl-fest', name:"Dreh-Kipp links · Fest · mit Pfosten", oeff:["dk-l", "fest"]},
@@ -7072,22 +7085,83 @@ function verglasungToAnschlag() {
 // ── MASSE-HERO (heller Schritt nach Glas, vor Detail-Ansicht) ────────
 const MH_PRESETS = {
   kunststoff: [[600,600],[800,1000],[1000,1200],[1230,1480],[1500,1500],[2000,1400]],
-  balkontuer: [[800,2000],[900,2100],[1000,2100],[1200,2100],[1500,2200]],
+  balkontuer: [[800,2000],[900,2100],[1000,2100],[1300,2000],[1500,2100],[1700,2100],[2000,2200]],
   haustuere:  [[900,2000],[1000,2100],[1100,2200],[1200,2200],[1400,2300]],
-  hst:        [[2000,2100],[2400,2100],[3000,2200],[3600,2400],[4500,2400],[6000,2400]],
+  hst:        [[2000,2100],[2500,2100],[3000,2200],[3500,2200],[4000,2300]],
 };
+// Balkontür-Maßgrenzen sind flügelabhängig (Kundenvorgabe 18.06.2026):
+//   1-Flügel : B 500–1100 mm, H 1800–2300 mm
+//   2-Flügel : B 1300–2000 mm, H 1800–2300 mm   (gilt auch für die Stulp-Variante)
+// 3-Flügel und Ober-/Unterlicht-Varianten behalten die breiteren Produktwerte aus
+// P.prod.balkontuer. Im Ablauf wird die Flügelaufteilung VOR den Maßen gewählt,
+// daher steht S.fluegel im Maß-Schritt fest. def = gültige Standard-Vorbelegung.
+const BALKON_1FL = { bMin:500,  bMax:1100, hMin:1800, hMax:2300, bDef:900,  hDef:2100 };
+const BALKON_2FL = { bMin:1300, bMax:2000, hMin:1800, hMax:2300, bDef:1600, hDef:2100 };
 function _mhRange(){ const pr = S.prod ? P.prod[S.prod] : null;
-  return { bMin: pr?.bMin||300, bMax: pr?.bMax||4000, hMin: pr?.hMin||300, hMax: pr?.hMax||3000, pr }; }
+  if(S.prod==='balkontuer' && S.fluegel==='1-fluegel'){
+    return { bMin:BALKON_1FL.bMin, bMax:BALKON_1FL.bMax, hMin:BALKON_1FL.hMin, hMax:BALKON_1FL.hMax, bDef:BALKON_1FL.bDef, hDef:BALKON_1FL.hDef, pr };
+  }
+  if(S.prod==='balkontuer' && (S.fluegel==='2-fluegel' || S.fluegel==='stulp')){
+    return { bMin:BALKON_2FL.bMin, bMax:BALKON_2FL.bMax, hMin:BALKON_2FL.hMin, hMax:BALKON_2FL.hMax, bDef:BALKON_2FL.bDef, hDef:BALKON_2FL.hDef, pr };
+  }
+  return { bMin: pr?.bMin||300, bMax: pr?.bMax||4000, hMin: pr?.hMin||300, hMax: pr?.hMax||3000, bDef: pr?.bDef||1000, hDef: pr?.hDef||1200, pr }; }
+// Liefert eine garantiert gültige Vorbelegung: vorhandenen State behalten, falls er
+// im aktiven Bereich liegt — sonst die Start-Vorbelegung. Schreibt das Ergebnis in den
+// State, damit Anzeige und S.bMm/S.hMm immer konsistent (und gültig) sind.
+// Balkontür startet bewusst auf dem MINDESTMASS (Kundenwunsch: immer zuerst aufs Minimum);
+// andere Produkte behalten ihren sinnvollen Standardwert (deren Minimum wäre zu klein).
+function _mhEnsureValidDefault(){
+  const { bMin, bMax, hMin, hMax, bDef, hDef } = _mhRange();
+  const startB = (S.prod==='balkontuer') ? bMin : bDef;
+  const startH = (S.prod==='balkontuer') ? hMin : hDef;
+  const b = (S.bMm && S.bMm>=bMin && S.bMm<=bMax) ? S.bMm : startB;
+  const h = (S.hMm && S.hMm>=hMin && S.hMm<=hMax) ? S.hMm : startH;
+  S.bMm = b; S.hMm = h;
+  return { b, h };
+}
+// Leeres (oder 0) Maßfeld beim Verlassen automatisch auf das Mindestmaß setzen,
+// damit nie ein leeres Feld stehen bleibt. Zu kleine/zu große Werte werden NICHT
+// verändert — die bleiben als rote Sperre sichtbar (harte Sperre bleibt erhalten).
+function mhBlurFill(){
+  const { bMin, hMin } = _mhRange();
+  const ib=document.getElementById('mh-ib'), ih=document.getElementById('mh-ih');
+  if(ib && (ib.value==='' || parseInt(ib.value)<=0)) ib.value=bMin;
+  if(ih && (ih.value==='' || parseInt(ih.value)<=0)) ih.value=hMin;
+  if(typeof mhOnInput==='function') mhOnInput();
+}
+// Prüft die aktuellen Eingaben gegen den aktiven Bereich, zeigt eine konkrete
+// Sperr-Meldung und (de)aktiviert den Weiter-Button. Gibt true zurück wenn gültig.
+function mhValidate(){
+  const { bMin, bMax, hMin, hMax } = _mhRange();
+  const ib=document.getElementById('mh-ib'), ih=document.getElementById('mh-ih');
+  const b=parseInt(ib&&ib.value)||0, h=parseInt(ih&&ih.value)||0;
+  const errEl=document.getElementById('mh-error'), btn=document.getElementById('mh-next-btn');
+  let msg='';
+  if(b>0 && b<bMin) msg='Mindestbreite '+bMin+' mm — in diesem Maß ist keine Konfiguration möglich.';
+  else if(b>bMax) msg='Höchstbreite '+bMax+' mm — in diesem Maß ist keine Konfiguration möglich.';
+  else if(h>0 && h<hMin) msg='Mindesthöhe '+hMin+' mm — in diesem Maß ist keine Konfiguration möglich.';
+  else if(h>hMax) msg='Höchsthöhe '+hMax+' mm — in diesem Maß ist keine Konfiguration möglich.';
+  const valid = (b>=bMin && b<=bMax && h>=hMin && h<=hMax);
+  if(errEl){ if(msg){ errEl.textContent=msg; errEl.style.display=''; } else { errEl.textContent=''; errEl.style.display='none'; } }
+  if(btn){ btn.disabled=!valid; btn.style.opacity=valid?'':'.45'; btn.style.cursor=valid?'':'not-allowed'; }
+  return valid;
+}
 function buildMasseHero(){
-  const { bMin, bMax, hMin, hMax, pr } = _mhRange();
+  const { bMin, bMax, hMin, hMax } = _mhRange();
+  const def = _mhEnsureValidDefault();
   const ib = document.getElementById('mh-ib'), ih = document.getElementById('mh-ih');
-  if(ib){ ib.value = S.bMm || pr?.bDef || 1000; ib.min = bMin; ib.max = bMax; }
-  if(ih){ ih.value = S.hMm || pr?.hDef || 1200; ih.min = hMin; ih.max = hMax; }
+  if(ib){ ib.value = def.b; ib.min = bMin; ib.max = bMax; }
+  if(ih){ ih.value = def.h; ih.min = hMin; ih.max = hMax; }
   const rng = document.getElementById('mh-range');
-  if(rng) rng.textContent = 'Möglicher Bereich: Breite '+bMin+'–'+bMax+' mm, Höhe '+hMin+'–'+hMax+' mm.';
+  if(rng) rng.textContent = 'Mindestmaß: Breite '+bMin+' mm, Höhe '+hMin+' mm · Höchstmaß: Breite '+bMax+' mm, Höhe '+hMax+' mm.';
+  const minb=document.getElementById('mh-minb'); if(minb) minb.textContent='min. '+bMin+' mm';
+  const minh=document.getElementById('mh-minh'); if(minh) minh.textContent='min. '+hMin+' mm';
+  const mnote=document.getElementById('mh-minnote-txt'); if(mnote) mnote.textContent='Mindestmaß: Breite '+bMin+' mm × Höhe '+hMin+' mm — kleiner ist nicht konfigurierbar.';
   const wrap = document.getElementById('mh-quickpick');
-  if(wrap){ const list = MH_PRESETS[S.prod] || MH_PRESETS.kunststoff;
+  if(wrap){ const list = (MH_PRESETS[S.prod] || MH_PRESETS.kunststoff)
+      .filter(function(p){ return p[0]>=bMin && p[0]<=bMax && p[1]>=hMin && p[1]<=hMax; });
     wrap.innerHTML = list.map(function(p){ return '<button type="button" class="szb" onclick="mhSetSz('+p[0]+','+p[1]+')">'+p[0]+'×'+p[1]+'</button>'; }).join(''); }
+  mhValidate();
 }
 function mhOnInput(){
   const { bMin, bMax, hMin, hMax } = _mhRange();
@@ -7095,16 +7169,18 @@ function mhOnInput(){
   const b=parseInt(ib.value)||0, h=parseInt(ih.value)||0;
   ib.style.borderColor=(b===0||(b>=bMin&&b<=bMax))?'':'rgba(118,169,250,0.45)';
   ih.style.borderColor=(h===0||(h>=hMin&&h<=hMax))?'':'rgba(118,169,250,0.45)';
+  mhValidate();
 }
 function mhSetSz(b,h){
   const ib=document.getElementById('mh-ib'), ih=document.getElementById('mh-ih');
   if(ib)ib.value=b; if(ih)ih.value=h; mhOnInput();
 }
 function heroSelectMasse(){
-  const { bMin, bMax, hMin, hMax } = _mhRange();
   const ib=document.getElementById('mh-ib'), ih=document.getElementById('mh-ih');
   let b=parseInt(ib&&ib.value)||0, h=parseInt(ih&&ih.value)||0;
-  if(b<bMin)b=bMin; if(b>bMax)b=bMax; if(h<hMin)h=hMin; if(h>hMax)h=hMax;
+  // Harte Sperre: out-of-range wird NICHT mehr still auf die Grenze geklemmt.
+  // Bei ungültigem Maß bleibt der Kunde im Maß-Schritt, mhValidate zeigt den Grund.
+  if(!mhValidate()) return;
   S.bMm=b; S.hMm=h;
   // in den bestehenden Detail-Maße-Step spiegeln, damit Anfrage/State konsistent sind
   const dib=document.getElementById('ib'), dih=document.getElementById('ih');
@@ -7311,16 +7387,16 @@ let wizIdx=0, wizFarbTab='fa';
 // Schritt-Registry — gilt = für welche Produkte; cond = zusätzliche Bedingung.
 const ALL='kunststoff,balkontuer,haustuere,hst'.split(',');
 const WIZ_ALL=[
-  {key:'profil', main:['hst'], gilt:ALL, title:'Wählen Sie das <span>Profil</span>', sub:'Das Drutex-System für Ihr Produkt.', render:wizRenderProfil, layout:'cards'},
-  {key:'psk', main:['hst'], gilt:['hst'], cond:()=>S.profil==='iglo-psk', title:'Wählen Sie das <span>PSK-System</span>', sub:'Kammer-System Ihrer Parallel-Schiebe-Kipp-Tür.', render:wizRenderPsk, layout:'cards'},
-  {key:'hslauf', main:['hst'], gilt:['hst'], cond:()=>S.profil==='iglo-hs', title:'In welche Richtung läuft die <span>Schiebetür</span>?', sub:'HebeSchiebe links oder rechts — Ansicht von innen.', render:wizRenderHsLauf, layout:'cards'},
-  {key:'fluegel', main:['hst'], gilt:['kunststoff','balkontuer','haustuere','hst'], cond:()=>S.prod!=='hst'||S.profil==='iglo-psk', title:'Wählen Sie die <span>Aufteilung</span>', sub:'Wie viele Flügel und welche Aufteilung?', render:wizRenderFluegel, layout:'cards'},
-  {key:'anschlag', main:true, gilt:ALL, cond:()=>!(S.prod==='hst'&&S.profil==='iglo-hs'), title:'Wählen Sie die <span>Öffnungsart</span>', sub:'In welche Richtung öffnet es?', render:wizRenderAnschlag, layout:'cards'},
-  {key:'glas', main:true, gilt:ALL, title:'Wählen Sie die <span>Verglasung</span>', sub:'2-fach oder 3-fach Wärmeschutz.', render:wizRenderGlas, layout:'cards'},
-  {key:'masse', main:true, gilt:ALL, title:'Geben Sie die <span>Maße</span> an', sub:'Einbaumaß in Millimetern.', render:wizRenderMasse, layout:'cards'},
-  {key:'anzahl', main:true, gilt:ALL, title:'Wählen Sie die <span>Anzahl</span>', sub:'Wie viele Stück dieser Konfiguration benötigen Sie?', render:wizRenderAnzahl, layout:'cards'},
-  {key:'tuer', main:true, gilt:['haustuere'], title:'Wählen Sie das <span>Türmodell</span>', sub:'Ihr Haustür-Design — die Vorschau links zeigt es sofort.', render:wizRenderTuermodell},
-  {key:'farbe', main:true, gilt:ALL, title:'Wählen Sie die <span>Farbe</span>', sub:'Außen- und Innenfarbe — die Vorschau zeigt Ihre Wahl sofort.', render:wizRenderFarbe},
+  {key:'profil', gilt:ALL, title:'Wählen Sie das <span>Profil</span>', sub:'Das Drutex-System für Ihr Produkt.', render:wizRenderProfil, layout:'cards'},
+  {key:'psk', gilt:['hst'], cond:()=>S.profil==='iglo-psk', title:'Wählen Sie das <span>PSK-System</span>', sub:'Kammer-System Ihrer Parallel-Schiebe-Kipp-Tür.', render:wizRenderPsk, layout:'cards'},
+  {key:'hslauf', gilt:['hst'], cond:()=>S.profil==='iglo-hs', title:'In welche Richtung läuft die <span>Schiebetür</span>?', sub:'HebeSchiebe links oder rechts — Ansicht von innen.', render:wizRenderHsLauf, layout:'cards'},
+  {key:'fluegel', gilt:['kunststoff','balkontuer','haustuere','hst'], cond:()=>S.prod!=='hst', title:'Wählen Sie die <span>Aufteilung</span>', sub:'Wie viele Flügel und welche Aufteilung?', render:wizRenderFluegel, layout:'cards'},
+  {key:'anschlag', gilt:ALL, cond:()=>!(S.prod==='hst'&&S.profil==='iglo-hs'), title:'Wählen Sie die <span>Öffnungsart</span>', sub:'In welche Richtung öffnet es?', render:wizRenderAnschlag, layout:'cards'},
+  {key:'glas', gilt:ALL, title:'Wählen Sie die <span>Verglasung</span>', sub:'2-fach oder 3-fach Wärmeschutz.', render:wizRenderGlas, layout:'cards'},
+  {key:'masse', gilt:ALL, title:'Geben Sie die <span>Maße</span> an', sub:'Einbaumaß in Millimetern.', render:wizRenderMasse, layout:'cards'},
+  {key:'anzahl', gilt:ALL, title:'Wählen Sie die <span>Anzahl</span>', sub:'Wie viele Stück dieser Konfiguration benötigen Sie?', render:wizRenderAnzahl, layout:'cards'},
+  {key:'tuer', gilt:['haustuere'], title:'Wählen Sie das <span>Türmodell</span>', sub:'Ihr Haustür-Design — die Vorschau links zeigt es sofort.', render:wizRenderTuermodell},
+  {key:'farbe', gilt:ALL, title:'Wählen Sie die <span>Farbe</span>', sub:'Außen- und Innenfarbe — die Vorschau zeigt Ihre Wahl sofort.', render:wizRenderFarbe},
   {key:'glasdekor', gilt:ALL, title:'Wählen Sie das <span>Glas-Motiv</span>', sub:'Ornamentglas für Sichtschutz — „Klarglas" = normales durchsichtiges Glas.', render:wizRenderGlasdekor},
   {key:'schall', gilt:['kunststoff','balkontuer','hst'], title:'Schall- &amp; <span>Sicherheitsglas</span>', sub:'Optional: zusätzlicher Schallschutz und Sicherheitsglas.', render:wizRenderSchall},
   {key:'griff', gilt:['kunststoff','balkontuer'], title:'Welcher <span>Griff</span>?', sub:'Modell, Farbe und Ausführung Ihres Fenstergriffs.', render:wizRenderGriff},
@@ -7329,9 +7405,9 @@ const WIZ_ALL=[
   {key:'balk', main:['balkontuer'], gilt:['balkontuer'], title:'Wählen Sie die <span>Schwelle</span>', sub:'Boden-Schwelle Ihrer Balkontür.', render:wizRenderBalkSchwelle, layout:'cards'},
   {key:'rolladen', gilt:['kunststoff','balkontuer','hst'], title:'Wählen Sie den <span>Rolladen</span>', sub:'Sonnen- und Sichtschutz — optional.', render:wizRenderRoll},
   {key:'sprossen', gilt:['kunststoff','balkontuer'], title:'Wählen Sie die <span>Sprossen</span>', sub:'Klassische Optik — aufgesetzt oder im Scheibenzwischenraum.', render:wizRenderSpro},
-  {key:'sicherheit', gilt:ALL, title:'Wählen Sie den <span>Einbruchschutz</span>', sub:'Wie sicher soll es sein?', render:wizRenderSicher},
-  {key:'angebot', main:true, gilt:ALL, title:'Ihre <span>Übersicht</span>', sub:'Alles auf einen Blick — dann zur Anfrage.', render:wizRenderAngebot},
-  {key:'kontakt', main:true, gilt:ALL, title:'Ihre <span>Anfrage</span>', sub:'Kontaktdaten eingeben — kostenlos & unverbindlich absenden.', render:wizRenderKontakt, layout:'cards'},
+  {key:'sicherheit', gilt:ALL, cond:()=>S.prod!=='hst', title:'Wählen Sie den <span>Einbruchschutz</span>', sub:'Wie sicher soll es sein?', render:wizRenderSicher},
+  {key:'angebot', gilt:ALL, title:'Ihre <span>Übersicht</span>', sub:'Alles auf einen Blick — dann zur Anfrage.', render:wizRenderAngebot},
+  {key:'kontakt', gilt:ALL, title:'Ihre <span>Anfrage</span>', sub:'Kontaktdaten eingeben — kostenlos & unverbindlich absenden.', render:wizRenderKontakt, layout:'cards'},
 ];
 // Hauptschritt-Filter: Fenster zeigt nur die wichtigen Schritte (Rest ist sinnvoll vorbelegt
 // und geht voll in die Anfrage-Mail). Andere Produkte vorerst unveraendert (folgt separat).
@@ -7365,7 +7441,7 @@ function wizRenderExtras(){
 }
 function wizRebuildSteps(){ const ck=WIZ_STEPS[wizIdx]&&WIZ_STEPS[wizIdx].key; WIZ_STEPS=buildWizSteps(S.prod||'kunststoff'); let ni=WIZ_STEPS.findIndex(function(s){return s.key===ck;}); if(ni<0)ni=Math.min(wizIdx,WIZ_STEPS.length-1); wizIdx=Math.max(0,ni); }
 // Türmodelle (Studio-Bilder, vorhanden) — finale Auswahl/Bilder folgen in Phase 2
-const WIZ_DOORS=['vollglas-inox','florida-lr-inox','montana-2-lr-inox','montana-3-lr-inox','ohio-inox','colorado-inox','alaska-2-inox','alaska-1-inox','montana-1-inox','nebraska-lcr-inox','pennsylvania-1-inox','texas-c-inox','texas-lr-inox'].map(function(k){return {key:k,name:k.replace(/-inox$/,'').replace(/-lr$|-lcr$|-c$/,'').replace(/-/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();}).trim(),img:'img/drutex-tueren/studio/'+k+'.png?v=20260611'};});
+const WIZ_DOORS=['vollglas-inox','florida-lr-inox','montana-2-lr-inox','montana-3-lr-inox','ohio-inox','colorado-inox','alaska-2-inox','alaska-1-inox','montana-1-inox','nebraska-lcr-inox','pennsylvania-1-inox','texas-c-inox','texas-lr-inox'].map(function(k){return {key:k,name:k.replace(/-inox$/,'').replace(/-lr$|-lcr$|-c$/,'').replace(/-/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();}).trim(),img:'img/drutex-tueren/studio/'+k+'.png?v=20260619v'};});
 function wizRenderPsk(){ return '<div class="wiz-cards">'+Object.keys(P.pskKammer).map(function(k){ var o=P.pskKammer[k]; return '<div class="wiz-card'+(k===S.pskKammer?' sel':'')+'" onclick="wizSetPsk(\''+k+'\')"><img src="img/karten/profil/'+k+'.png?v=20260609c" alt="'+o.name+'" loading="lazy"><div class="wiz-cn">'+o.name+'</div><div class="wiz-csub">'+(o.sub||'')+'</div></div>'; }).join('')+'</div>'; }
 function wizSetPsk(v){ wizSet('pskKammer',v); }
 function wizRenderTuermodell(){ return '<div class="wiz-cards">'+WIZ_DOORS.map(function(d){return '<div class="wiz-card'+(d.key===S.tuerModell?' sel':'')+'" onclick="wizSet(\'tuerModell\',\''+d.key+'\')"><div class="wiz-gbox"><img src="'+d.img+'" alt="'+d.name+'" loading="lazy"></div><div class="wiz-cn">'+d.name+'</div></div>';}).join('')+'</div>'; }
@@ -7545,7 +7621,7 @@ function wizStart(){
   if(window._touched){['sproTyp','sproDicke','sproRaster','roll','rollSeite','rollKasten','panzerFarbe','schall','sicher','sicherGlas','glasdekor','griffLocked'].forEach(function(k){window._touched.delete(k);});}
   const prod=S.prod||'kunststoff';
   // Profil-Default je Produkt (zurücksetzen, falls vom Vorgänger-Produkt unpassend)
-  if(prod==='haustuere'){ if(!_profilOkForProd('haustuere'))S.profil='iglo5'; if(!S.oeff1)S.oeff1='dreh-r'; if(!S.tuerOeffnung)S.tuerOeffnung='innen'; }
+  if(prod==='haustuere'){ if(!_profilOkForProd('haustuere'))S.profil='iglo5'; if(!S.oeff1)S.oeff1='dreh-r'; if(!S.tuerOeffnung)S.tuerOeffnung='innen'; if(!S.tuerModell)S.tuerModell='vollglas-inox'; }
   else if(prod==='hst'){ if(!_profilOkForProd('hst'))S.profil='iglo-hs'; if(['2-fluegel','3-fluegel'].indexOf(S.fluegel)<0)S.fluegel='2-fluegel'; if(!S.hstTeilung)S.hstTeilung='2-teilig'; if(typeof previewState!=='undefined')previewState.fluegel=(S.hstTeilung==='3-teilig')?3:2; }
   else { if(!_profilOkForProd(prod))S.profil='iglo5'; }
   if(!S.fluegel)S.fluegel='1-fluegel';
@@ -7597,14 +7673,21 @@ function wizRenderProfil(){
   return '<div style="max-width:620px;margin:0 auto">'+_wizPills(keys.map(function(k){return [k,P.profil[k].name];}),S.profil,'wizPickProfil')+'</div>';
 }
 function wizPickProfil(k){ S.profil=k; if(window._touched)window._touched.add('profil');
-  // Iglo HS hat keinen Aufteilungs-Schritt mehr → immer 2-flügelig/2-teilig festlegen, damit 3D + Angebot stimmen.
-  if(k==='iglo-hs'){ S.fluegel='2-fluegel'; S.hstTeilung='2-teilig'; if(window._touched){window._touched.add('fluegel');window._touched.add('hstTeilung');} if(typeof previewState!=='undefined')previewState.fluegel=2; }
+  // IGLO-HS + PSK haben keinen Aufteilungs-Schritt mehr → immer 2-flügelig/2-teilig festlegen, damit 3D + Angebot stimmen.
+  if(k==='iglo-hs'||k==='iglo-psk'){ S.fluegel='2-fluegel'; S.hstTeilung='2-teilig'; if(window._touched){window._touched.add('fluegel');window._touched.add('hstTeilung');} if(typeof previewState!=='undefined')previewState.fluegel=2; }
   const d2=document.getElementById('d2'); if(d2)d2.textContent=profilHeroName(k); if(typeof mkDone==='function')mkDone(2); if(typeof wizRebuildSteps==='function'){wizRebuildSteps(); wizCrumbs();} wizRenderPanel(); }
 const BALKON_FLUEGEL=[['1-fluegel','1 Flügel','1-fluegel.webp'],['2-fluegel','2 Flügel','stulp.webp']];
 // Balkontür 2-Flügel: Öffnungs-Varianten (Stulp) — DIN-Linien aufs Glas gezeichnet (Pillow), Stulp-Leiste mittig.
 const BALKON_ANSCHLAG_2F=[
   {img:'dl-stulp-dkr', name:'Dreh links · Stulp · Dreh-Kipp rechts', oeff:['dreh-l','dk-r']},
   {img:'dkl-stulp-dr', name:'Dreh-Kipp links · Stulp · Dreh rechts', oeff:['dk-l','dreh-r']},
+];
+// Balkontür 1-Flügel: Öffnungs-Varianten — DIN-Linien aufs Glas gezeichnet (Pillow), links/rechts gespiegelt.
+const BALKON_ANSCHLAG_1F=[
+  {img:'dk-links',   name:'Dreh-Kipp links',  oeff:'dk-l'},
+  {img:'dk-rechts',  name:'Dreh-Kipp rechts', oeff:'dk-r'},
+  {img:'dreh-links', name:'Dreh links',       oeff:'dreh-l'},
+  {img:'dreh-rechts',name:'Dreh rechts',      oeff:'dreh-r'},
 ];
 const HST_FLUEGEL=[['2-teilig','2-teilig · fest + Schiebe','2-teilig.png'],['3-teilig','3-teilig','3-teilig.png']];
 function wizPickHstTeilung(v){ S.hstTeilung=v; S.fluegel=(v==='3-teilig')?'3-fluegel':'2-fluegel'; if(window._touched){window._touched.add('hstTeilung');window._touched.add('fluegel');} if(typeof previewState!=='undefined')previewState.fluegel=(v==='3-teilig')?3:2; _wizPrev(); wizRenderPanel(); }
@@ -7657,18 +7740,13 @@ function wizSetHstLauf(v){ S.hstLauf=v; if(window._touched)window._touched.add('
 function wizSetTuerOeff(o,r){ S.oeff1=o; S.tuerOeffnung=r; if(window._touched){window._touched.add('oeff1');window._touched.add('tuerOeffnung');} _wizPrev(); wizRenderPanel(); }
 // 2-flügelige Haustür: Gehflügel-Seite (Griff) + Öffnungsrichtung. Beide Flügel sind Dreh.
 function wizSetTuerGeh(geh,r){ S.tuerGehfluegel=geh; S.tuerOeffnung=r; S.oeff1='dreh-l'; S.oeff2='dreh-r'; if(window._touched){window._touched.add('tuerGehfluegel');window._touched.add('tuerOeffnung');window._touched.add('oeff1');} if(typeof mkDone==='function')mkDone(4); _wizPrev(); wizRenderPanel(); }
-// DIN-Einzeichnung für 2-flügelige Stulptür: zwei Dreiecke mit Spitze zur Mitte
-// (Bandseite = Außenrand). Durchgezogen = nach innen öffnend, gestrichelt = nach außen.
-// Wird als Overlay über das echte Türbild gelegt (viewBox = Bildmaße 896x1200).
-function tuerDinOverlay(richtung){
-  const dash=(richtung==='aussen')?' stroke-dasharray="36 24"':'';
-  const d='M84 175 L444 600 L84 1035 M812 175 L452 600 L812 1035';
-  return '<svg class="tuer-din" viewBox="0 0 896 1200" preserveAspectRatio="xMidYMid meet">'
-    +'<path d="'+d+'" fill="none" stroke="#ffffff" stroke-width="17" stroke-linejoin="round" stroke-linecap="round"'+dash+'/>'
-    +'<path d="'+d+'" fill="none" stroke="#16335f" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"'+dash+'/>'
-    +'</svg>';
-}
 function wizRenderAnschlag(){
+  if(S.prod==='balkontuer' && S.fluegel==='1-fluegel'){
+    return '<div class="wiz-cards">'+BALKON_ANSCHLAG_1F.map(function(o,idx){
+      var sel=(S.oeff1===o.oeff)?' sel':'';
+      return '<div class="wiz-card'+sel+'" onclick="wizPickBalkonAnschlag1F('+idx+')"><img src="img/karten/balkon-anschlag-1f/'+o.img+'.webp?v=20260618balk" alt="'+o.name+'" loading="lazy" style="width:100%;height:auto;display:block"><div class="wiz-cn">'+o.name+'</div></div>';
+    }).join('')+'</div>';
+  }
   if(S.prod==='balkontuer' && (S.fluegel==='2-fluegel'||S.fluegel==='stulp')){
     return '<div class="wiz-cards">'+BALKON_ANSCHLAG_2F.map(function(o,idx){
       var sel=(S.oeff1===o.oeff[0]&&(S.oeff2||null)===(o.oeff[1]||null))?' sel':'';
@@ -7691,12 +7769,13 @@ function wizRenderAnschlag(){
       '</div>';
     if(S.fluegel==='2-fluegel'){
       const din2=function(geh,richtung){
-        const mir=(geh==='links')?' mir':'';   // links → spiegeln, Griff wandert nach links
+        const mir=(geh==='links')?' mir':'';   // Griff wandert auf die linke Gehflügel-Seite
         const sel=(S.tuerGehfluegel===geh&&(S.tuerOeffnung||'innen')===richtung)?' sel':'';
         const lbl=(richtung==='innen'?'Ansicht von innen · nach innen öffnend':'Ansicht von außen · nach außen öffnend');
-        return '<div class="wiz-card'+sel+'" onclick="wizSetTuerGeh(\''+geh+'\',\''+richtung+'\')"><div class="hac-vis'+mir+'"><img src="img/karten/haus-fluegel/2-fluegel-gf.webp?v=20260617g" alt="'+lbl+'" loading="lazy"><div class="hac-ovl">'+tuerDinOverlay(richtung)+'</div></div><div class="wiz-cn">Dreh links · Stulp · Dreh rechts</div><div class="wiz-csub">'+lbl+'</div></div>';
+        const img='2-fluegel';   // saubere 2-Fluegel-Tuer ohne DIN-X-Einzeichnung (Kundenwunsch 18.06.2026)
+        return '<div class="wiz-card'+sel+'" onclick="wizSetTuerGeh(\''+geh+'\',\''+richtung+'\')"><div class="hac-vis'+mir+'"><img src="img/karten/haus-fluegel/'+img+'.webp?v=20260619c" alt="'+lbl+'" loading="lazy"></div><div class="wiz-cn">Dreh links · Stulp · Dreh rechts</div><div class="wiz-csub">'+lbl+'</div></div>';
       };
-      const hilfe2='<div class="wiz-hint" style="max-width:820px;margin:0 auto 22px;text-align:left;line-height:1.6"><strong>Zwei Flügel – welcher ist der Gehflügel?</strong> Der <strong>Gehflügel</strong> ist der täglich genutzte Flügel mit dem Griff; der zweite (Standflügel) wird oben und unten verriegelt und nur bei Bedarf geöffnet. Wählen Sie die Seite des Griffs und die Öffnungsrichtung. Unsicher? Notieren Sie es in der Anfrage – wir klären es gemeinsam.</div>';
+      const hilfe2='<div class="wiz-hint" style="max-width:820px;margin:0 auto 22px;text-align:left;line-height:1.6"><strong>Zwei Flügel (Stulptür):</strong> Beide Flügel sind drehbar und treffen sich an einem Stulp – der <strong>Gehflügel</strong> trägt den Griff, der zweite (Standflügel) wird oben und unten verriegelt. Wählen Sie Ansicht und Öffnungsrichtung. Unsicher? Notieren Sie es in der Anfrage – wir klären es gemeinsam.</div>';
       return hilfe2+'<div class="wiz-cards">'+din2('rechts','innen')+din2('links','innen')+din2('rechts','aussen')+din2('links','aussen')+'</div>';
     }
     return hilfe+'<div class="wiz-cards">'+din('dreh-l','innen')+din('dreh-r','innen')+din('dreh-l','aussen')+din('dreh-r','aussen')+'</div>';
@@ -7710,17 +7789,23 @@ function wizRenderAnschlag(){
   if(S.anschlagIdx==null){ S.anschlagIdx=set.findIndex(function(o){ return o.oeff&&o.oeff[0]===S.oeff1&&(o.oeff[1]||null)===(S.oeff2||null)&&(o.oeff[2]||null)===(S.oeff3||null); }); }
   return '<div class="wiz-cards">'+set.map(function(o,idx){
     const sel=(idx===S.anschlagIdx)?' sel':'';
-    return '<div class="wiz-card'+sel+'" onclick="wizPickAnschlag('+idx+')"><img src="img/karten/'+o.img+'.png?v=20260608u" alt="'+o.name+'" loading="lazy"><div class="wiz-cn">'+o.name+'</div></div>';
+    return '<div class="wiz-card'+sel+'" onclick="wizPickAnschlag('+idx+')">'+(o.tag?'<span class="wiz-fav">'+o.tag+'</span>':'')+'<img src="img/karten/'+o.img+'.png?v=20260608u" alt="'+o.name+'" loading="lazy"><div class="wiz-cn">'+o.name+'</div></div>';
   }).join('')+'</div>';
 }
 function pskKippSchiebeCard(v){
+  // Frontaler PSK-Render (Higgsfield, 18.06.2026). psk-rechts = Schiebe-Kipp-Flügel + Drehgriff rechts.
+  // psk-links ist das EXAKT gespiegelte psk-rechts (dieselbe Tür, nur gewendete Anschlagseite) — physikalisch
+  // ist eine PSK-Links die Spiegelung der PSK-Rechts. Darum: Overlay einmal für "rechts" definiert
+  // (Kipp-Dreieck Spitze unten + Schiebe-Pfeil über dem rechten Flügel) und für "links" per scaleX(-1)
+  // mitgespiegelt → sitzt passgenau über dem linken Flügel, Pfeil zeigt dann nach rechts.
   var sel=(S.hstLauf===v)?' sel':'';
   var mir=(v==='links');
   var name=(v==='links')?'Kipp-Schiebe Links':'Kipp-Schiebe Rechts';
-  var sub=(v==='links')?'Schiebeflügel links · öffnet nach rechts':'Schiebeflügel rechts · öffnet nach links';
-  var paths='<line x1="865" y1="440" x2="690" y2="440"/><polyline points="740,400 690,440 740,480"/>';
-  var ov='<svg viewBox="0 0 1200 896" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%'+(mir?';transform:scaleX(-1)':'')+'" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#fff" stroke-width="20">'+paths+'</g><g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#225eaa" stroke-width="9">'+paths+'</g></svg>';
-  return '<div class="wiz-card'+sel+'" onclick="wizSetHstLauf(\''+v+'\')"><div style="position:relative;width:100%;line-height:0;border-radius:10px;overflow:hidden"><img src="img/karten/hst-fluegel/2-teilig.webp?v=20260610psk" alt="'+name+'" loading="lazy" style="width:100%;height:auto;aspect-ratio:auto;object-fit:fill;display:block;border-radius:0;padding:0">'+ov+'</div><div class="wiz-cn">'+name+'</div><div class="wiz-csub">'+sub+'</div></div>';
+  var sub=(v==='links')?'Schiebeflügel links · kippt + schiebt nach rechts':'Schiebeflügel rechts · kippt + schiebt nach links';
+  var img=(v==='links')?'psk-links':'psk-rechts';
+  var paths='<path d="M660 175 L772 915 L885 175"/><path d="M850 548 L700 548"/><path d="M745 510 L700 548 L745 586"/>';
+  var ov='<svg viewBox="0 0 1100 1100" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%'+(mir?';transform:scaleX(-1)':'')+'" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#fff" stroke-width="16">'+paths+'</g><g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#225eaa" stroke-width="8">'+paths+'</g></svg>';
+  return '<div class="wiz-card'+sel+'" onclick="wizSetHstLauf(\''+v+'\')"><div style="position:relative;width:100%;line-height:0;border-radius:10px;overflow:hidden"><img src="img/karten/hst-fluegel/'+img+'.webp?v=20260618psk2" alt="'+name+'" loading="lazy" style="width:100%;height:auto;display:block">'+ov+'</div><div class="wiz-cn">'+name+'</div><div class="wiz-csub">'+sub+'</div></div>';
 }
 // Iglo HS — Laufrichtung als große Bild-Karten (HebeSchiebe Links/Rechts, Pfeil-Overlay, Ansicht von innen).
 // Gleiches Muster wie pskKippSchiebeCard: Schiebetür-Bild + Pfeil; links gespiegelt → Pfeil zeigt nach rechts.
@@ -7734,6 +7819,7 @@ function hsLaufCard(v){
   return '<div class="wiz-card'+sel+'" onclick="wizSetHstLauf(\''+v+'\')"><div style="position:relative;width:100%;line-height:0;border-radius:10px;overflow:hidden"><img src="img/karten/hst-fluegel/2-teilig.webp?v=20260610psk" alt="'+name+'" loading="lazy" style="width:100%;height:auto;aspect-ratio:auto;object-fit:fill;display:block;border-radius:0;padding:0">'+ov+'</div><div class="wiz-cn">'+name+'</div><div class="wiz-csub">'+sub+'</div></div>';
 }
 function wizRenderHsLauf(){ return '<div class="wiz-cards">'+hsLaufCard('links')+hsLaufCard('rechts')+'</div>'; }
+function wizPickBalkonAnschlag1F(idx){ var o=BALKON_ANSCHLAG_1F[idx]; if(!o)return; S.oeff1=o.oeff; S.oeff2=null; S.oeff3=null; if(window._touched)window._touched.add('oeff1'); if(typeof buildOeffSash==='function')buildOeffSash(); if(typeof mkDone==='function')mkDone(4); wizRenderPanel(); }
 function wizPickBalkonAnschlag(idx){ var o=BALKON_ANSCHLAG_2F[idx]; if(!o)return; S.fluegel='stulp'; S.oeff1=o.oeff[0]; S.oeff2=o.oeff[1]||null; S.oeff3=null; if(typeof _applyDefaultSashStates==='function')_applyDefaultSashStates('stulp'); if(typeof previewState!=='undefined')previewState.fluegel=2; if(window._touched){window._touched.add('oeff1');window._touched.add('fluegel');} if(typeof buildOeffSash==='function')buildOeffSash(); if(typeof mkDone==='function')mkDone(4); wizRenderPanel(); }
 function wizPickAnschlag(idx){ S.anschlagIdx=idx; const o=(ANSCHLAG_SETS[S.fluegel]||[])[idx]; if(o){ S.oeff1=o.oeff[0]||null; S.oeff2=o.oeff[1]||null; S.oeff3=o.oeff[2]||null; S.oberlichtOeff=o.ol||null; S.unterlichtOeff=o.ul||null; } if(window._touched)window._touched.add('oeff1'); if(typeof buildOeffSash==='function')buildOeffSash(); if(typeof mkDone==='function')mkDone(4); wizRenderPanel(); }
 function wizRenderGlas(){
@@ -7746,19 +7832,44 @@ function wizRenderGlas(){
 function wizPickEarly(key,v){ S[key]=v; if(window._touched)window._touched.add(key); wizRenderPanel(); }
 function wizRenderMasse(){
   if(typeof applyFensterLimits==='function')applyFensterLimits();
-  const pr=S.prod?P.prod[S.prod]:null;
-  const b=S.bMm||(pr&&pr.bDef)||1000, h=S.hMm||(pr&&pr.hDef)||1200;
-  const bMin=(pr&&pr.bMin)||300,bMax=(pr&&pr.bMax)||4000,hMin=(pr&&pr.hMin)||300,hMax=(pr&&pr.hMax)||3000;
-  return '<div class="wiz-mass"><div class="wiz-mass-fields"><div style="flex:1"><label class="fl" for="wiz-mb">Breite (mm)</label><input class="inp" type="number" inputmode="numeric" id="wiz-mb" min="'+bMin+'" max="'+bMax+'" value="'+b+'" oninput="wizMassInput()"></div><div class="wiz-mass-x">×</div><div style="flex:1"><label class="fl" for="wiz-mh">Höhe (mm)</label><input class="inp" type="number" inputmode="numeric" id="wiz-mh" min="'+hMin+'" max="'+hMax+'" value="'+h+'" oninput="wizMassInput()"></div></div><div class="wiz-hint">Einbaumaß = Mauerwerksöffnung. Das Fenster wird ca. 10–20 mm kleiner gefertigt. Bereich: Breite '+bMin+'–'+bMax+' mm, Höhe '+hMin+'–'+hMax+' mm.</div></div>';
+  // Flügelabhängiger Bereich (Balkontür) — gleiche Quelle wie der Hero-Schritt.
+  const { bMin, bMax, hMin, hMax } = _mhRange();
+  const def=_mhEnsureValidDefault(); const b=def.b, h=def.h;
+  return '<div class="wiz-mass"><div class="wiz-mass-fields"><div style="flex:1"><label class="fl" for="wiz-mb">Breite (mm)</label><input class="inp" type="number" inputmode="numeric" id="wiz-mb" min="'+bMin+'" max="'+bMax+'" value="'+b+'" oninput="wizMassInput()" onblur="wizMassBlurFill()"></div><div class="wiz-mass-x">×</div><div style="flex:1"><label class="fl" for="wiz-mh">Höhe (mm)</label><input class="inp" type="number" inputmode="numeric" id="wiz-mh" min="'+hMin+'" max="'+hMax+'" value="'+h+'" oninput="wizMassInput()" onblur="wizMassBlurFill()"></div></div><div class="wiz-hint">Einbaumaß = Mauerwerksöffnung. Das Fenster wird ca. 10–20 mm kleiner gefertigt. Mindestmaß: Breite '+bMin+' mm, Höhe '+hMin+' mm · Höchstmaß: Breite '+bMax+' mm, Höhe '+hMax+' mm.</div><div id="wiz-mass-error" role="alert" style="display:none;margin-top:12px;padding:11px 14px;border-radius:10px;background:#fdecec;border:1px solid #f0c2c2;color:#9a2b2b;font-family:\'Manrope\',sans-serif;font-size:13.5px;font-weight:600;line-height:1.4"></div></div>';
+}
+// Validiert die Wizard-Maße gegen den aktiven (flügelabhängigen) Bereich,
+// zeigt eine Sperr-Meldung und (de)aktiviert den Wizard-Weiter-Button. true = gültig.
+function wizMassValidate(){
+  const { bMin, bMax, hMin, hMax } = _mhRange();
+  const ib=document.getElementById('wiz-mb'), ih=document.getElementById('wiz-mh');
+  const b=parseInt(ib&&ib.value)||0, h=parseInt(ih&&ih.value)||0;
+  const errEl=document.getElementById('wiz-mass-error'), btn=document.getElementById('wiz-nextbtn');
+  let msg='';
+  if(b>0 && b<bMin) msg='Mindestbreite '+bMin+' mm — in diesem Maß ist keine Konfiguration möglich.';
+  else if(b>bMax) msg='Höchstbreite '+bMax+' mm — in diesem Maß ist keine Konfiguration möglich.';
+  else if(h>0 && h<hMin) msg='Mindesthöhe '+hMin+' mm — in diesem Maß ist keine Konfiguration möglich.';
+  else if(h>hMax) msg='Höchsthöhe '+hMax+' mm — in diesem Maß ist keine Konfiguration möglich.';
+  const valid=(b>=bMin && b<=bMax && h>=hMin && h<=hMax);
+  if(errEl){ if(msg){ errEl.textContent=msg; errEl.style.display=''; } else { errEl.textContent=''; errEl.style.display='none'; } }
+  if(btn){ btn.disabled=!valid; btn.style.opacity=valid?'':'.45'; btn.style.cursor=valid?'':'not-allowed'; }
+  return valid;
 }
 function wizMassInput(){
-  const pr=S.prod?P.prod[S.prod]:null;
   const ib=document.getElementById('wiz-mb'), ih=document.getElementById('wiz-mh');
   let b=parseInt(ib&&ib.value)||0, h=parseInt(ih&&ih.value)||0;
-  const bMin=(pr&&pr.bMin)||300,bMax=(pr&&pr.bMax)||4000,hMin=(pr&&pr.hMin)||300,hMax=(pr&&pr.hMax)||3000;
-  if(b>0)S.bMm=Math.max(bMin,Math.min(bMax,b)); if(h>0)S.hMm=Math.max(hMin,Math.min(hMax,h));
+  // Harte Sperre statt stillem Clamp: nur gültige Werte in den State übernehmen.
+  const valid=wizMassValidate();
+  if(valid){ S.bMm=b; S.hMm=h; }
   if(window._touched){window._touched.add('bMm');window._touched.add('hMm');}
-  if(typeof mkDone==='function')mkDone(5);
+  if(typeof mkDone==='function' && valid)mkDone(5);
+}
+// Leeres Wizard-Maßfeld beim Verlassen auf das Mindestmaß setzen (zu klein/groß bleibt gesperrt).
+function wizMassBlurFill(){
+  const { bMin, hMin } = _mhRange();
+  const ib=document.getElementById('wiz-mb'), ih=document.getElementById('wiz-mh');
+  if(ib && (ib.value==='' || parseInt(ib.value)<=0)) ib.value=bMin;
+  if(ih && (ih.value==='' || parseInt(ih.value)<=0)) ih.value=hMin;
+  if(typeof wizMassInput==='function') wizMassInput();
 }
 function wizGo(i){
   wizIdx=Math.max(0,Math.min(WIZ_STEPS.length-1,i));
@@ -7793,6 +7904,10 @@ function wizGo(i){
     } else { img.style.display='none'; if(pw)pw.style.display=''; }
   })();
   wizCrumbs(); wizRenderPanel();
+  // Weiter-Button ist geteilt — beim Schrittwechsel wieder freigeben; der Maß-Schritt
+  // sperrt ihn ggf. selbst über wizMassValidate (harte Maß-Sperre).
+  const _nbtn=document.getElementById('wiz-nextbtn'); if(_nbtn){ _nbtn.disabled=false; _nbtn.style.opacity=''; _nbtn.style.cursor=''; }
+  if(s.key==='masse' && typeof wizMassValidate==='function') wizMassValidate();
   // Ansicht je Schritt: Farbe-Schritt richtet sich nach Außen/Innen-Tab (Außen = Außenseite ohne Griff/Scharniere),
   // Haustür-Türmodell immer Außen. ALLE anderen Schritte: zuletzt gewählte Ansicht BEIBEHALTEN —
   // wer außen Anthrazit gewählt hat, sieht außen Anthrazit weiter (kein verwirrender Sprung auf Innen/Weiß).
@@ -7833,12 +7948,12 @@ function wizCrumbs(){
   }
   c.innerHTML=html;
 }
-function wizCrumbLabel(k){return {profil:'Profil',psk:'PSK',hslauf:'Laufrichtung',tuer:'Türmodell',fluegel:'Aufteilung',anschlag:'Öffnung',glas:'Glas',masse:'Maße',farbe:'Farbe',glasdekor:'Motiv',schall:'Schall',griff:'Griff',griffhaus:'Türgriff',griffhst:'Griff',balk:'Schwelle',hstschwelle:'Schwelle',rolladen:'Rolladen',sprossen:'Sprossen',sicherheit:'Sicherheit',anzahl:'Anzahl',extras:'Mehr anpassen',angebot:'Übersicht',kontakt:'Anfrage'}[k]||k;}
-function wizNext(){ if(WIZ_STEPS[wizIdx].key==='kontakt'){ if(typeof d2submit==='function')d2submit({preventDefault:function(){}}); return; } if(wizIdx>=WIZ_STEPS.length-1){ wizFinish(); return; } wizGo(wizIdx+1); window.scrollTo({top:0,behavior:'auto'}); }
+function wizCrumbLabel(k){return {profil:'Profil',psk:'PSK',hslauf:'Laufrichtung',tuer:'Türmodell',fluegel:'Aufteilung',anschlag:'Öffnung',glas:'Glas',masse:'Maße',farbe:'Farbe',glasdekor:'Motiv',schall:'Schall',griff:'Griff',griffhaus:'Türgriff',griffhst:'Griff',balk:'Schwelle',hstschwelle:'Schwelle',rolladen:'Rolladen',sprossen:'Sprossen',sicherheit:'Sicherheit',anzahl:'Anzahl',angebot:'Übersicht',kontakt:'Anfrage'}[k]||k;}
+function wizNext(){ if(WIZ_STEPS[wizIdx].key==='masse' && typeof wizMassValidate==='function' && !wizMassValidate()) return; if(WIZ_STEPS[wizIdx].key==='kontakt'){ if(typeof d2submit==='function')d2submit({preventDefault:function(){}}); return; } if(wizIdx>=WIZ_STEPS.length-1){ wizFinish(); return; } wizGo(wizIdx+1); window.scrollTo({top:0,behavior:'auto'}); }
 function wizBack(){ if(wizIdx<=0){ wizExitToProd(); return; } wizGo(wizIdx-1); window.scrollTo({top:0,behavior:'auto'}); }
 // Auto-Advance: nach Auswahl einer Karte direkt zum nächsten Schritt — nur bei eindeutigen Einfach-Auswahl-Schritten.
 // Nicht bei: Farbe (Kundenwunsch), Maße/Anzahl (Eingabe), Schall/Griff/Rolladen/Sprossen (Mehrfach-/Detailauswahl).
-const WIZ_AUTONEXT = new Set(['profil','psk','hslauf','fluegel','anschlag','glas','tuer','balk','glasdekor','sicherheit']);
+const WIZ_AUTONEXT = new Set(['profil','psk','hslauf','fluegel','anschlag','glas','balk','glasdekor','sicherheit']);
 document.addEventListener('click', function(e){
   const panel = document.getElementById('wiz-panel');
   if(!panel || !panel.contains(e.target)) return;
@@ -7911,16 +8026,15 @@ function _schallSym(op){
     '<path d="M 46 -31 Q 63 -31 63 0 Q 63 31 46 31" opacity="'+op[3]+'"/></g></svg>';
 }
 var SCHALL_META={
-  'ohne':{name:'Standard · 32 dB',sub:'Ruhige Wohnlagen',op:[1,1,1,1]},
-  'rw-33':{name:'Rw 33 dB',sub:'Wohnstraßen · etwas Verkehr',op:[1,1,1,.16]},
-  'rw-38':{name:'Rw 38 dB',sub:'Hauptstraße · Bahn',op:[1,1,.16,.16]},
-  'rw-44':{name:'Rw 44 dB · Maximum',sub:'Flughafen · Autobahn',op:[1,.16,.16,.16]}
+  'ohne':{name:'Standard',sub:'2-fach 32 dB · 3-fach 35 dB',op:[1,1,1,1]},
+  'extra':{name:'Extra Schallschutz',sub:'Akustikglas · bis ca. 39 dB',op:[1,1,.16,.16]}
 };
 var SICHER_IMG={'kein':'sicher-float','esg':'sicher-esg','vsg':'sicher-vsg'};
 var SICHER_META={'kein':'Standard-Floatglas','esg':'ESG-Sicherheitsglas','vsg':'VSG-Sicherheitsglas'};
 var SICHER_SUB={'kein':'Normalglas · ohne Zusatz','esg':'Bruchsicher · zerfällt in Krümel','vsg':'Splitterbindend · Folie im Glas'};
 function wizRenderSchall(){
-  let h='<div class="wiz-twocol">';
+  let h='<p style="font-size:12.5px;line-height:1.55;color:#6a7a8f;margin:0 0 14px;font-family:\'Manrope\',sans-serif">Schon das Serienglas dämmt Lärm: 2-fach-Glas ca. 32 dB, 3-fach-Glas ca. 35 dB. <b style="color:#14233f">Extra Schallschutz</b> ist ein Spezial-Akustikglas (Rw bis ca. 39 dB) &ndash; sinnvoll an Hauptstra&szlig;en, Bahnlinien oder belebten Lagen.</p>';
+  h+='<div class="wiz-twocol">';
   h+='<div class="wiz-group"><div class="wiz-gt">Schallschutz</div><div class="wiz-optlist">'+Object.keys(P.schall).map(function(k){
     const m=SCHALL_META[k]||{name:P.schall[k].name,sub:'',op:[1,1,1,1]};
     return '<div class="wiz-optrow'+(k===S.schall?' sel':'')+'" onclick="wizSetSchall(\''+k+'\')"><div class="wiz-orsym">'+_schallSym(m.op)+'</div><div class="wiz-ortxt"><div class="wiz-orn">'+m.name+'</div><div class="wiz-ors">'+m.sub+'</div></div></div>';
@@ -7936,25 +8050,24 @@ function wizSetSicherGlas(v){ wizSet('sicherGlas',v); }
 // GRIFF
 // Griff-Karten: pro Modell eine Standard- und (falls verfügbar) eine abschließbare Variante
 function _griffCards(){
-  const list=[];
-  GRIFF_HERO_MODELS.forEach(function(k){
-    const nm=(P.griff[k]&&P.griff[k].name)||k;
-    const desc=(typeof GRIFF_MODEL_DESC!=='undefined'&&GRIFF_MODEL_DESC[k])||'';
-    list.push({griff:k,locked:false,name:nm,sub:(k==='mistral'?'Aluminium · ':'')+desc,badge:(k==='mistral')});
-    // abschließbare Variante nur wenn es ein Schloss-Bild gibt
-    const hasLock=GRIFF_URLS[k]&&Object.keys(GRIFF_URLS[k]).some(function(c){return GRIFF_URLS[k][c]&&GRIFF_URLS[k][c].lock;});
-    if(hasLock) list.push({griff:k,locked:true,name:nm+' abschließbar',sub:'mit Schließzylinder',badge:false});
-  });
-  return list;
+  // Kundenwunsch: feste Karten in Weiß, keine Farbauswahl mehr.
+  // Mistral + Mistral abschließbar überall; PZ beidseitig NUR bei Türen (nicht Fenster).
+  const cards=[
+    {griff:'mistral', locked:false, name:'Mistral',              sub:'Aluminium · klassisch elegant', badge:true},
+    {griff:'mistral', locked:true,  name:'Mistral abschließbar', sub:'mit Schließzylinder',           badge:false},
+  ];
+  if(S.prod!=='kunststoff') cards.push({griff:'pz-beid', locked:false, name:'PZ beidseitig', sub:'Schließzylinder innen + außen', badge:false});
+  return cards;
 }
 function wizRenderGriff(){
-  let h='<div class="wiz-group"><div class="wiz-gt">1. Griff</div><div class="wiz-cards">'+_griffCards().map(function(e){
-    const img=(typeof griffImgUrl==='function')?griffImgUrl(e.griff,S.griffColor,e.locked):'';
+  // Griffe fest in Weiß; PZ beidseitig hat ein eigenes weißes Bild.
+  if(S.prod==='kunststoff' && S.griff==='pz-beid'){ S.griff='mistral'; S.griffLocked=false; } // PZ gibt's bei Fenster nicht
+  let h='<div class="wiz-group"><div class="wiz-gt">Griff</div><div class="wiz-cards">'+_griffCards().map(function(e){
+    const img=(typeof griffImgUrl==='function')?griffImgUrl(e.griff,'weiss',e.locked):'';
     const seld=(e.griff===S.griff && !!S.griffLocked===e.locked)?' sel':'';
     const badge=e.badge?'<div class="wiz-badge">STANDARD</div>':'';
     return '<div class="wiz-card'+seld+'" onclick="wizPickGriff(\''+e.griff+'\','+e.locked+')"><div class="wiz-gbox"><img src="'+img+'" alt="'+e.name+'"></div><div class="wiz-cn">'+e.name+'</div><div class="wiz-csub">'+e.sub+'</div>'+badge+'</div>';
   }).join('')+'</div></div>';
-  h+='<div class="wiz-group"><div class="wiz-gt">2. Farbe</div><div class="wiz-dots">'+Object.keys(P.griffColor).map(function(k){const o=P.griffColor[k];return '<div class="wiz-dot'+(k===S.griffColor?' sel':'')+'" title="'+o.name+'" style="background:'+o.hex+'" onclick="wizSet(\'griffColor\',\''+k+'\')"></div>';}).join('')+'</div></div>';
   return h;
 }
 function wizPickGriff(model,locked){ S.griff=model; S.griffLocked=!!locked; if(window._touched){window._touched.add('griff');window._touched.add('griffLocked');} _wizPrev(); wizRenderPanel(); }
@@ -7980,7 +8093,6 @@ function wizRenderRoll(){
       ? '<div class="wiz-gbox wiz-roll-vis"><img src="'+imgs[k]+'" alt="'+P.roll[k].name+'" loading="lazy">'+(m.ic?'<span class="wiz-roll-ic"><i class="ms">'+m.ic+'</i></span>':'')+'</div>'
       : '<div class="wiz-gbox wiz-gbox-empty"><i class="ms" style="font-size:32px;color:#9aa7b5">block</i><span style="display:block;margin-top:4px">Kein Rolladen</span></div>';
     return '<div class="wiz-card wiz-roll-card'+(sel?' sel':'')+'" onclick="wizSetRoll(\''+k+'\')">'+
-      (sel?'<span class="wiz-roll-check"><i class="ms">check</i></span>':'')+
       vis+
       '<div class="wiz-cn">'+P.roll[k].name+'</div>'+
       (m.sub?'<div class="wiz-csub">'+m.sub+'</div>':'')+
@@ -8134,9 +8246,17 @@ function fluegelToProduct() {
 
 // ── PRODUKT WÄHLEN ───────────────────────────────────
 function pickProd(el) {
+  const _prevProd = S.prod;
   document.querySelectorAll('.pc').forEach(c=>c.classList.remove('sel'));
   el.classList.add('sel');
   S.prod = el.dataset.p;
+  // Schiebetür erzwingt VSG-Sicherheitsglas. Beim Wechsel WEG von der Schiebetür diesen Zwang
+  // wieder auf Standard zurücknehmen (sonst „klebt" VSG am Fenster/Balkon/Haustür). Greift NICHT
+  // bei legitim gewähltem/RC2-erzwungenem VSG anderer Produkte, da nur _prevProd==='hst' triggert.
+  if (_prevProd === 'hst' && S.prod !== 'hst' && S.sicherGlas === 'vsg') {
+    S.sicherGlas = 'kein';
+    if (window._touched) window._touched.delete('sicherGlas');
+  }
   if (window._touched) window._touched.add('prod');
   S.profil = null; S.fluegel = null; S.oeff1 = null; S.oeff2 = null; S.oeff3 = null;
   document.getElementById('d1').textContent = P.prod[S.prod].name;
@@ -8185,10 +8305,11 @@ function pickProd(el) {
   // entsprechende Drutex-Farb-Variante (HAUSTUER_FARB_FRAMES). Die Innenansicht
   // (Klinke + 3 Scharniere) wird vom User selbst über den View-Toggle aktiviert.
   if (S.prod === 'haustuere') {
+    // Haustür startet WEISS (Kundenwunsch 18.06.2026: wir liefern weiße Haustüren) —
+    // MUSS vor setPreviewView/erstem 3D-Load gesetzt werden, sonst baut das iframe
+    // die URL zuerst mit Anthrazit und das spätere postMessage-Weiß verliert das Timing-Rennen.
+    if (!S._faChosen) { S.fa = 'weiss'; S.fi = 'weiss'; }
     setPreviewView('aus');
-    // Haustür IMMER Anthrazit als Start (Kundenwunsch) — kein Flackern
-    // beim Wechsel von anderem Produkt mit anderer Farbe.
-    S.fa = 'anthrazit'; S.fi = 'anthrazit';
   } else if (S.prod === 'balkontuer') {
     setPreviewView('inn');
     // Sinnvolle Standard-Maße für Balkontür (verhindert nicht-tür-ähnliche Vorschau)
@@ -8201,8 +8322,8 @@ function pickProd(el) {
     // Default-Farbe für Fenster-3D-Vorschau: Anthrazit (Kundenwunsch)
     if (!S._faChosen) { S.fa = 'anthrazit'; S.fi = 'anthrazit'; }
   } else if (S.prod === 'hst') {
-    // Default-Farbe für HST-3D-Vorschau: Anthrazit (Kundenwunsch)
-    if (!S._faChosen) { S.fa = 'anthrazit'; S.fi = 'anthrazit'; }
+    // Default-Farbe für HST-3D-Vorschau: Weiß innen + außen (Kundenwunsch 18.06.2026)
+    if (!S._faChosen) { S.fa = 'weiss'; S.fi = 'weiss'; }
   }
   _updateDinToggle();
 
@@ -8324,11 +8445,13 @@ function buildSzButtons() {
   if (!wrap) return;
   const presets = {
     kunststoff: [[600,600],[800,1000],[1000,1200],[1230,1480],[1500,1500],[2000,1400]],
-    balkontuer: [[800,2000],[900,2100],[1000,2100],[1200,2100],[1500,2200]],
+    balkontuer: [[800,2000],[900,2100],[1000,2100],[1300,2000],[1500,2100],[1700,2100],[2000,2200]],
     haustuere:  [[900,2000],[1000,2100],[1100,2200],[1200,2200],[1400,2300]],
-    hst:        [[2000,2100],[2400,2100],[3000,2200],[3600,2400],[4500,2400],[6000,2400]],
+    hst:        [[2000,2100],[2500,2100],[3000,2200],[3500,2200],[4000,2300]],
   };
-  const list = presets[S.prod] || presets.kunststoff;
+  const r = (typeof _mhRange==='function') ? _mhRange() : {bMin:0,bMax:1e9,hMin:0,hMax:1e9};
+  const list = (presets[S.prod] || presets.kunststoff)
+    .filter(([b,h]) => b>=r.bMin && b<=r.bMax && h>=r.hMin && h<=r.hMax);
   wrap.innerHTML = list.map(([b,h]) => `<button class="szb" onclick="setSz(${b},${h})">${b}×${h}</button>`).join('');
 }
 
@@ -8345,12 +8468,31 @@ function buildHstGriff() {
         <div class="olabel" style="font-size:13px;font-weight:700">${v.name}</div>
       </div>
     </div>`;
-  grid.innerHTML = `
-    <div class="col-span-full"><div class="sec-t" style="margin-top:0">Innengriff (Muschelgriff)</div>
-      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
-        ${Object.entries(P.hstGriff).map(([k,v])=>mkCard(k,v,S.hstGriff===k,'pickHstGriff')).join('')}
-      </div>
-    </div>`;
+  if (S.profil === 'iglo-psk') {
+    // PSK: Fenster-Drehgriff, nur Weiß (Standard + abschließbar) — Kundenwunsch 18.06.2026
+    grid.innerHTML = `
+      <div class="col-span-full"><div class="sec-t" style="margin-top:0">PSK-Griff (Weiß)</div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
+          ${Object.entries(P.pskGriff).map(([k,v])=>mkCard(k,v,S.pskGriff===k,'pickPskGriff')).join('')}
+        </div>
+      </div>`;
+    const d9s = document.getElementById('d9s'); if (d9s) d9s.textContent = 'PSK-Drehgriff wählen';
+  } else {
+    grid.innerHTML = `
+      <div class="col-span-full"><div class="sec-t" style="margin-top:0">Innengriff (Muschelgriff)</div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
+          ${Object.entries(P.hstGriff).map(([k,v])=>mkCard(k,v,S.hstGriff===k,'pickHstGriff')).join('')}
+        </div>
+      </div>`;
+  }
+}
+
+function pickPskGriff(el) {
+  S.pskGriff = el.dataset.v;
+  el.parentElement.querySelectorAll('.oc').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+  _updateHstGriffSummary();
+  upSidebar(); drawPrev();
 }
 
 function pickHstGriff(el) {
@@ -8372,12 +8514,16 @@ function pickHstGriffAussen(el) {
   upSidebar(); drawPrev();
 }
 
-// Header-Summary für Step 9s: kombiniert Innen + Außen
+// Header-Summary für Step 9s: PSK = ein Drehgriff, IGLO-HS = Innen + Außen
 function _updateHstGriffSummary() {
-  const innen = P.hstGriff[S.hstGriff]?.name || S.hstGriff;
-  const aussen = P.hstGriffAussen[S.hstGriffAussen]?.name || S.hstGriffAussen;
   const d9s = document.getElementById('d9s');
-  if (d9s) d9s.textContent = `Innen: ${innen} · Außen: ${aussen}`;
+  if (S.profil === 'iglo-psk') {
+    if (d9s) d9s.textContent = P.pskGriff[S.pskGriff]?.name || S.pskGriff;
+  } else {
+    const innen = P.hstGriff[S.hstGriff]?.name || S.hstGriff;
+    const aussen = P.hstGriffAussen[S.hstGriffAussen]?.name || S.hstGriffAussen;
+    if (d9s) d9s.textContent = `Innen: ${innen} · Außen: ${aussen}`;
+  }
   const b = document.getElementById('b9s');
   if (b) b.innerHTML = '<i class="ms f" style="font-size:16px">check</i>';
   // Beide Auswahlen sind getroffen → mkDone
@@ -8477,6 +8623,7 @@ function applyStepVisibility() {
     's9s':   { show: S.prod === 'hst',                 openIf: false }, // HST-Muschelgriff (Kunden-Wunsch 21.04.2026)
     's11':   { show: S.prod !== 'haustuere', resetState: () => { S.roll = 'ohne'; mkDone(11); } }, // Rolladen: bei Fenster/Balkon/HST, nicht Haustür (Kunde 21.04.2026)
     's12':   { show: S.prod !== 'haustuere' && S.prod !== 'hst', resetState: () => { S.sproTyp = 'keine'; mkDone(12); } }, // Sprossen (Kunden-Check: HST auch raus — Schiebetür-Sprossen untypisch)
+    's10':   { show: S.prod !== 'hst', resetState: () => { S.sicher = 'wk1'; mkDone(10); if (window._touched) window._touched.delete('sicher'); } }, // Einbruchschutz: bei Schiebetür entfernt (Kundenwunsch 18.06.2026) — gibt es dort nicht
   };
   Object.entries(rules).forEach(([id, rule]) => {
     const el = document.getElementById(id);
@@ -8631,6 +8778,8 @@ function pick(el, key) {
     if (S.prod === 'hst') {
       updateHstProfilBlocks();
       applyStepVisibility();
+      // Griff-Schritt (s9s) an Profil anpassen: PSK = Drehgriff (weiß/abschließbar), IGLO-HS = Muschelgriff
+      if (typeof buildHstGriff === 'function') buildHstGriff();
       // Schritt 4 (Schiebetür-Spezifika) immer mit aktuellem Profil-Kontext neu aufbauen
       // (PSK: ohne Laufrichtung · Slide: mit · IGLO-HS: nur Schwelle)
       if (typeof buildOeffSash === 'function') buildOeffSash();
@@ -8887,6 +9036,26 @@ function enforceGlasRule() {
     card2.style.pointerEvents = '';
     card2.classList.remove('oc-disabled');
     if (hint) hint.classList.add('hidden');
+  }
+  // Sicherheitsglas: Bei Schiebetür (PSK + HS) NUR VSG — alle anderen Glasarten raus (Kundenwunsch 18.06.2026)
+  const sgKein = document.getElementById('sg-kein');
+  const sgEsg  = document.getElementById('sg-esg');
+  const sgVsg  = document.getElementById('sg-vsg');
+  if (sgKein && sgEsg && sgVsg) {
+    if (S.prod === 'hst') {
+      sgKein.style.display = 'none'; sgEsg.style.display = 'none';
+      sgKein.classList.remove('sel'); sgEsg.classList.remove('sel');
+      sgVsg.style.display = ''; sgVsg.classList.add('sel');
+      S.sicherGlas = 'vsg';
+      if (window._touched) window._touched.add('sicherGlas');  // VSG in Zusammenfassung + Bestellung führen
+    } else {
+      // Carryover-Reset (VSG-Zwang verlassen) passiert gezielt in pickProd beim Wechsel WEG von hst —
+      // hier nur Karten zeigen und sel-Status an den aktuellen Wert angleichen.
+      sgKein.style.display = ''; sgEsg.style.display = ''; sgVsg.style.display = '';
+      [['kein', sgKein], ['esg', sgEsg], ['vsg', sgVsg]].forEach(function (p) {
+        p[1].classList.toggle('sel', S.sicherGlas === p[0]);
+      });
+    }
   }
 }
 
@@ -9173,7 +9342,7 @@ function drGW(filename) {
 // Mapping pro Modell × Farbe × Locked — nur verifizierte Drutex-Dateien
 const GRIFF_URLS = {
   mistral: {
-    weiss:    { std:drGW('klamka-mistral-35mm-k-9016.png'), lock:drGW('klamka-mistralklucz-35mm-k-9016.png') },
+    weiss:    { std:drGW('klamka-mistral-35mm-k-9016.png'), lock:drGW('klamka-mistral-abschliessbar-weiss.png') },
     schwarz:  { std:drGW('klamka-mistral-35mm-k-9005.png'), lock:drGW('klamka-mistralklucz-35mm-k-9005.png') },
     anthrazit:{ std:drGW('klamka-mistral-35mm-k-7016.png'), lock:drGW('klamka-mistralklucz-35mm-k-7016.png') },
     silber:   { std:drGW('klamka-mistral-35mm-f1.png'),     lock:drGW('klamka-mistralklucz-35mm-k-9001.png') },
@@ -9194,7 +9363,8 @@ const GRIFF_URLS = {
     braun:    { std:drGW('klamki_dublin/klamka_okienna_dublin_-_brazowa_ral8019.png'),  lock:null },
   },
   'pz-beid': {
-    weiss:    { std:drGW('klamka-nevada-klucz-35mm-k-9016.png'), lock:drGW('klamka-nevada-klucz-35mm-k-9016.png') },
+    // eigenes PZ-beidseitig-Bild (weiß), erzeugt passend zum Mistral-Look
+    weiss:    { std:drGW('klamka-pz-beidseitig-weiss.png'), lock:drGW('klamka-pz-beidseitig-weiss.png') },
     schwarz:  { std:drGW('klamka-nevada-klucz-35mm-k-9005.png'), lock:drGW('klamka-nevada-klucz-35mm-k-9005.png') },
     anthrazit:{ std:drGW('klamka-nevada-klucz-35mm-k-7016.png'), lock:drGW('klamka-nevada-klucz-35mm-k-7016.png') },
     cremeweiss:{std:drGW('klamka-nevada-klucz-35mm-k-9001.png'), lock:drGW('klamka-nevada-klucz-35mm-k-9001.png') },
@@ -9276,6 +9446,7 @@ function pickGriffLock(locked) {
   refreshDescriptions();
 }
 function hstGriffSummary() {
+  if (S.profil === 'iglo-psk') return P.pskGriff[S.pskGriff]?.name || S.pskGriff;
   const inn = P.hstGriff[S.hstGriff]?.name || S.hstGriff;
   const aus = P.hstGriffAussen[S.hstGriffAussen]?.name || S.hstGriffAussen;
   const sch = (S.hstSchloss && S.hstSchloss !== 'ohne') ? (' · ' + (P.hstSchloss[S.hstSchloss]?.name || S.hstSchloss)) : '';
@@ -11135,7 +11306,8 @@ function calcUnit() {
     if (P.tuerGriffInnen[S.tuerGriffInnen])   price += P.tuerGriffInnen[S.tuerGriffInnen].add;
     if (P.tuerGriffAussen[S.tuerGriffAussen]) price += P.tuerGriffAussen[S.tuerGriffAussen].add;
   } else if (S.prod === 'hst') {
-    if (S.hstGriff && P.hstGriff[S.hstGriff]) price += P.hstGriff[S.hstGriff].add;
+    if (S.profil === 'iglo-psk') { if (S.pskGriff && P.pskGriff[S.pskGriff]) price += P.pskGriff[S.pskGriff].add; }
+    else if (S.hstGriff && P.hstGriff[S.hstGriff]) price += P.hstGriff[S.hstGriff].add;
   } else {
     if (S.griff && P.griff[S.griff]) price += P.griff[S.griff].add;
   }
@@ -11323,9 +11495,13 @@ function upSidebar() {
     if(S.tuerGriffInnen  && isTouched('tuerGriffInnen'))  rowsList.push(['Griff innen',  P.tuerGriffInnen?.[S.tuerGriffInnen]?.name||S.tuerGriffInnen]);
     if(S.tuerGriffAussen && isTouched('tuerGriffAussen')) rowsList.push(['Griff außen',  P.tuerGriffAussen?.[S.tuerGriffAussen]?.name||S.tuerGriffAussen]);
   } else if(S.prod==='hst') {
-    if(S.hstGriff) rowsList.push(['Griff innen', P.hstGriff?.[S.hstGriff]?.name||S.hstGriff]);
-    if(S.hstGriffAussen) rowsList.push(['Griff außen', P.hstGriffAussen?.[S.hstGriffAussen]?.name||S.hstGriffAussen]);
-    if(S.hstSchloss && S.hstSchloss!=='ohne') rowsList.push(['Schloss', P.hstSchloss?.[S.hstSchloss]?.name||S.hstSchloss]);
+    if(S.profil==='iglo-psk') {
+      rowsList.push(['Griff', P.pskGriff?.[S.pskGriff]?.name||S.pskGriff]);
+    } else {
+      if(S.hstGriff) rowsList.push(['Griff innen', P.hstGriff?.[S.hstGriff]?.name||S.hstGriff]);
+      if(S.hstGriffAussen) rowsList.push(['Griff außen', P.hstGriffAussen?.[S.hstGriffAussen]?.name||S.hstGriffAussen]);
+      if(S.hstSchloss && S.hstSchloss!=='ohne') rowsList.push(['Schloss', P.hstSchloss?.[S.hstSchloss]?.name||S.hstSchloss]);
+    }
   } else if(S.griff && isTouched('griff')) {
     rowsList.push(['Griff', P.griff?.[S.griff]?.name||S.griff]);
   }
@@ -11427,12 +11603,15 @@ function upFinalSum(rows,tot) {
     // Kunde 21.04.2026: Griff produkt-spezifisch anzeigen
     ...(S.prod !== 'haustuere' && S.prod !== 'hst' ? [['Griff', S.griff?P.griff[S.griff]?.name||S.griff:'–']] : []),
     ...(S.prod === 'haustuere' ? [['Türgriff Innen', P.tuerGriffInnen[S.tuerGriffInnen]?.name||S.tuerGriffInnen], ['Türgriff Außen', P.tuerGriffAussen[S.tuerGriffAussen]?.name||S.tuerGriffAussen]] : []),
-    ...(S.prod === 'hst'       ? [
+    ...(S.prod === 'hst' && S.profil === 'iglo-psk' ? [
+      ['Griff', P.pskGriff[S.pskGriff]?.name||S.pskGriff],
+    ] : []),
+    ...(S.prod === 'hst' && S.profil !== 'iglo-psk' ? [
       ['Griff innen', S.hstGriff?P.hstGriff[S.hstGriff]?.name||S.hstGriff:'–'],
       ['Griff außen', S.hstGriffAussen?P.hstGriffAussen[S.hstGriffAussen]?.name||S.hstGriffAussen:'–'],
       ...(S.hstSchloss && S.hstSchloss!=='ohne' ? [['Schloss', P.hstSchloss[S.hstSchloss]?.name||S.hstSchloss]] : [])
     ] : []),
-    ['Einbruchschutz', S.sicher?P.sicher[S.sicher]?.name||S.sicher:'–'],
+    ...(S.prod !== 'hst' ? [['Einbruchschutz', S.sicher?P.sicher[S.sicher]?.name||S.sicher:'–']] : []),
     ...(S.prod !== 'haustuere' && S.prod !== 'hst' ? [
       ['Rolladen', S.roll==='ohne' ? 'Kein Rolladen' : (P.roll[S.roll]?.name||S.roll) + ' · Kasten '+S.rollKasten+' mm'],
     ] : []),
@@ -12154,7 +12333,7 @@ const GLASS_ZONE = {
 };
 
 let prevOpen = false;
-let previewView = 'inn';
+let previewView = 'aus';
 
 const FLUEGEL_IMGS = {
   '1-fluegel': { aus: 'img/fenster_aussen_v3.webp', inn: 'img/fenster_standard_v3.webp' },
@@ -12980,9 +13159,10 @@ function _renderHst3d() {
   const isWood = HAUS3D_WOOD_KEYS.has(_ck);
   // HST: Seite aus der Laufrichtung (hstLauf) ableiten — links→l, rechts→r; Fallback auf oeff1.
   const _side  = (S.hstLauf === 'links') ? 'l' : (S.hstLauf === 'rechts') ? 'r' : ((S.oeff1 === 'dreh-l' || S.oeff1 === 'dk-l') ? 'l' : 'r');
-  // 3D-Innenansicht zeigt den Muschel-Innengriff → dessen Farbe (Innengriff-Wahl) steuert die 3D-Griff-Farbe
+  // 3D-Innenansicht zeigt den Muschel-Innengriff → dessen Farbe (Innengriff-Wahl) steuert die 3D-Griff-Farbe.
+  // PSK hat keinen Muschelgriff (sondern weißen Drehgriff) → immer weiß an die 3D-Vorschau.
   const _gripMap = { weiss:'weiss', braun:'braun', silber:'silber' };
-  const _grip  = _gripMap[S.hstGriff] || 'weiss';
+  const _grip  = (S.profil === 'iglo-psk') ? 'weiss' : (_gripMap[S.hstGriff] || 'weiss');
 
   wrap.style.display = 'block';
 
@@ -13052,7 +13232,7 @@ function _renderBalkontuer3d() {
     const _roll = S.roll || 'ohne';
     const _kasten = S.rollKasten || '175';
     const _rseite = S.rollSeite || 'rechts';
-    frame.src = `/${_src3d}?embed&v=20260614w2&bg=light&color=${_ck}&side=${_side}&layout=${_layout}&roll=${_roll}&rollKasten=${_kasten}&rollSeite=${_rseite}`;
+    frame.src = `/${_src3d}?embed&v=20260618bt&bg=light&color=${_ck}&side=${_side}&layout=${_layout}&roll=${_roll}&rollKasten=${_kasten}&rollSeite=${_rseite}&view=${_view}`;
     frame.onload = () => {
       const cw = frame.contentWindow;
       if (!cw) return;
@@ -13211,7 +13391,7 @@ function _renderHaustuer3d(previewView) {
   if (!haus3dWrap || !haus3dFrame) return;
   _show3dHint(true);
 
-  const _mdl   = S.tuerModell || 'florida-lr-inox';
+  const _mdl   = S.tuerModell || 'vollglas-inox';
   const _side  = (S.oeff1 === 'dreh-l') ? 'r' : 'l';  // DIN-Fix 30.05: DIN-Rechts (Standard, Griff links) = Katalog-Hand side=l; DIN-Links = side=r
   const _seitenteil = (S.fluegel === 'seitenteil-l') ? 'l' : (S.fluegel === 'seitenteil-r') ? 'r' : (S.fluegel === 'seitenteil-2') ? '2' : 'none';
   const _view  = (previewView === 'inn') ? 'innen' : 'aussen';
@@ -13351,7 +13531,7 @@ function drawPrev() {
   if (haus3dWrap) {
     if (isHausAussen) {
       // Außen-Ansicht: 3D-Iframe laden und anzeigen
-      const _mdl  = S.tuerModell || 'florida-lr-inox';
+      const _mdl  = S.tuerModell || 'vollglas-inox';
       const _side = (S.oeff1 === 'dreh-l') ? 'r' : 'l';  // DIN-Fix 30.05: siehe oben
       const _isLoaded = haus3dFrame.src.includes('haustuer-3d');
       if (!_isLoaded) {
@@ -13536,7 +13716,7 @@ async function submitForm(e) {
   const _kfName = (S.panzerFarbe && PANZER_FARBEN[S.panzerFarbe]) ? PANZER_FARBEN[S.panzerFarbe].name : '–';
   const rollName = (S.prod!=='haustuere' && S.prod!=='hst' && S.roll!=='ohne')
     ? `${P.roll[S.roll]?.name||S.roll} · Kasten ${S.rollKasten} mm · Panzerfarbe ${_kfName}` : 'Kein Rolladen';
-  const sicherName = P.sicher[S.sicher]?.name||S.sicher;
+  const sicherName = S.prod==='hst' ? '–' : (P.sicher[S.sicher]?.name||S.sicher); // Schiebetür ohne Einbruchschutz-Klasse (Kundenwunsch 18.06.2026)
   const sproStr    = S.sproTyp==='keine'?'Ohne':S.sproTyp+' '+S.sproDicke+' mm · '+((P.sproRaster[S.sproRaster]||{}).name||'');
   // Zusätzliche Felder für vollständige Bestellung
   const schallName  = S.schall && S.schall !== 'ohne' ? (P.schall[S.schall]?.name||S.schall) : 'Kein Zusatz';
@@ -13566,6 +13746,7 @@ async function submitForm(e) {
     dichtung:    fdName,
     sprossen:    sproStr,
     griff:       S.prod === 'haustuere' ? ('Innen: ' + (P.tuerGriffInnen[S.tuerGriffInnen]?.name || S.tuerGriffInnen) + ' / Außen: ' + (P.tuerGriffAussen[S.tuerGriffAussen]?.name || S.tuerGriffAussen))
+                 : (S.prod === 'hst' && S.profil === 'iglo-psk') ? (P.pskGriff[S.pskGriff]?.name || S.pskGriff)
                  : S.prod === 'hst'       ? (P.hstGriff[S.hstGriff]?.name || S.hstGriff)
                  : griffName,
     shutter:     rollName,
@@ -15223,18 +15404,15 @@ async function submitSkizze(e) {
 <!-- WhatsApp-Floating-Button (Mobile Quick-Conversion) -->
 <style>
   /* Mobile: links unten, damit Chatbot-Button rechts unten Platz hat. Desktop: ausgeblendet (Topbar hat WhatsApp). */
-  .df-wa-float { position: fixed; bottom: 22px; left: 22px; z-index: 90; display: flex; align-items: center; gap: 0; background: #25D366; color: #fff; border-radius: 999px; padding: 14px 18px 14px 14px; box-shadow: 0 8px 28px rgba(37,211,102,0.45), 0 4px 14px rgba(0,0,0,0.25); text-decoration: none; font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 14px; letter-spacing: 0.01em; transition: transform 0.2s, box-shadow 0.2s; }
-  .df-wa-float:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 12px 36px rgba(37,211,102,0.55), 0 6px 18px rgba(0,0,0,0.3); }
-  .df-wa-float svg { flex-shrink: 0; width: 24px; height: 24px; margin-right: 8px; }
-  .df-wa-float .df-wa-label { white-space: nowrap; }
-  @media (max-width: 640px) { .df-wa-float { padding: 12px 16px 12px 12px; bottom: 16px; left: 16px; font-size: 13px; } .df-wa-float svg { width: 22px; height: 22px; } }
-  @media (min-width: 768px) { .df-wa-float { display: none; } }
-  @media (prefers-reduced-motion: reduce) { .df-wa-float { transition: none; } }
+    .df-wa-float{position:fixed;bottom:24px;right:24px;z-index:90;display:flex;align-items:center;justify-content:center;width:60px;height:60px;background:#25D366;color:#fff;border-radius:50%;box-shadow:0 8px 28px rgba(37,211,102,.45),0 4px 14px rgba(0,0,0,.25);text-decoration:none;transition:transform .2s,box-shadow .2s}
+  .df-wa-float:hover{transform:translateY(-2px) scale(1.06);box-shadow:0 12px 36px rgba(37,211,102,.55),0 6px 18px rgba(0,0,0,.3)}
+  .df-wa-float svg{width:32px;height:32px;margin:0}
+  .df-wa-float .df-wa-label{display:none}
+  @media (max-width:640px){.df-wa-float{width:56px;height:56px;bottom:18px;right:18px}.df-wa-float svg{width:30px;height:30px}}
+  @media (prefers-reduced-motion:reduce){.df-wa-float{transition:none}}
 </style>
-<a class="df-wa-float" href="https://wa.me/491717263776" target="_blank" rel="noopener" aria-label="WhatsApp-Anfrage an Türen und Fensterhandel Christ">
-  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.149-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0 0 20.464 3.488"/></svg>
-  <span class="df-wa-label">WhatsApp</span>
-</a>
+<!-- WhatsApp-Float-Button auf Kundenwunsch entfernt -->
+
 
 
 <!-- Cloudflare Web Analytics (cookieless, DSGVO-konform) --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "2cf67e72370843bc8998180837703d02"}'></script><!-- End Cloudflare Web Analytics -->
@@ -15475,7 +15653,7 @@ function d2Hst(){ const w=document.getElementById('d2-hst3d-wrap'),f=document.ge
   const pl={type:'update',color:wood?null:ck,wood:wood?ck:null,glass:S.glasdekor||'klar',side,view:vk,hstGriff:grip};
   if(!f.src.includes('hst-3d')||cur!==sys){ f.src=exp; f.onload=()=>{const cw=f.contentWindow;if(!cw)return;cw.dispatchEvent(new Event('resize'));cw.postMessage(pl,'*');}; } else f.contentWindow&&f.contentWindow.postMessage(pl,'*'); }
 function d2Haus(){ const w=document.getElementById('d2-haus3d-wrap'),f=document.getElementById('d2-haus3d-frame'); if(!w||!f)return; showHint(true);
-  const mdl=S.tuerModell||'florida-lr-inox'; const side=(S.oeff1==='dreh-l')?'r':'l'; const view=(pv==='inn')?'innen':'aussen'; const farb=(view==='innen')?(S.fi||S.fa):(S.fa||S.fi); const ck=HAUS3D_COLOR_MAP[farb]||'anthrazitgrau'; const wood=HAUS3D_WOOD_KEYS.has(ck);
+  const mdl=S.tuerModell||'vollglas-inox'; const side=(S.oeff1==='dreh-l')?'r':'l'; const view=(pv==='inn')?'innen':'aussen'; const farb=(view==='innen')?(S.fi||S.fa):(S.fa||S.fi); const ck=HAUS3D_COLOR_MAP[farb]||'anthrazitgrau'; const wood=HAUS3D_WOOD_KEYS.has(ck);
   const pl={type:'update',model:mdl,side,view,color:wood?null:ck,wood:wood?ck:null,glass:S.glasdekor||'klar'};
   if(!f.src.includes('haustuer-3d')){ f.src=`haustuer-3d.html?embed&bg=light&v=20260609c&model=${mdl}&side=${side}&view=${view}&${wood?'wood':'color'}=${ck}`; f.onload=()=>{const cw=f.contentWindow;if(!cw)return;cw.postMessage(pl,'*');}; } else f.contentWindow&&f.contentWindow.postMessage(pl,'*'); w.style.display='block'; }
 function render3D(){ ['d2-fenster3d-wrap','d2-balkon3d-wrap','d2-hst3d-wrap','d2-haus3d-wrap'].forEach(i=>{const e=document.getElementById(i);if(e)e.style.display='none';});
@@ -15515,7 +15693,7 @@ const SECTIONS=[
  {id:'masse',t:'Maße (Einbaumaß)',gilt:['kunststoff','balkontuer','haustuere','hst'],req:true,sum:()=>`${S.bMm} × ${S.hMm} mm`,body:()=>{const pr=P.prod[S.prod]||{bMin:400,bMax:4000,hMin:400,hMax:3000};return hint(`Innenmaß der Maueröffnung. Breite ${pr.bMin}–${pr.bMax} mm · Höhe ${pr.hMin}–${pr.hMax} mm.`)+`<div class="d2fields"><div><label>Breite</label><div class="d2step"><button type="button" onclick="D2.step('bMm',-50)" aria-label="schmaler">−</button><input type="number" value="${S.bMm}" onchange="D2.num('bMm',this.value)"/><span class="d2unit">mm</span><button type="button" onclick="D2.step('bMm',50)" aria-label="breiter">+</button></div></div><div><label>Höhe</label><div class="d2step"><button type="button" onclick="D2.step('hMm',-50)" aria-label="niedriger">−</button><input type="number" value="${S.hMm}" onchange="D2.num('hMm',this.value)"/><span class="d2unit">mm</span><button type="button" onclick="D2.step('hMm',50)" aria-label="höher">+</button></div></div></div>`;}},
  {id:'anzahl',t:'Anzahl',gilt:['kunststoff','balkontuer','haustuere','hst'],sum:()=>`${S.qty} Stück`,body:()=>`<div class="d2step"><button type="button" onclick="D2.step('qty',-1)" aria-label="weniger">−</button><input type="number" value="${S.qty}" onchange="D2.num('qty',this.value)"/><span class="d2unit">Stück</span><button type="button" onclick="D2.step('qty',1)" aria-label="mehr">+</button></div>`},
  {id:'glas',t:'Verglasung',gilt:['kunststoff','balkontuer','haustuere','hst'],sum:()=>curName(P.glas,S.glas),body:()=>{const big=(S.bMm/1000)*(S.hMm/1000)/Math.max(1,sashCount())>2.5;const warn=(S.glas==='3fach'&&big)?`<div class="d2warn">${IWARN}<span>Bei großen Flügeln (&gt; 2,5 m²) ist 3-fach schwer — wir prüfen die Statik im Angebot.</span></div>`:'';return hint('3-fach enthält Warme Kante. Standard ist 2-fach.')+`<div class="d2img2">`+Object.keys(P.glas).map(k=>`<button type="button" class="d2imgo ${S.glas===k?'sel':''}" aria-pressed="${S.glas===k}" onclick="D2.set('glas','${k}')"><img src="img/glas-${k==='2fach'?'2fach':'3fach'}.png" alt="${P.glas[k].name}" loading="lazy"/><div class="cap">${k==='2fach'?'2-fach':'3-fach'}<small>${k==='2fach'?'24 mm Wärmeschutz':'40 mm · Warme Kante'}</small></div></button>`).join('')+`</div>`+warn;}},
- {id:'schall',t:'Schall & Sicherheitsglas',gilt:['kunststoff','balkontuer','hst'],sum:()=>(S.schall==='ohne'&&S.sicherGlas==='kein')?'Standard':[S.schall!=='ohne'?P.schall[S.schall].name:'',S.sicherGlas!=='kein'?P.sicherGlas[S.sicherGlas].name:''].filter(Boolean).join(' · '),body:()=>`<div class="d2sub">Schallschutz</div>`+pills('schall',Object.keys(P.schall).map(k=>[k,P.schall[k].name]))+`<div class="d2sub">Sicherheitsglas</div>`+tiles('sicherGlas',[{key:'kein',name:'Standard (Float)',img:'img/sicher-float.webp'},{key:'esg',name:'ESG',img:'img/sicher-esg.webp'},{key:'vsg',name:'VSG (Verbund)',img:'img/sicher-vsg.webp'}])},
+ {id:'schall',t:'Schall & Sicherheitsglas',gilt:['kunststoff','balkontuer','hst'],sum:()=>(S.schall==='ohne'&&S.sicherGlas==='kein')?'Standard':[S.schall!=='ohne'?P.schall[S.schall].name:'',S.sicherGlas!=='kein'?P.sicherGlas[S.sicherGlas].name:''].filter(Boolean).join(' · '),body:()=>`<div class="d2sub">Schallschutz</div>`+hint('Schon das Serienglas dämmt Lärm: 2-fach-Glas ca. 32 dB, 3-fach-Glas ca. 35 dB. Extra Schallschutz ist ein Spezial-Akustikglas (Rw bis ca. 39 dB) — sinnvoll an Hauptstraßen, Bahnlinien oder belebten Lagen.')+pills('schall',[['ohne','Standard','2-fach 32 dB · 3-fach 35 dB'],['extra','Extra Schallschutz','Akustikglas · bis ca. 39 dB']])+`<div class="d2sub">Sicherheitsglas</div>`+tiles('sicherGlas',[{key:'kein',name:'Standard (Float)',img:'img/sicher-float.webp'},{key:'esg',name:'ESG',img:'img/sicher-esg.webp'},{key:'vsg',name:'VSG (Verbund)',img:'img/sicher-vsg.webp'}])},
  {id:'glasdekor',t:'Glasdekor',gilt:['kunststoff','balkontuer','haustuere','hst'],sum:()=>curName(P.glasdekor,S.glasdekor),body:()=>hint('Ornamentglas für Sichtschutz (z. B. Bad).')+tiles('glasdekor',Object.keys(GD_IMG).map(k=>({key:k,name:P.glasdekor[k].name,img:'img/glasdekor/'+GD_IMG[k]+'.webp'})))},
  {id:'griff',t:'Fenstergriff',gilt:['kunststoff','balkontuer'],sum:()=>`${curName(P.griff,S.griff)} · ${curName(P.griffColor,S.griffColor)}`,body:()=>`<div class="d2sub">Modell</div>`+pills('griff',Object.keys(P.griff).map(k=>[k,P.griff[k].name]))+`<div class="d2sub">Farbe</div>`+swatches('griffColor',P.griffColor)+`<div style="margin-top:16px"><button type="button" class="d2tgl ${S.griffLocked?'on':''}" onclick="D2.toggleKey('griffLocked')"><span class="kn"></span>Abschließbarer Griff</button></div>`},
  {id:'griffhaus',t:'Türgriff',gilt:['haustuere'],sum:()=>`${curName(P.tuerGriffInnen,S.tuerGriffInnen)} / ${curName(P.tuerGriffAussen,S.tuerGriffAussen)}`,body:()=>`<div class="d2sub">Innen (Klinke)</div>`+tiles('tuerGriffInnen',Object.keys(P.tuerGriffInnen).map(k=>({key:k,name:P.tuerGriffInnen[k].name,img:P.tuerGriffInnen[k].img})))+`<div class="d2sub">Außen (Griff)</div>`+tiles('tuerGriffAussen',Object.keys(P.tuerGriffAussen).map(k=>({key:k,name:P.tuerGriffAussen[k].name,img:P.tuerGriffAussen[k].img})))},
@@ -15590,7 +15768,7 @@ function renderSummary(){
   const el=document.getElementById('d2-summary'); if(!el||!S.prod) return;
   const cnt=sashCount();
   let oeffN; if(S.prod==='hst'||S.prod==='haustuere')oeffN=P.oeff_sash[S.oeff1]?.name; else oeffN=[S.oeff1,S.oeff2,S.oeff3].slice(0,cnt).map(o=>P.oeff_sash[o]?.name).filter(Boolean).join(' / ');
-  const griffN=S.prod==='haustuere'?curName(P.tuerGriffAussen,S.tuerGriffAussen):S.prod==='hst'?curName(P.hstGriff,S.hstGriff):curName(P.griff,S.griff);
+  const griffN=S.prod==='haustuere'?curName(P.tuerGriffAussen,S.tuerGriffAussen):(S.prod==='hst'&&S.profil==='iglo-psk')?curName(P.pskGriff,S.pskGriff):S.prod==='hst'?curName(P.hstGriff,S.hstGriff):curName(P.griff,S.griff);
   const items=[
     ['Produkt',P.prod[S.prod]?.name,null],
     ['Profil',curName(P.profil,S.profil),'profil'],
@@ -15679,11 +15857,12 @@ function prodDetailLines(c){
   else oeffName='–';
   let griffName;
   if(c.prod==='haustuere')griffName='Innen: '+curName(P.tuerGriffInnen,c.tuerGriffInnen)+' / Außen: '+curName(P.tuerGriffAussen,c.tuerGriffAussen);
+  else if(c.prod==='hst'&&c.profil==='iglo-psk')griffName=curName(P.pskGriff,c.pskGriff);
   else if(c.prod==='hst')griffName=curName(P.hstGriff,c.hstGriff);
   else griffName=curName(P.griff,c.griff)+' ('+curName(P.griffColor,c.griffColor)+')'+(c.griffLocked?' · abschließbar':'');
   const _kf=(c.panzerFarbe&&PANZER_FARBEN[c.panzerFarbe])?PANZER_FARBEN[c.panzerFarbe].name:'–';
   const rollName=(c.prod!=='haustuere'&&c.roll&&c.roll!=='ohne')?(P.roll[c.roll].name+' · Kasten '+c.rollKasten+' mm · Panzerfarbe '+_kf):'Kein Rolladen';
-  const sicherName=P.sicher[c.sicher]?.name||c.sicher||'–';
+  const sicherName=c.prod==='hst' ? '–' : (P.sicher[c.sicher]?.name||c.sicher||'–'); // Schiebetür ohne Einbruchschutz-Klasse (Kundenwunsch 18.06.2026)
   const sproStr=(c.prod==='kunststoff'||c.prod==='balkontuer')?((!c.sproTyp||c.sproTyp==='keine')?'Ohne':(c.sproTyp+' '+c.sproDicke+' mm · '+((P.sproRaster[c.sproRaster]||{}).name||''))):'Ohne';
   const lines=[
     'Produkt:     '+prodName,
@@ -15738,11 +15917,12 @@ function d2submit(e){
   else if(S.oeff1)oeffName=cnt===1?(P.oeff_sash[S.oeff1]?.name||S.oeff1):[S.oeff1,S.oeff2,S.oeff3].slice(0,cnt).map(o=>P.oeff_sash[o]?.name||o).join(' / '); else oeffName='–';
   let griffName;
   if(S.prod==='haustuere')griffName=`Innen: ${curName(P.tuerGriffInnen,S.tuerGriffInnen)} / Außen: ${curName(P.tuerGriffAussen,S.tuerGriffAussen)}`;
+  else if(S.prod==='hst'&&S.profil==='iglo-psk')griffName=`${curName(P.pskGriff,S.pskGriff)}`;
   else if(S.prod==='hst')griffName=`${curName(P.hstGriff,S.hstGriff)}`;
   else griffName=`${curName(P.griff,S.griff)} (${curName(P.griffColor,S.griffColor)})${S.griffLocked?' · abschließbar':''}`;
   const _kfName=(S.panzerFarbe&&PANZER_FARBEN[S.panzerFarbe])?PANZER_FARBEN[S.panzerFarbe].name:'–';
   const rollName=(S.prod!=='haustuere'&&S.roll!=='ohne')?`${P.roll[S.roll].name} · Kasten ${S.rollKasten} mm · Panzerfarbe ${_kfName}`:'Kein Rolladen';
-  const sicherName=P.sicher[S.sicher]?.name||S.sicher;
+  const sicherName=S.prod==='hst' ? '–' : (P.sicher[S.sicher]?.name||S.sicher); // Schiebetür ohne Einbruchschutz-Klasse (Kundenwunsch 18.06.2026)
   const sproStr=(S.prod==='kunststoff'||S.prod==='balkontuer')?(S.sproTyp==='keine'?'Ohne':`${S.sproTyp} ${S.sproDicke} mm · ${(P.sproRaster[S.sproRaster]||{}).name||''}`):'Ohne';
   const tuerModellName=S.prod==='haustuere'?(S.tuerModell||'noch offen'):null;
   const offerId='DF-'+Date.now().toString().slice(-6);
