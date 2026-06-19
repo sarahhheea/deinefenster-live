@@ -7937,16 +7937,15 @@ function wizGo(i){
   }
   document.getElementById('wiz-title').innerHTML=s.title;
   document.getElementById('wiz-sub').innerHTML=s.sub||'';
-  // Haustür-Griff-Schritt: saubere Studio-Tür (frontal, weiß) statt 3D-Ansicht.
+  // Haustür nutzt jetzt auf JEDEM Schritt — auch beim Türgriff — NUR das 3D-Modell.
+  // Früher wurde beim Griff-Schritt eine frontale Studio-Tür STATT des 3D gezeigt; da das
+  // 3D-iframe (prev-wrap) durch drawPrev/setPreviewView danach wieder eingeblendet wurde,
+  // erschienen zwei Türen übereinander. Studio-Bild dauerhaft ausgeblendet lassen.
   (function(){
-    var st=document.getElementById('wiz-stage'); if(!st)return;
     var img=document.getElementById('wiz-doorstudio');
-    if(!img){ img=document.createElement('img'); img.id='wiz-doorstudio'; img.className='wiz-doorstudio'; img.alt='Haustür'; img.setAttribute('onerror',"this.src='img/drutex-tueren/studio/montana-1-inox.webp'"); st.appendChild(img); }
+    if(img) img.style.display='none';
     var pw=document.getElementById('prev-wrap');
-    if(S.prod==='haustuere' && s.key==='griffhaus'){
-      img.src='img/drutex-tueren/studio/'+(S.tuerModell||'montana-1-inox')+'.webp';
-      img.style.display='block'; if(pw)pw.style.display='none';
-    } else { img.style.display='none'; if(pw)pw.style.display=''; }
+    if(pw) pw.style.display='';
   })();
   wizCrumbs(); wizRenderPanel();
   // Weiter-Button ist geteilt — beim Schrittwechsel wieder freigeben; der Maß-Schritt
