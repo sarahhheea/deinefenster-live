@@ -4254,6 +4254,30 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   #cfg-wizard .wiz-dim-h::after{bottom:0;height:calc(50% - 44px)}
   #cfg-wizard .wiz-dim-h span{background:#f4f7fc;padding:8px 0;writing-mode:vertical-rl}
   #cfg-wizard .wiz-panel{min-width:0;min-height:300px}
+  /* ── Außen/Innen-Toggle auf der Vorschau ── */
+  #cfg-wizard .wiz-viewtoggle{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 auto 10px;max-width:340px}
+  #cfg-wizard .wiz-see{font-family:'Manrope',sans-serif;font-size:12px;color:#6b7280}
+  #cfg-wizard .wiz-see b{color:#1a2330;font-weight:700}
+  #cfg-wizard .wiz-vseg{display:inline-flex;background:#eef3fb;border:1px solid #dbe6f6;border-radius:999px;padding:3px}
+  #cfg-wizard .wiz-vseg button{border:0;background:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:12.5px;color:#6b7280;padding:7px 15px;border-radius:999px;display:inline-flex;align-items:center;gap:5px;min-height:36px}
+  #cfg-wizard .wiz-vseg button .ms{font-size:16px}
+  #cfg-wizard .wiz-vseg button.on{background:#225eaa;color:#fff;box-shadow:0 2px 8px rgba(34,94,170,.28)}
+  /* ── Live-Liste „Ihre Konfiguration" (ruhiges Datenblatt) ── */
+  #cfg-wizard .wiz-cfglist{max-width:380px;margin:16px auto 0;text-align:left}
+  #cfg-wizard .wiz-cfg-h{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:15px;color:#1a2330;margin:0 0 10px}
+  #cfg-wizard .wiz-cfg-sec{margin-bottom:4px}
+  #cfg-wizard .wiz-cfg-sechd{display:flex;align-items:center;justify-content:space-between;margin:14px 0 2px}
+  #cfg-wizard .wiz-cfg-sechd>span{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:#9aa3b2}
+  #cfg-wizard .wiz-cfg-edit{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:12px;color:#225eaa;cursor:pointer;display:inline-flex;align-items:center;gap:3px;border:0;background:none;padding:4px}
+  #cfg-wizard .wiz-cfg-edit .ms{font-size:14px}
+  #cfg-wizard .wiz-cfg-row{display:flex;align-items:baseline;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid #eef1f6}
+  #cfg-wizard .wiz-cfg-row:last-child{border-bottom:0}
+  #cfg-wizard .wiz-cfg-l{font-family:'Manrope',sans-serif;font-size:13px;color:#6b7280;flex-shrink:0}
+  #cfg-wizard .wiz-cfg-v{font-family:'Plus Jakarta Sans',sans-serif;font-size:13.5px;font-weight:700;color:#1a2330;text-align:right}
+  #cfg-wizard .wiz-cfg-v.open{color:#b6c0cf;font-weight:600}
+  #cfg-wizard .wiz-cfg-sw{width:13px;height:13px;border-radius:4px;border:1px solid rgba(0,0,0,.18);display:inline-block;vertical-align:-2px;margin-right:6px}
+  /* Etappe 1 = Desktop. Handy-Liste + Handy-Toggle folgen als eigene Etappe (stört Handy-Layout nicht). */
+  @media(max-width:820px){ #cfg-wizard .wiz-cfglist{display:none} #cfg-wizard .wiz-viewtoggle{display:none} }
   #cfg-wizard .fh-head{margin-bottom:14px !important}
   #cfg-wizard .fh-head h2{font-size:clamp(22px,2.8vw,30px) !important}
   #cfg-wizard .wiz-swgrid{max-height:34vh}
@@ -4451,6 +4475,15 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
     <div class="wiz-stage" id="wiz-stage">
       <div class="wiz-dim-b"><span id="wiz-dim-b">1000 mm</span></div>
       <div class="wiz-dim-h"><span id="wiz-dim-h">1200 mm</span></div>
+      <div id="wiz-viewtoggle" class="wiz-viewtoggle">
+        <span class="wiz-see">Sie sehen: <b id="wiz-see-val">Außenansicht</b></span>
+        <div class="wiz-vseg" role="group" aria-label="Ansicht umschalten">
+          <button type="button" id="wiz-v-aus" class="on" onclick="setPreviewView('aus')"><i class="ms" aria-hidden="true">wb_sunny</i>Außen</button>
+          <button type="button" id="wiz-v-inn" onclick="setPreviewView('inn')"><i class="ms" aria-hidden="true">home</i>Innen</button>
+        </div>
+      </div>
+      <!-- Vorschau (#prev-wrap) wird hier zur Laufzeit eingefügt (zwischen Toggle und Liste) -->
+      <div id="wiz-cfglist" class="wiz-cfglist" aria-live="polite"></div>
     </div>
     <div class="wiz-panel" id="wiz-panel"></div>
   </div>
@@ -7221,7 +7254,8 @@ function _movePrevTo(stageId){
   const pw = document.getElementById('prev-wrap'), stage = document.getElementById(stageId);
   if(!pw || !stage) return;
   if(!_prevWrapHome) _prevWrapHome = { parent: pw.parentNode, next: pw.nextSibling };
-  stage.appendChild(pw);
+  const _anchor = stage.querySelector('#wiz-cfglist');
+  if(_anchor) stage.insertBefore(pw, _anchor); else stage.appendChild(pw);
 }
 function _faMovePrevIn(){ _movePrevTo('fa-hero-stage'); }
 function _faMovePrevBack(){
@@ -7987,6 +8021,8 @@ function wizGo(i){
   // Übersicht: sobald ein Schnappschuss da ist, Karten-Bild aktualisieren
   if(s.key==='angebot'){ setTimeout(function(){ if(wizLastThumb && WIZ_STEPS[wizIdx] && WIZ_STEPS[wizIdx].key==='angebot') wizRenderPanel(); },600); }
   // KEIN drawPrev beim reinen Schrittwechsel — Konfiguration unverändert, Bild bleibt ruhig stehen (kein "Bocken")
+  if(typeof wizUpCfgList==='function')wizUpCfgList();
+  if(typeof wizUpViewToggle==='function')wizUpViewToggle();
 }
 function wizRenderPanel(){ const p=document.getElementById('wiz-panel'); if(p)p.innerHTML=WIZ_STEPS[wizIdx].render(); }
 let wizStepNavOpen=false;
@@ -8034,7 +8070,75 @@ document.addEventListener('click', function(e){
 }, true);
 function wizExitToProd(){ const w=document.getElementById('cfg-wizard'); if(w)w.style.display='none'; _faMovePrevBack(); const hero=document.getElementById('prod-hero'); if(hero)hero.style.display=''; const s1=document.getElementById('s1'); if(s1)s1.classList.remove('hero-done'); window.scrollTo({top:0,behavior:'auto'}); }
 function wizFinish(){ const w=document.getElementById('cfg-wizard'); if(w)w.style.display='none'; _faMovePrevBack(); const nav=document.getElementById('kfg-nav'); if(nav){nav.style.display=''; if(window.innerWidth<768)nav.classList.add('kfg-nav--mobile-strip'); else nav.classList.remove('kfg-nav--mobile-strip');} if(window.openDetailPhase){window.openDetailPhase(); if(window.D2&&typeof D2.gotoSection==='function')D2.gotoSection('anfrage');} }
-function _wizPrev(){ if(typeof vorschauAktualisieren==='function')vorschauAktualisieren(); if(typeof drawPrev==='function')drawPrev(); if(typeof upSidebar==='function')upSidebar(); }
+function _wizPrev(){ if(typeof vorschauAktualisieren==='function')vorschauAktualisieren(); if(typeof drawPrev==='function')drawPrev(); if(typeof upSidebar==='function')upSidebar(); if(typeof wizUpCfgList==='function')wizUpCfgList(); if(typeof wizUpViewToggle==='function')wizUpViewToggle(); }
+// ── Außen/Innen-Toggle auf der Vorschau (Label + aktiver Zustand) ──
+function wizUpViewToggle(){
+  // Innenansicht aktuell nur bei Fenster + Haustür verfügbar — Toggle nur dort zeigen
+  // (Balkontür + Schiebetür folgen, sobald deren 3D eine Innenansicht hat).
+  var wrap=document.getElementById('wiz-viewtoggle');
+  var supports=(S.prod==='kunststoff'||S.prod==='haustuere');
+  if(wrap) wrap.style.display = supports ? '' : 'none';
+  var aus=document.getElementById('wiz-v-aus'), inn=document.getElementById('wiz-v-inn'), val=document.getElementById('wiz-see-val');
+  if(!aus||!inn) return;
+  var isAus=(typeof previewView==='undefined')||previewView==='aus';
+  aus.classList.toggle('on', isAus); inn.classList.toggle('on', !isAus);
+  if(val) val.textContent=isAus?'Außenansicht':'Innenansicht';
+}
+// ── Sprung zurück zu einem Schritt (aus der Live-Liste „Ändern") ──
+function wizGoStep(k){ if(typeof WIZ_STEPS==='undefined'||!WIZ_STEPS)return false; var i=WIZ_STEPS.findIndex(function(s){return s.key===k;}); if(i>=0)wizGo(i); return false; }
+// ── Live-Liste „Ihre Konfiguration" (ruhige Datenblatt-Liste, gruppiert) ──
+function _cfgNm(tbl,key){ return (P[tbl]&&P[tbl][key]&&(P[tbl][key].name||''))||''; }
+function _cfgShort(v){ return (v||'').split('·')[0].split('(')[0].trim(); }
+function wizUpCfgList(){
+  var el=document.getElementById('wiz-cfglist'); if(!el) return;
+  if(!S.prod){ el.innerHTML=''; return; }
+  var keys=(typeof WIZ_STEPS!=='undefined'&&WIZ_STEPS)?WIZ_STEPS.map(function(s){return s.key;}):[];
+  function has(k){ return keys.indexOf(k)>=0; }
+  var T=(typeof isTouched==='function')?isTouched:function(){return true;};
+  function vMasse(){ return ((T('bMm')||T('hMm'))&&S.bMm&&S.hMm) ? (S.bMm+' × '+S.hMm+' mm') : null; }
+  function oeffLabel(){ if(!S.oeff1)return null; if(S.oeff1==='dreh-l')return 'Dreh links'; if(S.oeff1==='dreh-r')return 'Dreh rechts'; return _cfgNm('oeff_sash',S.oeff1)||S.oeff1; }
+  function griffVal(){
+    if(S.prod==='haustuere'){ return _cfgNm('tuerGriffAussen',S.tuerGriffAussen)||null; }
+    if(S.prod==='hst'){ return (S.profil==='iglo-psk')?(_cfgNm('pskGriff',S.pskGriff)||null):(_cfgNm('hstGriff',S.hstGriff)||null); }
+    return _cfgShort(_cfgNm('griff',S.griff))||null;
+  }
+  var groups=[
+    { t:'Profil & Maße', step: has('profil')?'profil':(has('masse')?'masse':null), rows:[
+      has('profil')?{l:'Profil', v:_cfgShort(_cfgNm('profil',S.profil)), core:true}:null,
+      has('masse')?{l:'Maße (B × H)', v:vMasse(), core:true}:null,
+      has('fluegel')?{l:'Aufteilung', v:_cfgNm('fluegel',S.fluegel), core:true}:null,
+      has('anschlag')?{l:'Öffnung', v:oeffLabel(), core:true}:null,
+    ]},
+    { t:'Farbe', step:'farbe', rows:[
+      {l:'Außen', v:(S.fa&&T('fa'))?_cfgNm('fa',S.fa):null, core:true, hex:(P.fa&&P.fa[S.fa]&&P.fa[S.fa].hex)||null},
+      {l:'Innen', v:(S.fi&&T('fi'))?_cfgNm('fi',S.fi):null, core:true, hex:(P.fi&&P.fi[S.fi]&&P.fi[S.fi].hex)||null},
+    ]},
+    { t:'Glas & Ausstattung', step: has('glas')?'glas':null, rows:[
+      has('glas')?{l:'Verglasung', v:_cfgNm('glas',S.glas), core:true}:null,
+      (S.schall&&S.schall!=='ohne')?{l:'Schallschutz', v:(_cfgNm('schall',S.schall)||'Extra')}:null,
+      (S.glasdekor&&S.glasdekor!=='klar')?{l:'Glasdekor', v:_cfgNm('glasdekor',S.glasdekor)}:null,
+      (S.sproTyp&&S.sproTyp!=='keine')?{l:'Sprossen', v:(_cfgNm('sproTyp',S.sproTyp)||'Sprossen')}:null,
+      {l:'Griff', v:griffVal(), core:true},
+      (S.roll&&S.roll!=='ohne')?{l:'Rolladen', v:_cfgNm('roll',S.roll)}:null,
+      (S.sicher&&S.sicher!=='ohne'&&S.sicher!=='wk1')?{l:'Einbruchschutz', v:_cfgNm('sicher',S.sicher)}:null,
+    ]},
+  ];
+  function esc(s){ return (''+s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  var html='<div class="wiz-cfg-h">Ihre Konfiguration</div>';
+  groups.forEach(function(g){
+    var rows=g.rows.filter(Boolean).filter(function(r){ return r.core || r.v; });
+    if(!rows.length) return;
+    html+='<div class="wiz-cfg-sec">';
+    html+='<div class="wiz-cfg-sechd"><span>'+esc(g.t)+'</span>'+(g.step?'<button type="button" class="wiz-cfg-edit" onclick="return wizGoStep(\''+g.step+'\')"><i class="ms" aria-hidden="true">edit</i>Ändern</button>':'')+'</div>';
+    rows.forEach(function(r){
+      var open=!r.v;
+      var dot=r.hex?'<span class="wiz-cfg-sw" style="background:'+esc(r.hex)+'"></span>':'';
+      html+='<div class="wiz-cfg-row"><span class="wiz-cfg-l">'+esc(r.l)+'</span><span class="wiz-cfg-v'+(open?' open':'')+'">'+(open?'noch nicht gewählt':(dot+esc(r.v)))+'</span></div>';
+    });
+    html+='</div>';
+  });
+  el.innerHTML=html;
+}
 function _wizPills(items,curVal,fn){ return '<div class="wiz-pills">'+items.map(function(it){return '<button type="button" class="wiz-pill'+(it[0]===curVal?' sel':'')+'" onclick="'+fn+'(\''+it[0]+'\')">'+it[1]+'</button>';}).join('')+'</div>'; }
 function wizSet(key,val){ S[key]=val; if(window._touched)window._touched.add(key); _wizPrev(); wizRenderPanel(); }
 // FARBE
@@ -13023,6 +13127,7 @@ function setPreviewView(v) {
   };
   _post3dView();
   setTimeout(_post3dView, 300);
+  if(typeof wizUpViewToggle==='function') wizUpViewToggle();
 }
 
 // DIN-Anschlag: 'links' = Standard (Klinke links, Scharniere rechts)
