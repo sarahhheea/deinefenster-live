@@ -4276,8 +4276,19 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   #cfg-wizard .wiz-cfg-v{font-family:'Plus Jakarta Sans',sans-serif;font-size:13.5px;font-weight:700;color:#1a2330;text-align:right}
   #cfg-wizard .wiz-cfg-v.open{color:#b6c0cf;font-weight:600}
   #cfg-wizard .wiz-cfg-sw{width:13px;height:13px;border-radius:4px;border:1px solid rgba(0,0,0,.18);display:inline-block;vertical-align:-2px;margin-right:6px}
-  /* Etappe 1 = Desktop. Handy-Liste + Handy-Toggle folgen als eigene Etappe (stört Handy-Layout nicht). */
-  @media(max-width:820px){ #cfg-wizard .wiz-cfglist{display:none} #cfg-wizard .wiz-viewtoggle{display:none} }
+  /* Liste-Kopf als Button (Desktop: immer offen, kein Chevron, kein Klick-Effekt) */
+  #cfg-wizard button.wiz-cfg-h{display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:0;padding:0;cursor:default;text-align:left}
+  #cfg-wizard .wiz-cfg-chev{display:none}
+  /* Handy: Toggle kompakt zeigen, Liste als einklappbare „Zusammenfassung" */
+  @media(max-width:820px){
+    #cfg-wizard .wiz-cfglist{max-width:none;margin:10px auto 0;width:100%}
+    #cfg-wizard .wiz-viewtoggle{max-width:none;margin:0 auto 8px}
+    #cfg-wizard button.wiz-cfg-h{cursor:pointer;margin-bottom:0}
+    #cfg-wizard .wiz-cfg-chev{display:inline-flex;transition:transform .2s;color:#6b7280}
+    #cfg-wizard .wiz-cfglist .wiz-cfg-body{display:none}
+    #cfg-wizard .wiz-cfglist.open .wiz-cfg-body{display:block;max-height:46vh;overflow:auto;margin-top:8px}
+    #cfg-wizard .wiz-cfglist.open .wiz-cfg-chev{transform:rotate(180deg)}
+  }
   #cfg-wizard .fh-head{margin-bottom:14px !important}
   #cfg-wizard .fh-head h2{font-size:clamp(22px,2.8vw,30px) !important}
   #cfg-wizard .wiz-swgrid{max-height:34vh}
@@ -8085,6 +8096,8 @@ function wizUpViewToggle(){
 }
 // ── Sprung zurück zu einem Schritt (aus der Live-Liste „Ändern") ──
 function wizGoStep(k){ if(typeof WIZ_STEPS==='undefined'||!WIZ_STEPS)return false; var i=WIZ_STEPS.findIndex(function(s){return s.key===k;}); if(i>=0)wizGo(i); return false; }
+// Handy: Live-Liste ein-/ausklappen (auf Desktop immer offen, Klick ohne Effekt)
+function wizToggleCfgList(){ var el=document.getElementById('wiz-cfglist'); if(el)el.classList.toggle('open'); return false; }
 // ── Live-Liste „Ihre Konfiguration" (ruhige Datenblatt-Liste, gruppiert) ──
 function _cfgNm(tbl,key){ return (P[tbl]&&P[tbl][key]&&(P[tbl][key].name||''))||''; }
 function _cfgShort(v){ return (v||'').split('·')[0].split('(')[0].trim(); }
@@ -8123,7 +8136,8 @@ function wizUpCfgList(){
     ]},
   ];
   function esc(s){ return (''+s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-  var html='<div class="wiz-cfg-h">Ihre Konfiguration</div>';
+  var html='<button type="button" class="wiz-cfg-h" onclick="return wizToggleCfgList()">Ihre Konfiguration<i class="ms wiz-cfg-chev" aria-hidden="true">expand_more</i></button>';
+  html+='<div class="wiz-cfg-body">';
   groups.forEach(function(g){
     var rows=g.rows.filter(Boolean).filter(function(r){ return r.core || r.v; });
     if(!rows.length) return;
@@ -8136,6 +8150,7 @@ function wizUpCfgList(){
     });
     html+='</div>';
   });
+  html+='</div>';
   el.innerHTML=html;
 }
 function _wizPills(items,curVal,fn){ return '<div class="wiz-pills">'+items.map(function(it){return '<button type="button" class="wiz-pill'+(it[0]===curVal?' sel':'')+'" onclick="'+fn+'(\''+it[0]+'\')">'+it[1]+'</button>';}).join('')+'</div>'; }
