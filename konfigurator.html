@@ -2476,8 +2476,14 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       top: calc(97px + env(safe-area-inset-top, 0px)) !important;
       justify-content: flex-start !important;
     }
-    /* Disclaimer auf Mobile komplett weg — Karten haben Priorität */
-    #prod-hero .hero-disclaimer { display: none !important; }
+    /* Disclaimer auf Mobile als kompakte Pille (Kundenwunsch: Angst vor Kosten nehmen) —
+       langer Zusatztext ausgeblendet, nur die Kernzusage bleibt. */
+    #prod-hero .hero-disclaimer { display: inline-flex !important; align-items: center; gap: 7px;
+      width: auto; max-width: 100%; margin: 0 auto 4px !important; padding: 6px 13px !important;
+      border-radius: 999px !important; font-size: 12px !important; line-height: 1.2 !important; }
+    #prod-hero .hero-disclaimer .ms { font-size: 15px !important; }
+    #prod-hero .hero-disclaimer .hd-body { font-size: 12px !important; line-height: 1.2 !important; }
+    #prod-hero .hero-disclaimer .hd-long { display: none !important; }
     /* "So funktioniert deine Anfrage" Banner auch auf Mobile weg
        (zu fett oberhalb des Step-Headers) */
     .anfrage-banner-wrap { display: none !important; }
@@ -3779,7 +3785,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   <div class="fh-head">
     <div class="hero-disclaimer" role="note" aria-label="Kostenlose, unverbindliche Anfrage">
       <i class="ms f" aria-hidden="true">verified</i>
-      <div class="hd-body"><strong>100 % kostenlos &amp; unverbindlich.</strong> Sie senden nur eine Anfrage — keine Kosten, kein Kaufvertrag, keine Verpflichtung.</div>
+      <div class="hd-body"><strong>100 % kostenlos &amp; unverbindlich.</strong><span class="hd-long"> Sie senden nur eine Anfrage — keine Kosten, kein Kaufvertrag, keine Verpflichtung.</span></div>
     </div>
   </div>
   <div class="hero-grid">
@@ -4187,7 +4193,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   #cfg-wizard .wiz-sumrow span{color:#6a7a8f}
   #cfg-wizard .wiz-sumrow b{color:#14233f;text-align:right}
   /* Anfrage-Schritt: breiter + zweispaltige Übersicht + Warenkorb */
-  #cfg-wizard .wiz-body.angebot-wide{max-width:1360px}
+  #cfg-wizard .wiz-body.angebot-wide{max-width:1360px;grid-template-columns:1fr}
   #cfg-wizard .wiz-sumcols{display:flex;gap:18px;align-items:flex-start}
   #cfg-wizard .wiz-sumcols .wiz-summary{flex:1;min-width:0}
   #cfg-wizard .wiz-cartbox{background:#eef4fb;border:1px solid #d6e3f3;border-radius:14px;padding:12px 16px;margin-bottom:6px}
@@ -7655,13 +7661,19 @@ function wizRenderAngebot(){
     var img=opts.thumb||WIZ_PROD_THUMB[c.prod]||WIZ_PROD_THUMB.kunststoff;
     var name=nm('prod',c.prod);
     var qty=c.qty||1;
+    var qtyId=opts.current?'current':opts.id;
+    var qtyCtl='<div class="wiz-oqtyctl" role="group" aria-label="Menge ändern">'
+      +'<button type="button" class="wiz-oqtybtn" onclick="wizCardQty(\''+qtyId+'\',-1)" aria-label="Menge verringern">−</button>'
+      +'<span class="wiz-oqtyval"><b>'+qty+'</b> Stück</span>'
+      +'<button type="button" class="wiz-oqtybtn" onclick="wizCardQty(\''+qtyId+'\',1)" aria-label="Menge erhöhen">+</button>'
+      +'</div>';
     var act=opts.current
       ? '<button type="button" class="wiz-obtn wiz-obtn-edit" onclick="wizGo(0)"><i class="ms" aria-hidden="true">tune</i>Bearbeiten</button>'
       : '<button type="button" class="wiz-obtn wiz-obtn-edit" onclick="wizEditItem(\''+opts.id+'\')"><i class="ms" aria-hidden="true">tune</i>Bearbeiten</button>'
         +'<button type="button" class="wiz-obtn wiz-obtn-del" onclick="wizCartRemove(\''+opts.id+'\')"><i class="ms" aria-hidden="true">delete</i>Entfernen</button>';
     // Variante B: Aktionen links · Beschreibung Mitte · Bild rechts
     return '<div class="wiz-ocard'+(opts.current?' is-current':'')+'">'
-      +'<div class="wiz-oactions"><span class="wiz-oqty">Menge: <b>'+qty+'</b></span>'+act+'</div>'
+      +'<div class="wiz-oactions">'+qtyCtl+act+'</div>'
       +'<div class="wiz-oinfo">'
         +'<div class="wiz-oname">'+name+(opts.current?' <span class="wiz-obadge">AKTUELL</span>':'')+'</div>'
         +'<div class="wiz-ospecs">'+specRows(c)+'</div>'
@@ -7672,14 +7684,31 @@ function wizRenderAngebot(){
   var inCart=(typeof cart!=='undefined')?cart:[];
   var total=inCart.length+1;
   var h='<div class="wiz-ohead">'+total+' '+(total===1?'Produkt':'Produkte')+' in Ihrer Anfrage</div>';
+  h+='<button type="button" class="wiz-addmore wiz-addmore-top" onclick="wizAddAnother()"><span>+</span> Weiteres Produkt hinzufügen</button>';
   h+='<div class="wiz-ocards">';
   inCart.forEach(function(it){ h+=card(it.config||{}, {id:it.id, thumb:it.thumb}); });
   h+=card(S, {current:true, thumb:wizLastThumb});
   h+='</div>';
-  h+='<button type="button" class="wiz-addmore" onclick="wizAddAnother()"><span>+</span> Weiteres Produkt hinzufügen</button>';
   return h;
 }
 function wizCartRemove(id){ if(typeof removeFromCart==='function'){removeFromCart(id);} else if(typeof cart!=='undefined'){cart=cart.filter(function(i){return i.id!==id;}); if(typeof saveCart==='function')saveCart();} wizRenderPanel(); }
+// Menge direkt in der Übersicht ändern (aktuelles Produkt ODER ein Warenkorb-Artikel).
+function wizCardQty(id,d){
+  if(id==='current'){
+    S.qty=Math.max(1,Math.min(99,(parseInt(S.qty)||1)+d));
+    if(window._touched)window._touched.add('qty');
+    if(typeof upSidebar==='function')upSidebar();
+  } else if(typeof cart!=='undefined'&&Array.isArray(cart)){
+    var it=cart.filter(function(i){return i.id===id;})[0];
+    if(it){
+      it.qty=Math.max(1,Math.min(99,(parseInt(it.qty)||1)+d));
+      if(it.config)it.config.qty=it.qty;
+      if(typeof it.unitPrice==='number')it.subtotal=it.unitPrice*it.qty;
+      if(typeof saveCart==='function')saveCart();
+    }
+  }
+  wizRenderPanel();
+}
 // Gespeicherten Warenkorb-Artikel zum Bearbeiten in den Wizard laden.
 // Die aktuell offene Konfiguration wird vorher gesichert (geht nicht verloren),
 // danach wird der gewählte Artikel als „aktuelle" Konfiguration geladen + aus dem
@@ -15556,8 +15585,9 @@ async function submitSkizze(e) {
   #cfg-wizard .wiz-stossh-pill.sel{ border-color:var(--c-primary); background:#eaf1fc; color:#225eaa; box-shadow:0 0 0 3px rgba(34,94,170,.12); }
   /* === STUFE 4: Bestellübersicht im Onlineshop-Stil (Warenkorb-Karten) === */
   /* ── Bestellübersicht (Variante B: Aktionen links · Beschreibung Mitte · Bild rechts) ── */
-  #cfg-wizard .wiz-ohead{ font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:15px; color:#14233f; margin:0 auto 12px; max-width:600px; text-align:left; }
-  #cfg-wizard .wiz-ocards{ max-width:600px; margin:0 auto; display:flex; flex-direction:column; gap:14px; }
+  #cfg-wizard .wiz-ohead{ font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:15px; color:#14233f; margin:0 auto 12px; max-width:720px; text-align:left; }
+  #cfg-wizard .wiz-addmore-top{ max-width:720px; margin:0 auto 16px; }
+  #cfg-wizard .wiz-ocards{ max-width:720px; margin:0 auto; display:flex; flex-direction:column; gap:16px; }
   #cfg-wizard .wiz-ocard{ display:grid; grid-template-columns:128px 1fr 150px; gap:16px; align-items:center; background:#fff; border:1px solid #e4ebf4; border-radius:16px; padding:16px; box-shadow:0 3px 14px rgba(20,40,80,.05); text-align:left; }
   #cfg-wizard .wiz-ocard.is-current{ border-color:rgba(34,94,170,.40); box-shadow:0 4px 18px rgba(34,94,170,.10); }
   /* Bild rechts */
@@ -15575,6 +15605,12 @@ async function submitSkizze(e) {
   #cfg-wizard .wiz-oactions{ display:flex; flex-direction:column; gap:9px; align-items:stretch; }
   #cfg-wizard .wiz-oqty{ font-family:'Manrope',sans-serif; font-size:12.5px; color:#5b6b80; text-align:center; }
   #cfg-wizard .wiz-oqty b{ color:#14233f; font-weight:700; }
+  /* Mengen-Stepper (± direkt in der Übersicht) */
+  #cfg-wizard .wiz-oqtyctl{ display:flex; align-items:center; justify-content:center; gap:8px; background:#f4f7fc; border:1px solid #e1e9f4; border-radius:11px; padding:4px; }
+  #cfg-wizard .wiz-oqtybtn{ width:40px; height:40px; flex:0 0 auto; border-radius:9px; border:1px solid #d8e2f0; background:#fff; color:#225eaa; font-size:22px; font-weight:800; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  #cfg-wizard .wiz-oqtybtn:hover{ background:#eef3fb; }
+  #cfg-wizard .wiz-oqtyval{ font-family:'Manrope',sans-serif; font-size:13px; color:#5b6b80; min-width:56px; text-align:center; }
+  #cfg-wizard .wiz-oqtyval b{ color:#14233f; font-weight:800; font-size:15px; }
   #cfg-wizard .wiz-obtn{ display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:13.5px; padding:11px 12px; border-radius:11px; border:1.6px solid transparent; min-height:44px; }
   #cfg-wizard .wiz-obtn .ms{ font-size:18px; }
   #cfg-wizard .wiz-obtn-edit{ background:#225eaa; color:#fff; }
@@ -15586,6 +15622,7 @@ async function submitSkizze(e) {
     #cfg-wizard .wiz-oinfo{ order:2; }
     #cfg-wizard .wiz-oactions{ order:3; flex-direction:row; flex-wrap:wrap; }
     #cfg-wizard .wiz-oactions .wiz-oqty{ flex:1 0 100%; text-align:left; }
+    #cfg-wizard .wiz-oactions .wiz-oqtyctl{ flex:1 0 100%; }
     #cfg-wizard .wiz-oactions .wiz-obtn{ flex:1; }
   }
   /* Auf der Uebersicht keine grosse Einzel-Vorschau — jede Karte hat ihr Thumbnail */
