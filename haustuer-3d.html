@@ -485,99 +485,33 @@ function roundedRectShape(w, h, r) {
 // x/y = Unterkante-links in Meter · w/h = Breite/Höhe
 // strips = sichtbare Edelstahl-Dekor-Stäbe
 // ══════════════════════════════════════════════
+// ── ALLE gemusterten Modelle: pixelgenaues Decal aus der Drutex-Katalogvorlage ──
+// (img/haustuer-motiv/*.png). Silber + weißes Glas freigestellt, Rest transparent →
+// 1:1-Optik wie das Katalogfoto; die konfigurierte Türfarbe scheint durch die transparenten
+// Stellen, das Decal spiegelt automatisch mit der Tür-Hand (DIN). Erzeugt mit
+// scripts/haustuer-motiv-extract.py aus den *_antracyt.jpg Katalogfotos.
+// Nur Vollglas bleibt Geometrie (reine Glastür, kein Katalogmotiv).
 const MODELLE = {
-  // Vollglas-Tür: ein großes helles Glasfeld mit Rahmen-Rand (Kundenwunsch 11.06.2026)
   'vollglas-inox': {
     brightGlass: true,
     noPanelFrame: true,            // randloses Glas (keine Silber-Einfassung) — Vollglas-Referenz
     longHandle: true,              // langer runder Stoßgriff ~80% Türhöhe
     panels: [{x:0.090, y:0.100, w:0.820, h:1.900}],
   },
-  'colorado-inox': {
-    // 5 quadratische Gläser, mittig gestapelt — Glasrahmen verschmelzen zum durchgehenden Inox-Band
-    panels: [
-      {x:0.400, y:1.395, w:0.200, h:0.175},
-      {x:0.400, y:1.190, w:0.200, h:0.175},
-      {x:0.400, y:0.985, w:0.200, h:0.175},
-      {x:0.400, y:0.780, w:0.200, h:0.175},
-      {x:0.400, y:0.575, w:0.200, h:0.175},
-    ]
-  },
-  'montana-1-inox': {
-    panels: [{x:0.400, y:0.320, w:0.185, h:1.460}]
-  },
-  'montana-2-lr-inox': {
-    // Pixelgenau gemessen: Strip 256-297mm (w=41mm), Glasrahmen 365-635mm, Gap=68mm
-    // Strips von y=359–1935mm (h=1576mm), Glaseinheit y=359–1712mm (h=1353mm)
-    // Strips 223mm HÖHER als Glasfeld — so im Original-Design
-    // GFW=0.040 → Glas-Loch: x=0.405 (=0.365+0.040), w=0.190 (=0.595-0.405)
-    panels: [{x:0.405, y:0.360, w:0.190, h:1.355}],
-    // Links: unten=359mm (=Glasrahmen-UK), oben=1935mm (+223mm über Glasrahmen-OK)
-    // Rechts: unten=136mm (-223mm unter Glasrahmen-UK), oben=1712mm (=Glasrahmen-OK)
-    strips: [{x:0.256, y:0.359, w:0.041, h:1.616}, {x:0.704, y:0.096, w:0.040, h:1.616}]
-  },
-  'montana-3-lr-inox': {
-    // Großes Glasfeld links + Spalte aus 6 SOLIDEN Inox-Blöcken rechts (kein Glas)
-    panels: [
-      {x:0.275, y:0.235, w:0.175, h:1.565},  // Großes Glasfeld links
-    ],
-    strips: [
-      {x:0.617, y:1.675, w:0.072, h:0.135},  // Inox-Riegel 1 (oben, senkrecht)
-      {x:0.617, y:1.415, w:0.072, h:0.135},  // Inox-Riegel 2
-      {x:0.617, y:1.155, w:0.072, h:0.135},  // Inox-Riegel 3
-      {x:0.617, y:0.895, w:0.072, h:0.135},  // Inox-Riegel 4
-      {x:0.617, y:0.635, w:0.072, h:0.135},  // Inox-Riegel 5
-      {x:0.617, y:0.375, w:0.072, h:0.135},  // Inox-Riegel 6 (unten)
-    ]
-  },
-  'florida-lr-inox': {
-    satinGlass: true,
-    panels: [{x:0.390, y:0.165, w:0.200, h:1.750}]
-  },
-  'ohio-inox': {
-    // 3 Quadrate gleichmäßig verteilt + 2 lange Inox-Streifen über volle Höhe
-    panels: [
-      {x:0.385, y:1.3175, w:0.230, h:0.205},
-      {x:0.385, y:0.8975, w:0.230, h:0.205},
-      {x:0.385, y:0.4775, w:0.230, h:0.205},
-    ],
-    strips: [{x:0.275, y:0.330, w:0.050, h:1.440}, {x:0.675, y:0.330, w:0.050, h:1.440}]
-  },
-  'alaska-1-inox': {
-    // 3 Quadrate mittig auf der Tür zentriert, gleichmäßig gespreizt (Zentren 1.45 / 1.00 / 0.55)
-    panels: [
-      {x:0.390, y:1.345, w:0.220, h:0.210},
-      {x:0.390, y:0.895, w:0.220, h:0.210},
-      {x:0.390, y:0.445, w:0.220, h:0.210},
-    ]
-  },
-  'alaska-2-inox': {
-    // 5 Quadrate mittig zentriert (Zentren 1.58 / 1.29 / 1.00 / 0.71 / 0.42)
-    panels: [
-      {x:0.390, y:1.4825, w:0.220, h:0.195},
-      {x:0.390, y:1.1925, w:0.220, h:0.195},
-      {x:0.390, y:0.9025, w:0.220, h:0.195},
-      {x:0.390, y:0.6125, w:0.220, h:0.195},
-      {x:0.390, y:0.3225, w:0.220, h:0.195},
-    ]
-  },
-  'nebraska-lcr-inox': {
-    // 5 quadratische Gläser mittig gestapelt auf durchgehendem Inox-Band (Glasrahmen verschmelzen)
-    panels: [
-      {x:0.400, y:1.470, w:0.200, h:0.175},
-      {x:0.400, y:1.235, w:0.200, h:0.175},
-      {x:0.400, y:1.000, w:0.200, h:0.175},
-      {x:0.400, y:0.765, w:0.200, h:0.175},
-      {x:0.400, y:0.530, w:0.200, h:0.175},
-    ]
-  },
-  // Pennsylvania 1/2/3: Motiv als pixelgenaues Decal direkt aus der Drutex-Katalogvorlage (img/haustuer-motiv/*).
-  // Silber + weißes Glas mit transparentem Hintergrund → 1:1-Optik; Türfarbe scheint durch. Spiegelt mit der Tür-Hand.
+  'colorado-inox':          { decalTexture: 'img/haustuer-motiv/colorado-inox.png' },
+  'montana-1-inox':         { decalTexture: 'img/haustuer-motiv/montana-1-inox.png' },
+  'montana-2-lr-inox':      { decalTexture: 'img/haustuer-motiv/montana-2-lr-inox.png' },
+  'montana-3-lr-inox':      { decalTexture: 'img/haustuer-motiv/montana-3-lr-inox.png' },
+  'florida-lr-inox':        { decalTexture: 'img/haustuer-motiv/florida-lr-inox.png' },
+  'ohio-inox':              { decalTexture: 'img/haustuer-motiv/ohio-inox.png' },
+  'alaska-1-inox':          { decalTexture: 'img/haustuer-motiv/alaska-1-inox.png' },
+  'alaska-2-inox':          { decalTexture: 'img/haustuer-motiv/alaska-2-inox.png' },
+  'nebraska-lcr-inox':      { decalTexture: 'img/haustuer-motiv/nebraska-lcr-inox.png' },
   'pennsylvania-1-inox':    { decalTexture: 'img/haustuer-motiv/pennsylvania-1.png' },
   'pennsylvania-2-lr-inox': { decalTexture: 'img/haustuer-motiv/pennsylvania-2.png' },
   'pennsylvania-3-lr-inox': { decalTexture: 'img/haustuer-motiv/pennsylvania-3.png' },
-  'texas-c-inox':  {panels: [{x:0.413, y:0.235, w:0.175, h:1.580}]},
-  'texas-lr-inox': {panels: [{x:0.413, y:0.235, w:0.175, h:1.580}]},
+  'texas-c-inox':           { decalTexture: 'img/haustuer-motiv/texas-c-inox.png' },
+  'texas-lr-inox':          { decalTexture: 'img/haustuer-motiv/texas-lr-inox.png' },
 };
 
 let glassObjects = [];
