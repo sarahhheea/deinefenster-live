@@ -6195,8 +6195,7 @@ const P = {
     // Kundenwunsch 25.05.2026: 20 Drutex-Außengriff-Optionen mit echten Drutex-Bildern
     // Bilder unter img/drutex-griffe/ (kopiert von drutex.de/de/produkte/addons/type/8/)
     // Kundenwunsch 16.06.2026: Stoßgriff Q45R + Z1 ganz nach oben
-    'stoss-q45r':    { name:'Stoßgriff Q45R (Edelstahl)', add:0, group:'Stoßgriff Edelstahl', img:'img/drutex-griffe/stoss-q45r.webp' },
-    'stoss-z1':      { name:'Stoßgriff Z1 (Edelstahl)',  add:0, group:'Stoßgriff Edelstahl', img:'img/drutex-griffe/stoss-z1.webp' },
+    'stoss-q45r':    { name:'Edelstahlstoßgriff', add:0, group:'Stoßgriff Edelstahl', img:'img/drutex-griffe/stoss-q45r.webp' },
     'knauf-weiss':   { name:'Knauf (weiß)',   add:0, group:'Knauf', img:'img/drutex-griffe/knauf-weiss.webp' },
     'knauf-braun':   { name:'Knauf (braun)',  add:0, group:'Knauf', img:'img/drutex-griffe/knauf-braun.webp' },
     'knauf-oliv':    { name:'Knauf (oliv)',   add:0, group:'Knauf', img:'img/drutex-griffe/knauf-oliv.webp' },
@@ -7513,10 +7512,18 @@ function wizRenderTuergriff(){
     var more=keys.length>LIM?'<button type="button" class="wiz-grmore" onclick="wizGriffMoreToggle(\''+sk+'\')">'+(all?'Weniger':'Alle '+keys.length+' →')+'</button>':'';
     return '<div class="wiz-grcol"><div class="wiz-grhd">'+title+'<small>'+subt+'</small></div>'+cards+more+'</div>';
   }
+  // Nur beim Edelstahlstoßgriff (stoss-q45r): Höhe wählbar (580 / 1200 / 1600 mm)
+  var stossH='';
+  if(S.tuerGriffAussen==='stoss-q45r'){
+    var cur=S.stossHoehe||'1200';
+    stossH='<div class="wiz-stossh"><div class="wiz-stossh-hd">Höhe des Edelstahlstoßgriffs</div><div class="wiz-stossh-pills">'+
+      ['580','1200','1600'].map(function(mm){return '<button type="button" class="wiz-stossh-pill'+(cur===mm?' sel':'')+'" onclick="wizSet(\'stossHoehe\',\''+mm+'\')">'+mm+' mm</button>';}).join('')+
+      '</div></div>';
+  }
   return '<div class="wiz-grcols">'+
     col('Innen','Klinke im Raum',P.tuerGriffInnen,S.tuerGriffInnen,'tuerGriffInnen')+
     col('Außen','von der Straße',P.tuerGriffAussen,S.tuerGriffAussen,'tuerGriffAussen')+
-  '</div>';
+  '</div>'+stossH;
 }
 let wizGriffTab='innen';
 function wizGriffTabSet(t){ wizGriffTab=t; if(typeof wizRenderPanel==='function')wizRenderPanel(); }
@@ -11677,7 +11684,7 @@ function upSidebar() {
   // Griffe / Beschlag — produktspezifisch, nur wenn User selber gewaehlt
   if(S.prod==='haustuere') {
     if(S.tuerGriffInnen  && isTouched('tuerGriffInnen'))  rowsList.push(['Griff innen',  P.tuerGriffInnen?.[S.tuerGriffInnen]?.name||S.tuerGriffInnen]);
-    if(S.tuerGriffAussen && isTouched('tuerGriffAussen')) rowsList.push(['Griff außen',  P.tuerGriffAussen?.[S.tuerGriffAussen]?.name||S.tuerGriffAussen]);
+    if(S.tuerGriffAussen && isTouched('tuerGriffAussen')) rowsList.push(['Griff außen',  (P.tuerGriffAussen?.[S.tuerGriffAussen]?.name||S.tuerGriffAussen) + (S.tuerGriffAussen==='stoss-q45r' ? ' · Höhe '+(S.stossHoehe||'1200')+' mm' : '')]);
   } else if(S.prod==='hst') {
     if(S.profil==='iglo-psk') {
       rowsList.push(['Griff', P.pskGriff?.[S.pskGriff]?.name||S.pskGriff]);
@@ -15533,6 +15540,12 @@ async function submitSkizze(e) {
   #cfg-wizard .wiz-grimg img{ width:100%; height:100%; object-fit:contain; padding:6px; }
   #cfg-wizard .wiz-grnm{ font-family:'Manrope',sans-serif; font-size:11.5px; font-weight:600; color:#14233f; text-align:center; line-height:1.2; }
   #cfg-wizard .wiz-grmore{ margin-top:2px; border:1px solid #d6e0ee; background:#f3f7fd; color:#225eaa; border-radius:9px; padding:9px 6px; font-weight:700; font-family:'Plus Jakarta Sans',sans-serif; cursor:pointer; font-size:12px; min-height:44px; }
+  /* Höhen-Auswahl beim Edelstahlstoßgriff */
+  #cfg-wizard .wiz-stossh{ max-width:520px; margin:14px auto 0; }
+  #cfg-wizard .wiz-stossh-hd{ font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:14px; color:#14233f; text-align:center; margin-bottom:10px; }
+  #cfg-wizard .wiz-stossh-pills{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
+  #cfg-wizard .wiz-stossh-pill{ min-height:48px; border:1.5px solid #d6e0ee; background:#fff; border-radius:11px; font-family:'Plus Jakarta Sans',sans-serif; font-weight:700; font-size:14px; color:#14233f; cursor:pointer; }
+  #cfg-wizard .wiz-stossh-pill.sel{ border-color:var(--c-primary); background:#eaf1fc; color:#225eaa; box-shadow:0 0 0 3px rgba(34,94,170,.12); }
   /* === STUFE 4: Bestellübersicht im Onlineshop-Stil (Warenkorb-Karten) === */
   /* ── Bestellübersicht (Variante B: Aktionen links · Beschreibung Mitte · Bild rechts) ── */
   #cfg-wizard .wiz-ohead{ font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:15px; color:#14233f; margin:0 auto 12px; max-width:600px; text-align:left; }
@@ -16072,7 +16085,7 @@ function prodDetailLines(c){
   else if(c.oeff1)oeffName=sc===1?(P.oeff_sash[c.oeff1]?.name||c.oeff1):[c.oeff1,c.oeff2,c.oeff3].slice(0,sc).map(o=>P.oeff_sash[o]?.name||o).join(' / ');
   else oeffName='–';
   let griffName;
-  if(c.prod==='haustuere')griffName='Innen: '+curName(P.tuerGriffInnen,c.tuerGriffInnen)+' / Außen: '+curName(P.tuerGriffAussen,c.tuerGriffAussen);
+  if(c.prod==='haustuere')griffName='Innen: '+curName(P.tuerGriffInnen,c.tuerGriffInnen)+' / Außen: '+curName(P.tuerGriffAussen,c.tuerGriffAussen)+(c.tuerGriffAussen==='stoss-q45r' ? ' (Höhe '+(c.stossHoehe||'1200')+' mm)' : '');
   else if(c.prod==='hst'&&c.profil==='iglo-psk')griffName=curName(P.pskGriff,c.pskGriff);
   else if(c.prod==='hst')griffName=curName(P.hstGriff,c.hstGriff);
   else griffName=curName(P.griff,c.griff)+' ('+curName(P.griffColor,c.griffColor)+')'+(c.griffLocked?' · abschließbar':'');
