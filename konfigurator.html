@@ -7720,6 +7720,7 @@ function wizAddAnother(){
 function _profilOkForProd(p){ return S.profil && P.profil[S.profil] && P.profil[S.profil].prods && P.profil[S.profil].prods.indexOf(p)>=0; }
 function wizStart(){
   wizIdx=0; wizFarbTab='fa';   // Außenfarbe zuerst (Kundenwunsch)
+  if(typeof wizVisited!=='undefined') wizVisited.clear(); // Neuanfang: keine alten Häkchen
   // Neuanfang = wirklich Neuanfang: alle Zusatz-/Detail-Optionen auf Standard,
   // damit nichts vom vorher konfigurierten Produkt übrig bleibt (z.B. alte Sprossen).
   S.sproTyp='keine'; S.sproDicke='18'; S.sproRaster='kreuz';
@@ -8041,15 +8042,19 @@ let wizStepNavOpen=false;
 function wizToggleStepNav(){ wizStepNavOpen=!wizStepNavOpen; wizCrumbs(); }
 function wizJump(i){ wizStepNavOpen=false; wizGo(i); }
 function wizGoAnfrage(){ var i=WIZ_STEPS.findIndex(function(s){return s.key==='angebot';}); if(i<0)i=WIZ_STEPS.findIndex(function(s){return s.key==='kontakt';}); if(i>=0){ wizGo(i); window.scrollTo({top:0,behavior:'auto'}); } }
+// Schritte, die der Nutzer tatsächlich besucht hat (ehrliches "erledigt"-Häkchen, keine falschen Haken bei Vorwärtssprung)
+const wizVisited = new Set();
 function wizCrumbs(){
   const c=document.getElementById('wiz-crumbs'); if(!c)return;
   const n=WIZ_STEPS.length; if(!n){ c.innerHTML=''; return; }
   const cur=Math.min(wizIdx+1,n), pct=Math.round((cur/n)*100);
   const curLabel=(WIZ_STEPS[wizIdx]&&wizCrumbLabel(WIZ_STEPS[wizIdx].key))||'';
   // Alle Schritte als anklickbare Nummern oben (Kundenwunsch: frei hin- und herspringen)
+  if(WIZ_STEPS[wizIdx]) wizVisited.add(WIZ_STEPS[wizIdx].key); // aktuellen Schritt als besucht merken
   let row='<ol class="wiz-strow">'+WIZ_STEPS.map(function(s,i){
-    const st=(i<wizIdx)?'done':((i===wizIdx)?'cur':'');
-    const mark=(i<wizIdx)?'<i class="ms" aria-hidden="true">check</i>':(i+1);
+    const visited=wizVisited.has(s.key);
+    const st=(i===wizIdx)?'cur':(visited?'done':'');
+    const mark=(i!==wizIdx && visited)?'<i class="ms" aria-hidden="true">check</i>':(i+1);
     return '<li class="wiz-st '+st+'"'+(st==='cur'?' aria-current="step"':'')+'>'
       +'<button type="button" onclick="wizGo('+i+')" aria-label="Schritt '+(i+1)+': '+wizCrumbLabel(s.key)+'">'
       +'<span class="wiz-st-dot">'+mark+'</span><span class="wiz-st-lb">'+wizCrumbLabel(s.key)+'</span>'
@@ -8062,6 +8067,15 @@ function wizCrumbs(){
     +((hasAnfrage&&!onAnfrage)?'<button type="button" class="wiz-toanfrage" onclick="wizGoAnfrage()">Direkt zur Anfrage<i class="ms" aria-hidden="true">arrow_forward</i></button>':'')
     +'</div></div>';
   c.innerHTML=row+sub;
+  // Aktiven Schritt nur bei Bedarf in den Sichtbereich scrollen (mit Kontext-Puffer) —
+  // frühe Schritte bleiben links sichtbar, kein Mitten-im-Wort-Beschnitt.
+  requestAnimationFrame(function(){
+    var rowEl=c.querySelector('.wiz-strow'), curEl=c.querySelector('.wiz-st.cur');
+    if(!rowEl||!curEl) return;
+    var rr=rowEl.getBoundingClientRect(), cr=curEl.getBoundingClientRect(), pad=64;
+    if(cr.left < rr.left+pad)        rowEl.scrollLeft -= (rr.left+pad - cr.left);
+    else if(cr.right > rr.right-pad) rowEl.scrollLeft += (cr.right - (rr.right-pad));
+  });
 }
 function wizCrumbLabel(k){return {profil:'Profil',psk:'PSK',hslauf:'Laufrichtung',tuer:'Türmodell',fluegel:'Aufteilung',anschlag:'Öffnung',glas:'Glas',masse:'Maße',farbe:'Farbe',glasdekor:'Motiv',schall:'Schall',griff:'Griff',griffhaus:'Türgriff',griffhst:'Griff',balk:'Schwelle',hstschwelle:'Schwelle',rolladen:'Rolladen',sprossen:'Sprossen',sicherheit:'Sicherheit',anzahl:'Anzahl',angebot:'Übersicht',kontakt:'Anfrage'}[k]||k;}
 function wizNext(){ if(WIZ_STEPS[wizIdx].key==='masse' && typeof wizMassValidate==='function' && !wizMassValidate()) return; if(WIZ_STEPS[wizIdx].key==='kontakt'){ if(typeof d2submit==='function')d2submit({preventDefault:function(){}}); return; } if(wizIdx>=WIZ_STEPS.length-1){ wizFinish(); return; } wizGo(wizIdx+1); window.scrollTo({top:0,behavior:'auto'}); }
@@ -15619,6 +15633,34 @@ async function submitSkizze(e) {
     #cfg-wizard .wiz-griffhead{ margin-bottom:8px !important; }
     #cfg-wizard .wiz-griff2col .wiz-card-opt .wiz-sym{ height:86px !important; }
     #cfg-wizard .wiz-griff2col .wiz-cards{ gap:8px !important; }
+  }
+  /* ════ SCHRITT-SPRUNG-NAVIGATION (frei springen, mit Wort-Labels) ════
+     Desktop: scrollbare Leiste mit Namen, aktiver Schritt zentriert.
+     Mobil: wischbare Pill-Chips. Überschreibt bewusst die "Labels aus"-Regel oben. */
+  #cfg-wizard .wiz-strow{ overflow-x:auto; scrollbar-width:none; scroll-behavior:smooth; padding:0 6px 6px;
+    -webkit-mask:linear-gradient(90deg,transparent,#000 34px,#000 calc(100% - 34px),transparent);
+            mask:linear-gradient(90deg,transparent,#000 34px,#000 calc(100% - 34px),transparent); }
+  #cfg-wizard .wiz-strow::-webkit-scrollbar{ display:none; }
+  #cfg-wizard .wiz-st{ flex:0 0 auto; width:78px; }
+  #cfg-wizard .wiz-st-lb{ display:block; white-space:nowrap; overflow-wrap:normal; }
+  /* Übersprungene/offene Schritt-Nummern dunkler für gute Lesbarkeit (WCAG AA) */
+  #cfg-wizard .wiz-st:not(.cur):not(.done) .wiz-st-dot{ color:#5a6a82; }
+  #cfg-wizard .wiz-st>button:focus-visible{ outline:2px solid var(--c-primary); outline-offset:2px; border-radius:8px; }
+  @media(max-width:700px){
+    #cfg-wizard .wiz-strow{ gap:8px; padding:0 4px 2px;
+      -webkit-mask:linear-gradient(90deg,transparent,#000 18px,#000 calc(100% - 22px),transparent);
+              mask:linear-gradient(90deg,transparent,#000 18px,#000 calc(100% - 22px),transparent); }
+    #cfg-wizard .wiz-st{ width:auto; }
+    #cfg-wizard .wiz-st::before{ display:none; }
+    #cfg-wizard .wiz-st>button{ flex-direction:row; gap:7px; padding:8px 14px; min-height:42px;
+      border:1.5px solid rgba(34,94,170,.26); border-radius:999px; background:#fff; }
+    #cfg-wizard .wiz-st-lb{ display:inline; white-space:nowrap; font-size:13px; }
+    #cfg-wizard .wiz-st.done>button{ border-color:rgba(34,94,170,.4); }
+    #cfg-wizard .wiz-st.done .wiz-st-lb{ color:#225eaa; }
+    #cfg-wizard .wiz-st.cur>button{ background:#225eaa; border-color:#225eaa; }
+    #cfg-wizard .wiz-st.cur .wiz-st-lb{ color:#fff; }
+    #cfg-wizard .wiz-st.cur .wiz-st-dot{ background:#fff; color:#225eaa; box-shadow:none; }
+    #cfg-wizard .wiz-st>button:focus-visible{ outline:2px solid var(--c-primary); outline-offset:2px; }
   }
 </style>
 <link rel="stylesheet" href="css/cookie-banner.css">
