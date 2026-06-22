@@ -4206,6 +4206,14 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   #cfg-wizard .wiz-addmore{margin-top:14px;width:100%;border:1.5px dashed #9bb6da;background:#f5f9ff;color:#225eaa;border-radius:12px;padding:12px;font-weight:800;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px}
   #cfg-wizard .wiz-addmore:hover{background:#e9f1fd}
   #cfg-wizard .wiz-addmore span{font-size:18px;line-height:1}
+  #cfg-wizard .wiz-addmore-hero{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;background:linear-gradient(120deg,#eef4fe 0%,#f6faff 100%);border:1.5px solid #c7dafc;border-radius:16px;padding:16px 20px;margin:0 0 18px}
+  #cfg-wizard .wiz-am-txt{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1 1 240px}
+  #cfg-wizard .wiz-am-txt strong{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;color:#1a4a87;line-height:1.2}
+  #cfg-wizard .wiz-am-txt span{font-family:'Manrope',sans-serif;font-size:13.5px;color:#4a5b73;line-height:1.35}
+  #cfg-wizard .wiz-addmore-btn{flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;background:#225eaa;color:#fff;border:none;border-radius:12px;padding:13px 22px;font-weight:800;font-size:15px;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(34,94,170,.28);transition:transform .12s ease,box-shadow .12s ease,background .12s ease}
+  #cfg-wizard .wiz-addmore-btn:hover{background:#1a4a87;transform:translateY(-1px);box-shadow:0 6px 18px rgba(34,94,170,.34)}
+  #cfg-wizard .wiz-addmore-btn span{font-size:21px;line-height:1}
+  @media(max-width:560px){ #cfg-wizard .wiz-addmore-hero{flex-direction:column;align-items:stretch} #cfg-wizard .wiz-am-txt{flex:0 0 auto} #cfg-wizard .wiz-addmore-btn{width:100%;justify-content:center} }
   /* Kontakt-/Anfrage-Formular im Wizard-Stil */
   .d2hide{display:none}
   #cfg-wizard .wiz-kform{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:14px;text-align:left}
@@ -7715,6 +7723,13 @@ function wizRenderAngebot(){
   var inCart=(typeof cart!=='undefined')?cart:[];
   var total=inCart.length+1;
   var h='<div class="wiz-ohead">Ihre Anfrage · '+total+' '+(total===1?'Produkt':'Produkte')+'</div>';
+  h+='<div class="wiz-addmore-hero">'
+      +'<div class="wiz-am-txt">'
+        +'<strong>Mehrere Produkte, ein Angebot</strong>'
+        +'<span>Fügen Sie so viele Fenster &amp; Türen hinzu, wie Sie brauchen — alles in einer Anfrage.</span>'
+      +'</div>'
+      +'<button type="button" class="wiz-addmore-btn" onclick="wizAddAnother()"><span>+</span> Weiteres Produkt hinzufügen</button>'
+    +'</div>';
   h+='<div class="wiz-ocards">';
   inCart.forEach(function(it){ h+=card(it.config||{}, {id:it.id, thumb:it.thumb}); });
   h+=card(S, {current:true, thumb:wizLastThumb});
@@ -15669,9 +15684,10 @@ async function submitSkizze(e) {
   #cfg-wizard .wiz-obtn-del{ color:#6b7280; border-color:transparent; flex:0 0 auto; padding:10px 14px; }
   #cfg-wizard .wiz-obtn-del:hover{ background:#fdf3f3; color:#b04a4a; }
   #cfg-wizard .wiz-addmore{ margin:28px auto 0; max-width:760px; }
+  #cfg-wizard .wiz-addmore-hero{ max-width:760px; margin-left:auto; margin-right:auto; }
   /* Handy: Bild + Name/Specs oben nebeneinander, Stepper + Aktionen in eigener Reihe darunter */
   @media(max-width:560px){
-    #cfg-wizard .wiz-ohead, #cfg-wizard .wiz-ocards, #cfg-wizard .wiz-addmore{ max-width:none; }
+    #cfg-wizard .wiz-ohead, #cfg-wizard .wiz-ocards, #cfg-wizard .wiz-addmore, #cfg-wizard .wiz-addmore-hero{ max-width:none; }
     #cfg-wizard .wiz-ocard{ grid-template-columns:60px 1fr; gap:8px 14px; padding:16px; }
     #cfg-wizard .wiz-othumb{ width:60px; height:60px; }
     #cfg-wizard .wiz-oside{ grid-column:1 / -1; flex-direction:column; align-items:stretch; gap:8px; margin-top:6px; }
