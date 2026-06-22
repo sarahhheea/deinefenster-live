@@ -8308,21 +8308,27 @@ function wizUpCfgList(){
     ]},
   ];
   function esc(s){ return (''+s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-  var html='<button type="button" class="wiz-cfg-h" onclick="return wizToggleCfgList()">Ihre Konfiguration<i class="ms wiz-cfg-chev" aria-hidden="true">expand_more</i></button>';
-  html+='<div class="wiz-cfg-body">';
-  groups.forEach(function(g){
-    var rows=g.rows.filter(Boolean).filter(function(r){ return r.core || r.v; });
-    if(!rows.length) return;
-    html+='<div class="wiz-cfg-sec">';
-    html+='<div class="wiz-cfg-sechd"><span>'+esc(g.t)+'</span></div>';
-    rows.forEach(function(r){
-      var open=!r.v;
-      var dot=r.hex?'<span class="wiz-cfg-sw" style="background:'+esc(r.hex)+'"></span>':'';
-      html+='<div class="wiz-cfg-row"><span class="wiz-cfg-l">'+esc(r.l)+'</span><span class="wiz-cfg-v'+(open?' open':'')+'">'+(open?'noch nicht gewählt':(dot+esc(r.v)))+'</span></div>';
-    });
-    html+='</div>';
-  });
-  html+='</div>';
+  // ── Kompakte Eckdaten-Zeile unter dem Fenster (Kundenwunsch 22.06.2026): „was es ist", klein.
+  //    Volle Aufschlüsselung erst am Ende (Übersicht). Mit Anschlag-Symbol (Öffnungsrichtung).
+  function _short(v){ return v?(''+v).split('(')[0].trim():null; }
+  var titel = has('profil') ? _short(_cfgShort(_cfgNm('profil',S.profil))) : (S.prod==='haustuere'?'Haustür':S.prod==='hst'?'Schiebetür':S.prod==='balkontuer'?'Balkontür':'Fenster');
+  var chips=[];
+  function add(v){ if(v) chips.push(esc(v)); }
+  add(has('fluegel')&&S.fluegel ? _short(_cfgNm('fluegel',S.fluegel)) : null);
+  add(has('anschlag') ? oeffLabel() : null);
+  add(vMasse());
+  add(has('glas')&&S.glas ? _short(_cfgNm('glas',S.glas)) : null);
+  var _fa=(S.fa&&T('fa'))?_short(_cfgNm('fa',S.fa)):null, _fi=(S.fi&&T('fi'))?_short(_cfgNm('fi',S.fi)):null;
+  if(_fa||_fi){ add((_fa&&_fi&&_fa===_fi)?('Farbe '+_fa):('Farbe '+(_fa||'–')+'/'+(_fi||'–'))); }
+  if(S.roll&&S.roll!=='ohne'){ add('Rolladen '+(_short(_cfgNm('roll',S.roll))||'')); }
+  // Anschlag-Symbol (nur Fenster, wo Karte eindeutig)
+  var anImg=null;
+  try{ if(S.prod==='kunststoff' && typeof ANSCHLAG_SETS!=='undefined'){ var _set=ANSCHLAG_SETS[S.fluegel]||[]; var _o=(S.anschlagIdx!=null)?_set[S.anschlagIdx]:null; if(!_o)_o=_set.filter(function(o){return o.oeff&&o.oeff[0]===S.oeff1&&(o.oeff[1]||null)===(S.oeff2||null);})[0]; if(_o&&_o.img)anImg='img/karten/'+_o.img+'.png?v=20260608u'; } }catch(e){}
+  var html='<div class="wiz-eck">'
+    +(anImg?'<img class="wiz-eck-an" src="'+anImg+'" alt="Öffnungsrichtung" loading="lazy">':'')
+    +'<div class="wiz-eck-txt"><b>'+esc(titel)+'</b>'
+    +(chips.length?'<span>'+chips.join(' · ')+'</span>':'<span class="wiz-eck-empty">wird konfiguriert …</span>')
+    +'</div></div>';
   el.innerHTML=html;
 }
 function _wizPills(items,curVal,fn){ return '<div class="wiz-pills">'+items.map(function(it){return '<button type="button" class="wiz-pill'+(it[0]===curVal?' sel':'')+'" onclick="'+fn+'(\''+it[0]+'\')">'+it[1]+'</button>';}).join('')+'</div>'; }
@@ -15884,18 +15890,17 @@ async function submitSkizze(e) {
     bottom:-1px; height:2.5px; border-radius:2px; background:#cbd9ee; }
   /* darunter: dünne Info-Zeile bleibt schlicht */
   #cfg-wizard .wiz-phsub{ max-width:1240px; margin:10px auto 0 !important; }
-  /* ════ Eckdaten-Karte unter dem Fenster (links) — kompakt, ohne „Ändern" (Kundenwunsch 22.06.2026)
-     Der Kunde sieht unter der Vorschau ruhig, was er hat. Volle Übersicht erst am Ende. ════ */
-  #cfg-wizard .wiz-cfglist{ max-width:380px; margin:14px auto 0; text-align:left;
-    background:#fff; border:1px solid #e7ecf3; border-radius:14px; padding:12px 16px 6px;
+  /* ════ Kompakte Eckdaten-Zeile unter dem Fenster + Anschlag-Symbol (Kundenwunsch 22.06.2026)
+     „Was es ist", klein. Volle Aufschlüsselung erst am Ende (Übersicht). ════ */
+  #cfg-wizard .wiz-cfglist{ max-width:430px; margin:14px auto 0; text-align:left;
+    background:#fff; border:1px solid #e7ecf3; border-radius:14px; padding:10px 14px;
     box-shadow:0 2px 12px rgba(20,40,80,.05); }
-  #cfg-wizard .wiz-cfglist .wiz-cfg-h{ margin:0 0 4px; font-size:14px; }
-  #cfg-wizard .wiz-cfglist .wiz-cfg-sechd{ margin:9px 0 0; }
-  #cfg-wizard .wiz-cfglist .wiz-cfg-sec:first-child .wiz-cfg-sechd{ margin-top:2px; }
-  #cfg-wizard .wiz-cfglist .wiz-cfg-sechd>span{ font-size:10px; }
-  #cfg-wizard .wiz-cfglist .wiz-cfg-row{ padding:4px 0; border-bottom-color:#f2f4f8; }
-  #cfg-wizard .wiz-cfglist .wiz-cfg-l{ font-size:12.5px; }
-  #cfg-wizard .wiz-cfglist .wiz-cfg-v{ font-size:12.5px; }
+  #cfg-wizard .wiz-eck{ display:flex; align-items:center; gap:12px; }
+  #cfg-wizard .wiz-eck-an{ flex:0 0 auto; width:46px; height:46px; object-fit:contain; border-radius:8px; background:#f5f8fc; padding:2px; border:1px solid #eef2f8; }
+  #cfg-wizard .wiz-eck-txt{ min-width:0; display:flex; flex-direction:column; gap:2px; }
+  #cfg-wizard .wiz-eck-txt b{ font-family:'Plus Jakarta Sans',sans-serif; font-size:14px; font-weight:800; color:#14233f; }
+  #cfg-wizard .wiz-eck-txt span{ font-family:'Manrope',sans-serif; font-size:12px; color:#5a6b80; line-height:1.35; }
+  #cfg-wizard .wiz-eck-empty{ color:#aab4c0; font-style:italic; }
 </style>
 <link rel="stylesheet" href="css/cookie-banner.css">
 <script defer src="js/cookie-banner.js"></script>
