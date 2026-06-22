@@ -4520,11 +4520,12 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
           <button type="button" id="wiz-v-inn" onclick="setPreviewView('inn')"><i class="ms" aria-hidden="true">home</i>Innen</button>
         </div>
       </div>
-      <!-- Vorschau (#prev-wrap) wird hier zur Laufzeit eingefügt (zwischen Toggle und Liste) -->
-      <div id="wiz-cfglist" class="wiz-cfglist" aria-live="polite"></div>
+      <!-- Vorschau (#prev-wrap) wird hier zur Laufzeit eingefügt -->
     </div>
     <div class="wiz-panel" id="wiz-panel"></div>
   </div>
+  <!-- Volle-Breite Spec-Leiste (Amazon-Stil): was gerade konfiguriert ist, immer sichtbar -->
+  <div id="wiz-cfglist" class="wiz-cfglist" aria-live="polite"></div>
   <div class="wiz-navbar">
     <div class="wiz-nav">
       <button type="button" class="wiz-otherprod" onclick="backToProductSelect()"><i class="ms f" aria-hidden="true">grid_view</i><span>Anderes Produkt wählen</span></button>
@@ -8308,27 +8309,27 @@ function wizUpCfgList(){
     ]},
   ];
   function esc(s){ return (''+s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-  // ── Kompakte Eckdaten-Zeile unter dem Fenster (Kundenwunsch 22.06.2026): „was es ist", klein.
-  //    Volle Aufschlüsselung erst am Ende (Übersicht). Mit Anschlag-Symbol (Öffnungsrichtung).
+  // ── Volle-Breite Spec-Leiste (Amazon-Stil, Kundenwunsch 22.06.2026): was gerade konfiguriert ist,
+  //    immer sichtbar unter dem Modell. Wichtige Werte als saubere Zellen + Anschlag-Symbol.
   function _short(v){ return v?(''+v).split('(')[0].trim():null; }
   var titel = has('profil') ? _short(_cfgShort(_cfgNm('profil',S.profil))) : (S.prod==='haustuere'?'Haustür':S.prod==='hst'?'Schiebetür':S.prod==='balkontuer'?'Balkontür':'Fenster');
-  var chips=[];
-  function add(v){ if(v) chips.push(esc(v)); }
-  add(has('fluegel')&&S.fluegel ? _short(_cfgNm('fluegel',S.fluegel)) : null);
-  add(has('anschlag') ? oeffLabel() : null);
-  add(vMasse());
-  add(has('glas')&&S.glas ? _short(_cfgNm('glas',S.glas)) : null);
-  var _fa=(S.fa&&T('fa'))?_short(_cfgNm('fa',S.fa)):null, _fi=(S.fi&&T('fi'))?_short(_cfgNm('fi',S.fi)):null;
-  if(_fa||_fi){ add((_fa&&_fi&&_fa===_fi)?('Farbe '+_fa):('Farbe '+(_fa||'–')+'/'+(_fi||'–'))); }
-  if(S.roll&&S.roll!=='ohne'){ add('Rolladen '+(_short(_cfgNm('roll',S.roll))||'')); }
-  // Anschlag-Symbol (nur Fenster, wo Karte eindeutig)
   var anImg=null;
   try{ if(S.prod==='kunststoff' && typeof ANSCHLAG_SETS!=='undefined'){ var _set=ANSCHLAG_SETS[S.fluegel]||[]; var _o=(S.anschlagIdx!=null)?_set[S.anschlagIdx]:null; if(!_o)_o=_set.filter(function(o){return o.oeff&&o.oeff[0]===S.oeff1&&(o.oeff[1]||null)===(S.oeff2||null);})[0]; if(_o&&_o.img)anImg='img/karten/'+_o.img+'.png?v=20260608u'; } }catch(e){}
-  var html='<div class="wiz-eck">'
-    +(anImg?'<img class="wiz-eck-an" src="'+anImg+'" alt="Öffnungsrichtung" loading="lazy">':'')
-    +'<div class="wiz-eck-txt"><b>'+esc(titel)+'</b>'
-    +(chips.length?'<span>'+chips.join(' · ')+'</span>':'<span class="wiz-eck-empty">wird konfiguriert …</span>')
-    +'</div></div>';
+  var _fa=(S.fa&&T('fa'))?_short(_cfgNm('fa',S.fa)):null, _fi=(S.fi&&T('fi'))?_short(_cfgNm('fi',S.fi)):null;
+  var _faHex=(P.fa&&P.fa[S.fa]&&P.fa[S.fa].hex)||null, _fiHex=(P.fi&&P.fi[S.fi]&&P.fi[S.fi].hex)||null;
+  var cells=[];
+  function cell(l,v,sw){ if(v) cells.push('<div class="wiz-spec-cell"><span class="wiz-spec-l">'+esc(l)+'</span><span class="wiz-spec-v">'+(sw?'<span class="wiz-spec-sw" style="background:'+esc(sw)+'"></span>':'')+esc(v)+'</span></div>'); }
+  cell('Aufteilung', has('fluegel')&&S.fluegel?_short(_cfgNm('fluegel',S.fluegel)):null);
+  cell('Öffnung', has('anschlag')?oeffLabel():null);
+  cell('Maße', vMasse());
+  cell('Verglasung', has('glas')&&S.glas?_short(_cfgNm('glas',S.glas)):null);
+  cell('Außen', _fa, _faHex);
+  cell('Innen', _fi, _fiHex);
+  if(has('rolladen')){ cell('Rolladen', (S.roll&&S.roll!=='ohne')?_short(_cfgNm('roll',S.roll)):'Nein'); }
+  var html='<div class="wiz-spec">'
+    +'<div class="wiz-spec-head">'+(anImg?'<img class="wiz-spec-an" src="'+anImg+'" alt="Öffnungsrichtung" loading="lazy">':'')+'<div class="wiz-spec-title"><span class="wiz-spec-eyebrow">Ihre Konfiguration</span><b>'+esc(titel)+'</b></div></div>'
+    +'<div class="wiz-spec-cells">'+(cells.length?cells.join(''):'<span class="wiz-eck-empty">wird konfiguriert …</span>')+'</div>'
+    +'</div>';
   el.innerHTML=html;
 }
 function _wizPills(items,curVal,fn){ return '<div class="wiz-pills">'+items.map(function(it){return '<button type="button" class="wiz-pill'+(it[0]===curVal?' sel':'')+'" onclick="'+fn+'(\''+it[0]+'\')">'+it[1]+'</button>';}).join('')+'</div>'; }
@@ -15901,17 +15902,28 @@ async function submitSkizze(e) {
     bottom:-1px; height:2.5px; border-radius:2px; background:#cbd9ee; }
   /* darunter: dünne Info-Zeile bleibt schlicht */
   #cfg-wizard .wiz-phsub{ max-width:1240px; margin:10px auto 0 !important; }
-  /* ════ Kompakte Eckdaten-Zeile unter dem Fenster + Anschlag-Symbol (Kundenwunsch 22.06.2026)
-     „Was es ist", klein. Volle Aufschlüsselung erst am Ende (Übersicht). ════ */
-  #cfg-wizard .wiz-cfglist{ max-width:430px; margin:14px auto 0; text-align:left;
-    background:#fff; border:1px solid #e7ecf3; border-radius:14px; padding:10px 14px;
+  /* ════ Volle-Breite Spec-Leiste (Amazon-Stil) unter dem Modell (Kundenwunsch 22.06.2026):
+     immer sichtbar, was gerade konfiguriert ist. Volle Aufschlüsselung am Ende (Übersicht). ════ */
+  #cfg-wizard .wiz-cfglist{ max-width:1180px; margin:18px auto 0; text-align:left; }
+  #cfg-wizard .wiz-spec{ display:flex; align-items:center; gap:18px; flex-wrap:wrap;
+    background:#fff; border:1px solid #e7ecf3; border-radius:14px; padding:11px 18px;
     box-shadow:0 2px 12px rgba(20,40,80,.05); }
-  #cfg-wizard .wiz-eck{ display:flex; align-items:center; gap:12px; }
-  #cfg-wizard .wiz-eck-an{ flex:0 0 auto; width:46px; height:46px; object-fit:contain; border-radius:8px; background:#f5f8fc; padding:2px; border:1px solid #eef2f8; }
-  #cfg-wizard .wiz-eck-txt{ min-width:0; display:flex; flex-direction:column; gap:2px; }
-  #cfg-wizard .wiz-eck-txt b{ font-family:'Plus Jakarta Sans',sans-serif; font-size:14px; font-weight:800; color:#14233f; }
-  #cfg-wizard .wiz-eck-txt span{ font-family:'Manrope',sans-serif; font-size:12px; color:#5a6b80; line-height:1.35; }
+  #cfg-wizard .wiz-spec-head{ display:flex; align-items:center; gap:11px; padding-right:18px;
+    border-right:1px solid #eef1f6; flex:0 0 auto; }
+  #cfg-wizard .wiz-spec-an{ width:44px; height:44px; object-fit:contain; border-radius:8px; background:#f5f8fc; padding:2px; border:1px solid #eef2f8; }
+  #cfg-wizard .wiz-spec-title{ display:flex; flex-direction:column; }
+  #cfg-wizard .wiz-spec-eyebrow{ font-size:9.5px; font-weight:800; letter-spacing:.6px; text-transform:uppercase; color:#a3afbe; }
+  #cfg-wizard .wiz-spec-title b{ font-family:'Plus Jakarta Sans',sans-serif; font-size:15px; font-weight:800; color:#14233f; }
+  #cfg-wizard .wiz-spec-cells{ display:flex; align-items:center; gap:22px; flex-wrap:wrap; flex:1 1 auto; }
+  #cfg-wizard .wiz-spec-cell{ display:flex; flex-direction:column; gap:1px; }
+  #cfg-wizard .wiz-spec-l{ font-size:10px; font-weight:700; letter-spacing:.3px; text-transform:uppercase; color:#9aa3b2; }
+  #cfg-wizard .wiz-spec-v{ font-family:'Plus Jakarta Sans',sans-serif; font-size:13.5px; font-weight:700; color:#14233f; display:flex; align-items:center; gap:6px; }
+  #cfg-wizard .wiz-spec-sw{ width:13px; height:13px; border-radius:4px; border:1px solid rgba(0,0,0,.18); flex:0 0 auto; }
   #cfg-wizard .wiz-eck-empty{ color:#aab4c0; font-style:italic; }
+  @media(max-width:820px){ #cfg-wizard .wiz-spec{ gap:12px; padding:10px 14px; } #cfg-wizard .wiz-spec-cells{ gap:14px; } #cfg-wizard .wiz-spec-head{ padding-right:12px; } }
+  /* Spec-Leiste nur wenn 3D-Produkt sichtbar — auf frühen Karten-Schritten + Übersicht/Anfrage aus */
+  #cfg-wizard:has(.wiz-body.cards-mode) #wiz-cfglist,
+  #cfg-wizard:has(.wiz-body.angebot-wide) #wiz-cfglist{ display:none; }
 </style>
 <link rel="stylesheet" href="css/cookie-banner.css">
 <script defer src="js/cookie-banner.js"></script>
