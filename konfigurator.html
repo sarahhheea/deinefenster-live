@@ -8509,7 +8509,18 @@ const PANZER_FARBEN = {
   'nussbaum':      {name:'Nussbaum',        hex:'#4c3320', border:'#2f1f13'},
   'moosgruen':     {name:'Moosgrün',        hex:'#47512f', border:'#2f361f'}
 };
-function wizSetRoll(v){ S.roll=v; if(window._touched)window._touched.add('roll'); if(typeof autoSetRollKasten==='function')autoSetRollKasten(); _wizPrev(); wizRenderPanel(); }
+function wizSetRoll(v){ S.roll=v; if(window._touched)window._touched.add('roll'); if(typeof autoSetRollKasten==='function')autoSetRollKasten(); _wizPrev(); wizRenderPanel();
+  // Nach Auswahl eines Rollladens auf dem Handy sanft zu den neu erschienenen Optionen
+  // (Antriebsseite + Panzerfarbe) scrollen — sonst liegen sie unterhalb der Karten und der
+  // Kunde übersieht, dass er Seite + Farbe wählen kann (Kundenwunsch Handy-Auffindbarkeit).
+  if(v && v!=='ohne' && window.innerWidth<=760){
+    try{ setTimeout(function(){
+      var el=document.querySelector('#wiz-panel [onclick*="wizSetRollSeite"]');
+      var grp=(el&&el.closest)?el.closest('.wiz-group'):null;
+      if(grp&&grp.scrollIntoView) grp.scrollIntoView({behavior:'auto',block:'center'});
+    },220); }catch(e){}
+  }
+}
 function wizSetPanzerFarbe(v){ S.panzerFarbe=v; if(window._touched)window._touched.add('panzerFarbe'); _wizPrev(); wizRenderPanel(); }
 function _panzerHex(){ return (S.panzerFarbe&&PANZER_FARBEN[S.panzerFarbe])?PANZER_FARBEN[S.panzerFarbe].hex:'#f1f1ec'; }
 function wizSetRollSeite(v){ wizSet('rollSeite',v); }
