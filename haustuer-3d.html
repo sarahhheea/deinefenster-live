@@ -313,7 +313,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.0;
+renderer.toneMappingExposure = 1.12;   // etwas heller belichtet — Inox-Silber + Türfarbe klarer sichtbar (Kundenwunsch)
 
 const scene = new THREE.Scene();
 // Im Embed-Modus dunkler Hintergrund (passt zum Konfigurator-Dark-Glass),
@@ -353,8 +353,8 @@ const envTex = pmremGen.fromScene(envSc, 0.04).texture;
 scene.environment = envTex;
 
 // ── Szenen-Beleuchtung ──────────────────────────────
-// Nur SO VIEL Ambient dass Anthrazit als dunkelgrau sichtbar ist
-scene.add(new THREE.AmbientLight(0xffffff, 0.42));
+// Etwas mehr Ambient: Türfarbe (auch Anthrazit) gleichmäßig hell, Silber-Inox besser ablesbar
+scene.add(new THREE.AmbientLight(0xffffff, 0.55));
 
 // Key-Licht von oben-rechts-leicht-vorne (klassische Produktfoto-Beleuchtung)
 const key = new THREE.DirectionalLight(0xffffff, 1.6);
@@ -368,7 +368,7 @@ key.shadow.bias = -0.001;
 scene.add(key);
 
 // Fill-Licht von links (Schatten aufhellen)
-const fill = new THREE.DirectionalLight(0xddeeff, 0.5);
+const fill = new THREE.DirectionalLight(0xddeeff, 0.62);
 fill.position.set(-3, 2.5, 3); scene.add(fill);
 
 // Sehr schwaches Frontlicht — verhindert pure-black bei Anthrazit
@@ -498,20 +498,20 @@ const MODELLE = {
     longHandle: true,              // langer runder Stoßgriff ~80% Türhöhe
     panels: [{x:0.090, y:0.100, w:0.820, h:1.900}],
   },
-  'colorado-inox':          { decalTexture: 'img/haustuer-motiv/colorado-inox.png' },
-  'montana-1-inox':         { decalTexture: 'img/haustuer-motiv/montana-1-inox.png' },
-  'montana-2-lr-inox':      { decalTexture: 'img/haustuer-motiv/montana-2-lr-inox.png' },
-  'montana-3-lr-inox':      { decalTexture: 'img/haustuer-motiv/montana-3-lr-inox.png' },
-  'florida-lr-inox':        { decalTexture: 'img/haustuer-motiv/florida-lr-inox.png' },
-  'ohio-inox':              { decalTexture: 'img/haustuer-motiv/ohio-inox.png' },
-  'alaska-1-inox':          { decalTexture: 'img/haustuer-motiv/alaska-1-inox.png' },
-  'alaska-2-inox':          { decalTexture: 'img/haustuer-motiv/alaska-2-inox.png' },
-  'nebraska-lcr-inox':      { decalTexture: 'img/haustuer-motiv/nebraska-lcr-inox.png' },
-  'pennsylvania-1-inox':    { decalTexture: 'img/haustuer-motiv/pennsylvania-1.png' },
-  'pennsylvania-2-lr-inox': { decalTexture: 'img/haustuer-motiv/pennsylvania-2.png' },
-  'pennsylvania-3-lr-inox': { decalTexture: 'img/haustuer-motiv/pennsylvania-3.png' },
-  'texas-c-inox':           { decalTexture: 'img/haustuer-motiv/texas-c-inox.png' },
-  'texas-lr-inox':          { decalTexture: 'img/haustuer-motiv/texas-lr-inox.png' },
+  'colorado-inox':          { decalTexture: 'img/haustuer-motiv/colorado-inox.webp' },
+  'montana-1-inox':         { decalTexture: 'img/haustuer-motiv/montana-1-inox.webp' },
+  'montana-2-lr-inox':      { decalTexture: 'img/haustuer-motiv/montana-2-lr-inox.webp' },
+  'montana-3-lr-inox':      { decalTexture: 'img/haustuer-motiv/montana-3-lr-inox.webp' },
+  'florida-lr-inox':        { decalTexture: 'img/haustuer-motiv/florida-lr-inox.webp' },
+  'ohio-inox':              { decalTexture: 'img/haustuer-motiv/ohio-inox.webp' },
+  'alaska-1-inox':          { decalTexture: 'img/haustuer-motiv/alaska-1-inox.webp' },
+  'alaska-2-inox':          { decalTexture: 'img/haustuer-motiv/alaska-2-inox.webp' },
+  'nebraska-lcr-inox':      { decalTexture: 'img/haustuer-motiv/nebraska-lcr-inox.webp' },
+  'pennsylvania-1-inox':    { decalTexture: 'img/haustuer-motiv/pennsylvania-1.webp' },
+  'pennsylvania-2-lr-inox': { decalTexture: 'img/haustuer-motiv/pennsylvania-2.webp' },
+  'pennsylvania-3-lr-inox': { decalTexture: 'img/haustuer-motiv/pennsylvania-3.webp' },
+  'texas-c-inox':           { decalTexture: 'img/haustuer-motiv/texas-c-inox.webp' },
+  'texas-lr-inox':          { decalTexture: 'img/haustuer-motiv/texas-lr-inox.webp' },
 };
 
 let glassObjects = [];
