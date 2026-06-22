@@ -15554,14 +15554,7 @@ async function submitSkizze(e) {
   #cfg-wizard .wiz-steps{ position:relative; }
   #cfg-wizard .wiz-st>button{ padding:3px 0; gap:0; min-height:44px; }
   #cfg-wizard .wiz-st-dot{ width:25px; height:25px; font-size:11.5px; border-width:2px; }
-  /* Schritt-Namen auf Desktop sichtbar + alle 15 ohne Scroll (Kundenwunsch 22.06.2026: benannte, frei anwählbare Schritte, alle auf einen Blick) */
-  #cfg-wizard .wiz-steps{ max-width:1240px !important; padding:0 8px; }
-  #cfg-wizard .wiz-strow{ overflow-x:auto; scrollbar-width:none; }
-  #cfg-wizard .wiz-strow::-webkit-scrollbar{ display:none; }
-  #cfg-wizard .wiz-st-lb{ display:block; font-size:10px; line-height:1.2; white-space:nowrap; overflow:visible; letter-spacing:-.1px; }
-  #cfg-wizard .wiz-st>button{ gap:6px; }
-  #cfg-wizard .wiz-st>button:hover .wiz-st-lb{ color:var(--c-primary); text-decoration:underline; text-underline-offset:2px; }
-  #cfg-wizard .wiz-st>button:hover .wiz-st-dot{ border-color:var(--c-primary); }
+  /* (Desktop-Namen + Sticky-Look werden im Konzept-B-Block weiter unten gesetzt) */
   #cfg-wizard .wiz-st::before{ top:16px; left:calc(-50% + 12px); width:calc(100% - 25px); }
   #cfg-wizard .wiz-phsub-row{ margin-top:10px; }
   #cfg-wizard .wiz-toanfrage{ font-size:12.5px; padding:8px 12px; }
@@ -15757,6 +15750,49 @@ async function submitSkizze(e) {
     #cfg-wizard .wiz-st.cur .wiz-st-dot{ background:#fff; color:#225eaa; box-shadow:none; }
     #cfg-wizard .wiz-st>button:focus-visible{ outline:2px solid var(--c-primary); outline-offset:2px; }
   }
+  /* ════════════════════════════════════════════════════════════════════
+     KONZEPT B — Unterstrich-Tabs, immer sichtbar (sticky)
+     Kundenwunsch 22.06.2026: Navigation bleibt beim Konfigurieren oben kleben,
+     modern/schlicht, sofort als „frei springbar" erkennbar. Überschreibt den
+     alten Kreis-/Pillen-Look. Gilt für Desktop UND Handy.
+     ════════════════════════════════════════════════════════════════════ */
+  /* Sticky-Kopf: klebt oben im Wizard-Scrollbereich (#cfg-wizard ist der Scroll-Container).
+     Container-Padding oben auf 0, Abstand wandert in die Leiste → lückenlose Abdeckung beim Scrollen. */
+  #cfg-wizard{ padding-top:0 !important; }
+  #cfg-wizard .wiz-steps{ position:sticky; top:0; z-index:40; max-width:none !important;
+    margin:0 -20px 16px !important;
+    padding:clamp(12px,1.8vh,20px) 20px 0 !important;
+    background:var(--c-page-bg,#f4f7fc); box-shadow:0 6px 14px -10px rgba(20,40,80,.25); }
+  /* Tab-Zeile: dünn, zentriert, mit feiner Grundlinie */
+  #cfg-wizard .wiz-strow{ max-width:1240px; margin:0 auto !important; align-items:flex-end; justify-content:center;
+    gap:2px; padding:0 6px !important; border-bottom:1px solid #e3e9f2; }
+  /* Verbindungslinie + Kreis-Look raus */
+  #cfg-wizard .wiz-st::before{ display:none !important; }
+  #cfg-wizard .wiz-st{ flex:0 0 auto; width:auto !important; }
+  #cfg-wizard .wiz-st>button{ flex-direction:column !important; align-items:center; gap:3px !important;
+    padding:4px 13px 9px !important; min-height:0 !important; background:none !important; border:0 !important;
+    border-radius:0 !important; position:relative; }
+  /* Nummer/Häkchen: klein über dem Namen, keine Kreis-Fläche mehr */
+  #cfg-wizard .wiz-st-dot{ width:auto !important; height:auto !important; background:none !important;
+    border:0 !important; box-shadow:none !important; font-size:10px !important; font-weight:700 !important;
+    color:#b3bdca !important; order:-1; }
+  #cfg-wizard .wiz-st-dot .ms{ font-size:13px !important; }
+  #cfg-wizard .wiz-st-lb{ display:block !important; font-size:13px !important; line-height:1.2 !important;
+    white-space:nowrap; color:#7a8aa0 !important; font-weight:600 !important; letter-spacing:0 !important; }
+  /* erledigt: dunkler Name, Häkchen in Blau */
+  #cfg-wizard .wiz-st.done .wiz-st-dot{ color:var(--c-primary) !important; }
+  #cfg-wizard .wiz-st.done .wiz-st-lb{ color:#46586f !important; }
+  /* aktueller Schritt: blauer Unterstrich (Tab-Look) */
+  #cfg-wizard .wiz-st.cur .wiz-st-dot{ color:var(--c-primary) !important; }
+  #cfg-wizard .wiz-st.cur .wiz-st-lb{ color:var(--c-primary) !important; font-weight:800 !important; }
+  #cfg-wizard .wiz-st.cur>button::after{ content:''; position:absolute; left:7px; right:7px; bottom:-1px;
+    height:2.5px; border-radius:2px; background:var(--c-primary); }
+  /* hover = klar als anklickbar erkennbar */
+  #cfg-wizard .wiz-st>button:hover .wiz-st-lb{ color:var(--c-primary) !important; }
+  #cfg-wizard .wiz-st:not(.cur)>button:hover::after{ content:''; position:absolute; left:7px; right:7px;
+    bottom:-1px; height:2.5px; border-radius:2px; background:#cbd9ee; }
+  /* darunter: dünne Info-Zeile bleibt schlicht */
+  #cfg-wizard .wiz-phsub{ max-width:1240px; margin:10px auto 0 !important; }
 </style>
 <link rel="stylesheet" href="css/cookie-banner.css">
 <script defer src="js/cookie-banner.js"></script>
