@@ -4315,6 +4315,16 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   #cfg-wizard .wiz-tab.sel{background:var(--c-primary);color:#fff;border-color:var(--c-primary)}
   /* Gerahmtes Farb-Panel — trennt Innen/Außen klar (Innen=blau, Außen=bronze) */
   #cfg-wizard .wiz-farb-panel{border:2px solid var(--c-primary);border-radius:16px;padding:12px 12px 6px;margin-top:2px;background:#fff;box-shadow:0 4px 16px rgba(20,40,80,.06)}
+  #cfg-wizard .wiz-dicht{margin-top:14px;border:1px solid #e1e9f4;border-radius:14px;padding:12px 14px;background:#fbfdff}
+  #cfg-wizard .wiz-dicht-hd{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:14px;color:#14233f;margin-bottom:10px}
+  #cfg-wizard .wiz-dicht-sub{font-weight:500;font-size:12.5px;color:#7b8794}
+  #cfg-wizard .wiz-dicht-opts{display:flex;gap:10px}
+  #cfg-wizard .wiz-dicht-opt{flex:1;display:flex;align-items:center;gap:9px;min-height:48px;padding:8px 14px;border:1.5px solid #d6e0ee;border-radius:12px;background:#fff;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:14.5px;color:#14233f;transition:border-color .12s,box-shadow .12s,background .12s}
+  #cfg-wizard .wiz-dicht-opt:hover{border-color:#a9c8ec}
+  #cfg-wizard .wiz-dicht-opt.sel{border-color:var(--c-primary);background:#eaf1fc;box-shadow:0 0 0 3px rgba(34,94,170,.12)}
+  #cfg-wizard .wiz-dicht-chip{width:22px;height:22px;border-radius:6px;flex:0 0 auto;border:1px solid rgba(0,0,0,.15)}
+  #cfg-wizard .wiz-dicht-nm{flex:1 1 auto}
+  #cfg-wizard .wiz-dicht-std{flex:0 0 auto;font-size:10.5px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;color:#225eaa;background:#dceafc;border-radius:999px;padding:3px 8px}
   #cfg-wizard .wiz-farb-panel.is-aussen{border-color:var(--c-primary)}
   #cfg-wizard .wiz-farb-head{background:rgba(34,94,170,.07);border-radius:11px;padding:10px 12px;margin-bottom:12px}
   #cfg-wizard .wiz-farb-panel.is-aussen .wiz-farb-head{background:rgba(34,94,170,.07)}
@@ -7741,6 +7751,7 @@ function wizRenderAngebot(){
     if(c.schall&&c.schall!=='ohne')extras.push('Schallschutz');
     if(c.sicherGlas&&c.sicherGlas!=='kein')extras.push('Sicherheitsglas');
     if(c.glasdekor&&c.glasdekor!=='klar')extras.push('Glasdekor');
+    if(c.fd&&c.fd!=='schwarz')extras.push('graue Dichtung');
     var line2='Farbe: '+farbe+' · '+(extras.length?extras.join(' · '):'Standard-Ausstattung');
     var qtyCtl='<div class="wiz-oqtyctl" role="group" aria-label="Menge ändern">'
       +'<button type="button" class="wiz-oqtybtn" onclick="wizCardQty(\''+qtyId+'\',-1)" aria-label="Menge verringern">−</button>'
@@ -8354,10 +8365,23 @@ function wizRenderFarbe(){
        '<div class="wiz-swgrid2">'+_shown.map(function(k){const o=table[k];return '<button type="button" class="wiz-sw2'+(k===cur?' sel':'')+'" title="'+o.name+'" aria-label="'+o.name+'" onclick="wizPickFarb(\''+k+'\')"><span class="wiz-chip2" style="background:'+o.hex+';border-color:'+(o.border||'rgba(0,0,0,.12)')+'"></span><span class="wiz-sw2n">'+o.name.split('(')[0].trim()+'</span></button>';}).join('')+'</div>'+
        (_keys.length>_LIM?'<button type="button" class="wiz-farb-more" onclick="wizFarbToggleAll(\''+tab+'\')">'+(_showAll?'Weniger anzeigen':'Alle '+_keys.length+' Farben &amp; Holzdekore anzeigen')+'</button>':'')+
      '</div>';
+  // Dichtungsfarbe — gilt fürs ganze Fenster (Gummidichtung am Flügel). Schwarz = Standard.
+  var _fd=S.fd||'schwarz';
+  h+='<div class="wiz-dicht">'+
+       '<div class="wiz-dicht-hd">Dichtungsfarbe<span class="wiz-dicht-sub"> · Gummidichtung am Flügel</span></div>'+
+       '<div class="wiz-dicht-opts">'+
+         '<button type="button" class="wiz-dicht-opt'+(_fd==='schwarz'?' sel':'')+'" onclick="wizPickDichtung(\'schwarz\')"><span class="wiz-dicht-chip" style="background:#1a1a1a"></span><span class="wiz-dicht-nm">Schwarz</span><span class="wiz-dicht-std">Standard</span></button>'+
+         '<button type="button" class="wiz-dicht-opt'+(_fd==='grau'?' sel':'')+'" onclick="wizPickDichtung(\'grau\')"><span class="wiz-dicht-chip" style="background:#7d7d7d"></span><span class="wiz-dicht-nm">Grau</span></button>'+
+       '</div>'+
+     '</div>';
   return h;
 }
 let wizFarbAll={fa:false,fi:false,fd:false};
 function wizFarbToggleAll(t){ wizFarbAll[t]=!wizFarbAll[t]; if(typeof wizRenderPanel==='function')wizRenderPanel(); }
+// Dichtungsfarbe wählen (Schwarz Standard / Grau). Landet in Übersicht + Angebot/Anfrage (S.fd ist überall verdrahtet).
+function wizPickDichtung(k){ S.fd=k; if(window._touched)window._touched.add('fd');
+  if(typeof wizRenderPanel==='function')wizRenderPanel();
+  if(typeof upSidebar==='function')upSidebar(); if(typeof wizUpCfgList==='function')wizUpCfgList(); }
 // GLASDEKOR
 function wizRenderGlasdekor(){
   return '<div class="wiz-cards">'+GD_KEYS.map(function(k){const o=(P.glasdekor&&P.glasdekor[k])||{name:k};return '<div class="wiz-card'+(k===S.glasdekor?' sel':'')+'" onclick="wizSet(\'glasdekor\',\''+k+'\')"><div class="wiz-vis"><img src="img/glasdekor/'+k+'.webp" alt="'+o.name+'"></div><div class="wiz-cn">'+o.name+'</div></div>';}).join('')+'</div>';
