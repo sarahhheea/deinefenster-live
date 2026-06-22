@@ -7517,24 +7517,31 @@ function wizRenderTuergriff(){
   // Innen + Außen NEBENEINANDER, ganze Klinke sichtbar. Pro Seite die wichtigsten zeigen,
   // Rest via "Alle anzeigen" (Außen hat viele Stoßgriffe).
   function shortName(n){ return (n||'').replace('Haustür-Klinke ','').replace('Haustürgriff ','').replace('Haustür-Griff ',''); }
+  // Höhe des Edelstahlstoßgriffs (580 / 1200 / 1600 mm) — nur wenn er gewählt ist.
+  // Erscheint DIREKT unter der Edelstahlstoßgriff-Karte (oben in der Außen-Spalte) →
+  // sofort sichtbar, kein Runterscrollen, logisch mit der Griff-Wahl verbunden.
+  function stossHeightHtml(){
+    if(S.tuerGriffAussen!=='stoss-q45r') return '';
+    var cur=S.stossHoehe||'1200';
+    return '<div class="wiz-stossh wiz-stossh-inline"><div class="wiz-stossh-hd">Höhe wählen</div><div class="wiz-stossh-pills">'+
+      ['580','1200','1600'].map(function(mm){return '<button type="button" class="wiz-stossh-pill'+(cur===mm?' sel':'')+'" onclick="wizSet(\'stossHoehe\',\''+mm+'\')">'+mm+'<small>mm</small></button>';}).join('')+
+      '</div></div>';
+  }
   function col(title,subt,obj,sel,sk){
     var keys=Object.keys(obj), LIM=4, all=wizGriffMore[sk], shown=all?keys:keys.slice(0,LIM);
-    var cards=shown.map(function(k){var o=obj[k];var im=o.img.replace(/\.webp$/,'-cut.webp');return '<button type="button" class="wiz-grcard'+(k===sel?' sel':'')+'" onclick="wizSet(\''+sk+'\',\''+k+'\')"><span class="wiz-grimg"><img src="'+im+'" alt="'+o.name+'" loading="lazy"></span><span class="wiz-grnm">'+shortName(o.name)+'</span></button>';}).join('');
+    var cards=shown.map(function(k){
+      var o=obj[k];var im=o.img.replace(/\.webp$/,'-cut.webp');
+      var card='<button type="button" class="wiz-grcard'+(k===sel?' sel':'')+'" onclick="wizSet(\''+sk+'\',\''+k+'\')"><span class="wiz-grimg"><img src="'+im+'" alt="'+o.name+'" loading="lazy"></span><span class="wiz-grnm">'+shortName(o.name)+'</span></button>';
+      if(sk==='tuerGriffAussen' && k==='stoss-q45r' && k===sel){ card+=stossHeightHtml(); }
+      return card;
+    }).join('');
     var more=keys.length>LIM?'<button type="button" class="wiz-grmore" onclick="wizGriffMoreToggle(\''+sk+'\')">'+(all?'Weniger':'Alle '+keys.length+' →')+'</button>':'';
     return '<div class="wiz-grcol"><div class="wiz-grhd">'+title+'<small>'+subt+'</small></div>'+cards+more+'</div>';
-  }
-  // Nur beim Edelstahlstoßgriff (stoss-q45r): Höhe wählbar (580 / 1200 / 1600 mm)
-  var stossH='';
-  if(S.tuerGriffAussen==='stoss-q45r'){
-    var cur=S.stossHoehe||'1200';
-    stossH='<div class="wiz-stossh"><div class="wiz-stossh-hd">Höhe des Edelstahlstoßgriffs</div><div class="wiz-stossh-pills">'+
-      ['580','1200','1600'].map(function(mm){return '<button type="button" class="wiz-stossh-pill'+(cur===mm?' sel':'')+'" onclick="wizSet(\'stossHoehe\',\''+mm+'\')">'+mm+' mm</button>';}).join('')+
-      '</div></div>';
   }
   return '<div class="wiz-grcols">'+
     col('Innen','Klinke im Raum',P.tuerGriffInnen,S.tuerGriffInnen,'tuerGriffInnen')+
     col('Außen','von der Straße',P.tuerGriffAussen,S.tuerGriffAussen,'tuerGriffAussen')+
-  '</div>'+stossH;
+  '</div>';
 }
 let wizGriffTab='innen';
 function wizGriffTabSet(t){ wizGriffTab=t; if(typeof wizRenderPanel==='function')wizRenderPanel(); }
@@ -15637,6 +15644,13 @@ async function submitSkizze(e) {
   #cfg-wizard .wiz-stossh-pills{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
   #cfg-wizard .wiz-stossh-pill{ min-height:48px; border:1.5px solid #d6e0ee; background:#fff; border-radius:11px; font-family:'Plus Jakarta Sans',sans-serif; font-weight:700; font-size:14px; color:#14233f; cursor:pointer; }
   #cfg-wizard .wiz-stossh-pill.sel{ border-color:var(--c-primary); background:#eaf1fc; color:#225eaa; box-shadow:0 0 0 3px rgba(34,94,170,.12); }
+  /* Inline-Variante: klappt DIREKT unter der Edelstahlstoßgriff-Karte auf (sofort sichtbar, kein Scrollen) */
+  #cfg-wizard .wiz-stossh-inline{ max-width:none; margin:8px 0 2px; padding:9px 9px 10px; background:#eaf1fc; border:1.5px solid rgba(34,94,170,.28); border-radius:12px; }
+  #cfg-wizard .wiz-stossh-inline .wiz-stossh-hd{ font-size:12px; font-weight:800; color:#225eaa; margin-bottom:7px; text-align:center; }
+  #cfg-wizard .wiz-stossh-inline .wiz-stossh-pills{ gap:6px; }
+  #cfg-wizard .wiz-stossh-inline .wiz-stossh-pill{ min-height:40px; display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1; gap:1px; font-size:14px; border-radius:9px; padding:4px 2px; }
+  #cfg-wizard .wiz-stossh-inline .wiz-stossh-pill small{ font-size:9.5px; font-weight:600; color:#7a8aa3; }
+  #cfg-wizard .wiz-stossh-inline .wiz-stossh-pill.sel small{ color:#225eaa; }
   /* === Bestellübersicht — aufgeräumte Warenkorb-Karten (Baymard-Linie) === */
   #cfg-wizard .wiz-ohead{ font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:16px; color:#14233f; margin:0 auto 16px; max-width:680px; text-align:left; }
   #cfg-wizard .wiz-ocards{ max-width:680px; margin:0 auto; display:flex; flex-direction:column; gap:16px; }
