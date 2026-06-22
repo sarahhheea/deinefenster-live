@@ -7515,7 +7515,7 @@ function wizRenderExtras(){
 }
 function wizRebuildSteps(){ const ck=WIZ_STEPS[wizIdx]&&WIZ_STEPS[wizIdx].key; WIZ_STEPS=buildWizSteps(S.prod||'kunststoff'); let ni=WIZ_STEPS.findIndex(function(s){return s.key===ck;}); if(ni<0)ni=Math.min(wizIdx,WIZ_STEPS.length-1); wizIdx=Math.max(0,ni); }
 // Türmodelle (Studio-Bilder, vorhanden) — finale Auswahl/Bilder folgen in Phase 2
-const WIZ_DOORS=['vollglas-inox','florida-lr-inox','montana-2-lr-inox','montana-3-lr-inox','ohio-inox','colorado-inox','alaska-2-inox','alaska-1-inox','montana-1-inox','nebraska-lcr-inox','pennsylvania-1-inox','texas-c-inox','texas-lr-inox'].map(function(k){return {key:k,name:k.replace(/-inox$/,'').replace(/-lr$|-lcr$|-c$/,'').replace(/-/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();}).trim(),img:'img/drutex-tueren/studio/'+k+'.webp?v=20260622d'};});
+const WIZ_DOORS=['vollglas-inox','florida-lr-inox','montana-2-lr-inox','montana-3-lr-inox','ohio-inox','colorado-inox','alaska-2-inox','alaska-1-inox','montana-1-inox','nebraska-lcr-inox','pennsylvania-1-inox','texas-c-inox','texas-lr-inox'].map(function(k){return {key:k,name:k.replace(/-inox$/,'').replace(/-lr$|-lcr$|-c$/,'').replace(/-/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();}).trim(),img:'img/drutex-tueren/studio-weiss/'+k+'.webp?v=20260622w'};});
 function wizRenderPsk(){ return '<div class="wiz-cards">'+Object.keys(P.pskKammer).map(function(k){ var o=P.pskKammer[k]; return '<div class="wiz-card'+(k===S.pskKammer?' sel':'')+'" onclick="wizSetPsk(\''+k+'\')"><img src="img/karten/profil/'+k+'.png?v=20260609c" alt="'+o.name+'" loading="lazy"><div class="wiz-cn">'+o.name+'</div><div class="wiz-csub">'+(o.sub||'')+'</div></div>'; }).join('')+'</div>'; }
 function wizSetPsk(v){ wizSet('pskKammer',v); }
 function wizRenderTuermodell(){ return '<div class="wiz-cards">'+WIZ_DOORS.map(function(d){return '<div class="wiz-card'+(d.key===S.tuerModell?' sel':'')+'" onclick="wizSet(\'tuerModell\',\''+d.key+'\')"><div class="wiz-gbox"><img src="'+d.img+'" alt="'+d.name+'" loading="lazy"></div><div class="wiz-cn">'+d.name+'</div></div>';}).join('')+'</div>'; }
@@ -13718,7 +13718,7 @@ function _renderHaustuer3d(previewView) {
   const _curST = (haus3dFrame.src.match(/[?&]seitenteil=([^&]+)/) || [])[1];
   const _isLoaded = haus3dFrame.src.includes('haustuer-3d') && _curST === _seitenteil;
   if (!_isLoaded) {
-    haus3dFrame.src = `haustuer-3d.html?embed&bg=light&v=20260622d&model=${_mdl}&side=${_side}&seitenteil=${_seitenteil}&view=${_view}&${isWood ? 'wood' : 'color'}=${_ck}`;
+    haus3dFrame.src = `haustuer-3d.html?embed&bg=light&v=20260622w&model=${_mdl}&side=${_side}&seitenteil=${_seitenteil}&view=${_view}&${isWood ? 'wood' : 'color'}=${_ck}`;
     haus3dFrame.onload = () => {
       const cw = haus3dFrame.contentWindow;
       if (!cw) return;
@@ -13854,7 +13854,7 @@ function drawPrev() {
         const _ck0 = HAUS3D_COLOR_MAP[S.fa] || 'anthrazitgrau';
         const _isWood0 = HAUS3D_WOOD_KEYS.has(_ck0);
         const _paramName = _isWood0 ? 'wood' : 'color';
-        haus3dFrame.src = `haustuer-3d.html?embed&bg=light&v=20260622d&model=${_mdl}&side=${_side}&${_paramName}=${_ck0}`;
+        haus3dFrame.src = `haustuer-3d.html?embed&bg=light&v=20260622w&model=${_mdl}&side=${_side}&${_paramName}=${_ck0}`;
         haus3dFrame.onload = () => {
           sendHaus3dColor(S.fa);
           haus3dFrame.contentWindow.postMessage({ type:'setGlass', key: S.glasdekor||'klar' }, '*');
@@ -16073,7 +16073,7 @@ function d2Hst(){ const w=document.getElementById('d2-hst3d-wrap'),f=document.ge
 function d2Haus(){ const w=document.getElementById('d2-haus3d-wrap'),f=document.getElementById('d2-haus3d-frame'); if(!w||!f)return; showHint(true);
   const mdl=S.tuerModell||'vollglas-inox'; const side=(S.oeff1==='dreh-l')?'r':'l'; const view=(pv==='inn')?'innen':'aussen'; const farb=(view==='innen')?(S.fi||S.fa):(S.fa||S.fi); const ck=HAUS3D_COLOR_MAP[farb]||'anthrazitgrau'; const wood=HAUS3D_WOOD_KEYS.has(ck);
   const pl={type:'update',model:mdl,side,view,color:wood?null:ck,wood:wood?ck:null,glass:S.glasdekor||'klar'};
-  if(!f.src.includes('haustuer-3d')){ f.src=`haustuer-3d.html?embed&bg=light&v=20260622d&model=${mdl}&side=${side}&view=${view}&${wood?'wood':'color'}=${ck}`; f.onload=()=>{const cw=f.contentWindow;if(!cw)return;cw.postMessage(pl,'*');}; } else f.contentWindow&&f.contentWindow.postMessage(pl,'*'); w.style.display='block'; }
+  if(!f.src.includes('haustuer-3d')){ f.src=`haustuer-3d.html?embed&bg=light&v=20260622w&model=${mdl}&side=${side}&view=${view}&${wood?'wood':'color'}=${ck}`; f.onload=()=>{const cw=f.contentWindow;if(!cw)return;cw.postMessage(pl,'*');}; } else f.contentWindow&&f.contentWindow.postMessage(pl,'*'); w.style.display='block'; }
 function render3D(){ ['d2-fenster3d-wrap','d2-balkon3d-wrap','d2-hst3d-wrap','d2-haus3d-wrap'].forEach(i=>{const e=document.getElementById(i);if(e)e.style.display='none';});
   if(!S.prod)return; if(S.prod==='haustuere')d2Haus(); else if(S.prod==='hst')d2Hst(); else if(S.prod==='balkontuer')d2Balkon(); else d2Fenster(); setOpenLabel(document.getElementById('d2-window-open-btn')?.dataset.open==='1'); }
 window.d2SetView=function(v){ pv=v; document.getElementById('d2-view-aus').setAttribute('aria-pressed', v==='aus'?'true':'false'); document.getElementById('d2-view-inn').setAttribute('aria-pressed', v==='inn'?'true':'false'); render3D(); };
