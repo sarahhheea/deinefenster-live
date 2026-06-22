@@ -7518,7 +7518,7 @@ function wizRenderExtras(){
 }
 function wizRebuildSteps(){ const ck=WIZ_STEPS[wizIdx]&&WIZ_STEPS[wizIdx].key; WIZ_STEPS=buildWizSteps(S.prod||'kunststoff'); let ni=WIZ_STEPS.findIndex(function(s){return s.key===ck;}); if(ni<0)ni=Math.min(wizIdx,WIZ_STEPS.length-1); wizIdx=Math.max(0,ni); }
 // Türmodelle (Studio-Bilder, vorhanden) — finale Auswahl/Bilder folgen in Phase 2
-const WIZ_DOORS=['vollglas-inox','florida-lr-inox','montana-2-lr-inox','montana-3-lr-inox','ohio-inox','colorado-inox','alaska-2-inox','alaska-1-inox','montana-1-inox','nebraska-lcr-inox','pennsylvania-1-inox','texas-c-inox','texas-lr-inox'].map(function(k){return {key:k,name:k.replace(/-inox$/,'').replace(/-lr$|-lcr$|-c$/,'').replace(/-/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();}).trim(),img:'img/drutex-tueren/studio-weiss/'+k+'.webp?v=20260622w'};});
+const WIZ_DOORS=['vollglas-inox','florida-lr-inox','montana-2-lr-inox','montana-3-lr-inox','ohio-inox','colorado-inox','alaska-2-inox','alaska-1-inox','montana-1-inox','nebraska-lcr-inox','pennsylvania-1-inox','texas-c-inox','texas-lr-inox'].map(function(k){return {key:k,name:k.replace(/-inox$/,'').replace(/-lr$|-lcr$|-c$/,'').replace(/-/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();}).trim(),img:'img/drutex-tueren/studio-weiss/'+k+'.webp?v=20260622wbg'};});
 function wizRenderPsk(){ return '<div class="wiz-cards">'+Object.keys(P.pskKammer).map(function(k){ var o=P.pskKammer[k]; return '<div class="wiz-card'+(k===S.pskKammer?' sel':'')+'" onclick="wizSetPsk(\''+k+'\')"><img src="img/karten/profil/'+k+'.png?v=20260609c" alt="'+o.name+'" loading="lazy"><div class="wiz-cn">'+o.name+'</div><div class="wiz-csub">'+(o.sub||'')+'</div></div>'; }).join('')+'</div>'; }
 function wizSetPsk(v){ wizSet('pskKammer',v); }
 function wizRenderTuermodell(){ return '<div class="wiz-cards">'+WIZ_DOORS.map(function(d){return '<div class="wiz-card'+(d.key===S.tuerModell?' sel':'')+'" onclick="wizSet(\'tuerModell\',\''+d.key+'\')"><div class="wiz-gbox"><img src="'+d.img+'" alt="'+d.name+'" loading="lazy"></div><div class="wiz-cn">'+d.name+'</div></div>';}).join('')+'</div>'; }
@@ -7659,13 +7659,48 @@ function wizCaptureThumb(){
       if(data[i+3]>12 && (data[i]<230||data[i+1]<230||data[i+2]<230)){
         if(x<minX)minX=x; if(x>maxX)maxX=x; if(y<minY)minY=y; if(y>maxY)maxY=y; found=true; } } }
     if(!found) return null;
-    var pad=10; minX=Math.max(0,minX-pad); minY=Math.max(0,minY-pad); maxX=Math.min(w,maxX+pad); maxY=Math.min(h,maxY+pad);
+    var pad=5; minX=Math.max(0,minX-pad); minY=Math.max(0,minY-pad); maxX=Math.min(w,maxX+pad); maxY=Math.min(h,maxY+pad);
     var cw=maxX-minX, ch=maxY-minY; if(cw<12||ch<12) return null;
     var out=document.createElement('canvas'); out.width=cw; out.height=ch;
     out.getContext('2d').drawImage(c, minX,minY,cw,ch, 0,0,cw,ch);
-    var d=out.toDataURL('image/jpeg',0.85);
+    var d=out.toDataURL('image/jpeg',0.92);
     return (d&&d.length>2000)?d:null;
   }catch(e){ return null; }
+}
+// Garantiert ein Produkt-Bild fürs Warenkorb-Karte, auch wenn der Kunde KEINE 3D-Stufe
+// gesehen hat (z. B. „Direkt zur Anfrage"). Rendert die 3D-Vorschau des aktuell konfigurierten
+// Produkts kurz UNSICHTBAR (off-screen) in echter Größe, greift sie ab, setzt alles zurück.
+function wizEnsureThumb(cb){
+  if(wizLastThumb){ if(cb)cb(); return; }
+  var pw=document.getElementById('prev-wrap');
+  if(!pw || !S.prod || typeof drawPrev!=='function'){ if(cb)cb(); return; }
+  // Auf der Übersicht ist der Vorschau-Container (#wiz-stage) display:none → ein Kind rendert
+  // selbst off-screen nicht. Darum prev-wrap kurz in einen sichtbaren Off-Screen-Host an <body>
+  // umhängen (umgeht display:none), rendern, abgreifen, exakt zurück an die Ursprungsstelle.
+  var origParent=pw.parentNode, origNext=pw.nextSibling;
+  var origStyle={position:pw.style.position,left:pw.style.left,top:pw.style.top,width:pw.style.width,height:pw.style.height,zIndex:pw.style.zIndex,visibility:pw.style.visibility,pointerEvents:pw.style.pointerEvents};
+  var host=document.createElement('div');
+  host.style.cssText='position:fixed;left:-10000px;top:0;width:360px;height:460px;z-index:-1;overflow:hidden;pointer-events:none';
+  document.body.appendChild(host);
+  pw.style.position='relative'; pw.style.left=''; pw.style.top='';
+  pw.style.width='360px'; pw.style.height='460px'; pw.style.zIndex=''; pw.style.visibility='visible'; pw.style.pointerEvents='none';
+  host.appendChild(pw);
+  try{ drawPrev(); }catch(e){}
+  var tries=0, iv=setInterval(function(){
+    tries++;
+    var t=wizCaptureThumb();
+    if(t){ wizLastThumb=t; done(); }
+    else if(tries>=16){ done(); }   // ~6,4s Maximum, dann aufgeben (Fallback-Bild bleibt)
+    function done(){ clearInterval(iv);
+      // exakt an Ursprungsstelle zurück
+      if(origParent){ if(origNext&&origNext.parentNode===origParent) origParent.insertBefore(pw,origNext); else origParent.appendChild(pw); }
+      pw.style.position=origStyle.position; pw.style.left=origStyle.left; pw.style.top=origStyle.top;
+      pw.style.width=origStyle.width; pw.style.height=origStyle.height; pw.style.zIndex=origStyle.zIndex;
+      pw.style.visibility=origStyle.visibility; pw.style.pointerEvents=origStyle.pointerEvents;
+      if(host.parentNode) host.parentNode.removeChild(host);
+      if(cb)cb();
+    }
+  },400);
 }
 function wizRenderAngebot(){
   function nm(tbl,key){ return (P[tbl]&&P[tbl][key]&&P[tbl][key].name)||key||'–'; }
@@ -8138,8 +8173,14 @@ function wizGo(i){
   const dh=document.getElementById('wiz-dim-h'); if(dh)dh.textContent=(S.hMm||1200)+' mm';
   // Live-3D-Schnappschuss fürs Warenkorb-Bild merken (nach kurzer Render-Pause)
   setTimeout(function(){ var _t=wizCaptureThumb(); if(_t)wizLastThumb=_t; },700);
-  // Übersicht: sobald ein Schnappschuss da ist, Karten-Bild aktualisieren
-  if(s.key==='angebot'){ setTimeout(function(){ if(wizLastThumb && WIZ_STEPS[wizIdx] && WIZ_STEPS[wizIdx].key==='angebot') wizRenderPanel(); },600); }
+  // Übersicht: sobald ein Schnappschuss da ist, Karten-Bild aktualisieren.
+  // Fehlt einer (Kunde sprang via „Direkt zur Anfrage" an allen 3D-Stufen vorbei),
+  // einmal unsichtbar das konfigurierte Produkt rendern + abgreifen → immer ein echtes Produktbild.
+  if(s.key==='angebot'){ setTimeout(function(){
+    if(WIZ_STEPS[wizIdx] && WIZ_STEPS[wizIdx].key!=='angebot') return;
+    if(wizLastThumb){ wizRenderPanel(); }
+    else { wizEnsureThumb(function(){ if(WIZ_STEPS[wizIdx] && WIZ_STEPS[wizIdx].key==='angebot') wizRenderPanel(); }); }
+  },600); }
   // KEIN drawPrev beim reinen Schrittwechsel — Konfiguration unverändert, Bild bleibt ruhig stehen (kein "Bocken")
   if(typeof wizUpCfgList==='function')wizUpCfgList();
   if(typeof wizUpViewToggle==='function')wizUpViewToggle();
@@ -13474,7 +13515,7 @@ function _renderHst3d() {
   wrap.style.display = 'block';
 
   // Bei System-Wechsel kompletten Reload erzwingen (verschiedene Geometrie)
-  const expectedSrc = `/hst-3d.html?embed&v=20260619hs3&bg=light&system=${_sys}&color=${_ck}&side=${_side}&view=${_viewKey}&grip=${_grip}`;
+  const expectedSrc = `/hst-3d.html?embed&v=20260622wbg3&bg=light&system=${_sys}&color=${_ck}&side=${_side}&view=${_viewKey}&grip=${_grip}`;
   const currentSys  = (frame.src.match(/[?&]system=([^&]+)/) || [])[1];
   const _needsReload = !frame.src.includes('hst-3d') || currentSys !== _sys;
 
@@ -13547,7 +13588,7 @@ function _renderBalkontuer3d() {
     const _roll = S.roll || 'ohne';
     const _kasten = S.rollKasten || '175';
     const _rseite = S.rollSeite || 'rechts';
-    frame.src = `/${_src3d}?embed&v=20260618bt&bg=light&color=${_ck}&side=${_side}&layout=${_layout}&roll=${_roll}&rollKasten=${_kasten}&rollSeite=${_rseite}&view=${_view}`;
+    frame.src = `/${_src3d}?embed&v=20260622wbgbt&bg=light&color=${_ck}&side=${_side}&layout=${_layout}&roll=${_roll}&rollKasten=${_kasten}&rollSeite=${_rseite}&view=${_view}`;
     frame.onload = () => {
       const cw = frame.contentWindow;
       if (!cw) return;
@@ -13644,7 +13685,7 @@ function _renderFenster3d() {
   // iframe neu laden wenn sich die Quelle ändert (1-Flügel ↔ Multi)
   const _wantsReload = !frame.src.includes(_src3d);
   if (_wantsReload) {
-    frame.src = `/${_src3d}?embed&v=20260614w2&bg=light&color=${_ck}&side=${_side}&layout=${_layout}&view=${_view}`;
+    frame.src = `/${_src3d}?embed&v=20260622wbgw2&bg=light&color=${_ck}&side=${_side}&layout=${_layout}&view=${_view}`;
     frame.onload = () => {
       const cw = frame.contentWindow;
       if (!cw) return;
@@ -13721,7 +13762,7 @@ function _renderHaustuer3d(previewView) {
   const _curST = (haus3dFrame.src.match(/[?&]seitenteil=([^&]+)/) || [])[1];
   const _isLoaded = haus3dFrame.src.includes('haustuer-3d') && _curST === _seitenteil;
   if (!_isLoaded) {
-    haus3dFrame.src = `haustuer-3d.html?embed&bg=light&v=20260622w&model=${_mdl}&side=${_side}&seitenteil=${_seitenteil}&view=${_view}&${isWood ? 'wood' : 'color'}=${_ck}`;
+    haus3dFrame.src = `haustuer-3d.html?embed&bg=light&v=20260622wbg&model=${_mdl}&side=${_side}&seitenteil=${_seitenteil}&view=${_view}&${isWood ? 'wood' : 'color'}=${_ck}`;
     haus3dFrame.onload = () => {
       const cw = haus3dFrame.contentWindow;
       if (!cw) return;
@@ -13857,7 +13898,7 @@ function drawPrev() {
         const _ck0 = HAUS3D_COLOR_MAP[S.fa] || 'anthrazitgrau';
         const _isWood0 = HAUS3D_WOOD_KEYS.has(_ck0);
         const _paramName = _isWood0 ? 'wood' : 'color';
-        haus3dFrame.src = `haustuer-3d.html?embed&bg=light&v=20260622w&model=${_mdl}&side=${_side}&${_paramName}=${_ck0}`;
+        haus3dFrame.src = `haustuer-3d.html?embed&bg=light&v=20260622wbg&model=${_mdl}&side=${_side}&${_paramName}=${_ck0}`;
         haus3dFrame.onload = () => {
           sendHaus3dColor(S.fa);
           haus3dFrame.contentWindow.postMessage({ type:'setGlass', key: S.glasdekor||'klar' }, '*');
@@ -15671,10 +15712,13 @@ async function submitSkizze(e) {
   /* === Bestellübersicht — aufgeräumte Warenkorb-Karten (Baymard-Linie) === */
   #cfg-wizard .wiz-ohead{ font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:16px; color:#14233f; margin:0 auto 16px; max-width:680px; text-align:left; }
   #cfg-wizard .wiz-ocards{ max-width:680px; margin:0 auto; display:flex; flex-direction:column; gap:16px; }
-  #cfg-wizard .wiz-ocard{ display:grid; grid-template-columns:84px 1fr minmax(190px,auto); gap:18px; align-items:center; background:#fff; border:1px solid #e5e9f0; border-radius:16px; padding:20px; box-shadow:0 1px 3px rgba(20,40,80,.04); text-align:left; }
+  #cfg-wizard .wiz-ocard{ display:grid; grid-template-columns:104px 1fr minmax(190px,auto); gap:18px; align-items:center; background:#fff; border:1px solid #e5e9f0; border-radius:16px; padding:20px; box-shadow:0 1px 3px rgba(20,40,80,.04); text-align:left; }
   #cfg-wizard .wiz-ocard.is-current{ border-color:rgba(34,94,170,.32); }
-  #cfg-wizard .wiz-othumb{ width:84px; height:84px; border-radius:12px; background:linear-gradient(160deg,#f3f6fb,#e9eff7); display:flex; align-items:center; justify-content:center; overflow:hidden; }
-  #cfg-wizard .wiz-othumb img{ max-width:100%; max-height:100%; object-fit:contain; filter:drop-shadow(0 4px 10px rgba(20,40,80,.15)); }
+  /* Produkt-Bild = Live-Abgriff der 3D-Vorschau (genau das konfigurierte Fenster). BG weiss = 3D-Szene jetzt weiss → randlos auf der weissen Karte; contain = schneidet nie ab. */
+  #cfg-wizard .wiz-othumb{ width:104px; height:118px; border-radius:12px; background:#fff; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  #cfg-wizard .wiz-othumb img{ width:100%; height:100%; max-width:none; max-height:none; object-fit:contain; filter:drop-shadow(0 3px 7px rgba(20,40,80,.14)); }
+  /* 3D-Vorschau jetzt weiss (für randlose Produktbilder) → in der Live-Vorschau als bewusste, saubere „Produkt-Vorschau-Karte" rahmen, damit der weisse Block nicht als Fremdkörper auf dem hellgrauen Konfigurator wirkt. */
+  #cfg-wizard #fenster3d-wrap, #cfg-wizard #balkon3d-wrap, #cfg-wizard #hst3d-wrap, #cfg-wizard #haus3d-wrap{ box-shadow:0 6px 22px rgba(20,40,80,.10); border:1px solid #eef2f8 !important; border-radius:16px !important; }
   #cfg-wizard .wiz-oinfo{ min-width:0; }
   #cfg-wizard .wiz-oname{ font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:17px; color:#14233f; display:flex; align-items:center; flex-wrap:wrap; gap:6px 9px; margin:0 0 6px; }
   #cfg-wizard .wiz-obadge{ font-family:'Plus Jakarta Sans',sans-serif; font-size:10px; font-weight:800; color:#225eaa; background:#e8f0fb; border-radius:999px; padding:3px 9px; letter-spacing:.04em; }
@@ -15697,8 +15741,8 @@ async function submitSkizze(e) {
   /* Handy: Bild + Name/Specs oben nebeneinander, Stepper + Aktionen in eigener Reihe darunter */
   @media(max-width:560px){
     #cfg-wizard .wiz-ohead, #cfg-wizard .wiz-ocards, #cfg-wizard .wiz-addmore, #cfg-wizard .wiz-addmore-hero{ max-width:none; }
-    #cfg-wizard .wiz-ocard{ grid-template-columns:60px 1fr; gap:8px 14px; padding:16px; }
-    #cfg-wizard .wiz-othumb{ width:60px; height:60px; }
+    #cfg-wizard .wiz-ocard{ grid-template-columns:64px 1fr; gap:8px 14px; padding:16px; }
+    #cfg-wizard .wiz-othumb{ width:64px; height:74px; }
     #cfg-wizard .wiz-oside{ grid-column:1 / -1; flex-direction:column; align-items:stretch; gap:8px; margin-top:6px; }
   }
   /* Auf der Uebersicht keine grosse Einzel-Vorschau — jede Karte hat ihr Thumbnail */
@@ -16086,23 +16130,23 @@ function d2Fenster(){ const w=document.getElementById('d2-fenster3d-wrap'),f=doc
   if(!sa.length){ if(/^2-/.test(lay))sa=['dk-l','dk-r']; else if(/^3-/.test(lay))sa=['dk-l','fest','dk-r']; else sa=['dk-r']; }
   const multi=/^[23]-/.test(lay); const src=multi?'fenster-3d-multi.html':'fenster-3d.html'; w.style.display='block';
   const pl={type:'update',layout:lay,sashes:sa,sashTyp:ot,separator:'',oberlicht:S.oberlichtOeff||'fest',unterlicht:S.unterlichtOeff||'fest',roll:S.roll||'ohne',rollKasten:S.rollKasten||'175',panzerHex:_panzerHex(),rollSeite:S.rollSeite||'rechts',view,color:wood?null:ck,wood:wood?ck:null,glass:S.glasdekor||'klar',side};
-  if(!f.src.includes(src)){ f.src=`/${src}?embed&bg=light&v=20260605&color=${ck}&side=${side}&layout=${lay}`; f.onload=()=>{const cw=f.contentWindow;if(!cw)return;cw.dispatchEvent(new Event('resize'));cw.postMessage(pl,'*');}; } else f.contentWindow&&f.contentWindow.postMessage(pl,'*'); }
+  if(!f.src.includes(src)){ f.src=`/${src}?embed&bg=light&v=20260622wbg05&color=${ck}&side=${side}&layout=${lay}`; f.onload=()=>{const cw=f.contentWindow;if(!cw)return;cw.dispatchEvent(new Event('resize'));cw.postMessage(pl,'*');}; } else f.contentWindow&&f.contentWindow.postMessage(pl,'*'); }
 function d2Balkon(){ const w=document.getElementById('d2-balkon3d-wrap'),f=document.getElementById('d2-balkon3d-frame'); if(!w||!f)return; showHint(true);
   const view=(pv==='aus')?'aussen':'innen'; const farb=(pv==='aus')?(S.fa||S.fi):(S.fi||S.fa); const ck=HAUS3D_COLOR_MAP[farb]||'anthrazitgrau'; const wood=HAUS3D_WOOD_KEYS.has(ck);
   const side=(S.oeff1==='dreh-l'||S.oeff1==='dk-l')?'l':'r'; const lay=S.fluegel||'1-fluegel'; const sa=[S.oeff1,S.oeff2].slice(0,sashCount()).filter(Boolean); const multi=/^2-/.test(lay); const src=multi?'balkontuer-3d-multi.html':'balkontuer-3d.html'; w.style.display='block';
   const pl={type:'update',layout:lay,sashes:sa,separator:'',roll:S.roll||'ohne',rollKasten:S.rollKasten||'175',panzerHex:_panzerHex(),rollSeite:S.rollSeite||'rechts',view,color:wood?null:ck,wood:wood?ck:null,glass:S.glasdekor||'klar',side};
-  if(!f.src.includes(src)){ f.src=`/${src}?embed&bg=light&v=20260605&color=${ck}&side=${side}&layout=${lay}&roll=${S.roll||'ohne'}&rollKasten=${S.rollKasten||'175'}&rollSeite=${S.rollSeite||'rechts'}`; f.onload=()=>{const cw=f.contentWindow;if(!cw)return;cw.dispatchEvent(new Event('resize'));cw.postMessage(pl,'*');}; } else f.contentWindow&&f.contentWindow.postMessage(pl,'*'); }
+  if(!f.src.includes(src)){ f.src=`/${src}?embed&bg=light&v=20260622wbg05&color=${ck}&side=${side}&layout=${lay}&roll=${S.roll||'ohne'}&rollKasten=${S.rollKasten||'175'}&rollSeite=${S.rollSeite||'rechts'}`; f.onload=()=>{const cw=f.contentWindow;if(!cw)return;cw.dispatchEvent(new Event('resize'));cw.postMessage(pl,'*');}; } else f.contentWindow&&f.contentWindow.postMessage(pl,'*'); }
 function d2Hst(){ const w=document.getElementById('d2-hst3d-wrap'),f=document.getElementById('d2-hst3d-frame'); if(!w||!f)return; showHint(true);
   const sys=(S.profil||'').replace(/^iglo-/,'')||'hs'; const vk=(pv==='aus')?'aussen':'innen';
   const ck=vk==='aussen'?(HAUS3D_COLOR_MAP[S.fa]||HAUS3D_COLOR_MAP[S.fi]||'anthrazitgrau'):(HAUS3D_COLOR_MAP[S.fi]||HAUS3D_COLOR_MAP[S.fa]||'anthrazitgrau'); const wood=HAUS3D_WOOD_KEYS.has(ck);
   const side=(S.oeff1==='dreh-l'||S.oeff1==='dk-l')?'l':'r'; const grip=S.hstGriffAussen||'weiss'; w.style.display='block';
-  const exp=`/hst-3d.html?embed&bg=light&v=20260619hs3&system=${sys}&color=${ck}&side=${side}&view=${vk}&grip=${grip}`; const cur=(f.src.match(/[?&]system=([^&]+)/)||[])[1];
+  const exp=`/hst-3d.html?embed&bg=light&v=20260622wbg3&system=${sys}&color=${ck}&side=${side}&view=${vk}&grip=${grip}`; const cur=(f.src.match(/[?&]system=([^&]+)/)||[])[1];
   const pl={type:'update',color:wood?null:ck,wood:wood?ck:null,glass:S.glasdekor||'klar',side,view:vk,hstGriff:grip};
   if(!f.src.includes('hst-3d')||cur!==sys){ f.src=exp; f.onload=()=>{const cw=f.contentWindow;if(!cw)return;cw.dispatchEvent(new Event('resize'));cw.postMessage(pl,'*');}; } else f.contentWindow&&f.contentWindow.postMessage(pl,'*'); }
 function d2Haus(){ const w=document.getElementById('d2-haus3d-wrap'),f=document.getElementById('d2-haus3d-frame'); if(!w||!f)return; showHint(true);
   const mdl=S.tuerModell||'vollglas-inox'; const side=(S.oeff1==='dreh-l')?'r':'l'; const view=(pv==='inn')?'innen':'aussen'; const farb=(view==='innen')?(S.fi||S.fa):(S.fa||S.fi); const ck=HAUS3D_COLOR_MAP[farb]||'anthrazitgrau'; const wood=HAUS3D_WOOD_KEYS.has(ck);
   const pl={type:'update',model:mdl,side,view,color:wood?null:ck,wood:wood?ck:null,glass:S.glasdekor||'klar'};
-  if(!f.src.includes('haustuer-3d')){ f.src=`haustuer-3d.html?embed&bg=light&v=20260622w&model=${mdl}&side=${side}&view=${view}&${wood?'wood':'color'}=${ck}`; f.onload=()=>{const cw=f.contentWindow;if(!cw)return;cw.postMessage(pl,'*');}; } else f.contentWindow&&f.contentWindow.postMessage(pl,'*'); w.style.display='block'; }
+  if(!f.src.includes('haustuer-3d')){ f.src=`haustuer-3d.html?embed&bg=light&v=20260622wbg&model=${mdl}&side=${side}&view=${view}&${wood?'wood':'color'}=${ck}`; f.onload=()=>{const cw=f.contentWindow;if(!cw)return;cw.postMessage(pl,'*');}; } else f.contentWindow&&f.contentWindow.postMessage(pl,'*'); w.style.display='block'; }
 function render3D(){ ['d2-fenster3d-wrap','d2-balkon3d-wrap','d2-hst3d-wrap','d2-haus3d-wrap'].forEach(i=>{const e=document.getElementById(i);if(e)e.style.display='none';});
   if(!S.prod)return; if(S.prod==='haustuere')d2Haus(); else if(S.prod==='hst')d2Hst(); else if(S.prod==='balkontuer')d2Balkon(); else d2Fenster(); setOpenLabel(document.getElementById('d2-window-open-btn')?.dataset.open==='1'); }
 window.d2SetView=function(v){ pv=v; document.getElementById('d2-view-aus').setAttribute('aria-pressed', v==='aus'?'true':'false'); document.getElementById('d2-view-inn').setAttribute('aria-pressed', v==='inn'?'true':'false'); render3D(); };
