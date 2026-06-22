@@ -7043,10 +7043,19 @@ const ANSCHLAG_SETS = {
     {img:'anschlag-3-ober-unter/dk-l_dreh-l_dk-r_st1__ol-fest__ul-fest', name:"Dreh-Kipp · Dreh-Stulp · Dreh-Kipp · festes Oberlicht · festes Unterlicht", oeff:["dk-l", "dreh-l", "dk-r"], stulp:true, ol:'fest', ul:'fest'},
   ],
 };
+// Liefert den anzuzeigenden Anschlag-Satz. Balkontür 1-Flügel: nur Dreh-Kipp links/rechts
+// (Kundenwunsch 22.06.2026) — reines Dreh + Kipp/Fest raus. Fenster behalten die volle Liste.
+function _anschlagSetFor(fluegelKey) {
+  let set = ANSCHLAG_SETS[fluegelKey] || [];
+  if (S.prod === 'balkontuer' && fluegelKey === '1-fluegel') {
+    set = set.filter(function(o){ return o.oeff && (o.oeff[0] === 'dk-l' || o.oeff[0] === 'dk-r'); });
+  }
+  return set;
+}
 function buildAnschlagHero(fluegelKey) {
   const g = document.getElementById('ah-grid');
-  const set = ANSCHLAG_SETS[fluegelKey];
-  if (!g || !set) return false;
+  const set = _anschlagSetFor(fluegelKey);
+  if (!g || !set.length) return false;
   g.innerHTML = set.map(function(o, idx){
     return '<div class="fh-card" onclick="heroSelectAnschlag(\'' + fluegelKey + '\',' + idx + ')">' +
              '<div class="fh-card-img"><img src="img/karten/' + o.img + '.png?v=20260608u" alt="' + o.name + '" loading="lazy"></div>' +
@@ -7059,7 +7068,7 @@ function buildAnschlagHero(fluegelKey) {
   return true;
 }
 function heroSelectAnschlag(fluegelKey, idx) {
-  const o = (ANSCHLAG_SETS[fluegelKey] || [])[idx];
+  const o = _anschlagSetFor(fluegelKey)[idx];
   if (o) {
     S.oeff1 = o.oeff[0] || null;
     S.oeff2 = o.oeff[1] || null;
@@ -7858,11 +7867,10 @@ const BALKON_ANSCHLAG_2F=[
   {img:'dkl-stulp-dr', name:'Dreh-Kipp links · Stulp · Dreh rechts', oeff:['dk-l','dreh-r']},
 ];
 // Balkontür 1-Flügel: Öffnungs-Varianten — DIN-Linien aufs Glas gezeichnet (Pillow), links/rechts gespiegelt.
+// Balkontür 1-Flügel: nur Dreh-Kipp links/rechts (Kundenwunsch 22.06.2026) — kein reines Dreh.
 const BALKON_ANSCHLAG_1F=[
   {img:'dk-links',   name:'Dreh-Kipp links',  oeff:'dk-l'},
   {img:'dk-rechts',  name:'Dreh-Kipp rechts', oeff:'dk-r'},
-  {img:'dreh-links', name:'Dreh links',       oeff:'dreh-l'},
-  {img:'dreh-rechts',name:'Dreh rechts',      oeff:'dreh-r'},
 ];
 const HST_FLUEGEL=[['2-teilig','2-teilig · fest + Schiebe','2-teilig.png'],['3-teilig','3-teilig','3-teilig.png']];
 function wizPickHstTeilung(v){ S.hstTeilung=v; S.fluegel=(v==='3-teilig')?'3-fluegel':'2-fluegel'; if(window._touched){window._touched.add('hstTeilung');window._touched.add('fluegel');} if(typeof previewState!=='undefined')previewState.fluegel=(v==='3-teilig')?3:2; _wizPrev(); wizRenderPanel(); }
