@@ -7586,16 +7586,11 @@ function wizRenderSchiebegriff(){
     var imgFor=function(k){return 'img/drutex-griffe/hst-hebel'+(k==='ohne'?'':'-schloss')+'-'+col+'-cut.webp';};
     return Object.keys(P.hstSchloss).map(function(k){const o=P.hstSchloss[k];return '<div class="wiz-card wiz-card-opt wiz-hstgr'+(k===S.hstSchloss?' sel':'')+'" onclick="wizSet(\'hstSchloss\',\''+k+'\')"><div class="wiz-sym"><img src="'+imgFor(k)+'" alt="'+o.name+'" loading="lazy"></div><div class="wiz-cn">'+o.name+'</div><div class="wiz-csub">'+(o.sub||'')+'</div></div>';}).join('');
   }
-  // Innen/Außen/Abschließbar als Umschalter (eine Sektion sichtbar) → passt ohne Scrollen.
-  var tab=(['innen','aussen','schloss'].indexOf(wizGriffTab)>=0)?wizGriffTab:'innen';
-  var h='<div class="wiz-tabs wiz-tabs-3">'+
-    '<button type="button" class="wiz-tab'+(tab==='innen'?' sel':'')+'" onclick="wizGriffTabSet(\'innen\')">Innengriff</button>'+
-    '<button type="button" class="wiz-tab'+(tab==='aussen'?' sel':'')+'" onclick="wizGriffTabSet(\'aussen\')">Außengriff</button>'+
-    '<button type="button" class="wiz-tab'+(tab==='schloss'?' sel':'')+'" onclick="wizGriffTabSet(\'schloss\')">Abschließbar</button>'+
-  '</div>';
-  if(tab==='innen') h+='<div class="wiz-griffsub">Muschelgriff im Raum</div><div class="wiz-cards wiz-one">'+colorCards({weiss:P.hstGriff.weiss},'weiss','hstGriff')+'</div>';
-  else if(tab==='aussen') h+='<div class="wiz-griffsub">Schiebegriff von der Straße</div><div class="wiz-cards wiz-one">'+colorCards({weiss:P.hstGriffAussen.weiss},'weiss','hstGriffAussen')+'</div>';
-  else h+='<div class="wiz-griffsub">Abschließbarer Griff mit Zylinder?</div><div class="wiz-cards">'+schlossCards()+'</div>';
+  // Alle drei Sektionen untereinander auflisten (kein Tab-Umschalter) — Kundenwunsch 23.06.2026
+  var h='';
+  h+='<div class="wiz-griffsub">Innengriff — Muschelgriff im Raum</div><div class="wiz-cards wiz-one">'+colorCards({weiss:P.hstGriff.weiss},'weiss','hstGriff')+'</div>';
+  h+='<div class="wiz-griffsub" style="margin-top:18px">Außengriff — Schiebegriff von der Straße</div><div class="wiz-cards wiz-one">'+colorCards({weiss:P.hstGriffAussen.weiss},'weiss','hstGriffAussen')+'</div>';
+  h+='<div class="wiz-griffsub" style="margin-top:18px">Abschließbar?</div><div class="wiz-cards wiz-one">'+schlossCards()+'</div>';
   return h;
 }
 function wizRenderBalkSchwelle(){
