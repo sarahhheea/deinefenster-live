@@ -146,7 +146,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 const canvasEl = document.getElementById('threeCanvas');
 const renderer = new THREE.WebGLRenderer({
   canvas: canvasEl, antialias: true, preserveDrawingBuffer: true,
-  powerPreference: 'high-performance', alpha: false
+  powerPreference: 'high-performance', alpha: true
 });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 3));   // max Schärfe
 renderer.shadowMap.enabled = true;
@@ -160,8 +160,15 @@ const scene = new THREE.Scene();
 // sonst Standard weiß (für Standalone-Ansicht)
 const _embed = new URLSearchParams(location.search).has('embed');
 const _bgLight = new URLSearchParams(location.search).get('bg')==='light';
-scene.background = new THREE.Color(_embed ? (_bgLight ? 0xffffff : 0x0a1530) : 0xffffff);
-if(_bgLight){var _s=document.createElement('style');_s.textContent='html.is-embed body,html body.embed{background:#ffffff !important}';document.head.appendChild(_s);}
+// TRANSPARENTER Hintergrund im Konfigurator (Kundenwunsch 23.06.2026) — der weiße Kasten
+// scheint durch, das Fenster „schwebt" frei ohne Bild-Rahmen. Tiefe via Bodenschatten.
+if(_embed ? _bgLight : true){
+  scene.background = null;
+  renderer.setClearColor(0x000000, 0);
+}else{
+  scene.background = new THREE.Color(0x0a1530);
+}
+if(_bgLight){var _s=document.createElement('style');_s.textContent='html.is-embed,html.is-embed body,html body.embed{background:transparent !important;overflow:hidden !important} html.is-embed #threeCanvas{transform:scale(1.035);transform-origin:center center}';document.head.appendChild(_s);}
 
 // Orthografische Kamera — flacher Produktfoto-Look (Referenzfotos sind orthografisch).
 // Vermeidet Perspektiv-Verzerrung, durch die bei mehreren Flügeln einer optisch breiter
@@ -191,7 +198,7 @@ function frameCamera() {
   const w = embed ? window.innerWidth  : window.innerWidth  - 252;
   const h = embed ? window.innerHeight : window.innerHeight - 40;
   const aspect = Math.max(w / Math.max(h, 1), 0.0001);
-  const margin = _rollKH ? 1.18 : 1.14;   // bei Rolladen mehr Luft, damit Kasten unter dem Label frei steht
+  const margin = _rollKH ? 1.30 : 1.26;   // mehr Luft ums Fenster → Studio-Look (Kundenwunsch 23.06.2026); bei Rolladen extra
   const halfH = ((FH + _rollKH) / 2) * margin;   // Rollladenkasten oben mit einrahmen
   const halfW = (FW / 2) * margin;
   // Fenster komplett sichtbar in beiden Achsen
@@ -831,6 +838,25 @@ function buildWindow(spec) {
 winGroup.position.set(-FW / 2, -FH / 2, 0);
 scene.add(winGroup);
 
+// ── Studio-Bodenschatten (Kundenwunsch 23.06.2026) ──────────────────
+// Weiche elliptische Schatten-Fläche knapp unter dem Fenster → das Fenster „steht"
+// statt flach zu schweben. Breite folgt FW (mehr Flügel = breiter), in animate aktualisiert.
+let studioShadow = null;
+if(_embed ? _bgLight : true){
+  const _ss=256, _sc=document.createElement('canvas'); _sc.width=_sc.height=_ss;
+  const _sg=_sc.getContext('2d');
+  const _rg=_sg.createRadialGradient(_ss/2,_ss/2,0,_ss/2,_ss/2,_ss/2);
+  _rg.addColorStop(0,'rgba(16,30,56,0.40)');
+  _rg.addColorStop(0.40,'rgba(16,30,56,0.17)');
+  _rg.addColorStop(1,'rgba(16,30,56,0)');
+  _sg.fillStyle=_rg; _sg.fillRect(0,0,_ss,_ss);
+  const _stex=new THREE.CanvasTexture(_sc); _stex.colorSpace=THREE.SRGBColorSpace;
+  const _smat=new THREE.MeshBasicMaterial({map:_stex,transparent:true,depthWrite:false});
+  studioShadow=new THREE.Mesh(new THREE.PlaneGeometry(1.0,0.5),_smat);
+  studioShadow.renderOrder=-1;
+  scene.add(studioShadow);
+}
+
 // setSide: 'r' = Griff rechts (Standard), 'l' = Griff links (gespiegelt)
 function setSide(s) {
   if (s === 'l') {
@@ -1349,6 +1375,11 @@ function updateSashAnimation() {
   requestAnimationFrame(animate);
   orb.update();
   updateSashAnimation();
+  // Studio-Schatten an Unterkante + Breite (FW) koppeln
+  if (studioShadow) {
+    studioShadow.position.set(0, -(FH + _rollKH) / 2, -0.2);
+    studioShadow.scale.set(FW * 1.85, 1, 1);
+  }
   renderer.render(scene, camera);
 })();
 </script>

@@ -180,7 +180,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 const canvasEl = document.getElementById('threeCanvas');
 const renderer = new THREE.WebGLRenderer({
   canvas: canvasEl, antialias: true, preserveDrawingBuffer: true,
-  powerPreference: 'high-performance', alpha: false
+  powerPreference: 'high-performance', alpha: true
 });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 3));   // max Schärfe
 renderer.shadowMap.enabled = true;
@@ -194,12 +194,34 @@ const scene = new THREE.Scene();
 // sonst Standard weiß (für Standalone-Ansicht)
 const _embed = new URLSearchParams(location.search).has('embed');
 const _bgLight = new URLSearchParams(location.search).get('bg')==='light';
-scene.background = new THREE.Color(_embed ? (_bgLight ? 0xffffff : 0x0a1530) : 0xffffff);
-if(_bgLight){var _s=document.createElement('style');_s.textContent='html.is-embed body,html body.embed{background:#ffffff !important}';document.head.appendChild(_s);}
+// Studio-Look (Kundenwunsch 23.06.2026): statt flachem Weiß ein dezenter, edler
+// vertikaler Verlauf — gibt dem weißen Fenster Tiefe, damit es nicht „reingepappt"
+// wirkt. Nur im hellen Modus; Standalone/dunkel bleibt unverändert.
+function _vGradTex(stops){
+  const c=document.createElement('canvas'); c.width=8; c.height=320;
+  const g=c.getContext('2d'); const grd=g.createLinearGradient(0,0,0,320);
+  stops.forEach(function(s){ grd.addColorStop(s[0],s[1]); });
+  g.fillStyle=grd; g.fillRect(0,0,8,320);
+  const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace; return t;
+}
+if(_embed ? _bgLight : true){
+  // TRANSPARENTER Hintergrund (Kundenwunsch 23.06.2026): der Canvas zeigt nur das Fenster +
+  // den weichen Bodenschatten, der Rest ist durchsichtig. So scheint der weiße Konfigurator-Kasten
+  // direkt durch → es gibt KEINE Hintergrund-Kante, das Fenster „schwebt" wirklich frei im Kasten
+  // (kein Bild-Rahmen/Extra-Ding). Der Warenkorb-Thumbnail unterlegt beim Abgriff weiß.
+  scene.background = null;
+  renderer.setClearColor(0x000000, 0);
+}else{
+  scene.background = new THREE.Color(0x0a1530);
+}
+if(_bgLight){var _s=document.createElement('style');_s.textContent='html.is-embed,html.is-embed body,html body.embed{background:transparent !important;overflow:hidden !important} html.is-embed #threeCanvas{transform:scale(1.035);transform-origin:center center}';document.head.appendChild(_s);}
 
 const camera = new THREE.PerspectiveCamera(15, 1, 0.1, 50);
 // Leicht versetzt für sichtbare 3D-Tiefe (statt komplett frontal-flach)
-camera.position.set(0, 0, 5.0);
+// Studio-Modus: Fenster etwas kleiner rendern → Luft drumherum, damit Verlauf +
+// Bodenschatten als „edler Produktshot" wirken (Kundenwunsch 23.06.2026).
+const _camBase = (_embed ? _bgLight : true) ? 5.7 : 5.0;
+camera.position.set(0, 0, _camBase);
 
 const orb = new OrbitControls(camera, canvasEl);
 orb.target.set(0, 0, 0);
@@ -718,7 +740,7 @@ function buildWindow(spec) {
   const _kH = _rollKastenH(spec);
   winGroup.position.y = -(FH + _kH) / 2;
   // Kamera etwas weiter weg, damit der höhere Aufbau (Fenster + Kasten) mit Rand ins Bild passt
-  camera.position.z = _kH ? 5.0 * (FH + _kH) / FH * 1.16 : 5.0;
+  camera.position.z = _kH ? _camBase * (FH + _kH) / FH * 1.16 : _camBase;
   if (typeof orb !== 'undefined' && orb && orb.update) orb.update();
 
   // Label-Overlay "Rollladen · Gurt/Motor"
@@ -747,6 +769,28 @@ buildWindow();
 winGroup.position.x = -FW / 2;
 winGroup.position.z = 0;
 scene.add(pivotGroup);
+
+// ── Studio-Bodenschatten (Kundenwunsch 23.06.2026) ──────────────────
+// Weiche elliptische Schatten-Fläche knapp unter dem Fenster → das Fenster
+// „steht" wie ein Produktfoto statt flach im Weiß zu schweben. Reiner
+// Gradient (lichtunabhängig) = deterministisch hübsch in jeder Aufteilung.
+let studioShadow = null;
+if(_embed ? _bgLight : true){
+  const _ss=256, _sc=document.createElement('canvas'); _sc.width=_sc.height=_ss;
+  const _sg=_sc.getContext('2d');
+  const _rg=_sg.createRadialGradient(_ss/2,_ss/2,0,_ss/2,_ss/2,_ss/2);
+  _rg.addColorStop(0,'rgba(16,30,56,0.40)');
+  _rg.addColorStop(0.40,'rgba(16,30,56,0.17)');
+  _rg.addColorStop(1,'rgba(16,30,56,0)');
+  _sg.fillStyle=_rg; _sg.fillRect(0,0,_ss,_ss);
+  const _stex=new THREE.CanvasTexture(_sc); _stex.colorSpace=THREE.SRGBColorSpace;
+  const _smat=new THREE.MeshBasicMaterial({map:_stex,transparent:true,depthWrite:false});
+  // kompaktere Ellipse, dunkelster Punkt direkt an der Fenster-Unterkante → echter Kontaktschatten
+  studioShadow=new THREE.Mesh(new THREE.PlaneGeometry(1.7,0.52),_smat);
+  studioShadow.renderOrder=-1;
+  studioShadow.position.set(0,-0.6,-0.2);
+  scene.add(studioShadow);
+}
 
 // setSide: 'r' = Griff rechts (Standard), 'l' = Griff links (gespiegelt)
 function setSide(s) {
@@ -1329,6 +1373,8 @@ function updateSashAnimation() {
   requestAnimationFrame(animate);
   orb.update();
   updateSashAnimation();
+  // Studio-Schatten an die aktuelle Fenster-Unterkante koppeln (Rolladen/Höhe)
+  if (studioShadow) studioShadow.position.y = winGroup.position.y;
   renderer.render(scene, camera);
 })();
 </script>
