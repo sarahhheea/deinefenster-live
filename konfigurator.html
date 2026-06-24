@@ -13627,10 +13627,14 @@ function _renderBalkontuer3d() {
   const _side  = _isZwei
     ? ((S.oeff1 === 'dk-l' || S.oeff1 === 'dk-r') ? 'l' : 'r')
     : ((S.oeff1 === 'dreh-l' || S.oeff1 === 'dk-l') ? 'r' : 'l');
-  const _layout = S.fluegel || '1-fluegel';
+  // BUG-FIX 2026-06-23: Stulp = 2 Flügel. Die 3D-Datei kennt nur layout='2-fluegel' + separator='stulp'
+  // (parseLayout('stulp')→cols:1 → würde sonst nur 1 Flügel zeichnen). Darum S.fluegel='stulp' hier auf
+  // 2-fluegel + separator mappen, sonst zeigt die Vorschau bei "2 Flügel · Stulp" fälschlich 1 Flügel.
+  const _layout = _isZwei ? '2-fluegel' : '1-fluegel';
+  const _separator = (S.fluegel === 'stulp') ? 'stulp' : (S.zweiteilung || '');
   const _sashes = [S.oeff1, S.oeff2].filter(Boolean);
   // BUG-FIX 2026-05-21 v2: _view inline berechnen statt const (closure-safe in async onload)
-  const _isMulti = /^2-/.test(_layout);
+  const _isMulti = _isZwei;
   const _src3d = _isMulti ? 'balkontuer-3d-multi.html' : 'balkontuer-3d.html';
 
   wrap.style.display = 'block';
@@ -13640,7 +13644,7 @@ function _renderBalkontuer3d() {
     const _roll = S.roll || 'ohne';
     const _kasten = S.rollKasten || '175';
     const _rseite = S.rollSeite || 'rechts';
-    frame.src = `/${_src3d}?embed&v=20260622wbgbt&bg=light&color=${_ck}&side=${_side}&layout=${_layout}&roll=${_roll}&rollKasten=${_kasten}&rollSeite=${_rseite}&view=${_view}`;
+    frame.src = `/${_src3d}?embed&v=20260622wbgbt&bg=light&color=${_ck}&side=${_side}&layout=${_layout}&separator=${_separator}&roll=${_roll}&rollKasten=${_kasten}&rollSeite=${_rseite}&view=${_view}`;
     frame.onload = () => {
       const cw = frame.contentWindow;
       if (!cw) return;
@@ -13649,7 +13653,7 @@ function _renderBalkontuer3d() {
         type: 'update',
         layout: _layout,
         sashes: _sashes,
-        separator: S.zweiteilung || '',
+        separator: _separator,
         roll:       S.roll       || 'ohne',
         rollKasten: S.rollKasten || '175',
         panzerHex: _panzerHex(),
@@ -13670,7 +13674,7 @@ function _renderBalkontuer3d() {
         type: 'update',
         layout: _layout,
         sashes: _sashes,
-        separator: S.zweiteilung || '',
+        separator: _separator,
         roll:       S.roll       || 'ohne',
         rollKasten: S.rollKasten || '175',
         panzerHex: _panzerHex(),
