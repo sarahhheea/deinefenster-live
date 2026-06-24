@@ -4416,6 +4416,16 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   /* Öffnungsart Haustür: 4 Türkarten kompakt, damit alle ohne Scrollen sichtbar sind (zentriert) */
   #cfg-wizard .wiz-body.cards-mode .hac-cards{max-width:720px;margin:0 auto;gap:14px}
   #cfg-wizard .wiz-body.cards-mode .hac-cards .wiz-card{width:152px}
+  /* Auf hohen Viewports (großer Monitor) Türkarten größer — restlicher Konfigurator-Maßstab.
+     Flache Laptops behalten die kompakte 152px-Variante, damit alle 4 ohne Scrollen sichtbar bleiben. */
+  @media (min-height:840px){
+    #cfg-wizard .wiz-body.cards-mode .hac-cards{max-width:840px;gap:16px}
+    #cfg-wizard .wiz-body.cards-mode .hac-cards .wiz-card{width:188px}
+  }
+  @media (min-height:960px){
+    #cfg-wizard .wiz-body.cards-mode .hac-cards{max-width:920px}
+    #cfg-wizard .wiz-body.cards-mode .hac-cards .wiz-card{width:212px}
+  }
   #cfg-wizard .hac-hint{font-size:12.5px;line-height:1.5;padding:10px 16px}
   #cfg-wizard .hac-ovl{position:absolute;inset:0;pointer-events:none}
   #cfg-wizard .hac-ovl svg{width:100%;height:100%;display:block}
@@ -6226,13 +6236,11 @@ const P = {
   tuerGriffAussen: {
     // Kundenwunsch 25.05.2026: 20 Drutex-Außengriff-Optionen mit echten Drutex-Bildern
     // Bilder unter img/drutex-griffe/ (kopiert von drutex.de/de/produkte/addons/type/8/)
-    // Kundenwunsch 16.06.2026: Stoßgriff Q45R + Z1 ganz nach oben
+    // Kundenwunsch 23.06.2026: Reihenfolge Außengriff = Drücker zuerst, dann Stoßgriff (mit Höhenwahl),
+    // dann Knauf, alles Weitere darunter (htg = Drücker/Hebel · stoss = Stoßgriff · knauf = Knauf).
+    'htg-30a':       { name:'Haustürgriff 30A (Edelstahl)', add:0, group:'Haustürgriff', img:'img/drutex-griffe/htg-30a.webp' },
     'stoss-q45r':    { name:'Edelstahlstoßgriff', add:0, group:'Stoßgriff Edelstahl', img:'img/drutex-griffe/stoss-q45r.webp' },
     'knauf-weiss':   { name:'Knauf (weiß)',   add:0, group:'Knauf', img:'img/drutex-griffe/knauf-weiss.webp' },
-    'knauf-braun':   { name:'Knauf (braun)',  add:0, group:'Knauf', img:'img/drutex-griffe/knauf-braun.webp' },
-    'knauf-oliv':    { name:'Knauf (oliv)',   add:0, group:'Knauf', img:'img/drutex-griffe/knauf-oliv.webp' },
-    'knauf-silber':  { name:'Knauf (silber)', add:0, group:'Knauf', img:'img/drutex-griffe/knauf-silber.webp' },
-    'htg-30a':       { name:'Haustürgriff 30A (Edelstahl)', add:0, group:'Haustürgriff', img:'img/drutex-griffe/htg-30a.webp' },
     'htg-weiss':     { name:'Haustürgriff (weiß)',  add:0, group:'Haustürgriff', img:'img/drutex-griffe/htg-weiss.webp' },
     'htg-oliv':      { name:'Haustürgriff (oliv)',  add:0, group:'Haustürgriff', img:'img/drutex-griffe/htg-oliv.webp' },
     'htg-silber':    { name:'Haustürgriff (silber)', add:0, group:'Haustürgriff', img:'img/drutex-griffe/htg-silber.webp' },
@@ -6240,6 +6248,9 @@ const P = {
     'htg-flach-braun':  { name:'Haustürgriff flach (braun)', add:0, group:'Haustürgriff flach', img:'img/drutex-griffe/htg-flach-braun.webp' },
     'htg-flach-silber': { name:'Haustürgriff flach (silber)', add:0, group:'Haustürgriff flach', img:'img/drutex-griffe/htg-flach-silber.webp' },
     'htg-r35a':      { name:'Haustürgriff R35A/2000M', add:0, group:'Haustürgriff Sonder', img:'img/drutex-griffe/htg-r35a.webp' },
+    'knauf-braun':   { name:'Knauf (braun)',  add:0, group:'Knauf', img:'img/drutex-griffe/knauf-braun.webp' },
+    'knauf-oliv':    { name:'Knauf (oliv)',   add:0, group:'Knauf', img:'img/drutex-griffe/knauf-oliv.webp' },
+    'knauf-silber':  { name:'Knauf (silber)', add:0, group:'Knauf', img:'img/drutex-griffe/knauf-silber.webp' },
   },
   // IGLO-HS INNEN-Griff = Muschelgriff (versenkter Flachgriff, 3 Farben: weiß/braun/silber).
   hstGriff: {
