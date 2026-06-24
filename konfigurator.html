@@ -7597,11 +7597,14 @@ function wizRenderSchiebegriff(){
     var imgFor=function(k){return 'img/drutex-griffe/hst-hebel'+(k==='ohne'?'':'-schloss')+'-'+col+'-cut.webp';};
     return Object.keys(P.hstSchloss).map(function(k){const o=P.hstSchloss[k];return '<div class="wiz-card wiz-card-opt wiz-hstgr'+(k===S.hstSchloss?' sel':'')+'" onclick="wizSet(\'hstSchloss\',\''+k+'\')"><div class="wiz-sym"><img src="'+imgFor(k)+'" alt="'+o.name+'" loading="lazy"></div><div class="wiz-cn">'+o.name+'</div><div class="wiz-csub">'+(o.sub||'')+'</div></div>';}).join('');
   }
-  // Alle drei Sektionen untereinander auflisten (kein Tab-Umschalter) — Kundenwunsch 23.06.2026
-  var h='';
-  h+='<div class="wiz-griffsub">Innengriff — Muschelgriff im Raum</div><div class="wiz-cards wiz-one">'+colorCards({weiss:P.hstGriff.weiss},'weiss','hstGriff')+'</div>';
-  h+='<div class="wiz-griffsub" style="margin-top:18px">Außengriff — Schiebegriff von der Straße</div><div class="wiz-cards wiz-one">'+colorCards({weiss:P.hstGriffAussen.weiss},'weiss','hstGriffAussen')+'</div>';
-  h+='<div class="wiz-griffsub" style="margin-top:18px">Abschließbar?</div><div class="wiz-cards wiz-one">'+schlossCards()+'</div>';
+  // Drei Sektionen nebeneinander (Innengriff | Außengriff | Abschließbar), darunter
+  // je die Optionen aufgelistet — Kundenwunsch 24.06.2026
+  function gcol(label,cards){return '<div class="wiz-gcol"><div class="wiz-griffsub">'+label+'</div><div class="wiz-cards wiz-gcol-cards">'+cards+'</div></div>';}
+  var h='<div class="wiz-griff3col">'+
+    gcol('Innengriff — Muschelgriff im Raum',colorCards({weiss:P.hstGriff.weiss},'weiss','hstGriff'))+
+    gcol('Außengriff — Schiebegriff von der Straße',colorCards({weiss:P.hstGriffAussen.weiss},'weiss','hstGriffAussen'))+
+    gcol('Abschließbar?',schlossCards())+
+    '</div>';
   return h;
 }
 function wizRenderBalkSchwelle(){
@@ -8083,7 +8086,8 @@ function hsLaufCard(v){
   var sub='Ansicht von innen';
   var paths='<line x1="865" y1="440" x2="690" y2="440"/><polyline points="740,400 690,440 740,480"/>';
   var ov='<svg viewBox="0 0 1200 896" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%'+(mir?';transform:scaleX(-1)':'')+'" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#fff" stroke-width="20">'+paths+'</g><g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#225eaa" stroke-width="9">'+paths+'</g></svg>';
-  return '<div class="wiz-card'+sel+'" onclick="wizSetHstLauf(\''+v+'\')"><div style="position:relative;width:100%;line-height:0;border-radius:10px;overflow:hidden"><img src="img/karten/hst-fluegel/2-teilig.webp?v=20260610psk" alt="'+name+'" loading="lazy" style="width:100%;height:auto;aspect-ratio:auto;object-fit:fill;display:block;border-radius:0;padding:0">'+ov+'</div><div class="wiz-cn">'+name+'</div><div class="wiz-csub">'+sub+'</div></div>';
+  var himg=(v==='links')?'2-teilig-links':'2-teilig';   // echtes gespiegeltes Bild je Laufrichtung (wie PSK) — links: Griff links, rechts: Griff rechts
+  return '<div class="wiz-card'+sel+'" onclick="wizSetHstLauf(\''+v+'\')"><div style="position:relative;width:100%;line-height:0;border-radius:10px;overflow:hidden"><img src="img/karten/hst-fluegel/'+himg+'.webp?v=20260623hs" alt="'+name+'" loading="lazy" style="width:100%;height:auto;aspect-ratio:auto;object-fit:fill;display:block;border-radius:0;padding:0">'+ov+'</div><div class="wiz-cn">'+name+'</div><div class="wiz-csub">'+sub+'</div></div>';
 }
 function wizRenderHsLauf(){ return '<div class="wiz-cards">'+hsLaufCard('links')+hsLaufCard('rechts')+'</div>'; }
 function wizPickBalkonAnschlag1F(idx){ var o=BALKON_ANSCHLAG_1F[idx]; if(!o)return; S.oeff1=o.oeff; S.oeff2=null; S.oeff3=null; if(window._touched)window._touched.add('oeff1'); if(typeof buildOeffSash==='function')buildOeffSash(); if(typeof mkDone==='function')mkDone(4); wizRenderPanel(); }
@@ -15722,6 +15726,12 @@ async function submitSkizze(e) {
   #cfg-wizard .wiz-tabs-3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
   #cfg-wizard .wiz-tabs-3 .wiz-tab{ padding:10px 6px; font-size:13px; text-align:center; min-height:48px; }
   #cfg-wizard .wiz-griffsub{ text-align:center; font-family:'Manrope',sans-serif; font-size:12.5px; color:#5b6b80; margin:10px 0 12px; }
+  /* HST-Griffschritt: drei Sektionen nebeneinander (Innengriff | Außengriff | Abschließbar) */
+  #cfg-wizard .wiz-griff3col{ display:flex; gap:14px; align-items:flex-start; justify-content:center; flex-wrap:wrap; }
+  #cfg-wizard .wiz-griff3col .wiz-gcol{ flex:1 1 0; min-width:150px; max-width:230px; }
+  #cfg-wizard .wiz-griff3col .wiz-gcol-cards{ flex-direction:column; align-items:center; justify-content:flex-start !important; gap:10px; }
+  #cfg-wizard .wiz-griff3col .wiz-gcol-cards .wiz-card-opt{ width:100% !important; max-width:200px; }
+  @media(max-width:560px){ #cfg-wizard .wiz-griff3col{ flex-direction:column; align-items:center; } #cfg-wizard .wiz-griff3col .wiz-gcol{ max-width:260px; width:100%; } }
   /* Griff-/Klinken-Kacheln: das Produktfoto füllt die Kachel ganz (cover) → ein sauberes Produktbild,
      kein eingebetteter Kasten-Rand. Foto-Hintergrund = Kachel-Hintergrund (nahtlos). */
   #cfg-wizard .wiz-card-opt .wiz-sym{ background:#f5f8fc !important; height:92px !important; border-radius:10px !important; overflow:hidden; }
