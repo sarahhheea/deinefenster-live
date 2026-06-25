@@ -8436,6 +8436,7 @@ function wizUpCfgList(){
   row('Außenfarbe', _fa, _faHex);
   row('Innenfarbe', _fi, _fiHex);
   if(has('rolladen')){ row('Rolladen', (S.roll&&S.roll!=='ohne')?_short(_cfgNm('roll',S.roll)):'Nein'); }
+  row('Anzahl', (S.qty||1)+' Stück');
   var _priceHtml='', _pp=null, _plabel=' / Stück';
   if(S.prod==='kunststoff' && typeof fensterPriceParts==='function'){ _pp=fensterPriceParts(); _plabel=' / Fenster'; }
   else if(S.prod==='balkontuer' && typeof balkonPriceParts==='function'){ _pp=balkonPriceParts(); _plabel=' / Balkontür'; }
@@ -8444,8 +8445,8 @@ function wizUpCfgList(){
   if(_pp){
     try{
       _priceHtml='<div class="wiz-pc-price" style="margin-top:12px;padding-top:11px;border-top:1px solid rgba(26,41,66,0.12);text-align:center">'
-        +'<div style="font-size:27px;font-weight:800;color:#225eaa;line-height:1.05;font-family:\'Plus Jakarta Sans\',sans-serif">'+fmt(_pp.unit)+'<span style="font-size:13px;font-weight:600;color:#5a6678">'+_plabel+'</span></div>'
-        +'<div style="font-size:10.5px;font-weight:500;color:#7a8699;margin-top:3px">inkl. MwSt'+((S.qty>1)?(' · '+S.qty+' Stück = '+fmt(_r2(_pp.unit*S.qty))):'')+'</div>'
+        +'<div style="font-size:27px;font-weight:800;color:#225eaa;line-height:1.05;font-family:\'Plus Jakarta Sans\',sans-serif">'+((S.qty>1)?fmt(_r2(_pp.unit*S.qty)):fmt(_pp.unit))+'<span style="font-size:13px;font-weight:600;color:#5a6678">'+((S.qty>1)?(' gesamt · '+S.qty+' Stück'):_plabel)+'</span></div>'
+        +'<div style="font-size:10.5px;font-weight:500;color:#7a8699;margin-top:3px">'+((S.qty>1)?('Einzelpreis '+fmt(_pp.unit)+' · inkl. MwSt'):'inkl. MwSt')+'</div>'
         +'<div style="font-size:10.5px;font-weight:600;color:#225eaa;margin-top:3px">'+delivText(orderDelivery())+'</div>'
         +'</div>';
     }catch(e){}
@@ -8711,7 +8712,7 @@ function wizSetSicher(v){ S.sicher=v; if(window._touched)window._touched.add('si
 function wizRenderAnzahl(){
   return '<div class="wiz-step"><div class="wiz-step-row"><button type="button" onclick="wizQty(-1)">−</button><div class="wiz-qv" id="wiz-qv">'+(S.qty||1)+'</div><button type="button" onclick="wizQty(1)">+</button></div><div class="wiz-step-unit">Stück</div></div><div class="wiz-hint">Alle Fenster dieser Bestellung werden mit der identischen Konfiguration gefertigt.</div>';
 }
-function wizQty(d){ let q=(parseInt(S.qty)||1)+d; q=Math.max(1,Math.min(99,q)); S.qty=q; if(window._touched)window._touched.add('qty'); if(typeof upSidebar==='function')upSidebar(); const el=document.getElementById('wiz-qv'); if(el)el.textContent=q; }
+function wizQty(d){ let q=(parseInt(S.qty)||1)+d; q=Math.max(1,Math.min(99,q)); S.qty=q; if(window._touched)window._touched.add('qty'); if(typeof upSidebar==='function')upSidebar(); if(typeof wizUpCfgList==='function')wizUpCfgList(); const el=document.getElementById('wiz-qv'); if(el)el.textContent=q; }
 function anschlagToFluegel() {
   const ah = document.getElementById('anschlag-hero'); if (ah) ah.style.display='none';
   buildFluegelHero();
