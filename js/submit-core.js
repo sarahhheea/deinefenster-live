@@ -271,7 +271,7 @@
           </div>
         </td></tr>` : '';
 
-      const sarahHtml = `<!DOCTYPE html><html lang="de"><body style="margin:0;padding:0;background:#f1f3ff;font-family:'Segoe UI',Arial,sans-serif">
+      const internHtml = `<!DOCTYPE html><html lang="de"><body style="margin:0;padding:0;background:#f1f3ff;font-family:'Segoe UI',Arial,sans-serif">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f3ff;padding:32px 16px"><tr><td align="center">
 <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%">
   <tr><td style="background:#112455;border-radius:16px 16px 0 0;padding:28px 36px">
@@ -355,7 +355,7 @@
           body: JSON.stringify({
             customer_email: formData.email,
             subject: `🔔 Neue Anfrage ${offerId} — DeineFenster.de`,
-            html: sarahHtml,
+            html: internHtml,
             text: internalText,
             confirmation: { name: formData.name, offerId: offerId, detailsHtml: kundenDetailsHtml },
           }),

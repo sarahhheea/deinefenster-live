@@ -11849,13 +11849,13 @@ const PREIS_FAKTOR = 0.97; // interner Kalkulationsfaktor
 const _FMAT_B = [450,600,800,1000,1200,1400,1500];
 const _FMAT_H = [400,600,800,1000,1200,1400,1700];
 const _FMAT = [
-  [134.35,134.35,155.89,182.48,202.71,224.38,233.91], // H395
-  [134.35,134.35,167.06,196.31,219.47,243.79,254.50], // H600
-  [134.35,134.35,174.01,201.23,222.08,250.45,260.68], // H800
-  [159.82,159.82,180.96,206.15,224.68,257.11,266.85], // H1000
-  [174.59,174.59,197.18,224.39,243.79,263.77,273.03], // H1200
-  [189.65,189.65,213.97,242.05,263.77,285.19,296.49], // H1400
-  [220.63,220.63,252.48,279.98,304.30,328.34,339.92], // H1700
+  [134,134,156,182,203,224,234], // H395
+  [134,134,167,196,219,244,254], // H600
+  [134,134,174,201,222,250,261], // H800
+  [160,160,181,206,225,257,267], // H1000
+  [175,175,197,224,244,264,273], // H1200
+  [190,190,214,242,264,285,296], // H1400
+  [221,221,252,280,304,328,340], // H1700
 ];
 function _interp1(x, xs, ys){
   const n = xs.length;
@@ -11873,11 +11873,11 @@ function fensterMatrix(b,h){
 // Bereich 500–1700 (Kunde: Fest min 500×500, max 1700×1700).
 const _FESTG = [500,800,1100,1400,1700];
 const _FESTMAT = [
-  [ 81.65,  81.65,  93.81, 113.79, 132.32], // B500
-  [ 81.65,  81.65, 101.92, 122.76, 142.16], // B800
-  [ 93.81, 101.92, 126.24, 151.14, 174.30], // B1100
-  [113.79, 122.76, 151.14, 178.64, 206.73], // B1400
-  [132.32, 142.16, 174.30, 206.73, 238.29], // B1700
+  [ 82,  82,  94, 114, 132], // B500
+  [ 82,  82, 102, 123, 142], // B800
+  [ 94, 102, 126, 151, 174], // B1100
+  [114, 123, 151, 179, 207], // B1400
+  [132, 142, 174, 207, 238], // B1700
 ];
 function fensterFestMatrix(b,h){
   if (b>1700) b=1700; if (h>1700) h=1700; if (b<500) b=500; if (h<500) h=500;
@@ -11954,7 +11954,7 @@ function fensterPriceParts(){
   let unitMarkt = bodyNoColor + colorAdd + glas + schall + sicherGlas + dekor + griff + roll + spro + sicher;
   if (unitMarkt < 50) unitMarkt = 50; // niedriges Sicherheitsnetz (Matrizen tragen die echten Mindestpreise: DK 134, Fest 81,65)
   const k = PREIS_FAKTOR;
-  const unit = _r2(unitMarkt*k);
+  const unit = Math.round(unitMarkt*k);
   // Aufschlüsselung (Preise)
   const flName = (P.fluegel[S.fluegel] && P.fluegel[S.fluegel].name) || (S.fluegel||'');
   const rows = [{ l:'Fenster · '+flName+' · '+b+'×'+h+' mm', v:fmt(_r2(frame*k)) }];
@@ -11992,16 +11992,16 @@ function calcUnitFenster(){ return fensterPriceParts().unit; }
 // 1-Flügel (DK) + 2-Flügel (Stulp) je eigene Matrix. Aufpreise wie Fenster (gleicher Hersteller).
 const _BLK_B1=[500,700,900,1100], _BLK_H1=[1700,1800,2000,2300];
 const _BLK_M1=[
-  [273.86,273.86,298.76,448.89], // H1700 (kleinste Balkontür)
-  [273.86,273.86,298.76,456.56], // H1800
-  [290.66,290.66,315.85,491.60], // H2000
-  [313.82,313.82,342.19,542.12], // H2300
+  [274,274,299,449], // H1700 (kleinste Balkontür)
+  [274,274,299,457], // H1800
+  [291,291,316,492], // H2000
+  [314,314,342,542], // H2300
 ];
 const _BLK_B2=[1300,1500,1700,2000], _BLK_H2=[1800,2000,2300];
 const _BLK_M2=[
-  [508.35,531.22,554.97,590.58], // H1800
-  [538.46,562.49,586.82,625.32], // H2000
-  [587.68,609.98,637.19,677.73], // H2300
+  [508,531,555,591], // H1800
+  [538,562,587,625], // H2000
+  [588,610,637,678], // H2300
 ];
 function _matLookup(b,h,BS,HS,M){
   const col=[]; for(let i=0;i<HS.length;i++) col.push(_interp1(b,BS,M[i]));
@@ -12022,16 +12022,16 @@ function balkonPriceParts(){
   if(S.sproTyp && S.sproTyp!=='keine' && F_SPRO[S.sproTyp]) price += F_SPRO[S.sproTyp][S.sproDicke]||0;
   price += F_SICHER[S.sicher]||0;
   if(S.balkonSchwelle && P.balkonSchwelle[S.balkonSchwelle]) price += P.balkonSchwelle[S.balkonSchwelle].add||0;
-  return { unit: _r2(price*PREIS_FAKTOR) };
+  return { unit: Math.round(price*PREIS_FAKTOR) };
 }
 
 // ── SCHIEBETÜR-PREISMODELL (PSK; IGLO-HS = Richtwert) ──
 const _PSK_B=[1500,2000,2500,3000], _PSK_H=[1700,1900,2100,2200];
 const _PSK_M=[
-  [1450.58,1490.83,1578.85,1680.19], // H1700
-  [1450.58,1490.83,1578.85,1680.19], // H1900 (gleiche Höhenstufe wie 1700)
-  [1489.96,1533.68,1628.94,1739.25], // H2100
-  [1507.91,1553.66,1651.23,1763.57], // H2200
+  [1451,1491,1579,1680], // H1700
+  [1451,1491,1579,1680], // H1900 (gleiche Höhenstufe wie 1700)
+  [1490,1534,1629,1739], // H2100
+  [1508,1554,1651,1764], // H2200
 ];
 function hstPriceParts(){
   const b=S.bMm||2200, h=S.hMm||2000;
@@ -12049,15 +12049,15 @@ function hstPriceParts(){
   price += F_SICHER[S.sicher]||0;
   if(P.hstSchwelle && P.hstSchwelle[S.hstSchwelle]) price += P.hstSchwelle[S.hstSchwelle].add||0;
   if(P.hstTeilung && P.hstTeilung[S.hstTeilung]) price += P.hstTeilung[S.hstTeilung].add||0;
-  return { unit: _r2(price*PREIS_FAKTOR) };
+  return { unit: Math.round(price*PREIS_FAKTOR) };
 }
 
 // ── HAUSTÜR-PREISMODELL (Basis-Matrix Florida-Inox + Glas-Stufe je Modell + Griff) ──
 const _HT_B=[900,1040,1170], _HT_H=[2000,2200,2400];
 const _HT_M=[
-  [1689.45,1756.05,1789.34], // H2000
-  [1719.27,1789.34,1824.09], // H2200
-  [1814.24,1887.50,1923.69], // H2400
+  [1689,1756,1789], // H2000
+  [1719,1789,1824], // H2200
+  [1814,1888,1924], // H2400
 ];
 // Modell-Aufschlag ggü. Florida-Basis (Glas-Stufe, ~konstant; Zuordnung nach Glasanteil — Näherung)
 const _HT_MODELL={
@@ -12078,7 +12078,7 @@ function haustuerPriceParts(){
   if(S.glas==='3fach') price += Math.round(24.4*(b*h/1e6));
   if(S.tuerGriffAussen==='stoss-q45r') price += 99.60; // Edelstahl-Stoßgriff
   price += F_SICHER[S.sicher]||0;
-  return { unit:_r2(price*PREIS_FAKTOR) };
+  return { unit: Math.round(price*PREIS_FAKTOR) };
 }
 
 function calcUnit() {

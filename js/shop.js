@@ -720,7 +720,7 @@ function gefilterteProdukte() {
 }
 
 /* ─── Shop-Header dynamisch je nach Zustand-Filter ─── */
-// SHOP_HEADERS-Logik entfernt: H1 + Sub bleiben statisch allgemein (Sarah-Entscheidung 24.05.2026).
+// SHOP_HEADERS-Logik entfernt: H1 + Sub bleiben statisch allgemein (Kundenentscheidung 24.05.2026).
 // aktualisiereShopHeader steuert nur noch den Gebraucht-Filter-Hinweis.
 function aktualisiereShopHeader() {
   const zustand = STATE.filter.zustand.size ? [...STATE.filter.zustand][0] : 'default';
