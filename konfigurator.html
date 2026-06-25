@@ -16891,18 +16891,35 @@ function prodDetailLines(c){
   return lines;
 }
 // HTML-Produktliste für die KUNDEN-Bestätigungsmail (alle angefragten Produkte: Warenkorb + aktuelles).
-function customerDetailsHtml(cfgs){
+// items: [{c:config, unit:Stückpreis|null, qty}] · sum: {orderSub, total, liefLbl} (Richtpreise, unverbindlich)
+function customerDetailsHtml(items,sum){
   function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-  return (cfgs||[]).map(function(c,i){
+  function eur(n){return (Number(n)||0).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';}
+  var n=(items||[]).length;
+  var prods=(items||[]).map(function(it,i){
+    var c=(it&&it.c)?it.c:it; var unit=(it&&typeof it.unit==='number')?it.unit:null; var qty=(it&&it.qty)||c.qty||1;
     var pn=(P.prod[c.prod]&&P.prod[c.prod].name)||c.prod||'Produkt';
     var rows=prodDetailLines(c).filter(function(l){return l.indexOf('Produkt:')!==0;}).map(function(l){
       var idx=l.indexOf(':'); var label=idx>=0?l.slice(0,idx):l; var val=idx>=0?l.slice(idx+1).trim():'';
       if(!val||val==='–'||val==='Ohne'||val==='Kein Rolladen')return '';
       return '<tr><td style="padding:2px 14px 2px 0;color:#8a8170;font-size:13px;white-space:nowrap;vertical-align:top;">'+esc(label)+'</td><td style="padding:2px 0;color:#1a2336;font-size:13px;">'+esc(val)+'</td></tr>';
     }).join('');
-    var head=cfgs.length>1?('Produkt '+(i+1)+' von '+cfgs.length+': '+pn+(c.qty>1?(' · '+c.qty+'×'):'')):(pn+(c.qty>1?(' · '+c.qty+'×'):''));
-    return '<div style="margin-top:14px;"><div style="font-family:Georgia,serif;font-size:15px;color:#1a2336;margin-bottom:4px;">'+esc(head)+'</div><table cellpadding="0" cellspacing="0" style="border-collapse:collapse;">'+rows+'</table></div>';
+    var priceRow = (unit!=null)?('<tr><td style="padding:6px 14px 2px 0;color:#8a8170;font-size:13px;white-space:nowrap;vertical-align:top;">Richtpreis</td><td style="padding:6px 0 2px;color:#1a2336;font-size:13px;font-weight:700;">'+eur(unit)+(qty>1?(' × '+qty+' = '+eur(unit*qty)):'')+' <span style="font-weight:400;color:#8a8170;">inkl. MwSt</span></td></tr>'):'';
+    var head=n>1?('Produkt '+(i+1)+' von '+n+': '+pn+(qty>1?(' · '+qty+'×'):'')):(pn+(qty>1?(' · '+qty+'×'):''));
+    return '<div style="margin-top:14px;"><div style="font-family:Georgia,serif;font-size:15px;color:#1a2336;margin-bottom:4px;">'+esc(head)+'</div><table cellpadding="0" cellspacing="0" style="border-collapse:collapse;">'+rows+priceRow+'</table></div>';
   }).join('');
+  var summaryHtml='';
+  if(sum){
+    summaryHtml='<div style="margin-top:18px;padding-top:13px;border-top:2px solid #e7e0d3;">'
+      +'<table cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;">'
+      +(n>1?('<tr><td style="padding:2px 0;color:#8a8170;font-size:13px;">Zwischensumme</td><td style="padding:2px 0;color:#1a2336;font-size:13px;text-align:right;">'+eur(sum.orderSub)+'</td></tr>'):'')
+      +'<tr><td style="padding:2px 0;color:#8a8170;font-size:13px;">Lieferung</td><td style="padding:2px 0;color:#1a2336;font-size:13px;text-align:right;">'+esc(sum.liefLbl)+'</td></tr>'
+      +'<tr><td style="padding:7px 0 0;color:#1a2336;font-size:16px;font-weight:700;font-family:Georgia,serif;">Voraussichtlicher Gesamtpreis</td><td style="padding:7px 0 0;color:#1a2336;font-size:16px;font-weight:700;text-align:right;font-family:Georgia,serif;">'+eur(sum.total)+'</td></tr>'
+      +'</table>'
+      +'<div style="margin-top:11px;font-size:12.5px;color:#8a8170;line-height:1.55;">Dies ist ein <b>unverbindlicher Richtpreis</b> inkl. 19 % MwSt — keinerlei Verpflichtung für Sie. Ihr persönliches, finales Angebot prüfen und senden wir Ihnen <b>innerhalb von 24 Stunden</b> per E-Mail zu, mit allen Details und dem genauen Preis. Sie können sich in Ruhe alles ansehen.</div>'
+      +'</div>';
+  }
+  return prods+summaryHtml;
 }
 function d2submit(e){
   e.preventDefault();
@@ -16940,14 +16957,29 @@ function d2submit(e){
   try{sessionStorage.setItem('df_anfrage',JSON.stringify({offerId,prodName,name,email,tel,ort,breite:S.bMm,hoehe:S.hMm,anzahl:S.qty,farbaussen:S.fa,farbinnen:S.fi,glas:S.glas,oeff:S.oeff1,oeffName:(S.anschlagName||null),profil:S.profil}));}catch(e){}
   // Alle Produkte der Anfrage = Warenkorb-Positionen + das aktuelle (zuletzt konfigurierte) Produkt.
   // Jedes Produkt kommt mit VOLLEN Details in die Firmen-Mail (nicht nur Kurzzeile).
-  const _allCfgs=(typeof cart!=='undefined'?cart.map(function(i){return i.config;}):[]).concat([S]);
-  const _multi=_allCfgs.length>1;
+  function _eur(n){ return (Number(n)||0).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €'; }
+  const _curUnit=calcUnit();
+  const _allItems=(typeof cart!=='undefined'?cart.map(function(it){return {c:it.config, unit:(typeof it.unitPrice==='number'?it.unitPrice:null), qty:(it.qty||1)};}):[])
+    .concat([{c:S, unit:_curUnit, qty:S.qty||1}]);
+  const _allCfgs=_allItems.map(function(x){return x.c;});
+  const _multi=_allItems.length>1;
   let _tp=['Neue Anfrage über DeineFenster.de','══════════════════════════════════════════','','KONTAKTDATEN','Name:        '+name,'Telefon:     '+(tel||'–'),'E-Mail:      '+email,'Versand:     '+versandText,'','Angebots-Nr: '+offerId];
-  if(_multi)_tp.push('','ANFRAGE MIT '+_allCfgs.length+' PRODUKTEN');
-  _allCfgs.forEach(function(c,i){
-    _tp.push('', _multi?('── PRODUKT '+(i+1)+' von '+_allCfgs.length+' ──'):'KONFIGURATION');
-    _tp=_tp.concat(prodDetailLines(c));
+  if(_multi)_tp.push('','ANFRAGE MIT '+_allItems.length+' PRODUKTEN');
+  let _orderSub=0;
+  _allItems.forEach(function(it,i){
+    _tp.push('', _multi?('── PRODUKT '+(i+1)+' von '+_allItems.length+' ──'):'KONFIGURATION');
+    _tp=_tp.concat(prodDetailLines(it.c));
+    var _u=it.unit, _q=it.qty||1;
+    if(_u!=null){ var _pos=_u*_q; _orderSub+=_pos;
+      _tp.push('Stückpreis:  '+_eur(_u)+' (inkl. MwSt)');
+      if(_q>1) _tp.push('Positionspreis: '+_eur(_pos)+' ('+_q+' Stück)');
+    }
   });
+  // Lieferkosten + Gesamtsumme (Brutto inkl. MwSt)
+  var _shipMail=(lieferart==='abholen'||!_dinfo.deliverable)?0:(_dinfo.cost||0);
+  var _liefLbl=lieferart==='abholen'?'Abholung im Lager (0 €)':(_dinfo.hasHS?'300 € deutschlandweit':(_dinfo.cost===0?'kostenlos (ab 10 Artikel)':(_dinfo.cost!=null?_eur(_dinfo.cost):'–')));
+  var _liefCustomer=lieferart==='abholen'?'Abholung im Lager · kostenlos':(_dinfo.hasHS?'300 € deutschlandweit':(_dinfo.cost===0?'kostenlose Lieferung':(_dinfo.cost!=null?_eur(_dinfo.cost):'—')));
+  _tp.push('','──────────────────────────','Zwischensumme: '+_eur(_orderSub),'Lieferung:     '+_liefLbl,'GESAMTPREIS (inkl. MwSt): '+_eur(_orderSub+_shipMail));
   _tp.push('','Datum:       '+datum);
   if(notiz)_tp.push('','Anmerkungen: '+notiz);
   if(typeof uploadedImages!=='undefined'&&uploadedImages.length)_tp.push('','Fotos beigefügt: '+uploadedImages.length+' ('+uploadedImages.map(function(i){return i.name;}).join(', ')+')');
@@ -16955,7 +16987,7 @@ function d2submit(e){
   const fotoAtts=(typeof uploadedImages!=='undefined'?uploadedImages:[]).map(function(im){ const b64=((im.data||'').split(',')[1])||''; return { filename:(im.name||'foto.jpg'), content:b64 }; }).filter(function(a){ return a.content; });
   // Senden und ERST bei Erfolg zur Danke-Seite. Schlägt der Versand fehl, bleibt der
   // Kunde im Formular und bekommt einen klaren Hinweis (statt falscher "Danke"-Seite).
-  fetch('https://deinefenster-email.sarahchrist.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({customer_email:email,subject:'[DeineFenster.de] Neue Anfrage '+offerId+': '+prodName+(_multi?(' (+'+(_allCfgs.length-1)+' weitere)'):''),text:txt,confirmation:{name,offerId,detailsHtml:customerDetailsHtml(_allCfgs)},attachments:fotoAtts,website:''})})
+  fetch('https://deinefenster-email.sarahchrist.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({customer_email:email,subject:'[DeineFenster.de] Neue Anfrage '+offerId+': '+prodName+(_multi?(' (+'+(_allCfgs.length-1)+' weitere)'):''),text:txt,confirmation:{name,offerId,detailsHtml:customerDetailsHtml(_allItems,{orderSub:_orderSub,total:_orderSub+_shipMail,liefLbl:_liefCustomer})},attachments:fotoAtts,website:''})})
     .then(function(r){ return r.json().catch(function(){return {};}).then(function(d){ return {ok:r.ok,data:d}; }); })
     .then(function(res){
       if(res.ok){ window.location.href='danke.html?prod='+encodeURIComponent(prodName)+'&imgs=0&offer='+encodeURIComponent(offerId); }
