@@ -6316,6 +6316,45 @@ function deliv(qty, prod) {
   return 49;
 }
 
+// ── LIEFER-MODELL (Gesamt-Warenkorb, Kundenvorgabe 25.06.2026) ──────────
+// N = Summe aller Artikel im Warenkorb (alle Produkte). Schwelle immer 10.
+//  1–4 Artikel: nur Abholung · 5–9: 290 € · ab 10: kostenlos.
+//  Hebeschiebetür (Schiebetür/iglo-hs): immer 300 € deutschlandweit.
+//  PSK (Schiebetür/iglo-psk): erst ab 10 Gesamt-Artikeln lieferbar, sonst Abholung.
+//  Abholung im Lager (Brandenburg a.d.H.) immer möglich + kostenlos.
+function _delivItemsFromCart(includeCurrent){
+  var items = (typeof cart!=='undefined'&&Array.isArray(cart)) ? cart.map(function(it){
+    var c=(it&&it.config)||{}; return {prod:c.prod, profil:c.profil, qty:Math.max(1,parseInt(it.qty)||1)};
+  }) : [];
+  if(includeCurrent && S.prod) items.push({prod:S.prod, profil:S.profil, qty:Math.max(1,parseInt(S.qty)||1)});
+  return items;
+}
+function cartDeliveryInfo(items){
+  var N=0, hasHS=false, hasPSK=false;
+  for(var i=0;i<items.length;i++){ var it=items[i]||{}; N+=Math.max(1,parseInt(it.qty)||1);
+    if(it.prod==='hst'&&it.profil==='iglo-hs') hasHS=true;
+    if(it.prod==='hst'&&it.profil==='iglo-psk') hasPSK=true; }
+  var cost, deliverable;
+  if(hasHS){ cost=300; deliverable=true; }                 // HS immer 300 €
+  else if(hasPSK && N<10){ cost=null; deliverable=false; }  // PSK erst ab 10
+  else if(N>=10){ cost=0; deliverable=true; }
+  else if(N>=5){ cost=290; deliverable=true; }
+  else { cost=null; deliverable=false; }                    // 1–4
+  return {N:N, cost:cost, deliverable:deliverable, hasHS:hasHS, hasPSK:hasPSK};
+}
+function orderDelivery(){ return cartDeliveryInfo(_delivItemsFromCart(true)); }
+// Liefertext für die Info-Zeile unter dem Preis
+function delivText(info){
+  info = info || orderDelivery();
+  if(info.hasHS) return 'Lieferung 300 € deutschlandweit · oder Abholung im Lager';
+  if(!info.deliverable){
+    if(info.hasPSK) return 'Nur Abholung im Lager · Lieferung der Schiebetür ab 10 Artikeln';
+    return 'Nur Abholung bei uns im Lager · Lieferung ab 5 Artikeln';
+  }
+  if(info.cost===0) return 'Kostenlose Lieferung · oder Abholung im Lager';
+  return 'Lieferung '+info.cost+' € · oder Abholung kostenlos';
+}
+
 // ── ZUSTAND ─────────────────────────────────────────
 const S = {
   prod:null, qty:1, bMm:500, hMm:500,  // Start = kleinstes Maß (Richtpreis "ab", Sarah 24.06.2026)
@@ -7669,15 +7708,20 @@ function wizSetLieferart(v){
   const hint=document.getElementById('lf-abhol-hint'); if(hint)hint.style.display=(v==='abholen')?'':'none';
 }
 function wizRenderKontakt(){
-  const la=S.lieferart||'liefern';
+  const _dinfo=orderDelivery();
+  let la=S.lieferart||(_dinfo.deliverable?'liefern':'abholen');
+  if(!_dinfo.deliverable){ la='abholen'; S.lieferart='abholen'; }
+  const _lieferLabel = !_dinfo.deliverable ? 'Lieferung zu Ihnen'
+    : (_dinfo.cost===0 ? 'Lieferung zu Ihnen — kostenlos'
+    : 'Lieferung zu Ihnen — '+_dinfo.cost+' €');
   return '<form class="wiz-kform kform-wide" id="wiz-anfrage-form" onsubmit="return false" novalidate>'+
     '<div class="kf-row"><div><label class="fl" for="d2-fn">Name *</label><input class="inp" type="text" id="d2-fn" autocomplete="name"></div>'+
     '<div><label class="fl" for="d2-fe">E-Mail *</label><input class="inp" type="email" id="d2-fe" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false"></div>'+
     '<div><label class="fl" for="d2-ft">Telefon</label><input class="inp" type="tel" id="d2-ft" inputmode="tel" autocomplete="tel"></div></div>'+
     '<div><label class="fl">Lieferung oder Abholung?</label><div class="wiz-kf-deliv">'+
-      '<button type="button" id="lf-liefer" class="wiz-deliv'+(la==="liefern"?" sel":"")+'" onclick="wizSetLieferart(\'liefern\')"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 3h15v13H1zM16 8h4l3 3v5h-7M5.5 19a2 2 0 100-4 2 2 0 000 4zm13 0a2 2 0 100-4 2 2 0 000 4z"/></svg>Lieferung zu Ihnen</button>'+
+      (_dinfo.deliverable?('<button type="button" id="lf-liefer" class="wiz-deliv'+(la==="liefern"?" sel":"")+'" onclick="wizSetLieferart(\'liefern\')"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 3h15v13H1zM16 8h4l3 3v5h-7M5.5 19a2 2 0 100-4 2 2 0 000 4zm13 0a2 2 0 100-4 2 2 0 000 4z"/></svg>'+_lieferLabel+'</button>'):'')+
       '<button type="button" id="lf-abhol" class="wiz-deliv'+(la==="abholen"?" sel":"")+'" onclick="wizSetLieferart(\'abholen\')"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10l9-7 9 7v10a1 1 0 01-1 1h-5v-7H9v7H4a1 1 0 01-1-1z"/></svg>Abholung bei uns vor Ort</button>'+
-    '</div><input type="hidden" id="d2-fliefer" value="'+la+'"></div>'+
+    '</div>'+(!_dinfo.deliverable?('<div class="wiz-khint" style="margin-top:6px">'+delivText(_dinfo)+'</div>'):'')+'<input type="hidden" id="d2-fliefer" value="'+la+'"></div>'+
     '<div class="kf-row" id="lf-addr"'+(la==="abholen"?' style="display:none"':'')+'>'+
       '<div><label class="fl" for="d2-fo">PLZ / Ort</label><input class="inp" type="text" id="d2-fo" autocomplete="postal-code"></div>'+
       '<div><label class="fl" for="d2-fst">Straße & Nr.</label><input class="inp" type="text" id="d2-fst" autocomplete="street-address"></div>'+
@@ -8401,7 +8445,8 @@ function wizUpCfgList(){
     try{
       _priceHtml='<div class="wiz-pc-price" style="margin-top:12px;padding-top:11px;border-top:1px solid rgba(26,41,66,0.12);text-align:center">'
         +'<div style="font-size:27px;font-weight:800;color:#225eaa;line-height:1.05;font-family:\'Plus Jakarta Sans\',sans-serif">'+fmt(_pp.unit)+'<span style="font-size:13px;font-weight:600;color:#5a6678">'+_plabel+'</span></div>'
-        +'<div style="font-size:10.5px;font-weight:500;color:#7a8699;margin-top:3px">inkl. MwSt · zzgl. Lieferung'+((S.qty>1)?(' · '+S.qty+' Stück = '+fmt(_r2(_pp.unit*S.qty))):'')+'</div>'
+        +'<div style="font-size:10.5px;font-weight:500;color:#7a8699;margin-top:3px">inkl. MwSt'+((S.qty>1)?(' · '+S.qty+' Stück = '+fmt(_r2(_pp.unit*S.qty))):'')+'</div>'
+        +'<div style="font-size:10.5px;font-weight:600;color:#225eaa;margin-top:3px">'+delivText(orderDelivery())+'</div>'
         +'</div>';
     }catch(e){}
   }
@@ -12049,7 +12094,8 @@ function fmt(n) { return n.toLocaleString('de-DE',{minimumFractionDigits:2,maxim
 // ── SIDEBAR UPDATE ────────────────────────────────────
 function upSidebar() {
   if (!S.prod) return;
-  const unit = calcUnit(), ship = deliv(S.qty, S.prod);
+  const _odi = orderDelivery();
+  const unit = calcUnit(), ship = (_odi.deliverable ? (_odi.cost||0) : 0);
   const sub  = unit*S.qty, tot = sub+ship;
   const pr   = P.prod[S.prod];
   const sqm  = (S.bMm/1000)*(S.hMm/1000);
@@ -12066,12 +12112,12 @@ function upSidebar() {
     const fp = fensterPriceParts();
     const krows = fp.rows.slice();
     if (S.qty>1) krows.push({l:'× '+S.qty+' Stück', v:fmt(_r2(fp.unit*S.qty)), bold:true});
-    krows.push({l:'Lieferung'+(S.qty>=10?' (ab 10 Stück gratis)':''), v:fmt(ship), sub:true});
+    krows.push(_odi.deliverable?{l:'Lieferung'+(_odi.cost===0?' (ab 10 Artikel gratis)':''), v:fmt(ship), sub:true}:{l:'Abholung im Lager', v:'kostenlos', sub:true});
     const elP=document.getElementById('sb-price');
     if (elP) elP.innerHTML = krows.map(r=>`<div class="pr${r.bold?' bold':r.sub?' sub':''}"><span>${r.l}</span><span>${r.v}</span></div>`).join('');
     const gesamt = _r2(fp.unit*S.qty + ship);
     const elT=document.getElementById('sb-total');
-    if (elT) elT.innerHTML = fmt(fp.unit)+' / Fenster<br><span style="font-size:0.78em;font-weight:600;opacity:.85">'+(S.qty>1?('Gesamt inkl. Lieferung: '+fmt(gesamt)):'inkl. MwSt · zzgl. Lieferung')+'</span>';
+    if (elT) elT.innerHTML = fmt(fp.unit)+' / Fenster<br><span style="font-size:0.78em;font-weight:600;opacity:.85">'+(S.qty>1?((_odi.deliverable?'Gesamt inkl. Lieferung: ':'Gesamt (Abholung): ')+fmt(gesamt)):('inkl. MwSt'+(_odi.deliverable?' · zzgl. Lieferung':' · Abholung im Lager')))+'</span>';
     const box=document.getElementById('conf-price-box'); if(box) box.style.setProperty('display','block','important');
     const mTotal=document.getElementById('m-total'); if(mTotal) mTotal.textContent=fmt(fp.unit);
     const mQty=document.getElementById('m-qty'); if(mQty) mQty.textContent=(S.qty>1)?'× '+S.qty:'';
@@ -16867,7 +16913,9 @@ function d2submit(e){
   const btn=document.getElementById('d2-fsub'); if(btn)btn.disabled=true; const _stx=document.getElementById('d2-fsubtxt'); if(_stx)_stx.textContent='Wird gesendet …';
   const _nbtn=document.querySelector('#wiz-nextbtn'); if(_nbtn)_nbtn.disabled=true; const _nbs=document.querySelector('#wiz-nextbtn span'); if(_nbs)_nbs.textContent='Wird gesendet …';
   const tel=g('d2-ft'),str=g('d2-fst'),notiz=g('d2-fno'),lieferart=(document.getElementById('d2-fliefer')?.value)||'liefern';
-  const versandText=lieferart==='abholen'?'Abholung bei uns vor Ort (Lager Brandenburg a.d.H.)':('Lieferung an: '+(ort||'–')+(str?', '+str:''));
+  const _dinfo=orderDelivery();
+  const _dcostTxt=_dinfo.hasHS?'300 € deutschlandweit':(_dinfo.cost===0?'kostenlos':(_dinfo.cost!=null?_dinfo.cost+' €':''));
+  const versandText=lieferart==='abholen'?'Abholung bei uns vor Ort (Lager Brandenburg a.d.H.)':('Lieferung an: '+(ort||'–')+(str?', '+str:'')+(_dcostTxt?(' · Lieferkosten: '+_dcostTxt):''));
   const datum=new Date().toLocaleDateString('de-DE');
   const prodName=P.prod[S.prod]?.name||S.prod, profilName=P.profil[S.profil]?.name||S.profil, glasName=P.glas[S.glas]?.name||S.glas;
   const faName=P.fa[S.fa]?.name||S.fa, fiName=P.fi[S.fi]?.name||S.fi, fdName=P.fd[S.fd]?.name||S.fd;
