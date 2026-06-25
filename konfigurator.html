@@ -5480,7 +5480,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
       <!-- Sprossen im Scheibenzwischenraum (SZR) -->
       <div class="oc" style="flex-direction:column;align-items:stretch;padding:14px;gap:0" data-v="szr" onclick="pick(this,'sproTyp')">
         <div style="height:140px;background:rgba(255,255,255,0.04);border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;overflow:hidden">
-          <img src="img/sprossen-innenliegend.webp?v=20260624e" alt="Sprossen im Scheibenzwischenraum" loading="lazy" decoding="async" style="max-height:140px;max-width:100%;width:auto;object-fit:contain;display:block">
+          <img src="img/sprossen-innenliegend.webp?v=20260624f" alt="Sprossen im Scheibenzwischenraum" loading="lazy" decoding="async" style="max-height:140px;max-width:100%;width:auto;object-fit:contain;display:block">
         </div>
         <div style="display:flex;align-items:flex-start;gap:10px">
           <div class="ora" style="margin-top:2px;flex-shrink:0"></div>
@@ -8100,14 +8100,14 @@ function applyFensterLimits(){
   if(S.bMm) S.bMm=Math.max(L.bMin,Math.min(L.bMax,S.bMm));
   if(S.hMm) S.hMm=Math.max(L.hMin,Math.min(L.hMax,S.hMm));
 }
-function wizPickFluegel(v){ S.fluegel=v; S.anschlagIdx=null; if(typeof applyFensterLimits==='function')applyFensterLimits(); if(window._touched)window._touched.add('fluegel'); if(typeof _applyDefaultSashStates==='function')_applyDefaultSashStates(v); if(typeof previewState!=='undefined')previewState.fluegel=(v==='stulp')?2:(parseInt(v.charAt(0))||1); const d3=document.getElementById('d3'); if(d3)d3.textContent=(P.fluegel[v]&&P.fluegel[v].name)||v; if(typeof buildOeffSash==='function')buildOeffSash(); if(typeof buildFarbePicker==='function')buildFarbePicker(); if(typeof mkDone==='function')mkDone(3); wizRenderPanel(); }
+function wizPickFluegel(v){ S.fluegel=v; S.anschlagIdx=null; S.anschlagName=null; if(typeof applyFensterLimits==='function')applyFensterLimits(); if(window._touched)window._touched.add('fluegel'); if(typeof _applyDefaultSashStates==='function')_applyDefaultSashStates(v); if(typeof previewState!=='undefined')previewState.fluegel=(v==='stulp')?2:(parseInt(v.charAt(0))||1); const d3=document.getElementById('d3'); if(d3)d3.textContent=(P.fluegel[v]&&P.fluegel[v].name)||v; if(typeof buildOeffSash==='function')buildOeffSash(); if(typeof buildFarbePicker==='function')buildFarbePicker(); if(typeof mkDone==='function')mkDone(3); wizRenderPanel(); }
 function wizSetOeff1(v){ S.oeff1=v; if(window._touched)window._touched.add('oeff1'); _wizPrev(); wizRenderPanel(); }
 function wizSetHstLauf(v){ S.hstLauf=v; if(window._touched)window._touched.add('hstLauf'); _wizPrev(); wizRenderPanel(); }
-function wizSetTuerOeff(o,r){ S.oeff1=o; S.tuerOeffnung=r; if(window._touched){window._touched.add('oeff1');window._touched.add('tuerOeffnung');} _wizPrev(); wizRenderPanel(); }
+function wizSetTuerOeff(o,r){ S.oeff1=o; S.tuerOeffnung=r; S.anschlagName=(typeof tuerOeffText==='function')?tuerOeffText():null; if(window._touched){window._touched.add('oeff1');window._touched.add('tuerOeffnung');} _wizPrev(); wizRenderPanel(); }
 // Haustuer-Oeffnung als Klartext fuer alle Zusammenfassungen — Richtung (nach innen/aussen) IMMER mit drin (Kundenwunsch 25.06.2026)
 function tuerOeffText(){ var r=(S.tuerOeffnung==='aussen')?'Nach außen öffnend':'Nach innen öffnend'; if(S.fluegel==='2-fluegel'){ var geh=(S.tuerGehfluegel==='links')?'Gehflügel links':'Gehflügel rechts'; return r+' · Stulptür · '+geh; } var d=(S.oeff1==='dreh-l')?'DIN links':'DIN rechts'; return r+' · '+d; }
 // 2-flügelige Haustür: Gehflügel-Seite (Griff) + Öffnungsrichtung. Beide Flügel sind Dreh.
-function wizSetTuerGeh(geh,r){ S.tuerGehfluegel=geh; S.tuerOeffnung=r; S.oeff1='dreh-l'; S.oeff2='dreh-r'; if(window._touched){window._touched.add('tuerGehfluegel');window._touched.add('tuerOeffnung');window._touched.add('oeff1');} if(typeof mkDone==='function')mkDone(4); _wizPrev(); wizRenderPanel(); }
+function wizSetTuerGeh(geh,r){ S.tuerGehfluegel=geh; S.tuerOeffnung=r; S.oeff1='dreh-l'; S.oeff2='dreh-r'; S.anschlagName=(typeof tuerOeffText==='function')?tuerOeffText():null; if(window._touched){window._touched.add('tuerGehfluegel');window._touched.add('tuerOeffnung');window._touched.add('oeff1');} if(typeof mkDone==='function')mkDone(4); _wizPrev(); wizRenderPanel(); }
 function wizRenderAnschlag(){
   if(S.prod==='balkontuer' && S.fluegel==='1-fluegel'){
     return '<div class="wiz-cards">'+BALKON_ANSCHLAG_1F.map(function(o,idx){
@@ -8185,9 +8185,9 @@ function hsLaufCard(v){
   return '<div class="wiz-card'+sel+'" onclick="wizSetHstLauf(\''+v+'\')"><div style="position:relative;width:100%;line-height:0;border-radius:10px;overflow:hidden"><img src="img/karten/hst-fluegel/'+himg+'.webp?v=20260623hs" alt="'+name+'" loading="lazy" style="width:100%;height:auto;aspect-ratio:auto;object-fit:fill;display:block;border-radius:0;padding:0">'+ov+'</div><div class="wiz-cn">'+name+'</div><div class="wiz-csub">'+sub+'</div></div>';
 }
 function wizRenderHsLauf(){ return '<div class="wiz-cards">'+hsLaufCard('links')+hsLaufCard('rechts')+'</div>'; }
-function wizPickBalkonAnschlag1F(idx){ var o=BALKON_ANSCHLAG_1F[idx]; if(!o)return; S.oeff1=o.oeff; S.oeff2=null; S.oeff3=null; if(window._touched)window._touched.add('oeff1'); if(typeof buildOeffSash==='function')buildOeffSash(); if(typeof mkDone==='function')mkDone(4); wizRenderPanel(); }
-function wizPickBalkonAnschlag(idx){ var o=BALKON_ANSCHLAG_2F[idx]; if(!o)return; S.fluegel='stulp'; S.anschlagIdx=idx; S.oeff1=o.oeff[0]; S.oeff2=o.oeff[1]||null; S.oeff3=null; /* BUG-FIX 2026-06-24: KEIN _applyDefaultSashStates('stulp') hier — das setzte cols=1-Default (oeff1='dk-r', oeff2=null) und verwarf die Karten-Wahl, dadurch sass der Griff immer auf derselben Seite statt nach Anschlag. Die oeff-Werte kommen direkt aus der gewaehlten Karte. */ if(typeof previewState!=='undefined')previewState.fluegel=2; if(window._touched){window._touched.add('oeff1');window._touched.add('oeff2');window._touched.add('fluegel');} if(typeof buildOeffSash==='function')buildOeffSash(); if(typeof mkDone==='function')mkDone(4); wizRenderPanel(); }
-function wizPickAnschlag(idx){ S.anschlagIdx=idx; const o=(ANSCHLAG_SETS[S.fluegel]||[])[idx]; if(o){ S.oeff1=o.oeff[0]||null; S.oeff2=o.oeff[1]||null; S.oeff3=o.oeff[2]||null; S.oberlichtOeff=o.ol||null; S.unterlichtOeff=o.ul||null; } if(window._touched)window._touched.add('oeff1'); if(typeof buildOeffSash==='function')buildOeffSash(); if(typeof mkDone==='function')mkDone(4); wizRenderPanel(); }
+function wizPickBalkonAnschlag1F(idx){ var o=BALKON_ANSCHLAG_1F[idx]; if(!o)return; S.oeff1=o.oeff; S.oeff2=null; S.oeff3=null; S.anschlagName=o.name||null; if(window._touched)window._touched.add('oeff1'); if(typeof buildOeffSash==='function')buildOeffSash(); if(typeof mkDone==='function')mkDone(4); wizRenderPanel(); }
+function wizPickBalkonAnschlag(idx){ var o=BALKON_ANSCHLAG_2F[idx]; if(!o)return; S.fluegel='stulp'; S.anschlagIdx=idx; S.oeff1=o.oeff[0]; S.oeff2=o.oeff[1]||null; S.oeff3=null; S.anschlagName=o.name||null; /* BUG-FIX 2026-06-24: KEIN _applyDefaultSashStates('stulp') hier — das setzte cols=1-Default (oeff1='dk-r', oeff2=null) und verwarf die Karten-Wahl, dadurch sass der Griff immer auf derselben Seite statt nach Anschlag. Die oeff-Werte kommen direkt aus der gewaehlten Karte. */ if(typeof previewState!=='undefined')previewState.fluegel=2; if(window._touched){window._touched.add('oeff1');window._touched.add('oeff2');window._touched.add('fluegel');} if(typeof buildOeffSash==='function')buildOeffSash(); if(typeof mkDone==='function')mkDone(4); wizRenderPanel(); }
+function wizPickAnschlag(idx){ S.anschlagIdx=idx; const o=(ANSCHLAG_SETS[S.fluegel]||[])[idx]; if(o){ S.oeff1=o.oeff[0]||null; S.oeff2=o.oeff[1]||null; S.oeff3=o.oeff[2]||null; S.oberlichtOeff=o.ol||null; S.unterlichtOeff=o.ul||null; S.anschlagName=o.name||null; } if(window._touched)window._touched.add('oeff1'); if(typeof buildOeffSash==='function')buildOeffSash(); if(typeof mkDone==='function')mkDone(4); wizRenderPanel(); }
 function wizRenderGlas(){
   const hst=(S.prod==='hst');
   const opts=[{v:'2fach',img:'img/glas-2fach.webp',name:'2-fach Wärmeschutz',spec:'24 mm · Edelgas · Standard-Wärmeschutz',dis:hst},{v:'3fach',img:'img/glas-3fach.webp',name:'3-fach Wärmeschutz',spec:'40 mm · Warme Kante · GEG 2024',dis:false}];
@@ -8390,7 +8390,7 @@ function wizUpCfgList(){
   function has(k){ return keys.indexOf(k)>=0; }
   var T=(typeof isTouched==='function')?isTouched:function(){return true;};
   function vMasse(){ return (S.bMm&&S.hMm) ? (S.bMm+' × '+S.hMm+' mm') : null; } // Maß immer zeigen (Sarah 25.06): Preis bezieht sich darauf
-  function oeffLabel(){ if(!S.oeff1)return null; if(S.prod==='haustuere')return tuerOeffText(); if(S.oeff1==='dreh-l')return 'Dreh links'; if(S.oeff1==='dreh-r')return 'Dreh rechts'; return _cfgNm('oeff_sash',S.oeff1)||S.oeff1; }
+  function oeffLabel(){ if(!S.oeff1)return null; if(S.prod==='haustuere')return tuerOeffText(); if(S.anschlagName)return S.anschlagName; if(S.oeff1==='dreh-l')return 'Dreh links'; if(S.oeff1==='dreh-r')return 'Dreh rechts'; return _cfgNm('oeff_sash',S.oeff1)||S.oeff1; }
   function griffVal(){
     if(S.prod==='haustuere'){ return _cfgNm('tuerGriffAussen',S.tuerGriffAussen)||null; }
     if(S.prod==='hst'){ return (S.profil==='iglo-psk')?(_cfgNm('pskGriff',S.pskGriff)||null):(_cfgNm('hstGriff',S.hstGriff)||null); }
@@ -8654,7 +8654,7 @@ function _panzerHex(){ return (S.panzerFarbe&&PANZER_FARBEN[S.panzerFarbe])?PANZ
 function wizSetRollSeite(v){ wizSet('rollSeite',v); }
 // SPROSSEN
 function wizRenderSpro(){
-  const types=[['keine','Ohne Sprossen',''],['aufgesetzt','Aufgesetzt','img/sprossen-aufgesetzt.webp?v=20260624e'],['szr','Im Glas (SZR)','img/sprossen-innenliegend.webp?v=20260624e']];
+  const types=[['keine','Ohne Sprossen',''],['aufgesetzt','Aufgesetzt','img/sprossen-aufgesetzt.webp?v=20260624e'],['szr','Im Glas (SZR)','img/sprossen-innenliegend.webp?v=20260624f']];
   let h='<div class="wiz-cards">'+types.map(function(t){
     const im=t[2]?'<img src="'+t[2]+'" alt="'+t[1]+'" loading="lazy">':'<div class="wiz-noimg">Ohne Sprossen</div>';
     return '<div class="wiz-card'+(t[0]===S.sproTyp?' sel':'')+'" onclick="wizSetSproTyp(\''+t[0]+'\')">'+im+'<div class="wiz-cn">'+t[1]+'</div></div>';
@@ -14586,7 +14586,7 @@ async function submitForm(e) {
     offerId, prodName, name, email, tel, ort,
     breite: S.bMm, hoehe: S.hMm, anzahl: S.qty,
     farbaussen: S.fa, farbinnen: S.fi,
-    glas: S.glas, oeff: S.oeff1,
+    glas: S.glas, oeff: S.oeff1, oeffName: (S.anschlagName||null),
     profil: S.profil
   };
   try { sessionStorage.setItem('df_anfrage', JSON.stringify(anfrageSummary)); } catch(e) {}
@@ -16772,7 +16772,7 @@ function d2render(){
 function renderSummary(){
   const el=document.getElementById('d2-summary'); if(!el||!S.prod) return;
   const cnt=sashCount();
-  let oeffN; if(S.prod==='hst'||S.prod==='haustuere')oeffN=P.oeff_sash[S.oeff1]?.name; else oeffN=[S.oeff1,S.oeff2,S.oeff3].slice(0,cnt).map(o=>P.oeff_sash[o]?.name).filter(Boolean).join(' / ');
+  let oeffN; if(S.anschlagName)oeffN=S.anschlagName; else if(S.prod==='hst'||S.prod==='haustuere')oeffN=P.oeff_sash[S.oeff1]?.name; else oeffN=[S.oeff1,S.oeff2,S.oeff3].slice(0,cnt).map(o=>P.oeff_sash[o]?.name).filter(Boolean).join(' / ');
   const griffN=S.prod==='haustuere'?curName(P.tuerGriffAussen,S.tuerGriffAussen):(S.prod==='hst'&&S.profil==='iglo-psk')?curName(P.pskGriff,S.pskGriff):S.prod==='hst'?curName(P.hstGriff,S.hstGriff):curName(P.griff,S.griff);
   const items=[
     ['Produkt',P.prod[S.prod]?.name,null],
@@ -16857,7 +16857,8 @@ function prodDetailLines(c){
   const glasName=P.glas[c.glas]?.name||c.glas||'–';
   const faName=P.fa[c.fa]?.name||c.fa||'–', fiName=P.fi[c.fi]?.name||c.fi||'–', fdName=P.fd[c.fd]?.name||c.fd||'–';
   let oeffName;
-  if(c.prod==='hst'||c.prod==='haustuere')oeffName=P.oeff_sash[c.oeff1]?.name||c.oeff1||'–';
+  if(c.anschlagName)oeffName=c.anschlagName;
+  else if(c.prod==='hst'||c.prod==='haustuere')oeffName=P.oeff_sash[c.oeff1]?.name||c.oeff1||'–';
   else if(c.oeff1)oeffName=sc===1?(P.oeff_sash[c.oeff1]?.name||c.oeff1):[c.oeff1,c.oeff2,c.oeff3].slice(0,sc).map(o=>P.oeff_sash[o]?.name||o).join(' / ');
   else oeffName='–';
   let griffName;
@@ -16920,7 +16921,8 @@ function d2submit(e){
   const prodName=P.prod[S.prod]?.name||S.prod, profilName=P.profil[S.profil]?.name||S.profil, glasName=P.glas[S.glas]?.name||S.glas;
   const faName=P.fa[S.fa]?.name||S.fa, fiName=P.fi[S.fi]?.name||S.fi, fdName=P.fd[S.fd]?.name||S.fd;
   const cnt=sashCount(); let oeffName;
-  if(S.prod==='hst'||S.prod==='haustuere')oeffName=P.oeff_sash[S.oeff1]?.name||S.oeff1||'–';
+  if(S.anschlagName)oeffName=S.anschlagName;
+  else if(S.prod==='hst'||S.prod==='haustuere')oeffName=P.oeff_sash[S.oeff1]?.name||S.oeff1||'–';
   else if(S.oeff1)oeffName=cnt===1?(P.oeff_sash[S.oeff1]?.name||S.oeff1):[S.oeff1,S.oeff2,S.oeff3].slice(0,cnt).map(o=>P.oeff_sash[o]?.name||o).join(' / '); else oeffName='–';
   let griffName;
   if(S.prod==='haustuere')griffName=`Innen: ${curName(P.tuerGriffInnen,S.tuerGriffInnen)} / Außen: ${curName(P.tuerGriffAussen,S.tuerGriffAussen)}`;
@@ -16935,7 +16937,7 @@ function d2submit(e){
   const offerId='DF-'+Date.now().toString().slice(-6);
   const deal={id:Date.now(),offer_id:offerId,name,email,phone:tel,ort,strasse:str,produkt:prodName,dimensions:S.bMm+'x'+S.hMm,profile:profilName,glass:glasName,opening:oeffName,color:faName+' / '+fiName,farbe_aussen:faName,farbe_innen:fiName,dichtung:fdName,sprossen:sproStr,griff:griffName,shutter:rollName,sicherheit:sicherName,glasdekor:P.glasdekor[S.glasdekor]?.name||S.glasdekor,anzahl:S.qty,tuermodell:tuerModellName,cart_items:(typeof cart!=='undefined'?cart.map(function(i){return i.summary;}):[]),cart_count:(typeof cart!=='undefined'?cart.length:0),attachments:(typeof uploadedImages!=='undefined'?uploadedImages.map(function(i){return i.name;}):[]),attachment_count:(typeof uploadedImages!=='undefined'?uploadedImages.length:0),date:datum,notes:notiz,lieferart:lieferart,versand:versandText,status:'new'};
   try{const ex=JSON.parse(localStorage.getItem('df_deals')||'[]');ex.unshift(deal);localStorage.setItem('df_deals',JSON.stringify(ex));}catch(e){}
-  try{sessionStorage.setItem('df_anfrage',JSON.stringify({offerId,prodName,name,email,tel,ort,breite:S.bMm,hoehe:S.hMm,anzahl:S.qty,farbaussen:S.fa,farbinnen:S.fi,glas:S.glas,oeff:S.oeff1,profil:S.profil}));}catch(e){}
+  try{sessionStorage.setItem('df_anfrage',JSON.stringify({offerId,prodName,name,email,tel,ort,breite:S.bMm,hoehe:S.hMm,anzahl:S.qty,farbaussen:S.fa,farbinnen:S.fi,glas:S.glas,oeff:S.oeff1,oeffName:(S.anschlagName||null),profil:S.profil}));}catch(e){}
   // Alle Produkte der Anfrage = Warenkorb-Positionen + das aktuelle (zuletzt konfigurierte) Produkt.
   // Jedes Produkt kommt mit VOLLEN Details in die Firmen-Mail (nicht nur Kurzzeile).
   const _allCfgs=(typeof cart!=='undefined'?cart.map(function(i){return i.config;}):[]).concat([S]);
