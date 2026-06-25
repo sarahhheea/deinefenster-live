@@ -8442,11 +8442,14 @@ function wizUpCfgList(){
   else if(S.prod==='balkontuer' && typeof balkonPriceParts==='function'){ _pp=balkonPriceParts(); _plabel=' / Balkontür'; }
   else if(S.prod==='hst' && typeof hstPriceParts==='function'){ _pp=hstPriceParts(); _plabel=' / Schiebetür'; }
   else if(S.prod==='haustuere' && typeof haustuerPriceParts==='function'){ _pp=haustuerPriceParts(); _plabel=' / Haustür'; }
+  var _qn=S.qty||1;
+  var _noun=(S.prod==='kunststoff')?'Fenster':(S.prod==='balkontuer')?(_qn>1?'Balkontüren':'Balkontür'):(S.prod==='hst')?(_qn>1?'Schiebetüren':'Schiebetür'):(S.prod==='haustuere')?(_qn>1?'Haustüren':'Haustür'):'Stück';
   if(_pp){
     try{
       _priceHtml='<div class="wiz-pc-price" style="margin-top:12px;padding-top:11px;border-top:1px solid rgba(26,41,66,0.12);text-align:center">'
-        +'<div style="font-size:27px;font-weight:800;color:#225eaa;line-height:1.05;font-family:\'Plus Jakarta Sans\',sans-serif">'+((S.qty>1)?fmt(_r2(_pp.unit*S.qty)):fmt(_pp.unit))+'<span style="font-size:13px;font-weight:600;color:#5a6678">'+((S.qty>1)?(' gesamt · '+S.qty+' Stück'):_plabel)+'</span></div>'
-        +'<div style="font-size:10.5px;font-weight:500;color:#7a8699;margin-top:3px">'+((S.qty>1)?('Einzelpreis '+fmt(_pp.unit)+' · inkl. MwSt'):'inkl. MwSt')+'</div>'
+        +'<div style="font-size:27px;font-weight:800;color:#225eaa;line-height:1.05;font-family:\'Plus Jakarta Sans\',sans-serif">'+((_qn>1)?fmt(_r2(_pp.unit*_qn)):fmt(_pp.unit))+'<span style="font-size:13px;font-weight:600;color:#5a6678">'+((_qn>1)?'':_plabel)+'</span></div>'
+        +((_qn>1)?('<div style="font-size:11px;font-weight:700;color:#1a2942;margin-top:4px">Gesamtpreis für '+_qn+' '+_noun+'</div>'):'')
+        +'<div style="font-size:10.5px;font-weight:500;color:#7a8699;margin-top:'+((_qn>1)?'2px':'3px')+'">'+((_qn>1)?('Einzelpreis '+fmt(_pp.unit)+' · inkl. MwSt'):'inkl. MwSt')+'</div>'
         +'<div style="font-size:10.5px;font-weight:600;color:#225eaa;margin-top:3px">'+delivText(orderDelivery())+'</div>'
         +'</div>';
     }catch(e){}
