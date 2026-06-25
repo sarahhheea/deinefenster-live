@@ -180,7 +180,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 const canvasEl = document.getElementById('threeCanvas');
 const renderer = new THREE.WebGLRenderer({
   canvas: canvasEl, antialias: true, preserveDrawingBuffer: true,
-  powerPreference: 'high-performance', alpha: true
+  powerPreference: 'high-performance', alpha: false
 });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 3));   // max Schärfe
 renderer.shadowMap.enabled = true;
@@ -205,16 +205,15 @@ function _vGradTex(stops){
   const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace; return t;
 }
 if(_embed ? _bgLight : true){
-  // TRANSPARENTER Hintergrund (Kundenwunsch 23.06.2026): der Canvas zeigt nur das Fenster +
-  // den weichen Bodenschatten, der Rest ist durchsichtig. So scheint der weiße Konfigurator-Kasten
-  // direkt durch → es gibt KEINE Hintergrund-Kante, das Fenster „schwebt" wirklich frei im Kasten
-  // (kein Bild-Rahmen/Extra-Ding). Der Warenkorb-Thumbnail unterlegt beim Abgriff weiß.
-  scene.background = null;
-  renderer.setClearColor(0x000000, 0);
+  // OPAKER weißer Hintergrund (Fix 25.06.2026): der transparente Modus erzeugte an der weißen
+  // Fensterrahmen-Kante einen grauen Anti-Aliasing-Halo (sichtbarer Rand oben/unten). Opak
+  // vermeidet das komplett. ACES rendert Weiß als ~#f5f5f6 — der Konfigurator-Kasten ist exakt
+  // darauf abgestimmt (wiz-stage bg #f5f5f6), sodass Vorschau und Kasten nahtlos verschmelzen.
+  scene.background = new THREE.Color(0xffffff);
 }else{
   scene.background = new THREE.Color(0x0a1530);
 }
-if(_bgLight){var _s=document.createElement('style');_s.textContent='html.is-embed,html.is-embed body,html body.embed{background:transparent !important;overflow:hidden !important} html.is-embed #threeCanvas{transform:scale(1.035);transform-origin:center center}';document.head.appendChild(_s);}
+if(_bgLight){var _s=document.createElement('style');_s.textContent='html.is-embed,html.is-embed body,html body.embed{background:#f5f5f6 !important;overflow:hidden !important}';document.head.appendChild(_s);}
 
 const camera = new THREE.PerspectiveCamera(15, 1, 0.1, 50);
 // Leicht versetzt für sichtbare 3D-Tiefe (statt komplett frontal-flach)
@@ -1297,11 +1296,15 @@ function resize() {
   const embed = new URLSearchParams(location.search).has('embed');
   const w = embed ? window.innerWidth  : window.innerWidth  - 252;
   const h = embed ? window.innerHeight : window.innerHeight - 40;
+  if (w < 2 || h < 2) return;  // iframe noch nicht sichtbar (display:none) → nicht mit 0 dimensionieren
   renderer.setSize(w, h);
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
 }
 window.addEventListener('resize', resize);
+// ResizeObserver: greift auch, wenn der iframe von display:none sichtbar wird (Konfigurator-Schrittwechsel) —
+// dann feuert KEIN window-resize, der Canvas behielte sonst eine falsche Größe → Rand oben/unten (Fix 25.06.2026).
+try{ new ResizeObserver(function(){ resize(); }).observe(document.documentElement); }catch(e){}
 resize();
 
 if (new URLSearchParams(location.search).has('embed')) {

@@ -14186,7 +14186,7 @@ function _renderFenster3d() {
   // iframe neu laden wenn sich die Quelle ändert (1-Flügel ↔ Multi)
   const _wantsReload = !frame.src.includes(_src3d);
   if (_wantsReload) {
-    frame.src = `/${_src3d}?embed&v=20260623studioD&bg=light&color=${_ck}&side=${_side}&layout=${_layout}&view=${_view}`;
+    frame.src = `/${_src3d}?embed&v=20260623studioH&bg=light&color=${_ck}&side=${_side}&layout=${_layout}&view=${_view}`;
     frame.onload = () => {
       const cw = frame.contentWindow;
       if (!cw) return;
@@ -16240,7 +16240,7 @@ async function submitSkizze(e) {
   #cfg-wizard .wiz-doorstudio{ display:none; height:188px; width:auto; max-width:52%; margin:0 auto; object-fit:contain; }
   /* "Komischer Rand" weg: dunkle Vignette + Frame-Reste der Live-Vorschau im Wizard abschalten */
   #cfg-wizard #prev-wrap::after, #cfg-wizard #prev-wrap::before{ display:none !important; content:none !important; }
-  #cfg-wizard #prev-wrap, #cfg-wizard #prev-wrap.sb-preview-frame{ background:transparent !important; border:0 !important; box-shadow:inset 0 0 0 2px #fff !important; border-radius:0 !important; }
+  #cfg-wizard #prev-wrap, #cfg-wizard #prev-wrap.sb-preview-frame{ background:transparent !important; border:0 !important; box-shadow:none !important; border-radius:0 !important; }
   /* Türgriff: Innen + Außen NEBENEINANDER, ganze Klinke sichtbar */
   #cfg-wizard .wiz-grcols{ display:grid; grid-template-columns:1fr 1fr; gap:12px; max-width:520px; margin:0 auto; }
   #cfg-wizard .wiz-grcol{ display:flex; flex-direction:column; gap:8px; }
@@ -16276,10 +16276,10 @@ async function submitSkizze(e) {
   /* 3D-Vorschau jetzt weiss (für randlose Produktbilder) → in der Live-Vorschau als bewusste, saubere „Produkt-Vorschau-Karte" rahmen, damit der weisse Block nicht als Fremdkörper auf dem hellgrauen Konfigurator wirkt. */
   #cfg-wizard #haus3d-wrap{ box-shadow:0 6px 22px rgba(20,40,80,.10); border:1px solid #eef2f8 !important; border-radius:16px !important; }
   /* Balkontür + Schiebetür: randlos + weißer Inset gegen die iframe-Kante — schweben frei (Kundenwunsch 23.06.2026) */
-  #cfg-wizard #balkon3d-wrap, #cfg-wizard #hst3d-wrap{ box-shadow:inset 0 0 0 2px #fff !important; border:0 !important; border-radius:0 !important; background:transparent !important; overflow:hidden !important; }
+  #cfg-wizard #balkon3d-wrap, #cfg-wizard #hst3d-wrap{ box-shadow:none !important; border:0 !important; border-radius:0 !important; background:transparent !important; overflow:hidden !important; }
   /* Fenster: randlos — verschmilzt mit dem weißen Vorschau-Kasten, das Fenster schwebt
      frei (Kundenwunsch 23.06.2026: kein „Extra-Ding"/Bild-Rahmen mehr um das Fenster). */
-  #cfg-wizard #fenster3d-wrap{ box-shadow:inset 0 0 0 2px #fff !important; border:0 !important; border-radius:0 !important; background:transparent !important; overflow:hidden !important; }
+  #cfg-wizard #fenster3d-wrap{ box-shadow:none !important; border:0 !important; border-radius:0 !important; background:transparent !important; overflow:hidden !important; }
   #cfg-wizard .wiz-oinfo{ min-width:0; }
   #cfg-wizard .wiz-oname{ font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:17px; color:#14233f; display:flex; align-items:center; flex-wrap:wrap; gap:6px 9px; margin:0 0 6px; }
   #cfg-wizard .wiz-obadge{ font-family:'Plus Jakarta Sans',sans-serif; font-size:10px; font-weight:800; color:#225eaa; background:#e8f0fb; border-radius:999px; padding:3px 9px; letter-spacing:.04em; }
@@ -16435,7 +16435,7 @@ async function submitSkizze(e) {
      ruhig & ohne Foto-Rand (Kundenwunsch 22.06.2026). Nur auf Schritten mit 3D-Vorschau. ════ */
   /* Weißer Kasten — das Fenster-iframe ist transparent, dieser Hintergrund scheint direkt
      durch, sodass das Fenster nahtlos im Kasten „schwebt" (Kundenwunsch 23.06.2026). */
-  #cfg-wizard .wiz-body:not(.cards-mode) .wiz-stage{ background:#fff !important; position:static !important;
+  #cfg-wizard .wiz-body:not(.cards-mode) .wiz-stage{ background:#f5f5f6 !important; position:static !important;
     border:1px solid var(--c-line,#e7ecf3); border-radius:18px !important;
     box-shadow:0 4px 20px rgba(20,40,80,.06); padding:14px 24px 18px !important; overflow:hidden;
     display:grid; grid-template-columns:minmax(210px,250px) minmax(0,1fr); grid-template-areas:"tg tg" "img desc";
@@ -16697,12 +16697,12 @@ function d2Fenster(){ const w=document.getElementById('d2-fenster3d-wrap'),f=doc
   if(!sa.length){ if(/^2-/.test(lay))sa=['dk-l','dk-r']; else if(/^3-/.test(lay))sa=['dk-l','fest','dk-r']; else sa=['dk-r']; }
   const multi=/^[23]-/.test(lay); const src=multi?'fenster-3d-multi.html':'fenster-3d.html'; w.style.display='block';
   const pl={type:'update',layout:lay,sashes:sa,sashTyp:ot,separator:'',oberlicht:S.oberlichtOeff||'fest',unterlicht:S.unterlichtOeff||'fest',roll:S.roll||'ohne',rollKasten:S.rollKasten||'175',panzerHex:_panzerHex(),rollSeite:S.rollSeite||'rechts',view,color:wood?null:ck,wood:wood?ck:null,glass:S.glasdekor||'klar',side};
-  if(!f.src.includes(src)){ f.src=`/${src}?embed&bg=light&v=20260623studioD&color=${ck}&side=${side}&layout=${lay}`; f.onload=()=>{const cw=f.contentWindow;if(!cw)return;cw.dispatchEvent(new Event('resize'));cw.postMessage(pl,'*');}; } else f.contentWindow&&f.contentWindow.postMessage(pl,'*'); }
+  if(!f.src.includes(src)){ f.src=`/${src}?embed&bg=light&v=20260623studioH&color=${ck}&side=${side}&layout=${lay}`; f.onload=()=>{const cw=f.contentWindow;if(!cw)return;cw.dispatchEvent(new Event('resize'));cw.postMessage(pl,'*');}; } else f.contentWindow&&f.contentWindow.postMessage(pl,'*'); }
 function d2Balkon(){ const w=document.getElementById('d2-balkon3d-wrap'),f=document.getElementById('d2-balkon3d-frame'); if(!w||!f)return; showHint(true);
   const view=(pv==='aus')?'aussen':'innen'; const farb=(pv==='aus')?(S.fa||S.fi):(S.fi||S.fa); const ck=HAUS3D_COLOR_MAP[farb]||'anthrazitgrau'; const wood=HAUS3D_WOOD_KEYS.has(ck);
   const side=(S.oeff1==='dreh-l'||S.oeff1==='dk-l')?'l':'r'; const lay=S.fluegel||'1-fluegel'; const sa=[S.oeff1,S.oeff2].slice(0,sashCount()).filter(Boolean); const multi=/^2-/.test(lay); const src=multi?'balkontuer-3d-multi.html':'balkontuer-3d.html'; w.style.display='block';
   const pl={type:'update',layout:lay,sashes:sa,separator:'',roll:S.roll||'ohne',rollKasten:S.rollKasten||'175',panzerHex:_panzerHex(),rollSeite:S.rollSeite||'rechts',view,color:wood?null:ck,wood:wood?ck:null,glass:S.glasdekor||'klar',side};
-  if(!f.src.includes(src)){ f.src=`/${src}?embed&bg=light&v=20260623studioD&color=${ck}&side=${side}&layout=${lay}&roll=${S.roll||'ohne'}&rollKasten=${S.rollKasten||'175'}&rollSeite=${S.rollSeite||'rechts'}`; f.onload=()=>{const cw=f.contentWindow;if(!cw)return;cw.dispatchEvent(new Event('resize'));cw.postMessage(pl,'*');}; } else f.contentWindow&&f.contentWindow.postMessage(pl,'*'); }
+  if(!f.src.includes(src)){ f.src=`/${src}?embed&bg=light&v=20260623studioH&color=${ck}&side=${side}&layout=${lay}&roll=${S.roll||'ohne'}&rollKasten=${S.rollKasten||'175'}&rollSeite=${S.rollSeite||'rechts'}`; f.onload=()=>{const cw=f.contentWindow;if(!cw)return;cw.dispatchEvent(new Event('resize'));cw.postMessage(pl,'*');}; } else f.contentWindow&&f.contentWindow.postMessage(pl,'*'); }
 function d2Hst(){ const w=document.getElementById('d2-hst3d-wrap'),f=document.getElementById('d2-hst3d-frame'); if(!w||!f)return; showHint(true);
   const sys=(S.profil||'').replace(/^iglo-/,'')||'hs'; const vk=(pv==='aus')?'aussen':'innen';
   const ck=vk==='aussen'?(HAUS3D_COLOR_MAP[S.fa]||HAUS3D_COLOR_MAP[S.fi]||'anthrazitgrau'):(HAUS3D_COLOR_MAP[S.fi]||HAUS3D_COLOR_MAP[S.fa]||'anthrazitgrau'); const wood=HAUS3D_WOOD_KEYS.has(ck);
