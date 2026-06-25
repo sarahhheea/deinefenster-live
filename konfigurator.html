@@ -6586,7 +6586,7 @@ function snapshotCurrentConfig() {
     unitPrice,
     qty: S.qty,
     subtotal: unitPrice * S.qty,
-    thumb: (typeof wizLastThumb!=='undefined') ? wizLastThumb : null,
+    thumb: (typeof wizLastThumb!=='undefined' && wizLastThumb && wizLastThumbProd===S.prod) ? wizLastThumb : null,  // nur eigenes Produkt-Bild, sonst Fallback (Fix: Balkontür zeigte Haustür)
     summary: `${prodName} · ${size} · ${S.qty} Stück · ${color}`
   };
 }
@@ -7750,7 +7750,7 @@ function wizRenderKontakt(){
 const WIZ_PROD_THUMB={ kunststoff:'img/fenster_standard_v3.webp', balkontuer:'img/balkontuer_standard_v3.webp?v=20260609g', haustuere:'img/haustuer_iglo_energy_montana_weiss.webp?v=20260506-5', hst:'img/hst_standard.webp?v=20260609g' };
 // Schnappschuss der Live-3D-Vorschau (echtes konfiguriertes Produkt fürs Warenkorb-Bild).
 // 3D nutzt preserveDrawingBuffer:true + same-origin → canvas.toDataURL funktioniert.
-let wizLastThumb=null;
+let wizLastThumb=null, wizLastThumbProd=null;  // Produkt-Tag: zu welchem Produkt das Bild gehört (Fix 25.06.2026 gegen falsche Warenkorb-Bilder)
 function wizCaptureThumb(){
   try{
     var map={kunststoff:'fenster3d-frame',balkontuer:'balkon3d-frame',haustuere:'haus3d-frame',hst:'hst3d-frame'};
@@ -7974,6 +7974,10 @@ function _profilOkForProd(p){ return S.profil && P.profil[S.profil] && P.profil[
 function wizStart(){
   wizIdx=0; wizFarbTab='fa';   // Außenfarbe zuerst (Kundenwunsch)
   if(typeof wizVisited!=='undefined') wizVisited.clear(); // Neuanfang: keine alten Häkchen
+  // Altes Warenkorb-Vorschaubild verwerfen (Fix 25.06.2026): sonst übernahm das neue Produkt
+  // das 3D-Bild des vorigen (z.B. Balkontür zeigte eine Haustür). Wird für das neue Produkt
+  // frisch abgegriffen; bis dahin greift der korrekte Produkt-Fallback (WIZ_PROD_THUMB).
+  if(typeof wizLastThumb!=='undefined') wizLastThumb=null;
   // Neuanfang = wirklich Neuanfang: alle Zusatz-/Detail-Optionen auf Standard,
   // damit nichts vom vorher konfigurierten Produkt übrig bleibt (z.B. alte Sprossen).
   S.sproTyp='keine'; S.sproDicke='18'; S.sproRaster='kreuz';
@@ -8006,7 +8010,7 @@ function wizStart(){
   wizGo(0);
   // Live-3D periodisch als Schnappschuss merken (fürs echte Warenkorb-Bild)
   try{ if(window._wizThumbTimer)clearInterval(window._wizThumbTimer);
-    window._wizThumbTimer=setInterval(function(){ var t=wizCaptureThumb(); if(t)wizLastThumb=t; },1200); }catch(e){}
+    window._wizThumbTimer=setInterval(function(){ var t=wizCaptureThumb(); if(t){wizLastThumb=t; wizLastThumbProd=S.prod;} },1200); }catch(e){}
   window.scrollTo({top:0,behavior:'auto'});
 }
 function wizStopThumbTimer(){ try{ if(window._wizThumbTimer){clearInterval(window._wizThumbTimer);window._wizThumbTimer=null;} }catch(e){} }
@@ -8290,7 +8294,7 @@ function wizGo(i){
   const db=document.getElementById('wiz-dim-b'); if(db)db.textContent=(S.bMm||1000)+' mm';
   const dh=document.getElementById('wiz-dim-h'); if(dh)dh.textContent=(S.hMm||1200)+' mm';
   // Live-3D-Schnappschuss fürs Warenkorb-Bild merken (nach kurzer Render-Pause)
-  setTimeout(function(){ var _t=wizCaptureThumb(); if(_t)wizLastThumb=_t; },700);
+  setTimeout(function(){ var _t=wizCaptureThumb(); if(_t){wizLastThumb=_t; wizLastThumbProd=S.prod;} },700);
   // Übersicht: sobald ein Schnappschuss da ist, Karten-Bild aktualisieren.
   // Fehlt einer (Kunde sprang via „Direkt zur Anfrage" an allen 3D-Stufen vorbei),
   // einmal unsichtbar das konfigurierte Produkt rendern + abgreifen → immer ein echtes Produktbild.
