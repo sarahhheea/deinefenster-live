@@ -6315,7 +6315,7 @@ const P = {
 function deliv(qty, prod) {
   if (prod==='hst')      return 149;
   if (prod==='haustuere')return 89;
-  if (prod==='kunststoff'){ if(qty>=10) return 0; if(qty>=5) return 79; return 49; } // Fenster: ab 10 gratis (Sarah)
+  if (prod==='kunststoff'){ if(qty>=10) return 0; if(qty>=5) return 79; return 49; } // Fenster: ab 10 gratis (Kunde)
   if (qty>=10)           return 99;
   if (qty>=5)            return 79;
   return 49;
@@ -6362,7 +6362,7 @@ function delivText(info){
 
 // ── ZUSTAND ─────────────────────────────────────────
 const S = {
-  prod:null, qty:1, bMm:500, hMm:500,  // Start = kleinstes Maß (Richtpreis "ab", Sarah 24.06.2026)
+  prod:null, qty:1, bMm:500, hMm:500,  // Start = kleinstes Maß (Richtpreis "ab", Kunde 24.06.2026)
   glas:'2fach', profil:null,
   schall:'ohne', sicherGlas:'kein',  // K6/K7 Fix (warmeKante entfernt: jetzt implizit bei 3-fach Glas)
   fluegel:'1-fluegel',
@@ -7277,15 +7277,15 @@ function _mhRange(){ const pr = S.prod ? P.prod[S.prod] : null;
   if(S.prod==='balkontuer' && (S.fluegel==='2-fluegel' || S.fluegel==='stulp')){
     return { bMin:BALKON_2FL.bMin, bMax:BALKON_2FL.bMax, hMin:BALKON_2FL.hMin, hMax:BALKON_2FL.hMax, bDef:BALKON_2FL.bDef, hDef:BALKON_2FL.hDef, pr };
   }
-  // Fest-Element (Festverglasung, 1-Flügel): nur 500×500 bis 1700×1700 (Sarah 24.06.2026)
+  // Fest-Element (Festverglasung, 1-Flügel): nur 500×500 bis 1700×1700 (Kunde 24.06.2026)
   if(S.prod==='kunststoff' && S.fluegel==='1-fluegel' && S.oeff1==='fest'){
     return { bMin:500, bMax:1700, hMin:500, hMax:1700, bDef:1000, hDef:1200, pr };
   }
-  // Schiebetür IGLO-HS (Hebe-Schiebe): min 2000×1900, max 4000×2300 (Sarah 24.06.2026)
+  // Schiebetür IGLO-HS (Hebe-Schiebe): min 2000×1900, max 4000×2300 (Kunde 24.06.2026)
   if(S.prod==='hst' && S.profil==='iglo-hs'){
     return { bMin:2000, bMax:4000, hMin:1900, hMax:2300, bDef:2000, hDef:1900, pr };
   }
-  // Fenster MIT Rolladen: min 600×700 (Sarah 25.06.2026) — kleiner stellen wir nicht mit Rolladen her
+  // Fenster MIT Rolladen: min 600×700 (Kunde 25.06.2026) — kleiner stellen wir nicht mit Rolladen her
   if(S.prod==='kunststoff' && S.roll && S.roll!=='ohne'){
     return { bMin: Math.max(600, pr?.bMin||500), bMax: pr?.bMax||1500, hMin: Math.max(700, pr?.hMin||500), hMax: pr?.hMax||1900, bDef: pr?.bDef||1000, hDef: pr?.hDef||1200, pr };
   }
@@ -8111,7 +8111,7 @@ function fensterLimitsFor(fl){
   fl=fl||'1-fluegel';
   var sash=(fl==='stulp')?2:(parseInt(fl.charAt(0))||1);
   var hasOL=/oberlicht|ober-unter/.test(fl), hasUL=/unterlicht|ober-unter/.test(fl);
-  // Mindestmaße nach Flügelzahl (Sarah 25.06.2026 — technisch nicht kleiner herstellbar):
+  // Mindestmaße nach Flügelzahl (Kunde 25.06.2026 — technisch nicht kleiner herstellbar):
   //   2-Flügel/Stulp: min 800 × 800 mm · 3-Flügel: min 1600 × 1000 mm
   var bMin=sash>=3?1600:(sash===2?800:500);
   var bMax=sash>=3?4000:(sash===2?2700:1500);
@@ -8277,7 +8277,7 @@ function wizGo(i){
   const body=document.querySelector('#cfg-wizard .wiz-body');
   if(body)body.classList.toggle('cards-mode', isCards);
   if(body)body.classList.toggle('angebot-wide', s.key==='angebot');
-  if(typeof upSidebar==='function')upSidebar(); // Preis zeigen/verstecken je nach 3D-Sichtbarkeit (Sarah 24.06.2026)
+  if(typeof upSidebar==='function')upSidebar(); // Preis zeigen/verstecken je nach 3D-Sichtbarkeit (Kunde 24.06.2026)
   if(!isCards){
     // Fenster-Vorschau nur EINMAL in die Bühne legen (danach nie verschoben → kein Flackern)
     const pw=document.getElementById('prev-wrap'), st=document.getElementById('wiz-stage');
@@ -8421,7 +8421,7 @@ function wizUpCfgList(){
   var keys=(typeof WIZ_STEPS!=='undefined'&&WIZ_STEPS)?WIZ_STEPS.map(function(s){return s.key;}):[];
   function has(k){ return keys.indexOf(k)>=0; }
   var T=(typeof isTouched==='function')?isTouched:function(){return true;};
-  function vMasse(){ return (S.bMm&&S.hMm) ? (S.bMm+' × '+S.hMm+' mm') : null; } // Maß immer zeigen (Sarah 25.06): Preis bezieht sich darauf
+  function vMasse(){ return (S.bMm&&S.hMm) ? (S.bMm+' × '+S.hMm+' mm') : null; } // Maß immer zeigen (Kunde 25.06): Preis bezieht sich darauf
   function oeffLabel(){ if(!S.oeff1)return null; if(S.prod==='haustuere')return tuerOeffText(); if(S.anschlagName)return S.anschlagName; if(S.oeff1==='dreh-l')return 'Dreh links'; if(S.oeff1==='dreh-r')return 'Dreh rechts'; return _cfgNm('oeff_sash',S.oeff1)||S.oeff1; }
   function griffVal(){
     if(S.prod==='haustuere'){ return _cfgNm('tuerGriffAussen',S.tuerGriffAussen)||null; }
@@ -8486,7 +8486,7 @@ function wizUpCfgList(){
         +'</div>';
     }catch(e){}
   }
-  // Mobile: schlanke Preis-Leiste in der fixen Navbar (Sarah 25.06.2026) — Preis immer sichtbar ohne Scrollen.
+  // Mobile: schlanke Preis-Leiste in der fixen Navbar (Kunde 25.06.2026) — Preis immer sichtbar ohne Scrollen.
   // Nur bei Konfig-Schritten (nicht Karten/Produktauswahl). Sichtbarkeit per CSS @media ≤767 + .mob-price-on.
   try{
     var _mp=document.getElementById('wiz-price');
@@ -8686,7 +8686,7 @@ const PANZER_FARBEN = {
   'moosgruen':     {name:'Moosgrün',        hex:'#47512f', border:'#2f361f'}
 };
 function wizSetRoll(v){ S.roll=v; if(window._touched)window._touched.add('roll');
-  if(S.prod==='kunststoff' && v!=='ohne'){ if(S.bMm<600)S.bMm=600; if(S.hMm<700)S.hMm=700; if(window._touched){window._touched.add('bMm');window._touched.add('hMm');} } // mit Rolladen min 600×700 (Sarah 25.06)
+  if(S.prod==='kunststoff' && v!=='ohne'){ if(S.bMm<600)S.bMm=600; if(S.hMm<700)S.hMm=700; if(window._touched){window._touched.add('bMm');window._touched.add('hMm');} } // mit Rolladen min 600×700 (Kunde 25.06)
   if(typeof autoSetRollKasten==='function')autoSetRollKasten(); _wizPrev(); wizRenderPanel();
   // Nach Auswahl eines Rollladens auf dem Handy sanft zu den neu erschienenen Optionen
   // (Antriebsseite + Panzerfarbe) scrollen — sonst liegen sie unterhalb der Karten und der
@@ -8878,13 +8878,13 @@ function pickProd(el) {
   } else if (S.prod === 'balkontuer') {
     setPreviewView('inn');
     // Sinnvolle Standard-Maße für Balkontür (verhindert nicht-tür-ähnliche Vorschau)
-    if (S.hMm / S.bMm < 1.5) { S.hMm = 1700; S.bMm = 700; } // Start = kleinste Balkontür 700×1700 (Richtpreis ab 266 €, Sarah 24.06.2026)
+    if (S.hMm / S.bMm < 1.5) { S.hMm = 1700; S.bMm = 700; } // Start = kleinste Balkontür 700×1700 (Richtpreis ab 266 €, Kunde 24.06.2026)
     // Default-Farbe für Balkontür-3D-Vorschau: Anthrazit (Kundenwunsch)
     if (!S._faChosen) { S.fa = 'anthrazit'; S.fi = 'anthrazit'; }
   } else if (S.prod === 'kunststoff') {
     // Fenster-Maße zurücksetzen wenn sie von Tür/Balkontür-Wechsel stammen
     if (S.hMm >= 1800) { S.hMm = 500; S.bMm = 500; }
-    // Start günstigster Richtpreis: Weiß (Preis startet am Basiswert, Kunde wählt Farbe später) — Sarah 24.06.2026
+    // Start günstigster Richtpreis: Weiß (Preis startet am Basiswert, Kunde wählt Farbe später) — Kunde 24.06.2026
     if (!S._faChosen) { S.fa = 'weiss'; S.fi = 'weiss'; }
   } else if (S.prod === 'hst') {
     // Default-Farbe für HST-3D-Vorschau: Weiß innen + außen (Kundenwunsch 18.06.2026)
@@ -10133,7 +10133,7 @@ function _applyDefaultSashStates(fluegelKey) {
   const cols = m ? parseInt(m[1], 10) : 1;
   // Default Drutex 2/3-Flügel: Griffe ZUR MITTE am Pfosten
   // Linker Sash → dk-r (Griff rechts = am Pfosten), rechter Sash → dk-l (Griff links = am Pfosten)
-  const defaults = cols === 1 ? ['dk-r']  // Standard öffenbar (Dreh-Kipp) — Preis matcht Referenz −3%
+  const defaults = cols === 1 ? ['dk-r']  // Standard öffenbar (Dreh-Kipp)
                  : cols === 2 ? ['dk-r', 'dk-l']
                  : cols === 3 ? ['dk-r', 'fest', 'dk-l']
                  : ['dk-r'];
@@ -11840,13 +11840,12 @@ function pickColor(el, key) {
 
 // ── PREIS BERECHNEN ──────────────────────────────────
 // ══════════════════════════════════════════════════════════════════
-// FENSTER-PREISMODELL (Kunststoff/Drutex) — geeicht an Marktdaten 2026-06.
+// FENSTER-PREISMODELL (Kunststoff/Drutex) — interne Hauspreisliste.
 // Saubere, monotone Größen-Matrix + bilineare Interpolation; Aufpreise je
-// Schritt; Farbe prozentual; ein globaler Regler MARKT_AUFSCHLAG (3% unter
-// Markt-Kundenpreis). Lokal/Test. Andere Produkte nutzen weiter calcUnit().
+// Schritt; Farbe prozentual; ein globaler Preis-Faktor.
 // ══════════════════════════════════════════════════════════════════
-const MARKT_AUFSCHLAG = 0.97; // 0,97 = 3% unter dem Referenz-Kundenpreis
-// Markt-Äquivalent "Ihr Preis" (1-Flügel DrehKipp, Iglo5 Classic, weiss, 2-fach), bereinigt monoton
+const PREIS_FAKTOR = 0.97; // interner Kalkulationsfaktor
+// Grundpreis brutto (1-Flügel DrehKipp, Iglo5 Classic, weiss, 2-fach), monoton
 const _FMAT_B = [450,600,800,1000,1200,1400,1500];
 const _FMAT_H = [400,600,800,1000,1200,1400,1700];
 const _FMAT = [
@@ -11870,8 +11869,8 @@ function fensterMatrix(b,h){
   for (let i=0;i<_FMAT_H.length;i++) col.push(_interp1(b,_FMAT_B,_FMAT[i]));
   return _interp1(h,_FMAT_H,col);
 }
-// FEST-Matrix (Festverglasung 1-Flügel) — eigene, günstigere Kurve, symmetrisch B/H. Markt-Äquivalent "Ihr Preis".
-// Bereich 500–1700 (Sarah: Fest min 500×500, max 1700×1700).
+// FEST-Matrix (Festverglasung 1-Flügel) — eigene, günstigere Kurve, symmetrisch B/H. Grundpreis brutto.
+// Bereich 500–1700 (Kunde: Fest min 500×500, max 1700×1700).
 const _FESTG = [500,800,1100,1400,1700];
 const _FESTMAT = [
   [ 81.65,  81.65,  93.81, 113.79, 132.32], // B500
@@ -11896,7 +11895,7 @@ function _fluegelFaktor(f){
   else if (f.indexOf('oberlicht')>=0 || f.indexOf('unterlicht')>=0) extra = 0.15;
   return base + extra;
 }
-// Geeichte Aufpreis-Tabellen (Markt-Äquivalent, vor ×0,97)
+// Aufpreis-Tabellen (brutto, vor Faktor)
 const F_PROFIL   = { 'iglo5':0, 'iglo-energy':45.17, 'iglo-edge':104.81 };
 const F_OEFF     = { 'fest':-98.15, 'kipp':-22.58, 'dreh-l':-14.19, 'dreh-r':-14.19, 'dk-l':0, 'dk-r':0 };
 const F_GLAS     = { '2fach':0, '3fach':28.96 };
@@ -11905,11 +11904,11 @@ const F_SICHERGLAS = { 'kein':0, 'esg':40, 'vsg':61.27 };
 const F_GLASDEKOR= { 'klar':0, 'satinato':31.79, 'chinchilla':31.79, 'master-carre':65.50 };
 const F_GRIFF    = { 'mistral':0, 'nevada':0, 'dublin':0, 'kwadrat':0, 'hoppe':6.66, 'pz-beid':0 };
 const F_ROLL     = { 'ohne':0, 'gurt':141.30, 'motor':267.82 };
-const F_SICHER   = { 'wk1':0, 'rc2':90 }; // rc2 = SCHÄTZUNG (nicht in Marktdaten), mit Drutex-Programm prüfen
+const F_SICHER   = { 'wk1':0, 'rc2':90 }; // rc2 = Richtwert, mit Drutex-Programm prüfen
 const F_SPRO     = { 'aufgesetzt':{'27':28,'45':38,'65':48}, 'szr':{'18':13,'26':18,'45':25} };
-// ── GRÖSSENABHÄNGIGE Aufpreise (geeicht 25.06.2026 — vorher fälschlich fest) ──
+// ── GRÖSSENABHÄNGIGE Aufpreise ──
 const _PROFIL_PCT = { 'iglo5':0, 'iglo-energy':0.20, 'iglo-edge':0.467 }; // Profil = % vom Basispreis (Edge 1-Punkt-Schätzung)
-function _rolladenDelta(b,h,type){ // breiten-getrieben + kleiner Höhenterm, an Markt geeicht
+function _rolladenDelta(b,h,type){ // breiten-getrieben + kleiner Höhenterm
   if(!type || type==='ohne') return 0;
   let d = _interp1(b,[700,1000,1400],[108.87,113.93,157.49]) + 0.0391*Math.max(0,h-500);
   if(type==='motor') d += 126.52; // Motor statt Gurt (~konstant)
@@ -11954,9 +11953,9 @@ function fensterPriceParts(){
   const sicher = F_SICHER[S.sicher]||0;
   let unitMarkt = bodyNoColor + colorAdd + glas + schall + sicherGlas + dekor + griff + roll + spro + sicher;
   if (unitMarkt < 50) unitMarkt = 50; // niedriges Sicherheitsnetz (Matrizen tragen die echten Mindestpreise: DK 134, Fest 81,65)
-  const k = MARKT_AUFSCHLAG;
+  const k = PREIS_FAKTOR;
   const unit = _r2(unitMarkt*k);
-  // Aufschlüsselung (UNSERE Preise, ×0,97)
+  // Aufschlüsselung (Preise)
   const flName = (P.fluegel[S.fluegel] && P.fluegel[S.fluegel].name) || (S.fluegel||'');
   const rows = [{ l:'Fenster · '+flName+' · '+b+'×'+h+' mm', v:fmt(_r2(frame*k)) }];
   if (prof) rows.push({ l:(P.profil[S.profil]&&P.profil[S.profil].name)||'Profil', v:'+ '+fmt(_r2(prof*k)), sub:true });
@@ -11989,7 +11988,7 @@ function fensterPriceParts(){
 }
 function calcUnitFenster(){ return fensterPriceParts().unit; }
 
-// ── BALKONTÜR-PREISMODELL (geeicht an Marktdaten 2026-06) ──
+// ── BALKONTÜR-PREISMODELL ──
 // 1-Flügel (DK) + 2-Flügel (Stulp) je eigene Matrix. Aufpreise wie Fenster (gleicher Hersteller).
 const _BLK_B1=[500,700,900,1100], _BLK_H1=[1700,1800,2000,2300];
 const _BLK_M1=[
@@ -12023,10 +12022,10 @@ function balkonPriceParts(){
   if(S.sproTyp && S.sproTyp!=='keine' && F_SPRO[S.sproTyp]) price += F_SPRO[S.sproTyp][S.sproDicke]||0;
   price += F_SICHER[S.sicher]||0;
   if(S.balkonSchwelle && P.balkonSchwelle[S.balkonSchwelle]) price += P.balkonSchwelle[S.balkonSchwelle].add||0;
-  return { unit: _r2(price*MARKT_AUFSCHLAG) };
+  return { unit: _r2(price*PREIS_FAKTOR) };
 }
 
-// ── SCHIEBETÜR-PREISMODELL (PSK, geeicht an Marktdaten; IGLO-HS = Aufschlag-Schätzung) ──
+// ── SCHIEBETÜR-PREISMODELL (PSK; IGLO-HS = Richtwert) ──
 const _PSK_B=[1500,2000,2500,3000], _PSK_H=[1700,1900,2100,2200];
 const _PSK_M=[
   [1450.58,1490.83,1578.85,1680.19], // H1700
@@ -12037,20 +12036,20 @@ const _PSK_M=[
 function hstPriceParts(){
   const b=S.bMm||2200, h=S.hMm||2000;
   let frame = _matLookup(b,h,_PSK_B,_PSK_H,_PSK_M);
-  if(S.profil==='iglo-hs') frame *= 1.30; // IGLO-HS Hebe-Schiebe: Aufschlag (SCHÄTZUNG — nicht in Referenz, mit Sarah prüfen)
+  if(S.profil==='iglo-hs') frame *= 1.30; // IGLO-HS Hebe-Schiebe: Faktor (Richtwert, intern prüfen)
   if(S.profil==='iglo-psk' && S.pskKammer==='iglo-energy') frame += 45; // Energy-Kammer (Schätzung wie Fenster)
   const faCol=S.fa&&S.fa!=='weiss', fiCol=S.fi&&S.fi!=='weiss';
   const farbPct=(faCol&&fiCol)?0.11:((faCol||fiCol)?0.092:0); // PSK-Farbe ~9,2% einseitig
   let price = frame*(1+farbPct);
-  // 3-fach ist bei PSK unser STANDARD und im Basispreis enthalten (geeicht auf Referenz-2-fach × 0,97).
-  // → kein 3-fach-Aufschlag, damit wir −3% unter dem Referenzpreis liegen.
+  // 3-fach ist bei PSK unser STANDARD und im Basispreis enthalten enthalten.
+  // → kein 3-fach-Aufschlag (3-fach im Grundpreis enthalten).
   price += F_SCHALL[S.schall]||0;
   price += F_SICHERGLAS[S.sicherGlas]||0;
   if(S.glasdekor && S.glasdekor!=='klar') price += F_GLASDEKOR[S.glasdekor]||0;
   price += F_SICHER[S.sicher]||0;
   if(P.hstSchwelle && P.hstSchwelle[S.hstSchwelle]) price += P.hstSchwelle[S.hstSchwelle].add||0;
   if(P.hstTeilung && P.hstTeilung[S.hstTeilung]) price += P.hstTeilung[S.hstTeilung].add||0;
-  return { unit: _r2(price*MARKT_AUFSCHLAG) };
+  return { unit: _r2(price*PREIS_FAKTOR) };
 }
 
 // ── HAUSTÜR-PREISMODELL (Basis-Matrix Florida-Inox + Glas-Stufe je Modell + Griff) ──
@@ -12079,7 +12078,7 @@ function haustuerPriceParts(){
   if(S.glas==='3fach') price += Math.round(24.4*(b*h/1e6));
   if(S.tuerGriffAussen==='stoss-q45r') price += 99.60; // Edelstahl-Stoßgriff
   price += F_SICHER[S.sicher]||0;
-  return { unit:_r2(price*MARKT_AUFSCHLAG) };
+  return { unit:_r2(price*PREIS_FAKTOR) };
 }
 
 function calcUnit() {
@@ -12152,7 +12151,7 @@ function upSidebar() {
   const base = pr.sqm>0 ? Math.max(pr.min, pr.fix+sqm*pr.sqm) : pr.min;
 
   if (S.prod === 'kunststoff') {
-    // Preis erst zeigen, wenn das 3D-Modell sichtbar ist (NICHT auf Karten-Schritten) — Sarah 24.06.2026
+    // Preis erst zeigen, wenn das 3D-Modell sichtbar ist (NICHT auf Karten-Schritten) — Kunde 24.06.2026
     const _wb=document.querySelector('#cfg-wizard .wiz-body');
     if (_wb && _wb.classList.contains('cards-mode')) {
       const _wp0=document.getElementById('wiz-price'); if(_wp0) _wp0.style.display='none';
@@ -16150,7 +16149,7 @@ async function submitSkizze(e) {
   #cfg-wizard .wiz-prog{ height:5px; background:#e7ecf3; border-radius:3px; overflow:hidden; }
   #cfg-wizard .wiz-prog>i{ display:block; height:100%; background:var(--c-primary); border-radius:3px; transition:width .25s ease; }
   #cfg-wizard .wiz-prog-txt{ font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:13px; color:#14233f; letter-spacing:.01em; }
-  /* Schlanke Preis-Leiste in der fixen Navbar — Preis IMMER sichtbar ohne Scrollen (Sarah 25.06.2026) */
+  /* Schlanke Preis-Leiste in der fixen Navbar — Preis IMMER sichtbar ohne Scrollen (Kunde 25.06.2026) */
   #cfg-wizard .wiz-navbar #wiz-price.mob-price-on{ display:block !important; padding:7px 16px 5px !important; margin-bottom:4px !important; }
   /* Nummern-Reihe auf dem Handy: kompakte Dots, Labels aus (12-15 passen sonst nicht) */
   #cfg-wizard .wiz-steps{ position:relative; }
