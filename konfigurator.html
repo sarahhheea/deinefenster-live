@@ -8060,6 +8060,8 @@ function wizPickFluegel(v){ S.fluegel=v; S.anschlagIdx=null; if(typeof applyFens
 function wizSetOeff1(v){ S.oeff1=v; if(window._touched)window._touched.add('oeff1'); _wizPrev(); wizRenderPanel(); }
 function wizSetHstLauf(v){ S.hstLauf=v; if(window._touched)window._touched.add('hstLauf'); _wizPrev(); wizRenderPanel(); }
 function wizSetTuerOeff(o,r){ S.oeff1=o; S.tuerOeffnung=r; if(window._touched){window._touched.add('oeff1');window._touched.add('tuerOeffnung');} _wizPrev(); wizRenderPanel(); }
+// Haustuer-Oeffnung als Klartext fuer alle Zusammenfassungen — Richtung (nach innen/aussen) IMMER mit drin (Kundenwunsch 25.06.2026)
+function tuerOeffText(){ var r=(S.tuerOeffnung==='aussen')?'Nach außen öffnend':'Nach innen öffnend'; if(S.fluegel==='2-fluegel'){ var geh=(S.tuerGehfluegel==='links')?'Gehflügel links':'Gehflügel rechts'; return r+' · Stulptür · '+geh; } var d=(S.oeff1==='dreh-l')?'DIN links':'DIN rechts'; return r+' · '+d; }
 // 2-flügelige Haustür: Gehflügel-Seite (Griff) + Öffnungsrichtung. Beide Flügel sind Dreh.
 function wizSetTuerGeh(geh,r){ S.tuerGehfluegel=geh; S.tuerOeffnung=r; S.oeff1='dreh-l'; S.oeff2='dreh-r'; if(window._touched){window._touched.add('tuerGehfluegel');window._touched.add('tuerOeffnung');window._touched.add('oeff1');} if(typeof mkDone==='function')mkDone(4); _wizPrev(); wizRenderPanel(); }
 function wizRenderAnschlag(){
@@ -8344,7 +8346,7 @@ function wizUpCfgList(){
   function has(k){ return keys.indexOf(k)>=0; }
   var T=(typeof isTouched==='function')?isTouched:function(){return true;};
   function vMasse(){ return (S.bMm&&S.hMm) ? (S.bMm+' × '+S.hMm+' mm') : null; } // Maß immer zeigen (Sarah 25.06): Preis bezieht sich darauf
-  function oeffLabel(){ if(!S.oeff1)return null; if(S.oeff1==='dreh-l')return 'Dreh links'; if(S.oeff1==='dreh-r')return 'Dreh rechts'; return _cfgNm('oeff_sash',S.oeff1)||S.oeff1; }
+  function oeffLabel(){ if(!S.oeff1)return null; if(S.prod==='haustuere')return tuerOeffText(); if(S.oeff1==='dreh-l')return 'Dreh links'; if(S.oeff1==='dreh-r')return 'Dreh rechts'; return _cfgNm('oeff_sash',S.oeff1)||S.oeff1; }
   function griffVal(){
     if(S.prod==='haustuere'){ return _cfgNm('tuerGriffAussen',S.tuerGriffAussen)||null; }
     if(S.prod==='hst'){ return (S.profil==='iglo-psk')?(_cfgNm('pskGriff',S.pskGriff)||null):(_cfgNm('hstGriff',S.hstGriff)||null); }
@@ -12219,7 +12221,8 @@ function upSidebar() {
   if(S.fluegel && isTouched('fluegel')) rowsList.push(['Aufteilung', P.fluegel[S.fluegel]?.name||S.fluegel]);
   if(S.bMm && S.hMm && (isTouched('bMm') || isTouched('hMm'))) rowsList.push(['Maße', S.bMm+' × '+S.hMm+' mm']);
   if(S.oeff1 && (isTouched('oeff1') || isTouched('oeff2') || isTouched('oeff3'))) {
-    const oLabel = (S.oeff1==='dreh-l') ? 'Dreh-Links (DIN-Links)'
+    const oLabel = (S.prod==='haustuere') ? tuerOeffText()
+                 : (S.oeff1==='dreh-l') ? 'Dreh-Links (DIN-Links)'
                  : (S.oeff1==='dreh-r') ? 'Dreh-Rechts (DIN-Rechts)'
                  : (P.oeff_sash[S.oeff1]?.name||S.oeff1);
     rowsList.push(['Öffnung',  oLabel]);
@@ -12314,6 +12317,8 @@ function upFinalSum(rows,tot) {
   let oeffStr;
   if (S.prod === 'hst') {
     oeffStr = 'Schiebe-Mechanik (siehe Schwelle/Teilung/Laufrichtung)';
+  } else if (S.prod === 'haustuere') {
+    oeffStr = S.oeff1 ? tuerOeffText() : '–';
   } else {
     oeffStr = S.oeff1 ? (cnt===1 ? P.oeff_sash[S.oeff1]?.name||S.oeff1 : 'L:'+( P.oeff_sash[S.oeff1]?.name||S.oeff1)+(S.oeff2?' / R:'+(P.oeff_sash[S.oeff2]?.name||S.oeff2):'')+(S.oeff3?' / M:'+(P.oeff_sash[S.oeff3]?.name||S.oeff3):'')) : '–';
   }
