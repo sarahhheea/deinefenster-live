@@ -13984,12 +13984,32 @@ function _renderHst3d() {
   const _gripMap = { weiss:'weiss', braun:'braun', silber:'silber' };
   const _grip  = (S.profil === 'iglo-psk') ? 'weiss' : (_gripMap[S.hstGriff] || 'weiss');
 
+  // Rollladen-Parameter (Kasten + Panzer) — wie bei der Balkontür, sonst zeigt die 3D keinen Rollladen
+  const _roll   = S.roll       || 'ohne';
+  const _kasten = S.rollKasten || '175';
+  const _rseite = S.rollSeite  || 'rechts';
+  const _phex   = _panzerHex();
+
   wrap.style.display = 'block';
 
   // Bei System-Wechsel kompletten Reload erzwingen (verschiedene Geometrie)
-  const expectedSrc = `/hst-3d.html?embed&v=20260622wbg3&bg=light&system=${_sys}&color=${_ck}&side=${_side}&view=${_viewKey}&grip=${_grip}`;
+  const expectedSrc = `/hst-3d.html?embed&v=20260625roll1&bg=light&system=${_sys}&color=${_ck}&side=${_side}&view=${_viewKey}&grip=${_grip}&roll=${_roll}&rollKasten=${_kasten}&rollSeite=${_rseite}&panzerHex=${encodeURIComponent(_phex)}`;
   const currentSys  = (frame.src.match(/[?&]system=([^&]+)/) || [])[1];
   const _needsReload = !frame.src.includes('hst-3d') || currentSys !== _sys;
+
+  const _payload = {
+    type: 'update',
+    color: isWood ? null : _ck,
+    wood:  isWood ? _ck  : null,
+    glass: S.glasdekor || 'klar',
+    side:  _side,
+    view:  _viewKey,
+    hstGriff: _grip,
+    roll:       _roll,
+    rollKasten: _kasten,
+    rollSeite:  _rseite,
+    panzerHex:  _phex
+  };
 
   if (_needsReload) {
     frame.src = expectedSrc;
@@ -13997,29 +14017,11 @@ function _renderHst3d() {
       const cw = frame.contentWindow;
       if (!cw) return;
       cw.dispatchEvent(new Event('resize'));
-      cw.postMessage({
-        type: 'update',
-        color: isWood ? null : _ck,
-        wood:  isWood ? _ck  : null,
-        glass: S.glasdekor || 'klar',
-        side:  _side,
-        view:  _viewKey,
-        hstGriff: _grip
-      }, '*');
+      cw.postMessage(_payload, '*');
     };
   } else {
     const cw = frame.contentWindow;
-    if (cw) {
-      cw.postMessage({
-        type: 'update',
-        color: isWood ? null : _ck,
-        wood:  isWood ? _ck  : null,
-        glass: S.glasdekor || 'klar',
-        side:  _side,
-        view:  _viewKey,
-        hstGriff: _grip
-      }, '*');
-    }
+    if (cw) cw.postMessage(_payload, '*');
   }
 }
 
