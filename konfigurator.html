@@ -7857,6 +7857,9 @@ function wizRenderAngebot(){
       +'<span class="wiz-oqtyval"><b>'+qty+'</b> Stück</span>'
       +'<button type="button" class="wiz-oqtybtn" onclick="wizCardQty(\''+qtyId+'\',1)" aria-label="Menge erhöhen">+</button>'
       +'</div>';
+    var _cunit=opts.current?((typeof calcUnit==='function')?calcUnit():null):((typeof opts.unit==='number')?opts.unit:null);
+    var _csub=(_cunit!=null)?_r2(_cunit*qty):null;
+    var _priceHtml=(_csub!=null)?('<div style="text-align:right;margin-bottom:7px"><div style="font-size:16px;font-weight:800;color:#225eaa;line-height:1.1">'+fmt(_csub)+'</div>'+((qty>1)?('<div style="font-size:11px;color:#7a8699">Einzelpreis '+fmt(_cunit)+'</div>'):'')+'<div style="font-size:10px;color:#9aa6b8">inkl. MwSt</div></div>'):'';
     var editClick=opts.current?'wizGo(0)':('wizEditItem(\''+opts.id+'\')');
     var delClick=opts.current?'wizRemoveCurrent()':('wizCartRemove(\''+opts.id+'\')');
     return '<div class="wiz-ocard'+(opts.current?' is-current':'')+'">'
@@ -7866,7 +7869,7 @@ function wizRenderAngebot(){
         +'<div class="wiz-ospec-line">'+line1+'</div>'
         +'<div class="wiz-ospec-line">'+line2+'</div>'
       +'</div>'
-      +'<div class="wiz-oside">'+qtyCtl
+      +'<div class="wiz-oside">'+_priceHtml+qtyCtl
         +'<div class="wiz-oacts">'
           +'<button type="button" class="wiz-obtn wiz-obtn-edit" onclick="'+editClick+'"><i class="ms" aria-hidden="true">tune</i>Bearbeiten</button>'
           +'<button type="button" class="wiz-obtn wiz-obtn-del" onclick="'+delClick+'"><i class="ms" aria-hidden="true">delete</i>Entfernen</button>'
@@ -7885,9 +7888,23 @@ function wizRenderAngebot(){
       +'<button type="button" class="wiz-addmore-btn" onclick="wizAddAnother()"><span>+</span> Weiteres Produkt hinzufügen</button>'
     +'</div>';
   h+='<div class="wiz-ocards">';
-  inCart.forEach(function(it){ h+=card(it.config||{}, {id:it.id, thumb:it.thumb}); });
+  inCart.forEach(function(it){ h+=card(it.config||{}, {id:it.id, thumb:it.thumb, unit:it.unitPrice}); });
   h+=card(S, {current:true, thumb:wizLastThumb});
   h+='</div>';
+  // Gesamtpreis + Lieferablauf (Kunden-Wunsch 25.06.2026)
+  var _ovSum=0;
+  inCart.forEach(function(it){ var u=(typeof it.unitPrice==='number')?it.unitPrice:0; _ovSum+=u*(it.qty||1); });
+  _ovSum += ((typeof calcUnit==='function'?calcUnit():0)*(S.qty||1));
+  var _ovDi=orderDelivery();
+  var _ovShip=_ovDi.deliverable?(_ovDi.cost||0):0;
+  var _ovLief=_ovDi.deliverable?(_ovDi.hasHS?'300 €':(_ovDi.cost===0?'kostenlos':fmt(_ovDi.cost))):'Abholung im Lager';
+  h+='<div style="margin-top:16px;background:#f7f9fd;border:1px solid #dfe5ee;border-radius:14px;padding:15px 17px">'
+    +'<div style="display:flex;justify-content:space-between;font-size:14px;color:#5a6678;padding:3px 0"><span>Zwischensumme</span><span>'+fmt(_ovSum)+'</span></div>'
+    +'<div style="display:flex;justify-content:space-between;font-size:14px;color:#5a6678;padding:3px 0"><span>Lieferung</span><span>'+_ovLief+'</span></div>'
+    +'<div style="display:flex;justify-content:space-between;font-size:19px;font-weight:800;color:#1a2942;padding:8px 0 0;border-top:1px solid #dfe5ee;margin-top:6px"><span>Gesamtpreis</span><span>'+fmt(_ovSum+_ovShip)+'</span></div>'
+    +'<div style="font-size:12.5px;color:#225eaa;font-weight:600;margin-top:9px">'+delivText(_ovDi)+'</div>'
+    +'<div style="font-size:11.5px;color:#8a8a8a;margin-top:4px">Alle Preise inkl. MwSt · unverbindlicher Richtpreis — Ihr finales Angebot erhalten Sie per E-Mail.</div>'
+  +'</div>';
   h+='<button type="button" class="wiz-addmore" onclick="wizAddAnother()"><span>+</span> Weiteres Produkt hinzufügen</button>';
   return h;
 }
