@@ -6006,7 +6006,7 @@ const P = {
     // Fix I (21.04.2026): Produkt-spezifische Min/Max-Maße aus Drutex-Branchenwerten
     kunststoff: { name:'Kunststofffenster', fix:89,   sqm:210, min:99,   bMin:400,  bMax:4000, hMin:400,  hMax:3000, bDef:500, hDef:500 },
     balkontuer: { name:'Balkontür',          fix:145,  sqm:215, min:179,  bMin:700,  bMax:2500, hMin:1700, hMax:2400, bDef:700,  hDef:1700 },
-    haustuere:  { name:'Haustür',            fix:0,    sqm:0,   min:899,  bMin:904,  bMax:1174, hMin:2028, hMax:2398, bDef:904, hDef:2028 },
+    haustuere:  { name:'Haustür',            fix:0,    sqm:0,   min:890,  bMin:900,  bMax:1170, hMin:2000, hMax:2400, bDef:1000, hDef:2100 },
     hst:        { name:'Schiebetür',          fix:580,  sqm:265, min:1299, bMin:1500, bMax:3000, hMin:1700, hMax:2200, bDef:1500, hDef:1700 },
   },
   // Fix K6+K7 (21.04.2026): Verglasung in 3 separate Entscheidungen zerlegt
@@ -11839,8 +11839,8 @@ function pickColor(el, key) {
 // ══════════════════════════════════════════════════════════════════
 const MARKT_AUFSCHLAG = 0.97; // 0,97 = 3% unter dem Referenz-Kundenpreis
 // Markt-Äquivalent "Ihr Preis" (1-Flügel DrehKipp, Iglo5 Classic, weiss, 2-fach), bereinigt monoton
-const _FMAT_B = [440,600,800,1000,1200,1400,1500];
-const _FMAT_H = [395,600,800,1000,1200,1400,1700];
+const _FMAT_B = [450,600,800,1000,1200,1400,1500];
+const _FMAT_H = [400,600,800,1000,1200,1400,1700];
 const _FMAT = [
   [134.35,134.35,155.89,182.48,202.71,224.38,233.91], // H395
   [134.35,134.35,167.06,196.31,219.47,243.79,254.50], // H600
@@ -12046,11 +12046,11 @@ function hstPriceParts(){
 }
 
 // ── HAUSTÜR-PREISMODELL (Basis-Matrix Florida-Inox + Glas-Stufe je Modell + Griff) ──
-const _HT_B=[904,1040,1174], _HT_H=[2028,2200,2398];
+const _HT_B=[900,1040,1170], _HT_H=[2000,2200,2400];
 const _HT_M=[
-  [1689.45,1756.05,1789.34], // H2028
+  [1689.45,1756.05,1789.34], // H2000
   [1719.27,1789.34,1824.09], // H2200
-  [1814.24,1887.50,1923.69], // H2398
+  [1814.24,1887.50,1923.69], // H2400
 ];
 // Modell-Aufschlag ggü. Florida-Basis (Glas-Stufe, ~konstant; Zuordnung nach Glasanteil — Näherung)
 const _HT_MODELL={
@@ -12062,7 +12062,7 @@ const _HT_MODELL={
   'texas-c-inox':90.34,'texas-lr-inox':90.34,
 };
 function haustuerPriceParts(){
-  const b=S.bMm||904, h=S.hMm||2028;
+  const b=S.bMm||1000, h=S.hMm||2100;
   let frame = _matLookup(b,h,_HT_B,_HT_H,_HT_M);
   frame += (_HT_MODELL[S.tuerModell]!=null ? _HT_MODELL[S.tuerModell] : 0);
   const faCol=S.fa&&S.fa!=='weiss', fiCol=S.fi&&S.fi!=='weiss';
