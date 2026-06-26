@@ -12033,10 +12033,16 @@ const _PSK_M=[
   [1490,1534,1629,1739], // H2100
   [1508,1554,1651,1764], // H2200
 ];
+// IGLO-HS (Hebe-Schiebe) — eigene Matrix, direkt kalkuliert (Bereich 2000–4000 × 1900–2300)
+const _HS_B=[2000,3000,4000], _HS_H=[1900,2100,2300];
+const _HS_M=[
+  [2600,2972,3805], // H1900
+  [2610,2988,3866], // H2100
+  [2701,3090,4021], // H2300
+];
 function hstPriceParts(){
   const b=S.bMm||2200, h=S.hMm||2000;
-  let frame = _matLookup(b,h,_PSK_B,_PSK_H,_PSK_M);
-  if(S.profil==='iglo-hs') frame *= 1.744; // IGLO-HS Hebe-Schiebe: Faktor (Richtwert, intern prüfen)
+  let frame = (S.profil==='iglo-hs') ? _matLookup(b,h,_HS_B,_HS_H,_HS_M) : _matLookup(b,h,_PSK_B,_PSK_H,_PSK_M);
   if(S.profil==='iglo-psk' && S.pskKammer==='iglo-energy') frame += 45; // Energy-Kammer (Schätzung wie Fenster)
   const faCol=S.fa&&S.fa!=='weiss', fiCol=S.fi&&S.fi!=='weiss';
   const farbPct=(faCol&&fiCol)?0.11:((faCol||fiCol)?0.092:0); // PSK-Farbe ~9,2% einseitig
