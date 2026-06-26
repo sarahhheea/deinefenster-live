@@ -197,11 +197,12 @@ const _bgLight = new URLSearchParams(location.search).get('bg')==='light';
 // TRANSPARENTER Hintergrund im Konfigurator (Kundenwunsch 23.06.2026) — weißer Kasten scheint
 // durch, die Tür „schwebt" frei ohne Bild-Rahmen. Tiefe via Bodenschatten.
 if(_embed ? _bgLight : true){
-  scene.background = new THREE.Color(0xffffff);
+  scene.background = null;
+  renderer.setClearColor(0xf4f7fc, 1);  // clearColor (NICHT tone-gemappt) = exakt #f4f7fc = Kasten-Ton
 }else{
   scene.background = new THREE.Color(0x0a1530);
 }
-if(_bgLight){var _s=document.createElement('style');_s.textContent='html.is-embed,html.is-embed body,html body.embed{background:#f5f5f6 !important;overflow:hidden !important}';document.head.appendChild(_s);}
+if(_bgLight){var _s=document.createElement('style');_s.textContent='html.is-embed,html.is-embed body,html body.embed{background:#f4f7fc !important;overflow:hidden !important}';document.head.appendChild(_s);}
 
 const camera = new THREE.PerspectiveCamera(15, 1, 0.1, 50);
 // Balkontür ist 2.1m hoch — Kamera weiter zurück und etwas höher
