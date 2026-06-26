@@ -11845,7 +11845,9 @@ function pickColor(el, key) {
 // Schritt; Farbe prozentual; ein globaler Preis-Faktor.
 // ══════════════════════════════════════════════════════════════════
 const PREIS_FAKTOR = 0.97; // interner Kalkulationsfaktor
-const SHOW_PRICES = false; // PREISE LIVE AUS — erst lokal korrigieren, dann auf true
+const SHOW_PRICES = true; // Preise live sichtbar
+// Endpreis je Stück: rund 10 € unter dem Listenpreis, auf glatte 10 € gerundet (nie aufdringlich exakt)
+function unserPreis(ref){ ref=Number(ref)||0; var p=Math.round((ref-10)/10)*10; return p<20?Math.max(0,Math.round(ref/10)*10):p; }
 // Grundpreis brutto (1-Flügel DrehKipp, Iglo5 Classic, weiss, 2-fach), monoton
 const _FMAT_B = [450,600,800,1000,1200,1400,1500];
 const _FMAT_H = [400,600,800,1000,1200,1400,1700];
@@ -11955,7 +11957,7 @@ function fensterPriceParts(){
   let unitMarkt = bodyNoColor + colorAdd + glas + schall + sicherGlas + dekor + griff + roll + spro + sicher;
   if (unitMarkt < 50) unitMarkt = 50; // niedriges Sicherheitsnetz (Matrizen tragen die echten Mindestpreise: DK 134, Fest 81,65)
   const k = PREIS_FAKTOR;
-  const unit = Math.round(unitMarkt*k);
+  const unit = unserPreis(unitMarkt);
   // Aufschlüsselung (Preise)
   const flName = (P.fluegel[S.fluegel] && P.fluegel[S.fluegel].name) || (S.fluegel||'');
   const rows = [{ l:'Fenster · '+flName+' · '+b+'×'+h+' mm', v:fmt(_r2(frame*k)) }];
@@ -12000,9 +12002,9 @@ const _BLK_M1=[
 ];
 const _BLK_B2=[1300,1500,1700,2000], _BLK_H2=[1800,2000,2300];
 const _BLK_M2=[
-  [508,531,555,591], // H1800
-  [538,562,587,625], // H2000
-  [588,610,637,678], // H2300
+  [541,564,587,622], // H1800
+  [576,600,624,662], // H2000
+  [633,654,681,723], // H2300
 ];
 function _matLookup(b,h,BS,HS,M){
   const col=[]; for(let i=0;i<HS.length;i++) col.push(_interp1(b,BS,M[i]));
@@ -12023,7 +12025,7 @@ function balkonPriceParts(){
   if(S.sproTyp && S.sproTyp!=='keine' && F_SPRO[S.sproTyp]) price += F_SPRO[S.sproTyp][S.sproDicke]||0;
   price += F_SICHER[S.sicher]||0;
   if(S.balkonSchwelle && P.balkonSchwelle[S.balkonSchwelle]) price += P.balkonSchwelle[S.balkonSchwelle].add||0;
-  return { unit: Math.round(price*PREIS_FAKTOR) };
+  return { unit: unserPreis(price) };
 }
 
 // ── SCHIEBETÜR-PREISMODELL (PSK; IGLO-HS = Richtwert) ──
@@ -12056,7 +12058,7 @@ function hstPriceParts(){
   price += F_SICHER[S.sicher]||0;
   if(P.hstSchwelle && P.hstSchwelle[S.hstSchwelle]) price += P.hstSchwelle[S.hstSchwelle].add||0;
   if(P.hstTeilung && P.hstTeilung[S.hstTeilung]) price += P.hstTeilung[S.hstTeilung].add||0;
-  return { unit: Math.round(price*PREIS_FAKTOR) };
+  return { unit: unserPreis(price) };
 }
 
 // ── HAUSTÜR-PREISMODELL (Basis-Matrix Florida-Inox + Glas-Stufe je Modell + Griff) ──
@@ -12085,7 +12087,7 @@ function haustuerPriceParts(){
   if(S.glas==='3fach') price += Math.round(24.4*(b*h/1e6));
   if(S.tuerGriffAussen==='stoss-q45r') price += 100; // Edelstahl-Stoßgriff
   price += F_SICHER[S.sicher]||0;
-  return { unit: Math.round(price*PREIS_FAKTOR) };
+  return { unit: unserPreis(price) };
 }
 
 function calcUnit() {
