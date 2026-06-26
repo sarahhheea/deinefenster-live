@@ -11897,12 +11897,12 @@ function _fluegelFaktor(f){
 }
 // Aufpreis-Tabellen (brutto, vor Faktor)
 const F_PROFIL   = { 'iglo5':0, 'iglo-energy':45.17, 'iglo-edge':104.81 };
-const F_OEFF     = { 'fest':-98.15, 'kipp':-22.58, 'dreh-l':-14.19, 'dreh-r':-14.19, 'dk-l':0, 'dk-r':0 };
+const F_OEFF     = { 'fest':-98, 'kipp':-23, 'dreh-l':-14, 'dreh-r':-14, 'dk-l':0, 'dk-r':0 };
 const F_GLAS     = { '2fach':0, '3fach':28.96 };
 const F_SCHALL   = { 'ohne':0, 'extra':62 };
-const F_SICHERGLAS = { 'kein':0, 'esg':40, 'vsg':61.27 };
-const F_GLASDEKOR= { 'klar':0, 'satinato':31.79, 'chinchilla':31.79, 'master-carre':65.50 };
-const F_GRIFF    = { 'mistral':0, 'nevada':0, 'dublin':0, 'kwadrat':0, 'hoppe':6.66, 'pz-beid':0 };
+const F_SICHERGLAS = { 'kein':0, 'esg':40, 'vsg':61 };
+const F_GLASDEKOR= { 'klar':0, 'satinato':32, 'chinchilla':32, 'master-carre':66 };
+const F_GRIFF    = { 'mistral':0, 'nevada':0, 'dublin':0, 'kwadrat':0, 'hoppe':7, 'pz-beid':0 };
 const F_ROLL     = { 'ohne':0, 'gurt':141.30, 'motor':267.82 };
 const F_SICHER   = { 'wk1':0, 'rc2':90 }; // rc2 = Richtwert, mit Drutex-Programm prüfen
 const F_SPRO     = { 'aufgesetzt':{'27':28,'45':38,'65':48}, 'szr':{'18':13,'26':18,'45':25} };
@@ -11910,16 +11910,16 @@ const F_SPRO     = { 'aufgesetzt':{'27':28,'45':38,'65':48}, 'szr':{'18':13,'26'
 const _PROFIL_PCT = { 'iglo5':0, 'iglo-energy':0.20, 'iglo-edge':0.467 }; // Profil = % vom Basispreis (Edge 1-Punkt-Schätzung)
 function _rolladenDelta(b,h,type){ // breiten-getrieben + kleiner Höhenterm
   if(!type || type==='ohne') return 0;
-  let d = _interp1(b,[700,1000,1400],[108.87,113.93,157.49]) + 0.0391*Math.max(0,h-500);
-  if(type==='motor') d += 126.52; // Motor statt Gurt (~konstant)
+  let d = _interp1(b,[700,1000,1400],[109,114,157]) + 0.04*Math.max(0,h-500);
+  if(type==='motor') d += 127; // Motor statt Gurt (~konstant)
   return d;
 }
 function _glasOptDelta(area){ // Glas-Optionen pro m² (Glasfläche-getrieben; je 1-Punkt-Eichung)
   let d=0;
-  if(S.glas==='3fach') d += 24.1*area;
-  if(S.schall && S.schall!=='ohne') d += 51.7*area;
-  if(S.sicherGlas==='esg') d += 33.3*area; else if(S.sicherGlas==='vsg') d += 51*area;
-  if(S.glasdekor==='master-carre') d += 54.6*area; else if(S.glasdekor && S.glasdekor!=='klar') d += 26.5*area;
+  if(S.glas==='3fach') d += 24*area;
+  if(S.schall && S.schall!=='ohne') d += 52*area;
+  if(S.sicherGlas==='esg') d += 33*area; else if(S.sicherGlas==='vsg') d += 51*area;
+  if(S.glasdekor==='master-carre') d += 55*area; else if(S.glasdekor && S.glasdekor!=='klar') d += 27*area;
   return d;
 }
 function _r2(x){ return Math.round(x*100)/100; }
@@ -11943,11 +11943,11 @@ function fensterPriceParts(){
   const bodyNoColor = frame + prof + oeff;
   const colorAdd = bodyNoColor*farbPct;
   // Glas-Optionen pro m² (größenabhängig)
-  const glas = (S.glas==='3fach') ? 24.1*area : 0;
-  const schall = (S.schall && S.schall!=='ohne') ? 51.7*area : 0;
-  const sicherGlas = (S.sicherGlas==='esg') ? 33.3*area : (S.sicherGlas==='vsg' ? 51*area : 0);
-  const dekor = (S.glasdekor==='master-carre') ? 54.6*area : ((S.glasdekor && S.glasdekor!=='klar') ? 26.5*area : 0);
-  let griff = F_GRIFF[S.griff]||0; if (S.griffLocked) griff += 4.92;
+  const glas = (S.glas==='3fach') ? 24*area : 0;
+  const schall = (S.schall && S.schall!=='ohne') ? 52*area : 0;
+  const sicherGlas = (S.sicherGlas==='esg') ? 33*area : (S.sicherGlas==='vsg' ? 51*area : 0);
+  const dekor = (S.glasdekor==='master-carre') ? 55*area : ((S.glasdekor && S.glasdekor!=='klar') ? 27*area : 0);
+  let griff = F_GRIFF[S.griff]||0; if (S.griffLocked) griff += 5;
   const roll = _rolladenDelta(b,h,S.roll); // Rolladen breiten-getrieben (größenabhängig)
   let spro = 0; if (S.sproTyp && S.sproTyp!=='keine' && F_SPRO[S.sproTyp]) spro = F_SPRO[S.sproTyp][S.sproDicke]||0;
   const sicher = F_SICHER[S.sicher]||0;
@@ -12017,7 +12017,7 @@ function balkonPriceParts(){
   const farbPct=(faCol&&fiCol)?0.15:((faCol||fiCol)?0.125:0);
   let price = (frame+prof)*(1+farbPct);
   price += _glasOptDelta(area); // Glas-Optionen pro m² (3-fach/Schall/Sicherheitsglas/Glasdekor)
-  let griff=F_GRIFF[S.griff]||0; if(S.griffLocked) griff+=4.92; price += griff;
+  let griff=F_GRIFF[S.griff]||0; if(S.griffLocked) griff+=5; price += griff;
   price += _rolladenDelta(b,h,S.roll); // Rolladen breiten-getrieben (größenabhängig)
   if(S.sproTyp && S.sproTyp!=='keine' && F_SPRO[S.sproTyp]) price += F_SPRO[S.sproTyp][S.sproDicke]||0;
   price += F_SICHER[S.sicher]||0;
@@ -12036,7 +12036,7 @@ const _PSK_M=[
 function hstPriceParts(){
   const b=S.bMm||2200, h=S.hMm||2000;
   let frame = _matLookup(b,h,_PSK_B,_PSK_H,_PSK_M);
-  if(S.profil==='iglo-hs') frame *= 1.30; // IGLO-HS Hebe-Schiebe: Faktor (Richtwert, intern prüfen)
+  if(S.profil==='iglo-hs') frame *= 1.744; // IGLO-HS Hebe-Schiebe: Faktor (Richtwert, intern prüfen)
   if(S.profil==='iglo-psk' && S.pskKammer==='iglo-energy') frame += 45; // Energy-Kammer (Schätzung wie Fenster)
   const faCol=S.fa&&S.fa!=='weiss', fiCol=S.fi&&S.fi!=='weiss';
   const farbPct=(faCol&&fiCol)?0.11:((faCol||fiCol)?0.092:0); // PSK-Farbe ~9,2% einseitig
@@ -12061,12 +12061,12 @@ const _HT_M=[
 ];
 // Modell-Aufschlag ggü. Florida-Basis (Glas-Stufe, ~konstant; Zuordnung nach Glasanteil — Näherung)
 const _HT_MODELL={
-  'vollglas-inox':-813.02,                                                   // Vollglas = günstigste Stufe
+  'vollglas-inox':-813,                                                   // Vollglas = günstigste Stufe
   'florida-lr-inox':0,'montana-1-inox':0,'montana-2-lr-inox':0,             // Dekor-Basis (wenig Glas)
-  'montana-3-lr-inox':90.34,'ohio-inox':90.34,'colorado-inox':90.34,        // Dekor mehr Glas
-  'alaska-1-inox':90.34,'alaska-2-inox':90.34,'nebraska-lcr-inox':90.34,
-  'pennsylvania-1-inox':90.34,'pennsylvania-2-lr-inox':90.34,'pennsylvania-3-lr-inox':90.34,
-  'texas-c-inox':90.34,'texas-lr-inox':90.34,
+  'montana-3-lr-inox':90,'ohio-inox':90,'colorado-inox':90,        // Dekor mehr Glas
+  'alaska-1-inox':90,'alaska-2-inox':90,'nebraska-lcr-inox':90,
+  'pennsylvania-1-inox':90,'pennsylvania-2-lr-inox':90,'pennsylvania-3-lr-inox':90,
+  'texas-c-inox':90,'texas-lr-inox':90,
 };
 function haustuerPriceParts(){
   const b=S.bMm||1000, h=S.hMm||2100;
@@ -12076,7 +12076,7 @@ function haustuerPriceParts(){
   const farbPct=(faCol&&fiCol)?0.17:((faCol||fiCol)?0.145:0); // Haustür-Farbe ~14,5% einseitig
   let price = frame*(1+farbPct);
   if(S.glas==='3fach') price += Math.round(24.4*(b*h/1e6));
-  if(S.tuerGriffAussen==='stoss-q45r') price += 99.60; // Edelstahl-Stoßgriff
+  if(S.tuerGriffAussen==='stoss-q45r') price += 100; // Edelstahl-Stoßgriff
   price += F_SICHER[S.sicher]||0;
   return { unit: Math.round(price*PREIS_FAKTOR) };
 }
