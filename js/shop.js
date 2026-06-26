@@ -420,23 +420,48 @@ function baueFilterSidebar() {
   addFarbGruppe('Weitere', alleFarben.filter(f => !inGruppen.has(f)).map(farbOption).join(''));
   farbWrap.innerHTML = farbHtml;
 
-  // Eigenschaften (nur die, die mindestens 1 Produkt hat)
+  // Eigenschaften — gruppiert & sortiert (Inhaberin-Wunsch 26.06.2026).
+  // Vorher: eine lange unsortierte Liste, inkl. frei eingetippter Einzeltexte ("Nur Kipp",
+  // "Kein Schlüssel muss aufgebohrt werden" …) → wirkte chaotisch, Flügel ging unter.
+  // Jetzt: klare Themen-Gruppen in fester Reihenfolge (Flügel zuerst), gleiches Muster wie
+  // der Farbe-Block. Frei-Text-Sätze landen nicht mehr in den Filtern (nur saubere Tags).
   const eigWrap = document.getElementById('filterEigenschaften');
   const alleEig = STATE.metadaten.alle_eigenschaften || [];
-  eigWrap.innerHTML = alleEig.map(e => {
-    if (e.startsWith('rc')) return ''; // RC läuft separat (Sicherheit-Block)
-    if (e.endsWith('-verglasung')) return ''; // Verglasung läuft separat
-    if (e.startsWith('farbe-') || e === 'holzdekor') return ''; // Farben laufen im Farbe-Block — nicht in Eigenschaften
-    if (/\d/.test(e)) return ''; // Zahlen-Einträge (z.B. "80 mm Rahmen") gehören nicht in Eigenschaften
-    if (e === 'vermessen') return ''; // läuft im Zustand-Block — keine Doppelung
-    const count = STATE.produkte.filter(p => (p.eigenschaften || []).includes(e)).length;
+  const eigCount = e => STATE.produkte.filter(p => (p.eigenschaften || []).includes(e)).length;
+  const eigOption = (e) => {
+    const count = eigCount(e);
     if (count === 0) return '';
     return `
       <label class="filter-option">
         <span class="flex items-center gap-2"><input type="checkbox" class="check filter-eigenschaft" value="${e}"/><span>${eigenschaftAnzeige(e)}</span></span>
         <span class="count">${count}</span>
       </label>`;
-  }).join('');
+  };
+  const EIG_GRUPPEN = [
+    { titel: 'Flügel',                   werte: ['einfluegelig','zweifluegelig','dreifluegelig','vierfluegelig'] },
+    { titel: 'Aufteilung & Öffnung',     werte: ['dreh-kipp','stulp','pfosten','kaempfer','festverglasung','parallel-schiebe-kipp','hebe-schiebe'] },
+    { titel: 'Bauform',                  werte: ['oberlicht','unterlicht','ober-unter-licht','kellerfenster-typ','rundfenster-typ','rundbogenfenster-typ','stichbogenfenster-typ'] },
+    { titel: 'Sprossen',                 werte: ['sprossen-aufgesetzt','sprossen-innen'] },
+    { titel: 'Rollladen',                werte: ['mit-rollo','rollladen-gurtwickler','rollladen-motor','rollladen-elektrisch'] },
+    { titel: 'Schwelle & Komfort',       werte: ['alu-schwelle','null-schwelle','barrierefrei','kompaktmass'] },
+    { titel: 'Ausstattung & Sicherheit', werte: ['edelstahl-stossgriff','5-fach-verriegelung','beidseitig-abschliessbar','passivhaus-tauglich','einzelstueck'] }
+  ];
+  const gezeigt = new Set();
+  EIG_GRUPPEN.forEach(g => g.werte.forEach(w => gezeigt.add(w)));
+  // „Weitere": nur noch nicht zugeordnete, SAUBERE Tag-artige Eigenschaften (kein Frei-Text-Satz,
+  // keine Zahl, keine Farbe/Verglasung). So verschwindet kein echter neuer Tag, aber Müll bleibt raus.
+  const ausschluss = e => e.startsWith('rc') || e.endsWith('-verglasung') || e.startsWith('farbe-') || e === 'holzdekor' || /\d/.test(e) || e === 'vermessen';
+  const istTagArtig = e => /^[a-zäöüß]+(-[a-zäöüß]+)*$/.test(e) && e.length <= 24;
+  const weitere = alleEig.filter(e => !gezeigt.has(e) && !ausschluss(e) && istTagArtig(e) && eigCount(e) > 0);
+  let eigHtml = '', ersteEigGruppe = true;
+  const addEigGruppe = (titel, opts) => {
+    if (!opts) return; // leere Gruppe komplett überspringen
+    eigHtml += `<div class="filter-block-title" style="font-size:10px;opacity:.7;margin:${ersteEigGruppe ? '0' : '12px'} 0 6px">${titel}</div>` + opts;
+    ersteEigGruppe = false;
+  };
+  EIG_GRUPPEN.forEach(g => addEigGruppe(g.titel, g.werte.map(eigOption).join('')));
+  addEigGruppe('Weitere', weitere.map(eigOption).join(''));
+  eigWrap.innerHTML = eigHtml;
 
   // Counts für Verglasung, RC, Zustand, Größe, Sonderpreis, Export (statisch im HTML)
   setCountAttr('zustand-neu', STATE.produkte.filter(p => _asArr(p.zustand).includes('neu')).length);
