@@ -3812,7 +3812,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
 
     <div class="hcard" onclick="heroSelectProd('kunststoff')">
       <div class="hcard-name hcard-name-top">Kunststofffenster</div>
-      <div style="text-align:center;color:#225eaa;font-weight:800;font-size:14.5px;margin-top:-2px;line-height:1.2">ab 79 €<span style="font-weight:600;color:#7a8699;font-size:11px"> · nach Maß, inkl. MwSt</span></div>
+      <div class="ab-preis" style="text-align:center;color:#225eaa;font-weight:800;font-size:14.5px;margin-top:-2px;line-height:1.2">ab 79 €<span style="font-weight:600;color:#7a8699;font-size:11px"> · nach Maß, inkl. MwSt</span></div>
       <div class="hcard-img-wrap">
         <img class="hcard-img" src="img/karten/fenster-weiss.webp?v=20260608u" alt="Kunststofffenster" loading="eager">
       </div>
@@ -3826,7 +3826,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
 
     <div class="hcard" onclick="heroSelectProd('balkontuer')">
       <div class="hcard-name hcard-name-top">Balkontür</div>
-      <div style="text-align:center;color:#225eaa;font-weight:800;font-size:14.5px;margin-top:-2px;line-height:1.2">ab 266 €<span style="font-weight:600;color:#7a8699;font-size:11px"> · nach Maß, inkl. MwSt</span></div>
+      <div class="ab-preis" style="text-align:center;color:#225eaa;font-weight:800;font-size:14.5px;margin-top:-2px;line-height:1.2">ab 266 €<span style="font-weight:600;color:#7a8699;font-size:11px"> · nach Maß, inkl. MwSt</span></div>
       <div class="hcard-img-wrap">
         <img class="hcard-img" src="img/karten/balkontuer-weiss.webp?v=20260612c" alt="Balkontür" loading="eager">
       </div>
@@ -3840,7 +3840,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
 
     <div class="hcard" onclick="heroSelectProd('haustuere')">
       <div class="hcard-name hcard-name-top">Haustür</div>
-      <div style="text-align:center;color:#225eaa;font-weight:800;font-size:14.5px;margin-top:-2px;line-height:1.2">ab 850 €<span style="font-weight:600;color:#7a8699;font-size:11px"> · Vollglas; Dekor ab ~1.640 €</span></div>
+      <div class="ab-preis" style="text-align:center;color:#225eaa;font-weight:800;font-size:14.5px;margin-top:-2px;line-height:1.2">ab 850 €<span style="font-weight:600;color:#7a8699;font-size:11px"> · Vollglas; Dekor ab ~1.640 €</span></div>
       <div class="hcard-img-wrap">
         <img class="hcard-img" src="img/karten/haustuer-weiss.webp?v=20260612h" alt="Haustür" loading="eager">
       </div>
@@ -3854,7 +3854,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
 
     <div class="hcard" onclick="heroSelectProd('hst')">
       <div class="hcard-name hcard-name-top">Schiebetür</div>
-      <div style="text-align:center;color:#225eaa;font-weight:800;font-size:14.5px;margin-top:-2px;line-height:1.2">ab 1.407 €<span style="font-weight:600;color:#7a8699;font-size:11px"> · PSK, 3-fach, nach Maß</span></div>
+      <div class="ab-preis" style="text-align:center;color:#225eaa;font-weight:800;font-size:14.5px;margin-top:-2px;line-height:1.2">ab 1.407 €<span style="font-weight:600;color:#7a8699;font-size:11px"> · PSK, 3-fach, nach Maß</span></div>
       <div class="hcard-img-wrap">
         <img class="hcard-img" src="img/karten/hst-weiss.webp?v=20260612i" alt="Schiebetür" loading="eager">
       </div>
@@ -7865,7 +7865,7 @@ function wizRenderAngebot(){
       +'</div>';
     var _cunit=opts.current?((typeof calcUnit==='function')?calcUnit():null):((typeof opts.unit==='number')?opts.unit:null);
     var _csub=(_cunit!=null)?_r2(_cunit*qty):null;
-    var _priceHtml=(_csub!=null)?('<div style="text-align:right;margin-bottom:7px"><div style="font-size:16px;font-weight:800;color:#225eaa;line-height:1.1">'+fmt(_csub)+'</div>'+((qty>1)?('<div style="font-size:11px;color:#7a8699">Einzelpreis '+fmt(_cunit)+'</div>'):'')+'<div style="font-size:10px;color:#9aa6b8">inkl. MwSt</div></div>'):'';
+    var _priceHtml=(SHOW_PRICES && _csub!=null)?('<div style="text-align:right;margin-bottom:7px"><div style="font-size:16px;font-weight:800;color:#225eaa;line-height:1.1">'+fmt(_csub)+'</div>'+((qty>1)?('<div style="font-size:11px;color:#7a8699">Einzelpreis '+fmt(_cunit)+'</div>'):'')+'<div style="font-size:10px;color:#9aa6b8">inkl. MwSt</div></div>'):'';
     var editClick=opts.current?'wizGo(0)':('wizEditItem(\''+opts.id+'\')');
     var delClick=opts.current?'wizRemoveCurrent()':('wizCartRemove(\''+opts.id+'\')');
     return '<div class="wiz-ocard'+(opts.current?' is-current':'')+'">'
@@ -7904,7 +7904,7 @@ function wizRenderAngebot(){
   var _ovDi=orderDelivery();
   var _ovShip=_ovDi.deliverable?(_ovDi.cost||0):0;
   var _ovLief=_ovDi.deliverable?(_ovDi.hasHS?'300 €':(_ovDi.cost===0?'kostenlos':fmt(_ovDi.cost))):'Abholung im Lager';
-  h+='<div style="margin-top:16px;background:#f7f9fd;border:1px solid #dfe5ee;border-radius:14px;padding:15px 17px">'
+  if(SHOW_PRICES) h+='<div style="margin-top:16px;background:#f7f9fd;border:1px solid #dfe5ee;border-radius:14px;padding:15px 17px">'
     +'<div style="display:flex;justify-content:space-between;font-size:14px;color:#5a6678;padding:3px 0"><span>Zwischensumme</span><span>'+fmt(_ovSum)+'</span></div>'
     +'<div style="display:flex;justify-content:space-between;font-size:14px;color:#5a6678;padding:3px 0"><span>Lieferung</span><span>'+_ovLief+'</span></div>'
     +'<div style="display:flex;justify-content:space-between;font-size:19px;font-weight:800;color:#1a2942;padding:8px 0 0;border-top:1px solid #dfe5ee;margin-top:6px"><span>Gesamtpreis</span><span>'+fmt(_ovSum+_ovShip)+'</span></div>'
@@ -8476,7 +8476,7 @@ function wizUpCfgList(){
   else if(S.prod==='haustuere' && typeof haustuerPriceParts==='function'){ _pp=haustuerPriceParts(); _plabel=' / Haustür'; }
   var _qn=S.qty||1;
   var _noun=(S.prod==='kunststoff')?'Fenster':(S.prod==='balkontuer')?(_qn>1?'Balkontüren':'Balkontür'):(S.prod==='hst')?(_qn>1?'Schiebetüren':'Schiebetür'):(S.prod==='haustuere')?(_qn>1?'Haustüren':'Haustür'):'Stück';
-  if(_pp){
+  if(_pp && SHOW_PRICES){
     try{
       _priceHtml='<div class="wiz-pc-price" style="margin-top:12px;padding-top:11px;border-top:1px solid rgba(26,41,66,0.12);text-align:center">'
         +'<div style="font-size:27px;font-weight:800;color:#225eaa;line-height:1.05;font-family:\'Plus Jakarta Sans\',sans-serif">'+((_qn>1)?fmt(_r2(_pp.unit*_qn)):fmt(_pp.unit))+'<span style="font-size:13px;font-weight:600;color:#5a6678">'+((_qn>1)?'':_plabel)+'</span></div>'
@@ -8492,7 +8492,7 @@ function wizUpCfgList(){
     var _mp=document.getElementById('wiz-price');
     var _stepKey=(typeof WIZ_STEPS!=='undefined'&&WIZ_STEPS[wizIdx])?WIZ_STEPS[wizIdx].key:'';
     if(_mp){
-      if(_pp && _stepKey!=='angebot'){
+      if(SHOW_PRICES && _pp && _stepKey!=='angebot'){
         var _mbig=(_qn>1)?fmt(_r2(_pp.unit*_qn)):fmt(_pp.unit);
         var _mlab=(_qn>1)?('Gesamtpreis für '+_qn+' '+_noun+' · Einzelpreis '+fmt(_pp.unit)):(_plabel+' · inkl. MwSt');
         _mp.innerHTML='<span style="font-size:18px;font-weight:800;color:#225eaa">'+_mbig+'</span> <span style="font-size:11px;font-weight:600;color:#7a8699">'+_mlab+'</span>';
@@ -11845,6 +11845,7 @@ function pickColor(el, key) {
 // Schritt; Farbe prozentual; ein globaler Preis-Faktor.
 // ══════════════════════════════════════════════════════════════════
 const PREIS_FAKTOR = 0.97; // interner Kalkulationsfaktor
+const SHOW_PRICES = false; // PREISE LIVE AUS — erst lokal korrigieren, dann auf true
 // Grundpreis brutto (1-Flügel DrehKipp, Iglo5 Classic, weiss, 2-fach), monoton
 const _FMAT_B = [450,600,800,1000,1200,1400,1500];
 const _FMAT_H = [400,600,800,1000,1200,1400,1700];
@@ -12173,7 +12174,7 @@ function upSidebar() {
     const gesamt = _r2(fp.unit*S.qty + ship);
     const elT=document.getElementById('sb-total');
     if (elT) elT.innerHTML = fmt(fp.unit)+' / Fenster<br><span style="font-size:0.78em;font-weight:600;opacity:.85">'+(S.qty>1?((_odi.deliverable?'Gesamt inkl. Lieferung: ':'Gesamt (Abholung): ')+fmt(gesamt)):('inkl. MwSt'+(_odi.deliverable?' · zzgl. Lieferung':' · Abholung im Lager')))+'</span>';
-    const box=document.getElementById('conf-price-box'); if(box) box.style.setProperty('display','block','important');
+    const box=document.getElementById('conf-price-box'); if(box && SHOW_PRICES) box.style.setProperty('display','block','important');
     const mTotal=document.getElementById('m-total'); if(mTotal) mTotal.textContent=fmt(fp.unit);
     const mQty=document.getElementById('m-qty'); if(mQty) mQty.textContent=(S.qty>1)?'× '+S.qty:'';
     const qb=document.getElementById('sb-qty-badge'); if(qb){ if(S.qty>1){qb.textContent='× '+S.qty;qb.style.display='inline-block';} else qb.style.display='none'; }
@@ -16963,12 +16964,12 @@ function customerDetailsHtml(items,sum){
       if(!val||val==='–'||val==='Ohne'||val==='Kein Rolladen')return '';
       return '<tr><td style="padding:2px 14px 2px 0;color:#8a8170;font-size:13px;white-space:nowrap;vertical-align:top;">'+esc(label)+'</td><td style="padding:2px 0;color:#1a2336;font-size:13px;">'+esc(val)+'</td></tr>';
     }).join('');
-    var priceRow = (unit!=null)?('<tr><td style="padding:6px 14px 2px 0;color:#8a8170;font-size:13px;white-space:nowrap;vertical-align:top;">Richtpreis</td><td style="padding:6px 0 2px;color:#1a2336;font-size:13px;font-weight:700;">'+eur(unit)+(qty>1?(' × '+qty+' = '+eur(unit*qty)):'')+' <span style="font-weight:400;color:#8a8170;">inkl. MwSt</span></td></tr>'):'';
+    var priceRow = (SHOW_PRICES && unit!=null)?('<tr><td style="padding:6px 14px 2px 0;color:#8a8170;font-size:13px;white-space:nowrap;vertical-align:top;">Richtpreis</td><td style="padding:6px 0 2px;color:#1a2336;font-size:13px;font-weight:700;">'+eur(unit)+(qty>1?(' × '+qty+' = '+eur(unit*qty)):'')+' <span style="font-weight:400;color:#8a8170;">inkl. MwSt</span></td></tr>'):'';
     var head=n>1?('Produkt '+(i+1)+' von '+n+': '+pn+(qty>1?(' · '+qty+'×'):'')):(pn+(qty>1?(' · '+qty+'×'):''));
     return '<div style="margin-top:14px;"><div style="font-family:Georgia,serif;font-size:15px;color:#1a2336;margin-bottom:4px;">'+esc(head)+'</div><table cellpadding="0" cellspacing="0" style="border-collapse:collapse;">'+rows+priceRow+'</table></div>';
   }).join('');
   var summaryHtml='';
-  if(sum){
+  if(sum && SHOW_PRICES){
     summaryHtml='<div style="margin-top:18px;padding-top:13px;border-top:2px solid #e7e0d3;">'
       +'<table cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;">'
       +(n>1?('<tr><td style="padding:2px 0;color:#8a8170;font-size:13px;">Zwischensumme</td><td style="padding:2px 0;color:#1a2336;font-size:13px;text-align:right;">'+eur(sum.orderSub)+'</td></tr>'):'')
@@ -17029,7 +17030,7 @@ function d2submit(e){
     _tp.push('', _multi?('── PRODUKT '+(i+1)+' von '+_allItems.length+' ──'):'KONFIGURATION');
     _tp=_tp.concat(prodDetailLines(it.c));
     var _u=it.unit, _q=it.qty||1;
-    if(_u!=null){ var _pos=_u*_q; _orderSub+=_pos;
+    if(_u!=null && SHOW_PRICES){ var _pos=_u*_q; _orderSub+=_pos;
       _tp.push('Stückpreis:  '+_eur(_u)+' (inkl. MwSt)');
       if(_q>1) _tp.push('Positionspreis: '+_eur(_pos)+' ('+_q+' Stück)');
     }
@@ -17038,7 +17039,7 @@ function d2submit(e){
   var _shipMail=(lieferart==='abholen'||!_dinfo.deliverable)?0:(_dinfo.cost||0);
   var _liefLbl=lieferart==='abholen'?'Abholung im Lager (0 €)':(_dinfo.hasHS?'300 € deutschlandweit':(_dinfo.cost===0?'kostenlos (ab 10 Artikel)':(_dinfo.cost!=null?_eur(_dinfo.cost):'–')));
   var _liefCustomer=lieferart==='abholen'?'Abholung im Lager · kostenlos':(_dinfo.hasHS?'300 € deutschlandweit':(_dinfo.cost===0?'kostenlose Lieferung':(_dinfo.cost!=null?_eur(_dinfo.cost):'—')));
-  _tp.push('','──────────────────────────','Zwischensumme: '+_eur(_orderSub),'Lieferung:     '+_liefLbl,'GESAMTPREIS (inkl. MwSt): '+_eur(_orderSub+_shipMail));
+  if(SHOW_PRICES) _tp.push('','──────────────────────────','Zwischensumme: '+_eur(_orderSub),'Lieferung:     '+_liefLbl,'GESAMTPREIS (inkl. MwSt): '+_eur(_orderSub+_shipMail));
   _tp.push('','Datum:       '+datum);
   if(notiz)_tp.push('','Anmerkungen: '+notiz);
   if(typeof uploadedImages!=='undefined'&&uploadedImages.length)_tp.push('','Fotos beigefügt: '+uploadedImages.length+' ('+uploadedImages.map(function(i){return i.name;}).join(', ')+')');
@@ -17068,7 +17069,7 @@ window.addEventListener('message',ev=>{ if(ev.data&&ev.data.type==='modelMoved')
 <script>
 // Preis-Anzeige nach Init-Settle einmal frisch zeichnen (Start-Richtpreis korrekt), Preis-Logik 24.06.2026
 (function(){ function refresh(){ try{ if(typeof S!=='undefined' && S.prod==='kunststoff' && typeof upSidebar==='function') upSidebar(); }catch(e){} }
-  window.addEventListener('load', function(){ refresh(); setTimeout(refresh, 250); setTimeout(refresh, 700); }); })();
+  window.addEventListener('load', function(){ try{ if(typeof SHOW_PRICES!=='undefined' && !SHOW_PRICES){ document.querySelectorAll('.ab-preis').forEach(function(e){e.style.display='none';}); } }catch(e){} refresh(); setTimeout(refresh, 250); setTimeout(refresh, 700); }); })();
 </script>
 </body>
 </html>
