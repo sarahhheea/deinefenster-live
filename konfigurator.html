@@ -7761,6 +7761,7 @@ const WIZ_PROD_THUMB={ kunststoff:'img/fenster_standard_v3.webp', balkontuer:'im
 let wizLastThumb=null, wizLastThumbProd=null;  // Produkt-Tag: zu welchem Produkt das Bild gehört (Fix 25.06.2026 gegen falsche Warenkorb-Bilder)
 function wizCaptureThumb(){
   try{
+    if((S.prod==='kunststoff'||S.prod==='balkontuer') && typeof renderSVGPrev==='function'){ var _svg=renderSVGPrev('', (typeof previewView!=='undefined'?previewView:'inn')); if(_svg) return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(_svg); }
     var map={kunststoff:'fenster3d-frame',balkontuer:'balkon3d-frame',haustuere:'haus3d-frame',hst:'hst3d-frame'};
     var f=document.getElementById(map[S.prod]); if(!f||!f.contentDocument) return null;
     var c=f.contentDocument.querySelector('canvas'); if(!c||!c.width) return null;
@@ -14345,7 +14346,7 @@ function _renderHaustuer3d(previewView) {
 function updateDimOverlay(){
   var ov=document.getElementById('dim-overlay');
   if(!ov) return;
-  if(!S.prod || !S.bMm || !S.hMm){ ov.style.display='none'; return; }
+  if(!S.prod || !S.bMm || !S.hMm || S.prod==='kunststoff' || S.prod==='balkontuer'){ ov.style.display='none'; return; }
   var hasRoll = S.roll && S.roll!=='ohne';
   var rollH = hasRoll ? (parseInt(S.rollKasten,10)||175) : 0;
   var L=14, R=86, T=11, B=86, col='#225eaa';
@@ -14417,7 +14418,7 @@ function drawPrev() {
       return;
     }
     // FENSTER: 3D-iframe statt SVG-Vorschau (Kunden-Wunsch 16.05.2026)
-    if (S.prod === 'kunststoff') {
+    if (false && S.prod === 'kunststoff') {  /* SVG statt 3D (Kunde 27.06.2026) */
       svgWrap.style.display = 'none';
       if (ph)   ph.style.display   = 'none';
       if (wrap) wrap.style.display = 'none';
@@ -14429,7 +14430,7 @@ function drawPrev() {
       return;
     }
     // BALKONTÜR: eigene 3D-Datei (balkontuer-3d.html) — höher als Fenster, mit Alu-Schwelle
-    if (S.prod === 'balkontuer') {
+    if (false && S.prod === 'balkontuer') {  /* SVG statt 3D */
       svgWrap.style.display = 'none';
       if (ph)   ph.style.display   = 'none';
       if (wrap) wrap.style.display = 'none';
@@ -15493,27 +15494,19 @@ async function submitSkizze(e) {
   }
 
   function rolladenKasten(x, y, w, h, rollSeite, rollTyp) {
-    // Kasten-Körper (Alu-grau)
-    let s = '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="#7a838f" rx="4"/>';
-    // Glanz oben
-    s += '<rect x="'+(x+3)+'" y="'+(y+3)+'" width="'+(w-6)+'" height="'+(h*0.28)+'" rx="3" fill="rgba(255,255,255,0.10)"/>';
-    // Horizontale Lamellenlinien (realistische Dichte)
+    // Panzer in der gewaehlten Panzerfarbe; Fugen/Kanten als transparente Abdunklung (auf jeder Farbe)
+    var pc = (typeof _panzerHex==='function') ? _panzerHex() : '#f1f1ec';
+    let s = '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+pc+'" stroke="rgba(0,0,0,0.22)" stroke-width="1.5" rx="4"/>';
+    s += '<rect x="'+(x+3)+'" y="'+(y+3)+'" width="'+(w-6)+'" height="'+(h*0.26)+'" rx="3" fill="rgba(255,255,255,0.22)"/>';
     const nLines=Math.max(4,Math.round(h/14));
-    for (let i=1;i<nLines;i++) s += '<line x1="'+(x+2)+'" y1="'+(y+i*h/nLines)+'" x2="'+(x+w-2)+'" y2="'+(y+i*h/nLines)+'" stroke="#5d6672" stroke-width="1.5" opacity="0.7"/>';
-    // Abschlussleiste unten
-    s += '<rect x="'+x+'" y="'+(y+h-8)+'" width="'+w+'" height="8" fill="#5d6672"/>';
+    for (let i=1;i<nLines;i++) s += '<line x1="'+(x+2)+'" y1="'+(y+i*h/nLines)+'" x2="'+(x+w-2)+'" y2="'+(y+i*h/nLines)+'" stroke="rgba(0,0,0,0.16)" stroke-width="1.4"/>';
+    s += '<rect x="'+x+'" y="'+(y+h-7)+'" width="'+w+'" height="7" fill="rgba(0,0,0,0.18)"/>';
     if (rollTyp==='gurt') {
-      const gx = rollSeite==='links' ? x+32 : x+w-66;
-      s += '<rect x="'+gx+'" y="'+(y+h*0.16)+'" width="34" height="'+(h*0.68)+'" rx="5" fill="#545e6c" stroke="#404858" stroke-width="1.5"/>';
-      s += '<rect x="'+(gx+10)+'" y="'+(y+h*0.62)+'" width="14" height="'+(h*0.28)+'" rx="2" fill="#3a424e"/>';
-      s += '<circle cx="'+(gx+17)+'" cy="'+(y+h*0.38)+'" r="10" fill="#4a5462" stroke="#3a424e" stroke-width="1.5"/>';
-      s += '<circle cx="'+(gx+17)+'" cy="'+(y+h*0.38)+'" r="5" fill="#363e4a"/>';
+      const gx = rollSeite==='links' ? x+30 : x+w-64;
+      s += '<rect x="'+gx+'" y="'+(y+h*0.18)+'" width="32" height="'+(h*0.64)+'" rx="5" fill="rgba(0,0,0,0.20)"/>';
     } else if (rollTyp==='motor') {
-      const mx = rollSeite==='links' ? x+w*0.14 : x+w*0.72;
-      const mw = w*0.14;
-      s += '<rect x="'+mx+'" y="'+(y+h*0.15)+'" width="'+mw+'" height="'+(h*0.7)+'" rx="6" fill="#4e5864" stroke="#3c4450" stroke-width="1.5"/>';
-      s += '<circle cx="'+(mx+mw/2)+'" cy="'+(y+h*0.45)+'" r="'+(h*0.14)+'" fill="#3c4450" stroke="#2c333e" stroke-width="1.5"/>';
-      s += '<circle cx="'+(mx+mw/2)+'" cy="'+(y+h*0.45)+'" r="'+(h*0.06)+'" fill="#5a6270"/>';
+      const mx = rollSeite==='links' ? x+w*0.16 : x+w*0.74;
+      s += '<circle cx="'+mx+'" cy="'+(y+h*0.5)+'" r="'+(h*0.17)+'" fill="rgba(0,0,0,0.20)"/>';
     }
     return s;
   }
