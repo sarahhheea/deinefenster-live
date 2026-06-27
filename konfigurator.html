@@ -15520,27 +15520,31 @@ async function submitSkizze(e) {
   // Maße fuer Fenster/Balkontuer: Breite unten, Gesamthoehe links, Rollladenkasten-Anteil markiert
   // (Kunde 27.06.2026: Kasten steckt IN der Gesamthoehe, man sieht wie viel er einnimmt).
   function massDims(bMm, hMm, totalH, hasRoll, rollH) {
-    const col='rgba(118,169,250,0.95)', ln='rgba(118,169,250,0.55)';
-    const sz=Math.min(bMm*0.05,40);
+    const col='rgba(34,94,170,0.96)', ln='rgba(34,94,170,0.55)';
+    const sz=Math.min(Math.max(bMm*0.05,26),42);
+    const halo=' paint-order="stroke" stroke="rgba(255,255,255,0.95)" stroke-width="'+(sz*0.22)+'"';
     let s='';
-    const halo=' paint-order="stroke" stroke="rgba(255,255,255,0.92)" stroke-width="'+(sz*0.2)+'"';
     // Breite — Masslinie unten
-    const wy=totalH+32;
-    s+='<line x1="0" y1="'+wy+'" x2="'+bMm+'" y2="'+wy+'" stroke="'+ln+'" stroke-width="2"/>'
-      +'<line x1="0" y1="'+(wy-9)+'" x2="0" y2="'+(wy+9)+'" stroke="'+ln+'" stroke-width="2"/>'
-      +'<line x1="'+bMm+'" y1="'+(wy-9)+'" x2="'+bMm+'" y2="'+(wy+9)+'" stroke="'+ln+'" stroke-width="2"/>'
-      +'<text x="'+(bMm/2)+'" y="'+(wy+sz+2)+'" text-anchor="middle" font-family="Manrope,sans-serif" font-size="'+sz+'" fill="'+col+'" font-weight="700"'+halo+'>'+bMm+' mm</text>';
-    // Gesamthoehe — Masslinie links
-    const hx=-24;
-    s+='<line x1="'+hx+'" y1="0" x2="'+hx+'" y2="'+hMm+'" stroke="'+ln+'" stroke-width="2"/>'
-      +'<line x1="'+(hx-9)+'" y1="0" x2="'+(hx+9)+'" y2="0" stroke="'+ln+'" stroke-width="2"/>'
-      +'<line x1="'+(hx-9)+'" y1="'+hMm+'" x2="'+(hx+9)+'" y2="'+hMm+'" stroke="'+ln+'" stroke-width="2"/>'
-      +'<text x="'+(hx-15)+'" y="'+(hMm/2)+'" text-anchor="middle" transform="rotate(-90 '+(hx-15)+' '+(hMm/2)+')" font-family="Manrope,sans-serif" font-size="'+sz+'" fill="'+col+'" font-weight="700"'+halo+'>'+hMm+' mm</text>';
-    // Kasten-Anteil: Tick an der Grenze + Beschriftung auf dem Band
+    const wy=totalH+30;
+    s+='<line x1="0" y1="'+wy+'" x2="'+bMm+'" y2="'+wy+'" stroke="'+ln+'" stroke-width="2.4"/>'
+      +'<line x1="0" y1="'+(wy-10)+'" x2="0" y2="'+(wy+10)+'" stroke="'+ln+'" stroke-width="2.4"/>'
+      +'<line x1="'+bMm+'" y1="'+(wy-10)+'" x2="'+bMm+'" y2="'+(wy+10)+'" stroke="'+ln+'" stroke-width="2.4"/>'
+      +'<text x="'+(bMm/2)+'" y="'+(wy+sz+4)+'" text-anchor="middle" font-family="Manrope,sans-serif" font-size="'+sz+'" fill="'+col+'" font-weight="800"'+halo+'>'+bMm+' mm</text>';
+    // Gesamthoehe — Masslinie LINKS (volle Hoehe, exakt)
+    const hx=-26;
+    s+='<line x1="'+hx+'" y1="0" x2="'+hx+'" y2="'+hMm+'" stroke="'+ln+'" stroke-width="2.4"/>'
+      +'<line x1="'+(hx-10)+'" y1="0" x2="'+(hx+10)+'" y2="0" stroke="'+ln+'" stroke-width="2.4"/>'
+      +'<line x1="'+(hx-10)+'" y1="'+hMm+'" x2="'+(hx+10)+'" y2="'+hMm+'" stroke="'+ln+'" stroke-width="2.4"/>'
+      +'<text x="'+(hx-16)+'" y="'+(hMm/2)+'" text-anchor="middle" transform="rotate(-90 '+(hx-16)+' '+(hMm/2)+')" font-family="Manrope,sans-serif" font-size="'+sz+'" fill="'+col+'" font-weight="800"'+halo+'>'+hMm+' mm</text>';
+    // Kasten RECHTS — eigener Strich NUR bis zur Kasten-Grenze + 175/215 mm
     if (hasRoll && rollH>0) {
-      s+='<line x1="'+(hx-9)+'" y1="'+rollH+'" x2="'+(hx+9)+'" y2="'+rollH+'" stroke="'+ln+'" stroke-width="2"/>';
-      const ks=Math.min(bMm*0.045, rollH*0.52, 38);
-      s+='<text x="'+(bMm/2)+'" y="'+(rollH/2+ks*0.34)+'" text-anchor="middle" font-family="Manrope,sans-serif" font-size="'+ks+'" fill="#ffffff" font-weight="700" paint-order="stroke" stroke="rgba(0,0,0,0.30)" stroke-width="'+(ks*0.1)+'">Kasten '+rollH+' mm</text>';
+      const rxk=bMm+26, kfs=Math.min(sz, Math.max(rollH*0.5, 22));
+      s+='<line x1="'+rxk+'" y1="0" x2="'+rxk+'" y2="'+rollH+'" stroke="'+ln+'" stroke-width="2.4"/>'
+        +'<line x1="'+(rxk-10)+'" y1="0" x2="'+(rxk+10)+'" y2="0" stroke="'+ln+'" stroke-width="2.4"/>'
+        +'<line x1="'+(rxk-10)+'" y1="'+rollH+'" x2="'+(rxk+10)+'" y2="'+rollH+'" stroke="'+ln+'" stroke-width="2.4"/>'
+        +'<text x="'+(rxk+16)+'" y="'+(rollH/2)+'" text-anchor="middle" transform="rotate(-90 '+(rxk+16)+' '+(rollH/2)+')" font-family="Manrope,sans-serif" font-size="'+kfs+'" fill="'+col+'" font-weight="800"'+halo+'>'+rollH+' mm</text>';
+      const ks=Math.min(bMm*0.05, rollH*0.55, 36);
+      s+='<text x="'+(bMm/2)+'" y="'+(rollH/2+ks*0.34)+'" text-anchor="middle" font-family="Manrope,sans-serif" font-size="'+ks+'" fill="#ffffff" font-weight="800" paint-order="stroke" stroke="rgba(40,48,60,0.5)" stroke-width="'+(ks*0.12)+'">Kasten</text>';
     }
     return s;
   }
