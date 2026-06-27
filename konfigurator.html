@@ -6303,7 +6303,7 @@ const P = {
   // IGLO-HS Schloss-Option (abschließbarer Griff) — nur 2 Auswahlmoeglichkeiten: nein/ja.
   hstSchloss: {
     'ohne':         { name:'Nicht abschließbar', sub:'Standard-Griff', add:0 },
-    'innen-aussen': { name:'Abschließbar', sub:'innen + außen · Zylinder beidseitig', add:0 },
+    'innen-aussen': { name:'Abschließbar', sub:'innen + außen · Zylinder beidseitig', add:59 },
   },
   // PSK-Griff = weißer Hebe-Schiebe-Griff (Schale + Bedienhebel), nur eine Variante. Kundenwunsch 19.06.2026.
   // Eigener Render, ersetzt bei PSK den Muschel-/Schiebegriff (der bleibt nur für IGLO-HS).
@@ -12058,6 +12058,8 @@ function hstPriceParts(){
   if(S.glasdekor && S.glasdekor!=='klar') price += F_GLASDEKOR[S.glasdekor]||0;
   price += F_SICHER[S.sicher]||0;
   if(S.roll && S.roll!=='ohne') price += _hstRolladenDelta(b); // Rolladen (Schiebetür, breiten-getrieben) — fehlte vorher ganz
+  if(P.hstSchloss && P.hstSchloss[S.hstSchloss]) price += P.hstSchloss[S.hstSchloss].add||0; // abschließbar (IGLO-HS) — fehlte vorher
+  if(P.pskGriff && P.pskGriff[S.pskGriff]) price += P.pskGriff[S.pskGriff].add||0; // PSK-Griff-Variante (aktuell 0)
   if(P.hstSchwelle && P.hstSchwelle[S.hstSchwelle]) price += P.hstSchwelle[S.hstSchwelle].add||0;
   if(P.hstTeilung && P.hstTeilung[S.hstTeilung]) price += P.hstTeilung[S.hstTeilung].add||0;
   return { unit: unserPreis(price) };
