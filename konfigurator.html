@@ -8227,9 +8227,13 @@ function pskKippSchiebeCard(v){
   // EIN Bild (psk-rechts, Griff rechts) für beide — "links" wird per scaleX(-1) gespiegelt → Griff links,
   // beide Karten sind dadurch garantiert identisch (kein zweiter, helleren Render). Overlay spiegelt mit.
   var mirCss=mir?';transform:scaleX(-1)':'';
-  var paths='<path d="M660 175 L772 915 L885 175"/><path d="M850 548 L700 548"/><path d="M745 510 L700 548 L745 586"/>';
-  var ov='<svg viewBox="0 0 1100 1100" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%'+mirCss+'" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#fff" stroke-width="16">'+paths+'</g><g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#225eaa" stroke-width="8">'+paths+'</g></svg>';
-  return '<div class="wiz-card'+sel+'" onclick="wizSetHstLauf(\''+v+'\')"><div class="wiz-laufvis wiz-laufvis-psk"><img src="img/karten/hst-fluegel/psk-rechts.webp?v=20260625psk3" alt="'+name+'" loading="lazy" style="'+mirCss.replace(/^;/,'')+'">'+ov+'</div><div class="wiz-cn">'+name+'</div><div class="wiz-csub">'+sub+'</div></div>';
+  // Weißes PSK-Modell (gleiches Bild wie im Profil-Schritt, schöner als der flache Render).
+  // Overlay in Bild-Pixelkoordinaten (viewBox 1024): Kipp-Dreieck (Spitze unten) + Schiebe-Pfeil
+  // sitzen auf dem RECHTEN, bedienbaren Flügel (Mittelpfosten x≈492, Flügelmitte x≈672, Tür y 126–884).
+  // "links" spiegelt Bild + Overlay per scaleX(-1) → Griff/Einzeichnung wandern auf den linken Flügel.
+  var paths='<path d="M588 250 L672 762 L756 250"/><path d="M756 506 L592 506"/><path d="M636 470 L592 506 L636 542"/>';
+  var ov='<svg viewBox="0 0 1024 1024" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%'+mirCss+'" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#fff" stroke-width="15">'+paths+'</g><g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke="#225eaa" stroke-width="7.5">'+paths+'</g></svg>';
+  return '<div class="wiz-card'+sel+'" onclick="wizSetHstLauf(\''+v+'\')"><div class="wiz-laufvis wiz-laufvis-psk"><img src="img/karten/profil/iglo-psk.webp?v=20260627psk4" alt="'+name+'" loading="lazy" style="'+mirCss.replace(/^;/,'')+'">'+ov+'</div><div class="wiz-cn">'+name+'</div><div class="wiz-csub">'+sub+'</div></div>';
 }
 // Iglo HS — Laufrichtung als große Bild-Karten (HebeSchiebe Links/Rechts, Pfeil-Overlay, Ansicht von innen).
 // Gleiches Muster wie pskKippSchiebeCard: Schiebetür-Bild + Pfeil; links gespiegelt → Pfeil zeigt nach rechts.
