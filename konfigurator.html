@@ -15455,6 +15455,34 @@ async function submitSkizze(e) {
     return '<text x="'+cx+'" y="'+y+'" text-anchor="middle" font-family="Manrope,sans-serif" font-size="'+size+'" fill="'+col+'" font-weight="700" opacity="0.85">'+bMm+' \xd7 '+hMm+' mm</text>';
   }
 
+  // Maße fuer Fenster/Balkontuer: Breite unten, Gesamthoehe links, Rollladenkasten-Anteil markiert
+  // (Kunde 27.06.2026: Kasten steckt IN der Gesamthoehe, man sieht wie viel er einnimmt).
+  function massDims(bMm, hMm, totalH, hasRoll, rollH) {
+    const col='rgba(118,169,250,0.95)', ln='rgba(118,169,250,0.55)';
+    const sz=Math.min(bMm*0.05,40);
+    let s='';
+    const halo=' paint-order="stroke" stroke="rgba(255,255,255,0.92)" stroke-width="'+(sz*0.2)+'"';
+    // Breite — Masslinie unten
+    const wy=totalH+32;
+    s+='<line x1="0" y1="'+wy+'" x2="'+bMm+'" y2="'+wy+'" stroke="'+ln+'" stroke-width="2"/>'
+      +'<line x1="0" y1="'+(wy-9)+'" x2="0" y2="'+(wy+9)+'" stroke="'+ln+'" stroke-width="2"/>'
+      +'<line x1="'+bMm+'" y1="'+(wy-9)+'" x2="'+bMm+'" y2="'+(wy+9)+'" stroke="'+ln+'" stroke-width="2"/>'
+      +'<text x="'+(bMm/2)+'" y="'+(wy+sz+2)+'" text-anchor="middle" font-family="Manrope,sans-serif" font-size="'+sz+'" fill="'+col+'" font-weight="700"'+halo+'>'+bMm+' mm</text>';
+    // Gesamthoehe — Masslinie links
+    const hx=-24;
+    s+='<line x1="'+hx+'" y1="0" x2="'+hx+'" y2="'+hMm+'" stroke="'+ln+'" stroke-width="2"/>'
+      +'<line x1="'+(hx-9)+'" y1="0" x2="'+(hx+9)+'" y2="0" stroke="'+ln+'" stroke-width="2"/>'
+      +'<line x1="'+(hx-9)+'" y1="'+hMm+'" x2="'+(hx+9)+'" y2="'+hMm+'" stroke="'+ln+'" stroke-width="2"/>'
+      +'<text x="'+(hx-15)+'" y="'+(hMm/2)+'" text-anchor="middle" transform="rotate(-90 '+(hx-15)+' '+(hMm/2)+')" font-family="Manrope,sans-serif" font-size="'+sz+'" fill="'+col+'" font-weight="700"'+halo+'>'+hMm+' mm</text>';
+    // Kasten-Anteil: Tick an der Grenze + Beschriftung auf dem Band
+    if (hasRoll && rollH>0) {
+      s+='<line x1="'+(hx-9)+'" y1="'+rollH+'" x2="'+(hx+9)+'" y2="'+rollH+'" stroke="'+ln+'" stroke-width="2"/>';
+      const ks=Math.min(bMm*0.045, rollH*0.52, 38);
+      s+='<text x="'+(bMm/2)+'" y="'+(rollH/2+ks*0.34)+'" text-anchor="middle" font-family="Manrope,sans-serif" font-size="'+ks+'" fill="#ffffff" font-weight="700" paint-order="stroke" stroke="rgba(0,0,0,0.30)" stroke-width="'+(ks*0.1)+'">Kasten '+rollH+' mm</text>';
+    }
+    return s;
+  }
+
   function svgDefs(dekor) {
     return '<defs>'+patternDefs(dekor)
       // Scene gradients
@@ -15560,16 +15588,20 @@ async function submitSkizze(e) {
   function drawFenster(S, view) {
     const bMm=S.bMm||1000, hMm=S.hMm||1200, fl=S.fluegel||'1-fluegel';
     const isFenster = S.prod==='kunststoff';
-    const hasRoll=S.roll&&S.roll!=='ohne', rollH=hasRoll?ROLLO_H:0;
+    const hasRoll=S.roll&&S.roll!=='ohne';
+    // Rollladenkasten sitzt INNERHALB der eingegebenen Gesamthoehe (Kunde 27.06.2026):
+    // echte Kasten-mm (175 / ueber Fenster 1750 -> 215), Fenster = Gesamthoehe minus Kasten.
+    const rollH=hasRoll?(parseInt(S.rollKasten,10)||ROLLO_H):0;
+    const winH=hasRoll?Math.max(hMm-rollH,160):hMm;
     const sbH = isFenster ? 46 : 0;  // Fensterbank nur bei Kunststofffenster
-    const totalH = hMm + rollH + sbH;
+    const totalH = hMm + sbH;        // Kasten ist in hMm enthalten, nicht obendrauf
     const fCol=colorOf(view==='aus'?S.fa:S.fi,view==='aus'?'fa':'fi')||'#f4f4f0';
     const fBorder=(fCol==='#f4f4f0'||fCol==='#fdf6e3')?'#c8c8c0':'rgba(0,0,0,0.16)';
     const hasOL=fl.includes('oberlicht')||fl.includes('ober-unter');
     const hasUL=fl.includes('unterlicht')||fl.includes('ober-unter');
     const nFl=parseInt(fl.charAt(0))||1;
-    const OL_H=hasOL?Math.round(hMm*0.20):0, UL_H=hasUL?Math.round(hMm*0.17):0;
-    const MAIN_H=hMm-OL_H-UL_H, wY=rollH;
+    const OL_H=hasOL?Math.round(winH*0.20):0, UL_H=hasUL?Math.round(winH*0.17):0;
+    const MAIN_H=winH-OL_H-UL_H, wY=rollH;
 
     // viewBox mit 18px seitlichem Überhang der Fensterbank + Leibung-Margin
     const LD = 80, vbX = isFenster ? -18 : 0, vbW = bMm + (isFenster ? 36 : 0);
@@ -15579,23 +15611,23 @@ async function submitSkizze(e) {
       +'<rect x="'+lbX+'" y="'+lbY+'" width="'+lbW+'" height="'+lbH+'" fill="url(#wallGrad)"/>'
       +'<rect x="'+lbX+'" y="'+lbY+'" width="'+lbW+'" height="'+lbH+'" fill="url(#floorGrad)"/>'
       +'<rect x="'+lbX+'" y="'+lbY+'" width="'+lbW+'" height="'+lbH+'" fill="url(#lightSpill)"/>'
-      +leibung(0,wY,bMm,hMm,LD);
+      +leibung(0,wY,bMm,winH,LD);
     if (hasRoll) svg+=rolladenKasten(0,0,bMm,rollH,S.rollSeite,S.roll);
     svg+='<g filter="url(#winGlow)">'
-      +'<rect x="0" y="'+wY+'" width="'+bMm+'" height="'+hMm+'" fill="'+fCol+'" rx="3"/>'
-      +'<rect x="0" y="'+wY+'" width="'+bMm+'" height="'+hMm+'" fill="url(#frameLum)" opacity="0.22" rx="3"/>'
-      +'<rect x="0" y="'+wY+'" width="'+bMm+'" height="'+hMm+'" fill="none" stroke="'+fBorder+'" stroke-width="3" rx="3"/>'
+      +'<rect x="0" y="'+wY+'" width="'+bMm+'" height="'+winH+'" fill="'+fCol+'" rx="3"/>'
+      +'<rect x="0" y="'+wY+'" width="'+bMm+'" height="'+winH+'" fill="url(#frameLum)" opacity="0.22" rx="3"/>'
+      +'<rect x="0" y="'+wY+'" width="'+bMm+'" height="'+winH+'" fill="none" stroke="'+fBorder+'" stroke-width="3" rx="3"/>'
       +'</g>'
-      +frameBevel(0, wY, bMm, hMm, 6, OFR);
+      +frameBevel(0, wY, bMm, winH, 6, OFR);
     if (hasOL) {
       const olX=OFR,olY=wY+OFR,olW=bMm-2*OFR,olH2=OL_H-OFR;
       svg+=glassRect(olX,olY,olW,olH2,S.glasdekor)+sprosse(olX,olY,olW,olH2,S.sproTyp,S.sproDicke);
       svg+='<line x1="0" y1="'+(wY+OL_H)+'" x2="'+bMm+'" y2="'+(wY+OL_H)+'" stroke="'+fBorder+'" stroke-width="4"/>';
     }
     if (hasUL) {
-      const ulX=OFR,ulY=wY+hMm-UL_H+4,ulW=bMm-2*OFR,ulH2=UL_H-OFR+4;
+      const ulX=OFR,ulY=wY+winH-UL_H+4,ulW=bMm-2*OFR,ulH2=UL_H-OFR+4;
       svg+=glassRect(ulX,ulY,ulW,ulH2,S.glasdekor)+sprosse(ulX,ulY,ulW,ulH2,S.sproTyp,S.sproDicke);
-      svg+='<line x1="0" y1="'+(wY+hMm-UL_H)+'" x2="'+bMm+'" y2="'+(wY+hMm-UL_H)+'" stroke="'+fBorder+'" stroke-width="3"/>';
+      svg+='<line x1="0" y1="'+(wY+winH-UL_H)+'" x2="'+bMm+'" y2="'+(wY+winH-UL_H)+'" stroke="'+fBorder+'" stroke-width="3"/>';
     }
     const mainY=wY+OFR+OL_H, mainH2=MAIN_H-OFR, sashW=(bMm-2*OFR)/nFl;
     for (let i=0;i<nFl;i++) {
@@ -15605,8 +15637,8 @@ async function submitSkizze(e) {
       if (i>0) svg+='<rect x="'+(sx-6)+'" y="'+mainY+'" width="12" height="'+mainH2+'" fill="'+fCol+'" opacity="0.9"/>';
     }
     // Fensterbank (Kunststofffenster)
-    if (isFenster) svg += fensterbank(bMm, wY, hMm);
-    svg+=massLabel(bMm/2,totalH-10,bMm,hMm,false)+'</svg>';
+    if (isFenster) svg += fensterbank(bMm, wY, winH);
+    svg+=massDims(bMm,hMm,totalH,hasRoll,rollH)+'</svg>';
     return svg;
   }
 
