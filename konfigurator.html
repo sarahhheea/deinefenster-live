@@ -15313,14 +15313,8 @@ async function submitSkizze(e) {
       s += '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+gf+'" opacity="'+go+'"/>';
       s += '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="url(#glBase)"/>';
     } else {
-      // Clear glass — outdoor scene: sky (top 68%) + ground (bottom 32%)
-      const skyH = h * 0.68, gndH = h * 0.32;
-      s += '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+skyH+'" fill="url(#outSky)"/>';
-      s += '<rect x="'+x+'" y="'+(y+skyH)+'" width="'+w+'" height="'+gndH+'" fill="url(#outGround)"/>';
-      // Horizon haze band across sky/ground seam
-      s += '<rect x="'+x+'" y="'+(y+h*0.58)+'" width="'+w+'" height="'+(h*0.20)+'" fill="url(#outHaze)"/>';
-      // Very subtle glass tint
-      s += '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="rgba(200,228,255,0.05)"/>';
+      // Klares Glas — NEUTRAL (kein Himmel/Boden/Sonne), nur dezenter Glas-Verlauf
+      s += '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="url(#glNeutral)"/>';
     }
     // Glass streak texture
     s += '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="url(#glStreak)"/>';
@@ -15557,6 +15551,7 @@ async function submitSkizze(e) {
       +'<radialGradient id="lightSpill" cx="50%" cy="45%" r="60%"><stop offset="0%" stop-color="rgba(255,252,238,0.40)"/><stop offset="40%" stop-color="rgba(255,248,225,0.18)"/><stop offset="70%" stop-color="rgba(240,235,215,0.06)"/><stop offset="100%" stop-color="rgba(0,0,0,0)"/></radialGradient>'
       // Glass sky-to-ground gradient (objectBoundingBox scales to any rect)
       +'<linearGradient id="glBase" x1="0%" y1="0%" x2="6%" y2="100%" gradientUnits="objectBoundingBox"><stop offset="0%" stop-color="#ddf0ff" stop-opacity="0.52"/><stop offset="18%" stop-color="#a8d8f8" stop-opacity="0.26"/><stop offset="52%" stop-color="#6aacdc" stop-opacity="0.09"/><stop offset="100%" stop-color="#1848b0" stop-opacity="0.28"/></linearGradient>'
+      +'<linearGradient id="glNeutral" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#eaf0f4"/><stop offset="48%" stop-color="#dde6ec"/><stop offset="100%" stop-color="#ccd7df"/></linearGradient>'
       // Outdoor scene through glass: sky
       +'<linearGradient id="outSky" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#ddf1ff"/><stop offset="28%" stop-color="#aad6f5"/><stop offset="60%" stop-color="#6cb8e8"/><stop offset="100%" stop-color="#9dd2f0"/></linearGradient>'
       // Outdoor scene through glass: ground
@@ -15621,7 +15616,7 @@ async function submitSkizze(e) {
         else                       s += fensterGriff(x,y,w,h,oeff,S.griff);
       }
       // Scharniere am Flügelrahmen (nur Kunststofffenster, bewegliche Flügel)
-      if (!isFixed && S.prod==='kunststoff') s += fensterScharniere(x,y,w,h,oeff);
+      if (view==='inn' && !isFixed && S.prod==='kunststoff') s += fensterScharniere(x,y,w,h,oeff);
     }
     return s;
   }
