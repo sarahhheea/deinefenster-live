@@ -12057,10 +12057,13 @@ function hstPriceParts(){
   price += F_SICHERGLAS[S.sicherGlas]||0;
   if(S.glasdekor && S.glasdekor!=='klar') price += F_GLASDEKOR[S.glasdekor]||0;
   price += F_SICHER[S.sicher]||0;
+  if(S.roll && S.roll!=='ohne') price += _hstRolladenDelta(b); // Rolladen (Schiebetür, breiten-getrieben) — fehlte vorher ganz
   if(P.hstSchwelle && P.hstSchwelle[S.hstSchwelle]) price += P.hstSchwelle[S.hstSchwelle].add||0;
   if(P.hstTeilung && P.hstTeilung[S.hstTeilung]) price += P.hstTeilung[S.hstTeilung].add||0;
   return { unit: unserPreis(price) };
 }
+// Rolladen-Aufpreis für Schiebetüren (PSK/HS): breiten-getrieben, ~228 € + 0,10 €/mm (an 2 Marktpunkten geeicht: 2500→479, 3500→579)
+function _hstRolladenDelta(b){ return Math.round(228 + 0.10*(Number(b)||2200)); }
 
 // ── HAUSTÜR-PREISMODELL (Basis-Matrix Florida-Inox + Glas-Stufe je Modell + Griff) ──
 const _HT_B=[900,1040,1170], _HT_H=[2000,2200,2400];
