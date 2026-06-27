@@ -642,6 +642,17 @@ function pruefeMassErkennung(text) {
   }
 }
 
+/* ─── Alle Maß-Paare (Breite×Höhe) aus einem Text ziehen ───
+   Für Sammel-Auktionen, wo viele Fenster-Maße im Beschreibungstext untereinander stehen. */
+function parseMasse(text) {
+  const re = /(\d{3,4})\s*[x×*]\s*(\d{3,4})/gi;
+  const out = []; let m;
+  while ((m = re.exec(text)) !== null) {
+    out.push([parseInt(m[1], 10), parseInt(m[2], 10)]);
+  }
+  return out;
+}
+
 /* ─── Filter-/Sort-Logik ─── */
 function gefilterteProdukte() {
   const f = STATE.filter;
@@ -679,17 +690,23 @@ function gefilterteProdukte() {
         if (!(p.eigenschaften || []).includes(e)) return false;
       }
     }
-    // Maße mit Toleranz (Fuzzy-Match)
-    const tol = f.toleranz / 100;
-    if (f.breite !== null) {
-      const min = f.breite * (1 - tol);
-      const max = f.breite * (1 + tol);
-      if (p.breite_mm < min || p.breite_mm > max) return false;
-    }
-    if (f.hoehe !== null) {
-      const min = f.hoehe * (1 - tol);
-      const max = f.hoehe * (1 + tol);
-      if (p.hoehe_mm < min || p.hoehe_mm > max) return false;
+    // Maße mit Toleranz (Fuzzy-Match) — strukturierte Hauptmaße ODER Maße irgendwo im Text.
+    // So tauchen auch Sammel-Auktionen auf, deren viele Fenster-Maße nur in der Beschreibung stehen.
+    if (f.breite !== null || f.hoehe !== null) {
+      const tol = f.toleranz / 100;
+      const passt = (val, ziel) => ziel == null || (val >= ziel * (1 - tol) && val <= ziel * (1 + tol));
+      // 1) strukturierte Hauptmaße des Inserats
+      let massOk = passt(p.breite_mm, f.breite) && passt(p.hoehe_mm, f.hoehe) &&
+                   (f.breite === null || p.breite_mm > 0) && (f.hoehe === null || p.hoehe_mm > 0);
+      // 2) jedes Maß-Paar aus Titel + Beschreibung (beide Orientierungen erlaubt)
+      if (!massOk) {
+        const paare = parseMasse((p.titel || '') + ' \n ' + (p.beschreibung || ''));
+        massOk = paare.some(([pb, ph]) =>
+          (passt(pb, f.breite) && passt(ph, f.hoehe)) ||
+          (passt(ph, f.breite) && passt(pb, f.hoehe))
+        );
+      }
+      if (!massOk) return false;
     }
     // Preis
     if (f.preisVon !== null && p.preis_eur < f.preisVon) return false;
