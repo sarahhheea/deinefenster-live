@@ -5711,6 +5711,8 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
     <div id="din-btn-rechts" style="display:none"></div>
     <!-- BILD-VORSCHAU (mit Frame-Box — sb-preview-frame Klasse) -->
     <div id="prev-wrap" class="w-full sb-preview-frame" style="position:relative;width:100%;flex-shrink:0;overflow:hidden">
+      <!-- Maß-Overlay (Breite unten, Hoehe + Kasten rechts) — liegt ueber 3D/Bild (Kunde 27.06.2026) -->
+      <div id="dim-overlay" style="display:none;position:absolute;inset:0;z-index:22;pointer-events:none;font-family:'Manrope',sans-serif"></div>
       <!-- 3D-Interaktivitäts-Hinweis (unten zentriert, nur bei aktiver 3D-Vorschau sichtbar)
            interner Hinweis.05.2026: produkt-spezifischer Text + dezenter Maus-Bob -->
       <div id="prev-3d-hint" style="display:none;position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:20;background:rgba(8,14,28,0.85);backdrop-filter:blur(10px);border:1px solid rgba(118,169,250,0.32);color:rgba(232,238,255,0.96);font-family:'Manrope',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.01em;padding:8px 14px;border-radius:999px;box-shadow:0 6px 18px rgba(0,0,0,0.45);pointer-events:auto;align-items:center;gap:9px;white-space:nowrap">
@@ -14307,6 +14309,40 @@ function _renderHaustuer3d(previewView) {
 }
 // ─────────────────────────────────────────────────────────────
 
+// Maß-Overlay ueber der 3D-Vorschau: Breite unten, Gesamthoehe rechts, Kasten-Grenze markiert.
+// Prozent-Rahmen L/R/T/B = wo das Produkt im Vorschau-Frame sitzt (kalibrierbar).
+function updateDimOverlay(){
+  var ov=document.getElementById('dim-overlay');
+  if(!ov) return;
+  if(!S.prod || !S.bMm || !S.hMm){ ov.style.display='none'; return; }
+  var hasRoll = S.roll && S.roll!=='ohne';
+  var rollH = hasRoll ? (parseInt(S.rollKasten,10)||175) : 0;
+  var L=14, R=86, T=11, B=86, col='#225eaa';
+  var seg=function(css){ return '<div style="position:absolute;background:'+col+';'+css+'"></div>'; };
+  var lab=function(x,y,t,rot){ return '<div style="position:absolute;left:'+x+'%;top:'+y+'%;transform:translate(-50%,-50%)'+(rot?' rotate(-90deg)':'')+';color:'+col+';font-weight:800;font-size:13px;letter-spacing:.01em;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff,0 0 2px #fff;white-space:nowrap">'+t+'</div>'; };
+  var h='';
+  // Breite unten
+  var by=B+5;
+  h+=seg('left:'+L+'%;width:'+(R-L)+'%;top:'+by+'%;height:2px;');
+  h+=seg('left:'+L+'%;top:'+(by-1.4)+'%;width:2px;height:2.8%;');
+  h+=seg('left:'+R+'%;top:'+(by-1.4)+'%;width:2px;height:2.8%;');
+  h+=lab((L+R)/2, by+4.2, S.bMm+' mm', false);
+  // Gesamthoehe rechts
+  var rx=R+5;
+  h+=seg('left:'+rx+'%;top:'+T+'%;height:'+(B-T)+'%;width:2px;');
+  h+=seg('left:'+(rx-1.4)+'%;top:'+T+'%;width:2.8%;height:2px;');
+  h+=seg('left:'+(rx-1.4)+'%;top:'+B+'%;width:2.8%;height:2px;');
+  h+=lab(rx+4.5, (T+B)/2, S.hMm+' mm', true);
+  // Kasten-Grenze + Beschriftung
+  if(hasRoll && rollH>0){
+    var ky=T+(rollH/S.hMm)*(B-T);
+    h+=seg('left:'+(rx-1.4)+'%;top:'+ky+'%;width:2.8%;height:2px;');
+    h+=lab((L+R)/2, T+(rollH/S.hMm)*(B-T)/2, 'Kasten', false);
+  }
+  ov.innerHTML=h;
+  ov.style.display='block';
+}
+
 function drawPrev() {
   const imgEl = document.getElementById('vorschau-bild');
   const svgEl = document.getElementById('overlay-svg');
@@ -14315,6 +14351,7 @@ function drawPrev() {
   if (!imgEl || !svgEl) return;
 
   _updateColorStrip();
+  if (typeof updateDimOverlay === 'function') updateDimOverlay();
 
   // ─── SVG-Vorschau (ersetzt Bilder + 3D komplett) ───────────
   const svgWrap  = document.getElementById('svg-prev-wrap');
