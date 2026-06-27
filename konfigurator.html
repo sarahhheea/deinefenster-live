@@ -11905,7 +11905,8 @@ const F_GLAS     = { '2fach':0, '3fach':28.96 };
 const F_SCHALL   = { 'ohne':0, 'extra':62 };
 const F_SICHERGLAS = { 'kein':0, 'esg':40, 'vsg':61 };
 const F_GLASDEKOR= { 'klar':0, 'satinato':32, 'chinchilla':32, 'master-carre':66 };
-const F_GRIFF    = { 'mistral':0, 'nevada':0, 'dublin':0, 'kwadrat':0, 'hoppe':7, 'pz-beid':0 };
+const F_GRIFF    = { 'mistral':0, 'nevada':0, 'dublin':0, 'kwadrat':0, 'hoppe':15, 'pz-beid':250 };
+function _griffLockAdd(){ return (S.griffColor && S.griffColor!=='weiss') ? 14 : 11; } // abschließbarer Zylinder: weiß 11 €, farbig 14 €
 const F_ROLL     = { 'ohne':0, 'gurt':141.30, 'motor':267.82 };
 const F_SICHER   = { 'wk1':0, 'rc2':90 }; // rc2 = Richtwert, mit Drutex-Programm prüfen
 const F_SPRO     = { 'aufgesetzt':{'27':28,'45':38,'65':48}, 'szr':{'18':13,'26':18,'45':25} };
@@ -11950,7 +11951,7 @@ function fensterPriceParts(){
   const schall = (S.schall && S.schall!=='ohne') ? 52*area : 0;
   const sicherGlas = (S.sicherGlas==='esg') ? 33*area : (S.sicherGlas==='vsg' ? 51*area : 0);
   const dekor = (S.glasdekor==='master-carre') ? 55*area : ((S.glasdekor && S.glasdekor!=='klar') ? 27*area : 0);
-  let griff = F_GRIFF[S.griff]||0; if (S.griffLocked) griff += 5;
+  let griff = F_GRIFF[S.griff]||0; if (S.griffLocked) griff += _griffLockAdd();
   const roll = _rolladenDelta(b,h,S.roll); // Rolladen breiten-getrieben (größenabhängig)
   let spro = 0; if (S.sproTyp && S.sproTyp!=='keine' && F_SPRO[S.sproTyp]) spro = F_SPRO[S.sproTyp][S.sproDicke]||0;
   const sicher = F_SICHER[S.sicher]||0;
@@ -12020,7 +12021,7 @@ function balkonPriceParts(){
   const farbPct=(faCol&&fiCol)?0.15:((faCol||fiCol)?0.125:0);
   let price = (frame+prof)*(1+farbPct);
   price += _glasOptDelta(area); // Glas-Optionen pro m² (3-fach/Schall/Sicherheitsglas/Glasdekor)
-  let griff=F_GRIFF[S.griff]||0; if(S.griffLocked) griff+=5; price += griff;
+  let griff=F_GRIFF[S.griff]||0; if(S.griffLocked) griff+=_griffLockAdd(); price += griff;
   price += _rolladenDelta(b,h,S.roll); // Rolladen breiten-getrieben (größenabhängig)
   if(S.sproTyp && S.sproTyp!=='keine' && F_SPRO[S.sproTyp]) price += F_SPRO[S.sproTyp][S.sproDicke]||0;
   price += F_SICHER[S.sicher]||0;
