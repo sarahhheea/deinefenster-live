@@ -7724,7 +7724,7 @@ function wizRenderKontakt(){
   return '<form class="wiz-kform kform-wide" id="wiz-anfrage-form" onsubmit="return false" novalidate>'+
     '<div class="kf-row"><div><label class="fl" for="d2-fn">Name *</label><input class="inp" type="text" id="d2-fn" autocomplete="name"></div>'+
     '<div><label class="fl" for="d2-fe">E-Mail *</label><input class="inp" type="email" id="d2-fe" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false"></div>'+
-    '<div><label class="fl" for="d2-ft">Telefon</label><input class="inp" type="tel" id="d2-ft" inputmode="tel" autocomplete="tel"></div></div>'+
+    '<div><label class="fl" for="d2-ft">Telefon *</label><input class="inp" type="tel" id="d2-ft" inputmode="tel" autocomplete="tel" required></div></div>'+
     '<div><label class="fl">Lieferung oder Abholung?</label><div class="wiz-kf-deliv">'+
       (_dinfo.deliverable?('<button type="button" id="lf-liefer" class="wiz-deliv'+(la==="liefern"?" sel":"")+'" onclick="wizSetLieferart(\'liefern\')"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 3h15v13H1zM16 8h4l3 3v5h-7M5.5 19a2 2 0 100-4 2 2 0 000 4zm13 0a2 2 0 100-4 2 2 0 000 4z"/></svg>'+_lieferLabel+'</button>'):'')+
       '<button type="button" id="lf-abhol" class="wiz-deliv'+(la==="abholen"?" sel":"")+'" onclick="wizSetLieferart(\'abholen\')"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10l9-7 9 7v10a1 1 0 01-1 1h-5v-7H9v7H4a1 1 0 01-1-1z"/></svg>Abholung bei uns vor Ort</button>'+
@@ -17096,13 +17096,15 @@ function customerDetailsHtml(items,sum){
 function d2submit(e){
   e.preventDefault();
   const err=document.getElementById('d2-ferr'); const g=id=>(document.getElementById(id)?.value||'').trim();
-  const name=g('d2-fn'),email=g('d2-fe'),ort=g('d2-fo'),dsgvo=document.getElementById('d2-fdsgvo')?.checked;
+  const name=g('d2-fn'),email=g('d2-fe'),ort=g('d2-fo'),tel=g('d2-ft'),dsgvo=document.getElementById('d2-fdsgvo')?.checked;
   err.classList.add('d2hide');
-  if(!name||!email||!dsgvo){ err.textContent='Bitte Name, E-Mail und die Einwilligung (*) ausfüllen.'; err.classList.remove('d2hide'); return false; }
+  if(!name||!email||!tel||!dsgvo){ err.textContent='Bitte Name, E-Mail, Telefon und die Einwilligung (*) ausfüllen.'; err.classList.remove('d2hide'); return false; }
+  // Telefon-Pflicht gegen Fake-Anfragen (Kundenwunsch 26.06.2026): mind. 6 Ziffern verlangen
+  if(tel.replace(/\D/g,'').length<6){ err.textContent='Bitte eine gültige Telefonnummer angeben — wir brauchen sie für Rückfragen zu Ihrem Angebot.'; err.classList.remove('d2hide'); return false; }
   if(!S.prod){ err.textContent='Bitte zuerst ein Produkt wählen.'; err.classList.remove('d2hide'); return false; }
   const btn=document.getElementById('d2-fsub'); if(btn)btn.disabled=true; const _stx=document.getElementById('d2-fsubtxt'); if(_stx)_stx.textContent='Wird gesendet …';
   const _nbtn=document.querySelector('#wiz-nextbtn'); if(_nbtn)_nbtn.disabled=true; const _nbs=document.querySelector('#wiz-nextbtn span'); if(_nbs)_nbs.textContent='Wird gesendet …';
-  const tel=g('d2-ft'),str=g('d2-fst'),notiz=g('d2-fno'),lieferart=(document.getElementById('d2-fliefer')?.value)||'liefern';
+  const str=g('d2-fst'),notiz=g('d2-fno'),lieferart=(document.getElementById('d2-fliefer')?.value)||'liefern';  // tel oben schon deklariert (Pflichtfeld-Check)
   const _dinfo=orderDelivery();
   const _dcostTxt=_dinfo.hasHS?'300 € deutschlandweit':(_dinfo.cost===0?'kostenlos':(_dinfo.cost!=null?_dinfo.cost+' €':''));
   const versandText=lieferart==='abholen'?'Abholung bei uns vor Ort (Lager Brandenburg a.d.H.)':('Lieferung an: '+(ort||'–')+(str?', '+str:'')+(_dcostTxt?(' · Lieferkosten: '+_dcostTxt):''));
