@@ -7776,10 +7776,37 @@ function wizCaptureThumb(){
     if(!found) return null;
     var pad=5; minX=Math.max(0,minX-pad); minY=Math.max(0,minY-pad); maxX=Math.min(w,maxX+pad); maxY=Math.min(h,maxY+pad);
     var cw=maxX-minX, ch=maxY-minY; if(cw<12||ch<12) return null;
-    var out=document.createElement('canvas'); out.width=cw; out.height=ch;
+    // Ausgabe mit Rand rechts/unten fuer die Masse (wie das Vorschau-Overlay)
+    var hasRoll = S.roll && S.roll!=='ohne';
+    var rollH = hasRoll ? (parseInt(S.rollKasten,10)||175) : 0;
+    var fs=Math.max(13, Math.round(cw*0.052));
+    var withDim = !!(S.bMm && S.hMm);
+    var mL=8, mT=8, mR=withDim?Math.round(fs*4.4):8, mB=withDim?Math.round(fs*3.0):8;
+    var ow=cw+mL+mR, oh=ch+mT+mB;
+    var out=document.createElement('canvas'); out.width=ow; out.height=oh;
     var octx=out.getContext('2d');
-    octx.fillStyle='#ffffff'; octx.fillRect(0,0,cw,ch);  // weißer Grund: 3D-Canvas ist jetzt transparent → JPEG sonst schwarz
-    octx.drawImage(c, minX,minY,cw,ch, 0,0,cw,ch);
+    octx.fillStyle='#ffffff'; octx.fillRect(0,0,ow,oh);  // weißer Grund: 3D-Canvas ist transparent → JPEG sonst schwarz
+    octx.drawImage(c, minX,minY,cw,ch, mL,mT,cw,ch);
+    if(withDim){
+      var px=mL, py=mT, pw=cw, ph=ch, t=Math.round(fs*0.45), gap=Math.round(fs*1.1);
+      octx.textAlign='center'; octx.textBaseline='middle'; octx.font='800 '+fs+'px Manrope, Arial, sans-serif';
+      var htxt=function(txt,x,y,fill){ octx.save(); octx.lineJoin='round'; octx.lineWidth=Math.max(3,fs*0.3); octx.strokeStyle='rgba(255,255,255,0.96)'; octx.strokeText(txt,x,y); octx.fillStyle=fill||'#225eaa'; octx.fillText(txt,x,y); octx.restore(); };
+      octx.strokeStyle='#225eaa'; octx.lineWidth=2;
+      // Breite unten
+      var wy=py+ph+gap;
+      octx.beginPath(); octx.moveTo(px,wy); octx.lineTo(px+pw,wy); octx.moveTo(px,wy-t); octx.lineTo(px,wy+t); octx.moveTo(px+pw,wy-t); octx.lineTo(px+pw,wy+t); octx.stroke();
+      htxt(S.bMm+' mm', px+pw/2, wy+fs*0.95);
+      // Hoehe rechts
+      var rx=px+pw+gap;
+      octx.beginPath(); octx.moveTo(rx,py); octx.lineTo(rx,py+ph); octx.moveTo(rx-t,py); octx.lineTo(rx+t,py); octx.moveTo(rx-t,py+ph); octx.lineTo(rx+t,py+ph); octx.stroke();
+      octx.save(); octx.translate(rx+fs*0.95, py+ph/2); octx.rotate(-Math.PI/2); htxt(S.hMm+' mm',0,0); octx.restore();
+      // Kasten-Grenze + Label
+      if(hasRoll && rollH>0){
+        var ky=py+(rollH/S.hMm)*ph;
+        octx.beginPath(); octx.moveTo(rx-t,ky); octx.lineTo(rx+t,ky); octx.stroke();
+        htxt('Kasten', px+pw/2, py+(rollH/S.hMm)*ph/2, '#3a4250');
+      }
+    }
     var d=out.toDataURL('image/jpeg',0.92);
     return (d&&d.length>2000)?d:null;
   }catch(e){ return null; }
