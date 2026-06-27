@@ -9625,11 +9625,12 @@ function enforceGlasRule() {
 }
 
 // Kunde 21.05.2026: Kastenhöhe wird AUTOMATISCH gesetzt (keine UI mehr).
-// Fenster/Balkontür <1750 mm → 175 · ≥1750 mm → 215 · HST immer 225.
+// Fenster/Balkontür: Kasten steckt IN der Gesamthoehe (Konvention A) — 175 solange das
+// Fenster (Glas) <= 1750 bleibt, sonst 215. Fenster = hMm − Kasten; hMm − 175 > 1750 ⇔ hMm > 1925. HST immer 225.
 function autoSetRollKasten() {
   // Schiebetüren: Hebe-Schiebe (HS) = 225 mm, PSK + IGLO Slide = 215 mm
   if (S.prod === 'hst') S.rollKasten = (S.profil === 'iglo-hs') ? '225' : '215';
-  else if ((S.hMm || 0) >= 1750) S.rollKasten = '215';
+  else if ((S.hMm || 0) > 1925) S.rollKasten = '215';  // Glas > 1750 ⇔ Gesamthoehe > 1925
   else S.rollKasten = '175';
   const txt = document.getElementById('roll-kasten-auto-text');
   if (txt) txt.textContent = 'Kastenhöhe ' + S.rollKasten + ' mm';
