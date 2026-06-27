@@ -5725,11 +5725,11 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
         <iframe id="haus3d-frame" src="about:blank" style="width:100%;height:100%;border:none;display:block" allowfullscreen></iframe>
       </div>
       <!-- 3D-Vorschau für Fenster (Drutex Iglo 5) -->
-      <div id="fenster3d-wrap" style="display:none;position:absolute;inset:0;z-index:10;border-radius:var(--r-md);overflow:hidden">
+      <div id="fenster3d-wrap" style="display:none;position:absolute;top:6%;right:13%;bottom:11%;left:13%;z-index:10;border-radius:var(--r-md);overflow:hidden">
         <iframe id="fenster3d-frame" src="about:blank" style="width:100%;height:100%;border:none;display:block" allowfullscreen></iframe>
       </div>
       <!-- 3D-Vorschau für Balkontür (Drutex Iglo 5 Balkontür) -->
-      <div id="balkon3d-wrap" style="display:none;position:absolute;inset:0;z-index:10;border-radius:var(--r-md);overflow:hidden;background:#0a1530 url('img/karten/balkontuer-anthrazit.webp') no-repeat center/contain">
+      <div id="balkon3d-wrap" style="display:none;position:absolute;top:6%;right:13%;bottom:11%;left:13%;z-index:10;border-radius:var(--r-md);overflow:hidden;background:#0a1530 url('img/karten/balkontuer-anthrazit.webp') no-repeat center/contain">
         <iframe id="balkon3d-frame" src="about:blank" style="width:100%;height:100%;border:none;display:block" allowfullscreen></iframe>
       </div>
       <!-- 3D-Vorschau für Hebe-Schiebetür (Drutex IGLO-HS) -->
@@ -14366,10 +14366,13 @@ function updateDimOverlay(_retry){
   if(!S.prod || !S.bMm || !S.hMm){ ov.style.display='none'; return; }
   var hasRoll = S.roll && S.roll!=='ohne';
   var rollH = hasRoll ? (parseInt(S.rollKasten,10)||175) : 0;
-  // echte Produkt-Kanten messen; falls 3D noch nicht da: Default + erneut versuchen
-  var bb=getProd3dBoundsPct(), L,R,T,B;
-  if(bb){ L=bb.l; R=bb.r; T=bb.t; B=bb.b; }
-  else { L=14;R=86;T=12;B=86; if((_retry||0)<8) setTimeout(function(){try{updateDimOverlay((_retry||0)+1);}catch(e){}},500); }
+  // echte Produkt-Kanten messen + auf den Vorschau-Rahmen umrechnen (3D ist eingerueckt, damit Platz fuer Masse bleibt)
+  var bb=getProd3dBoundsPct();
+  var hasM=(S.prod==='kunststoff'||S.prod==='balkontuer');
+  var iL=hasM?13:0, iR=hasM?13:0, iT=hasM?6:0, iB=hasM?11:0;
+  var wW=100-iL-iR, wH=100-iT-iB, L,R,T,B;
+  if(bb){ L=iL+bb.l*wW/100; R=iL+bb.r*wW/100; T=iT+bb.t*wH/100; B=iT+bb.b*wH/100; }
+  else { L=iL+5; R=100-iR-5; T=iT+10; B=100-iB-5; if((_retry||0)<8) setTimeout(function(){try{updateDimOverlay((_retry||0)+1);}catch(e){}},500); }
   var col='#225eaa';
   var seg=function(css){ return '<div style="position:absolute;background:'+col+';'+css+'"></div>'; };
   var lab=function(x,y,t,rot){ return '<div style="position:absolute;left:'+x+'%;top:'+y+'%;transform:translate(-50%,-50%)'+(rot?' rotate(-90deg)':'')+';color:'+col+';font-weight:800;font-size:13px;letter-spacing:.01em;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff,0 0 2px #fff;white-space:nowrap">'+t+'</div>'; };
