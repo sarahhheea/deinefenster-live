@@ -11918,6 +11918,13 @@ const _FESTMAT = [
   [114, 123, 151, 179, 207], // B1400
   [132, 142, 174, 207, 238], // B1700
 ];
+// 3-Flügel-Preistabelle (an Markt-Raster geeicht, Werte ~10 € konservativ → nie über Vergleichswert). Frame ohne Öffnungs-Abzug; oeff bildet die Öffnungsart ab.
+const _3FL_B = [1600,2200,2800,3600], _3FL_H = [1000,1300,1600];
+const _3FL_M = [
+  [543,594,672,776], // H1000
+  [608,665,751,862], // H1300
+  [675,737,831,948], // H1600
+];
 function fensterFestMatrix(b,h){
   if (b>1700) b=1700; if (h>1700) h=1700; if (b<500) b=500; if (h<500) h=500;
   const col=[];
@@ -11972,10 +11979,15 @@ function fensterPriceParts(){
   if (isSingleFest){
     frame = fensterFestMatrix(b,h);            // eigene, günstigere Fest-Kurve (ohne Beschlag)
   } else {
-    // 3-Flügel: additives Modell (Faktor 1,413 + Sockel) bildet die Preiskurve über alle Größen genauer ab als ein fester Faktor (der bei kleinen Maßen zu niedrig war).
-    frame = (String(S.fluegel||'').charAt(0)==='3')
-            ? fensterMatrix(b,h)*(1.413 + (fak - 1.83)) + 155
-            : fensterMatrix(b,h)*fak;            // Rahmen + Flügel
+    // 3-Flügel: eigene Preistabelle (an Markt-Raster geeicht) — fester Faktor lag über die Größen teils drüber/teils weit drunter.
+    if (String(S.fluegel||'').charAt(0)==='3'){
+      let f3 = _matLookup(b,h,_3FL_B,_3FL_H,_3FL_M);
+      if (S.fluegel.indexOf('ober-unter')>=0) f3 *= 1.30;
+      else if (S.fluegel.indexOf('oberlicht')>=0 || S.fluegel.indexOf('unterlicht')>=0) f3 *= 1.15;
+      frame = f3;
+    } else {
+      frame = fensterMatrix(b,h)*fak;            // Rahmen + Flügel
+    }
     ['oeff1','oeff2','oeff3'].slice(0,cnt).forEach(k=>{ if (S[k] && F_OEFF[S[k]]!=null) oeff += F_OEFF[S[k]]; });
   }
   const area = (b/1000)*(h/1000);
