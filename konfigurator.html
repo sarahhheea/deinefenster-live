@@ -11925,6 +11925,18 @@ const _3FL_M = [
   [608,665,751,862], // H1300
   [675,737,831,948], // H1600
 ];
+// 2-Flügel-Preistabellen (an Markt-Raster geeicht). Pfosten (Mittelpfosten) + Stulp getrennt — Stulp ist teurer. Frame ohne Öffnungs-Abzug; oeff bildet die Öffnungsart ab.
+const _2FL_B = [1000,1400,1800,2200], _2FL_H = [900,1300,1600];
+const _2FL_P = [
+  [260,298,351,392], // H900  Pfosten
+  [331,382,445,495], // H1300
+  [373,428,497,553], // H1600
+];
+const _2FL_S = [
+  [282,320,373,415], // H900  Stulp
+  [364,413,477,529], // H1300
+  [412,467,536,594], // H1600
+];
 function fensterFestMatrix(b,h){
   if (b>1700) b=1700; if (h>1700) h=1700; if (b<500) b=500; if (h<500) h=500;
   const col=[];
@@ -11985,8 +11997,15 @@ function fensterPriceParts(){
       if (S.fluegel.indexOf('ober-unter')>=0) f3 *= 1.30;
       else if (S.fluegel.indexOf('oberlicht')>=0 || S.fluegel.indexOf('unterlicht')>=0) f3 *= 1.15;
       frame = f3;
+    } else if (S.fluegel==='stulp'){
+      frame = _matLookup(b,h,_2FL_B,_2FL_H,_2FL_S);   // 2-Flügel Stulp (eigene Tabelle)
+    } else if (String(S.fluegel||'').charAt(0)==='2'){
+      let f2 = _matLookup(b,h,_2FL_B,_2FL_H,_2FL_P);  // 2-Flügel Pfosten (eigene Tabelle)
+      if (S.fluegel.indexOf('ober-unter')>=0) f2 *= 1.30;
+      else if (S.fluegel.indexOf('oberlicht')>=0 || S.fluegel.indexOf('unterlicht')>=0) f2 *= 1.15;
+      frame = f2;
     } else {
-      frame = fensterMatrix(b,h)*fak;            // Rahmen + Flügel
+      frame = fensterMatrix(b,h)*fak;            // 1-Flügel: Rahmen + Flügel
     }
     ['oeff1','oeff2','oeff3'].slice(0,cnt).forEach(k=>{ if (S[k] && F_OEFF[S[k]]!=null) oeff += F_OEFF[S[k]]; });
   }
