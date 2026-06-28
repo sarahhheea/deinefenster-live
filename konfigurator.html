@@ -14400,8 +14400,9 @@ function updateDimOverlay(_retry){
   var seg=function(css){ return '<div style="position:absolute;background:'+col+';'+css+'"></div>'; };
   var lab=function(x,y,t,rot){ return '<div style="position:absolute;left:'+x+'%;top:'+y+'%;transform:translate(-50%,-50%)'+(rot?' rotate(-90deg)':'')+';color:'+col+';font-weight:800;font-size:13px;letter-spacing:.01em;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff,0 0 2px #fff;white-space:nowrap">'+t+'</div>'; };
   var h='';
-  // Sichtbare Kasten-Unterkante im 3D-Modell (feste Proportion); KFRAC ggf. per Screenshot feinjustieren. Label = echte mm.
-  var KFRAC=0.20;
+  // Sichtbare Kasten-Unterkante: im 3D-Modell sitzt der Kasten (Hoehe rollH) OBEN auf dem Fenster (Hoehe hMm-rollH).
+  // Sein Anteil an der sichtbaren Gesamthoehe ist daher exakt rollH/hMm -> Linie endet genau an der Kasten-Unterkante.
+  var KFRAC=(hasRoll&&rollH>0)?(rollH/S.hMm):0;
   var ky=(hasRoll&&rollH>0)?(T+KFRAC*(B-T)):T;
   var winMm=(hasRoll&&rollH>0)?(S.hMm-rollH):S.hMm;
   var lx=L-4, rx=R+4;
