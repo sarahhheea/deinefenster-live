@@ -14388,26 +14388,33 @@ function updateDimOverlay(_retry){
   var seg=function(css){ return '<div style="position:absolute;background:'+col+';'+css+'"></div>'; };
   var lab=function(x,y,t,rot){ return '<div style="position:absolute;left:'+x+'%;top:'+y+'%;transform:translate(-50%,-50%)'+(rot?' rotate(-90deg)':'')+';color:'+col+';font-weight:800;font-size:13px;letter-spacing:.01em;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff,0 0 2px #fff;white-space:nowrap">'+t+'</div>'; };
   var h='';
-  // Breite unten — exakt ueber Produktbreite
-  var by=B+4;
-  h+=seg('left:'+L+'%;width:'+(R-L)+'%;top:'+by+'%;height:2px;');
-  h+=seg('left:'+L+'%;top:'+(by-1.3)+'%;width:2px;height:2.6%;');
-  h+=seg('left:'+(R-0.2)+'%;top:'+(by-1.3)+'%;width:2px;height:2.6%;');
-  h+=lab((L+R)/2, by+4, S.bMm+' mm', false);
-  // Gesamthoehe rechts — exakt von Ober- bis Unterkante
-  var rx=R+4;
-  h+=seg('left:'+rx+'%;top:'+T+'%;height:'+(B-T)+'%;width:2px;');
-  h+=seg('left:'+(rx-1.2)+'%;top:'+T+'%;width:2.6%;height:2px;');
-  h+=seg('left:'+(rx-1.2)+'%;top:'+(B-0.2)+'%;width:2.6%;height:2px;');
-  h+=lab(rx+4.2, (T+B)/2, S.hMm+' mm', true);
-  // Kasten links — Strich NUR bis zur Kasten-Grenze + 175/215 mm
+  // Sichtbare Kasten-Unterkante im 3D-Modell (feste Proportion); KFRAC ggf. per Screenshot feinjustieren. Label = echte mm.
+  var KFRAC=0.20;
+  var ky=(hasRoll&&rollH>0)?(T+KFRAC*(B-T)):T;
+  var winMm=(hasRoll&&rollH>0)?(S.hMm-rollH):S.hMm;
+  var lx=L-4, rx=R+4;
+  // Breite unten
+  h+=seg('left:'+L+'%;width:'+(R-L)+'%;top:'+(B+4)+'%;height:2px;');
+  h+=seg('left:'+L+'%;top:'+(B+2.7)+'%;width:2px;height:2.6%;');
+  h+=seg('left:'+(R-0.2)+'%;top:'+(B+2.7)+'%;width:2px;height:2.6%;');
+  h+=lab((L+R)/2, B+8, S.bMm+' mm', false);
+  // Gesamthoehe LINKS (volle Hoehe)
+  h+=seg('left:'+lx+'%;top:'+T+'%;height:'+(B-T)+'%;width:2px;');
+  h+=seg('left:'+(lx-1.2)+'%;top:'+T+'%;width:2.6%;height:2px;');
+  h+=seg('left:'+(lx-1.2)+'%;top:'+(B-0.2)+'%;width:2.6%;height:2px;');
+  h+=lab(lx-4.2, (T+B)/2, S.hMm+' mm', true);
   if(hasRoll && rollH>0){
-    var ky=T+(rollH/S.hMm)*(B-T), lx=L-4;
-    h+=seg('left:'+lx+'%;top:'+T+'%;height:'+(ky-T)+'%;width:2px;');
-    h+=seg('left:'+(lx-1.2)+'%;top:'+T+'%;width:2.6%;height:2px;');
-    h+=seg('left:'+(lx-1.2)+'%;top:'+ky+'%;width:2.6%;height:2px;');
-    h+=lab(lx-4.2, (T+ky)/2, rollH+' mm', true);
+    // RECHTS oben: Kasten (bis zur sichtbaren Kasten-Grenze) + mm
+    h+=seg('left:'+rx+'%;top:'+T+'%;height:'+(ky-T)+'%;width:2px;');
+    h+=seg('left:'+(rx-1.2)+'%;top:'+T+'%;width:2.6%;height:2px;');
+    h+=seg('left:'+(rx-1.2)+'%;top:'+ky+'%;width:2.6%;height:2px;');
+    h+=lab(rx+4.2, (T+ky)/2, rollH+' mm', true);
     h+=lab((L+R)/2, (T+ky)/2, 'Kasten', false);
+    // RECHTS unten: Fensterhoehe — NUR bis zum Fenster (nicht durch den Kasten) + mm
+    h+=seg('left:'+rx+'%;top:'+ky+'%;height:'+(B-ky)+'%;width:2px;');
+    h+=seg('left:'+(rx-1.2)+'%;top:'+ky+'%;width:2.6%;height:2px;');
+    h+=seg('left:'+(rx-1.2)+'%;top:'+(B-0.2)+'%;width:2.6%;height:2px;');
+    h+=lab(rx+4.2, (ky+B)/2, winMm+' mm', true);
   }
   ov.innerHTML=h;
   ov.style.display='block';
