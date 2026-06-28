@@ -11972,7 +11972,10 @@ function fensterPriceParts(){
   if (isSingleFest){
     frame = fensterFestMatrix(b,h);            // eigene, günstigere Fest-Kurve (ohne Beschlag)
   } else {
-    frame = fensterMatrix(b,h)*fak;            // Rahmen + Flügel
+    // 3-Flügel: additives Modell (Faktor 1,413 + Sockel) bildet die Preiskurve über alle Größen genauer ab als ein fester Faktor (der bei kleinen Maßen zu niedrig war).
+    frame = (String(S.fluegel||'').charAt(0)==='3')
+            ? fensterMatrix(b,h)*(1.413 + (fak - 1.83)) + 155
+            : fensterMatrix(b,h)*fak;            // Rahmen + Flügel
     ['oeff1','oeff2','oeff3'].slice(0,cnt).forEach(k=>{ if (S[k] && F_OEFF[S[k]]!=null) oeff += F_OEFF[S[k]]; });
   }
   const area = (b/1000)*(h/1000);
