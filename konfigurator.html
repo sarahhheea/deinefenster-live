@@ -12093,15 +12093,21 @@ function hstPriceParts(){
   price += F_SICHERGLAS[S.sicherGlas]||0;
   if(S.glasdekor && S.glasdekor!=='klar') price += F_GLASDEKOR[S.glasdekor]||0;
   price += F_SICHER[S.sicher]||0;
-  if(S.roll && S.roll!=='ohne') price += _hstRolladenDelta(b); // Rolladen (Schiebetür, breiten-getrieben) — fehlte vorher ganz
+  if(S.roll && S.roll!=='ohne') price += _hstRolladenDelta(b, S.profil); // Rolladen (Schiebetür, breiten-getrieben)
   if(P.hstSchloss && P.hstSchloss[S.hstSchloss]) price += P.hstSchloss[S.hstSchloss].add||0; // abschließbar (IGLO-HS) — fehlte vorher
   if(P.pskGriff && P.pskGriff[S.pskGriff]) price += P.pskGriff[S.pskGriff].add||0; // PSK-Griff-Variante (aktuell 0)
   if(P.hstSchwelle && P.hstSchwelle[S.hstSchwelle]) price += P.hstSchwelle[S.hstSchwelle].add||0;
   if(P.hstTeilung && P.hstTeilung[S.hstTeilung]) price += P.hstTeilung[S.hstTeilung].add||0;
   return { unit: unserPreis(price) };
 }
-// Rolladen-Aufpreis für Schiebetüren (PSK/HS): breiten-getrieben (~228 € Grundbetrag + 0,10 €/mm Breite)
-function _hstRolladenDelta(b){ return Math.round(228 + 0.10*(Number(b)||2200)); }
+// Rolladen-Aufpreis für Schiebetüren: PSK linear; Hebe-Schiebe einteilig bis ~3,1 m, darüber zweiteilig (Stufe).
+function _hstRolladenDelta(b, profil){
+  b = Number(b)||2200;
+  if(profil==='iglo-hs'){
+    return (b < 3100) ? Math.max(0, Math.round(0.208*b - 30)) : 1370;
+  }
+  return Math.round(228 + 0.10*b);
+}
 
 // ── HAUSTÜR-PREISMODELL (Basis-Matrix Florida-Inox + Glas-Stufe je Modell + Griff) ──
 const _HT_B=[900,1000,1100,1170], _HT_H=[2000,2200,2400];
