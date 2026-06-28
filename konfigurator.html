@@ -7202,7 +7202,7 @@ function heroSelectAnschlag(fluegelKey, idx) {
 function buildVerglasungHero() {
   const g = document.getElementById('vh-grid');
   if (!g) return;
-  const hst = (S.prod === 'hst');
+  const hst = (S.prod === 'hst' && S.profil !== 'iglo-psk');   // PSK darf 2-fach (Kundenwunsch 28.06.2026)
   const opts = [
     { v:'2fach', img:'img/glas-2fach.webp?v=20260608u', name:'2-fach Wärmeschutz',
       spec:'24 mm · Edelgas-Füllung · Standard-Wärmeschutz', dis:hst },
@@ -8252,8 +8252,10 @@ function wizPickBalkonAnschlag1F(idx){ var o=BALKON_ANSCHLAG_1F[idx]; if(!o)retu
 function wizPickBalkonAnschlag(idx){ var o=BALKON_ANSCHLAG_2F[idx]; if(!o)return; S.fluegel='stulp'; S.anschlagIdx=idx; S.oeff1=o.oeff[0]; S.oeff2=o.oeff[1]||null; S.oeff3=null; S.anschlagName=o.name||null; /* BUG-FIX 2026-06-24: KEIN _applyDefaultSashStates('stulp') hier — das setzte cols=1-Default (oeff1='dk-r', oeff2=null) und verwarf die Karten-Wahl, dadurch sass der Griff immer auf derselben Seite statt nach Anschlag. Die oeff-Werte kommen direkt aus der gewaehlten Karte. */ if(typeof previewState!=='undefined')previewState.fluegel=2; if(window._touched){window._touched.add('oeff1');window._touched.add('oeff2');window._touched.add('fluegel');} if(typeof buildOeffSash==='function')buildOeffSash(); if(typeof mkDone==='function')mkDone(4); wizRenderPanel(); }
 function wizPickAnschlag(idx){ S.anschlagIdx=idx; const o=(ANSCHLAG_SETS[S.fluegel]||[])[idx]; if(o){ S.oeff1=o.oeff[0]||null; S.oeff2=o.oeff[1]||null; S.oeff3=o.oeff[2]||null; S.oberlichtOeff=o.ol||null; S.unterlichtOeff=o.ul||null; S.anschlagName=o.name||null; } if(window._touched)window._touched.add('oeff1'); if(typeof buildOeffSash==='function')buildOeffSash(); if(typeof mkDone==='function')mkDone(4); wizRenderPanel(); }
 function wizRenderGlas(){
-  const hst=(S.prod==='hst');
-  const opts=[{v:'2fach',img:'img/glas-2fach.webp',name:'2-fach Wärmeschutz',spec:'24 mm · Edelgas · Standard-Wärmeschutz',dis:hst},{v:'3fach',img:'img/glas-3fach.webp',name:'3-fach Wärmeschutz',spec:'40 mm · Warme Kante · GEG 2024',dis:false}];
+  // 2-fach nur bei der IGLO-HS Hebe-Schiebetür gesperrt (große Flügel → nur 3-fach).
+  // PSK darf 2-fach UND 3-fach (Kundenwunsch 28.06.2026).
+  const lock2=(S.prod==='hst' && S.profil!=='iglo-psk');
+  const opts=[{v:'2fach',img:'img/glas-2fach.webp',name:'2-fach Wärmeschutz',spec:'24 mm · Edelgas · Standard-Wärmeschutz',dis:lock2},{v:'3fach',img:'img/glas-3fach.webp',name:'3-fach Wärmeschutz',spec:'40 mm · Warme Kante · GEG 2024',dis:false}];
   return '<div class="wiz-cards">'+opts.map(function(o){
     return '<div class="wiz-card'+(o.v===S.glas?' sel':'')+(o.dis?' wiz-card-dis':'')+'" '+(o.dis?'':'onclick="wizPickEarly(\'glas\',\''+o.v+'\')"')+'><img src="'+o.img+'?v=20260608u" alt="'+o.name+'" loading="lazy"><div class="wiz-cn">'+o.name+'</div><div class="wiz-csub">'+(o.dis?'Bei Schiebetür nur 3-fach':o.spec)+'</div></div>';
   }).join('')+'</div>';
@@ -9621,7 +9623,7 @@ function enforceGlasRule() {
   const card3 = document.getElementById('glas-3fach');
   const hint  = document.getElementById('glas-hst-hint');
   if (!card2 || !card3) return;
-  if (S.prod === 'hst') {
+  if (S.prod === 'hst' && S.profil !== 'iglo-psk') {
     card2.classList.add('oc-disabled');
     card2.style.opacity = '0.35';
     card2.style.pointerEvents = 'none';
@@ -17022,7 +17024,7 @@ window.openDetailPhase=function(){
   if(!S.bMm)S.bMm=pr.bDef; if(!S.hMm)S.hMm=pr.hDef;
   if(!S.oeff1)S.oeff1=(S.prod==='haustuere')?'dreh-r':'dk-r';
   S.rollKasten=(S.prod==='hst')?'225':(S.rollKasten==='225'?'175':(S.rollKasten||'175'));
-  if(S.prod==='hst'&&S.glas!=='3fach')S.glas='3fach';
+  if(S.prod==='hst'&&S.profil!=='iglo-psk'&&S.glas!=='3fach')S.glas='3fach';
   document.body.classList.add('d2-active');
   document.getElementById('detail2').style.display='flex';
   stepIndex=0;
