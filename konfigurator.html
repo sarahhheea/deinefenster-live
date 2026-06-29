@@ -17281,35 +17281,46 @@ window.addEventListener('message',ev=>{ if(ev.data&&ev.data.type==='modelMoved')
 <!-- ══ KONFIGURATOR-REDESIGN Phase 1: Produktauswahl App-Look (Vorlage übertragen, Mechanik unangetastet) ══ -->
 <style id="konfig-redesign">
 @media (max-width:767px){
-  #prod-hero{ background:#eef2f7 !important; padding:84px 14px 10px !important; }
-  /* Lieferbedingungen kompakt als 3 Chips */
-  #prod-hero .liefer-box{ background:#fff !important; border:1px solid #e3e9f1 !important; border-radius:13px !important; padding:8px 10px !important; margin:0 auto 8px !important; box-shadow:0 2px 10px -6px rgba(20,40,70,.18) !important; max-width:100% !important; }
-  #prod-hero .liefer-title{ font-size:11.5px !important; color:#13233b !important; justify-content:center !important; margin-bottom:5px !important; }
-  #prod-hero .liefer-staffel{ display:flex !important; gap:6px !important; margin:0 !important; }
-  #prod-hero .lf-step{ flex:1 !important; background:#f4f7fb !important; border:0 !important; border-radius:9px !important; padding:5px 3px !important; text-align:center !important; margin:0 !important; min-width:0 !important; }
-  #prod-hero .lf-step--free{ background:#eaf6ee !important; }
+  #prod-hero{ background:#eef2f7 !important; padding:80px 13px 8px !important; }
+
+  /* Lieferung: schlanke Zeile, KEIN Kasten — 3 Stufen mit feinen Trennern */
+  #prod-hero .liefer-box{ background:transparent !important; border:0 !important; box-shadow:none !important; padding:2px 0 6px !important; margin:0 auto 6px !important; max-width:100% !important; }
+  #prod-hero .liefer-title{ font-size:11px !important; color:#5b6b80 !important; font-weight:700 !important; justify-content:center !important; margin-bottom:6px !important; }
+  #prod-hero .liefer-title .ms{ font-size:14px !important; }
+  #prod-hero .liefer-staffel{ display:flex !important; gap:0 !important; justify-content:center !important; margin:0 !important; }
+  #prod-hero .lf-step{ flex:0 1 auto !important; background:transparent !important; border:0 !important; border-right:1px solid #dbe3ee !important; border-radius:0 !important; padding:0 11px !important; text-align:center !important; margin:0 !important; min-width:0 !important; }
+  #prod-hero .lf-step:last-child{ border-right:0 !important; }
   #prod-hero .lf-icon, #prod-hero .lf-badge, #prod-hero .liefer-hints, #prod-hero .lf-text small{ display:none !important; }
-  #prod-hero .lf-menge{ font-size:10px !important; color:#5b6b80 !important; font-weight:800 !important; margin:0 0 1px !important; }
-  #prod-hero .lf-text{ font-size:10px !important; line-height:1.2 !important; color:#13233b !important; font-weight:600 !important; }
+  #prod-hero .lf-menge{ font-size:10.5px !important; color:#5b6b80 !important; font-weight:800 !important; margin:0 0 1px !important; }
+  #prod-hero .lf-text{ font-size:10.5px !important; line-height:1.2 !important; color:#13233b !important; font-weight:700 !important; }
   #prod-hero .lf-step--free .lf-text strong{ color:#15803d !important; }
-  /* App-Grid: 4 Produkte 2×2 */
-  #prod-hero .hero-grid{ grid-template-columns:1fr 1fr !important; gap:11px !important; }
-  #prod-hero .hcard{ background:#fff !important; border:1px solid #e3e9f1 !important; border-radius:18px !important; overflow:visible !important; box-shadow:0 8px 20px -12px rgba(20,40,70,.32) !important; padding:11px 10px 10px !important; text-align:center !important; }
+
+  /* App-Grid: 4 Produkte 2×2, gleichmäßig */
+  #prod-hero .hero-grid{ grid-template-columns:1fr 1fr !important; gap:11px !important; align-items:stretch !important; }
+  #prod-hero .hcard{ display:flex !important; flex-direction:column !important; background:#fff !important; border:1px solid #e3e9f1 !important; border-radius:18px !important; overflow:visible !important; box-shadow:0 8px 20px -12px rgba(20,40,70,.32) !important; padding:11px 10px 10px !important; text-align:center !important; }
   /* Foto rahmenlos & KOMPLETT sichtbar (contain statt cover) */
-  #prod-hero .hcard-img-wrap{ background:transparent !important; aspect-ratio:auto !important; height:104px !important; padding:0 !important; margin:0 !important; overflow:visible !important; border-radius:0 !important; }
+  #prod-hero .hcard-img-wrap{ order:1 !important; background:transparent !important; aspect-ratio:auto !important; height:96px !important; padding:0 !important; margin:0 !important; overflow:visible !important; border-radius:0 !important; }
   #prod-hero .hcard-img{ object-fit:contain !important; width:100% !important; height:100% !important; transform:none !important; }
   #prod-hero .hcard:hover .hcard-img{ transform:none !important; }
-  #prod-hero .hcard-name-top{ font-size:14px !important; font-weight:800 !important; padding:6px 0 0 !important; color:#13233b !important; letter-spacing:-.01em !important; }
-  #prod-hero .ab-preis{ font-size:12.5px !important; margin-top:1px !important; }
-  #prod-hero .ab-preis span{ font-size:10px !important; }
-  /* EIN einheitlicher Primär-Button mit sichtbarem Text */
-  #prod-hero .hcard-info{ padding:0 !important; }
+  #prod-hero .hcard-name-top{ order:2 !important; font-size:13.5px !important; font-weight:800 !important; padding:7px 0 0 !important; color:#13233b !important; letter-spacing:-.01em !important; }
+  /* Preis IMMER 1-zeilig (variabler Zusatz raus, einheitlich "inkl. MwSt") → Karten gleich */
+  #prod-hero .ab-preis{ order:3 !important; font-size:13px !important; margin:1px 0 0 !important; white-space:nowrap !important; }
+  #prod-hero .ab-preis span{ display:none !important; }
+  #prod-hero .ab-preis::after{ content:" · inkl. MwSt" !important; font-weight:600 !important; color:#7a8699 !important; font-size:10px !important; }
+  /* EIN einheitlicher Primär-Button, unten bündig */
+  #prod-hero .hcard-info{ order:4 !important; margin-top:auto !important; padding:0 !important; }
   #prod-hero .hcard-cta{ display:flex !important; align-items:center !important; justify-content:center !important; gap:7px !important; margin-top:9px !important; background:#225eaa !important; color:#fff !important; border-radius:12px !important; padding:11px !important; font-size:13.5px !important; font-weight:800 !important; letter-spacing:.01em !important; text-transform:none !important; box-shadow:0 7px 15px -7px rgba(34,94,170,.55) !important; opacity:1 !important; }
   #prod-hero .hcard-cta span{ font-size:13.5px !important; color:#fff !important; }
   #prod-hero .hcard-cta svg{ color:#fff !important; width:14px !important; height:14px !important; }
+
   /* Kernzusage grün */
   #prod-hero .hero-disclaimer{ background:#eaf6ee !important; color:#15803d !important; border:1px solid #c9e9d5 !important; }
   #prod-hero .hero-disclaimer .ms, #prod-hero .hero-disclaimer .hd-body{ color:#15803d !important; }
+
+  /* NAV: aufgeklapptes Menü HELL statt dunkelblau (zum Rest der Seite passend) */
+  #mobileMenu{ background:#ffffff !important; border-top:1px solid #e3e9f1 !important; box-shadow:0 14px 30px -12px rgba(20,40,70,.3) !important; }
+  #mobileMenu a, #mobileMenu button, #mobileMenu span, #mobileMenu div{ color:#13233b !important; }
+  #mobileMenu a{ border-bottom:1px solid #eef1f6 !important; }
 }
 </style>
 </body>
