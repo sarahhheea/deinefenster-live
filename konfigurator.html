@@ -14192,6 +14192,7 @@ function _renderBalkontuer3d() {
         separator: _separator,
         roll:       S.roll       || 'ohne',
         rollKasten: S.rollKasten || '175',
+        realH:      S.hMm,
         panzerHex: _panzerHex(),
         rollSeite:  S.rollSeite  || 'rechts',
         sproTyp:    S.sproTyp    || 'keine',
@@ -14213,6 +14214,7 @@ function _renderBalkontuer3d() {
         separator: _separator,
         roll:       S.roll       || 'ohne',
         rollKasten: S.rollKasten || '175',
+        realH:      S.hMm,
         panzerHex: _panzerHex(),
         rollSeite:  S.rollSeite  || 'rechts',
         sproTyp:    S.sproTyp    || 'keine',
@@ -14277,7 +14279,7 @@ function _renderFenster3d() {
   // iframe neu laden wenn sich die Quelle ändert (1-Flügel ↔ Multi)
   const _wantsReload = !frame.src.includes(_src3d);
   if (_wantsReload) {
-    frame.src = `/${_src3d}?embed&v=20260623studioJ&bg=light&color=${_ck}&side=${_side}&layout=${_layout}&view=${_view}`;
+    frame.src = `/${_src3d}?embed&v=20260629dim1&bg=light&color=${_ck}&side=${_side}&layout=${_layout}&view=${_view}`;
     frame.onload = () => {
       const cw = frame.contentWindow;
       if (!cw) return;
@@ -14293,6 +14295,7 @@ function _renderFenster3d() {
         unterlicht: _unterlicht,
         roll:       S.roll       || 'ohne',
         rollKasten: S.rollKasten || '175',
+        realH:      S.hMm,
         panzerHex: _panzerHex(),
         rollSeite:  S.rollSeite  || 'rechts',
         sproTyp:    S.sproTyp    || 'keine',
@@ -14317,6 +14320,7 @@ function _renderFenster3d() {
         unterlicht: _unterlicht,
         roll:       S.roll       || 'ohne',
         rollKasten: S.rollKasten || '175',
+        realH:      S.hMm,
         panzerHex: _panzerHex(),
         rollSeite:  S.rollSeite  || 'rechts',
         sproTyp:    S.sproTyp    || 'keine',
@@ -14402,46 +14406,56 @@ function getProd3dBoundsPct(){
   }catch(e){ return null; }
 }
 
+// Das 3D-Modell projiziert seine echten Kanten und schickt sie hierher (exakt statt Pixel-Raten).
+if(!window._dims3dHook){ window._dims3dHook=true;
+  window.addEventListener('message', function(e){
+    var d=e&&e.data; if(d&&d.type==='dims3d'){ d._t=Date.now(); window._dims3d=d;
+      if(typeof updateDimOverlay==='function'){ try{updateDimOverlay();}catch(_){} } }
+  });
+}
 function updateDimOverlay(_retry){
   var ov=document.getElementById('dim-overlay');
   if(!ov) return;
   if(!S.prod || !S.bMm || !S.hMm){ ov.style.display='none'; return; }
   var hasRoll = S.roll && S.roll!=='ohne';
   var rollH = hasRoll ? (parseInt(S.rollKasten,10)||175) : 0;
-  // echte Produkt-Kanten messen + auf den Vorschau-Rahmen umrechnen (3D ist eingerueckt, damit Platz fuer Masse bleibt)
-  var bb=getProd3dBoundsPct();
   var hasM=(S.prod==='kunststoff'||S.prod==='balkontuer');
   var iL=hasM?13:0, iR=hasM?13:0, iT=hasM?6:0, iB=hasM?11:0;
-  var wW=100-iL-iR, wH=100-iT-iB, L,R,T,B;
-  if(bb){ L=iL+bb.l*wW/100; R=iL+bb.r*wW/100; T=iT+bb.t*wH/100; B=iT+bb.b*wH/100; }
-  else { L=iL+5; R=100-iR-5; T=iT+10; B=100-iB-5; if((_retry||0)<8) setTimeout(function(){try{updateDimOverlay((_retry||0)+1);}catch(e){}},500); }
-  // Saubere technische Bemassung wie ein professioneller Konfigurator: Breite UNTEN, Hoehe RECHTS,
-  // Kasten als eigene Mass-Klammer oben-rechts. Duenne Linien, helle Beschriftung, nichts mitten im Produkt.
+  var wW=100-iL-iR, wH=100-iT-iB;
+  // Bevorzugt die exakt projizierten Kanten vom 3D-Modell (nur Fenster meldet sie); sonst Pixel-Scan.
+  var d=(S.prod==='kunststoff') ? window._dims3d : null;
+  if(!d){
+    var bb=getProd3dBoundsPct();
+    if(!bb){ if((_retry||0)<12){ setTimeout(function(){try{updateDimOverlay((_retry||0)+1);}catch(e){}},350); } ov.style.display='none'; return; }
+    var kf=(hasRoll&&rollH>0)?(rollH/S.hMm):0;
+    d={ wLeftX:bb.l, wRightX:bb.r, wBottomY:bb.b, topY:bb.t, seamY:bb.t+kf*(bb.b-bb.t), rightExtentX:bb.r };
+  }
+  var mapX=function(x){return iL + x*wW/100;};
+  var mapY=function(y){return iT + y*wH/100;};
+  var L=mapX(d.wLeftX), R=mapX(d.wRightX);
+  var Bw=mapY(d.wBottomY), Ttop=mapY(d.topY), seam=mapY(d.seamY), rEx=mapX(d.rightExtentX);
+  // Saubere technische Bemassung: Breite UNTEN (Fensterbreite), Gesamthoehe RECHTS (eingegebene Hoehe,
+  // Kasten mit drin), Kasten als eigene Klammer oben-rechts + Label. Duenne Linien, nichts im Produkt.
   var col='#225eaa';
   var seg=function(css){ return '<div style="position:absolute;background:'+col+';'+css+'"></div>'; };
-  var lab=function(x,y,t,rot,strong){ return '<div style="position:absolute;left:'+x+'%;top:'+y+'%;transform:translate(-50%,-50%)'+(rot?' rotate(-90deg)':'')+';color:'+col+';font-weight:'+(strong?800:700)+';font-size:'+(strong?13:12)+'px;letter-spacing:.01em;text-shadow:0 0 3px #fff,0 0 2px #fff,0 0 1px #fff;white-space:nowrap">'+t+'</div>'; };
-  // vertikale Mass-Klammer (Linie + End-Ticks) bei x von y0 bis y1
+  var lab=function(x,y,t,rot,strong){ return '<div style="position:absolute;left:'+x+'%;top:'+y+'%;transform:translate(-50%,-50%)'+(rot?' rotate(-90deg)':'')+';color:'+col+';font-weight:'+(strong?800:700)+';font-size:'+(strong?13:11.5)+'px;letter-spacing:.01em;text-shadow:0 0 3px #fff,0 0 2px #fff,0 0 1px #fff;white-space:nowrap">'+t+'</div>'; };
   var vbr=function(x,y0,y1){ return seg('left:'+x+'%;top:'+y0+'%;height:'+(y1-y0)+'%;width:1.5px;')
       + seg('left:'+(x-1.0)+'%;top:'+y0+'%;width:2.0%;height:1.5px;')
       + seg('left:'+(x-1.0)+'%;top:'+(y1-0.15)+'%;width:2.0%;height:1.5px;'); };
   var h='';
-  // Sichtbare Kasten-Unterkante: im 3D sitzt der Kasten (Hoehe rollH) OBEN auf dem Fenster (Hoehe hMm-rollH).
-  // Anteil an der sichtbaren Gesamthoehe = rollH/hMm -> Klammer endet genau an der Kasten-Unterkante.
-  var KFRAC=(hasRoll&&rollH>0)?(rollH/S.hMm):0;
-  var ky=(hasRoll&&rollH>0)?(T+KFRAC*(B-T)):T;
-  var rxH=R+8, rxK=R+3;   // aeussere Klammer = Gesamthoehe, innere (oben) = Kasten
   // ── Breite UNTEN ──
-  h+=seg('left:'+L+'%;width:'+(R-L)+'%;top:'+(B+4)+'%;height:1.5px;');
-  h+=seg('left:'+L+'%;top:'+(B+2.8)+'%;width:1.5px;height:2.4%;');
-  h+=seg('left:'+(R-0.15)+'%;top:'+(B+2.8)+'%;width:1.5px;height:2.4%;');
-  h+=lab((L+R)/2, B+8, S.bMm+' mm', false, true);
-  // ── Gesamthoehe RECHTS (= eingegebene Hoehe, Kasten ist mit drin) ──
-  h+=vbr(rxH, T, B);
-  h+=lab(rxH+4, (T+B)/2, S.hMm+' mm', true, true);
+  h+=seg('left:'+L+'%;width:'+(R-L)+'%;top:'+(Bw+4)+'%;height:1.5px;');
+  h+=seg('left:'+L+'%;top:'+(Bw+2.8)+'%;width:1.5px;height:2.4%;');
+  h+=seg('left:'+(R-0.15)+'%;top:'+(Bw+2.8)+'%;width:1.5px;height:2.4%;');
+  h+=lab((L+R)/2, Bw+8, S.bMm+' mm', false, true);
+  // ── Gesamthoehe RECHTS ──
+  h+=vbr(rEx+6, Ttop, Bw);
+  h+=lab(rEx+9.5, (Ttop+Bw)/2, S.hMm+' mm', true, true);
   if(hasRoll && rollH>0){
-    // ── Kasten: eigene Klammer oben (bis zur Kasten-Unterkante) + Label "Kasten" darueber ──
-    h+=vbr(rxK, T, ky);
-    h+=lab((L+R)/2, Math.max(T-3.6, 1.5), 'Kasten · '+rollH+' mm', false, false);
+    // ── Kasten: eigene Klammer oben (Oberkante -> Naht) + Label "Kasten" darueber ──
+    h+=vbr(rEx+2, Ttop, seam);
+    h+=lab(rEx+4.2, (Ttop+seam)/2, rollH+' mm', true, false);
+    h+=lab((L+R)/2, (Ttop+seam)/2, 'Kasten', false, false);
   }
   ov.innerHTML=h;
   ov.style.display='block';
@@ -16893,12 +16907,12 @@ function d2Fenster(){ const w=document.getElementById('d2-fenster3d-wrap'),f=doc
   if(!sa.length){ if(/^2-/.test(lay))sa=['dk-l','dk-r']; else if(/^3-/.test(lay))sa=['dk-l','fest','dk-r']; else sa=['dk-r']; }
   const multi=/^[23]-/.test(lay); const src=multi?'fenster-3d-multi.html':'fenster-3d.html'; w.style.display='block';
   const pl={type:'update',layout:lay,sashes:sa,sashTyp:ot,separator:'',oberlicht:S.oberlichtOeff||'fest',unterlicht:S.unterlichtOeff||'fest',roll:S.roll||'ohne',rollKasten:S.rollKasten||'175',panzerHex:_panzerHex(),rollSeite:S.rollSeite||'rechts',view,color:wood?null:ck,wood:wood?ck:null,glass:S.glasdekor||'klar',side};
-  if(!f.src.includes(src)){ f.src=`/${src}?embed&bg=light&v=20260623studioJ&color=${ck}&side=${side}&layout=${lay}`; f.onload=()=>{const cw=f.contentWindow;if(!cw)return;cw.dispatchEvent(new Event('resize'));cw.postMessage(pl,'*');}; } else f.contentWindow&&f.contentWindow.postMessage(pl,'*'); }
+  if(!f.src.includes(src)){ f.src=`/${src}?embed&bg=light&v=20260629dim1&color=${ck}&side=${side}&layout=${lay}`; f.onload=()=>{const cw=f.contentWindow;if(!cw)return;cw.dispatchEvent(new Event('resize'));cw.postMessage(pl,'*');}; } else f.contentWindow&&f.contentWindow.postMessage(pl,'*'); }
 function d2Balkon(){ const w=document.getElementById('d2-balkon3d-wrap'),f=document.getElementById('d2-balkon3d-frame'); if(!w||!f)return; showHint(true);
   const view=(pv==='aus')?'aussen':'innen'; const farb=(pv==='aus')?(S.fa||S.fi):(S.fi||S.fa); const ck=HAUS3D_COLOR_MAP[farb]||'anthrazitgrau'; const wood=HAUS3D_WOOD_KEYS.has(ck);
   const side=(S.oeff1==='dreh-l'||S.oeff1==='dk-l')?'l':'r'; const lay=S.fluegel||'1-fluegel'; const sa=[S.oeff1,S.oeff2].slice(0,sashCount()).filter(Boolean); const multi=/^2-/.test(lay); const src=multi?'balkontuer-3d-multi.html':'balkontuer-3d.html'; w.style.display='block';
   const pl={type:'update',layout:lay,sashes:sa,separator:'',roll:S.roll||'ohne',rollKasten:S.rollKasten||'175',panzerHex:_panzerHex(),rollSeite:S.rollSeite||'rechts',view,color:wood?null:ck,wood:wood?ck:null,glass:S.glasdekor||'klar',side};
-  if(!f.src.includes(src)){ f.src=`/${src}?embed&bg=light&v=20260623studioJ&color=${ck}&side=${side}&layout=${lay}&roll=${S.roll||'ohne'}&rollKasten=${S.rollKasten||'175'}&rollSeite=${S.rollSeite||'rechts'}`; f.onload=()=>{const cw=f.contentWindow;if(!cw)return;cw.dispatchEvent(new Event('resize'));cw.postMessage(pl,'*');}; } else f.contentWindow&&f.contentWindow.postMessage(pl,'*'); }
+  if(!f.src.includes(src)){ f.src=`/${src}?embed&bg=light&v=20260629dim1&color=${ck}&side=${side}&layout=${lay}&roll=${S.roll||'ohne'}&rollKasten=${S.rollKasten||'175'}&rollSeite=${S.rollSeite||'rechts'}`; f.onload=()=>{const cw=f.contentWindow;if(!cw)return;cw.dispatchEvent(new Event('resize'));cw.postMessage(pl,'*');}; } else f.contentWindow&&f.contentWindow.postMessage(pl,'*'); }
 function d2Hst(){ const w=document.getElementById('d2-hst3d-wrap'),f=document.getElementById('d2-hst3d-frame'); if(!w||!f)return; showHint(true);
   const sys=(S.profil||'').replace(/^iglo-/,'')||'hs'; const vk=(pv==='aus')?'aussen':'innen';
   const ck=vk==='aussen'?(HAUS3D_COLOR_MAP[S.fa]||HAUS3D_COLOR_MAP[S.fi]||'anthrazitgrau'):(HAUS3D_COLOR_MAP[S.fi]||HAUS3D_COLOR_MAP[S.fa]||'anthrazitgrau'); const wood=HAUS3D_WOOD_KEYS.has(ck);
