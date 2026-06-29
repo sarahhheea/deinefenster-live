@@ -15870,26 +15870,36 @@ async function submitSkizze(e) {
     var halo=' paint-order="stroke" stroke="#fff" stroke-width="'+(sz*0.22)+'" stroke-linejoin="round"';
     var mL=30, mR=235, mT=hasRoll?20:40, mB=nFl>1?210:150;
     var vb=(-mL)+' '+(-mT)+' '+(bMm+mL+mR)+' '+(hMm+mT+mB);
-    var s='<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+vb+'" style="width:100%;height:100%;display:block" preserveAspectRatio="xMidYMid meet">';
+    var s='<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+vb+'" style="width:100%;height:100%;display:block" preserveAspectRatio="xMidYMid meet">'+svgDefs(S.glasdekor);
+    // ── Rollladenkasten als eigener, realistischer Kasten OBEN ──
     if(hasRoll){
       var pc=(typeof _panzerHex==='function')?_panzerHex():'#eceae3';
-      s+='<rect x="0" y="0" width="'+bMm+'" height="'+rollH+'" rx="6" fill="'+pc+'" stroke="'+fBorder+'" stroke-width="3"/>';
-      var nl=Math.max(2,Math.round(rollH/55));
-      for(var li=1;li<nl;li++) s+='<line x1="6" y1="'+(li*rollH/nl)+'" x2="'+(bMm-6)+'" y2="'+(li*rollH/nl)+'" stroke="rgba(0,0,0,0.13)" stroke-width="2"/>';
+      s+='<rect x="0" y="0" width="'+bMm+'" height="'+rollH+'" rx="6" fill="'+pc+'"/>'
+        +'<rect x="0" y="0" width="'+bMm+'" height="'+rollH+'" rx="6" fill="url(#frameLum)" opacity="0.45"/>'
+        +frameBevel(0,0,bMm,rollH,4,Math.min(16,rollH*0.2))
+        +'<rect x="0" y="0" width="'+bMm+'" height="'+rollH+'" rx="6" fill="none" stroke="'+fBorder+'" stroke-width="2.5"/>';
+      var nl=Math.max(3,Math.round(rollH/40));
+      for(var li=1;li<nl;li++){ var ly=rollH*li/nl;
+        s+='<line x1="10" y1="'+ly+'" x2="'+(bMm-10)+'" y2="'+ly+'" stroke="rgba(0,0,0,0.09)" stroke-width="1.4"/>'
+          +'<line x1="10" y1="'+(ly+1.6)+'" x2="'+(bMm-10)+'" y2="'+(ly+1.6)+'" stroke="rgba(255,255,255,0.30)" stroke-width="1"/>'; }
       s+='<text x="'+(bMm/2)+'" y="'+(rollH/2)+'" text-anchor="middle" dominant-baseline="central" font-family="Manrope,sans-serif" font-weight="800" font-size="'+kfs+'" fill="'+dimCol+'"'+halo+'>Kasten · '+rollH+' mm</text>';
     }
-    s+='<rect x="0" y="'+winTop+'" width="'+bMm+'" height="'+winH+'" rx="4" fill="'+fCol+'" stroke="'+fBorder+'" stroke-width="3"/>';
-    var innerX=FR, innerY=winTop+FR, innerW=bMm-2*FR, innerH=winH-2*FR, sashW=innerW/nFl;
+    // ── Fenster: realistischer Rahmen + Fluegel (echtes Glas, echter Griff, Scharniere) ──
+    s+='<g filter="url(#winGlow)">'
+      +'<rect x="0" y="'+winTop+'" width="'+bMm+'" height="'+winH+'" rx="4" fill="'+fCol+'"/>'
+      +'<rect x="0" y="'+winTop+'" width="'+bMm+'" height="'+winH+'" rx="4" fill="url(#frameLum)" opacity="0.22"/>'
+      +'<rect x="0" y="'+winTop+'" width="'+bMm+'" height="'+winH+'" rx="4" fill="none" stroke="'+fBorder+'" stroke-width="3"/>'
+      +'</g>'+frameBevel(0,winTop,bMm,winH,6,OFR);
+    var innerY=winTop+OFR, innerH=winH-2*OFR, sashW=(bMm-2*OFR)/nFl;
     for(var i=0;i<nFl;i++){
       var oeff=i===0?(S.oeff1||'dreh-r'):i===1?(S.oeff2||'dreh-l'):(S.oeff3||'fest');
-      var sx=innerX+i*sashW;
-      s+='<rect x="'+sx+'" y="'+innerY+'" width="'+sashW+'" height="'+innerH+'" fill="'+fCol+'" stroke="'+fBorder+'" stroke-width="2.5"/>';
-      var gpad=Math.max(sashW*0.06,14);
-      var gx=sx+gpad, gy=innerY+gpad, gw=sashW-2*gpad, gh=innerH-2*gpad;
-      s+='<rect x="'+gx+'" y="'+gy+'" width="'+gw+'" height="'+gh+'" fill="#e9f2fc" stroke="rgba(0,0,0,0.18)" stroke-width="1.5"/>';
-      s+=schemaAnschlag(gx,gy,gw,gh,oeff,'rgba(34,94,170,0.5)');
-      s+=schemaGriff(sx,innerY,sashW,innerH,oeff,'#5a6470');
-      if(i>0) s+='<line x1="'+sx+'" y1="'+innerY+'" x2="'+sx+'" y2="'+(innerY+innerH)+'" stroke="'+fBorder+'" stroke-width="4"/>';
+      var sx=OFR+i*sashW;
+      // drawSash setzt den Griff gespiegelt (Drutex-Standard: dk-r = Band rechts -> Griff LINKS).
+      // Darum fuer drawSash die Seite drehen, damit Griff+Scharniere zum Anschlag (und 3D) passen.
+      var oeffSash=({'dk-r':'dk-l','dk-l':'dk-r','dreh-r':'dreh-l','dreh-l':'dreh-r'})[oeff]||oeff;
+      s+=drawSash(sx,innerY,sashW,innerH,oeffSash,S,view,fCol);
+      s+=schemaAnschlag(sx+SFR,innerY+SFR,sashW-2*SFR,innerH-2*SFR,oeff,'rgba(34,94,170,0.34)');
+      if(i>0) s+='<rect x="'+(sx-7)+'" y="'+innerY+'" width="14" height="'+innerH+'" fill="'+fCol+'"/>'+frameBevel(sx-7,innerY,14,innerH,2,7);
     }
     var wy1=hMm+48;
     if(nFl>1){
