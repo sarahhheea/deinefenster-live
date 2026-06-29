@@ -17103,7 +17103,9 @@ function prodDetailLines(c){
   else if(c.prod==='hst')griffName=curName(P.hstGriff,c.hstGriff);
   else griffName=curName(P.griff,c.griff)+' ('+curName(P.griffColor,c.griffColor)+')'+(c.griffLocked?' · abschließbar':'');
   const _kf=(c.panzerFarbe&&PANZER_FARBEN[c.panzerFarbe])?PANZER_FARBEN[c.panzerFarbe].name:'–';
-  const rollName=(c.prod!=='haustuere'&&c.roll&&c.roll!=='ohne')?(P.roll[c.roll].name+' · Kasten '+c.rollKasten+' mm · Panzerfarbe '+_kf):'Kein Rolladen';
+  const _rSeite=(c.rollSeite==='links')?'links':'rechts';
+  const _rSeitWort=(c.roll==='motor')?'Motorseite (Seite des Motorkabels)':'Antriebsseite (Seite des Gurts)';
+  const rollName=(c.prod!=='haustuere'&&c.roll&&c.roll!=='ohne')?(P.roll[c.roll].name+' · '+_rSeitWort+': '+_rSeite+' · Kasten '+c.rollKasten+' mm · Panzerfarbe '+_kf):'Kein Rolladen';
   const sicherName=c.prod==='hst' ? '–' : (P.sicher[c.sicher]?.name||c.sicher||'–'); // Schiebetür ohne Einbruchschutz-Klasse (Kundenwunsch 18.06.2026)
   const sproStr=(c.prod==='kunststoff'||c.prod==='balkontuer')?((!c.sproTyp||c.sproTyp==='keine')?'Ohne':(c.sproTyp+' '+c.sproDicke+' mm · '+((P.sproRaster[c.sproRaster]||{}).name||''))):'Ohne';
   const lines=[
@@ -17123,6 +17125,19 @@ function prodDetailLines(c){
     'Rolladen:    '+rollName,
     'Sicherheit:  '+sicherName
   ];
+  // Jeder Mini-Schritt muss in die Anfrage (sonst weiß das Team nicht, was der Kunde will):
+  if(c.prod!=='haustuere'){
+    lines.push('Schallschutz:'+((c.schall&&c.schall!=='ohne')?(P.schall[c.schall]?.name||c.schall):'Standard'));
+    lines.push('Sicher.-Glas:'+((c.sicherGlas&&c.sicherGlas!=='kein')?(P.sicherGlas[c.sicherGlas]?.name||c.sicherGlas):'Kein'));
+  }
+  if(c.prod==='hst'){
+    if(c.profil==='iglo-hs')lines.push('Laufrichtung:'+(P.hstLauf[c.hstLauf]?.name||c.hstLauf||'–'));
+    if(c.profil==='iglo-psk')lines.push('Kammer:      '+(P.pskKammer[c.pskKammer]?.name||c.pskKammer||'–'));
+    lines.push('Schwelle:    '+(P.hstSchwelle[c.hstSchwelle]?.name||c.hstSchwelle||'–'));
+    lines.push('Teilung:     '+(P.hstTeilung[c.hstTeilung]?.name||c.hstTeilung||'–'));
+    lines.push('Abschließbar:'+(P.hstSchloss[c.hstSchloss]?.name||c.hstSchloss||'–'));
+  }
+  if(c.prod==='balkontuer')lines.push('Schwelle:    '+(P.balkonSchwelle[c.balkonSchwelle]?.name||c.balkonSchwelle||'–'));
   if(c.prod==='haustuere')lines.push('Türmodell:   '+(c.tuerModell||'noch offen'));
   return lines;
 }
