@@ -461,17 +461,22 @@ function _addRolladen(spec) {
   const _pzZ   = FD + SASH_DZ + 0.012;  // klar VOR der Fenster-Flueglkante (kein Verschmelzen)
   const _pzW   = FW + 2 * ROL_SCHIENE_W;  // randlos: deckt den ganzen Rahmen ab (wie der Kasten)
   const _pzTop = FH - 0.004;           // direkt unter dem Kasten
-  const _pzBot = Math.max(_pzTop - 0.16, FH * 0.74);  // schmaler sichtbarer Streifen (Panzerfarbe sichtbar)
-  const _pzPitch = 0.044;              // Lamellen-Raster (Hoehe inkl. Fuge)
-  const _pzSlatH = 0.035;              // sichtbare Lamellenhoehe (9 mm Fuge -> klarere Linien)
-  const _pzSlatD = 0.016;              // Lamellentiefe
-  // dunkles Backing -> Fugen wirken dunkel, kein Durchblick aufs Glas
+  // VOLL HOCHGEZOGEN: nur ein schmaler aufgerollter Panzer-Streifen direkt unter dem Kasten,
+  // Scheibe komplett frei -> sauber wie bei professionellen Konfiguratoren (Kunde 29.06.2026).
+  const _pzBot = _pzTop - 0.06;
+  const _pzPitch = 0.030;              // feines Lamellen-Raster im schmalen Streifen
+  const _pzSlatH = 0.022;
+  const _pzSlatD = 0.016;
+  // dezentes Backing nur hinter dem schmalen Streifen
   winGroup.add(bx(FW / 2, (_pzTop + _pzBot) / 2, _pzZ - 0.006, _pzW, _pzTop - _pzBot, 0.006, spacerMat));
-  // kraeftige Endleiste unten
   winGroup.add(bx(FW / 2, _pzBot + ROL_END_H / 2, _pzZ, _pzW, ROL_END_H, _pzSlatD + 0.004, _panzMat));
-  // Lamellen gestapelt nach oben bis unter den Kasten
   for (let _ly = _pzBot + ROL_END_H + _pzPitch / 2; _ly + _pzSlatH / 2 <= _pzTop; _ly += _pzPitch) {
     winGroup.add(bx(FW / 2, _ly, _pzZ, _pzW, _pzSlatH, _pzSlatD, _panzMat));
+  }
+  // Gurt (bei Gurtwickler): schmaler Gurt an der Innenseite, nahe dem Rahmen, ohne die Scheibe zuzudecken
+  if (spec.roll === 'gurt') {
+    const _gx = (spec.rollSeite === 'links') ? 0.05 : (FW - 0.05);
+    winGroup.add(bx(_gx, FH * 0.62, _pzZ, 0.020, FH * 0.58, 0.004, _panzMat));
   }
 }
 

@@ -7897,14 +7897,8 @@ function wizRenderAngebot(){
     var _priceHtml=(SHOW_PRICES && _csub!=null)?('<div style="text-align:right;margin-bottom:7px"><div style="font-size:16px;font-weight:800;color:#225eaa;line-height:1.1">'+fmt(_csub)+'</div>'+((qty>1)?('<div style="font-size:11px;color:#7a8699">Einzelpreis '+fmt(_cunit)+'</div>'):'')+'<div style="font-size:10px;color:#9aa6b8">inkl. MwSt</div></div>'):'';
     var editClick=opts.current?'wizGo(0)':('wizEditItem(\''+opts.id+'\')');
     var delClick=opts.current?'wizRemoveCurrent()':('wizCartRemove(\''+opts.id+'\')');
-    // Fenster/Balkontür: saubere Schemazeichnung statt 3D-Schnappschuss (Kunde sieht klar was er bestellt)
-    var thumbInner='<img src="'+img+'" alt="'+name+'" loading="lazy" decoding="async">';
-    if((c.prod==='kunststoff'||c.prod==='balkontuer') && typeof renderSchemaPrev==='function'){
-      var _schema=''; try{ _schema=renderSchemaPrev(null,'inn',c); }catch(e){}
-      if(_schema) thumbInner='<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center">'+_schema+'</div>';
-    }
     return '<div class="wiz-ocard'+(opts.current?' is-current':'')+'">'
-      +'<div class="wiz-othumb">'+thumbInner+'</div>'
+      +'<div class="wiz-othumb"><img src="'+img+'" alt="'+name+'" loading="lazy" decoding="async"></div>'
       +'<div class="wiz-oinfo">'
         +'<div class="wiz-oname">'+name+(opts.current?' <span class="wiz-obadge">AKTUELL</span>':'')+'</div>'
         +'<div class="wiz-ospec-line">'+line1+'</div>'
@@ -14293,7 +14287,7 @@ function _renderFenster3d() {
   // iframe neu laden wenn sich die Quelle ändert (1-Flügel ↔ Multi)
   const _wantsReload = !frame.src.includes(_src3d);
   if (_wantsReload) {
-    frame.src = `/${_src3d}?embed&v=20260629dim2&bg=light&color=${_ck}&side=${_side}&layout=${_layout}&view=${_view}`;
+    frame.src = `/${_src3d}?embed&v=20260629dim4&bg=light&color=${_ck}&side=${_side}&layout=${_layout}&view=${_view}`;
     frame.onload = () => {
       const cw = frame.contentWindow;
       if (!cw) return;
@@ -14519,9 +14513,9 @@ function drawPrev() {
     }
     // FENSTER/BALKONTÜR: auf dem Rollladen-Schritt die flache Schemazeichnung (Kasten + Maße sauber)
     // statt 3D — professioneller Maß-Stil (Kunde 29.06.2026). 3D bleibt auf den anderen Schritten.
-    // EINHEITLICH: Fenster/Balkontuer zeigen auf JEDEM Schritt dieselbe saubere Schemazeichnung
-    // (kein Wechsel 3D<->Zeichnung mehr -> nichts springt). Zeichnung spiegelt Farbe/Glas/Griff/Rollladen.
-    window._schemaActive = (S.prod==='kunststoff'||S.prod==='balkontuer');
+    // Schema-Zeichnung deaktiviert -> Fenster/Balkontuer nutzen wieder das 3D-Modell (Kundenwunsch 29.06.2026:
+    // 3D sieht besser aus; nur der Kasten wird im 3D sauber gemacht). drawSchema bleibt fuer spaeter ungenutzt.
+    window._schemaActive = false;
     if (window._schemaActive) {
       if (ph)   ph.style.display   = 'none';
       if (wrap) wrap.style.display = 'none';
@@ -17039,12 +17033,12 @@ function d2Fenster(){ const w=document.getElementById('d2-fenster3d-wrap'),f=doc
   if(!sa.length){ if(/^2-/.test(lay))sa=['dk-l','dk-r']; else if(/^3-/.test(lay))sa=['dk-l','fest','dk-r']; else sa=['dk-r']; }
   const multi=/^[23]-/.test(lay); const src=multi?'fenster-3d-multi.html':'fenster-3d.html'; w.style.display='block';
   const pl={type:'update',layout:lay,sashes:sa,sashTyp:ot,separator:'',oberlicht:S.oberlichtOeff||'fest',unterlicht:S.unterlichtOeff||'fest',roll:S.roll||'ohne',rollKasten:S.rollKasten||'175',panzerHex:_panzerHex(),rollSeite:S.rollSeite||'rechts',view,color:wood?null:ck,wood:wood?ck:null,glass:S.glasdekor||'klar',side};
-  if(!f.src.includes(src)){ f.src=`/${src}?embed&bg=light&v=20260629dim2&color=${ck}&side=${side}&layout=${lay}`; f.onload=()=>{const cw=f.contentWindow;if(!cw)return;cw.dispatchEvent(new Event('resize'));cw.postMessage(pl,'*');}; } else f.contentWindow&&f.contentWindow.postMessage(pl,'*'); }
+  if(!f.src.includes(src)){ f.src=`/${src}?embed&bg=light&v=20260629dim4&color=${ck}&side=${side}&layout=${lay}`; f.onload=()=>{const cw=f.contentWindow;if(!cw)return;cw.dispatchEvent(new Event('resize'));cw.postMessage(pl,'*');}; } else f.contentWindow&&f.contentWindow.postMessage(pl,'*'); }
 function d2Balkon(){ const w=document.getElementById('d2-balkon3d-wrap'),f=document.getElementById('d2-balkon3d-frame'); if(!w||!f)return; showHint(true);
   const view=(pv==='aus')?'aussen':'innen'; const farb=(pv==='aus')?(S.fa||S.fi):(S.fi||S.fa); const ck=HAUS3D_COLOR_MAP[farb]||'anthrazitgrau'; const wood=HAUS3D_WOOD_KEYS.has(ck);
   const side=(S.oeff1==='dreh-l'||S.oeff1==='dk-l')?'l':'r'; const lay=S.fluegel||'1-fluegel'; const sa=[S.oeff1,S.oeff2].slice(0,sashCount()).filter(Boolean); const multi=/^2-/.test(lay); const src=multi?'balkontuer-3d-multi.html':'balkontuer-3d.html'; w.style.display='block';
   const pl={type:'update',layout:lay,sashes:sa,separator:'',roll:S.roll||'ohne',rollKasten:S.rollKasten||'175',panzerHex:_panzerHex(),rollSeite:S.rollSeite||'rechts',view,color:wood?null:ck,wood:wood?ck:null,glass:S.glasdekor||'klar',side};
-  if(!f.src.includes(src)){ f.src=`/${src}?embed&bg=light&v=20260629dim2&color=${ck}&side=${side}&layout=${lay}&roll=${S.roll||'ohne'}&rollKasten=${S.rollKasten||'175'}&rollSeite=${S.rollSeite||'rechts'}`; f.onload=()=>{const cw=f.contentWindow;if(!cw)return;cw.dispatchEvent(new Event('resize'));cw.postMessage(pl,'*');}; } else f.contentWindow&&f.contentWindow.postMessage(pl,'*'); }
+  if(!f.src.includes(src)){ f.src=`/${src}?embed&bg=light&v=20260629dim4&color=${ck}&side=${side}&layout=${lay}&roll=${S.roll||'ohne'}&rollKasten=${S.rollKasten||'175'}&rollSeite=${S.rollSeite||'rechts'}`; f.onload=()=>{const cw=f.contentWindow;if(!cw)return;cw.dispatchEvent(new Event('resize'));cw.postMessage(pl,'*');}; } else f.contentWindow&&f.contentWindow.postMessage(pl,'*'); }
 function d2Hst(){ const w=document.getElementById('d2-hst3d-wrap'),f=document.getElementById('d2-hst3d-frame'); if(!w||!f)return; showHint(true);
   const sys=(S.profil||'').replace(/^iglo-/,'')||'hs'; const vk=(pv==='aus')?'aussen':'innen';
   const ck=vk==='aussen'?(HAUS3D_COLOR_MAP[S.fa]||HAUS3D_COLOR_MAP[S.fi]||'anthrazitgrau'):(HAUS3D_COLOR_MAP[S.fi]||HAUS3D_COLOR_MAP[S.fa]||'anthrazitgrau'); const wood=HAUS3D_WOOD_KEYS.has(ck);
