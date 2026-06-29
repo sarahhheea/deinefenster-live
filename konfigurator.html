@@ -14519,10 +14519,9 @@ function drawPrev() {
     }
     // FENSTER/BALKONTÜR: auf dem Rollladen-Schritt die flache Schemazeichnung (Kasten + Maße sauber)
     // statt 3D — professioneller Maß-Stil (Kunde 29.06.2026). 3D bleibt auf den anderen Schritten.
-    (function(){
-      var _sk=(typeof WIZ_STEPS!=='undefined'&&WIZ_STEPS[wizIdx])?WIZ_STEPS[wizIdx].key:'';
-      window._schemaActive = ((S.prod==='kunststoff'||S.prod==='balkontuer') && (_sk==='rolladen'||_sk==='masse'));
-    })();
+    // EINHEITLICH: Fenster/Balkontuer zeigen auf JEDEM Schritt dieselbe saubere Schemazeichnung
+    // (kein Wechsel 3D<->Zeichnung mehr -> nichts springt). Zeichnung spiegelt Farbe/Glas/Griff/Rollladen.
+    window._schemaActive = (S.prod==='kunststoff'||S.prod==='balkontuer');
     if (window._schemaActive) {
       if (ph)   ph.style.display   = 'none';
       if (wrap) wrap.style.display = 'none';
