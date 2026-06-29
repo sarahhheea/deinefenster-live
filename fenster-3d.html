@@ -455,11 +455,13 @@ function _addRolladen(spec) {
   winGroup.add(bx(FW + ROL_SCHIENE_W / 2, schieneY, schieneZ, ROL_SCHIENE_W, FH, ROL_SCHIENE_D, frameMat));
 
   // ── Endschiene (gerade unter Kasten-Unterkante) ──
-  // ── Panzer (Lamellen-Vorhang, ca. zur Haelfte heruntergelassen) ──
+  // ── Panzer (Lamellen-Vorhang) — HOCHGEZOGEN: nur schmaler Streifen unter dem Kasten sichtbar,
+  //    Rest = freies Glas. So bleibt die Panzerfarbe waehlbar, ohne das Fenster zu verdecken
+  //    (Kundenwunsch 29.06.2026: Rollladen hoch, Glas frei). ──
   const _pzZ   = FD + SASH_DZ + 0.012;  // klar VOR der Fenster-Flueglkante (kein Verschmelzen)
   const _pzW   = FW + 2 * ROL_SCHIENE_W;  // randlos: deckt den ganzen Rahmen ab (wie der Kasten)
   const _pzTop = FH - 0.004;           // direkt unter dem Kasten
-  const _pzBot = FH * 0.50;            // bedeckt das obere halbe Fenster
+  const _pzBot = Math.max(_pzTop - 0.16, FH * 0.74);  // schmaler sichtbarer Streifen (Panzerfarbe sichtbar)
   const _pzPitch = 0.044;              // Lamellen-Raster (Hoehe inkl. Fuge)
   const _pzSlatH = 0.035;              // sichtbare Lamellenhoehe (9 mm Fuge -> klarere Linien)
   const _pzSlatD = 0.016;              // Lamellentiefe
