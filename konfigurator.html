@@ -14415,38 +14415,33 @@ function updateDimOverlay(_retry){
   var wW=100-iL-iR, wH=100-iT-iB, L,R,T,B;
   if(bb){ L=iL+bb.l*wW/100; R=iL+bb.r*wW/100; T=iT+bb.t*wH/100; B=iT+bb.b*wH/100; }
   else { L=iL+5; R=100-iR-5; T=iT+10; B=100-iB-5; if((_retry||0)<8) setTimeout(function(){try{updateDimOverlay((_retry||0)+1);}catch(e){}},500); }
+  // Saubere technische Bemassung wie ein professioneller Konfigurator: Breite UNTEN, Hoehe RECHTS,
+  // Kasten als eigene Mass-Klammer oben-rechts. Duenne Linien, helle Beschriftung, nichts mitten im Produkt.
   var col='#225eaa';
   var seg=function(css){ return '<div style="position:absolute;background:'+col+';'+css+'"></div>'; };
-  var lab=function(x,y,t,rot){ return '<div style="position:absolute;left:'+x+'%;top:'+y+'%;transform:translate(-50%,-50%)'+(rot?' rotate(-90deg)':'')+';color:'+col+';font-weight:800;font-size:13px;letter-spacing:.01em;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff,0 0 2px #fff;white-space:nowrap">'+t+'</div>'; };
+  var lab=function(x,y,t,rot,strong){ return '<div style="position:absolute;left:'+x+'%;top:'+y+'%;transform:translate(-50%,-50%)'+(rot?' rotate(-90deg)':'')+';color:'+col+';font-weight:'+(strong?800:700)+';font-size:'+(strong?13:12)+'px;letter-spacing:.01em;text-shadow:0 0 3px #fff,0 0 2px #fff,0 0 1px #fff;white-space:nowrap">'+t+'</div>'; };
+  // vertikale Mass-Klammer (Linie + End-Ticks) bei x von y0 bis y1
+  var vbr=function(x,y0,y1){ return seg('left:'+x+'%;top:'+y0+'%;height:'+(y1-y0)+'%;width:1.5px;')
+      + seg('left:'+(x-1.0)+'%;top:'+y0+'%;width:2.0%;height:1.5px;')
+      + seg('left:'+(x-1.0)+'%;top:'+(y1-0.15)+'%;width:2.0%;height:1.5px;'); };
   var h='';
-  // Sichtbare Kasten-Unterkante: im 3D-Modell sitzt der Kasten (Hoehe rollH) OBEN auf dem Fenster (Hoehe hMm-rollH).
-  // Sein Anteil an der sichtbaren Gesamthoehe ist daher exakt rollH/hMm -> Linie endet genau an der Kasten-Unterkante.
+  // Sichtbare Kasten-Unterkante: im 3D sitzt der Kasten (Hoehe rollH) OBEN auf dem Fenster (Hoehe hMm-rollH).
+  // Anteil an der sichtbaren Gesamthoehe = rollH/hMm -> Klammer endet genau an der Kasten-Unterkante.
   var KFRAC=(hasRoll&&rollH>0)?(rollH/S.hMm):0;
   var ky=(hasRoll&&rollH>0)?(T+KFRAC*(B-T)):T;
-  var winMm=(hasRoll&&rollH>0)?(S.hMm-rollH):S.hMm;
-  var lx=L-4, rx=R+4;
-  // Breite unten
-  h+=seg('left:'+L+'%;width:'+(R-L)+'%;top:'+(B+4)+'%;height:2px;');
-  h+=seg('left:'+L+'%;top:'+(B+2.7)+'%;width:2px;height:2.6%;');
-  h+=seg('left:'+(R-0.2)+'%;top:'+(B+2.7)+'%;width:2px;height:2.6%;');
-  h+=lab((L+R)/2, B+8, S.bMm+' mm', false);
-  // Gesamthoehe LINKS (volle Hoehe)
-  h+=seg('left:'+lx+'%;top:'+T+'%;height:'+(B-T)+'%;width:2px;');
-  h+=seg('left:'+(lx-1.2)+'%;top:'+T+'%;width:2.6%;height:2px;');
-  h+=seg('left:'+(lx-1.2)+'%;top:'+(B-0.2)+'%;width:2.6%;height:2px;');
-  h+=lab(lx-4.2, (T+B)/2, S.hMm+' mm', true);
+  var rxH=R+8, rxK=R+3;   // aeussere Klammer = Gesamthoehe, innere (oben) = Kasten
+  // ── Breite UNTEN ──
+  h+=seg('left:'+L+'%;width:'+(R-L)+'%;top:'+(B+4)+'%;height:1.5px;');
+  h+=seg('left:'+L+'%;top:'+(B+2.8)+'%;width:1.5px;height:2.4%;');
+  h+=seg('left:'+(R-0.15)+'%;top:'+(B+2.8)+'%;width:1.5px;height:2.4%;');
+  h+=lab((L+R)/2, B+8, S.bMm+' mm', false, true);
+  // ── Gesamthoehe RECHTS (= eingegebene Hoehe, Kasten ist mit drin) ──
+  h+=vbr(rxH, T, B);
+  h+=lab(rxH+4, (T+B)/2, S.hMm+' mm', true, true);
   if(hasRoll && rollH>0){
-    // RECHTS oben: Kasten (bis zur sichtbaren Kasten-Grenze) + mm
-    h+=seg('left:'+rx+'%;top:'+T+'%;height:'+(ky-T)+'%;width:2px;');
-    h+=seg('left:'+(rx-1.2)+'%;top:'+T+'%;width:2.6%;height:2px;');
-    h+=seg('left:'+(rx-1.2)+'%;top:'+ky+'%;width:2.6%;height:2px;');
-    h+=lab(rx+4.2, (T+ky)/2, rollH+' mm', true);
-    h+=lab((L+R)/2, (T+ky)/2, 'Kasten', false);
-    // RECHTS unten: Fensterhoehe — NUR bis zum Fenster (nicht durch den Kasten) + mm
-    h+=seg('left:'+rx+'%;top:'+ky+'%;height:'+(B-ky)+'%;width:2px;');
-    h+=seg('left:'+(rx-1.2)+'%;top:'+ky+'%;width:2.6%;height:2px;');
-    h+=seg('left:'+(rx-1.2)+'%;top:'+(B-0.2)+'%;width:2.6%;height:2px;');
-    h+=lab(rx+4.2, (ky+B)/2, winMm+' mm', true);
+    // ── Kasten: eigene Klammer oben (bis zur Kasten-Unterkante) + Label "Kasten" darueber ──
+    h+=vbr(rxK, T, ky);
+    h+=lab((L+R)/2, Math.max(T-3.6, 1.5), 'Kasten · '+rollH+' mm', false, false);
   }
   ov.innerHTML=h;
   ov.style.display='block';
