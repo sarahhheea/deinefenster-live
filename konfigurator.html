@@ -11967,6 +11967,14 @@ const F_SICHER   = { 'wk1':0, 'rc2':87 }; // RC2-Einbruchschutz
 const F_SPRO     = { 'aufgesetzt':{'27':28,'45':38,'65':48}, 'szr':{'18':13,'26':18,'45':25} };
 // ── GRÖSSENABHÄNGIGE Aufpreise ──
 const _PROFIL_PCT = { 'iglo5':0, 'iglo-energy':0.20, 'iglo-edge':0.467 }; // Profil = % vom Basispreis (Edge 1-Punkt-Schätzung)
+// Premium-Farben (Sonderfarben/Holzdekore höherer Preisstufe) — kosten mehr Farbaufschlag als Standard-Farben.
+const _PREM_FARBE = ['schwarzbr','basaltgr-gl','basaltgr-sa','betongrau','crown-plat','dunkelgr','dunkelrot','eiche-nat','eisengl','moosgruen','oregon','schiefgr-gl','schiefgr-sa','douglasie'];
+function _farbPremDelta(){
+  var faCol=S.fa&&S.fa!=='weiss', fiCol=S.fi&&S.fi!=='weiss';
+  var faP=faCol&&_PREM_FARBE.indexOf(S.fa)>=0, fiP=fiCol&&_PREM_FARBE.indexOf(S.fi)>=0;
+  if(faCol&&fiCol) return (faP&&fiP)?0.054:0;   // beidseitig: Premium-Aufschlag nur wenn beide Premium (gemischt sicher unter)
+  return (faP||fiP)?0.088:0;                    // einseitig
+}
 function _rolladenDelta(b,h,type){ // breiten-getrieben + kleiner Höhenterm
   if(!type || type==='ohne') return 0;
   let d = _interp1(b,[700,1000,1400],[109,114,157]) + 0.04*Math.max(0,h-500);
@@ -12013,7 +12021,7 @@ function fensterPriceParts(){
   const prof = frame * (_PROFIL_PCT[S.profil]||0); // Profil = % vom Basispreis (größenabhängig)
   // Farbe prozentual auf Rahmen-Körper (außen/innen)
   const faCol = S.fa && S.fa!=='weiss', fiCol = S.fi && S.fi!=='weiss';
-  const farbPct = (faCol&&fiCol) ? 0.19 : ((faCol||fiCol) ? 0.125 : 0);
+  const farbPct = ((faCol&&fiCol) ? 0.19 : ((faCol||fiCol) ? 0.125 : 0)) + _farbPremDelta();
   const bodyNoColor = frame + prof + oeff;
   const colorAdd = bodyNoColor*farbPct;
   // Glas-Optionen pro m² (größenabhängig)
@@ -12088,7 +12096,7 @@ function balkonPriceParts(){
   const area=(b/1000)*(h/1000);
   const prof = frame * (_PROFIL_PCT[S.profil]||0); // Profil % vom Basispreis (größenabhängig)
   const faCol=S.fa&&S.fa!=='weiss', fiCol=S.fi&&S.fi!=='weiss';
-  const farbPct=(faCol&&fiCol)?0.18:((faCol||fiCol)?0.125:0);
+  const farbPct=((faCol&&fiCol)?0.18:((faCol||fiCol)?0.125:0))+_farbPremDelta();
   let price = (frame+prof)*(1+farbPct);
   price += _glasOptDelta(area); // Glas-Optionen pro m² (3-fach/Schall/Sicherheitsglas/Glasdekor)
   let griff=F_GRIFF[S.griff]||0; if(S.griffLocked) griff+=_griffLockAdd(); price += griff;
@@ -12119,7 +12127,7 @@ function hstPriceParts(){
   let frame = (S.profil==='iglo-hs') ? _matLookup(b,h,_HS_B,_HS_H,_HS_M) : _matLookup(b,h,_PSK_B,_PSK_H,_PSK_M);
   if(S.profil==='iglo-psk' && S.pskKammer==='iglo-energy') frame += 45; // Energy-Kammer (Schätzung wie Fenster)
   const faCol=S.fa&&S.fa!=='weiss', fiCol=S.fi&&S.fi!=='weiss';
-  const farbPct=(faCol&&fiCol)?0.11:((faCol||fiCol)?0.092:0); // PSK-Farbe ~9,2% einseitig
+  const farbPct=((faCol&&fiCol)?0.11:((faCol||fiCol)?0.092:0))+_farbPremDelta(); // PSK-Farbe + Premium-Aufschlag
   let price = frame*(1+farbPct);
   // 3-fach ist bei PSK unser STANDARD und im Basispreis enthalten enthalten.
   // → kein 3-fach-Aufschlag (3-fach im Grundpreis enthalten).
@@ -12164,7 +12172,7 @@ function haustuerPriceParts(){
   let frame = _matLookup(b,h,_HT_B,_HT_H,_HT_M);
   frame += (_HT_MODELL[S.tuerModell]!=null ? _HT_MODELL[S.tuerModell] : 0);
   const faCol=S.fa&&S.fa!=='weiss', fiCol=S.fi&&S.fi!=='weiss';
-  const farbPct=(faCol&&fiCol)?0.17:((faCol||fiCol)?0.145:0); // Haustür-Farbe (konservativ, sicher unter Vergleichswert)
+  const farbPct=((faCol&&fiCol)?0.17:((faCol||fiCol)?0.145:0))+_farbPremDelta(); // Haustür-Farbe + Premium-Aufschlag
   let price = frame*(1+farbPct);
   if(S.glas==='3fach') price += Math.round(24.4*(b*h/1e6));
   if(S.tuerGriffAussen==='stoss-q45r') price += 100; // Edelstahl-Stoßgriff
