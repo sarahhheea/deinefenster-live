@@ -14732,8 +14732,10 @@ async function submitForm(e) {
   }
   // Rolladen nur bei Fenster/Balkontür
   const _kfName = (S.panzerFarbe && PANZER_FARBEN[S.panzerFarbe]) ? PANZER_FARBEN[S.panzerFarbe].name : '–';
-  const rollName = (S.prod!=='haustuere' && S.prod!=='hst' && S.roll!=='ohne')
-    ? `${P.roll[S.roll]?.name||S.roll} · Kasten ${S.rollKasten} mm · Panzerfarbe ${_kfName}` : 'Kein Rolladen';
+  const _rollSeiteWort = S.roll==='motor' ? 'Motorseite (Seite des Motorkabels)' : 'Antriebsseite (Seite des Gurts)';
+  const _rollSeiteVal = S.rollSeite==='links' ? 'links' : 'rechts';
+  const rollName = (S.prod!=='haustuere' && S.roll && S.roll!=='ohne')
+    ? `${P.roll[S.roll]?.name||S.roll} · ${_rollSeiteWort}: ${_rollSeiteVal}${S.prod!=='hst' ? (' · Kasten '+S.rollKasten+' mm · Panzerfarbe '+_kfName) : ''}` : 'Kein Rolladen';
   const sicherName = S.prod==='hst' ? '–' : (P.sicher[S.sicher]?.name||S.sicher); // Schiebetür ohne Einbruchschutz-Klasse (Kundenwunsch 18.06.2026)
   const sproStr    = S.sproTyp==='keine'?'Ohne':S.sproTyp+' '+S.sproDicke+' mm · '+((P.sproRaster[S.sproRaster]||{}).name||'');
   // Zusätzliche Felder für vollständige Bestellung
@@ -14820,14 +14822,25 @@ async function submitForm(e) {
       'PSK-System:  ' + (P.pskKammer[S.pskKammer]?.name||S.pskKammer),
       'Laufrichtung:' + (S.hstLauf==='links'?'PSK-Links':'PSK-Rechts'),
     ] : []),
-    'Glasart:     ' + glasName,
+    'Aufteilung:  ' + fluegelName,
     'Öffnungsart: ' + oeffName,
+    'Glasart:     ' + glasName,
+    'Glasdekor:   ' + glasdekorName,
+    'Schallschutz:' + schallName,
+    'Sicher.Glas: ' + sicherGlasName,
     'Außenfarbe:  ' + faName,
     'Innenfarbe:  ' + fiName,
+    'Dichtung:    ' + fdName,
+    'Griff:       ' + griffName + ((S.prod!=='haustuere' && S.prod!=='hst' && S.griffLocked) ? ' · abschließbar' : ''),
+    ...(S.prod==='hst' ? ['Abschließbar:' + (P.hstSchloss[S.hstSchloss]?.name||S.hstSchloss||'–')] : []),
     'Sprossen:    ' + sproStr,
     'Rolladen:    ' + rollName,
+    ...(balkonSchwelleName ? ['Schwelle:    ' + balkonSchwelleName] : []),
     'Sicherheit:  ' + sicherName,
     ...(tuerModellName ? ['Türmodell:   ' + tuerModellName] : []),
+    ...((typeof cart!=='undefined' && cart && cart.length) ? ['', '──────────────────────────────', 'WEITERE PRODUKTE IM WARENKORB (' + cart.length + '):'].concat(
+      cart.map(function(it, idx){ return [''].concat(['Produkt ' + (idx+2) + ':']).concat(prodDetailLines(it.config).map(function(l){ return '  ' + l; })); }).reduce(function(a,b){ return a.concat(b); }, [])
+    ) : []),
     '',
     'Datum:       ' + datum,
     ...(notiz ? ['', 'Anmerkungen: ' + notiz] : []),
