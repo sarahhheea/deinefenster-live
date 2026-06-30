@@ -4287,6 +4287,8 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   #cfg-wizard .wiz-body:not(.cards-mode) .wiz-panel .wiz-cards .wiz-card{width:182px}
   #cfg-wizard .wiz-body:not(.cards-mode) .wiz-panel .wiz-twocol{justify-content:flex-start}
   #cfg-wizard .wiz-stage #prev-wrap{height:300px !important;width:250px !important;max-width:90% !important;margin:0 auto !important;background:transparent !important;border:0 !important;box-shadow:none !important;border-radius:0 !important}
+  /* Flache Massskizze (Fenster/Balkontuer) braucht mehr Platz als das 3D, damit man Masse + Anschlag gut erkennt */
+  #cfg-wizard .wiz-stage #prev-wrap.wiz-schema{height:430px !important;width:360px !important;max-width:98% !important}
   #cfg-wizard #prev-3d-hint{display:none !important}
   /* Maß-Bemaßung am Fenster: Breite unten, Höhe rechts (wie üblicher Konfigurator-Standard) */
   #cfg-wizard .wiz-dim-b,#cfg-wizard .wiz-dim-h{position:absolute;display:flex;align-items:center;justify-content:center;color:#6a7a8f;font-family:'Manrope',sans-serif;font-size:12px;font-weight:600;pointer-events:none;z-index:5}
@@ -14583,6 +14585,7 @@ function drawPrev() {
     // DIN-Anschlag + Griff, Masse aussen. Gleiche Skizze wandert in Bestelluebersicht + Anfrage
     // (Kunde 30.06.2026). 3D-Modell bleibt im Code, wird hier aber nicht genutzt.
     window._schemaActive = (S.prod==='kunststoff' || S.prod==='balkontuer');
+    if (prevWrap) prevWrap.classList.toggle('wiz-schema', window._schemaActive);
     if (window._schemaActive) {
       var _ovEl=document.getElementById('dim-overlay'); if(_ovEl) _ovEl.style.display='none'; // altes 3D-Blau weg
       if (ph)   ph.style.display   = 'none';
@@ -15931,28 +15934,32 @@ async function submitSkizze(e) {
     var frameStroke=isLight?'#b7bcc4':'rgba(0,0,0,0.30)';
     var pzCol=(typeof _panzerHex==='function')?_panzerHex():'#f1f1ec';
     var kastenFill=isLight?'#eaecef':fCol, kastenStroke=isLight?'#aeb4bc':frameStroke;
-    var dim='#225eaa', dimLn='rgba(34,94,170,.34)';
-    var sz=Math.min(Math.max(bMm*0.052,30),54), absz=sz*0.92;
-    var mL=Math.max(bMm*0.18,240), mR=Math.max(bMm*0.40,440), mT=58, mB=Math.max(hMm*0.20,200);
+    var dim='#225eaa', dimLn='rgba(34,94,170,.40)';
+    // Grosse, gut lesbare Masse; enge Raender (kein leerer Platz links/oben) → Fenster fuellt das Feld
+    var sz=Math.min(Math.max(bMm*0.072,56),90), absz=sz;
+    var mL=Math.max(bMm*0.05,56), mT=Math.max(bMm*0.05,56);
+    var mR=Math.max(bMm*0.30, absz*5.0), mB=Math.max(hMm*0.17, absz*5.0);
     var vb=(-mL)+" "+(-mT)+" "+(bMm+mL+mR)+" "+(hMm+mT+mB);
     var s='<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+vb+'" style="width:100%;height:100%;display:block" preserveAspectRatio="xMidYMid meet">';
     s+='<defs><linearGradient id="schGlass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6fbff"/><stop offset="0.5" stop-color="#e3edf7"/><stop offset="1" stop-color="#eef6fc"/></linearGradient>'
+      +'<linearGradient id="pzSheen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity="0.30"/><stop offset="0.45" stop-color="#ffffff" stop-opacity="0.05"/><stop offset="1" stop-color="#000000" stop-opacity="0.14"/></linearGradient>'
       +'<filter id="schShadow" x="-25%" y="-25%" width="150%" height="150%"><feDropShadow dx="0" dy="7" stdDeviation="11" flood-color="rgba(20,42,82,0.18)"/></filter></defs>';
     var line=function(x1,y1,x2,y2,col,w,dash){ return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+col+'" stroke-width="'+(w||2)+'"'+(dash?' stroke-dasharray="7 6"':'')+' stroke-linecap="round"/>'; };
-    var txt=function(x,y,t,rot,size,col,halo){ var r=rot?(' transform="rotate(-90 '+x+' '+y+')"'):''; var po=halo?' paint-order="stroke" stroke="#fff" stroke-width="5" stroke-linejoin="round"':''; return '<text x="'+x+'" y="'+y+'"'+r+po+' text-anchor="middle" dominant-baseline="central" font-family="Manrope,Arial,sans-serif" font-weight="800" font-size="'+(size||absz)+'" fill="'+(col||dim)+'">'+t+'</text>'; };
-    // Massklammern (Markenfarbe, runde Endstriche)
-    var vdim=function(x,y0,y1,val,strong){ var t=11; return line(x,y0,x,y1,dimLn,2)+line(x-t,y0,x+t,y0,dimLn,2)+line(x-t,y1,x+t,y1,dimLn,2)+txt(x+absz*0.74,(y0+y1)/2,val,true,strong?absz:absz*0.84); };
-    var hdim=function(y,x0,x1,val,strong){ var t=11; return line(x0,y,x1,y,dimLn,2)+line(x0,y-t,x0,y+t,dimLn,2)+line(x1,y-t,x1,y+t,dimLn,2)+txt((x0+x1)/2,y+absz*0.9,val,false,strong?absz:absz*0.84); };
+    var txt=function(x,y,t,rot,size,col,halo){ var r=rot?(' transform="rotate(-90 '+x+' '+y+')"'):''; var po=halo?' paint-order="stroke" stroke="#fff" stroke-width="6" stroke-linejoin="round"':''; return '<text x="'+x+'" y="'+y+'"'+r+po+' text-anchor="middle" dominant-baseline="central" font-family="Manrope,Arial,sans-serif" font-weight="800" font-size="'+(size||absz)+'" fill="'+(col||dim)+'">'+t+'</text>'; };
+    var vdim=function(x,y0,y1,val,strong){ var t=13; return line(x,y0,x,y1,dimLn,2.4)+line(x-t,y0,x+t,y0,dimLn,2.4)+line(x-t,y1,x+t,y1,dimLn,2.4)+txt(x+absz*0.78,(y0+y1)/2,val,true,strong?absz:absz*0.82); };
+    var hdim=function(y,x0,x1,val,strong){ var t=13; return line(x0,y,x1,y,dimLn,2.4)+line(x0,y-t,x0,y+t,dimLn,2.4)+line(x1,y-t,x1,y+t,dimLn,2.4)+txt((x0+x1)/2,y+absz*0.92,val,false,strong?absz:absz*0.82); };
     var FR=Math.max(Math.min(bMm,winMm)*0.05,34);
     var innerW=bMm-2*FR, sashW=innerW/nFl, gy=winTop+FR, gh=winMm-2*FR;
-    var pzH = hasRoll ? Math.max(Math.min(gh*0.10, rollH*0.65), 22) : 0;  // Panzer kuckt minimal raus
+    // Panzer deutlich sichtbarer (echter Streifen), kuckt aber nur oben raus
+    var pzH = hasRoll ? Math.max(Math.min(gh*0.16, rollH*0.95), 34) : 0;
     var gy2 = gy+pzH, gh2 = Math.max(gh-pzH, 80);
     // ===== Kasten + Rahmen (mit weichem Schatten) =====
     s+='<g filter="url(#schShadow)">';
     if(hasRoll){
       s+='<rect x="0" y="0" width="'+bMm+'" height="'+rollH+'" rx="7" fill="'+kastenFill+'" stroke="'+kastenStroke+'" stroke-width="3"/>';
-      s+=line(bMm*0.05,rollH*0.40,bMm*0.95,rollH*0.40,'rgba(0,0,0,.09)',2)+line(bMm*0.05,rollH*0.66,bMm*0.95,rollH*0.66,'rgba(0,0,0,.09)',2);
-      s+=txt(bMm/2, rollH/2, "Kasten", false, Math.min(sz*0.78, rollH*0.40), isLight?'#6a7077':'#f3f5f7');
+      s+=line(bMm*0.05,rollH*0.42,bMm*0.95,rollH*0.42,'rgba(0,0,0,.08)',2);
+      var _kl="Rollladenkasten", _klSz=Math.min(rollH*0.44, (bMm*0.92)/(_kl.length*0.56));
+      s+=txt(bMm/2, rollH/2, _kl, false, _klSz, isLight?'#5f666e':'#f3f5f7');
     }
     s+='<rect x="0" y="'+winTop+'" width="'+bMm+'" height="'+winMm+'" rx="7" fill="'+fCol+'" stroke="'+frameStroke+'" stroke-width="4"/>';
     s+='</g>';
@@ -15962,27 +15969,35 @@ async function submitSkizze(e) {
       var gx=FR+i*sashW;
       // Glas (sichtbar)
       s+='<rect x="'+gx+'" y="'+gy+'" width="'+sashW+'" height="'+gh+'" fill="url(#schGlass)" stroke="#a7b2bf" stroke-width="1.6"/>';
-      // Panzer-Streifen oben (Panzerfarbe, minimal) mit dezenten Lamellen
+      // Panzer-Streifen oben (Panzerfarbe) mit echten Lamellen (Schatten + Highlight) + Endschiene + Sheen
       if(hasRoll && pzH>0){
-        s+='<rect x="'+gx+'" y="'+gy+'" width="'+sashW+'" height="'+pzH+'" fill="'+pzCol+'" stroke="rgba(0,0,0,.14)" stroke-width="1"/>';
-        for(var sl=gy+5; sl<gy+pzH-2; sl+=6) s+=line(gx+2,sl,gx+sashW-2,sl,'rgba(0,0,0,.08)',1);
+        s+='<rect x="'+gx+'" y="'+gy+'" width="'+sashW+'" height="'+pzH+'" fill="'+pzCol+'" stroke="rgba(0,0,0,.20)" stroke-width="1.3"/>';
+        var _lh=Math.max(pzH/5, 9), _x1=gx+2.5, _x2=gx+sashW-2.5;
+        for(var ly=gy+_lh; ly<gy+pzH-_lh*0.5; ly+=_lh){
+          s+=line(_x1,ly,_x2,ly,'rgba(0,0,0,.20)',1.6);
+          s+=line(_x1,ly+1.8,_x2,ly+1.8,'rgba(255,255,255,.22)',1.3);
+        }
+        // Endschiene (unterste, etwas kraeftigere Leiste)
+        var _eh=Math.max(_lh*1.15,11);
+        s+='<rect x="'+gx+'" y="'+(gy+pzH-_eh)+'" width="'+sashW+'" height="'+_eh+'" fill="'+pzCol+'" stroke="rgba(0,0,0,.24)" stroke-width="1.3"/>';
+        s+='<rect x="'+gx+'" y="'+gy+'" width="'+sashW+'" height="'+pzH+'" fill="url(#pzSheen)" stroke="none"/>';
       }
       // Anschlag (DIN) + Griff — UNTER dem Panzer
       s+=schemaAnschlag(gx,gy2,sashW,gh2,oeff,'#586272');
       s+=schemaGriff(gx,gy2,sashW,gh2,oeff,'#384452');
       var ab=ABBR[oeff]||"";
-      if(ab) s+=txt(gx+sashW*0.5, gy2+gh2-absz*0.7, ab, false, Math.min(sz*0.62, sashW*0.20), '#7a838e', true);
+      if(ab) s+=txt(gx+sashW*0.5, gy2+gh2-absz*0.62, ab, false, Math.min(sz*0.6, sashW*0.20), '#6f7882', true);
       if(i>0) s+=line(gx,gy,gx,gy+gh,frameStroke,5);
     }
     // ===== Masse aussen (Markenfarbe, mit Abstand vom Fenster) =====
-    var by=hMm+mB*0.46, by2=hMm+mB*0.82;
-    s+=line(0,hMm+16,0,by2+18,dimLn,1.4)+line(bMm,hMm+16,bMm,by2+18,dimLn,1.4);
-    if(nFl>1){ for(var k=0;k<nFl;k++){ var x0=FR+k*sashW, x1=x0+sashW; s+=hdim(by,x0,x1,Math.round(bMm/nFl)); s+=line(x0,hMm+16,x0,by+12,dimLn,1.4); } s+=hdim(by2,0,bMm,bMm,true); }
+    var by=hMm+mB*0.32, by2=hMm+mB*0.60;
+    s+=line(0,hMm+18,0,by2+20,dimLn,1.6)+line(bMm,hMm+18,bMm,by2+20,dimLn,1.6);
+    if(nFl>1){ for(var k=0;k<nFl;k++){ var x0=FR+k*sashW, x1=x0+sashW; s+=hdim(by,x0,x1,Math.round(bMm/nFl)); s+=line(x0,hMm+18,x0,by+14,dimLn,1.6); } s+=hdim(by2,0,bMm,bMm,true); }
     else { s+=hdim(by2,0,bMm,bMm,true); }
     var rxIn=bMm+mR*0.34, rxOut=bMm+mR*0.70;
-    s+=line(bMm+16,0,rxOut+18,0,dimLn,1.4)+line(bMm+16,hMm,rxOut+18,hMm,dimLn,1.4);
+    s+=line(bMm+18,0,rxOut+20,0,dimLn,1.6)+line(bMm+18,hMm,rxOut+20,hMm,dimLn,1.6);
     if(hasRoll){
-      s+=line(bMm+16,rollH,rxIn+18,rollH,dimLn,1.4);
+      s+=line(bMm+18,rollH,rxIn+20,rollH,dimLn,1.6);
       s+=vdim(rxIn,0,rollH,rollH);            // Kasten-Hoehe
       s+=vdim(rxIn,rollH,hMm,winMm);          // Fenster-Hoehe
     }
