@@ -7759,9 +7759,38 @@ const WIZ_PROD_THUMB={ kunststoff:'img/fenster_standard_v3.webp', balkontuer:'im
 // Schnappschuss der Live-3D-Vorschau (echtes konfiguriertes Produkt fürs Warenkorb-Bild).
 // 3D nutzt preserveDrawingBuffer:true + same-origin → canvas.toDataURL funktioniert.
 let wizLastThumb=null, wizLastThumbProd=null;  // Produkt-Tag: zu welchem Produkt das Bild gehört (Fix 25.06.2026 gegen falsche Warenkorb-Bilder)
+// Fenster/Balkontuer nutzen die flache Massskizze als Vorschau → daraus das Warenkorb-/Anfrage-Bild
+// rendern (SVG → JPEG, async gecacht; kein 3D-Canvas mehr). So wandert dieselbe Skizze in
+// Bestelluebersicht + Anfrage (Kunde 30.06.2026).
+var _schemaThumbBusy=false, _schemaThumbKey='';
+function _buildSchemaThumb(cb){
+  try{
+    if(typeof window.renderSchemaPrev!=='function'){ cb&&cb(null); return; }
+    var svgStr=window.renderSchemaPrev(null,'inn',S);
+    if(!svgStr){ cb&&cb(null); return; }
+    var W=560,H=620, cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+    var ctx=cv.getContext('2d'); ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,W,H);
+    var blob=new Blob([svgStr],{type:'image/svg+xml;charset=utf-8'}), url=URL.createObjectURL(blob), img=new Image();
+    img.onload=function(){ try{ ctx.drawImage(img,0,0,W,H); URL.revokeObjectURL(url); var d=cv.toDataURL('image/jpeg',0.92); cb&&cb((d&&d.length>2000)?d:null);}catch(e){ try{URL.revokeObjectURL(url);}catch(_){ } cb&&cb(null);} };
+    img.onerror=function(){ try{URL.revokeObjectURL(url);}catch(_){ } cb&&cb(null); };
+    img.src=url;
+  }catch(e){ cb&&cb(null); }
+}
+function _scheduleSchemaThumb(){
+  try{
+    var key=[S.prod,S.bMm,S.hMm,S.fluegel,S.oeff1,S.oeff2,S.oeff3,S.roll,S.rollKasten,S.panzerFarbe,S.fa,S.fi].join('|');
+    if(key===_schemaThumbKey && window._schemaThumbData) return;
+    if(_schemaThumbBusy) return;
+    _schemaThumbBusy=true;
+    _buildSchemaThumb(function(d){ _schemaThumbBusy=false; if(d){ _schemaThumbKey=key; window._schemaThumbData=d; if(typeof wizLastThumb!=='undefined'){ wizLastThumb=d; wizLastThumbProd=S.prod; } } });
+  }catch(e){ _schemaThumbBusy=false; }
+}
 function wizCaptureThumb(){
   try{
-    var map={kunststoff:'fenster3d-frame',balkontuer:'balkon3d-frame',haustuere:'haus3d-frame',hst:'hst3d-frame'};
+    // Fenster/Balkontuer → flache Skizze als Bild (async); bei erstem Aufruf evtl. noch null,
+    // der 1,2s-Timer / die Polling-Loops holen es kurz danach.
+    if(S.prod==='kunststoff'||S.prod==='balkontuer'){ _scheduleSchemaThumb(); return window._schemaThumbData||null; }
+    var map={haustuere:'haus3d-frame',hst:'hst3d-frame'};
     var f=document.getElementById(map[S.prod]); if(!f||!f.contentDocument) return null;
     var c=f.contentDocument.querySelector('canvas'); if(!c||!c.width) return null;
     var w=c.width, h=c.height;
@@ -17471,9 +17500,14 @@ function d2submit(e){
   if(typeof uploadedImages!=='undefined'&&uploadedImages.length)_tp.push('','Fotos beigefügt: '+uploadedImages.length+' ('+uploadedImages.map(function(i){return i.name;}).join(', ')+')');
   const txt=_tp.join('\n');
   const fotoAtts=(typeof uploadedImages!=='undefined'?uploadedImages:[]).map(function(im){ const b64=((im.data||'').split(',')[1])||''; return { filename:(im.name||'foto.jpg'), content:b64 }; }).filter(function(a){ return a.content; });
+  // Technische Massskizze je Produkt als Anhang — Kunde bekommt sie im Angebot, wir in der Anfrage.
+  var _skizzen=[];
+  (typeof cart!=='undefined'?cart:[]).forEach(function(it,idx){ var b=((it.thumb||'').split(',')[1])||''; if(b)_skizzen.push({ filename:'Massskizze-Produkt-'+(idx+1)+'.jpg', content:b }); });
+  (function(){ if(typeof wizLastThumb!=='undefined' && wizLastThumb && (typeof wizLastThumbProd==='undefined'||wizLastThumbProd===S.prod)){ var b=(wizLastThumb.split(',')[1])||''; if(b)_skizzen.push({ filename:'Massskizze-Produkt-'+(((typeof cart!=='undefined'?cart.length:0))+1)+'.jpg', content:b }); } })();
+  const _allAtts=fotoAtts.concat(_skizzen);
   // Senden und ERST bei Erfolg zur Danke-Seite. Schlägt der Versand fehl, bleibt der
   // Kunde im Formular und bekommt einen klaren Hinweis (statt falscher "Danke"-Seite).
-  fetch('https://deinefenster-email.sarahchrist.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({customer_email:email,subject:'[DeineFenster.de] Neue Anfrage '+offerId+': '+prodName+(_multi?(' (+'+(_allCfgs.length-1)+' weitere)'):''),text:txt,confirmation:{name,offerId,detailsHtml:customerDetailsHtml(_allItems,{orderSub:_orderSub,total:_orderSub+_shipMail,liefLbl:_liefCustomer})},attachments:fotoAtts,website:''})})
+  fetch('https://deinefenster-email.sarahchrist.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({customer_email:email,subject:'[DeineFenster.de] Neue Anfrage '+offerId+': '+prodName+(_multi?(' (+'+(_allCfgs.length-1)+' weitere)'):''),text:txt,confirmation:{name,offerId,detailsHtml:customerDetailsHtml(_allItems,{orderSub:_orderSub,total:_orderSub+_shipMail,liefLbl:_liefCustomer})},attachments:_allAtts,website:''})})
     .then(function(r){ return r.json().catch(function(){return {};}).then(function(d){ return {ok:r.ok,data:d}; }); })
     .then(function(res){
       if(res.ok){ window.location.href='danke.html?prod='+encodeURIComponent(prodName)+'&imgs=0&offer='+encodeURIComponent(offerId); }
