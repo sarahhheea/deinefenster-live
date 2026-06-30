@@ -12129,13 +12129,16 @@ function hstPriceParts(){
   let frame = (S.profil==='iglo-hs') ? _matLookup(b,h,_HS_B,_HS_H,_HS_M) : _matLookup(b,h,_PSK_B,_PSK_H,_PSK_M);
   if(S.profil==='iglo-psk' && S.pskKammer==='iglo-energy') frame += 45; // Energy-Kammer (Schätzung wie Fenster)
   const faCol=S.fa&&S.fa!=='weiss', fiCol=S.fi&&S.fi!=='weiss';
-  const farbPct=((faCol&&fiCol)?0.11:((faCol||fiCol)?0.092:0))+_farbPremDelta(); // PSK-Farbe + Premium-Aufschlag
+  // IGLO-HS hat deutlich höheren Farbaufschlag als PSK (großer Hebe-Schiebe-Rahmen): einseitig 21% / beidseitig 30% vs PSK 9,2% / 11%.
+  const _hsOne=(S.profil==='iglo-hs')?0.21:0.092, _hsBoth=(S.profil==='iglo-hs')?0.30:0.11;
+  const farbPct=((faCol&&fiCol)?_hsBoth:((faCol||fiCol)?_hsOne:0))+_farbPremDelta();
   let price = frame*(1+farbPct);
   // 3-fach ist bei PSK unser STANDARD und im Basispreis enthalten enthalten.
   // → kein 3-fach-Aufschlag (3-fach im Grundpreis enthalten).
   price += F_SCHALL[S.schall]||0;
   price += F_SICHERGLAS[S.sicherGlas]||0;
-  if(S.glasdekor && S.glasdekor!=='klar') price += F_GLASDEKOR[S.glasdekor]||0;
+  // Glasdekor (Ornamentglas) pro m² Glasfläche — bei großen Schiebetüren sonst viel zu billig (war flacher Festbetrag).
+  if(S.glasdekor && S.glasdekor!=='klar') price += (S.glasdekor==='master-carre'?55:27)*((b/1000)*(h/1000));
   price += F_SICHER[S.sicher]||0;
   if(S.roll && S.roll!=='ohne') price += _hstRolladenDelta(b, S.profil); // Rolladen (Schiebetür, breiten-getrieben)
   if(P.hstSchloss && P.hstSchloss[S.hstSchloss]) price += P.hstSchloss[S.hstSchloss].add||0; // abschließbar (IGLO-HS) — fehlte vorher
