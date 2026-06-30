@@ -15914,11 +15914,29 @@ async function submitSkizze(e) {
   }
   function schemaGriff(x,y,w,h,oeff,col){
     if(!oeff||oeff==='fest') return '';
-    var gw=Math.max(w*0.02,7), gh=Math.max(h*0.10,42);
-    if(oeff==='kipp'){ var cx=x+w/2, cy=y+10; return '<rect x="'+(cx-gh/2)+'" y="'+cy+'" width="'+gh+'" height="'+gw+'" rx="'+(gw/2)+'" fill="'+col+'"/>'; }
+    var metal=col||'#384452', hi='rgba(255,255,255,0.34)', sh='rgba(0,0,0,0.22)';
+    if(oeff==='kipp'){
+      // Kippgriff oben Mitte: Rosette + waagerechter Hebel
+      var cx=x+w/2, cy=y+Math.max(h*0.06,18);
+      var bw=Math.max(w*0.18,52), bh=Math.max(w*0.055,16);
+      return '<rect x="'+(cx-bh*0.7)+'" y="'+(cy-bh*0.7)+'" width="'+(bh*1.4)+'" height="'+(bh*1.4)+'" rx="'+(bh*0.5)+'" fill="'+metal+'"/>'
+           + '<rect x="'+(cx-bw/2)+'" y="'+(cy-bh/2)+'" width="'+bw+'" height="'+bh+'" rx="'+(bh/2)+'" fill="'+metal+'"/>'
+           + '<rect x="'+(cx-bw*0.40)+'" y="'+(cy-bh*0.30)+'" width="'+(bw*0.7)+'" height="'+(bh*0.30)+'" rx="'+(bh*0.15)+'" fill="'+hi+'"/>';
+    }
+    // Dreh/Dreh-Kipp: Rosette + Hebel nach UNTEN auf der Griffseite (gegenueber dem Band)
     var hingeR=(oeff==='dreh-r'||oeff==='dk-r');
-    var bx = hingeR ? x+14 : x+w-14-gw;   // Griff gegenueber dem Band
-    return '<rect x="'+bx+'" y="'+(y+h/2-gh/2)+'" width="'+gw+'" height="'+gh+'" rx="'+(gw/2)+'" fill="'+col+'"/>';
+    var ex = hingeR ? x+Math.max(w*0.055,20) : x+w-Math.max(w*0.055,20); // Griffseite
+    var cy=y+h*0.5;
+    var lw=Math.max(w*0.05,19);                 // Hebelbreite
+    var rw=lw*1.9, rh=Math.max(h*0.13,50);      // Rosette (Grundplatte)
+    var lh=Math.max(h*0.17,62);                 // Hebellaenge nach unten
+    var s='';
+    s+='<rect x="'+(ex-rw/2)+'" y="'+(cy-rh/2)+'" width="'+rw+'" height="'+rh+'" rx="'+(rw*0.32)+'" fill="'+metal+'"/>';
+    s+='<rect x="'+(ex-rw/2)+'" y="'+(cy-rh/2)+'" width="'+(rw*0.34)+'" height="'+rh+'" rx="'+(rw*0.17)+'" fill="'+hi+'"/>';
+    s+='<rect x="'+(ex-lw/2)+'" y="'+cy+'" width="'+lw+'" height="'+lh+'" rx="'+(lw/2)+'" fill="'+metal+'"/>';
+    s+='<rect x="'+(ex-lw*0.30)+'" y="'+(cy+lw*0.3)+'" width="'+(lw*0.34)+'" height="'+(lh*0.78)+'" rx="'+(lw*0.17)+'" fill="'+hi+'"/>';
+    s+='<rect x="'+(ex+lw*0.06)+'" y="'+(cy+lw*0.3)+'" width="'+(lw*0.18)+'" height="'+(lh*0.78)+'" rx="'+(lw*0.09)+'" fill="'+sh+'"/>';
+    return s;
   }
   function drawSchema(S, view){
     // Flache technische Massskizze — eigener, sauberer Stil (Branchen-Prinzip, kein Nachbau):
@@ -15932,13 +15950,13 @@ async function submitSkizze(e) {
     var fCol=colorOf(view==='aus'?S.fa:S.fi,view==='aus'?'fa':'fi')||'#ffffff';
     var isLight=/^#(f|e|d)/i.test(fCol);
     var frameStroke=isLight?'#b7bcc4':'rgba(0,0,0,0.30)';
-    var pzCol=(typeof _panzerHex==='function')?_panzerHex():'#f1f1ec';
+    var pzCol=(S.panzerFarbe && typeof PANZER_FARBEN!=='undefined' && PANZER_FARBEN[S.panzerFarbe]) ? PANZER_FARBEN[S.panzerFarbe].hex : ((typeof _panzerHex==='function')?_panzerHex():'#f1f1ec');
     var kastenFill=isLight?'#eaecef':fCol, kastenStroke=isLight?'#aeb4bc':frameStroke;
     var dim='#225eaa', dimLn='rgba(34,94,170,.40)';
     // Grosse, gut lesbare Masse; enge Raender (kein leerer Platz links/oben) → Fenster fuellt das Feld
-    var sz=Math.min(Math.max(bMm*0.072,56),90), absz=sz;
-    var mL=Math.max(bMm*0.05,56), mT=Math.max(bMm*0.05,56);
-    var mR=Math.max(bMm*0.30, absz*5.0), mB=Math.max(hMm*0.17, absz*5.0);
+    var sz=Math.min(Math.max(bMm*0.062,48),74), absz=sz;
+    var mL=Math.max(bMm*0.03,38), mT=Math.max(bMm*0.04,44);
+    var mR=Math.max(bMm*0.24, absz*4.2), mB=Math.max(hMm*0.13, absz*4.2);
     var vb=(-mL)+" "+(-mT)+" "+(bMm+mL+mR)+" "+(hMm+mT+mB);
     var s='<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+vb+'" style="width:100%;height:100%;display:block" preserveAspectRatio="xMidYMid meet">';
     s+='<defs><linearGradient id="schGlass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6fbff"/><stop offset="0.5" stop-color="#e3edf7"/><stop offset="1" stop-color="#eef6fc"/></linearGradient>'
@@ -15963,7 +15981,7 @@ async function submitSkizze(e) {
     }
     s+='<rect x="0" y="'+winTop+'" width="'+bMm+'" height="'+winMm+'" rx="7" fill="'+fCol+'" stroke="'+frameStroke+'" stroke-width="4"/>';
     s+='</g>';
-    var ABBR={"dk-r":"DKR","dk-l":"DKL","dreh-r":"DR","dreh-l":"DL","kipp":"Kipp","fest":"Fest"};
+    var OEFFNAME={"dk-r":"Dreh-Kipp rechts","dk-l":"Dreh-Kipp links","dreh-r":"Dreh rechts","dreh-l":"Dreh links","kipp":"Kipp","fest":"Fest"};
     for(var i=0;i<nFl;i++){
       var oeff=i===0?(S.oeff1||"dreh-r"):i===1?(S.oeff2||"dreh-l"):(S.oeff3||"fest");
       var gx=FR+i*sashW;
@@ -15985,16 +16003,23 @@ async function submitSkizze(e) {
       // Anschlag (DIN) + Griff — UNTER dem Panzer
       s+=schemaAnschlag(gx,gy2,sashW,gh2,oeff,'#586272');
       s+=schemaGriff(gx,gy2,sashW,gh2,oeff,'#384452');
-      var ab=ABBR[oeff]||"";
-      if(ab) s+=txt(gx+sashW*0.5, gy2+gh2-absz*0.62, ab, false, Math.min(sz*0.6, sashW*0.20), '#6f7882', true);
+      // Oeffnungstyp ausgeschrieben, klein + dezent unten ins Fenster (eigener Stil, keine Kuerzel-Kopie)
+      var nm=OEFFNAME[oeff]||"";
+      if(nm){
+        var lblSz=Math.min(sz*0.42, (sashW*0.86)/(nm.length*0.54));
+        var lx=gx+sashW*0.5, ly=gy2+gh2-lblSz*1.35;
+        var pw=nm.length*lblSz*0.55+lblSz*0.9, ph=lblSz*1.65;
+        s+='<rect x="'+(lx-pw/2)+'" y="'+(ly-ph/2)+'" width="'+pw+'" height="'+ph+'" rx="'+(ph/2)+'" fill="rgba(255,255,255,0.88)" stroke="rgba(34,94,170,0.16)" stroke-width="1"/>';
+        s+=txt(lx, ly, nm, false, lblSz, '#46505c', false);
+      }
       if(i>0) s+=line(gx,gy,gx,gy+gh,frameStroke,5);
     }
     // ===== Masse aussen (Markenfarbe, mit Abstand vom Fenster) =====
-    var by=hMm+mB*0.32, by2=hMm+mB*0.60;
+    var by=hMm+mB*0.30, by2=hMm+mB*0.58;
     s+=line(0,hMm+18,0,by2+20,dimLn,1.6)+line(bMm,hMm+18,bMm,by2+20,dimLn,1.6);
     if(nFl>1){ for(var k=0;k<nFl;k++){ var x0=FR+k*sashW, x1=x0+sashW; s+=hdim(by,x0,x1,Math.round(bMm/nFl)); s+=line(x0,hMm+18,x0,by+14,dimLn,1.6); } s+=hdim(by2,0,bMm,bMm,true); }
     else { s+=hdim(by2,0,bMm,bMm,true); }
-    var rxIn=bMm+mR*0.34, rxOut=bMm+mR*0.70;
+    var rxIn=bMm+mR*0.30, rxOut=bMm+mR*0.62;
     s+=line(bMm+18,0,rxOut+20,0,dimLn,1.6)+line(bMm+18,hMm,rxOut+20,hMm,dimLn,1.6);
     if(hasRoll){
       s+=line(bMm+18,rollH,rxIn+20,rollH,dimLn,1.6);
