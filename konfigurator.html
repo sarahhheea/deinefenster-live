@@ -14512,9 +14512,9 @@ function drawPrev() {
     }
     // FENSTER/BALKONTÜR: auf dem Rollladen-Schritt die flache Schemazeichnung (Kasten + Maße sauber)
     // statt 3D — professioneller Maß-Stil (Kunde 29.06.2026). 3D bleibt auf den anderen Schritten.
-    // Schema-Zeichnung deaktiviert -> Fenster/Balkontuer nutzen wieder das 3D-Modell (Kundenwunsch 29.06.2026:
-    // 3D sieht besser aus; nur der Kasten wird im 3D sauber gemacht). drawSchema bleibt fuer spaeter ungenutzt.
-    window._schemaActive = false;
+    // Flache Skizze (Referenz-Stil) auf Mass-/Rollladen-Schritt; 3D bleibt fuer Farbe/Glas/Griff.
+    (function(){ var _sk=(typeof WIZ_STEPS!=='undefined'&&WIZ_STEPS[wizIdx])?WIZ_STEPS[wizIdx].key:'';
+      window._schemaActive = ((S.prod==='kunststoff'||S.prod==='balkontuer') && (_sk==='rolladen'||_sk==='masse')); })();
     if (window._schemaActive) {
       if (ph)   ph.style.display   = 'none';
       if (wrap) wrap.style.display = 'none';
@@ -15849,71 +15849,62 @@ async function submitSkizze(e) {
     return '<rect x="'+bx+'" y="'+(y+h/2-gh/2)+'" width="'+gw+'" height="'+gh+'" rx="'+(gw/2)+'" fill="'+col+'"/>';
   }
   function drawSchema(S, view){
-    var bMm=S.bMm||1000, hMm=S.hMm||1200, fl=S.fluegel||'1-fluegel';
+    // Flache technische Skizze im Stil eines professionellen Konfigurators (Referenz meinfenster24):
+    // graue Kasten-Box oben, klares Fenster mit Anschlag-Zeichen + Kuerzel, Masse AUSSEN auf
+    // gestrichelten Hilfslinien (mit Abstand). Konvention: Kasten ist IN der eingegebenen Hoehe.
+    var bMm=S.bMm||1000, hMm=S.hMm||1200, fl=S.fluegel||"1-fluegel";
     var nFl=parseInt(String(fl).charAt(0))||1;
-    var hasRoll=S.roll&&S.roll!=='ohne';
+    var hasRoll=S.roll&&S.roll!=="ohne";
     var rollH=hasRoll?(parseInt(S.rollKasten,10)||ROLLO_H):0;
-    var winTop=rollH, winH=Math.max(hMm-rollH,160);
-    var fCol=colorOf(view==='aus'?S.fa:S.fi, view==='aus'?'fa':'fi')||'#f4f4f0';
-    var fBorder=(fCol==='#f4f4f0'||fCol==='#fdf6e3')?'#c4c4bc':'rgba(0,0,0,0.32)';
-    var dimCol='#225eaa', dimLn='rgba(34,94,170,0.55)';
-    var FR=Math.max(Math.min(bMm,winH)*0.055,42);
-    var sz=Math.min(Math.max(bMm*0.05,28),46), kfs=Math.min(sz,34);
-    var halo=' paint-order="stroke" stroke="#fff" stroke-width="'+(sz*0.22)+'" stroke-linejoin="round"';
-    var mL=30, mR=235, mT=hasRoll?20:40, mB=nFl>1?210:150;
-    var vb=(-mL)+' '+(-mT)+' '+(bMm+mL+mR)+' '+(hMm+mT+mB);
-    var s='<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+vb+'" style="width:100%;height:100%;display:block" preserveAspectRatio="xMidYMid meet">'+svgDefs(S.glasdekor);
-    // ── Rollladenkasten als eigener, realistischer Kasten OBEN ──
+    var winTop=rollH, winMm=Math.max(hMm-rollH,160);
+    var frameFill="#ffffff", frameStroke="#33373d", glassFill="#f7fbff";
+    var kastenFill="#e7e7e7", kastenStroke="#9aa0a6";
+    var dimCol="#3c4148", dimLn="#c2c6cc";
+    var sz=Math.min(Math.max(bMm*0.052,30),54), absz=sz*0.92;
+    var mL=Math.max(bMm*0.16,210), mR=Math.max(bMm*0.34,380), mT=46, mB=Math.max(hMm*0.16,160);
+    var vb=(-mL)+" "+(-mT)+" "+(bMm+mL+mR)+" "+(hMm+mT+mB);
+    var s='<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+vb+'" style="width:100%;height:100%;display:block" preserveAspectRatio="xMidYMid meet">';
+    var line=function(x1,y1,x2,y2,col,w,dash){ return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+col+'" stroke-width="'+(w||2)+'"'+(dash?' stroke-dasharray="7 6"':'')+' stroke-linecap="butt"/>'; };
+    var txt=function(x,y,t,rot,size){ var r=rot?(' transform="rotate(-90 '+x+' '+y+')"'):''; return '<text x="'+x+'" y="'+y+'"'+r+' text-anchor="middle" dominant-baseline="central" font-family="Manrope,Arial,sans-serif" font-weight="700" font-size="'+(size||absz)+'" fill="'+dimCol+'">'+t+'</text>'; };
+    // vertikale Massklammer bei x von y0..y1 (mit Endstrichen) + Zahl rechts daneben
+    var vdim=function(x,y0,y1,val){ var t=10; return line(x,y0,x,y1,dimLn,2.2)+line(x-t,y0,x+t,y0,dimLn,2.2)+line(x-t,y1,x+t,y1,dimLn,2.2)+txt(x+absz*0.7,(y0+y1)/2,val,true); };
+    var hdim=function(y,x0,x1,val){ var t=10; return line(x0,y,x1,y,dimLn,2.2)+line(x0,y-t,x0,y+t,dimLn,2.2)+line(x1,y-t,x1,y+t,dimLn,2.2)+txt((x0+x1)/2,y+absz*0.85,val); };
+    // ===== Kasten =====
     if(hasRoll){
-      var pc=(typeof _panzerHex==='function')?_panzerHex():'#eceae3';
-      s+='<rect x="0" y="0" width="'+bMm+'" height="'+rollH+'" rx="6" fill="'+pc+'"/>'
-        +'<rect x="0" y="0" width="'+bMm+'" height="'+rollH+'" rx="6" fill="url(#frameLum)" opacity="0.45"/>'
-        +frameBevel(0,0,bMm,rollH,4,Math.min(16,rollH*0.2))
-        +'<rect x="0" y="0" width="'+bMm+'" height="'+rollH+'" rx="6" fill="none" stroke="'+fBorder+'" stroke-width="2.5"/>';
-      var nl=Math.max(3,Math.round(rollH/40));
-      for(var li=1;li<nl;li++){ var ly=rollH*li/nl;
-        s+='<line x1="10" y1="'+ly+'" x2="'+(bMm-10)+'" y2="'+ly+'" stroke="rgba(0,0,0,0.09)" stroke-width="1.4"/>'
-          +'<line x1="10" y1="'+(ly+1.6)+'" x2="'+(bMm-10)+'" y2="'+(ly+1.6)+'" stroke="rgba(255,255,255,0.30)" stroke-width="1"/>'; }
-      s+='<text x="'+(bMm/2)+'" y="'+(rollH/2)+'" text-anchor="middle" dominant-baseline="central" font-family="Manrope,sans-serif" font-weight="800" font-size="'+kfs+'" fill="'+dimCol+'"'+halo+'>Kasten · '+rollH+' mm</text>';
+      s+='<rect x="0" y="0" width="'+bMm+'" height="'+rollH+'" fill="'+kastenFill+'" stroke="'+kastenStroke+'" stroke-width="2.5"/>';
+      s+=txt(bMm/2, rollH/2, "Kasten", false, Math.min(sz, rollH*0.46));
     }
-    // ── Fenster: realistischer Rahmen + Fluegel (echtes Glas, echter Griff, Scharniere) ──
-    s+='<g filter="url(#winGlow)">'
-      +'<rect x="0" y="'+winTop+'" width="'+bMm+'" height="'+winH+'" rx="4" fill="'+fCol+'"/>'
-      +'<rect x="0" y="'+winTop+'" width="'+bMm+'" height="'+winH+'" rx="4" fill="url(#frameLum)" opacity="0.22"/>'
-      +'<rect x="0" y="'+winTop+'" width="'+bMm+'" height="'+winH+'" rx="4" fill="none" stroke="'+fBorder+'" stroke-width="3"/>'
-      +'</g>'+frameBevel(0,winTop,bMm,winH,6,OFR);
-    var innerY=winTop+OFR, innerH=winH-2*OFR, sashW=(bMm-2*OFR)/nFl;
+    // ===== Fenster =====
+    s+='<rect x="0" y="'+winTop+'" width="'+bMm+'" height="'+winMm+'" fill="'+frameFill+'" stroke="'+frameStroke+'" stroke-width="3.5"/>';
+    var FR=Math.max(Math.min(bMm,winMm)*0.045,32);
+    var innerW=bMm-2*FR, sashW=innerW/nFl, gy=winTop+FR, gh=winMm-2*FR;
+    var ABBR={"dk-r":"DKR","dk-l":"DKL","dreh-r":"DR","dreh-l":"DL","kipp":"K","fest":"F"};
     for(var i=0;i<nFl;i++){
-      var oeff=i===0?(S.oeff1||'dreh-r'):i===1?(S.oeff2||'dreh-l'):(S.oeff3||'fest');
-      var sx=OFR+i*sashW;
-      // drawSash setzt den Griff gespiegelt (Drutex-Standard: dk-r = Band rechts -> Griff LINKS).
-      // Darum fuer drawSash die Seite drehen, damit Griff+Scharniere zum Anschlag (und 3D) passen.
-      var oeffSash=({'dk-r':'dk-l','dk-l':'dk-r','dreh-r':'dreh-l','dreh-l':'dreh-r'})[oeff]||oeff;
-      s+=drawSash(sx,innerY,sashW,innerH,oeffSash,S,view,fCol);
-      s+=schemaAnschlag(sx+SFR,innerY+SFR,sashW-2*SFR,innerH-2*SFR,oeff,'rgba(34,94,170,0.34)');
-      if(i>0) s+='<rect x="'+(sx-7)+'" y="'+innerY+'" width="14" height="'+innerH+'" fill="'+fCol+'"/>'+frameBevel(sx-7,innerY,14,innerH,2,7);
+      var oeff=i===0?(S.oeff1||"dreh-r"):i===1?(S.oeff2||"dreh-l"):(S.oeff3||"fest");
+      var gx=FR+i*sashW;
+      s+='<rect x="'+gx+'" y="'+gy+'" width="'+sashW+'" height="'+gh+'" fill="'+glassFill+'" stroke="#8b9098" stroke-width="1.6"/>';
+      s+=schemaAnschlag(gx,gy,sashW,gh,oeff,"#7b828c");
+      s+=schemaGriff(gx,gy,sashW,gh,oeff,"#5a626c");
+      var ab=ABBR[oeff]||"";
+      if(ab) s+=txt(gx+sashW/2, gy+gh*0.5, ab, false, Math.min(sz*0.86, sashW*0.24));
+      if(i>0) s+=line(gx,gy,gx,gy+gh,frameStroke,4.5);
     }
-    var wy1=hMm+48;
-    if(nFl>1){
-      for(var k=0;k<nFl;k++){
-        var x0=FR+k*sashW, x1=x0+sashW, fw=Math.round(bMm/nFl);
-        s+='<line x1="'+x0+'" y1="'+wy1+'" x2="'+x1+'" y2="'+wy1+'" stroke="'+dimLn+'" stroke-width="2.4"/>'
-          +'<line x1="'+x0+'" y1="'+(wy1-9)+'" x2="'+x0+'" y2="'+(wy1+9)+'" stroke="'+dimLn+'" stroke-width="2.4"/>'
-          +'<line x1="'+x1+'" y1="'+(wy1-9)+'" x2="'+x1+'" y2="'+(wy1+9)+'" stroke="'+dimLn+'" stroke-width="2.4"/>'
-          +'<text x="'+((x0+x1)/2)+'" y="'+(wy1+sz*0.86)+'" text-anchor="middle" font-family="Manrope,sans-serif" font-size="'+(sz*0.8)+'" fill="'+dimCol+'" font-weight="700"'+halo+'>'+fw+'</text>';
-      }
+    // ===== Masse aussen =====
+    // Breite unten (je Fluegel + gesamt)
+    var by=hMm+mB*0.40, by2=hMm+mB*0.78;
+    s+=line(0,hMm,0,by2+16,dimLn,1.4,true)+line(bMm,hMm,bMm,by2+16,dimLn,1.4,true);
+    if(nFl>1){ for(var k=0;k<nFl;k++){ var x0=FR+k*sashW, x1=x0+sashW; s+=hdim(by,x0,x1,Math.round(bMm/nFl)); s+=line(x0,hMm,x0,by+12,dimLn,1.4,true); } s+=hdim(by2,0,bMm,bMm); }
+    else { s+=hdim(by2,0,bMm,bMm); }
+    // Hoehen rechts: Kasten + Fenster (innere Linie), Gesamt (aeussere Linie)
+    var rxIn=bMm+mR*0.30, rxOut=bMm+mR*0.66;
+    s+=line(0,0,rxOut+16,0,dimLn,1.4,true)+line(0,hMm,rxOut+16,hMm,dimLn,1.4,true);
+    if(hasRoll){
+      s+=line(0,rollH,rxIn+16,rollH,dimLn,1.4,true);
+      s+=vdim(rxIn,0,rollH,rollH);           // Kasten-Hoehe
+      s+=vdim(rxIn,rollH,hMm,winMm);          // Fenster-Hoehe
     }
-    var wy2=nFl>1?hMm+125:hMm+55;
-    s+='<line x1="0" y1="'+wy2+'" x2="'+bMm+'" y2="'+wy2+'" stroke="'+dimLn+'" stroke-width="2.6"/>'
-      +'<line x1="0" y1="'+(wy2-11)+'" x2="0" y2="'+(wy2+11)+'" stroke="'+dimLn+'" stroke-width="2.6"/>'
-      +'<line x1="'+bMm+'" y1="'+(wy2-11)+'" x2="'+bMm+'" y2="'+(wy2+11)+'" stroke="'+dimLn+'" stroke-width="2.6"/>'
-      +'<text x="'+(bMm/2)+'" y="'+(wy2+sz+2)+'" text-anchor="middle" font-family="Manrope,sans-serif" font-size="'+sz+'" fill="'+dimCol+'" font-weight="800"'+halo+'>'+bMm+' mm</text>';
-    var hx=bMm+62;
-    s+='<line x1="'+hx+'" y1="0" x2="'+hx+'" y2="'+hMm+'" stroke="'+dimLn+'" stroke-width="2.6"/>'
-      +'<line x1="'+(hx-11)+'" y1="0" x2="'+(hx+11)+'" y2="0" stroke="'+dimLn+'" stroke-width="2.6"/>'
-      +'<line x1="'+(hx-11)+'" y1="'+hMm+'" x2="'+(hx+11)+'" y2="'+hMm+'" stroke="'+dimLn+'" stroke-width="2.6"/>'
-      +'<text x="'+(hx+36)+'" y="'+(hMm/2)+'" text-anchor="middle" transform="rotate(-90 '+(hx+36)+' '+(hMm/2)+')" font-family="Manrope,sans-serif" font-size="'+sz+'" fill="'+dimCol+'" font-weight="800"'+halo+'>'+hMm+' mm</text>';
-    s+='</svg>';
+    s+=vdim(rxOut,0,hMm,hMm);                  // Gesamthoehe
+    s+="</svg>";
     return s;
   }
 
