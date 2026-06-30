@@ -4288,7 +4288,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   #cfg-wizard .wiz-body:not(.cards-mode) .wiz-panel .wiz-twocol{justify-content:flex-start}
   #cfg-wizard .wiz-stage #prev-wrap{height:300px !important;width:250px !important;max-width:90% !important;margin:0 auto !important;background:transparent !important;border:0 !important;box-shadow:none !important;border-radius:0 !important}
   /* Flache Massskizze (Fenster/Balkontuer) braucht mehr Platz als das 3D, damit man Masse + Anschlag gut erkennt */
-  #cfg-wizard .wiz-stage #prev-wrap.wiz-schema{height:430px !important;width:360px !important;max-width:98% !important}
+  #cfg-wizard .wiz-stage #prev-wrap.wiz-schema{height:500px !important;width:380px !important;max-width:99% !important}
   #cfg-wizard #prev-3d-hint{display:none !important}
   /* Maß-Bemaßung am Fenster: Breite unten, Höhe rechts (wie üblicher Konfigurator-Standard) */
   #cfg-wizard .wiz-dim-b,#cfg-wizard .wiz-dim-h{position:absolute;display:flex;align-items:center;justify-content:center;color:#6a7a8f;font-family:'Manrope',sans-serif;font-size:12px;font-weight:600;pointer-events:none;z-index:5}
@@ -15914,28 +15914,27 @@ async function submitSkizze(e) {
   }
   function schemaGriff(x,y,w,h,oeff,col){
     if(!oeff||oeff==='fest') return '';
-    var metal=col||'#384452', hi='rgba(255,255,255,0.34)', sh='rgba(0,0,0,0.22)';
+    // Realistischer Fenstergriff in Silber/Metallic (Griffe sind im Normalfall nicht schwarz)
+    var metal='url(#schGrip)', edge='#878e98', hi='rgba(255,255,255,0.55)';
     if(oeff==='kipp'){
       // Kippgriff oben Mitte: Rosette + waagerechter Hebel
       var cx=x+w/2, cy=y+Math.max(h*0.06,18);
-      var bw=Math.max(w*0.18,52), bh=Math.max(w*0.055,16);
-      return '<rect x="'+(cx-bh*0.7)+'" y="'+(cy-bh*0.7)+'" width="'+(bh*1.4)+'" height="'+(bh*1.4)+'" rx="'+(bh*0.5)+'" fill="'+metal+'"/>'
-           + '<rect x="'+(cx-bw/2)+'" y="'+(cy-bh/2)+'" width="'+bw+'" height="'+bh+'" rx="'+(bh/2)+'" fill="'+metal+'"/>'
-           + '<rect x="'+(cx-bw*0.40)+'" y="'+(cy-bh*0.30)+'" width="'+(bw*0.7)+'" height="'+(bh*0.30)+'" rx="'+(bh*0.15)+'" fill="'+hi+'"/>';
+      var bw=Math.max(w*0.18,54), bh=Math.max(w*0.058,17);
+      return '<rect x="'+(cx-bh*0.75)+'" y="'+(cy-bh*0.75)+'" width="'+(bh*1.5)+'" height="'+(bh*1.5)+'" rx="'+(bh*0.5)+'" fill="'+metal+'" stroke="'+edge+'" stroke-width="1.4"/>'
+           + '<rect x="'+(cx-bw/2)+'" y="'+(cy-bh/2)+'" width="'+bw+'" height="'+bh+'" rx="'+(bh/2)+'" fill="'+metal+'" stroke="'+edge+'" stroke-width="1.4"/>'
+           + '<rect x="'+(cx-bw*0.40)+'" y="'+(cy-bh*0.26)+'" width="'+(bw*0.7)+'" height="'+(bh*0.26)+'" rx="'+(bh*0.13)+'" fill="'+hi+'"/>';
     }
     // Dreh/Dreh-Kipp: Rosette + Hebel nach UNTEN auf der Griffseite (gegenueber dem Band)
     var hingeR=(oeff==='dreh-r'||oeff==='dk-r');
     var ex = hingeR ? x+Math.max(w*0.055,20) : x+w-Math.max(w*0.055,20); // Griffseite
     var cy=y+h*0.5;
-    var lw=Math.max(w*0.05,19);                 // Hebelbreite
-    var rw=lw*1.9, rh=Math.max(h*0.13,50);      // Rosette (Grundplatte)
-    var lh=Math.max(h*0.17,62);                 // Hebellaenge nach unten
+    var lw=Math.max(w*0.052,20);                // Hebelbreite
+    var rw=lw*1.95, rh=Math.max(h*0.14,54);     // Rosette (Grundplatte)
+    var lh=Math.max(h*0.18,66);                 // Hebellaenge nach unten
     var s='';
-    s+='<rect x="'+(ex-rw/2)+'" y="'+(cy-rh/2)+'" width="'+rw+'" height="'+rh+'" rx="'+(rw*0.32)+'" fill="'+metal+'"/>';
-    s+='<rect x="'+(ex-rw/2)+'" y="'+(cy-rh/2)+'" width="'+(rw*0.34)+'" height="'+rh+'" rx="'+(rw*0.17)+'" fill="'+hi+'"/>';
-    s+='<rect x="'+(ex-lw/2)+'" y="'+cy+'" width="'+lw+'" height="'+lh+'" rx="'+(lw/2)+'" fill="'+metal+'"/>';
-    s+='<rect x="'+(ex-lw*0.30)+'" y="'+(cy+lw*0.3)+'" width="'+(lw*0.34)+'" height="'+(lh*0.78)+'" rx="'+(lw*0.17)+'" fill="'+hi+'"/>';
-    s+='<rect x="'+(ex+lw*0.06)+'" y="'+(cy+lw*0.3)+'" width="'+(lw*0.18)+'" height="'+(lh*0.78)+'" rx="'+(lw*0.09)+'" fill="'+sh+'"/>';
+    s+='<rect x="'+(ex-rw/2)+'" y="'+(cy-rh/2)+'" width="'+rw+'" height="'+rh+'" rx="'+(rw*0.34)+'" fill="'+metal+'" stroke="'+edge+'" stroke-width="1.5"/>';
+    s+='<rect x="'+(ex-lw/2)+'" y="'+(cy-lw*0.3)+'" width="'+lw+'" height="'+lh+'" rx="'+(lw/2)+'" fill="'+metal+'" stroke="'+edge+'" stroke-width="1.5"/>';
+    s+='<rect x="'+(ex-lw*0.26)+'" y="'+(cy+lw*0.2)+'" width="'+(lw*0.30)+'" height="'+(lh*0.74)+'" rx="'+(lw*0.15)+'" fill="'+hi+'"/>';
     return s;
   }
   function drawSchema(S, view){
@@ -15954,13 +15953,14 @@ async function submitSkizze(e) {
     var kastenFill=isLight?'#eaecef':fCol, kastenStroke=isLight?'#aeb4bc':frameStroke;
     var dim='#225eaa', dimLn='rgba(34,94,170,.40)';
     // Grosse, gut lesbare Masse; enge Raender (kein leerer Platz links/oben) → Fenster fuellt das Feld
-    var sz=Math.min(Math.max(bMm*0.062,48),74), absz=sz;
-    var mL=Math.max(bMm*0.03,38), mT=Math.max(bMm*0.04,44);
-    var mR=Math.max(bMm*0.24, absz*4.2), mB=Math.max(hMm*0.13, absz*4.2);
+    var sz=Math.min(Math.max(bMm*0.065,50),78), absz=sz;
+    var mL=Math.max(bMm*0.028,36), mT=Math.max(bMm*0.038,42);
+    var mR=Math.max(bMm*0.22, absz*3.8), mB=Math.max(hMm*0.12, absz*3.8);
     var vb=(-mL)+" "+(-mT)+" "+(bMm+mL+mR)+" "+(hMm+mT+mB);
     var s='<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+vb+'" style="width:100%;height:100%;display:block" preserveAspectRatio="xMidYMid meet">';
     s+='<defs><linearGradient id="schGlass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6fbff"/><stop offset="0.5" stop-color="#e3edf7"/><stop offset="1" stop-color="#eef6fc"/></linearGradient>'
       +'<linearGradient id="pzSheen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity="0.30"/><stop offset="0.45" stop-color="#ffffff" stop-opacity="0.05"/><stop offset="1" stop-color="#000000" stop-opacity="0.14"/></linearGradient>'
+      +'<linearGradient id="schGrip" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f4f6f8"/><stop offset="0.42" stop-color="#cfd4da"/><stop offset="0.72" stop-color="#aeb4bd"/><stop offset="1" stop-color="#cdd2d8"/></linearGradient>'
       +'<filter id="schShadow" x="-25%" y="-25%" width="150%" height="150%"><feDropShadow dx="0" dy="7" stdDeviation="11" flood-color="rgba(20,42,82,0.18)"/></filter></defs>';
     var line=function(x1,y1,x2,y2,col,w,dash){ return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+col+'" stroke-width="'+(w||2)+'"'+(dash?' stroke-dasharray="7 6"':'')+' stroke-linecap="round"/>'; };
     var txt=function(x,y,t,rot,size,col,halo){ var r=rot?(' transform="rotate(-90 '+x+' '+y+')"'):''; var po=halo?' paint-order="stroke" stroke="#fff" stroke-width="6" stroke-linejoin="round"':''; return '<text x="'+x+'" y="'+y+'"'+r+po+' text-anchor="middle" dominant-baseline="central" font-family="Manrope,Arial,sans-serif" font-weight="800" font-size="'+(size||absz)+'" fill="'+(col||dim)+'">'+t+'</text>'; };
@@ -16015,11 +16015,11 @@ async function submitSkizze(e) {
       if(i>0) s+=line(gx,gy,gx,gy+gh,frameStroke,5);
     }
     // ===== Masse aussen (Markenfarbe, mit Abstand vom Fenster) =====
-    var by=hMm+mB*0.30, by2=hMm+mB*0.58;
+    var by=hMm+mB*0.28, by2=hMm+mB*0.56;
     s+=line(0,hMm+18,0,by2+20,dimLn,1.6)+line(bMm,hMm+18,bMm,by2+20,dimLn,1.6);
     if(nFl>1){ for(var k=0;k<nFl;k++){ var x0=FR+k*sashW, x1=x0+sashW; s+=hdim(by,x0,x1,Math.round(bMm/nFl)); s+=line(x0,hMm+18,x0,by+14,dimLn,1.6); } s+=hdim(by2,0,bMm,bMm,true); }
     else { s+=hdim(by2,0,bMm,bMm,true); }
-    var rxIn=bMm+mR*0.30, rxOut=bMm+mR*0.62;
+    var rxIn=bMm+mR*0.28, rxOut=bMm+mR*0.58;
     s+=line(bMm+18,0,rxOut+20,0,dimLn,1.6)+line(bMm+18,hMm,rxOut+20,hMm,dimLn,1.6);
     if(hasRoll){
       s+=line(bMm+18,rollH,rxIn+20,rollH,dimLn,1.6);
