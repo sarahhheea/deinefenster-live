@@ -12051,7 +12051,9 @@ function fensterPriceParts(){
     ['oeff1','oeff2','oeff3'].slice(0,cnt).forEach(k=>{ if (S[k] && F_OEFF[S[k]]!=null) oeff += F_OEFF[S[k]]; });
   }
   const area = (b/1000)*(h/1000);
-  const prof = frame * (_PROFIL_PCT[S.profil]||0); // Profil = % vom Basispreis (größenabhängig)
+  // Profil-Aufpreis (Energy) ist ~pro Fenster (am 1-Flügel-Grundpreis), nicht × Flügelzahl — sonst bei Mehrflügel viel zu hoch.
+  const _profBaseF = (S.fluegel==='stulp'||String(S.fluegel||'').charAt(0)==='2'||String(S.fluegel||'').charAt(0)==='3') ? fensterMatrix(b,h) : frame;
+  const prof = _profBaseF * (_PROFIL_PCT[S.profil]||0);
   // Farbe prozentual auf Rahmen-Körper (außen/innen)
   const faCol = S.fa && S.fa!=='weiss', fiCol = S.fi && S.fi!=='weiss';
   const farbPct = ((faCol&&fiCol) ? 0.19 : ((faCol||fiCol) ? 0.125 : 0)) + _farbPremDelta();
@@ -12127,7 +12129,9 @@ function balkonPriceParts(){
   const is2F=(S.fluegel==='2-fluegel'||S.fluegel==='stulp');
   let frame = is2F ? _matLookup(b,h,_BLK_B2,_BLK_H2,_BLK_M2) : _matLookup(b,h,_BLK_B1,_BLK_H1,_BLK_M1);
   const area=(b/1000)*(h/1000);
-  const prof = frame * (_PROFIL_PCT[S.profil]||0); // Profil % vom Basispreis (größenabhängig)
+  // Profil-Aufpreis am 1-Flügel-Grundpreis (nicht × Flügelzahl), sonst bei 2-Flügel/Stulp zu hoch.
+  const _profBaseB = is2F ? _matLookup(b,h,_BLK_B1,_BLK_H1,_BLK_M1) : frame;
+  const prof = _profBaseB * (_PROFIL_PCT[S.profil]||0);
   const faCol=S.fa&&S.fa!=='weiss', fiCol=S.fi&&S.fi!=='weiss';
   const farbPct=((faCol&&fiCol)?0.18:((faCol||fiCol)?0.125:0))+_farbPremDelta();
   let price = (frame+prof)*(1+farbPct);
