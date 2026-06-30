@@ -4445,7 +4445,7 @@ html body #sidebar-wrap #kfg-sum-block { display: none !important; }
   #cfg-wizard .wiz-card .wiz-vis svg{width:60%;height:60%;display:block}
   /* Griff-Bild auf hellgrauer Box (weiße Griffe sonst unsichtbar) */
   #cfg-wizard .wiz-card .wiz-gbox{width:100%;aspect-ratio:1/1;border-radius:10px;background:#eef2f8;display:flex;align-items:center;justify-content:center;overflow:hidden}
-  #cfg-wizard .wiz-card .wiz-gbox img{width:80%;height:80%;object-fit:contain;background:transparent;border-radius:0;aspect-ratio:auto;padding:0}
+  #cfg-wizard .wiz-card .wiz-gbox img{width:100%;height:100%;object-fit:contain;background:transparent;border-radius:0;aspect-ratio:auto;padding:0}
   #cfg-wizard .wiz-card .wiz-gbox-empty{color:#9aa7b5;font-family:'Manrope',sans-serif;font-size:13px;font-weight:600;text-align:center;padding:8px}
   #cfg-wizard .hac-vis{position:relative;width:100%}
   #cfg-wizard .hac-vis img{width:100%;height:auto;display:block;border-radius:10px}
@@ -7629,7 +7629,7 @@ function wizRenderExtras(){
 }
 function wizRebuildSteps(){ const ck=WIZ_STEPS[wizIdx]&&WIZ_STEPS[wizIdx].key; WIZ_STEPS=buildWizSteps(S.prod||'kunststoff'); let ni=WIZ_STEPS.findIndex(function(s){return s.key===ck;}); if(ni<0)ni=Math.min(wizIdx,WIZ_STEPS.length-1); wizIdx=Math.max(0,ni); }
 // Türmodelle (Studio-Bilder, vorhanden) — finale Auswahl/Bilder folgen in Phase 2
-const WIZ_DOORS=['vollglas-inox','halbglas-inox','florida-lr-inox','montana-2-lr-inox','montana-3-lr-inox','ohio-inox','colorado-inox','alaska-2-inox','alaska-1-inox','montana-1-inox','nebraska-lcr-inox','pennsylvania-1-inox','pennsylvania-2-lr-inox','pennsylvania-3-lr-inox','texas-c-inox','texas-lr-inox'].map(function(k){return {key:k,name:k.replace(/-inox$/,'').replace(/-lr$|-lcr$|-c$/,'').replace(/-/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();}).trim(),img:'img/drutex-tueren/studio/'+k+'.webp?v=20260630t'};});
+const WIZ_DOORS=['vollglas-inox','halbglas-inox','florida-lr-inox','montana-2-lr-inox','montana-3-lr-inox','ohio-inox','colorado-inox','alaska-2-inox','alaska-1-inox','montana-1-inox','nebraska-lcr-inox','pennsylvania-1-inox','pennsylvania-2-lr-inox','pennsylvania-3-lr-inox','texas-c-inox','texas-lr-inox'].map(function(k){return {key:k,name:k.replace(/-inox$/,'').replace(/-lr$|-lcr$|-c$/,'').replace(/-/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();}).trim(),img:'img/drutex-tueren/studio/'+k+'.webp?v=20260630b'};});
 function wizRenderPsk(){ return '<div class="wiz-cards">'+Object.keys(P.pskKammer).map(function(k){ var o=P.pskKammer[k]; return '<div class="wiz-card'+(k===S.pskKammer?' sel':'')+'" onclick="wizSetPsk(\''+k+'\')"><img src="img/karten/profil/'+k+'.png?v=20260609c" alt="'+o.name+'" loading="lazy"><div class="wiz-cn">'+o.name+'</div><div class="wiz-csub">'+(o.sub||'')+'</div></div>'; }).join('')+'</div>'; }
 function wizSetPsk(v){ wizSet('pskKammer',v); }
 function wizRenderTuermodell(){ return '<div class="wiz-cards">'+WIZ_DOORS.map(function(d){return '<div class="wiz-card'+(d.key===S.tuerModell?' sel':'')+'" onclick="wizSet(\'tuerModell\',\''+d.key+'\')"><div class="wiz-gbox"><img src="'+d.img+'" alt="'+d.name+'" loading="lazy"></div><div class="wiz-cn">'+d.name+'</div></div>';}).join('')+'</div>'; }
