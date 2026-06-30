@@ -7915,13 +7915,6 @@ function wizRenderAngebot(){
   var inCart=(typeof cart!=='undefined')?cart:[];
   var total=inCart.length+1;
   var h='<div class="wiz-ohead">Ihre Anfrage · '+total+' '+(total===1?'Produkt':'Produkte')+'</div>';
-  h+='<div class="wiz-addmore-hero">'
-      +'<div class="wiz-am-txt">'
-        +'<strong>Mehrere Produkte, ein Angebot</strong>'
-        +'<span>Fügen Sie so viele Fenster &amp; Türen hinzu, wie Sie brauchen — alles in einer Anfrage.</span>'
-      +'</div>'
-      +'<button type="button" class="wiz-addmore-btn" onclick="wizAddAnother()"><span>+</span> Weiteres Produkt hinzufügen</button>'
-    +'</div>';
   h+='<div class="wiz-ocards">';
   inCart.forEach(function(it){ h+=card(it.config||{}, {id:it.id, thumb:it.thumb, unit:it.unitPrice}); });
   h+=card(S, {current:true, thumb:wizLastThumb});
@@ -7933,14 +7926,14 @@ function wizRenderAngebot(){
   var _ovDi=orderDelivery();
   var _ovShip=_ovDi.deliverable?(_ovDi.cost||0):0;
   var _ovLief=_ovDi.deliverable?(_ovDi.hasHS?'300 €':(_ovDi.cost===0?'kostenlos':fmt(_ovDi.cost))):'Abholung im Lager';
-  if(SHOW_PRICES) h+='<div style="margin-top:16px;background:#f7f9fd;border:1px solid #dfe5ee;border-radius:14px;padding:15px 17px">'
+  if(SHOW_PRICES) h+='<div style="margin:14px auto 0;max-width:600px;background:#f7f9fd;border:1px solid #dfe5ee;border-radius:14px;padding:15px 17px">'
     +'<div style="display:flex;justify-content:space-between;font-size:14px;color:#5a6678;padding:3px 0"><span>Zwischensumme</span><span>'+fmt(_ovSum)+'</span></div>'
     +'<div style="display:flex;justify-content:space-between;font-size:14px;color:#5a6678;padding:3px 0"><span>Lieferung</span><span>'+_ovLief+'</span></div>'
     +'<div style="display:flex;justify-content:space-between;font-size:19px;font-weight:800;color:#1a2942;padding:8px 0 0;border-top:1px solid #dfe5ee;margin-top:6px"><span>Gesamtpreis</span><span>'+fmt(_ovSum+_ovShip)+'</span></div>'
     +'<div style="font-size:12.5px;color:#225eaa;font-weight:600;margin-top:9px">'+delivText(_ovDi)+'</div>'
     +'<div style="font-size:11.5px;color:#8a8a8a;margin-top:4px">Alle Preise inkl. MwSt · unverbindlicher Richtpreis — Ihr finales Angebot erhalten Sie per E-Mail.</div>'
   +'</div>';
-  h+='<button type="button" class="wiz-addmore" onclick="wizAddAnother()"><span>+</span> Weiteres Produkt hinzufügen</button>';
+  h+='<button type="button" class="wiz-addmore" onclick="wizAddAnother()"><span>+</span> Weiteres Produkt hinzufügen <em>— alles in einer Anfrage</em></button>';
   return h;
 }
 function wizCartRemove(id){ if(typeof removeFromCart==='function'){removeFromCart(id);} else if(typeof cart!=='undefined'){cart=cart.filter(function(i){return i.id!==id;}); if(typeof saveCart==='function')saveCart();} wizRenderPanel(); }
@@ -16611,12 +16604,12 @@ async function submitSkizze(e) {
   #cfg-wizard .wiz-stossh-inline .wiz-stossh-pill small{ font-size:9.5px; font-weight:600; color:#7a8aa3; }
   #cfg-wizard .wiz-stossh-inline .wiz-stossh-pill.sel small{ color:#225eaa; }
   /* === Bestellübersicht — aufgeräumte Warenkorb-Karten (Baymard-Linie) === */
-  #cfg-wizard .wiz-ohead{ font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:16px; color:#14233f; margin:0 auto 16px; max-width:680px; text-align:left; }
-  #cfg-wizard .wiz-ocards{ max-width:680px; margin:0 auto; display:flex; flex-direction:column; gap:16px; }
-  #cfg-wizard .wiz-ocard{ display:grid; grid-template-columns:104px 1fr minmax(190px,auto); gap:18px; align-items:center; background:#fff; border:1px solid #e5e9f0; border-radius:16px; padding:20px; box-shadow:0 1px 3px rgba(20,40,80,.04); text-align:left; }
+  #cfg-wizard .wiz-ohead{ font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:16px; color:#14233f; margin:0 auto 12px; max-width:600px; text-align:left; }
+  #cfg-wizard .wiz-ocards{ max-width:600px; margin:0 auto; display:flex; flex-direction:column; gap:14px; }
+  #cfg-wizard .wiz-ocard{ display:grid; grid-template-columns:118px 1fr auto; gap:14px; align-items:center; background:#fff; border:1px solid #e5e9f0; border-radius:16px; padding:16px 18px; box-shadow:0 1px 3px rgba(20,40,80,.04); text-align:left; }
   #cfg-wizard .wiz-ocard.is-current{ border-color:rgba(34,94,170,.32); }
   /* Produkt-Bild = Live-Abgriff der 3D-Vorschau (genau das konfigurierte Fenster). BG weiss = 3D-Szene jetzt weiss → randlos auf der weissen Karte; contain = schneidet nie ab. */
-  #cfg-wizard .wiz-othumb{ width:104px; height:118px; border-radius:12px; background:#fff; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  #cfg-wizard .wiz-othumb{ width:118px; height:132px; border-radius:12px; background:#fff; display:flex; align-items:center; justify-content:center; overflow:hidden; }
   #cfg-wizard .wiz-othumb img{ width:100%; height:100%; max-width:none; max-height:none; object-fit:contain; filter:drop-shadow(0 3px 7px rgba(20,40,80,.14)); }
   /* 3D-Vorschau jetzt weiss (für randlose Produktbilder) → in der Live-Vorschau als bewusste, saubere „Produkt-Vorschau-Karte" rahmen, damit der weisse Block nicht als Fremdkörper auf dem hellgrauen Konfigurator wirkt. */
   #cfg-wizard #haus3d-wrap{ box-shadow:0 6px 22px rgba(20,40,80,.10); border:1px solid #eef2f8 !important; border-radius:16px !important; }
@@ -16642,7 +16635,8 @@ async function submitSkizze(e) {
   #cfg-wizard .wiz-obtn-edit:hover{ background:#eef4fb; border-color:#a9c8ec; }
   #cfg-wizard .wiz-obtn-del{ color:#6b7280; border-color:transparent; flex:0 0 auto; padding:10px 14px; }
   #cfg-wizard .wiz-obtn-del:hover{ background:#fdf3f3; color:#b04a4a; }
-  #cfg-wizard .wiz-addmore{ margin:28px auto 0; max-width:760px; }
+  #cfg-wizard .wiz-addmore{ margin:14px auto 0; max-width:600px; }
+  #cfg-wizard .wiz-addmore em{ font-style:normal; font-weight:600; color:#7a8aa0; font-size:13px; }
   #cfg-wizard .wiz-addmore-hero{ max-width:760px; margin-left:auto; margin-right:auto; }
   /* Handy: Bild + Name/Specs oben nebeneinander, Stepper + Aktionen in eigener Reihe darunter */
   @media(max-width:560px){
@@ -16653,6 +16647,15 @@ async function submitSkizze(e) {
   }
   /* Auf der Uebersicht keine grosse Einzel-Vorschau — jede Karte hat ihr Thumbnail */
   #cfg-wizard .wiz-body.angebot-wide .wiz-stage{ display:none !important; }
+  /* === Desktop-Dichte (Kundenwunsch 30.06.2026: weniger scrollen, mehr auf einen Blick) ===
+     NUR Desktop (>=768px) — der Handy-App-Look bleibt unangetastet. Engerer vertikaler
+     Rhythmus, damit dichte Schritte (z. B. Farbe) ohne Ueberlauf auf einen Bildschirm passen. */
+  @media(min-width:768px){
+    #cfg-wizard .wiz-head{ margin-bottom:12px; }
+    #cfg-wizard .wiz-head h2{ font-size:clamp(22px,2.6vw,30px); }
+    #cfg-wizard .wiz-head .wiz-sub{ margin-top:4px; font-size:14px; }
+    #cfg-wizard .wiz-body{ gap:24px; }
+  }
   /* === STUFE 3: Karten-Schritte passen ohne Scrollen aufs Handy (2 pro Reihe, kompaktes Bild) === */
   @media (max-width:767px){
     /* Wizard im Flow = Vollbild-App (deckt Seiten-Banner + Nav ab) → mehr Platz, alles ohne Scrollen */
