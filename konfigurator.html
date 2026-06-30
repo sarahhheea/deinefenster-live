@@ -7876,9 +7876,9 @@ function wizRenderAngebot(){
     var name=nm('prod',c.prod);
     var qty=c.qty||1;
     var qtyId=opts.current?'current':opts.id;
-    // Ruhige Spec-Zeilen (grau, · getrennt) statt schwerer Icon-Reihen
-    var line1=[ (c.bMm||'–')+' × '+(c.hMm||'–')+' mm', sh(nm('profil',c.profil)), sh(nm('glas',c.glas)) ].filter(Boolean).join(' · ');
+    // Gut lesbare Eigenschaften-Liste (Label + Wert), Maße prominent — statt gedraengter Mini-Zeilen
     var farbe=sh(nm('fa',c.fa))+((c.fi&&c.fi!==c.fa)?(' / innen '+sh(nm('fi',c.fi))):'');
+    var faHex=(P.fa&&P.fa[c.fa]&&P.fa[c.fa].hex)||'#e6ebf3';
     var extras=[];
     if(c.roll&&c.roll!=='ohne')extras.push('Rolladen');
     if(c.sproTyp&&c.sproTyp!=='keine')extras.push('Sprossen');
@@ -7886,7 +7886,15 @@ function wizRenderAngebot(){
     if(c.sicherGlas&&c.sicherGlas!=='kein')extras.push('Sicherheitsglas');
     if(c.glasdekor&&c.glasdekor!=='klar')extras.push('Glasdekor');
     if(c.fd&&c.fd!=='schwarz')extras.push('graue Dichtung');
-    var line2='Farbe: '+farbe+' · '+(extras.length?extras.join(' · '):'Standard-Ausstattung');
+    var extrasTxt=extras.length?extras.join(' · '):'Standard-Ausstattung';
+    var specRow=function(k,v,cls){ return '<div class="wiz-ospk">'+k+'</div><div class="wiz-ospv'+(cls?' '+cls:'')+'">'+v+'</div>'; };
+    var specsGrid='<div class="wiz-ospecs">'
+      +specRow('Maße (B × H)','<b>'+(c.bMm||'–')+' × '+(c.hMm||'–')+' mm</b>','wiz-ospv-strong')
+      +specRow('Profil', sh(nm('profil',c.profil))||'–')
+      +specRow('Glas', sh(nm('glas',c.glas))||'–')
+      +specRow('Farbe', '<span class="wiz-osw" style="background:'+faHex+'"></span>'+farbe)
+      +specRow('Ausstattung', extrasTxt)
+      +'</div>';
     var qtyCtl='<div class="wiz-oqtyctl" role="group" aria-label="Menge ändern">'
       +'<button type="button" class="wiz-oqtybtn" onclick="wizCardQty(\''+qtyId+'\',-1)" aria-label="Menge verringern">−</button>'
       +'<span class="wiz-oqtyval"><b>'+qty+'</b> Stück</span>'
@@ -7894,15 +7902,14 @@ function wizRenderAngebot(){
       +'</div>';
     var _cunit=opts.current?((typeof calcUnit==='function')?calcUnit():null):((typeof opts.unit==='number')?opts.unit:null);
     var _csub=(_cunit!=null)?_r2(_cunit*qty):null;
-    var _priceHtml=(SHOW_PRICES && _csub!=null)?('<div style="text-align:right;margin-bottom:7px"><div style="font-size:16px;font-weight:800;color:#225eaa;line-height:1.1">'+fmt(_csub)+'</div>'+((qty>1)?('<div style="font-size:11px;color:#7a8699">Einzelpreis '+fmt(_cunit)+'</div>'):'')+'<div style="font-size:10px;color:#9aa6b8">inkl. MwSt</div></div>'):'';
+    var _priceHtml=(SHOW_PRICES && _csub!=null)?('<div style="text-align:right;margin-bottom:9px"><div style="font-size:23px;font-weight:800;color:#225eaa;line-height:1.05">'+fmt(_csub)+'</div>'+((qty>1)?('<div style="font-size:12px;color:#7a8699">Einzelpreis '+fmt(_cunit)+'</div>'):'')+'<div style="font-size:11px;color:#9aa6b8">inkl. MwSt</div></div>'):'';
     var editClick=opts.current?'wizGo(0)':('wizEditItem(\''+opts.id+'\')');
     var delClick=opts.current?'wizRemoveCurrent()':('wizCartRemove(\''+opts.id+'\')');
     return '<div class="wiz-ocard'+(opts.current?' is-current':'')+'">'
       +'<div class="wiz-othumb"><img src="'+img+'" alt="'+name+'" loading="lazy" decoding="async"></div>'
       +'<div class="wiz-oinfo">'
         +'<div class="wiz-oname">'+name+(opts.current?' <span class="wiz-obadge">AKTUELL</span>':'')+'</div>'
-        +'<div class="wiz-ospec-line">'+line1+'</div>'
-        +'<div class="wiz-ospec-line">'+line2+'</div>'
+        +specsGrid
       +'</div>'
       +'<div class="wiz-oside">'+_priceHtml+qtyCtl
         +'<div class="wiz-oacts">'
@@ -7926,10 +7933,10 @@ function wizRenderAngebot(){
   var _ovDi=orderDelivery();
   var _ovShip=_ovDi.deliverable?(_ovDi.cost||0):0;
   var _ovLief=_ovDi.deliverable?(_ovDi.hasHS?'300 €':(_ovDi.cost===0?'kostenlos':fmt(_ovDi.cost))):'Abholung im Lager';
-  if(SHOW_PRICES) h+='<div style="margin:14px auto 0;max-width:600px;background:#f7f9fd;border:1px solid #dfe5ee;border-radius:14px;padding:15px 17px">'
-    +'<div style="display:flex;justify-content:space-between;font-size:14px;color:#5a6678;padding:3px 0"><span>Zwischensumme</span><span>'+fmt(_ovSum)+'</span></div>'
-    +'<div style="display:flex;justify-content:space-between;font-size:14px;color:#5a6678;padding:3px 0"><span>Lieferung</span><span>'+_ovLief+'</span></div>'
-    +'<div style="display:flex;justify-content:space-between;font-size:19px;font-weight:800;color:#1a2942;padding:8px 0 0;border-top:1px solid #dfe5ee;margin-top:6px"><span>Gesamtpreis</span><span>'+fmt(_ovSum+_ovShip)+'</span></div>'
+  if(SHOW_PRICES) h+='<div style="margin:16px auto 0;max-width:1100px;background:#f7f9fd;border:1px solid #dfe5ee;border-radius:16px;padding:18px 24px">'
+    +'<div style="display:flex;justify-content:space-between;font-size:15px;color:#5a6678;padding:4px 0"><span>Zwischensumme</span><span>'+fmt(_ovSum)+'</span></div>'
+    +'<div style="display:flex;justify-content:space-between;font-size:15px;color:#5a6678;padding:4px 0"><span>Lieferung</span><span>'+_ovLief+'</span></div>'
+    +'<div style="display:flex;justify-content:space-between;font-size:21px;font-weight:800;color:#1a2942;padding:10px 0 0;border-top:1px solid #dfe5ee;margin-top:7px"><span>Gesamtpreis</span><span>'+fmt(_ovSum+_ovShip)+'</span></div>'
     +'<div style="font-size:12.5px;color:#225eaa;font-weight:600;margin-top:9px">'+delivText(_ovDi)+'</div>'
     +'<div style="font-size:11.5px;color:#8a8a8a;margin-top:4px">Alle Preise inkl. MwSt · unverbindlicher Richtpreis — Ihr finales Angebot erhalten Sie per E-Mail.</div>'
   +'</div>';
@@ -16620,12 +16627,12 @@ async function submitSkizze(e) {
   #cfg-wizard .wiz-stossh-inline .wiz-stossh-pill small{ font-size:9.5px; font-weight:600; color:#7a8aa3; }
   #cfg-wizard .wiz-stossh-inline .wiz-stossh-pill.sel small{ color:#225eaa; }
   /* === Bestellübersicht — aufgeräumte Warenkorb-Karten (Baymard-Linie) === */
-  #cfg-wizard .wiz-ohead{ font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:16px; color:#14233f; margin:0 auto 12px; max-width:600px; text-align:left; }
-  #cfg-wizard .wiz-ocards{ max-width:600px; margin:0 auto; display:flex; flex-direction:column; gap:14px; }
-  #cfg-wizard .wiz-ocard{ display:grid; grid-template-columns:118px 1fr auto; gap:14px; align-items:center; background:#fff; border:1px solid #e5e9f0; border-radius:16px; padding:16px 18px; box-shadow:0 1px 3px rgba(20,40,80,.04); text-align:left; }
+  #cfg-wizard .wiz-ohead{ font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:17px; color:#14233f; margin:0 auto 14px; max-width:1100px; text-align:left; }
+  #cfg-wizard .wiz-ocards{ max-width:1100px; margin:0 auto; display:flex; flex-direction:column; gap:16px; }
+  #cfg-wizard .wiz-ocard{ display:grid; grid-template-columns:230px 1fr auto; gap:32px; align-items:start; background:#fff; border:1px solid #e5e9f0; border-radius:18px; padding:24px 28px; box-shadow:0 1px 3px rgba(20,40,80,.04); text-align:left; }
   #cfg-wizard .wiz-ocard.is-current{ border-color:rgba(34,94,170,.32); }
   /* Produkt-Bild = Live-Abgriff der 3D-Vorschau (genau das konfigurierte Fenster). BG weiss = 3D-Szene jetzt weiss → randlos auf der weissen Karte; contain = schneidet nie ab. */
-  #cfg-wizard .wiz-othumb{ width:118px; height:132px; border-radius:12px; background:#fff; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  #cfg-wizard .wiz-othumb{ width:230px; height:250px; border-radius:14px; background:#fff; display:flex; align-items:center; justify-content:center; overflow:hidden; }
   #cfg-wizard .wiz-othumb img{ width:100%; height:100%; max-width:none; max-height:none; object-fit:contain; filter:drop-shadow(0 3px 7px rgba(20,40,80,.14)); }
   /* 3D-Vorschau jetzt weiss (für randlose Produktbilder) → in der Live-Vorschau als bewusste, saubere „Produkt-Vorschau-Karte" rahmen, damit der weisse Block nicht als Fremdkörper auf dem hellgrauen Konfigurator wirkt. */
   #cfg-wizard #haus3d-wrap{ box-shadow:0 6px 22px rgba(20,40,80,.10); border:1px solid #eef2f8 !important; border-radius:16px !important; }
@@ -16635,9 +16642,15 @@ async function submitSkizze(e) {
      frei (Kundenwunsch 23.06.2026: kein „Extra-Ding"/Bild-Rahmen mehr um das Fenster). */
   #cfg-wizard #fenster3d-wrap{ box-shadow:none !important; border:0 !important; border-radius:0 !important; background:transparent !important; overflow:hidden !important; }
   #cfg-wizard .wiz-oinfo{ min-width:0; }
-  #cfg-wizard .wiz-oname{ font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:17px; color:#14233f; display:flex; align-items:center; flex-wrap:wrap; gap:6px 9px; margin:0 0 6px; }
+  #cfg-wizard .wiz-oname{ font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:22px; color:#14233f; display:flex; align-items:center; flex-wrap:wrap; gap:6px 10px; margin:0 0 14px; }
   #cfg-wizard .wiz-obadge{ font-family:'Plus Jakarta Sans',sans-serif; font-size:10px; font-weight:800; color:#225eaa; background:#e8f0fb; border-radius:999px; padding:3px 9px; letter-spacing:.04em; }
   #cfg-wizard .wiz-ospec-line{ font-family:'Manrope',sans-serif; font-size:14px; color:#6b7280; line-height:1.55; }
+  /* Gut lesbare Eigenschaften-Liste (Label + Wert) — grosszuegig, klar erkennbar */
+  #cfg-wizard .wiz-ospecs{ display:grid; grid-template-columns:auto 1fr; column-gap:26px; row-gap:11px; align-items:baseline; max-width:560px; }
+  #cfg-wizard .wiz-ospk{ font-family:'Manrope',sans-serif; font-size:14.5px; color:#8693a6; font-weight:600; white-space:nowrap; }
+  #cfg-wizard .wiz-ospv{ font-family:'Plus Jakarta Sans',sans-serif; font-size:15.5px; color:#1a2942; font-weight:700; line-height:1.35; }
+  #cfg-wizard .wiz-ospv-strong b{ font-size:17px; color:#225eaa; }
+  #cfg-wizard .wiz-osw{ width:15px; height:15px; border-radius:5px; border:1px solid rgba(0,0,0,.16); display:inline-block; vertical-align:-3px; margin-right:8px; }
   #cfg-wizard .wiz-oside{ display:flex; flex-direction:column; gap:10px; align-items:stretch; }
   #cfg-wizard .wiz-oqtyctl{ display:flex; align-items:center; gap:6px; background:#f4f7fc; border:1px solid #e1e9f4; border-radius:11px; padding:4px; }
   #cfg-wizard .wiz-oqtybtn{ width:44px; height:44px; flex:0 0 auto; border-radius:9px; border:1px solid #d8e2f0; background:#fff; color:#225eaa; font-size:22px; font-weight:800; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; }
@@ -16651,15 +16664,31 @@ async function submitSkizze(e) {
   #cfg-wizard .wiz-obtn-edit:hover{ background:#eef4fb; border-color:#a9c8ec; }
   #cfg-wizard .wiz-obtn-del{ color:#6b7280; border-color:transparent; flex:0 0 auto; padding:10px 14px; }
   #cfg-wizard .wiz-obtn-del:hover{ background:#fdf3f3; color:#b04a4a; }
-  #cfg-wizard .wiz-addmore{ margin:14px auto 0; max-width:600px; }
+  #cfg-wizard .wiz-addmore{ margin:16px auto 0; max-width:1100px; }
   #cfg-wizard .wiz-addmore em{ font-style:normal; font-weight:600; color:#7a8aa0; font-size:13px; }
   #cfg-wizard .wiz-addmore-hero{ max-width:760px; margin-left:auto; margin-right:auto; }
   /* Handy: Bild + Name/Specs oben nebeneinander, Stepper + Aktionen in eigener Reihe darunter */
+  /* Tablet/schmaler Desktop (561–900px): Preis+Menge+Aktionen klappen als Zeile unters Produkt,
+     damit die 3. Spalte nicht mit den Eigenschaften kollidiert. Bild bleibt gross. */
+  @media(max-width:900px){
+    #cfg-wizard .wiz-ocard{ grid-template-columns:190px 1fr; gap:16px 24px; }
+    #cfg-wizard .wiz-othumb{ width:190px; height:210px; }
+    #cfg-wizard .wiz-oside{ grid-column:1 / -1; flex-direction:row; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; margin-top:12px; padding-top:14px; border-top:1px solid #eef1f6; }
+    #cfg-wizard .wiz-oside>div:first-child{ margin-bottom:0 !important; text-align:left !important; }
+    #cfg-wizard .wiz-oqtyctl, #cfg-wizard .wiz-oacts{ flex:0 0 auto; }
+  }
   @media(max-width:560px){
     #cfg-wizard .wiz-ohead, #cfg-wizard .wiz-ocards, #cfg-wizard .wiz-addmore, #cfg-wizard .wiz-addmore-hero{ max-width:none; }
-    #cfg-wizard .wiz-ocard{ grid-template-columns:64px 1fr; gap:8px 14px; padding:16px; }
-    #cfg-wizard .wiz-othumb{ width:64px; height:74px; }
-    #cfg-wizard .wiz-oside{ grid-column:1 / -1; flex-direction:column; align-items:stretch; gap:8px; margin-top:6px; }
+    #cfg-wizard .wiz-ocard{ grid-template-columns:104px 1fr; gap:10px 16px; padding:18px; align-items:start; }
+    #cfg-wizard .wiz-oside{ flex-direction:column; align-items:stretch; justify-content:flex-start; border-top:0; padding-top:0; }
+    #cfg-wizard .wiz-oside>div:first-child{ text-align:left !important; }
+    #cfg-wizard .wiz-othumb{ width:104px; height:116px; }
+    #cfg-wizard .wiz-oname{ font-size:18px; margin-bottom:10px; }
+    #cfg-wizard .wiz-ospecs{ grid-template-columns:auto 1fr; column-gap:16px; row-gap:8px; max-width:none; }
+    #cfg-wizard .wiz-ospk{ font-size:13px; }
+    #cfg-wizard .wiz-ospv{ font-size:14px; }
+    #cfg-wizard .wiz-ospv-strong b{ font-size:15px; }
+    #cfg-wizard .wiz-oside{ grid-column:1 / -1; flex-direction:column; align-items:stretch; gap:8px; margin-top:10px; }
   }
   /* Auf der Uebersicht keine grosse Einzel-Vorschau — jede Karte hat ihr Thumbnail */
   #cfg-wizard .wiz-body.angebot-wide .wiz-stage{ display:none !important; }
