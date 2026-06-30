@@ -7921,7 +7921,10 @@ function wizRenderAngebot(){
   }
   var inCart=(typeof cart!=='undefined')?cart:[];
   var total=inCart.length+1;
-  var h='<div class="wiz-ohead">Ihre Anfrage · '+total+' '+(total===1?'Produkt':'Produkte')+'</div>';
+  var h='<div class="wiz-ohead-row">'
+      +'<div class="wiz-ohead">Ihre Anfrage · '+total+' '+(total===1?'Produkt':'Produkte')+'</div>'
+      +'<button type="button" class="wiz-addmore-top" onclick="wizAddAnother()"><span>+</span> Weiteres Produkt hinzufügen</button>'
+    +'</div>';
   h+='<div class="wiz-ocards">';
   inCart.forEach(function(it){ h+=card(it.config||{}, {id:it.id, thumb:it.thumb, unit:it.unitPrice}); });
   h+=card(S, {current:true, thumb:wizLastThumb});
@@ -7940,7 +7943,6 @@ function wizRenderAngebot(){
     +'<div style="font-size:12.5px;color:#225eaa;font-weight:600;margin-top:9px">'+delivText(_ovDi)+'</div>'
     +'<div style="font-size:11.5px;color:#8a8a8a;margin-top:4px">Alle Preise inkl. MwSt · unverbindlicher Richtpreis — Ihr finales Angebot erhalten Sie per E-Mail.</div>'
   +'</div>';
-  h+='<button type="button" class="wiz-addmore" onclick="wizAddAnother()"><span>+</span> Weiteres Produkt hinzufügen <em>— alles in einer Anfrage</em></button>';
   return h;
 }
 function wizCartRemove(id){ if(typeof removeFromCart==='function'){removeFromCart(id);} else if(typeof cart!=='undefined'){cart=cart.filter(function(i){return i.id!==id;}); if(typeof saveCart==='function')saveCart();} wizRenderPanel(); }
@@ -16627,7 +16629,11 @@ async function submitSkizze(e) {
   #cfg-wizard .wiz-stossh-inline .wiz-stossh-pill small{ font-size:9.5px; font-weight:600; color:#7a8aa3; }
   #cfg-wizard .wiz-stossh-inline .wiz-stossh-pill.sel small{ color:#225eaa; }
   /* === Bestellübersicht — aufgeräumte Warenkorb-Karten (Baymard-Linie) === */
-  #cfg-wizard .wiz-ohead{ font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:17px; color:#14233f; margin:0 auto 14px; max-width:1100px; text-align:left; }
+  #cfg-wizard .wiz-ohead-row{ display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; max-width:1100px; margin:0 auto 14px; }
+  #cfg-wizard .wiz-ohead{ font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:17px; color:#14233f; margin:0; text-align:left; }
+  #cfg-wizard .wiz-addmore-top{ display:inline-flex; align-items:center; gap:8px; font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:14.5px; color:#225eaa; background:#eef4fd; border:1.5px solid #bcd3f2; border-radius:11px; padding:11px 18px; cursor:pointer; transition:background .12s,border-color .12s; }
+  #cfg-wizard .wiz-addmore-top:hover{ background:#e1ecfb; border-color:#9cc0ed; }
+  #cfg-wizard .wiz-addmore-top span{ font-size:19px; line-height:1; margin-top:-1px; }
   #cfg-wizard .wiz-ocards{ max-width:1100px; margin:0 auto; display:flex; flex-direction:column; gap:16px; }
   #cfg-wizard .wiz-ocard{ display:grid; grid-template-columns:230px 1fr auto; gap:32px; align-items:start; background:#fff; border:1px solid #e5e9f0; border-radius:18px; padding:24px 28px; box-shadow:0 1px 3px rgba(20,40,80,.04); text-align:left; }
   #cfg-wizard .wiz-ocard.is-current{ border-color:rgba(34,94,170,.32); }
