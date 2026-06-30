@@ -14512,10 +14512,11 @@ function drawPrev() {
     }
     // FENSTER/BALKONTÜR: auf dem Rollladen-Schritt die flache Schemazeichnung (Kasten + Maße sauber)
     // statt 3D — professioneller Maß-Stil (Kunde 29.06.2026). 3D bleibt auf den anderen Schritten.
-    // Flache Skizze (Referenz-Stil) auf Mass-/Rollladen-Schritt; 3D bleibt fuer Farbe/Glas/Griff.
-    (function(){ var _sk=(typeof WIZ_STEPS!=='undefined'&&WIZ_STEPS[wizIdx])?WIZ_STEPS[wizIdx].key:'';
-      window._schemaActive = ((S.prod==='kunststoff'||S.prod==='balkontuer') && (_sk==='rolladen'||_sk==='masse')); })();
+    // Flache Skizze abgeschaltet (war der Konkurrenz zu aehnlich + inkonsistent). Fenster/Balkontuer
+    // nutzen ueberall das 3D mit sichtbarem Panzer (Panzerfarbe waehlbar); Masse sauber im 3D-Overlay.
+    window._schemaActive = false;
     if (window._schemaActive) {
+      var _ovEl=document.getElementById('dim-overlay'); if(_ovEl) _ovEl.style.display='none'; // altes 3D-Blau weg
       if (ph)   ph.style.display   = 'none';
       if (wrap) wrap.style.display = 'none';
       ['haus3d-wrap','fenster3d-wrap','balkon3d-wrap','hst3d-wrap'].forEach(function(id){var e=document.getElementById(id); if(e)e.style.display='none';});
@@ -15863,7 +15864,7 @@ async function submitSkizze(e) {
     var sz=Math.min(Math.max(bMm*0.052,30),54), absz=sz*0.92;
     var mL=Math.max(bMm*0.16,210), mR=Math.max(bMm*0.34,380), mT=46, mB=Math.max(hMm*0.16,160);
     var vb=(-mL)+" "+(-mT)+" "+(bMm+mL+mR)+" "+(hMm+mT+mB);
-    var s='<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+vb+'" style="width:100%;height:100%;display:block" preserveAspectRatio="xMidYMid meet">';
+    var s='<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+vb+'" style="width:100%;height:100%;display:block" preserveAspectRatio="xMidYMid meet">'+svgDefs(S.glasdekor);
     var line=function(x1,y1,x2,y2,col,w,dash){ return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+col+'" stroke-width="'+(w||2)+'"'+(dash?' stroke-dasharray="7 6"':'')+' stroke-linecap="butt"/>'; };
     var txt=function(x,y,t,rot,size){ var r=rot?(' transform="rotate(-90 '+x+' '+y+')"'):''; return '<text x="'+x+'" y="'+y+'"'+r+' text-anchor="middle" dominant-baseline="central" font-family="Manrope,Arial,sans-serif" font-weight="700" font-size="'+(size||absz)+'" fill="'+dimCol+'">'+t+'</text>'; };
     // vertikale Massklammer bei x von y0..y1 (mit Endstrichen) + Zahl rechts daneben
