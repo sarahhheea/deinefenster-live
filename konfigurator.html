@@ -14464,6 +14464,24 @@ function updateDimOverlay(_retry){
     h+=vbr(rEx+2, Ttop, seam);
     h+=lab(rEx+4.2, (Ttop+seam)/2, rollH+' mm', true, false);
   }
+  // ── Anschlag-Diagonalen (Oeffnungsrichtung) ueber dem Glas des 3D-Modells, pro Fluegel ──
+  if(S.prod==='kunststoff'||S.prod==='balkontuer'){
+    var nFl=parseInt(String(S.fluegel||'1').charAt(0))||1;
+    var giX=(R-L)*0.10, giY=(Bw-seam)*0.07;
+    var aL=L+giX, aR=R-giX, aT=seam+giY, aB=Bw-giY, asW=(aR-aL)/nFl;
+    var poly=function(pts){ return '<polyline points="'+pts+'" fill="none" stroke="#2a3340" stroke-opacity="0.5" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round" stroke-linecap="round"/>'; };
+    var ans='';
+    for(var ai=0; ai<nFl; ai++){
+      var oe = ai===0?(S.oeff1||'dk-r'):ai===1?(S.oeff2||'dk-l'):(S.oeff3||'fest');
+      if(!oe||oe==='fest') continue;
+      var ax=aL+ai*asW, ay=aT, aw=asW, ah=aB-aT;
+      var hingeR=(oe==='dreh-r'||oe==='dk-r'), hingeL=(oe==='dreh-l'||oe==='dk-l'), isK=(oe==='kipp'||oe==='dk-r'||oe==='dk-l');
+      if(hingeR) ans+=poly(ax+','+ay+' '+(ax+aw)+','+(ay+ah/2)+' '+ax+','+(ay+ah));
+      else if(hingeL) ans+=poly((ax+aw)+','+ay+' '+ax+','+(ay+ah/2)+' '+(ax+aw)+','+(ay+ah));
+      if(isK) ans+=poly(ax+','+ay+' '+(ax+aw/2)+','+(ay+ah)+' '+(ax+aw)+','+ay);
+    }
+    if(ans) h+='<svg style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none" viewBox="0 0 100 100" preserveAspectRatio="none">'+ans+'</svg>';
+  }
   ov.innerHTML=h;
   ov.style.display='block';
 }
