@@ -17463,7 +17463,17 @@ function customerDetailsHtml(items,sum){
     }).join('');
     var priceRow = (SHOW_PRICES && unit!=null)?('<tr><td style="padding:6px 14px 2px 0;color:#8a8170;font-size:13px;white-space:nowrap;vertical-align:top;">Richtpreis</td><td style="padding:6px 0 2px;color:#1a2336;font-size:13px;font-weight:700;">'+eur(unit)+(qty>1?(' × '+qty+' = '+eur(unit*qty)):'')+' <span style="font-weight:400;color:#8a8170;">inkl. MwSt</span></td></tr>'):'';
     var head=n>1?('Produkt '+(i+1)+' von '+n+': '+pn+(qty>1?(' · '+qty+'×'):'')):(pn+(qty>1?(' · '+qty+'×'):''));
-    return '<div style="margin-top:14px;"><div style="font-family:Georgia,serif;font-size:15px;color:#1a2336;margin-bottom:4px;">'+esc(head)+'</div><table cellpadding="0" cellspacing="0" style="border-collapse:collapse;">'+rows+priceRow+'</table></div>';
+    var thumb=(it&&it.thumb)?it.thumb:null;
+    var specsTbl='<table cellpadding="0" cellspacing="0" style="border-collapse:collapse;">'+rows+priceRow+'</table>';
+    var imgCell=thumb?('<img src="'+thumb+'" alt="Maßskizze" width="200" style="width:200px;max-width:100%;height:auto;border:1px solid #e4e7ec;border-radius:8px;background:#ffffff;display:block;" />'):'';
+    // Eigenschaften links, Maßskizze direkt daneben (wie die Zusammenfassung im Konfigurator)
+    return '<div style="margin-top:16px;">'
+      +'<div style="font-family:Georgia,serif;font-size:15px;color:#1a2336;margin-bottom:6px;">'+esc(head)+'</div>'
+      +'<table cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;"><tr>'
+        +'<td valign="top" style="vertical-align:top;padding-right:14px;">'+specsTbl+'</td>'
+        +(imgCell?('<td valign="top" align="right" width="210" style="vertical-align:top;width:210px;">'+imgCell+'</td>'):'')
+      +'</tr></table>'
+      +'</div>';
   }).join('');
   var summaryHtml='';
   if(sum && SHOW_PRICES){
@@ -17518,8 +17528,8 @@ function d2submit(e){
   // Jedes Produkt kommt mit VOLLEN Details in die Firmen-Mail (nicht nur Kurzzeile).
   function _eur(n){ return (Number(n)||0).toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €'; }
   const _curUnit=calcUnit();
-  const _allItems=(typeof cart!=='undefined'?cart.map(function(it){return {c:it.config, unit:(typeof it.unitPrice==='number'?it.unitPrice:null), qty:(it.qty||1)};}):[])
-    .concat([{c:S, unit:_curUnit, qty:S.qty||1}]);
+  const _allItems=(typeof cart!=='undefined'?cart.map(function(it){return {c:it.config, unit:(typeof it.unitPrice==='number'?it.unitPrice:null), qty:(it.qty||1), thumb:it.thumb||null};}):[])
+    .concat([{c:S, unit:_curUnit, qty:S.qty||1, thumb:((typeof wizLastThumb!=='undefined'&&wizLastThumb&&(typeof wizLastThumbProd==='undefined'||wizLastThumbProd===S.prod))?wizLastThumb:null)}]);
   const _allCfgs=_allItems.map(function(x){return x.c;});
   const _multi=_allItems.length>1;
   let _tp=['Neue Anfrage über DeineFenster.de','══════════════════════════════════════════','','KONTAKTDATEN','Name:        '+name,'Telefon:     '+(tel||'–'),'E-Mail:      '+email,'Versand:     '+versandText,'','Angebots-Nr: '+offerId];
