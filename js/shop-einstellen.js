@@ -958,6 +958,13 @@ function resetFormular() {
   const _exp = document.getElementById('formExport'); if (_exp) _exp.checked = false;
   const _sp = document.getElementById('formSonderpreis'); if (_sp) _sp.checked = false;
   const _st = document.getElementById('formStandnummer'); if (_st) _st.value = '';
+  // FIX 01.07.2026 (Kundenwunsch): Edit-Kontext MUSS zurück, sonst wird jedes weitere
+  // Inserat nach dem Bearbeiten ein Update auf DIESELBE ID -> ueberschreibt vorherige
+  // Inserate (Ursache: mehrere Inserate teilten sich eine ID). "Naechstes Inserat" = echter Neu-Insert.
+  STATE.editMode = false;
+  STATE.editId = null;
+  const _vb = document.getElementById('veroeffentlichenBtn');
+  if (_vb) _vb.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">publish</span> Inserat veröffentlichen';
   STATE.bilder = [];
   // Mehrfach-Auswahl-Felder zurücksetzen
   STATE.zustaende = ['neu'];
