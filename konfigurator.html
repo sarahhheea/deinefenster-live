@@ -12178,8 +12178,9 @@ function balkonPriceParts(){
   price += _rolladenDelta(b,h,S.roll); // Rolladen breiten-getrieben (größenabhängig)
   if(S.sproTyp && S.sproTyp!=='keine' && F_SPRO[S.sproTyp]) price += F_SPRO[S.sproTyp][S.sproDicke]||0;
   price += F_SICHER[S.sicher]||0;
-  if(S.balkonSchwelle && P.balkonSchwelle[S.balkonSchwelle]) price += P.balkonSchwelle[S.balkonSchwelle].add||0;
-  return { unit: unserPreis(price) };
+  if(S.balkonSchwelle==='alu-20'){ price += Math.max(0, Math.round(86 + 0.0674*(b-1300))); } // Alu-Schwelle breitenabhängig an Markt geeicht (~88-135€, knapp drunter)
+  else if(S.balkonSchwelle && P.balkonSchwelle[S.balkonSchwelle]) price += P.balkonSchwelle[S.balkonSchwelle].add||0;
+  return { unit: unserPreisFenster(price) };
 }
 
 // ── SCHIEBETÜR-PREISMODELL (PSK; IGLO-HS = Richtwert) ──
