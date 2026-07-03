@@ -11920,6 +11920,8 @@ function unserPreis(ref){ ref=Number(ref)||0; var p=Math.round((ref-10)/10)*10; 
 // Fenster-spezifische enge Marge: ~5€ unter Markt (Matrizen sind so geeicht dass floor(ref-5) nie über Markt liegt). Nur Fenster; andere Produkte nutzen weiter unserPreis() bis sie geeicht sind.
 // Nachbildung ist kalkuliert und liegt IMMER knapp unter Vergleichspreis (nie drüber). Auf glatte 5er abrunden → Kunde zahlt einen glatten Preis, 1–5 € unter Markt.
 function unserPreisFenster(ref){ ref=Number(ref)||0; return Math.max(0, Math.floor(ref/5)*5); }
+// Sichere enge Marge für HST/PSK/Haustür (Basis ≈ Markt): ~5€ drunter, floor garantiert nie über Markt.
+function unserPreis5(ref){ ref=Number(ref)||0; return Math.max(0, Math.floor(ref-5)); }
 // Grundpreis brutto (1-Flügel DrehKipp, Iglo5 Classic, weiss, 2-fach), monoton
 const _FMAT_B = [450,600,700,800,900,1000,1100,1200,1300,1400,1500];
 const _FMAT_H = [400,500,600,700,800,900,1000,1100,1200,1300,1400,1500,1600,1700];
@@ -12219,7 +12221,7 @@ function hstPriceParts(){
   if(P.pskGriff && P.pskGriff[S.pskGriff]) price += P.pskGriff[S.pskGriff].add||0; // PSK-Griff-Variante (aktuell 0)
   if(P.hstSchwelle && P.hstSchwelle[S.hstSchwelle]) price += P.hstSchwelle[S.hstSchwelle].add||0;
   if(P.hstTeilung && P.hstTeilung[S.hstTeilung]) price += P.hstTeilung[S.hstTeilung].add||0;
-  return { unit: unserPreis(price) };
+  return { unit: unserPreis5(price) };
 }
 // Rolladen-Aufpreis für Schiebetüren: PSK linear; Hebe-Schiebe einteilig bis ~3,1 m, darüber zweiteilig (Stufe).
 function _hstRolladenDelta(b, profil){
@@ -12254,9 +12256,10 @@ function haustuerPriceParts(){
   const farbPct=((faCol&&fiCol)?0.17:((faCol||fiCol)?0.145:0))+_farbPremDelta(); // Haustür-Farbe + Premium-Aufschlag
   let price = frame*(1+farbPct);
   if(S.glas==='3fach') price += Math.round(24.4*(b*h/1e6));
-  if(S.tuerGriffAussen==='stoss-q45r') price += 100; // Edelstahl-Stoßgriff
+  if(S.tuerGriffAussen==='stoss-q45r') price += 100; // Edelstahl-Stoßgriff (Markt 99.31)
+  else if(S.tuerGriffAussen && String(S.tuerGriffAussen).indexOf('knauf')===0) price += 5; // Knauf (Markt +5.21)
   price += F_SICHER[S.sicher]||0;
-  return { unit: unserPreis(price) };
+  return { unit: unserPreis5(price) };
 }
 
 function calcUnit() {
