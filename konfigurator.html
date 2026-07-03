@@ -11917,17 +11917,23 @@ const PREIS_FAKTOR = 0.97; // interner Kalkulationsfaktor
 const SHOW_PRICES = true; // Preise live sichtbar
 // Endpreis je Stück: rund 10 € unter dem Listenpreis, auf glatte 10 € gerundet (nie aufdringlich exakt)
 function unserPreis(ref){ ref=Number(ref)||0; var p=Math.round((ref-10)/10)*10; return p<20?Math.max(0,Math.round(ref/10)*10):p; }
+// Fenster-spezifische enge Marge: ~5€ unter Markt (Matrizen sind so geeicht dass floor(ref-5) nie über Markt liegt). Nur Fenster; andere Produkte nutzen weiter unserPreis() bis sie geeicht sind.
+function unserPreisFenster(ref){ ref=Number(ref)||0; return Math.max(0, Math.floor(ref-4)); }
 // Grundpreis brutto (1-Flügel DrehKipp, Iglo5 Classic, weiss, 2-fach), monoton
-const _FMAT_B = [450,600,800,1000,1200,1400,1500];
-const _FMAT_H = [400,600,800,1000,1200,1400,1700];
+const _FMAT_B = [450,600,700,800,1000,1200,1400,1500];
+const _FMAT_H = [400,600,700,800,900,1000,1200,1400,1500,1600,1700];
 const _FMAT = [
-  [134,134,156,182,203,224,234], // H395
-  [134,134,167,196,219,244,254], // H600
-  [134,134,174,201,222,250,261], // H800
-  [160,160,181,206,225,257,267], // H1000
-  [175,175,197,224,244,264,273], // H1200
-  [190,190,214,242,264,285,296], // H1400
-  [221,221,252,280,304,328,340], // H1700
+  [134,134,134,142,173,203,225,234], // H400
+  [134,134,134,142,173,219,244,255], // H600
+  [134,134,134,142,173,225,262,273], // H700
+  [134,134,142,150,173,225,264,273], // H800
+  [141,141,150,159,161,225,264,273], // H900
+  [160,160,169,181,206,209,264,273], // H1000
+  [175,175,185,197,224,244,264,273], // H1200
+  [190,190,201,214,242,264,285,296], // H1400
+  [198,198,208,223,251,273,295,306], // H1500
+  [205,205,216,231,261,284,306,317], // H1600
+  [221,221,233,252,280,304,328,340], // H1700
 ];
 function _interp1(x, xs, ys){
   const n = xs.length;
@@ -11952,23 +11958,39 @@ const _FESTMAT = [
   [132, 142, 174, 207, 238], // B1700
 ];
 // 3-Flügel-Preistabelle (an Markt-Raster geeicht, Werte ~10 € konservativ → nie über Vergleichswert). Frame ohne Öffnungs-Abzug; oeff bildet die Öffnungsart ab.
-const _3FL_B = [1600,2200,2800,3600], _3FL_H = [1000,1300,1600];
+const _3FL_B = [1600,1900,2200,2500,2800,3200,3600], _3FL_H = [600,700,800,900,1000,1200,1400,1600];
+// Werte = Markt(dk-fest-dk) + 98, weil der Code F_OEFF['fest']=-98 für den Mittelflügel wieder abzieht → Standard-Kombi landet auf Markt-5.
 const _3FL_M = [
-  [543,594,672,776], // H1000
-  [608,665,751,862], // H1300
-  [675,737,831,948], // H1600
+  [436,447,477,531,591,662,764], // H600
+  [457,468,500,531,591,662,786], // H700
+  [479,490,523,556,591,662,786], // H800
+  [502,514,549,582,618,662,786], // H900
+  [553,566,605,645,683,734,786], // H1000
+  [597,611,653,695,736,789,840], // H1200
+  [641,656,700,745,789,845,904], // H1400
+  [685,701,748,796,842,900,959], // H1600
 ];
 // 2-Flügel-Preistabellen (an Markt-Raster geeicht). Pfosten (Mittelpfosten) + Stulp getrennt — Stulp ist teurer. Frame ohne Öffnungs-Abzug; oeff bildet die Öffnungsart ab.
-const _2FL_B = [1000,1400,1800,2200], _2FL_H = [900,1300,1600];
+const _2FL_B = [1000,1200,1400,1600,1800,2000,2400,2800], _2FL_H = [600,700,800,900,1000,1200,1400,1600];
 const _2FL_P = [
-  [260,298,351,392], // H900  Pfosten
-  [331,382,445,495], // H1300
-  [373,428,497,553], // H1600
+  [205,223,238,280,320,340,426,488], // H600  Pfosten
+  [219,238,254,280,320,340,448,525], // H700
+  [232,252,268,296,320,340,448,525], // H800
+  [246,268,285,312,338,358,448,525], // H900
+  [278,301,320,353,380,401,448,525], // H1000
+  [305,331,352,385,415,437,488,525], // H1200
+  [332,361,384,417,449,474,529,573], // H1400
+  [359,391,415,449,484,510,570,608], // H1600
 ];
 const _2FL_S = [
-  [282,320,373,415], // H900  Stulp
-  [364,413,477,529], // H1300
-  [412,467,536,594], // H1600
+  [219,238,252,296,339,359,448,516], // H600  Stulp
+  [236,255,270,296,339,359,481,579], // H700
+  [252,271,288,315,339,359,481,600], // H800
+  [268,289,307,334,359,380,481,600], // H900
+  [302,325,345,377,404,425,481,600], // H1000
+  [334,359,381,415,443,467,530,600], // H1200
+  [366,395,417,452,483,508,574,648], // H1400
+  [398,430,454,488,523,549,622,702], // H1600
 ];
 function fensterFestMatrix(b,h){
   if (b>1700) b=1700; if (h>1700) h=1700; if (b<500) b=500; if (h<500) h=500;
@@ -11993,11 +12015,11 @@ const F_GLAS     = { '2fach':0, '3fach':28.96 };
 const F_SCHALL   = { 'ohne':0, 'extra':62 };
 const F_SICHERGLAS = { 'kein':0, 'esg':40, 'vsg':61 };
 const F_GLASDEKOR= { 'klar':0, 'satinato':32, 'chinchilla':32, 'master-carre':66 };
-const F_GRIFF    = { 'mistral':0, 'nevada':0, 'dublin':0, 'kwadrat':0, 'hoppe':7, 'pz-beid':113 };
+const F_GRIFF    = { 'mistral':0, 'nevada':0, 'dublin':0, 'kwadrat':0, 'hoppe':6, 'pz-beid':113 };
 function _griffLockAdd(){ return 5; } // Aufpreis abschließbarer Zylinder
 const F_ROLL     = { 'ohne':0, 'gurt':141.30, 'motor':267.82 };
 const F_SICHER   = { 'wk1':0, 'rc2':87 }; // RC2-Einbruchschutz
-const F_SPRO     = { 'aufgesetzt':{'27':28,'45':38,'65':48}, 'szr':{'18':13,'26':18,'45':25} };
+const F_SPRO     = { 'aufgesetzt':{'27':28,'45':38,'65':48}, 'szr':{'18':12,'26':17,'45':24} };
 // ── GRÖSSENABHÄNGIGE Aufpreise ──
 const _PROFIL_PCT = { 'iglo5':0, 'iglo-energy':0.20, 'iglo-edge':0.467 }; // Profil = % vom Basispreis (Edge 1-Punkt-Schätzung)
 // Premium-Farben (Sonderfarben/Holzdekore höherer Preisstufe) — kosten mehr Farbaufschlag als Standard-Farben.
@@ -12008,11 +12030,20 @@ function _farbPremDelta(){
   if(faCol&&fiCol) return (faP&&fiP)?0.054:0;   // beidseitig: Premium-Aufschlag nur wenn beide Premium (gemischt sicher unter)
   return (faP||fiP)?0.088:0;                    // einseitig
 }
-function _rolladenDelta(b,h,type){ // breiten-getrieben + kleiner Höhenterm
+// Rolladen-Preistabelle (Gurt, an Markt-Raster geeicht ~1€ drunter; Breit-kurz-Spikes smooth gecappt → sicher drunter). Motor = +125.
+const _ROLL_B = [600,1000,1200,1400,1600,1800,2000,2400,2800];
+const _ROLL_H = [600,1000,1400,1700];
+const _ROLL_G = [
+  [108,121,139,152,166,179,196,223,249], // H600
+  [118,132,152,167,183,198,217,247,277], // H1000
+  [131,148,171,187,206,224,245,300,340], // H1400
+  [141,160,184,203,223,240,265,320,360], // H1700
+];
+function _rolladenDelta(b,h,type){
   if(!type || type==='ohne') return 0;
-  let d = _interp1(b,[700,1000,1400],[109,114,157]) + 0.04*Math.max(0,h-500);
-  if(type==='motor') d += 127; // Motor statt Gurt (~konstant)
-  return d;
+  let g = _matLookup(b,h,_ROLL_B,_ROLL_H,_ROLL_G);
+  if(type==='motor') g += 125; // Motor statt Gurt
+  return g;
 }
 function _glasOptDelta(area){ // Glas-Optionen pro m² (Glasfläche-getrieben; je 1-Punkt-Eichung)
   let d=0;
@@ -12067,11 +12098,14 @@ function fensterPriceParts(){
   let griff = F_GRIFF[S.griff]||0; if (S.griffLocked) griff += _griffLockAdd();
   const roll = _rolladenDelta(b,h,S.roll); // Rolladen breiten-getrieben (größenabhängig)
   let spro = 0; if (S.sproTyp && S.sproTyp!=='keine' && F_SPRO[S.sproTyp]) spro = F_SPRO[S.sproTyp][S.sproDicke]||0;
-  const sicher = F_SICHER[S.sicher]||0;
+  let sicher = F_SICHER[S.sicher]||0;
+  if (S.sicher==='rc2'){ let _nS=(S.fluegel==='stulp')?2:(parseInt(S.fluegel,10)||1); let _opn=0; for(let _i=1;_i<=_nS;_i++){ if(S['oeff'+_i] && S['oeff'+_i]!=='fest') _opn++; } if(_opn<1)_opn=1; sicher = 87 + 78*(_opn-1); } // RC2 skaliert mit öffenbaren Flügeln (an Markt geeicht, knapp drunter)
   let unitMarkt = bodyNoColor + colorAdd + glas + schall + sicherGlas + dekor + griff + roll + spro + sicher;
   if (unitMarkt < 50) unitMarkt = 50; // niedriges Sicherheitsnetz (Matrizen tragen die echten Mindestpreise: DK 134, Fest 81,65)
   const k = PREIS_FAKTOR;
-  const unit = unserPreis(unitMarkt);
+  // Oberlicht/Unterlicht/Ober-Unter-Varianten (×-Faktor noch nicht gegen Markt verifiziert) → alte, sichere Marge (mehr drunter). Standard-Typen → enge ~5€-Marge.
+  const _isOL = /oberlicht|unterlicht|ober-unter/.test(S.fluegel||'');
+  const unit = _isOL ? unserPreis(unitMarkt) : unserPreisFenster(unitMarkt);
   // Aufschlüsselung (Preise)
   const flName = (P.fluegel[S.fluegel] && P.fluegel[S.fluegel].name) || (S.fluegel||'');
   const rows = [{ l:'Fenster · '+flName+' · '+b+'×'+h+' mm', v:fmt(_r2(frame*k)) }];
