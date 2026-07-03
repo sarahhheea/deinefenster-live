@@ -12171,13 +12171,13 @@ function balkonPriceParts(){
   const _profBaseB = is2F ? _matLookup(b,h,_BLK_B1,_BLK_H1,_BLK_M1) : frame;
   const prof = _profBaseB * (_PROFIL_PCT[S.profil]||0);
   const faCol=S.fa&&S.fa!=='weiss', fiCol=S.fi&&S.fi!=='weiss';
-  const farbPct=((faCol&&fiCol)?0.18:((faCol||fiCol)?0.125:0))+_farbPremDelta();
+  const farbPct=((faCol&&fiCol)?0.19:((faCol||fiCol)?0.125:0))+_farbPremDelta();
   let price = (frame+prof)*(1+farbPct);
   price += _glasOptDelta(area); // Glas-Optionen pro m² (3-fach/Schall/Sicherheitsglas/Glasdekor)
   let griff=F_GRIFF[S.griff]||0; if(S.griffLocked) griff+=_griffLockAdd(); price += griff;
   price += _rolladenDelta(b,h,S.roll); // Rolladen breiten-getrieben (größenabhängig)
   if(S.sproTyp && S.sproTyp!=='keine' && F_SPRO[S.sproTyp]) price += F_SPRO[S.sproTyp][S.sproDicke]||0;
-  price += F_SICHER[S.sicher]||0;
+  if(S.sicher==='rc2'){ let _o=is2F?2:1; price += 87 + 78*(_o-1); } else price += F_SICHER[S.sicher]||0; // RC2 skaliert mit Flügelzahl (2-Flügel-Balkon = 2 öffenbar, an Markt 170€ geeicht)
   if(S.balkonSchwelle==='alu-20'){ price += Math.max(0, Math.round(86 + 0.0674*(b-1300))); } // Alu-Schwelle breitenabhängig an Markt geeicht (~88-135€, knapp drunter)
   else if(S.balkonSchwelle && P.balkonSchwelle[S.balkonSchwelle]) price += P.balkonSchwelle[S.balkonSchwelle].add||0;
   return { unit: unserPreisFenster(price) };
