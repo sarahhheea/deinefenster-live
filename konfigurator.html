@@ -15967,9 +15967,10 @@ async function submitSkizze(e) {
   // Sauber, ohne Szene: Fenster-Box + Anschlag-Diagonalen + Griff, Kasten als eigener Kasten OBEN,
   // Breite (je Fluegel + gesamt) unten, Gesamthoehe (Kasten INKL.) rechts. Kein 3D, keine Wand/Leibung.
   function schemaAnschlag(x,y,w,h,oeff,col){
-    if(!oeff||oeff==='fest') return '';
+    if(!oeff) return '';
     var sw=Math.max(Math.min(w,h)*0.012,3.2);
     var L='stroke="'+col+'" stroke-width="'+sw+'" fill="none" stroke-linejoin="round" stroke-linecap="round"';
+    if(oeff==='fest'){ var fcx=x+w/2, fcy=y+h/2, fcs=Math.min(w,h)*0.14; return '<line x1="'+(fcx-fcs)+'" y1="'+fcy+'" x2="'+(fcx+fcs)+'" y2="'+fcy+'" '+L+'/><line x1="'+fcx+'" y1="'+(fcy-fcs)+'" x2="'+fcx+'" y2="'+(fcy+fcs)+'" '+L+'/>'; } // Drutex: Fest = kleines Kreuz
     var s='', hingeR=(oeff==='dreh-r'||oeff==='dk-r'), hingeL=(oeff==='dreh-l'||oeff==='dk-l');
     var isKipp=(oeff==='kipp'), isDK=(oeff==='dk-r'||oeff==='dk-l');
     // Dreh-Dreieck nach DIN: Basis auf Bandseite, Spitze zur Griffseite (Band rechts -> Spitze links)
@@ -16039,15 +16040,34 @@ async function submitSkizze(e) {
     var pzH = hasRoll ? Math.max(Math.min(gh*0.16, rollH*0.95), 34) : 0;
     var gy2 = gy+pzH, gh2 = Math.max(gh-pzH, 80);
     // ===== Kasten + Rahmen (mit weichem Schatten) =====
+    // Gurtwickler-/Motor-Coil wird SEPARAT (ausserhalb der Filter-Gruppe) gebaut und danach gezeichnet,
+    // damit der SVG-Schatten-Filter ihn nicht verschluckt.
+    var _coil='';
+    if(hasRoll){
+      var _seite=(S.rollSeite==='links')?'links':'rechts', _isMot=(S.roll==='motor');
+      var _cr=Math.min(rollH*0.36, bMm*0.06, 78), _cx=(_seite==='rechts')?(bMm-_cr-rollH*0.30):(_cr+rollH*0.30), _cy=rollH*0.5, _dir=(_seite==='rechts')?1:-1;
+      var _csw=Math.max(_cr*0.10,5);   // kraeftige Strichstaerke (wie DIN-Dreiecke)
+      var _sp='M', _turns=2.4, _steps=Math.round(_turns*20);
+      for(var _i=0;_i<=_steps;_i++){ var _t=_i/_steps*_turns*2*Math.PI, _rr=(_cr-_csw*1.4)*_i/_steps+_csw*0.6; _sp+=(_i?' L':'')+(_cx+_rr*Math.cos(_t)).toFixed(1)+' '+(_cy+_rr*Math.sin(_t)).toFixed(1); }
+      _coil+='<circle cx="'+_cx+'" cy="'+_cy+'" r="'+_cr+'" fill="#ffffff" stroke="#2c3542" stroke-width="'+_csw+'"/>';
+      _coil+='<path d="'+_sp+'" fill="none" stroke="#2c3542" stroke-width="'+(_csw*0.72)+'" stroke-linecap="round"/>';
+      _coil+='<path d="M'+(_cx+_dir*(_cr+_csw*1.6))+' '+(_cy-_cr*0.72)+' q'+(_dir*_cr*0.72)+' '+(_cr*0.12)+' '+(_dir*_cr*0.6)+' '+(_cr*0.92)+'" fill="none" stroke="#d43a3a" stroke-width="'+(_csw*1.05)+'" stroke-linecap="round"/>';
+      _coil+='<path d="M'+(_cx+_dir*(_cr+_csw*1.6))+' '+(_cy-_cr*0.72)+' l'+(_dir*-_cr*0.36)+' '+(-_cr*0.02)+' l'+(_dir*_cr*0.16)+' '+(_cr*0.42)+'" fill="none" stroke="#d43a3a" stroke-width="'+(_csw*1.05)+'" stroke-linejoin="round"/>';
+      if(_isMot){ var _kx=_cx+_dir*(_cr+rollH*0.5), _pw=rollH*0.4, _ph=rollH*0.3;
+        _coil+=line(_cx+_dir*_cr,_cy,_kx,_cy,'#2c3542',_csw);
+        _coil+='<rect x="'+((_dir>0?_kx:_kx-_pw))+'" y="'+(_cy-_ph/2)+'" width="'+_pw+'" height="'+_ph+'" rx="'+(_ph*0.18)+'" fill="#f4f5f7" stroke="#2c3542" stroke-width="'+_csw+'"/>';
+        _coil+=line((_dir>0?_kx+_pw*0.34:_kx-_pw*0.66),_cy-_ph*0.9,(_dir>0?_kx+_pw*0.34:_kx-_pw*0.66),_cy-_ph/2,'#2c3542',_csw*0.8);
+        _coil+=line((_dir>0?_kx+_pw*0.66:_kx-_pw*0.34),_cy-_ph*0.9,(_dir>0?_kx+_pw*0.66:_kx-_pw*0.34),_cy-_ph/2,'#2c3542',_csw*0.8);
+      }
+    }
     s+='<g filter="url(#schShadow)">';
     if(hasRoll){
       s+='<rect x="0" y="0" width="'+bMm+'" height="'+rollH+'" rx="7" fill="'+kastenFill+'" stroke="'+kastenStroke+'" stroke-width="3"/>';
-      s+=line(bMm*0.05,rollH*0.42,bMm*0.95,rollH*0.42,'rgba(0,0,0,.08)',2);
-      var _kl="Rollladenkasten", _klSz=Math.min(rollH*0.44, (bMm*0.92)/(_kl.length*0.56));
-      s+=txt(bMm/2, rollH/2, _kl, false, _klSz, isLight?'#5f666e':'#f3f5f7');
+      s+=line(bMm*0.04,rollH*0.62,bMm*0.96,rollH*0.62,'rgba(0,0,0,.08)',2); // Kasten-Deckelfuge
     }
     s+='<rect x="0" y="'+winTop+'" width="'+bMm+'" height="'+winMm+'" rx="7" fill="'+fCol+'" stroke="'+frameStroke+'" stroke-width="4"/>';
     s+='</g>';
+    s+=_coil;  // Coil ausserhalb des Filters → wird immer gezeichnet
     var OEFFNAME={"dk-r":"Dreh-Kipp rechts","dk-l":"Dreh-Kipp links","dreh-r":"Dreh rechts","dreh-l":"Dreh links","kipp":"Kipp","fest":"Fest"};
     for(var i=0;i<nFl;i++){
       var oeff=i===0?(S.oeff1||"dreh-r"):i===1?(S.oeff2||"dreh-l"):(S.oeff3||"fest");
@@ -16067,9 +16087,9 @@ async function submitSkizze(e) {
         s+='<rect x="'+gx+'" y="'+(gy+pzH-_eh)+'" width="'+sashW+'" height="'+_eh+'" fill="'+pzCol+'" stroke="rgba(0,0,0,.24)" stroke-width="1.3"/>';
         s+='<rect x="'+gx+'" y="'+gy+'" width="'+sashW+'" height="'+pzH+'" fill="url(#pzSheen)" stroke="none"/>';
       }
-      // Anschlag (DIN) + Griff — UNTER dem Panzer
+      // Anschlag (DIN) — UNTER dem Panzer. Griff bewusst weggelassen (Kundenwunsch 04.07.2026):
+      // das DIN-Dreieck zeigt die Öffnungsrichtung, der gezeichnete Griff war nur Ballast.
       s+=schemaAnschlag(gx,gy2,sashW,gh2,oeff,'#586272');
-      s+=schemaGriff(gx,gy2,sashW,gh2,oeff,'#384452');
       // Oeffnungstyp ausgeschrieben, klein + dezent unten ins Fenster (eigener Stil, keine Kuerzel-Kopie)
       var nm=OEFFNAME[oeff]||"";
       if(nm){
