@@ -7882,7 +7882,7 @@ function wizRenderAngebot(){
   function sh(v){ return (v||'').split('·')[0].split('(')[0].trim(); }
   function specLine(c){
     c=c||{};
-    var farbe=sh(nm('fa',c.fa))+((c.fi&&c.fi!==c.fa)?(' / '+sh(nm('fi',c.fi))):'');
+    var farbe='außen '+sh(nm('fa',c.fa))+' · innen '+sh(nm('fi',c.fi));
     return [ (c.bMm||'–')+'×'+(c.hMm||'–')+' mm', farbe, sh(nm('glas',c.glas)), sh(nm('profil',c.profil)) ].filter(Boolean).join(' · ');
   }
   function specRows(c){
@@ -7898,7 +7898,8 @@ function wizRenderAngebot(){
     return ''
       +'<div class="wiz-ospec"><i class="ms" aria-hidden="true">straighten</i><b>'+(c.bMm||'–')+' × '+(c.hMm||'–')+' mm</b></div>'
       +'<div class="wiz-ospec"><i class="ms" aria-hidden="true">view_in_ar</i>'+[sh(nm('profil',c.profil)),sh(nm('glas',c.glas))].filter(Boolean).join(' · ')+'</div>'
-      +'<div class="wiz-ospec"><i class="ms" aria-hidden="true">palette</i>Farbe: <b>'+farbe+'</b></div>'
+      +'<div class="wiz-ospec"><i class="ms" aria-hidden="true">palette</i>Außenfarbe: <b>'+nm('fa',c.fa)+'</b></div>'
+      +'<div class="wiz-ospec"><i class="ms" aria-hidden="true">wb_sunny</i>Innenfarbe: <b>'+nm('fi',c.fi)+'</b></div>'
       +'<div class="wiz-ospec"><i class="ms" aria-hidden="true">auto_awesome</i>'+extrasTxt+'</div>';
   }
   function card(c, opts){
@@ -7910,6 +7911,7 @@ function wizRenderAngebot(){
     // Gut lesbare Eigenschaften-Liste (Label + Wert), Maße prominent — statt gedraengter Mini-Zeilen
     var farbe=sh(nm('fa',c.fa))+((c.fi&&c.fi!==c.fa)?(' / innen '+sh(nm('fi',c.fi))):'');
     var faHex=(P.fa&&P.fa[c.fa]&&P.fa[c.fa].hex)||'#e6ebf3';
+    var fiHex=(P.fi&&P.fi[c.fi]&&P.fi[c.fi].hex)||'#e6ebf3';
     var extras=[];
     if(c.roll&&c.roll!=='ohne')extras.push('Rolladen');
     if(c.sproTyp&&c.sproTyp!=='keine')extras.push('Sprossen');
@@ -7923,7 +7925,8 @@ function wizRenderAngebot(){
       +specRow('Maße (B × H)','<b>'+(c.bMm||'–')+' × '+(c.hMm||'–')+' mm</b>','wiz-ospv-strong')
       +specRow('Profil', sh(nm('profil',c.profil))||'–')
       +specRow('Glas', sh(nm('glas',c.glas))||'–')
-      +specRow('Farbe', '<span class="wiz-osw" style="background:'+faHex+'"></span>'+farbe)
+      +specRow('Außenfarbe', '<span class="wiz-osw" style="background:'+faHex+'"></span>'+nm('fa',c.fa))
+      +specRow('Innenfarbe', '<span class="wiz-osw" style="background:'+fiHex+'"></span>'+nm('fi',c.fi))
       +specRow('Ausstattung', extrasTxt)
       +'</div>';
     var qtyCtl='<div class="wiz-oqtyctl" role="group" aria-label="Menge ändern">'
