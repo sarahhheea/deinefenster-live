@@ -12122,7 +12122,7 @@ function fensterPriceParts(){
   const dekor = (S.glasdekor==='master-carre') ? 55*area : ((S.glasdekor && S.glasdekor!=='klar') ? 27*area : 0);
   let griff = F_GRIFF[S.griff]||0; if (S.griffLocked) griff += _griffLockAdd();
   const roll = _rolladenDelta(b,h,S.roll); // Rolladen breiten-getrieben (größenabhängig)
-  let spro = 0; if (S.sproTyp && S.sproTyp!=='keine' && F_SPRO[S.sproTyp]){ spro = F_SPRO[S.sproTyp][S.sproDicke]||0; var _rrF=P.sproRaster&&P.sproRaster[S.sproRaster]; if(_rrF) spro += Math.round(11*Math.max(0,(_rrF.v||0)+(_rrF.h||0)-1)*Math.min(2.2,area/1.2)); } // Raster-Aufpreis: dichtere Muster = mehr Sprossenbalken (an Markt geeicht)
+  let spro = 0; if (S.sproTyp && S.sproTyp!=='keine' && F_SPRO[S.sproTyp]){ spro = F_SPRO[S.sproTyp][S.sproDicke]||0; var _rrF=P.sproRaster&&P.sproRaster[S.sproRaster]; if(_rrF) spro += Math.round(11*Math.max(0,(_rrF.v||0)+(_rrF.h||0)-1)*Math.min(2.2,area/1.2)); } // Raster-Aufpreis: dichtere Muster = mehr Sprossenbalken (kalkuliert)
   let sicher = F_SICHER[S.sicher]||0;
   if (S.sicher==='rc2'){ let _nS=(S.fluegel==='stulp')?2:(parseInt(S.fluegel,10)||1); let _opn=0; for(let _i=1;_i<=_nS;_i++){ if(S['oeff'+_i] && S['oeff'+_i]!=='fest') _opn++; } if(_opn<1)_opn=1; sicher = 87 + 78*(_opn-1); } // RC2 skaliert mit öffenbaren Flügeln (kalkuliert, knapp drunter)
   const _isSingle = !isSingleFest && String(S.fluegel||'').charAt(0)!=='2' && String(S.fluegel||'').charAt(0)!=='3' && S.fluegel!=='stulp';
@@ -12199,9 +12199,9 @@ function balkonPriceParts(){
   price += _glasOptDelta(area); // Glas-Optionen pro m² (3-fach/Schall/Sicherheitsglas/Glasdekor)
   let griff=F_GRIFF[S.griff]||0; if(S.griffLocked) griff+=_griffLockAdd(); price += griff;
   price += _rolladenDelta(b,h,S.roll); // Rolladen breiten-getrieben (größenabhängig)
-  if(S.sproTyp && S.sproTyp!=='keine' && F_SPRO[S.sproTyp]){ price += F_SPRO[S.sproTyp][S.sproDicke]||0; var _rrB=P.sproRaster&&P.sproRaster[S.sproRaster]; if(_rrB) price += Math.round(11*Math.max(0,(_rrB.v||0)+(_rrB.h||0)-1)*Math.min(2.2,area/1.2)); } // Raster-Aufpreis (an Markt geeicht)
+  if(S.sproTyp && S.sproTyp!=='keine' && F_SPRO[S.sproTyp]){ price += F_SPRO[S.sproTyp][S.sproDicke]||0; var _rrB=P.sproRaster&&P.sproRaster[S.sproRaster]; if(_rrB) price += Math.round(11*Math.max(0,(_rrB.v||0)+(_rrB.h||0)-1)*Math.min(2.2,area/1.2)); } // Raster-Aufpreis (kalkuliert)
   if(S.sicher==='rc2'){ let _o=is2F?2:1; price += 87 + 78*(_o-1); } else price += F_SICHER[S.sicher]||0; // RC2 skaliert mit Flügelzahl (2-Flügel-Balkon = 2 öffenbar, an Markt 170€ geeicht)
-  if(S.balkonSchwelle==='alu-20'){ price += Math.max(0, Math.round(86 + 0.0674*(b-1300))); } // Alu-Schwelle breitenabhängig an Markt geeicht (~88-135€, knapp drunter)
+  if(S.balkonSchwelle==='alu-20'){ price += Math.max(0, Math.round(86 + 0.0674*(b-1300))); } // Alu-Schwelle breitenabhängig kalkuliert (~88-135€, knapp drunter)
   else if(S.balkonSchwelle && P.balkonSchwelle[S.balkonSchwelle]) price += P.balkonSchwelle[S.balkonSchwelle].add||0;
   return { unit: unserPreisFenster(price) };
 }
