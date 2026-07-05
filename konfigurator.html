@@ -12218,12 +12218,21 @@ const _PSK_M=[
   [1490,1534,1629,1739], // H2100
   [1508,1554,1651,1764], // H2200
 ];
-// IGLO-HS (Hebe-Schiebe) — eigene Matrix, direkt kalkuliert (Bereich 2000–4000 × 1900–2300)
-const _HS_B=[2000,3000,4000], _HS_H=[1900,2100,2300];
+// IGLO-HS (Hebe-Schiebe) — Matrix über den gesamten wählbaren Bereich (1700–3000 × 1700–2200) am Markt geeicht.
+// Die Preisfläche hat ZWEI scharfe Verstärkungs-Stufen: Breite ab ~2205 mm (+42 €) und Höhe ab ~2110 mm (+42 €).
+// Daher enge Knotenpaare an den Schwellen (2209/2210 bzw. 2119/2120): Tief-Wert bis knapp vor der Stufe, dann 1-mm-Sprung
+// auf den Hoch-Wert → keine Interpolations-Rampe, die im Zwischenband über den Markt schießen könnte (nie zu teuer).
+// Breiten-Achse mit dichten Stützpunkten: Der Markt setzt post-Stufe eine feine Verstärkungs-TREPPE
+// (~+44 € je ~100 mm Breite). Dichte Knoten an jeder Plateau-Kante halten uns an den üblichen (runden)
+// Bestellmaßen exakt ~4–5 € unter Markt; nur an ungeraden Zwischenmaßen (z. B. 2340 mm) etwas Abweichung.
+const _HS_B=[1700,2000,2200,2209,2210,2250,2300,2350,2400,2450,2500,2550,2600,2700,2750,2800,3000], _HS_H=[1700,1900,2100,2119,2120,2200];
 const _HS_M=[
-  [2600,2972,3805], // H1900
-  [2610,2988,3866], // H2100
-  [2701,3090,4021], // H2300
+  [2576,2589,2598,2597,2638,2640,2642,2685,2687,2730,2732,2773,2775,2817,2860,2862,2956], // H1700
+  [2584,2600,2609,2609,2650,2652,2654,2697,2699,2743,2745,2787,2788,2832,2874,2877,2972], // H1900
+  [2593,2610,2621,2621,2662,2664,2667,2710,2712,2756,2759,2800,2802,2846,2888,2892,2988], // H2100 (vor Höhen-Stufe)
+  [2593,2610,2621,2621,2662,2664,2667,2710,2712,2756,2759,2800,2802,2846,2888,2892,2988], // H2119
+  [2634,2651,2663,2663,2704,2707,2710,2753,2756,2800,2803,2846,2849,2896,2940,2942,3035], // H2120 (nach Höhen-Stufe)
+  [2638,2655,2667,2667,2708,2711,2714,2757,2760,2804,2807,2850,2853,2900,2944,2946,3039], // H2200
 ];
 function hstPriceParts(){
   const b=S.bMm||2200, h=S.hMm||2000;
