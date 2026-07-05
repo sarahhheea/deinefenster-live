@@ -11965,6 +11965,17 @@ const _REINF=[
   [0,0,0,0,0,0,0,0,0,0,0],
 ];
 function _reinfDelta(b,h){ if(!h || b/h < 1.26) return 0; const col=[]; for(let i=0;i<_REINF_H.length;i++) col.push(_interp1(b,_REINF_B,_REINF[i])); return Math.max(0,_interp1(h,_REINF_H,col)); }
+// Verstärkung Mehrflügel (breit-kurz, an Markt geeicht, gate Seitenverhältnis)
+const _R2_B=[1200,1400,1600,1800,2000,2200,2400,2600,2800], _R2_H=[500,600,700,800,900,1000];
+const _R2P=[[0,47,38,26,32,14,0,0,1],[0,0,49,38,46,29,16,18,19],[0,0,0,68,77,51,29,21,13],[0,0,0,0,0,84,64,60,54],[0,0,0,0,0,1,151,166,181],[0,0,0,0,0,2,8,183,194]];
+const _R2S=[[0,48,36,22,28,9,0,0,0],[0,0,47,35,41,23,17,18,19],[0,0,0,66,74,43,22,11,0],[0,0,0,0,0,79,59,39,19],[0,0,0,0,0,2,159,183,205],[0,0,0,0,0,5,19,204,225]];
+const _RF3_B=[1600,1900,2200,2500,2800,3200,3600], _RF3_H=[600,700,800,900,1000,1200,1400,1600];
+const _RF3=[[0,0,0,78,61,46,0],[0,0,0,0,106,97,35],[0,0,0,0,0,147,90],[0,0,0,0,0,0,139],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0]];
+function _reinfMF(b,h){ if(!h) return 0; var r=b/h, fl=S.fluegel;
+  if(fl==='3-fluegel'){ if(r<3.98) return 0; var c=[]; for(var i=0;i<_RF3_H.length;i++)c.push(_interp1(b,_RF3_B,_RF3[i])); return Math.max(0,_interp1(h,_RF3_H,c)); }
+  if(fl==='stulp'){ if(r<2.2) return 0; var c2=[]; for(var j=0;j<_R2_H.length;j++)c2.push(_interp1(b,_R2_B,_R2S[j])); return Math.max(0,_interp1(h,_R2_H,c2)); }
+  if(fl==='2-fluegel'){ if(r<2.2) return 0; var c3=[]; for(var k=0;k<_R2_H.length;k++)c3.push(_interp1(b,_R2_B,_R2P[k])); return Math.max(0,_interp1(h,_R2_H,c3)); }
+  return 0; }
 // FEST-Matrix (Festverglasung 1-Flügel) — eigene, günstigere Kurve, symmetrisch B/H. Grundpreis brutto.
 // Bereich 500–1700 (Kunde: Fest min 500×500, max 1700×1700).
 const _FESTG = [500,800,1100,1400,1700];
@@ -12119,7 +12130,7 @@ function fensterPriceParts(){
   let sicher = F_SICHER[S.sicher]||0;
   if (S.sicher==='rc2'){ let _nS=(S.fluegel==='stulp')?2:(parseInt(S.fluegel,10)||1); let _opn=0; for(let _i=1;_i<=_nS;_i++){ if(S['oeff'+_i] && S['oeff'+_i]!=='fest') _opn++; } if(_opn<1)_opn=1; sicher = 87 + 78*(_opn-1); } // RC2 skaliert mit öffenbaren Flügeln (kalkuliert, knapp drunter)
   const _isSingle = !isSingleFest && String(S.fluegel||'').charAt(0)!=='2' && String(S.fluegel||'').charAt(0)!=='3' && S.fluegel!=='stulp';
-  const _reinf = _isSingle ? _reinfDelta(b,h) : 0; // Verstärkung breite Einzelflügel
+  const _reinf = _isSingle ? _reinfDelta(b,h) : _reinfMF(b,h); // Verstärkung breit-kurz (Einzel- + Mehrflügel)
   let unitMarkt = bodyNoColor + colorAdd + glas + schall + sicherGlas + dekor + griff + roll + spro + sicher + _reinf;
   if (unitMarkt < 50) unitMarkt = 50; // niedriges Sicherheitsnetz (Matrizen tragen die echten Mindestpreise: DK 134, Fest 81,65)
   const k = PREIS_FAKTOR;
