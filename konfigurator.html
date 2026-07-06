@@ -12239,8 +12239,9 @@ function hstPriceParts(){
   let frame = (S.profil==='iglo-hs') ? _matLookup(b,h,_HS_B,_HS_H,_HS_M) : _matLookup(b,h,_PSK_B,_PSK_H,_PSK_M);
   if(S.profil==='iglo-psk' && S.pskKammer==='iglo-energy') frame += 45; // Energy-Kammer (Schätzung wie Fenster)
   const faCol=S.fa&&S.fa!=='weiss', fiCol=S.fi&&S.fi!=='weiss';
-  // IGLO-HS hat deutlich höheren Farbaufschlag als PSK (großer Hebe-Schiebe-Rahmen): einseitig 21% / beidseitig 30% vs PSK 9,2% / 11%.
-  const _hsOne=(S.profil==='iglo-hs')?0.21:0.092, _hsBoth=(S.profil==='iglo-hs')?0.30:0.11;
+  // IGLO-HS Farbaufschlag am Markt gemessen: einseitig ~20,7 % (großes Ende, Minimum), beidseitig 30,2–30,7 %.
+  // Einseitig auf 20,6 % gesetzt (knapp unter Markt-Minimum → nie darüber); beidseitig 30 % bleibt sicher unter Markt.
+  const _hsOne=(S.profil==='iglo-hs')?0.206:0.092, _hsBoth=(S.profil==='iglo-hs')?0.30:0.11;
   const farbPct=((faCol&&fiCol)?_hsBoth:((faCol||fiCol)?_hsOne:0))+_farbPremDelta();
   let price = frame*(1+farbPct);
   // 3-fach ist bei PSK unser STANDARD und im Basispreis enthalten enthalten.
