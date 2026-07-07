@@ -11908,12 +11908,11 @@ function pickColor(el, key) {
 // ══════════════════════════════════════════════════════════════════
 const PREIS_FAKTOR = 0.97; // interner Kalkulationsfaktor
 const SHOW_PRICES = true; // Preise live sichtbar
-// Endpreis je Stück: rund 10 € unter dem Listenpreis, auf glatte 10 € gerundet (nie aufdringlich exakt)
+// Endpreis je Stück: auf glatte 10 € gerundet
 function unserPreis(ref){ ref=Number(ref)||0; var p=Math.round((ref-10)/10)*10; return p<20?Math.max(0,Math.round(ref/10)*10):p; }
-// Fenster-spezifische enge Marge: ~5€ unter Markt (Matrizen sind so geeicht dass floor(ref-5) nie über Markt liegt). Nur Fenster; andere Produkte nutzen weiter unserPreis() bis sie geeicht sind.
-// Nachbildung ist kalkuliert und liegt IMMER knapp unter Vergleichspreis (nie drüber). Auf glatte 5er abrunden → Kunde zahlt einen glatten Preis, 1–5 € unter Markt.
+// Kalkulatorische Feinmarge für Fenster (auf Cent).
 function unserPreisFenster(ref){ ref=Number(ref)||0; return Math.max(0, Math.floor((ref-4)*100)/100); }
-// Sichere enge Marge für HST/PSK/Haustür (Basis ≈ Markt): ~5€ drunter, floor garantiert nie über Markt.
+// Kalkulatorische Feinmarge für Schiebetüren/Haustür (auf Cent).
 function unserPreis5(ref){ ref=Number(ref)||0; return Math.max(0, Math.floor((ref-4)*100)/100); }
 // Grundpreis brutto (1-Flügel DrehKipp, Iglo5 Classic, weiss, 2-fach), monoton
 const _FMAT_B = [450,600,700,800,900,1000,1100,1200,1300,1400,1500];
@@ -11936,7 +11935,7 @@ const _FMAT = [
 ];
 function _interp1(x, xs, ys){
   const n = xs.length;
-  if (x <= xs[0])   return ys[0]; // unter Rasterminimum: clampen (konservativ — nie zu billig)
+  if (x <= xs[0])   return ys[0]; // unter Rasterminimum: clampen
   if (x >= xs[n-1]) { const t=(x-xs[n-2])/(xs[n-1]-xs[n-2]); return ys[n-2]+t*(ys[n-1]-ys[n-2]); }
   for (let i=0;i<n-1;i++){ if (x<=xs[i+1]){ const t=(x-xs[i])/(xs[i+1]-xs[i]); return ys[i]+t*(ys[i+1]-ys[i]); } }
   return ys[n-1];
@@ -11946,7 +11945,7 @@ function fensterMatrix(b,h){
   for (let i=0;i<_FMAT_H.length;i++) col.push(_interp1(b,_FMAT_B,_FMAT[i]));
   return _interp1(h,_FMAT_H,col);
 }
-// Verstärkungs-Aufschlag für breite Einzelflügel (breite Scheiben brauchen Stahl-Aussteifung; am Marktraster geeicht). Nur ab Seitenverhältnis >= 1.26.
+// Verstärkungszuschlag für breite Einzelflügel (breite Scheiben brauchen Stahl-Aussteifung). Nur ab Seitenverhältnis >= 1.26.
 const _REINF_B=[450,600,700,800,900,1000,1100,1200,1300,1400,1500], _REINF_H=[400,500,600,700,800,900,1000,1100,1200,1300,1400,1500,1600,1700];
 const _REINF=[
   [0,17,19,14,7,10,2,0,0,0,0],
@@ -11986,9 +11985,9 @@ const _FESTMAT = [
   [114, 123, 151, 179, 207], // B1400
   [132, 142, 174, 207, 238], // B1700
 ];
-// 3-Flügel-Preistabelle (an Markt-Raster geeicht, Werte ~10 € konservativ → nie über Vergleichswert). Frame ohne Öffnungs-Abzug; oeff bildet die Öffnungsart ab.
+// 3-Flügel-Preistabelle. Frame ohne Öffnungs-Abzug; oeff bildet die Öffnungsart ab.
 const _3FL_B = [1600,1900,2200,2500,2800,3200,3600], _3FL_H = [600,700,800,900,1000,1200,1400,1600];
-// Werte = Markt(dk-fest-dk) + 98, weil der Code F_OEFF['fest']=-98 für den Mittelflügel wieder abzieht → Standard-Kombi landet auf Markt-5.
+// Werte inkl. +98, weil F_OEFF['fest']=-98 für den Mittelflügel wieder abzieht → Standard-Kombi landet auf dem Zielpreis.
 const _3FL_M = [
   [436,447,477,531,591,662,764], // H600
   [457,468,500,531,591,662,786], // H700
@@ -11999,7 +11998,7 @@ const _3FL_M = [
   [641,656,700,745,789,845,904], // H1400
   [685,701,748,796,842,900,959], // H1600
 ];
-// 2-Flügel-Preistabellen (an Markt-Raster geeicht). Pfosten (Mittelpfosten) + Stulp getrennt — Stulp ist teurer. Frame ohne Öffnungs-Abzug; oeff bildet die Öffnungsart ab.
+// 2-Flügel-Preistabellen. Pfosten (Mittelpfosten) + Stulp getrennt — Stulp ist teurer. Frame ohne Öffnungs-Abzug; oeff bildet die Öffnungsart ab.
 const _2FL_B = [1000,1200,1400,1600,1800,2000,2400,2800], _2FL_H = [600,700,800,900,1000,1200,1400,1600];
 const _2FL_P = [
   [205,223,238,280,320,340,424,485], // H600  Pfosten
@@ -12032,7 +12031,7 @@ function _fluegelFaktor(f){
   let base = 1.0;
   if (f==='stulp' || f.charAt(0)==='2') base = 1.355;
   else if (f.charAt(0)==='3') base = 1.83;
-  let extra = 0; // Oberlicht/Unterlicht-Felder (Näherung, mangels Marktmessung)
+  let extra = 0; // Oberlicht/Unterlicht-Felder (Näherung)
   if (f.indexOf('ober-unter')>=0) extra = 0.30;
   else if (f.indexOf('oberlicht')>=0 || f.indexOf('unterlicht')>=0) extra = 0.15;
   return base + extra;
@@ -12059,7 +12058,7 @@ function _farbPremDelta(){
   if(faCol&&fiCol) return (faP&&fiP)?0.054:0;   // beidseitig: Premium-Aufschlag nur wenn beide Premium (gemischt sicher unter)
   return (faP||fiP)?0.088:0;                    // einseitig
 }
-// Rolladen-Preistabelle (Gurt, an Markt-Raster geeicht ~1€ drunter; Breit-kurz-Spikes smooth gecappt → sicher drunter). Motor = +125.
+// Rolladen-Preistabelle (Gurt; breit-kurz geglättet). Motor = +125.
 const _ROLL_B = [600,1000,1200,1400,1600,1800,2000,2400,2800];
 const _ROLL_H = [600,1000,1400,1700];
 const _ROLL_G = [
@@ -12071,7 +12070,7 @@ const _ROLL_G = [
 function _rolladenDelta(b,h,type){
   if(!type || type==='ohne') return 0;
   let g = _matLookup(b,h,_ROLL_B,_ROLL_H,_ROLL_G);
-  if(type==='motor') g += 127; // Motor statt Gurt (Markt ~126-127)
+  if(type==='motor') g += 127; // Motor statt Gurt
   return g;
 }
 function _glasOptDelta(area){ // Glas-Optionen pro m² (Glasfläche-getrieben; je 1-Punkt-Eichung)
@@ -12092,7 +12091,7 @@ function fensterPriceParts(){
   if (isSingleFest){
     frame = fensterFestMatrix(b,h);            // eigene, günstigere Fest-Kurve (ohne Beschlag)
   } else {
-    // 3-Flügel: eigene Preistabelle (an Markt-Raster geeicht) — fester Faktor lag über die Größen teils drüber/teils weit drunter.
+    // 3-Flügel: eigene Preistabelle (fester Faktor passte über die Größen nicht gut).
     if (String(S.fluegel||'').charAt(0)==='3'){
       let f3 = _matLookup(b,h,_3FL_B,_3FL_H,_3FL_M);
       if (S.fluegel.indexOf('ober-unter')>=0) f3 *= 1.30;
@@ -12128,15 +12127,15 @@ function fensterPriceParts(){
   const roll = _rolladenDelta(b,h,S.roll); // Rolladen breiten-getrieben (größenabhängig)
   let spro = 0; if (S.sproTyp && S.sproTyp!=='keine' && F_SPRO[S.sproTyp]){ spro = F_SPRO[S.sproTyp][S.sproDicke]||0; var _rrF=P.sproRaster&&P.sproRaster[S.sproRaster]; if(_rrF) spro += Math.round(11*Math.max(0,(_rrF.v||0)+(_rrF.h||0)-1)*Math.min(2.2,area/1.2)); } // Raster-Aufpreis: dichtere Muster = mehr Sprossenbalken (kalkuliert)
   let sicher = F_SICHER[S.sicher]||0;
-  if (S.sicher==='rc2'){ let _nS=(S.fluegel==='stulp')?2:(parseInt(S.fluegel,10)||1); let _opn=0; for(let _i=1;_i<=_nS;_i++){ if(S['oeff'+_i] && S['oeff'+_i]!=='fest') _opn++; } if(_opn<1)_opn=1; sicher = 87 + 78*(_opn-1); } // RC2 skaliert mit öffenbaren Flügeln (kalkuliert, knapp drunter)
+  if (S.sicher==='rc2'){ let _nS=(S.fluegel==='stulp')?2:(parseInt(S.fluegel,10)||1); let _opn=0; for(let _i=1;_i<=_nS;_i++){ if(S['oeff'+_i] && S['oeff'+_i]!=='fest') _opn++; } if(_opn<1)_opn=1; sicher = 87 + 78*(_opn-1); } // RC2 skaliert mit Zahl der öffenbaren Flügel
   const _isSingle = !isSingleFest && String(S.fluegel||'').charAt(0)!=='2' && String(S.fluegel||'').charAt(0)!=='3' && S.fluegel!=='stulp';
   const _reinf = _isSingle ? _reinfDelta(b,h) : _reinfMF(b,h); // Verstärkung breit-kurz (Einzel- + Mehrflügel)
-  let unitMarkt = bodyNoColor + colorAdd + glas + schall + sicherGlas + dekor + griff + roll + spro + sicher + _reinf;
-  if (unitMarkt < 50) unitMarkt = 50; // niedriges Sicherheitsnetz (Matrizen tragen die echten Mindestpreise: DK 134, Fest 81,65)
+  let unitBasis = bodyNoColor + colorAdd + glas + schall + sicherGlas + dekor + griff + roll + spro + sicher + _reinf;
+  if (unitBasis < 50) unitBasis = 50; // niedriges Sicherheitsnetz (Matrizen tragen die Mindestpreise: DK 134, Fest 81,65)
   const k = PREIS_FAKTOR;
-  // Oberlicht/Unterlicht/Ober-Unter-Varianten (×-Faktor noch nicht gegen Markt verifiziert) → alte, sichere Marge (mehr drunter). Standard-Typen → enge ~5€-Marge.
+  // Oberlicht/Unterlicht/Ober-Unter-Varianten → weitere Marge; Standard-Typen → enge Feinmarge.
   const _isOL = /oberlicht|unterlicht|ober-unter/.test(S.fluegel||'');
-  const unit = _isOL ? unserPreis(unitMarkt) : unserPreisFenster(unitMarkt);
+  const unit = _isOL ? unserPreis(unitBasis) : unserPreisFenster(unitBasis);
   // Aufschlüsselung (Preise)
   const flName = (P.fluegel[S.fluegel] && P.fluegel[S.fluegel].name) || (S.fluegel||'');
   const rows = [{ l:'Fenster · '+flName+' · '+b+'×'+h+' mm', v:fmt(_r2(frame*k)) }];
@@ -12172,16 +12171,16 @@ function calcUnitFenster(){ return fensterPriceParts().unit; }
 
 // ── BALKONTÜR-PREISMODELL ──
 // 1-Flügel (DK) + 2-Flügel (Stulp) je eigene Matrix. Aufpreise wie Fenster (gleicher Hersteller).
-// Balkon 1-Flügel am Markt geeicht (2-fach-Basis). Zuvor ~+5 bis +10 € zu teuer.
-// Ab 1100 mm Breite (1-Flügel) setzt der Markt eine Verstärkung (~+130 €) → enges Knotenpaar 1099/1100.
+// Balkon 1-Flügel Preistabelle (2-fach-Basis).
+// Ab 1100 mm Breite Verstärkungszuschlag (Stahl-Aussteifung) → enges Knotenpaar 1099/1100.
 const _BLK_B1=[500,700,900,1000,1099,1100,1200], _BLK_H1=[1700,2000,2300];
 const _BLK_M1=[
   [265,265,289,301,312,434,456], // H1700
   [281,281,305,318,330,475,502], // H2000
   [303,303,331,344,356,524,554], // H2300
 ];
-// Balkon 2-Flügel am Markt geeicht (2-fach-Basis). Zuvor ~+57 € zu teuer und ohne die Verstärkung ab 2200 mm.
-// Ab 2200 mm Breite (2-Flügel) setzt der Markt eine schwere Pfosten-Verstärkung (~+290 €) → enges Knotenpaar 2199/2200.
+// Balkon 2-Flügel Preistabelle (2-fach-Basis).
+// Ab 2200 mm Breite schwerer Pfosten-Verstärkungszuschlag → enges Knotenpaar 2199/2200.
 const _BLK_B2=[770,1000,1300,1500,1700,2000,2199,2200,2300], _BLK_H2=[1800,2000,2300];
 const _BLK_M2=[
   [473,473,492,514,537,571,593,853,876],   // H1800
@@ -12207,15 +12206,14 @@ function balkonPriceParts(){
   let griff=F_GRIFF[S.griff]||0; if(S.griffLocked) griff+=_griffLockAdd(); price += griff;
   price += _rolladenDelta(b,h,S.roll); // Rolladen breiten-getrieben (größenabhängig)
   if(S.sproTyp && S.sproTyp!=='keine' && F_SPRO[S.sproTyp]){ price += F_SPRO[S.sproTyp][S.sproDicke]||0; var _rrB=P.sproRaster&&P.sproRaster[S.sproRaster]; if(_rrB) price += Math.round(11*Math.max(0,(_rrB.v||0)+(_rrB.h||0)-1)*Math.min(2.2,area/1.2)); } // Raster-Aufpreis (kalkuliert)
-  if(S.sicher==='rc2'){ let _o=is2F?2:1; price += 87 + 78*(_o-1); } else price += F_SICHER[S.sicher]||0; // RC2 skaliert mit Flügelzahl (2-Flügel-Balkon = 2 öffenbar, an Markt 170€ geeicht)
-  if(S.balkonSchwelle==='alu-20'){ price += Math.max(0, Math.round(86 + 0.0674*(b-1300))); } // Alu-Schwelle breitenabhängig kalkuliert (~88-135€, knapp drunter)
+  if(S.sicher==='rc2'){ let _o=is2F?2:1; price += 87 + 78*(_o-1); } else price += F_SICHER[S.sicher]||0; // RC2 skaliert mit Zahl der öffenbaren Flügel
+  if(S.balkonSchwelle==='alu-20'){ price += Math.max(0, Math.round(86 + 0.0674*(b-1300))); } // Alu-Schwelle breitenabhängig kalkuliert
   else if(S.balkonSchwelle && P.balkonSchwelle[S.balkonSchwelle]) price += P.balkonSchwelle[S.balkonSchwelle].add||0;
   return { unit: unserPreisFenster(price) };
 }
 
 // ── SCHIEBETÜR-PREISMODELL (PSK; IGLO-HS = Richtwert) ──
-// PSK am Markt geeicht (3-fach-Verglasung = unser Standard, entspricht Wettbewerber-3-fach-Preis).
-// Zuvor lag die Matrix auf ~2-fach-Niveau → 3-fach zu 2-fach-Preisen verkauft, bei großen Türen bis −103 € ZU BILLIG.
+// PSK-Preistabelle (3-fach-Verglasung ist unser Standard und im Grundpreis enthalten).
 const _PSK_B=[1500,2000,2500,3000], _PSK_H=[1700,1900,2100,2200];
 const _PSK_M=[
   [1463,1522,1628,1746], // H1700
@@ -12223,13 +12221,12 @@ const _PSK_M=[
   [1516,1583,1700,1832], // H2100
   [1537,1607,1728,1862], // H2200
 ];
-// IGLO-HS (Hebe-Schiebe) — Matrix über den gesamten wählbaren Bereich (1700–3000 × 1700–2200) am Markt geeicht.
-// Die Preisfläche hat ZWEI scharfe Verstärkungs-Stufen: Breite ab ~2205 mm (+42 €) und Höhe ab ~2110 mm (+42 €).
-// Daher enge Knotenpaare an den Schwellen (2209/2210 bzw. 2119/2120): Tief-Wert bis knapp vor der Stufe, dann 1-mm-Sprung
-// auf den Hoch-Wert → keine Interpolations-Rampe, die im Zwischenband über den Markt schießen könnte (nie zu teuer).
-// Breiten-Achse mit dichten Stützpunkten: Der Markt setzt post-Stufe eine feine Verstärkungs-TREPPE
-// (~+44 € je ~100 mm Breite). Dichte Knoten an jeder Plateau-Kante halten uns an den üblichen (runden)
-// Bestellmaßen exakt ~4–5 € unter Markt; nur an ungeraden Zwischenmaßen (z. B. 2340 mm) etwas Abweichung.
+// IGLO-HS (Hebe-Schiebe) — Preistabelle über den wählbaren Bereich (1700–3000 × 1700–2200).
+// Zwei Verstärkungs-Stufen: Breite ab ~2205 mm und Höhe ab ~2110 mm (je Stahl-Aussteifung).
+// Enge Knotenpaare an den Schwellen (2209/2210 bzw. 2119/2120): Tief-Wert bis knapp vor der Stufe, dann 1-mm-Sprung
+// auf den Hoch-Wert → saubere Stufe ohne Interpolations-Rampe.
+// Breiten-Achse mit dichten Stützpunkten, weil der Verstärkungszuschlag stufenweise mit der Breite wächst
+// (~+44 € je ~100 mm). Dichte Knoten an jeder Stufen-Kante halten den Preis an runden Maßen sauber.
 const _HS_B=[1700,2000,2200,2209,2210,2250,2300,2350,2400,2450,2500,2550,2600,2700,2750,2800,3000], _HS_H=[1700,1900,2100,2119,2120,2200];
 const _HS_M=[
   [2576,2589,2598,2597,2638,2640,2642,2685,2687,2730,2732,2773,2775,2817,2860,2862,2956], // H1700
@@ -12244,8 +12241,7 @@ function hstPriceParts(){
   let frame = (S.profil==='iglo-hs') ? _matLookup(b,h,_HS_B,_HS_H,_HS_M) : _matLookup(b,h,_PSK_B,_PSK_H,_PSK_M);
   if(S.profil==='iglo-psk' && S.pskKammer==='iglo-energy') frame += 45; // Energy-Kammer (Schätzung wie Fenster)
   const faCol=S.fa&&S.fa!=='weiss', fiCol=S.fi&&S.fi!=='weiss';
-  // IGLO-HS Farbaufschlag am Markt gemessen: einseitig ~20,7 % (großes Ende, Minimum), beidseitig 30,2–30,7 %.
-  // Einseitig auf 20,6 % gesetzt (knapp unter Markt-Minimum → nie darüber); beidseitig 30 % bleibt sicher unter Markt.
+  // IGLO-HS hat höheren Farbaufschlag als PSK (großer Hebe-Schiebe-Rahmen): einseitig 20,6 % / beidseitig 30 % vs PSK 8,7 % / 11 %.
   const _hsOne=(S.profil==='iglo-hs')?0.206:0.087, _hsBoth=(S.profil==='iglo-hs')?0.30:0.11;
   const farbPct=((faCol&&fiCol)?_hsBoth:((faCol||fiCol)?_hsOne:0))+_farbPremDelta();
   let price = frame*(1+farbPct);
@@ -12253,7 +12249,7 @@ function hstPriceParts(){
   // → kein 3-fach-Aufschlag (3-fach im Grundpreis enthalten).
   price += F_SCHALL[S.schall]||0;
   price += F_SICHERGLAS[S.sicherGlas]||0;
-  // Glasdekor (Ornamentglas) pro m² Glasfläche — bei großen Schiebetüren sonst viel zu billig (war flacher Festbetrag).
+  // Glasdekor (Ornamentglas) pro m² Glasfläche (größenabhängig).
   if(S.glasdekor && S.glasdekor!=='klar') price += (S.glasdekor==='master-carre'?55:27)*((b/1000)*(h/1000));
   price += F_SICHER[S.sicher]||0;
   if(S.roll && S.roll!=='ohne') price += _hstRolladenDelta(b, S.profil); // Rolladen (Schiebetür, breiten-getrieben)
@@ -12273,19 +12269,19 @@ function _hstRolladenDelta(b, profil){
 }
 
 // ── HAUSTÜR-PREISMODELL (Basis-Matrix Florida-Inox + Glas-Stufe je Modell + Griff) ──
-// Haustür Florida-Inox am Markt geeicht (2-fach-Basis). Zuvor ~+52 € zu teuer.
+// Haustür Florida-Inox Preistabelle (2-fach-Basis).
 const _HT_B=[904,1000,1100,1174], _HT_H=[2028,2200,2398];
 const _HT_M=[
   [1635,1667,1699,1732], // H2028
   [1664,1697,1732,1765], // H2200
   [1756,1791,1826,1862], // H2398
 ];
-// Modell-Aufschlag ggü. Florida-Basis (am Markt gemessen, FLACHER Betrag — nicht farb-verstärkt).
-// Markt-Tiers: Florida/Montana(1)/Alaska1 = Basis 0; die übrigen Dekor-Modelle +87,44 €; Vollglas (Glasfüllung) −786,96 €.
+// Modell-Aufschlag ggü. Florida-Basis (flacher Betrag, unabhängig von der Farbe).
+// Basis-Modelle (Florida/Montana/Alaska1) = 0; weitere Dekor-Modelle = fester Aufschlag; Vollglas = Abschlag.
 const _HT_MODELL={
-  'vollglas-inox':-787,                                                    // Vollglas (Glasfüllung), Markt −786,96
-  'florida-lr-inox':0,'montana-1-inox':0,'alaska-1-inox':0,                // 1800er-Tier = Basis
-  'montana-2-lr-inox':87,'montana-3-lr-inox':87,'ohio-inox':87,'colorado-inox':87, // 2000er-Tier = +87,44
+  'vollglas-inox':-787,                                                    // Vollglas-Füllung (Abschlag ggü. Dekor)
+  'florida-lr-inox':0,'montana-1-inox':0,'alaska-1-inox':0,                // Basis-Modelle
+  'montana-2-lr-inox':87,'montana-3-lr-inox':87,'ohio-inox':87,'colorado-inox':87, // Dekor-Modelle mit Aufschlag
   'alaska-2-inox':87,'nebraska-lcr-inox':87,
   'pennsylvania-1-inox':87,'pennsylvania-2-lr-inox':87,'pennsylvania-3-lr-inox':87,
   'texas-c-inox':87,'texas-lr-inox':87,
@@ -12296,10 +12292,10 @@ function haustuerPriceParts(){
   const _mDelta = (_HT_MODELL[S.tuerModell]!=null ? _HT_MODELL[S.tuerModell] : 0);
   const faCol=S.fa&&S.fa!=='weiss', fiCol=S.fi&&S.fi!=='weiss';
   const farbPct=((faCol&&fiCol)?0.17:((faCol||fiCol)?0.145:0))+_farbPremDelta(); // Haustür-Farbe + Premium-Aufschlag
-  let price = frame*(1+farbPct) + _mDelta; // Modell-Aufschlag FLACH addieren (Markt verstärkt ihn nicht mit der Farbe)
+  let price = frame*(1+farbPct) + _mDelta; // Modell-Aufschlag flach addieren (nicht mit der Farbe skalieren)
   if(S.glas==='3fach') price += Math.round(24.4*(b*h/1e6));
-  if(S.tuerGriffAussen==='stoss-q45r') price += 100; // Edelstahl-Stoßgriff (Markt 99.31)
-  else if(S.tuerGriffAussen && String(S.tuerGriffAussen).indexOf('knauf')===0) price += 5; // Knauf (Markt +5.21)
+  if(S.tuerGriffAussen==='stoss-q45r') price += 100; // Edelstahl-Stoßgriff
+  else if(S.tuerGriffAussen && String(S.tuerGriffAussen).indexOf('knauf')===0) price += 5; // Knauf
   price += F_SICHER[S.sicher]||0;
   return { unit: unserPreis5(price) };
 }
