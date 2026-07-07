@@ -500,6 +500,8 @@ h1,h2,h3{font-family:var(--serif);font-weight:700;letter-spacing:-.022em;line-he
 #head .sub,#head p{font-size:17px}
 @media(max-width:880px){.grid{grid-template-columns:1fr!important}.stage-card{top:auto;position:static;display:block}.stage{flex:none;padding:16px 24px 8px}.head h2{font-size:28px}.stageimg{max-width:190px}.summary{display:none}.steps-inner{gap:2px}.step{min-width:84px;flex:0 0 auto}.steps-hint{padding:8px 14px}.sh-jump{font-size:11px}}
 /* === Handy: Auswahl-Schritte + Fußleiste === */
+/* Liefer-Info-Button/Overlay + Backdrop nur auf dem Handy — Basis versteckt (Desktop) */
+.lf-infobtn,.lf-backdrop,.lf-close{display:none}
 @media(max-width:600px){
   /* Auswahl-Karten: 2 pro Reihe (statt 3), großes erkennbares Bild, orphan mittig */
   .grid.select .opts,
@@ -521,6 +523,30 @@ h1,h2,h3{font-family:var(--serif);font-weight:700;letter-spacing:-.022em;line-he
   .btn svg{width:14px;height:14px}
   .btn-back{padding:0 14px;gap:6px}
   .btn-next{padding:0 18px;gap:6px;flex:0 1 auto}
+  /* ── Startseite: 4 Produkte untereinander, kompakt (Bild links, Text rechts) ── */
+  .pk-grid{grid-template-columns:1fr!important;gap:12px}
+  .pcard{flex-direction:row;align-items:center;text-align:left;padding:12px;gap:14px}
+  .pcard .pimg{height:94px;width:108px;flex:0 0 108px;margin-bottom:0;border:1px solid var(--line)}
+  .pcard .pimg img{max-height:88px}
+  .pcard .pinfo{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start}
+  .pcard .pt{font-size:19px}
+  .pcard .pp{margin-top:3px}
+  .pcard .pgo{margin-top:9px;padding:9px 15px;width:auto;font-size:13px}
+  .pk-head2 h1{font-size:30px;line-height:1.12}
+  .pk-sub{margin-top:4px}
+  /* ── Liefer-Infos: Info-Button statt großem Block; Overlay als Bottom-Sheet ── */
+  .lf-infobtn{display:flex;align-items:center;gap:9px;width:100%;padding:13px 15px;border:1px solid var(--line);border-radius:12px;background:#fff;font-weight:600;font-size:13.5px;color:var(--primary);margin-bottom:16px;cursor:pointer;text-align:left}
+  .lf-infobtn svg{width:18px;height:18px;flex:0 0 auto}
+  .lf-backdrop{display:none;position:fixed;inset:0;background:rgba(10,18,37,.42);z-index:79}
+  body.lf-open .lf-backdrop{display:block}
+  .liefer{position:fixed;left:0;right:0;bottom:0;z-index:80;border:0;border-radius:18px 18px 0 0;box-shadow:0 -12px 40px rgba(10,18,37,.2);padding:20px 18px calc(20px + env(safe-area-inset-bottom));transform:translateY(110%);transition:transform .28s var(--ease);max-height:82vh;overflow:auto;margin:0}
+  body.lf-open .liefer{transform:translateY(0)}
+  .lf-close{display:grid;place-items:center;position:absolute;top:12px;right:12px;width:34px;height:34px;border:1px solid var(--line);border-radius:50%;background:#fff;cursor:pointer;color:var(--ink)}
+  .lf-close svg{width:16px;height:16px}
+  /* ── Warenkorb oben klar erkennbar: Label anzeigen + blaues Badge ── */
+  .tb-links .lbl{display:inline!important}
+  .tb-link{padding:9px 12px;font-size:12.5px;gap:6px}
+  .tb-link .badge{background:var(--primary);color:#fff}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -1366,15 +1392,20 @@ const PRODUCTS=[
 function renderPicker(){
   const cards=PRODUCTS.map(p=>`<div class="pcard" onclick="startProduct('${p.id}')">
     <div class="pimg"><img src="${p.img}" alt="${p.t}"></div>
-    <div class="pt">${p.t}</div><div class="pp">${p.from} <span>· nach Maß · inkl. MwSt</span></div>
-    <div class="pgo">Konfigurieren <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div></div>`).join('');
+    <div class="pinfo">
+      <div class="pt">${p.t}</div><div class="pp">${p.from} <span>· nach Maß · inkl. MwSt</span></div>
+      <div class="pgo">Konfigurieren <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div>
+    </div></div>`).join('');
   const truck=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5v8h1"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>`;
   const fork=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4v11h8V9h5l4 4v2h-2"/><circle cx="6" cy="18" r="2"/><path d="M14 4h4"/></svg>`;
   const door=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M12 3v18M9 12h.01"/></svg>`;
   document.getElementById('pickerView').innerHTML=
     `<div class="pk-head2"><h1>Ihr Fenster. Ihr Maß. Ihr <span class="accent">Angebot</span>.</h1>
        <p>Maßgenau konfigurieren — kostenlos &amp; unverbindlich per E-Mail.</p></div>
+     <button class="lf-infobtn" onclick="document.body.classList.add('lf-open')">${truck} Lieferung &amp; Abholung — so kommt's zu Ihnen<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;margin-left:auto"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></button>
+     <div class="lf-backdrop" onclick="document.body.classList.remove('lf-open')"></div>
      <div class="liefer">
+       <button class="lf-close" aria-label="Schließen" onclick="document.body.classList.remove('lf-open')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
        <div class="lf-title">${truck} So kommen Ihre Fenster zu Ihnen</div>
        <div class="lf-tiers">
          <div class="lf-tier"><b>1–4 Fenster</b><span>Abholung bei uns im Lager · Brandenburg a.d.H.</span></div>
