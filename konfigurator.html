@@ -12280,22 +12280,23 @@ const _HT_M=[
   [1664,1697,1732,1765], // H2200
   [1756,1791,1826,1862], // H2398
 ];
-// Modell-Aufschlag ggü. Florida-Basis (Glas-Stufe, ~konstant; Zuordnung nach Glasanteil — Näherung)
+// Modell-Aufschlag ggü. Florida-Basis (am Markt gemessen, FLACHER Betrag — nicht farb-verstärkt).
+// Markt-Tiers: Florida/Montana(1)/Alaska1 = Basis 0; die übrigen Dekor-Modelle +87,44 €; Vollglas (Glasfüllung) −786,96 €.
 const _HT_MODELL={
-  'vollglas-inox':-813,                                                   // Vollglas = günstigste Stufe
-  'florida-lr-inox':0,'montana-1-inox':0,'montana-2-lr-inox':0,             // Dekor-Basis (wenig Glas)
-  'montana-3-lr-inox':90,'ohio-inox':90,'colorado-inox':90,        // Dekor mehr Glas
-  'alaska-1-inox':90,'alaska-2-inox':90,'nebraska-lcr-inox':90,
-  'pennsylvania-1-inox':90,'pennsylvania-2-lr-inox':90,'pennsylvania-3-lr-inox':90,
-  'texas-c-inox':90,'texas-lr-inox':90,
+  'vollglas-inox':-787,                                                    // Vollglas (Glasfüllung), Markt −786,96
+  'florida-lr-inox':0,'montana-1-inox':0,'alaska-1-inox':0,                // 1800er-Tier = Basis
+  'montana-2-lr-inox':87,'montana-3-lr-inox':87,'ohio-inox':87,'colorado-inox':87, // 2000er-Tier = +87,44
+  'alaska-2-inox':87,'nebraska-lcr-inox':87,
+  'pennsylvania-1-inox':87,'pennsylvania-2-lr-inox':87,'pennsylvania-3-lr-inox':87,
+  'texas-c-inox':87,'texas-lr-inox':87,
 };
 function haustuerPriceParts(){
   const b=S.bMm||1000, h=S.hMm||2100;
   let frame = _matLookup(b,h,_HT_B,_HT_H,_HT_M);
-  frame += (_HT_MODELL[S.tuerModell]!=null ? _HT_MODELL[S.tuerModell] : 0);
+  const _mDelta = (_HT_MODELL[S.tuerModell]!=null ? _HT_MODELL[S.tuerModell] : 0);
   const faCol=S.fa&&S.fa!=='weiss', fiCol=S.fi&&S.fi!=='weiss';
   const farbPct=((faCol&&fiCol)?0.17:((faCol||fiCol)?0.145:0))+_farbPremDelta(); // Haustür-Farbe + Premium-Aufschlag
-  let price = frame*(1+farbPct);
+  let price = frame*(1+farbPct) + _mDelta; // Modell-Aufschlag FLACH addieren (Markt verstärkt ihn nicht mit der Farbe)
   if(S.glas==='3fach') price += Math.round(24.4*(b*h/1e6));
   if(S.tuerGriffAussen==='stoss-q45r') price += 100; // Edelstahl-Stoßgriff (Markt 99.31)
   else if(S.tuerGriffAussen && String(S.tuerGriffAussen).indexOf('knauf')===0) price += 5; // Knauf (Markt +5.21)
