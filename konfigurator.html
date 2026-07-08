@@ -677,7 +677,7 @@ const COLORS=[
   {key:'sonder',n:'Sonderfarbe',c:'#8899aa'},
 ];
 const _PREM_FARBE=['schwarzbr','basaltgr-gl','basaltgr-sa','betongrau','crown-plat','dunkelgr','dunkelrot','eiche-nat','eisengl','moosgruen','oregon','schiefgr-gl','schiefgr-sa','douglasie'];
-const S={ prod:'fenster', profile:'classic', aufteilung:'1fl', opening:'dkr', anschlagIdx:1, hstSystem:'psk', pskKammer:'iglo5', w:1000, h:1200, anzahl:1, outer:0, inner:0, balkonSchwelle:'alu', doorModel:'nebraska-lcr-inox', griffTuer:'stoss', griffHst:'innen', hstTeilung:'2', hstLauf:'rechts',
+const S={ prod:'fenster', profile:'classic', aufteilung:'1fl', opening:'dkr', anschlagIdx:1, hstSystem:'psk', pskKammer:'iglo5', w:1000, h:1200, anzahl:1, outer:0, inner:0, balkonSchwelle:'alu', doorModel:'nebraska-lcr-inox', griffTuer:'stoss', griffHst:'innen', hstSchloss:'ohne', hstTeilung:'2', hstLauf:'rechts',
   glass:'2', glasdekor:'klar', schall:false, griff:'mistral', roll:'kein', panzer:null, sprossen:'ohne', sicher:false, colorTarget:'i' };
 
 // === Öffnung PRO FLÜGEL — 1:1 aus dem Live-Konfigurator (ANSCHLAG_SETS, geprüft 04.07.2026) ===
@@ -1310,7 +1310,7 @@ function price(){
   if(S.prod==='schiebe'){
     L.profil=(S.hstSystem==='hs')?'iglo-hs':'iglo-psk';
     L.pskKammer=S.pskKammer||'iglo5';
-    L.hstSchloss=(S.griffHst==='abschliessbar')?'innen-aussen':'ohne';
+    L.hstSchloss=(S.hstSchloss==='innen-aussen')?'innen-aussen':'ohne';
     L.bMm=+S.w||2200; L.hMm=+S.h||2100;
     LS=L; return _lp_hst();
   }
@@ -1548,10 +1548,14 @@ function panelHTML(){
       ocIcon('pskKammer','iglo-energy',`<svg viewBox="0 0 40 40" fill="none" stroke="var(--primary)" stroke-width="1.4" style="height:52px"><rect x="4" y="6" width="32" height="28" rx="1"/><line x1="10" y1="6" x2="10" y2="34"/><line x1="15" y1="6" x2="15" y2="34"/><line x1="20" y1="6" x2="20" y2="34"/><line x1="25" y1="6" x2="25" y2="34"/><line x1="30" y1="6" x2="30" y2="34"/></svg>`,'IGLO Energy PSK','7-Kammer · 82 mm',''));
   }
   if(k==='griffhst'){
-    return grp('Schiebegriff','three',
-      ocImg('griffHst','innen','img/drutex-griffe/hst-hebel-weiss-cut.webp','Standard-Stangengriff','innen & außen','inklusive')+
-      ocImg('griffHst','muschel','img/drutex-griffe/hst-muschel-weiss-cut.webp','Muschelgriff','flach versenkt','')+
-      ocImg('griffHst','abschliessbar','img/drutex-griffe/hst-hebel-schloss-weiss-cut.webp','Abschließbar','mit Schließzylinder',''));
+    // Wie Live-Schiebegriff: Innengriff (Stangengriff) + Außengriff (Muschelgriff) fest inklusive, Abschließbar zur Wahl
+    const fix=(img,t,s)=>`<div class="ocard on"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="vis"><img src="${img}" alt="${t}"></div><div class="t">${t}</div><div class="s">${s}</div><div class="pdl inc">inklusive</div></div>`;
+    return `<div class="card"><div class="grp-title">Innengriff</div><div class="opts one">${fix('img/drutex-griffe/hst-hebel-weiss-cut.webp','Standard-Stangengriff','zum Öffnen & Kippen von innen')}</div></div>`
+      +`<div class="card"><div class="grp-title">Außengriff</div><div class="opts one">${fix('img/drutex-griffe/hst-muschel-weiss-cut.webp','Muschelgriff','flach versenkt, außen')}</div></div>`
+      +`<div class="card"><div class="grp-title">Abschließbar?</div><div class="opts two">`
+        +ocImg('hstSchloss','ohne','img/drutex-griffe/hst-hebel-weiss-cut.webp','Nicht abschließbar','Standard','inklusive')
+        +ocImg('hstSchloss','innen-aussen','img/drutex-griffe/hst-hebel-schloss-weiss-cut.webp','Abschließbar','innen + außen · Schließzylinder',' + 59 €')
+      +`</div></div>`;
   }
   if(k==='aufteilung'){
     const auf=(val,img,t,dl)=>{ const on=S.aufteilung===val; return `<div class="ocard ${on?'on':''}" onclick="setAufteilung('${val}')"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="vis"><img src="${img}" alt="${t}"></div><div class="t">${t}</div>${dl?`<div class="pdl">${dl}</div>`:''}</div>`; };
@@ -1699,7 +1703,7 @@ function summaryRows(){
   if(S.prod==='schiebe'){
     const psk=S.hstSystem!=='hs';
     const kammerRow=psk?`<div class="srow"><span class="k">PSK-System</span><span class="v">${S.pskKammer==='iglo-energy'?'IGLO Energy PSK':'IGLO 5 Classic PSK'}</span></div>`:'';
-    const griffN={innen:'Standard-Stangengriff',muschel:'Muschelgriff',abschliessbar:'Abschließbar'}[S.griffHst]||'Stangengriff';
+    const griffN='Stangengriff + Muschelgriff'+(S.hstSchloss==='innen-aussen'?' · abschließbar':'');
     return `<div class="srow"><span class="k">System</span><span class="v">${psk?'PSK Schiebetür':'Hebe-Schiebetür'}</span></div>${kammerRow}
       <div class="srow"><span class="k">${psk?'Öffnung':'Laufrichtung'}</span><span class="v">${S.hstLauf==='links'?(psk?'Kipp-Schiebe links':'nach links'):(psk?'Kipp-Schiebe rechts':'nach rechts')}</span></div>${massRow}${colorRows}
       <div class="srow"><span class="k">Verglasung</span><span class="v">${S.glass==='3'?'3-fach':'2-fach'}</span></div>
