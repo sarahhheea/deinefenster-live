@@ -522,6 +522,17 @@ h1,h2,h3{font-family:var(--serif);font-weight:700;letter-spacing:-.022em;line-he
   .grid.select .ocard .t{font-size:15px;margin-top:0}
   .grid.select .ocard .s{white-space:normal;margin-top:2px;font-size:12px;line-height:1.3;overflow-wrap:break-word}
   .grid.select .ocard .pdl{white-space:nowrap;margin-top:2px}
+  /* ── Wizard-Optionskarten (echter Container ist #wizGrid, NICHT .grid.select): Modell/Griff/Profil
+        2 pro Reihe statt 3-Spalten-Überlauf; Bild groß, zentriert, voll sichtbar ── */
+  #wizGrid .opts.three{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
+  #wizGrid .opts.three>.ocard{flex:1 1 calc(50% - 8px);max-width:calc(50% - 6px);min-width:0}
+  #wizGrid .opts.three .ocard .vis{height:120px}
+  #wizGrid .opts.three .ocard .vis img{max-height:118px;max-width:100%;width:auto;object-fit:contain}
+  #wizGrid .opts.three .ocard .t{font-size:14.5px;line-height:1.25}
+  #wizGrid .opts.three .ocard .s{font-size:12px;line-height:1.3;overflow-wrap:break-word}
+  /* Türmodell-Karten: höheres Bildfeld (Türen sind hochkant) — schlägt Inline-height:300px */
+  #wizGrid .doorgrid .vis{height:168px!important}
+  #wizGrid .doorgrid .vis img{max-height:166px}
   /* Fußleiste: Preis + Zurück + Weiter ohne Überlappung */
   .footer-inner{padding:10px 12px;gap:8px}
   .price .amt{font-size:19px}
@@ -1143,7 +1154,6 @@ function schiebeStageSVG(){
 const DOOR_MOTIFS={'alaska-1-inox':1,'alaska-2-inox':1,'colorado-inox':1,'florida-lr-inox':1,'montana-1-inox':1,'montana-2-lr-inox':1,'montana-3-lr-inox':1,'nebraska-lcr-inox':1,'ohio-inox':1,'pennsylvania-1-inox':1,'pennsylvania-2-lr-inox':1,'pennsylvania-3-lr-inox':1,'texas-c-inox':1,'texas-lr-inox':1};
 // ---- Haustür: gezeichnete Skizze (farbiges Türblatt + Inox-Modellmotiv + Griff) — färbt sich mit der Farbe ----
 function haustuerStageSVG(){
-  return flatWindowSVG(true);   // Haustür = flache Drutex-Skizze (Türblatt + Glas + Dreh + Griff + 3 Bänder + Schwelle)
   const co=COLORS[S.outer], dark=isDarkCol(S.outer);
   const edge=dark?'rgba(255,255,255,.30)':'rgba(30,40,55,.44)', miter=dark?shade(co.c,22):shade(co.c,-15);
   const seal=dark?'rgba(255,255,255,.24)':'rgba(20,27,40,.5)';
@@ -1556,8 +1566,11 @@ function panelHTML(){
   if(k==='griffhst'){
     // Wie Live-Schiebegriff: Innengriff (Stangengriff) + Außengriff (Muschelgriff) fest inklusive, Abschließbar zur Wahl
     const fix=(img,t,s)=>`<div class="ocard on"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="vis"><img src="${img}" alt="${t}"></div><div class="t">${t}</div><div class="s">${s}</div><div class="pdl inc">inklusive</div></div>`;
-    return `<div class="card"><div class="grp-title">Innengriff</div><div class="opts one">${fix('img/drutex-griffe/hst-hebel-weiss-cut.webp','Standard-Stangengriff','zum Öffnen & Kippen von innen')}</div></div>`
-      +`<div class="card"><div class="grp-title">Außengriff</div><div class="opts one">${fix('img/drutex-griffe/hst-muschel-weiss-cut.webp','Muschelgriff','flach versenkt, außen')}</div></div>`
+    // Innengriff + Außengriff nebeneinander (beide serienmäßig inklusive), darunter die Abschließbar-Wahl
+    return `<div class="card"><div class="grp-title">Serien-Griffe — innen &amp; außen inklusive</div><div class="opts two">`
+        +fix('img/drutex-griffe/hst-hebel-weiss-cut.webp','Innengriff','Stangengriff · öffnen &amp; kippen')
+        +fix('img/drutex-griffe/hst-muschel-weiss-cut.webp','Außengriff','Muschelgriff · flach versenkt')
+      +`</div></div>`
       +`<div class="card"><div class="grp-title">Abschließbar?</div><div class="opts two">`
         +ocImg('hstSchloss','ohne','img/drutex-griffe/hst-hebel-weiss-cut.webp','Nicht abschließbar','Standard','inklusive')
         +ocImg('hstSchloss','innen-aussen','img/drutex-griffe/hst-hebel-schloss-weiss-cut.webp','Abschließbar','innen + außen · Schließzylinder',' + 59 €')
@@ -1603,9 +1616,9 @@ function panelHTML(){
   }
   if(k==='griffTuer'){
     return grp('Türgriff','three',
-      ocImg('griffTuer','stoss','img/drutex-griffe/htg-30a-cut.webp','Stoßgriff','gerade Edelstahl-Stange','inklusive')+
+      ocImg('griffTuer','stoss','img/drutex-griffe/stoss-q45r-cut.webp','Stoßgriff','gerade Edelstahl-Stange','inklusive')+
       ocImg('griffTuer','klinke','img/drutex-griffe/htg-flach-weiss-cut.webp','Drückergarnitur','Klinke innen & außen','inklusive')+
-      ocImg('griffTuer','knauf','img/drutex-griffe/htg-r35a-cut.webp','Knauf','fester Knauf außen','inklusive'));
+      ocImg('griffTuer','knauf','img/drutex-griffe/knauf-weiss-cut.webp','Knauf','fester Knauf außen','inklusive'));
   }
   if(k==='teilung'){
     const two=`<svg viewBox="0 0 40 30" fill="none" stroke="var(--primary)" stroke-width="1.6" style="height:54px;width:auto"><rect x="2" y="3" width="36" height="24" rx="1"/><line x1="20" y1="3" x2="20" y2="27"/></svg>`;
