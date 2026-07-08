@@ -1272,7 +1272,12 @@ function _lp_fenster(){
   }
   const area=(b/1000)*(h/1000);
   const _profBaseF=frame;
-  const prof=(LS.profil==='iglo-energy')?(String(LS.fluegel||'').charAt(0)==='1'?_profBaseF*0.22:Math.max(0,10.11+0.0213*b+0.0417*h)):_profBaseF*(_lp_PROFIL_PCT[LS.profil]||0);
+  const _enFl=String(LS.fluegel||'').charAt(0);
+  const _enUp = (_enFl==='1') ? _profBaseF*0.22
+    : (LS.fluegel==='stulp') ? (10.11+0.0213*b+0.0417*h)
+    : (_enFl==='3') ? (-61.08+0.0513*b-0.0143*h)
+    : (-5.46+0.0307*b+0.0390*h);
+  const prof=(LS.profil==='iglo-energy')? Math.max(0,_enUp) : _profBaseF*(_lp_PROFIL_PCT[LS.profil]||0);
   const faCol=LS.fa&&LS.fa!=='weiss', fiCol=LS.fi&&LS.fi!=='weiss';
   const farbPct=((faCol&&fiCol)?0.19:((faCol||fiCol)?0.125:0))+_lp_farbPremDelta();
   const bodyNoColor=frame+prof+oeff, colorAdd=bodyNoColor*farbPct;
