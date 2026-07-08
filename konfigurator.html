@@ -551,6 +551,9 @@ h1,h2,h3{font-family:var(--serif);font-weight:700;letter-spacing:-.022em;line-he
   .mrow input{height:56px;font-size:22px}
   .mhint{font-size:12.5px;line-height:1.4}
   .mhint span{min-width:0;overflow-wrap:break-word}
+  /* ── Farb-Raster: 3 Spalten (46 Farben passen sauber, Namen nicht abgeschnitten) ── */
+  .swatches{grid-template-columns:repeat(3,1fr)!important;gap:14px 10px}
+  .sw .nm{font-size:12px;line-height:1.25;overflow-wrap:break-word}
   /* ── Warenkorb oben klar erkennbar: Label anzeigen + blaues Badge ── */
   .tb-links .lbl{display:inline!important}
   .tb-link{padding:9px 12px;font-size:12.5px;gap:6px}
@@ -626,15 +629,54 @@ h1,h2,h3{font-family:var(--serif);font-weight:700;letter-spacing:-.022em;line-he
 <script>
 const HERO_IMG="";
 const COLORS=[
-  {n:'Weiß',c:'#f4f5f7',dl:'inklusive',inc:true,add:0},
-  {n:'Anthrazitgrau',c:'#383c42',dl:'',add:45},
-  {n:'Anthrazit Glatt',c:'#31353b',dl:'',add:45},
-  {n:'Cremeweiß',c:'#efe9d8',dl:'',add:39},
-  {n:'Weiß FX',c:'#eceef1',dl:'',add:39},
-  {n:'Achatgrau',c:'#b8b3a6',dl:'',add:45},
-  {n:'Lichtgrau',c:'#c9ccce',dl:'',add:45},
-  {n:'Signalgrau',c:'#8f9497',dl:'',add:45},
+  {key:'weiss',n:'Weiß',c:'#f4f4f0'},
+  {key:'anthrazit',n:'Anthrazitgrau',c:'#373d3f'},
+  {key:'anthraz-gl',n:'Anthrazitgrau Glatt',c:'#373d3f'},
+  {key:'cremeweiss',n:'Cremeweiß',c:'#fdf6e3'},
+  {key:'weiss-fx',n:'Weiß FX',c:'#ededea'},
+  {key:'achatgrau',n:'Achatgrau',c:'#b4b6a8'},
+  {key:'lichtgrau',n:'Lichtgrau',c:'#c5c6be'},
+  {key:'signalgrau',n:'Signalgrau',c:'#9c9c9c'},
+  {key:'betongrau',n:'Betongrau',c:'#7c7f79'},
+  {key:'quarzgr-gl',n:'Quarzgrau Glatt',c:'#6c6f66'},
+  {key:'quarzgr-sa',n:'Quarzgrau Sandstruktur',c:'#6c6f66'},
+  {key:'basaltgr-gl',n:'Basaltgrau Glatt',c:'#4f5458'},
+  {key:'basaltgr-sa',n:'Basaltgrau Sandstruktur',c:'#4f5458'},
+  {key:'schiefgr-gl',n:'Schiefergrau Glatt',c:'#3e454c'},
+  {key:'schiefgr-sa',n:'Schiefergrau Sandstruktur',c:'#3e454c'},
+  {key:'anthraz-um',n:'Anthrazitgrau Ulti-Matt',c:'#373d3f'},
+  {key:'schwarz-um',n:'Schwarz Ulti-Matt',c:'#0e0e10'},
+  {key:'schwarzbr',n:'Schwarzbraun',c:'#26211e'},
+  {key:'alux-db',n:'Alux DB',c:'#4a3520'},
+  {key:'alu-gebr',n:'Aluminium gebürstet',c:'#b0b3b8'},
+  {key:'eisengl',n:'Eisenglimmer Schiefer',c:'#4a4a4a'},
+  {key:'crown-plat',n:'Crown Platin',c:'#d0ccc6'},
+  {key:'sheffield',n:'Sheffield Oak Light',c:'#c8b090'},
+  {key:'winchester',n:'Winchester',c:'#8c6440'},
+  {key:'eiche-hell',n:'Eiche Hell',c:'#d4bc98'},
+  {key:'eiche-nat',n:'Eiche Natur',c:'#b89660'},
+  {key:'golden-oak',n:'Golden Oak',c:'#9b6840'},
+  {key:'nussbaum',n:'Nussbaum',c:'#6e4828'},
+  {key:'mooreiche',n:'Mooreiche',c:'#4e3828'},
+  {key:'dunkleiche',n:'Dunkleiche',c:'#3c2c20'},
+  {key:'siena-noce',n:'Siena Noce',c:'#7c5c38'},
+  {key:'siena-ross',n:'Siena Rosso',c:'#8c3c2c'},
+  {key:'mahagoni',n:'Mahagoni',c:'#6b3a2a'},
+  {key:'macore',n:'Macoré',c:'#8c4030'},
+  {key:'oregon',n:'Oregon',c:'#c8a870'},
+  {key:'douglasie',n:'Streifen-Douglasie',c:'#c0986c'},
+  {key:'bergkiefer',n:'Bergkiefer',c:'#d4b884'},
+  {key:'teak',n:'Teak',c:'#8c6838'},
+  {key:'schoko-br',n:'Schokoladenbraun',c:'#5c3218'},
+  {key:'braun-mar',n:'Braun Maron',c:'#6a4828'},
+  {key:'moosgruen',n:'Moosgrün',c:'#1e3e2c'},
+  {key:'dunkelgr',n:'Dunkelgrün',c:'#2e4e28'},
+  {key:'stahlblau',n:'Stahlblau',c:'#1c4c6c'},
+  {key:'brillblau',n:'Brilliantblau',c:'#2a5c8c'},
+  {key:'dunkelrot',n:'Dunkelrot',c:'#6c1c1c'},
+  {key:'sonder',n:'Sonderfarbe',c:'#8899aa'},
 ];
+const _PREM_FARBE=['schwarzbr','basaltgr-gl','basaltgr-sa','betongrau','crown-plat','dunkelgr','dunkelrot','eiche-nat','eisengl','moosgruen','oregon','schiefgr-gl','schiefgr-sa','douglasie'];
 const S={ prod:'fenster', profile:'classic', aufteilung:'1fl', opening:'dkr', anschlagIdx:1, hstSystem:'psk', pskKammer:'iglo5', w:1000, h:1200, anzahl:1, outer:0, inner:0, balkonSchwelle:'alu', doorModel:'nebraska-lcr-inox', griffTuer:'stoss', griffHst:'innen', hstTeilung:'2', hstLauf:'rechts',
   glass:'2', glasdekor:'klar', schall:false, griff:'mistral', roll:'kein', panzer:null, sprossen:'ohne', sicher:false, colorTarget:'i' };
 
@@ -690,7 +732,7 @@ function tokSash(tok){
 }
 
 function shade(hex,a){const n=parseInt(hex.slice(1),16);let r=(n>>16)+a,g=((n>>8)&255)+a,b=(n&255)+a;r=Math.max(0,Math.min(255,r));g=Math.max(0,Math.min(255,g));b=Math.max(0,Math.min(255,b));return '#'+(r<<16|g<<8|b).toString(16).padStart(6,'0');}
-function isDarkCol(i){return i===1||i===2||i===7;}
+function isDarkCol(i){ const h=(COLORS[i]&&COLORS[i].c)||'#ffffff'; const n=parseInt(h.slice(1),16); const r=(n>>16)&255,g=(n>>8)&255,b=n&255; return (0.299*r+0.587*g+0.114*b) < 150; }
 // Rollladen-KASTEN wie in der Drutex-Zeichnung: Band mit feinen Lamellen-Linien, KEIN rundes Ding.
 // Motor = kleines Stecker-Symbol rechts oben. Gurt = dezente Marke.
 // Spirale (Gurtwickler-/Motor-Rad) wie in der Drutex-Skizze: Kreis mit eingerollter Spirale.
@@ -1128,7 +1170,7 @@ function haustuerStageSVG(){
 
 const COLIMG=['weiss','anthrazit','anthraz-gl','cremeweiss','weiss-fx','achatgrau','lichtgrau','signalgrau'];
 function stageHTML(){
-  return `<img class="stageimg" src="img/fenster/${COLIMG[S.outer]}.webp" alt="Fenster ${COLORS[S.outer].n}">
+  return `<img class="stageimg" src="img/fenster/${COLIMG[S.outer]||(isDarkCol(S.outer)?'anthrazit':'weiss')}.webp" alt="Fenster ${COLORS[S.outer].n}">
     <div class="stagedim">${AUFTN[S.aufteilung]} · ${OPEN[S.opening]}<br>${S.w} × ${S.h} mm · Außen ${COLORS[S.outer].n}</div>`;
 }
 // ===== LIVE-PREIS-ENGINE — 1:1 aus df-fenster/konfigurator.html übernommen (Preise identisch zum Live-Konfigurator). =====
@@ -1159,6 +1201,8 @@ const _lp_PROFIL_PCT={'iglo5':0,'iglo-energy':0.20,'iglo-edge':0.467};
 function _lp_griffLockAdd(){ return 5; }
 function _lp_rolladenDelta(b,h,type){ if(!type||type==='ohne')return 0; let d=_lp_interp1(b,[700,1000,1400],[109,114,157])+0.04*Math.max(0,h-500); if(type==='motor')d+=127; return d; }
 function _lp_glasOptDelta(area){ let d=0; if(LS.glas==='3fach')d+=24*area; if(LS.schall&&LS.schall!=='ohne')d+=52*area; if(LS.sicherGlas==='esg')d+=33*area; else if(LS.sicherGlas==='vsg')d+=51*area; if(LS.glasdekor==='master-carre')d+=55*area; else if(LS.glasdekor&&LS.glasdekor!=='klar')d+=27*area; return d; }
+// Premium-Farb-Aufschlag wie Live: 14 Sonderfarben/Holzdekore kosten mehr (einseitig +8,8% / beidseitig-beide-premium +5,4%)
+function _lp_farbPremDelta(){ var faCol=LS.fa&&LS.fa!=='weiss', fiCol=LS.fi&&LS.fi!=='weiss'; var faP=faCol&&_PREM_FARBE.indexOf(LS.fa)>=0, fiP=fiCol&&_PREM_FARBE.indexOf(LS.fi)>=0; if(faCol&&fiCol) return (faP&&fiP)?0.054:0; return (faP||fiP)?0.088:0; }
 function _lp_fenster(){
   const b=LS.bMm||1000, h=LS.hMm||1200, fak=_lp_fluegelFaktor(LS.fluegel), cnt=LS.cnt||1;
   const isSingleFest=(LS.fluegel==='1-fluegel'&&LS.oeff1==='fest');
@@ -1175,7 +1219,7 @@ function _lp_fenster(){
   const _profBaseF=(LS.fluegel==='stulp'||String(LS.fluegel||'').charAt(0)==='2'||String(LS.fluegel||'').charAt(0)==='3')?_lp_fensterMatrix(b,h):frame;
   const prof=_profBaseF*(_lp_PROFIL_PCT[LS.profil]||0);
   const faCol=LS.fa&&LS.fa!=='weiss', fiCol=LS.fi&&LS.fi!=='weiss';
-  const farbPct=((faCol&&fiCol)?0.19:((faCol||fiCol)?0.125:0));   // Premium-Delta 0 (alle Mockup-Farben Standard)
+  const farbPct=((faCol&&fiCol)?0.19:((faCol||fiCol)?0.125:0))+_lp_farbPremDelta();
   const bodyNoColor=frame+prof+oeff, colorAdd=bodyNoColor*farbPct;
   const glas=(LS.glas==='3fach')?24*area:0;
   const schall=(LS.schall&&LS.schall!=='ohne')?52*area:0;
@@ -1200,7 +1244,7 @@ function _lp_balkon(){
   const _profBaseB=is2F?_lp_matLookup(b,h,_lp_BLK_B1,_lp_BLK_H1,_lp_BLK_M1):frame;
   const prof=_profBaseB*(_lp_PROFIL_PCT[LS.profil]||0);
   const faCol=LS.fa&&LS.fa!=='weiss', fiCol=LS.fi&&LS.fi!=='weiss';
-  const farbPct=((faCol&&fiCol)?0.18:((faCol||fiCol)?0.125:0));
+  const farbPct=((faCol&&fiCol)?0.18:((faCol||fiCol)?0.125:0))+_lp_farbPremDelta();
   let price=(frame+prof)*(1+farbPct);
   price+=_lp_glasOptDelta(area);
   let griff=_lp_F_GRIFF[LS.griff]||0; if(LS.griffLocked)griff+=_lp_griffLockAdd(); price+=griff;
@@ -1221,7 +1265,7 @@ function _lp_hst(){
   if(LS.profil==='iglo-psk'&&LS.pskKammer==='iglo-energy')frame+=45;
   const faCol=LS.fa&&LS.fa!=='weiss', fiCol=LS.fi&&LS.fi!=='weiss';
   const _hsOne=(LS.profil==='iglo-hs')?0.21:0.092, _hsBoth=(LS.profil==='iglo-hs')?0.30:0.11;
-  const farbPct=((faCol&&fiCol)?_hsBoth:((faCol||fiCol)?_hsOne:0));
+  const farbPct=((faCol&&fiCol)?_hsBoth:((faCol||fiCol)?_hsOne:0))+_lp_farbPremDelta();
   let price=frame*(1+farbPct);
   price+=_lp_F_SCHALL[LS.schall]||0;
   price+=_lp_F_SICHERGLAS[LS.sicherGlas]||0;
@@ -1239,7 +1283,7 @@ function _lp_haustuer(){
   let frame=_lp_matLookup(b,h,_lp_HT_B,_lp_HT_H,_lp_HT_M);
   frame+=(_lp_HT_MODELL[LS.tuerModell]!=null?_lp_HT_MODELL[LS.tuerModell]:0);
   const faCol=LS.fa&&LS.fa!=='weiss', fiCol=LS.fi&&LS.fi!=='weiss';
-  const farbPct=((faCol&&fiCol)?0.17:((faCol||fiCol)?0.145:0));
+  const farbPct=((faCol&&fiCol)?0.17:((faCol||fiCol)?0.145:0))+_lp_farbPremDelta();
   let price=frame*(1+farbPct);
   if(LS.glas==='3fach')price+=Math.round(24.4*(b*h/1e6));
   if(LS.tuerGriffAussen==='stoss-q45r')price+=100;
@@ -1250,7 +1294,7 @@ function _lp_haustuer(){
 function price(){
   const L={};
   L.bMm=+S.w||1000; L.hMm=+S.h||1200;
-  L.fa=(S.outer===0)?'weiss':'anthrazit'; L.fi=(S.inner===0)?'weiss':'anthrazit';   // Mockup-Farben sind alle Standard (kein Premium-Aufschlag)
+  L.fa=(COLORS[S.outer]&&COLORS[S.outer].key)||'weiss'; L.fi=(COLORS[S.inner]&&COLORS[S.inner].key)||'weiss';   // echter Farb-Key → korrekter (auch Premium-)Preis
   L.glas=(S.glass==='3')?'3fach':'2fach';
   L.schall=S.schall?'extra':'ohne';
   L.sicherGlas='kein';                                                              // Mockup hat kein separates Sicherheitsglas
@@ -1382,6 +1426,7 @@ let STEPS=STEPS_FENSTER;
 let cur=0;
 let started=false;
 let liefer='abholung';   // 'abholung' | 'lieferung'
+var colAll=false;        // Farb-Schritt: alle 46 Farben zeigen (var → inline-onclick erreichbar)
 let anfrageView='cart';  // 'cart' (Übersicht) | 'form' (Checkout-Seite) | 'done' (Bestätigung)
 // === Echter Warenkorb ===
 // cart[i] = {conf:{...S}, name:''}; Menge = conf.anzahl. editIndex = welcher Artikel gerade konfiguriert wird (-1 = keiner).
@@ -1617,11 +1662,16 @@ function panelHTML(){
   }
   if(k==='farbe'){
     const co=COLORS[S.outer],ci=COLORS[S.inner],sel=S.colorTarget==='a'?S.outer:S.inner;
-    const sw=COLORS.map((c,i)=>`<div class="sw ${sel===i?'on':''}" onclick="pickColor(${i})"><div class="chip" style="background:${c.c}"></div><div class="nm">${c.n}</div><div class="dl ${c.inc?'inc':''}">${c.dl}</div></div>`).join('');
+    const showAll = colAll || sel>=11;                       // ausgewählte Farbe immer sichtbar
+    const LIM = showAll ? COLORS.length : 11;
+    const sw=COLORS.slice(0,LIM).map((c,i)=>`<div class="sw ${sel===i?'on':''}" onclick="pickColor(${i})"><div class="chip" style="background:${c.c}"></div><div class="nm">${c.n}</div>${i===0?'<div class="dl inc">inklusive</div>':''}</div>`).join('');
+    const moreBtn = showAll
+      ? `<button class="more" onclick="colAll=false;render()">Weniger anzeigen ↑</button>`
+      : `<button class="more" onclick="colAll=true;render()">Alle ${COLORS.length} Farben &amp; Holzdekore anzeigen →</button>`;
     return `<div class="card"><div class="seg2">
         <button class="${S.colorTarget==='i'?'on':''}" onclick="set('colorTarget','i')"><div class="t">Innenfarbe</div><div class="s">${ci.n}</div></button>
         <button class="${S.colorTarget==='a'?'on':''}" onclick="set('colorTarget','a')"><div class="t">Außenfarbe</div><div class="s">${co.n}</div></button></div></div>
-      <div class="card"><div class="grp-title">${S.colorTarget==='a'?'Außenfarbe':'Innenfarbe'} wählen</div><div class="swatches">${sw}</div><button class="more">Alle 46 Farben &amp; Holzdekore anzeigen →</button></div>`;
+      <div class="card"><div class="grp-title">${S.colorTarget==='a'?'Außenfarbe':'Innenfarbe'} wählen</div><div class="swatches">${sw}</div>${moreBtn}</div>`;
   }
   if(k==='extras'){
     const row=(key,t,s,dl,inc)=>`<label class="optrow ${S[key]?'on':''}" onclick="toggle('${key}')"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><span><span class="ot">${t}</span><br><span class="os">${s}</span></span><span class="delta ${inc?'inc':''}">${dl}</span></label>`;
