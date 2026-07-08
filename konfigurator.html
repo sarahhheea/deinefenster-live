@@ -513,9 +513,12 @@ h1,h2,h3{font-family:var(--serif);font-weight:700;letter-spacing:-.022em;line-he
   .grid.select .opts.three,
   .grid.select .opts.four{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
   .grid.select .opts>.ocard{flex:1 1 calc(50% - 8px);max-width:calc(50% - 6px);display:flex;flex-direction:column;justify-content:flex-start;align-items:center}
-  .grid.select .ocard{padding:14px 10px 15px}
-  .grid.select .ocard .vis{height:118px;margin-bottom:9px;display:grid;place-items:center;width:100%}
-  .grid.select .ocard .vis img{max-height:116px;max-width:100%;width:auto;object-fit:contain}
+  .grid.select .ocard{padding:11px 9px 12px}
+  .grid.select .ocard .vis{height:96px;margin-bottom:7px;display:grid;place-items:center;width:100%}
+  .grid.select .ocard .vis img{max-height:94px;max-width:100%;width:auto;object-fit:contain}
+  /* Überschrift kompakter → alle Optionen (z.B. 4 Tür-Anschläge) auf einen Blick */
+  #head h2{font-size:25px} #head .sub,#head p{font-size:13.5px;margin-top:4px}
+  .head{margin-bottom:14px}
   .grid.select .ocard .t{font-size:15px;margin-top:0}
   .grid.select .ocard .s{white-space:normal;margin-top:2px;font-size:12px;line-height:1.3;overflow-wrap:break-word}
   .grid.select .ocard .pdl{white-space:nowrap;margin-top:2px}
@@ -678,7 +681,6 @@ const COLORS=[
   {key:'stahlblau',n:'Stahlblau',c:'#1c4c6c'},
   {key:'brillblau',n:'Brilliantblau',c:'#2a5c8c'},
   {key:'dunkelrot',n:'Dunkelrot',c:'#6c1c1c'},
-  {key:'sonder',n:'Sonderfarbe',c:'#8899aa'},
 ];
 const _PREM_FARBE=['schwarzbr','basaltgr-gl','basaltgr-sa','betongrau','crown-plat','dunkelgr','dunkelrot','eiche-nat','eisengl','moosgruen','oregon','schiefgr-gl','schiefgr-sa','douglasie'];
 const S={ prod:'fenster', profile:'classic', aufteilung:'1fl', opening:'dkr', anschlagIdx:1, hstSystem:'psk', pskKammer:'iglo5', w:1000, h:1200, anzahl:1, outer:0, inner:0, balkonSchwelle:'alu', doorModel:'nebraska-lcr-inox', griffTuer:'stoss', griffHst:'innen', hstSchloss:'ohne', hstTeilung:'2', hstLauf:'rechts',
@@ -1670,12 +1672,9 @@ function panelHTML(){
   }
   if(k==='farbe'){
     const co=COLORS[S.outer],ci=COLORS[S.inner],sel=S.colorTarget==='a'?S.outer:S.inner;
-    const showAll = colAll || sel>=11;                       // ausgewählte Farbe immer sichtbar
-    const LIM = showAll ? COLORS.length : 11;
-    const sw=COLORS.slice(0,LIM).map((c,i)=>`<div class="sw ${sel===i?'on':''}" onclick="pickColor(${i})"><div class="chip" style="background:${c.c}"></div><div class="nm">${c.n}</div>${i===0?'<div class="dl inc">inklusive</div>':''}</div>`).join('');
-    const moreBtn = showAll
-      ? `<button class="more" onclick="colAll=false;render()">Weniger anzeigen ↑</button>`
-      : `<button class="more" onclick="colAll=true;render()">Alle ${COLORS.length} Farben &amp; Holzdekore anzeigen →</button>`;
+    // Alle Farben direkt zeigen (Kundenwunsch: nicht hinter Aufklapp-Button verstecken)
+    const sw=COLORS.map((c,i)=>`<div class="sw ${sel===i?'on':''}" onclick="pickColor(${i})"><div class="chip" style="background:${c.c}"></div><div class="nm">${c.n}</div>${i===0?'<div class="dl inc">inklusive</div>':''}</div>`).join('');
+    const moreBtn = '';
     return `<div class="card"><div class="seg2">
         <button class="${S.colorTarget==='i'?'on':''}" onclick="set('colorTarget','i')"><div class="t">Innenfarbe</div><div class="s">${ci.n}</div></button>
         <button class="${S.colorTarget==='a'?'on':''}" onclick="set('colorTarget','a')"><div class="t">Außenfarbe</div><div class="s">${co.n}</div></button></div></div>
