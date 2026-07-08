@@ -115,6 +115,13 @@ h1,h2,h3{font-family:var(--serif);font-weight:700;letter-spacing:-.022em;line-he
 .ocard .tick{position:absolute;top:10px;right:10px;width:20px;height:20px;border-radius:50%;background:var(--accent);display:none;place-items:center}
 .ocard .tick svg{width:11px;height:11px}
 .ocard.on .tick{display:grid}
+.mrange{font-weight:600;font-size:12.5px;color:var(--ink-soft);margin-left:8px}
+.mrow input.bad{border-color:#d43a3a!important;box-shadow:inset 0 0 0 1px #d43a3a}
+.masswarn{align-items:center;gap:9px;background:#fdecec;border:1px solid #f3c0c0;color:#b02525;border-radius:12px;padding:12px 15px;font-size:13.5px;font-weight:600;line-height:1.4;margin:2px 0 4px}
+.masswarn svg{width:20px;height:20px;flex:0 0 auto}
+.masswarn.shake{animation:mshake .4s}
+@keyframes mshake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+.btn-next.disabled,.btn-next:disabled{opacity:.45;cursor:not-allowed;box-shadow:none;filter:grayscale(.3)}
 .spro-pills{display:flex;flex-wrap:wrap;gap:10px}
 .spro-pill{border:1px solid var(--line);border-radius:999px;padding:11px 20px;cursor:pointer;background:var(--surface);font:inherit;font-weight:600;font-size:14.5px;color:var(--ink);transition:.2s var(--ease)}
 .spro-pill:hover{border-color:var(--ink-soft)}
@@ -1353,7 +1360,19 @@ function _lp_haustuer(){
   return _lp_unserPreis(price);
 }
 // ===== Mapping Mockup-State S → Live-State LS, dann Live-Engine aufrufen =====
+// Technische Maß-Grenzen je Produkt (Fenster je Aufteilung) — außerhalb ist keine Fertigung/kein Preis möglich
+function massLimits(){
+  if(S.prod==='balkon') return {bMin:600,bMax:2500,hMin:1800,hMax:2400};
+  if(S.prod==='haustuer') return {bMin:800,bMax:1400,hMin:1800,hMax:2400};
+  if(S.prod==='schiebe') return {bMin:1800,bMax:6500,hMin:1800,hMax:2600};
+  const sash=parseInt(S.aufteilung)||1;   // '1fl'/'2fl'/'3fl' → 1/2/3, 'ol' → 1
+  const bMin=sash>=3?1200:(sash===2?800:500), bMax=sash>=3?4000:(sash===2?2700:1500);
+  let hMin=500,hMax=1900; if(S.aufteilung==='ol'){ hMin=900; hMax=2400; }
+  return {bMin,bMax,hMin,hMax};
+}
+function massOk(){ const L=massLimits(),b=+S.w||0,h=+S.h||0; return b>=L.bMin&&b<=L.bMax&&h>=L.hMin&&h<=L.hMax; }
 function price(){
+  if(!massOk()) return null;   // technisch unmögliches Maß → kein Preis
   const L={};
   L.bMm=+S.w||1000; L.hMm=+S.h||1200;
   L.fa=(COLORS[S.outer]&&COLORS[S.outer].key)||'weiss'; L.fi=(COLORS[S.inner]&&COLORS[S.inner].key)||'weiss';   // echter Farb-Key → korrekter (auch Premium-)Preis
@@ -1740,11 +1759,13 @@ function panelHTML(){
     return grp('Einbruchschutz','two', ocIcon('sicher',false,shield,'WK1 Standard','2 Pilzkopfverriegelungen','inklusive')+ocIcon('sicher',true,shield,'WK2 Sicherheit','abschließbarer Griff · VSG',''));
   }
   if(k==='masse'){
+    const L=massLimits();
     return `<div class="card massecard"><div class="grp-title">Maße eingeben</div>
       <div class="mgrid">
-        <div class="mfield"><label>Breite</label><div class="mrow"><input id="mW" type="number" inputmode="numeric" enterkeyhint="next" min="0" value="${S.w}" oninput="setMass('w',this.value)" onfocus="this.select()" onkeydown="if(event.key==='Enter'){event.preventDefault();var h=document.getElementById('mH');if(h){h.focus();h.select();}}"><span class="unit">mm</span></div></div>
-        <div class="mfield"><label>Höhe</label><div class="mrow"><input id="mH" type="number" inputmode="numeric" enterkeyhint="done" min="0" value="${S.h}" oninput="setMass('h',this.value)" onfocus="this.select()" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}"><span class="unit">mm</span></div></div>
+        <div class="mfield"><label>Breite <span class="mrange">${L.bMin}–${L.bMax} mm</span></label><div class="mrow"><input id="mW" type="number" inputmode="numeric" enterkeyhint="next" min="0" value="${S.w}" oninput="setMass('w',this.value)" onfocus="this.select()" onkeydown="if(event.key==='Enter'){event.preventDefault();var h=document.getElementById('mH');if(h){h.focus();h.select();}}"><span class="unit">mm</span></div></div>
+        <div class="mfield"><label>Höhe <span class="mrange">${L.hMin}–${L.hMax} mm</span></label><div class="mrow"><input id="mH" type="number" inputmode="numeric" enterkeyhint="done" min="0" value="${S.h}" oninput="setMass('h',this.value)" onfocus="this.select()" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}"><span class="unit">mm</span></div></div>
       </div>
+      <div id="massWarn" class="masswarn" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg><span></span></div>
       <div class="mhint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span>Richtmaße genügen für die Anfrage — das genaue Aufmaß nehmen wir gemeinsam vor Ort.</span></div></div>`;
   }
   if(k==='farbe'){
@@ -1808,7 +1829,7 @@ function summaryRows(){
 const LIEFER_MIN=5;   // Lieferung erst ab dieser Element-Menge (Live: 1–4 nur Abholung), Hebe-Schiebetür immer lieferbar
 function cartTotals(){
   let sub=0,qty=0,hasHS=false;
-  cart.forEach(it=>{ const q=it.conf.anzahl||1; qty+=q; sub+=withConf(it.conf,price)*q; if(it.conf.prod==='schiebe'&&it.conf.hstSystem==='hs')hasHS=true; });
+  cart.forEach(it=>{ const q=it.conf.anzahl||1; qty+=q; sub+=(withConf(it.conf,price)||0)*q; if(it.conf.prod==='schiebe'&&it.conf.hstSystem==='hs')hasHS=true; });
   const lieferOk=(qty>=LIEFER_MIN||hasHS);
   if(!lieferOk && liefer==='lieferung') liefer='abholung';   // nicht erlaubte Auswahl zurücksetzen
   let ship=0,shipNote='';
@@ -1971,7 +1992,24 @@ function maybeAutoAdvance(){
 }
 function set(k,v){S[k]=v;render();maybeAutoAdvance();}
 // Maße live setzen OHNE Neu-Rendern (sonst verliert das Feld den Fokus) — nur Preis unten aktualisieren
-function setMass(k,v){ S[k]=(+v||0); if(editIndex>=0&&cart[editIndex]) cart[editIndex].conf[k]=S[k]; const el=document.getElementById('pInt'); if(el)el.textContent=price(); }
+function setMass(k,v){ S[k]=(+v||0); if(editIndex>=0&&cart[editIndex]) cart[editIndex].conf[k]=S[k]; updateMassValidity(); refreshPrice(); }
+// Preis + Weiter-Knopf abhängig von Maß-Gültigkeit (kein Preis bei technisch unmöglichem Maß)
+function refreshPrice(){
+  const p=price(), onMasse=STEPS[cur]&&STEPS[cur].key==='masse';
+  const el=document.getElementById('pInt'); if(el) el.textContent=(p==null)?'—':p;
+  const sub=document.getElementById('pFootSub'), nb=document.getElementById('btnNext');
+  if(p==null && onMasse){ if(sub)sub.textContent='Maß außerhalb des möglichen Bereichs'; if(nb){nb.disabled=true;nb.classList.add('disabled');} }
+  else { if(sub)sub.textContent='pro '+prodUnit()+' · inkl. MwSt · unverbindlich'; if(nb){nb.disabled=false;nb.classList.remove('disabled');} }
+}
+// Rote Markierung + Hinweis im Maße-Schritt, ohne Neu-Rendern (Fokus bleibt)
+function updateMassValidity(){
+  const L=massLimits(), b=+S.w||0, h=+S.h||0, bOk=b>=L.bMin&&b<=L.bMax, hOk=h>=L.hMin&&h<=L.hMax;
+  const mW=document.getElementById('mW'), mH=document.getElementById('mH'), warn=document.getElementById('massWarn');
+  if(mW) mW.classList.toggle('bad', b>0&&!bOk); if(mH) mH.classList.toggle('bad', h>0&&!hOk);
+  if(warn){ const sp=warn.querySelector('span'), m=[]; if(b>0&&!bOk)m.push(`Breite ${L.bMin}–${L.bMax} mm`); if(h>0&&!hOk)m.push(`Höhe ${L.hMin}–${L.hMax} mm`);
+    if(m.length){ if(sp)sp.textContent='Für dieses Maß können wir kein Angebot erstellen — bitte '+m.join(' und ')+' einhalten.'; warn.style.display='flex'; }
+    else warn.style.display='none'; }
+}
 function setAufteilung(v){ S.aufteilung=v; const set=anschlagSet(); S.anschlagIdx=Math.min(ANSCHLAG_DEFIDX[v]||0,set.length-1); syncOpening(); render(); maybeAutoAdvance(); }
 function setAnschlag(idx){ S.anschlagIdx=idx; syncOpening(); render(); maybeAutoAdvance(); }
 function setTuerOeff(idx,r){ S.anschlagIdx=idx; S.tuerOeffnung=r; syncOpening(); render(); maybeAutoAdvance(); }   // Haustür: DIN links/rechts + innen/außen
@@ -2027,7 +2065,7 @@ function toggle(k){S[k]=!S[k];render();}
 function toggleGlass(){S.glass=S.glass==='3'?'2':'3';render();}
 function pickColor(i){if(S.colorTarget==='a')S.outer=i;else S.inner=i;render();}
 function go(i){cur=Math.max(0,Math.min(STEPS.length-1,i));render();window.scrollTo({top:0,behavior:'smooth'});}
-function next(){ if(cur<STEPS.length-1) go(cur+1); }
+function next(){ if(STEPS[cur]&&STEPS[cur].key==='masse'&&!massOk()){ updateMassValidity(); const w=document.getElementById('massWarn'); if(w){w.style.display='flex'; w.classList.add('shake'); setTimeout(()=>w.classList.remove('shake'),450);} return; } if(cur<STEPS.length-1) go(cur+1); }
 function back(){ if(cur===0) backToPicker(); else go(cur-1); }
 function render(){
   if(editIndex>=0&&cart[editIndex]) cart[editIndex].conf={...S};   // aktive Konfig live in den Warenkorb spiegeln
@@ -2059,8 +2097,7 @@ function render(){
   document.getElementById('stage').innerHTML=stageSVG();
   document.getElementById('summary').innerHTML='<div class="eb">Ihre Konfiguration</div><h3>'+configTitle()+'</h3>'+summaryRows();
   document.getElementById('panel').innerHTML=panelHTML();
-  document.getElementById('pInt').textContent=price();
-  document.getElementById('pFootSub').textContent='pro '+prodUnit()+' · inkl. MwSt · unverbindlich';
+  updateMassValidity(); refreshPrice();
   document.getElementById('backLbl').textContent=cur===0?'Produkte':'Zurück';
   document.getElementById('nextLbl').textContent=cur===STEPS.length-1?'Zur Anfrage':'Weiter';
   updateCartBadge();
