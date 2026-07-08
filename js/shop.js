@@ -716,6 +716,10 @@ function gefilterteProdukte() {
       // Maß-Patterns aus Suche entfernen, da via Filter abgedeckt
       const reinText = f.suche.replace(/\d{3,4}\s*[x×*]\s*\d{3,4}/i, '').trim().toLowerCase();
       if (reinText) {
+        // 1) Standnummer TOLERANT prüfen: "741B", "Nr 741", "741 b" → findet "741 B".
+        //    Trifft die Nummer, ist das Produkt sofort gemeint (unabhängig vom Volltext).
+        if (typeof nummerTreffer === 'function' && nummerTreffer(reinText, p.standnummer)) return true;
+        // 2) Sonst normale Volltextsuche über alle Felder.
         const haystack = [
           p.titel,
           p.beschreibung,
@@ -771,6 +775,33 @@ function aktualisiereShopHeader() {
   else if (hinweis) hinweis.classList.add('hidden');
 }
 
+/* ─── Standnummer-Hilfen für den „nicht gefunden"-Fall ─── */
+// Sieht die Eingabe nach einer Standnummer aus (hat Ziffern, ist aber kein Maß-Muster wie 1200x800)?
+function istNummerSuche(s) {
+  if (!s) return false;
+  if (/\d{3,4}\s*[x×*]\s*\d{3,4}/i.test(s)) return false; // das ist ein Maß, kein Nummern-Fall
+  const q = (typeof normNr === 'function') ? normNr(s) : String(s).toLowerCase();
+  return /\d/.test(q) && q.length >= 2;
+}
+function _ziffernTeil(s) {
+  const norm = (typeof normNr === 'function') ? normNr(s) : String(s || '').toLowerCase();
+  const m = norm.match(/\d+/);
+  return m ? parseInt(m[0], 10) : null;
+}
+// Die dem Suchbegriff numerisch nächstgelegenen Standnummern (für „meinten Sie …?").
+function naechsteStandnummern(query, n) {
+  const qz = _ziffernTeil(query);
+  if (qz == null) return [];
+  const cand = (STATE.produkte || [])
+    .filter(p => p.standnummer && p.aktiv !== false)
+    .map(p => ({ nr: String(p.standnummer), z: _ziffernTeil(p.standnummer) }))
+    .filter(x => x.z != null)
+    .sort((a, b) => Math.abs(a.z - qz) - Math.abs(b.z - qz));
+  const seen = new Set(); const uniq = [];
+  for (const x of cand) { if (!seen.has(x.nr)) { seen.add(x.nr); uniq.push(x.nr); } if (uniq.length >= n) break; }
+  return uniq;
+}
+
 /* ─── Render-Pipeline ─── */
 function rendere() {
   const result = gefilterteProdukte();
@@ -816,6 +847,44 @@ function rendere() {
             <span class="material-symbols-outlined" style="font-size:18px">phone</span> Kontakt &amp; Anfahrt
           </a>
         </div>`;
+    } else if (istNummerSuche(STATE.filter.suche)) {
+      // Nummern-Suche ohne Treffer: helfen statt Sackgasse — nächste Standnummern + Anruf.
+      const q = STATE.filter.suche.trim();
+      const naeheste = naechsteStandnummern(q, 4);
+      const vorschlaege = naeheste.length ? `
+        <p class="text-xs mt-4 mb-2" style="color:rgba(232,238,255,0.6);">Diese Standnummern liegen in der Nähe:</p>
+        <div class="flex flex-wrap items-center justify-center gap-2">
+          ${naeheste.map(nr => `<button type="button" class="nr-vorschlag" data-nr="${escapeHtml(nr)}" style="display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:9px;background:rgba(118,169,250,0.14);border:1px solid rgba(118,169,250,0.4);color:#e8eeff;font-weight:800;font-size:13px;cursor:pointer;">📍 ${escapeHtml(nr)}</button>`).join('')}
+        </div>` : '';
+      emptyEl.innerHTML = `
+        <span class="material-symbols-outlined" style="font-size:56px;color:rgba(118,169,250,0.4);">wrong_location</span>
+        <h3 class="text-xl font-extrabold mt-3" style="color:#e8eeff;">Standnummer „${escapeHtml(q)}" nicht gefunden</h3>
+        <p class="text-sm mt-1.5 max-w-md mx-auto" style="color:rgba(232,238,255,0.6);">Vielleicht ist die Ware schon verkauft oder die Nummer weicht leicht ab. Rufen Sie uns kurz an — wir finden sie sofort.</p>
+        ${vorschlaege}
+        <div class="mt-5 flex flex-wrap items-center justify-center gap-2.5">
+          <a href="tel:+491717263776" class="inline-flex items-center gap-1.5 px-5 py-2.5 text-sm font-bold" style="border-radius:8px;background:#225eaa;color:#fff;text-decoration:none;">
+            <span class="material-symbols-outlined" style="font-size:18px">call</span> 0171 7263776 anrufen
+          </a>
+          <a href="https://wa.me/491717263776?text=${encodeURIComponent('Hallo, haben Sie noch die Standnummer ' + q + '?')}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-5 py-2.5 text-sm font-bold" style="border-radius:8px;background:#25D366;color:#fff;text-decoration:none;">
+            <span class="material-symbols-outlined" style="font-size:18px">chat</span> WhatsApp
+          </a>
+          <button id="resetFromEmpty" class="inline-flex items-center gap-1.5 px-5 py-2.5 text-sm font-bold" style="border-radius:8px;background:transparent;color:#76a9fa;border:1.5px solid rgba(118,169,250,0.5);cursor:pointer;">
+            <span class="material-symbols-outlined" style="font-size:18px">refresh</span> Suche zurücksetzen
+          </button>
+        </div>`;
+      emptyEl.querySelectorAll('.nr-vorschlag').forEach(btn => btn.addEventListener('click', () => {
+        const nr = btn.getAttribute('data-nr');
+        const input = document.getElementById('sucheInput');
+        if (input) input.value = nr;
+        STATE.filter.suche = nr;
+        document.getElementById('sucheClearBtn') && document.getElementById('sucheClearBtn').classList.remove('hidden');
+        rendere();
+      }));
+      const resetBtn = document.getElementById('resetFromEmpty');
+      if (resetBtn) resetBtn.addEventListener('click', () => {
+        const reset = document.getElementById('resetFilters');
+        if (reset) reset.click();
+      });
     } else {
       emptyEl.innerHTML = `
         <span class="material-symbols-outlined" style="font-size:56px;color:rgba(118,169,250,0.35);">search_off</span>
@@ -892,7 +961,7 @@ function karteHtml(p) {
   // Verglasung nur bei Produkten mit Glas (Fenster/Balkontür/Haustür/Schiebetür) — NICHT bei Dämmung/Baumaterialien/Garagentor
   const NO_GLAS_KATS = new Set(['daemmung','baumaterialien','garagentor-gebraucht']);
   const verglasungTxt = !NO_GLAS_KATS.has(kategorieZuGruppe(p.kategorie))
-    ? _asArr(p.verglasung).map(v => `${v}-fach`).join(' · ') : '';
+    ? _asArr(p.verglasung).map(v => `${String(v).replace(/\s*-?\s*fach\s*$/i, '')}-fach`).join(' · ') : '';
   const istMarkiert = !!p.sonderpreis_eur || !!p.export_modell;
   const preisStern = istMarkiert ? '*' : '';
 
@@ -903,9 +972,13 @@ function karteHtml(p) {
   const zustandTag = istGebraucht
     ? '<span class="karte-tag karte-tag--gebraucht">Gebraucht</span>' : '';
 
-  // Kompakte Meta-Zeile: Stand · Verglasung · Verfügbarkeit (statt Pillen-Stapel)
+  // Standnummer als „Held"-Marke aufs Bild (unten rechts) — nicht mehr klein in der Meta-Zeile.
+  const standOverlay = p.standnummer
+    ? `<div class="karte-stand-overlay"><span class="material-symbols-outlined">location_on</span><span class="kso-txt"><span class="kso-lbl">Standnr.</span><span class="kso-nr">${escapeHtml(p.standnummer)}</span></span></div>`
+    : '';
+
+  // Kompakte Meta-Zeile: Verglasung · Verfügbarkeit (Stand ist jetzt Overlay)
   const metaParts = [];
-  if (p.standnummer) metaParts.push(`<span class="karte-stand">📍 Stand ${escapeHtml(p.standnummer)}</span>`);
   if (verglasungTxt) metaParts.push(`<span>${verglasungTxt}</span>`);
   if (p.rc_klasse) metaParts.push(`<span>${escapeHtml(p.rc_klasse)}</span>`);
   if (verfTxt) metaParts.push(`<span class="karte-verf">${verfTxt}</span>`);
@@ -973,13 +1046,14 @@ function karteHtml(p) {
         ${archivBadge}
         ${druckIcon}
         ${aktionMenu}
+        ${standOverlay}
       </div>
       <div class="karte-body">
         <div class="karte-preis-row">
           ${preisPrefix}
           <span class="karte-preis">${formatPreis(p.preis_eur)}<span class="karte-preis-stern">${preisStern}</span></span>
         </div>
-        <p class="karte-masse"><span class="material-symbols-outlined">straighten</span>${p.breite_mm} × ${p.hoehe_mm} mm</p>
+        <p class="karte-masse"><span class="material-symbols-outlined">straighten</span>${p.breite_mm} × ${p.hoehe_mm} <span class="karte-masse-unit">mm</span></p>
         <h3 class="karte-titel line-clamp-2">${escapeHtml(p.titel)}</h3>
         ${metaZeile}
         <div class="karte-cta-wrap">

@@ -480,10 +480,32 @@ input[type="range"].range-clean::-moz-range-thumb {
 .karte-preis-stern { font-size: 14px; vertical-align: super; }
 .karte-masse {
   display: flex; align-items: center; gap: 5px;
-  margin-top: 4px;
-  font-size: 14px; font-weight: 700; color: #1f2937;
+  margin-top: 5px;
+  font-size: 17px; font-weight: 800; color: #14233f; letter-spacing: 0.01em;
 }
-.karte-masse .material-symbols-outlined { font-size: 17px; color: #225eaa; }
+.karte-masse .karte-masse-unit { font-size: 12px; font-weight: 600; color: #6b7890; }
+.karte-masse .material-symbols-outlined { font-size: 19px; color: #225eaa; }
+/* ── Standnummer als „Held" aufs Bild (unten rechts) — Kunde nennt die Nummer, findet die Ware sofort ── */
+.karte-stand-overlay {
+  position: absolute; right: 8px; bottom: 8px; z-index: 4;
+  display: flex; align-items: center; gap: 7px;
+  background: rgba(255,255,255,0.97);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  border: 1px solid rgba(34,94,170,0.28);
+  border-radius: 12px; padding: 5px 11px 5px 9px;
+  box-shadow: 0 6px 16px -6px rgba(8,21,46,0.4);
+}
+.karte-stand-overlay .material-symbols-outlined { font-size: 18px; color: #225eaa; line-height: 1; }
+.karte-stand-overlay .kso-txt { display: flex; flex-direction: column; line-height: 1; }
+.karte-stand-overlay .kso-lbl {
+  font-size: 8.5px; font-weight: 700; color: #6b7890;
+  text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 2px;
+}
+.karte-stand-overlay .kso-nr { font-size: 18px; font-weight: 900; color: #14233f; letter-spacing: 0.01em; }
+@media (max-width: 767px) {
+  .karte-stand-overlay { padding: 4px 9px 4px 7px; border-radius: 10px; }
+  .karte-stand-overlay .kso-nr { font-size: 16px; }
+}
 .karte-titel {
   margin-top: 6px;
   font-size: 14px; font-weight: 600; line-height: 1.3; color: var(--c-ink, #1d2433);
@@ -1758,7 +1780,7 @@ input[type="range"].range-clean::-moz-range-thumb {
   <div class="shop-searchbar" role="search">
     <div class="shop-searchbar-field">
       <span class="material-symbols-outlined shop-searchbar-icon" aria-hidden="true">search</span>
-      <input id="sucheInput" type="text" placeholder="Suche Produkt oder Maße (z.B. „1200x800&#8220;, „Anthrazit&#8220;, „Kellerfenster&#8220;)" autocomplete="off"/>
+      <input id="sucheInput" type="text" placeholder="Standnummer (z.B. 741B), Maße (z.B. 1200x800) oder Stichwort…" autocomplete="off" enterkeyhint="search" inputmode="search"/>
       <button id="sucheClearBtn" class="hidden shop-searchbar-clear" aria-label="Suche leeren">
         <span class="material-symbols-outlined" aria-hidden="true">close</span>
       </button>
@@ -2403,7 +2425,8 @@ input[type="range"].range-clean::-moz-range-thumb {
 </a>
 
 <script src="js/sheets-config.js?v=2026-06-19-1mb" defer></script>
-<script src="js/shop.js?v=2026-06-27-masssuche-text" defer></script>
+<script src="js/shop-suche-util.js?v=2026-07-08-nrsuche" defer></script>
+<script src="js/shop.js?v=2026-07-08-nrsuche" defer></script>
 
 <style>
 /* ===== NAV/Topbar/Mega/Mobile auf HELL (Shop-only Override, nav.css unangetastet) 2026-06-01 ===== */
