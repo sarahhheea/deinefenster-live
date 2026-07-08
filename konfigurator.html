@@ -1536,7 +1536,7 @@ function startProduct(id){
   cart.push({conf:{...S},name:''}); editIndex=cart.length-1;   // neuer Artikel im Warenkorb
   window.scrollTo({top:0}); render();
 }
-function setHstSystem(v){ S.hstSystem=v; S.hstTeilung='2'; STEPS=buildSchiebeSteps(); if(cur>=STEPS.length)cur=STEPS.length-1; render(); }
+function setHstSystem(v){ S.hstSystem=v; S.hstTeilung='2'; STEPS=buildSchiebeSteps(); if(cur>=STEPS.length)cur=STEPS.length-1; render(); maybeAutoAdvance(); }
 function backToPicker(){ started=false; anfrageView='cart'; window.scrollTo({top:0}); render(); }
 function showAnfrage(){ anfrageView='form'; window.scrollTo({top:0}); render(); setTimeout(()=>document.querySelector('.co-form input')?.focus({preventScroll:true}),40); }
 
@@ -1898,12 +1898,23 @@ function submitAnfrage(ev){
     .catch(e=>{ if(btn){ btn.disabled=false; btn.textContent=orig||'Anfrage kostenlos absenden'; }
       alert('Das Senden hat leider nicht geklappt. Bitte versuchen Sie es gleich noch einmal oder rufen Sie uns an — Ihre Konfiguration bleibt erhalten.'); });
 }
-function set(k,v){S[k]=v;render();}
+// Schritte, bei denen ein Klick auf die Option direkt weiterspringt (schnelle Struktur-Wahl).
+// NICHT dabei: farbe/modell/griff*/motiv (Wirkung sehen) + masse/anzahl (tippen) + anfrage.
+// rollladen NICHT dabei: hat Zweit-Wahlen (Bedienseite + Panzerfarbe) — würde sonst zu früh wegspringen.
+const AUTO_ADV={profil:1,aufteilung:1,oeffnung:1,psk:1,lauf:1,teilung:1,glas:1,schall:1,sicherheit:1,schwelle:1};
+let _advTimer=null;
+function maybeAutoAdvance(){
+  const k=STEPS[cur]&&STEPS[cur].key;
+  if(!k||!AUTO_ADV[k]||cur>=STEPS.length-1) return;
+  clearTimeout(_advTimer);
+  _advTimer=setTimeout(()=>{ if(STEPS[cur]&&STEPS[cur].key===k) go(cur+1); }, 240);  // kurz aufleuchten lassen, dann weiter
+}
+function set(k,v){S[k]=v;render();maybeAutoAdvance();}
 // Maße live setzen OHNE Neu-Rendern (sonst verliert das Feld den Fokus) — nur Preis unten aktualisieren
 function setMass(k,v){ S[k]=(+v||0); if(editIndex>=0&&cart[editIndex]) cart[editIndex].conf[k]=S[k]; const el=document.getElementById('pInt'); if(el)el.textContent=price(); }
-function setAufteilung(v){ S.aufteilung=v; const set=anschlagSet(); S.anschlagIdx=Math.min(ANSCHLAG_DEFIDX[v]||0,set.length-1); syncOpening(); render(); }
-function setAnschlag(idx){ S.anschlagIdx=idx; syncOpening(); render(); }
-function setTuerOeff(idx,r){ S.anschlagIdx=idx; S.tuerOeffnung=r; syncOpening(); render(); }   // Haustür: DIN links/rechts + innen/außen
+function setAufteilung(v){ S.aufteilung=v; const set=anschlagSet(); S.anschlagIdx=Math.min(ANSCHLAG_DEFIDX[v]||0,set.length-1); syncOpening(); render(); maybeAutoAdvance(); }
+function setAnschlag(idx){ S.anschlagIdx=idx; syncOpening(); render(); maybeAutoAdvance(); }
+function setTuerOeff(idx,r){ S.anschlagIdx=idx; S.tuerOeffnung=r; syncOpening(); render(); maybeAutoAdvance(); }   // Haustür: DIN links/rechts + innen/außen
 // Echtes Live-Foto je Öffnungs-Karte. Balkon hat eigene Bilder; Fenster 1-Flügel = anschlag-1f; Mehrflügel-Fenster = null (Mini-Skizze).
 function oeffCardImg(o){
   const of=o.oeff, stulp=(o.stulpAt>0);
