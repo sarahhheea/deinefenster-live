@@ -1229,8 +1229,8 @@ const _lp_RF3_B=[1600,1900,2200,2500,2800,3200,3600], _lp_RF3_H=[600,700,800,900
 const _lp_RF3=[[0,0,0,78,61,46,0],[0,0,0,0,106,97,35],[0,0,0,0,0,147,90],[0,0,0,0,0,0,139],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0]];
 function _lp_reinfMF(b,h){ if(!h)return 0; var r=b/h, fl=LS.fluegel;
   if(String(fl||'').charAt(0)==='3'){ if(r<3.98)return 0; var c=[]; for(var i=0;i<_lp_RF3_H.length;i++)c.push(_lp_interp1(b,_lp_RF3_B,_lp_RF3[i])); return Math.max(0,_lp_interp1(h,_lp_RF3_H,c)); }
-  if(fl==='stulp'){ if(r<2.2)return 0; var c2=[]; for(var j=0;j<_lp_R2_H.length;j++)c2.push(_lp_interp1(b,_lp_R2_B,_lp_R2S[j])); return Math.max(0,_lp_interp1(h,_lp_R2_H,c2)); }
-  if(String(fl||'').charAt(0)==='2'){ if(r<2.2)return 0; var c3=[]; for(var k=0;k<_lp_R2_H.length;k++)c3.push(_lp_interp1(b,_lp_R2_B,_lp_R2P[k])); return Math.max(0,_lp_interp1(h,_lp_R2_H,c3)); }
+  if(fl==='stulp'){ if(r<2.2)return 0; var hc=Math.min(h,1000), tp=Math.max(0,Math.min(1,(1200-h)/200)); var c2=[]; for(var j=0;j<_lp_R2_H.length;j++)c2.push(_lp_interp1(b,_lp_R2_B,_lp_R2S[j])); return Math.max(0,_lp_interp1(hc,_lp_R2_H,c2))*tp; }
+  if(String(fl||'').charAt(0)==='2'){ if(r<2.2)return 0; var hc2=Math.min(h,1000), tp2=Math.max(0,Math.min(1,(1200-h)/200)); var c3=[]; for(var k=0;k<_lp_R2_H.length;k++)c3.push(_lp_interp1(b,_lp_R2_B,_lp_R2P[k])); return Math.max(0,_lp_interp1(hc2,_lp_R2_H,c3))*tp2; }
   return 0; }
 function _lp_fenster(){
   const b=LS.bMm||1000, h=LS.hMm||1200, fak=_lp_fluegelFaktor(LS.fluegel), cnt=LS.cnt||1;
