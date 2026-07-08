@@ -115,6 +115,10 @@ h1,h2,h3{font-family:var(--serif);font-weight:700;letter-spacing:-.022em;line-he
 .ocard .tick{position:absolute;top:10px;right:10px;width:20px;height:20px;border-radius:50%;background:var(--accent);display:none;place-items:center}
 .ocard .tick svg{width:11px;height:11px}
 .ocard.on .tick{display:grid}
+.spro-pills{display:flex;flex-wrap:wrap;gap:10px}
+.spro-pill{border:1px solid var(--line);border-radius:999px;padding:11px 20px;cursor:pointer;background:var(--surface);font:inherit;font-weight:600;font-size:14.5px;color:var(--ink);transition:.2s var(--ease)}
+.spro-pill:hover{border-color:var(--ink-soft)}
+.spro-pill.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink);background:rgba(34,94,170,.05)}
 
 .seg2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .seg2 button{border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;cursor:pointer;background:var(--surface);text-align:left;font:inherit;transition:.25s var(--ease)}
@@ -702,7 +706,7 @@ const COLORS=[
 ];
 const _PREM_FARBE=['schwarzbr','basaltgr-gl','basaltgr-sa','betongrau','crown-plat','dunkelgr','dunkelrot','eiche-nat','eisengl','moosgruen','oregon','schiefgr-gl','schiefgr-sa','douglasie'];
 const S={ prod:'fenster', profile:'classic', aufteilung:'1fl', opening:'dkr', anschlagIdx:1, hstSystem:'psk', pskKammer:'iglo5', w:1000, h:1200, anzahl:1, outer:0, inner:0, balkonSchwelle:'alu', doorModel:'nebraska-lcr-inox', griffTuer:'stoss', griffHst:'innen', hstSchloss:'ohne', hstTeilung:'2', hstLauf:'rechts',
-  glass:'2', glasdekor:'klar', schall:false, griff:'mistral', roll:'kein', panzer:null, sprossen:'ohne', sicher:false, colorTarget:'i' };
+  glass:'2', glasdekor:'klar', schall:false, griff:'mistral', roll:'kein', panzer:null, sproTyp:'keine', sproDicke:'27', sproRaster:'kreuz', sicher:false, colorTarget:'i' };
 
 // === Öffnung PRO FLÜGEL — 1:1 aus dem Live-Konfigurator (ANSCHLAG_SETS, geprüft 04.07.2026) ===
 // Jede Karte = eine Kombination; oeff = Öffnung je Flügel (links→rechts). stulpAt = Trennung nach Flügel i ist ein Stulp (statt Pfosten).
@@ -862,7 +866,13 @@ function drawSash(x,y,w,h,sash,ctx,num){
   s+=`<g stroke="${miter}" stroke-width="1"><line x1="${x}" y1="${y}" x2="${gx1}" y2="${gy1}"/><line x1="${x+w}" y1="${y}" x2="${gx2}" y2="${gy1}"/><line x1="${x}" y1="${y+h}" x2="${gx1}" y2="${gy2}"/><line x1="${x+w}" y1="${y+h}" x2="${gx2}" y2="${gy2}"/></g>`;
   s+=`<rect x="${gx1}" y="${gy1}" width="${gx2-gx1}" height="${gy2-gy1}" fill="#dcebf6" stroke="#8fa8bd" stroke-width="1"/>`;
   if(num) s+=`<text x="${mx}" y="${my}" text-anchor="middle" dominant-baseline="central" font-family="Inter" font-weight="600" font-size="${Math.min(34,(gx2-gx1)*0.32)}" fill="rgba(40,55,80,.34)">${num}</text>`;  // Drutex Feld-Nummer — immer gleich (nicht einfärben)
-  if(S.sprossen&&S.sprossen!=='ohne'&&sash.open!=='transom') s+=`<g stroke="rgba(44,53,66,.5)" stroke-width="2.2" fill="none"><line x1="${mx}" y1="${gy1}" x2="${mx}" y2="${gy2}"/><line x1="${gx1}" y1="${my}" x2="${gx2}" y2="${my}"/></g>`;
+  if(S.sproTyp&&S.sproTyp!=='keine'&&sash.open!=='transom'){
+    const r=SPRO_RASTER[S.sproRaster]||SPRO_RASTER.kreuz; let sl='';
+    for(let i=1;i<=r.v;i++){ const vx=(gx1+(gx2-gx1)*i/(r.v+1)).toFixed(1); sl+=`<line x1="${vx}" y1="${gy1}" x2="${vx}" y2="${gy2}"/>`; }
+    for(let j=1;j<=r.h;j++){ const hy=(gy1+(gy2-gy1)*j/(r.h+1)).toFixed(1); sl+=`<line x1="${gx1}" y1="${hy}" x2="${gx2}" y2="${hy}"/>`; }
+    if(S.sproTyp==='aufgesetzt') s+=`<g stroke="rgba(30,40,55,.32)" stroke-width="4.6" fill="none" stroke-linecap="round">${sl}</g><g stroke="${co.c}" stroke-width="3.2" fill="none" stroke-linecap="round">${sl}</g>`;
+    else s+=`<g stroke="rgba(120,140,164,.95)" stroke-width="1.7" fill="none" stroke-linecap="round">${sl}</g>`;
+  }
   s+=`<g stroke="#2c3542" stroke-width="1.5" fill="none" stroke-linejoin="round">${sashOpenLines(sash.open,sash.hinge,gx1,gy1,gx2,gy2)}</g>`;
   // Griffe bewusst weggelassen (Kundenwunsch 04.07.2026) — DIN-Dreieck zeigt die Richtung.
   return s;
@@ -1037,6 +1047,15 @@ function flatWindowSVG(isBalkon){
     s+=`<rect x="${gx}" y="${gy}" width="${sashW}" height="${gh}" fill="${fCol}" stroke="${frameStroke}" stroke-width="${DW}"/>`+gehr(gx,gy,sashW,gh,SFR);
     const glx=gx+SFR, gly=gy+SFR, glw=Math.max(sashW-2*SFR,20), glh=Math.max(gh-2*SFR,20);
     s+=`<rect x="${glx}" y="${gly}" width="${glw}" height="${glh}" fill="${GLASS}" stroke="${GLASSST}" stroke-width="${DW}"/>`;
+    // Sprossen-Raster aufs Glasfeld (aufgesetzt = farbige Profilbalken, im-Glas/SZR = dünne Sprossen)
+    if(S.sproTyp&&S.sproTyp!=='keine'){
+      const sgy1=gly+pzH, sgx1=glx, sgx2=glx+glw, sgy2=gly+glh, r=SPRO_RASTER[S.sproRaster]||SPRO_RASTER.kreuz; let sl='';
+      for(let vi=1;vi<=r.v;vi++){ const vx=(sgx1+(sgx2-sgx1)*vi/(r.v+1)).toFixed(1); sl+=`<line x1="${vx}" y1="${sgy1}" x2="${vx}" y2="${sgy2}"/>`; }
+      for(let hj=1;hj<=r.h;hj++){ const yy=(sgy1+(sgy2-sgy1)*hj/(r.h+1)).toFixed(1); sl+=`<line x1="${sgx1}" y1="${yy}" x2="${sgx2}" y2="${yy}"/>`; }
+      const bw=Math.max(uu*0.007,4);
+      if(S.sproTyp==='aufgesetzt') s+=`<g stroke="${miter}" stroke-width="${bw*1.5}" fill="none" stroke-linecap="square">${sl}</g><g stroke="${fCol}" stroke-width="${bw}" fill="none" stroke-linecap="square">${sl}</g>`;
+      else s+=`<g stroke="${dark?'rgba(232,240,248,.95)':'rgba(96,116,142,.98)'}" stroke-width="${Math.max(bw*0.62,3)}" fill="none" stroke-linecap="round">${sl}</g>`;
+    }
     if(pzH>0){ const pz=(S.panzer!=null?COLORS[S.panzer]:co).c;
       s+=`<rect x="${glx}" y="${gly}" width="${glw}" height="${pzH}" fill="${pz}" stroke="rgba(0,0,0,.2)" stroke-width="${DW*0.6}"/>`;
       const lh=Math.max(pzH/5,10); for(let ly=gly+lh; ly<gly+pzH-lh*0.5; ly+=lh) s+=`<line x1="${glx+2}" y1="${ly}" x2="${glx+glw-2}" y2="${ly}" stroke="rgba(0,0,0,.18)" stroke-width="${DW*0.5}"/>`;
@@ -1339,8 +1358,8 @@ function price(){
   L.glasdekor=(S.glasdekor==='master')?'master-carre':(S.glasdekor||'klar');
   L.roll=(!S.roll||S.roll==='kein')?'ohne':S.roll;
   L.sicher=S.sicher?'rc2':'wk1';
-  L.sproTyp=(S.sprossen==='aufgesetzt')?'aufgesetzt':(S.sprossen==='imglas'?'szr':'keine');
-  L.sproDicke=(L.sproTyp==='szr')?'26':'27';
+  L.sproTyp=S.sproTyp||'keine';
+  L.sproDicke=S.sproDicke||'27';
   L.griff='mistral'; L.griffLocked=(S.griff==='abschliessbar');
   if(S.prod==='haustuer'){
     L.profil='iglo5'; L.tuerModell=S.doorModel; L.tuerGriffAussen=''; LS=L; return _lp_haustuer();
@@ -1534,7 +1553,7 @@ function startProduct(id){
   // Neues Produkt = frischer Start (nichts vom vorherigen Produkt übernehmen) — wie bei Konkurrenz-Konfiguratoren.
   S.aufteilung='1fl'; S.anschlagIdx=(S.prod==='balkon')?0:(ANSCHLAG_DEFIDX['1fl']||1);
   S.roll='kein'; S.panzer=null; S.rollSeite='rechts';
-  S.sprossen='ohne'; S.sicher=false; S.glass='2'; S.glasdekor='klar'; S.schall=false;
+  S.sproTyp='keine'; S.sproDicke='27'; S.sproRaster='kreuz'; S.sicher=false; S.glass='2'; S.glasdekor='klar'; S.schall=false;
   S.outer=0; S.inner=0; S.colorTarget='i'; S.anzahl=1;
   S.griff='mistral'; S.griffTuer='stoss'; S.hstTeilung='2'; S.hstLauf='rechts'; S.balkonSchwelle='alu';
   const dim={fenster:[1000,1200],balkon:[900,2100],haustuer:[1100,2100],schiebe:[2000,2100]}[S.prod]||[1000,1200];
@@ -1690,8 +1709,26 @@ function panelHTML(){
     return `<div class="card"><div class="grp-title">Rollladen</div><div class="opts three">${c('kein',ban,'Kein Rollladen','ohne','inklusive')}${c('gurt','<img src="img/rolladen-gurt.webp" alt="Gurtwickler">','Mit Gurtwickler','per Hand','')}${c('motor','<img src="img/rolladen-elektrisch.webp" alt="Motorrolladen">','Motorrolladen','elektrisch','')}</div></div>${seitpick}${pzpick}`;
   }
   if(k==='sprossen'){
-    const c=(val,vis,t,s,delta)=>`<div class="ocard ${S.sprossen===val?'on':''}" onclick="set('sprossen','${val}')"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="vis">${vis}</div><div class="t">${t}</div>${s?`<div class="s">${s}</div>`:''}${delta?`<div class="pdl">${delta}</div>`:''}</div>`;
-    return `<div class="card"><div class="grp-title">Sprossen</div><div class="opts three">${c('ohne',ban,'Ohne Sprossen','','inklusive')}${c('aufgesetzt','<img src="img/sprossen-aufgesetzt.webp" alt="Aufgesetzt">','Aufgesetzt','klassische Optik','')}${c('imglas','<img src="img/sprossen-innenliegend.webp" alt="Im Glas">','Im Glas (SZR)','pflegeleicht','')}</div></div>`;
+    const tick=`<span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span>`;
+    // 1) Art
+    const tc=(val,vis,t,s,delta)=>`<div class="ocard ${S.sproTyp===val?'on':''}" onclick="setSproTyp('${val}')">${tick}<div class="vis">${vis}</div><div class="t">${t}</div>${s?`<div class="s">${s}</div>`:''}${delta?`<div class="pdl">${delta}</div>`:''}</div>`;
+    let html=`<div class="card"><div class="grp-title">Sprossen — Art</div><div class="opts three">`
+      +tc('keine',ban,'Ohne Sprossen','','inklusive')
+      +tc('aufgesetzt','<img src="img/sprossen-aufgesetzt.webp" alt="Aufgesetzt">','Aufgesetzt','außen aufgesetzt · klassisch','')
+      +tc('szr','<img src="img/sprossen-innenliegend.webp" alt="Im Glas">','Im Glas (SZR)','innenliegend · pflegeleicht','')
+      +`</div></div>`;
+    if(S.sproTyp&&S.sproTyp!=='keine'){
+      // 2) Aufteilung — echte Produktfotos je Raster (aufgesetzt + szr)
+      const rc=Object.keys(SPRO_RASTER).map(rk=>{ const r=SPRO_RASTER[rk];
+        return `<div class="ocard ${S.sproRaster===rk?'on':''}" onclick="setSproRaster('${rk}')">${tick}<div class="vis"><img src="img/karten/sprossen/sprossen-${S.sproTyp}-${rk}.webp?v=2026" alt="${r.name}" loading="lazy" decoding="async"></div><div class="t">${r.name}</div></div>`;
+      }).join('');
+      html+=`<div class="card"><div class="grp-title">Aufteilung</div><div class="opts three">${rc}</div></div>`;
+      // 3) Breite (mm) — je nach Art
+      const dks=(SPRO_DICKEN[S.sproTyp]||[]);
+      const pills=dks.map(d=>`<button type="button" class="spro-pill ${S.sproDicke===d?'on':''}" onclick="setSproDicke('${d}')">${d} mm</button>`).join('');
+      html+=`<div class="card"><div class="grp-title">Breite</div><div class="spro-pills">${pills}</div></div>`;
+    }
+    return html;
   }
   if(k==='sicherheit'){
     const shield=`<svg viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.5" stroke-linejoin="round" style="height:60px;width:auto"><path d="M12 2 4 5v6.5c0 4.8 3.4 8 8 9.5 4.6-1.5 8-4.7 8-9.5V5l-8-3Z"/><path d="M9.3 14v-2.2M12 14v-4.2M14.7 14v-6.2" stroke-width="2" stroke-linecap="round"/></svg>`;
@@ -1725,6 +1762,10 @@ function panelHTML(){
 const PROFN={classic:'IGLO 5 Classic',energy:'IGLO Energy'};
 const AUFTN={'1fl':'1 Flügel','2fl':'2 Flügel','3fl':'3 Flügel',ol:'Mit Oberlicht'};
 const DEKON={klar:'Klarglas',satinato:'Satinato',chinchilla:'Chinchilla',master:'Master-Carré'};
+// Sprossen: Typ (aufgesetzt/im Glas) · Breite (mm, je Typ) · Aufteilung/Raster (v=senkrecht, h=waagerecht) — wie Live
+const SPRO_DICKEN={aufgesetzt:['27','45','65'], szr:['18','26','45']};
+const SPRO_RASTER={senk2:{name:'Senkrecht',v:1,h:0}, waag2:{name:'Waagerecht',v:0,h:1}, kreuz:{name:'Kreuz · 4 Felder',v:1,h:1}, feld6:{name:'6 Felder',v:2,h:1}, feld9:{name:'9 Felder',v:2,h:2}};
+const SPROTYPN={keine:'Ohne',aufgesetzt:'Aufgesetzt',szr:'Im Glas (SZR)'};
 const GRIFFN={mistral:'Mistral',abschliessbar:'Mistral abschließbar'};
 function summaryRows(){
   const co=COLORS[S.outer],ci=COLORS[S.inner];
@@ -1748,7 +1789,7 @@ function summaryRows(){
       <div class="srow"><span class="k">Griff</span><span class="v">${griffN}</span></div>
       <div class="srow"><span class="k">Rollladen</span><span class="v">${S.roll==='motor'?'Motor':S.roll==='gurt'?'Gurtwickler':'—'}</span></div>`;
   }
-  const ex=[]; if(S.roll==='gurt')ex.push('Rollladen · Gurtwickler'); if(S.roll==='motor')ex.push('Motorrolladen'); if(S.schall)ex.push('Schallschutz'); if(S.sprossen==='aufgesetzt')ex.push('Sprossen aufgesetzt'); if(S.sprossen==='imglas')ex.push('Sprossen im Glas'); if(S.sicher)ex.push('RC1');
+  const ex=[]; if(S.roll==='gurt')ex.push('Rollladen · Gurtwickler'); if(S.roll==='motor')ex.push('Motorrolladen'); if(S.schall)ex.push('Schallschutz'); if(S.sproTyp&&S.sproTyp!=='keine')ex.push('Sprossen '+(SPROTYPN[S.sproTyp]||'')+' · '+S.sproDicke+' mm · '+((SPRO_RASTER[S.sproRaster]||{}).name||'')); if(S.sicher)ex.push('RC1');
   const schwelleRow = S.prod==='balkon'?`<div class="srow"><span class="k">Schwelle</span><span class="v">${S.balkonSchwelle==='alu'?'Aluschwelle':'ohne'}</span></div>`:'';
   return `<div class="srow"><span class="k">Profil</span><span class="v">${PROFN[S.profile]}</span></div>
     <div class="srow"><span class="k">Aufteilung</span><span class="v">${AUFTN[S.aufteilung]}</span></div>
@@ -1929,6 +1970,10 @@ function setMass(k,v){ S[k]=(+v||0); if(editIndex>=0&&cart[editIndex]) cart[edit
 function setAufteilung(v){ S.aufteilung=v; const set=anschlagSet(); S.anschlagIdx=Math.min(ANSCHLAG_DEFIDX[v]||0,set.length-1); syncOpening(); render(); maybeAutoAdvance(); }
 function setAnschlag(idx){ S.anschlagIdx=idx; syncOpening(); render(); maybeAutoAdvance(); }
 function setTuerOeff(idx,r){ S.anschlagIdx=idx; S.tuerOeffnung=r; syncOpening(); render(); maybeAutoAdvance(); }   // Haustür: DIN links/rechts + innen/außen
+// Sprossen: Art (wählt gültige Breite), Aufteilung, Breite — bewusst KEIN Auto-Weiter (Detailauswahl)
+function setSproTyp(v){ S.sproTyp=v; if(v!=='keine'){ const dk=SPRO_DICKEN[v]||[]; if(dk.indexOf(S.sproDicke)<0)S.sproDicke=dk[0]; } render(); }
+function setSproRaster(v){ S.sproRaster=v; render(); }
+function setSproDicke(v){ S.sproDicke=v; render(); }
 // Echtes Live-Foto je Öffnungs-Karte. Balkon hat eigene Bilder; Fenster 1-Flügel = anschlag-1f; Mehrflügel-Fenster = null (Mini-Skizze).
 function oeffCardImg(o){
   const of=o.oeff, stulp=(o.stulpAt>0);
