@@ -1213,7 +1213,7 @@ const _lp_F_SCHALL={'ohne':0,'extra':62};
 const _lp_F_SICHERGLAS={'kein':0,'esg':40,'vsg':61};
 const _lp_F_SICHER={'wk1':0,'rc2':87};
 const _lp_F_SPRO={'aufgesetzt':{'27':28,'45':38,'65':48},'szr':{'18':13,'26':18,'45':25}};
-const _lp_PROFIL_PCT={'iglo5':0,'iglo-energy':0.22};
+const _lp_PROFIL_PCT={'iglo5':0};
 function _lp_griffLockAdd(){ return 5; }
 function _lp_rolladenDelta(b,h,type){ if(!type||type==='ohne')return 0; let d=_lp_interp1(b,[700,1000,1400],[109,114,157])+0.04*Math.max(0,h-500); if(type==='motor')d+=127; return d; }
 function _lp_glasOptDelta(area){ let d=0; if(LS.glas==='3fach')d+=24*area; if(LS.schall&&LS.schall!=='ohne')d+=52*area; if(LS.sicherGlas==='esg')d+=33*area; else if(LS.sicherGlas==='vsg')d+=51*area; if(LS.glasdekor==='master-carre')d+=55*area; else if(LS.glasdekor&&LS.glasdekor!=='klar')d+=27*area; return d; }
@@ -1345,7 +1345,7 @@ function price(){
     L.bMm=+S.w||2200; L.hMm=+S.h||2100;
     LS=L; return _lp_hst();
   }
-  L.profil={classic:'iglo5',energy:'iglo-energy'}[S.profile]||'iglo5';
+  L.profil={classic:'iglo5'}[S.profile]||'iglo5';
   const _an=(typeof curAnschlag==='function')?curAnschlag():null, _oeff=(_an&&_an.oeff)||[], _stulp=(_an&&_an.stulpAt||0)>0;
   L.oeff1=_oeff[0]||null; L.oeff2=_oeff[1]||null; L.oeff3=_oeff[2]||null;
   L.fluegel = (S.aufteilung==='1fl')?'1-fluegel' : (S.aufteilung==='2fl')?(_stulp?'stulp':'2-fluegel') : (S.aufteilung==='3fl')?'3-fluegel' : (S.aufteilung==='ol')?'oberlicht':'1-fluegel';
@@ -1571,7 +1571,7 @@ function panelHTML(){
         c('hs','img/karten/profil/iglo-hs.webp','Hebe-Schiebetür','Anheben + schieben · große, raumhohe Terrassenfronten'));
     }
     return grp('Profil-System','three',
-      ocImg('profile','classic','img/karten/profil/iglo5.png','IGLO 5 Classic','5-Kammer · Uw 0,83')+ocImg('profile','energy','img/karten/profil/iglo-energy.png','IGLO Energy','7-Kammer · Uw 0,71'));
+      ocImg('profile','classic','img/karten/profil/iglo5.png','IGLO 5 Classic','5-Kammer · Uw 0,83'));
   }
   if(k==='psk'){
     return grp('PSK-Kammer-System','two',
@@ -1715,7 +1715,7 @@ function panelHTML(){
   }
   if(k==='anfrage'){ return anfrageHTML(); }
 }
-const PROFN={classic:'IGLO 5 Classic',energy:'IGLO Energy'};
+const PROFN={classic:'IGLO 5 Classic'};
 const AUFTN={'1fl':'1 Flügel','2fl':'2 Flügel','3fl':'3 Flügel',ol:'Mit Oberlicht'};
 const DEKON={klar:'Klarglas',satinato:'Satinato',chinchilla:'Chinchilla',master:'Master-Carré'};
 const GRIFFN={mistral:'Mistral',abschliessbar:'Mistral abschließbar'};
