@@ -1723,15 +1723,15 @@ function panelHTML(){
       +tc('szr','<img src="img/sprossen-innenliegend.webp" alt="Im Glas">','Im Glas (SZR)','innenliegend · pflegeleicht','')
       +`</div></div>`;
     if(S.sproTyp&&S.sproTyp!=='keine'){
-      // 2) Aufteilung — echte Produktfotos je Raster (aufgesetzt + szr)
+      // 2) Breite (mm) — je nach Art — steht ÜBER der Aufteilung (Kundenwunsch)
+      const dks=(SPRO_DICKEN[S.sproTyp]||[]);
+      const pills=dks.map(d=>`<button type="button" class="spro-pill ${S.sproDicke===d?'on':''}" onclick="setSproDicke('${d}')">${d} mm</button>`).join('');
+      html+=`<div class="card"><div class="grp-title">Breite</div><div class="spro-pills">${pills}</div></div>`;
+      // 3) Aufteilung — echte Produktfotos je Raster (aufgesetzt + szr)
       const rc=Object.keys(SPRO_RASTER).map(rk=>{ const r=SPRO_RASTER[rk];
         return `<div class="ocard ${S.sproRaster===rk?'on':''}" onclick="setSproRaster('${rk}')">${tick}<div class="vis"><img src="img/karten/sprossen/sprossen-${S.sproTyp}-${rk}.webp?v=2026" alt="${r.name}" loading="lazy" decoding="async"></div><div class="t">${r.name}</div></div>`;
       }).join('');
       html+=`<div class="card"><div class="grp-title">Aufteilung</div><div class="opts three">${rc}</div></div>`;
-      // 3) Breite (mm) — je nach Art
-      const dks=(SPRO_DICKEN[S.sproTyp]||[]);
-      const pills=dks.map(d=>`<button type="button" class="spro-pill ${S.sproDicke===d?'on':''}" onclick="setSproDicke('${d}')">${d} mm</button>`).join('');
-      html+=`<div class="card"><div class="grp-title">Breite</div><div class="spro-pills">${pills}</div></div>`;
     }
     return html;
   }
