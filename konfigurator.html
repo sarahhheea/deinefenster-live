@@ -331,6 +331,13 @@ h1,h2,h3{font-family:var(--serif);font-weight:700;letter-spacing:-.022em;line-he
 .ovs-note{text-align:center;font-size:12px;color:var(--ink-soft);margin-top:12px}
 .ovs-ship{font-size:11.5px;color:var(--ink-soft);margin-top:14px;line-height:1.5;border-top:1px solid var(--line);padding-top:12px;display:flex;gap:9px}
 .ovs-ship svg{width:17px;height:17px;flex:0 0 auto;color:var(--accent)}
+.ovs-terms{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+.ovs-terms-h{font-size:12px;text-transform:uppercase;letter-spacing:.07em;font-weight:700;color:var(--ink-soft);margin-bottom:8px}
+.ovs-term{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:12.5px;color:var(--ink-soft);padding:6px 9px;border-radius:9px;line-height:1.35}
+.ovs-term span{flex:0 0 auto;font-weight:600}
+.ovs-term b{color:var(--ink);font-weight:600;text-align:right}
+.ovs-term.on{background:rgba(176,141,87,.10);color:var(--accent-d)}
+.ovs-term.on span,.ovs-term.on b{color:var(--accent-d)}
 .anfrage-form{width:100%;margin-top:24px;max-width:720px;margin-left:auto;margin-right:auto}
 /* Positions-Karten (echter Warenkorb) */
 .pos-card{border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0;background:#fff}
@@ -1839,6 +1846,13 @@ function anfrageHTML(){
         <button class="cta" onclick="showAnfrage()">Unverbindliches Angebot anfordern →</button>
         <div class="ovs-note">Kostenlos &amp; unverbindlich · kein Kaufzwang · finales Angebot per E-Mail</div>
         <div class="ovs-ship">${truck}<span>Maßfenster sind Sonderanfertigungen — wir prüfen jede Konfiguration persönlich und senden Ihnen ein geprüftes Angebot. Familienbetrieb aus Brandenburg a. d. Havel.</span></div>
+        <div class="ovs-terms">
+          <div class="ovs-terms-h">Lieferbedingungen</div>
+          <div class="ovs-term ${t.qty<5?'on':''}"><span>1–4 Fenster</span><b>Abholung im Lager · Brandenburg a. d. H.</b></div>
+          <div class="ovs-term ${t.qty>=5&&t.qty<10?'on':''}"><span>5–9 Fenster</span><b>Lieferung deutschlandweit · 239 €</b></div>
+          <div class="ovs-term ${t.qty>=10?'on':''}"><span>ab 10 Fenster</span><b>Kostenlose Lieferung · deutschlandweit</b></div>
+          ${t.hasHS?`<div class="ovs-term"><span>Hebe-Schiebetür</span><b>immer lieferbar (Speditionszuschlag)</b></div>`:''}
+        </div>
       </aside>
     </div>`;
 }
