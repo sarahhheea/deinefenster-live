@@ -865,7 +865,7 @@ function drawSash(x,y,w,h,sash,ctx,num){
   let s=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${co.c}" stroke="${edge}" stroke-width="1.1"/>`;
   s+=`<g stroke="${miter}" stroke-width="1"><line x1="${x}" y1="${y}" x2="${gx1}" y2="${gy1}"/><line x1="${x+w}" y1="${y}" x2="${gx2}" y2="${gy1}"/><line x1="${x}" y1="${y+h}" x2="${gx1}" y2="${gy2}"/><line x1="${x+w}" y1="${y+h}" x2="${gx2}" y2="${gy2}"/></g>`;
   s+=`<rect x="${gx1}" y="${gy1}" width="${gx2-gx1}" height="${gy2-gy1}" fill="#dcebf6" stroke="#8fa8bd" stroke-width="1"/>`;
-  if(num) s+=`<text x="${mx}" y="${my}" text-anchor="middle" dominant-baseline="central" font-family="Inter" font-weight="600" font-size="${Math.min(34,(gx2-gx1)*0.32)}" fill="rgba(40,55,80,.34)">${num}</text>`;  // Drutex Feld-Nummer — immer gleich (nicht einfärben)
+  // Feld-Nummer bewusst weggelassen (Kundenwunsch 08.07.2026: saubere Skizze ohne Zahlen)
   if(S.sproTyp&&S.sproTyp!=='keine'&&sash.open!=='transom'){
     const r=SPRO_RASTER[S.sproRaster]||SPRO_RASTER.kreuz; let sl='';
     for(let i=1;i<=r.v;i++){ const vx=(gx1+(gx2-gx1)*i/(r.v+1)).toFixed(1); sl+=`<line x1="${vx}" y1="${gy1}" x2="${vx}" y2="${gy2}"/>`; }
@@ -1061,7 +1061,7 @@ function flatWindowSVG(isBalkon){
       const lh=Math.max(pzH/5,10); for(let ly=gly+lh; ly<gly+pzH-lh*0.5; ly+=lh) s+=`<line x1="${glx+2}" y1="${ly}" x2="${glx+glw-2}" y2="${ly}" stroke="rgba(0,0,0,.18)" stroke-width="${DW*0.5}"/>`;
     }
     const cy=gly+pzH+(glh-pzH)/2;
-    s+=`<text x="${glx+glw/2}" y="${cy}" text-anchor="middle" dominant-baseline="central" font-family="Inter,Arial" font-weight="600" font-size="${Math.min(glw*0.32,glh*0.4,220)}" fill="rgba(40,55,80,.30)">${i+1}</text>`;
+    // Feld-Nummer bewusst weggelassen (Kundenwunsch 08.07.2026: saubere Skizze ohne Zahlen)
     s+=`<g stroke="${DIN}" stroke-width="${Math.max(Math.min(glw,glh)*0.006,2.4)}" fill="none" stroke-linejoin="round" stroke-linecap="round">${sashOpenLines(sashes[i].open,sashes[i].hinge,glx,gly+pzH,glx+glw,gly+glh)}</g>`;
     // Stulp: der reine „dreh"-Flügel im Stulp-Paar ist der Standflügel → KEIN Griff (öffnet als Zweites per Kantriegel).
     const isStand = stulpAt>0 && sashes[i].open==='dreh' && (i===stulpAt || i===stulpAt-1);
@@ -1110,7 +1110,7 @@ function slidePanel(x,y,w,h,type,dir,ctx,num,sys){
   let s=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${co.c}" stroke="${edge}" stroke-width="1.1"/>`;
   s+=`<rect x="${gx1}" y="${gy1}" width="${gx2-gx1}" height="${gy2-gy1}" fill="#dcebf6" stroke="#8fa8bd" stroke-width="1"/>`;
   const showNum = num && !(sys==='psk' && type==='schiebe');   // PSK-Schiebefeld ist voll → keine große Zahl
-  if(showNum) s+=`<text x="${cx}" y="${type==='fest'?cy:gy1+20}" text-anchor="middle" dominant-baseline="central" font-family="Inter" font-weight="600" font-size="${type==='fest'?30:22}" fill="rgba(40,55,80,.30)">${num}</text>`;
+  // Feld-Nummer bewusst weggelassen (Kundenwunsch 08.07.2026: saubere Skizze ohne Zahlen)
   if(type==='schiebe'){
     // Stangengriff bewusst weggelassen (Kundenwunsch 04.07.2026) — Schiebe-Pfeil zeigt die Laufrichtung.
     if(sys==='psk'){                                          // Kipp-Dreieck (Spitze oben) über das Feld
