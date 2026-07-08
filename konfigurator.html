@@ -1179,17 +1179,17 @@ var LS={};
 function _lp_unserPreis(ref){ ref=Number(ref)||0; var p=Math.round((ref-10)/10)*10; return p<20?Math.max(0,Math.round(ref/10)*10):p; }
 function _lp_interp1(x,xs,ys){ const n=xs.length; if(x<=xs[0])return ys[0]; if(x>=xs[n-1]){const t=(x-xs[n-2])/(xs[n-1]-xs[n-2]);return ys[n-2]+t*(ys[n-1]-ys[n-2]);} for(let i=0;i<n-1;i++){if(x<=xs[i+1]){const t=(x-xs[i])/(xs[i+1]-xs[i]);return ys[i]+t*(ys[i+1]-ys[i]);}} return ys[n-1]; }
 function _lp_matLookup(b,h,BS,HS,M){ const col=[]; for(let i=0;i<HS.length;i++)col.push(_lp_interp1(b,BS,M[i])); return _lp_interp1(h,HS,col); }
-const _lp_FMAT_B=[450,600,800,1000,1200,1400,1500], _lp_FMAT_H=[400,600,800,1000,1200,1400,1700];
-const _lp_FMAT=[[134,134,156,182,203,224,234],[134,134,167,196,219,244,254],[134,134,174,201,222,250,261],[160,160,181,206,225,257,267],[175,175,197,224,244,264,273],[190,190,214,242,264,285,296],[221,221,252,280,304,328,340]];
+const _lp_FMAT_B=[450,600,700,800,900,1000,1100,1200,1300,1400,1500], _lp_FMAT_H=[400,500,600,700,800,900,1000,1100,1200,1300,1400,1500,1600,1700];
+const _lp_FMAT=[[134,134,134,142,162,173,191,203,215,225,234],[134,134,134,142,162,173,191,211,224,234,245],[134,134,134,142,162,173,191,219,233,244,255],[134,134,134,142,162,173,191,225,242,262,273],[134,134,142,150,162,173,191,225,242,264,273],[141,141,150,159,170,183,191,225,242,264,273],[160,160,169,181,193,206,215,225,242,264,273],[167,167,176,190,202,215,225,234,242,264,273],[175,175,185,197,211,224,234,244,254,264,273],[182,182,192,206,217,233,244,254,263,274,283],[190,190,201,214,228,242,254,264,274,285,296],[198,198,208,223,236,251,262,273,285,295,306],[205,205,216,231,246,261,271,284,296,306,317],[221,221,233,252,267,280,292,304,316,328,340],];
 function _lp_fensterMatrix(b,h){ const col=[]; for(let i=0;i<_lp_FMAT_H.length;i++)col.push(_lp_interp1(b,_lp_FMAT_B,_lp_FMAT[i])); return _lp_interp1(h,_lp_FMAT_H,col); }
 const _lp_FESTG=[500,800,1100,1400,1700];
 const _lp_FESTMAT=[[82,82,94,114,132],[82,82,102,123,142],[94,102,126,151,174],[114,123,151,179,207],[132,142,174,207,238]];
 function _lp_fensterFestMatrix(b,h){ if(b>1700)b=1700;if(h>1700)h=1700;if(b<500)b=500;if(h<500)h=500; const col=[]; for(let i=0;i<_lp_FESTG.length;i++)col.push(_lp_interp1(b,_lp_FESTG,_lp_FESTMAT[i])); return _lp_interp1(h,_lp_FESTG,col); }
-const _lp_3FL_B=[1600,2200,2800,3600], _lp_3FL_H=[1000,1300,1600];
-const _lp_3FL_M=[[543,594,672,776],[608,665,751,862],[675,737,831,948]];
-const _lp_2FL_B=[1000,1400,1800,2200], _lp_2FL_H=[900,1300,1600];
-const _lp_2FL_P=[[260,298,351,392],[331,382,445,495],[373,428,497,553]];
-const _lp_2FL_S=[[282,320,373,415],[364,413,477,529],[412,467,536,594]];
+const _lp_3FL_B=[1600,1900,2200,2500,2800,3200,3600], _lp_3FL_H=[600,700,800,900,1000,1200,1400,1600];
+const _lp_3FL_M=[[436,447,477,531,591,662,764],[457,468,500,531,591,662,786],[479,490,523,556,591,662,786],[502,514,549,582,618,662,786],[553,566,605,645,683,734,786],[597,611,653,695,736,789,840],[641,656,700,745,789,845,904],[685,701,748,796,842,900,959],];
+const _lp_2FL_B=[1000,1200,1400,1600,1800,2000,2400,2800], _lp_2FL_H=[600,700,800,900,1000,1200,1400,1600];
+const _lp_2FL_P=[[205,223,238,280,320,340,424,485],[219,238,254,280,320,340,448,525],[232,252,268,296,320,340,448,525],[246,268,285,312,338,358,398,438],[278,301,320,353,380,401,440,490],[305,331,352,385,415,437,488,525],[332,361,384,417,449,474,529,573],[359,391,415,449,484,510,570,608],];
+const _lp_2FL_S=[[219,238,252,296,339,359,445,513],[236,255,270,296,339,359,481,579],[252,271,288,315,339,359,481,600],[268,289,307,334,359,380,420,460],[302,325,345,377,404,425,462,510],[334,359,381,415,443,467,530,600],[366,395,417,452,483,508,574,648],[398,430,454,488,523,549,622,702],];
 function _lp_fluegelFaktor(f){ f=f||'1-fluegel'; let base=1.0; if(f==='stulp'||f.charAt(0)==='2')base=1.355; else if(f.charAt(0)==='3')base=1.83; let extra=0; if(f.indexOf('ober-unter')>=0)extra=0.30; else if(f.indexOf('oberlicht')>=0||f.indexOf('unterlicht')>=0)extra=0.15; return base+extra; }
 const _lp_F_OEFF={'fest':-98,'kipp':-23,'dreh-l':-14,'dreh-r':-14,'dk-l':0,'dk-r':0};
 const _lp_F_GRIFF={'mistral':0,'nevada':0,'dublin':0,'kwadrat':0,'hoppe':7,'pz-beid':113};
@@ -1203,6 +1203,19 @@ function _lp_rolladenDelta(b,h,type){ if(!type||type==='ohne')return 0; let d=_l
 function _lp_glasOptDelta(area){ let d=0; if(LS.glas==='3fach')d+=24*area; if(LS.schall&&LS.schall!=='ohne')d+=52*area; if(LS.sicherGlas==='esg')d+=33*area; else if(LS.sicherGlas==='vsg')d+=51*area; if(LS.glasdekor==='master-carre')d+=55*area; else if(LS.glasdekor&&LS.glasdekor!=='klar')d+=27*area; return d; }
 // Premium-Farb-Aufschlag wie Live: 14 Sonderfarben/Holzdekore kosten mehr (einseitig +8,8% / beidseitig-beide-premium +5,4%)
 function _lp_farbPremDelta(){ var faCol=LS.fa&&LS.fa!=='weiss', fiCol=LS.fi&&LS.fi!=='weiss'; var faP=faCol&&_PREM_FARBE.indexOf(LS.fa)>=0, fiP=fiCol&&_PREM_FARBE.indexOf(LS.fi)>=0; if(faCol&&fiCol) return (faP&&fiP)?0.054:0; return (faP||fiP)?0.088:0; }
+const _lp_REINF_B=[450,600,700,800,900,1000,1100,1200,1300,1400,1500], _lp_REINF_H=[400,500,600,700,800,900,1000,1100,1200,1300,1400,1500,1600,1700];
+const _lp_REINF=[[0,17,19,14,7,10,2,0,0,0,0],[0,0,24,20,13,17,9,0,0,0,0],[0,0,0,25,19,23,17,0,0,0,0],[0,0,0,0,34,39,34,12,7,0,3],[0,0,0,0,0,0,51,30,28,20,26],[0,0,0,0,0,0,0,48,47,39,45],[0,0,0,0,0,0,0,0,80,74,81],[0,0,0,0,0,0,0,0,0,92,100],[0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0]];
+function _lp_reinfDelta(b,h){ if(!h||b/h<1.26)return 0; const col=[]; for(let i=0;i<_lp_REINF_H.length;i++)col.push(_lp_interp1(b,_lp_REINF_B,_lp_REINF[i])); return Math.max(0,_lp_interp1(h,_lp_REINF_H,col)); }
+const _lp_R2_B=[1200,1400,1600,1800,2000,2200,2400,2600,2800], _lp_R2_H=[500,600,700,800,900,1000];
+const _lp_R2P=[[0,47,38,26,32,14,0,0,1],[0,0,49,38,46,29,16,18,19],[0,0,0,68,77,51,29,21,13],[0,0,0,0,0,84,64,60,54],[0,0,0,0,0,1,151,166,181],[0,0,0,0,0,2,8,183,194]];
+const _lp_R2S=[[0,48,36,22,28,9,0,0,0],[0,0,47,35,41,23,17,18,19],[0,0,0,66,74,43,22,11,0],[0,0,0,0,0,79,59,39,19],[0,0,0,0,0,2,159,183,205],[0,0,0,0,0,5,19,204,225]];
+const _lp_RF3_B=[1600,1900,2200,2500,2800,3200,3600], _lp_RF3_H=[600,700,800,900,1000,1200,1400,1600];
+const _lp_RF3=[[0,0,0,78,61,46,0],[0,0,0,0,106,97,35],[0,0,0,0,0,147,90],[0,0,0,0,0,0,139],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0],[0,0,0,0,0,0,0]];
+function _lp_reinfMF(b,h){ if(!h)return 0; var r=b/h, fl=LS.fluegel;
+  if(String(fl||'').charAt(0)==='3'){ if(r<3.98)return 0; var c=[]; for(var i=0;i<_lp_RF3_H.length;i++)c.push(_lp_interp1(b,_lp_RF3_B,_lp_RF3[i])); return Math.max(0,_lp_interp1(h,_lp_RF3_H,c)); }
+  if(fl==='stulp'){ if(r<2.2)return 0; var c2=[]; for(var j=0;j<_lp_R2_H.length;j++)c2.push(_lp_interp1(b,_lp_R2_B,_lp_R2S[j])); return Math.max(0,_lp_interp1(h,_lp_R2_H,c2)); }
+  if(String(fl||'').charAt(0)==='2'){ if(r<2.2)return 0; var c3=[]; for(var k=0;k<_lp_R2_H.length;k++)c3.push(_lp_interp1(b,_lp_R2_B,_lp_R2P[k])); return Math.max(0,_lp_interp1(h,_lp_R2_H,c3)); }
+  return 0; }
 function _lp_fenster(){
   const b=LS.bMm||1000, h=LS.hMm||1200, fak=_lp_fluegelFaktor(LS.fluegel), cnt=LS.cnt||1;
   const isSingleFest=(LS.fluegel==='1-fluegel'&&LS.oeff1==='fest');
@@ -1229,14 +1242,16 @@ function _lp_fenster(){
   const roll=_lp_rolladenDelta(b,h,LS.roll);
   let spro=0; if(LS.sproTyp&&LS.sproTyp!=='keine'&&_lp_F_SPRO[LS.sproTyp])spro=_lp_F_SPRO[LS.sproTyp][LS.sproDicke]||0;
   const sicher=_lp_F_SICHER[LS.sicher]||0;
-  let unitMarkt=bodyNoColor+colorAdd+glas+schall+sicherGlas+dekor+griff+roll+spro+sicher;
+  var _lp_isSingle=!isSingleFest&&String(LS.fluegel||'').charAt(0)!=='2'&&String(LS.fluegel||'').charAt(0)!=='3'&&LS.fluegel!=='stulp';
+  var _lp_reinf=_lp_isSingle?_lp_reinfDelta(b,h):_lp_reinfMF(b,h);
+  let unitMarkt=bodyNoColor+colorAdd+glas+schall+sicherGlas+dekor+griff+roll+spro+sicher+_lp_reinf;
   if(unitMarkt<50)unitMarkt=50;
   return _lp_unserPreis(unitMarkt);
 }
-const _lp_BLK_B1=[500,700,900,1000,1100], _lp_BLK_H1=[1700,1800,2000,2300];
-const _lp_BLK_M1=[[274,274,299,311,449],[274,274,299,311,457],[291,291,316,329,492],[314,314,342,356,542]];
-const _lp_BLK_B2=[1300,1500,1700,2000], _lp_BLK_H2=[1800,2000,2300];
-const _lp_BLK_M2=[[541,564,587,622],[576,600,624,662],[633,654,681,723]];
+const _lp_BLK_B1=[500,700,900,1000,1099,1100,1200], _lp_BLK_H1=[1700,2000,2300];
+const _lp_BLK_M1=[[265,265,289,301,312,434,456],[281,281,305,318,330,475,502],[303,303,331,344,356,524,554]];
+const _lp_BLK_B2=[770,1000,1300,1500,1700,2000,2199,2200,2300], _lp_BLK_H2=[1800,2000,2300];
+const _lp_BLK_M2=[[473,473,492,514,537,571,593,853,876],[501,501,521,544,568,605,627,916,941],[548,548,568,590,616,656,681,1013,1041]];
 function _lp_balkon(){
   const b=LS.bMm||900, h=LS.hMm||2000, is2F=(LS.fluegel==='2-fluegel'||LS.fluegel==='stulp');
   let frame=is2F?_lp_matLookup(b,h,_lp_BLK_B2,_lp_BLK_H2,_lp_BLK_M2):_lp_matLookup(b,h,_lp_BLK_B1,_lp_BLK_H1,_lp_BLK_M1);
@@ -1255,16 +1270,16 @@ function _lp_balkon(){
   return _lp_unserPreis(price);
 }
 const _lp_PSK_B=[1500,2000,2500,3000], _lp_PSK_H=[1700,1900,2100,2200];
-const _lp_PSK_M=[[1451,1491,1579,1680],[1451,1491,1579,1680],[1490,1534,1629,1739],[1508,1554,1651,1764]];
-const _lp_HS_B=[2000,3000,4000], _lp_HS_H=[1900,2100,2300];
-const _lp_HS_M=[[2600,2972,3805],[2610,2988,3866],[2701,3090,4021]];
+const _lp_PSK_M=[[1463,1522,1628,1746],[1471,1532,1640,1760],[1516,1583,1700,1832],[1537,1607,1728,1862]];
+const _lp_HS_B=[1700,2000,2200,2209,2210,2250,2300,2350,2400,2450,2500,2550,2600,2700,2750,2800,3000], _lp_HS_H=[1700,1900,2100,2119,2120,2200];
+const _lp_HS_M=[[2576,2589,2598,2597,2638,2640,2642,2685,2687,2730,2732,2773,2775,2817,2860,2862,2956],[2584,2600,2609,2609,2650,2652,2654,2697,2699,2743,2745,2787,2788,2832,2874,2877,2972],[2593,2610,2621,2621,2662,2664,2667,2710,2712,2756,2759,2800,2802,2846,2888,2892,2988],[2593,2610,2621,2621,2662,2664,2667,2710,2712,2756,2759,2800,2802,2846,2888,2892,2988],[2634,2651,2663,2663,2704,2707,2710,2753,2756,2800,2803,2846,2849,2896,2940,2942,3035],[2638,2655,2667,2667,2708,2711,2714,2757,2760,2804,2807,2850,2853,2900,2944,2946,3039]];
 function _lp_hstRolladenDelta(b,profil){ b=Number(b)||2200; if(profil==='iglo-hs'){return(b<3100)?Math.max(0,Math.round(0.208*b-30)):1370;} return Math.round(228+0.10*b); }
 function _lp_hst(){
   const b=LS.bMm||2200, h=LS.hMm||2000;
   let frame=(LS.profil==='iglo-hs')?_lp_matLookup(b,h,_lp_HS_B,_lp_HS_H,_lp_HS_M):_lp_matLookup(b,h,_lp_PSK_B,_lp_PSK_H,_lp_PSK_M);
   if(LS.profil==='iglo-psk'&&LS.pskKammer==='iglo-energy')frame+=45;
   const faCol=LS.fa&&LS.fa!=='weiss', fiCol=LS.fi&&LS.fi!=='weiss';
-  const _hsOne=(LS.profil==='iglo-hs')?0.21:0.092, _hsBoth=(LS.profil==='iglo-hs')?0.30:0.11;
+  const _hsOne=(LS.profil==='iglo-hs')?0.206:0.087, _hsBoth=(LS.profil==='iglo-hs')?0.30:0.11;
   const farbPct=((faCol&&fiCol)?_hsBoth:((faCol||fiCol)?_hsOne:0))+_lp_farbPremDelta();
   let price=frame*(1+farbPct);
   price+=_lp_F_SCHALL[LS.schall]||0;
@@ -1275,16 +1290,16 @@ function _lp_hst(){
   if(LS.hstSchloss==='innen-aussen')price+=59;
   return _lp_unserPreis(price);
 }
-const _lp_HT_B=[900,1000,1100,1170], _lp_HT_H=[2000,2200,2400];
-const _lp_HT_M=[[1689,1723,1756,1789],[1719,1754,1789,1824],[1814,1850,1887,1923]];
-const _lp_HT_MODELL={'vollglas-inox':-813,'florida-lr-inox':0,'montana-1-inox':0,'montana-2-lr-inox':0,'montana-3-lr-inox':90,'ohio-inox':90,'colorado-inox':90,'alaska-1-inox':90,'alaska-2-inox':90,'nebraska-lcr-inox':90,'pennsylvania-1-inox':90,'pennsylvania-2-lr-inox':90,'pennsylvania-3-lr-inox':90,'texas-c-inox':90,'texas-lr-inox':90};
+const _lp_HT_B=[904,1000,1100,1174], _lp_HT_H=[2028,2200,2398];
+const _lp_HT_M=[[1635,1667,1699,1732],[1664,1697,1732,1765],[1756,1791,1826,1862]];
+const _lp_HT_MODELL={'vollglas-inox':-787,'florida-lr-inox':0,'montana-1-inox':0,'alaska-1-inox':0,'montana-2-lr-inox':87,'montana-3-lr-inox':87,'ohio-inox':87,'colorado-inox':87,'alaska-2-inox':87,'nebraska-lcr-inox':87,'pennsylvania-1-inox':87,'pennsylvania-2-lr-inox':87,'pennsylvania-3-lr-inox':87,'texas-c-inox':87,'texas-lr-inox':87};
 function _lp_haustuer(){
   const b=LS.bMm||1000, h=LS.hMm||2100;
   let frame=_lp_matLookup(b,h,_lp_HT_B,_lp_HT_H,_lp_HT_M);
-  frame+=(_lp_HT_MODELL[LS.tuerModell]!=null?_lp_HT_MODELL[LS.tuerModell]:0);
+  const _lp_mD=(_lp_HT_MODELL[LS.tuerModell]!=null?_lp_HT_MODELL[LS.tuerModell]:0);
   const faCol=LS.fa&&LS.fa!=='weiss', fiCol=LS.fi&&LS.fi!=='weiss';
   const farbPct=((faCol&&fiCol)?0.17:((faCol||fiCol)?0.145:0))+_lp_farbPremDelta();
-  let price=frame*(1+farbPct);
+  let price=frame*(1+farbPct)+_lp_mD;
   if(LS.glas==='3fach')price+=Math.round(24.4*(b*h/1e6));
   if(LS.tuerGriffAussen==='stoss-q45r')price+=100;
   price+=_lp_F_SICHER[LS.sicher]||0;
