@@ -1344,7 +1344,7 @@ function _lp_hst(){
   let price=frame*(1+farbPct);
   price+=_lp_F_SCHALL[LS.schall]||0;
   price+=_lp_F_SICHERGLAS[LS.sicherGlas]||0;
-  if(LS.profil==='iglo-psk'&&LS.glas==='3fach')price+=23*((b/1000)*(h/1000));
+  if(LS.profil==='iglo-psk')price+=23.5*((b/1000)*(h/1000));
   if(LS.glasdekor&&LS.glasdekor!=='klar')price+=(LS.glasdekor==='master-carre'?55:27)*((b/1000)*(h/1000));
   price+=_lp_F_SICHER[LS.sicher]||0;
   if(LS.roll&&LS.roll!=='ohne')price+=_lp_hstRolladenDelta(b,LS.profil);
@@ -1494,7 +1494,6 @@ function buildSchiebeSteps(){
     {key:'masse',label:'Maße',title:['Ihre ','Maße'],sub:'Breite und Höhe der Öffnung in Millimeter.'},
     {key:'anzahl',label:'Anzahl',title:['Die ','Anzahl'],sub:'Wie viele gleiche Schiebetüren benötigen Sie?'},
     {key:'farbe',label:'Farbe',title:['Die ','Farbe'],sub:'Außen- und Innenfarbe — die Vorschau zeigt Ihre Wahl.'},
-    {key:'glas',label:'Glas',title:['Die ','Verglasung'],sub:'2-fach oder 3-fach Wärmeschutz.'},
     {key:'motiv',label:'Motiv',title:['Das ','Glasmotiv'],sub:'Klarglas oder ein Sichtschutz-Dekor.'},
     {key:'schall',label:'Schall',title:['Der ','Schallschutz'],sub:'Optional: zusätzlicher Schallschutz.'},
     {key:'griffhst',label:'Griff',title:['Der ','Schiebegriff'],sub:'Innengriff, Außengriff und Ausführung.'},
@@ -1584,7 +1583,7 @@ function startProduct(id){
   // Neues Produkt = frischer Start (nichts vom vorherigen Produkt übernehmen) — wie in modernen Konfiguratoren üblich.
   S.aufteilung='1fl'; S.anschlagIdx=(S.prod==='balkon')?0:(ANSCHLAG_DEFIDX['1fl']||1);
   S.roll='kein'; S.panzer=null; S.rollSeite='rechts';
-  S.sproTyp='keine'; S.sproDicke='27'; S.sproRaster='kreuz'; S.sicher=false; S.glass='2'; S.glasdekor='klar'; S.schall=false;
+  S.sproTyp='keine'; S.sproDicke='27'; S.sproRaster='kreuz'; S.sicher=false; S.glass=(S.prod==='schiebe')?'3':'2'; S.glasdekor='klar'; S.schall=false;
   S.outer=0; S.inner=0; S.colorTarget='i'; S.anzahl=1;
   S.griff='mistral'; S.griffTuer='stoss'; S.hstTeilung='2'; S.hstLauf='rechts'; S.balkonSchwelle='alu';
   const dim={fenster:[1000,1200],balkon:[900,2100],haustuer:[1100,2100],schiebe:[2000,2100]}[S.prod]||[1000,1200];
