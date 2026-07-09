@@ -6058,6 +6058,8 @@ const S = {
   tuerModell: null,
   hstSchwelle:'standard', hstTeilung:'2-teilig', hstLauf:'rechts',  // Fix W9
   balkonSchwelle:'alu-20',  // Kunden-Wunsch 21.04.2026
+  // Rahmenverbreiterung: Modus + Maß pro Seite (mm). State-Speicherung, Preis folgt separat.
+  rvMode:'nein', rvLinks:'keine', rvRechts:'keine', rvOben:'keine', rvUnten:'keine',
 };
 let done = new Set();
 
@@ -10070,20 +10072,37 @@ function buildOeffSash() {
 }
 
 // Fix V6 (21.04.2026): Rahmenverbreiterung Progressive Disclosure
+const RV_SIDE_KEYS = { links:'rvLinks', rechts:'rvRechts', oben:'rvOben', unten:'rvUnten' };
 function toggleRV(el, mode) {
   el.parentElement.querySelectorAll('.oc').forEach(c => c.classList.remove('sel'));
   el.classList.add('sel');
   const sides = document.getElementById('rv-sides');
   if (sides) sides.classList.toggle('hidden', mode === 'nein');
+  S.rvMode = mode;
+  if (window._touched) window._touched.add('rvMode');
+  // "nein" setzt alle Seiten zurück, damit keine verwaisten Maße im State bleiben.
+  if (mode === 'nein') {
+    Object.keys(RV_SIDE_KEYS).forEach(side => {
+      S[RV_SIDE_KEYS[side]] = 'keine';
+      const grid = document.getElementById('rv-'+side+'-grid');
+      if (grid) grid.querySelectorAll('.oc').forEach(c => c.classList.toggle('sel', c.dataset.v === 'keine'));
+    });
+  }
+  if (typeof upSidebar === 'function') upSidebar();
 }
 
-// Stub für pickRV (bisher nur im HTML referenziert) — gibt wenigstens visuelles Feedback
+// State-Speicherung der Rahmenverbreiterung pro Seite (Preisberechnung folgt separat).
 function pickRV(el) {
   const side = el.dataset.side;
   const grid = el.parentElement;
   if (grid) grid.querySelectorAll('.oc').forEach(c => c.classList.remove('sel'));
   el.classList.add('sel');
-  // TODO: Rahmenverbreiterungs-Preisberechnung + State-Speicherung (nicht Teil V6-Scope)
+  const key = RV_SIDE_KEYS[side];
+  if (key) {
+    S[key] = el.dataset.v;
+    if (window._touched) window._touched.add(key);
+  }
+  if (typeof upSidebar === 'function') upSidebar();
 }
 
 // Fix W9 (21.04.2026): HST-spezifische Optionen (Schwelle / Teilung / Laufrichtung)
@@ -10833,8 +10852,14 @@ function upSidebar() {
     rowsList.push(['Griff', P.griff?.[S.griff]?.name||S.griff]);
   }
   if(S.sicher && S.sicher!=='ohne' && isTouched('sicher')) rowsList.push(['Einbruchschutz', P.sicher?.[S.sicher]?.name||S.sicher]);
-  if(S.rahmenVerbreit && S.rahmenVerbreit!=='ohne' && isTouched('rahmenVerbreit'))
-    rowsList.push(['Rahmenverbreiterung', P.rahmenVerbreit?.[S.rahmenVerbreit]?.name||S.rahmenVerbreit]);
+  if(S.rvMode==='ja' && isTouched('rvMode')) {
+    const rvParts = [];
+    [['links','Links'],['rechts','Rechts'],['oben','Oben'],['unten','Unten']].forEach(([side,label])=>{
+      const v = S[RV_SIDE_KEYS[side]];
+      if(v && v!=='keine') rvParts.push(label+': '+v+' mm');
+    });
+    if(rvParts.length) rowsList.push(['Rahmenverbreiterung', rvParts.join(' · ')]);
+  }
   if(S.spro && S.sproTyp && S.sproTyp!=='keine' && isTouched('sproTyp')) rowsList.push(['Sprossen', P.sproTyp?.[S.sproTyp]?.name||S.sproTyp]);
   if(S.roll && S.roll!=='ohne' && isTouched('roll')) {
     rowsList.push(['Rolladen', P.roll[S.roll]?.name||S.roll]);
