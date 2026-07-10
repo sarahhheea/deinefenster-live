@@ -218,7 +218,7 @@ h1,h2,h3{font-family:var(--serif);font-weight:700;letter-spacing:-.022em;line-he
 .pcard:hover .pgo{background:#332f2a}
 .pcard .pgo svg{width:14px;height:14px}
 
-.liefer{margin:6px 0 34px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:22px 26px}
+.liefer{margin:6px 0 34px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:30px 34px}
 .lf-title{display:flex;align-items:center;justify-content:center;gap:10px;font:700 12px/1 var(--sans);text-transform:uppercase;letter-spacing:.18em;color:var(--ink);margin-bottom:16px}
 .lf-title svg{width:19px;height:19px;color:var(--accent)}
 .lf-tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
@@ -1964,26 +1964,166 @@ function formHTML(t){
     </div>`;
 }
 let lastAnfrageNr='';
-function submitAnfrage(ev){
+// ── Mail-Ableitung: Anfrage-Mails (intern + Kunde) werden KOMPLETT aus dem
+//    LIVE-Konfigurator abgeleitet — Preis (price/cartTotals), Eigenschaften
+//    (summaryRows), farbige Skizze (stageSVG). Keine eingefrorenen Werte:
+//    ändert sich der Konfigurator, ändert sich die Mail automatisch. ─────────
+function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+
+function fetchToDataURL(url){
+  return fetch(url).then(function(r){ if(!r.ok) throw new Error('img'); return r.blob(); })
+    .then(function(b){ return new Promise(function(res,rej){ var fr=new FileReader(); fr.onload=function(){res(fr.result);}; fr.onerror=rej; fr.readAsDataURL(b); }); });
+}
+
+function _drawToPng(src,W,H){
+  return new Promise(function(res,rej){
+    var img=new Image();
+    img.onload=function(){ try{
+      var w=W||img.naturalWidth||340;
+      var h=H||Math.round(w*((img.naturalHeight/img.naturalWidth)||1.2));
+      var cv=document.createElement('canvas'); cv.width=w; cv.height=h;
+      var cx=cv.getContext('2d'); cx.fillStyle='#fff'; cx.fillRect(0,0,w,h); cx.drawImage(img,0,0,w,h);
+      // Weißen Rand automatisch wegschneiden, damit die Skizze eng sitzt.
+      try{
+        var d=cx.getImageData(0,0,w,h).data, minX=w,minY=h,maxX=0,maxY=0,found=false;
+        for(var y=0;y<h;y++){ for(var x=0;x<w;x++){ var o=(y*w+x)*4; if(d[o]<245||d[o+1]<245||d[o+2]<245){ found=true; if(x<minX)minX=x; if(x>maxX)maxX=x; if(y<minY)minY=y; if(y>maxY)maxY=y; } } }
+        if(found){ var pad=6; minX=Math.max(0,minX-pad); minY=Math.max(0,minY-pad); maxX=Math.min(w-1,maxX+pad); maxY=Math.min(h-1,maxY+pad);
+          var cw=maxX-minX+1, ch=maxY-minY+1;
+          var c2=document.createElement('canvas'); c2.width=cw; c2.height=ch;
+          var cx2=c2.getContext('2d'); cx2.fillStyle='#fff'; cx2.fillRect(0,0,cw,ch); cx2.drawImage(cv,minX,minY,cw,ch,0,0,cw,ch);
+          res(c2.toDataURL('image/png')); return; }
+      }catch(e){}
+      res(cv.toDataURL('image/png'));
+    }catch(e){ rej(e); } };
+    img.onerror=function(){ rej(new Error('load')); };
+    img.src=src;
+  });
+}
+
+// Skizze (SVG-String ODER <img src>) → PNG-DataURL. Externe Bilder werden erst
+// als Data-URI eingebettet, sonst käme die Skizze im PNG leer an.
+async function svgToPngDataURL(markup,W){
+  W=W||340; markup=(markup||'').trim();
+  var im=markup.match(/<img[^>]+src="([^"]+)"/i);
+  if(im){ return await _drawToPng(new URL(im[1],location.href).href,W,0); }
+  var svg=markup, hrefs=[], re=/(?:xlink:href|href)="([^"]+)"/gi, m;
+  while((m=re.exec(svg))){ if(m[1] && !/^data:/.test(m[1]) && !/^#/.test(m[1])) hrefs.push(m[1]); }
+  var uniq=hrefs.filter(function(v,i){return hrefs.indexOf(v)===i;});
+  for(var u=0;u<uniq.length;u++){
+    try{ var d=await fetchToDataURL(new URL(uniq[u],location.href).href); svg=svg.split('"'+uniq[u]+'"').join('"'+d+'"'); }catch(e){}
+  }
+  var vw=W, vh=W, vb=svg.match(/viewBox="([\d.\-]+)\s+([\d.\-]+)\s+([\d.\-]+)\s+([\d.\-]+)"/);
+  if(vb){ vw=+vb[3]; vh=+vb[4]; }
+  svg=svg.replace(/<svg([^>]*)>/i,function(mm,attrs){
+    attrs=attrs.replace(/\swidth="[^"]*"/i,'').replace(/\sheight="[^"]*"/i,'');
+    if(!/xmlns=/.test(attrs)) attrs=' xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"'+attrs;
+    return '<svg width="'+vw+'" height="'+vh+'"'+attrs+'>';
+  });
+  var H=Math.round(W*((vh/vw)||1));
+  return await _drawToPng('data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg),W,H);
+}
+
+// summaryRows() nutzt CSS-Klassen — E-Mail-Clients ignorieren <style>, daher
+// hier in eine inline-gestylte Tabelle umschreiben (Inhalt bleibt sonst als Text).
+function _mailRows(srowHtml){
+  var h=(srowHtml||'')
+    .replace(/class="dot" style="background:/g,'style="display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:middle;margin-right:6px;border:1px solid rgba(0,0,0,.15);background:')
+    .replace(/<div class="srow"><span class="k[^"]*">([\s\S]*?)<\/span><span class="v[^"]*">([\s\S]*?)<\/span><\/div>/g,
+      function(mm,k,v){ return '<tr><td style="padding:5px 14px 5px 0;color:#6b7280;font-size:13px;vertical-align:top;white-space:nowrap">'+k+'</td><td style="padding:5px 0;color:#111827;font-size:13px;font-weight:600;vertical-align:top">'+v+'</td></tr>'; });
+  return '<table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse">'+h+'</table>';
+}
+
+function _posBlock(i,q,title,rowsTable,unit,line,cid){
+  var sketch = cid
+    ? '<td width="238" valign="top" style="padding-right:22px"><div style="background:#f6f9fc;border:1px solid #e6eaf1;border-radius:12px;padding:14px"><img src="cid:'+cid+'" width="210" style="width:210px;max-width:100%;display:block" alt="Skizze"></div></td>'
+    : '';
+  var priceLine = (line==null)
+    ? '<div style="margin-top:12px;font-size:17px;font-weight:800;color:#225eaa">Preis auf Anfrage</div>'
+    : '<div style="margin-top:12px"><div style="font-size:17px;font-weight:800;color:#111827">'+eur(line)+'</div>'+((unit!=null&&q>1)?'<div style="font-size:12px;color:#6b7280;margin-top:2px">'+eur(unit)+' / Stück</div>':'')+'</div>';
+  return '<div style="padding:22px 0;border-top:1px solid #edf1f6">'+
+    '<div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#9aa2ac">Position '+(i+1)+' · '+q+' ×</div>'+
+    '<div style="font-size:18px;font-weight:800;color:#111827;margin:3px 0 16px">'+title+'</div>'+
+    '<table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse"><tr>'+sketch+
+    '<td valign="top">'+rowsTable+priceLine+'</td></tr></table></div>';
+}
+function _mailTotals(t){
+  var shipTxt=(liefer==='abholung')?'kostenlos':(t.ship?eur(t.ship):'kostenfrei');
+  return '<table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;border-top:2px solid #eef1f5;margin-top:4px">'+
+    '<tr><td style="padding:7px 0 3px;color:#6b7280;font-size:13px">Zwischensumme ('+t.qty+')</td><td align="right" style="padding:7px 0 3px;font-size:13px;font-weight:600">'+eur(t.sub)+'</td></tr>'+
+    '<tr><td style="padding:2px 0;color:#6b7280;font-size:13px">'+(liefer==='abholung'?'Abholung im Lager':'Lieferung')+'</td><td align="right" style="padding:2px 0;font-size:13px;font-weight:600">'+shipTxt+'</td></tr>'+
+    '<tr><td style="padding:8px 0 2px;font-size:15px;font-weight:800">Gesamt</td><td align="right" style="padding:8px 0 2px;font-size:15px;font-weight:800">'+eur(t.total)+'</td></tr>'+
+    '<tr><td colspan="2" style="color:#9aa2ac;font-size:11.5px;padding-top:3px">inkl. 19 % MwSt ('+eur(t.mwst)+') · unverbindlicher Richtpreis · kein Kaufvertrag</td></tr></table>';
+}
+
+function _kundeBox(name,email,tel,adr,msg){
+  var row=function(k,v){ return v?'<tr><td style="padding:3px 14px 3px 0;color:#6b7280;font-size:13px;white-space:nowrap;vertical-align:top">'+k+'</td><td style="padding:3px 0;font-size:13px;font-weight:600;color:#111827">'+esc(v)+'</td></tr>':''; };
+  return '<div style="background:#f6f9fc;border:1px solid #e6eaf1;border-radius:10px;padding:12px 14px;margin:0 0 18px">'+
+    '<div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#9aa2ac;margin-bottom:5px">Kundendaten</div>'+
+    '<table cellpadding="0" cellspacing="0" style="border-collapse:collapse">'+row('Name',name)+row('E-Mail',email)+row('Telefon',tel)+row('Abholung/Lieferung',adr)+(msg?row('Nachricht',msg):'')+'</table></div>';
+}
+
+function _mailShell(inner){
+  return '<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>'+
+    '<body style="margin:0;padding:0;background:#eef2f7;font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;color:#111827">'+
+    '<table width="100%" cellpadding="0" cellspacing="0" style="background:#eef2f7;padding:24px 0"><tr><td align="center">'+
+    '<table width="640" cellpadding="0" cellspacing="0" style="max-width:640px;width:100%;background:#fff;border:1px solid #e6eaf1;border-radius:16px">'+
+    '<tr><td style="padding:30px 34px">'+
+    '<div style="font-size:16px;font-weight:800;color:#225eaa">Deine<span style="color:#111827">Fenster</span>.de</div>'+
+    '<div style="font-size:14px;font-weight:700;margin:12px 0 16px">Neue Konfigurator-Anfrage</div>'+
+    inner+'</td></tr></table></td></tr></table></body></html>';
+}
+
+async function submitAnfrage(ev){
   ev.preventDefault();
-  const f=ev.target, g=n=>{const el=f.querySelector('[name="'+n+'"]'); return el?(el.value||'').trim():'';};
-  const vorname=g('vorname'), nachname=g('nachname'), email=g('email'), tel=g('tel'), plz=g('plz'), ort=g('ort'), strasse=g('strasse'), msg=g('msg');
-  const name=(vorname+' '+nachname).trim()||'—';
-  const nr='DF-'+new Date().toISOString().slice(2,10).replace(/-/g,'')+'-'+Math.floor(1000+Math.random()*9000);
-  const adr = (liefer==='lieferung') ? ('Lieferung nach: '+[strasse,(plz+' '+ort).trim()].filter(Boolean).join(', ')) : 'Abholung im Lager · Brandenburg a. d. Havel';
-  const L=['Neue Anfrage über den DeineFenster.de-Konfigurator','════════════════════════════════════════','','KONTAKTDATEN',
-    'Name:      '+name,'E-Mail:    '+email,'Telefon:   '+(tel||'–'),adr,'','KONFIGURATION ('+cart.length+' Position'+(cart.length===1?'':'en')+')'];
-  cart.forEach((it,i)=>{ const q=it.conf.anzahl||1; L.push(''); L.push('Position '+(i+1)+': '+q+' × '+withConf(it.conf,configTitle)+(it.name?' · '+it.name:'')); L.push('  '+withConf(it.conf,prodSpecs)); });
-  if(msg){ L.push(''); L.push('Anmerkung: '+msg); }
-  L.push(''); L.push('Anfrage-Nr.: '+nr); L.push('(Preise werden im persönlichen Angebot geprüft — keine Preise in dieser Mail.)');
-  const prodName = cart.length?withConf(cart[0].conf,configTitle):'Konfiguration';
-  const btn=f.querySelector('[type=submit]'); const orig=btn?btn.textContent:'';
+  var f=ev.target, g=function(n){ var el=f.querySelector('[name="'+n+'"]'); return el?(el.value||'').trim():''; };
+  var vorname=g('vorname'), nachname=g('nachname'), email=g('email'), tel=g('tel'), plz=g('plz'), ort=g('ort'), strasse=g('strasse'), msg=g('msg');
+  var name=(vorname+' '+nachname).trim()||'—';
+  var nr='DF-'+new Date().toISOString().slice(2,10).replace(/-/g,'')+'-'+Math.floor(1000+Math.random()*9000);
+  var adr=(liefer==='lieferung') ? ('Lieferung nach: '+[strasse,(plz+' '+ort).trim()].filter(Boolean).join(', ')) : 'Abholung im Lager · Brandenburg a. d. Havel';
+  var t=cartTotals();
+  var btn=f.querySelector('[type=submit]'), orig=btn?btn.textContent:'';
   if(btn){ btn.disabled=true; btn.textContent='Wird gesendet…'; }
-  fetch('https://deinefenster-email.sarahchrist.workers.dev',{ method:'POST', headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({ customer_email:email, subject:'[DeineFenster.de] Neue Anfrage '+nr+': '+prodName, text:L.join('\n'), confirmation:{name:name,offerId:nr}, website:'' }) })
-    .then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); lastAnfrageNr=nr; anfrageView='done'; window.scrollTo({top:0,behavior:'smooth'}); render(); })
-    .catch(e=>{ if(btn){ btn.disabled=false; btn.textContent=orig||'Anfrage kostenlos absenden'; }
-      alert('Das Senden hat leider nicht geklappt. Bitte versuchen Sie es gleich noch einmal oder rufen Sie uns an — Ihre Konfiguration bleibt erhalten.'); });
+  try{
+    var L=['Neue Anfrage über den DeineFenster.de-Konfigurator','','KONTAKTDATEN',
+      'Name:    '+name,'E-Mail:  '+email,'Telefon: '+(tel||'–'),adr,'','KONFIGURATION ('+cart.length+' Position'+(cart.length===1?'':'en')+')'];
+    var posHtml='', sketches=[];
+    for(let i=0;i<cart.length;i++){
+      let it=cart[i], conf=it.conf, q=conf.anzahl||1;
+      let unit=withConf(conf,price), line=(unit==null?null:unit*q);
+      let title=withConf(conf,configTitle);
+      let rowsTable=_mailRows(withConf(conf,summaryRows));
+      let cid='pos'+i, hasSketch=false;
+      try{
+        let svg=withConf(conf,function(){return stageSVG();});
+        let png=await svgToPngDataURL(svg,880);
+        if(png && png.indexOf('base64,')>0){ sketches.push({filename:'skizze-pos'+(i+1)+'.png', content:png.split('base64,')[1], content_id:cid}); hasSketch=true; }
+      }catch(e){}
+      posHtml+=_posBlock(i,q,title,rowsTable,unit,line,hasSketch?cid:null);
+      L.push('');
+      L.push('Position '+(i+1)+': '+q+' × '+withConf(conf,configTitle));
+      L.push('  '+withConf(conf,prodSpecs));
+      L.push('  Positionspreis: '+(line==null?'auf Anfrage':eur(line))+((unit!=null&&q>1)?'  ('+eur(unit)+' / Stück)':''));
+    }
+    L.push('');
+    L.push('Zwischensumme ('+t.qty+'): '+eur(t.sub));
+    L.push(liefer==='abholung'?'Abholung im Lager: kostenlos':'Lieferung: '+(t.ship?eur(t.ship):'kostenfrei'));
+    L.push('Gesamt: '+eur(t.total)+'  (inkl. 19 % MwSt '+eur(t.mwst)+' · unverbindlicher Richtpreis · kein Kaufvertrag)');
+    if(msg){ L.push(''); L.push('Anmerkung: '+msg); }
+    L.push(''); L.push('Anfrage-Nr.: '+nr);
+
+    var totalsHtml=_mailTotals(t);
+    var internHtml=_mailShell(_kundeBox(name,email,tel,adr,msg)+posHtml+totalsHtml);
+    var detailsHtml=posHtml+totalsHtml;
+    var prodName=cart.length?withConf(cart[0].conf,configTitle):'Konfiguration';
+
+    var r=await fetch('https://deinefenster-email.sarahchrist.workers.dev',{ method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ customer_email:email, subject:'[DeineFenster.de] Neue Anfrage '+nr+': '+prodName, text:L.join('\n'), html:internHtml, confirmation:{name:name,offerId:nr,detailsHtml:detailsHtml}, sketches:sketches, website:'' }) });
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    lastAnfrageNr=nr; anfrageView='done'; window.scrollTo({top:0,behavior:'smooth'}); render();
+  }catch(e){
+    if(btn){ btn.disabled=false; btn.textContent=orig||'Anfrage kostenlos absenden'; }
+    alert('Das Senden hat leider nicht geklappt. Bitte versuchen Sie es gleich noch einmal oder rufen Sie uns an — Ihre Konfiguration bleibt erhalten.');
+  }
 }
 // Schritte, bei denen ein Klick auf die Option direkt weiterspringt (schnelle Struktur-Wahl).
 // NICHT dabei: farbe/modell/griff*/motiv (Wirkung sehen) + masse/anzahl (tippen) + anfrage.
