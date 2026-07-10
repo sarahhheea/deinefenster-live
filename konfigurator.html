@@ -1562,15 +1562,15 @@ function renderPicker(){
      <div class="lf-backdrop" onclick="document.body.classList.remove('lf-open')"></div>
      <div class="liefer">
        <button class="lf-close" aria-label="Schließen" onclick="document.body.classList.remove('lf-open')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-       <div class="lf-title">${truck} So kommen Ihre Fenster zu Ihnen</div>
+       <div class="lf-title">${truck} So kommen Ihre Produkte zu Ihnen</div>
        <div class="lf-tiers">
-         <div class="lf-tier"><b>1–4 Fenster</b><span>Abholung bei uns im Lager · Brandenburg a.d.H.</span></div>
-         <div class="lf-tier"><b>5–9 Fenster</b><span>Lieferung 239 €</span></div>
-         <div class="lf-tier hot"><b>ab 10 Fenster</b><span>Kostenfrei · deutschlandweit</span></div>
+         <div class="lf-tier"><b>1–4 Elemente</b><span>Abholung bei uns im Lager · Brandenburg a.d.H.</span></div>
+         <div class="lf-tier"><b>5–9 Elemente</b><span>Lieferung 239 €</span></div>
+         <div class="lf-tier hot"><b>ab 10 Elemente</b><span>Kostenfrei · deutschlandweit</span></div>
        </div>
        <div class="lf-hints">
          <span>${fork} Anlieferung per Stapler auf Einwegpalette — Sie müssen nichts abladen</span>
-         <span>${door} Hebe-Schiebetür: 300 € deutschlandweit</span>
+         <span>${door} Hebe-Schiebetür: Direktlieferung vom Hersteller · 300 € (ab 10 Elementen frei)</span>
        </div>
      </div>
      <div class="pk-sub">Wählen Sie Ihr Produkt</div>
@@ -1854,7 +1854,7 @@ function cartTotals(){
   if(!lieferOk && liefer==='lieferung') liefer='abholung';   // nicht erlaubte Auswahl zurücksetzen
   let ship=0,shipNote='';
   if(liefer==='abholung'){ ship=0; shipNote='Abholung im Lager · Brandenburg a. d. H.'; }
-  else { if(qty>=10){ ship=0; shipNote='ab 10 Elementen kostenfrei · deutschlandweit'; } else { ship=239; shipNote='Spedition deutschlandweit'; } if(hasHS){ ship=Math.max(ship,300); shipNote='inkl. Hebe-Schiebetür · deutschlandweit'; } }
+  else { if(qty>=10){ ship=0; shipNote='ab 10 Elementen kostenfrei · deutschlandweit'; } else if(hasHS){ ship=300; shipNote='Hebe-Schiebetür · Direktlieferung vom Hersteller'; } else { ship=239; shipNote='Spedition deutschlandweit'; } }
   const total=sub+ship, mwst=total-total/1.19;
   return {sub,qty,ship,shipNote,total,mwst,hasHS,lieferOk};
 }
@@ -1911,7 +1911,7 @@ function anfrageHTML(){
   const items=cart.map((it,i)=>posCard(it,i)).join('');
   const shipRow = liefer==='abholung'
     ? `<div class="ovs-line"><span>Abholung im Lager</span><b>kostenlos</b></div>`
-    : `<div class="ovs-line"><span>Lieferung (Spedition)</span><b>${t.ship?eur(t.ship):'kostenfrei'}</b></div>`;
+    : `<div class="ovs-line"><span>Lieferung ${t.hasHS?'(Direktlieferung vom Hersteller)':'(Spedition)'}</span><b>${t.ship?eur(t.ship):'kostenfrei'}</b></div>`;
   return `<div class="ov-cart">
       <div class="ov-items">
         <div class="grp-title" style="text-align:left;padding:2px 0 10px">Meine Artikel · Bestellübersicht</div>
@@ -1922,7 +1922,7 @@ function anfrageHTML(){
         <div class="ovs-title">Zusammenfassung</div>
         <div class="ovs-deliv">
           <button class="${liefer==='abholung'?'on':''}" onclick="setLiefer('abholung')"><b>Abholung</b><span>Lager Brandenburg · kostenlos</span></button>
-          <button class="${liefer==='lieferung'?'on':''} ${t.lieferOk?'':'locked'}" ${t.lieferOk?'':'disabled'} onclick="setLiefer('lieferung')"><b>Lieferung</b><span>${t.lieferOk?'Spedition deutschlandweit':'erst ab '+LIEFER_MIN+' Elementen'}</span></button>
+          <button class="${liefer==='lieferung'?'on':''} ${t.lieferOk?'':'locked'}" ${t.lieferOk?'':'disabled'} onclick="setLiefer('lieferung')"><b>Lieferung</b><span>${t.lieferOk?(t.hasHS?'Direktlieferung vom Hersteller':'Spedition deutschlandweit'):'erst ab '+LIEFER_MIN+' Elementen'}</span></button>
         </div>
         ${t.lieferOk?'':`<div class="ovs-shipnote" style="text-align:left;margin:-8px 0 12px">Kleinere Mengen: Abholung im Lager. Lieferung per Spedition ab ${LIEFER_MIN} Elementen (Hebe-Schiebetür immer lieferbar).</div>`}
         <div class="ovs-line"><span>Zwischensumme (${t.qty} ${t.qty===1?'Artikel':'Artikel'})</span><b class="tnum">${eur(t.sub)}</b></div>
@@ -1935,10 +1935,10 @@ function anfrageHTML(){
         <div class="ovs-ship">${truck}<span>Maßfenster sind Sonderanfertigungen — wir prüfen jede Konfiguration persönlich und senden Ihnen ein geprüftes Angebot. Familienbetrieb aus Brandenburg a. d. Havel.</span></div>
         <div class="ovs-terms">
           <div class="ovs-terms-h">Lieferbedingungen</div>
-          <div class="ovs-term ${t.qty<5?'on':''}"><span>1–4 Fenster</span><b>Abholung im Lager · Brandenburg a. d. H.</b></div>
-          <div class="ovs-term ${t.qty>=5&&t.qty<10?'on':''}"><span>5–9 Fenster</span><b>Lieferung deutschlandweit · 239 €</b></div>
-          <div class="ovs-term ${t.qty>=10?'on':''}"><span>ab 10 Fenster</span><b>Kostenlose Lieferung · deutschlandweit</b></div>
-          ${t.hasHS?`<div class="ovs-term"><span>Hebe-Schiebetür</span><b>immer lieferbar (Speditionszuschlag)</b></div>`:''}
+          <div class="ovs-term ${t.qty<5?'on':''}"><span>1–4 Elemente</span><b>Abholung im Lager · Brandenburg a. d. H.</b></div>
+          <div class="ovs-term ${t.qty>=5&&t.qty<10?'on':''}"><span>5–9 Elemente</span><b>Lieferung deutschlandweit · 239 €</b></div>
+          <div class="ovs-term ${t.qty>=10?'on':''}"><span>ab 10 Elemente</span><b>Kostenlose Lieferung · deutschlandweit</b></div>
+          ${t.hasHS?`<div class="ovs-term"><span>Hebe-Schiebetür</span><b>immer lieferbar · Direktlieferung vom Hersteller</b></div>`:''}
         </div>
       </aside>
     </div>`;
