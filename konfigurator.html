@@ -1348,7 +1348,7 @@ function _lp_hst(){
   if(LS.glasdekor&&LS.glasdekor!=='klar')price+=(LS.glasdekor==='master-carre'?55:27)*((b/1000)*(h/1000));
   price+=_lp_F_SICHER[LS.sicher]||0;
   if(LS.roll&&LS.roll!=='ohne')price+=_lp_hstRolladenDelta(b,LS.profil);
-  if(LS.hstSchloss==='innen-aussen')price+=59;
+  if(LS.hstSchloss==='innen-aussen')price+=119;
   return _lp_unserPreis(price);
 }
 const _lp_HT_B=[904,1000,1100,1174], _lp_HT_H=[2028,2200,2398];
@@ -1635,17 +1635,31 @@ function panelHTML(){
       ocIcon('pskKammer','iglo-energy',`<svg viewBox="0 0 40 40" fill="none" stroke="var(--primary)" stroke-width="1.4" style="height:52px"><rect x="4" y="6" width="32" height="28" rx="1"/><line x1="10" y1="6" x2="10" y2="34"/><line x1="15" y1="6" x2="15" y2="34"/><line x1="20" y1="6" x2="20" y2="34"/><line x1="25" y1="6" x2="25" y2="34"/><line x1="30" y1="6" x2="30" y2="34"/></svg>`,'IGLO Energy PSK','7-Kammer · 82 mm',''));
   }
   if(k==='griffhst'){
-    // Wie Live-Schiebegriff: Innengriff (Stangengriff) + Außengriff (Muschelgriff) fest inklusive, Abschließbar zur Wahl
-    const fix=(img,t,s)=>`<div class="ocard on"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="vis"><img src="${img}" alt="${t}"></div><div class="t">${t}</div><div class="s">${s}</div><div class="pdl inc">inklusive</div></div>`;
-    // Innengriff + Außengriff nebeneinander (beide serienmäßig inklusive), darunter die Abschließbar-Wahl
-    return `<div class="card"><div class="grp-title">Serien-Griffe — innen &amp; außen inklusive</div><div class="opts two">`
-        +fix('img/drutex-griffe/hst-hebel-weiss-cut.webp','Innengriff','Stangengriff · öffnen &amp; kippen')
-        +fix('img/drutex-griffe/hst-muschel-weiss-cut.webp','Außengriff','Muschelgriff · flach versenkt')
-      +`</div></div>`
-      +`<div class="card"><div class="grp-title">Abschließbar?</div><div class="opts two">`
-        +ocImg('hstSchloss','ohne','img/drutex-griffe/hst-hebel-weiss-cut.webp','Nicht abschließbar','Standard','inklusive')
-        +ocImg('hstSchloss','innen-aussen','img/drutex-griffe/hst-hebel-schloss-weiss-cut.webp','Abschließbar','innen + außen · Schließzylinder',' + 59 €')
+    const CHK='<span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span>';
+    const fix=(img,t)=>`<div class="ocard on">${CHK}<div class="vis"><img src="${img}" alt="${t}"></div><div class="t">${t}</div><div class="pdl inc">inklusive</div></div>`;
+    // Hinweis: Griffe sind weiß abgebildet, Farbe folgt der Rahmenfarbe (damit Kunden sich nicht wundern).
+    const farbHinweis='<div style="font-size:12.5px;color:#6b7280;margin:-4px 4px 16px;line-height:1.5">Die Griffe sind hier weiß abgebildet — die <b>Griff-Farbe passt sich automatisch Ihrer gewählten Rahmenfarbe an</b>.</div>';
+    // Abschließbar-Wahl (nur Text, kein Symbol) — gilt für PSK und HS.
+    const schloss=`<div class="card"><div class="grp-title">Abschließbar?</div><div class="opts two">`
+        +ocText('hstSchloss','ohne','Nicht abschließbar','','inklusive')
+        +ocText('hstSchloss','innen-aussen','Abschließbar','','+ 119 €')
       +`</div></div>`;
+    if(S.hstSystem==='hs'){
+      // IGLO-HS: Innen- + Außengriff serienmäßig inklusive (zwei Karten, füllt die Reihe).
+      return `<div class="card"><div class="grp-title">Serien-Griffe — innen &amp; außen inklusive</div><div class="opts two">`
+          +fix('img/drutex-griffe/hst-hebel-weiss-cut.webp','Innengriff')
+          +fix('img/drutex-griffe/hst-muschel-weiss-cut.webp','Außengriff')
+        +`</div></div>`+farbHinweis+schloss;
+    }
+    // PSK: EIN Standard-Griff → vollbreite horizontale „Inklusive"-Karte (kein leeres Feld rechts).
+    return `<div class="card"><div class="grp-title">PSK-Griff — Standard, inklusive</div>`
+        +`<div style="display:flex;align-items:center;gap:22px;border:2px solid var(--primary,#225eaa);border-radius:16px;padding:16px 22px;background:#fff;position:relative">`
+          +`<span style="position:absolute;top:12px;right:12px;width:22px;height:22px;border-radius:50%;background:var(--primary,#225eaa);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span>`
+          +`<div style="flex:0 0 100px;text-align:center"><img src="img/drutex-griffe/psk-griff-weiss.webp" alt="PSK-Griff" style="max-width:100%;max-height:120px;display:block;margin:0 auto"></div>`
+          +`<div style="flex:1"><div style="font-size:16px;font-weight:800;color:#111827">PSK-Griff</div><div style="font-size:13px;color:#6b7280;margin-top:3px">Serienmäßig bei PSK-Schiebetüren</div></div>`
+          +`<div style="font-weight:800;color:#1a7f4b;white-space:nowrap;font-size:14px">inklusive</div>`
+        +`</div>`
+      +`</div>`+farbHinweis+schloss;
   }
   if(k==='aufteilung'){
     const auf=(val,img,t,dl)=>{ const on=S.aufteilung===val; return `<div class="ocard ${on?'on':''}" onclick="setAufteilung('${val}')"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="vis"><img src="${img}" alt="${t}"></div><div class="t">${t}</div>${dl?`<div class="pdl">${dl}</div>`:''}</div>`; };
@@ -1814,7 +1828,7 @@ function summaryRows(){
   if(S.prod==='schiebe'){
     const psk=S.hstSystem!=='hs';
     const kammerRow=psk?`<div class="srow"><span class="k">PSK-System</span><span class="v">${S.pskKammer==='iglo-energy'?'IGLO Energy PSK':'IGLO 5 Classic PSK'}</span></div>`:'';
-    const griffN='Stangengriff + Muschelgriff'+(S.hstSchloss==='innen-aussen'?' · abschließbar':'');
+    const griffN=(S.hstSystem==='hs'?'Innengriff + Außengriff':'PSK-Griff')+(S.hstSchloss==='innen-aussen'?' · abschließbar':'');
     return `<div class="srow"><span class="k">System</span><span class="v">${psk?'PSK Schiebetür':'Hebe-Schiebetür'}</span></div>${kammerRow}
       <div class="srow"><span class="k">${psk?'Öffnung':'Laufrichtung'}</span><span class="v">${S.hstLauf==='links'?(psk?'Kipp-Schiebe links':'nach links'):(psk?'Kipp-Schiebe rechts':'nach rechts')}</span></div>${massRow}${colorRows}
       <div class="srow"><span class="k">Verglasung</span><span class="v">${S.glass==='3'?'3-fach':'2-fach'}</span></div>
