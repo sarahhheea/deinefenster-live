@@ -607,7 +607,7 @@ h1,h2,h3{font-family:var(--serif);font-weight:700;letter-spacing:-.022em;line-he
 <body>
 
 <div class="dfnav-util dfnav--flow"><div class="dfnav-wrap">
-  <a href="/gebrauchte-fenster-kaufen.html"><span style="color:oklch(0.8 0.15 85)">&#9733;</span> 4,2 &middot; 110 Google-Bewertungen &middot; Hofverkauf Fr 10&ndash;17 Uhr</a>
+  <a href="/gebrauchte-fenster-kaufen.html"><span style="color:oklch(0.8 0.15 85)">&#9733;</span> 4,7 &middot; 93 Google-Bewertungen &middot; Hofverkauf Fr 10&ndash;17 Uhr</a>
   <div class="dfnav-uright">
     <a href="/ueber-uns.html">&Uuml;ber uns</a>
     <a href="/ueber-drutex.html">&Uuml;ber Drutex</a>
@@ -1635,10 +1635,15 @@ function eur(n){ return (Math.round(n)).toLocaleString('de-DE',{style:'currency'
 function withConf(conf,fn){ const bak={...S}; Object.assign(S,conf); let out; try{ out=fn(); } finally{ Object.assign(S,bak); } return out; }
 function cartCount(){ return cart.length; }
 function updateCartBadge(){ document.querySelectorAll('.js-cartcount').forEach(el=>{ el.textContent=cartCount(); el.style.display=cartCount()?'':'none'; }); }
+// === Warenkorb-Persistenz (localStorage) — additiv, ändert die cart-Semantik nicht ===
+const CART_LS_KEY='df_cart_v1';
+function saveCart(){ try{ localStorage.setItem(CART_LS_KEY, JSON.stringify({v:1,t:Date.now(),items:cart.map(it=>({conf:it.conf,name:it.name||''}))})); }catch(e){}
+  try{ window.dispatchEvent(new CustomEvent('df-cart-changed',{detail:{count:cart.length}})); }catch(e){} }
+function loadCart(){ try{ const d=JSON.parse(localStorage.getItem(CART_LS_KEY)||'null'); if(d&&Array.isArray(d.items)&&d.items.length){ cart=d.items.filter(o=>o&&o.conf).map(o=>({conf:o.conf,name:o.name||''})); } }catch(e){} }
 // Menge eines Artikels ändern
 function itemQty(i,d){ const it=cart[i]; if(!it)return; it.conf.anzahl=Math.max(1,(it.conf.anzahl||1)+d); if(i===editIndex)S.anzahl=it.conf.anzahl; render(); }
 // Freien Namen setzen (Raum o.ä.)
-function itemName(i,v){ if(cart[i])cart[i].name=v; updateCartBadge(); }
+function itemName(i,v){ if(cart[i])cart[i].name=v; updateCartBadge(); saveCart(); }
 // Artikel entfernen
 function itemRemove(i){ cart.splice(i,1); if(editIndex===i)editIndex=-1; else if(editIndex>i)editIndex--; if(!cart.length){ backToPicker(); return; } render(); }
 // Artikel bearbeiten: Konfig zurück in S laden, passende STEPS, zu Schritt 0
@@ -2339,6 +2344,7 @@ function next(){ if(STEPS[cur]&&STEPS[cur].key==='masse'&&!massOk()){ updateMass
 function back(){ if(cur===0) backToPicker(); else go(cur-1); }
 function render(){
   if(editIndex>=0&&cart[editIndex]) cart[editIndex].conf={...S};   // aktive Konfig live in den Warenkorb spiegeln
+  saveCart();   // Warenkorb bei jeder Änderung persistieren (überlebt Reload/Seitenwechsel)
   const nav=document.querySelector('.steps'), foot=document.querySelector('.footer');
   if(!started){
     document.getElementById('pickerView').style.display='block';
@@ -2372,10 +2378,13 @@ function render(){
   document.getElementById('nextLbl').textContent=cur===STEPS.length-1?'Zur Anfrage':'Weiter';
   updateCartBadge();
 }
+loadCart();   // gespeicherten Warenkorb wiederherstellen (Persistenz)
 render();
+// Über das site-weite Warenkorb-Symbol (?cart=1) direkt in die Übersicht
+try{ if(/[?&]cart=1(?:&|$)/.test(location.search) && cart.length){ openCart(); } }catch(e){}
 </script>
 <!-- Dezente Legal-Zeile (kein blauer Banner) — Impressum/Datenschutz bleiben rechtlich erreichbar (§5 DDG) -->
 <div class="legalbar">© DeineFenster.de · <a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a> · <a href="agb.html">AGB</a> · <a href="agb.html#p7">Widerruf</a> · <a href="#" onclick="if(window.dfOpenCookieSettings)dfOpenCookieSettings();return false;">Cookie-Einstellungen</a></div>
-<script src="/js/dfnav.js" defer></script>
+<script src="/js/dfnav.js?v=cart1" defer></script>
 </body>
 </html>
