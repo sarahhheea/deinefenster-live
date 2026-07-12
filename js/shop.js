@@ -617,10 +617,7 @@ function bindeEventHandler() {
     }
   });
 
-  // Sticky Nav scroll-Effekt
-  window.addEventListener('scroll', () => {
-    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
-  });
+  // Sticky Nav scroll-Effekt entfernt — Navigation wird jetzt von dfnav.js gesteuert.
 }
 
 /* ─── Maß-Auto-Erkennung im Suchtext ─── */

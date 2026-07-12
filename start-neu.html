@@ -1,7 +1,6 @@
-<!doctype html>
-<html lang="de">
+<!DOCTYPE html>
+<html lang="de" class="light">
 <head>
-<meta name="robots" content="noindex,nofollow">
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
 <link rel="icon" type="image/png" sizes="32x32" href="img/logo/favicon-32.png?v=20260518"/>
@@ -31,7 +30,7 @@
 <meta name="twitter:title" content="Drutex Fenster &amp; Türen online konfigurieren"/>
 <meta name="twitter:description" content="Maßgefertigte Kunststofffenster &amp; Türen vom Drutex-Händler. Online konfigurieren — Angebot per E-Mail. Lieferung deutschlandweit."/>
 <meta name="twitter:image" content="https://deinefenster.de/img/og-default.jpg"/>
-<meta name="robots" content="index, follow, max-image-preview:large"/>
+<meta name="robots" content="noindex, nofollow"/>
 
 <!-- Structured Data: LocalBusiness + Product Catalog -->
 <script type="application/ld+json">
@@ -398,334 +397,1076 @@
 </script>
 
 <!-- Design-System 2026 (self-contained: eigene Tokens, kein Tailwind/global-design nötig) -->
-<link rel="stylesheet" href="/fonts/df-fonts.css">
-<link rel="stylesheet" href="/fonts/material-symbols.css">
-<style>
-:root{
-  --ink:oklch(0.26 0.055 256); --ink-soft:oklch(0.37 0.055 256);
-  --primary:oklch(0.52 0.13 255); --primary-d:oklch(0.45 0.13 256); --accent:oklch(0.72 0.12 250);
-  --card:oklch(0.995 0.004 240); --line:oklch(0.9 0.02 244); --panel:oklch(0.97 0.012 240);
-  --wrap:1320px; --ease:cubic-bezier(.16,1,.3,1);
-  --disp:'General Sans','Inter',sans-serif;
-  --sky:radial-gradient(130% 120% at 78% 4%, #eef6fc 0%, #d8e9f5 42%, #b6d1e5 100%);
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{font-family:'Inter',system-ui,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;background:#eef5fb}
-img{display:block;max-width:100%}
-a{color:inherit;text-decoration:none}
-.material-symbols-outlined{font-variation-settings:'wght' 400,'opsz' 24}
-.wrap{max-width:var(--wrap);margin:0 auto;padding:0 clamp(20px,4vw,52px)}
-.btn{display:inline-flex;align-items:center;gap:9px;font-weight:600;font-size:1rem;padding:15px 30px;border-radius:14px;transition:transform .4s var(--ease),background .2s,box-shadow .3s;cursor:pointer;border:1.5px solid transparent;font-family:var(--disp)}
-.btn-primary{background:var(--primary);color:#fff;box-shadow:0 16px 34px -12px oklch(0.52 0.13 255 / .55)}
-.btn-primary:hover{background:var(--primary-d);transform:translateY(-3px)}
-.btn-ghost{background:rgba(255,255,255,.65);color:var(--ink);border-color:rgba(255,255,255,.9);backdrop-filter:blur(6px)}
-.btn-ghost:hover{border-color:var(--primary);color:var(--primary)}
-.eyebrow{font-family:var(--disp);font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--primary);display:inline-flex;align-items:center;gap:10px}
-.eyebrow::before{content:"";width:26px;height:2px;background:var(--accent)}
-h2{font-family:var(--disp);font-size:clamp(1.9rem,1.3rem + 1.8vw,2.8rem);font-weight:600;letter-spacing:-.02em;line-height:1.05}
-
-/* NAV + Wisch-Mega-Menü */
-nav{position:fixed;top:0;left:0;right:0;z-index:50;transition:background .4s,box-shadow .4s}
-nav .row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;height:76px;transition:height .4s var(--ease)}
-body.scrolled nav{background:oklch(0.98 0.01 240 / .86);backdrop-filter:blur(14px);box-shadow:0 1px 0 var(--line)}
-body.scrolled nav .row{height:60px}
-.logo{font-family:var(--disp);font-weight:700;font-size:1.42rem;letter-spacing:-.03em;color:var(--ink);display:inline-flex;align-items:baseline}
-.logo span{color:var(--primary)}
-.navlinks{display:flex;gap:32px;justify-self:center}
-.navlinks>a,.navitem>a{font-size:.95rem;font-weight:500;color:var(--ink);opacity:.82;position:relative;padding:26px 0;transition:opacity .2s;display:inline-flex;align-items:center;gap:5px;cursor:pointer}
-.navlinks>a:hover,.navitem:hover>a{opacity:1}
-.navitem{position:relative}
-.navitem>a .material-symbols-outlined{font-size:18px;transition:transform .3s var(--ease)}
-.navitem:hover>a .material-symbols-outlined{transform:rotate(180deg)}
-.mega{position:absolute;top:100%;left:50%;transform:translateX(-50%) translateY(8px);width:660px;background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 34px 66px -26px oklch(0.4 0.08 255 / .45);padding:22px;opacity:0;visibility:hidden;transition:opacity .28s var(--ease),transform .28s var(--ease);display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.navitem:hover .mega{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0)}
-.mega a{display:flex;gap:12px;align-items:center;padding:11px 12px;border-radius:12px;transition:background .2s}
-.mega a:hover{background:var(--panel)}
-.mega .mi{width:42px;height:42px;border-radius:11px;background:var(--sky);display:grid;place-items:center;flex:none}
-.mega .mi .material-symbols-outlined{font-size:22px;color:var(--primary)}
-.mega b{font-family:var(--disp);font-weight:600;font-size:.92rem;color:var(--ink);display:block}
-.mega .ds{font-size:.78rem;color:var(--ink-soft)}
-.navright{display:flex;gap:16px;align-items:center;justify-self:end}
-.navphone{font-size:.9rem;font-weight:600;color:var(--ink-soft)}
-.navcta{background:var(--primary);color:#fff;font-weight:600;font-size:.86rem;padding:10px 20px;border-radius:12px;font-family:var(--disp)}
-.burger{display:none;flex-direction:column;gap:5px;background:none;border:0;cursor:pointer;padding:6px}
-.burger span{width:24px;height:2px;background:var(--ink);border-radius:2px;transition:.3s var(--ease)}
-#mnav{display:none}
-.mobmenu{display:none;position:fixed;top:60px;left:0;right:0;z-index:49;background:oklch(0.98 0.01 240 / .97);backdrop-filter:blur(16px);border-bottom:1px solid var(--line);padding:10px clamp(20px,5vw,40px) 20px}
-.mobmenu a{display:block;font-family:var(--disp);font-weight:600;font-size:1.08rem;padding:12px 0;border-bottom:1px solid var(--line)}
-#mnav:checked ~ .mobmenu{display:block}
-
-/* HERO — immersiv, ein Guss: Headline im Himmel, Produkte groß darunter */
-.hero{position:relative;overflow:hidden;background:var(--sky);padding-top:76px;min-height:100vh}
-.hero::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(60% 40% at 78% 8%, rgba(255,255,255,.5), transparent 70%)}
-.hero-head{position:relative;z-index:4;text-align:center;max-width:760px;margin:0 auto;padding:clamp(18px,3.5vh,40px) 20px 0}
-.hero-head h1{font-family:var(--disp);font-size:clamp(2rem,1.2rem + 2.5vw,3.05rem);font-weight:600;letter-spacing:-.02em;line-height:1.06;color:oklch(0.2 0.06 258);margin:14px 0 0}
-.hero-head h1 .soft{color:var(--primary)}
-.hero-head p{font-size:clamp(1.02rem,.98rem + .3vw,1.18rem);color:oklch(0.33 0.05 256);font-weight:500;max-width:46ch;margin:14px auto 22px;line-height:1.55}
-.chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:26px}
-.chip{display:inline-flex;align-items:center;gap:7px;font-size:.82rem;font-weight:600;color:var(--ink);background:var(--card);border:1px solid var(--line);padding:8px 13px;border-radius:10px}
-.chip .d{width:6px;height:6px;border-radius:50%;background:var(--accent)}
-.hero-cta{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
-.hero-trust{display:flex;align-items:center;gap:9px;justify-content:center;margin-top:22px;font-size:.92rem;font-weight:700;color:oklch(0.3 0.05 256);flex-wrap:wrap}
-.stars{color:oklch(0.75 0.13 75);letter-spacing:2px}
-.hero-media{position:absolute;inset:76px 0 0 0;z-index:1;overflow:hidden}
-.hero-media img{position:absolute;bottom:-2%;left:50%;transform:translateX(-50%);width:min(940px,88%);max-width:none;height:auto;
-  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 9%,#000 91%,transparent 100%);
-  mask-image:linear-gradient(90deg,transparent 0,#000 9%,#000 91%,transparent 100%)}
-
-.reveal{opacity:0;transform:translateY(20px);transition:opacity .8s var(--ease),transform .8s var(--ease)}
-.reveal.in{opacity:1;transform:none}
-.hero-media{opacity:0;transform:scale(1.015)}.hero-media.in{opacity:1;transform:none;transition:opacity 1.1s var(--ease),transform 1.4s var(--ease)}
-@media(prefers-reduced-motion:reduce){.reveal,.hero-media{opacity:1!important;transform:none!important;transition:none}}
-
-/* TRUST-STRIP */
-.trust{background:var(--card);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.trust .row{display:flex;justify-content:space-between;gap:22px;flex-wrap:wrap;padding:18px 0}
-.trust .item{display:flex;align-items:center;gap:9px;font-size:.92rem;font-weight:600}
-.trust .item .material-symbols-outlined{font-size:20px;color:var(--primary)}
-
-section.block{padding:clamp(56px,7vw,96px) 0}
-.sec-head{max-width:640px;margin:0 auto clamp(30px,4vw,48px);text-align:center}
-.sec-head p{color:var(--ink-soft);margin-top:12px}
-.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
-.tile{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;transition:transform .3s var(--ease),box-shadow .3s}
-.tile:hover{transform:translateY(-6px);box-shadow:0 26px 50px -22px oklch(0.4 0.08 255 / .35)}
-.tile-img{aspect-ratio:5/4;background:var(--sky);display:grid;place-items:center;padding:22px}
-.tile-img img{max-height:100%;width:auto;filter:drop-shadow(0 20px 20px oklch(0.4 0.08 255 / .22))}
-.tile-img.render{padding:0;background:oklch(0.99 0.005 240)}
-.tile-img.render img{width:100%;height:100%;max-height:none;object-fit:cover;filter:none}
-.tile-b{padding:20px 22px 24px;display:flex;flex-direction:column;gap:6px;flex:1}
-.tile-b h3{font-family:var(--disp);font-size:1.15rem;font-weight:600}
-.tile-b p{font-size:.9rem;color:var(--ink-soft);flex:1}
-.tile-cta{margin-top:10px;display:inline-flex;align-items:center;gap:7px;font-family:var(--disp);font-weight:600;font-size:.9rem;color:#fff;background:var(--primary);padding:11px 18px;border-radius:12px;align-self:flex-start;transition:background .2s}
-.tile:hover .tile-cta{background:var(--primary-d)}
-.tile-cta .material-symbols-outlined{font-size:18px;transition:transform .3s var(--ease)}
-.tile:hover .tile-cta .material-symbols-outlined{transform:translateX(4px)}
-
-.konf{background:linear-gradient(160deg,#e6f1fb,#d3e6f5)}
-.konf .grid{display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center}
-.steps{display:flex;gap:12px;margin:22px 0 26px;flex-wrap:wrap}
-.step{display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;min-width:66px}
-.step .c{width:46px;height:46px;border-radius:50%;background:var(--card);border:1.5px solid var(--line);display:grid;place-items:center;font-family:var(--disp);font-weight:600;color:var(--primary)}
-.step span{font-size:.8rem;color:var(--ink-soft);font-weight:600}
-.konf-vis{background:var(--card);border:1px solid var(--line);border-radius:18px;min-height:280px;display:grid;place-items:center;box-shadow:0 24px 50px -26px oklch(0.4 0.08 255 / .4)}
-.konf-vis img{width:66%}
-
-.fam .grid{display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center}
-.fam-img{border-radius:18px;overflow:hidden;aspect-ratio:4/3}
-.fam-img img{width:100%;height:100%;object-fit:cover}
-.fam p{color:var(--ink-soft);margin:14px 0}
-.badges{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
-.badge{display:inline-flex;align-items:center;gap:7px;font-size:.82rem;font-weight:600;background:var(--panel);border:1px solid var(--line);padding:8px 13px;border-radius:10px}
-
-footer{background:oklch(0.24 0.05 258);color:oklch(0.85 0.02 250);padding:56px 0 28px}
-footer .cols{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:30px}
-footer .flogo{height:34px;margin-bottom:14px;filter:brightness(0) invert(1);opacity:.92}
-footer h4{color:#fff;font-family:var(--disp);font-size:.95rem;margin-bottom:12px;font-weight:600}
-footer a{display:block;font-size:.88rem;padding:4px 0;color:oklch(0.82 0.02 250)}
-footer a:hover{color:#fff}
-footer .fb{border-top:1px solid oklch(0.4 0.03 258);margin-top:34px;padding-top:18px;font-size:.8rem;color:oklch(0.7 0.02 250)}
-
+<link rel="preconnect" href="https://fonts.bunny.net"/>
+<link href="https://fonts.bunny.net/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@1,9..144,400;1,9..144,500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="css/df-2026.css?v=2026061601"/>
+<link href="fonts/material-symbols.css" rel="stylesheet"/>
+<link rel="stylesheet" href="/fonts/df-fonts.css"/>
+<style id="nhero-css">
+.nhero{--nprimary:oklch(0.52 0.13 255);--nprimary-d:oklch(0.45 0.13 256);--nink:oklch(0.26 0.055 256);--nink-soft:oklch(0.37 0.055 256);--naccent:oklch(0.72 0.12 250);--nline:oklch(0.9 0.02 244);--ndisp:'Switzer','Inter',sans-serif;--nease:cubic-bezier(.16,1,.3,1);
+  position:relative;overflow:hidden;display:flex;align-items:center;min-height:clamp(588px,calc(78vh + 48px),768px);padding:calc(var(--nav-h,106px) + var(--banner-h,0px) + 12px) 0 clamp(36px,5vh,64px);
+  background:
+    radial-gradient(80% 90% at 82% 12%, rgba(150,196,224,0.55), rgba(150,196,224,0) 60%),
+    radial-gradient(55% 26% at 64% 99%, rgba(60,100,140,0.12), rgba(60,100,140,0) 70%),
+    linear-gradient(90deg, #e6f1f8 0%, #d5e8f4 32%, #bfdcef 47%, #aed3e9 57%, #acd1e8 100%)}
+.nhero-media{position:absolute;top:48px;right:0;bottom:0;width:min(52vw,900px);z-index:1;overflow:hidden}
+.nhero-stage{position:absolute;inset:0;z-index:1;cursor:pointer;transition:transform .55s var(--nease)}
+.nhero-stage:focus-visible{outline:2px solid var(--nprimary);outline-offset:-4px;border-radius:14px}
+@media(hover:hover){.nhero-media:hover .nhero-stage{transform:scale(1.035)}}
+.nhero-layer{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center center;opacity:0;transform:scale(1.02);transition:opacity .5s cubic-bezier(.4,0,.2,1),transform .6s cubic-bezier(.4,0,.2,1);-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 26%,#000 100%),linear-gradient(180deg,transparent 0,#000 8%,#000 92%,transparent 100%);-webkit-mask-composite:source-in;mask-image:linear-gradient(90deg,transparent 0,#000 26%,#000 100%),linear-gradient(180deg,transparent 0,#000 8%,#000 92%,transparent 100%);mask-composite:intersect}
+.nhero-layer.is-active{opacity:1;transform:none}
+.nhero-nav{position:absolute;top:44%;transform:translateY(-50%);z-index:4;width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,.75);background:rgba(255,255,255,.6);backdrop-filter:blur(9px) saturate(1.1);-webkit-backdrop-filter:blur(9px) saturate(1.1);color:var(--nprimary-d);display:grid;place-items:center;cursor:pointer;box-shadow:0 10px 24px -10px rgba(28,58,108,.5);opacity:.92;transition:background .2s,transform .2s,box-shadow .2s,opacity .2s}
+.nhero-nav:hover{background:#fff;transform:translateY(-50%) scale(1.07)}
+.nhero-nav:focus-visible{outline:2px solid var(--nprimary);outline-offset:2px;opacity:1}
+.nhero-nav .material-symbols-outlined{font-size:26px}
+.nhero-nav-prev{left:10px}.nhero-nav-next{right:10px}
+.nhero-dots{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(7% + 78px);z-index:3;display:flex;gap:8px;align-items:center}
+.nhero-dot{width:8px;height:8px;padding:0;border:none;border-radius:99px;background:oklch(0.62 0.03 256/.45);cursor:pointer;transition:width .3s var(--nease),background .3s var(--nease)}
+.nhero-dot:hover{background:oklch(0.55 0.06 256/.85)}
+.nhero-dot.is-active{width:22px;background:var(--nprimary)}
+.nhero-dot:focus-visible{outline:2px solid var(--nprimary);outline-offset:3px}
+.nhero-card{position:absolute;left:50%;bottom:7%;transform:translateX(-50%);display:flex;align-items:center;gap:13px;padding:12px 16px;border-radius:16px;background:rgba(255,255,255,.82);backdrop-filter:blur(16px) saturate(1.2);-webkit-backdrop-filter:blur(16px) saturate(1.2);border:1px solid rgba(255,255,255,.85);box-shadow:0 22px 46px -16px rgba(28,58,108,.42);z-index:3;max-width:88%;min-width:min(300px,86%);transition:transform .4s var(--nease),box-shadow .3s;text-decoration:none}
+.nhero-card:hover{transform:translateX(-50%) translateY(-3px)}
+.nhero-card-tx{display:flex;flex-direction:column;line-height:1.18;transition:opacity .18s var(--nease),transform .18s var(--nease)}
+.nhero-card.swapping .nhero-card-tx{opacity:0;transform:translateY(3px)}
+.nhero-card-tx b{font-family:var(--ndisp);font-size:1.12rem;font-weight:600;color:var(--nink);letter-spacing:-.015em}
+.nhero-card-tx>span{font-size:.75rem;font-weight:500;letter-spacing:.005em;color:oklch(0.47 0.04 256);margin-top:2px;white-space:nowrap}
+.nhero-card-go{width:34px;height:34px;border-radius:50%;background:var(--nprimary);color:#fff;display:grid;place-items:center;font-size:20px;flex:none;margin-left:auto;transition:transform .25s var(--nease)}
+.nhero-card:hover .nhero-card-go{transform:translateX(3px)}
+.nhero-inner{position:relative;z-index:2;width:100%;max-width:1240px;margin:0 auto;padding:0 clamp(20px,4vw,48px)}
+.nhero-head{max-width:600px}
+.nhero-eyebrow{font-size:.75rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--nprimary-d);display:inline-flex;align-items:center;gap:10px;margin-bottom:18px}
+.nhero-eyebrow::before{content:"";width:26px;height:2px;background:var(--naccent)}
+.nhero h1{font-family:var(--ndisp);font-size:clamp(2.3rem,1.6rem + 2vw,3.2rem);font-weight:700;letter-spacing:-.03em;line-height:1.08;color:var(--nink);margin:0;text-wrap:balance}
+.nhero-soft{display:block;color:var(--nprimary-d);font-size:.6em;line-height:1.12;letter-spacing:-.02em;margin-top:.16em}
+.nhero-head p{font-size:clamp(1rem,.97rem + .3vw,1.18rem);color:var(--nink-soft);margin:20px 0 0;max-width:42ch;line-height:1.55}
+.nhero-cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
+.nhero-btn{font-family:var(--ndisp);font-weight:600;font-size:.98rem;padding:14px 26px;border-radius:13px;text-decoration:none;transition:transform .2s,background .2s,box-shadow .2s;display:inline-flex;align-items:center}
+.nhero-btn-primary{background:var(--nprimary);color:#fff;box-shadow:0 16px 34px -14px oklch(0.52 0.13 255/.7)}
+.nhero-btn-primary:hover{background:var(--nprimary-d);transform:translateY(-2px)}
+.nhero-btn-ghost{background:#fff;color:var(--nink);border:1px solid var(--nline)}
+.nhero-btn-ghost:hover{transform:translateY(-2px)}
+.nhero-trust{margin-top:26px;font-size:.88rem;color:var(--nink-soft);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.nhero-stars{color:oklch(0.75 0.13 75);letter-spacing:1px}
+/* Live-Nav über hellem Hero lesbar machen (df-2026-Nav war für dunklen Video-Hero gedacht) */
+.util{background:var(--surface-2);border-bottom:1px solid var(--border)}
+.util a{color:var(--soft)}
+.util .wa{color:var(--acc-text)}
+nav.main{background:rgba(255,255,255,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--border);box-shadow:0 4px 22px rgba(0,0,0,.06)}
+.logo{color:var(--text);text-shadow:none}
+.logo span{color:var(--acc-text)}
+.nav-link{color:var(--text);text-shadow:none}
+.nav-link:hover{color:var(--acc-text)}
+@media(prefers-reduced-motion:reduce){.nhero-layer,.nhero-card-tx,.nhero-stage{transition:none!important}.nhero-media:hover .nhero-stage{transform:none}}
 @media(max-width:960px){
-  .navlinks,.navphone{display:none}
-  .burger{display:flex}
-  .hero{padding-top:60px;min-height:0;display:flex;flex-direction:column}
-  .hero-head{order:1}
-  .hero-media{order:2;position:relative;inset:auto;height:46vh;margin-top:8px;overflow:hidden}
-  .hero-media img{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:120%;max-width:none;height:auto;-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 8%);mask-image:linear-gradient(180deg,transparent 0,#000 8%)}
-  .hero-media.in{transform:none}
-  .tiles{grid-template-columns:1fr 1fr}
-  .konf .grid,.fam .grid{grid-template-columns:1fr;gap:26px}
-  footer .cols{grid-template-columns:1fr 1fr}
+  .nhero{flex-direction:column;min-height:0;padding-top:calc(var(--nav-h,106px) + var(--banner-h,0px) + 8px);text-align:center}
+  .nhero-media{position:relative;width:100%;height:auto;aspect-ratio:4/3;order:2;margin-top:16px}
+  .nhero-layer{object-fit:contain;-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 5%,#000 95%,transparent 100%);mask-image:linear-gradient(180deg,transparent 0,#000 5%,#000 95%,transparent 100%)}
+  .nhero-inner{order:1}
+  .nhero-head{max-width:100%;margin:0 auto}
+  .nhero-cta,.nhero-trust,.nhero-eyebrow{justify-content:center}
+  .nhero-head p{margin-left:auto;margin-right:auto}
+  .nhero-nav-prev{left:6px}.nhero-nav-next{right:6px}
+  .nhero-dots{bottom:76px}
+  .nhero-card{left:12px;right:12px;transform:none;bottom:-6px;max-width:none;min-width:0}
 }
-@media(max-width:560px){.tiles{grid-template-columns:1fr}}
+</style>
 
-.reviews{background:var(--panel)}
-.rgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:6px}
-.rcard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;display:flex;flex-direction:column}
-.rcard .rs{color:oklch(0.75 0.13 75);letter-spacing:2px;font-size:.95rem}
-.rcard p{margin:10px 0 14px;color:var(--ink);font-size:.94rem;line-height:1.55;flex:1}
-.rcard .who b{font-family:var(--disp);font-weight:600;font-size:.9rem}
-.rcard .who small{display:block;color:var(--ink-soft);font-size:.78rem;margin-top:2px}
-.reg-pills{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;margin-top:4px}
-.reg-pills a{font-size:.88rem;font-weight:600;color:var(--ink);background:var(--card);border:1px solid var(--line);padding:8px 15px;border-radius:999px;transition:.2s}
-.reg-pills a:hover{border-color:var(--primary);color:var(--primary)}
-.faqwrap{max-width:820px;margin:0 auto}
-.faqwrap details{border-bottom:1px solid var(--line)}
-.faqwrap summary{cursor:pointer;list-style:none;padding:18px 2px;font-family:var(--disp);font-weight:600;font-size:1.06rem;display:flex;justify-content:space-between;align-items:center;gap:16px;color:var(--ink)}
-.faqwrap summary::-webkit-details-marker{display:none}
-.faqwrap summary::after{content:"+";color:var(--primary);font-size:1.5rem;font-weight:400;line-height:1}
-.faqwrap details[open] summary::after{content:"\2212"}
-.faqwrap .fa{padding:0 2px 20px;color:var(--ink-soft);line-height:1.65;max-width:72ch}
-@media(max-width:900px){.rgrid{grid-template-columns:1fr 1fr}}
-@media(max-width:560px){.rgrid{grid-template-columns:1fr}}
-.stickycta{position:fixed;bottom:20px;right:20px;z-index:60;background:var(--primary);color:#fff;font-family:var(--disp);font-weight:600;font-size:.95rem;padding:14px 24px;border-radius:14px;box-shadow:0 18px 38px -12px oklch(0.52 0.13 255/.6);display:inline-flex;align-items:center;gap:8px;opacity:0;transform:translateY(22px);transition:opacity .4s var(--ease),transform .4s var(--ease);pointer-events:none}
-body.scrolled .stickycta{opacity:1;transform:none;pointer-events:auto}
-.stickycta .material-symbols-outlined{font-size:18px}
-@media(max-width:600px){.stickycta{left:14px;right:14px;bottom:14px;justify-content:center}}
+<style>
+/* ── Betriebsurlaub-Banner (dezent, ruhiger Markenton statt knallrot) ── */
+#urlaub-banner{position:fixed;top:0;left:0;right:0;z-index:99999;background:linear-gradient(90deg,#112455 0%,#0d1b33 100%);color:#fff;font-family:var(--font-body);font-size:13px;line-height:1.4;text-align:center;padding:10px 18px;font-weight:600;letter-spacing:.01em;border-bottom:1px solid rgba(255,255,255,.16);box-shadow:0 2px 16px rgba(8,21,46,.35)}
+#urlaub-banner strong{font-weight:800;color:#fff}
+#urlaub-banner-close{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:transparent;border:0;color:#eaf1ff;font-size:21px;line-height:1;cursor:pointer;padding:2px 8px;opacity:.85}
+#urlaub-banner-close:hover{opacity:1}
+/* Banner schiebt Util-Bar + Nav nach unten via --banner-h */
+body[style*="padding-top"] .util{top:var(--banner-h,0)}
+body[style*="padding-top"] nav.main{top:calc(var(--banner-h,0) + 38px)}
+
+/* ── Mega-Menü (helles df-2026-Panel unter „Produkte") ── */
+.nav-item{display:flex;align-items:center}
+.nav-links{margin:0 auto}  /* Menü mittig (Logo links, CTA rechts) */
+.nav-chev{font-size:18px;transition:transform .25s;vertical-align:middle}
+.nav-item:hover .nav-chev,.nav-item:focus-within .nav-chev,.nav-item.open .nav-chev{transform:rotate(180deg)}
+/* Vollbreiten-Flyout — Balken über die ganze Breite, bündig an der Nav-Unterkante (absolut zu nav.main) */
+.mega{position:absolute;left:0;right:0;top:100%;width:auto;background:var(--bg);border:none;border-top:1px solid var(--border);border-bottom:1px solid var(--border);border-radius:0;box-shadow:0 26px 50px -24px rgba(8,21,46,.3);opacity:0;visibility:hidden;pointer-events:none;transform:translateY(8px);transition:opacity .2s var(--ease),transform .22s var(--ease);z-index:70}
+.mega::before{content:"";position:absolute;top:-10px;left:0;right:0;height:10px}
+.nav-item:hover .mega,.nav-item:focus-within .mega,.nav-item.open .mega{opacity:1;visibility:visible;pointer-events:auto;transform:translateY(0)}
+.mega-grid{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr 1.15fr;gap:var(--s5) var(--s7);padding:var(--s6) clamp(20px,4vw,48px)}
+.mega-feat .mega-card{display:block;border:1px solid var(--border);border-radius:14px;overflow:hidden;text-decoration:none;background:var(--surface);height:100%;transition:transform .2s,box-shadow .2s,border-color .2s}
+.mega-feat .mega-card:hover{transform:translateY(-3px);box-shadow:0 18px 40px -22px rgba(28,58,108,.4);border-color:var(--acc)}
+.mega-feat .mega-card img{width:100%;height:120px;object-fit:cover;display:block}
+.mega-feat .mega-cb{padding:13px 16px}
+.mega-feat .mega-cb b{font-family:var(--font-display);font-size:.95rem;color:var(--text);display:block}
+.mega-feat .mega-cb small{display:block;color:var(--soft);font-size:.82rem;margin:3px 0 8px;line-height:1.4}
+.mega-feat .mega-cb .cta{color:var(--acc-text);font-weight:700;font-size:.85rem}
+.mega-col h4{font-family:var(--font-display);font-size:.72rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--acc-text);margin-bottom:var(--s3)}
+.mega-link{display:flex;gap:12px;align-items:flex-start;padding:9px 11px;border-radius:10px;transition:background .18s}
+.mega-link:hover{background:var(--surface)}
+.mega-ic{flex-shrink:0;width:34px;height:34px;border-radius:9px;background:rgba(118,169,250,.14);display:flex;align-items:center;justify-content:center}
+.mega-ic .material-symbols-outlined{font-size:19px;color:var(--acc-text)}
+.mega-ic.prod{width:52px;height:52px;background:#fff;border:1px solid var(--border);padding:5px;border-radius:11px}
+.mega-ic.prod img{width:100%;height:100%;object-fit:contain;display:block}
+.mega-link:hover .mega-ic.prod{border-color:var(--acc)}
+.mega-link b{display:block;font-family:var(--font-display);font-weight:700;font-size:.92rem;color:var(--text);letter-spacing:-.01em}
+.mega-link small{display:block;font-size:.78rem;color:var(--soft);margin-top:1px;line-height:1.35}
+.mega-foot{grid-column:1 / -1;border-top:1px solid var(--border);padding-top:var(--s4);margin-top:var(--s2);display:flex;justify-content:space-between;align-items:center;gap:var(--s4);flex-wrap:wrap}
+.mega-foot a.all{font-weight:700;color:var(--acc-text);font-size:.88rem}
+.mega-foot a.all:hover{text-decoration:underline}
+/* Produkt-Karten-Reihe (große Renders + Label darunter, wie Profi-Menü) */
+.mega-inner{max-width:1180px;margin:0 auto;padding:var(--s6) clamp(20px,4vw,48px)}
+.mega-prods{display:grid;grid-template-columns:repeat(6,1fr);gap:var(--s3)}
+.mega-prod{display:flex;flex-direction:column;align-items:center;text-align:center;text-decoration:none;padding:14px 8px 16px;border-radius:14px;border:1px solid transparent;transition:border-color .18s,background .18s,transform .18s,box-shadow .18s}
+.mega-prod:hover{background:oklch(0.965 0.015 240);transform:translateY(-3px)}
+.mega-prod:hover b{color:var(--acc-text)}
+.mega-prod-img{width:100%;height:132px;display:flex;align-items:flex-end;justify-content:center;margin-bottom:12px}
+.mega-prod-img img{max-width:100%;max-height:100%;object-fit:contain}
+.mega-prod b{font-family:var(--font-display);font-size:.94rem;color:var(--text);letter-spacing:-.01em}
+.mega-prod small{font-size:.76rem;color:var(--soft);margin-top:3px;line-height:1.3}
+.mega-foot2{border-top:1px solid var(--border);margin-top:var(--s5);padding-top:var(--s4);display:flex;justify-content:space-between;align-items:center;gap:var(--s4);flex-wrap:wrap}
+.mega-foot2 a.all{font-weight:700;color:var(--acc-text);font-size:.88rem}
+.mega-foot2 a.all:hover{text-decoration:underline}
+.mega-mixed{display:grid;grid-template-columns:1.5fr 1fr 1.1fr;gap:var(--s6);align-items:stretch}
+.mega-prods-2{grid-template-columns:1fr 1fr;gap:var(--s3)}
+.mega-services{display:flex;flex-direction:column;gap:4px;padding-top:6px;border-left:1px solid var(--border);padding-left:var(--s5)}
+.mega-srv{display:flex;gap:12px;align-items:flex-start;padding:11px;border-radius:10px;text-decoration:none;transition:background .18s}
+.mega-srv:hover{background:oklch(0.965 0.015 240)}
+.mega-srv>.material-symbols-outlined{width:38px;height:38px;border-radius:10px;background:oklch(0.9 0.05 244);display:grid;place-items:center;font-size:20px;color:var(--acc-text);flex:none}
+.mega-srv b{font-family:var(--font-display);font-size:.94rem;color:var(--text);display:block;letter-spacing:-.01em}
+.mega-srv small{font-size:.78rem;color:var(--soft);display:block;margin-top:2px;line-height:1.35}
+.mega-card{display:block;border:1px solid var(--border);border-radius:14px;overflow:hidden;text-decoration:none;background:oklch(0.965 0.015 240);transition:transform .2s,box-shadow .2s,border-color .2s}
+.mega-card:hover{transform:translateY(-3px);box-shadow:0 18px 40px -22px rgba(28,58,108,.4);border-color:var(--acc)}
+.mega-card img{width:100%;height:120px;object-fit:cover;display:block}
+.mega-cb{padding:13px 16px}
+.mega-cb b{font-family:var(--font-display);font-size:.95rem;color:var(--text);display:block}
+.mega-cb small{display:block;color:var(--soft);font-size:.82rem;margin:3px 0 8px;line-height:1.4}
+.mega-cb .cta{color:var(--acc-text);font-weight:700;font-size:.85rem}
+@media(max-width:900px){.mega-prods{grid-template-columns:repeat(3,1fr)}.mega-mixed{grid-template-columns:1fr}.mega-services{border-left:0;padding-left:0}}
+
+/* ── Mobile-Menü (Off-Canvas) ── */
+.burger{display:none;background:transparent;border:0;cursor:pointer;color:#fff;padding:4px;margin-left:auto;line-height:0}
+body.scrolled .burger{color:var(--text)}
+.burger .material-symbols-outlined{font-size:30px}
+.mnav{position:fixed;inset:0;z-index:120;background:rgba(8,14,30,.5);opacity:0;visibility:hidden;transition:opacity .25s}
+.mnav.open{opacity:1;visibility:visible}
+.mnav-panel{position:absolute;top:0;right:0;height:100%;width:min(340px,86vw);background:var(--bg);box-shadow:-12px 0 40px rgba(8,21,46,.25);transform:translateX(100%);transition:transform .3s var(--ease);overflow-y:auto;padding:var(--s6) var(--s5)}
+.mnav.open .mnav-panel{transform:none}
+.mnav-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--s5)}
+.mnav-head .logo{color:var(--text)}
+.mnav-head .logo span{color:var(--acc-text)}
+.mnav-close{background:transparent;border:0;cursor:pointer;color:var(--text);padding:4px;line-height:0}
+.mnav-close .material-symbols-outlined{font-size:28px}
+.mnav a.ml{display:block;font-family:var(--font-display);font-weight:700;font-size:1.05rem;color:var(--text);padding:13px 0;border-bottom:1px solid var(--border)}
+.mnav details>summary{display:flex;justify-content:space-between;align-items:center;font-family:var(--font-display);font-weight:700;font-size:1.05rem;color:var(--text);padding:13px 0;border-bottom:1px solid var(--border);cursor:pointer;list-style:none}
+.mnav details>summary::-webkit-details-marker{display:none}
+.mnav details[open]>summary .material-symbols-outlined{transform:rotate(180deg)}
+.mnav details>summary .material-symbols-outlined{transition:transform .2s}
+.mnav details .sub{padding:6px 0 10px 12px}
+.mnav details .sub a{display:block;color:var(--soft);font-size:.95rem;padding:7px 0;font-weight:600}
+.mnav details .sub a:hover{color:var(--acc-text)}
+.mnav .ml-cta{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:var(--s5);background:linear-gradient(135deg,#2a6cc4,#1c4f90);color:#fff;font-weight:700;padding:14px;border-radius:var(--pill);border-bottom:0}
+
+@media(max-width:860px){
+  .nav-links{display:none}
+  .nav-cta{display:none}
+  .burger{display:inline-flex}
+}
+@media(min-width:861px){.mnav{display:none}}
+
+/* Band-Bild (optionaler Foto-Streifen unter Stats) */
+.band{margin-top:var(--s7);border-radius:var(--r);overflow:hidden;border:1px solid var(--border);box-shadow:var(--shadow)}
+.band img{width:100%;height:clamp(180px,28vw,360px);object-fit:cover}
+
+/* 4-spaltiger Ablauf (nutzt df-2026-Tokens, gleiche Breakpoints wie .steps) */
+.steps.steps-4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:980px){.steps.steps-4{grid-template-columns:1fr 1fr}}
+@media(max-width:860px){.steps.steps-4{grid-template-columns:1fr}}
+
+/* Kundenbewertungen (helle Karten, gleiche Sprache wie .card) */
+.revgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--s5)}
+.rev{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:var(--s6);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:var(--s4);transition:border-color .25s,transform .25s}
+.rev:hover{border-color:var(--acc);transform:translateY(-3px)}
+.rev .stars{color:#e8a93c;letter-spacing:2px;font-size:1rem}
+.rev p{color:var(--text);font-size:1rem;line-height:1.6;flex:1}
+.rev .who{display:flex;align-items:center;gap:12px;border-top:1px solid var(--border);padding-top:var(--s4)}
+.rev .av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#2a6cc4,#1c4f90);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:.95rem;flex-shrink:0}
+.rev .who b{font-family:var(--font-display);font-size:.92rem;color:var(--text)}
+.rev .who small{display:block;color:var(--soft);font-size:.8rem;font-weight:500}
+@media(max-width:860px){.revgrid{grid-template-columns:1fr}}
+
+/* Lieferregionen — ruhige Tag-Liste */
+.regions{display:flex;flex-wrap:wrap;gap:10px;margin-top:var(--s5)}
+.regions a{display:inline-flex;align-items:center;font-family:var(--font-display);font-weight:600;font-size:.92rem;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:var(--pill);padding:8px 16px;transition:border-color .2s,color .2s,background .2s}
+.regions a:hover{border-color:var(--acc);color:var(--acc-text);background:#fff}
+.regions a.lead-city{background:rgba(118,169,250,.12);border-color:rgba(118,169,250,.45);color:var(--acc-text)}
+.region-note{margin-top:var(--s5);font-size:.85rem;color:var(--soft)}
+
+/* CTA-Block (dunkel, gleiche Sprache wie .konf) */
+.ctablock{--mx:80%;--my:8%;background:linear-gradient(125deg,#0d1b33,#0a1530);border-radius:var(--r);padding:clamp(32px,5vw,72px);position:relative;overflow:hidden;box-shadow:inset 0 0 90px rgba(118,169,250,.1),0 30px 60px -30px rgba(8,21,46,.55)}
+.ctablock::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(460px circle at var(--mx) var(--my), rgba(118,169,250,.30), transparent 62%)}
+.ctablock>div{position:relative;z-index:1;max-width:640px}
+.ctablock .eyebrow{color:#bcd6ff}
+.ctablock .eyebrow::before{background:var(--acc)}
+.ctablock h2{color:#fff;margin:var(--s4) 0 var(--s4)}
+.ctablock p{color:rgba(255,255,255,.82);margin-bottom:var(--s6)}
+.ctablock .ctabtns{display:flex;flex-wrap:wrap;gap:var(--s4)}
+.ctablock .ghost-d{display:inline-flex;align-items:center;gap:8px;font-weight:700;color:#bcd6ff;border:1px solid rgba(118,169,250,.55);border-radius:var(--pill);padding:14px 26px;transition:background .2s,transform .2s}
+.ctablock .ghost-d:hover{background:rgba(118,169,250,.12);transform:translateY(-2px)}
+
+/* Drutex-Programm-Uebersicht (dunkler Block, alle 17 Systeme) */
+.dsys{margin-top:var(--s8);border-top:1px solid rgba(190,214,255,.16);padding-top:var(--s7)}
+.dsys-h{color:#fff;font-family:var(--font-display);font-weight:800;font-size:1.3rem;margin-bottom:var(--s5)}
+.dsys-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--s6) var(--s7)}
+.dsys-col h4{color:#bcd6ff;font-family:var(--font-display);font-weight:700;font-size:.82rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:var(--s3)}
+.dsys-col ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px}
+.dsys-col li{color:#a9bbdc;font-size:.92rem;line-height:1.5}
+.dsys-col li b{color:#e8eeff;font-weight:700}
+.dsys-tag{display:inline-block;margin-left:6px;font-size:.64rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#0a1530;background:#76a9fa;border-radius:5px;padding:2px 7px;vertical-align:middle}
+.dsys-note{margin-top:var(--s6);color:rgba(255,255,255,.72);font-size:.92rem}
+.dsys-note a{color:#bcd6ff;text-decoration:underline}
+@media(max-width:760px){.dsys-grid{grid-template-columns:1fr}}
+
+/* Galerie 2x2 gleich groß (Seiten-lokal, ueberschreibt globales 1.6fr/1fr+gbig) */
+.gallery.g4{grid-template-columns:1fr 1fr}
+@media(max-width:600px){.gallery.g4{grid-template-columns:1fr}}
+
+/* Beschriftung auf dem Band-Bild (wie Galerie-Captions) */
+.band{position:relative}
+.band::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(to top,rgba(8,14,30,.74) 0%,rgba(8,14,30,.1) 50%,transparent 70%)}
+.band-cap{position:absolute;left:var(--s5);bottom:var(--s4);z-index:2;color:#fff;font-family:var(--font-display);font-weight:700;font-size:1.05rem;text-shadow:0 2px 14px rgba(0,0,0,.6)}
+</style>
+<style>
+.hero-kacheln{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:30px;max-width:1100px}
+@media(prefers-reduced-motion:no-preference){.hk{opacity:0;animation:hkIn .7s cubic-bezier(.16,1,.3,1) forwards}.hk:nth-child(1){animation-delay:.12s}.hk:nth-child(2){animation-delay:.24s}.hk:nth-child(3){animation-delay:.36s}}
+@keyframes hkIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.hk{position:relative;display:flex;flex-direction:column;gap:8px;padding:20px 22px;border-radius:20px;
+  background:rgba(10,20,40,.30);backdrop-filter:blur(20px) saturate(1.3);-webkit-backdrop-filter:blur(20px) saturate(1.3);
+  border:1px solid rgba(255,255,255,.18);box-shadow:0 10px 34px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.16);
+  text-align:left;transition:transform .25s,border-color .25s,box-shadow .25s}
+.hk:hover{transform:translateY(-5px);border-color:rgba(118,169,250,.6);box-shadow:0 18px 50px rgba(0,0,0,.4),0 0 0 1px rgba(118,169,250,.4),0 0 28px -6px rgba(118,169,250,.45),inset 0 1px 0 rgba(255,255,255,.22)}
+.hk-ic{font-size:30px;color:#cfe0ff;margin-bottom:2px}
+.hk-t{display:flex;align-items:center;justify-content:space-between;gap:12px;font-weight:800;font-size:1.16rem;color:#fff;line-height:1.2;letter-spacing:-.01em;text-shadow:0 1px 3px rgba(0,0,0,.35)}.hk-arrow{font-weight:400;font-size:1.5rem;color:#cfe0ff;flex-shrink:0;line-height:1;transition:transform .2s}.hk:hover .hk-arrow{transform:translateX(4px)}
+.hk-d{font-size:.9rem;color:rgba(255,255,255,.88);line-height:1.5;text-shadow:0 1px 3px rgba(0,0,0,.4)}
+.hk-cta{margin-top:8px;font-weight:700;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.35)}
+@media(max-width:960px){.hero-kacheln{grid-template-columns:1fr 1fr}}@media(max-width:600px){.hero-kacheln{grid-template-columns:1fr;gap:7px;margin-top:18px}.hk{padding:12px 15px;background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;border-color:rgba(255,255,255,.28)}.hk-t{font-size:1.05rem;text-shadow:0 1px 4px rgba(0,0,0,.55)}.hk-arrow{text-shadow:0 1px 4px rgba(0,0,0,.55)}}
+</style>
+<style>
+/* Hero kleiner + Inhalt zuerst (nur Startseite, ueberschreibt globales .hero) */
+.hero{min-height:82vh;min-height:82svh}
+.hero .wrap{padding-top:128px;padding-bottom:104px}
+/* H1 etwas ruhiger, nimmt das "Erschlagende" raus */
+.hero-text h1{font-size:clamp(2.1rem,1.4rem + 2.1vw,3.4rem)}
+.hero-text{max-width:840px}
+/* etwas staerkerer Scrim, damit Headline + Button klar lesbar sind */
+.hero-bg::after{background:
+   linear-gradient(180deg,rgba(0,0,0,.50) 0%,rgba(0,0,0,.14) 16%,transparent 30%),
+   linear-gradient(0deg,rgba(0,0,0,.50) 0%,rgba(0,0,0,.18) 26%,transparent 46%),
+   linear-gradient(100deg,rgba(0,0,0,.66) 0%,rgba(0,0,0,.44) 34%,rgba(0,0,0,.14) 62%,transparent 84%)}
+/* EIN klarer Haupt-Button im Hero */
+.hero-btns{display:flex;flex-wrap:wrap;gap:14px;margin-top:30px}
+.hbtn{display:inline-flex;align-items:center;gap:9px;font-family:var(--font-display);font-weight:800;font-size:1.05rem;border-radius:var(--pill);padding:15px 30px;transition:transform .2s,box-shadow .2s,background .2s;line-height:1}
+.hbtn-primary{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.7);text-shadow:0 1px 4px rgba(0,0,0,.6)}
+.hbtn-primary:hover{transform:translateY(-2px);background:rgba(255,255,255,.10)}
+.hbtn-primary span{font-size:1.25rem;transition:transform .2s}
+.hbtn-primary:hover span{transform:translateX(4px)}
+.hbtn-ghost{color:#fff;border:1.5px solid rgba(255,255,255,.7);text-shadow:0 1px 4px rgba(0,0,0,.6)}
+.hbtn-ghost:hover{background:rgba(255,255,255,.10);transform:translateY(-2px)}
+@media(max-width:600px){.hbtn{flex:1 1 100%;justify-content:center}}
+/* Handy: Hero zeigt nur Standbild statt Video (kein Play-/Antipp-Symbol) */
+@media(max-width:600px){.hero-bg video{display:none}.hero-bg{background:#3a567f url('/img/hero-hof-uebersicht.jpg?v=2026060701') center/cover no-repeat}}
+
+/* Die 3 Wege — heller Block direkt unter dem Hero (Inhalt zuerst) */
+.wege{background:var(--bg);padding:clamp(34px,5vw,64px) 0}
+.wege-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(14px,1.6vw,22px)}
+.wege-c{display:flex;flex-direction:column;gap:7px;padding:24px 26px;border-radius:18px;background:#fff;border:1px solid #e3eaf6;box-shadow:0 10px 30px -18px rgba(8,21,46,.4);transition:transform .22s,box-shadow .22s,border-color .22s}
+.wege-c:hover{transform:translateY(-4px);border-color:rgba(118,169,250,.55);box-shadow:0 22px 46px -22px rgba(8,21,46,.5),0 0 0 1px rgba(118,169,250,.35)}
+.wege-t{display:flex;align-items:center;justify-content:space-between;gap:12px;font-family:var(--font-display);font-weight:800;font-size:1.18rem;color:var(--ink);letter-spacing:-.01em;line-height:1.2}
+.wege-ar{color:var(--acc-text);font-weight:400;font-size:1.4rem;line-height:1;flex-shrink:0;transition:transform .2s}
+.wege-c:hover .wege-ar{transform:translateX(4px)}
+.wege-d{font-size:.94rem;color:var(--soft);line-height:1.5}
+@media(max-width:760px){.wege-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 
-<input type="checkbox" id="mnav">
-<a class="stickycta" href="/konfigurator.html">Jetzt konfigurieren <span class="material-symbols-outlined">arrow_forward</span></a>
-<nav>
-  <div class="wrap row">
-    <a class="logo" href="/index.html">DeineFenster<span>.de</span></a>
-    <div class="navlinks">
-      <div class="navitem">
-        <a href="/produkte.html">Fenster &amp; Türen <span class="material-symbols-outlined">expand_more</span></a>
-        <div class="mega">
-          <a href="/konfigurator.html?prod=kunststoff"><span class="mi"><span class="material-symbols-outlined">window</span></span><span><b>Kunststofffenster</b><span class="ds">IGLO 5 &amp; Energy · nach Maß</span></span></a>
-          <a href="/konfigurator.html?prod=haustuere"><span class="mi"><span class="material-symbols-outlined">door_front</span></span><span><b>Haustüren</b><span class="ds">über 50 Design-Modelle</span></span></a>
-          <a href="/konfigurator.html?prod=hst"><span class="mi"><span class="material-symbols-outlined">door_sliding</span></span><span><b>Schiebetüren</b><span class="ds">PSK &amp; Hebe-Schiebe</span></span></a>
-          <a href="/konfigurator.html?prod=balkontuer"><span class="mi"><span class="material-symbols-outlined">deck</span></span><span><b>Balkontüren</b><span class="ds">ein- &amp; zweiflügelig</span></span></a>
-          <a href="/konfigurator.html?prod=rollladen"><span class="mi"><span class="material-symbols-outlined">roller_shades</span></span><span><b>Rollläden</b><span class="ds">elektrisch · Smart-Home</span></span></a>
-          <a href="/gebrauchte-fenster-kaufen.html"><span class="mi"><span class="material-symbols-outlined">storefront</span></span><span><b>Gebrauchte · Hofverkauf</b><span class="ds">jeden Freitag</span></span></a>
+<!-- BETRIEBSURLAUB-BANNER START -->
+<div id="urlaub-banner" role="status" aria-label="Betriebsurlaub-Hinweis" style="position:fixed;top:0;left:0;right:0;z-index:99999;background:linear-gradient(90deg,#213a6c 0%,#152a4f 100%);color:#e7eefb;font-family:'Inter','Manrope',-apple-system,Segoe UI,Arial,sans-serif;font-size:12.5px;line-height:1.4;text-align:center;padding:7px 42px 7px 18px;font-weight:500;letter-spacing:.01em;box-shadow:0 1px 10px rgba(8,21,46,.22);">
+  <strong style="font-weight:800;color:#fff;">Betriebsurlaub 15.&ndash;27. August</strong> &mdash; ab 28. August wieder regul&auml;r ge&ouml;ffnet &middot; Hofverkauf jeden Freitag 10&ndash;17 Uhr
+  <button id="urlaub-banner-close" type="button" aria-label="Hinweis schlie&szlig;en" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:transparent;border:0;color:#fff;font-size:21px;line-height:1;cursor:pointer;padding:2px 8px;opacity:0.9;">&times;</button>
+</div>
+<script>(function(){var KEY='urlaubBannerClosed_2026_0815_urlaub15_urlaub';var b=document.getElementById('urlaub-banner');if(!b)return;if(window.__urlaubBanner)return;window.__urlaubBanner=1;var root=document.documentElement,basePad=null;function apply(){if(basePad===null){basePad=parseFloat(getComputedStyle(document.body).paddingTop)||0;}var h=b.offsetHeight;root.style.setProperty('--banner-h',h+'px');document.body.style.paddingTop=(basePad+h)+'px';}function reset(){root.style.removeProperty('--banner-h');document.body.style.paddingTop=(basePad&&basePad>0)?basePad+'px':'';}if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',apply);}else{apply();}window.addEventListener('resize',apply);var x=document.getElementById('urlaub-banner-close');if(x){x.addEventListener('click',function(){reset();b.parentNode&&b.parentNode.removeChild(b);try{localStorage.setItem(KEY,'1');}catch(e){}});}})();</script>
+<!-- BETRIEBSURLAUB-BANNER END -->
+
+<!-- Utility-Bar -->
+<div class="util"><div class="wrap">
+  <a href="gebrauchte-fenster-kaufen.html"><span style="color:oklch(0.8 0.15 85)">&#9733;</span> 4,2 &middot; 110 Google-Bewertungen &middot; Hofverkauf Fr 10&ndash;17 Uhr</a>
+  <div class="right">
+    <a href="/ueber-uns.html">Über uns</a>
+    <a href="/ueber-drutex.html">Über Drutex</a>
+    <a href="/kontakt.html">Kontakt</a>
+    <a href="tel:+4933812148373">&#9742; 03381 / 2148373</a>
+  </div>
+</div></div>
+
+<!-- Navigation -->
+<nav class="main"><div class="wrap">
+  <a class="logo" href="index.html"><b>DeineFenster</b><span>.de</span></a>
+  <div class="nav-links">
+    <!-- 1) Fenster & Türen -->
+    <div class="nav-item">
+      <a class="nav-link" href="produkte.html">Fenster &amp; Türen <span class="material-symbols-outlined nav-chev" aria-hidden="true">expand_more</span></a>
+      <div class="mega" role="menu" aria-label="Fenster und Türen">
+        <div class="mega-inner">
+          <div class="mega-prods">
+            <a class="mega-prod" href="kunststofffenster-kaufen.html" role="menuitem"><span class="mega-prod-img"><img src="img/_p-window.webp" alt="" loading="lazy"></span><b>Kunststofffenster</b><small>Drutex IGLO nach Ma&szlig;</small></a>
+            <a class="mega-prod" href="produkte/haustueren/iglo-energy.html" role="menuitem"><span class="mega-prod-img"><img src="img/_p-door.webp" alt="" loading="lazy"></span><b>Haust&uuml;ren</b><small>Ged&auml;mmt, viele Modelle</small></a>
+            <a class="mega-prod" href="produkte/balkontueren/iglo-energy.html" role="menuitem"><span class="mega-prod-img"><img src="img/_p-balkon.webp" alt="" loading="lazy"></span><b>Balkont&uuml;ren</b><small>Dreh-Kipp &amp; Hebe-Schiebe</small></a>
+            <a class="mega-prod" href="produkte/hebe-schiebetueren/iglo-energy-psk.html" role="menuitem"><span class="mega-prod-img"><img src="img/_p-hst.webp" alt="" loading="lazy"></span><b>Schiebet&uuml;ren</b><small>HST bis 6,5 m</small></a>
+            <a class="mega-prod" href="produkte/rollladen/aufsatz-rollladen.html" role="menuitem"><span class="mega-prod-img"><img src="img/_p-rollladen.webp" alt="" loading="lazy"></span><b>Rolll&auml;den</b><small>Elektrisch &amp; smart</small></a>
+            <a class="mega-prod" href="daemmung-kaufen.html" role="menuitem"><span class="mega-prod-img"><img src="img/_p-daemmung.webp" alt="" loading="lazy"></span><b>D&auml;mmung</b><small>Rollenware ab Lager</small></a>
+          </div>
+          <div class="mega-foot2">
+            <a class="all" href="produkte.html">Alle Produkte ansehen →</a>
+            <a class="btn-primary" style="padding:11px 22px;font-size:.88rem" href="konfigurator.html">Zum Konfigurator</a>
+          </div>
         </div>
       </div>
-      <a href="/konfigurator.html">Konfigurator</a>
-      <a href="/shop.html">Shop</a>
-      <a href="/ueber-uns.html">Über uns</a>
     </div>
-    <div class="navright">
-      <span class="navphone">0171 7263776</span>
-      <a class="navcta" href="/konfigurator.html">Jetzt konfigurieren</a>
-      <label class="burger" for="mnav" aria-label="Menü"><span></span><span></span><span></span></label>
+    <!-- 2) Gebraucht & Hofverkauf -->
+    <div class="nav-item">
+      <a class="nav-link" href="gebrauchte-fenster-kaufen.html">Gebraucht &amp; Hofverkauf <span class="material-symbols-outlined nav-chev" aria-hidden="true">expand_more</span></a>
+      <div class="mega" role="menu" aria-label="Gebraucht und Hofverkauf">
+        <div class="mega-inner">
+          <div class="mega-mixed">
+            <div class="mega-prods mega-prods-2">
+              <a class="mega-prod" href="gebrauchte-fenster-kaufen.html" role="menuitem"><span class="mega-prod-img"><img src="img/_p-window.webp" alt="" loading="lazy"></span><b>Gebrauchte Fenster</b><small>5.000 St&uuml;ck vor Ort, sofort</small></a>
+              <a class="mega-prod" href="garagentor-gebraucht-kaufen.html" role="menuitem"><span class="mega-prod-img"><img src="img/_p-garagentor.webp" alt="" loading="lazy"></span><b>Garagentore</b><small>Gebraucht: Sektional &amp; Schwing</small></a>
+            </div>
+            <div class="mega-services">
+              <a class="mega-srv" href="shop.html" role="menuitem"><span><b>Lager-Shop</b><small>Neue Drutex-Lagerfenster, sofort</small></span></a>
+              <a class="mega-srv" href="fenster-austauschen-kosten.html" role="menuitem"><span><b>Ankauf — wir kaufen an</b><small>Alte Fenster &amp; T&uuml;ren verkaufen</small></span></a>
+            </div>
+            <a class="mega-card mega-hofcard" href="gebrauchte-fenster-kaufen.html">
+              <img src="img/hof-gebrauchte-fenster.webp" alt="" loading="lazy">
+              <div class="mega-cb"><b>Hofverkauf Brandenburg</b><small>Jeden Freitag 10–17 Uhr, Selbstabholung</small><span class="cta">Zum Hofverkauf →</span></div>
+            </a>
+          </div>
+          <div class="mega-foot2">
+            <a class="all" href="gebrauchte-fenster-kaufen.html">Alle im Hofverkauf →</a>
+            <a class="btn-primary" style="padding:11px 22px;font-size:.88rem" href="shop.html">Zum Shop</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- 3) Konfigurator (direkt) -->
+    <a class="nav-link" href="konfigurator.html">Konfigurator</a>
+    <!-- 4) Ratgeber -->
+    <div class="nav-item">
+      <a class="nav-link" href="ratgeber/index.html">Ratgeber <span class="material-symbols-outlined nav-chev" aria-hidden="true">expand_more</span></a>
+      <div class="mega" role="menu" aria-label="Ratgeber">
+        <div class="mega-grid">
+          <div class="mega-col">
+            <h4>Ratgeber</h4>
+            <a class="mega-link" href="ratgeber/fenster-u-wert-erklaert.html" role="menuitem"><span class="mega-ic"><span class="material-symbols-outlined" aria-hidden="true">thermostat</span></span><span><b>U-Wert erklärt</b><small>Das wichtigste Energiekriterium</small></span></a>
+            <a class="mega-link" href="ratgeber/iglo5-vs-iglo-energy.html" role="menuitem"><span class="mega-ic"><span class="material-symbols-outlined" aria-hidden="true">compare</span></span><span><b>IGLO 5 vs. IGLO Energy</b><small>Welches Profil für welches Projekt</small></span></a>
+            <a class="mega-link" href="ratgeber/bafa-foerderung-fenster-2026.html" role="menuitem"><span class="mega-ic"><span class="material-symbols-outlined" aria-hidden="true">savings</span></span><span><b>BAFA-Förderung 2026</b><small>Zuschuss vor der Bestellung</small></span></a>
+          </div>
+          <div class="mega-col">
+            <h4>Hilfe</h4>
+            <a class="mega-link" href="faq.html" role="menuitem"><span class="mega-ic"><span class="material-symbols-outlined" aria-hidden="true">help</span></span><span><b>FAQ</b><small>Häufige Fragen zum Fensterkauf</small></span></a>
+            <a class="mega-link" href="glossar.html" role="menuitem"><span class="mega-ic"><span class="material-symbols-outlined" aria-hidden="true">menu_book</span></span><span><b>Glossar</b><small>Fachbegriffe einfach erklärt</small></span></a>
+          </div>
+          <div class="mega-col mega-feat">
+            <a class="mega-card" href="kfw-foerderung.html">
+              <img src="img/home-wohnzimmer-drutex.jpeg" alt="" loading="lazy">
+              <div class="mega-cb"><b>Förderung 2026</b><small>BAFA-Zuschuss für neue Fenster sichern</small><span class="cta">Förder-Ratgeber →</span></div>
+            </a>
+          </div>
+          <div class="mega-foot">
+            <a class="all" href="ratgeber/index.html">Alle Ratgeber-Artikel →</a>
+            <a class="btn-primary" style="padding:11px 22px;font-size:.88rem" href="kfw-foerderung.html">Förder-Ratgeber</a>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-</nav>
-<div class="mobmenu">
-  <a href="/kunststofffenster-kaufen.html">Fenster</a><a href="/produkte/haustueren/iglo-energy.html">Türen</a><a href="/produkte/hebe-schiebetueren/iglo-energy-psk.html">Schiebetüren</a><a href="/konfigurator.html">Konfigurator</a><a href="/shop.html">Shop</a><a href="/ueber-uns.html">Über uns</a>
+  <a class="nav-cta" href="/anfrage.html">Angebot anfragen</a>
+  <button class="burger" id="burger" type="button" aria-label="Menü öffnen" aria-expanded="false" aria-controls="mnav">
+    <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+  </button>
+</div></nav>
+
+<!-- Mobile-Menü -->
+<div class="mnav" id="mnav">
+  <div class="mnav-panel">
+    <div class="mnav-head">
+      <a class="logo" href="index.html"><b>DeineFenster</b><span>.de</span></a>
+      <button class="mnav-close" id="mnavClose" type="button" aria-label="Menü schließen"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
+    </div>
+    <details>
+      <summary>Fenster &amp; Türen <span class="material-symbols-outlined" aria-hidden="true">expand_more</span></summary>
+      <div class="sub">
+        <a href="kunststofffenster-kaufen.html">Kunststofffenster</a>
+        <a href="produkte/haustueren/iglo-energy.html">Haustüren</a>
+        <a href="produkte/balkontueren/iglo-energy.html">Balkontüren</a>
+        <a href="produkte/hebe-schiebetueren/iglo-energy-psk.html">Schiebetüren (HST)</a>
+        <a href="produkte/rollladen/aufsatz-rollladen.html">Rollläden</a>
+        <a href="produkte.html">Alle Produkte →</a>
+      </div>
+    </details>
+    <details>
+      <summary>Gebraucht &amp; Hofverkauf <span class="material-symbols-outlined" aria-hidden="true">expand_more</span></summary>
+      <div class="sub">
+        <a href="gebrauchte-fenster-kaufen.html">Gebrauchte Fenster</a>
+        <a href="garagentor-gebraucht-kaufen.html">Garagentore (gebraucht)</a>
+        <a href="fenster-austauschen-kosten.html">Ankauf — wir kaufen an</a>
+        <a href="shop.html">Lager-Shop</a>
+        <a href="daemmung-kaufen.html">Dämmung</a>
+      </div>
+    </details>
+    <a class="ml" href="konfigurator.html">Konfigurator</a>
+    <details>
+      <summary>Ratgeber <span class="material-symbols-outlined" aria-hidden="true">expand_more</span></summary>
+      <div class="sub">
+        <a href="ratgeber/fenster-u-wert-erklaert.html">U-Wert erklärt</a>
+        <a href="ratgeber/iglo5-vs-iglo-energy.html">IGLO 5 vs. IGLO Energy</a>
+        <a href="ratgeber/bafa-foerderung-fenster-2026.html">BAFA-Förderung 2026</a>
+        <a href="faq.html">FAQ</a>
+        <a href="glossar.html">Glossar</a>
+        <a href="ratgeber/index.html">Alle Ratgeber →</a>
+      </div>
+    </details>
+    <a class="ml" href="ueber-uns.html">Über uns</a>
+    <a class="ml" href="ueber-drutex.html">Über Drutex</a>
+    <a class="ml" href="kontakt.html">Kontakt</a>
+    <a class="ml-cta" href="/anfrage.html"><span class="material-symbols-outlined" aria-hidden="true">mail</span> Angebot anfragen</a>
+  </div>
 </div>
 
-<section class="hero">
-  <div class="hero-media" id="heroImg"><img src="img/_hero-headroom.webp" alt="Fenster, Haustür und Schiebetür nach Maß von Drutex"></div>
-  <div class="wrap hero-head">
-    <span class="eyebrow reveal">Drutex-Direktimport · Familienbetrieb seit 1996</span>
-    <h1 class="reveal">Fenster &amp; Türen nach Maß.<br><span class="soft">Direkt vom Hersteller.</span></h1>
-    <p class="reveal">Konfiguriere dein Wunschprodukt mit Live-Preis und Skizze, gefertigt nach deinem Maß und geliefert deutschlandweit.</p>
-    <div class="hero-cta reveal">
-      <a class="btn btn-primary" href="/konfigurator.html">Jetzt konfigurieren</a>
-      <a class="btn btn-ghost" href="/shop.html">Zum Shop</a>
+<!-- Neues Startbild: Produkt-Switcher (nhero-Namensraum, kollidiert nicht mit df-2026) -->
+<header class="nhero">
+  <div class="nhero-media" id="heroImg">
+    <div class="nhero-stage" id="heroStage" role="group" aria-roledescription="Produkt-Auswahl" aria-label="Produkt w&auml;hlen &ndash; Pfeiltasten links und rechts oder Klick" tabindex="0">
+      <img class="nhero-layer is-active" data-prod="fenster" src="img/_hero-sw-fenster.webp?v=eq1" alt="Kunststofffenster nach Ma&szlig; von Drutex, dahinter Haust&uuml;r, Balkont&uuml;r und Schiebet&uuml;r" fetchpriority="high" width="1024" height="1024">
+      <img class="nhero-layer" data-prod="balkon" src="img/_hero-sw-balkon.webp?v=eq1" alt="Balkont&uuml;r nach Ma&szlig; von Drutex" loading="lazy" width="1024" height="1024">
+      <img class="nhero-layer" data-prod="haustuer" src="img/_hero-sw-haustuer.webp?v=eq1" alt="Haust&uuml;r nach Ma&szlig; von Drutex" loading="lazy" width="1024" height="1024">
+      <img class="nhero-layer" data-prod="schiebe" src="img/_hero-sw-schiebe.webp?v=eq1" alt="Hebe-Schiebet&uuml;r nach Ma&szlig; von Drutex" loading="lazy" width="1024" height="1024">
     </div>
-    <div class="hero-trust reveal"><span class="stars">★★★★</span> 4,2 · über 110 Google-Bewertungen · autorisierter Drutex-Fachhändler</div>
+    <button class="nhero-nav nhero-nav-prev" id="heroPrev" type="button" aria-label="Vorheriges Produkt"><span class="material-symbols-outlined" aria-hidden="true">chevron_left</span></button>
+    <button class="nhero-nav nhero-nav-next" id="heroNext" type="button" aria-label="N&auml;chstes Produkt"><span class="material-symbols-outlined" aria-hidden="true">chevron_right</span></button>
+    <div class="nhero-dots" id="heroDots" role="tablist" aria-label="Produkt w&auml;hlen">
+      <button class="nhero-dot is-active" type="button" role="tab" aria-selected="true" data-i="0" aria-label="Fenster"></button>
+      <button class="nhero-dot" type="button" role="tab" aria-selected="false" data-i="1" aria-label="Balkont&uuml;r"></button>
+      <button class="nhero-dot" type="button" role="tab" aria-selected="false" data-i="2" aria-label="Haust&uuml;r"></button>
+      <button class="nhero-dot" type="button" role="tab" aria-selected="false" data-i="3" aria-label="Schiebet&uuml;r"></button>
+    </div>
+    <a class="nhero-card" id="heroCard" href="konfigurator.html?prod=fenster" aria-label="Fenster konfigurieren">
+      <span class="nhero-card-tx"><b id="heroCardTitle" aria-live="polite">Fenster</b><span>Nach Ma&szlig; &middot; Live-Preis</span></span>
+      <span class="nhero-card-go material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+    </a>
   </div>
-</section>
-
-<div class="trust">
-  <div class="wrap row">
-    <div class="item"><span class="material-symbols-outlined">verified</span>Familienbetrieb seit 1996</div>
-    <div class="item"><span class="material-symbols-outlined">handshake</span>Autorisierter Drutex-Fachhändler</div>
-    <div class="item"><span class="material-symbols-outlined">local_shipping</span>Lieferung deutschlandweit</div>
-    <div class="item"><span class="material-symbols-outlined">factory</span>Direkt ab Werk, ohne Zwischenhändler</div>
+  <div class="nhero-inner">
+    <div class="nhero-head">
+      <span class="nhero-eyebrow">Drutex-Direktimport &middot; Familienbetrieb seit 1996</span>
+      <h1>Fenster &amp; T&uuml;ren nach Ma&szlig;. <span class="nhero-soft">Direkt vom Hersteller.</span></h1>
+      <p>Konfiguriere dein Wunschprodukt mit Live-Preis und Skizze, gefertigt nach deinem Ma&szlig; und geliefert deutschlandweit.</p>
+      <div class="nhero-cta">
+        <a class="nhero-btn nhero-btn-primary" href="konfigurator.html">Jetzt konfigurieren</a>
+        <a class="nhero-btn nhero-btn-ghost" href="shop.html">Zum Shop</a>
+      </div>
+      <div class="nhero-trust"><span class="nhero-stars" aria-label="4,2 von 5 Sternen">&#9733;&#9733;&#9733;&#9733;&#9733;</span> 4,2 &middot; &uuml;ber 110 Google-Bewertungen &middot; autorisierter Drutex-Fachh&auml;ndler</div>
+    </div>
   </div>
-</div>
+</header>
 
-<section class="block">
+<!-- Die 3 Wege — heller Block direkt unter dem Hero (Inhalt zuerst) -->
+<section class="wege"><div class="wrap">
+  <div class="wege-grid">
+    <a class="wege-c" href="shop.html?zustand=gebraucht">
+      <span class="wege-t">Gebrauchte Fenster <span class="wege-ar" aria-hidden="true">&rarr;</span></span>
+      <span class="wege-d">5000 St&uuml;ck vor Ort &middot; sofort zur Abholung im Hofverkauf.</span>
+    </a>
+    <a class="wege-c" href="shop.html?zustand=neu">
+      <span class="wege-t">Neue Fenster im Lager <span class="wege-ar" aria-hidden="true">&rarr;</span></span>
+      <span class="wege-d">5000 neue Fenster sofort verf&uuml;gbar &middot; deutschlandweite Lieferung.</span>
+    </a>
+    <a class="wege-c" href="konfigurator.html">
+      <span class="wege-t">Fenster &amp; T&uuml;ren nach Ma&szlig; <span class="wege-ar" aria-hidden="true">&rarr;</span></span>
+      <span class="wege-d">Im Konfigurator selbst zusammenstellen &middot; Angebot per Mail.</span>
+    </a>
+  </div>
+</div></section>
+
+<!-- Dämmung — prominent direkt unter den 3 Wegen (Kunden-Magnet) -->
+<section class="promo" id="daemmung"><div class="wrap">
+  <div>
+    <span class="eyebrow">Auch im Lager · Dämmung aus Direktimport</span>
+    <h2>Günstige Dämmung — neu, direkt ab Lager.</h2>
+    <p>Viele kommen für die günstige Dämmrolle zu uns — und nehmen ihre Fenster gleich mit. Rollenware neu &amp; original verpackt, abholen in Brandenburg an der Havel oder Lieferung bis 200 km. Staffelpreise je nach Menge direkt im Shop.</p>
+  </div>
+  <a class="promo-cta" href="shop.html?cat=daemmung">Zum Dämmung-Shop →</a>
+</div></section>
+
+<!-- Neu & Gebraucht / Hofverkauf -->
+<section class="alt"><div class="wrap">
+  <div class="sec-head">
+    <span class="eyebrow">Sortiment</span>
+    <h2>Neu &amp; <span class="accent">Gebraucht.</span></h2>
+  </div>
+  <div class="cards">
+    <a class="card" href="gebrauchte-fenster-kaufen.html">
+      <div class="img"><img src="/img/hof-gebrauchte-fenster.webp" alt="Gebrauchte Fenster im Hofverkauf Brandenburg an der Havel"></div>
+      <div class="body">
+        <h3>Gebrauchte Fenster</h3>
+        <ul><li>5000 gebrauchte Fenster vor Ort</li><li>Sofort verfügbar zur Abholung</li><li>Faire Vor-Ort-Preise</li></ul>
+        <span class="ghost">Mehr ansehen →</span>
+      </div>
+    </a>
+    <a class="card" href="kunststofffenster-kaufen.html">
+      <div class="img"><img src="/img/lager/lager-tageslicht.jpg" alt="Neue Drutex-Lagerfenster in der Halle, originalverpackt"></div>
+      <div class="body">
+        <h3>Drutex-Lagerfenster</h3>
+        <ul><li>5000 neue Fenster vor Ort</li><li>100 % Drutex-Originalware, neu &amp; OVP</li><li>Sofort zum Mitnehmen</li></ul>
+        <span class="ghost">Mehr ansehen →</span>
+      </div>
+    </a>
+  </div>
+</div></section>
+
+<!-- Galerie: echte Lager-/Hallen-Fotos -->
+<section class="alt"><div class="wrap">
+  <div class="sec-head">
+    <span class="eyebrow">Kurze Einblicke in unser Unternehmen</span>
+    <h2>Echte Bilder <span class="accent">der Firma.</span></h2>
+  </div>
+  <div class="gallery g4">
+    <a class="gcard" href="kunststofffenster-kaufen.html"><img src="/img/lager/lager-haupthalle.webp" alt="Drutex-Haupthalle mit tausenden Fenstern bei Türen und Fensterhandel Christ" loading="lazy"><span class="gcap">Lagerhalle mit 2000 m² Ausstellungsfläche</span></a>
+    <a class="gcard" href="gebrauchte-fenster-kaufen.html"><img src="/img/lager/lager-aussen-hof.webp" alt="Außenlager im Hof, gestapelte Fenster" loading="lazy"><span class="gcap">Außenlager mit 16.000 m² Ausstellungsfläche</span></a>
+    <a class="gcard" href="ueber-uns.html"><img src="/img/ueber-uns-showroom-drutex.jpg" alt="Drutex-Showroom mit Fenster- und Türmustern bei Türen und Fensterhandel Christ" loading="lazy"><span class="gcap">Showroom mit 100 m² Ausstellungsfläche</span></a>
+    <a class="gcard" href="gebrauchte-fenster-kaufen.html"><img src="/img/lager/lager-hochregal.jpg" alt="Hochregallager mit eingelagerten Fenstern und Profilen bei Türen und Fensterhandel Christ" loading="lazy"><span class="gcap">500 laufende Meter Hochregallager</span></a>
+  </div>
+</div></section>
+
+<!-- Editorial Pull-Quote — ruhiger Magazin-Atemzug -->
+<section class="statement"><div class="wrap">
+  <p class="pull"><span class="mark">„</span>Fenster kauft man einmal in 30&nbsp;Jahren. <em>Wir verkaufen sie seit&nbsp;30&nbsp;Jahren.</em></p>
+  <span class="pull-by">Türen und Fensterhandel Christ · Brandenburg an der Havel</span>
+</div></section>
+
+<!-- Warum / In Zahlen — dunkler Cinematic-Block -->
+<section class="dark"><div class="wrap">
+  <div class="sec-head">
+    <span class="eyebrow">Warum DeineFenster.de</span>
+    <h2>Fensterkauf neu gedacht.<br><span class="accent">In Zahlen.</span></h2>
+  </div>
+  <div class="stats stats-4">
+    <div class="stat"><div class="num">30 Jahre</div><div class="lbl">Erfahrung seit 1996</div></div>
+    <div class="stat"><div class="num">10.000</div><div class="lbl">Fenster vor Ort</div></div>
+    <div class="stat"><div class="num">4,2 ★</div><div class="lbl">110 Google-Bewertungen</div></div>
+    <div class="stat"><div class="num">14 Tage</div><div class="lbl">Herstellungszeit</div></div>
+  </div>
+  <div class="band"><img src="/img/lager/lager-halle-a3w.jpg" alt="Drutex-Lagerhalle voller Fenster bei Türen und Fensterhandel Christ"><span class="band-cap">500 Fenster mit Rollläden vor Ort</span></div>
+</div></section>
+
+<!-- Ablauf -->
+<section class="alt"><div class="wrap">
+  <div class="sec-head">
+    <span class="eyebrow">So einfach geht's</span>
+    <h2>In <span class="accent">4 Schritten</span> zu Ihren neuen Fenstern.</h2>
+  </div>
+  <div class="steps steps-4">
+    <div class="step"><div class="n">01</div><h3>Konfigurieren</h3><p>Profil, Maße, Farbe, Verglasung und Zubehör im Online-Konfigurator wählen — unverbindliches Angebot per E-Mail.</p></div>
+    <div class="step"><div class="n">02</div><h3>Angebot per E-Mail</h3><p>Wir prüfen Ihre Konfiguration, kalkulieren Versand &amp; Details und senden ein schriftliches, unverbindliches Angebot.</p></div>
+    <div class="step"><div class="n">03</div><h3>Bestätigen</h3><p>Sie bestätigen das Angebot und überweisen — ab dann bestellen wir bei Drutex und die Fertigung Ihrer Maßanfertigung beginnt.</p></div>
+    <div class="step"><div class="n">04</div><h3>Lieferung</h3><p>Deutschlandweit per Spedition: ab 10&nbsp;Fenstern versandkostenfreie Lieferung, Lieferzeit ca.&nbsp;14&nbsp;Tage — gilt für neue Fenster (Neubestellung). Oder Abholung im Hofverkauf.</p></div>
+  </div>
+</div></section>
+
+<!-- Lieferregionen / deutschlandweite Lieferung -->
+<section><div class="wrap">
+  <div class="sec-head">
+    <span class="eyebrow">Liefergebiet</span>
+    <h2>Fenster für <span class="accent">ganz Deutschland.</span></h2>
+  </div>
+  <p class="lead" style="max-width:60ch">Drutex liefert direkt vom Werk per Spedition — auf Einwegpalette, mit eigenem Stapler am LKW. Kein Zwischenhändler, kein Aufpreis für entlegene Regionen. Eine Auswahl der Städte, in die wir regelmäßig liefern:</p>
+  <div class="regions">
+    <a class="lead-city" href="staedte/fenster-brandenburg-an-der-havel.html">Brandenburg a.d.H.</a>
+    <a href="staedte/fenster-berlin.html">Berlin</a>
+    <a href="staedte/fenster-potsdam.html">Potsdam</a>
+    <a href="staedte/fenster-hamburg.html">Hamburg</a>
+    <a href="staedte/fenster-muenchen.html">München</a>
+    <a href="staedte/fenster-koeln.html">Köln</a>
+    <a href="staedte/fenster-frankfurt-am-main.html">Frankfurt a.M.</a>
+    <a href="staedte/fenster-stuttgart.html">Stuttgart</a>
+    <a href="staedte/fenster-duesseldorf.html">Düsseldorf</a>
+    <a href="staedte/fenster-leipzig.html">Leipzig</a>
+    <a href="staedte/fenster-dresden.html">Dresden</a>
+    <a href="staedte/fenster-hannover.html">Hannover</a>
+    <a href="staedte/fenster-nuernberg.html">Nürnberg</a>
+    <a href="staedte/fenster-bremen.html">Bremen</a>
+    <a href="staedte/fenster-magdeburg.html">Magdeburg</a>
+    <a href="staedte/fenster-cottbus.html">Cottbus</a>
+  </div>
+  <p class="region-note">Nicht alle Lieferorte aufgeführt — Drutex liefert deutschlandweit. Fragen zur Lieferung in Ihre Stadt? <a class="ghost" href="/anfrage.html">Jetzt anfragen →</a></p>
+</div></section>
+
+<!-- Kundenbewertungen — zwei gegenläufige Lauf-Reihen, dunkler Block, Stopp bei Hover -->
+<section class="dark revsec">
   <div class="wrap">
     <div class="sec-head">
-      <span class="eyebrow">Unser Sortiment</span>
-      <h2 style="margin-top:12px">Für jedes Zuhause das Passende</h2>
-      <p>Alles nach Maß, direkt vom Hersteller Drutex. Wähle dein Produkt und konfiguriere es online.</p>
-    </div>
-    <div class="tiles">
-      <div class="tile"><div class="tile-img render"><img src="img/_card-fenster.webp" alt="Kunststofffenster"></div>
-        <div class="tile-b"><h3>Kunststofffenster</h3><p>IGLO 5 Classic &amp; IGLO Energy. 5 oder 7 Kammern, Uw bis 0,71.</p><a class="tile-cta" href="/konfigurator.html?prod=kunststoff">Konfigurieren <span class="material-symbols-outlined">arrow_forward</span></a></div></div>
-      <div class="tile"><div class="tile-img render"><img src="img/_card-haustuer.webp" alt="Haustüren"></div>
-        <div class="tile-b"><h3>Haustüren</h3><p>Über 50 Design-Modelle, nach Maß, in vielen Farben.</p><a class="tile-cta" href="/konfigurator.html?prod=haustuere">Konfigurieren <span class="material-symbols-outlined">arrow_forward</span></a></div></div>
-      <div class="tile"><div class="tile-img render"><img src="img/_card-schiebe.webp" alt="Schiebetüren"></div>
-        <div class="tile-b"><h3>Schiebetüren</h3><p>PSK &amp; Hebe-Schiebe, bis 6,5 m breit, barrierearm.</p><a class="tile-cta" href="/konfigurator.html?prod=hst">Konfigurieren <span class="material-symbols-outlined">arrow_forward</span></a></div></div>
-      <div class="tile"><div class="tile-img render"><img src="img/_card-balkon.webp" alt="Balkontüren"></div>
-        <div class="tile-b"><h3>Balkontüren</h3><p>Ein- &amp; zweiflügelig, mit flacher Alu-Schwelle.</p><a class="tile-cta" href="/konfigurator.html?prod=balkontuer">Konfigurieren <span class="material-symbols-outlined">arrow_forward</span></a></div></div>
-      <div class="tile"><div class="tile-img render"><img src="img/_card-rollladen.webp" alt="Rollläden"></div>
-        <div class="tile-b"><h3>Rollläden</h3><p>Elektrisch mit Funk-Motor, Smart-Home-ready.</p><a class="tile-cta" href="/konfigurator.html?prod=rollladen">Konfigurieren <span class="material-symbols-outlined">arrow_forward</span></a></div></div>
-      <div class="tile"><div class="tile-img" style="padding:0"><img src="img/hof-gebrauchte-fenster.jpg" alt="Hofverkauf" style="width:100%;height:100%;object-fit:cover;filter:none;max-height:none"></div>
-        <div class="tile-b"><h3>Gebrauchte · Hofverkauf</h3><p>Jeden Freitag in Brandenburg, nur Selbstabholung.</p><a class="tile-cta" href="/gebrauchte-fenster-kaufen.html" style="background:transparent;color:var(--primary);border:1.5px solid var(--line)">Zum Hofverkauf <span class="material-symbols-outlined">arrow_forward</span></a></div></div>
+      <span class="eyebrow">4,2 ★ bei Google · über 110 Bewertungen</span>
+      <h2>Das sagen <span class="accent">unsere Kunden.</span></h2>
     </div>
   </div>
+  <div class="revmarquee">
+    <div class="revrow"><div class="revtrack">
+      <div class="rev"><div class="stars" aria-label="5 von 5 Sternen">★★★★★</div><p>„Top Service, super Qualität und sehr freundliches, hilfsbereites Team — absolut empfehlenswert!"</p><div class="who"><span class="av" aria-hidden="true">E</span><span><b>Emre K.</b><small>Google-Rezension · vor 5 Monaten</small></span></div></div>
+      <div class="rev"><div class="stars" aria-label="5 von 5 Sternen">★★★★★</div><p>„Gebrauchte Fenster in fast allen Größen, neue wohl auch — freundliche und hilfsbereite Menschen hier — das geht in Ordnung so!"</p><div class="who"><span class="av" aria-hidden="true">J</span><span><b>Janek D.</b><small>Google Local Guide · vor 2 Monaten</small></span></div></div>
+      <div class="rev"><div class="stars" aria-label="5 von 5 Sternen">★★★★★</div><p>„Unkompliziert, gute Qualität sowie schnelle und gut verpackte Lieferung."</p><div class="who"><span class="av" aria-hidden="true">A</span><span><b>A.</b><small>Google-Rezension · kürzlich</small></span></div></div>
+      <div class="rev"><div class="stars" aria-label="5 von 5 Sternen">★★★★★</div><p>„Sehr gute Kommunikation mit dem Verkäufer."</p><div class="who"><span class="av" aria-hidden="true">D</span><span><b>D.</b><small>Google-Rezension · kürzlich</small></span></div></div>
+      <div class="rev" aria-hidden="true"><div class="stars">★★★★★</div><p>„Top Service, super Qualität und sehr freundliches, hilfsbereites Team — absolut empfehlenswert!"</p><div class="who"><span class="av">E</span><span><b>Emre K.</b><small>Google-Rezension · vor 5 Monaten</small></span></div></div>
+      <div class="rev" aria-hidden="true"><div class="stars">★★★★★</div><p>„Gebrauchte Fenster in fast allen Größen, neue wohl auch — freundliche und hilfsbereite Menschen hier — das geht in Ordnung so!"</p><div class="who"><span class="av">J</span><span><b>Janek D.</b><small>Google Local Guide · vor 2 Monaten</small></span></div></div>
+      <div class="rev" aria-hidden="true"><div class="stars">★★★★★</div><p>„Unkompliziert, gute Qualität sowie schnelle und gut verpackte Lieferung."</p><div class="who"><span class="av">A</span><span><b>A.</b><small>Google-Rezension · kürzlich</small></span></div></div>
+      <div class="rev" aria-hidden="true"><div class="stars">★★★★★</div><p>„Sehr gute Kommunikation mit dem Verkäufer."</p><div class="who"><span class="av">D</span><span><b>D.</b><small>Google-Rezension · kürzlich</small></span></div></div>
+    </div></div>
+    <div class="revrow"><div class="revtrack rev-rev">
+      <div class="rev"><div class="stars" aria-label="5 von 5 Sternen">★★★★★</div><p>„Sehr gute Kommunikation mit dem Verkäufer."</p><div class="who"><span class="av" aria-hidden="true">D</span><span><b>D.</b><small>Google-Rezension · kürzlich</small></span></div></div>
+      <div class="rev"><div class="stars" aria-label="5 von 5 Sternen">★★★★★</div><p>„Unkompliziert, gute Qualität sowie schnelle und gut verpackte Lieferung."</p><div class="who"><span class="av" aria-hidden="true">A</span><span><b>A.</b><small>Google-Rezension · kürzlich</small></span></div></div>
+      <div class="rev"><div class="stars" aria-label="5 von 5 Sternen">★★★★★</div><p>„Gebrauchte Fenster in fast allen Größen, neue wohl auch — freundliche und hilfsbereite Menschen hier — das geht in Ordnung so!"</p><div class="who"><span class="av" aria-hidden="true">J</span><span><b>Janek D.</b><small>Google Local Guide · vor 2 Monaten</small></span></div></div>
+      <div class="rev"><div class="stars" aria-label="5 von 5 Sternen">★★★★★</div><p>„Top Service, super Qualität und sehr freundliches, hilfsbereites Team — absolut empfehlenswert!"</p><div class="who"><span class="av" aria-hidden="true">E</span><span><b>Emre K.</b><small>Google-Rezension · vor 5 Monaten</small></span></div></div>
+      <div class="rev" aria-hidden="true"><div class="stars">★★★★★</div><p>„Sehr gute Kommunikation mit dem Verkäufer."</p><div class="who"><span class="av">D</span><span><b>D.</b><small>Google-Rezension · kürzlich</small></span></div></div>
+      <div class="rev" aria-hidden="true"><div class="stars">★★★★★</div><p>„Unkompliziert, gute Qualität sowie schnelle und gut verpackte Lieferung."</p><div class="who"><span class="av">A</span><span><b>A.</b><small>Google-Rezension · kürzlich</small></span></div></div>
+      <div class="rev" aria-hidden="true"><div class="stars">★★★★★</div><p>„Gebrauchte Fenster in fast allen Größen, neue wohl auch — freundliche und hilfsbereite Menschen hier — das geht in Ordnung so!"</p><div class="who"><span class="av">J</span><span><b>Janek D.</b><small>Google Local Guide · vor 2 Monaten</small></span></div></div>
+      <div class="rev" aria-hidden="true"><div class="stars">★★★★★</div><p>„Top Service, super Qualität und sehr freundliches, hilfsbereites Team — absolut empfehlenswert!"</p><div class="who"><span class="av">E</span><span><b>Emre K.</b><small>Google-Rezension · vor 5 Monaten</small></span></div></div>
+    </div></div>
+  </div>
+  <div class="wrap"><p class="region-note" style="margin-top:var(--s6)"><a class="ghost" href="https://www.google.com/maps?cid=9402028850820563054" target="_blank" rel="noopener">Alle Bewertungen auf Google ansehen →</a></p></div>
 </section>
 
-<section class="block konf">
-  <div class="wrap grid">
-    <div class="konf-vis"><img src="img/_card-fenster.webp" alt="Konfigurator-Vorschau"></div>
-    <div>
-      <span class="eyebrow">Konfigurator</span>
-      <h2 style="margin-top:12px">In 4 Schritten zu deinem Fenster</h2>
-      <p style="color:var(--ink-soft);margin-top:12px">Ruhig und geführt. Du siehst bei jeder Auswahl sofort Skizze und Richtpreis.</p>
-      <div class="steps">
-        <div class="step"><span class="c">1</span><span>Typ</span></div>
-        <div class="step"><span class="c">2</span><span>Maß</span></div>
-        <div class="step"><span class="c">3</span><span>Farbe</span></div>
-        <div class="step"><span class="c">4</span><span>Glas</span></div>
+<!-- Drutex-Profilsysteme — Entscheidungshilfe + vollstaendiges Programm (SEO/GEO) -->
+<section class="dark" id="drutex-systeme"><div class="wrap">
+  <div class="sec-head">
+    <span class="eyebrow">Entscheidungs-Hilfe · Drutex-Profilsysteme</span>
+    <h2>Welches Drutex-Fenster passt zu <span class="accent">Ihrem Projekt?</span></h2>
+  </div>
+  <p class="lead" style="max-width:72ch;color:rgba(255,255,255,.84)">Drutex fertigt <strong>17 Fenstersysteme</strong> in Kunststoff, Aluminium und Holz — von der Standard-Sanierung bis zum Passivhaus. Für deutsche Privathaushalte haben wir uns auf die <strong>zwei meistgefragten Kunststoff-Profile</strong> spezialisiert und liefern sie nach Maß: <strong>IGLO&nbsp;5&nbsp;Classic</strong> und <strong>IGLO&nbsp;Energy</strong>. Weitere Drutex-Systeme stellen wir informativ vor.</p>
+  <div class="prodgrid" style="margin-top:var(--s6)">
+    <a class="pcard" href="produkte/kunststofffenster/iglo-5-classic.html">
+      <div class="pbody">
+        <span class="eyebrow" style="margin-bottom:6px">Sanierung · Standard</span>
+        <h3>IGLO 5 Classic</h3>
+        <p>Der bewährte Allrounder: Uw bis 0,83 W/(m²K), 5-Kammer, 70 mm Bautiefe, 2 Dichtungsebenen. Beste Wahl für die Standard-Sanierung im Bestandsbau.</p>
+        <span class="ghost">Details ansehen →</span>
       </div>
-      <a class="btn btn-primary" href="/konfigurator.html">Jetzt konfigurieren</a>
-    </div>
-  </div>
-</section>
-
-<section class="block fam">
-  <div class="wrap grid">
-    <div class="fam-img"><img src="img/home-wohnzimmer-drutex.jpeg" alt="Drutex-Fenster im Wohnzimmer"></div>
-    <div>
-      <span class="eyebrow">Über uns</span>
-      <h2 style="margin-top:12px">Familienbetrieb aus Brandenburg an der Havel</h2>
-      <p>Seit 1996 handeln wir mit Drutex-Fenstern und -Türen. Kein anonymer Online-Shop: du kannst uns anrufen, vorbeikommen und jeden Freitag im Hofverkauf stöbern.</p>
-      <div class="badges">
-        <span class="badge">Autorisierter Drutex-Fachhändler</span>
-        <span class="badge">Türen &amp; Fensterhandel Christ</span>
-        <span class="badge">Hofverkauf Fr 10–17 Uhr</span>
+    </a>
+    <a class="pcard" href="produkte/kunststofffenster/iglo-energy.html">
+      <div class="pbody">
+        <span class="eyebrow" style="margin-bottom:6px">Neubau · KfW/BAFA</span>
+        <h3>IGLO Energy</h3>
+        <p>Förderfähig: Uw bis 0,71 W/(m²K), 7-Kammer, 82 mm, 3 Dichtungsebenen. Für hohen Energiestandard und spürbar niedrigere Heizkosten.</p>
+        <span class="ghost">Details ansehen →</span>
       </div>
-      <div style="margin-top:22px"><a class="btn btn-ghost" style="background:#fff;border-color:var(--line)" href="/ueber-uns.html">Mehr über uns</a></div>
+    </a>
+  </div>
+  <div class="dsys">
+    <h3 class="dsys-h">Das komplette Drutex-Programm im Überblick</h3>
+    <div class="dsys-grid">
+      <div class="dsys-col">
+        <h4>Kunststoff (PVC) · IGLO-Reihe</h4>
+        <ul>
+          <li><b>IGLO Edge</b> — 7-Kammer, 82 mm, Uw ab 0,66 · Passivhaus</li>
+          <li><b>IGLO Energy</b> — 7-Kammer, 82 mm, Uw ab 0,71 · Energiespar <span class="dsys-tag">angeboten</span></li>
+          <li><b>IGLO Energy Classic</b> — 7-Kammer, 82 mm, abgerundete Form</li>
+          <li><b>IGLO Energy Alucover</b> — 7-Kammer, 93 mm, mit Alu-Außenschale</li>
+          <li><b>IGLO 5 / IGLO 5 Classic</b> — 5-Kammer, 70 mm · Standard <span class="dsys-tag">angeboten</span></li>
+          <li><b>IGLO Light</b> — 5-Kammer, 70 mm, schmale Ansichtsbreiten</li>
+          <li><b>IGLO EXT</b> — nach außen öffnende Fenster &amp; Balkontüren</li>
+          <li><b>IGLO Premier</b> — nach außen dreh-/kippbar, verdeckter Beschlag</li>
+          <li><b>IDEAL / NEO-Linie</b> — Einsteiger-Programm</li>
+        </ul>
+      </div>
+      <div class="dsys-col">
+        <h4>Aluminium · MB-Reihe</h4>
+        <ul>
+          <li><b>MB-86N SI</b> — 77 mm, Uw ab 0,76 · Premium</li>
+          <li><b>MB-79N SI</b> — verbesserte Wärmeisolation</li>
+          <li><b>MB-70HI</b> — wärmegedämmt (High Insulation)</li>
+          <li><b>MB-70</b> — wärmegedämmtes Standardprofil</li>
+          <li><b>MB-45</b> — schlank, ungedämmt (z.B. Wintergarten)</li>
+        </ul>
+        <h4 style="margin-top:var(--s5)">Holz &amp; Holz-Aluminium</h4>
+        <ul>
+          <li><b>SOFTLINE</b> — Holzfenster, 68 / 78 / 88 mm</li>
+          <li><b>DUOLINE</b> — Holz-Alu, außen Aluminium-Schale</li>
+        </ul>
+      </div>
+    </div>
+    <p class="dsys-note">Wir liefern die drei IGLO-Profile <strong>Classic, Energy und Edge</strong> nach Maß. Weitere Drutex-Systeme auf Anfrage — <a href="kontakt.html">sprechen Sie uns an</a>.</p>
+  </div>
+</div></section>
+
+<!-- Ratgeber-Teaser -->
+<section class="alt"><div class="wrap">
+  <div class="sec-head">
+    <span class="eyebrow">Tiefer einsteigen</span>
+    <h2>Aus unserem <span class="accent">Ratgeber.</span></h2>
+  </div>
+  <div class="prodgrid">
+    <a class="pcard" href="ratgeber/fenster-u-wert-erklaert.html">
+      <div class="pbody">
+        <span class="eyebrow" style="margin-bottom:6px">Ratgeber</span>
+        <h3>U-Wert einfach erklärt</h3>
+        <p>Was der Uw-Wert beim Fenster bedeutet — und warum er das wichtigste Energiekriterium beim Kauf ist.</p>
+        <span class="ghost">Artikel lesen →</span>
+      </div>
+    </a>
+    <a class="pcard" href="ratgeber/iglo5-vs-iglo-energy.html">
+      <div class="pbody">
+        <span class="eyebrow" style="margin-bottom:6px">Ratgeber</span>
+        <h3>IGLO 5 vs. IGLO Energy</h3>
+        <p>Der direkte Vergleich der zwei beliebtesten Drutex-Profile — welches sich für welches Projekt lohnt.</p>
+        <span class="ghost">Artikel lesen →</span>
+      </div>
+    </a>
+    <a class="pcard" href="ratgeber/bafa-foerderung-fenster-2026.html">
+      <div class="pbody">
+        <span class="eyebrow" style="margin-bottom:6px">Ratgeber</span>
+        <h3>KfW- &amp; BAFA-Förderung 2026</h3>
+        <p>Welche Drutex-Fenster förderfähig sind und wie Sie den Zuschuss vor der Bestellung beantragen.</p>
+        <span class="ghost">Artikel lesen →</span>
+      </div>
+    </a>
+    <a class="pcard" href="ratgeber/gebrauchte-fenster-kaufen-ratgeber.html">
+      <div class="pbody">
+        <span class="eyebrow" style="margin-bottom:6px">Ratgeber</span>
+        <h3>Gebrauchte Fenster kaufen</h3>
+        <p>Worauf Sie beim Kauf gebrauchter Fenster achten sollten — Tipps, Checks und faire Preise.</p>
+        <span class="ghost">Artikel lesen →</span>
+      </div>
+    </a>
+  </div>
+  <p class="region-note"><a class="ghost" href="ratgeber/index.html">Alle Ratgeber-Artikel ansehen →</a></p>
+</div></section>
+
+<!-- FAQ: 8 häufigste Fragen (SEO/GEO-Langtext, native details-Akkordeon) -->
+<section><div class="wrap">
+  <div class="sec-head">
+    <span class="eyebrow">Vor dem Kauf</span>
+    <h2>Was Sie über den <span class="accent">Fenster-Kauf</span> wissen sollten.</h2>
+  </div>
+  <p class="lead" style="max-width:60ch;margin-bottom:var(--s7)">Die 8 häufigsten Fragen unserer Kunden — direkt beantwortet, ohne Marketing-Sprech. Mehr Details auf unserer <a href="faq.html" style="color:var(--acc-text);font-weight:600">FAQ-Seite</a> und im <a href="glossar.html" style="color:var(--acc-text);font-weight:600">Glossar</a>.</p>
+  <div class="faq">
+    <details open>
+      <summary><span class="q">Was bedeutet der Uw-Wert beim Fenster?</span><span class="pm" aria-hidden="true"></span></summary>
+      <div class="ans"><p>Der <strong>Uw-Wert</strong> ist das wichtigste Energiekriterium beim Fenster-Kauf — er gibt an, wie viel Wärme das gesamte Fenster (Glas plus Rahmen) pro Quadratmeter und Grad Temperaturunterschied verliert. Je niedriger der Uw, desto besser die Wärmedämmung. Drutex IGLO Energy hat Uw 0,71 W/(m²K) und ist damit Passivhaus-tauglich. IGLO 5 Classic liegt bei 0,83. Mehr im <a href="glossar.html#uw-wert">Glossar</a>.</p></div>
+    </details>
+    <details>
+      <summary><span class="q">Wer haftet beim Aufmaß — ich oder der Händler?</span><span class="pm" aria-hidden="true"></span></summary>
+      <div class="ans"><p>Bei selbst gemessenem Aufmaß tragen <strong>Sie das Risiko</strong> für falsche Maße — die Drutex-Fenster werden millimetergenau nach Auftrag gefertigt. Wir empfehlen daher: zweimal messen (oben/unten und links/rechts — das kleinere Maß zählt). Oder: nutzen Sie unser <strong>kostenloses Aufmaß-Angebot</strong> per WhatsApp. Bei Auftrag durch uns übernehmen wir die Aufmaß-Haftung. Wichtig: Sie messen das <strong>Rohbaumaß</strong> (Maueröffnung ohne Putz), das Fenster wird 10–20 mm kleiner gefertigt.</p></div>
+    </details>
+    <details>
+      <summary><span class="q">Selbst einbauen oder Handwerker beauftragen?</span><span class="pm" aria-hidden="true"></span></summary>
+      <div class="ans"><p>Der <strong>Einbau</strong> erfordert handwerkliche Erfahrung — Justierung, Fugendichtung, Anschlüsse und Verquellschäumen müssen fachgerecht erfolgen. Bei nicht-fachgerechter <strong>Montage erlischt die Drutex-Gewährleistung</strong>. Wir empfehlen: erfahrene Tischler oder Fenstermonteure beauftragen. Auf Wunsch vermitteln wir Montage-Partner in Ihrer Region — die Montagekosten variieren je nach Aufwand und werden vom Handwerker direkt mit Ihnen abgerechnet.</p></div>
+    </details>
+    <details>
+      <summary><span class="q">Welche Drutex-Fenster sind KfW-förderfähig?</span><span class="pm" aria-hidden="true"></span></summary>
+      <div class="ans"><p>Die <strong>BAFA-Förderung</strong> (BEG EM) bezuschusst neue Fenster mit bis zu <strong>15 %</strong> (mit iSFP bis 20 %). Bedingung: Uw ≤ 0,95 W/(m²K). Förderfähig: <strong>IGLO Energy</strong> (Uw 0,71) und <strong>IGLO 5 Classic</strong> (Uw 0,83). <strong>KfW 458 gilt nicht mehr für Einzelfenster.</strong> Antrag <strong>vor</strong> Bestellung auf <a href="https://www.bafa.de" target="_blank" rel="noopener">bafa.de</a> stellen. <a href="kfw-foerderung.html">Förder-Ratgeber 2026 →</a></p></div>
+    </details>
+    <details>
+      <summary><span class="q">Wie viel Heizkosten spare ich mit neuen Drutex-Fenstern?</span><span class="pm" aria-hidden="true"></span></summary>
+      <div class="ans"><p>Bei einem typischen Einfamilienhaus mit alten Fenstern (Uw &gt; 2,5) auf IGLO Energy (Uw 0,71) sparen Sie ca. 20–35 % der Heizkosten pro Jahr — die konkrete Höhe hängt von Heizenergie-Preis, Fensterfläche und Klimazone ab. Über 15 Jahre amortisiert sich der Mehrpreis von IGLO Energy gegenüber IGLO 5 Classic in der Regel komplett — plus BAFA-Förderung.</p></div>
+    </details>
+    <details>
+      <summary><span class="q">Was bedeutet 10 Jahre Drutex-Gewährleistung konkret?</span><span class="pm" aria-hidden="true"></span></summary>
+      <div class="ans"><p>Die <strong>Drutex-Herstellergarantie</strong> umfasst 10 Jahre auf das Profil (Vergilbung, Verzug, Versprödung) und 5 Jahre auf den Beschlag (Mechanik). Plus 2 Jahre gesetzliche <strong>Gewährleistung</strong> auf Material- und Verarbeitungsfehler. Nicht abgedeckt: Transportschäden (sofort bei Anlieferung melden), Schäden durch unfachgemäße Montage, Kratzer durch Bauarbeiten.</p></div>
+    </details>
+    <details>
+      <summary><span class="q">Wie lange dauert die Lieferung von Drutex-Fenstern nach Maß?</span><span class="pm" aria-hidden="true"></span></summary>
+      <div class="ans"><p>Maßgefertigte Drutex-Fenster: ca. <strong>2 Wochen</strong> ab unserer Bestellung beim Werk. <strong>Drutex liefert direkt</strong> per Spedition bis zur Bordsteinkante. Wenn Sie es eilig haben: <a href="shop.html">Lager-Shop</a> — Lagerware sofort verfügbar.</p></div>
+    </details>
+    <details>
+      <summary><span class="q">Brauche ich neue Fenster für Passivhaus-Standard?</span><span class="pm" aria-hidden="true"></span></summary>
+      <div class="ans"><p><strong>Passivhaus-Standard</strong> verlangt extrem dichte Gebäudehülle und Uw-Werte unter 0,80 W/(m²K) bei Fenstern. Drutex IGLO Energy (Uw 0,71) erfüllt bei entsprechender 3-fach-Verglasung diesen Standard. Wichtig: Argon-Füllung, Warme-Kante-Abstandhalter und fachgerechter Einbau mit luftdichter Anbindung sind Pflicht.</p></div>
+    </details>
+  </div>
+</div></section>
+
+<!-- Über Drutex (dunkler Block in getönter Fläche → Ebenen-Tiefe) -->
+<section class="alt"><div class="wrap">
+  <div class="konf">
+    <div>
+      <span class="eyebrow">Der Hersteller</span>
+      <h2>Drutex — PVC-Fensterhersteller seit 1985.</h2>
+      <p>Drutex produziert seit 1985 in einem der größten Fensterwerke Europas in Bytów: eigene Profil-Extrusion, eigenes Glaswerk, eigene Beschlagfertigung — und verbaut ausschließlich Profile der Klasse A. Wir sind autorisierter Drutex-Händler und liefern diese Originalware direkt zu Ihnen.</p>
+    </div>
+    <div class="kbtn"><a class="btn-primary" href="ueber-drutex.html">Mehr über Drutex →</a></div>
+  </div>
+</div></section>
+
+<!-- Abschluss-CTA -->
+<section><div class="wrap">
+  <div class="ctablock">
+    <div>
+      <span class="eyebrow">Jetzt starten</span>
+      <h2>Bereit für Ihre neuen Fenster?</h2>
+      <p>Konfigurieren Sie Ihr Wunschfenster online — unverbindliches Angebot innerhalb von 24 Stunden per E-Mail. Kostenlos, ohne Verpflichtung.</p>
+      <div class="ctabtns">
+        <a class="btn-primary" href="konfigurator.html">Jetzt konfigurieren →</a>
+        <a class="ghost-d" href="/anfrage.html">Angebot per E-Mail</a>
+        <a class="ghost-d" href="https://wa.me/491717263776" target="_blank" rel="noopener">WhatsApp-Beratung</a>
+      </div>
     </div>
   </div>
-</section>
+</div></section>
 
-
-<section class="block reviews">
-  <div class="wrap">
-    <div class="sec-head"><span class="eyebrow">4,2 ★ bei Google · über 110 Bewertungen</span><h2 style="margin-top:12px">Das sagen unsere Kunden</h2></div>
-    <div class="rgrid"><div class="rcard"><div class="rs">★★★★★</div><p>„Top Service, super Qualität und sehr freundliches, hilfsbereites Team — absolut empfehlenswert!"</p><div class="who"><b>Emre K.</b><small>Google-Rezension · vor 5 Monaten</small></div></div><div class="rcard"><div class="rs">★★★★★</div><p>„Gebrauchte Fenster in fast allen Größen, neue wohl auch — freundliche und hilfsbereite Menschen hier."</p><div class="who"><b>Janek D.</b><small>Google Local Guide · vor 2 Monaten</small></div></div><div class="rcard"><div class="rs">★★★★★</div><p>„Unkompliziert, gute Qualität sowie schnelle und gut verpackte Lieferung."</p><div class="who"><b>A.</b><small>Google-Rezension · kürzlich</small></div></div><div class="rcard"><div class="rs">★★★★★</div><p>„Sehr gute Kommunikation mit dem Verkäufer."</p><div class="who"><b>D.</b><small>Google-Rezension · kürzlich</small></div></div></div>
-    <div style="text-align:center;margin-top:28px"><a class="btn btn-ghost" style="background:#fff;border-color:var(--line)" href="https://www.google.com/maps?cid=9402028850820563054" target="_blank" rel="noopener">Alle Bewertungen auf Google</a></div>
+<!-- Hellblau-Banner mit Preis -->
+<section class="promo"><div class="wrap">
+  <div>
+    <span class="eyebrow">Lagerverkauf · Hofverkauf Brandenburg</span>
+    <h2>Drutex-Lagerfenster ab 80 € inkl. MwSt.</h2>
+    <p>Neu &amp; original verpackt, sofort verfügbar zur Abholung — solange der Vorrat reicht.</p>
   </div>
-</section>
+  <a class="promo-cta" href="shop.html">Zum Lager-Shop →</a>
+</div></section>
 
-<section class="block">
-  <div class="wrap">
-    <div class="sec-head"><span class="eyebrow">Liefergebiet</span><h2 style="margin-top:12px">Lieferung deutschlandweit</h2><p>Direkt vom Werk per Spedition, ohne Aufpreis für entlegene Regionen.</p></div>
-    <div class="reg-pills"><a href="/staedte/fenster-brandenburg-an-der-havel.html">Brandenburg a.d.H.</a><a href="/staedte/fenster-berlin.html">Berlin</a><a href="/staedte/fenster-potsdam.html">Potsdam</a><a href="/staedte/fenster-hamburg.html">Hamburg</a><a href="/staedte/fenster-muenchen.html">München</a><a href="/staedte/fenster-koeln.html">Köln</a><a href="/staedte/fenster-frankfurt-am-main.html">Frankfurt a.M.</a><a href="/staedte/fenster-stuttgart.html">Stuttgart</a><a href="/staedte/fenster-duesseldorf.html">Düsseldorf</a><a href="/staedte/fenster-leipzig.html">Leipzig</a><a href="/staedte/fenster-dresden.html">Dresden</a><a href="/staedte/fenster-hannover.html">Hannover</a><a href="/staedte/fenster-nuernberg.html">Nürnberg</a><a href="/staedte/fenster-bremen.html">Bremen</a><a href="/staedte/fenster-magdeburg.html">Magdeburg</a><a href="/staedte/fenster-cottbus.html">Cottbus</a></div>
-  </div>
-</section>
-
-<section class="block" style="background:var(--panel)">
-  <div class="wrap">
-    <div class="sec-head"><span class="eyebrow">Fragen &amp; Antworten</span><h2 style="margin-top:12px">Häufige Fragen</h2></div>
-    <div class="faqwrap"><details><summary>Was bedeutet der Uw-Wert beim Fenster?</summary><div class="fa">Der Uw-Wert ist das wichtigste Energiekriterium beim Fenster-Kauf — er gibt an, wie viel Wärme das gesamte Fenster (Glas plus Rahmen) pro Quadratmeter und Grad Temperaturunterschied verliert. Je niedriger der Uw, desto besser die Wärmedämmung. Drutex IGLO Energy hat Uw 0,71 W/(m²K) und ist damit Passivhaus-tauglich. IGLO 5 Classic liegt bei 0,83. Mehr im Glossar.</div></details><details><summary>Wer haftet beim Aufmaß — ich oder der Händler?</summary><div class="fa">Bei selbst gemessenem Aufmaß tragen Sie das Risiko für falsche Maße — die Drutex-Fenster werden millimetergenau nach Auftrag gefertigt. Wir empfehlen daher: zweimal messen (oben/unten und links/rechts — das kleinere Maß zählt). Oder: nutzen Sie unser kostenloses Aufmaß-Angebot per WhatsApp. Bei Auftrag durch uns übernehmen wir die Aufmaß-Haftung. Wichtig: Sie messen das Rohbaumaß (Maueröffnung ohne Putz), das Fenster wird 10–20 mm kleiner gefertigt.</div></details><details><summary>Selbst einbauen oder Handwerker beauftragen?</summary><div class="fa">Der Einbau erfordert handwerkliche Erfahrung — Justierung, Fugendichtung, Anschlüsse und Verquellschäumen müssen fachgerecht erfolgen. Bei nicht-fachgerechter Montage erlischt die Drutex-Gewährleistung. Wir empfehlen: erfahrene Tischler oder Fenstermonteure beauftragen. Auf Wunsch vermitteln wir Montage-Partner in Ihrer Region — die Montagekosten variieren je nach Aufwand und werden vom Handwerker direkt mit Ihnen abgerechnet.</div></details><details><summary>Welche Drutex-Fenster sind KfW-förderfähig?</summary><div class="fa">Die BAFA-Förderung (BEG EM) bezuschusst neue Fenster mit bis zu 15 % (mit iSFP bis 20 %). Bedingung: Uw ≤ 0,95 W/(m²K). Förderfähig: IGLO Energy (Uw 0,71) und IGLO 5 Classic (Uw 0,83). KfW 458 gilt nicht mehr für Einzelfenster. Antrag vor Bestellung auf bafa.de stellen. Förder-Ratgeber 2026 →</div></details><details><summary>Wie viel Heizkosten spare ich mit neuen Drutex-Fenstern?</summary><div class="fa">Bei einem typischen Einfamilienhaus mit alten Fenstern (Uw &gt; 2,5) auf IGLO Energy (Uw 0,71) sparen Sie ca. 20–35 % der Heizkosten pro Jahr — die konkrete Höhe hängt von Heizenergie-Preis, Fensterfläche und Klimazone ab. Über 15 Jahre amortisiert sich der Mehrpreis von IGLO Energy gegenüber IGLO 5 Classic in der Regel komplett — plus BAFA-Förderung.</div></details><details><summary>Was bedeutet 10 Jahre Drutex-Gewährleistung konkret?</summary><div class="fa">Die Drutex-Herstellergarantie umfasst 10 Jahre auf das Profil (Vergilbung, Verzug, Versprödung) und 5 Jahre auf den Beschlag (Mechanik). Plus 2 Jahre gesetzliche Gewährleistung auf Material- und Verarbeitungsfehler. Nicht abgedeckt: Transportschäden (sofort bei Anlieferung melden), Schäden durch unfachgemäße Montage, Kratzer durch Bauarbeiten.</div></details><details><summary>Wie lange dauert die Lieferung von Drutex-Fenstern nach Maß?</summary><div class="fa">Maßgefertigte Drutex-Fenster: ca. 2 Wochen ab unserer Bestellung beim Werk. Drutex liefert direkt per Spedition bis zur Bordsteinkante. Wenn Sie es eilig haben: Lager-Shop — Lagerware sofort verfügbar.</div></details><details><summary>Brauche ich neue Fenster für Passivhaus-Standard?</summary><div class="fa">Passivhaus-Standard verlangt extrem dichte Gebäudehülle und Uw-Werte unter 0,80 W/(m²K) bei Fenstern. Drutex IGLO Energy (Uw 0,71) erfüllt bei entsprechender 3-fach-Verglasung diesen Standard. Wichtig: Argon-Füllung, Warme-Kante-Abstandhalter und fachgerechter Einbau mit luftdichter Anbindung sind Pflicht.</div></details></div>
-  </div>
-</section>
-
-<footer>
-  <div class="wrap">
+<footer><div class="wrap">
+  <div class="foot-top">
+    <div class="foot-brand">
+      <a class="logo" href="index.html"><b>DeineFenster</b><span>.de</span></a>
+      <p class="foot-tag">Drutex-Kunststofffenster &amp; -Türen vom Fachhandel. Autorisierter Drutex-Händler · Türen und Fensterhandel Christ seit 1996 · Lieferung deutschlandweit.</p>
+      <div class="foot-contact">
+        <a href="tel:+4933812148373">☎ 03381 / 2148373</a>
+        <a href="mailto:info@baustoffchrist.de">info@baustoffchrist.de</a>
+        <a href="kontakt.html">Fohrder Landstraße 13 · 14772 Brandenburg a.d.H.</a>
+      </div>
+    </div>
     <div class="cols">
-      <div>
-        <img class="flogo" src="img/logo/deinefenster-logo.svg" alt="DeineFenster.de">
-        <p style="font-size:.85rem;color:oklch(0.72 0.02 250);max-width:26ch">Türen und Fensterhandel Christ · Fohrder Landstraße 13 · 14772 Brandenburg an der Havel</p>
+      <div class="col">
+        <h3>Sortiment</h3>
+        <a href="produkte.html">Produkte</a>
+        <a href="konfigurator.html">Konfigurator</a>
+        <a href="shop.html">Shop</a>
+        <a href="kunststofffenster-kaufen.html">Neue Fenster</a>
+        <a href="gebrauchte-fenster-kaufen.html">Gebrauchte Fenster</a>
       </div>
-      <div><h4>Produkte</h4><a href="/kunststofffenster-kaufen.html">Fenster</a><a href="/produkte/haustueren/iglo-energy.html">Haustüren</a><a href="/produkte/hebe-schiebetueren/iglo-energy-psk.html">Schiebetüren</a><a href="/produkte/rollladen/aufsatz-rollladen.html">Rollläden</a></div>
-      <div><h4>Service</h4><a href="/konfigurator.html">Konfigurator</a><a href="/shop.html">Shop</a><a href="/gebrauchte-fenster-kaufen.html">Hofverkauf</a><a href="/kontakt.html">Kontakt</a></div>
-      <div><h4>Rechtliches</h4><a href="/impressum.html">Impressum</a><a href="/datenschutz.html">Datenschutz</a><a href="/agb.html">AGB</a><a href="/widerruf.html">Widerruf</a></div>
+      <div class="col">
+        <h3>Service</h3>
+        <a href="ueber-uns.html">Über uns</a>
+        <a href="kontakt.html">Kontakt</a>
+        <a href="fenster-austauschen-kosten.html">Ankauf</a>
+        <a href="ratgeber/index.html">Ratgeber</a>
+        <a href="faq.html">FAQ</a>
+      </div>
+      <div class="col">
+        <h3>Rechtliches</h3>
+        <a href="impressum.html">Impressum</a>
+        <a href="datenschutz.html">Datenschutz</a>
+        <a href="agb.html">AGB</a>
+        <a href="agb.html#p7">Widerrufsrecht</a>
+      </div>
     </div>
-    <div class="fb">© 2026 DeineFenster.de · Autorisierter Drutex-Fachhändler · Hofverkauf jeden Freitag 10–17 Uhr</div>
   </div>
-</footer>
+  <div class="foot-bottom">
+    <p>© 2026 DeineFenster.de · Türen und Fensterhandel Christ · Alle Rechte vorbehalten. · <span style="opacity:.8">Stand: <time datetime="2026-06-04">Juni 2026</time></span></p>
+    <div class="foot-legal">
+      <a href="impressum.html">Impressum</a>
+      <a href="datenschutz.html">Datenschutz</a>
+      <a href="agb.html">AGB</a>
+      <button type="button" onclick="window.dfOpenCookieSettings && window.dfOpenCookieSettings()">Cookie-Einstellungen</button>
+    </div>
+  </div>
+</div></footer>
 
+<!-- WhatsApp-Floating-Button (immer sichtbar, rechts unten) -->
+<style>
+    .df-wa-float{position:fixed;bottom:24px;right:24px;z-index:90;display:flex;align-items:center;justify-content:center;width:60px;height:60px;background:#25D366;color:#fff;border-radius:50%;box-shadow:0 8px 28px rgba(37,211,102,.45),0 4px 14px rgba(0,0,0,.25);text-decoration:none;transition:transform .2s,box-shadow .2s}
+  .df-wa-float:hover{transform:translateY(-2px) scale(1.06);box-shadow:0 12px 36px rgba(37,211,102,.55),0 6px 18px rgba(0,0,0,.3)}
+  .df-wa-float svg{width:32px;height:32px;margin:0}
+  .df-wa-float .df-wa-label{display:none}
+  @media (max-width:640px){.df-wa-float{width:56px;height:56px;bottom:18px;right:18px}.df-wa-float svg{width:30px;height:30px}}
+  @media (prefers-reduced-motion:reduce){.df-wa-float{transition:none}}
+</style>
+<a class="df-wa-float" href="https://wa.me/491717263776" target="_blank" rel="noopener" aria-label="WhatsApp-Anfrage an Türen und Fensterhandel Christ">
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.149-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0 0 20.464 3.488"/></svg>
+  <span class="df-wa-label">WhatsApp</span>
+</a>
+
+<!-- Cookie-Consent (TTDSG § 25) -->
+<link rel="stylesheet" href="css/cookie-banner.css">
+<script defer src="js/cookie-banner.js"></script>
+
+<!-- Cloudflare Web Analytics (cookieless, DSGVO-konform) --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "2cf67e72370843bc8998180837703d02"}'></script><!-- End Cloudflare Web Analytics -->
+
+<script src="/js/vendor/gsap.min.js"></script>
+<script src="/js/vendor/ScrollTrigger.min.js"></script>
 <script>
-  window.addEventListener('DOMContentLoaded',function(){
-    document.querySelectorAll('.reveal').forEach(function(el,i){setTimeout(function(){el.classList.add('in')},120+i*90)});
-    setTimeout(function(){var h=document.getElementById('heroImg');if(h)h.classList.add('in')},260);
+  // Hero-Video etwas langsamer = ruhiger/cineastischer
+  (function(){ var hv = document.querySelector('.hero-bg video'); if(hv){ hv.playbackRate = 0.7; hv.addEventListener('loadedmetadata', function(){ hv.playbackRate = 0.7; }); } })();
+  // Nav bleibt über dem Hero-Video durchsichtig, wird erst solide weiß sobald man am Hero vorbei ist (kein weißer Balken übers Video)
+  var heroEl = document.querySelector('.hero');
+  var onScroll = function(){ var t = heroEl ? Math.max(40, heroEl.offsetHeight - 90) : 40; document.body.classList.toggle('scrolled', window.scrollY > t); };
+  onScroll();
+  addEventListener('scroll', onScroll, { passive: true });
+
+  // Mobile-Menü
+  (function(){
+    var burger = document.getElementById('burger');
+    var mnav = document.getElementById('mnav');
+    var closeBtn = document.getElementById('mnavClose');
+    if(!burger || !mnav) return;
+    function open(){ mnav.classList.add('open'); burger.setAttribute('aria-expanded','true'); document.body.style.overflow='hidden'; }
+    function shut(){ mnav.classList.remove('open'); burger.setAttribute('aria-expanded','false'); document.body.style.overflow=''; }
+    burger.addEventListener('click', open);
+    closeBtn && closeBtn.addEventListener('click', shut);
+    mnav.addEventListener('click', function(e){ if(e.target === mnav) shut(); });
+    mnav.querySelectorAll('a[href]').forEach(function(a){ a.addEventListener('click', shut); });
+    document.addEventListener('keydown', function(e){ if(e.key === 'Escape') shut(); });
+  })();
+
+  // Scroll-Reveal (additiv; ohne JS bleibt alles sichtbar) — gestaffelt + Zahl-Count-up
+  document.documentElement.classList.add('js-ready');
+  var reduceM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+  document.querySelectorAll('.sec-head, .konf > div, .ctablock .inner, .band, .region-pills, .promo .wrap').forEach(function(el){ el.classList.add('reveal'); io.observe(el); });
+  document.querySelectorAll('.cards, .prodgrid, .steps, .steps-4, .stats, .stats-4').forEach(function(grp){
+    Array.prototype.forEach.call(grp.children, function(child, i){ child.classList.add('reveal'); child.style.transitionDelay = ((i % 4) * 80) + 'ms'; io.observe(child); });
   });
-  window.addEventListener('scroll',function(){document.body.classList.toggle('scrolled',window.scrollY>24)},{passive:true});
+  function countUp(el){
+    var raw = el.textContent, m = raw.match(/([\d.,]+)/); if(!m) return;
+    var isDec = m[1].indexOf(',') > -1, target = parseFloat(m[1].replace(/\./g,'').replace(',', '.')); if(isNaN(target)) return;
+    var pre = raw.slice(0, m.index), post = raw.slice(m.index + m[1].length), start = null, dur = 1300;
+    function fmt(v){ return isDec ? v.toLocaleString('de-DE',{minimumFractionDigits:1,maximumFractionDigits:1}) : Math.round(v).toLocaleString('de-DE'); }
+    function tick(t){ if(!start) start=t; var p=Math.min((t-start)/dur,1), e=1-Math.pow(1-p,3); el.textContent=pre+fmt(target*e)+post; if(p<1) requestAnimationFrame(tick); else el.textContent=pre+fmt(target)+post; }
+    requestAnimationFrame(tick);
+  }
+  if(!reduceM){
+    var cObs = new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ var n=e.target.querySelector('.num'); if(n && !n.dataset.c){ n.dataset.c='1'; countUp(n); } cObs.unobserve(e.target);} }); }, { threshold: 0.4 });
+    document.querySelectorAll('.stat').forEach(function(s){ cObs.observe(s); });
+  }
+
+  // Hero-Scroll-Szene (fixiert + Rein-/Raus-Zoom, reversibel) + Maus-Mitlauf — NUR Desktop (mobil: ruhiger statischer Hero, kein Pin), reduced-motion-safe
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches && matchMedia('(min-width: 900px)').matches && window.gsap && window.ScrollTrigger) {
+    gsap.registerPlugin(ScrollTrigger);
+    var heroEl = document.querySelector('.hero');
+    if (heroEl) {
+      var tl = gsap.timeline({ scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: 0.6 } });
+      tl.to('.hero-bg', { scale: 1.12, ease: 'none' }, 0);
+
+      // dezenter Maus-Mitlauf des Videos (nur Desktop-Cursor)
+      if (matchMedia('(pointer:fine)').matches) {
+        var vid = document.querySelector('.hero-bg video') || document.querySelector('.hero-bg img');
+        if (vid) {
+          heroEl.addEventListener('mousemove', function(e){
+            var r = heroEl.getBoundingClientRect();
+            var x = (e.clientX - r.left) / r.width - 0.5;
+            var y = (e.clientY - r.top) / r.height - 0.5;
+            vid.style.transform = 'translate(' + (x * -16).toFixed(1) + 'px,' + (y * -12).toFixed(1) + 'px)';
+          });
+          heroEl.addEventListener('mouseleave', function(){ vid.style.transform = ''; });
+        }
+      }
+    }
+  }
+
+  // Interaktives Licht: dunkle Blöcke bekommen einen Spotlight, der der Maus folgt — + magnetische CTAs
+  if (!reduceM && matchMedia('(pointer:fine)').matches) {
+    document.querySelectorAll('.konf, .ctablock, section.dark').forEach(function(el){
+      el.addEventListener('mousemove', function(e){
+        var r = el.getBoundingClientRect();
+        el.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100).toFixed(1) + '%');
+        el.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100).toFixed(1) + '%');
+      });
+      el.addEventListener('mouseleave', function(){ el.style.removeProperty('--mx'); el.style.removeProperty('--my'); });
+    });
+    document.querySelectorAll('.btn-primary, .promo-cta, .nav-cta').forEach(function(btn){
+      btn.style.willChange = 'transform';
+      btn.addEventListener('mousemove', function(e){
+        var r = btn.getBoundingClientRect();
+        var mx = (e.clientX - r.left - r.width/2) / r.width;
+        var my = (e.clientY - r.top - r.height/2) / r.height;
+        btn.style.transform = 'translate(' + (mx*6).toFixed(1) + 'px,' + (my*6).toFixed(1) + 'px)';
+      });
+      btn.addEventListener('mouseleave', function(){ btn.style.transform = ''; });
+    });
+  }
+</script>
+<script>
+/* Neues Startbild — Produkt-Switcher (nhero) */
+(function(){
+  var stage=document.getElementById('heroStage');
+  var card=document.getElementById('heroCard');
+  if(!stage||!card) return;
+  var layers=[].slice.call(stage.querySelectorAll('.nhero-layer'));
+  var title=document.getElementById('heroCardTitle');
+  var prevBtn=document.getElementById('heroPrev');
+  var nextBtn=document.getElementById('heroNext');
+  var dotsWrap=document.getElementById('heroDots');
+  var dots=dotsWrap?[].slice.call(dotsWrap.querySelectorAll('.nhero-dot')):[];
+  var PRODS=[
+    {key:'fenster', name:'Fenster',    prod:'fenster'},
+    {key:'balkon',  name:'Balkontür',  prod:'balkon'},
+    {key:'haustuer',name:'Haustür',    prod:'haustuer'},
+    {key:'schiebe', name:'Schiebetür', prod:'schiebe'}
+  ];
+  var idx=0, swapT=null, swiped=false;
+  function setActive(i){
+    i=((i%PRODS.length)+PRODS.length)%PRODS.length;
+    if(i===idx) return;
+    idx=i; var p=PRODS[i];
+    layers.forEach(function(l){ l.classList.toggle('is-active', l.getAttribute('data-prod')===p.key); });
+    dots.forEach(function(d,di){ var on=di===i; d.classList.toggle('is-active',on); d.setAttribute('aria-selected',on?'true':'false'); });
+    card.classList.add('swapping');
+    if(swapT) window.clearTimeout(swapT);
+    swapT=window.setTimeout(function(){
+      title.textContent=p.name;
+      card.setAttribute('href','konfigurator.html?prod='+p.prod);
+      card.setAttribute('aria-label',p.name+' konfigurieren');
+      card.classList.remove('swapping');
+      swapT=null;
+    },170);
+  }
+  function nextP(){ setActive(idx+1); }
+  function prevP(){ setActive(idx-1); }
+  nextBtn.addEventListener('click',function(){ nextP(); });
+  prevBtn.addEventListener('click',function(){ prevP(); });
+  dots.forEach(function(d){ d.addEventListener('click',function(){ setActive(+d.getAttribute('data-i')); }); });
+  stage.addEventListener('click',function(e){
+    if(swiped){ swiped=false; return; }
+    var r=stage.getBoundingClientRect();
+    if((e.clientX-r.left) < r.width/2) prevP(); else nextP();
+  });
+  stage.addEventListener('keydown',function(e){
+    if(e.key==='ArrowLeft'){ e.preventDefault(); prevP(); }
+    else if(e.key==='ArrowRight'){ e.preventDefault(); nextP(); }
+  });
+  var sx=null;
+  stage.addEventListener('touchstart',function(e){ sx=e.touches[0].clientX; swiped=false; },{passive:true});
+  stage.addEventListener('touchend',function(e){
+    if(sx===null) return;
+    var dx=e.changedTouches[0].clientX - sx; sx=null;
+    if(Math.abs(dx)>40){ swiped=true; if(dx<0) nextP(); else prevP(); }
+  },{passive:true});
+})();
+</script>
+<script>
+/* Mega-Menü: hover-intent — öffnet sofort, schließt mit Verzögerung, bleibt offen im Panel */
+(function(){
+  var CLOSE_DELAY=260;
+  var items=[].slice.call(document.querySelectorAll('nav.main .nav-item'));
+  items.forEach(function(item){
+    if(!item.querySelector('.mega')) return;
+    var t=null;
+    function open(){ clearTimeout(t); items.forEach(function(o){ if(o!==item) o.classList.remove('open'); }); item.classList.add('open'); }
+    function scheduleClose(){ clearTimeout(t); t=window.setTimeout(function(){ item.classList.remove('open'); }, CLOSE_DELAY); }
+    item.addEventListener('mouseenter', open);
+    item.addEventListener('mouseleave', scheduleClose);
+    item.addEventListener('focusin', open);
+    item.addEventListener('focusout', function(e){ if(!item.contains(e.relatedTarget)) scheduleClose(); });
+  });
+  // Klick/Escape schließt alle
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape') items.forEach(function(o){ o.classList.remove('open'); }); });
+})();
 </script>
 </body>
 </html>

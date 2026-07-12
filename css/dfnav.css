@@ -1,0 +1,129 @@
+/* ============================================================
+   dfnav — eigenständige, kollisionsfreie Site-Navigation
+   Namespace: .dfnav*  ·  eigene --dfn-* Tokens (keine Fremd-Abhängigkeit)
+   Funktioniert standalone auf jeder Seite (auch ohne df-2026.css).
+   Braucht nur: Material Symbols Font (/fonts/material-symbols.css).
+   ============================================================ */
+:root{
+  --dfn-bg:oklch(0.99 0.006 240);
+  --dfn-surface:oklch(0.965 0.015 240);
+  --dfn-surface2:oklch(0.945 0.02 240);
+  --dfn-border:oklch(0.9 0.02 244);
+  --dfn-text:oklch(0.26 0.055 256);
+  --dfn-soft:oklch(0.4 0.05 256);
+  --dfn-acc:oklch(0.72 0.12 250);
+  --dfn-acc-text:oklch(0.45 0.13 256);
+  --dfn-ease:cubic-bezier(.16,1,.3,1);
+  --dfn-pill:999px;
+  --dfn-disp:'Switzer','Inter','Segoe UI',system-ui,sans-serif;
+  --dfn-h:106px;              /* util 38 + nav 68 */
+}
+.dfnav-wrap{max-width:1520px;margin:0 auto;padding:0 clamp(24px,4.5vw,72px)}
+
+/* ---- Utility-Leiste (oben) ---- */
+.dfnav-util{position:fixed;top:var(--banner-h,0px);left:0;right:0;z-index:60;background:var(--dfn-surface2);border-bottom:1px solid var(--dfn-border);font-size:.8rem}
+.dfnav-util .dfnav-wrap{display:flex;justify-content:space-between;align-items:center;height:38px}
+.dfnav-util a{color:var(--dfn-soft);font-weight:600;text-decoration:none;transition:color .2s}
+.dfnav-util a:hover{color:var(--dfn-acc-text)}
+.dfnav-util .dfnav-uright{display:flex;gap:24px;align-items:center}
+.dfnav-util .dfnav-wa{color:var(--dfn-acc-text)}
+
+/* ---- Hauptnav ---- */
+.dfnav{position:fixed;top:calc(var(--banner-h,0px) + 38px);left:0;right:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--dfn-border);box-shadow:0 4px 22px rgba(0,0,0,.06)}
+.dfnav .dfnav-wrap{display:flex;align-items:center;gap:32px;height:68px}
+.dfnav-logo{font-family:var(--dfn-disp);font-weight:800;font-size:1.3rem;letter-spacing:-.02em;color:var(--dfn-text);text-decoration:none}
+.dfnav-logo span{color:var(--dfn-acc-text)}
+.dfnav-links{display:flex;gap:24px;margin:0 auto}
+.dfnav-item{display:flex;align-items:center}
+.dfnav-link{position:relative;font-family:var(--dfn-disp);font-weight:600;font-size:.95rem;color:var(--dfn-text);padding:6px 0;text-decoration:none;transition:color .2s;cursor:pointer}
+.dfnav-link:hover,.dfnav-item:hover .dfnav-link,.dfnav-item.open .dfnav-link{color:var(--dfn-acc-text)}
+.dfnav-chev{font-size:18px;transition:transform .25s;vertical-align:middle}
+.dfnav-item:hover .dfnav-chev,.dfnav-item:focus-within .dfnav-chev,.dfnav-item.open .dfnav-chev{transform:rotate(180deg)}
+.dfnav-cta{background:var(--dfn-acc-text);color:#fff;font-family:var(--dfn-disp);font-weight:700;font-size:.9rem;padding:11px 22px;border-radius:var(--dfn-pill);text-decoration:none;box-shadow:0 14px 30px -12px rgba(28,58,108,.5);transition:transform .2s,box-shadow .2s}
+.dfnav-cta:hover{transform:translateY(-1px);box-shadow:0 18px 34px -12px rgba(28,58,108,.55)}
+
+/* ---- Vollbreiten-Flyout ---- */
+.dfnav-mega{position:absolute;left:0;right:0;top:100%;background:var(--dfn-bg);border-top:1px solid var(--dfn-border);border-bottom:1px solid var(--dfn-border);box-shadow:0 26px 50px -24px rgba(8,21,46,.3);opacity:0;visibility:hidden;pointer-events:none;transform:translateY(8px);transition:opacity .2s var(--dfn-ease),transform .22s var(--dfn-ease);z-index:70}
+.dfnav-mega::before{content:"";position:absolute;top:-10px;left:0;right:0;height:10px}
+.dfnav-item:hover .dfnav-mega,.dfnav-item:focus-within .dfnav-mega,.dfnav-item.open .dfnav-mega{opacity:1;visibility:visible;pointer-events:auto;transform:translateY(0)}
+.dfnav-inner{max-width:1180px;margin:0 auto;padding:32px clamp(20px,4vw,48px)}
+.dfnav-grid{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr 1.15fr;gap:24px 48px;padding:32px clamp(20px,4vw,48px)}
+
+/* Produkt-Kartenreihe */
+.dfnav-prods{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+.dfnav-prod{display:flex;flex-direction:column;align-items:center;text-align:center;text-decoration:none;padding:14px 8px 16px;border-radius:14px;border:1px solid transparent;transition:border-color .18s,background .18s,transform .18s}
+.dfnav-prod:hover{background:oklch(0.965 0.015 240);transform:translateY(-3px)}
+.dfnav-prod:hover b{color:var(--dfn-acc-text)}
+.dfnav-prod-img{width:100%;height:132px;display:flex;align-items:flex-end;justify-content:center;margin-bottom:12px}
+.dfnav-prod-img img{max-width:100%;max-height:100%;object-fit:contain}
+.dfnav-prod b{font-family:var(--dfn-disp);font-size:.94rem;color:var(--dfn-text);letter-spacing:-.01em}
+.dfnav-prod small{font-size:.76rem;color:var(--dfn-soft);margin-top:3px;line-height:1.3}
+
+/* Gemischtes Flyout (Gebraucht) */
+.dfnav-mixed{display:grid;grid-template-columns:1.5fr 1fr 1.1fr;gap:32px;align-items:stretch}
+.dfnav-prods-2{grid-template-columns:1fr 1fr;gap:12px}
+.dfnav-services{display:flex;flex-direction:column;gap:4px;padding-top:6px;border-left:1px solid var(--dfn-border);padding-left:24px}
+.dfnav-srv{display:flex;gap:12px;align-items:flex-start;padding:11px;border-radius:10px;text-decoration:none;transition:background .18s}
+.dfnav-srv:hover{background:oklch(0.965 0.015 240)}
+.dfnav-srv b{font-family:var(--dfn-disp);font-size:.94rem;color:var(--dfn-text);display:block;letter-spacing:-.01em}
+.dfnav-srv small{font-size:.78rem;color:var(--dfn-soft);display:block;margin-top:2px;line-height:1.35}
+
+/* Textspalten-Flyout (Ratgeber) */
+.dfnav-col h4{font-family:var(--dfn-disp);font-size:.72rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--dfn-acc-text);margin-bottom:12px}
+.dfnav-mlink{display:flex;gap:12px;align-items:flex-start;padding:9px 11px;border-radius:10px;transition:background .18s;text-decoration:none}
+.dfnav-mlink:hover{background:var(--dfn-surface)}
+.dfnav-ic{flex-shrink:0;width:34px;height:34px;border-radius:9px;background:rgba(118,169,250,.14);display:flex;align-items:center;justify-content:center}
+.dfnav-ic .material-symbols-outlined{font-size:19px;color:var(--dfn-acc-text)}
+.dfnav-mlink b{display:block;font-family:var(--dfn-disp);font-weight:700;font-size:.92rem;color:var(--dfn-text);letter-spacing:-.01em}
+.dfnav-mlink small{display:block;font-size:.78rem;color:var(--dfn-soft);margin-top:1px;line-height:1.35}
+
+/* Flyout-Feature-Karte */
+.dfnav-card{display:block;border:1px solid var(--dfn-border);border-radius:14px;overflow:hidden;text-decoration:none;background:oklch(0.965 0.015 240);transition:transform .2s,box-shadow .2s,border-color .2s;height:100%}
+.dfnav-card:hover{transform:translateY(-3px);box-shadow:0 18px 40px -22px rgba(28,58,108,.4);border-color:var(--dfn-acc)}
+.dfnav-card img{width:100%;height:120px;object-fit:cover;display:block}
+.dfnav-cb{padding:13px 16px}
+.dfnav-cb b{font-family:var(--dfn-disp);font-size:.95rem;color:var(--dfn-text);display:block}
+.dfnav-cb small{display:block;color:var(--dfn-soft);font-size:.82rem;margin:3px 0 8px;line-height:1.4}
+.dfnav-cb .cta{color:var(--dfn-acc-text);font-weight:700;font-size:.85rem}
+
+/* Flyout-Fußzeile */
+.dfnav-foot{border-top:1px solid var(--dfn-border);margin-top:24px;padding-top:16px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.dfnav-foot a.all{font-weight:700;color:var(--dfn-acc-text);font-size:.88rem;text-decoration:none}
+.dfnav-foot a.all:hover{text-decoration:underline}
+.dfnav-foot .dfnav-fbtn{background:var(--dfn-acc-text);color:#fff;font-family:var(--dfn-disp);font-weight:700;padding:11px 22px;font-size:.88rem;border-radius:var(--dfn-pill);text-decoration:none}
+
+/* ---- Burger + Mobile-Drawer ---- */
+.dfnav-burger{display:none;background:transparent;border:0;cursor:pointer;color:var(--dfn-text);padding:4px;margin-left:auto;line-height:0}
+.dfnav-burger .material-symbols-outlined{font-size:30px}
+.dfnav-drawer{position:fixed;inset:0;z-index:120;background:rgba(8,14,30,.5);opacity:0;visibility:hidden;transition:opacity .25s}
+.dfnav-drawer.open{opacity:1;visibility:visible}
+.dfnav-panel{position:absolute;top:0;right:0;height:100%;width:min(340px,86vw);background:var(--dfn-bg);box-shadow:-12px 0 40px rgba(8,21,46,.25);transform:translateX(100%);transition:transform .3s var(--dfn-ease);overflow-y:auto;padding:32px 24px}
+.dfnav-drawer.open .dfnav-panel{transform:none}
+.dfnav-dhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.dfnav-close{background:transparent;border:0;cursor:pointer;color:var(--dfn-text);padding:4px;line-height:0}
+.dfnav-close .material-symbols-outlined{font-size:28px}
+.dfnav-drawer a.dfnav-ml{display:block;font-family:var(--dfn-disp);font-weight:700;font-size:1.05rem;color:var(--dfn-text);padding:13px 0;border-bottom:1px solid var(--dfn-border);text-decoration:none}
+.dfnav-drawer details>summary{display:flex;justify-content:space-between;align-items:center;font-family:var(--dfn-disp);font-weight:700;font-size:1.05rem;color:var(--dfn-text);padding:13px 0;border-bottom:1px solid var(--dfn-border);cursor:pointer;list-style:none}
+.dfnav-drawer details>summary::-webkit-details-marker{display:none}
+.dfnav-drawer details[open]>summary .material-symbols-outlined{transform:rotate(180deg)}
+.dfnav-drawer details>summary .material-symbols-outlined{transition:transform .2s}
+.dfnav-drawer details .dfnav-sub{padding:6px 0 10px 12px}
+.dfnav-drawer details .dfnav-sub a{display:block;color:var(--dfn-soft);font-size:.95rem;padding:7px 0;font-weight:600;text-decoration:none}
+.dfnav-drawer details .dfnav-sub a:hover{color:var(--dfn-acc-text)}
+.dfnav-drawer .dfnav-mlcta{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:24px;background:var(--dfn-acc-text);color:#fff;font-family:var(--dfn-disp);font-weight:700;padding:14px;border-radius:var(--dfn-pill);text-decoration:none}
+
+/* ---- Konfigurator-Variante: nicht-klebend ---- */
+.dfnav--flow .dfnav-util,.dfnav-util.dfnav--flow{position:static}
+.dfnav.dfnav--flow{position:static}
+
+/* ---- Responsive ---- */
+@media(max-width:900px){.dfnav-prods{grid-template-columns:repeat(3,1fr)}.dfnav-mixed{grid-template-columns:1fr}.dfnav-services{border-left:0;padding-left:0}}
+@media(max-width:860px){
+  .dfnav-links{display:none}
+  .dfnav-cta{display:none}
+  .dfnav-burger{display:inline-flex}
+  .dfnav-util{display:none}
+  .dfnav{top:var(--banner-h,0px)}
+  :root{--dfn-h:68px}
+}
+@media(min-width:861px){.dfnav-drawer{display:none}}
