@@ -1530,7 +1530,8 @@ function configTitle(){
 function prodName(){ return {fenster:'Kunststofffenster',balkon:'Balkontür',haustuer:'Haustür',schiebe:'Schiebetür'}[S.prod]||'Kunststofffenster'; }
 function prodUnit(){ return {fenster:'Fenster',balkon:'Balkontür',haustuer:'Haustür',schiebe:'Schiebetür'}[S.prod]||'Fenster'; }
 function prodSpecs(){
-  const c=COLORS[S.outer].n;
+  const co=COLORS[S.outer].n, ci=COLORS[S.inner].n;
+  const c=(S.outer===S.inner)?`${co} (außen & innen)`:`außen ${co} · innen ${ci}`;
   if(S.prod==='haustuer') return `${DOORN[S.doorModel]||'—'} · ${GRIFFT[S.griffTuer]} · ${S.w}×${S.h} mm · ${c}`;
   if(S.prod==='schiebe') return `${S.hstSystem==='hs'?'Hebe-Schiebe':'PSK'} · ${S.hstLauf==='links'?'nach links':'nach rechts'} · ${S.w}×${S.h} mm · ${c}`;
   const ex=[]; if(S.roll==='gurt')ex.push('Rollladen'); if(S.roll==='motor')ex.push('Motorrolladen'); if(S.glass==='3')ex.push('3-fach'); if(S.prod==='balkon'&&S.balkonSchwelle==='alu')ex.push('Aluschwelle'); if(S.sicher)ex.push('RC1');
@@ -1977,11 +1978,13 @@ function setLiefer(v){ if(v==='lieferung' && !cartTotals().lieferOk) return; lie
 // Kern-Eigenschaften je Produkt für die eingeklappte Ansicht (3-4 Zeilen)
 function posKeySpecs(conf){
   return withConf(conf,()=>{
-    const co=COLORS[S.outer].n, rows=[];
+    const co=COLORS[S.outer].n, ci=COLORS[S.inner].n, rows=[];
     const add=(k,v)=>rows.push(`<div class="ps-row"><span>${k}</span><b>${v}</b></div>`);
-    if(S.prod==='haustuer'){ add('Modell',DOORN[S.doorModel]||'—'); add('Maße',`${S.w} × ${S.h} mm`); add('Farbe',co); add('Verglasung',`${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}`); }
-    else if(S.prod==='schiebe'){ add('System',S.hstSystem==='hs'?'Hebe-Schiebetür':'PSK Schiebetür'); add('Maße',`${S.w} × ${S.h} mm`); add('Farbe',co); add('Verglasung',S.glass==='3'?'3-fach':'2-fach'); }
-    else { add('Aufteilung',AUFTN[S.aufteilung]); add('Maße',`${S.w} × ${S.h} mm`); add('Farbe',co); add('Verglasung',`${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}`); }
+    // Farbe immer klar beschriften: gleiche Farbe = eine Zeile, sonst Außen + Innen getrennt
+    const addColor=()=>{ if(S.outer===S.inner) add('Farbe',`${co} (außen &amp; innen)`); else { add('Außenfarbe',co); add('Innenfarbe',ci); } };
+    if(S.prod==='haustuer'){ add('Modell',DOORN[S.doorModel]||'—'); add('Maße',`${S.w} × ${S.h} mm`); addColor(); add('Verglasung',`${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}`); }
+    else if(S.prod==='schiebe'){ add('System',S.hstSystem==='hs'?'Hebe-Schiebetür':'PSK Schiebetür'); add('Maße',`${S.w} × ${S.h} mm`); addColor(); add('Verglasung',S.glass==='3'?'3-fach':'2-fach'); }
+    else { add('Aufteilung',AUFTN[S.aufteilung]); add('Maße',`${S.w} × ${S.h} mm`); addColor(); add('Verglasung',`${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}`); }
     return rows.join('');
   });
 }
