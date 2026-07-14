@@ -878,10 +878,10 @@ body.scrolled .burger{color:var(--text)}
     </div>
     <div class="nhero-media" id="heroImg">
       <div class="nhero-stage" id="heroStage" role="group" aria-roledescription="Produkt-Auswahl" aria-label="Produkt w&auml;hlen &ndash; Pfeiltasten links und rechts oder Klick" tabindex="0">
-        <img class="nhero-layer is-active" data-prod="fenster" src="img/_hero-sw-fenster.webp?v=ne2" alt="Kunststofffenster nach Ma&szlig; von Drutex, dahinter Haust&uuml;r, Balkont&uuml;r und Schiebet&uuml;r" fetchpriority="high" width="1024" height="1024">
-        <img class="nhero-layer" data-prod="balkon" src="img/_hero-sw-balkon.webp?v=ne2" alt="Balkont&uuml;r nach Ma&szlig; von Drutex" loading="lazy" width="1024" height="1024">
-        <img class="nhero-layer" data-prod="haustuer" src="img/_hero-sw-haustuer.webp?v=ne2" alt="Haust&uuml;r nach Ma&szlig; von Drutex" loading="lazy" width="1024" height="1024">
-        <img class="nhero-layer" data-prod="schiebe" src="img/_hero-sw-schiebe.webp?v=ne2" alt="Hebe-Schiebet&uuml;r nach Ma&szlig; von Drutex" loading="lazy" width="1024" height="1024">
+        <img class="nhero-layer is-active" data-prod="fenster" src="img/_hero-sw-fenster.webp?v=r3" alt="Kunststofffenster nach Ma&szlig; von Drutex, dahinter Haust&uuml;r, Balkont&uuml;r und Schiebet&uuml;r" fetchpriority="high" width="1024" height="1024">
+        <img class="nhero-layer" data-prod="balkon" src="img/_hero-sw-balkon.webp?v=r3" alt="Balkont&uuml;r nach Ma&szlig; von Drutex" loading="lazy" width="1024" height="1024">
+        <img class="nhero-layer" data-prod="haustuer" src="img/_hero-sw-haustuer.webp?v=r3" alt="Haust&uuml;r nach Ma&szlig; von Drutex" loading="lazy" width="1024" height="1024">
+        <img class="nhero-layer" data-prod="schiebe" src="img/_hero-sw-schiebe.webp?v=r3" alt="Hebe-Schiebet&uuml;r nach Ma&szlig; von Drutex" loading="lazy" width="1024" height="1024">
       </div>
       <button class="nhero-nav nhero-nav-prev" id="heroPrev" type="button" aria-label="Vorheriges Produkt"><span class="material-symbols-outlined" aria-hidden="true">chevron_left</span></button>
       <button class="nhero-nav nhero-nav-next" id="heroNext" type="button" aria-label="N&auml;chstes Produkt"><span class="material-symbols-outlined" aria-hidden="true">chevron_right</span></button>
@@ -1440,6 +1440,11 @@ body.scrolled .burger{color:var(--text)}
     {key:'haustuer',name:'Haustür',    prod:'haustuer'},
     {key:'schiebe', name:'Schiebetür', prod:'schiebe'}
   ];
+  // Responsive Produktbilder: Desktop = scharfe Studio-Originale, Handy = randlose Version (nahtlos)
+  var MOBQ=window.matchMedia('(max-width:960px)');
+  function applyHeroSrc(){ layers.forEach(function(l){ var p=l.getAttribute('data-prod'); if(!p) return; var want='img/_hero-sw-'+p+(MOBQ.matches?'-seam':'')+'.webp?v=r3'; if(l.getAttribute('src')!==want) l.setAttribute('src',want); }); }
+  applyHeroSrc();
+  try{ MOBQ.addEventListener('change',applyHeroSrc); }catch(e){ try{ MOBQ.addListener(applyHeroSrc); }catch(_){} }
   var idx=0, swapT=null, swiped=false;
   function setActive(i){
     i=((i%PRODS.length)+PRODS.length)%PRODS.length;
