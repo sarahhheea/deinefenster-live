@@ -1463,7 +1463,7 @@ function _lp_hst(){
 }
 const _lp_HT_B=[904,1000,1100,1174], _lp_HT_H=[2028,2200,2398];
 const _lp_HT_M=[[1635,1667,1699,1732],[1664,1697,1732,1765],[1756,1791,1826,1862]];
-const _lp_HT_MODELL={'vollglas-inox':-787,'florida-lr-inox':0,'montana-1-inox':0,'alaska-1-inox':0,'montana-2-lr-inox':87,'montana-3-lr-inox':87,'ohio-inox':87,'colorado-inox':87,'alaska-2-inox':87,'nebraska-lcr-inox':87,'pennsylvania-1-inox':87,'pennsylvania-2-lr-inox':87,'pennsylvania-3-lr-inox':87,'texas-c-inox':87,'texas-lr-inox':87};
+const _lp_HT_MODELL={'vollglas-inox':-759,'florida-lr-inox':0,'montana-1-inox':0,'alaska-1-inox':0,'montana-2-lr-inox':87,'montana-3-lr-inox':87,'ohio-inox':87,'colorado-inox':87,'alaska-2-inox':87,'nebraska-lcr-inox':87,'pennsylvania-1-inox':87,'pennsylvania-2-lr-inox':87,'pennsylvania-3-lr-inox':87,'texas-c-inox':87,'texas-lr-inox':87};
 function _lp_haustuer(){
   const b=LS.bMm||1000, h=LS.hMm||2100;
   let frame=_lp_matLookup(b,h,_lp_HT_B,_lp_HT_H,_lp_HT_M);
@@ -1656,10 +1656,10 @@ function openCart(){ anfrageView='cart'; if(!cart.length){ if(!started){ backToP
 // Zwischen Übersicht und Checkout-Formular wechseln
 function showCart(){ anfrageView='cart'; window.scrollTo({top:0}); render(); }
 const PRODUCTS=[
-  {id:'fenster',t:'Kunststofffenster',img:'img/karten/fenster-weiss.webp',from:'ab 120 €'},
-  {id:'balkon',t:'Balkontür',img:'img/karten/balkontuer-weiss.webp',from:'ab 266 €'},
-  {id:'haustuer',t:'Haustür',img:'img/karten/haustuer-weiss.webp',from:'ab 850 €'},
-  {id:'schiebe',t:'Schiebetür',img:'img/karten/hst-weiss.webp',from:'ab 1.407 €'},
+  {id:'fenster',t:'Kunststofffenster',img:'img/karten/fenster-weiss.webp',from:'ab 79 €'},
+  {id:'balkon',t:'Balkontür',img:'img/karten/balkontuer-weiss.webp',from:'ab 274 €'},
+  {id:'haustuer',t:'Haustür',img:'img/karten/haustuer-weiss.webp',from:'ab 872 €'},
+  {id:'schiebe',t:'Schiebetür',img:'img/karten/hst-weiss.webp',from:'ab 1.501 €'},
 ];
 function renderPicker(){
   const cards=PRODUCTS.map(p=>`<div class="pcard" onclick="startProduct('${p.id}')">
@@ -1697,12 +1697,13 @@ function renderPicker(){
 function startProduct(id){
   S.prod=id||'fenster';
   // Neues Produkt = frischer Start (nichts vom vorherigen Produkt übernehmen) — wie in modernen Konfiguratoren üblich.
-  S.aufteilung='1fl'; S.anschlagIdx=(S.prod==='balkon')?0:(ANSCHLAG_DEFIDX['1fl']||1);
+  S.aufteilung='1fl'; S.anschlagIdx=(S.prod==='balkon')?0:(S.prod==='fenster'?ANSCHLAG['1fl'].findIndex(function(o){return o.oeff&&o.oeff[0]==='fest';}):(ANSCHLAG_DEFIDX['1fl']||1));  // Fenster startet auf günstigster Variante (Festverglasung) → Startpreis = beworbenes Minimum, baut sich mit Öffnung/Größe auf
   S.roll='kein'; S.panzer=null; S.rollSeite='rechts';
   S.sproTyp='keine'; S.sproDicke='27'; S.sproRaster='kreuz'; S.sicher=false; S.glass=(S.prod==='schiebe')?'3':'2'; S.glasdekor='klar'; S.schall=false;
   S.outer=0; S.inner=0; S.colorTarget='i'; S.anzahl=1;
   S.griff='mistral'; S.griffTuer='stoss'; S.hstTeilung='2'; S.hstLauf='rechts'; S.balkonSchwelle='alu';
-  const dim={fenster:[1000,1200],balkon:[900,2100],haustuer:[1100,2100],schiebe:[2000,2100]}[S.prod]||[1000,1200];
+  S.doorModel='vollglas-inox';   // Haustür startet am günstigsten Modell (Vollglas) → Startpreis = beworbenes Minimum, baut sich mit teureren Modellen auf
+  const dim={fenster:[500,500],balkon:[600,1800],haustuer:[900,2000],schiebe:[1800,1800]}[S.prod]||[1000,1200];
   S.w=dim[0]; S.h=dim[1];
   STEPS=(S.prod==='schiebe')?buildSchiebeSteps():(STEPMAP[S.prod]||STEPS_FENSTER); started=true; cur=0;
   cart.push({conf:{...S},name:''}); editIndex=cart.length-1;   // neuer Artikel im Warenkorb
