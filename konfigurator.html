@@ -1439,14 +1439,14 @@ function _lp_balkon(){
   if(LS.balkonSchwelle==='ohne')price+=-25;   // Live: P.balkonSchwelle.ohne.add
   return _lp_unserPreis(price);
 }
-const _lp_PSK_B=[1500,2000,2500,3000], _lp_PSK_H=[1700,1900,2100,2200];
-const _lp_PSK_M=[[1405,1444,1529,1627],[1405,1444,1529,1627],[1443,1485,1578,1685],[1461,1505,1599,1708]];
+const _lp_PSK_B=[1800,2000,2200,2400,2600,2800,3000,3300], _lp_PSK_H=[1800,1900,2000,2100,2200,2300,2400];
+const _lp_PSK_M=[[1415,1443,1486,1513,1561,1596,1626,1626],[1415,1443,1486,1513,1561,1596,1626,1626],[1436,1465,1508,1539,1586,1622,1657,1657],[1455,1484,1527,1561,1608,1645,1684,1684],[1472,1504,1547,1581,1630,1667,1707,1707],[1491,1525,1569,1604,1655,1693,1733,1733],[1507,1542,1589,1626,1676,1716,1758,1758]];  /* frische Wettbewerber-Ihr-Preise 2026-07, engmaschig 8x7; price=unserPreis=~4 unter Markt */
 const _lp_HS_B=[1700,2000,2200,2400,2600,2800,3000,3500,4000], _lp_HS_H=[1900,2100,2300,2400];
 const _lp_HS_M=[[2586,2601,2611,2702,2792,2878,2973,3200,3806],[2595,2612,2623,2714,2806,2897,2989,3585,3867],[2702,2702,2768,2835,2902,2997,3091,3729,4022],[2751,2751,2830,2909,2988,3066,3145,3623,4101]];
 function _lp_hstRolladenDelta(b,profil){ b=Number(b)||2200; if(profil==='iglo-hs'){return(b<3100)?Math.max(0,Math.round(0.208*b-30)):1370;} return Math.round(228+0.10*b); }
 function _lp_hst(){
   const b=LS.bMm||2200, h=LS.hMm||2000;
-  let frame=(LS.profil==='iglo-hs')?_lp_matLookup(b,h,_lp_HS_B,_lp_HS_H,_lp_HS_M):_lp_matLookup(b,h,_lp_PSK_B,_lp_PSK_H,_lp_PSK_M);
+  let frame=(LS.profil==='iglo-hs')?_lp_matLookup(b,h,_lp_HS_B,_lp_HS_H,_lp_HS_M):_lp_matLookup(Math.min(b,3300),Math.min(h,2400),_lp_PSK_B,_lp_PSK_H,_lp_PSK_M);  /* PSK: ueber Rasterrand kappen, kein Runaway */
   if(LS.profil==='iglo-psk'&&LS.pskKammer==='iglo-energy')frame+=45;
   const faCol=LS.fa&&LS.fa!=='weiss', fiCol=LS.fi&&LS.fi!=='weiss';
   const _hsOne=(LS.profil==='iglo-hs')?0.206:0.087, _hsBoth=(LS.profil==='iglo-hs')?0.30:0.11;
@@ -1454,7 +1454,7 @@ function _lp_hst(){
   let price=frame*(1+farbPct);
   price+=_lp_F_SCHALL[LS.schall]||0;
   price+=_lp_F_SICHERGLAS[LS.sicherGlas]||0;
-  if(LS.profil==='iglo-psk')price+=23.5*((b/1000)*(h/1000));
+  /* PSK: kein Flaechen-Aufschlag mehr — Matrix _lp_PSK_M enthaelt bereits die 3-fach-Marktpreise (Doppel-Zaehler entfernt) */
   if(LS.glasdekor&&LS.glasdekor!=='klar')price+=(LS.glasdekor==='master-carre'?55:27)*((b/1000)*(h/1000));
   price+=_lp_F_SICHER[LS.sicher]||0;
   if(LS.roll&&LS.roll!=='ohne')price+=_lp_hstRolladenDelta(b,LS.profil);
@@ -1659,7 +1659,7 @@ const PRODUCTS=[
   {id:'fenster',t:'Kunststofffenster',img:'img/karten/fenster-weiss.webp',from:'ab 79 €'},
   {id:'balkon',t:'Balkontür',img:'img/karten/balkontuer-weiss.webp',from:'ab 274 €'},
   {id:'haustuer',t:'Haustür',img:'img/karten/haustuer-weiss.webp',from:'ab 872 €'},
-  {id:'schiebe',t:'Schiebetür',img:'img/karten/hst-weiss.webp',from:'ab 1.501 €'},
+  {id:'schiebe',t:'Schiebetür',img:'img/karten/hst-weiss.webp',from:'ab 1.411 €'},
 ];
 function renderPicker(){
   const cards=PRODUCTS.map(p=>`<div class="pcard" onclick="startProduct('${p.id}')">
