@@ -205,6 +205,7 @@ function setupLoggedInUI() {
        "fenster-1fluegel" werden über kategorieZuGruppe() gemappt. ─── */
 const FIXED_KATEGORIEN = {
   'fenster': 'Fenster',
+  'dachfenster': 'Dachfenster',
   'balkontuer': 'Balkontür',
   'haustuer': 'Haustür',
   'schiebetuer': 'Schiebetür',
@@ -216,7 +217,8 @@ const FIXED_KATEGORIEN = {
 /* ─── Sub-Kategorie aus Sheet (z.B. "fenster-1fluegel") auf Hauptgruppe mappen ─── */
 function kategorieZuGruppe(kat) {
   if (!kat) return '';
-  if (kat.startsWith('fenster-') || ['festelement','kellerfenster','rundfenster','rundbogenfenster','stichbogenfenster','dachfenster'].includes(kat)) return 'fenster';
+  if (kat === 'dachfenster') return 'dachfenster';
+  if (kat.startsWith('fenster-') || ['festelement','kellerfenster','rundfenster','rundbogenfenster','stichbogenfenster'].includes(kat)) return 'fenster';
   if (kat.startsWith('balkontuer-')) return 'balkontuer';
   if (kat === 'haustuer' || kat.startsWith('haustuer-')) return 'haustuer';
   if (kat.startsWith('schiebetuer-')) return 'schiebetuer';
@@ -376,7 +378,7 @@ function berechneMetadaten(produkte) {
 function baueFilterSidebar() {
   // Reihenfolge der Hauptgruppen (interner Hinweis.05.2026: Untertypen wandern zu Eigenschaften)
   const katWrap = document.getElementById('filterKategorien');
-  const ORDER = ['fenster', 'balkontuer', 'haustuer', 'schiebetuer', 'daemmung', 'baumaterialien', 'garagentor-gebraucht'];
+  const ORDER = ['fenster', 'dachfenster', 'balkontuer', 'haustuer', 'schiebetuer', 'daemmung', 'baumaterialien', 'garagentor-gebraucht'];
   const renderItem = (key, label) => {
     const count = STATE.produkte.filter(p => _asArr(p.kategorie_keys).some(k => kategorieZuGruppe(k) === key)).length;
     return `
