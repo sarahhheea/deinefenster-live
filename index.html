@@ -422,6 +422,7 @@
 .nhero-nav .material-symbols-outlined{font-size:26px}
 .nhero-nav-prev{left:10px}.nhero-nav-next{right:10px}
 .nhero-dots{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(7% + 78px);z-index:3;display:flex;gap:8px;align-items:center}
+.nhero-tabs{display:none}
 .nhero-dot{width:8px;height:8px;padding:0;border:none;border-radius:99px;background:oklch(0.62 0.03 256/.45);cursor:pointer;transition:width .3s var(--nease),background .3s var(--nease)}
 .nhero-dot:hover{background:oklch(0.55 0.06 256/.85)}
 .nhero-dot.is-active{width:22px;background:var(--nprimary)}
@@ -463,23 +464,26 @@ nav.main{background:rgba(255,255,255,.92);backdrop-filter:blur(12px);-webkit-bac
   .nhero{flex-direction:column;min-height:0;padding-top:calc(var(--nav-h,106px) + var(--banner-h,0px) + 2px);padding-bottom:16px;text-align:center}
   .nhero h1{font-size:clamp(1.7rem,6.2vw,2.05rem);line-height:1.12}
   .nhero-eyebrow{margin-bottom:8px;font-size:.7rem}
-  .nhero-head p{font-size:.82rem;line-height:1.36;margin-top:6px;max-width:44ch}
+  .nhero-head p{display:none}
   .nhero-cta{margin-top:12px}
   .nhero-btn{padding:12px 22px}
   .nhero-trust{margin-top:8px;font-size:.76rem}
-  .nhero-media{position:relative;display:flex;flex-direction:column;align-items:center;width:100%;height:auto;order:2;margin-top:-24px;padding:0;overflow:visible}
-  .nhero-stage{position:relative;inset:auto;width:100%;aspect-ratio:5/4}
-  .nhero-layer{object-fit:cover;object-position:center 46%;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 9%,#000 91%,transparent 100%),linear-gradient(180deg,transparent 0,#000 8%,#000 90%,transparent 100%);-webkit-mask-composite:source-in;mask-image:linear-gradient(90deg,transparent 0,#000 9%,#000 91%,transparent 100%),linear-gradient(180deg,transparent 0,#000 8%,#000 90%,transparent 100%);mask-composite:intersect}
-  .nhero-layer[data-prod="balkon"]{object-position:center 34%}
+  .nhero-media{position:relative;display:flex;flex-direction:column;align-items:center;width:100%;height:auto;order:2;margin-top:-34px;padding:0;overflow:visible}
+  .nhero-stage{position:relative;inset:auto;width:100%;aspect-ratio:3/2;order:2}
+  .nhero-layer{object-fit:cover;object-position:center 48%;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 9%,#000 91%,transparent 100%),linear-gradient(180deg,transparent 0,#000 8%,#000 90%,transparent 100%);-webkit-mask-composite:source-in;mask-image:linear-gradient(90deg,transparent 0,#000 9%,#000 91%,transparent 100%),linear-gradient(180deg,transparent 0,#000 8%,#000 90%,transparent 100%);mask-composite:intersect}
+  .nhero-layer[data-prod="balkon"]{object-position:center 30%}
   .nhero-inner{order:1}
   .nhero-head{max-width:100%;margin:0 auto}
   .nhero-cta,.nhero-trust,.nhero-eyebrow{justify-content:center}
   .nhero-head p{margin-left:auto;margin-right:auto}
-  .nhero-nav{top:40vw}
-  .nhero-nav-prev{left:6px}.nhero-nav-next{right:6px}
-  .nhero-dots{position:static;transform:none;left:auto;bottom:auto;margin:2px 0 0;gap:4px}
-  .nhero-dot{box-sizing:content-box;padding:12px 8px;background-clip:content-box}
-  .nhero-card{position:static;transform:none;left:auto;right:auto;bottom:auto;margin:14px auto 0;max-width:330px;width:calc(100% - 40px);min-width:0}
+  .nhero-nav{display:none}
+  .nhero-dots{display:none}
+  .nhero-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;width:calc(100% - 24px);max-width:376px;margin:2px auto 0;order:1}
+  .nhero-tabs button{display:flex;flex-direction:column;align-items:center;gap:2px;background:#fff;border:1.5px solid var(--nline);border-radius:12px;padding:7px 3px 5px;cursor:pointer;font-family:var(--ndisp);-webkit-tap-highlight-color:rgba(34,94,170,.12)}
+  .nhero-tabs button img{width:100%;height:38px;object-fit:contain}
+  .nhero-tabs button span{font-size:10.5px;font-weight:700;color:var(--nink);letter-spacing:-.01em;white-space:nowrap}
+  .nhero-tabs button.is-active{background:#eaf2fb;border-color:var(--nprimary);box-shadow:0 5px 14px -6px rgba(28,58,108,.4)}
+  .nhero-card{position:static;transform:none;left:auto;right:auto;bottom:auto;margin:12px auto 0;max-width:340px;width:calc(100% - 40px);min-width:0;order:3}
 }
 </style>
 
@@ -873,6 +877,12 @@ body.scrolled .burger{color:var(--text)}
       <button class="nhero-dot" type="button" role="tab" aria-selected="false" data-i="1" aria-label="Balkont&uuml;r"></button>
       <button class="nhero-dot" type="button" role="tab" aria-selected="false" data-i="2" aria-label="Haust&uuml;r"></button>
       <button class="nhero-dot" type="button" role="tab" aria-selected="false" data-i="3" aria-label="Schiebet&uuml;r"></button>
+    </div>
+    <div class="nhero-tabs" role="tablist" aria-label="Produkt w&auml;hlen &ndash; durchklicken">
+      <button type="button" role="tab" data-i="0" class="is-active" aria-selected="true"><img src="img/_p-window.webp" alt="Fenster" width="120" height="120" loading="lazy" decoding="async"><span>Fenster</span></button>
+      <button type="button" role="tab" data-i="1" aria-selected="false"><img src="img/_p-balkon.webp" alt="Balkont&uuml;r" width="120" height="120" loading="lazy" decoding="async"><span>Balkont&uuml;r</span></button>
+      <button type="button" role="tab" data-i="2" aria-selected="false"><img src="img/_p-door.webp" alt="Haust&uuml;r" width="120" height="120" loading="lazy" decoding="async"><span>Haust&uuml;r</span></button>
+      <button type="button" role="tab" data-i="3" aria-selected="false"><img src="img/_p-hst.webp" alt="Schiebet&uuml;r" width="120" height="120" loading="lazy" decoding="async"><span>Schiebet&uuml;r</span></button>
     </div>
     <a class="nhero-card" id="heroCard" href="konfigurator.html?prod=fenster" aria-label="Fenster konfigurieren">
       <span class="nhero-card-tx"><b id="heroCardTitle" aria-live="polite">Fenster</b><span>Nach Ma&szlig; &middot; Live-Preis</span></span>
