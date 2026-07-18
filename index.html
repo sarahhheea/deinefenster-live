@@ -460,22 +460,34 @@ nav.main{background:rgba(255,255,255,.92);backdrop-filter:blur(12px);-webkit-bac
 .nav-link:hover{color:var(--acc-text)}
 @media(prefers-reduced-motion:reduce){.nhero-layer,.nhero-card-tx,.nhero-stage{transition:none!important}.nhero-media:hover .nhero-stage{transform:none}}
 @media(max-width:960px){
-  .nhero{flex-direction:column;min-height:0;padding-top:calc(var(--nav-h,106px) + var(--banner-h,0px) + 8px);text-align:center}
-  .nhero-media{position:relative;width:100%;height:auto;aspect-ratio:4/3;order:2;margin-top:16px}
-  .nhero-layer{object-fit:contain;-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 5%,#000 95%,transparent 100%);mask-image:linear-gradient(180deg,transparent 0,#000 5%,#000 95%,transparent 100%)}
+  .nhero{flex-direction:column;min-height:0;padding-top:calc(var(--nav-h,106px) + var(--banner-h,0px) + 6px);padding-bottom:18px;text-align:center}
+  .nhero h1{font-size:clamp(1.7rem,6.2vw,2.05rem);line-height:1.12}
+  .nhero-eyebrow{margin-bottom:8px;font-size:.7rem}
+  .nhero-head p{font-size:.87rem;line-height:1.42;margin-top:8px;max-width:31ch}
+  .nhero-cta{margin-top:15px}
+  .nhero-btn{padding:12px 22px}
+  .nhero-trust{margin-top:11px;font-size:.79rem}
+  .nhero-media{position:relative;display:flex;flex-direction:column;align-items:center;width:100%;height:auto;order:2;margin-top:-14px;padding:0;overflow:visible}
+  .nhero-stage{position:relative;inset:auto;width:100%;aspect-ratio:5/4}
+  .nhero-layer{object-fit:cover;object-position:center 46%;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 9%,#000 91%,transparent 100%),linear-gradient(180deg,transparent 0,#000 8%,#000 90%,transparent 100%);-webkit-mask-composite:source-in;mask-image:linear-gradient(90deg,transparent 0,#000 9%,#000 91%,transparent 100%),linear-gradient(180deg,transparent 0,#000 8%,#000 90%,transparent 100%);mask-composite:intersect}
+  .nhero-layer[data-prod="balkon"]{object-position:center 34%}
   .nhero-inner{order:1}
   .nhero-head{max-width:100%;margin:0 auto}
   .nhero-cta,.nhero-trust,.nhero-eyebrow{justify-content:center}
   .nhero-head p{margin-left:auto;margin-right:auto}
+  .nhero-nav{top:40vw}
   .nhero-nav-prev{left:6px}.nhero-nav-next{right:6px}
-  .nhero-dots{bottom:76px}
-  .nhero-card{left:12px;right:12px;transform:none;bottom:-6px;max-width:none;min-width:0}
+  .nhero-dots{position:static;transform:none;left:auto;bottom:auto;margin:-2px 0 0}
+  .nhero-card{position:static;transform:none;left:auto;right:auto;bottom:auto;margin:14px auto 0;max-width:330px;width:calc(100% - 40px);min-width:0}
 }
 </style>
 
 <style>
 /* ── Betriebsurlaub-Banner (dezent, ruhiger Markenton statt knallrot) ── */
-#urlaub-banner{position:fixed;top:0;left:0;right:0;z-index:99999;background:linear-gradient(90deg,#112455 0%,#0d1b33 100%);color:#fff;font-family:var(--font-body);font-size:13px;line-height:1.4;text-align:center;padding:10px 18px;font-weight:600;letter-spacing:.01em;border-bottom:1px solid rgba(255,255,255,.16);box-shadow:0 2px 16px rgba(8,21,46,.35)}
+#urlaub-banner{position:fixed;top:0;left:0;right:0;z-index:99999;background:linear-gradient(90deg,#112455 0%,#0d1b33 100%);color:#fff;font-family:var(--font-body);font-size:12.5px;line-height:1.3;text-align:center;padding:8px 42px 8px 16px;font-weight:600;letter-spacing:.01em;border-bottom:1px solid rgba(255,255,255,.16);box-shadow:0 2px 16px rgba(8,21,46,.35)}
+@media(max-width:640px){#urlaub-banner{font-size:11.5px;padding:6px 36px 6px 12px;line-height:1.28}}
+.ub-short{display:none}
+@media(max-width:640px){.ub-full{display:none}.ub-short{display:inline}}
 #urlaub-banner strong{font-weight:800;color:#fff}
 #urlaub-banner-close{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:transparent;border:0;color:#eaf1ff;font-size:21px;line-height:1;cursor:pointer;padding:2px 8px;opacity:.85}
 #urlaub-banner-close:hover{opacity:1}
@@ -544,7 +556,8 @@ body[style*="padding-top"] nav.main{top:calc(var(--banner-h,0) + 38px)}
 @media(max-width:900px){.mega-prods{grid-template-columns:repeat(3,1fr)}.mega-mixed{grid-template-columns:1fr}.mega-services{border-left:0;padding-left:0}}
 
 /* ── Mobile-Menü (Off-Canvas) ── */
-.burger{display:none;background:transparent;border:0;cursor:pointer;color:#fff;padding:4px;margin-left:auto;line-height:0}
+.burger{display:none;background:transparent;border:0;cursor:pointer;color:var(--text);padding:9px;margin-left:auto;line-height:0;border-radius:10px;-webkit-tap-highlight-color:rgba(34,94,170,.12)}
+.burger:active{background:rgba(34,94,170,.08)}
 body.scrolled .burger{color:var(--text)}
 .burger .material-symbols-outlined{font-size:30px}
 .mnav{position:fixed;inset:0;z-index:120;background:rgba(8,14,30,.5);opacity:0;visibility:hidden;transition:opacity .25s}
@@ -691,7 +704,7 @@ body.scrolled .burger{color:var(--text)}
 
 <!-- BETRIEBSURLAUB-BANNER START -->
 <div id="urlaub-banner" role="status" aria-label="Betriebsurlaub-Hinweis" style="position:fixed;top:0;left:0;right:0;z-index:99999;background:linear-gradient(90deg,#213a6c 0%,#152a4f 100%);color:#e7eefb;font-family:'Inter','Manrope',-apple-system,Segoe UI,Arial,sans-serif;font-size:12.5px;line-height:1.4;text-align:center;padding:7px 42px 7px 18px;font-weight:500;letter-spacing:.01em;box-shadow:0 1px 10px rgba(8,21,46,.22);">
-  <strong style="font-weight:800;color:#fff;">Betriebsurlaub 15.&ndash;27. August</strong> &mdash; ab 28. August wieder regul&auml;r ge&ouml;ffnet &middot; Hofverkauf jeden Freitag 10&ndash;17 Uhr
+  <span class="ub-full"><strong style="font-weight:800;color:#fff;">Betriebsurlaub 15.&ndash;27. August</strong> &mdash; ab 28. August wieder regul&auml;r ge&ouml;ffnet &middot; Hofverkauf jeden Freitag 10&ndash;17 Uhr</span><span class="ub-short"><strong style="font-weight:800;color:#fff;">Betriebsurlaub 15.&ndash;27. Aug</strong> &middot; Hofverkauf Fr 10&ndash;17 Uhr</span>
   <button id="urlaub-banner-close" type="button" aria-label="Hinweis schlie&szlig;en" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:transparent;border:0;color:#fff;font-size:21px;line-height:1;cursor:pointer;padding:2px 8px;opacity:0.9;">&times;</button>
 </div>
 <script>(function(){var KEY='urlaubBannerClosed_2026_0815_urlaub15_urlaub';var b=document.getElementById('urlaub-banner');if(!b)return;if(window.__urlaubBanner)return;window.__urlaubBanner=1;var root=document.documentElement,basePad=null;function apply(){if(basePad===null){basePad=parseFloat(getComputedStyle(document.body).paddingTop)||0;}var h=b.offsetHeight;root.style.setProperty('--banner-h',h+'px');document.body.style.paddingTop=(basePad+h)+'px';}function reset(){root.style.removeProperty('--banner-h');document.body.style.paddingTop=(basePad&&basePad>0)?basePad+'px':'';}if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',apply);}else{apply();}window.addEventListener('resize',apply);var x=document.getElementById('urlaub-banner-close');if(x){x.addEventListener('click',function(){reset();b.parentNode&&b.parentNode.removeChild(b);try{localStorage.setItem(KEY,'1');}catch(e){}});}})();</script>
