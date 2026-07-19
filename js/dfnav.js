@@ -45,9 +45,7 @@
     a.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><span class="df-cart-badge" hidden>0</span>';
     return a;
   }
-  var isKonfig=/konfigurator/i.test(location.pathname||'');
   function inject(){
-    if(isKonfig) return null;   // Konfig-Seite hat schon „Meine Artikel" — kein doppeltes Symbol
     ensureStyle();
     var link=document.querySelector('.df-cart-link');
     if(!link){
