@@ -7,29 +7,16 @@
 <link rel="icon" type="image/png" sizes="180x180" href="img/logo/deinefenster-profile-720.png?v=20260518"/>
 <link rel="apple-touch-icon" href="img/logo/apple-touch-icon-180.png?v=20260518"/>
 <link rel="manifest" href="/manifest.json"/>
-<title>Danke | DeineFenster.de</title>
-<meta name="description" content="Vielen Dank für Ihre Anfrage bei DeineFenster.de. Wir melden uns innerhalb von 24 Stunden persönlich per E-Mail bei Ihnen."/>
+<title>Warenkorb — Ihr Angebot | DeineFenster.de</title>
+<meta name="description" content="Ihr Warenkorb bei DeineFenster.de — die von Ihnen zusammengestellten Fenster, Türen und mehr nach Maß. Kostenlos und unverbindlich ein Angebot anfordern. Familienbetrieb seit 1996 in Brandenburg an der Havel."/>
 <meta name="author" content="Türen und Fensterhandel Christ"/>
 <meta name="geo.region" content="DE-BB"/>
 <meta name="geo.placename" content="Brandenburg an der Havel"/>
 <meta name="geo.position" content="52.4292945;12.5395001"/>
 <meta name="ICBM" content="52.4292945, 12.5395001"/>
 <meta name="theme-color" content="#225eaa"/>
-<link rel="canonical" href="https://deinefenster.de/danke.html"/>
-<!-- Open Graph / Social Preview -->
-<meta property="og:title" content="Danke | DeineFenster.de"/>
-<meta property="og:description" content="Vielen Dank für Ihre Anfrage bei DeineFenster.de. Wir melden uns innerhalb von 24 Stunden persönlich per E-Mail bei Ihnen."/>
-<meta property="og:type" content="website"/>
-<meta property="og:url" content="https://deinefenster.de/danke.html"/>
-<meta property="og:image" content="https://deinefenster.de/img/og-default.jpg"/>
-<meta property="og:locale" content="de_DE"/>
-<meta property="og:site_name" content="DeineFenster.de"/>
-<!-- Twitter/X Card -->
-<meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:title" content="Danke | DeineFenster.de"/>
-<meta name="twitter:description" content="Vielen Dank für Ihre Anfrage. Wir melden uns innerhalb von 24 Stunden per E-Mail."/>
-<meta name="twitter:image" content="https://deinefenster.de/img/og-default.jpg"/>
-<meta name="robots" content="noindex, nofollow"/>
+<link rel="canonical" href="https://www.deinefenster.de/warenkorb.html"/>
+<meta name="robots" content="noindex, follow"/>
 
 <!-- Design-System 2026 (self-contained: eigene Tokens, kein Tailwind/global-design nötig) -->
 <link rel="preconnect" href="https://fonts.bunny.net"/>
@@ -44,47 +31,116 @@
 #urlaub-banner strong{font-weight:800;color:#fff}
 #urlaub-banner-close{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:transparent;border:0;color:#eaf1ff;font-size:21px;line-height:1;cursor:pointer;padding:2px 8px;opacity:.85}
 #urlaub-banner-close:hover{opacity:1}
-/* Nav: siehe /css/dfnav.css (dfnav-Komponente) */
 
-/* Band-Bild (optionaler Foto-Streifen unter Stats) */
-.band{margin-top:var(--s7);border-radius:var(--r);overflow:hidden;border:1px solid var(--border);box-shadow:var(--shadow)}
-.band img{width:100%;height:clamp(180px,28vw,360px);object-fit:cover}
+/* ================= WARENKORB-SEITE ================= */
+/* Design-Tokens auf die Seiten-Wrapper gescoped, damit Nav/Footer (df-2026 / dfnav) unberührt bleiben */
+.wk-page{
+  --bg:#eef2f8; --surface:#fff; --ink:#14181d; --ink-soft:#5b626b;
+  --line:#e3e6ea; --line-d:#d3d9e6; --accent:#225eaa; --accent-d:#1b4d8c;
+  --primary:#225eaa; --primary-d:#1b4d8c; --acc:#76a9fa;
+  --serif:'Plus Jakarta Sans','Segoe UI',system-ui,sans-serif;
+  --sans:'Manrope','Segoe UI',system-ui,sans-serif;
+  --r:14px; --pill:999px;
+  background:var(--bg);
+  font-family:var(--sans);
+  color:var(--ink);
+  padding:calc(var(--nav-clear, 120px) + 10px) 0 64px;   /* fixe Navi (+ Banner via Body-Padding) freihalten — wie Content-Seiten */
+}
+.wk-wrap{max-width:1240px;margin:0 auto;padding:0 22px}
+.wk-crumbs{font-size:13px;color:var(--ink-soft);margin-bottom:18px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.wk-crumbs a{color:var(--primary);font-weight:600;text-decoration:none}
+.wk-crumbs a:hover{text-decoration:underline}
+.wk-crumbs span.sep{color:var(--line-d)}
+.wk-head{margin-bottom:22px}
+.wk-head h1{font-family:var(--serif);font-size:clamp(26px,4vw,36px);font-weight:800;color:var(--ink);line-height:1.1}
+.wk-head .wk-sub{font-size:14.5px;color:var(--ink-soft);margin-top:8px;max-width:60ch}
 
-/* 4-spaltiger Ablauf (nutzt df-2026-Tokens, gleiche Breakpoints wie .steps) */
-.steps.steps-4{grid-template-columns:repeat(4,1fr)}
-@media(max-width:980px){.steps.steps-4{grid-template-columns:1fr 1fr}}
-@media(max-width:860px){.steps.steps-4{grid-template-columns:1fr}}
+/* ── Bestellübersicht (aus Konfigurator) ── */
+.wk-page .ov-cart{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:26px;width:100%;align-items:start}
+.wk-page .ov-items{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:6px 26px 20px}
+.wk-page .ov-summary{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:24px 26px;position:sticky;top:120px}
+.wk-page .ovs-title{font-weight:700;font-size:18px;margin-bottom:14px}
+.wk-page .ovs-line{display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;font-size:14.5px;color:var(--ink-soft)}
+.wk-page .ovs-line b{color:var(--ink);font-size:16px;font-weight:700}
+.wk-page .ovs-total{display:flex;justify-content:space-between;align-items:baseline;margin:10px 0 4px;padding-top:14px;border-top:2px solid var(--ink)}
+.wk-page .ovs-total span{font-size:12.5px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;color:var(--ink-soft)}
+.wk-page .ovs-total b{font-size:26px;font-weight:800;color:var(--primary)}
+.wk-page .ovs-mwst{font-size:11.5px;color:var(--ink-soft);text-align:right;margin:0 0 16px}
+.wk-page .ovs-note{text-align:center;font-size:12px;color:var(--ink-soft);margin-top:12px}
 
-/* Kundenbewertungen (helle Karten, gleiche Sprache wie .card) */
-.revgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--s5)}
-.rev{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:var(--s6);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:var(--s4);transition:border-color .25s,transform .25s}
-.rev:hover{border-color:var(--acc);transform:translateY(-3px)}
-.rev .stars{color:#e8a93c;letter-spacing:2px;font-size:1rem}
-.rev p{color:var(--text);font-size:1rem;line-height:1.6;flex:1}
-.rev .who{display:flex;align-items:center;gap:12px;border-top:1px solid var(--border);padding-top:var(--s4)}
-.rev .av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#2a6cc4,#1c4f90);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:.95rem;flex-shrink:0}
-.rev .who b{font-family:var(--font-display);font-size:.92rem;color:var(--text)}
-.rev .who small{display:block;color:var(--soft);font-size:.8rem;font-weight:500}
-@media(max-width:860px){.revgrid{grid-template-columns:1fr}}
+/* Liefer-Wahl */
+.wk-page .ovs-deliv{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:16px}
+.wk-page .ovs-deliv button{text-align:left;border:1.5px solid var(--line-d);border-radius:10px;background:#fff;padding:10px 12px;cursor:pointer;font:inherit;min-height:56px}
+.wk-page .ovs-deliv button b{display:block;font-size:14px}
+.wk-page .ovs-deliv button span{font-size:11px;color:var(--ink-soft);line-height:1.3;display:block;margin-top:2px}
+.wk-page .ovs-deliv button.on{border-color:var(--primary);background:#f4f9ff;box-shadow:inset 0 0 0 1px var(--primary)}
+.wk-page .ovs-deliv button.locked{opacity:.5;cursor:not-allowed;background:var(--bg)}
+.wk-page .ovs-deliv button.locked:hover{border-color:var(--line-d)}
+.wk-page .ovs-shipnote{font-size:11.5px;color:var(--ink-soft);margin:-4px 0 8px;text-align:right;line-height:1.4}
 
-/* Lieferregionen — ruhige Tag-Liste */
-.regions{display:flex;flex-wrap:wrap;gap:10px;margin-top:var(--s5)}
-.regions a{display:inline-flex;align-items:center;font-family:var(--font-display);font-weight:600;font-size:.92rem;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:var(--pill);padding:8px 16px;transition:border-color .2s,color .2s,background .2s}
-.regions a:hover{border-color:var(--acc);color:var(--acc-text);background:#fff}
-.regions a.lead-city{background:rgba(118,169,250,.12);border-color:rgba(118,169,250,.45);color:var(--acc-text)}
-.region-note{margin-top:var(--s5);font-size:.85rem;color:var(--soft)}
+/* Positions-Karten (echter Warenkorb) */
+.wk-page .pos-card{border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0;background:#fff}
+.wk-page .pos-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.wk-page .pos-no{flex:0 0 auto;font-size:12px;font-weight:800;letter-spacing:.05em;color:#fff;background:var(--primary);border-radius:6px;padding:4px 9px}
+.wk-page .pos-body{display:flex;gap:22px;align-items:stretch}
+.wk-page .pos-draw{flex:0 0 300px;width:300px;min-height:320px;display:grid;place-items:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}
+.wk-page .pos-draw svg{max-width:100%;max-height:300px;width:100%;height:auto}
+.wk-page .pos-draw img{max-width:100%;max-height:300px;width:auto;height:auto;object-fit:contain}
+.wk-page .pos-main{flex:1;min-width:0}
+.wk-page .pos-title{font-size:17px;font-weight:800;margin-bottom:8px}
+.wk-page .pos-specs{display:grid;grid-template-columns:1fr;gap:2px}
+.wk-page .ps-row{display:flex;justify-content:space-between;gap:12px;font-size:13.5px;padding:3px 0;border-bottom:1px dotted var(--line)}
+.wk-page .ps-row span{color:var(--ink-soft)}
+.wk-page .ps-row b{color:var(--ink);font-weight:600;text-align:right}
+.wk-page .pos-more{margin-top:9px}
+.wk-page .pos-more summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--primary);list-style:none;display:inline-flex;align-items:center;gap:5px}
+.wk-page .pos-more summary::-webkit-details-marker{display:none}
+.wk-page .pos-more summary::before{content:'+';font-weight:800;font-size:15px}
+.wk-page .pos-more[open] summary::before{content:'–'}
+.wk-page .pos-full{margin-top:8px;border-top:1px solid var(--line);padding-top:6px}
+.wk-page .pos-full .srow{display:flex;justify-content:space-between;gap:12px;padding:5px 0;font-size:13px;border-bottom:1px solid var(--line)}
+.wk-page .pos-full .srow .k{color:var(--ink-soft)}
+.wk-page .pos-full .srow .v{text-align:right;font-weight:600}
+.wk-page .pos-full .dot{display:inline-block;width:11px;height:11px;border-radius:50%;border:1px solid #bbb;margin-right:5px;vertical-align:-1px}
+.wk-page .pos-foot{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:14px;padding-top:13px;border-top:1px solid var(--line)}
+.wk-page .qty{display:inline-flex;align-items:center;border:1px solid var(--line-d);border-radius:8px;overflow:hidden}
+.wk-page .qty button{width:44px;height:44px;border:none;background:var(--bg);font-size:19px;font-weight:700;cursor:pointer;color:var(--ink)}
+.wk-page .qty button:hover{background:#eef3f9;color:var(--primary)}
+.wk-page .qty span{min-width:38px;text-align:center;font-weight:700;font-size:15px}
+.wk-page .pos-price{text-align:right;margin-left:auto}
+.wk-page .pos-price .pp-unit{display:block;font-size:11.5px;color:var(--ink-soft)}
+.wk-page .pos-price b{font-size:18px;font-weight:800;color:var(--ink)}
+.wk-page .pos-act{display:flex;gap:16px}
+.wk-page .pos-act button{background:none;border:none;font:inherit;font-size:13px;font-weight:700;cursor:pointer;color:var(--primary);min-height:44px}
+.wk-page .pos-act button.rm{color:var(--ink-soft)}
+.wk-page .pos-act button:hover{text-decoration:underline}
 
-/* CTA-Block (dunkel, gleiche Sprache wie .konf) */
-.ctablock{--mx:80%;--my:8%;background:linear-gradient(125deg,#0d1b33,#0a1530);border-radius:var(--r);padding:clamp(32px,5vw,72px);position:relative;overflow:hidden;box-shadow:inset 0 0 90px rgba(118,169,250,.1),0 30px 60px -30px rgba(8,21,46,.55)}
-.ctablock::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(460px circle at var(--mx) var(--my), rgba(118,169,250,.30), transparent 62%)}
-.ctablock>div{position:relative;z-index:1;max-width:640px}
-.ctablock .eyebrow{color:#bcd6ff}
-.ctablock .eyebrow::before{background:var(--acc)}
-.ctablock h2{color:#fff;margin:var(--s4) 0 var(--s4)}
-.ctablock p{color:rgba(255,255,255,.82);margin-bottom:var(--s6)}
-.ctablock .ctabtns{display:flex;flex-wrap:wrap;gap:var(--s4)}
-.ctablock .ghost-d{display:inline-flex;align-items:center;gap:8px;font-weight:700;color:#bcd6ff;border:1px solid rgba(118,169,250,.55);border-radius:var(--pill);padding:14px 26px;transition:background .2s,transform .2s}
-.ctablock .ghost-d:hover{background:rgba(118,169,250,.12);transform:translateY(-2px)}
+/* Hinzufügen-Button */
+.wk-page .addbtn{width:100%;margin-top:16px;padding:16px;border:1.5px dashed var(--line-d);border-radius:10px;background:transparent;color:var(--primary);font:inherit;font-weight:700;font-size:14.5px;cursor:pointer;text-decoration:none;display:block;text-align:center;min-height:48px}
+.wk-page .addbtn:hover{border-color:var(--primary);background:#f5f9ff}
+
+/* Primärer Angebots-Button */
+.wk-page .cta{width:100%;min-height:56px;border:none;border-radius:var(--pill);background:linear-gradient(135deg,#2a6cc4,#1c4f90);color:#fff;font:700 14.5px/1 var(--sans);letter-spacing:.01em;cursor:pointer;margin-top:6px;transition:.2s cubic-bezier(.16,1,.3,1);box-shadow:0 8px 24px -6px rgba(118,169,250,.5);display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+.wk-page .cta:hover{transform:translateY(-2px);box-shadow:0 12px 30px -8px rgba(118,169,250,.6)}
+.wk-page .cta:active{transform:translateY(0)}
+
+/* Leer-Zustand */
+.wk-empty{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:clamp(36px,7vw,72px) 24px;text-align:center;max-width:620px;margin:8px auto 0}
+.wk-empty .wk-emp-ic{width:78px;height:78px;margin:0 auto 20px;color:var(--acc);display:grid;place-items:center;background:#f2f7ff;border-radius:50%}
+.wk-empty .wk-emp-ic svg{width:40px;height:40px}
+.wk-empty h2{font-family:var(--serif);font-size:22px;font-weight:800;color:var(--ink);margin-bottom:10px}
+.wk-empty p{font-size:14.5px;color:var(--ink-soft);line-height:1.6;max-width:44ch;margin:0 auto 24px}
+.wk-empty .cta{max-width:300px;margin-left:auto;margin-right:auto}
+
+/* Mobile */
+@media(max-width:900px){
+  .wk-page .ov-cart{grid-template-columns:1fr}
+  .wk-page .ov-summary{position:static}
+  .wk-page .pos-body{gap:14px;flex-direction:column}
+  .wk-page .pos-draw{flex-basis:auto;width:100%;min-height:220px;padding:12px}
+  .wk-page .pos-draw svg{max-width:100%;max-height:240px}
+  .wk-page .pos-foot{justify-content:space-between}
+}
 </style>
 </head>
 <body>
@@ -238,28 +294,20 @@
   </div>
 </div>
 
-<!-- Hero: Foto-Vollhintergrund, keine Buttons -->
-<!-- Danke / Bestaetigung -->
-<section><div class="wrap" style="text-align:center;max-width:760px;margin-inline:auto">
-  <div class="sec-head" style="text-align:center">
-    <span class="eyebrow">Anfrage eingegangen</span>
-    <h1>Danke f&uuml;r Ihre <span class="accent">Anfrage!</span></h1>
+<!-- ===== WARENKORB ===== -->
+<main class="wk-page">
+  <div class="wk-wrap">
+    <nav class="wk-crumbs" aria-label="Brotkrümel">
+      <a href="/index.html">Startseite</a><span class="sep">›</span><span>Warenkorb</span>
+    </nav>
+    <header class="wk-head">
+      <h1>Mein Angebot</h1>
+      <p class="wk-sub">Ihre zusammengestellten Elemente — kostenlos &amp; unverbindlich anfragen.</p>
+    </header>
+    <div id="wk-root"></div>
   </div>
-  <p class="lead" style="max-width:56ch;margin:0 auto 8px;overflow-wrap:break-word">Wir haben Ihre Anfrage erhalten und melden uns innerhalb von 24&nbsp;Stunden pers&ouml;nlich per E-Mail bei Ihnen.</p>
-  <p style="max-width:56ch;margin:0 auto 28px;overflow-wrap:break-word">Bitte pr&uuml;fen Sie auch Ihren Spam-Ordner, falls Sie nichts von uns h&ouml;ren.</p>
-  <div class="ctablock">
-    <div>
-      <span class="eyebrow">Wie geht es weiter?</span>
-      <h2>In der Zwischenzeit</h2>
-      <p>Schauen Sie sich gern weiter um &mdash; konfigurieren Sie Ihr Wunschfenster oder st&ouml;bern Sie im Ratgeber.</p>
-      <div class="ctabtns">
-        <a class="btn-primary" href="/index.html">Zur Startseite</a>
-        <a class="ghost-d" href="/konfigurator.html">Zum Konfigurator</a>
-        <a class="ghost-d" href="/ratgeber/">Ratgeber</a>
-      </div>
-    </div>
-  </div>
-</div></section>
+</main>
+
 
 <footer><div class="wrap">
   <div class="foot-top">
@@ -319,7 +367,7 @@
   @media (prefers-reduced-motion:reduce){.df-wa-float{transition:none}}
 </style>
 <a class="df-wa-float" href="https://wa.me/491717263776" target="_blank" rel="noopener" aria-label="WhatsApp-Anfrage an Türen und Fensterhandel Christ">
-  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.149-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0 0 20.464 3.488"/></svg>
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.149-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884M20.464 3.488A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0 0 20.464 3.488"/></svg>
   <span class="df-wa-label">WhatsApp</span>
 </a>
 
@@ -327,91 +375,167 @@
 <link rel="stylesheet" href="css/cookie-banner.css">
 <script defer src="js/cookie-banner.js"></script>
 
-<!-- Cloudflare Web Analytics (cookieless, DSGVO-konform) --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "2cf67e72370843bc8998180837703d02"}'></script><!-- End Cloudflare Web Analytics -->
-
-<script src="/js/vendor/gsap.min.js"></script>
-<script src="/js/vendor/ScrollTrigger.min.js"></script>
+<!-- ===== Warenkorb-Logik (self-contained, präsentational — keine Preis-Engine) ===== -->
 <script>
-  // Hero-Video etwas langsamer = ruhiger/cineastischer
-  (function(){ var hv = document.querySelector('.hero-bg video'); if(hv){ hv.playbackRate = 0.7; hv.addEventListener('loadedmetadata', function(){ hv.playbackRate = 0.7; }); } })();
-  // Nav wird beim Scrollen solide weiß, oben über dem Foto durchsichtig
-  var onScroll = function(){ document.body.classList.toggle('scrolled', window.scrollY > 40); };
-  onScroll();
-  addEventListener('scroll', onScroll, { passive: true });
+(function(){
+  var CART_KEY = 'df_cart_v1';
+  var LIEFER_MIN = 5;
+  var items = [];
+  var liefer = 'abholung'; // 'abholung' | 'lieferung'
+  var root = document.getElementById('wk-root');
 
-  // Scroll-Reveal (additiv; ohne JS bleibt alles sichtbar) — gestaffelt + Zahl-Count-up
-  document.documentElement.classList.add('js-ready');
-  var reduceM = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var io = new IntersectionObserver(function(entries){
-    entries.forEach(function(e){ if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
-  }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
-  document.querySelectorAll('.sec-head, .konf > div, .ctablock .inner, .band, .region-pills, .promo .wrap').forEach(function(el){ el.classList.add('reveal'); io.observe(el); });
-  document.querySelectorAll('.cards, .prodgrid, .steps, .steps-4, .stats, .stats-4').forEach(function(grp){
-    Array.prototype.forEach.call(grp.children, function(child, i){ child.classList.add('reveal'); child.style.transitionDelay = ((i % 4) * 80) + 'ms'; io.observe(child); });
-  });
-  function countUp(el){
-    var raw = el.textContent, m = raw.match(/([\d.,]+)/); if(!m) return;
-    var isDec = m[1].indexOf(',') > -1, target = parseFloat(m[1].replace(/\./g,'').replace(',', '.')); if(isNaN(target)) return;
-    var pre = raw.slice(0, m.index), post = raw.slice(m.index + m[1].length), start = null, dur = 1300;
-    function fmt(v){ return isDec ? v.toLocaleString('de-DE',{minimumFractionDigits:1,maximumFractionDigits:1}) : Math.round(v).toLocaleString('de-DE'); }
-    function tick(t){ if(!start) start=t; var p=Math.min((t-start)/dur,1), e=1-Math.pow(1-p,3); el.textContent=pre+fmt(target*e)+post; if(p<1) requestAnimationFrame(tick); else el.textContent=pre+fmt(target)+post; }
-    requestAnimationFrame(tick);
-  }
-  if(!reduceM){
-    var cObs = new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ var n=e.target.querySelector('.num'); if(n && !n.dataset.c){ n.dataset.c='1'; countUp(n); } cObs.unobserve(e.target);} }); }, { threshold: 0.4 });
-    document.querySelectorAll('.stat').forEach(function(s){ cObs.observe(s); });
-  }
+  function eur(n){ return (Math.round(n)).toLocaleString('de-DE',{style:'currency',currency:'EUR'}); }
+  function esc(s){ return String(s==null?'':s); }
 
-  // Hero-Scroll-Szene (fixiert + Rein-/Raus-Zoom, reversibel) + Maus-Mitlauf — reduced-motion-safe
-  if (!matchMedia('(prefers-reduced-motion: reduce)').matches && window.gsap && window.ScrollTrigger) {
-    gsap.registerPlugin(ScrollTrigger);
-    var heroEl = document.querySelector('.hero');
-    if (heroEl) {
-      gsap.set('.hero-cta', { autoAlpha: 0, scale: 0.92 });
-      var tl = gsap.timeline({ scrollTrigger: { trigger: '.hero', start: 'top top', end: '+=130%', scrub: 0.6, pin: true, anticipatePin: 1 } });
-      tl.to('.hero-bg', { scale: 1.22, ease: 'none' }, 0)
-        .to('.hero > .wrap', { autoAlpha: 0, y: -40, ease: 'none' }, 0)
-        .to('.hero .trustbar', { autoAlpha: 0, ease: 'none' }, 0)
-        .to('.hero-cta', { autoAlpha: 1, scale: 1, ease: 'none' }, 0.5);
-
-      // dezenter Maus-Mitlauf des Videos (nur Desktop-Cursor)
-      if (matchMedia('(pointer:fine)').matches) {
-        var vid = document.querySelector('.hero-bg video') || document.querySelector('.hero-bg img');
-        if (vid) {
-          heroEl.addEventListener('mousemove', function(e){
-            var r = heroEl.getBoundingClientRect();
-            var x = (e.clientX - r.left) / r.width - 0.5;
-            var y = (e.clientY - r.top) / r.height - 0.5;
-            vid.style.transform = 'translate(' + (x * -16).toFixed(1) + 'px,' + (y * -12).toFixed(1) + 'px)';
-          });
-          heroEl.addEventListener('mouseleave', function(){ vid.style.transform = ''; });
-        }
+  function load(){
+    items = [];
+    try{
+      var raw = localStorage.getItem(CART_KEY);
+      if(raw){
+        var data = JSON.parse(raw);
+        if(data && Array.isArray(data.items)) items = data.items.filter(function(it){ return it && it.r; });
       }
-    }
+    }catch(e){ items = []; }
   }
 
-  // Interaktives Licht: dunkle Blöcke bekommen einen Spotlight, der der Maus folgt — + magnetische CTAs
-  if (!reduceM && matchMedia('(pointer:fine)').matches) {
-    document.querySelectorAll('.konf, .ctablock, section.dark').forEach(function(el){
-      el.addEventListener('mousemove', function(e){
-        var r = el.getBoundingClientRect();
-        el.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100).toFixed(1) + '%');
-        el.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100).toFixed(1) + '%');
-      });
-      el.addEventListener('mouseleave', function(){ el.style.removeProperty('--mx'); el.style.removeProperty('--my'); });
-    });
-    document.querySelectorAll('.btn-primary, .promo-cta, .nav-cta').forEach(function(btn){
-      btn.style.willChange = 'transform';
-      btn.addEventListener('mousemove', function(e){
-        var r = btn.getBoundingClientRect();
-        var mx = (e.clientX - r.left - r.width/2) / r.width;
-        var my = (e.clientY - r.top - r.height/2) / r.height;
-        btn.style.transform = 'translate(' + (mx*6).toFixed(1) + 'px,' + (my*6).toFixed(1) + 'px)';
-      });
-      btn.addEventListener('mouseleave', function(){ btn.style.transform = ''; });
-    });
+  function save(){
+    try{
+      localStorage.setItem(CART_KEY, JSON.stringify({ v:2, t:Date.now(), items:items }));
+    }catch(e){}
+    try{
+      window.dispatchEvent(new CustomEvent('df-cart-changed',{ detail:{ count: items.length } }));
+    }catch(e){}
   }
+
+  function unitPrice(it){ var p = it && it.r ? Number(it.r.price) : 0; return isNaN(p) ? 0 : p; }
+  function itemQty(it){ var q = Number(it && it.qty); return (isNaN(q) || q < 1) ? 1 : q; }
+
+  function totals(){
+    var sub = 0, qty = 0, hasHS = false;
+    items.forEach(function(it){
+      var q = itemQty(it);
+      qty += q;
+      sub += unitPrice(it) * q;
+      var c = it.conf || {};
+      if(c.prod === 'schiebe' && c.hstSystem === 'hs') hasHS = true;
+    });
+    var lieferAllowed = (qty >= LIEFER_MIN) || hasHS;
+    var mode = liefer;
+    if(mode === 'lieferung' && !lieferAllowed) mode = 'abholung';
+
+    var ship = 0, shipNote = '';
+    if(mode === 'abholung'){
+      ship = 0; shipNote = 'Abholung im Lager · Brandenburg a. d. H.';
+    } else {
+      if(qty >= 10){ ship = 0; shipNote = 'ab 10 Elementen kostenfrei · deutschlandweit'; }
+      else if(hasHS){ ship = 300; shipNote = 'Hebe-Schiebetür · Direktlieferung vom Hersteller'; }
+      else { ship = 239; shipNote = 'Spedition deutschlandweit'; }
+    }
+    var gesamt = sub + ship;
+    var mwst = gesamt - gesamt / 1.19;
+    return { sub:sub, qty:qty, hasHS:hasHS, lieferAllowed:lieferAllowed, mode:mode, ship:ship, shipNote:shipNote, gesamt:gesamt, mwst:mwst };
+  }
+
+  function posCard(it, i){
+    var r = it.r || {};
+    var q = itemQty(it);
+    var price = unitPrice(it);
+    return '' +
+      '<div class="pos-card">' +
+        '<div class="pos-head"><span class="pos-no">Pos. ' + (i+1) + '</span></div>' +
+        '<div class="pos-body">' +
+          '<div class="pos-draw">' + esc(r.sketch) + '</div>' +
+          '<div class="pos-main">' +
+            '<div class="pos-title">' + esc(r.title) + '</div>' +
+            '<div class="pos-specs">' + esc(r.specs) + '</div>' +
+            '<details class="pos-more"><summary>Alle Details anzeigen</summary><div class="pos-full">' + esc(r.full) + '</div></details>' +
+          '</div>' +
+        '</div>' +
+        '<div class="pos-foot">' +
+          '<div class="qty"><button type="button" aria-label="Weniger" onclick="wkQty(' + i + ',-1)">−</button><span class="tnum">' + q + '</span><button type="button" aria-label="Mehr" onclick="wkQty(' + i + ',1)">+</button></div>' +
+          '<div class="pos-price"><span class="pp-unit">' + eur(price) + ' / Stück</span><b class="tnum">' + eur(price * q) + '</b></div>' +
+          '<div class="pos-act"><button type="button" onclick="wkEdit(' + i + ')">Bearbeiten</button><button type="button" class="rm" onclick="wkRemove(' + i + ')">Entfernen</button></div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  function emptyState(){
+    return '' +
+      '<div class="wk-empty">' +
+        '<div class="wk-emp-ic" aria-hidden="true">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>' +
+        '</div>' +
+        '<h2>Ihr Warenkorb ist noch leer</h2>' +
+        '<p>Stellen Sie Ihre Fenster, Türen und mehr nach Maß zusammen — kostenlos &amp; unverbindlich.</p>' +
+        '<a class="cta" href="/konfigurator.html">Jetzt konfigurieren</a>' +
+      '</div>';
+  }
+
+  function render(){
+    if(!items.length){ root.innerHTML = emptyState(); return; }
+    var t = totals();
+    liefer = t.mode; // gegen unerlaubte Auswahl absichern
+
+    var cards = items.map(function(it, i){ return posCard(it, i); }).join('');
+
+    var lieferBtnCls = 'ovs-deliv-lieferung' + (t.mode === 'lieferung' ? ' on' : '') + (t.lieferAllowed ? '' : ' locked');
+    var lieferHint = t.lieferAllowed ? 'deutschlandweit per Spedition' : 'ab ' + LIEFER_MIN + ' Elementen (o. Hebe-Schiebetür)';
+
+    var summary = '' +
+      '<aside class="ov-summary">' +
+        '<div class="ovs-title">Zusammenfassung</div>' +
+        '<div class="ovs-deliv">' +
+          '<button type="button" class="' + (t.mode === 'abholung' ? 'on' : '') + '" onclick="setLiefer(\'abholung\')"><b>Abholung</b><span>Brandenburg a. d. H. · kostenlos</span></button>' +
+          '<button type="button" class="' + lieferBtnCls + '" ' + (t.lieferAllowed ? '' : 'disabled aria-disabled="true"') + ' onclick="setLiefer(\'lieferung\')"><b>Lieferung</b><span>' + lieferHint + '</span></button>' +
+        '</div>' +
+        '<div class="ovs-line"><span>Zwischensumme (' + t.qty + ' Artikel)</span><b>' + eur(t.sub) + '</b></div>' +
+        '<div class="ovs-line"><span>Versand</span><b>' + (t.ship === 0 ? 'kostenlos' : eur(t.ship)) + '</b></div>' +
+        '<div class="ovs-shipnote">' + esc(t.shipNote) + '</div>' +
+        '<div class="ovs-total"><span>Gesamt</span><b>' + eur(t.gesamt) + '</b></div>' +
+        '<div class="ovs-mwst">inkl. 19 % MwSt (' + eur(t.mwst) + ') · unverbindlich, kein Kaufvertrag</div>' +
+        '<a class="cta" href="/konfigurator.html?cart=1&checkout=1">Unverbindliches Angebot anfordern →</a>' +
+        '<div class="ovs-note">Kostenlos &amp; unverbindlich · kein Kaufzwang · finales Angebot per E-Mail</div>' +
+      '</aside>';
+
+    root.innerHTML = '' +
+      '<div class="ov-cart">' +
+        '<div class="ov-items">' + cards +
+          '<a class="addbtn" href="/konfigurator.html">+ Weiteres Produkt hinzufügen</a>' +
+        '</div>' +
+        summary +
+      '</div>';
+  }
+
+  // ── Interaktion ──
+  window.wkQty = function(i, d){
+    if(!items[i]) return;
+    var q = Math.max(1, itemQty(items[i]) + d);
+    items[i].qty = q;
+    if(items[i].conf) items[i].conf.anzahl = q;
+    save(); render();
+  };
+  window.wkRemove = function(i){
+    if(i < 0 || i >= items.length) return;
+    items.splice(i, 1);
+    save(); render();
+  };
+  window.wkEdit = function(i){
+    location.href = '/konfigurator.html?edit=' + i;
+  };
+  window.setLiefer = function(mode){
+    if(mode === 'lieferung'){
+      var t = totals();
+      if(!t.lieferAllowed) return; // nicht erlaubt
+    }
+    liefer = mode;
+    render();
+  };
+
+  load();
+  render();
+})();
 </script>
+
 <script src="/js/dfnav.js?v=cart2" defer></script>
 </body>
 </html>
