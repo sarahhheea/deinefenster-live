@@ -28,6 +28,7 @@ const KATEGORIEN = [
   { key: 'fenster-oberlicht',          label: 'Fenster mit Oberlicht',            icon: 'space_dashboard' },
   { key: 'fenster-unterlicht',         label: 'Fenster mit Unterlicht',           icon: 'vertical_split' },
   { key: 'fenster-sprossen',           label: 'Fenster mit Sprossen',             icon: 'window_open' },
+  { key: 'holzfenster',                label: 'Holzfenster',                      icon: 'forest' },
   { key: 'dachfenster',                label: 'Dachfenster',                      icon: 'skylight' },
   { key: 'garagentor',                 label: 'Garagentor',                       icon: 'garage' },
   { key: 'daemmung',                   label: 'Dämmung',                          icon: 'layers' },
