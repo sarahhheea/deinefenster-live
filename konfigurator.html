@@ -95,6 +95,14 @@ h1,h2,h3{font-family:var(--serif);font-weight:700;letter-spacing:-.022em;line-he
 .ocard .vis{height:92px;display:grid;place-items:center;margin-bottom:10px}
 /* Griff-Bilder: weiße Griffe verblassen auf Weiß → nur ein dezenter Schatten definiert die Kanten (Hintergrund bleibt weiß wie zuvor, nur ordentlicher) */
 .opts.griffvis .ocard .vis img{filter:drop-shadow(0 4px 9px rgba(30,45,75,.22)) drop-shadow(0 1px 2px rgba(30,45,75,.14))}
+/* Sprossen-Schritt kompakt: Art + Breite + Aufteilung auf einen Blick (kein Scrollen) */
+.spro-step .card{margin:0 0 10px;padding:13px 15px}
+.spro-step .opts.three .ocard .vis{height:88px}
+.spro-step .opts.spro-raster{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.spro-step .opts.spro-raster .ocard{padding:9px 6px}
+.spro-step .opts.spro-raster .ocard .vis{height:60px;margin-bottom:6px}
+.spro-step .opts.spro-raster .ocard .t{font-size:11px;line-height:1.15}
+@media(max-width:900px){ .spro-step .opts.spro-raster{grid-template-columns:repeat(5,1fr);gap:6px} }
 .ocard .vis svg{width:auto;height:100%}
 .ocard .vis img{max-height:100%;max-width:100%;object-fit:contain}
 .ocard .t{font-weight:600;font-size:14.5px}
@@ -1899,7 +1907,7 @@ function panelHTML(){
     const tick=`<span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span>`;
     // 1) Art
     const tc=(val,vis,t,s,delta)=>`<div class="ocard ${S.sproTyp===val?'on':''}" onclick="setSproTyp('${val}')">${tick}<div class="vis">${vis}</div><div class="t">${t}</div>${s?`<div class="s">${s}</div>`:''}${delta?`<div class="pdl">${delta}</div>`:''}</div>`;
-    let html=`<div class="card"><div class="grp-title">Sprossen — Art</div><div class="opts three">`
+    let html=`<div class="spro-step"><div class="card"><div class="grp-title">Sprossen — Art</div><div class="opts three">`
       +tc('keine',ban,'Ohne Sprossen','','inklusive')
       +tc('aufgesetzt','<img src="img/sprossen-aufgesetzt.webp" alt="Aufgesetzt">','Aufgesetzt','außen aufgesetzt · klassisch','')
       +tc('szr','<img src="img/sprossen-innenliegend.webp" alt="Im Glas">','Im Glas (SZR)','innenliegend · pflegeleicht','')
@@ -1909,13 +1917,13 @@ function panelHTML(){
       const dks=(SPRO_DICKEN[S.sproTyp]||[]);
       const pills=dks.map(d=>`<button type="button" class="spro-pill ${S.sproDicke===d?'on':''}" onclick="setSproDicke('${d}')">${d} mm</button>`).join('');
       html+=`<div class="card"><div class="grp-title">Breite</div><div class="spro-pills">${pills}</div></div>`;
-      // 3) Aufteilung — echte Produktfotos je Raster (aufgesetzt + szr)
+      // 3) Aufteilung — echte Produktfotos je Raster (aufgesetzt + szr) — 5 in einer Reihe (alles auf einen Blick)
       const rc=Object.keys(SPRO_RASTER).map(rk=>{ const r=SPRO_RASTER[rk];
         return `<div class="ocard ${S.sproRaster===rk?'on':''}" onclick="setSproRaster('${rk}')">${tick}<div class="vis"><img src="img/karten/sprossen/sprossen-${S.sproTyp}-${rk}.webp?v=2026" alt="${r.name}" loading="lazy" decoding="async"></div><div class="t">${r.name}</div></div>`;
       }).join('');
-      html+=`<div class="card"><div class="grp-title">Aufteilung</div><div class="opts three">${rc}</div></div>`;
+      html+=`<div class="card"><div class="grp-title">Aufteilung</div><div class="opts spro-raster">${rc}</div></div>`;
     }
-    return html;
+    return html+`</div>`;
   }
   if(k==='sicherheit'){
     const shield=`<svg viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.5" stroke-linejoin="round" style="height:60px;width:auto"><path d="M12 2 4 5v6.5c0 4.8 3.4 8 8 9.5 4.6-1.5 8-4.7 8-9.5V5l-8-3Z"/><path d="M9.3 14v-2.2M12 14v-4.2M14.7 14v-6.2" stroke-width="2" stroke-linecap="round"/></svg>`;
