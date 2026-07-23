@@ -93,6 +93,9 @@ h1,h2,h3{font-family:var(--serif);font-weight:700;letter-spacing:-.022em;line-he
 .ocard:hover{border-color:var(--ink-soft)}
 .ocard.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
 .ocard .vis{height:92px;display:grid;place-items:center;margin-bottom:10px}
+/* Griff-Bilder: weiße Griffe verblassen auf Weiß → dezenter Kontrast-Hintergrund + weicher Schatten, damit sie klar sichtbar „schweben" */
+.opts.griffvis .ocard .vis{background:linear-gradient(160deg,#eff3f9,#dbe3ef);border:1px solid #e0e6f0;border-radius:12px;padding:10px}
+.opts.griffvis .ocard .vis img{max-height:84%;max-width:88%;filter:drop-shadow(0 5px 11px rgba(28,49,90,.24))}
 .ocard .vis svg{width:auto;height:100%}
 .ocard .vis img{max-height:100%;max-width:100%;object-fit:contain}
 .ocard .t{font-weight:600;font-size:14.5px}
@@ -1787,7 +1790,7 @@ function panelHTML(){
       +`</div></div>`;
     if(S.hstSystem==='hs'){
       // IGLO-HS: Innen- + Außengriff serienmäßig inklusive (zwei Karten, füllt die Reihe).
-      return `<div class="card"><div class="grp-title">Serien-Griffe — innen &amp; außen inklusive</div><div class="opts two">`
+      return `<div class="card"><div class="grp-title">Serien-Griffe — innen &amp; außen inklusive</div><div class="opts two griffvis">`
           +fix('img/drutex-griffe/hst-hebel-weiss-cut.webp','Innengriff')
           +fix('img/drutex-griffe/hst-muschel-weiss-cut.webp','Außengriff')
         +`</div></div>`+farbHinweis+schloss;
@@ -1841,7 +1844,7 @@ function panelHTML(){
     return `<div class="card"><div class="grp-title">Türmodell — ${DOORS.length} Designs</div><div class="opts three doorgrid">${cards}</div></div>`;
   }
   if(k==='griffTuer'){
-    return grp('Türgriff','three',
+    return grp('Türgriff','three griffvis',
       ocImg('griffTuer','stoss','img/drutex-griffe/stoss-q45r-cut.webp','Stoßgriff','gerade Edelstahl-Stange','inklusive')+
       ocImg('griffTuer','klinke','img/drutex-griffe/htg-flach-weiss-cut.webp','Drückergarnitur','Klinke innen & außen','inklusive')+
       ocImg('griffTuer','knauf','img/drutex-griffe/knauf-weiss-cut.webp','Knauf','fester Knauf außen','inklusive'));
@@ -1877,7 +1880,7 @@ function panelHTML(){
     const wave=`<svg viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.9" stroke-linecap="round" style="height:52px;width:auto"><path d="M4 9.5v5M8 6.5v11M12 3.5v17M16 6.5v11M20 9.5v5"/></svg>`;
     return grp('Schallschutz','two', ocIcon('schall',false,wave,'Standardglas','','inklusive')+ocIcon('schall',true,wave,'Schallschutzglas','ruhigere Räume',''));
   }
-  if(k==='griff') return grp('Griff','two',
+  if(k==='griff') return grp('Griff','two griffvis',
     ocImg('griff','mistral','img/drutex-griffe/cdn/klamka-mistral-35mm-k-9016.webp','Mistral','Aluminium · klassisch elegant','inklusive')+
     ocImg('griff','abschliessbar','img/drutex-griffe/cdn/klamka-mistral-abschliessbar-weiss.webp','Mistral abschließbar','mit Schließzylinder',''));
   const ban=`<svg viewBox="0 0 24 24" fill="none" stroke="#9aa3b0" stroke-width="1.5" style="height:60px;width:auto"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg>`;
