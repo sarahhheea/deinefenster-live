@@ -93,9 +93,8 @@ h1,h2,h3{font-family:var(--serif);font-weight:700;letter-spacing:-.022em;line-he
 .ocard:hover{border-color:var(--ink-soft)}
 .ocard.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
 .ocard .vis{height:92px;display:grid;place-items:center;margin-bottom:10px}
-/* Griff-Bilder: weiße Griffe verblassen auf Weiß → dezenter Kontrast-Hintergrund + weicher Schatten, damit sie klar sichtbar „schweben" */
-.opts.griffvis .ocard .vis{background:linear-gradient(160deg,#eff3f9,#dbe3ef);border:1px solid #e0e6f0;border-radius:12px;padding:10px}
-.opts.griffvis .ocard .vis img{max-height:84%;max-width:88%;filter:drop-shadow(0 5px 11px rgba(28,49,90,.24))}
+/* Griff-Bilder: weiße Griffe verblassen auf Weiß → nur ein dezenter Schatten definiert die Kanten (Hintergrund bleibt weiß wie zuvor, nur ordentlicher) */
+.opts.griffvis .ocard .vis img{filter:drop-shadow(0 4px 9px rgba(30,45,75,.22)) drop-shadow(0 1px 2px rgba(30,45,75,.14))}
 .ocard .vis svg{width:auto;height:100%}
 .ocard .vis img{max-height:100%;max-width:100%;object-fit:contain}
 .ocard .t{font-weight:600;font-size:14.5px}
@@ -151,7 +150,7 @@ h1,h2,h3{font-family:var(--serif);font-weight:700;letter-spacing:-.022em;line-he
 .mrow .unit{font-weight:600;color:var(--ink-soft);font-size:15px;flex:0 0 auto}
 .mgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
 .mfield label{display:block;font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-soft);margin-bottom:8px}
-.massecard{max-width:560px;margin-left:auto;margin-right:auto}   /* Maße mittig (Sarah) */
+.massecard{max-width:560px;margin-left:auto;margin-right:auto}   /* Maße mittig */
 .massecard .mfield label{text-align:center}
 .massecard .mrow{padding:0 14px}
 .massecard .mrow input{text-align:center;letter-spacing:.5px}
@@ -1100,7 +1099,7 @@ function gurtDevice(bMm,rollH,hMm,winY,FR,uu){
   return s;
 }
 // Original-Griff aus dem PDF (Raster, 16x58) — grau auf hellem Rahmen, dunkel auf farbigem. Griffseite = Gegenseite Band.
-// Kipp: Griff oben-mitte waagerecht. Fest: kein Griff. KEINE Griffhöhe (Sarah).
+// Kipp: Griff oben-mitte waagerecht. Fest: kein Griff. KEINE Griffhöhe.
 function skizzeHandle(open,hinge,gx,gy,sashW,gh,SFR,dark){
   if(open==='fest'||open==='transom') return '';
   const griffRight=(hinge==='l');   // Band links -> Griff rechts
@@ -1138,7 +1137,7 @@ function skizzeHinges(open,hinge,gx,gy,sashW,gh,SFR,line){
 }
 // Maßstäbliche Fenster/Balkon-Skizze 1:1 wie Drutex-Angebots-Skizze (PDF): Rahmen+Gehrung, flaches Glas,
 // Feld-Nr., DIN pro Flügel, Original-Griff + 3/2-Scharniere, Stulp/Pfosten, Rollladen-Kasten+Coil, Panzer. Bemaßung: Breite oben +
-// Einzelbreiten unten, Höhe rechts (Element+Gesamt), Kasten "215" oben-links. KEINE Griffhöhe (Sarah).
+// Einzelbreiten unten, Höhe rechts (Element+Gesamt), Kasten "215" oben-links. KEINE Griffhöhe.
 function flatWindowSVG(isBalkon){
   const bMm=Math.max(+S.w||1000,300), hMm=Math.max(+S.h||1200,300);
   const av=sketchAussen(), ci=av?S.outer:S.inner;                 // Außenfarbe beim Außenfarbe-Wählen, sonst Innenfarbe
@@ -1979,12 +1978,16 @@ function summaryRows(){
       <div class="srow"><span class="k">Griff</span><span class="v">${griffN}</span></div>
       <div class="srow"><span class="k">Rollladen</span><span class="v">${S.roll==='motor'?'Motor':S.roll==='gurt'?'Gurtwickler':'—'}</span></div>`;
   }
-  const ex=[]; if(S.roll==='gurt')ex.push('Rollladen · Gurtwickler'); if(S.roll==='motor')ex.push('Motorrolladen'); if(S.schall)ex.push('Schallschutz'); if(S.sproTyp&&S.sproTyp!=='keine')ex.push('Sprossen '+(SPROTYPN[S.sproTyp]||'')+' · '+S.sproDicke+' mm · '+((SPRO_RASTER[S.sproRaster]||{}).name||'')); if(S.sicher)ex.push('RC1');
+  const ex=[]; if(S.roll==='gurt')ex.push('Rollladen · Gurtwickler'); if(S.roll==='motor')ex.push('Motorrolladen'); if(S.schall)ex.push('Schallschutz'); if(S.sicher)ex.push('RC1');
+  // Sprossen als eigene, klar sichtbare Zeile (aufgesetzt / im Glas = innenliegend) statt in „Extras" versteckt
+  const sproN=(S.sproTyp&&S.sproTyp!=='keine')?((SPROTYPN[S.sproTyp]||'')+' · '+S.sproDicke+' mm · '+((SPRO_RASTER[S.sproRaster]||{}).name||'')):'ohne';
+  const sproRow=`<div class="srow"><span class="k">Sprossen</span><span class="v">${sproN}</span></div>`;
   const schwelleRow = S.prod==='balkon'?`<div class="srow"><span class="k">Schwelle</span><span class="v">${S.balkonSchwelle==='alu'?'Aluschwelle':'ohne'}</span></div>`:'';
   return `<div class="srow"><span class="k">Profil</span><span class="v">${PROFN[S.profile]}</span></div>
     <div class="srow"><span class="k">Aufteilung</span><span class="v">${AUFTN[S.aufteilung]}</span></div>
     <div class="srow"><span class="k">Öffnung</span><span class="v">${openingName()}</span></div>${massRow}${colorRows}
     <div class="srow"><span class="k">Verglasung</span><span class="v">${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}</span></div>${schwelleRow}
+    ${sproRow}
     <div class="srow"><span class="k">Griff</span><span class="v">${GRIFFN[S.griff]}</span></div>
     <div class="srow"><span class="k">Extras</span><span class="v">${ex.length?ex.join(' · '):'— keine —'}</span></div>`;
 }
