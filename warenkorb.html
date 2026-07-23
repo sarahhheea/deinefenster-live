@@ -532,6 +532,14 @@
   };
 
   load();
+  // Selbstheilung: alte Skizzen-Snapshots (vor Konfigurator-Update) einmalig im Konfigurator frisch rendern lassen
+  try{
+    var stale = items.length && items.some(function(it){ return !it.r || it.r.sv !== 3; });
+    if(stale && !sessionStorage.getItem('wkHealed')){
+      sessionStorage.setItem('wkHealed','1');
+      location.replace('/konfigurator.html?heal=1');
+    }
+  }catch(e){}
   render();
 })();
 </script>

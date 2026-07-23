@@ -1669,7 +1669,7 @@ const CART_LS_KEY='df_cart_v1';
 function cartSnapshot(it){
   const conf=it.conf, q=conf.anzahl||1;
   let r={};
-  try{ r={ price:(withConf(conf,price)||0), sketch:withConf(conf,()=>stageSVG()), title:withConf(conf,configTitle), specs:posKeySpecs(conf), full:withConf(conf,summaryRows) }; }catch(e){ r={price:0,sketch:'',title:'Artikel',specs:'',full:''}; }
+  try{ r={ sv:3, price:(withConf(conf,price)||0), sketch:withConf(conf,()=>stageSVG()), title:withConf(conf,configTitle), specs:posKeySpecs(conf), full:withConf(conf,summaryRows) }; }catch(e){ r={sv:3,price:0,sketch:'',title:'Artikel',specs:'',full:''}; }
   return { conf, name:it.name||'', qty:q, r };
 }
 function saveCart(){ try{ localStorage.setItem(CART_LS_KEY, JSON.stringify({v:2,t:Date.now(),items:cart.map(cartSnapshot)})); }catch(e){}
@@ -2444,7 +2444,8 @@ render();
 try{
   const qs=location.search;
   const mEdit=qs.match(/[?&]edit=(\d+)/);
-  if(mEdit && cart[+mEdit[1]]){ itemEdit(+mEdit[1]); }
+  if(/[?&]heal=1/.test(qs)){ location.replace('/warenkorb.html'); }   // Warenkorb-Selbstheilung: render() oben hat die Snapshots frisch gespeichert → zurück
+  else if(mEdit && cart[+mEdit[1]]){ itemEdit(+mEdit[1]); }
   else if(/[?&]checkout=1(?:&|$)/.test(qs) && cart.length){ openCart(); showAnfrage(); }
   else if(/[?&]cart=1(?:&|$)/.test(qs) && cart.length){ openCart(); }
 }catch(e){}
