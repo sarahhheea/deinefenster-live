@@ -1158,12 +1158,13 @@ function flatWindowSVG(isBalkon){
   const alu=isBalkon&&S.balkonSchwelle==='alu', schwH=alu?60:0;
   const winY=rollH, totalH=rollH+hMm+schwH, uu=Math.max(bMm,totalH);
   const DT=Math.max(uu*0.05,54), DW=Math.max(uu*0.0032,2), tick=DT*0.32;
-  const mL=Math.max(uu*0.13,DT*2.2), mR=Math.max(uu*0.20,DT*3.4), mT=Math.max(uu*0.11,DT*2.0), mB=Math.max(uu*0.16,DT*3.2);
+  const mL=Math.max(uu*0.13,DT*2.2), mR=Math.max(uu*0.24,DT*4.8), mT=Math.max(uu*0.11,DT*2.0), mB=Math.max(uu*0.16,DT*3.2);
   // Rahmen-/Flügelbreiten wie Drutex-Profil (Pos 1: Rahmen 50001 + Flügel 50011 → ~50 mm Blend- + ~66 mm Flügelrahmen sichtbar = 116 mm je Seite bei 1000 mm).
   const FR=Math.max(bMm*0.05,42), innerW=bMm-2*FR, sashW=innerW/nFl, gy=winY+FR, gh=hMm-2*FR;
   const SFR=Math.max(Math.min(sashW,gh)*0.075,30), pzH=hasRoll?Math.max(Math.min(gh*0.2,rollH*0.9),40):0;
   const gehr=(x,y,w,h,fr)=>`<g stroke="${miter}" stroke-width="${Math.max(uu*0.0018,1.4)}" stroke-linecap="round"><line x1="${x}" y1="${y}" x2="${x+fr}" y2="${y+fr}"/><line x1="${x+w}" y1="${y}" x2="${x+w-fr}" y2="${y+fr}"/><line x1="${x}" y1="${y+h}" x2="${x+fr}" y2="${y+h-fr}"/><line x1="${x+w}" y1="${y+h}" x2="${x+w-fr}" y2="${y+h-fr}"/></g>`;
   const vt=(x,y,t)=>`<text x="${x}" y="${y}" transform="rotate(-90 ${x} ${y})" text-anchor="middle" dominant-baseline="central" font-family="Inter,Arial" font-weight="700" font-size="${DT}" fill="${DIMC}">${t}</text>`;
+  const vth=(x,y,t)=>`<text x="${x}" y="${y}" text-anchor="start" dominant-baseline="central" font-family="Inter,Arial" font-weight="700" font-size="${DT}" fill="${DIMC}">${t}</text>`;
   const ht=(x,y,t)=>`<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-family="Inter,Arial" font-weight="700" font-size="${DT}" fill="${DIMC}">${t}</text>`;
   const hb=(x0,x1,y)=>`<g stroke="${DIML}" stroke-width="${DW}" fill="none"><line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}"/><line x1="${x0}" y1="${y-tick}" x2="${x0}" y2="${y+tick}"/><line x1="${x1}" y1="${y-tick}" x2="${x1}" y2="${y+tick}"/></g>`;
   const vb=(x,y0,y1)=>`<g stroke="${DIML}" stroke-width="${DW}" fill="none"><line x1="${x}" y1="${y0}" x2="${x}" y2="${y1}"/><line x1="${x-tick}" y1="${y0}" x2="${x+tick}" y2="${y0}"/><line x1="${x-tick}" y1="${y1}" x2="${x+tick}" y2="${y1}"/></g>`;
@@ -1209,9 +1210,9 @@ function flatWindowSVG(isBalkon){
   const dimTot=rollH+hMm;                                            // Kasten + Element (ohne Schwelle)
   const topY=-mT*0.5; s+=hb(0,bMm,topY)+ht(bMm/2,topY-DT*0.7,bMm);   // Breite gesamt oben
   if(nFl>1){ const botY=totalH+mB*0.42; for(let i=0;i<nFl;i++){ const x0=FR+i*sashW, x1=x0+sashW; s+=hb(x0,x1,botY)+ht((x0+x1)/2,botY+DT*0.72,Math.round(bMm/nFl)); } }
-  const rx1=bMm+mR*0.34, rx2=bMm+mR*0.66;
-  s+=vb(rx2,0,dimTot)+vt(rx2+DT*0.7,dimTot/2,dimTot);                 // Gesamthöhe rechts (Kasten+Element)
-  if(hasRoll){ s+=vb(rx1,winY,winY+hMm)+vt(rx1+DT*0.7,winY+hMm/2,hMm); }  // Elementhöhe (bei Rollladen)
+  const rx1=bMm+DT*0.85, rx2=bMm+DT*0.85;
+  s+=vb(rx2,0,dimTot)+vth(rx2+DT*0.5,dimTot/2,dimTot);               // Gesamthöhe rechts — waagerecht lesbar (nicht gedreht)
+  if(hasRoll){ s+=vb(rx1,winY,winY+hMm)+vth(rx1+DT*0.5,winY+hMm/2,hMm); }  // Elementhöhe (bei Rollladen)
   if(hasRoll){ const lx=-mL*0.42; s+=vb(lx,0,rollH)+vt(lx-DT*0.7,rollH/2,rollH); }  // Kasten "215" oben-links
   return s+`</svg>`;
 }
@@ -1229,7 +1230,7 @@ const DEFS=`<defs><linearGradient id="glassg" x1="0" y1="0" x2="0" y2="1"><stop 
   <linearGradient id="halu" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#aeb3ba"/><stop offset=".3" stop-color="#eceef1"/><stop offset=".55" stop-color="#d3d7dc"/><stop offset="1" stop-color="#a7acb3"/></linearGradient>
   <linearGradient id="doorbg" x1="0" y1="0" x2="0.35" y2="1"><stop offset="0" stop-color="#eff3f8"/><stop offset="1" stop-color="#dde5ee"/></linearGradient>
   <filter id="hblur" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="1.5"/></filter></defs>`;
-function dimsRight(x,y1,y2,val){return `<g stroke="#b3b0a8" stroke-width="1" fill="none"><line x1="${x}" y1="${y1}" x2="${x}" y2="${y2}"/><line x1="${x-4}" y1="${y1}" x2="${x+4}" y2="${y1}"/><line x1="${x-4}" y1="${y2}" x2="${x+4}" y2="${y2}"/></g><text x="${x+8}" y="${(y1+y2)/2}" text-anchor="middle" font-size="12" fill="#6E6A63" font-family="Inter" font-weight="600" transform="rotate(90 ${x+8} ${(y1+y2)/2})">${val} mm</text>`;}
+function dimsRight(x,y1,y2,val){return `<g stroke="#b3b0a8" stroke-width="1" fill="none"><line x1="${x}" y1="${y1}" x2="${x}" y2="${y2}"/><line x1="${x-4}" y1="${y1}" x2="${x+4}" y2="${y1}"/><line x1="${x-4}" y1="${y2}" x2="${x+4}" y2="${y2}"/></g><text x="${x+6}" y="${(y1+y2)/2}" text-anchor="start" dominant-baseline="central" font-size="12" fill="#6E6A63" font-family="Inter" font-weight="600">${val} mm</text>`;}
 function dimsBottom(x1,x2,y,val){return `<g stroke="#b3b0a8" stroke-width="1" fill="none"><line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}"/><line x1="${x1}" y1="${y-4}" x2="${x1}" y2="${y+4}"/><line x1="${x2}" y1="${y-4}" x2="${x2}" y2="${y+4}"/></g><text x="${(x1+x2)/2}" y="${y+17}" text-anchor="middle" font-size="12" fill="#6E6A63" font-family="Inter" font-weight="600">${val} mm</text>`;}
 // ---- Balkontür: wie Fenster, aber Türproportion (bis Boden), Griff auf Türhöhe, optionale Aluschwelle ----
 function balkonStageSVG(){ return flatWindowSVG(true); }
@@ -1269,11 +1270,12 @@ function schiebeStageSVG(){
   const sys=S.hstSystem||'psk', n=(sys==='psk')?2:((S.hstTeilung==='3')?3:2), slideIdx=(S.hstLauf==='links')?0:n-1;
   const hasRoll=(S.roll&&S.roll!=='kein'), rollH=hasRoll?215:0, winY=rollH, totalH=rollH+hMm, uu=Math.max(bMm,totalH);
   const DT=Math.max(uu*0.045,54), DW=Math.max(uu*0.0032,2), tick=DT*0.32;
-  const mL=Math.max(uu*0.13,DT*2.2), mR=Math.max(uu*0.20,DT*3.4), mT=Math.max(uu*0.11,DT*2.0), mB=Math.max(uu*0.16,DT*3.2);
+  const mL=Math.max(uu*0.13,DT*2.2), mR=Math.max(uu*0.24,DT*4.8), mT=Math.max(uu*0.11,DT*2.0), mB=Math.max(uu*0.16,DT*3.2);
   const FR=Math.max(Math.min(bMm,hMm)*0.05,40), innerW=bMm-2*FR, pw=innerW/n, gy=winY+FR, gh=hMm-2*FR;
   const SFR=Math.max(Math.min(pw,gh)*0.05,22), pzH=hasRoll?Math.max(Math.min(gh*0.2,rollH*0.9),40):0;
   const gehr=(x,y,w,h,fr)=>`<g stroke="${miter}" stroke-width="${Math.max(uu*0.0018,1.4)}" stroke-linecap="round"><line x1="${x}" y1="${y}" x2="${x+fr}" y2="${y+fr}"/><line x1="${x+w}" y1="${y}" x2="${x+w-fr}" y2="${y+fr}"/><line x1="${x}" y1="${y+h}" x2="${x+fr}" y2="${y+h-fr}"/><line x1="${x+w}" y1="${y+h}" x2="${x+w-fr}" y2="${y+h-fr}"/></g>`;
   const vt=(x,y,t)=>`<text x="${x}" y="${y}" transform="rotate(-90 ${x} ${y})" text-anchor="middle" dominant-baseline="central" font-family="Inter,Arial" font-weight="700" font-size="${DT}" fill="${DIMC}">${t}</text>`;
+  const vth=(x,y,t)=>`<text x="${x}" y="${y}" text-anchor="start" dominant-baseline="central" font-family="Inter,Arial" font-weight="700" font-size="${DT}" fill="${DIMC}">${t}</text>`;
   const ht=(x,y,t)=>`<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-family="Inter,Arial" font-weight="700" font-size="${DT}" fill="${DIMC}">${t}</text>`;
   const hb=(x0,x1,y)=>`<g stroke="${DIML}" stroke-width="${DW}" fill="none"><line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}"/><line x1="${x0}" y1="${y-tick}" x2="${x0}" y2="${y+tick}"/><line x1="${x1}" y1="${y-tick}" x2="${x1}" y2="${y+tick}"/></g>`;
   const vb=(x,y0,y1)=>`<g stroke="${DIML}" stroke-width="${DW}" fill="none"><line x1="${x}" y1="${y0}" x2="${x}" y2="${y1}"/><line x1="${x-tick}" y1="${y0}" x2="${x+tick}" y2="${y0}"/><line x1="${x-tick}" y1="${y1}" x2="${x+tick}" y2="${y1}"/></g>`;
@@ -1303,9 +1305,9 @@ function schiebeStageSVG(){
   // Bemaßung wie PDF
   const dimTot=rollH+hMm, topY=-mT*0.5; s+=hb(0,bMm,topY)+ht(bMm/2,topY-DT*0.7,bMm);
   { const botY=totalH+mB*0.42; for(let i=0;i<n;i++){ const x0=FR+i*pw, x1=x0+pw; s+=hb(x0,x1,botY)+ht((x0+x1)/2,botY+DT*0.72,Math.round(bMm/n)); } }
-  const rx1=bMm+mR*0.34, rx2=bMm+mR*0.66;
-  s+=vb(rx2,0,dimTot)+vt(rx2+DT*0.7,dimTot/2,dimTot);
-  if(hasRoll){ s+=vb(rx1,winY,winY+hMm)+vt(rx1+DT*0.7,winY+hMm/2,hMm); const lx=-mL*0.42; s+=vb(lx,0,rollH)+vt(lx-DT*0.7,rollH/2,rollH); }
+  const rx1=bMm+DT*0.85, rx2=bMm+DT*0.85;
+  s+=vb(rx2,0,dimTot)+vth(rx2+DT*0.5,dimTot/2,dimTot);               // Höhe waagerecht lesbar
+  if(hasRoll){ s+=vb(rx1,winY,winY+hMm)+vth(rx1+DT*0.5,winY+hMm/2,hMm); const lx=-mL*0.42; s+=vb(lx,0,rollH)+vt(lx-DT*0.7,rollH/2,rollH); }
   return s+`</svg>`;
 }
 const DOOR_MOTIFS={'alaska-1-inox':1,'alaska-2-inox':1,'colorado-inox':1,'florida-lr-inox':1,'montana-1-inox':1,'montana-2-lr-inox':1,'montana-3-lr-inox':1,'nebraska-lcr-inox':1,'ohio-inox':1,'pennsylvania-1-inox':1,'pennsylvania-2-lr-inox':1,'pennsylvania-3-lr-inox':1,'texas-c-inox':1,'texas-lr-inox':1};
@@ -1333,7 +1335,7 @@ function haustuerStageSVG(){
   if(S.griffTuer==='knauf'){ handle=realHandle(gxL, BY+BH*0.5); handle=`<circle cx="${gxL}" cy="${BY+BH*0.5}" r="6.5" fill="url(#hknob)" stroke="rgba(24,32,46,.6)"/><circle cx="${gxL-2}" cy="${BY+BH*0.5-2}" r="2" fill="rgba(255,255,255,.8)"/>`; }
   else if(S.griffTuer==='klinke'){ const dir=handleSide==='r'?-1:1; handle=`<circle cx="${gxL}" cy="${BY+BH*0.5}" r="4.5" fill="url(#hknob)" stroke="rgba(24,32,46,.6)"/><rect x="${dir<0?gxL-22:gxL+2}" y="${BY+BH*0.5-2.4}" width="20" height="4.8" rx="2.4" fill="url(#halu)" stroke="rgba(24,32,46,.5)"/>`; }
   else { handle=`<rect x="${gxL-3}" y="${BY+BH*0.28}" width="6" height="${BH*0.44}" rx="3" fill="url(#halu)" stroke="rgba(24,32,46,.55)" stroke-width="0.8"/><line x1="${gxL-1.2}" y1="${BY+BH*0.3}" x2="${gxL-1.2}" y2="${BY+BH*0.7}" stroke="rgba(255,255,255,.55)" stroke-width="0.7"/>`; }
-  return `<svg viewBox="0 0 240 360" role="img" aria-label="Haustür-Skizze ${DOORN[key]||''}">${DEFS}
+  return `<svg viewBox="0 0 278 360" role="img" aria-label="Haustür-Skizze ${DOORN[key]||''}">${DEFS}
     <ellipse cx="120" cy="${BY+BH+16}" rx="90" ry="6" fill="rgba(26,42,74,.07)"/>
     ${blade}${handle}
     ${dimsRight(BX+BW+22, BY, BY+BH, S.h)}
