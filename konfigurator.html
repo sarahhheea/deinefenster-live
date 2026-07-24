@@ -1329,34 +1329,64 @@ function schiebeStageSVG(){
 const DOOR_MOTIFS={'alaska-1-inox':1,'alaska-2-inox':1,'colorado-inox':1,'florida-lr-inox':1,'montana-1-inox':1,'montana-2-lr-inox':1,'montana-3-lr-inox':1,'nebraska-lcr-inox':1,'ohio-inox':1,'pennsylvania-1-inox':1,'pennsylvania-2-lr-inox':1,'pennsylvania-3-lr-inox':1,'texas-c-inox':1,'texas-lr-inox':1};
 // ---- Haustür: gezeichnete Skizze (farbiges Türblatt + Inox-Modellmotiv + Griff) — färbt sich mit der Farbe ----
 function haustuerStageSVG(){
-  const co=COLORS[S.outer], dark=isDarkCol(S.outer);
-  const edge=dark?'rgba(255,255,255,.30)':'rgba(30,40,55,.44)', miter=dark?shade(co.c,22):shade(co.c,-15);
-  const seal=dark?'rgba(255,255,255,.24)':'rgba(20,27,40,.5)';
-  const BX=64,BW=112,BY=22,BH=300, IX=BX+9,IY=BY+9,IW=BW-18,IH=BH-18;
+  // Maßstäbliche technische Skizze wie Drutex-Angebots-PDF (identische Sprache wie flatWindowSVG):
+  // Gehrungsrahmen + Flügel, flaches Glas/Motiv, DIN-Dreh-Symbol, Beschlag-Marken, Bemaßung (Breite oben, Höhe rechts,
+  // Glas-Innenmaß), "Innen"-Beschriftung. Färbt + ändert sich mit Modell, Farbe, Öffnung und Maßen.
   const key=S.doorModel||'nebraska-lcr-inox';
-  const handleSide=(S.opening==='dkl')?'r':'l';
-  let blade='';
-  blade+=`<rect x="${BX-9}" y="${BY-7}" width="${BW+18}" height="${BH+14}" rx="2" fill="${co.c}" stroke="${edge}" stroke-width="0.9"/>`;
-  blade+=`<rect x="${BX}" y="${BY}" width="${BW}" height="${BH}" fill="${co.c}" stroke="${edge}" stroke-width="1.4"/>`;
-  blade+=`<g stroke="${miter}" stroke-width="1"><line x1="${BX}" y1="${BY}" x2="${IX}" y2="${IY}"/><line x1="${BX+BW}" y1="${BY}" x2="${IX+IW}" y2="${IY}"/><line x1="${BX}" y1="${BY+BH}" x2="${IX}" y2="${IY+IH}"/><line x1="${BX+BW}" y1="${BY+BH}" x2="${IX+IW}" y2="${IY+IH}"/></g>`;
-  blade+=`<rect x="${IX}" y="${IY}" width="${IW}" height="${IH}" fill="none" stroke="${dark?'rgba(255,255,255,.12)':'rgba(20,28,40,.12)'}" stroke-width="1"/>`;
+  const bMm=Math.max(+S.w||1100,400), hMm=Math.max(+S.h||2100,900);
+  const co=COLORS[S.outer], dark=isDarkCol(S.outer), fCol=co.c;
+  const line=dark?'#17181a':'#111';
+  const GLASS=dark?'#cdd3d5':'#d7e7f7', GLASSST=line, DIN=dark?'#5e6772':'#9ca8b4', DIMC='#1e242b', DIML='#565b61';
+  const handleSide=(S.opening==='dkl')?'r':'l', hinge=(handleSide==='r')?'l':'r';   // Band = Gegenseite Griff
+  const uu=Math.max(bMm,hMm);
+  const DT=Math.max(uu*0.045,52), DW=Math.max(uu*0.0032,2), tick=DT*0.32;
+  const mL=Math.max(uu*0.10,DT*2.0), mR=Math.max(uu*0.20,DT*4.4), mT=Math.max(uu*0.13,DT*2.6), mB=Math.max(uu*0.10,DT*2.0);
+  const FR=Math.max(bMm*0.06,64), gx=FR, gy=FR, sashW=bMm-2*FR, gh=hMm-2*FR;   // Türrahmen (Blendrahmen)
+  const SFR=Math.max(Math.min(sashW,gh)*0.06,40);                              // Flügelrahmen
+  const glx=gx+SFR, gly=gy+SFR, glw=Math.max(sashW-2*SFR,20), glh=Math.max(gh-2*SFR,20);
+  const gehr=(x,y,w,h,fr)=>`<g stroke="${line}" stroke-width="${Math.max(uu*0.0018,1.4)}" stroke-linecap="round"><line x1="${x}" y1="${y}" x2="${x+fr}" y2="${y+fr}"/><line x1="${x+w}" y1="${y}" x2="${x+w-fr}" y2="${y+fr}"/><line x1="${x}" y1="${y+h}" x2="${x+fr}" y2="${y+h-fr}"/><line x1="${x+w}" y1="${y+h}" x2="${x+w-fr}" y2="${y+h-fr}"/></g>`;
+  const hb=(x0,x1,y)=>`<g stroke="${DIML}" stroke-width="${DW}" fill="none"><line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}"/><line x1="${x0}" y1="${y-tick}" x2="${x0}" y2="${y+tick}"/><line x1="${x1}" y1="${y-tick}" x2="${x1}" y2="${y+tick}"/></g>`;
+  const vb=(x,y0,y1)=>`<g stroke="${DIML}" stroke-width="${DW}" fill="none"><line x1="${x}" y1="${y0}" x2="${x}" y2="${y1}"/><line x1="${x-tick}" y1="${y0}" x2="${x+tick}" y2="${y0}"/><line x1="${x-tick}" y1="${y1}" x2="${x+tick}" y2="${y1}"/></g>`;
+  const ht=(x,y,t)=>`<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-family="Inter,Arial" font-weight="700" font-size="${DT}" fill="${DIMC}">${t}</text>`;
+  const vt=(x,y,t)=>`<text x="${x}" y="${y}" transform="rotate(-90 ${x} ${y})" text-anchor="middle" dominant-baseline="central" font-family="Inter,Arial" font-weight="700" font-size="${DT}" fill="${DIMC}">${t}</text>`;
+  let s=`<svg viewBox="${-mL} ${-mT} ${bMm+mL+mR} ${hMm+mT+mB}" role="img" aria-label="Haustür-Skizze ${DOORN[key]||''}" preserveAspectRatio="xMidYMid meet">${DEFS}`;
+  // Blendrahmen + Flügel (mit Gehrung)
+  s+=`<rect x="0" y="0" width="${bMm}" height="${hMm}" fill="${fCol}" stroke="${line}" stroke-width="${Math.max(uu*0.004,3)}"/>`+gehr(0,0,bMm,hMm,FR);
+  s+=`<rect x="${gx}" y="${gy}" width="${sashW}" height="${gh}" fill="${fCol}" stroke="${line}" stroke-width="${DW}"/>`+gehr(gx,gy,sashW,gh,SFR);
+  // Glasfeld bzw. Modell-Motiv
+  s+=`<rect x="${glx}" y="${gly}" width="${glw}" height="${glh}" fill="${GLASS}" stroke="${GLASSST}" stroke-width="${DW}"/>`;
   if(DOOR_MOTIFS[key]){
-    blade+=`<image href="img/tuer-motive/${key}.png" x="${BX}" y="${BY}" width="${BW}" height="${BH}" preserveAspectRatio="xMidYMid meet" opacity="${dark?0.5:0.95}"/>`;
-  } else {
-    blade+=`<rect x="${BX+BW*0.16}" y="${BY+BH*0.06}" width="${BW*0.68}" height="${BH*0.88}" fill="url(#glassg)" stroke="${seal}" stroke-width="2"/>`;
-    blade+=`<polygon points="${BX+BW*0.16},${BY+BH*0.06} ${BX+BW*0.5},${BY+BH*0.06} ${BX+BW*0.28},${BY+BH*0.94} ${BX+BW*0.16},${BY+BH*0.94}" fill="url(#reflg)"/>`;
+    s+=`<image href="img/tuer-motive/${key}.png" x="${glx}" y="${gly}" width="${glw}" height="${glh}" preserveAspectRatio="xMidYMid meet" opacity="${dark?0.55:0.95}"/>`;
   }
-  const gxL = handleSide==='r'? BX+BW-9 : BX+9;
-  let handle='';
-  if(S.griffTuer==='knauf'){ handle=realHandle(gxL, BY+BH*0.5); handle=`<circle cx="${gxL}" cy="${BY+BH*0.5}" r="6.5" fill="url(#hknob)" stroke="rgba(24,32,46,.6)"/><circle cx="${gxL-2}" cy="${BY+BH*0.5-2}" r="2" fill="rgba(255,255,255,.8)"/>`; }
-  else if(S.griffTuer==='klinke'){ const dir=handleSide==='r'?-1:1; handle=`<circle cx="${gxL}" cy="${BY+BH*0.5}" r="4.5" fill="url(#hknob)" stroke="rgba(24,32,46,.6)"/><rect x="${dir<0?gxL-22:gxL+2}" y="${BY+BH*0.5-2.4}" width="20" height="4.8" rx="2.4" fill="url(#halu)" stroke="rgba(24,32,46,.5)"/>`; }
-  else { handle=`<rect x="${gxL-3}" y="${BY+BH*0.28}" width="6" height="${BH*0.44}" rx="3" fill="url(#halu)" stroke="rgba(24,32,46,.55)" stroke-width="0.8"/><line x1="${gxL-1.2}" y1="${BY+BH*0.3}" x2="${gxL-1.2}" y2="${BY+BH*0.7}" stroke="rgba(255,255,255,.55)" stroke-width="0.7"/>`; }
-  return `<svg viewBox="0 0 278 360" role="img" aria-label="Haustür-Skizze ${DOORN[key]||''}">${DEFS}
-    <ellipse cx="120" cy="${BY+BH+16}" rx="90" ry="6" fill="rgba(26,42,74,.07)"/>
-    ${blade}${handle}
-    ${dimsRight(BX+BW+22, BY, BY+BH, S.h)}
-    ${dimsBottom(BX, BX+BW, BY+BH+14, S.w)}
-  </svg>`;
+  // DIN-Dreh-Symbol (Spitze zur Griffseite)
+  s+=`<g stroke="${DIN}" stroke-width="${Math.max(Math.min(glw,glh)*0.006,2.4)}" fill="none" stroke-linejoin="round" stroke-linecap="round">${sashOpenLines('dreh',hinge,glx,gly,glx+glw,gly+glh)}</g>`;
+  // Beschlag-/Scharnier-Marken (Bandseite)
+  s+=skizzeHinges('dreh',hinge,gx,gy,sashW,gh,SFR,line);
+  // Klinke/Knauf/Stange im flachen technischen Stil (weiße Fläche + dünne Kontur), auf Griffhöhe ~1050 mm
+  const holmX=(handleSide==='r')? gx+sashW-SFR*0.5 : gx+SFR*0.5;
+  const cyH=Math.max(gy+SFR*1.6, Math.min(gy+gh-SFR*1.6, hMm-1050));
+  const hw=Math.max(uu*0.0032,2.2);
+  if(S.griffTuer==='knauf'){
+    const R=Math.max(SFR*0.5,uu*0.014);
+    s+=`<circle cx="${holmX}" cy="${cyH}" r="${R}" fill="#fff" stroke="${line}" stroke-width="${hw}"/><circle cx="${holmX}" cy="${cyH}" r="${R*0.3}" fill="${line}"/>`;
+  } else if(S.griffTuer==='stange'){
+    const bw=Math.max(SFR*0.42,uu*0.011);
+    s+=`<rect x="${holmX-bw/2}" y="${gy+gh*0.24}" width="${bw}" height="${gh*0.52}" rx="${bw*0.5}" fill="#fff" stroke="${line}" stroke-width="${hw}"/>`;
+  } else {   // Klinke (Standard): Langschild + waagerechter Drücker zur Glasmitte + Spindel
+    const dir=(handleSide==='r')?-1:1;
+    const shH=Math.max(gh*0.11,uu*0.075), shW=Math.max(SFR*0.7,uu*0.016), lev=Math.max(glw*0.16,uu*0.05), lT=Math.max(shW*0.42,uu*0.007);
+    s+=`<rect x="${holmX-shW/2}" y="${cyH-shH/2}" width="${shW}" height="${shH}" rx="${shW*0.42}" fill="#fff" stroke="${line}" stroke-width="${hw}"/>`
+      +`<rect x="${dir<0?holmX-lev:holmX}" y="${cyH-lT/2}" width="${lev}" height="${lT}" rx="${lT*0.5}" fill="#fff" stroke="${line}" stroke-width="${hw}"/>`
+      +`<circle cx="${holmX}" cy="${cyH}" r="${lT*0.7}" fill="${line}"/>`;
+  }
+  // Bemaßung: Breite oben, Höhe rechts, Glas-Innenbreite unten im Glas
+  const topY=-mT*0.5; s+=hb(0,bMm,topY)+ht(bMm/2,topY-DT*0.72,bMm);
+  const rxH=bMm+DT*0.9; s+=vb(rxH,0,hMm)+vt(rxH+DT*0.62,hMm/2,hMm);   // Höhe senkrecht (wie PDF)
+  const giY=gly+glh-DT*0.55; s+=hb(glx+DW,glx+glw-DW,giY)+ht((glx*2+glw)/2,giY-DT*0.5,Math.round(glw));
+  // "Innen"-Beschriftung senkrecht ganz rechts (Innenansicht)
+  const ix=bMm+DT*2.7, iy=hMm*0.5;
+  s+=`<text x="${ix}" y="${iy}" transform="rotate(-90 ${ix} ${iy})" text-anchor="middle" dominant-baseline="central" font-family="Inter,Arial" font-weight="600" font-size="${DT*0.9}" fill="#8a867e">Innen</text>`;
+  return s+`</svg>`;
 }
 
 const COLIMG=['weiss','anthrazit','anthraz-gl','cremeweiss','weiss-fx','achatgrau','lichtgrau','signalgrau'];
