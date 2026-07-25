@@ -601,12 +601,13 @@ body:not(.wiz-active) .topbar{display:none}
   .tb-links .lbl{display:inline!important}
   .tb-link{padding:9px 12px;font-size:12.5px;gap:6px}
   .tb-link .badge{background:var(--primary);color:#fff}
-  /* ── Skizze bleibt oben KLEBEN (kompakt), damit man Farb-/Optionswechsel live sieht ── */
-  .stage-card{position:sticky!important;top:calc(106px + var(--banner-h,0px));z-index:6;box-shadow:0 6px 16px rgba(10,18,37,.07);margin-bottom:14px}
-  .stage{padding:10px 20px 4px}
-  .stage svg{max-width:132px}
-  .stageimg{max-width:130px}
-  .floor{bottom:16px}
+  /* ── Vorschau scrollt mit (NICHT sticky): großer Held oben auf jedem Schritt, überlappt aber die Optionen nicht mehr ── */
+  .stage-card{position:static!important;top:auto;z-index:1;box-shadow:0 6px 16px rgba(10,18,37,.07);margin-bottom:14px}
+  /* Phase 2 „Vorschau als Held": Skizze deutlich größer + edle Bühne; max-height begrenzt hohe Türen (Karte hat overflow:hidden) */
+  .stage{padding:20px 20px 12px;background:linear-gradient(180deg,#f3f7fd,#e8eef7)}
+  .stage svg{max-width:216px;max-height:280px}
+  .stageimg{max-width:212px;max-height:280px}
+  .floor{bottom:20px}
   /* ── Weiter-Leiste = Amazon-Kauf-Leiste: Preis groß, Buttons groß (≥48px) ── */
   .footer-inner{padding:11px 13px calc(11px + env(safe-area-inset-bottom));gap:9px}
   .price .amt{font-size:22px}
@@ -631,6 +632,17 @@ body:not(.wiz-active) .topbar{display:none}
   body.wiz-active .steps-hint{justify-content:center;padding:7px 16px 10px;font-weight:700;color:var(--ink)}
   body.wiz-active .steps-hint .sh-jump{display:none}
   body.wiz-active #stepNow{font-size:12.5px;letter-spacing:.02em}
+}
+/* Skip-Extras-Button: nur mobil im Wizard — Kunde übernimmt Standards & geht direkt zum Angebot */
+.skip-extras{display:none}
+@media(max-width:600px){
+  body.wiz-active .skip-extras{display:block;width:100%;margin:0 0 16px;padding:14px 16px;min-height:54px;
+    border:1px solid color-mix(in srgb,var(--accent) 30%,var(--line));border-radius:12px;
+    background:linear-gradient(180deg,#f4f8fd,#e9f1fb);color:var(--accent);
+    font:800 14.5px/1.25 var(--sans);cursor:pointer;text-align:center;box-shadow:0 2px 8px rgba(34,94,170,.08)}
+  .skip-extras svg{display:inline;width:15px;height:15px;vertical-align:-2px;margin-left:4px}
+  .skip-extras .sub{display:block;font-weight:500;color:var(--ink-soft);font-size:11.5px;margin-top:3px}
+  .skip-extras:active{transform:scale(.99)}
 }
 /* Tablet-Fix: Produkt-Kacheln 2-spaltig (600–880px); schlägt die spätere 4-Spalten-Basisregel, verhindert Horizontal-Überlauf */
 @media(max-width:880px){ .pk-grid{grid-template-columns:1fr 1fr} }
@@ -1798,6 +1810,9 @@ function buildSchiebeSteps(){
 }
 const STEPMAP={fenster:STEPS_FENSTER,balkon:STEPS_BALKON,haustuer:STEPS_HAUSTUER};
 let STEPS=STEPS_FENSTER;
+// Überspringbare Extras: alles vorbelegt → Kunde kann mit einem Tap die Standards übernehmen und direkt zum Angebot
+const SKIP_KEYS=['motiv','schall','griff','sicherheit','rollladen','sprossen'];
+function finishWithDefaults(){ commitCurrent(); }   // übernimmt aktuelle Konfig inkl. Standard-Extras → Warenkorb (gleiche sichere Logik wie „In den Warenkorb legen")
 let cur=0;
 let started=false;
 let liefer='abholung';   // 'abholung' | 'lieferung'
@@ -2586,6 +2601,10 @@ function render(){
   document.getElementById('stage').innerHTML=stageSVG();
   document.getElementById('summary').innerHTML='<div class="eb">Ihre Konfiguration</div><h3>'+configTitle()+'</h3>'+summaryRows();
   document.getElementById('panel').innerHTML=panelHTML();
+  if(SKIP_KEYS.includes(STEPS[cur].key) && cur<STEPS.length-1){
+    document.getElementById('panel').insertAdjacentHTML('afterbegin',
+      '<button type="button" class="skip-extras" onclick="finishWithDefaults()">Passt so — direkt zum Angebot <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg><span class="sub">Griff, Schall, Sicherheit &amp; Rollladen sind auf Standard vorbelegt</span></button>');
+  }
   updateMassValidity(); refreshPrice();
   document.getElementById('backLbl').textContent=cur===0?'Produkte':'Zurück';
   document.getElementById('nextLbl').textContent = cur===STEPS.length-2 ? (editIndex>=0?'Änderungen übernehmen':'In den Warenkorb legen') : 'Weiter';
