@@ -1896,7 +1896,7 @@ function startProduct(id){
 // Bewusster „In den Warenkorb legen"-Moment — erst hier landet der Entwurf im Warenkorb (Zähler zählt erst jetzt)
 function commitCurrent(){
   if(editIndex>=0&&cart[editIndex]){ cart[editIndex].conf={...S}; }        // bestehenden Artikel aktualisieren
-  else { cart.push({conf:{...S},name:''}); editIndex=cart.length-1; }      // neuen Artikel hinzufügen
+  else { cart.unshift({conf:{...S},name:''}); editIndex=0; }               // neuen Artikel VORNE einfügen → neueste Position steht oben (Warenkorb, Zähler, Angebots-Mail konsistent)
   saveCart(); updateCartBadge();
   location.href='warenkorb.html';   // bewusst in den echten Warenkorb (eigene Seite) — nicht mehr in die Wizard-Übersicht
 }

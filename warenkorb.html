@@ -32,103 +32,149 @@
 #urlaub-banner-close{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:transparent;border:0;color:#eaf1ff;font-size:21px;line-height:1;cursor:pointer;padding:2px 8px;opacity:.85}
 #urlaub-banner-close:hover{opacity:1}
 
-/* ================= WARENKORB-SEITE ================= */
-/* Design-Tokens auf die Seiten-Wrapper gescoped, damit Nav/Footer (df-2026 / dfnav) unberührt bleiben */
+/* ============ WARENKORB — Premium „Modern Clean / DTC" ============ */
+/* Tokens auf die Seiten-Wrapper gescoped; Nav/Footer (df-2026 / dfnav) bleiben unberührt.
+   Leitprinzip: teuer durch Reduktion — NUR der CTA ist blau gefüllt, Hierarchie über Schriftgewicht. */
 .wk-page{
-  --bg:#eef2f8; --surface:#fff; --ink:#14181d; --ink-soft:#5b626b;
-  --line:#e3e6ea; --line-d:#d3d9e6; --accent:#225eaa; --accent-d:#1b4d8c;
-  --primary:#225eaa; --primary-d:#1b4d8c; --acc:#76a9fa;
-  --serif:'Plus Jakarta Sans','Segoe UI',system-ui,sans-serif;
+  --bg:#F4F6FA; --surface:#fff; --stage:#FAFBFD; --sunken:#EEF2F8;
+  --ink:#14181D; --ink-strong:#0B0E12; --ink-soft:#5B626B; --ink-faint:#8A929C;
+  --line:#E4E9F0; --line-2:#D3DAE4;
+  --brand:#225EAA; --brand-d:#1B4E8E; --blue-text:#1E4E86; --green:#1F8A5B; --danger:#C0392B;
+  --newest:#76A9FA;
+  /* Legacy-Aliasse für verbleibende Selektoren (Crumbs, Empty-State) */
+  --primary:#225EAA; --line-d:#D3DAE4; --acc:#76A9FA; --r:14px;
   --sans:'Manrope','Segoe UI',system-ui,sans-serif;
-  --r:14px; --pill:999px;
+  --serif:'Manrope','Segoe UI',system-ui,sans-serif;
   background:var(--bg);
   font-family:var(--sans);
   color:var(--ink);
-  padding:calc(var(--nav-clear, 120px) + 10px) 0 64px;   /* fixe Navi (+ Banner via Body-Padding) freihalten — wie Content-Seiten */
+  -webkit-font-smoothing:antialiased;
+  padding:calc(var(--nav-clear, 120px) + 10px) 0 72px;   /* fixe Navi (+ Banner via Body-Padding) freihalten */
 }
-.wk-wrap{max-width:1240px;margin:0 auto;padding:0 22px}
+.wk-wrap{max-width:1200px;margin:0 auto;padding:0 22px}
 .wk-crumbs{font-size:13px;color:var(--ink-soft);margin-bottom:18px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.wk-crumbs a{color:var(--primary);font-weight:600;text-decoration:none}
+.wk-crumbs a{color:var(--blue-text);font-weight:600;text-decoration:none}
 .wk-crumbs a:hover{text-decoration:underline}
-.wk-crumbs span.sep{color:var(--line-d)}
-.wk-head{margin-bottom:22px}
-.wk-head h1{font-family:var(--serif);font-size:clamp(26px,4vw,36px);font-weight:800;color:var(--ink);line-height:1.1}
-.wk-head .wk-sub{font-size:14.5px;color:var(--ink-soft);margin-top:8px;max-width:60ch}
+.wk-crumbs span.sep{color:var(--line-2)}
+.wk-head{margin-bottom:20px}
+.wk-head h1{font-family:var(--sans);font-size:clamp(27px,4vw,34px);font-weight:700;letter-spacing:-.02em;color:var(--ink-strong);line-height:1.08}
+.wk-head .wk-sub{font-size:16px;font-weight:450;color:var(--ink-soft);margin-top:9px;max-width:60ch;line-height:1.5}
 
-/* ── Bestellübersicht (aus Konfigurator) ── */
+/* ── Schritt-Indikator (statisch) ── */
+.wk-steps{display:flex;align-items:center;gap:14px;margin:0 0 18px}
+.wk-step{display:flex;align-items:center;gap:10px;flex:0 0 auto}
+.wk-step-no{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;background:var(--sunken);color:var(--ink-faint)}
+.wk-step.is-active .wk-step-no{background:var(--brand);color:#fff}
+.wk-step-lb{font-size:14px;color:var(--ink-soft);font-weight:500;white-space:nowrap}
+.wk-step.is-active .wk-step-lb{color:var(--ink);font-weight:600}
+.wk-step-line{flex:1 1 auto;height:2px;background:var(--line);border-radius:2px;min-width:20px;max-width:140px}
+
+/* ── Trust-Leiste (statisch) ── */
+.wk-trust{display:flex;flex-wrap:wrap;align-items:center;gap:10px 28px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 20px;margin:0 0 22px}
+.wk-trust-i{display:inline-flex;align-items:center;gap:9px;font-size:13px;color:var(--ink-soft);font-weight:500}
+.wk-trust-i svg{width:17px;height:17px;color:var(--ink-soft);flex:0 0 auto}
+
+/* ── Grid ── */
 .wk-page .ov-cart{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:26px;width:100%;align-items:start}
-.wk-page .ov-items{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:6px 26px 20px}
-.wk-page .ov-summary{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:24px 26px;position:sticky;top:120px}
-.wk-page .ovs-title{font-weight:700;font-size:18px;margin-bottom:14px}
-.wk-page .ovs-line{display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;font-size:14.5px;color:var(--ink-soft)}
-.wk-page .ovs-line b{color:var(--ink);font-size:16px;font-weight:700}
-.wk-page .ovs-total{display:flex;justify-content:space-between;align-items:baseline;margin:10px 0 4px;padding-top:14px;border-top:2px solid var(--ink)}
-.wk-page .ovs-total span{font-size:12.5px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;color:var(--ink-soft)}
-.wk-page .ovs-total b{font-size:26px;font-weight:800;color:var(--primary)}
-.wk-page .ovs-mwst{font-size:11.5px;color:var(--ink-soft);text-align:right;margin:0 0 16px}
-.wk-page .ovs-note{text-align:center;font-size:12px;color:var(--ink-soft);margin-top:12px}
+.wk-page .ov-items{background:transparent;border:none;border-radius:0;padding:0}
 
-/* Liefer-Wahl */
-.wk-page .ovs-deliv{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:16px}
-.wk-page .ovs-deliv button{text-align:left;border:1.5px solid var(--line-d);border-radius:10px;background:#fff;padding:10px 12px;cursor:pointer;font:inherit;min-height:56px}
-.wk-page .ovs-deliv button b{display:block;font-size:14px}
-.wk-page .ovs-deliv button span{font-size:11px;color:var(--ink-soft);line-height:1.3;display:block;margin-top:2px}
-.wk-page .ovs-deliv button.on{border-color:var(--primary);background:#f4f9ff;box-shadow:inset 0 0 0 1px var(--primary)}
-.wk-page .ovs-deliv button.locked{opacity:.5;cursor:not-allowed;background:var(--bg)}
-.wk-page .ovs-deliv button.locked:hover{border-color:var(--line-d)}
-.wk-page .ovs-shipnote{font-size:11.5px;color:var(--ink-soft);margin:-4px 0 8px;text-align:right;line-height:1.4}
+/* ── Positions-Karte ── */
+.wk-page .pos-card{position:relative;border:1px solid var(--line);border-radius:16px;padding:28px;margin:0 0 18px;background:var(--surface);box-shadow:0 1px 2px rgba(20,24,29,.04),0 8px 24px -12px rgba(20,24,29,.10);transition:border-color .18s ease,box-shadow .18s ease}
+.wk-page .pos-card:hover{border-color:var(--line-2)}
+.wk-page .pos-card.is-newest{border-left:3px solid var(--newest)}
+.wk-page .pos-head{display:flex;align-items:center;flex-wrap:wrap;gap:10px 12px;margin-bottom:18px}
+.wk-page .pos-no{flex:0 0 auto;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);background:none;padding:0}
+.wk-page .pos-new{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;letter-spacing:.02em;color:var(--ink-faint);background:none;padding:0}
+.wk-page .pos-del{margin-left:auto;flex:0 0 auto;display:inline-flex;align-items:center;gap:7px;background:none;border:none;border-radius:8px;padding:7px 9px;min-height:0;font:inherit;font-size:13px;font-weight:600;color:var(--ink-faint);cursor:pointer;transition:.15s ease}
+.wk-page .pos-del svg{width:16px;height:16px}
+.wk-page .pos-del span{display:inline}
+.wk-page .pos-del:hover{color:var(--danger);background:#FBECEA}
 
-/* Positions-Karten (echter Warenkorb) */
-.wk-page .pos-card{border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0;background:#fff}
-.wk-page .pos-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
-.wk-page .pos-no{flex:0 0 auto;font-size:12px;font-weight:800;letter-spacing:.05em;color:#fff;background:var(--primary);border-radius:6px;padding:4px 9px}
-.wk-page .pos-body{display:flex;gap:22px;align-items:stretch}
-.wk-page .pos-draw{flex:0 0 300px;width:300px;min-height:320px;display:grid;place-items:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}
-.wk-page .pos-draw svg{max-width:100%;max-height:300px;width:100%;height:auto}
-.wk-page .pos-draw img{max-width:100%;max-height:300px;width:auto;height:auto;object-fit:contain}
-.wk-page .pos-main{flex:1;min-width:0}
-.wk-page .pos-title{font-size:17px;font-weight:800;margin-bottom:8px}
-.wk-page .pos-specs{display:grid;grid-template-columns:1fr;gap:2px}
-.wk-page .ps-row{display:flex;justify-content:space-between;gap:12px;font-size:13.5px;padding:3px 0;border-bottom:1px dotted var(--line)}
-.wk-page .ps-row span{color:var(--ink-soft)}
-.wk-page .ps-row b{color:var(--ink);font-weight:600;text-align:right}
-.wk-page .pos-more{margin-top:9px}
-.wk-page .pos-more summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--primary);list-style:none;display:inline-flex;align-items:center;gap:5px}
+.wk-page .pos-body{display:grid;grid-template-columns:240px 1fr;gap:28px;align-items:start}
+
+/* Bühne — Strichzeichnung verschmilzt via mix-blend-mode:multiply; feste Höhe (aspect-ratio) hält jede SVG/Grafik sicher im Rahmen */
+.wk-page .pos-draw{position:relative;overflow:hidden;background:var(--stage);border:1px solid var(--line);border-radius:12px;padding:22px;display:grid;place-items:center;aspect-ratio:5/6;background-image:radial-gradient(120% 100% at 50% 0%,#fff,var(--stage) 70%)}
+.wk-page .pos-draw svg{display:block;width:100%;height:100%;mix-blend-mode:multiply}
+.wk-page .pos-draw img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;mix-blend-mode:multiply}
+
+.wk-page .pos-main{min-width:0}
+.wk-page .pos-title{font-size:20px;font-weight:650;letter-spacing:-.01em;color:var(--ink);margin:0 0 14px}
+.wk-page .pos-specs{display:grid;grid-template-columns:1fr;gap:0}
+.wk-page .ps-row{display:flex;justify-content:space-between;gap:14px;padding:11px 0;border-bottom:1px solid var(--line)}
+.wk-page .ps-row:last-child{border-bottom:none}
+.wk-page .ps-row span{font-size:13px;font-weight:500;color:var(--ink-soft)}
+.wk-page .ps-row b{font-size:14px;font-weight:600;color:var(--ink);text-align:right}
+
+.wk-page .pos-more{margin-top:12px}
+.wk-page .pos-more summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--ink-soft);list-style:none;display:inline-flex;align-items:center;gap:7px;transition:color .15s ease}
 .wk-page .pos-more summary::-webkit-details-marker{display:none}
-.wk-page .pos-more summary::before{content:'+';font-weight:800;font-size:15px}
-.wk-page .pos-more[open] summary::before{content:'–'}
-.wk-page .pos-full{margin-top:8px;border-top:1px solid var(--line);padding-top:6px}
-.wk-page .pos-full .srow{display:flex;justify-content:space-between;gap:12px;padding:5px 0;font-size:13px;border-bottom:1px solid var(--line)}
+.wk-page .pos-more summary::after{content:'';width:7px;height:7px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg);margin-top:-3px;transition:transform .2s ease}
+.wk-page .pos-more[open] summary::after{transform:rotate(-135deg);margin-top:2px}
+.wk-page .pos-more summary:hover{color:var(--ink)}
+.wk-page .pos-full{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}
+.wk-page .pos-full .srow{display:flex;justify-content:space-between;gap:12px;padding:7px 0;font-size:13px;border-bottom:1px solid var(--line)}
+.wk-page .pos-full .srow:last-child{border-bottom:none}
 .wk-page .pos-full .srow .k{color:var(--ink-soft)}
-.wk-page .pos-full .srow .v{text-align:right;font-weight:600}
-.wk-page .pos-full .dot{display:inline-block;width:11px;height:11px;border-radius:50%;border:1px solid #bbb;margin-right:5px;vertical-align:-1px}
-.wk-page .pos-foot{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:14px;padding-top:13px;border-top:1px solid var(--line)}
-.wk-page .qty{display:inline-flex;align-items:center;border:1px solid var(--line-d);border-radius:8px;overflow:hidden}
-.wk-page .qty button{width:44px;height:44px;border:none;background:var(--bg);font-size:19px;font-weight:700;cursor:pointer;color:var(--ink)}
-.wk-page .qty button:hover{background:#eef3f9;color:var(--primary)}
-.wk-page .qty span{min-width:38px;text-align:center;font-weight:700;font-size:15px}
+.wk-page .pos-full .srow .v{text-align:right;font-weight:600;color:var(--ink)}
+.wk-page .pos-full .dot{display:inline-block;width:11px;height:11px;border-radius:50%;border:1px solid var(--line-2);margin-right:5px;vertical-align:-1px}
+
+/* Fuß der Karte */
+.wk-page .pos-foot{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:22px;padding-top:20px;border-top:1px solid var(--line)}
+.wk-page .qty{display:inline-flex;align-items:center;height:44px;background:var(--sunken);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.wk-page .qty button{width:44px;height:44px;border:none;background:transparent;font-size:18px;font-weight:600;cursor:pointer;color:var(--ink-soft);transition:.12s ease}
+.wk-page .qty button:hover{background:#fff;color:var(--ink)}
+.wk-page .qty span{min-width:34px;text-align:center;font-weight:700;font-size:15px;color:var(--ink);font-variant-numeric:tabular-nums}
 .wk-page .pos-price{text-align:right;margin-left:auto}
-.wk-page .pos-price .pp-unit{display:block;font-size:11.5px;color:var(--ink-soft)}
-.wk-page .pos-price b{font-size:18px;font-weight:800;color:var(--ink)}
-.wk-page .pos-act{display:flex;gap:16px}
-.wk-page .pos-act button{background:none;border:none;font:inherit;font-size:13px;font-weight:700;cursor:pointer;color:var(--primary);min-height:44px}
-.wk-page .pos-act button.rm{color:var(--ink-soft)}
-.wk-page .pos-act button:hover{text-decoration:underline}
+.wk-page .pos-price .pp-unit{display:block;font-size:13px;font-weight:500;color:var(--ink-faint);margin-bottom:2px;font-variant-numeric:tabular-nums}
+.wk-page .pos-price b{font-size:20px;font-weight:700;color:var(--ink);letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.wk-page .pos-edit{display:inline-flex;align-items:center;gap:8px;height:44px;background:var(--surface);border:1px solid var(--line-2);border-radius:10px;padding:0 18px;font:inherit;font-size:13.5px;font-weight:600;color:var(--ink);cursor:pointer;transition:.15s ease}
+.wk-page .pos-edit svg{width:16px;height:16px;color:var(--ink-soft)}
+.wk-page .pos-edit:hover{border-color:var(--ink)}
+.wk-page .pos-edit:active{transform:translateY(1px)}
 
 /* Hinzufügen-Button */
-.wk-page .addbtn{width:100%;margin-top:16px;padding:16px;border:1.5px dashed var(--line-d);border-radius:10px;background:transparent;color:var(--primary);font:inherit;font-weight:700;font-size:14.5px;cursor:pointer;text-decoration:none;display:block;text-align:center;min-height:48px}
-.wk-page .addbtn:hover{border-color:var(--primary);background:#f5f9ff}
+.wk-page .addbtn{width:100%;margin-top:4px;padding:16px;border:1.5px dashed var(--line-2);border-radius:12px;background:transparent;color:var(--ink-soft);font:inherit;font-weight:600;font-size:14px;cursor:pointer;text-decoration:none;display:block;text-align:center;transition:.15s ease}
+.wk-page .addbtn:hover{border-color:var(--ink-soft);background:var(--surface);color:var(--ink)}
 
-/* Primärer Angebots-Button */
-.wk-page .cta{width:100%;min-height:56px;border:none;border-radius:var(--pill);background:linear-gradient(135deg,#2a6cc4,#1c4f90);color:#fff;font:700 14.5px/1 var(--sans);letter-spacing:.01em;cursor:pointer;margin-top:6px;transition:.2s cubic-bezier(.16,1,.3,1);box-shadow:0 8px 24px -6px rgba(118,169,250,.5);display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
-.wk-page .cta:hover{transform:translateY(-2px);box-shadow:0 12px 30px -8px rgba(118,169,250,.6)}
+/* ── Zusammenfassung ── */
+.wk-page .ov-summary{background:var(--surface);border:1px solid var(--line-2);border-radius:18px;padding:28px;position:sticky;top:96px;box-shadow:0 12px 40px -16px rgba(20,24,29,.16)}
+.wk-page .ovs-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.10em;color:var(--ink-soft);margin-bottom:18px}
+
+/* Liefer-Wahl als Segment-Control */
+.wk-page .ovs-deliv{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:18px;background:var(--sunken);border:1px solid var(--line);border-radius:12px;padding:5px}
+.wk-page .ovs-deliv button{text-align:left;border:1px solid transparent;border-radius:8px;background:transparent;padding:10px 12px;cursor:pointer;font:inherit;min-height:56px;color:var(--ink-faint);transition:.15s ease}
+.wk-page .ovs-deliv button b{display:block;font-size:14px;font-weight:600;color:inherit}
+.wk-page .ovs-deliv button span{font-size:11px;color:var(--ink-faint);line-height:1.3;display:block;margin-top:3px}
+.wk-page .ovs-deliv button.on{background:var(--surface);color:var(--ink);border-color:var(--line);box-shadow:0 1px 3px rgba(20,24,29,.10)}
+.wk-page .ovs-deliv button.on b{color:var(--ink)}
+.wk-page .ovs-deliv button.on span{color:var(--ink-soft)}
+.wk-page .ovs-deliv button.locked{opacity:.55;cursor:not-allowed}
+
+.wk-page .ovs-line{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:9px 0;font-size:14px;color:var(--ink-soft)}
+.wk-page .ovs-line b{color:var(--ink);font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
+.wk-page .ovs-line b.is-free{color:var(--green)}
+.wk-page .ovs-shipnote{font-size:11.5px;color:var(--ink-faint);margin:-2px 0 6px;text-align:right;line-height:1.4}
+.wk-page .ovs-total{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:14px 0 6px;padding:16px 20px;border-radius:12px;background:#EAF1FB}
+.wk-page .ovs-total span{font-size:12px;text-transform:uppercase;letter-spacing:.08em;font-weight:700;color:var(--ink-soft)}
+.wk-page .ovs-total b{font-size:30px;font-weight:750;color:var(--ink-strong);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.wk-page .ovs-mwst{font-size:11.5px;color:var(--ink-faint);text-align:right;margin:0 0 16px}
+.wk-page .ovs-note{text-align:center;font-size:12px;color:var(--ink-faint);margin-top:14px;line-height:1.5}
+
+/* Zusammenfassung: per Inline-Script eingehängte Vertrauens-Zeilen */
+.wk-page .ovs-assure{display:flex;flex-direction:column;gap:9px;margin:4px 0 16px;padding-top:16px;border-top:1px solid var(--line)}
+.wk-page .ovs-assure > div{display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:500;color:var(--ink-soft)}
+.wk-page .ovs-assure svg{width:15px;height:15px;color:var(--ink-soft);flex:0 0 auto}
+
+/* Primärer Angebots-Button — EINZIGER blauer Fill */
+.wk-page .cta{width:100%;min-height:56px;border:none;border-radius:12px;background:var(--brand);color:#fff;font:700 15px/1.2 var(--sans);letter-spacing:.005em;cursor:pointer;margin-top:4px;transition:background .18s ease,transform .18s ease,box-shadow .18s ease;box-shadow:0 8px 20px -8px rgba(34,94,170,.5);display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;text-align:center;padding:0 18px}
+.wk-page .cta:hover{background:var(--brand-d);transform:translateY(-1px);box-shadow:0 12px 24px -8px rgba(34,94,170,.55)}
 .wk-page .cta:active{transform:translateY(0)}
 
 /* Leer-Zustand */
-.wk-empty{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:clamp(36px,7vw,72px) 24px;text-align:center;max-width:620px;margin:8px auto 0}
-.wk-empty .wk-emp-ic{width:78px;height:78px;margin:0 auto 20px;color:var(--acc);display:grid;place-items:center;background:#f2f7ff;border-radius:50%}
-.wk-empty .wk-emp-ic svg{width:40px;height:40px}
-.wk-empty h2{font-family:var(--serif);font-size:22px;font-weight:800;color:var(--ink);margin-bottom:10px}
+.wk-empty{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:clamp(36px,7vw,72px) 24px;text-align:center;max-width:620px;margin:8px auto 0;box-shadow:0 1px 2px rgba(20,24,29,.04),0 8px 24px -12px rgba(20,24,29,.10)}
+.wk-empty .wk-emp-ic{width:78px;height:78px;margin:0 auto 20px;color:var(--brand);display:grid;place-items:center;background:var(--sunken);border-radius:50%}
+.wk-empty .wk-emp-ic svg{width:38px;height:38px}
+.wk-empty h2{font-family:var(--sans);font-size:22px;font-weight:700;letter-spacing:-.01em;color:var(--ink-strong);margin-bottom:10px}
 .wk-empty p{font-size:14.5px;color:var(--ink-soft);line-height:1.6;max-width:44ch;margin:0 auto 24px}
 .wk-empty .cta{max-width:300px;margin-left:auto;margin-right:auto}
 
@@ -136,10 +182,21 @@
 @media(max-width:900px){
   .wk-page .ov-cart{grid-template-columns:1fr}
   .wk-page .ov-summary{position:static}
-  .wk-page .pos-body{gap:14px;flex-direction:column}
-  .wk-page .pos-draw{flex-basis:auto;width:100%;min-height:220px;padding:12px}
-  .wk-page .pos-draw svg{max-width:100%;max-height:240px}
-  .wk-page .pos-foot{justify-content:space-between}
+}
+@media(max-width:640px){
+  .wk-wrap{padding:0 16px}
+  .wk-page .pos-card{padding:20px;border-radius:14px}
+  .wk-page .pos-body{grid-template-columns:1fr;gap:18px}
+  .wk-page .pos-draw{width:100%;aspect-ratio:1/1;padding:18px}
+  .wk-page .pos-foot{gap:12px}
+  .wk-page .pos-edit{flex:0 0 auto}
+  .wk-steps{gap:9px}
+  .wk-step-lb{font-size:12.5px;white-space:normal}
+  .wk-step-line{min-width:12px}
+  .wk-trust{gap:8px 18px;padding:12px 16px}
+  .wk-trust-i{font-size:12px}
+  .wk-page .ov-summary{padding:22px}
+  .wk-page .ovs-total b{font-size:26px}
 }
 </style>
 </head>
@@ -304,6 +361,36 @@
       <h1>Mein Angebot</h1>
       <p class="wk-sub">Ihre zusammengestellten Elemente — kostenlos &amp; unverbindlich anfragen.</p>
     </header>
+
+    <!-- Schritt-Indikator (statisch) -->
+    <div class="wk-steps" aria-label="Fortschritt">
+      <div class="wk-step is-active">
+        <span class="wk-step-no">1</span>
+        <span class="wk-step-lb">Angebot zusammenstellen</span>
+      </div>
+      <span class="wk-step-line" aria-hidden="true"></span>
+      <div class="wk-step">
+        <span class="wk-step-no">2</span>
+        <span class="wk-step-lb">Anfrage senden</span>
+      </div>
+    </div>
+
+    <!-- Trust-Leiste (statisch) -->
+    <div class="wk-trust">
+      <span class="wk-trust-i">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
+        Kostenlos &amp; unverbindlich
+      </span>
+      <span class="wk-trust-i">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21V9l9-6 9 6v12"/><path d="M9 21v-6h6v6"/></svg>
+        Familienbetrieb seit 1996
+      </span>
+      <span class="wk-trust-i">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>
+        Persönliche Beratung
+      </span>
+    </div>
+
     <div id="wk-root"></div>
   </div>
 </main>
@@ -440,9 +527,15 @@
     var r = it.r || {};
     var q = itemQty(it);
     var price = unitPrice(it);
+    var trashSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>';
+    var pencilSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
     return '' +
-      '<div class="pos-card">' +
-        '<div class="pos-head"><span class="pos-no">Pos. ' + (i+1) + '</span></div>' +
+      '<div class="pos-card' + (i===0 ? ' is-newest' : '') + '">' +
+        '<div class="pos-head">' +
+          '<span class="pos-no">Pos. ' + (i+1) + '</span>' +
+          (i===0 ? '<span class="pos-new">Zuletzt hinzugefügt</span>' : '') +
+          '<button type="button" class="pos-del" aria-label="Diese Position aus dem Warenkorb entfernen" title="Aus dem Warenkorb entfernen" onclick="wkRemove(' + i + ')">' + trashSvg + '<span>Entfernen</span></button>' +
+        '</div>' +
         '<div class="pos-body">' +
           '<div class="pos-draw">' + esc(r.sketch) + '</div>' +
           '<div class="pos-main">' +
@@ -454,7 +547,7 @@
         '<div class="pos-foot">' +
           '<div class="qty"><button type="button" aria-label="Weniger" onclick="wkQty(' + i + ',-1)">−</button><span class="tnum">' + q + '</span><button type="button" aria-label="Mehr" onclick="wkQty(' + i + ',1)">+</button></div>' +
           '<div class="pos-price"><span class="pp-unit">' + eur(price) + ' / Stück</span><b class="tnum">' + eur(price * q) + '</b></div>' +
-          '<div class="pos-act"><button type="button" onclick="wkEdit(' + i + ')">Bearbeiten</button><button type="button" class="rm" onclick="wkRemove(' + i + ')">Entfernen</button></div>' +
+          '<button type="button" class="pos-edit" onclick="wkEdit(' + i + ')">' + pencilSvg + 'Bearbeiten</button>' +
         '</div>' +
       '</div>';
   }
@@ -541,6 +634,40 @@
     }
   }catch(e){}
   render();
+})();
+</script>
+
+<!-- Premium-Ausbau der (per JS gerenderten) Zusammenfassung: Vertrauens-Zeilen + „kostenlos"-Akzent.
+     Läuft nach jedem Re-Render (Menge/Liefer-Umschaltung) erneut über MutationObserver. -->
+<script>
+(function(){
+  var root = document.getElementById('wk-root');
+  if(!root || typeof MutationObserver === 'undefined') return;
+  var chk = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
+  var LINES = ['Persönliche Prüfung durch unser Team', 'Antwort meist am nächsten Werktag'];
+
+  function enhance(){
+    var sum = root.querySelector('.ov-summary');
+    if(!sum) return;
+    // 1) „kostenlos" grün akzentuieren (Grün ausschließlich hierfür)
+    sum.querySelectorAll('.ovs-line b').forEach(function(b){
+      if(b.textContent.trim().toLowerCase() === 'kostenlos') b.classList.add('is-free');
+      else b.classList.remove('is-free');
+    });
+    // 2) Vertrauens-Zeilen vor dem CTA einhängen (nur einmal je Render)
+    if(!sum.querySelector('.ovs-assure')){
+      var cta = sum.querySelector('.cta');
+      if(cta){
+        var box = document.createElement('div');
+        box.className = 'ovs-assure';
+        box.innerHTML = LINES.map(function(t){ return '<div>' + chk + '<span>' + t + '</span></div>'; }).join('');
+        cta.parentNode.insertBefore(box, cta);
+      }
+    }
+  }
+  var mo = new MutationObserver(function(){ enhance(); });
+  mo.observe(root, { childList:true, subtree:true });
+  enhance();
 })();
 </script>
 
