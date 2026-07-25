@@ -64,6 +64,17 @@ body:not(.wiz-active) .topbar{display:none}
 .step.active{border-bottom-color:var(--ink)}
 .step.active .num{background:var(--ink);border-color:var(--ink);color:#fff}
 .step.active .lb{color:var(--ink)}
+/* ===== Kapitel-Reiter (Phasen-Stepper, Variante A) — ersetzt die Einzel-Schritt-Kreise ===== */
+.steps-inner.phmode{overflow:visible;gap:6px;padding:6px 24px 0}
+.ph{flex:1 1 0;padding:14px 10px 12px;text-align:center;cursor:pointer;border:none;background:none;border-bottom:3px solid var(--line);transition:.25s var(--ease)}
+.ph .cap{font-family:var(--serif);font-size:14.5px;font-weight:700;color:var(--ink-soft);letter-spacing:.01em;display:block;white-space:nowrap}
+.ph .cnt{display:block;font-size:11px;color:var(--ink-soft);margin-top:2px}
+.ph.done{border-bottom-color:var(--accent)}
+.ph.done .cap{color:var(--ink)}
+.ph.active{border-bottom-color:var(--ink)}
+.ph.active .cap{color:var(--ink)}
+.ph.active .cnt{color:var(--accent);font-weight:700}
+@media(max-width:880px){.steps-inner.phmode{gap:3px;padding:6px 10px 0}.ph{padding:11px 3px 9px}.ph .cap{font-size:12px}.ph .cnt{font-size:10px}}
 
 /* Haupt */
 .wrap{flex:1;max-width:1160px;margin:0 auto;width:100%;padding:34px 32px 128px}
@@ -626,9 +637,8 @@ body:not(.wiz-active) .topbar{display:none}
   body.wiz-active .dfnav-util{display:none}
   /* "Anderes Produkt"-Extraleiste raus (Zurück-zu-Produkten liegt in der Fußleiste auf Schritt 1) */
   body.wiz-active .topbar .tb-row{display:none}
-  /* 14 Tabs raus → dünner Fortschrittsbalken + kompakte Schritt-Zeile */
-  body.wiz-active .steps-inner{display:none}
-  body.wiz-active .wizprog{display:block;margin:11px 16px 0}
+  /* Phasen-Reiter bleiben auch mobil sichtbar (4 Kapitel passen); nur der alte 14-Kreis-Modus wird versteckt */
+  body.wiz-active .steps-inner:not(.phmode){display:none}
   body.wiz-active .steps-hint{justify-content:center;padding:7px 16px 10px;font-weight:700;color:var(--ink)}
   body.wiz-active .steps-hint .sh-jump{display:none}
   body.wiz-active #stepNow{font-size:12.5px;letter-spacing:.02em}
@@ -811,7 +821,7 @@ body:not(.wiz-active) .topbar{display:none}
   </div>
   <nav class="steps"><div class="steps-inner" id="stepbar"></div>
     <div class="wizprog" aria-hidden="true"><i id="wizprogFill"></i></div>
-    <div class="steps-hint"><span id="stepNow"></span><span class="sh-jump"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7h8M8 7l3-3M8 7l3 3M16 17H8M16 17l-3-3M16 17l-3 3"/></svg> Jeden Schritt frei anklickbar</span></div>
+    <div class="steps-hint"><span id="stepNow"></span><span class="sh-jump"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7h8M8 7l3-3M8 7l3 3M16 17H8M16 17l-3-3M16 17l-3 3"/></svg> Jeden Bereich frei anklickbar</span></div>
   </nav>
 </header>
 
@@ -1374,7 +1384,8 @@ function haustuerStageSVG(){
   // Glas-Innenmaß), "Innen"-Beschriftung. Färbt + ändert sich mit Modell, Farbe, Öffnung und Maßen.
   const key=S.doorModel||'nebraska-lcr-inox';
   const bMm=Math.max(+S.w||1100,400), hMm=Math.max(+S.h||2100,900);
-  const co=COLORS[S.outer], dark=isDarkCol(S.outer), fCol=co.c;
+  const av=sketchAussen(), ci=av?S.outer:S.inner;               // Außenfarbe beim Außenfarbe-Wählen, sonst Innenfarbe (wie Fenster-Skizze)
+  const co=COLORS[ci], dark=isDarkCol(ci), fCol=co.c;
   const line=dark?'#17181a':'#111';
   const GLASS=dark?'#cdd3d5':'#d7e7f7', GLASSST=line, DIN=dark?'#5e6772':'#9ca8b4', DIMC='#1e242b', DIML='#565b61';
   const handleSide=(S.opening==='dkl')?'r':'l', hinge=(handleSide==='r')?'l':'r';   // Band = Gegenseite Griff
@@ -1398,6 +1409,7 @@ function haustuerStageSVG(){
   if(DOOR_MOTIFS[key]){
     s+=`<image href="img/tuer-motive/${key}.png" x="${glx}" y="${gly}" width="${glw}" height="${glh}" preserveAspectRatio="xMidYMid meet" opacity="${dark?0.55:0.95}"/>`;
   }
+  if(!av){   // Griff, Scharniere & DIN-Symbol nur in der Innenansicht (von außen nicht sichtbar)
   // DIN-Dreh-Symbol (Spitze zur Griffseite)
   s+=`<g stroke="${DIN}" stroke-width="${Math.max(Math.min(glw,glh)*0.006,2.4)}" fill="none" stroke-linejoin="round" stroke-linecap="round">${sashOpenLines('dreh',hinge,glx,gly,glx+glw,gly+glh)}</g>`;
   // Beschlag-/Scharnier-Marken (Bandseite)
@@ -1419,13 +1431,12 @@ function haustuerStageSVG(){
       +`<rect x="${dir<0?holmX-lev:holmX}" y="${cyH-lT/2}" width="${lev}" height="${lT}" rx="${lT*0.5}" fill="#fff" stroke="${line}" stroke-width="${hw}"/>`
       +`<circle cx="${holmX}" cy="${cyH}" r="${lT*0.7}" fill="${line}"/>`;
   }
+  }   // Ende: Griff/Scharniere/DIN nur Innenansicht
   // Bemaßung: Breite oben, Höhe rechts, Glas-Innenbreite unten im Glas
   const topY=-mT*0.5; s+=hb(0,bMm,topY)+ht(bMm/2,topY-DT*0.72,bMm);
   const rxH=bMm+DT*0.9; s+=vb(rxH,0,hMm)+vt(rxH+DT*0.62,hMm/2,hMm);   // Höhe senkrecht (wie PDF)
   const giY=gly+glh-DT*0.55; s+=hb(glx+DW,glx+glw-DW,giY)+ht((glx*2+glw)/2,giY-DT*0.5,Math.round(glw));
-  // "Innen"-Beschriftung senkrecht ganz rechts (Innenansicht)
-  const ix=bMm+DT*2.7, iy=hMm*0.5;
-  s+=`<text x="${ix}" y="${iy}" transform="rotate(-90 ${ix} ${iy})" text-anchor="middle" dominant-baseline="central" font-family="Inter,Arial" font-weight="600" font-size="${DT*0.9}" fill="#8a867e">Innen</text>`;
+  // (Innen/Außen-Beschriftung entfernt — Kundenwunsch: die senkrechte Schrift an der Skizze weg)
   return s+`</svg>`;
 }
 
@@ -1809,6 +1820,20 @@ function buildSchiebeSteps(){
     ...common];
 }
 const STEPMAP={fenster:STEPS_FENSTER,balkon:STEPS_BALKON,haustuer:STEPS_HAUSTUER};
+// ===== Kapitel-Zuordnung für den Phasen-Stepper (Variante A). Gilt produktübergreifend über den Step-Key. =====
+const STEP_PHASE={
+  profil:'basis', aufteilung:'basis', oeffnung:'basis', anschlag:'basis', masse:'basis', anzahl:'basis', psk:'basis', lauf:'basis',
+  modell:'design', farbe:'design', glas:'design', motiv:'design',
+  schall:'details', griff:'details', griffTuer:'details', griffhst:'details', schwelle:'details', sicherheit:'details', rollladen:'details', sprossen:'details', extras:'details',
+  anfrage:'anfrage'
+};
+const PHASE_CAP={basis:'Basis', design:'Design', details:'Details', anfrage:'Anfrage'};
+// Fasst die aktuellen STEPS in zusammenhängende Kapitel-Gruppen (die Reihenfolge je Produkt hält Kapitel zusammenhängend).
+function phaseGroups(){
+  const g=[]; STEPS.forEach((s,i)=>{ const ph=STEP_PHASE[s.key]||'details'; const last=g[g.length-1];
+    if(last&&last.ph===ph){ last.to=i; } else { g.push({ph:ph, cap:PHASE_CAP[ph]||ph, from:i, to:i}); } });
+  return g;
+}
 let STEPS=STEPS_FENSTER;
 // Überspringbare Extras: alles vorbelegt → Kunde kann mit einem Tap die Standards übernehmen und direkt zum Angebot
 const SKIP_KEYS=['motiv','schall','griff','sicherheit','rollladen','sprossen'];
@@ -2589,10 +2614,12 @@ function render(){
   g.classList.toggle('full', key==='anfrage');
   g.classList.toggle('select', selectMode);
   nav.style.display='block'; foot.style.display=(key==='anfrage')?'none':'block';
-  document.getElementById('stepbar').innerHTML=STEPS.map((s,i)=>{
-    const cls=i===cur?'active':(i<cur?'done':'');
-    const num=i<cur?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg>`:(i+1);
-    return `<button class="step ${cls}" onclick="go(${i})"><span class="num">${num}</span><span class="lb">${s.label}</span></button>`;
+  const _sb=document.getElementById('stepbar'); _sb.className='steps-inner phmode';
+  _sb.innerHTML=phaseGroups().map(g=>{
+    const total=g.to-g.from+1;
+    const cls=(cur>g.to)?'done':((cur>=g.from&&cur<=g.to)?'active':'');
+    const cnt=(cls==='active')?((cur-g.from+1)+'/'+total):(cls==='done'?'fertig':(total+(total===1?' Schritt':' Schritte')));
+    return `<button class="ph ${cls}" onclick="go(${g.from})"><span class="cap">${g.cap}</span><span class="cnt">${cnt}</span></button>`;
   }).join('');
   document.getElementById('stepNow').textContent='Schritt '+(cur+1)+' von '+STEPS.length+' · '+STEPS[cur].label;
   var _wpf=document.getElementById('wizprogFill'); if(_wpf) _wpf.style.width=Math.round(((cur+1)/STEPS.length)*100)+'%';
