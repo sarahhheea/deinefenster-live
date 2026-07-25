@@ -48,6 +48,11 @@ const STATE = {
 
 const LS_KEY = 'deinefenster_warenkorb_v1';
 
+/* ─── Rollladen: „Ohne Rollladen" = kein einziger Rollladen-Tag (Inhaberin-Wunsch 25.07.2026).
+   Bestehende Inserate ohne Angabe fallen automatisch hierunter — keine Datenmigration nötig. ─── */
+const ROLLLADEN_TAGS = ['mit-rollo','rollladen-gurtwickler','rollladen-motor','rollladen-elektrisch'];
+const hatRollladen = p => (p.eigenschaften || []).some(e => ROLLLADEN_TAGS.includes(e));
+
 /* ─── Init ─── */
 document.addEventListener('DOMContentLoaded', async () => {
   loadCart();
@@ -431,7 +436,9 @@ function baueFilterSidebar() {
   // der Farbe-Block. Frei-Text-Sätze landen nicht mehr in den Filtern (nur saubere Tags).
   const eigWrap = document.getElementById('filterEigenschaften');
   const alleEig = STATE.metadaten.alle_eigenschaften || [];
-  const eigCount = e => STATE.produkte.filter(p => (p.eigenschaften || []).includes(e)).length;
+  const eigCount = e => e === 'rollladen-ohne'
+    ? STATE.produkte.filter(p => !hatRollladen(p)).length
+    : STATE.produkte.filter(p => (p.eigenschaften || []).includes(e)).length;
   const eigOption = (e) => {
     const count = eigCount(e);
     if (count === 0) return '';
@@ -446,7 +453,7 @@ function baueFilterSidebar() {
     { titel: 'Aufteilung & Öffnung',     werte: ['dreh-kipp','stulp','pfosten','kaempfer','festverglasung','parallel-schiebe-kipp','hebe-schiebe'] },
     { titel: 'Bauform',                  werte: ['oberlicht','unterlicht','ober-unter-licht','kellerfenster-typ','rundfenster-typ','rundbogenfenster-typ','stichbogenfenster-typ'] },
     { titel: 'Sprossen',                 werte: ['sprossen-aufgesetzt','sprossen-innen'] },
-    { titel: 'Rollladen',                werte: ['mit-rollo','rollladen-gurtwickler','rollladen-motor','rollladen-elektrisch'] },
+    { titel: 'Rollladen',                werte: ['mit-rollo','rollladen-gurtwickler','rollladen-motor','rollladen-elektrisch','rollladen-ohne'] },
     { titel: 'Schwelle & Komfort',       werte: ['alu-schwelle','null-schwelle','barrierefrei','kompaktmass'] },
     { titel: 'Ausstattung & Sicherheit', werte: ['edelstahl-stossgriff','5-fach-verriegelung','beidseitig-abschliessbar','passivhaus-tauglich','einzelstueck'] }
   ];
@@ -688,7 +695,8 @@ function gefilterteProdukte() {
     // Eigenschaften — alle müssen vorhanden sein (UND-Logik)
     if (f.eigenschaften.size) {
       for (const e of f.eigenschaften) {
-        if (!(p.eigenschaften || []).includes(e)) return false;
+        if (e === 'rollladen-ohne') { if (hatRollladen(p)) return false; }   // „Ohne Rollladen" = kein Rollladen-Tag
+        else if (!(p.eigenschaften || []).includes(e)) return false;
       }
     }
     // Maße mit Toleranz (Fuzzy-Match) — strukturierte Hauptmaße ODER Maße irgendwo im Text.
@@ -2029,6 +2037,7 @@ function eigenschaftAnzeige(code) {
     // Rollladen — gleiche Schlüssel wie im Einstell-Formular (vorher unbeschriftet)
     'rollladen-gurtwickler': 'Mit Rollladen (Gurtwickler)',
     'rollladen-motor': 'Mit Rollladen (Motor)',
+    'rollladen-ohne': 'Ohne Rollladen',
     // Zustand / Komfort (vorher unbeschriftet → roher Code im Filter)
     'einzelstueck': 'Einzelstück',
     'vermessen': 'Vermessen',

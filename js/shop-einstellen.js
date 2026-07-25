@@ -94,7 +94,8 @@ const EIGENSCHAFTEN_GRUPPEN = [
     icon: 'roller_shades',
     items: [
       { key: 'rollladen-gurtwickler', label: 'Mit Gurtwickler' },
-      { key: 'rollladen-motor',       label: 'Mit Motor (elektrisch)' }
+      { key: 'rollladen-motor',       label: 'Mit Motor (elektrisch)' },
+      { key: 'rollladen-ohne',        label: 'Ohne Rollladen' }
     ]
   },
   {
