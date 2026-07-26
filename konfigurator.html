@@ -133,6 +133,11 @@ body:not(.wiz-active) .topbar{display:none}
 
 .swatches{display:grid;grid-template-columns:repeat(4,1fr);gap:18px 14px}
 .innchip{width:52px;height:52px;border-radius:50%;border:1px solid var(--line-d);display:inline-block;box-shadow:inset 0 0 0 1px rgba(0,0,0,.05)}
+.farbe-cols{display:grid;grid-template-columns:minmax(0,1fr) 176px;gap:14px;align-items:start}
+.farbe-cols>.card{margin:0;min-width:0}
+.farbe-cols .swatches{grid-template-columns:repeat(3,1fr)}
+.opts.farbe-innen-opts{grid-template-columns:1fr}
+@media(max-width:760px){.farbe-cols{grid-template-columns:1fr}.farbe-cols .swatches{grid-template-columns:repeat(3,1fr)}}
 .ocard.disabled{opacity:.45;cursor:not-allowed;pointer-events:none}
 .sw{cursor:pointer;text-align:center}
 .sw .chip{height:54px;border-radius:var(--r);border:1px solid var(--line-d);position:relative;transition:.2s var(--ease)}
@@ -894,7 +899,7 @@ const COLORS=[
   {key:'dunkelrot',n:'Dunkelrot',c:'#6c1c1c'},
 ];
 const _PREM_FARBE=['schwarzbr','basaltgr-gl','basaltgr-sa','betongrau','crown-plat','dunkelgr','dunkelrot','eiche-nat','eisengl','moosgruen','oregon','schiefgr-gl','schiefgr-sa','douglasie'];
-const S={ prod:'fenster', profile:'classic', aufteilung:'1fl', opening:'dkr', anschlagIdx:1, hstSystem:'psk', pskKammer:'iglo5', w:1000, h:1200, anzahl:1, outer:0, inner:0, balkonSchwelle:'alu', doorModel:'nebraska-lcr-inox', griffTuer:'klinke', griffAussen:'klinke', stossHoehe:'1200', griffHst:'innen', hstSchloss:'ohne', hstTeilung:'2', hstLauf:'rechts',
+const S={ prod:'fenster', profile:'classic', aufteilung:'1fl', opening:'dkr', anschlagIdx:1, hstSystem:'psk', pskKammer:'iglo5', w:1000, h:1200, anzahl:1, outer:0, inner:0, balkonSchwelle:'ohne', doorModel:'nebraska-lcr-inox', griffTuer:'klinke', griffAussen:'klinke', stossHoehe:'1200', griffHst:'innen', hstSchloss:'ohne', hstTeilung:'2', hstLauf:'rechts',
   glass:'2', glasdekor:'klar', schall:false, griff:'mistral', roll:'kein', panzer:null, sproTyp:'keine', sproDicke:'27', sproRaster:'kreuz', sicher:false, colorTarget:'a' };
 
 // === Öffnung PRO FLÜGEL — 1:1 aus dem Live-Konfigurator (ANSCHLAG_SETS, geprüft 04.07.2026) ===
@@ -1915,7 +1920,7 @@ function startProduct(id){
   S.roll='kein'; S.panzer=null; S.rollSeite='rechts';
   S.sproTyp='keine'; S.sproDicke='27'; S.sproRaster='kreuz'; S.sicher=false; S.glass=(S.prod==='schiebe')?'3':'2'; S.glasdekor='klar'; S.schall=false;
   S.outer=0; S.inner=0; S.colorTarget='a'; S.anzahl=1;
-  S.griff='mistral'; S.griffTuer='klinke'; S.griffAussen='klinke'; S.stossHoehe='1200'; S.hstTeilung='2'; S.hstLauf='rechts'; S.balkonSchwelle='alu';
+  S.griff='mistral'; S.griffTuer='klinke'; S.griffAussen='klinke'; S.stossHoehe='1200'; S.hstTeilung='2'; S.hstLauf='rechts'; S.balkonSchwelle='ohne';
   S.doorModel='vollglas-inox';   // Haustür startet am günstigsten Modell (Vollglas) → Startpreis = beworbenes Minimum, baut sich mit teureren Modellen auf
   const dim={fenster:[500,500],balkon:[600,1800],haustuer:[900,2000],schiebe:[1800,1800]}[S.prod]||[1000,1200];
   S.w=dim[0]; S.h=dim[1];
@@ -2085,8 +2090,8 @@ function panelHTML(){
     // Bild-Karten mit echten Fotos + Text wie im Live-Konfigurator (schwelle-alu20 / schwelle-ohne)
     const scard=(val,src,t,s)=>`<div class="ocard ${S.balkonSchwelle===val?'on':''}" onclick="set('balkonSchwelle','${val}')"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="vis"><img src="${src}?v=1" loading="lazy" decoding="async" alt="${t}"></div><div class="t">${t}</div><div class="s">${s}</div></div>`;
     return grp('Bodenschwelle','two',
-      scard('alu','img/schwelle-alu20.webp','Alu-Schwelle 20 mm','Niedrige Schwelle aus Aluminium · bewitterungsbeständig')
-     +scard('ohne','img/schwelle-ohne.webp','Ohne Schwelle','Nur bei innenliegenden Balkontüren · kein Wetterschutz'));
+      scard('ohne','img/schwelle-ohne.webp','Ohne Schwelle','Standard-Ausführung')
+     +scard('alu','img/schwelle-alu20.webp','Alu-Schwelle 20 mm','Niedrige Alu-Schwelle · bewitterungsbeständig'));
   }
   if(k==='anzahl') return `<div class="card"><div class="grp-title">Anzahl gleicher ${prodUnit()==='Fenster'?'Fenster':prodUnit()+'en'}</div>
     <div class="qwrap"><button class="qbtn" onclick="set('anzahl',Math.max(1,S.anzahl-1))">−</button><div class="qnum">${S.anzahl}</div><button class="qbtn" onclick="set('anzahl',Math.min(99,S.anzahl+1))">+</button></div>
@@ -2156,12 +2161,14 @@ function panelHTML(){
     const innenFarbig=(S.inner!==0), outerIsWhite=(S.outer===0);
     const sw=COLORS.map((c,i)=>`<div class="sw ${S.outer===i?'on':''}" onclick="pickOuter(${i})"><div class="chip" style="background:${c.c}"></div><div class="nm">${c.n}</div>${i===0?'<div class="dl inc">inklusive</div>':''}</div>`).join('');
     const tick=`<span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span>`;
-    const innenToggle=`<div class="opts two">`
+    const innenToggle=`<div class="opts farbe-innen-opts">`
       +`<div class="ocard ${S.inner===0?'on':''}" onclick="setInnenWeiss()">${tick}<div class="vis" style="height:84px;place-items:center"><span class="innchip" style="background:${COLORS[0].c}"></span></div><div class="t">Weiß</div><div class="s">innen weiß</div></div>`
       +`<div class="ocard ${innenFarbig?'on':''}${outerIsWhite?' disabled':''}" onclick="${outerIsWhite?'':'setInnenFarbig()'}">${tick}<div class="vis" style="height:84px;place-items:center"><span class="innchip" style="background:${co.c}"></span></div><div class="t">Farbig</div><div class="s">${outerIsWhite?'erst Außenfarbe wählen':'innen wie außen'}</div></div>`
       +`</div>`;
-    return `<div class="card"><div class="grp-title">Außenfarbe wählen</div><div class="swatches">${sw}</div></div>`
-      +`<div class="card"><div class="grp-title">Innenfarbe</div>${innenToggle}</div>`;
+    return `<div class="farbe-cols">`
+      +`<div class="card"><div class="grp-title">Außenfarbe wählen</div><div class="swatches">${sw}</div></div>`
+      +`<div class="card"><div class="grp-title">Innenfarbe</div>${innenToggle}</div>`
+      +`</div>`;
   }
   if(k==='extras'){
     const row=(key,t,s,dl,inc)=>`<label class="optrow ${S[key]?'on':''}" onclick="toggle('${key}')"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><span><span class="ot">${t}</span><br><span class="os">${s}</span></span><span class="delta ${inc?'inc':''}">${dl}</span></label>`;
