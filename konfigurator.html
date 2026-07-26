@@ -892,7 +892,7 @@ const COLORS=[
   {key:'dunkelrot',n:'Dunkelrot',c:'#6c1c1c'},
 ];
 const _PREM_FARBE=['schwarzbr','basaltgr-gl','basaltgr-sa','betongrau','crown-plat','dunkelgr','dunkelrot','eiche-nat','eisengl','moosgruen','oregon','schiefgr-gl','schiefgr-sa','douglasie'];
-const S={ prod:'fenster', profile:'classic', aufteilung:'1fl', opening:'dkr', anschlagIdx:1, hstSystem:'psk', pskKammer:'iglo5', w:1000, h:1200, anzahl:1, outer:0, inner:0, balkonSchwelle:'alu', doorModel:'nebraska-lcr-inox', griffTuer:'klinke', griffAussen:'klinke', stossModell:'q45r', griffHst:'innen', hstSchloss:'ohne', hstTeilung:'2', hstLauf:'rechts',
+const S={ prod:'fenster', profile:'classic', aufteilung:'1fl', opening:'dkr', anschlagIdx:1, hstSystem:'psk', pskKammer:'iglo5', w:1000, h:1200, anzahl:1, outer:0, inner:0, balkonSchwelle:'alu', doorModel:'nebraska-lcr-inox', griffTuer:'klinke', griffAussen:'klinke', stossHoehe:'1200', griffHst:'innen', hstSchloss:'ohne', hstTeilung:'2', hstLauf:'rechts',
   glass:'2', glasdekor:'klar', schall:false, griff:'mistral', roll:'kein', panzer:null, sproTyp:'keine', sproDicke:'27', sproRaster:'kreuz', sicher:false, colorTarget:'i' };
 
 // === Öffnung PRO FLÜGEL — 1:1 aus dem Live-Konfigurator (ANSCHLAG_SETS, geprüft 04.07.2026) ===
@@ -1748,11 +1748,10 @@ const DOORS=[  // echte Drutex-Studio-Renders (weiß), Modell-Set wie Live-Konfi
 const DOORIMG=k=>`img/drutex-tueren/studio/${k}.webp`;   // echte Drutex-Studio-Renders wie im Live-Konfigurator
 const DOORN=Object.fromEntries(DOORS.map(d=>[d.k,d.n]));
 const GRIFFT={stoss:'Stoßgriff',klinke:'Drückergarnitur',knauf:'Knauf'};
-const STOSS_MODELLE=[{k:'p10d',n:'P10D'},{k:'p45',n:'P45'},{k:'q10',n:'Q10'},{k:'q45r',n:'Q45R'},{k:'z1',n:'Z1'}];
-const STOSS_NAME={p10d:'P10D',p45:'P45',q10:'Q10',q45r:'Q45R',z1:'Z1'};
+const STOSS_HOEHEN=['580','1200','1600'];
 function _griffAussenVal(){ return S.griffAussen || ((S.griffTuer&&S.griffTuer!=='stange')?S.griffTuer:'klinke'); }
-function griffTuerShort(){ var a=_griffAussenVal(); return (GRIFFT[a]||'—')+(a==='stoss'?' '+(STOSS_NAME[S.stossModell]||''):''); }
-function griffTuerFull(){ var a=_griffAussenVal(); return (GRIFFT[a]||'—')+(a==='stoss'?' '+(STOSS_NAME[S.stossModell]||''):'')+' außen · Drückergarnitur innen'; }
+function griffTuerShort(){ var a=_griffAussenVal(); return (GRIFFT[a]||'—')+(a==='stoss'?' · '+(S.stossHoehe||'1200')+' mm':''); }
+function griffTuerFull(){ var a=_griffAussenVal(); return (GRIFFT[a]||'—')+(a==='stoss'?' · Höhe '+(S.stossHoehe||'1200')+' mm':'')+' außen · Drückergarnitur innen'; }
 const STEPS_FENSTER=[  // Reihenfolge exakt wie Live-Konfigurator (STEP_ORDER)
   {key:'profil',label:'Profil',title:['Ihr ','Profil'],sub:'Das Drutex-System für Ihr Fenster.'},
   {key:'aufteilung',label:'Aufteilung',title:['Die ','Aufteilung'],sub:'Wie viele Flügel soll Ihr Fenster haben?'},
@@ -1928,7 +1927,7 @@ function startProduct(id){
   S.roll='kein'; S.panzer=null; S.rollSeite='rechts';
   S.sproTyp='keine'; S.sproDicke='27'; S.sproRaster='kreuz'; S.sicher=false; S.glass=(S.prod==='schiebe')?'3':'2'; S.glasdekor='klar'; S.schall=false;
   S.outer=0; S.inner=0; S.colorTarget='i'; S.anzahl=1;
-  S.griff='mistral'; S.griffTuer='klinke'; S.griffAussen='klinke'; S.stossModell='q45r'; S.hstTeilung='2'; S.hstLauf='rechts'; S.balkonSchwelle='alu';
+  S.griff='mistral'; S.griffTuer='klinke'; S.griffAussen='klinke'; S.stossHoehe='1200'; S.hstTeilung='2'; S.hstLauf='rechts'; S.balkonSchwelle='alu';
   S.doorModel='vollglas-inox';   // Haustür startet am günstigsten Modell (Vollglas) → Startpreis = beworbenes Minimum, baut sich mit teureren Modellen auf
   const dim={fenster:[500,500],balkon:[600,1800],haustuer:[900,2000],schiebe:[1800,1800]}[S.prod]||[1000,1200];
   S.w=dim[0]; S.h=dim[1];
@@ -2063,7 +2062,7 @@ function panelHTML(){
   }
   if(k==='griffTuer'){
     if(!S.griffAussen) S.griffAussen=_griffAussenVal();
-    if(!S.stossModell) S.stossModell='q45r';
+    if(!S.stossHoehe) S.stossHoehe='1200';
     S.griffTuer=S.griffAussen;
     const tick=`<span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span>`;
     const ga=(val,img,t,sub)=>`<div class="ocard ${S.griffAussen===val?'on':''}" onclick="setGriffAussen('${val}')">${tick}<div class="vis"><img src="${img}" alt="${t}"></div><div class="t">${t}</div>${sub?`<div class="s">${sub}</div>`:''}<div class="pdl">inklusive</div></div>`;
@@ -2074,8 +2073,8 @@ function panelHTML(){
       +ga('stoss','img/drutex-griffe/stoss-q45r-cut.webp','Stoßgriff','Edelstahl-Stange')
       +`</div></div>`;
     if(S.griffAussen==='stoss'){
-      const mc=STOSS_MODELLE.map(m=>`<div class="ocard ${S.stossModell===m.k?'on':''}" onclick="setStossModell('${m.k}')">${tick}<div class="vis"><img src="img/drutex-griffe/stoss-${m.k}-cut.webp" alt="Stoßgriff ${m.n}" loading="lazy" decoding="async"></div><div class="t">${m.n}</div></div>`).join('');
-      html+=`<div class="card"><div class="grp-title">Stoßgriff-Modell</div><div class="opts three">${mc}</div></div>`;
+      const pills=STOSS_HOEHEN.map(mm=>`<button type="button" class="spro-pill ${(S.stossHoehe||'1200')===mm?'on':''}" onclick="setStossHoehe('${mm}')">${mm} mm</button>`).join('');
+      html+=`<div class="card"><div class="grp-title">Stoßgriff-Höhe</div><div class="spro-pills">${pills}</div></div>`;
     }
     return html;
   }
@@ -2555,7 +2554,7 @@ function setAnschlag(idx){ S.anschlagIdx=idx; syncOpening(); render(); maybeAuto
 function setTuerOeff(idx,r){ S.anschlagIdx=idx; S.tuerOeffnung=r; syncOpening(); render(); maybeAutoAdvance(); }   // Haustür: DIN links/rechts + innen/außen
 // Sprossen: Art (wählt gültige Breite), Aufteilung, Breite — bewusst KEIN Auto-Weiter (Detailauswahl)
 function setGriffAussen(v){ S.griffAussen=v; S.griffTuer=v; render(); }
-function setStossModell(v){ S.stossModell=v; render(); }
+function setStossHoehe(v){ S.stossHoehe=v; render(); }
 function setSproTyp(v){ S.sproTyp=v; if(v!=='keine'){ const dk=SPRO_DICKEN[v]||[]; if(dk.indexOf(S.sproDicke)<0)S.sproDicke=dk[0]; } render(); }
 function setSproRaster(v){ S.sproRaster=v; render(); }
 function setSproDicke(v){ S.sproDicke=v; render(); }
