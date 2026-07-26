@@ -132,6 +132,8 @@ body:not(.wiz-active) .topbar{display:none}
 .seg2 button.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
 
 .swatches{display:grid;grid-template-columns:repeat(4,1fr);gap:18px 14px}
+.innchip{width:52px;height:52px;border-radius:50%;border:1px solid var(--line-d);display:inline-block;box-shadow:inset 0 0 0 1px rgba(0,0,0,.05)}
+.ocard.disabled{opacity:.45;cursor:not-allowed;pointer-events:none}
 .sw{cursor:pointer;text-align:center}
 .sw .chip{height:54px;border-radius:var(--r);border:1px solid var(--line-d);position:relative;transition:.2s var(--ease)}
 .sw:hover .chip{transform:translateY(-2px)}
@@ -893,7 +895,7 @@ const COLORS=[
 ];
 const _PREM_FARBE=['schwarzbr','basaltgr-gl','basaltgr-sa','betongrau','crown-plat','dunkelgr','dunkelrot','eiche-nat','eisengl','moosgruen','oregon','schiefgr-gl','schiefgr-sa','douglasie'];
 const S={ prod:'fenster', profile:'classic', aufteilung:'1fl', opening:'dkr', anschlagIdx:1, hstSystem:'psk', pskKammer:'iglo5', w:1000, h:1200, anzahl:1, outer:0, inner:0, balkonSchwelle:'alu', doorModel:'nebraska-lcr-inox', griffTuer:'klinke', griffAussen:'klinke', stossHoehe:'1200', griffHst:'innen', hstSchloss:'ohne', hstTeilung:'2', hstLauf:'rechts',
-  glass:'2', glasdekor:'klar', schall:false, griff:'mistral', roll:'kein', panzer:null, sproTyp:'keine', sproDicke:'27', sproRaster:'kreuz', sicher:false, colorTarget:'i' };
+  glass:'2', glasdekor:'klar', schall:false, griff:'mistral', roll:'kein', panzer:null, sproTyp:'keine', sproDicke:'27', sproRaster:'kreuz', sicher:false, colorTarget:'a' };
 
 // === Öffnung PRO FLÜGEL — 1:1 aus dem Live-Konfigurator (ANSCHLAG_SETS, geprüft 04.07.2026) ===
 // Jede Karte = eine Kombination; oeff = Öffnung je Flügel (links→rechts). stulpAt = Trennung nach Flügel i ist ein Stulp (statt Pfosten).
@@ -1912,7 +1914,7 @@ function startProduct(id){
   S.aufteilung='1fl'; S.anschlagIdx=(S.prod==='balkon')?0:(S.prod==='fenster'?ANSCHLAG['1fl'].findIndex(function(o){return o.oeff&&o.oeff[0]==='fest';}):(ANSCHLAG_DEFIDX['1fl']||1));  // Fenster startet auf günstigster Variante (Festverglasung) → Startpreis = beworbenes Minimum, baut sich mit Öffnung/Größe auf
   S.roll='kein'; S.panzer=null; S.rollSeite='rechts';
   S.sproTyp='keine'; S.sproDicke='27'; S.sproRaster='kreuz'; S.sicher=false; S.glass=(S.prod==='schiebe')?'3':'2'; S.glasdekor='klar'; S.schall=false;
-  S.outer=0; S.inner=0; S.colorTarget='i'; S.anzahl=1;
+  S.outer=0; S.inner=0; S.colorTarget='a'; S.anzahl=1;
   S.griff='mistral'; S.griffTuer='klinke'; S.griffAussen='klinke'; S.stossHoehe='1200'; S.hstTeilung='2'; S.hstLauf='rechts'; S.balkonSchwelle='alu';
   S.doorModel='vollglas-inox';   // Haustür startet am günstigsten Modell (Vollglas) → Startpreis = beworbenes Minimum, baut sich mit teureren Modellen auf
   const dim={fenster:[500,500],balkon:[600,1800],haustuer:[900,2000],schiebe:[1800,1800]}[S.prod]||[1000,1200];
@@ -2150,14 +2152,16 @@ function panelHTML(){
       <div class="mhint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span>Richtmaße genügen für die Anfrage — das genaue Aufmaß nehmen wir gemeinsam vor Ort.</span></div></div>`;
   }
   if(k==='farbe'){
-    const co=COLORS[S.outer],ci=COLORS[S.inner],sel=S.colorTarget==='a'?S.outer:S.inner;
-    // Alle Farben direkt zeigen (Kundenwunsch: nicht hinter Aufklapp-Button verstecken)
-    const sw=COLORS.map((c,i)=>`<div class="sw ${sel===i?'on':''}" onclick="pickColor(${i})"><div class="chip" style="background:${c.c}"></div><div class="nm">${c.n}</div>${i===0?'<div class="dl inc">inklusive</div>':''}</div>`).join('');
-    const moreBtn = '';
-    return `<div class="card"><div class="seg2">
-        <button class="${S.colorTarget==='i'?'on':''}" onclick="set('colorTarget','i')"><div class="t">Innenfarbe</div><div class="s">${ci.n}</div></button>
-        <button class="${S.colorTarget==='a'?'on':''}" onclick="set('colorTarget','a')"><div class="t">Außenfarbe</div><div class="s">${co.n}</div></button></div></div>
-      <div class="card"><div class="grp-title">${S.colorTarget==='a'?'Außenfarbe':'Innenfarbe'} wählen</div><div class="swatches">${sw}</div>${moreBtn}</div>`;
+    const co=COLORS[S.outer],ci=COLORS[S.inner];
+    const innenFarbig=(S.inner!==0), outerIsWhite=(S.outer===0);
+    const sw=COLORS.map((c,i)=>`<div class="sw ${S.outer===i?'on':''}" onclick="pickOuter(${i})"><div class="chip" style="background:${c.c}"></div><div class="nm">${c.n}</div>${i===0?'<div class="dl inc">inklusive</div>':''}</div>`).join('');
+    const tick=`<span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span>`;
+    const innenToggle=`<div class="opts two">`
+      +`<div class="ocard ${S.inner===0?'on':''}" onclick="setInnenWeiss()">${tick}<div class="vis" style="height:84px;place-items:center"><span class="innchip" style="background:${COLORS[0].c}"></span></div><div class="t">Weiß</div><div class="s">innen weiß</div></div>`
+      +`<div class="ocard ${innenFarbig?'on':''}${outerIsWhite?' disabled':''}" onclick="${outerIsWhite?'':'setInnenFarbig()'}">${tick}<div class="vis" style="height:84px;place-items:center"><span class="innchip" style="background:${co.c}"></span></div><div class="t">Farbig</div><div class="s">${outerIsWhite?'erst Außenfarbe wählen':'innen wie außen'}</div></div>`
+      +`</div>`;
+    return `<div class="card"><div class="grp-title">Außenfarbe wählen</div><div class="swatches">${sw}</div></div>`
+      +`<div class="card"><div class="grp-title">Innenfarbe</div>${innenToggle}</div>`;
   }
   if(k==='extras'){
     const row=(key,t,s,dl,inc)=>`<label class="optrow ${S[key]?'on':''}" onclick="toggle('${key}')"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><span><span class="ot">${t}</span><br><span class="os">${s}</span></span><span class="delta ${inc?'inc':''}">${dl}</span></label>`;
@@ -2593,6 +2597,9 @@ function miniAnschlag(oeff,stulpAt){
 function toggle(k){S[k]=!S[k];render();}
 function toggleGlass(){S.glass=S.glass==='3'?'2':'3';render();}
 function pickColor(i){if(S.colorTarget==='a')S.outer=i;else S.inner=i;render();}
+function pickOuter(i){ if(S.inner!==0) S.inner=i; S.outer=i; S.colorTarget='a'; render(); }
+function setInnenWeiss(){ S.inner=0; S.colorTarget='i'; render(); }
+function setInnenFarbig(){ S.inner=S.outer; S.colorTarget='i'; render(); }
 function go(i){cur=Math.max(0,Math.min(STEPS.length-1,i));render();window.scrollTo({top:0,behavior:'smooth'});}
 function next(){ if(STEPS[cur]&&STEPS[cur].key==='masse'&&!massOk()){ updateMassValidity(); const w=document.getElementById('massWarn'); if(w){w.style.display='flex'; w.classList.add('shake'); setTimeout(()=>w.classList.remove('shake'),450);} return; } if(cur===STEPS.length-2){ commitCurrent(); return; }   /* letzter Konfig-Schritt → bewusst in den Warenkorb legen */ if(cur<STEPS.length-1) go(cur+1); }
 function back(){ if(cur===0) backToPicker(); else go(cur-1); }
