@@ -892,7 +892,7 @@ const COLORS=[
   {key:'dunkelrot',n:'Dunkelrot',c:'#6c1c1c'},
 ];
 const _PREM_FARBE=['schwarzbr','basaltgr-gl','basaltgr-sa','betongrau','crown-plat','dunkelgr','dunkelrot','eiche-nat','eisengl','moosgruen','oregon','schiefgr-gl','schiefgr-sa','douglasie'];
-const S={ prod:'fenster', profile:'classic', aufteilung:'1fl', opening:'dkr', anschlagIdx:1, hstSystem:'psk', pskKammer:'iglo5', w:1000, h:1200, anzahl:1, outer:0, inner:0, balkonSchwelle:'alu', doorModel:'nebraska-lcr-inox', griffTuer:'stoss', griffHst:'innen', hstSchloss:'ohne', hstTeilung:'2', hstLauf:'rechts',
+const S={ prod:'fenster', profile:'classic', aufteilung:'1fl', opening:'dkr', anschlagIdx:1, hstSystem:'psk', pskKammer:'iglo5', w:1000, h:1200, anzahl:1, outer:0, inner:0, balkonSchwelle:'alu', doorModel:'nebraska-lcr-inox', griffTuer:'klinke', griffAussen:'klinke', stossModell:'q45r', griffHst:'innen', hstSchloss:'ohne', hstTeilung:'2', hstLauf:'rechts',
   glass:'2', glasdekor:'klar', schall:false, griff:'mistral', roll:'kein', panzer:null, sproTyp:'keine', sproDicke:'27', sproRaster:'kreuz', sicher:false, colorTarget:'i' };
 
 // === Öffnung PRO FLÜGEL — 1:1 aus dem Live-Konfigurator (ANSCHLAG_SETS, geprüft 04.07.2026) ===
@@ -1417,10 +1417,10 @@ function haustuerStageSVG(){
   const holmX=(handleSide==='r')? gx+sashW-SFR*0.5 : gx+SFR*0.5;
   const cyH=Math.max(gy+SFR*1.6, Math.min(gy+gh-SFR*1.6, hMm-1050));
   const hw=Math.max(uu*0.0032,2.2);
-  if(S.griffTuer==='knauf'){
+  if(_griffAussenVal()==='knauf'){
     const R=Math.max(SFR*0.5,uu*0.014);
     s+=`<circle cx="${holmX}" cy="${cyH}" r="${R}" fill="#fff" stroke="${line}" stroke-width="${hw}"/><circle cx="${holmX}" cy="${cyH}" r="${R*0.3}" fill="${line}"/>`;
-  } else if(S.griffTuer==='stange'){
+  } else if(_griffAussenVal()==='stoss'){
     const bw=Math.max(SFR*0.42,uu*0.011);
     s+=`<rect x="${holmX-bw/2}" y="${gy+gh*0.24}" width="${bw}" height="${gh*0.52}" rx="${bw*0.5}" fill="#fff" stroke="${line}" stroke-width="${hw}"/>`;
   } else {   // Klinke (Standard): Langschild + waagerechter Drücker zur Glasmitte + Spindel
@@ -1730,7 +1730,7 @@ function prodUnit(){ return {fenster:'Fenster',balkon:'Balkontür',haustuer:'Hau
 function prodSpecs(){
   const co=COLORS[S.outer].n, ci=COLORS[S.inner].n;
   const c=(S.outer===S.inner)?`${co} (außen & innen)`:`außen ${co} · innen ${ci}`;
-  if(S.prod==='haustuer') return `${DOORN[S.doorModel]||'—'} · ${GRIFFT[S.griffTuer]} · ${S.w}×${S.h} mm · ${c}`;
+  if(S.prod==='haustuer') return `${DOORN[S.doorModel]||'—'} · ${griffTuerShort()} · ${S.w}×${S.h} mm · ${c}`;
   if(S.prod==='schiebe') return `${S.hstSystem==='hs'?'Hebe-Schiebe':'PSK'} · ${S.hstLauf==='links'?'nach links':'nach rechts'} · ${S.w}×${S.h} mm · ${c}`;
   const ex=[]; if(S.roll==='gurt')ex.push('Rollladen'); if(S.roll==='motor')ex.push('Motorrolladen'); if(S.glass==='3')ex.push('3-fach'); if(S.prod==='balkon'&&S.balkonSchwelle==='alu')ex.push('Aluschwelle'); if(S.sicher)ex.push('RC1');
   return `${AUFTN[S.aufteilung]} · ${openingName()} · ${S.w}×${S.h} mm · ${c}${ex.length?' · '+ex.join(', '):''}`;
@@ -1748,6 +1748,11 @@ const DOORS=[  // echte Drutex-Studio-Renders (weiß), Modell-Set wie Live-Konfi
 const DOORIMG=k=>`img/drutex-tueren/studio/${k}.webp`;   // echte Drutex-Studio-Renders wie im Live-Konfigurator
 const DOORN=Object.fromEntries(DOORS.map(d=>[d.k,d.n]));
 const GRIFFT={stoss:'Stoßgriff',klinke:'Drückergarnitur',knauf:'Knauf'};
+const STOSS_MODELLE=[{k:'p10d',n:'P10D'},{k:'p45',n:'P45'},{k:'q10',n:'Q10'},{k:'q45r',n:'Q45R'},{k:'z1',n:'Z1'}];
+const STOSS_NAME={p10d:'P10D',p45:'P45',q10:'Q10',q45r:'Q45R',z1:'Z1'};
+function _griffAussenVal(){ return S.griffAussen || ((S.griffTuer&&S.griffTuer!=='stange')?S.griffTuer:'klinke'); }
+function griffTuerShort(){ var a=_griffAussenVal(); return (GRIFFT[a]||'—')+(a==='stoss'?' '+(STOSS_NAME[S.stossModell]||''):''); }
+function griffTuerFull(){ var a=_griffAussenVal(); return (GRIFFT[a]||'—')+(a==='stoss'?' '+(STOSS_NAME[S.stossModell]||''):'')+' außen · Drückergarnitur innen'; }
 const STEPS_FENSTER=[  // Reihenfolge exakt wie Live-Konfigurator (STEP_ORDER)
   {key:'profil',label:'Profil',title:['Ihr ','Profil'],sub:'Das Drutex-System für Ihr Fenster.'},
   {key:'aufteilung',label:'Aufteilung',title:['Die ','Aufteilung'],sub:'Wie viele Flügel soll Ihr Fenster haben?'},
@@ -1790,7 +1795,7 @@ const STEPS_HAUSTUER=[  // Reihenfolge wie im Live-Konfigurator (WIZ_ALL, gilt:'
   {key:'farbe',label:'Farbe',title:['Die ','Farbe'],sub:'Außen- und Innenfarbe des Türblatts.'},
   {key:'glas',label:'Glas',title:['Die ','Verglasung'],sub:'2-fach ist inklusive, 3-fach dämmt noch besser.'},
   {key:'motiv',label:'Motiv',title:['Das ','Glasmotiv'],sub:'Klarglas oder ein Sichtschutz-Dekor.'},
-  {key:'griffTuer',label:'Griff',title:['Der ','Türgriff'],sub:'Stoßgriff, Drücker oder Knauf.'},
+  {key:'griffTuer',label:'Griff',title:['Der ','Türgriff'],sub:'Innen Drückergarnitur, außen Klinke, Knauf oder Stoßgriff.'},
   {key:'sicherheit',label:'Sicherheit',title:['Die ','Sicherheit'],sub:'Mehrfachverriegelung für mehr Einbruchschutz.'},
   {key:'anfrage',label:'Übersicht',title:['Übersicht & ','Anfrage'],sub:'Kostenlos anfordern — unverbindlich.'},
 ];
@@ -1923,7 +1928,7 @@ function startProduct(id){
   S.roll='kein'; S.panzer=null; S.rollSeite='rechts';
   S.sproTyp='keine'; S.sproDicke='27'; S.sproRaster='kreuz'; S.sicher=false; S.glass=(S.prod==='schiebe')?'3':'2'; S.glasdekor='klar'; S.schall=false;
   S.outer=0; S.inner=0; S.colorTarget='i'; S.anzahl=1;
-  S.griff='mistral'; S.griffTuer='stoss'; S.hstTeilung='2'; S.hstLauf='rechts'; S.balkonSchwelle='alu';
+  S.griff='mistral'; S.griffTuer='klinke'; S.griffAussen='klinke'; S.stossModell='q45r'; S.hstTeilung='2'; S.hstLauf='rechts'; S.balkonSchwelle='alu';
   S.doorModel='vollglas-inox';   // Haustür startet am günstigsten Modell (Vollglas) → Startpreis = beworbenes Minimum, baut sich mit teureren Modellen auf
   const dim={fenster:[500,500],balkon:[600,1800],haustuer:[900,2000],schiebe:[1800,1800]}[S.prod]||[1000,1200];
   S.w=dim[0]; S.h=dim[1];
@@ -2057,10 +2062,22 @@ function panelHTML(){
     return `<div class="card"><div class="grp-title">Türmodell — ${DOORS.length} Designs</div><div class="opts three doorgrid">${cards}</div></div>`;
   }
   if(k==='griffTuer'){
-    return grp('Türgriff','three griffvis',
-      ocImg('griffTuer','stoss','img/drutex-griffe/stoss-q45r-cut.webp','Stoßgriff','gerade Edelstahl-Stange','inklusive')+
-      ocImg('griffTuer','klinke','img/drutex-griffe/htg-flach-weiss-cut.webp','Drückergarnitur','Klinke innen & außen','inklusive')+
-      ocImg('griffTuer','knauf','img/drutex-griffe/knauf-weiss-cut.webp','Knauf','fester Knauf außen','inklusive'));
+    if(!S.griffAussen) S.griffAussen=_griffAussenVal();
+    if(!S.stossModell) S.stossModell='q45r';
+    S.griffTuer=S.griffAussen;
+    const tick=`<span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span>`;
+    const ga=(val,img,t,sub)=>`<div class="ocard ${S.griffAussen===val?'on':''}" onclick="setGriffAussen('${val}')">${tick}<div class="vis"><img src="${img}" alt="${t}"></div><div class="t">${t}</div>${sub?`<div class="s">${sub}</div>`:''}<div class="pdl">inklusive</div></div>`;
+    let html=`<div class="card"><div class="grp-title">Innen</div><div class="opts three"><div class="ocard on"><div class="vis"><img src="img/drutex-griffe/klinke-innen-silber-cut.webp" alt="Drückergarnitur innen"></div><div class="t">Drückergarnitur</div><div class="s">Klinke innen · fest</div><div class="pdl">inklusive</div></div></div></div>`;
+    html+=`<div class="card"><div class="grp-title">Außen</div><div class="opts three">`
+      +ga('klinke','img/drutex-griffe/htg-flach-silber-cut.webp','Drückergarnitur','Klinke außen')
+      +ga('knauf','img/drutex-griffe/knauf-silber-cut.webp','Knauf','fester Knauf außen')
+      +ga('stoss','img/drutex-griffe/stoss-q45r-cut.webp','Stoßgriff','Edelstahl-Stange')
+      +`</div></div>`;
+    if(S.griffAussen==='stoss'){
+      const mc=STOSS_MODELLE.map(m=>`<div class="ocard ${S.stossModell===m.k?'on':''}" onclick="setStossModell('${m.k}')">${tick}<div class="vis"><img src="img/drutex-griffe/stoss-${m.k}-cut.webp" alt="Stoßgriff ${m.n}" loading="lazy" decoding="async"></div><div class="t">${m.n}</div></div>`).join('');
+      html+=`<div class="card"><div class="grp-title">Stoßgriff-Modell</div><div class="opts three">${mc}</div></div>`;
+    }
+    return html;
   }
   if(k==='teilung'){
     const two=`<svg viewBox="0 0 40 30" fill="none" stroke="var(--primary)" stroke-width="1.6" style="height:54px;width:auto"><rect x="2" y="3" width="36" height="24" rx="1"/><line x1="20" y1="3" x2="20" y2="27"/></svg>`;
@@ -2179,7 +2196,7 @@ function summaryRows(){
       <div class="srow"><span class="k">Anschlag</span><span class="v">${S.opening==='dkl'?'links (DIN)':'rechts (DIN)'}</span></div>
       <div class="srow"><span class="k">Modell</span><span class="v">${DOORN[S.doorModel]||'—'}</span></div>${massRow}${colorRows}
       <div class="srow"><span class="k">Verglasung</span><span class="v">${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}</span></div>
-      <div class="srow"><span class="k">Griff</span><span class="v">${GRIFFT[S.griffTuer]||'—'}</span></div>
+      <div class="srow"><span class="k">Griff</span><span class="v">${griffTuerFull()}</span></div>
       <div class="srow"><span class="k">Sicherheit</span><span class="v">${S.sicher?'Mehrfachverriegelung':'Standard'}</span></div>`;
   }
   if(S.prod==='schiebe'){
@@ -2537,6 +2554,8 @@ function setAufteilung(v){ S.aufteilung=v; const set=anschlagSet(); S.anschlagId
 function setAnschlag(idx){ S.anschlagIdx=idx; syncOpening(); render(); maybeAutoAdvance(); }
 function setTuerOeff(idx,r){ S.anschlagIdx=idx; S.tuerOeffnung=r; syncOpening(); render(); maybeAutoAdvance(); }   // Haustür: DIN links/rechts + innen/außen
 // Sprossen: Art (wählt gültige Breite), Aufteilung, Breite — bewusst KEIN Auto-Weiter (Detailauswahl)
+function setGriffAussen(v){ S.griffAussen=v; S.griffTuer=v; render(); }
+function setStossModell(v){ S.stossModell=v; render(); }
 function setSproTyp(v){ S.sproTyp=v; if(v!=='keine'){ const dk=SPRO_DICKEN[v]||[]; if(dk.indexOf(S.sproDicke)<0)S.sproDicke=dk[0]; } render(); }
 function setSproRaster(v){ S.sproRaster=v; render(); }
 function setSproDicke(v){ S.sproDicke=v; render(); }
