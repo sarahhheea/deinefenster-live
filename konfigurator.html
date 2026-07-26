@@ -630,12 +630,17 @@ body:not(.wiz-active) .topbar{display:none}
   body.wiz-active .dfnav-util{display:none}
   /* "Anderes Produkt"-Extraleiste raus (Zurück-zu-Produkten liegt in der Fußleiste auf Schritt 1) */
   body.wiz-active .topbar .tb-row{display:none}
-  /* 14 Tabs raus → dünner Fortschrittsbalken + kompakte Schritt-Zeile */
-  body.wiz-active .steps-inner{display:none}
-  body.wiz-active .wizprog{display:block;margin:11px 16px 0}
-  body.wiz-active .steps-hint{justify-content:center;padding:7px 16px 10px;font-weight:700;color:var(--ink)}
-  body.wiz-active .steps-hint .sh-jump{display:none}
-  body.wiz-active #stepNow{font-size:12.5px;letter-spacing:.02em}
+  /* Dünner Fortschrittsbalken + kompakte swipebare Schritt-Tabs (wie vorher: mehr Schritte sichtbar, durchziehbar), aktueller zentriert */
+  body.wiz-active .wizprog{display:block;margin:10px 14px 4px}
+  body.wiz-active .steps-inner{display:flex;gap:2px;padding:0 10px 4px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  body.wiz-active .steps-inner::-webkit-scrollbar{display:none}
+  body.wiz-active .steps-inner .step{flex:0 0 auto;min-width:74px;gap:6px;padding:9px 6px;border:none;border-radius:0;background:none;border-bottom:2px solid transparent}
+  body.wiz-active .steps-inner .step .num{width:19px;height:19px;font-size:10px}
+  body.wiz-active .steps-inner .step .lb{font-size:10.5px;letter-spacing:.05em}
+  body.wiz-active .steps-inner .step.active{border-bottom-color:var(--accent)}
+  body.wiz-active .steps-inner .step.active .num{background:var(--accent);border-color:var(--accent);color:#fff}
+  body.wiz-active .steps-inner .step.active .lb{color:var(--ink)}
+  body.wiz-active .steps-hint{display:none}
 }
 /* Skip-Extras-Button: nur mobil im Wizard — Kunde übernimmt Standards & geht direkt zum Angebot */
 .skip-extras{display:none}
@@ -2620,6 +2625,9 @@ function render(){
   }).join('');
   document.getElementById('stepNow').textContent='Schritt '+(cur+1)+' von '+STEPS.length+' · '+STEPS[cur].label;
   var _wpf=document.getElementById('wizprogFill'); if(_wpf) _wpf.style.width=Math.round(((cur+1)/STEPS.length)*100)+'%';
+  // aktuellen Schritt in der swipebaren Leiste mittig schieben (nur horizontal, ohne Seiten-Scroll zu stören)
+  (function(){var sc=document.getElementById('stepbar'),ac=sc&&sc.querySelector('.step.active');
+    if(sc&&ac){ sc.scrollLeft = Math.max(0, ac.offsetLeft - (sc.clientWidth - ac.offsetWidth)/2); }})();
   document.getElementById('hTitle').innerHTML=STEPS[cur].title[0]+'<span class="accent">'+STEPS[cur].title[1]+'</span>';
   document.getElementById('hSub').textContent=STEPS[cur].sub;
   document.getElementById('stage').innerHTML=stageSVG();
