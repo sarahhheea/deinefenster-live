@@ -933,15 +933,37 @@ function rendere() {
   gridEl.querySelectorAll('[data-action="detail"]').forEach(card => {
     card.addEventListener('click', () => oeffneDetail(card.dataset.id));
   });
+  // „⋯"-Menü auf-/zuklappen (nur ein Menü gleichzeitig offen)
+  gridEl.querySelectorAll('[data-action="kebab"]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const menu = btn.parentElement.querySelector('.shop-card-kebab-menu');
+      const wasOpen = menu.classList.contains('open');
+      schliesseKebabMenus();
+      if (!wasOpen) { menu.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); }
+    });
+  });
   gridEl.querySelectorAll('[data-action="teilen"]').forEach(btn => {
-    btn.addEventListener('click', e => { e.stopPropagation(); const p = STATE.produkte.find(x => x.id === btn.dataset.id); if (p) teileProdukt(p); });
+    btn.addEventListener('click', e => { e.stopPropagation(); schliesseKebabMenus(); const p = STATE.produkte.find(x => x.id === btn.dataset.id); if (p) teileProdukt(p); });
   });
   gridEl.querySelectorAll('[data-action="kundendruck"]').forEach(btn => {
-    btn.addEventListener('click', e => { e.stopPropagation(); const p = STATE.produkte.find(x => x.id === btn.dataset.id); if (p) druckeProduktblatt(p); });
+    btn.addEventListener('click', e => { e.stopPropagation(); schliesseKebabMenus(); const p = STATE.produkte.find(x => x.id === btn.dataset.id); if (p) druckeProduktblatt(p); });
   });
   gridEl.querySelectorAll('[data-action="anfrage"]').forEach(btn => {
     btn.addEventListener('click', e => { e.stopPropagation(); const p = STATE.produkte.find(x => x.id === btn.dataset.id); if (p) oeffneAnfrageModal(p); });
   });
+  // Klick außerhalb / Escape schließt offene „⋯"-Menüs (nur einmal global registrieren)
+  if (!window.__shopKebabInit) {
+    window.__shopKebabInit = true;
+    document.addEventListener('click', schliesseKebabMenus);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') schliesseKebabMenus(); });
+  }
+}
+
+// Schließt alle offenen Karten-„⋯"-Menüs und setzt aria-expanded zurück
+function schliesseKebabMenus() {
+  document.querySelectorAll('.shop-card-kebab-menu.open').forEach(m => m.classList.remove('open'));
+  document.querySelectorAll('.shop-card-kebab[aria-expanded="true"]').forEach(b => b.setAttribute('aria-expanded', 'false'));
 }
 
 // Bestands-Badge zentral. "Nur X verfügbar" auf jedem Einzelprodukt (neu + gebraucht).
@@ -1022,7 +1044,8 @@ function karteHtml(p) {
   const archivStyle = istArchiviert ? 'opacity:0.55;filter:saturate(0.6)' : '';
 
   // Haupt-Action: blauer „Anfragen"-Knopf aufs On-Site-Formular (oeffneAnfrageModal, DSGVO-konform).
-  // Sekundär (Details/Teilen/Drucken) bleibt für Desktop, am Handy ausgeblendet.
+  // Karten-Klick öffnet das Detail (data-action="detail" auf <article>) — ein separater „Details"-Knopf
+  // wäre redundant. Teilen/Drucken (selten genutzt) stecken in einem kompakten „⋯"-Menü.
   const ctaRow = istArchiviert ? '' : `
         <div class="shop-card-cta-row">
           <button type="button" class="shop-card-cta-anfrage" data-action="anfrage" data-id="${p.id}"
@@ -1030,20 +1053,20 @@ function karteHtml(p) {
             <span class="material-symbols-outlined">mail</span>
             Anfragen
           </button>
-        </div>
-        <div class="shop-card-cta-row shop-card-cta-secondary" style="margin-top:6px">
-          <button type="button" class="shop-card-cta-details" style="flex:1" aria-label="Details ansehen">
-            <span class="material-symbols-outlined">open_in_new</span>
-            <span>Details</span>
-          </button>
-          <button type="button" class="shop-card-cta-details" style="flex:1" data-action="teilen" data-id="${p.id}" aria-label="Teilen" title="Teilen">
-            <span class="material-symbols-outlined">share</span>
-            <span>Teilen</span>
-          </button>
-          <button type="button" class="shop-card-cta-details" style="flex:1" data-action="kundendruck" data-id="${p.id}" aria-label="Drucken" title="Drucken">
-            <span class="material-symbols-outlined">print</span>
-            <span>Drucken</span>
-          </button>
+          <div class="shop-card-kebab-wrap">
+            <button type="button" class="shop-card-kebab" data-action="kebab" data-id="${p.id}"
+               aria-haspopup="true" aria-expanded="false" aria-label="Weitere Aktionen" title="Weitere Aktionen">
+              <span class="material-symbols-outlined">more_horiz</span>
+            </button>
+            <div class="shop-card-kebab-menu" role="menu">
+              <button type="button" role="menuitem" data-action="teilen" data-id="${p.id}">
+                <span class="material-symbols-outlined">share</span><span>Teilen</span>
+              </button>
+              <button type="button" role="menuitem" data-action="kundendruck" data-id="${p.id}">
+                <span class="material-symbols-outlined">print</span><span>Drucken</span>
+              </button>
+            </div>
+          </div>
         </div>`;
 
   return `

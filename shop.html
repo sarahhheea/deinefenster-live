@@ -268,6 +268,37 @@ select.input-clean { background-image: url('data:image/svg+xml;utf8,<svg xmlns=%
   font-variant-numeric: tabular-nums;
 }
 
+/* Filter-Akkordeon — sekundäre Filter, standardmäßig zugeklappt */
+.filter-acc { border-bottom: 1px solid var(--c-border); }
+.filter-acc-sum {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  cursor: pointer;
+  padding: 14px 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  color: #225eaa;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.filter-acc-sum::-webkit-details-marker { display: none; }
+.filter-acc-sum::marker { content: ""; }
+.filter-acc-sum:hover { opacity: 0.82; }
+.filter-acc-chev {
+  font-size: 20px;
+  color: var(--c-text-muted);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+.filter-acc[open] .filter-acc-chev { transform: rotate(180deg); }
+.filter-acc-body { padding-bottom: 14px; }
+
 /* Custom Checkbox — dark */
 .check {
   appearance: none;
@@ -1103,26 +1134,35 @@ input[type="range"].range-clean::-moz-range-thumb {
   box-shadow: 0 6px 16px rgba(34,94,170,0.38);
 }
 .shop-card-cta-anfrage .material-symbols-outlined { font-size: 18px; }
-.shop-card-cta-details {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 11px 14px;
-  background: transparent;
-  color: #76a9fa;
-  border: 1.5px solid rgba(118,169,250,0.35);
-  border-radius: 10px;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-weight: 700;
-  font-size: 12px;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
-  min-height: 44px;
-  flex-shrink: 0;
-  white-space: nowrap;
+/* „⋯"-Menü auf der Karte (Teilen/Drucken) — sekundär, entlastet die Karte */
+.shop-card-kebab-wrap { position: relative; flex-shrink: 0; }
+.shop-card-kebab {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 48px; min-height: 48px;
+  background: transparent; color: #76a9fa;
+  border: 1.5px solid rgba(118,169,250,0.35); border-radius: 10px;
+  cursor: pointer; transition: background 0.15s, border-color 0.15s;
 }
-.shop-card-cta-details:hover { background: rgba(118,169,250,0.08); border-color: rgba(118,169,250,0.6); }
-.shop-card-cta-details .material-symbols-outlined { font-size: 16px; }
+.shop-card-kebab:hover { background: rgba(118,169,250,0.08); border-color: rgba(118,169,250,0.6); }
+.shop-card-kebab .material-symbols-outlined { font-size: 20px; }
+.shop-card-kebab-menu {
+  position: absolute; right: 0; bottom: calc(100% + 6px);
+  min-width: 152px; background: #fff;
+  border: 1px solid rgba(34,94,170,0.16); border-radius: 12px;
+  box-shadow: 0 14px 34px -12px rgba(8,21,46,0.34);
+  padding: 6px; z-index: 20;
+  display: none; flex-direction: column; gap: 2px;
+}
+.shop-card-kebab-menu.open { display: flex; }
+.shop-card-kebab-menu button {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 10px 12px;
+  background: transparent; border: none; border-radius: 8px;
+  font-family: 'Manrope', sans-serif; font-size: 13px; font-weight: 600;
+  color: #14233f; cursor: pointer; text-align: left;
+}
+.shop-card-kebab-menu button:hover { background: rgba(34,94,170,0.07); }
+.shop-card-kebab-menu button .material-symbols-outlined { font-size: 18px; color: #225eaa; }
 /* Kleinanzeigen-Stil: kompakte 2-spaltige Karten am Handy */
 @media (max-width: 640px) {
   #produktGrid { gap: 12px; }
@@ -1140,7 +1180,7 @@ input[type="range"].range-clean::-moz-range-thumb {
 /* ===== SHOP HERO v3 — Media-Hero (hell-Editorial 2026-06-01) ===== */
 .shop-hero3 {
   position: relative;
-  min-height: clamp(150px, 20vh, 210px);
+  min-height: clamp(84px, 11vh, 120px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1167,15 +1207,17 @@ input[type="range"].range-clean::-moz-range-thumb {
 .shop-hero3-inner {
   position: relative; z-index: 1;
   width: 100%; max-width: 880px; margin: 0 auto;
-  padding: clamp(34px, 4.5vh, 52px) 24px clamp(30px, 3.5vw, 44px);
+  padding: clamp(34px, 4vh, 44px) 24px clamp(14px, 2vw, 20px);
   color: #14233f;
   display: flex; flex-direction: column; align-items: center; text-align: center;
 }
+/* Desktop: util+Hauptnav sind fixed (bis ~139px) — Hero-Eyebrow muss darunter starten, sonst verdeckt */
+@media (min-width: 1024px) { .shop-hero3-inner { padding-top: 60px; } }
 .shop-hero3-eyebrow {
   display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 9px;
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 10.5px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase;
-  color: #225eaa; margin-bottom: 10px;
+  color: #225eaa; margin-bottom: 7px;
 }
 .shop-hero3-sep { color: rgba(34,94,170,0.4); }
 .shop-hero3-count { letter-spacing: 0.04em; color: #51607a; }
@@ -1183,9 +1225,9 @@ input[type="range"].range-clean::-moz-range-thumb {
 .shop-hero3-title {
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-weight: 800;
-  font-size: clamp(1.5rem, 3.2vw, 2.45rem);
-  line-height: 1.1; letter-spacing: -0.02em;
-  color: #14233f; margin: 0; max-width: 20ch;
+  font-size: clamp(1.3rem, 2.6vw, 1.9rem);
+  line-height: 1.12; letter-spacing: -0.02em;
+  color: #14233f; margin: 0; max-width: 24ch;
 }
 .shop-hero3-accent {
   font-family: 'Fraunces', serif;
@@ -1193,12 +1235,12 @@ input[type="range"].range-clean::-moz-range-thumb {
   color: #225eaa; letter-spacing: -0.01em;
 }
 .shop-hero3-sub {
-  margin: 11px auto 0;
+  margin: 8px auto 0;
   font-family: 'Manrope', sans-serif;
   font-size: clamp(0.86rem, 1.15vw, 0.98rem);
   line-height: 1.5; color: #51607a; max-width: 56ch;
 }
-.shop-hero3 .shop-open-badge { margin: 14px auto 0; }
+.shop-hero3 .shop-open-badge { margin: 10px auto 0; }
 /* Open-Badge hell-Override (Kontrast auf hellem Hero) */
 .shop-hero3 .shop-open-badge--closed { background: rgba(184,127,0,0.12); color: #8a5a00; border-color: rgba(184,127,0,0.32); }
 .shop-hero3 .shop-open-badge--open { background: rgba(10,138,58,0.12); color: #0a8a3a; border-color: rgba(10,138,58,0.30); }
@@ -1725,7 +1767,44 @@ input[type="range"].range-clean::-moz-range-thumb {
       <div id="filterKategorien" class="space-y-0.5"></div>
     </section>
 
-    <!-- Zustand -->
+    <!-- Maße (mm) — Primärfilter direkt unter Produkttyp -->
+    <section class="filter-block">
+      <h4 class="filter-block-title">Maße (mm)</h4>
+      <div class="grid grid-cols-2 gap-2 mb-3">
+        <label class="block">
+          <span class="block text-[11px] text-ink-soft mb-1">Breite</span>
+          <input id="filterBreite" type="number" min="0" max="6500" placeholder="1200" class="input-num">
+        </label>
+        <label class="block">
+          <span class="block text-[11px] text-ink-soft mb-1">Höhe</span>
+          <input id="filterHoehe" type="number" min="0" max="3000" placeholder="800" class="input-num">
+        </label>
+      </div>
+      <div>
+        <div class="flex justify-between items-center mb-1.5">
+          <span class="text-[11px] text-ink-soft">Toleranz</span>
+          <span id="toleranzWert" class="text-[11px] font-bold text-ink">±15%</span>
+        </div>
+        <input id="filterToleranz" type="range" min="0" max="50" value="15" class="range-clean">
+      </div>
+    </section>
+
+    <!-- Preis (€) — Primärfilter -->
+    <section class="filter-block">
+      <h4 class="filter-block-title">Preis (€)</h4>
+      <div class="grid grid-cols-2 gap-2">
+        <label class="block">
+          <span class="block text-[11px] text-ink-soft mb-1">Von</span>
+          <input id="filterPreisVon" type="number" min="0" placeholder="0" class="input-num">
+        </label>
+        <label class="block">
+          <span class="block text-[11px] text-ink-soft mb-1">Bis</span>
+          <input id="filterPreisBis" type="number" min="0" placeholder="∞" class="input-num">
+        </label>
+      </div>
+    </section>
+
+    <!-- Zustand — Primärfilter, offen -->
     <section class="filter-block">
       <h4 class="filter-block-title">Zustand</h4>
       <div class="space-y-0.5">
@@ -1748,146 +1827,123 @@ input[type="range"].range-clean::-moz-range-thumb {
       </div>
     </section>
 
-    <!-- Eigenschaften -->
-    <section class="filter-block">
-      <h4 class="filter-block-title">Eigenschaften</h4>
-      <div id="filterEigenschaften" class="space-y-0.5"></div>
-    </section>
-
-    <!-- Farbe -->
-    <section class="filter-block">
-      <h4 class="filter-block-title">Farbe</h4>
-      <div id="filterFarben" class="space-y-0.5"></div>
-    </section>
-
-    <!-- Material -->
-    <section class="filter-block">
-      <h4 class="filter-block-title">Material</h4>
-      <div class="space-y-0.5">
-        <label class="filter-option">
-          <span class="flex items-center gap-2"><input type="checkbox" class="check filter-material" value="kunststoff"/><span>Kunststoff</span></span>
-          <span class="count" data-count="material-kunststoff"></span>
-        </label>
-        <label class="filter-option">
-          <span class="flex items-center gap-2"><input type="checkbox" class="check filter-material" value="holz"/><span>Holz</span></span>
-          <span class="count" data-count="material-holz"></span>
-        </label>
-        <label class="filter-option">
-          <span class="flex items-center gap-2"><input type="checkbox" class="check filter-material" value="aluminium"/><span>Aluminium</span></span>
-          <span class="count" data-count="material-aluminium"></span>
-        </label>
-      </div>
-    </section>
-
-    <!-- Glasart -->
-    <section class="filter-block">
-      <h4 class="filter-block-title">Glasart</h4>
-      <div class="space-y-0.5">
-        <label class="filter-option">
-          <span class="flex items-center gap-2"><input type="checkbox" class="check filter-glasart" value="klarglas"/><span>Klarglas</span></span>
-          <span class="count" data-count="glasart-klarglas"></span>
-        </label>
-        <label class="filter-option">
-          <span class="flex items-center gap-2"><input type="checkbox" class="check filter-glasart" value="chinchilla"/><span>Chinchilla</span></span>
-          <span class="count" data-count="glasart-chinchilla"></span>
-        </label>
-        <label class="filter-option">
-          <span class="flex items-center gap-2"><input type="checkbox" class="check filter-glasart" value="milchglas"/><span>Milchglas</span></span>
-          <span class="count" data-count="glasart-milchglas"></span>
-        </label>
-        <label class="filter-option">
-          <span class="flex items-center gap-2"><input type="checkbox" class="check filter-glasart" value="sicherheitsglas"/><span>Sicherheitsglas</span></span>
-          <span class="count" data-count="glasart-sicherheitsglas"></span>
-        </label>
-        <label class="filter-option">
-          <span class="flex items-center gap-2"><input type="checkbox" class="check filter-glasart" value="schallschutzglas"/><span>Schallschutzglas</span></span>
-          <span class="count" data-count="glasart-schallschutzglas"></span>
-        </label>
-      </div>
-    </section>
-
-    <!-- Verglasung -->
-    <section class="filter-block">
-      <h4 class="filter-block-title">Verglasung</h4>
-      <div class="space-y-0.5">
-        <label class="filter-option">
-          <span class="flex items-center gap-2"><input type="checkbox" class="check filter-verglasung" value="2-fach"/><span>2-fach</span></span>
-          <span class="count" data-count="verglasung-2-fach"></span>
-        </label>
-        <label class="filter-option">
-          <span class="flex items-center gap-2"><input type="checkbox" class="check filter-verglasung" value="3-fach"/><span>3-fach (Premium)</span></span>
-          <span class="count" data-count="verglasung-3-fach"></span>
-        </label>
-      </div>
-    </section>
-
-    <!-- Sicherheit -->
-    <section class="filter-block">
-      <h4 class="filter-block-title">Sicherheit</h4>
-      <div class="space-y-0.5">
-        <label class="filter-option">
-          <span class="flex items-center gap-2"><input type="checkbox" class="check filter-rc" value="RC2"/><span>RC2 (einbruchhemmend)</span></span>
-          <span class="count" data-count="rc-RC2"></span>
-        </label>
-        <label class="filter-option">
-          <span class="flex items-center gap-2"><input type="checkbox" class="check filter-rc" value="RC3"/><span>RC3 (höhere Sicherheit)</span></span>
-          <span class="count" data-count="rc-RC3"></span>
-        </label>
-      </div>
-    </section>
-
-    <!-- Weitere (sekundäre Filter) -->
+    <!-- Weitere (sekundäre Filter) — zugeklappte Akkordeons -->
     <div style="margin:10px 0 2px;padding-top:10px;border-top:1px solid rgba(118,169,250,0.14);">
-      <span style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#76a9fa;opacity:.75;">Weitere</span>
+      <span style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#76a9fa;opacity:.75;">Weitere Filter</span>
     </div>
 
-    <!-- Maße (mm) -->
-    <section class="filter-block">
-      <h4 class="filter-block-title">Maße (mm)</h4>
-      <div class="grid grid-cols-2 gap-2 mb-3">
-        <label class="block">
-          <span class="block text-[11px] text-ink-soft mb-1">Breite</span>
-          <input id="filterBreite" type="number" min="0" max="6500" placeholder="1200" class="input-num">
-        </label>
-        <label class="block">
-          <span class="block text-[11px] text-ink-soft mb-1">Höhe</span>
-          <input id="filterHoehe" type="number" min="0" max="3000" placeholder="800" class="input-num">
-        </label>
+    <!-- Eigenschaften -->
+    <details class="filter-acc">
+      <summary class="filter-acc-sum">Eigenschaften<span class="material-symbols-outlined filter-acc-chev" aria-hidden="true">expand_more</span></summary>
+      <div class="filter-acc-body">
+        <div id="filterEigenschaften" class="space-y-0.5"></div>
       </div>
-      <div>
-        <div class="flex justify-between items-center mb-1.5">
-          <span class="text-[11px] text-ink-soft">Toleranz</span>
-          <span id="toleranzWert" class="text-[11px] font-bold text-ink">±15%</span>
-        </div>
-        <input id="filterToleranz" type="range" min="0" max="50" value="15" class="range-clean">
-      </div>
-    </section>
+    </details>
 
-    <!-- Preis (€) -->
-    <section class="filter-block">
-      <h4 class="filter-block-title">Preis (€)</h4>
-      <div class="grid grid-cols-2 gap-2">
-        <label class="block">
-          <span class="block text-[11px] text-ink-soft mb-1">Von</span>
-          <input id="filterPreisVon" type="number" min="0" placeholder="0" class="input-num">
-        </label>
-        <label class="block">
-          <span class="block text-[11px] text-ink-soft mb-1">Bis</span>
-          <input id="filterPreisBis" type="number" min="0" placeholder="∞" class="input-num">
-        </label>
+    <!-- Farbe -->
+    <details class="filter-acc">
+      <summary class="filter-acc-sum">Farbe<span class="material-symbols-outlined filter-acc-chev" aria-hidden="true">expand_more</span></summary>
+      <div class="filter-acc-body">
+        <div id="filterFarben" class="space-y-0.5"></div>
       </div>
-    </section>
+    </details>
+
+    <!-- Material -->
+    <details class="filter-acc">
+      <summary class="filter-acc-sum">Material<span class="material-symbols-outlined filter-acc-chev" aria-hidden="true">expand_more</span></summary>
+      <div class="filter-acc-body">
+        <div class="space-y-0.5">
+          <label class="filter-option">
+            <span class="flex items-center gap-2"><input type="checkbox" class="check filter-material" value="kunststoff"/><span>Kunststoff</span></span>
+            <span class="count" data-count="material-kunststoff"></span>
+          </label>
+          <label class="filter-option">
+            <span class="flex items-center gap-2"><input type="checkbox" class="check filter-material" value="holz"/><span>Holz</span></span>
+            <span class="count" data-count="material-holz"></span>
+          </label>
+          <label class="filter-option">
+            <span class="flex items-center gap-2"><input type="checkbox" class="check filter-material" value="aluminium"/><span>Aluminium</span></span>
+            <span class="count" data-count="material-aluminium"></span>
+          </label>
+        </div>
+      </div>
+    </details>
+
+    <!-- Glasart -->
+    <details class="filter-acc">
+      <summary class="filter-acc-sum">Glasart<span class="material-symbols-outlined filter-acc-chev" aria-hidden="true">expand_more</span></summary>
+      <div class="filter-acc-body">
+        <div class="space-y-0.5">
+          <label class="filter-option">
+            <span class="flex items-center gap-2"><input type="checkbox" class="check filter-glasart" value="klarglas"/><span>Klarglas</span></span>
+            <span class="count" data-count="glasart-klarglas"></span>
+          </label>
+          <label class="filter-option">
+            <span class="flex items-center gap-2"><input type="checkbox" class="check filter-glasart" value="chinchilla"/><span>Chinchilla</span></span>
+            <span class="count" data-count="glasart-chinchilla"></span>
+          </label>
+          <label class="filter-option">
+            <span class="flex items-center gap-2"><input type="checkbox" class="check filter-glasart" value="milchglas"/><span>Milchglas</span></span>
+            <span class="count" data-count="glasart-milchglas"></span>
+          </label>
+          <label class="filter-option">
+            <span class="flex items-center gap-2"><input type="checkbox" class="check filter-glasart" value="sicherheitsglas"/><span>Sicherheitsglas</span></span>
+            <span class="count" data-count="glasart-sicherheitsglas"></span>
+          </label>
+          <label class="filter-option">
+            <span class="flex items-center gap-2"><input type="checkbox" class="check filter-glasart" value="schallschutzglas"/><span>Schallschutzglas</span></span>
+            <span class="count" data-count="glasart-schallschutzglas"></span>
+          </label>
+        </div>
+      </div>
+    </details>
+
+    <!-- Verglasung -->
+    <details class="filter-acc">
+      <summary class="filter-acc-sum">Verglasung<span class="material-symbols-outlined filter-acc-chev" aria-hidden="true">expand_more</span></summary>
+      <div class="filter-acc-body">
+        <div class="space-y-0.5">
+          <label class="filter-option">
+            <span class="flex items-center gap-2"><input type="checkbox" class="check filter-verglasung" value="2-fach"/><span>2-fach</span></span>
+            <span class="count" data-count="verglasung-2-fach"></span>
+          </label>
+          <label class="filter-option">
+            <span class="flex items-center gap-2"><input type="checkbox" class="check filter-verglasung" value="3-fach"/><span>3-fach (Premium)</span></span>
+            <span class="count" data-count="verglasung-3-fach"></span>
+          </label>
+        </div>
+      </div>
+    </details>
+
+    <!-- Sicherheit -->
+    <details class="filter-acc">
+      <summary class="filter-acc-sum">Sicherheit<span class="material-symbols-outlined filter-acc-chev" aria-hidden="true">expand_more</span></summary>
+      <div class="filter-acc-body">
+        <div class="space-y-0.5">
+          <label class="filter-option">
+            <span class="flex items-center gap-2"><input type="checkbox" class="check filter-rc" value="RC2"/><span>RC2 (einbruchhemmend)</span></span>
+            <span class="count" data-count="rc-RC2"></span>
+          </label>
+          <label class="filter-option">
+            <span class="flex items-center gap-2"><input type="checkbox" class="check filter-rc" value="RC3"/><span>RC3 (höhere Sicherheit)</span></span>
+            <span class="count" data-count="rc-RC3"></span>
+          </label>
+        </div>
+      </div>
+    </details>
 
     <!-- Angebote -->
-    <section class="filter-block">
-      <h4 class="filter-block-title">Angebote</h4>
-      <div class="space-y-0.5">
-        <label class="filter-option">
-          <span class="flex items-center gap-2"><input type="checkbox" class="check filter-sonderpreis" value="ja"/><span>Nur Sonderpreise ★</span></span>
-          <span class="count" data-count="sonderpreis"></span>
-        </label>
+    <details class="filter-acc">
+      <summary class="filter-acc-sum">Angebote<span class="material-symbols-outlined filter-acc-chev" aria-hidden="true">expand_more</span></summary>
+      <div class="filter-acc-body">
+        <div class="space-y-0.5">
+          <label class="filter-option">
+            <span class="flex items-center gap-2"><input type="checkbox" class="check filter-sonderpreis" value="ja"/><span>Nur Sonderpreise ★</span></span>
+            <span class="count" data-count="sonderpreis"></span>
+          </label>
+        </div>
       </div>
-    </section>
+    </details>
 
     <!-- Mobile: sticky Ergebnisse-anzeigen-Knopf (Kleinanzeigen-Muster) -->
     <div class="filter-apply-bar">
