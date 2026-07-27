@@ -132,13 +132,13 @@ body:not(.wiz-active) .topbar{display:none}
 .seg2 button.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
 
 .swatches{display:grid;grid-template-columns:repeat(4,1fr);gap:18px 14px}
-.innchip{width:52px;height:52px;border-radius:50%;border:1px solid var(--line-d);display:inline-block;box-shadow:inset 0 0 0 1px rgba(0,0,0,.05)}
-.farbe-cols{display:grid;grid-template-columns:minmax(0,1fr) 176px;gap:14px;align-items:start}
-.farbe-cols>.card{margin:0;min-width:0}
-.farbe-cols .swatches{grid-template-columns:repeat(3,1fr)}
-.opts.farbe-innen-opts{grid-template-columns:1fr}
-@media(max-width:760px){.farbe-cols{grid-template-columns:1fr}.farbe-cols .swatches{grid-template-columns:repeat(3,1fr)}}
-.ocard.disabled{opacity:.45;cursor:not-allowed;pointer-events:none}
+.innen-seg{display:flex;align-items:center;gap:12px 16px;flex-wrap:wrap;margin:0 0 18px;padding:0 0 18px;border-bottom:1px solid var(--line)}
+.innen-seg-lbl{font-weight:700;font-size:14.5px;color:var(--ink)}
+.seg-pills{display:inline-flex;background:var(--bg);border:1px solid var(--line-d);border-radius:12px;padding:4px}
+.seg-pills button{display:inline-flex;align-items:center;gap:8px;border:none;background:transparent;font:inherit;font-weight:600;font-size:14px;color:var(--ink-soft);padding:9px 16px;border-radius:9px;cursor:pointer;min-height:42px}
+.seg-pills button.on{background:#fff;color:var(--primary);box-shadow:0 1px 4px rgba(20,30,50,.14)}
+.segdot{width:15px;height:15px;border-radius:50%;border:1px solid var(--line-d);flex:0 0 auto}
+.innen-hint{font-size:12.5px;color:var(--ink-soft)}
 .sw{cursor:pointer;text-align:center}
 .sw .chip{height:54px;border-radius:var(--r);border:1px solid var(--line-d);position:relative;transition:.2s var(--ease)}
 .sw:hover .chip{transform:translateY(-2px)}
@@ -2219,17 +2219,14 @@ function panelHTML(){
   }
   if(k==='farbe'){
     const co=COLORS[S.outer],ci=COLORS[S.inner];
-    const innenFarbig=(S.inner!==0), outerIsWhite=(S.outer===0);
+    const innenFarbig=(S.inner!==0);
     const sw=COLORS.map((c,i)=>`<div class="sw ${S.outer===i?'on':''}" onclick="pickOuter(${i})"><div class="chip" style="background:${c.c}"></div><div class="nm">${c.n}</div>${i===0?'<div class="dl inc">inklusive</div>':''}</div>`).join('');
-    const tick=`<span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span>`;
-    const innenToggle=`<div class="opts farbe-innen-opts">`
-      +`<div class="ocard ${S.inner===0?'on':''}" onclick="setInnenWeiss()">${tick}<div class="vis" style="height:84px;place-items:center"><span class="innchip" style="background:${COLORS[0].c}"></span></div><div class="t">Weiß</div><div class="s">innen weiß</div></div>`
-      +`<div class="ocard ${innenFarbig?'on':''}${outerIsWhite?' disabled':''}" onclick="${outerIsWhite?'':'setInnenFarbig()'}">${tick}<div class="vis" style="height:84px;place-items:center"><span class="innchip" style="background:${co.c}"></span></div><div class="t">Farbig</div><div class="s">${outerIsWhite?'erst Außenfarbe wählen':'innen wie außen'}</div></div>`
-      +`</div>`;
-    return `<div class="farbe-cols">`
-      +`<div class="card"><div class="grp-title">Außenfarbe wählen</div><div class="swatches">${sw}</div></div>`
-      +`<div class="card"><div class="grp-title">Innenfarbe</div>${innenToggle}</div>`
-      +`</div>`;
+    const innenSeg=`<div class="innen-seg"><span class="innen-seg-lbl">Innenfarbe:</span><div class="seg-pills">`
+      +`<button type="button" class="${S.inner===0?'on':''}" onclick="setInnenWeiss()"><span class="segdot" style="background:${COLORS[0].c}"></span>Weiß</button>`
+      +`<button type="button" class="${innenFarbig?'on':''}" onclick="setInnenFarbig()"><span class="segdot" style="background:${co.c}"></span>Farbig</button>`
+      +`</div><span class="innen-hint">Farbig = innen wie außen</span></div>`;
+    return `<div class="card">`+innenSeg
+      +`<div class="grp-title">Außenfarbe</div><div class="swatches">${sw}</div></div>`;
   }
   if(k==='extras'){
     const row=(key,t,s,dl,inc)=>`<label class="optrow ${S[key]?'on':''}" onclick="toggle('${key}')"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><span><span class="ot">${t}</span><br><span class="os">${s}</span></span><span class="delta ${inc?'inc':''}">${dl}</span></label>`;
