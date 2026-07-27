@@ -172,6 +172,17 @@ function applyUrlFilter() {
       }
     });
   }
+  // ?q=... — Freitext-Suche von der Startseite uebernehmen (Suchfeld vorbefuellen + filtern)
+  const q = params.get('q');
+  if (q && q.trim()) {
+    STATE.filter.suche = q.trim();
+    const inp = document.getElementById('sucheInput');
+    if (inp) inp.value = q.trim();
+    try { pruefeMassErkennung(STATE.filter.suche); } catch (e) {}
+    const clr = document.getElementById('sucheClearBtn');
+    if (clr) clr.classList.remove('hidden');
+    scrollNeeded = true;
+  }
   if (scrollNeeded) {
     setTimeout(() => {
       const grid = document.getElementById('produktGrid');
