@@ -384,6 +384,7 @@
 <script>
 (function(){
   var CART_KEY = 'df_cart_v1';
+  var PRICE_REV = 1;  // MUSS mit PRICE_REV in konfigurator.html uebereinstimmen — bei Preisaenderung dort UND hier hochzaehlen
   var LIEFER_MIN = 5;
   var items = [];
   var liefer = 'abholung'; // 'abholung' | 'lieferung'
@@ -545,7 +546,7 @@
   load();
   // Selbstheilung: alte Skizzen-Snapshots (vor Konfigurator-Update) einmalig im Konfigurator frisch rendern lassen
   try{
-    var stale = items.length && items.some(function(it){ return !it.r || it.r.sv !== 3; });
+    var stale = items.length && items.some(function(it){ return !it.r || it.r.sv !== 3 || it.r.pv !== PRICE_REV; });
     if(stale && !sessionStorage.getItem('wkHealed')){
       sessionStorage.setItem('wkHealed','1');
       location.replace('/konfigurator.html?heal=1');
