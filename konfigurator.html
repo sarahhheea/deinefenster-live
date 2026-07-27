@@ -542,6 +542,24 @@ body:not(.wiz-active) .topbar{display:none}
 /* === Handy: Auswahl-Schritte + Fußleiste === */
 /* Liefer-Info-Button/Overlay + Backdrop nur auf dem Handy — Basis versteckt (Desktop) */
 .lf-infobtn,.lf-backdrop,.lf-close{display:none}
+/* Desktop/Tablet (≥601px): Einstieg ruhig — kompakter Liefer-Knopf statt großem Block; Details als zentriertes Fenster auf Klick */
+@media(min-width:601px){
+  .lf-infobtn{display:inline-flex;align-items:center;gap:10px;max-width:520px;margin:2px auto 26px;padding:14px 20px;
+    border:1px solid var(--line);border-radius:12px;background:var(--surface);font-weight:600;font-size:14.5px;color:var(--primary);cursor:pointer;transition:.2s var(--ease)}
+  .lf-infobtn:hover{border-color:var(--primary)}
+  .lf-infobtn svg{width:18px;height:18px;flex:0 0 auto}
+  /* Knopf zentrieren (renderPicker rendert ihn als Block-Kind) */
+  main .lf-infobtn{display:flex;width:max-content}
+  .lf-backdrop{display:none;position:fixed;inset:0;background:rgba(10,18,37,.42);z-index:79}
+  body.lf-open .lf-backdrop{display:block}
+  .liefer{position:fixed;left:50%;top:50%;transform:translate(-50%,-46%) scale(.98);opacity:0;pointer-events:none;
+    width:min(580px,92vw);max-height:84vh;overflow:auto;z-index:80;margin:0;padding:28px 32px;border-radius:16px;
+    box-shadow:0 30px 80px rgba(10,18,37,.3);transition:opacity .2s var(--ease),transform .2s var(--ease)}
+  body.lf-open .liefer{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+  .lf-close{display:grid;place-items:center;position:absolute;top:14px;right:14px;width:34px;height:34px;
+    border:1px solid var(--line);border-radius:50%;background:var(--surface);cursor:pointer;color:var(--ink)}
+  .lf-close svg{width:16px;height:16px}
+}
 @media(max-width:600px){
   /* Auswahl-Karten: 2 pro Reihe (statt 3), großes erkennbares Bild, orphan mittig */
   .grid.select .opts,
