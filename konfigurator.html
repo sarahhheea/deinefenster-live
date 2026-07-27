@@ -227,17 +227,23 @@ body:not(.wiz-active) .topbar{display:none}
 .pcard .pgo svg{width:14px;height:14px}
 
 .liefer{margin:6px 0 34px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:30px 34px}
-.lf-title{display:flex;align-items:center;justify-content:center;gap:10px;font:700 12px/1 var(--sans);text-transform:uppercase;letter-spacing:.18em;color:var(--ink);margin-bottom:16px}
-.lf-title svg{width:19px;height:19px;color:var(--accent)}
-.lf-tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.lf-tier{border:1px solid var(--line);border-radius:var(--r);padding:16px;text-align:center}
-.lf-tier b{display:block;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
-.lf-tier span{font-size:13px;color:var(--ink-soft);display:block;margin-top:5px}
-.lf-tier.hot{border-color:var(--accent);background:rgba(176,141,87,.06)}
-.lf-tier.hot span{color:var(--accent-d);font-weight:600}
-.lf-hints{display:flex;flex-wrap:wrap;gap:10px 28px;justify-content:center;margin-top:18px;font-size:13px;color:var(--ink-soft)}
-.lf-hints span{display:inline-flex;align-items:center;gap:8px}
-.lf-hints svg{width:16px;height:16px;color:var(--accent);flex:0 0 auto}
+.lf-title{display:flex;align-items:center;justify-content:center;gap:10px;font:800 17px/1.2 var(--serif);letter-spacing:-.01em;color:var(--ink);margin-bottom:18px;padding:0 42px;text-wrap:balance}
+.lf-title svg{width:21px;height:21px;color:var(--accent)}
+.lf-tiers{display:flex;flex-direction:column;gap:10px}
+.lf-tier{display:flex;align-items:center;gap:14px;border:1px solid var(--line);border-radius:13px;padding:13px 16px;text-align:left}
+.lf-tier .lf-ic{width:40px;height:40px;flex:0 0 auto;display:grid;place-items:center;border-radius:11px;background:rgba(34,94,170,.10);color:var(--accent)}
+.lf-tier .lf-ic svg{width:21px;height:21px}
+.lf-tier .lf-txt{flex:1;min-width:0}
+.lf-tier .lf-txt b{display:block;font-size:15px;font-weight:700;color:var(--ink)}
+.lf-tier .lf-txt span{display:block;font-size:13px;color:var(--ink-soft);margin-top:2px;overflow-wrap:break-word}
+.lf-tier .lf-tag{flex:0 0 auto;font-size:12.5px;font-weight:700;padding:6px 12px;border-radius:999px;background:var(--bg);color:var(--ink-soft);white-space:nowrap}
+.lf-tier .lf-tag.price{color:var(--ink)}
+.lf-tier .lf-tag.free{background:#e4f3ea;color:#1f7a4d}
+.lf-tier.hot{border-color:rgba(34,94,170,.42);background:rgba(34,94,170,.05)}
+.lf-tier.hot .lf-ic{background:var(--accent);color:#fff}
+.lf-hints{display:flex;flex-direction:column;gap:9px;margin-top:16px;font-size:12.5px;color:var(--ink-soft)}
+.lf-hints span{display:flex;align-items:flex-start;gap:9px}
+.lf-hints svg{width:16px;height:16px;color:var(--accent);flex:0 0 auto;margin-top:1px}
 .pk-trust{text-align:center;margin-top:26px;color:var(--ink);font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.1em}
 .pk-trust span{color:var(--ink-soft);font-weight:400;text-transform:none;letter-spacing:0;font-size:13px}
 
@@ -1934,6 +1940,8 @@ function renderPicker(){
   const truck=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5v8h1"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>`;
   const fork=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4v11h8V9h5l4 4v2h-2"/><circle cx="6" cy="18" r="2"/><path d="M14 4h4"/></svg>`;
   const door=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M12 3v18M9 12h.01"/></svg>`;
+  const boxic=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5v8l9 5 9-5V8z"/><path d="M3.3 7L12 12l8.7-5M12 22V12"/></svg>`;
+  const checkic=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>`;
   document.getElementById('pickerView').innerHTML=
     `<div class="pk-head2">
        <h1>Was möchten Sie <span class="accent">konfigurieren</span>?</h1>
@@ -1950,9 +1958,9 @@ function renderPicker(){
        <button class="lf-close" aria-label="Schließen" onclick="document.body.classList.remove('lf-open')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
        <div class="lf-title">${truck} So kommen Ihre Produkte zu Ihnen</div>
        <div class="lf-tiers">
-         <div class="lf-tier"><b>1–4 Elemente</b><span>Abholung bei uns im Lager · Brandenburg a.d.H.</span></div>
-         <div class="lf-tier"><b>5–9 Elemente</b><span>Lieferung 239 €</span></div>
-         <div class="lf-tier hot"><b>ab 10 Elemente</b><span>Kostenfrei · deutschlandweit</span></div>
+         <div class="lf-tier"><span class="lf-ic">${boxic}</span><div class="lf-txt"><b>1–4 Elemente</b><span>Abholung im Lager · Brandenburg a.d.H.</span></div><span class="lf-tag">gratis</span></div>
+         <div class="lf-tier"><span class="lf-ic">${truck}</span><div class="lf-txt"><b>5–9 Elemente</b><span>Lieferung deutschlandweit</span></div><span class="lf-tag price">239 €</span></div>
+         <div class="lf-tier hot"><span class="lf-ic">${checkic}</span><div class="lf-txt"><b>ab 10 Elemente</b><span>Lieferung deutschlandweit</span></div><span class="lf-tag free">kostenlos</span></div>
        </div>
        <div class="lf-hints">
          <span>${fork} Anlieferung per Stapler auf Einwegpalette — Sie müssen nichts abladen</span>
