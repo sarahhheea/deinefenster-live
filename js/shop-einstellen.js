@@ -73,6 +73,9 @@ const EIGENSCHAFTEN_GRUPPEN = [
     titel: 'Öffnungsart',
     icon: 'open_in_full',
     items: [
+      // Inhaberin-Wunsch 29.07.2026: eigener Haken statt frei getipptem Text —
+      // nur so wird „nach außen öffnend" im Shop filterbar (Ausnahme, daher Kaufkriterium)
+      { key: 'nach-aussen-oeffnend',  label: 'Nach außen öffnend' },
       { key: 'dreh-kipp',             label: 'Dreh-Kipp' },
       { key: 'stulp',                 label: 'Stulpprofil (ohne Pfosten)' },
       { key: 'pfosten',               label: 'Mittelpfosten' },
@@ -119,6 +122,29 @@ const EIGENSCHAFTEN_GRUPPEN = [
 
 // Flache Liste für Rückwärtskompatibilität (Lade-/Speicher-Logik)
 const EIGENSCHAFTEN = EIGENSCHAFTEN_GRUPPEN.flatMap(g => g.items);
+
+/* ─── „Nach außen öffnend": Alt-Inserate beim Bearbeiten aufräumen ───────────
+   Vor dem Haken wurde das frei getippt — mal in Eigenschaften, mal bei der
+   Öffnungsart, mal nur im Titel/Text. Beim Bearbeiten wird daraus automatisch
+   der Standard-Haken, der Frei-Text fällt weg. So heilt sich der Bestand
+   Inserat für Inserat, ohne dass jemand alles von Hand nachpflegen muss.     */
+const TAG_AUSSEN = 'nach-aussen-oeffnend';
+const RE_AUSSEN_TAG  = /nach\s*au(ss|ß)en/i;
+const RE_AUSSEN_TEXT = /nach\s*au(ss|ß)en\s*(auf|öffn|oeffn|aufgeh)/i;
+const istFreitextAussen = v => typeof v === 'string' && v !== TAG_AUSSEN && RE_AUSSEN_TAG.test(v);
+
+function normalisiereAussenTag(p) {
+  const eig = _alsArray(p.eigenschaften);
+  const oa  = _alsArray(p.oeffnungsart);
+  const treffer = eig.includes(TAG_AUSSEN)
+    || eig.some(istFreitextAussen)
+    || oa.some(istFreitextAussen)
+    || RE_AUSSEN_TAG.test(String(p.kategorie_key || ''))
+    || RE_AUSSEN_TEXT.test(`${p.titel || ''} ${p.beschreibung || ''}`);
+  const eigenschaften = eig.filter(e => !istFreitextAussen(e));
+  if (treffer && !eigenschaften.includes(TAG_AUSSEN)) eigenschaften.push(TAG_AUSSEN);
+  return { eigenschaften, oeffnungsart: oa.filter(o => !istFreitextAussen(o)) };
+}
 
 /* ─── Mehrfach-Auswahl-Felder (Chips) ───────────────────────────────────
    Inhaberin-Wunsch 07.06.2026: ALLE Reiter mehrfach anklickbar + bei jedem
@@ -271,6 +297,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 /* ─── Edit-Mode: Produkt ins Formular laden ─── */
 async function ladeProduktInsFormular(p) {
+  // Alt-Frei-Text „Nach Außen öffnend" → Standard-Haken (siehe normalisiereAussenTag)
+  const aussen = normalisiereAussenTag(p);
+  p = { ...p, eigenschaften: aussen.eigenschaften, oeffnungsart: aussen.oeffnungsart };
   STATE.zustaende = _alsArray(p.zustand); if (!STATE.zustaende.length) STATE.zustaende = ['neu'];
   STATE.materialien = _alsArray(p.material);
   STATE.glasarten = _alsArray(p.glasart);       // String (alt) ODER Array (neu)
@@ -786,6 +815,11 @@ function ladeCustomEigenschaften() {
     STATE.customEigenschaften = raw ? JSON.parse(raw) : [];
   } catch (e) { STATE.customEigenschaften = []; }
   if (!Array.isArray(STATE.customEigenschaften)) STATE.customEigenschaften = [];
+  // Einmalig aufräumen: frühere Eigen-Einträge wie „Nach Außen öffnend" gibt es
+  // jetzt als Standard-Haken — sonst stünde beides doppelt in der Liste.
+  const vorher = STATE.customEigenschaften.length;
+  STATE.customEigenschaften = STATE.customEigenschaften.filter(c => !istFreitextAussen(c));
+  if (STATE.customEigenschaften.length !== vorher) speichereCustomEigenschaften();
 }
 function speichereCustomEigenschaften() {
   try { localStorage.setItem(CUSTOM_EIG_KEY, JSON.stringify(STATE.customEigenschaften)); } catch (e) {}

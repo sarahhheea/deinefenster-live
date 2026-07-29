@@ -246,6 +246,38 @@ function kategorieZuGruppe(kat) {
   return '';
 }
 
+/* ─── Öffnungsrichtung „nach außen" (Inhaberin-Wunsch 29.07.2026) ──────────
+   In Deutschland öffnen Fenster/Türen fast immer nach innen — „nach außen"
+   ist die Ausnahme (v.a. Balkontüren + Haustüren) und für Kunden ein echtes
+   Kaufkriterium. Bisher stand das nur frei getippt im Titel/in der Beschreibung
+   bzw. als Frei-Text in eigenschaften/oeffnungsart („Nach Außen öffnend",
+   „nach außen öffnend", …) — dadurch NICHT filterbar. Hier wird daraus EIN
+   sauberer Tag abgeleitet; das Einstell-Formular setzt ihn künftig direkt.  */
+const TAG_AUSSEN = 'nach-aussen-oeffnend';
+// Tag-Felder (eigenschaften/oeffnungsart/kategorie): dort ist „nach außen" immer als Merkmal gemeint
+const RE_AUSSEN_TAG  = /nach\s*au(ss|ß)en/i;
+// Freitext (Titel/Beschreibung): nur echte Richtungsaussage — „außen Anthrazit innen weiß" darf NICHT greifen
+const RE_AUSSEN_TEXT = /nach\s*au(ss|ß)en\s*(auf|öffn|oeffn|aufgeh)/i;
+
+function istFreitextAussen(v) {
+  return typeof v === 'string' && v !== TAG_AUSSEN && RE_AUSSEN_TAG.test(v);
+}
+function istNachAussenOeffnend(p) {
+  const baseEig = Array.isArray(p.eigenschaften) ? p.eigenschaften : [];
+  if (baseEig.includes(TAG_AUSSEN)) return true;
+  if (baseEig.some(istFreitextAussen)) return true;
+  if (_asArr(p.oeffnungsart).some(istFreitextAussen)) return true;
+  if (RE_AUSSEN_TAG.test(String(p.kategorie_key || p.kategorie || ''))) return true;
+  return RE_AUSSEN_TEXT.test(`${p.titel || ''} ${p.beschreibung || ''}`);
+}
+/* Eigenschaften-Liste eines Produkts: Frei-Text-Varianten raus, Bauart- + Richtungs-Tag rein */
+function baueEigenschaften(p, kat) {
+  const base = (Array.isArray(p.eigenschaften) ? p.eigenschaften : []).filter(e => !istFreitextAussen(e));
+  const bauart = deriveBauartTags(kat).filter(t => !base.includes(t));
+  const richtung = (istNachAussenOeffnend(p) && !base.includes(TAG_AUSSEN)) ? [TAG_AUSSEN] : [];
+  return [...base, ...bauart, ...richtung];
+}
+
 /* ─── Bauart-Tags abgeleitet aus kategorie_key — wandern in p.eigenschaften ─── */
 function deriveBauartTags(kat) {
   const tags = [];
@@ -280,8 +312,6 @@ async function loadProdukte() {
 
     const sheetsProdukte = (data.produkte || []).map(p => {
       const kat = p.kategorie || p.kategorie_key || '';
-      const baseEig = Array.isArray(p.eigenschaften) ? p.eigenschaften : [];
-      const bauart = deriveBauartTags(kat).filter(t => !baseEig.includes(t));
       const matArr = _asArr(p.material).map(x => String(x).toLowerCase());
       const zustArr = _asArr(p.zustand);
       const katKeys = _asArr(p.kategorie_keys);
@@ -305,9 +335,11 @@ async function loadProdukte() {
         farbe: _asArr(p.farbe).length ? _asArr(p.farbe) : ['weiss'],
         verglasung: _asArr(p.verglasung),
         u_wert: p.u_wert || null,
-        oeffnungsart: _asArr(p.oeffnungsart).length ? _asArr(p.oeffnungsart) : ['dreh-kipp'],
+        // Frei-Text „Nach Außen öffnend" wird zum Tag (s.u.) — nicht doppelt als Öffnungsart anzeigen
+        oeffnungsart: _asArr(p.oeffnungsart).filter(o => !istFreitextAussen(o)).length
+          ? _asArr(p.oeffnungsart).filter(o => !istFreitextAussen(o)) : ['dreh-kipp'],
         rc_klasse: p.rc_klasse || null,
-        eigenschaften: [...baseEig, ...bauart],
+        eigenschaften: baueEigenschaften(p, kat),
         lagerbestand: Number(p.lagerbestand) || 1,
         bild: (Array.isArray(p.bilder) && p.bilder[0]) || 'img/fenster_standard.png',
         bilder: Array.isArray(p.bilder) ? p.bilder : [],
@@ -340,11 +372,9 @@ async function loadProdukteFromJson() {
     // Bauart-Tags in eigenschaften reinpacken, Sub-Kategorien werden nur über kategorie_key referenziert
     STATE.produkte = (data.produkte || []).map(p => {
       const kat = p.kategorie || p.kategorie_key || '';
-      const baseEig = Array.isArray(p.eigenschaften) ? p.eigenschaften : [];
-      const bauart = deriveBauartTags(kat).filter(t => !baseEig.includes(t));
       const katKeys = _asArr(p.kategorie_keys);
       return {
-        ...p, kategorie: kat, eigenschaften: [...baseEig, ...bauart],
+        ...p, kategorie: kat, eigenschaften: baueEigenschaften(p, kat),
         kategorie_keys: katKeys.length ? katKeys : (kat ? [kat] : []),
         system: _asArr(p.system).join(' · '),
         // Mehrfach-Felder vereinheitlichen (abwärtskompatibel zu Einzelwerten)
@@ -353,7 +383,7 @@ async function loadProdukteFromJson() {
         glasart: _asArr(p.glasart).map(x => String(x).toLowerCase()),
         farbe: _asArr(p.farbe),
         verglasung: _asArr(p.verglasung),
-        oeffnungsart: _asArr(p.oeffnungsart)
+        oeffnungsart: _asArr(p.oeffnungsart).filter(o => !istFreitextAussen(o))
       };
     });
     STATE.metadaten = berechneMetadaten(STATE.produkte);
@@ -461,7 +491,7 @@ function baueFilterSidebar() {
   };
   const EIG_GRUPPEN = [
     { titel: 'Flügel',                   werte: ['einfluegelig','zweifluegelig','dreifluegelig','vierfluegelig'] },
-    { titel: 'Aufteilung & Öffnung',     werte: ['dreh-kipp','stulp','pfosten','kaempfer','festverglasung','parallel-schiebe-kipp','hebe-schiebe'] },
+    { titel: 'Aufteilung & Öffnung',     werte: ['nach-aussen-oeffnend','dreh-kipp','stulp','pfosten','kaempfer','festverglasung','parallel-schiebe-kipp','hebe-schiebe'] },
     { titel: 'Bauform',                  werte: ['oberlicht','unterlicht','ober-unter-licht','kellerfenster-typ','rundfenster-typ','rundbogenfenster-typ','stichbogenfenster-typ'] },
     { titel: 'Sprossen',                 werte: ['sprossen-aufgesetzt','sprossen-innen'] },
     { titel: 'Rollladen',                werte: ['mit-rollo','rollladen-gurtwickler','rollladen-motor','rollladen-elektrisch','rollladen-ohne'] },
@@ -2048,6 +2078,7 @@ function oeffnungsartLabel(code) {
 
 function eigenschaftAnzeige(code) {
   const map = {
+    'nach-aussen-oeffnend': 'Nach außen öffnend',
     'dreh-kipp': 'Dreh-Kipp',
     'stulp': 'Stulpprofil (kein Mittelpfosten)',
     'pfosten': 'Mittelpfosten',
