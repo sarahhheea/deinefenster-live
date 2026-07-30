@@ -424,11 +424,15 @@ function berechneMetadaten(produkte) {
 
 /* ─── Filter-Sidebar dynamisch ─── */
 function baueFilterSidebar() {
+  // Zähler-Basis OHNE die nach außen öffnenden Artikel — die sind standardmäßig ausgeblendet,
+  // also darf „Balkontüren 40" nicht mehr versprechen als die Liste danach zeigt.
+  // Einzige Ausnahme: der Zähler des Filters „Nach außen öffnend" selbst (s. eigCount).
+  const ZAEHL_BASIS = STATE.produkte.filter(p => !(p.eigenschaften || []).includes(TAG_AUSSEN));
   // Reihenfolge der Hauptgruppen (interner Hinweis.05.2026: Untertypen wandern zu Eigenschaften)
   const katWrap = document.getElementById('filterKategorien');
   const ORDER = ['fenster', 'holzfenster', 'dachfenster', 'balkontuer', 'haustuer', 'schiebetuer', 'daemmung', 'baumaterialien', 'garagentor-gebraucht'];
   const renderItem = (key, label) => {
-    const count = STATE.produkte.filter(p => _asArr(p.kategorie_keys).some(k => kategorieZuGruppe(k) === key)).length;
+    const count = ZAEHL_BASIS.filter(p => _asArr(p.kategorie_keys).some(k => kategorieZuGruppe(k) === key)).length;
     return `
       <label class="filter-option">
         <span class="flex items-center gap-2"><input type="checkbox" class="check filter-kategorie" value="${key}"/><span>${escapeHtml(label)}</span></span>
@@ -444,7 +448,7 @@ function baueFilterSidebar() {
   const farbWrap = document.getElementById('filterFarben');
   const alleFarben = STATE.metadaten.alle_farben || [];
   const farbOption = (f) => {
-    const count = STATE.produkte.filter(p => _asArr(p.farbe).includes(f)).length;
+    const count = ZAEHL_BASIS.filter(p => _asArr(p.farbe).includes(f)).length;
     if (count === 0) return '';
     return `
       <label class="filter-option">
@@ -478,8 +482,9 @@ function baueFilterSidebar() {
   const eigWrap = document.getElementById('filterEigenschaften');
   const alleEig = STATE.metadaten.alle_eigenschaften || [];
   const eigCount = e => e === 'rollladen-ohne'
-    ? STATE.produkte.filter(p => !hatRollladen(p)).length
-    : STATE.produkte.filter(p => (p.eigenschaften || []).includes(e)).length;
+    ? ZAEHL_BASIS.filter(p => !hatRollladen(p)).length
+    // „Nach außen öffnend" zählt gegen ALLE Produkte — sonst stünde dort immer 0
+    : (e === TAG_AUSSEN ? STATE.produkte : ZAEHL_BASIS).filter(p => (p.eigenschaften || []).includes(e)).length;
   const eigOption = (e) => {
     const count = eigCount(e);
     if (count === 0) return '';
@@ -516,29 +521,29 @@ function baueFilterSidebar() {
   eigWrap.innerHTML = eigHtml;
 
   // Counts für Verglasung, RC, Zustand, Größe, Sonderpreis, Export (statisch im HTML)
-  setCountAttr('zustand-neu', STATE.produkte.filter(p => _asArr(p.zustand).includes('neu')).length);
-  setCountAttr('zustand-gebraucht', STATE.produkte.filter(p => _asArr(p.zustand).includes('gebraucht')).length);
-  setCountAttr('zustand-vermessen', STATE.produkte.filter(p => (p.eigenschaften || []).includes('vermessen')).length);
-  setCountAttr('zustand-sonderposten', STATE.produkte.filter(p => _asArr(p.zustand).includes('sonderposten')).length);
-  setCountAttr('material-kunststoff', STATE.produkte.filter(p => _asArr(p.material).includes('kunststoff')).length);
-  setCountAttr('material-holz', STATE.produkte.filter(p => _asArr(p.material).includes('holz')).length);
-  setCountAttr('material-aluminium', STATE.produkte.filter(p => _asArr(p.material).includes('aluminium')).length);
-  setCountAttr('glasart-klarglas', STATE.produkte.filter(p => _asArr(p.glasart).includes('klarglas')).length);
-  setCountAttr('glasart-chinchilla', STATE.produkte.filter(p => _asArr(p.glasart).includes('chinchilla')).length);
-  setCountAttr('glasart-milchglas', STATE.produkte.filter(p => _asArr(p.glasart).includes('milchglas')).length);
-  setCountAttr('glasart-sicherheitsglas', STATE.produkte.filter(p => _asArr(p.glasart).includes('sicherheitsglas')).length);
-  setCountAttr('glasart-schallschutzglas', STATE.produkte.filter(p => _asArr(p.glasart).includes('schallschutzglas')).length);
-  setCountAttr('verglasung-2-fach', STATE.produkte.filter(p => _asArr(p.verglasung).includes('2-fach')).length);
-  setCountAttr('verglasung-3-fach', STATE.produkte.filter(p => _asArr(p.verglasung).includes('3-fach')).length);
-  setCountAttr('rc-RC2', STATE.produkte.filter(p => p.rc_klasse === 'RC2').length);
-  setCountAttr('rc-RC3', STATE.produkte.filter(p => p.rc_klasse === 'RC3').length);
-  setCountAttr('groesse-klein', STATE.produkte.filter(p => p.groesse_klasse === 'klein').length);
-  setCountAttr('groesse-schmal', STATE.produkte.filter(p => p.groesse_klasse === 'schmal').length);
-  setCountAttr('groesse-normal', STATE.produkte.filter(p => p.groesse_klasse === 'normal').length);
-  setCountAttr('groesse-hoch', STATE.produkte.filter(p => p.groesse_klasse === 'hoch').length);
-  setCountAttr('groesse-gross', STATE.produkte.filter(p => p.groesse_klasse === 'gross').length);
-  setCountAttr('sonderpreis', STATE.produkte.filter(p => !!p.sonderpreis_eur).length);
-  setCountAttr('export', STATE.produkte.filter(p => !!p.export_modell).length);
+  setCountAttr('zustand-neu', ZAEHL_BASIS.filter(p => _asArr(p.zustand).includes('neu')).length);
+  setCountAttr('zustand-gebraucht', ZAEHL_BASIS.filter(p => _asArr(p.zustand).includes('gebraucht')).length);
+  setCountAttr('zustand-vermessen', ZAEHL_BASIS.filter(p => (p.eigenschaften || []).includes('vermessen')).length);
+  setCountAttr('zustand-sonderposten', ZAEHL_BASIS.filter(p => _asArr(p.zustand).includes('sonderposten')).length);
+  setCountAttr('material-kunststoff', ZAEHL_BASIS.filter(p => _asArr(p.material).includes('kunststoff')).length);
+  setCountAttr('material-holz', ZAEHL_BASIS.filter(p => _asArr(p.material).includes('holz')).length);
+  setCountAttr('material-aluminium', ZAEHL_BASIS.filter(p => _asArr(p.material).includes('aluminium')).length);
+  setCountAttr('glasart-klarglas', ZAEHL_BASIS.filter(p => _asArr(p.glasart).includes('klarglas')).length);
+  setCountAttr('glasart-chinchilla', ZAEHL_BASIS.filter(p => _asArr(p.glasart).includes('chinchilla')).length);
+  setCountAttr('glasart-milchglas', ZAEHL_BASIS.filter(p => _asArr(p.glasart).includes('milchglas')).length);
+  setCountAttr('glasart-sicherheitsglas', ZAEHL_BASIS.filter(p => _asArr(p.glasart).includes('sicherheitsglas')).length);
+  setCountAttr('glasart-schallschutzglas', ZAEHL_BASIS.filter(p => _asArr(p.glasart).includes('schallschutzglas')).length);
+  setCountAttr('verglasung-2-fach', ZAEHL_BASIS.filter(p => _asArr(p.verglasung).includes('2-fach')).length);
+  setCountAttr('verglasung-3-fach', ZAEHL_BASIS.filter(p => _asArr(p.verglasung).includes('3-fach')).length);
+  setCountAttr('rc-RC2', ZAEHL_BASIS.filter(p => p.rc_klasse === 'RC2').length);
+  setCountAttr('rc-RC3', ZAEHL_BASIS.filter(p => p.rc_klasse === 'RC3').length);
+  setCountAttr('groesse-klein', ZAEHL_BASIS.filter(p => p.groesse_klasse === 'klein').length);
+  setCountAttr('groesse-schmal', ZAEHL_BASIS.filter(p => p.groesse_klasse === 'schmal').length);
+  setCountAttr('groesse-normal', ZAEHL_BASIS.filter(p => p.groesse_klasse === 'normal').length);
+  setCountAttr('groesse-hoch', ZAEHL_BASIS.filter(p => p.groesse_klasse === 'hoch').length);
+  setCountAttr('groesse-gross', ZAEHL_BASIS.filter(p => p.groesse_klasse === 'gross').length);
+  setCountAttr('sonderpreis', ZAEHL_BASIS.filter(p => !!p.sonderpreis_eur).length);
+  setCountAttr('export', ZAEHL_BASIS.filter(p => !!p.export_modell).length);
 }
 
 function setCountAttr(key, val) {
@@ -702,11 +707,78 @@ function parseMasse(text) {
   return out;
 }
 
-/* ─── Filter-/Sort-Logik ─── */
-function gefilterteProdukte() {
+/* ─── „Nach außen öffnend" ist standardmäßig AUSGEBLENDET (Inhaberin 29.07.2026) ──
+   Wer „Balkontür" sucht, meint die normale nach innen öffnende — nach außen ist der
+   Sonderfall und würde die Liste nur verwässern. Die Artikel tauchen auf, sobald der
+   Filter gesetzt ist, direkt danach gesucht wird oder die Standnummer eingegeben wird. */
+function zeigeAussenOeffnend() {
   const f = STATE.filter;
+  if (f.eigenschaften.has(TAG_AUSSEN)) return true;
+  return !!f.suche && RE_AUSSEN_TAG.test(f.suche);
+}
+/* Suchtext ohne Maß-Angabe (die deckt der Maß-Filter ab) — gleiche Aufbereitung wie unten in der Suche */
+function sucheReinText() {
+  const s = STATE.filter.suche;
+  return s ? s.replace(/\d{3,4}\s*[x×*]\s*\d{3,4}/i, '').trim().toLowerCase() : '';
+}
+/* Wie viele „nach außen"-Artikel blendet der aktuelle Filter gerade aus? (für den Hinweis) */
+function anzahlAusgeblendetAussen() {
+  if (zeigeAussenOeffnend()) return 0;
+  return gefilterteProdukte({ nurAussen: true }).length;
+}
+
+/* ─── Hinweiszeile über dem Grid ────────────────────────────────────────────
+   Ausblenden ist gewollt, aber die Ware darf nicht unsichtbar werden: passend zum
+   aktuellen Filter steht hier, wie viele nach außen öffnende Artikel gerade fehlen —
+   ein Klick zeigt genau diese. Umgekehrt: bei aktivem Filter der Weg zurück.      */
+function rendereAussenHinweis() {
+  const box = document.getElementById('aussenHinweis');
+  if (!box) return;
+  const aktiv = STATE.filter.eigenschaften.has(TAG_AUSSEN);
+
+  if (aktiv) {
+    box.innerHTML = `
+      <span class="material-symbols-outlined" aria-hidden="true">swap_horiz</span>
+      <span class="ah-txt">Sie sehen nur Artikel, die <strong>nach außen</strong> öffnen.</span>
+      <button type="button" class="aussen-hinweis-btn" data-aussen="aus">Alle Artikel zeigen</button>`;
+    box.classList.remove('hidden');
+  } else {
+    const n = anzahlAusgeblendetAussen();
+    if (n === 0) { box.classList.add('hidden'); box.innerHTML = ''; return; }
+    box.innerHTML = `
+      <span class="material-symbols-outlined" aria-hidden="true">swap_horiz</span>
+      <span class="ah-txt">${n} weitere${n === 1 ? 'r Artikel öffnet' : ' Artikel öffnen'} <strong>nach außen</strong> — normalerweise ausgeblendet.</span>
+      <button type="button" class="aussen-hinweis-btn" data-aussen="ein">${n === 1 ? 'Diesen zeigen' : 'Diese zeigen'}</button>`;
+    box.classList.remove('hidden');
+  }
+
+  const btn = box.querySelector('.aussen-hinweis-btn');
+  btn.addEventListener('click', () => {
+    const ein = btn.dataset.aussen === 'ein';
+    if (ein) STATE.filter.eigenschaften.add(TAG_AUSSEN);
+    else STATE.filter.eigenschaften.delete(TAG_AUSSEN);
+    const cb = document.querySelector(`.filter-eigenschaft[value="${TAG_AUSSEN}"]`);
+    if (cb) cb.checked = ein;
+    rendere();
+  });
+}
+
+/* ─── Filter-/Sort-Logik ─── */
+function gefilterteProdukte(opt) {
+  const f = STATE.filter;
+  // opt.nurAussen: dieselben Filter, aber genau andersherum — liefert die ausgeblendeten Artikel
+  const nurAussen = !!(opt && opt.nurAussen);
 
   let result = STATE.produkte.filter(p => {
+    // Öffnungsrichtung (s.o.) — vor allen anderen Regeln
+    const istAussen = (p.eigenschaften || []).includes(TAG_AUSSEN);
+    if (nurAussen) { if (!istAussen) return false; }
+    else if (istAussen && !zeigeAussenOeffnend()) {
+      // Ausnahme: wer die Standnummer eingibt, meint genau diesen Artikel — der taucht immer auf
+      const q = sucheReinText();
+      const perNummer = q && typeof nummerTreffer === 'function' && nummerTreffer(q, p.standnummer);
+      if (!perNummer) return false;
+    }
     // Zustand (neu / gebraucht / vermessen — Produkt kann jetzt mehrere haben)
     if (f.zustand.size) {
       if (f.zustand.has('vermessen')) {
@@ -779,7 +851,10 @@ function gefilterteProdukte() {
           p.standnummer || '',
           (p.eigenschaften || []).join(' ')
         ].join(' ').toLowerCase();
-        if (!haystack.includes(reinText)) return false;
+        // ß/ss vereinheitlichen: „nach aussen" findet jetzt auch „nach außen"
+        // (Kunden tippen beides — vorher gab die ss-Schreibweise 0 Treffer)
+        const ohneSz = s => s.replace(/ß/g, 'ss');
+        if (!ohneSz(haystack).includes(ohneSz(reinText))) return false;
       }
     }
     return true;
@@ -863,6 +938,7 @@ function rendere() {
 
   // Aktive Chips
   rendereAktiveChips();
+  rendereAussenHinweis();
 
   // Empty State
   const emptyEl = document.getElementById('emptyState');

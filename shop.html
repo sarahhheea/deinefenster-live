@@ -1321,6 +1321,21 @@ input[type="range"].range-clean::-moz-range-thumb {
 .shop-masse-hinweis { margin-top: 10px; font-size: 13px; font-weight: 600; color: #225eaa; }
 .shop-masse-hinweis-close { text-decoration: underline; margin-left: 8px; background: none; border: none; cursor: pointer; color: #225eaa; font-size: 12px; }
 
+/* Hinweis auf ausgeblendete nach-außen-öffnende Artikel (Standard: ausgeblendet) */
+.aussen-hinweis { display: flex; align-items: flex-start; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 14px; padding: 10px 14px; border-radius: 10px;
+  background: rgba(34,94,170,0.06); border: 1px solid rgba(34,94,170,0.18);
+  font-size: 13px; line-height: 1.45; color: #43506a; }
+.aussen-hinweis .material-symbols-outlined { font-size: 18px; color: #225eaa; flex: none; margin-top: 1px; }
+/* Text darf schrumpfen, damit er auf dem Handy neben dem Icon bleibt statt darunter zu rutschen */
+.aussen-hinweis .ah-txt { flex: 1 1 180px; min-width: 0; }
+.aussen-hinweis-btn { background: none; border: none; padding: 0; cursor: pointer;
+  color: #225eaa; font-weight: 700; font-size: 13px; text-decoration: underline; flex: none; }
+/* Handy: Knopf in eigene Zeile, damit der Satz nicht auf drei schmale Zeilen zerfällt */
+@media (max-width: 640px) {
+  .aussen-hinweis-btn { flex: 1 0 100%; text-align: left; margin-top: 4px; margin-left: 26px; }
+}
+
 /* So läuft's — Disclosure (hell) */
 .shop-info2 { margin-top: 8px; border: 1px solid rgba(34,94,170,0.14); border-radius: 14px; background: #f6f9fe; overflow: hidden; }
 .shop-info2-summary { list-style: none; cursor: pointer; }
@@ -1978,6 +1993,9 @@ input[type="range"].range-clean::-moz-range-thumb {
     <!-- Aktive Filter -->
     <div id="aktiveChips" class="flex flex-wrap gap-2 mb-4 min-h-[28px]"></div>
 
+    <!-- Hinweis auf ausgeblendete nach-außen-öffnende Artikel (Text kommt aus shop.js) -->
+    <div id="aussenHinweis" class="aussen-hinweis hidden"></div>
+
     <!-- Produkt-Grid -->
     <div id="produktGrid" class="grid grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-5"></div>
 
@@ -2328,7 +2346,7 @@ input[type="range"].range-clean::-moz-range-thumb {
 
 <script src="js/sheets-config.js?v=2026-06-19-1mb" defer></script>
 <script src="js/shop-suche-util.js?v=2026-07-08-nrsuche" defer></script>
-<script src="js/shop.js?v=2026-07-29-aussen" defer></script>
+<script src="js/shop.js?v=2026-07-30-aussen2" defer></script>
 
 <style>
 /* ===== NAV/Topbar/Mega/Mobile auf HELL (Shop-only Override, nav.css unangetastet) 2026-06-01 ===== */
