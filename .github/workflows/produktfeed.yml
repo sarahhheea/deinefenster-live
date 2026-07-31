@@ -36,17 +36,37 @@ jobs:
         working-directory: .github/scripts
         run: python3 test_google_feed.py
 
-      - name: Feed erzeugen
-        run: python3 .github/scripts/json_to_google_feed.py
-
-      - name: Aenderung committen
+      - name: Feed erzeugen und committen
         run: |
-          if git diff --quiet -- feed.xml; then
-            echo "feed.xml unveraendert - nichts zu tun"
-            exit 0
-          fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add feed.xml
-          git commit -m "Produktfeed aktualisiert"
-          git push
+
+          # Der Shop-Editor committet laufend. Zwischen Erzeugen und Push kann
+          # main also weiterwandern und der Push abprallen. Darum bis zu fuenf
+          # Versuche, jedes Mal vom frischen Stand neu erzeugt - so entstehen
+          # keine Konflikte und der Feed bleibt in jedem Fall aktuell.
+          for versuch in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+
+            python3 .github/scripts/json_to_google_feed.py
+
+            if git diff --quiet -- feed.xml; then
+              echo "feed.xml unveraendert - nichts zu tun"
+              exit 0
+            fi
+
+            git add feed.xml
+            git commit -m "Produktfeed aktualisiert"
+
+            if git push; then
+              echo "Feed aktualisiert (Versuch $versuch)"
+              exit 0
+            fi
+
+            echo "Push kollidiert - main ist weitergewandert, neuer Versuch"
+            sleep $((versuch * 5))
+          done
+
+          echo "Feed konnte nach fuenf Versuchen nicht gepusht werden"
+          exit 1
