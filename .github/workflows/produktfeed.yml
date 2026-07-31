@@ -34,7 +34,9 @@ jobs:
 
       - name: Tests
         working-directory: .github/scripts
-        run: python3 test_google_feed.py
+        run: |
+          python3 test_google_feed.py
+          python3 test_local_inventory.py
 
       - name: Feed erzeugen und committen
         run: |
@@ -50,13 +52,14 @@ jobs:
             git reset --hard origin/main
 
             python3 .github/scripts/json_to_google_feed.py
+            python3 .github/scripts/json_to_local_inventory.py
 
-            if git diff --quiet -- feed.xml; then
-              echo "feed.xml unveraendert - nichts zu tun"
+            if git diff --quiet -- feed.xml local-inventory.xml; then
+              echo "Feeds unveraendert - nichts zu tun"
               exit 0
             fi
 
-            git add feed.xml
+            git add feed.xml local-inventory.xml
             git commit -m "Produktfeed aktualisiert"
 
             if git push; then
