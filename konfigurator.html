@@ -1687,7 +1687,7 @@ function massLimits(){
   return {bMin,bMax,hMin,hMax};
 }
 function massOk(){ const L=massLimits(),b=+S.w||0,h=+S.h||0; return b>=L.bMin&&b<=L.bMax&&h>=L.hMin&&h<=L.hMax; }
-/* Preisregel (verbindlich, Sarah 30.07.2026): Der Endpreis einer fertigen Konfiguration liegt IMMER
+/* Preisregel (verbindlich, Stand 07/2026): Der Endpreis einer fertigen Konfiguration liegt IMMER
    unter dem Marktniveau, aber nie mehr als 5 EUR darunter. Alle vier Produkte ziehen denselben Betrag
    ab; durch das Aufrunden landet der Abstand damit zwischen 3 und 4 EUR — mit 1 EUR Sicherheitsabstand
    zur 5-EUR-Grenze. NIE erhoehen ohne frische Marktmessung. */
@@ -1702,11 +1702,11 @@ function _pfBasis(L){ var e=(L.profil==='iglo-energy'), fl=L.fluegel, oe=L.oeff1
     if(oe==='dreh-l'||oe==='dreh-r'){ var vd=e?_pfLook(_PF.e_dk,b,h):_fdkBasis(b,h); return vd-14; }
     return e?_pfLook(_PF.e_dk,b,h):_fdkBasis(b,h); }
   if(fl==='stulp') return _pfLook(e?_PF.e_s2:_PF.c_s2,b,h);
-  /* 2-Fluegel Pfosten: Der fruehere Zuschlag von +14 EUR („c_p2 lag unter Marktniveau") gilt nicht
+  /* 2-Fluegel Pfosten: Der fruehere Zuschlag von +14 EUR (c_p2 lag unter Marktniveau) gilt nicht
      mehr — mit ihm lagen wir am 31.07.2026 durchgehend 9,50 bis 17,60 EUR UEBER Markt (14 von 14
      Stichproben). Ohne ihn trifft die Basis wieder. Gemessen mit der korrekten Oeffnungsart des
      Marktprodukts (Dreh links + Dreh-Kipp rechts) — bei falscher Oeffnungsart misst man sonst nur
-     das Oeffnungs-Delta und „findet" einen Fehler, der keiner ist. */
+     das Oeffnungs-Delta und "findet" einen Fehler, der keiner ist. */
   if((''+fl).charAt(0)==='2') return _pfLook(e?_PF.e_p2:_PF.c_p2,b,h);
   if((''+fl).charAt(0)==='3') return _pfLook(e?_PF.e_f3:_PF.c_f3,b,h);
   return _pfLook(e?_PF.e_dk:_PF.c_dk,b,h); }
@@ -1824,7 +1824,7 @@ function _lp_balkonNEU(){ var L=LS;
   if(L.sicher==='rc2') d+=87;
   if(L.griffLocked) d+=5;
   if(L.balkonSchwelle==='alu') d+=150;   /* 20-mm-Alu-Schwelle: Marktaufpreis 150 EUR (30.07.2026 gemessen).
-                                            Vorher wurde stattdessen bei „ohne" 25 EUR ABGEZOGEN, obwohl die
+                                            Vorher wurde stattdessen bei "ohne" 25 EUR ABGEZOGEN, obwohl die
                                             gemessene Basis bereits ohne Schwelle ist — doppelt falsch. */
   var roll=(L.roll&&L.roll!=='ohne')?(_lp_interp1(L.bMm,[700,1000,1400],[109,114,157])+0.04*Math.max(0,L.hMm-500)):0; if(L.roll==='motor') roll+=127; d+=roll;
   if(L.sproTyp==='aufgesetzt') d+=({'27':28,'45':38,'65':48})[L.sproDicke]||28; else if(L.sproTyp==='szr') d+=({'18':13,'26':18,'45':25})[L.sproDicke]||13;
@@ -2206,7 +2206,7 @@ function setupPkCarousel(){
   grid.addEventListener('scroll',function(){clearTimeout(grid._t);grid._t=setTimeout(upd,60);},{passive:true});
   upd();
 }
-// Startzustand eines Produkts als reines Objekt — EINZIGE Quelle für „frischer Start" UND für den beworbenen ab-Preis.
+// Startzustand eines Produkts als reines Objekt — EINZIGE Quelle fuer "frischer Start" UND für den beworbenen ab-Preis.
 // Bewusst ohne render()/Seiteneffekte, damit der ab-Preis aus derselben Rechnung kommt, die der Kunde danach sieht.
 function defaultConfig(id){
   const p=id||'fenster';
@@ -2216,7 +2216,7 @@ function defaultConfig(id){
     aufteilung:'1fl',
     // Fenster startet auf günstigster Variante (Festverglasung) → Startpreis = beworbenes Minimum, baut sich mit Öffnung/Größe auf
     anschlagIdx:(p==='balkon')?0:(p==='fenster'?ANSCHLAG['1fl'].findIndex(function(o){return o.oeff&&o.oeff[0]==='fest';}):(ANSCHLAG_DEFIDX['1fl']||1)),
-    profile:'classic',                 // Profil-System zurücksetzen (sonst schleppt ein Produktwechsel „Energy" mit und der ab-Preis stimmt nicht)
+    profile:'classic',                 // Profil-System zurücksetzen (sonst schleppt ein Produktwechsel "Energy" mit und der ab-Preis stimmt nicht)
     hstSystem:'psk', pskKammer:'iglo5', hstSchloss:'ohne',   // Schiebetür startet auf dem günstigeren PSK-System
     roll:'kein', panzer:null, rollSeite:'rechts',
     sproTyp:'keine', sproDicke:'27', sproRaster:'kreuz', sicher:false,
