@@ -2076,7 +2076,6 @@ const STEPS_FENSTER=[  // Reihenfolge exakt wie Live-Konfigurator (STEP_ORDER)
   {key:'farbe',label:'Farbe',title:['Die ','Farbe'],sub:'Außen- und Innenfarbe — die Vorschau zeigt Ihre Wahl.'},
   {key:'glas',label:'Glas',title:['Die ','Verglasung'],sub:'2-fach oder 3-fach Wärmeschutz.'},
   {key:'motiv',label:'Motiv',title:['Das ','Glasmotiv'],sub:'Klarglas oder ein Sichtschutz-Dekor.'},
-  {key:'schall',label:'Schall',title:['Der ','Schallschutz'],sub:'Für ruhigere Räume an lauteren Straßen.'},
   {key:'griff',label:'Griff',title:['Der ','Griff'],sub:'Modell und Ausführung Ihres Fenstergriffs.'},
   {key:'sicherheit',label:'Sicherheit',title:['Die ','Sicherheit'],sub:'Sicherheitsbeschlag erschwert das Aufhebeln.'},
   {key:'rollladen',label:'Rollladen',title:['Der ','Rollladen'],sub:'Sicht- und Sonnenschutz als Aufsatzkasten.'},
@@ -2092,7 +2091,6 @@ const STEPS_BALKON=[  // Reihenfolge wie Live-Konfigurator (WIZ_ALL, gilt:'balko
   {key:'farbe',label:'Farbe',title:['Die ','Farbe'],sub:'Außen- und Innenfarbe — die Vorschau zeigt Ihre Wahl.'},
   {key:'glas',label:'Glas',title:['Die ','Verglasung'],sub:'2-fach oder 3-fach Wärmeschutz.'},
   {key:'motiv',label:'Motiv',title:['Das ','Glasmotiv'],sub:'Klarglas oder ein Sichtschutz-Dekor.'},
-  {key:'schall',label:'Schall',title:['Der ','Schallschutz'],sub:'Optional: zusätzlicher Schallschutz.'},
   {key:'griff',label:'Griff',title:['Der ','Griff'],sub:'Modell und Ausführung Ihres Griffs.'},
   {key:'schwelle',label:'Schwelle',title:['Die ','Schwelle'],sub:'Flache Aluschwelle für einen barrierearmen Übergang.'},
   {key:'sicherheit',label:'Sicherheit',title:['Die ','Sicherheit'],sub:'Sicherheitsbeschlag erschwert das Aufhebeln.'},
@@ -2123,7 +2121,6 @@ function buildSchiebeSteps(){
     {key:'anzahl',label:'Anzahl',title:['Die ','Anzahl'],sub:'Wie viele gleiche Schiebetüren benötigen Sie?'},
     {key:'farbe',label:'Farbe',title:['Die ','Farbe'],sub:'Außen- und Innenfarbe — die Vorschau zeigt Ihre Wahl.'},
     {key:'motiv',label:'Motiv',title:['Das ','Glasmotiv'],sub:'Klarglas oder ein Sichtschutz-Dekor.'},
-    {key:'schall',label:'Schall',title:['Der ','Schallschutz'],sub:'Optional: zusätzlicher Schallschutz.'},
     {key:'griffhst',label:'Griff',title:['Der ','Schiebegriff'],sub:'Innengriff, Außengriff und Ausführung.'},
     {key:'rollladen',label:'Rollladen',title:['Der ','Rollladen'],sub:'Sicht- und Sonnenschutz als Aufsatzkasten.'},
     {key:'anfrage',label:'Übersicht',title:['Übersicht & ','Anfrage'],sub:'Kostenlos anfordern — unverbindlich.'},
@@ -3066,7 +3063,16 @@ function pickColor(i){if(S.colorTarget==='a')S.outer=i;else S.inner=i;render();}
 function pickOuter(i){ if(S.inner!==0) S.inner=i; S.outer=i; S.colorTarget='a'; render(); }
 function setInnenWeiss(){ S.inner=0; S.colorTarget='i'; render(); }
 function setInnenFarbig(){ S.inner=S.outer; S.colorTarget='i'; render(); }
-function go(i){cur=Math.max(0,Math.min(STEPS.length-1,i));render();window.scrollTo({top:0,behavior:'smooth'});}
+function go(i){
+  const ziel=Math.max(0,Math.min(STEPS.length-1,i));
+  // Die Schrittleiste ist frei anklickbar. Wer direkt auf die Uebersicht springt, muss dort seine
+  // Konfiguration sehen — vorher stand da „0 Artikel · 0,00 €", obwohl gerade konfiguriert wurde.
+  // (Der Weiter-Knopf im letzten Schritt legt selbst ab und wechselt in den Warenkorb.)
+  if(STEPS[ziel]&&STEPS[ziel].key==='anfrage'&&started&&editIndex<0){
+    cart.unshift({conf:{...S},name:''}); editIndex=0; saveCart(); updateCartBadge();
+  }
+  cur=ziel; render(); window.scrollTo({top:0,behavior:'smooth'});
+}
 function next(){ if(STEPS[cur]&&STEPS[cur].key==='masse'&&!massOk()){ updateMassValidity(); const w=document.getElementById('massWarn'); if(w){w.style.display='flex'; w.classList.add('shake'); setTimeout(()=>w.classList.remove('shake'),450);} return; } if(cur===STEPS.length-2){ commitCurrent(); return; }   /* letzter Konfig-Schritt → bewusst in den Warenkorb legen */ if(cur<STEPS.length-1) go(cur+1); }
 function back(){ if(cur===0) backToPicker(); else go(cur-1); }
 function render(){
