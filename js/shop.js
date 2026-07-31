@@ -172,6 +172,19 @@ function applyUrlFilter() {
       }
     });
   }
+  // ?eig=mit-rollo — Ausstattungs-Filter direkt vorwaehlen (auch komma-separiert).
+  // Nur Werte, zu denen es eine Checkbox gibt — sonst wuerde eine falsche URL
+  // eine leere Trefferliste erzeugen, ohne dass der Kunde den Grund sieht.
+  const eig = params.get('eig');
+  if (eig) {
+    eig.split(',').map(s => s.trim()).filter(Boolean).forEach(e => {
+      const cb = document.querySelector(`.filter-eigenschaft[value="${e}"]`);
+      if (!cb) return;
+      STATE.filter.eigenschaften.add(e);
+      cb.checked = true;
+      scrollNeeded = true;
+    });
+  }
   // ?q=... — Freitext-Suche von der Startseite uebernehmen (Suchfeld vorbefuellen + filtern)
   const q = params.get('q');
   if (q && q.trim()) {
