@@ -1,0 +1,52 @@
+name: Produktfeed aktualisieren
+
+# Haelt feed.xml automatisch synchron mit dem Shop-Bestand.
+# Ohne das laeuft der Feed auseinander: Google bewirbt dann verkaufte Ware
+# und kennt neue Inserate nicht.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'data/shop-produkte.json'
+      - '.github/scripts/json_to_google_feed.py'
+  schedule:
+    # Taeglich 04:15 UTC als Sicherheitsnetz, falls ein Push den Pfadfilter umgeht.
+    - cron: '15 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: produktfeed
+  cancel-in-progress: false
+
+jobs:
+  feed:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Tests
+        working-directory: .github/scripts
+        run: python3 test_google_feed.py
+
+      - name: Feed erzeugen
+        run: python3 .github/scripts/json_to_google_feed.py
+
+      - name: Aenderung committen
+        run: |
+          if git diff --quiet -- feed.xml; then
+            echo "feed.xml unveraendert - nichts zu tun"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add feed.xml
+          git commit -m "Produktfeed aktualisiert"
+          git push
