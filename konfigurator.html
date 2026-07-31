@@ -1702,7 +1702,12 @@ function _pfBasis(L){ var e=(L.profil==='iglo-energy'), fl=L.fluegel, oe=L.oeff1
     if(oe==='dreh-l'||oe==='dreh-r'){ var vd=e?_pfLook(_PF.e_dk,b,h):_fdkBasis(b,h); return vd-14; }
     return e?_pfLook(_PF.e_dk,b,h):_fdkBasis(b,h); }
   if(fl==='stulp') return _pfLook(e?_PF.e_s2:_PF.c_s2,b,h);
-  if((''+fl).charAt(0)==='2'){ var _v2=_pfLook(e?_PF.e_p2:_PF.c_p2,b,h); return (_v2!=null&&!e)?_v2+14:_v2; }   // c_p2 (2-Flügel Pfosten classic) war konstant ~14€ unter Marktniveau (2026-07 gemessen)
+  /* 2-Fluegel Pfosten: Der fruehere Zuschlag von +14 EUR („c_p2 lag unter Marktniveau") gilt nicht
+     mehr — mit ihm lagen wir am 31.07.2026 durchgehend 9,50 bis 17,60 EUR UEBER Markt (14 von 14
+     Stichproben). Ohne ihn trifft die Basis wieder. Gemessen mit der korrekten Oeffnungsart des
+     Marktprodukts (Dreh links + Dreh-Kipp rechts) — bei falscher Oeffnungsart misst man sonst nur
+     das Oeffnungs-Delta und „findet" einen Fehler, der keiner ist. */
+  if((''+fl).charAt(0)==='2') return _pfLook(e?_PF.e_p2:_PF.c_p2,b,h);
   if((''+fl).charAt(0)==='3') return _pfLook(e?_PF.e_f3:_PF.c_f3,b,h);
   return _pfLook(e?_PF.e_dk:_PF.c_dk,b,h); }
 /* Fenster 1-fluegelig Dreh-Kipp (IGLO 5): gemessenes Gitter aus Kanten-Stuetzstellen + 50-mm-Raster (31.07.2026, 1087 Messpunkte).
