@@ -1801,6 +1801,7 @@ var _PH={"W":[800,850,900,950,1000,1050,1100,1150,1200,1250,1300,1350,1400],"H":
 var _PH_MODELL={"vollglas-inox":-787,"halbglas-inox":-245,"florida-lr-inox":0,"montana-1-inox":0,"alaska-1-inox":0,"montana-2-lr-inox":87,"montana-3-lr-inox":87,"nebraska-lcr-inox":87,"ohio-inox":87,"colorado-inox":87,"alaska-2-inox":87,"pennsylvania-1-inox":87,"pennsylvania-2-lr-inox":87,"pennsylvania-3-lr-inox":87,"texas-c-inox":87,"texas-lr-inox":87};
 var _PH_TIER={"t1":[35.3,0.1235],"t2":[79.1,0.1235],"t3":[122.8,0.1235],"t4":[10.1,0.2121],"t5":[53.8,0.2121]};
 var _PH_FARB={"weiss":["0",0],"weiss-fx":["0",0],"anthraz-gl":["t3",2],"anthrazit":["t1",2],"basaltgr-gl":["t5",2],"basaltgr-sa":["t4",2],"betongrau":["t5",2],"cremeweiss":["t2",1],"crown-plat":["t5",2],"dunkelgr":["t4",1],"dunkelrot":["t4",1],"dunkleiche":["t1",2],"eiche-nat":["t4",2],"eisengl":["t5",2],"golden-oak":["t1",2],"signalgrau":["t2",2],"lichtgrau":["t3",2],"macore":["t1",2],"mahagoni":["t1",2],"moosgruen":["t4",1],"nussbaum":["t1",2],"oregon":["t4",2],"quarzgr-gl":["t3",2],"quarzgr-sa":["t2",2],"schiefgr-gl":["t5",2],"schoko-br":["t1",2],"schwarzbr":["t4",2],"sheffield":["t3",1],"douglasie":["t4",2],"winchester":["t1",2],"schwarz-um":["t3",2],"anthraz-um":["t3",2],"achatgrau":["t2",2],"schiefgr-sa":["t4",2],"alux-db":["t4",1],"alu-gebr":["t5",2],"eiche-hell":["t1",2],"mooreiche":["t1",2],"siena-noce":["t4",2],"siena-ross":["t4",1],"bergkiefer":["t1",2],"teak":["t1",2],"braun-mar":["t1",2],"stahlblau":["t4",1],"brillblau":["t4",1]};
+var _PH_MOTIV={"W":[900,1100,1300],"H":[1800,2400],"M":[[47.53,57.79,61.52],[55.85,67.94,72.41]]};
 var _PH_GLAS={"W":[800,1000,1200,1400],"H":[1900,2050,2200,2350,2400],"M":[[43,48,56,56],[44,48,56,56],[47,52,61,61],[50,55,65,65],[51,56,66,66]]};
 function _phLook(g,b,h){ if(!g)return null; var W=g.W,H=g.H,M=g.M; var wi=0; while(wi<W.length-1&&W[wi]<b)wi++; var hi=0; while(hi<H.length-1&&H[hi]<h)hi++; var v=M[hi][wi]; if(v==null){ for(var k=hi;k<H.length;k++){ if(M[k][wi]!=null){v=M[k][wi];break;} } } return v; }
 function _phColor(key,base,isInnenToo){ var f=_PH_FARB[key]; if(!f||f[0]==='0')return 0; var t=_PH_TIER[f[0]]; var s=t[0]+t[1]*base; if(isInnenToo)s+=f[1]*Math.max(0,0.03665*base-29.8); return s; }
@@ -1827,11 +1828,12 @@ function _lp_haustuerNEU(){ var L=LS; var base=_phBasis(L.bMm||1000,L.hMm||2100)
   if(fa) d+=_phColor(L.fa,base,fi); else if(fi) d+=_phColor(L.fi,base,true);   /* nur-innen konservativ MIT Innen-Zuschlag: Markt-Haustür nicht per Konfigurator messbar (GESCHÄTZT, nie zu billig) */
   if(L.glas==='3fach'){ var gd=_phBilin(_PH_GLAS,L.bMm||1000,L.hMm||2100); d+=(gd!=null?gd:55); }
   if(L.sicher==='rc2') d+=87;
-  /* Glasmotiv: Marktaufpreis waechst mit der Tuerflaeche (3 Messpunkte 30.07.2026, dazwischen linear).
-     Master-Carre kostet durchgehend das 2,05-fache eines Standard-Dekors. War bei uns bisher gratis. */
+  /* Glasmotiv: haengt an Breite UND Hoehe getrennt, NICHT an der Flaeche — 1100x1800 (1,98 m2)
+     kostet 57,79 EUR, das groessere 900x2400 (2,16 m2) nur 55,85. Deshalb als bilineares Raster
+     (6 Messpunkte 31.07.2026) statt als Flaechenformel; die Flaechenformel lag bis 8,85 EUR unter
+     Marktniveau und riss damit die 5-EUR-Grenze. Master-Carre = 2,05-faches eines Standard-Dekors. */
   if(L.glasdekor&&L.glasdekor!=='klar'){
-    var _fl=(L.bMm/1000)*(L.hMm/1000);
-    var _mv=_lp_interp1(_fl,[1.8,2.31,2.99],[47.53,59.73,69.58]);
+    var _mv=_phBilin(_PH_MOTIV,L.bMm||1000,L.hMm||2100);
     d+=(L.glasdekor==='master-carre')?_mv*2.05:_mv;
   }
   /* Stossgriff: Marktpreis haengt NUR an der Griefflaenge, nicht an der Tuergroesse (gemessen 30.07.2026:
