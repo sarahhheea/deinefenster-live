@@ -1696,10 +1696,8 @@ input[type="range"].range-clean::-moz-range-thumb {
   </div>
   <!-- Trust-Leiste: Vertrauens-Signale oberhalb der Produkte (Baymard/CRO) -->
   <div class="shop-trust" aria-label="Vorteile">
-    <span class="shop-trust-i"><span class="material-symbols-outlined" aria-hidden="true">local_shipping</span><span class="shop-trust-t">Lieferung<small>deutschlandweit</small></span></span>
-    <span class="shop-trust-i"><span class="material-symbols-outlined" aria-hidden="true">storefront</span><span class="shop-trust-t">Selbstabholung<small>kostenfrei in Brandenburg</small></span></span>
-    <span class="shop-trust-i"><span class="material-symbols-outlined" aria-hidden="true">verified</span><span class="shop-trust-t">Familienbetrieb<small>Fensterhandel Christ</small></span></span>
-    <span class="shop-trust-i"><span class="material-symbols-outlined" aria-hidden="true">bolt</span><span class="shop-trust-t">Sofort verfügbar<small>tagesaktueller Bestand</small></span></span>
+        <span class="shop-trust-i"><span class="material-symbols-outlined" aria-hidden="true">storefront</span><span class="shop-trust-t">Selbstabholung<small>kostenfrei in Brandenburg</small></span></span>
+        <span class="shop-trust-i"><span class="material-symbols-outlined" aria-hidden="true">bolt</span><span class="shop-trust-t">Sofort verfügbar<small>tagesaktueller Bestand</small></span></span>
   </div>
   <div id="masseHinweis" class="hidden shop-masse-hinweis">
     <span class="material-symbols-outlined align-bottom" style="font-size:14px" aria-hidden="true">auto_awesome</span>
@@ -2473,5 +2471,53 @@ section[style*="#0a1530"], div[style*="#0a1530"] { background: #f4f7fc !importan
 
 <!-- Cloudflare Web Analytics (cookieless, DSGVO-konform) --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "2cf67e72370843bc8998180837703d02"}'></script><!-- End Cloudflare Web Analytics -->
 <script src="/js/dfnav.js?v=cart3" defer></script>
+
+<!-- ===== Shop-Layout 2026-07-31: Produkte + Preise ohne Scrollen sichtbar =====
+     Kopfbereich auf eine Zeile eingedampft, Suchleiste bleibt beim Scrollen stehen,
+     kompaktere Karten. H1 bleibt bewusst im Dokument (Google braucht sie) — nur klein. -->
+<style>
+  /* Kopf: Eyebrow, Unterzeile und Oeffnungs-Badge raus; H1 als schlanke Zeile.
+     Die Elemente bleiben im DOM, weil shop.js sie beschreibt (sonst bricht das Skript). */
+  /* Kopfbereich optisch raus. Bewusst NICHT display:none — shop.js beschreibt
+     #shopHeaderTitle/#produktAnzahl/#shopOpenBadge, und die H1 muss fuer Google
+     lesbar bleiben. Daher aus dem Layout genommen statt entfernt.
+     (Vorher lag die H1 unsichtbar hinter der fixierten Navigation.) */
+  #shopHeroCard {
+    position: absolute !important; width: 1px !important; height: 1px !important;
+    padding: 0 !important; margin: -1px !important; overflow: hidden !important;
+    clip-path: inset(50%) !important; white-space: nowrap !important; border: 0 !important;
+  }
+
+  /* Suchleiste bleibt beim Scrollen erreichbar (dfnav ist fixed: 106px, mobil 68px) */
+  .shop-searchbar {
+    position: sticky; top: calc(var(--banner-h, 0px) + var(--dfn-h, 106px) + 8px);
+    z-index: 30; margin-top: 0;
+  }
+
+  /* Karten kompakter -> mehr Produkte samt Preis oberhalb der Falz */
+  .karte-bild { aspect-ratio: 16 / 11; }
+  .karte-body { padding: 8px 12px 10px; }
+
+  /* Spaltenzahl: xl:grid-cols-3 (ab 1280px) greift, xl:grid-cols-4 ist im
+     vorkompilierten css/tailwind.css nicht enthalten. Daher hier per CSS:
+     ab 1100px drei, ab 1400px vier Spalten. */
+  @media (min-width: 1100px) { #produktGrid { grid-template-columns: repeat(3, minmax(0,1fr)) !important; } }
+  @media (min-width: 1400px) { #produktGrid { grid-template-columns: repeat(4, minmax(0,1fr)) !important; } }
+
+  /* Leere Filter-Chip-Zeile reservierte dauerhaft 44px, obwohl nichts drinsteht */
+  #aktiveChips:empty { min-height: 0 !important; margin-bottom: 0 !important; }
+
+  @media (max-width: 900px) {
+    .shop-hero3-inner { padding-top: 10px !important; padding-bottom: 4px !important; }
+    .shop-hero3-title { font-size: 15px !important; }
+    /* Suchleiste stand mobil dreizeilig (136px): Suche oben, Filter+Sortierung daneben */
+    .shop-searchbar { flex-wrap: wrap; row-gap: 8px; column-gap: 8px; padding: 9px; }
+    .shop-searchbar-field { flex: 1 1 100%; }
+    .shop-searchbar-filter { flex: 0 0 auto; }
+    .shop-searchbar-sort { flex: 1 1 auto; min-width: 0; }
+    .karte-bild { aspect-ratio: 4 / 3; }
+    .karte-body { padding: 8px 10px 10px; }
+  }
+</style>
 </body>
 </html>
