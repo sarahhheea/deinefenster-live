@@ -43,7 +43,9 @@ body:not(.wiz-active) .topbar{display:none}
 .tb-row{max-width:1160px;margin:0 auto;padding:18px 32px;display:flex;align-items:center;justify-content:space-between;gap:16px}
 .brand{font-weight:800;font-size:17px;letter-spacing:.06em;text-transform:uppercase}
 .brand b{font-weight:800}
-.tb-links{display:flex;gap:10px}
+.tb-links{display:flex;gap:14px;align-items:center}
+.tb-prod{font-weight:800;font-size:15px;color:var(--ink);letter-spacing:.01em;display:inline-flex;align-items:center}
+.tb-prod::before{content:'';width:1px;height:20px;background:var(--line);margin-right:14px;display:inline-block}
 .tb-link{display:inline-flex;align-items:center;gap:8px;padding:11px 16px;border:1px solid var(--line);background:transparent;color:var(--ink);
   font:600 11.5px/1 var(--sans);text-transform:uppercase;letter-spacing:.12em;cursor:pointer;border-radius:2px;transition:.2s var(--ease)}
 .tb-link:hover{border-color:var(--ink)}
@@ -483,17 +485,17 @@ body:not(.wiz-active) .topbar{display:none}
 .summary .srow{padding:3px 0;font-size:11.5px}
 .stageimg{width:100%;max-width:238px;height:auto;display:block;margin:0 auto;filter:drop-shadow(0 12px 24px rgba(20,40,80,.16))}
 .stagedim{text-align:center;margin-top:14px;font-size:12.5px;color:var(--ink-soft);line-height:1.55}
-.grid{grid-template-columns:minmax(0,0.86fr) minmax(0,1.14fr);gap:30px;align-items:stretch}
+.grid{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:28px;align-items:start}
 .stage-card{top:150px}
 .grid:not(.select) #panel{display:flex;flex-direction:column;justify-content:flex-start}
 /* Vorschau-Schritte (ab Farbe): Skizze + Liste NEBENEINANDER, edel & großzügig, Optionen füllen die rechte Spalte */
-.stage-card{display:flex;flex-direction:column;align-items:stretch;overflow:hidden}
-.stage{flex:0 0 auto;padding:26px 18px 20px;display:grid;place-items:center;background:linear-gradient(180deg,#f4f7fc,#eef2f8)}
-.stage svg{max-width:300px}
-.summary{flex:1 1 auto;border-top:1px solid var(--line);border-left:none;padding:20px 26px;display:flex;flex-direction:column;justify-content:flex-start}
+.stage-card{display:flex;flex-direction:row;align-items:stretch;overflow:hidden}
+.stage{flex:0 0 43%;padding:18px 14px;display:grid;place-items:center;background:linear-gradient(180deg,#f4f7fc,#eef2f8)}
+.stage svg{max-width:225px}
+.summary{flex:1 1 57%;border-top:none;border-left:1px solid var(--line);padding:16px 22px;display:flex;flex-direction:column;justify-content:flex-start}
 .summary .eb{font-size:10.5px;letter-spacing:.2em}
-.summary h3{font-size:22px;margin:3px 0 16px}
-.summary .srow{padding:8.5px 0;font-size:14px}
+.summary h3{font-size:18px;margin:2px 0 10px}
+.summary .srow{padding:5px 0;font-size:12.5px}
 .pick>.card{align-self:stretch;width:100%}
 .pick{gap:18px}
 .wrap{max-width:1300px;padding:12px 28px 96px}
@@ -709,12 +711,29 @@ body:not(.wiz-active) .topbar{display:none}
 .legalbar a{color:var(--ink-soft);text-decoration:none}
 .legalbar a:hover{color:var(--primary);text-decoration:underline}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+.pw-modal{display:none;position:fixed;inset:0;z-index:200;align-items:center;justify-content:center;padding:20px}
+.pw-modal.on{display:flex}
+.pw-modal .pw-back{position:absolute;inset:0;background:rgba(10,18,37,.5)}
+.pw-card{position:relative;background:#fff;border-radius:16px;max-width:420px;width:100%;padding:26px 26px 22px;box-shadow:0 24px 60px -20px rgba(10,20,40,.5);text-align:center}
+.pw-title{font-size:20px;font-weight:800;color:var(--ink);margin:0 0 8px}
+.pw-text{font-size:14.5px;color:var(--ink-soft);line-height:1.5;margin:0 0 20px}
+.pw-actions{display:flex;flex-direction:column;gap:10px}
+.pw-btn{width:100%;padding:13px 18px;border-radius:12px;font-weight:700;font-size:15px;cursor:pointer;border:1.5px solid transparent}
+.pw-primary{background:var(--primary);color:#fff}
+.pw-primary:hover{filter:brightness(1.06)}
+.pw-ghost{background:#fff;color:var(--ink-soft);border-color:var(--line)}
+.pw-ghost:hover{border-color:var(--line-d);color:var(--ink)}
+/* Schritt-Leiste: Sprung-Klarheit */
+.step{cursor:pointer}
+.step:hover .num{border-color:var(--primary)}
+.step:hover .lb{color:var(--primary)}
+.step.active{cursor:default}
 /* ===== EINHEITLICHES OPTIONS-KARTEN-SCHEMA — Ausstattungs-Schritte, Desktop (>=881px). EIN Schema fuer alle Schritte: gleicher Rahmen, gleiche Hoehe, gleiche vis-Flaeche, Status-Zeile unten mit reserviertem Platz. Tuer-Hochformat (.door) ausgenommen. ===== */
 @media(min-width:881px){
-  .grid:not(.select) .ocard:not(.door){display:flex;flex-direction:column;align-items:center;min-height:264px;padding:18px 16px 15px;border:1.5px solid var(--line);border-radius:14px;overflow:hidden}
-  .grid:not(.select) .ocard:not(.door) .vis{height:126px!important;width:100%;margin-bottom:12px;display:grid;place-items:center;overflow:hidden}
-  .grid:not(.select) .ocard:not(.door) .vis img{max-height:122px!important;max-width:100%;width:auto;object-fit:contain}
-  .grid:not(.select) .ocard:not(.door) .vis svg{width:auto!important;height:58px!important;max-height:58px!important}
+  .grid:not(.select) .ocard:not(.door){display:flex;flex-direction:column;align-items:center;min-height:231px;padding:14px 14px 12px;border:1.5px solid var(--line);border-radius:14px;overflow:hidden}
+  .grid:not(.select) .ocard:not(.door) .vis{height:104px!important;width:100%;margin-bottom:9px;display:grid;place-items:center;overflow:hidden}
+  .grid:not(.select) .ocard:not(.door) .vis img{max-height:100px!important;max-width:100%;width:auto;object-fit:contain}
+  .grid:not(.select) .ocard:not(.door) .vis svg{width:auto!important;height:52px!important;max-height:52px!important}
   .grid:not(.select) .ocard:not(.door) .t{font-size:16px;line-height:1.25;margin-top:0}
   .grid:not(.select) .ocard:not(.door) .s{font-size:13px;line-height:1.3;min-height:34px;margin-top:3px;display:flex;align-items:flex-start;justify-content:center;text-align:center}
   .grid:not(.select) .ocard:not(.door) .pdl{margin-top:auto;padding-top:8px}
@@ -874,7 +893,8 @@ body:not(.wiz-active) .topbar{display:none}
 <header class="topbar">
   <div class="tb-row">
     <div class="tb-links">
-      <button class="tb-link" onclick="backToPicker()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span class="lbl">Anderes Produkt</span></button>
+      <button class="tb-link" onclick="askSwitchProduct()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span class="lbl">Anderes Produkt</span></button>
+      <div class="tb-prod" id="tbProd"></div>
     </div>
   </div>
   <nav class="steps"><div class="steps-inner" id="stepbar"></div>
@@ -882,6 +902,17 @@ body:not(.wiz-active) .topbar{display:none}
     <div class="steps-hint"><span id="stepNow"></span><span class="sh-jump"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7h8M8 7l3-3M8 7l3 3M16 17H8M16 17l-3-3M16 17l-3 3"/></svg> Jeden Schritt frei anklickbar</span></div>
   </nav>
 </header>
+<div class="pw-modal" id="pwModal" role="dialog" aria-modal="true" aria-labelledby="pwTitle" onkeydown="if(event.key==='Escape')closePwModal()">
+  <div class="pw-back" onclick="closePwModal()"></div>
+  <div class="pw-card">
+    <div class="pw-title" id="pwTitle">Produkt wechseln?</div>
+    <p class="pw-text">Deine aktuellen Eingaben für dieses Produkt gehen dabei verloren.</p>
+    <div class="pw-actions">
+      <button class="pw-btn pw-primary" onclick="closePwModal()">Weiter konfigurieren</button>
+      <button class="pw-btn pw-ghost" onclick="confirmSwitchProduct()">Trotzdem wechseln</button>
+    </div>
+  </div>
+</div>
 
 <main class="wrap">
   <section id="pickerView"></section>
@@ -2031,6 +2062,9 @@ function cartToast(){
 }
 function setHstSystem(v){ S.hstSystem=v; S.hstTeilung='2'; STEPS=buildSchiebeSteps(); if(cur>=STEPS.length)cur=STEPS.length-1; render(); maybeAutoAdvance(); }
 function backToPicker(){ started=false; anfrageView='cart'; window.scrollTo({top:0}); render(); }
+function askSwitchProduct(){ if(started && cur>0){ document.getElementById('pwModal').classList.add('on'); document.body.style.overflow='hidden'; var b=document.querySelector('#pwModal .pw-primary'); if(b) b.focus(); } else { backToPicker(); } }
+function closePwModal(){ var m=document.getElementById('pwModal'); if(m) m.classList.remove('on'); document.body.style.overflow=''; }
+function confirmSwitchProduct(){ closePwModal(); backToPicker(); }
 function showAnfrage(){ anfrageView='form'; window.scrollTo({top:0}); render(); setTimeout(()=>document.querySelector('.co-form input')?.focus({preventScroll:true}),40); }
 
 function miniWin(opening){
@@ -2717,9 +2751,10 @@ function render(){
   document.getElementById('stepbar').innerHTML=STEPS.map((s,i)=>{
     const cls=i===cur?'active':(i<cur?'done':'');
     const num=i<cur?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg>`:(i+1);
-    return `<button class="step ${cls}" onclick="go(${i})"><span class="num">${num}</span><span class="lb">${s.label}</span></button>`;
+    return `<button class="step ${cls}" onclick="go(${i})" aria-current="${i===cur?'step':'false'}"><span class="num">${num}</span><span class="lb">${s.label}</span></button>`;
   }).join('');
   document.getElementById('stepNow').textContent='Schritt '+(cur+1)+' von '+STEPS.length+' · '+STEPS[cur].label;
+  {var _tp=document.getElementById('tbProd'); if(_tp) _tp.textContent=prodName();}
   var _wpf=document.getElementById('wizprogFill'); if(_wpf) _wpf.style.width=Math.round(((cur+1)/STEPS.length)*100)+'%';
   // aktuellen Schritt in der swipebaren Leiste mittig schieben (nur horizontal, ohne Seiten-Scroll zu stören)
   (function(){var sc=document.getElementById('stepbar'),ac=sc&&sc.querySelector('.step.active');
