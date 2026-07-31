@@ -1855,6 +1855,14 @@ var _PHT={
 function _stufeIdx(kanten,v){ var i=0; while(i<kanten.length && v>=kanten[i]) i++; return i; }
 function _phBasis(b,h){ return _PHT.M[_stufeIdx(_PHT.H,h)][_stufeIdx(_PHT.W,b)]; }
 function _lp_haustuerNEU(){ var L=LS; var base=_phBasis(L.bMm||1000,L.hMm||2100); if(base==null) return _lp_haustuer();
+  /* IGLO Energy (7 Kammern, 82 mm) statt IGLO 5: +20 % auf den Basispreis.
+     ABGELEITET, NICHT DIREKT GEMESSEN — unsere Preisreferenz fuehrt keine Energy-Haustuer.
+     Grundlage: derselbe Faktor, den wir bei Fenstern aus 165 Wertepaaren gemessen haben
+     (Median 1,2017, Streuung 1,13-1,21), und den Fenster und Balkontuer bereits verwenden.
+     Ein Shop mit beiden Tuersystemen weist 833,50 -> 1.105,12 EUR aus (+32,6 %); die Differenz
+     zu unseren 20 % ist plausibel, weil Energy dort serienmaeßig 3-fach-Glas enthaelt, das bei
+     uns separat gewaehlt wird. Sobald eine Energy-Haustuer messbar wird: nachkalibrieren. */
+  if(L.profil==='iglo-energy') base*=1.20;
   var d=(_PH_MODELL[L.tuerModell]!=null?_PH_MODELL[L.tuerModell]:0);
   var fa=L.fa&&L.fa!=='weiss', fi=L.fi&&L.fi!=='weiss';
   if(fa) d+=_phColor(L.fa,base,fi); else if(fi) d+=_phColor(L.fi,base,true);   /* nur-innen konservativ MIT Innen-Zuschlag: Markt-Haustür nicht per Konfigurator messbar (GESCHÄTZT, nie zu billig) */
@@ -1950,7 +1958,8 @@ function price(){
   L.sproDicke=S.sproDicke||'27';
   L.griff='mistral'; L.griffLocked=(S.griff==='abschliessbar');
   if(S.prod==='haustuer'){
-    L.profil='iglo5'; L.tuerModell=S.doorModel;
+    L.profil={classic:'iglo5',energy:'iglo-energy'}[S.profile]||'iglo5';   // war festverdrahtet -> Auswahl blieb wirkungslos
+    L.tuerModell=S.doorModel;
     L.tuerGriffAussen=(typeof _griffAussenVal==='function')?_griffAussenVal():(S.griffAussen||'klinke');
     L.stossHoehe=S.stossHoehe||'1200';
     LS=L; return _lp_haustuerNEU();
