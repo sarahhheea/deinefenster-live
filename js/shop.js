@@ -1477,12 +1477,10 @@ function istGemerkt(id) {
   return STATE.warenkorb.some(e => String(e.id) === String(id));
 }
 function toggleMerk(id) {
-  if (istGemerkt(id)) {
-    entferneAusCart(id);
-  } else {
-    addToCart(id);
-    oeffneCart();
-  }
+  // Bewusst OHNE die Liste zu oeffnen: der Kunde soll mehrere Artikel
+  // hintereinander merken koennen. Rueckmeldung gibt der Zaehler oben.
+  if (istGemerkt(id)) entferneAusCart(id);
+  else addToCart(id);
   document.querySelectorAll(`[data-action="merk"][data-id="${id}"]`).forEach(b => {
     const an = istGemerkt(id);
     b.classList.toggle('on', an);
@@ -1661,11 +1659,18 @@ function schliesseCart() {
 }
 
 function zeigeCartFeedback(id) {
-  // Kurz-Animation am Cart-Icon
+  // Kurze Animation am Merk-Knopf + Zaehler (ersetzt das frueher aufspringende Panel)
   const btn = document.getElementById('cartBtnNav');
+  if (!btn) return;
   btn.style.transition = 'transform 0.18s ease';
   btn.style.transform = 'scale(1.18)';
   setTimeout(() => { btn.style.transform = ''; }, 180);
+  const badge = document.getElementById('cartBadgeNav');
+  if (badge) {
+    badge.classList.remove('pop');
+    void badge.offsetWidth;
+    badge.classList.add('pop');
+  }
 }
 
 function stelleCartAnfrage() {
