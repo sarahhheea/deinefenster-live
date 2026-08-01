@@ -1694,6 +1694,9 @@ input[type="range"].range-clean::-moz-range-thumb {
       <option value="groesse-auf">Größe ↑</option>
     </select>
   </div>
+  <!-- Kategorien zum Anklicken, direkt ueber dem Shop -->
+  <nav id="katLeiste" class="kat-leiste" aria-label="Produktkategorien"></nav>
+
   <!-- Trust-Leiste: Vertrauens-Signale oberhalb der Produkte (Baymard/CRO) -->
   <div class="shop-trust" aria-label="Vorteile">
         <span class="shop-trust-i"><span class="material-symbols-outlined" aria-hidden="true">storefront</span><span class="shop-trust-t">Selbstabholung<small>kostenfrei in Brandenburg</small></span></span>
@@ -1796,15 +1799,9 @@ input[type="range"].range-clean::-moz-range-thumb {
     </div>
 
     <!-- Produkttyp — ganz oben (interner Hinweis.05.2026): Fenster/Türen + Baumaterial-Untergruppe -->
-    <!-- Produkttyp -->
-    <section class="filter-block">
-      <h4 class="filter-block-title">Produkttyp</h4>
-      <div id="filterKategorien" class="space-y-0.5"></div>
-    </section>
-
     <!-- Maße (mm) — Primärfilter direkt unter Produkttyp -->
-    <section class="filter-block">
-      <h4 class="filter-block-title">Maße (mm)</h4>
+    <section class="filter-block filter-mass">
+      <h4 class="filter-block-title"><span class="material-symbols-outlined">straighten</span> Ma&szlig;e (mm)</h4>
       <div class="grid grid-cols-2 gap-2 mb-3">
         <label class="block">
           <span class="block text-[11px] text-ink-soft mb-1">Breite</span>
@@ -1822,7 +1819,14 @@ input[type="range"].range-clean::-moz-range-thumb {
         </div>
         <input id="filterToleranz" type="range" min="0" max="50" value="15" class="range-clean">
       </div>
+      <button type="button" id="massFinden" class="mass-finden">Finden</button>
     </section>
+    <!-- Produkttyp -->
+    <section class="filter-block">
+      <h4 class="filter-block-title">Produkttyp</h4>
+      <div id="filterKategorien" class="space-y-0.5"></div>
+    </section>
+
 
     <!-- Preis (€) — Primärfilter -->
     <section class="filter-block">
@@ -2508,6 +2512,58 @@ section[style*="#0a1530"], div[style*="#0a1530"] { background: #f4f7fc !importan
   @media (max-width: 860px) { .shop-top-offset { padding-top: 16px; } }
 
 
+
+  /* ── Kategorie-Leiste ueber dem Shop ── */
+  .kat-leiste {
+    display: flex; gap: 9px; padding: 14px 0 4px;
+    flex-wrap: wrap;                 /* Desktop: umbrechen statt abschneiden */
+    scrollbar-width: none; -ms-overflow-style: none;
+  }
+  @media (max-width: 900px) {
+    /* Handy: eine Zeile zum Wischen, spart Hoehe ueber den Produkten */
+    .kat-leiste { flex-wrap: nowrap; overflow-x: auto; }
+  }
+  .kat-leiste::-webkit-scrollbar { display: none; }
+  .kat-chip {
+    display: inline-flex; align-items: center; gap: 8px; flex: none; cursor: pointer;
+    padding: 9px 16px; border-radius: 999px; border: 1.5px solid #e7ebf1; background: #fff;
+    font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 600; font-size: 14px;
+    color: #14233f; white-space: nowrap; transition: border-color .16s, background .16s, color .16s;
+  }
+  .kat-chip:hover { border-color: #76a9fa; color: #225eaa; }
+  .kat-chip .material-symbols-outlined { font-size: 19px; color: #8593aa; transition: color .16s; }
+  .kat-chip:hover .material-symbols-outlined { color: #225eaa; }
+  .kat-num { font-size: 12.5px; font-weight: 700; color: #8593aa; }
+  .kat-chip.on { background: #225eaa; border-color: #225eaa; color: #fff; }
+  .kat-chip.on .material-symbols-outlined,
+  .kat-chip.on .kat-num { color: rgba(255,255,255,.82); }
+
+  /* ── Massfilter: erster und auffaelligster Block in der Filterspalte ── */
+  .filter-mass {
+    background: #f2f7ff; border: 1.5px solid rgba(34,94,170,.22); border-radius: 13px;
+    padding: 13px 13px 14px !important; margin-bottom: 16px;
+  }
+  .filter-mass .filter-block-title {
+    display: flex; align-items: center; gap: 7px; color: #14233f !important;
+    font-size: 14px !important; margin-bottom: 10px !important;
+  }
+  .filter-mass .filter-block-title .material-symbols-outlined { font-size: 19px; color: #225eaa; }
+  .mass-finden {
+    width: 100%; margin-top: 12px; padding: 11px; border: 0; border-radius: 10px;
+    background: #225eaa; color: #fff; cursor: pointer;
+    font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 14px;
+    transition: background .16s;
+  }
+  .mass-finden:hover { background: #1b4d8c; }
+
+  /* Produkttyp steht jetzt oben als Leiste — in der Spalte waere er doppelt */
+  #filterKategorien, #filterKategorien + *, .filter-block:has(#filterKategorien) { display: none !important; }
+
+  @media (max-width: 900px) {
+    .kat-leiste { padding: 10px 0 2px; gap: 7px; }
+    .kat-chip { padding: 8px 13px; font-size: 13px; }
+  }
+
   /* ── Merkliste: Herz auf der Karte + Knopf in der Navigation ── */
   .karte-merk {
     position: absolute; top: 8px; right: 8px; z-index: 4;
@@ -2702,5 +2758,17 @@ section[style*="#0a1530"], div[style*="#0a1530"] { background: #f4f7fc !importan
     </button>
   </div>
 </aside>
+<script>
+  /* Massfilter-Knopf: die Eingaben filtern schon beim Tippen — der Knopf bringt
+     den Kunden nur zu den Treffern (wichtig auf dem Handy, wo die Liste unten steht). */
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('#massFinden');
+    if (!b) return;
+    var ziel = document.getElementById('produktGrid');
+    if (ziel) ziel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    var fc = document.getElementById('filterClose');
+    if (fc && fc.offsetParent !== null) fc.click();
+  });
+</script>
 </body>
 </html>

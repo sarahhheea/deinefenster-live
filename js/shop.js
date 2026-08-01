@@ -436,6 +436,57 @@ function berechneMetadaten(produkte) {
 }
 
 /* ─── Filter-Sidebar dynamisch ─── */
+
+/* ─── Kategorie-Leiste ueber den Produkten ─────────────────────────────────
+   Steuert bewusst die vorhandenen Filter-Checkboxen, statt eine zweite
+   Filterlogik danebenzustellen — so bleiben Leiste und Filterspalte synchron. */
+const KAT_ICON = {
+  // Achtung: fonts/material-symbols-outlined.woff2 ist ein Subset. Nicht enthaltene
+  // Ligaturen (z.B. 'skylight') werden als Klartext gerendert — vor dem Einsatz pruefen.
+  fenster: 'window', holzfenster: 'window', dachfenster: 'roofing',
+  balkontuer: 'door_open', haustuer: 'door_front', schiebetuer: 'meeting_room',
+  daemmung: 'layers', baumaterialien: 'foundation', 'garagentor-gebraucht': 'garage'
+};
+
+function baueKatLeiste() {
+  const wrap = document.getElementById('katLeiste');
+  if (!wrap) return;
+  const ZAEHL_BASIS = STATE.produkte.filter(p => !(p.eigenschaften || []).includes(TAG_AUSSEN));
+  const ORDER = ['fenster', 'holzfenster', 'dachfenster', 'balkontuer', 'haustuer',
+                 'schiebetuer', 'daemmung', 'baumaterialien', 'garagentor-gebraucht'];
+  const aktive = STATE.filter.kategorien;
+  const chips = [`
+    <button type="button" class="kat-chip${aktive.size === 0 ? ' on' : ''}" data-kat="">
+      <span class="material-symbols-outlined">grid_view</span>Alle
+      <span class="kat-num">${ZAEHL_BASIS.length}</span>
+    </button>`];
+  ORDER.filter(k => STATE.kategorien[k]).forEach(k => {
+    const n = ZAEHL_BASIS.filter(p => _asArr(p.kategorie_keys).some(x => kategorieZuGruppe(x) === k)).length;
+    if (!n) return;
+    chips.push(`
+      <button type="button" class="kat-chip${aktive.has(k) ? ' on' : ''}" data-kat="${k}">
+        <span class="material-symbols-outlined">${KAT_ICON[k] || 'category'}</span>${escapeHtml(STATE.kategorien[k])}
+        <span class="kat-num">${n}</span>
+      </button>`);
+  });
+  wrap.innerHTML = chips.join('');
+
+  wrap.querySelectorAll('.kat-chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const kat = btn.dataset.kat;
+      const boxen = document.querySelectorAll('.filter-kategorie');
+      if (!kat) {
+        boxen.forEach(cb => { if (cb.checked) { cb.checked = false; cb.dispatchEvent(new Event('change', {bubbles: true})); } });
+      } else {
+        boxen.forEach(cb => {
+          const soll = cb.value === kat ? !STATE.filter.kategorien.has(kat) : false;
+          if (cb.checked !== soll) { cb.checked = soll; cb.dispatchEvent(new Event('change', {bubbles: true})); }
+        });
+      }
+    });
+  });
+}
+
 function baueFilterSidebar() {
   // Zähler-Basis OHNE die nach außen öffnenden Artikel — die sind standardmäßig ausgeblendet,
   // also darf „Balkontüren 40" nicht mehr versprechen als die Liste danach zeigt.
@@ -456,6 +507,7 @@ function baueFilterSidebar() {
     .filter(k => STATE.kategorien[k])
     .map(k => renderItem(k, STATE.kategorien[k]))
     .join('');
+  baueKatLeiste();
 
   // Farben — in Unterkategorien gruppiert (Inhaberin-Wunsch 16.06.2026: Uni-Farben / Holzdekore / Sonstige)
   const farbWrap = document.getElementById('filterFarben');
@@ -588,6 +640,7 @@ function bindeEventHandler() {
   });
 
   // Filter-Checkboxen (Event-Delegation)
+  document.getElementById('filterSidebar').addEventListener('change', () => setTimeout(baueKatLeiste, 0), true);
   document.getElementById('filterSidebar').addEventListener('change', e => {
     const t = e.target;
     if (!t.matches('input[type="checkbox"]')) return;
