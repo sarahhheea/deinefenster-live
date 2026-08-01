@@ -714,7 +714,23 @@ body:not(.wiz-active) .topbar{display:none}
 .legalbar a{color:var(--ink-soft);text-decoration:none}
 .legalbar a:hover{color:var(--primary);text-decoration:underline}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+body.checkout-focus .topbar{display:none}
+.co-trust{display:flex;flex-wrap:wrap;align-items:center;gap:9px 18px;margin-top:14px;font-size:13px;color:var(--ink-soft)}
+.co-tr-item{display:inline-flex;align-items:center;gap:6px}
+.co-tr-item svg{width:15px;height:15px;flex:0 0 auto}
+.co-trust .star{color:#f5a623}
+.co-tr-item.chk svg{color:var(--accent)}
+.co-tr-tel{color:var(--primary);font-weight:700;text-decoration:none}
+.co-tr-tel:hover{text-decoration:underline}
 .cd-wrap{position:fixed;inset:0;z-index:100000;visibility:hidden}
+.cd-ship{padding:0 22px}
+.cd-ship:empty{display:none}
+.cd-ship-msg{font-size:13px;color:var(--ink-soft);padding:13px 0 8px}
+.cd-ship-msg b{color:var(--ink);font-weight:700}
+.cd-ship-msg.reached b{color:var(--primary)}
+.cd-ship-bar{height:7px;border-radius:999px;background:var(--line);overflow:hidden;margin-bottom:13px}
+.cd-ship-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:999px;transition:width .4s var(--ease)}
+.cd-ship-bar.reached i{background:var(--accent)}
 .cd-wrap.on{visibility:visible}
 .cd-back{position:absolute;inset:0;background:rgba(10,18,37,.45);opacity:0;transition:opacity .3s}
 .cd-wrap.on .cd-back{opacity:1}
@@ -755,6 +771,9 @@ body:not(.wiz-active) .topbar{display:none}
 .cd-empty{text-align:center;padding:70px 20px;color:var(--ink-soft)}
 .cd-empty p{margin-top:14px;font-size:15px}
 @media(max-width:600px){.cd-panel{width:100%}.cd-head h2{font-size:19px}}
+.co-deliv-lbl{font-size:12px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.co-deliv{margin-bottom:16px}
+.co-delivnote{font-size:12px;color:var(--ink-soft);margin:-10px 0 14px;line-height:1.4}
 .pw-modal{display:none;position:fixed;inset:0;z-index:200;align-items:center;justify-content:center;padding:20px}
 .pw-modal.on{display:flex}
 .pw-modal .pw-back{position:absolute;inset:0;background:rgba(10,18,37,.5)}
@@ -962,6 +981,7 @@ body:not(.wiz-active) .topbar{display:none}
   <div class="cd-back" onclick="closeCartDrawer()"></div>
   <aside class="cd-panel" role="dialog" aria-modal="true" aria-label="Warenkorb" onkeydown="if(event.key==='Escape')closeCartDrawer()">
     <div class="cd-head"><h2>Warenkorb</h2><button class="cd-x" onclick="closeCartDrawer()" aria-label="Schließen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="22" height="22"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="cd-ship" id="cdShip"></div>
     <div class="cd-body" id="cdBody"></div>
     <div class="cd-foot" id="cdFoot"></div>
   </aside>
@@ -2179,9 +2199,9 @@ function itemEdit(i){ const it=cart[i]; if(!it)return; Object.assign(S,it.conf);
 // Weiteres Produkt: aktueller Artikel bleibt im cart, neuer Start über Produktwähler
 function addAnother(){ editIndex=-1; anfrageView='cart'; backToPicker(); }
 // Warenkorb öffnen (Übersicht-Schritt) — legt bei Bedarf einen Artikel an
-function openCart(){ anfrageView='cart'; if(!cart.length){ if(!started){ backToPicker(); return; } } if(!started&&cart.length){ itemEdit(cart.length-1); } const idx=STEPS.findIndex(s=>s.key==='anfrage'); if(idx>=0)go(idx); }
+function openCart(){ openCartDrawer(); }   // Korb = Drawer (eine Ansicht)
 // Zwischen Übersicht und Checkout-Formular wechseln
-function showCart(){ anfrageView='cart'; window.scrollTo({top:0}); render(); }
+function showCart(){ openCartDrawer(); }   // Korb = Drawer (eine Ansicht)
 // === Warenkorb-Drawer (seitlich) — neue Ansicht der bestehenden cart-Daten, kein Duplikat der Logik ===
 function cdItemHTML(it,i){
   var conf=it.conf, q=conf.anzahl||1;
@@ -2197,8 +2217,12 @@ function cdItemHTML(it,i){
     +'</div></div>';
 }
 function renderCartDrawer(){
-  var body=document.getElementById('cdBody'), foot=document.getElementById('cdFoot');
+  var body=document.getElementById('cdBody'), foot=document.getElementById('cdFoot'), ship=document.getElementById('cdShip');
   if(!body||!foot) return;
+  if(ship){ if(!cart.length){ ship.innerHTML=''; } else { var _q=cartTotals().qty, _need=10-_q, _pct=Math.min(100,_q*10);
+    ship.innerHTML = _need>0
+      ? '<div class="cd-ship-msg">Noch <b>'+_need+' '+(_need===1?'Element':'Elemente')+'</b> bis zur kostenlosen Lieferung deutschlandweit</div><div class="cd-ship-bar"><i style="width:'+_pct+'%"></i></div>'
+      : '<div class="cd-ship-msg reached"><b>Kostenlose Lieferung</b> deutschlandweit erreicht</div><div class="cd-ship-bar reached"><i style="width:100%"></i></div>'; } }
   if(!cart.length){
     body.innerHTML='<div class="cd-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="46" height="46" style="opacity:.35"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><p>Dein Warenkorb ist noch leer.</p></div>';
     foot.innerHTML='<button type="button" class="cd-cta" onclick="closeCartDrawer()">Jetzt konfigurieren</button>';
@@ -2216,7 +2240,7 @@ function renderCartDrawer(){
 function openCartDrawer(){ renderCartDrawer(); var w=document.getElementById('cartDrawer'); if(!w)return; w.classList.add('on'); w.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; var x=w.querySelector('.cd-x'); if(x)x.focus(); }
 function closeCartDrawer(){ var w=document.getElementById('cartDrawer'); if(!w)return; w.classList.remove('on'); w.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
 function cdEdit(i){ closeCartDrawer(); itemEdit(i); }
-function cdToAnfrage(){ closeCartDrawer(); location.href='warenkorb.html'; }
+function cdToAnfrage(){ if(!cart.length){ closeCartDrawer(); return; } closeCartDrawer(); if(!started){ itemEdit(cart.length-1); } anfrageView='form'; var idx=STEPS.findIndex(function(s){return s.key==='anfrage';}); if(idx>=0){ go(idx); } else { location.href='warenkorb.html'; } }
 // Nav-Warenkorb-Icon (und alle warenkorb-Links) auf dieser Seite öffnen den Drawer statt zu navigieren
 document.addEventListener('click',function(e){ if(!e.target.closest)return; var a=e.target.closest('a[href*="warenkorb"]'); if(a){ e.preventDefault(); openCartDrawer(); } });
 const PRODUCTS=[
@@ -2720,7 +2744,7 @@ function anfrageHTML(){
       <button class="cta" onclick="backToPicker()">Weiteres Produkt konfigurieren</button>
     </div>`;
   }
-  if(anfrageView==='form') return formHTML(t);
+  return formHTML(t);   // Drawer ist der einzige Korb → Schritt 14 = direkt das Anfrage-Formular (ov-cart darunter ungenutzt)
   const items=cart.map((it,i)=>posCard(it,i)).join('');
   const shipRow = liefer==='abholung'
     ? `<div class="ovs-line"><span>Abholung im Lager</span><b>kostenlos</b></div>`
@@ -2760,25 +2784,27 @@ function anfrageHTML(){
 function formHTML(t){
   const mini=cart.map(it=>{ const q=it.conf.anzahl||1, nm=withConf(it.conf,configTitle); return `<div class="co-item"><span>${q} × ${nm}${it.name?' · '+it.name.replace(/</g,'&lt;'):''}</span><b class="tnum">${eur(withConf(it.conf,price)*q)}</b></div>`; }).join('');
   const lief=(liefer==='lieferung');
-  const addr = lief ? `<div class="field"><label>Straße &amp; Hausnummer</label><input name="strasse" required placeholder="Musterstraße 1"></div>` : '';
-  return `<div class="co-head"><button class="co-back" onclick="showCart()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 18l-6-6 6-6"/></svg> Zurück zur Übersicht</button>
-      <h2>Angebot anfordern</h2><p>Kostenlos &amp; unverbindlich — wir senden Ihr geprüftes Angebot per E-Mail.</p></div>
+  const addr = lief ? `<div class="field"><label>Stra&szlig;e &amp; Hausnummer <span class="req">*</span></label><input name="strasse" required autocomplete="street-address" placeholder="Musterstra&szlig;e 1"></div>
+        <div class="opts two"><div class="field"><label>PLZ <span class="req">*</span></label><input name="plz" required inputmode="numeric" autocomplete="postal-code" placeholder="14772"></div><div class="field"><label>Ort <span class="req">*</span></label><input name="ort" required autocomplete="address-level2" placeholder="Brandenburg a. d. Havel"></div></div>` : '';
+  return `<div class="co-head"><button class="co-back" onclick="showCart()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 18l-6-6 6-6"/></svg> Zurück zum Warenkorb</button>
+      <h2>Angebot anfordern</h2><p>Kostenlos &amp; unverbindlich — wir senden Ihr geprüftes Angebot per E-Mail.</p><div class="co-trust"><span class="co-tr-item"><svg viewBox="0 0 24 24" fill="currentColor" class="star"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.9L12 17.8 5.9 21l1.2-6.9-5-4.9 6.9-1z"/></svg> <b>4,7</b>&nbsp;· 93 Google-Bewertungen</span><span class="co-tr-item chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg> Jede Konfiguration persönlich geprüft</span><a class="co-tr-item co-tr-tel" href="tel:+4933812148373"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg> 03381 / 2148373</a></div></div>
     <div class="co-grid">
       <form class="card co-form" onsubmit="submitAnfrage(event)">
+        <div class="co-deliv-lbl">Wie möchten Sie es erhalten?</div>
+        <div class="ovs-deliv co-deliv">
+          <button type="button" class="${liefer==='abholung'?'on':''}" onclick="setLiefer('abholung')"><b>Abholung</b><span>Lager Brandenburg &middot; kostenlos</span></button>
+          <button type="button" class="${liefer==='lieferung'?'on':''} ${t.lieferOk?'':'locked'}" ${t.lieferOk?'':'disabled'} onclick="setLiefer('lieferung')"><b>Lieferung</b><span>${t.lieferOk?'deutschlandweit':'ab '+LIEFER_MIN+' Elem.'}</span></button>
+        </div>
+        ${t.lieferOk?'':`<div class="co-delivnote">Lieferung ist ab ${LIEFER_MIN} Elementen möglich — kleinere Mengen zur Abholung im Lager (kostenlos).</div>`}
+        <div class="field"><label>Name <span class="req">*</span></label><input name="name" required autocomplete="name" placeholder="Vor- und Nachname"></div>
         <div class="opts two">
-          <div class="field"><label>Vorname</label><input name="vorname" placeholder="Vorname"></div>
-          <div class="field"><label>Nachname</label><input name="nachname" placeholder="Nachname"></div></div>
-        <div class="opts two">
-          <div class="field"><label>E-Mail <span class="req">*</span></label><input name="email" type="email" required placeholder="ihre@email.de"></div>
-          <div class="field"><label>Telefon <span class="opt">(optional)</span></label><input name="tel" placeholder="Für Rückfragen"></div></div>
+          <div class="field"><label>E-Mail <span class="req">*</span></label><input name="email" type="email" required autocomplete="email" inputmode="email" placeholder="ihre@email.de"></div>
+          <div class="field"><label>Telefon <span class="opt">(empfohlen)</span></label><input name="tel" type="tel" autocomplete="tel" inputmode="tel" placeholder="Für schnelle Rückfragen"></div></div>
         ${addr}
-        <div class="opts two">
-          <div class="field"><label>PLZ ${lief?'<span class="req">*</span>':'<span class="opt">(optional)</span>'}</label><input name="plz" ${lief?'required':''} placeholder="14772"></div>
-          <div class="field"><label>Ort ${lief?'<span class="req">*</span>':'<span class="opt">(optional)</span>'}</label><input name="ort" ${lief?'required':''} placeholder="Brandenburg a. d. Havel"></div></div>
         <div class="field"><label>Nachricht <span class="opt">(optional)</span></label><textarea name="msg" rows="2" placeholder="Anmerkungen, Wunsch-Liefertermin, Fragen …"></textarea></div>
-        <label class="consent"><input type="checkbox" name="dse" required> Ich habe die <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutzerklärung</a> gelesen und stimme der Verarbeitung meiner Angaben zur Bearbeitung meiner Anfrage zu. <span class="req">*</span></label>
+        <label class="consent"><input type="checkbox" name="dse" required aria-required="true"><span>Ich habe die <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutzerkl&auml;rung</a> gelesen und stimme der Verarbeitung meiner Angaben zur Bearbeitung meiner Anfrage zu. <span class="req">*</span></span></label>
         <button class="cta" type="submit">Anfrage kostenlos absenden</button>
-        <div class="trust">Sichere Übertragung · keine Kosten · kein Kaufvertrag · Antwort in 1–2 Werktagen</div>
+        <div class="trust"><b>Kostenlos &amp; unverbindlich</b> &mdash; kein Kaufvertrag, keine Zahlung. Jede Konfiguration wird individuell gepr&uuml;ft; Sie erhalten Ihr gepr&uuml;ftes Angebot per E-Mail, i.&nbsp;d.&nbsp;R. innerhalb von 1&ndash;2 Werktagen.</div>
       </form>
       <aside class="ov-summary co-summary">
         <div class="ovs-title">Ihre Bestellung</div>
@@ -2903,8 +2929,7 @@ function _mailShell(inner){
 async function submitAnfrage(ev){
   ev.preventDefault();
   var f=ev.target, g=function(n){ var el=f.querySelector('[name="'+n+'"]'); return el?(el.value||'').trim():''; };
-  var vorname=g('vorname'), nachname=g('nachname'), email=g('email'), tel=g('tel'), plz=g('plz'), ort=g('ort'), strasse=g('strasse'), msg=g('msg');
-  var name=(vorname+' '+nachname).trim()||'—';
+  var name=g('name')||'—', email=g('email'), tel=g('tel'), plz=g('plz'), ort=g('ort'), strasse=g('strasse'), msg=g('msg');
   var nr='DF-'+new Date().toISOString().slice(2,10).replace(/-/g,'')+'-'+Math.floor(1000+Math.random()*9000);
   var adr=(liefer==='lieferung') ? ('Lieferung nach: '+[strasse,(plz+' '+ort).trim()].filter(Boolean).join(', ')) : 'Abholung im Lager · Brandenburg a. d. Havel';
   var t=cartTotals();
@@ -3077,6 +3102,7 @@ function next(){ if(STEPS[cur]&&STEPS[cur].key==='masse'&&!massOk()){ updateMass
 function back(){ if(cur===0) backToPicker(); else go(cur-1); }
 function render(){
   if(editIndex>=0&&cart[editIndex]) cart[editIndex].conf={...S};   // aktive Konfig live in den Warenkorb spiegeln
+  document.body.classList.toggle('checkout-focus', started && anfrageView==='form');
   saveCart();   // Warenkorb bei jeder Änderung persistieren (überlebt Reload/Seitenwechsel)
   const nav=document.querySelector('.steps'), foot=document.querySelector('.footer');
   if(!started){
