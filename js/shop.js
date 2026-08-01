@@ -1079,6 +1079,9 @@ function rendere() {
   gridEl.querySelectorAll('[data-action="kundendruck"]').forEach(btn => {
     btn.addEventListener('click', e => { e.stopPropagation(); schliesseKebabMenus(); const p = STATE.produkte.find(x => x.id === btn.dataset.id); if (p) druckeProduktblatt(p); });
   });
+  gridEl.querySelectorAll('[data-action="merk"]').forEach(btn => {
+    btn.addEventListener('click', e => { e.stopPropagation(); toggleMerk(btn.dataset.id); });
+  });
   gridEl.querySelectorAll('[data-action="anfrage"]').forEach(btn => {
     btn.addEventListener('click', e => { e.stopPropagation(); const p = STATE.produkte.find(x => x.id === btn.dataset.id); if (p) oeffneAnfrageModal(p); });
   });
@@ -1223,6 +1226,9 @@ function karteHtml(p) {
         ${archivBadge}
         ${druckIcon}
         ${aktionMenu}
+        ${istArchiviert ? '' : `<button type="button" class="karte-merk${istGemerkt(p.id) ? ' on' : ''}" data-action="merk" data-id="${p.id}"
+           aria-label="${escapeHtml(p.titel)} merken" aria-pressed="${istGemerkt(p.id)}" title="Merken">
+          <span class="material-symbols-outlined">favorite</span></button>`}
       </div>
       <div class="karte-body">
         <h3 class="karte-titel line-clamp-2">${escapeHtml(p.titel)}</h3>
@@ -1463,6 +1469,73 @@ function resetAlleFilter() {
 }
 
 /* ─── Warenkorb ─── */
+
+/* ─── Merkliste ────────────────────────────────────────────────────────────
+   Nutzt die vorhandene Warenkorb-Mechanik (STATE.warenkorb + localStorage).
+   Anfragen laeuft bewusst ueber das On-Site-Formular, nicht per mailto. */
+function istGemerkt(id) {
+  return STATE.warenkorb.some(e => String(e.id) === String(id));
+}
+function toggleMerk(id) {
+  if (istGemerkt(id)) {
+    entferneAusCart(id);
+  } else {
+    addToCart(id);
+    oeffneCart();
+  }
+  document.querySelectorAll(`[data-action="merk"][data-id="${id}"]`).forEach(b => {
+    const an = istGemerkt(id);
+    b.classList.toggle('on', an);
+    b.setAttribute('aria-pressed', an ? 'true' : 'false');
+  });
+}
+
+/* Alle gemerkten Positionen in EINER Anfrage — fuellt das bestehende Formular. */
+function oeffneSammelAnfrage() {
+  const eintraege = STATE.warenkorb
+    .map(e => ({ e, p: STATE.produkte.find(x => String(x.id) === String(e.id)) }))
+    .filter(x => x.p);
+  if (!eintraege.length) return;
+
+  const zeilen = eintraege.map(({ e, p }, i) => {
+    const teile = [`${i + 1}. ${p.titel}`];
+    if (p.standnummer) teile.push(`   Standnr.: ${p.standnummer}`);
+    teile.push(`   Artikel-Nr.: ${p.id}`);
+    if (p.breite_mm && p.hoehe_mm) teile.push(`   Masse: ${p.breite_mm} × ${p.hoehe_mm} mm`);
+    teile.push(`   Menge: ${e.menge}`);
+    teile.push(`   Preis: ${formatPreis(p.preis_eur * e.menge)}`);
+    return teile.join('\n');
+  }).join('\n\n');
+
+  const summe = eintraege.reduce((s, { e, p }) => s + p.preis_eur * e.menge, 0);
+  const anzahl = eintraege.length;
+
+  document.getElementById('anfrageProduktId').value =
+    eintraege.map(({ p }) => p.id).join(', ');
+  document.getElementById('anfrageProduktTitel').value =
+    `Merkliste — ${anzahl} ${anzahl === 1 ? 'Position' : 'Positionen'}`;
+  document.getElementById('anfrageNachricht').value = [
+    'Hallo,', '',
+    `ich interessiere mich für folgende ${anzahl} ${anzahl === 1 ? 'Position' : 'Positionen'} aus Ihrem Lager-Shop:`,
+    '', zeilen, '',
+    `Zwischensumme: ${formatPreis(summe)} (inkl. 19 % USt., zzgl. Versand)`, '',
+    'Sind diese Artikel noch verfügbar? Bitte um Rückmeldung mit Versandkosten.',
+    '', 'Vielen Dank!'
+  ].join('\n');
+
+  const st = document.getElementById('anfrageStatus');
+  st.classList.add('hidden'); st.textContent = '';
+  const btn = document.getElementById('anfrageSubmitBtn');
+  btn.disabled = false;
+  btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px">send</span> Anfrage senden';
+
+  schliesseCart();
+  document.getElementById('anfrageModal').classList.add('open');
+  document.getElementById('anfrageOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('anfrageName').focus(), 80);
+}
+
 function loadCart() {
   try {
     const raw = localStorage.getItem(LS_KEY);
@@ -1597,6 +1670,8 @@ function zeigeCartFeedback(id) {
 
 function stelleCartAnfrage() {
   if (STATE.warenkorb.length === 0) return;
+  return oeffneSammelAnfrage();   // Formular statt mailto
+  /* eslint-disable no-unreachable */
   const items = STATE.warenkorb.map(e => {
     const p = STATE.produkte.find(x => x.id === e.id);
     if (!p) return '';
@@ -2236,3 +2311,22 @@ function eigenschaftAnzeige(code) {
   // (z.B. neue Eigenschaft "null-schwelle" → "Null Schwelle")
   return String(code).replace(/[-_]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
+
+/* Merklisten-Knopf in die Navigation haengen (nur auf der Shop-Seite). */
+(function () {
+  function init() {
+    var wrap = document.querySelector('nav.dfnav .dfnav-wrap');
+    if (!wrap || document.getElementById('cartBtnNav')) return;
+    var cta = wrap.querySelector('.dfnav-cta');
+    var b = document.createElement('button');
+    b.id = 'cartBtnNav'; b.type = 'button'; b.className = 'dfnav-merk';
+    b.setAttribute('aria-label', 'Merkliste anzeigen'); b.title = 'Merkliste';
+    b.innerHTML = '<span class="material-symbols-outlined">favorite</span>' +
+                  '<span id="cartBadgeNav" class="dfnav-merk-badge hidden">0</span>';
+    b.addEventListener('click', function () { oeffneCart(); });
+    if (cta) wrap.insertBefore(b, cta); else wrap.appendChild(b);
+    if (typeof updateCartUI === 'function') updateCartUI();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();

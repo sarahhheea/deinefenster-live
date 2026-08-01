@@ -2507,6 +2507,58 @@ section[style*="#0a1530"], div[style*="#0a1530"] { background: #f4f7fc !importan
   .shop-top-offset { padding-top: 56px; }
   @media (max-width: 860px) { .shop-top-offset { padding-top: 16px; } }
 
+
+  /* ── Merkliste: Herz auf der Karte + Knopf in der Navigation ── */
+  .karte-merk {
+    position: absolute; top: 8px; right: 8px; z-index: 4;
+    width: 36px; height: 36px; border-radius: 50%; border: 0; cursor: pointer;
+    background: rgba(255,255,255,.94); color: #8593aa;
+    display: grid; place-items: center; box-shadow: 0 2px 8px rgba(8,21,46,.18);
+    transition: color .15s, transform .15s, background .15s;
+  }
+  .karte-merk:hover { color: #e11d48; transform: scale(1.08); background: #fff; }
+  .karte-merk .material-symbols-outlined { font-size: 20px; }
+  .karte-merk.on { color: #e11d48; }
+  .karte-merk.on .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
+
+  .dfnav-merk {
+    position: relative; display: inline-flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px; border-radius: 12px; border: 0; background: none;
+    color: #225eaa; cursor: pointer; flex: none; margin-left: auto; transition: background .18s;
+  }
+  .dfnav-merk:hover { background: rgba(34,94,170,.10); }
+  .dfnav-merk .material-symbols-outlined { font-size: 23px; }
+  .dfnav-merk-badge {
+    position: absolute; top: 2px; right: 2px; min-width: 18px; height: 18px; padding: 0 5px;
+    border-radius: 9px; background: #e11d48; color: #fff;
+    font: 700 11px/18px system-ui, sans-serif; text-align: center; pointer-events: none;
+  }
+  .dfnav-merk-badge.hidden { display: none; }
+  .dfnav-merk + .df-cart-link { margin-left: 0; }
+
+  #cartDrawer {
+    display: flex; flex-direction: column; background: #fff;
+    /* Ohne Versatz lag der Kopf der Schublade hinter dem fixierten Hinweisband */
+    top: var(--banner-h, 0px); height: calc(100vh - var(--banner-h, 0px));
+  }
+  #cartOverlay { top: var(--banner-h, 0px); height: calc(100vh - var(--banner-h, 0px)); }
+  #cartDrawer h2 { font-family: 'Plus Jakarta Sans', sans-serif; }
+  @media (max-width: 560px) { #cartDrawer { width: 100% !important; } }
+
+  /* Die Positionen nutzen Farb-Token des frueheren dunklen Themes und waren
+     auf Weiss kaum lesbar — hier auf das helle Design gesetzt. */
+  #cartItems h4 { color: #14233f !important; font-size: 13px !important; line-height: 1.35 !important; }
+  #cartItems p  { color: #5a6577 !important; font-size: 11.5px !important; }
+  #cartItems img { background: #eef3fb !important; border: 1px solid #e7ebf1; }
+  #cartItems > div { border-bottom: 1px solid #eef1f6 !important; }
+  #cartItems > div:last-child { border-bottom: 0 !important; }
+  #cartItems [data-cart-act] { color: #225eaa !important; background: #f2f6fc; }
+  #cartItems [data-cart-act]:hover { background: #e3ecf9; }
+  #cartItems .inline-flex.items-center.rounded-full { background: #f7faff !important; border: 1px solid #e7ebf1; }
+  #cartItems span { color: #14233f; }
+  #cartItems [data-cart-act="entfernen"] { color: #8593aa !important; background: none; }
+  #cartItems [data-cart-act="entfernen"]:hover { color: #e11d48 !important; }
+
   /* ── Karten-Optik aus dem Shop-Entwurf ─────────────────────────────────
      Rahmenlose Karte, Bild mit runden Ecken, darunter Titel > Masse >
      Standnummer, Preis unten links neben dem Anfragen-Knopf. */
@@ -2605,5 +2657,48 @@ section[style*="#0a1530"], div[style*="#0a1530"] { background: #f4f7fc !importan
     .karte-body { padding: 8px 10px 10px; }
   }
 </style>
+
+<!-- ===== Merkliste: Liste der gemerkten Artikel + Sammel-Anfrage ===== -->
+<div id="cartOverlay" class="overlay" onclick="schliesseCart()"></div>
+<aside id="cartDrawer" class="drawer" style="width:480px;" aria-label="Merkliste">
+  <header class="flex items-center justify-between px-6 py-5" style="border-bottom:1px solid rgba(34,94,170,0.14);">
+    <h2 class="text-lg font-bold flex items-center gap-2" style="color:#14233f;">
+      <span class="material-symbols-outlined" style="color:#225eaa;">favorite</span>
+      Merkliste <span id="cartTitleCount" style="color:#5a6577;font-weight:600;"></span>
+    </h2>
+    <button onclick="schliesseCart()" aria-label="Merkliste schlie&szlig;en"
+            style="width:34px;height:34px;border-radius:9px;border:1px solid rgba(34,94,170,0.16);background:#fff;cursor:pointer;color:#46526a;">
+      <span class="material-symbols-outlined" style="font-size:20px;">close</span>
+    </button>
+  </header>
+
+  <div id="cartItems" class="px-6 py-4" style="overflow-y:auto;flex:1;"></div>
+
+  <div id="cartEmptyState" class="px-6 py-10 text-center" style="color:#5a6577;">
+    <span class="material-symbols-outlined" style="font-size:44px;color:#cbd3e0;">favorite_border</span>
+    <p style="font-weight:700;color:#14233f;margin:12px 0 4px;">Noch nichts gemerkt</p>
+    <p style="font-size:14px;">Tippe bei einem Artikel auf das Herz &mdash; hier kannst du dann alles auf einmal anfragen.</p>
+  </div>
+
+  <div id="cartFooter" class="px-6 py-5" style="border-top:1px solid rgba(34,94,170,0.14);background:#f7faff;">
+    <div class="flex items-center justify-between mb-3">
+      <span style="font-size:14px;color:#5a6577;font-weight:600;">Zwischensumme</span>
+      <span id="cartSubtotal" style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:20px;color:#14233f;">0 &euro;</span>
+    </div>
+    <p style="font-size:11.5px;color:#828da0;margin:0 0 12px;line-height:1.45;">
+      Inkl. 19&nbsp;% USt., zzgl. Versand. Unverbindliche Anfrage &mdash; kein Kauf.
+      Der Bestand &auml;ndert sich t&auml;glich, wir best&auml;tigen die Verf&uuml;gbarkeit.
+    </p>
+    <button type="button" onclick="oeffneSammelAnfrage()" class="w-full inline-flex items-center justify-center gap-2"
+            style="background:#225eaa;color:#fff;border:0;border-radius:11px;padding:14px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:15px;cursor:pointer;">
+      <span class="material-symbols-outlined" style="font-size:19px;">mail</span>
+      Alle auf einmal anfragen
+    </button>
+    <button type="button" onclick="leereCart()" class="w-full mt-2"
+            style="background:none;border:0;color:#828da0;font-size:12.5px;font-weight:600;cursor:pointer;padding:6px;">
+      Merkliste leeren
+    </button>
+  </div>
+</aside>
 </body>
 </html>
