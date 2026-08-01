@@ -1131,12 +1131,16 @@ function karteHtml(p) {
     (p.lagerbestand > 1 ? `${p.lagerbestand} auf Lager` : `Nur ${p.lagerbestand} verfügbar`);
   // Gebraucht-Tag als kleine Marke aufs Bild (oben links), wie bei Kleinanzeigen die Zustandsmarke
   const zustandTag = istGebraucht
-    ? '<span class="karte-tag karte-tag--gebraucht">Gebraucht</span>' : '';
+    ? '<span class="karte-tag karte-tag--gebraucht">Gebraucht</span>'
+    : (istNeu ? '<span class="karte-tag karte-tag--neu">Neu</span>' : '');
 
   // Standnummer als „Held"-Marke aufs Bild (unten rechts) — nicht mehr klein in der Meta-Zeile.
-  const standOverlay = p.standnummer
-    ? `<div class="karte-stand-overlay"><span class="material-symbols-outlined">location_on</span><span class="kso-txt"><span class="kso-lbl">Standnr.</span><span class="kso-nr">${escapeHtml(p.standnummer)}</span></span></div>`
-    : '';
+  const standOverlay = '';
+  const standZeileParts = [];
+  if (p.standnummer) standZeileParts.push(`Standnr. <b>${escapeHtml(p.standnummer)}</b>`);
+  if (verfTxt) standZeileParts.push(`<span class="karte-verf">${verfTxt}</span>`);
+  const standZeile = standZeileParts.length
+    ? `<div class="karte-nr">${standZeileParts.join(' <span class="karte-meta-dot">·</span> ')}</div>` : '';
 
   // Kompakte Meta-Zeile: Verglasung · Verfügbarkeit (Stand ist jetzt Overlay)
   const metaParts = [];
@@ -1199,6 +1203,17 @@ function karteHtml(p) {
           </div>
         </div>`;
 
+  // Aufbau wie im Shop-Entwurf: Bild + Zustandsmarke, darunter Titel, Masse,
+  // Standnummer — Preis steht unten in einer Zeile neben dem Anfragen-Knopf.
+  const masseTxt = (p.breite_mm && p.hoehe_mm)
+    ? `${p.breite_mm} × ${p.hoehe_mm} <span class="karte-masse-unit">mm</span>` : '';
+  const specParts = [];
+  if (masseTxt) specParts.push(masseTxt);
+  if (verglasungTxt) specParts.push(verglasungTxt);
+  if (p.rc_klasse) specParts.push(escapeHtml(p.rc_klasse));
+  const specZeile = specParts.length
+    ? `<p class="karte-spec">${specParts.join(' <span class="karte-meta-dot">·</span> ')}</p>` : '';
+
   return `
     <article class="karte" data-action="detail" data-id="${p.id}" style="${archivStyle}">
       <div class="karte-bild-wrap" style="position:relative">
@@ -1208,17 +1223,16 @@ function karteHtml(p) {
         ${archivBadge}
         ${druckIcon}
         ${aktionMenu}
-        ${standOverlay}
       </div>
       <div class="karte-body">
-        <div class="karte-preis-row">
-          ${preisPrefix}
-          <span class="karte-preis">${formatPreis(p.preis_eur)}<span class="karte-preis-stern">${preisStern}</span></span>
-        </div>
-        <p class="karte-masse"><span class="material-symbols-outlined">straighten</span>${p.breite_mm} × ${p.hoehe_mm} <span class="karte-masse-unit">mm</span></p>
         <h3 class="karte-titel line-clamp-2">${escapeHtml(p.titel)}</h3>
-        ${metaZeile}
-        <div class="karte-cta-wrap">
+        ${specZeile}
+        ${standZeile}
+        <div class="karte-foot">
+          <div class="karte-pricewrap">
+            <span class="karte-preis">${preisPrefix ? preisPrefix + ' ' : ''}${formatPreis(p.preis_eur)}<span class="karte-preis-stern">${preisStern}</span></span>
+            <span class="karte-mwst">inkl. MwSt.</span>
+          </div>
           ${ctaRow}
         </div>
       </div>
