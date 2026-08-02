@@ -1658,7 +1658,7 @@ function updateCartUI() {
     const p = STATE.produkte.find(x => x.id === eintrag.id);
     if (!p) return '';
     return `
-      <div class="flex gap-3 py-3 border-b border-outline-variant last:border-0">
+      <div class="flex gap-3 py-3 border-b border-outline-variant last:border-0 merk-item" data-merk-detail="${p.id}" role="button" tabindex="0" aria-label="${escapeHtml(p.titel)} gross ansehen">
         <img src="${escapeHtml(p.bild)}" alt="" class="w-20 h-20 rounded-lg object-contain bg-surface-container-low" onerror="this.src='img/fenster_standard.png'"/>
         <div class="flex-1 min-w-0">
           <h4 class="text-xs font-bold leading-snug line-clamp-2">${escapeHtml(p.titel)}</h4>
@@ -1682,6 +1682,17 @@ function updateCartUI() {
       </div>`;
   }).join('');
 
+  itemsEl.querySelectorAll('[data-merk-detail]').forEach(row => {
+    const oeffne = () => {
+      MERK_RUECKWEG = true;      // nach dem Schliessen zurueck zur Merkliste
+      schliesseCart();
+      oeffneDetail(row.dataset.merkDetail);
+    };
+    row.addEventListener('click', e => { if (e.target.closest('[data-cart-act]')) return; oeffne(); });
+    row.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); oeffne(); }
+    });
+  });
   itemsEl.querySelectorAll('[data-cart-act]').forEach(btn => {
     btn.addEventListener('click', () => {
       const act = btn.dataset.cartAct;
@@ -1926,10 +1937,16 @@ function setupCarousel(total) {
   document.addEventListener('keydown', carouselKeys);
 }
 
+let MERK_RUECKWEG = false;   // true, wenn die grosse Ansicht aus der Merkliste heraus geoeffnet wurde
+
 function schliesseDetail() {
   document.getElementById('detailModal').classList.remove('open');
   document.getElementById('detailOverlay').classList.remove('open');
   document.body.style.overflow = '';
+  if (MERK_RUECKWEG) {           // zurueck dorthin, wo der Kunde herkam
+    MERK_RUECKWEG = false;
+    setTimeout(oeffneCart, 120);
+  }
   // Deep-Link-Parameter aus der Adresse entfernen (sauberer Zustand)
   try { if (location.search.indexOf('produkt=') !== -1) history.replaceState(null, '', location.pathname); } catch (e) {}
 }
