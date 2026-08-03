@@ -221,7 +221,7 @@ body:not(.wiz-active) .topbar{display:none}
 .pk-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px}
 .pcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px 20px 22px;cursor:pointer;transition:.28s var(--ease);text-align:center;display:flex;flex-direction:column}
 .pcard:hover{border-color:var(--ink);transform:translateY(-4px)}
-.pcard .pimg{height:236px;display:grid;place-items:center;background:#fff;border-radius:var(--r);margin-bottom:16px;overflow:hidden}
+.pcard .pimg{position:relative;height:236px;display:grid;place-items:center;background:#fff;border-radius:var(--r);margin-bottom:16px;overflow:hidden}
 .pcard .pimg img{max-height:96%;max-width:92%;width:auto;height:auto;object-fit:contain}
 .pcard .pt{font-family:var(--serif);font-weight:600;font-size:23px}
 .pcard .pp{color:var(--ink);font-weight:600;font-size:15px;margin-top:5px}
@@ -975,7 +975,7 @@ body.checkout-focus .topbar{display:none}
             <a class="dfnav-prod" href="/konfigurator.html?prod=schiebe" role="menuitem"><span class="dfnav-prod-img"><img src="/img/_p-hst.webp" alt="" loading="lazy"></span><b>Schiebet&uuml;ren</b><small>HST bis 6,5 m</small></a>
             <a class="dfnav-prod" href="/shop.html?eig=mit-rollo" role="menuitem"><span class="dfnav-prod-img"><img src="/img/_p-rollladen.webp" alt="" loading="lazy"></span><b>Rolll&auml;den</b><small>Fenster mit Rollladen ab Lager</small></a>
             <a class="dfnav-prod" href="/shop.html?cat=daemmung" role="menuitem"><span class="dfnav-prod-img"><img src="/img/_p-daemmung.webp" alt="" loading="lazy"></span><b>D&auml;mmung</b><small>Rollenware ab Lager</small></a>
-          </div>
+          <p class="dfnav-ai-note">Produktabbildungen sind KI-generierte Symbolbilder.</p></div>
           <div class="dfnav-foot">
             <a class="all" href="/produkte.html">Alle Produkte ansehen &rarr;</a>
             <a class="dfnav-fbtn" href="/konfigurator.html">Zum Konfigurator</a>
@@ -2536,7 +2536,7 @@ function abLabel(p){
 }
 function renderPicker(){
   const cards=PRODUCTS.map(p=>`<div class="pcard" onclick="startProduct('${p.id}')">
-    <div class="pimg"><img src="${p.img}" alt="${p.t}"></div>
+    <div class="pimg"><img src="${p.img}" alt="${p.t} (KI-generiertes Symbolbild)"><span class="ai-badge">KI-Symbolbild</span></div>
     <div class="pinfo">
       <div class="pt">${p.t}</div><div class="pp">${abLabel(p)} <span>· nach Maß · inkl. MwSt</span></div>
       <div class="pgo">Konfigurieren <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div>
@@ -2710,7 +2710,7 @@ function ocIcon(field,val,icon,t,s,delta){
   const on=S[field]===val; const vv=typeof val==='string'?`'${val}'`:val; const dl=deltaLabel(field,val)||delta||'';
   return `<div class="ocard ${on?'on':''}" onclick="set('${field}',${vv})"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="vis" style="height:84px;place-items:center">${icon}</div><div class="t">${t}</div>${s?`<div class="s">${s}</div>`:''}${dl?`<div class="pdl${/inklusive/.test(dl)?' inc':''}">${dl}</div>`:''}</div>`;
 }
-function grp(title,cls,inner){return `<div class="card"><div class="grp-title">${title}</div><div class="opts ${cls}">${inner}</div></div>`;}
+function grp(title,cls,inner,aiNote){return `<div class="card"><div class="grp-title">${title}</div><div class="opts ${cls}">${inner}</div>${aiNote?`<p class="ai-note">${aiNote}</p>`:''}</div>`;}
 function panelHTML(){
   const k=STEPS[cur].key;
   if(k==='profil'){
@@ -2841,7 +2841,7 @@ function panelHTML(){
     <div class="qwrap"><button class="qbtn" onclick="set('anzahl',Math.max(1,S.anzahl-1))">−</button><div class="qnum">${S.anzahl}</div><button class="qbtn" onclick="set('anzahl',Math.min(99,S.anzahl+1))">+</button></div>
     <div class="mhint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span>Der Preis gilt pro ${prodUnit()}. Der Versand richtet sich nach der Gesamtanzahl (ab 10 kostenfrei).</span></div></div>`;
   if(k==='glas') return grp('Verglasung','two',
-    ocImg('glass','2','img/glas-2fach.webp','2-fach Wärmeschutz','Standard','inklusive')+ocImg('glass','3','img/glas-3fach.webp','3-fach Wärmeschutz','beste Dämmung',''));
+    ocImg('glass','2','img/glas-2fach.webp','2-fach Wärmeschutz','Standard','inklusive')+ocImg('glass','3','img/glas-3fach.webp','3-fach Wärmeschutz','beste Dämmung',''), 'Die Glas-Abbildungen sind KI-generierte Symbolbilder zur Veranschaulichung des Aufbaus.');
   if(k==='motiv') return grp('Glasmotiv','two',
     ocImg('glasdekor','klar','img/glasdekor/klar.webp','Klarglas','klare Durchsicht','inklusive')+ocImg('glasdekor','satinato','img/glasdekor/satinato.webp','Satinato','blickdicht','')+ocImg('glasdekor','chinchilla','img/glasdekor/chinchilla.webp','Chinchilla','Struktur','')+ocImg('glasdekor','master','img/glasdekor/master-carre.webp','Master-Carré','Ornament',''));
   if(k==='schall'){
@@ -2862,7 +2862,7 @@ function panelHTML(){
     const pzpick = S.roll!=='kein'? `<div class="card" style="margin-top:16px"><div class="grp-title">Panzerfarbe</div>
       <div class="pzrow"><button class="pzsw txt ${S.panzer==null?'on':''}" onclick="set('panzer',null)">wie Rahmen</button>${COLORS.map((co,i)=>`<button class="pzsw ${S.panzer===i?'on':''}" style="background:${co.c}" title="${co.n}" onclick="set('panzer',${i})"></button>`).join('')}</div>
       <div class="pzhint">Der Rollladenpanzer kann in einer eigenen Farbe geliefert werden.</div></div>`:'';
-    return `<div class="card"><div class="grp-title">Rollladen</div><div class="opts three">${c('kein',ban,'Kein Rollladen','ohne','inklusive')}${c('gurt','<img src="img/rolladen-gurt.webp" alt="Gurtwickler">','Mit Gurtwickler','per Hand','')}${c('motor','<img src="img/rolladen-elektrisch.webp" alt="Motorrolladen">','Motorrolladen','elektrisch','')}</div></div>${seitpick}${pzpick}`;
+    return `<div class="card"><div class="grp-title">Rollladen</div><div class="opts three">${c('kein',ban,'Kein Rollladen','ohne','inklusive')}${c('gurt','<img src="img/rolladen-gurt.webp" alt="Gurtwickler">','Mit Gurtwickler','per Hand','')}${c('motor','<img src="img/rolladen-elektrisch.webp" alt="Motorrolladen">','Motorrolladen','elektrisch','')}</div><p class="ai-note">Die Rollladen-Abbildungen sind KI-generierte Symbolbilder.</p></div>${seitpick}${pzpick}`;
   }
   if(k==='sprossen'){
     const tick=`<span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span>`;
@@ -2872,7 +2872,7 @@ function panelHTML(){
       +tc('keine',ban,'Ohne Sprossen','','inklusive')
       +tc('aufgesetzt','<img src="img/sprossen-aufgesetzt.webp" alt="Aufgesetzt">','Aufgesetzt','außen aufgesetzt · klassisch','')
       +tc('szr','<img src="img/sprossen-innenliegend.webp" alt="Im Glas">','Im Glas (SZR)','innenliegend · pflegeleicht','')
-      +`</div></div>`;
+      +`</div><p class="ai-note">Die Sprossen-Abbildungen sind KI-generierte Symbolbilder.</p></div>`;
     if(S.sproTyp&&S.sproTyp!=='keine'){
       // 2) Breite (mm) — je nach Art — steht ÜBER der Aufteilung (Kundenwunsch)
       const dks=(SPRO_DICKEN[S.sproTyp]||[]);

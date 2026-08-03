@@ -476,7 +476,7 @@ function baueKatLeiste() {
   const aktive = STATE.filter.kategorien;
   // Kachel-Innenleben: Foto wenn vorhanden, sonst neutrales Symbol
   const pic = (k) => KAT_BILD[k]
-    ? `<img src="${KAT_BILD[k]}" alt="" loading="lazy" decoding="async"/>`
+    ? `<img src="${KAT_BILD[k]}" alt="KI-generiertes Symbolbild" loading="lazy" decoding="async"/>`
     : `<span class="kat-nopic"><span class="material-symbols-outlined">${KAT_ICON[k] || 'category'}</span></span>`;
 
   const chips = [`
@@ -495,7 +495,7 @@ function baueKatLeiste() {
         <span class="kat-num">${n}</span>
       </button>`);
   });
-  wrap.innerHTML = chips.join('');
+  wrap.innerHTML = chips.join('') + '<p class="ai-note shop-ai-note">Die Kategorie-Symbolbilder sind KI-generiert. Die Artikelfotos darunter sind echte Aufnahmen der vorrätigen Ware.</p>';
 
   wrap.querySelectorAll('.kat-chip').forEach(btn => {
     btn.addEventListener('click', () => {
