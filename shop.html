@@ -1374,9 +1374,9 @@ input[type="range"].range-clean::-moz-range-thumb {
 .shop-masse-hinweis-close { text-decoration: underline; margin-left: 8px; background: none; border: none; cursor: pointer; color: #225eaa; font-size: 12px; }
 
 /* Hinweis auf ausgeblendete nach-außen-öffnende Artikel (Standard: ausgeblendet) */
-/* Randinfo zu 10 von 772 Artikeln — als schmale Zeile, nicht als Kasten ueber der ganzen Ware. */
-.aussen-hinweis { display: flex; align-items: center; gap: 7px; flex-wrap: nowrap;
-  margin-bottom: 10px; padding: 6px 2px; border: 0; background: none;
+/* Randinfo zu 10 von 772 Artikeln — schmale Zeile UNTER der Liste. */
+.aussen-hinweis { display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
+  margin: 14px 0 0; padding: 10px 2px 0; border: 0; border-top: 1px solid #e3e6ea; background: none;
   font-size: 12.5px; line-height: 1.35; color: #5b626b; }
 .aussen-hinweis .material-symbols-outlined { font-size: 16px; color: #5b626b; flex: none; }
 .aussen-hinweis .ah-txt { flex: 1 1 auto; min-width: 0; }
@@ -1829,15 +1829,18 @@ input[type="range"].range-clean::-moz-range-thumb {
       <button type="button" id="massFinden" class="mass-finden">Finden</button>
     </section>
     <!-- Produkttyp -->
-    <section class="filter-block">
-      <h4 class="filter-block-title">Produkttyp</h4>
+    <details class="filter-acc">
+      <summary class="filter-acc-sum">Produkttyp<span class="material-symbols-outlined filter-acc-chev" aria-hidden="true">expand_more</span></summary>
+      <div class="filter-acc-body">
       <div id="filterKategorien" class="space-y-0.5"></div>
-    </section>
+      </div>
+    </details>
 
 
     <!-- Preis (€) — Primärfilter -->
-    <section class="filter-block">
-      <h4 class="filter-block-title">Preis (€)</h4>
+    <details class="filter-acc">
+      <summary class="filter-acc-sum">Preis (€)<span class="material-symbols-outlined filter-acc-chev" aria-hidden="true">expand_more</span></summary>
+      <div class="filter-acc-body">
       <div class="grid grid-cols-2 gap-2">
         <label class="block">
           <span class="block text-[11px] text-ink-soft mb-1">Von</span>
@@ -1848,11 +1851,13 @@ input[type="range"].range-clean::-moz-range-thumb {
           <input id="filterPreisBis" type="number" min="0" placeholder="∞" class="input-num">
         </label>
       </div>
-    </section>
+      </div>
+    </details>
 
     <!-- Zustand — Primärfilter, offen -->
-    <section class="filter-block">
-      <h4 class="filter-block-title">Zustand</h4>
+    <details class="filter-acc">
+      <summary class="filter-acc-sum">Zustand<span class="material-symbols-outlined filter-acc-chev" aria-hidden="true">expand_more</span></summary>
+      <div class="filter-acc-body">
       <div class="space-y-0.5">
         <label class="filter-option">
           <span class="flex items-center gap-2"><input type="checkbox" class="check filter-zustand" value="neu"/><span>Neu</span></span>
@@ -1871,22 +1876,14 @@ input[type="range"].range-clean::-moz-range-thumb {
           <span class="count" data-count="zustand-sonderposten"></span>
         </label>
       </div>
-    </section>
+      </div>
+    </details>
 
     <!-- Ehemalige Zwischenueberschrift „Weitere Filter" entfernt: der Sammelschalter
          darunter heisst bereits „Weitere Eigenschaften" — zwei Zeilen sagten dasselbe. -->
 
     <!-- Eigenschaften -->
-    <!-- Baymard-Stufe 3: Facetten, die weniger als ~15 % der Kunden nutzen, liegen
-         gebuendelt hinter EINEM Schalter statt als sieben Einzel-Akkordeons untereinander.
-         Maß, Produkttyp, Preis und Zustand bleiben oben offen — das sind die haeufigen. -->
-    <details class="filter-mehr">
-      <summary class="filter-mehr-sum">
-        <span class="filter-mehr-txt">Weitere Eigenschaften</span>
-        <span class="filter-mehr-num" id="filterMehrAktiv" hidden>0</span>
-        <span class="material-symbols-outlined filter-mehr-chev" aria-hidden="true">expand_more</span>
-      </summary>
-      <div class="filter-mehr-body">
+
     <details class="filter-acc">
       <summary class="filter-acc-sum">Eigenschaften<span class="material-symbols-outlined filter-acc-chev" aria-hidden="true">expand_more</span></summary>
       <div class="filter-acc-body">
@@ -1998,8 +1995,6 @@ input[type="range"].range-clean::-moz-range-thumb {
         </div>
       </div>
     </details>
-      </div>
-    </details>
 
     <!-- Mobile: sticky Ergebnisse-anzeigen-Knopf (Kleinanzeigen-Muster) -->
     <div class="filter-apply-bar">
@@ -2013,10 +2008,12 @@ input[type="range"].range-clean::-moz-range-thumb {
     <div id="aktiveChips" class="flex flex-wrap gap-2 mb-4 min-h-[28px]"></div>
 
     <!-- Hinweis auf ausgeblendete nach-außen-öffnende Artikel (Text kommt aus shop.js) -->
-    <div id="aussenHinweis" class="aussen-hinweis hidden"></div>
-
     <!-- Produkt-Grid -->
     <div id="produktGrid" class="grid grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-5"></div>
+
+    <!-- Randinfo zu 10 von 772 Artikeln: steht UNTER der Liste, nicht davor.
+         Ueber der Ware kostete sie 46px Hoehe, bevor der Kunde ein Fenster sah. -->
+    <div id="aussenHinweis" class="aussen-hinweis hidden"></div>
 
     <!-- Empty State -->
     <div id="emptyState" class="empty hidden">
@@ -2649,6 +2646,21 @@ section[style*="#0a1530"], div[style*="#0a1530"] { background: #f4f7fc !importan
   .kat-alle-txt { color: #fff; font-size: 11.5px; font-weight: 700; line-height: 1.2; text-align: center; }
   .kat-chip--alle.on .kat-pic { box-shadow: 0 0 0 2px rgba(34,94,170,0.28); }
 
+  /* Handy: jede Zeile ueber der Ware kostet Sichtbarkeit — Abstaende und Schriftgroessen
+     der Kopfzeile hier bewusst enger als auf dem Desktop. */
+  @media (max-width: 900px) {
+    .kat-leiste { padding: 11px 0 2px; gap: 8px; }
+    /* Breite kostet hier keine Hoehe (wird seitlich gewischt) — lieber etwas breiter,
+       damit „Holzfenster" und „Dachfenster" ausgeschrieben bleiben statt abzuschneiden. */
+    .kat-chip { flex: 0 0 88px; max-width: 88px; }
+    .kat-pic { height: 60px; padding: 6px 7px 5px; }
+    .kat-name { font-size: 10.5px; margin-top: 5px; }
+    .kat-num { font-size: 10.5px; }
+    .shop-tools { margin-top: 9px; }
+    .shop-tool { min-height: 38px; padding: 8px 13px; }
+    .shop-pangv-mini { margin-top: 7px; font-size: 10px; }
+  }
+
   /* Handy: Kopfkarte optisch raus, damit die Ware nach oben rueckt. NICHT entfernen —
      die H1 bleibt fuer Google im Dokument und shop.js schreibt in #shopHeaderTitle,
      #produktAnzahl und #shopOpenBadge; ersatzloses Loeschen bricht das Skript. */
@@ -2856,6 +2868,21 @@ section[style*="#0a1530"], div[style*="#0a1530"] { background: #f4f7fc !importan
      deutlich groesseres Foto — die Ware ist das Verkaufsargument, nicht die Dichte. */
   @media (min-width: 1100px) { #produktGrid { grid-template-columns: repeat(3, minmax(0,1fr)) !important; } }
 
+  /* ── Filterspalte: alles ausser „Maße" zugeklappt ──
+     Der Kunde sieht saemtliche Filternamen untereinander und klappt gezielt auf, statt
+     durch eine lange offene Liste zu scrollen. Der Zaehler zeigt an, wo etwas aktiv ist —
+     ohne ihn waere ein zugeklappter, aber greifender Filter unsichtbar. */
+  .filter-acc-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 18px; height: 18px; padding: 0 6px; margin-left: auto; margin-right: 4px;
+    border-radius: 999px; background: #225eaa; color: #fff;
+    font-size: 10.5px; font-weight: 800; letter-spacing: 0;
+  }
+  .filter-acc-num[hidden] { display: none; }
+  /* „Maße" bleibt bewusst offen und optisch hervorgehoben — der wichtigste Einstieg,
+     und der Kunde soll auf einen Blick sehen, dass er nach Maß suchen kann. */
+  .filter-mass { margin-bottom: 4px; }
+
   /* Zweispaltiges Layout NICHT ueber Tailwind-Arbitrary-Values (lg:grid-cols-[232px_1fr]):
      Die sind im vorkompilierten css/tailwind.css nicht enthalten, die Klasse laeuft ins
      Leere und das Layout faellt einspaltig zusammen. Deshalb hier explizit. */
@@ -2863,25 +2890,6 @@ section[style*="#0a1530"], div[style*="#0a1530"] { background: #f4f7fc !importan
     #main { grid-template-columns: 232px minmax(0, 1fr); }
   }
 
-  /* ── „Weitere Eigenschaften": Sammelschalter fuer die selten genutzten Filter ── */
-  .filter-mehr { margin-top: 6px; border-top: 1px solid #e3e6ea; padding-top: 4px; }
-  .filter-mehr-sum {
-    list-style: none; cursor: pointer; display: flex; align-items: center; gap: 8px;
-    padding: 13px 2px; font-family: 'Plus Jakarta Sans', sans-serif;
-    font-weight: 700; font-size: 13px; color: #14181d; user-select: none;
-  }
-  .filter-mehr-sum::-webkit-details-marker { display: none; }
-  .filter-mehr-sum:hover { color: #225eaa; }
-  .filter-mehr-txt { flex: 1; }
-  .filter-mehr-num {
-    display: inline-flex; align-items: center; justify-content: center;
-    min-width: 19px; height: 19px; padding: 0 6px; border-radius: 999px;
-    background: #225eaa; color: #fff; font-size: 10.5px; font-weight: 800;
-  }
-  .filter-mehr-chev { font-size: 20px; color: #5b626b; transition: transform .2s; }
-  .filter-mehr[open] .filter-mehr-chev { transform: rotate(180deg); }
-  /* Innenliegende Einzel-Akkordeons etwas einruecken, damit die Verschachtelung lesbar ist */
-  .filter-mehr-body { padding-left: 2px; border-left: 2px solid #eef2f8; margin-left: 2px; }
 
   /* Leere Filter-Chip-Zeile reservierte dauerhaft 44px, obwohl nichts drinsteht */
   #aktiveChips:empty { min-height: 0 !important; margin-bottom: 0 !important; }

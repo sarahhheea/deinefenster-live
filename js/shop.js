@@ -1019,19 +1019,27 @@ function naechsteStandnummern(query, n) {
   return uniq;
 }
 
-/* ─── „Weitere Eigenschaften": Zaehler aktiver Filter ───
-   Die selten genutzten Facetten liegen zugeklappt hinter einem Sammelschalter. Ohne
-   sichtbaren Zaehler wuesste niemand, dass dort noch ein Filter greift — die Trefferzahl
-   waere dann unerklaerlich niedrig. Der Zaehler oeffnet den Block ausserdem automatisch,
-   wenn beim Laden schon etwas gesetzt ist (z.B. per URL-Parameter). */
-function aktualisiereMehrZaehler() {
-  const box = document.querySelector('.filter-mehr');
-  const num = document.getElementById('filterMehrAktiv');
-  if (!box || !num) return;
-  const n = box.querySelectorAll('input[type="checkbox"]:checked').length;
-  num.textContent = n;
-  num.hidden = n === 0;
-  if (n > 0 && !box.open) box.open = true;
+/* ─── Zaehler je Filter-Akkordeon ───
+   Alle Filter ausser „Maße" sind zugeklappt, damit der Kunde saemtliche Namen auf einen
+   Blick sieht. Ohne Zaehler waere aber unsichtbar, WO ein Filter greift — die Trefferzahl
+   waere dann unerklaerlich niedrig. Deshalb: aktive Anzahl in die zugeklappte Zeile
+   schreiben und den Block automatisch oeffnen, wenn beim Laden schon etwas gesetzt ist
+   (z.B. ueber einen Link mit Filter-Parameter). */
+function aktualisiereFilterZaehler() {
+  document.querySelectorAll('.filter-acc').forEach(box => {
+    const sum = box.querySelector('.filter-acc-sum');
+    if (!sum) return;
+    const n = box.querySelectorAll('input[type="checkbox"]:checked').length;
+    let num = sum.querySelector('.filter-acc-num');
+    if (!num) {
+      num = document.createElement('span');
+      num.className = 'filter-acc-num';
+      sum.insertBefore(num, sum.querySelector('.filter-acc-chev'));
+    }
+    num.textContent = n;
+    num.hidden = n === 0;
+    if (n > 0 && !box.open) box.open = true;
+  });
 }
 
 /* ─── Render-Pipeline ─── */
@@ -1040,7 +1048,7 @@ function rendere() {
   document.getElementById('produktAnzahl').textContent = result.length;
   const _toolsAnzahl = document.getElementById('toolsAnzahl');
   if (_toolsAnzahl) _toolsAnzahl.textContent = result.length;
-  aktualisiereMehrZaehler();
+  aktualisiereFilterZaehler();
   const _applyBtn = document.getElementById('filterApplyMob');
   if (_applyBtn) _applyBtn.textContent = result.length + (result.length === 1 ? ' Ergebnis anzeigen' : ' Ergebnisse anzeigen');
   aktualisiereShopHeader();
