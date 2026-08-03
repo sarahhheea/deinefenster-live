@@ -721,6 +721,31 @@ input[type="range"].range-clean::-moz-range-thumb {
   flex-direction: column;
 }
 .drawer.open { transform: translateX(0) !important; box-shadow: -16px 0 48px rgba(0,0,0,0.5); }
+
+/* ── Handy: Produktansicht als Bottom-Sheet ──
+   Faehrt von unten hoch statt von rechts. Die Liste bleibt dahinter an ihrer
+   Scroll-Position stehen — deshalb ein Sheet und keine Unterseite: Stoebern
+   darf nicht unterbrochen werden. Schliessen per Wisch nach unten, X oder Hintergrund. */
+.sheet-grip { display: none; }
+@media (max-width: 900px) {
+  #detailModal.drawer {
+    top: auto; bottom: 0; left: 0; right: 0;
+    width: 100% !important; max-width: 100%;
+    height: auto; max-height: 92vh; max-height: 92dvh;
+    border-left: 0; border-radius: 20px 20px 0 0;
+    transform: translateY(101%);
+    transition: transform .28s cubic-bezier(.32,.72,0,1);
+  }
+  #detailModal.drawer.open { transform: translateY(0) !important; box-shadow: 0 -12px 40px rgba(8,21,46,.28); }
+  /* Waehrend der Wischgeste darf keine Uebergangszeit bremsen */
+  #detailModal.is-dragging { transition: none; }
+  #detailModal .sheet-grip {
+    display: flex; justify-content: center; align-items: center;
+    padding: 9px 0 3px; flex: 0 0 auto; touch-action: none; cursor: grab;
+  }
+  #detailModal .sheet-grip span { display: block; width: 38px; height: 4px; border-radius: 99px; background: #d3d9e6; }
+  #detailModal > header { border-radius: 20px 20px 0 0; padding-top: 6px !important; }
+}
 /* Detail-Schublade: Preis + "Anfrage senden" als klebrige Leiste unten — immer sichtbar ohne Scrollen */
 .shop-detail-cta {
   position: sticky;
@@ -744,10 +769,16 @@ input[type="range"].range-clean::-moz-range-thumb {
   min-height: 48px; border: none; cursor: pointer; text-decoration: none;
   transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
 }
-.detail-cta-wa { background: #25D366; color: #fff; box-shadow: 0 4px 12px rgba(37,211,102,0.30); }
-.detail-cta-wa:hover { background: #1da851; transform: translateY(-1px); }
-.detail-cta-anfrage { background: #225eaa; color: #fff; box-shadow: 0 4px 12px rgba(34,94,170,0.28); }
-.detail-cta-anfrage:hover { background: #1b4d8c; transform: translateY(-1px); }
+/* WhatsApp ist die Nebenoption — deshalb Umriss statt Vollflaeche. Vollflaechig gruen
+   konkurrierte optisch mit „Anfragen" und zog den Blick vom eigentlichen Weg weg. */
+.detail-cta-wa { background: #fff; color: #128c4a; border: 1.5px solid #b7e4c9; flex: 0 0 auto; box-shadow: none; }
+.detail-cta-wa:hover { background: #f2fbf6; border-color: #128c4a; transform: translateY(-1px); }
+/* Haupt-CTA im selben Verlauf wie im Konfigurator — ein Knopf-Bild auf der ganzen Website */
+.detail-cta-anfrage {
+  background: linear-gradient(135deg, #2a6cc4, #1c4f90); color: #fff; flex: 1;
+  box-shadow: 0 8px 22px -8px rgba(34,94,170,0.62);
+}
+.detail-cta-anfrage:hover { background: linear-gradient(135deg, #2360b4, #17457f); transform: translateY(-1px); }
 /* Am Handy: Preis-Zeile oben, beide Knöpfe gleich breit darunter */
 @media (max-width: 640px) {
   .shop-detail-cta { flex-direction: column; align-items: stretch; gap: 10px; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); }
@@ -848,7 +879,7 @@ input[type="range"].range-clean::-moz-range-thumb {
   font-family: 'Fraunces', serif;
   font-weight: 500;
   font-style: italic;
-  color: #76a9fa;
+  color: #225eaa;
 }
 .shop-hero-headblock {
   flex: 1;
@@ -884,7 +915,7 @@ input[type="range"].range-clean::-moz-range-thumb {
   font-family: 'Manrope', sans-serif;
   font-size: 12px;
   font-weight: 700;
-  color: #76a9fa;
+  color: #225eaa;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
   min-height: 40px;
@@ -931,13 +962,13 @@ input[type="range"].range-clean::-moz-range-thumb {
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #76a9fa;
+  color: #225eaa;
   margin: 0 0 6px 0;
 }
 .shop-info-section p, .shop-info-section ul { margin: 0; }
 .shop-info-section ul { padding-left: 18px; }
-.shop-info-section strong { color: #e8eeff; font-weight: 700; }
-.shop-info-section a { color: #76a9fa; text-decoration: underline; }
+.shop-info-section strong { color: #14181d; font-weight: 700; }
+.shop-info-section a { color: #225eaa; text-decoration: underline; }
 .shop-info-ctas {
   margin-top: 12px;
   display: flex;
@@ -959,7 +990,7 @@ input[type="range"].range-clean::-moz-range-thumb {
 }
 .shop-info-cta--wa { background: #25D366; color: #fff; }
 .shop-info-cta--tel { background: #225eaa; color: #fff; }
-.shop-info-cta--mail { background: transparent; color: #76a9fa; border: 1.5px solid rgba(118,169,250,0.5); }
+.shop-info-cta--mail { background: transparent; color: #225eaa; border: 1.5px solid rgba(118,169,250,0.5); }
 .shop-info-cta .material-symbols-outlined { font-size: 15px; }
 .shop-open-badge {
   display: inline-flex;
@@ -1050,13 +1081,14 @@ input[type="range"].range-clean::-moz-range-thumb {
   .shop-sticky-bar-cta { padding: 8px 12px; font-size: 11px; }
   .shop-sticky-bar-cta span:not(.material-symbols-outlined) { display: none; }
 }
+/* PAngV-Pflichtangabe: muss in Sichtweite der Preise bleiben, darf aber nicht dominieren. */
 .shop-pangv-mini {
-  margin: 4px 0 0;
-  font-size: 11px;
-  color: rgba(232,238,255,0.45);
-  line-height: 1.5;
+  margin: 9px 2px 0;
+  font-size: 10.5px;
+  color: #5b626b;
+  line-height: 1.4;
 }
-.shop-pangv-mini a { color: rgba(118,169,250,0.7); text-decoration: underline; }
+.shop-pangv-mini a { color: #225eaa; text-decoration: underline; }
 
 /* Pflicht-Hinweis-Strip: immer sichtbar, drei harte Punkte (Selbstabholung, Helfer, Transporter) */
 .shop-pflicht-strip {
@@ -1081,7 +1113,7 @@ input[type="range"].range-clean::-moz-range-thumb {
 }
 .shop-pflicht-pill .material-symbols-outlined {
   font-size: 20px;
-  color: #76a9fa;
+  color: #225eaa;
   flex-shrink: 0;
 }
 .shop-pflicht-pill strong {
@@ -1140,7 +1172,7 @@ input[type="range"].range-clean::-moz-range-thumb {
 .shop-card-kebab {
   display: inline-flex; align-items: center; justify-content: center;
   width: 48px; min-height: 48px;
-  background: transparent; color: #76a9fa;
+  background: transparent; color: #225eaa;
   border: 1.5px solid rgba(118,169,250,0.35); border-radius: 10px;
   cursor: pointer; transition: background 0.15s, border-color 0.15s;
 }
@@ -1244,60 +1276,73 @@ input[type="range"].range-clean::-moz-range-thumb {
 .shop-hero3 .shop-open-badge--open { background: rgba(10,138,58,0.12); color: #0a8a3a; border-color: rgba(10,138,58,0.30); }
 
 /* ===== Schwebende Suchleiste ===== */
+/* Suche — eine ruhige Zeile. Farben aus dem Konfigurator-System. */
 .shop-searchbar {
   position: relative; z-index: 5;
   margin-top: clamp(-10px, -1vw, -8px);
-  display: flex; gap: 10px; align-items: stretch;
-  background: #ffffff;
-  border: 1px solid rgba(34,94,170,0.14);
-  border-radius: 14px;
-  padding: 12px;
-  box-shadow: 0 14px 34px -18px rgba(8,21,46,0.28);
+  display: flex;
 }
-.shop-searchbar-field { position: relative; flex: 1; display: flex; align-items: center; }
-.shop-searchbar-icon { position: absolute; left: 16px; font-size: 22px; color: #225eaa; pointer-events: none; }
+.shop-searchbar-field {
+  position: relative; flex: 1; display: flex; align-items: center;
+  background: #fff; border: 1.5px solid #d3d9e6; border-radius: 14px;
+  transition: border-color .15s, box-shadow .15s;
+}
+.shop-searchbar-field:focus-within { border-color: #225eaa; box-shadow: 0 0 0 3.5px rgba(34,94,170,0.13); }
+.shop-searchbar-icon { position: absolute; left: 15px; font-size: 21px; color: #5b626b; pointer-events: none; }
 #sucheInput {
   width: 100%; border: 0; background: transparent;
-  padding: 14px 44px 14px 48px;
-  font-family: 'Manrope', sans-serif; font-size: 16px; font-weight: 500; color: #14233f;
+  padding: 12px 44px 12px 44px;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; font-weight: 500; color: #14181d;
 }
-#sucheInput::placeholder { color: #8593aa; font-weight: 400; }
+#sucheInput::placeholder { color: #8b95a5; font-weight: 400; }
 #sucheInput:focus { outline: none; }
 .shop-searchbar-clear {
-  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  position: absolute; right: 9px; top: 50%; transform: translateY(-50%);
   width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
-  border-radius: 8px; background: rgba(34,94,170,0.08); border: 1px solid rgba(34,94,170,0.16);
-  color: #225eaa; cursor: pointer;
+  border-radius: 8px; background: #eef2f8; border: 1px solid #d3d9e6;
+  color: #5b626b; cursor: pointer;
 }
 .shop-searchbar-clear .material-symbols-outlined { font-size: 16px; }
-.shop-searchbar-filter {
-  display: inline-flex; align-items: center; gap: 7px; padding: 0 18px;
-  border-radius: 12px; background: #225eaa; color: #fff; border: 0;
-  font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 14px;
-  cursor: pointer; min-height: 48px;
+
+/* Werkzeugzeile: Filter · Sortierung · Trefferzahl */
+.shop-tools { display: flex; align-items: center; gap: 8px; margin-top: 11px; min-width: 0; }
+.shop-tool {
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 1.5px solid #d3d9e6; background: #fff; color: #14181d;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 700;
+  padding: 9px 14px; border-radius: 999px; cursor: pointer; white-space: nowrap; min-height: 40px;
 }
-.shop-searchbar-filter .material-symbols-outlined { font-size: 19px; }
-@media (min-width: 1024px) { .shop-searchbar-filter { display: none !important; } }
-.shop-searchbar-filter-badge {
+.shop-tool .material-symbols-outlined { font-size: 17px; color: #5b626b; }
+.shop-tool:hover { border-color: #225eaa; }
+.shop-tool--select { position: relative; padding-right: 10px; }
+.shop-tool--select select {
+  border: 0; background: transparent; font: inherit; color: #14181d;
+  cursor: pointer; padding-right: 16px; -webkit-appearance: none; appearance: none;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22><path fill=%22%235b626b%22 d=%22M7 10l5 5 5-5z%22/></svg>');
+  background-repeat: no-repeat; background-position: right center;
+}
+.shop-tool--select select:focus { outline: none; }
+.shop-tool-badge {
   display: inline-flex; align-items: center; justify-content: center;
   min-width: 18px; height: 18px; padding: 0 5px;
-  background: #76a9fa; color: #0a1f44; border-radius: 5px; font-size: 10px; font-weight: 800;
+  background: #225eaa; color: #fff; border-radius: 999px; font-size: 10px; font-weight: 800;
 }
-.shop-searchbar-sort {
-  border: 1px solid rgba(34,94,170,0.18); border-radius: 12px;
-  padding: 0 38px 0 16px; min-height: 48px;
-  font-family: 'Manrope', sans-serif; font-size: 14px; font-weight: 600; color: #14233f;
-  background-color: #fff; cursor: pointer;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22><path fill=%22%23225eaa%22 d=%22M7 10l5 5 5-5z%22/></svg>');
-  background-repeat: no-repeat; background-position: right 14px center;
-  -webkit-appearance: none; appearance: none;
+.shop-tools-count {
+  margin-left: auto; font-size: 12.5px; color: #5b626b; font-weight: 600;
+  white-space: nowrap; flex: 0 1 auto; overflow: hidden; text-overflow: ellipsis;
 }
-.shop-searchbar-sort:focus { outline: none; border-color: #225eaa; box-shadow: 0 0 0 3px rgba(34,94,170,0.12); }
-@media (max-width: 820px) {
-  .shop-searchbar { flex-wrap: wrap; margin-top: clamp(-10px, -2vw, -8px); border-radius: 14px; }
-  .shop-searchbar-field { flex-basis: 100%; }
-  .shop-searchbar-filter { flex: 1; }
-  .shop-searchbar-sort { flex: 1; }
+@media (min-width: 1024px) { #filterTrigger { display: none !important; } }
+/* Schmale Handys: Sortier-Knopf darf schrumpfen, damit die Trefferzahl nicht abgeschnitten wird */
+@media (max-width: 420px) {
+  .shop-tool { padding: 9px 12px; font-size: 12.5px; }
+  .shop-tool--select { flex: 0 1 auto; min-width: 0; }
+  .shop-tool--select select { max-width: 92px; text-overflow: ellipsis; }
+}
+/* Sehr schmale Geraete (z.B. iPhone SE): Trefferzahl weg — sie steht ohnehin
+   auf der „Alle"-Kachel. Sonst ueberlappt sie den Sortier-Knopf. */
+@media (max-width: 360px) {
+  .shop-tools-count { display: none; }
+  .shop-tool--select select { max-width: 78px; }
 }
 
 /* Trust-Leiste (Vertrauens-Signale oberhalb der Produkte) */
@@ -1322,19 +1367,14 @@ input[type="range"].range-clean::-moz-range-thumb {
 .shop-masse-hinweis-close { text-decoration: underline; margin-left: 8px; background: none; border: none; cursor: pointer; color: #225eaa; font-size: 12px; }
 
 /* Hinweis auf ausgeblendete nach-außen-öffnende Artikel (Standard: ausgeblendet) */
-.aussen-hinweis { display: flex; align-items: flex-start; gap: 8px; flex-wrap: wrap;
-  margin-bottom: 14px; padding: 10px 14px; border-radius: 10px;
-  background: rgba(34,94,170,0.06); border: 1px solid rgba(34,94,170,0.18);
-  font-size: 13px; line-height: 1.45; color: #43506a; }
-.aussen-hinweis .material-symbols-outlined { font-size: 18px; color: #225eaa; flex: none; margin-top: 1px; }
-/* Text darf schrumpfen, damit er auf dem Handy neben dem Icon bleibt statt darunter zu rutschen */
-.aussen-hinweis .ah-txt { flex: 1 1 180px; min-width: 0; }
+/* Randinfo zu 10 von 772 Artikeln — als schmale Zeile, nicht als Kasten ueber der ganzen Ware. */
+.aussen-hinweis { display: flex; align-items: center; gap: 7px; flex-wrap: nowrap;
+  margin-bottom: 10px; padding: 6px 2px; border: 0; background: none;
+  font-size: 12.5px; line-height: 1.35; color: #5b626b; }
+.aussen-hinweis .material-symbols-outlined { font-size: 16px; color: #5b626b; flex: none; }
+.aussen-hinweis .ah-txt { flex: 1 1 auto; min-width: 0; }
 .aussen-hinweis-btn { background: none; border: none; padding: 0; cursor: pointer;
-  color: #225eaa; font-weight: 700; font-size: 13px; text-decoration: underline; flex: none; }
-/* Handy: Knopf in eigene Zeile, damit der Satz nicht auf drei schmale Zeilen zerfällt */
-@media (max-width: 640px) {
-  .aussen-hinweis-btn { flex: 1 0 100%; text-align: left; margin-top: 4px; margin-left: 26px; }
-}
+  color: #225eaa; font-weight: 700; font-size: 12.5px; text-decoration: underline; flex: none; white-space: nowrap; }
 
 /* So läuft's — Disclosure (hell) */
 .shop-info2 { margin-top: 8px; border: 1px solid rgba(34,94,170,0.14); border-radius: 14px; background: #f6f9fe; overflow: hidden; }
@@ -1358,8 +1398,8 @@ input[type="range"].range-clean::-moz-range-thumb {
 .shop-pflicht-pill .material-symbols-outlined { color: #225eaa; }
 .shop-pflicht-pill strong { color: #14233f; }
 
-/* PAngV-Mini (hell-Override) */
-.shop-pangv-mini { color: #8593aa; }
+/* PAngV-Mini (hell-Override) — #5b626b haelt 4,5:1 auf Weiss (BFSG/WCAG AA) */
+.shop-pangv-mini { color: #5b626b; }
 .shop-pangv-mini a { color: #225eaa; }
 
 /* Gebraucht-Hinweis (hell) */
@@ -1409,19 +1449,19 @@ input[type="range"].range-clean::-moz-range-thumb {
               font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 14px;
               color: rgba(232,238,255,0.65); cursor: pointer; transition: all .18s;
               border-left: 3px solid transparent; user-select: none; }
-  .mega-cat .material-symbols-outlined { font-size: 20px; color: #76a9fa; transition: color .18s; }
+  .mega-cat .material-symbols-outlined { font-size: 20px; color: #225eaa; transition: color .18s; }
   .mega-cat:hover, .mega-cat.active {
-    background: #0f1c30; color: #76a9fa; border-left-color: #76a9fa;
+    background: #0f1c30; color: #225eaa; border-left-color: #225eaa;
   }
-  .mega-cat.active .material-symbols-outlined, .mega-cat:hover .material-symbols-outlined { color: #76a9fa; }
+  .mega-cat.active .material-symbols-outlined, .mega-cat:hover .material-symbols-outlined { color: #225eaa; }
   .mega-cat .mega-cat-arrow { margin-left: auto; color: rgba(255,255,255,0.25); font-size: 18px; transition: transform .18s; }
-  .mega-cat.active .mega-cat-arrow, .mega-cat:hover .mega-cat-arrow { color: #76a9fa; transform: translateX(2px); }
+  .mega-cat.active .mega-cat-arrow, .mega-cat:hover .mega-cat-arrow { color: #225eaa; transform: translateX(2px); }
   .mega-panels { padding: 26px 32px; position: relative; }
   .mega-panel { display: none; }
   .mega-panel.active { display: block; animation: megaFade .2s ease; }
   @keyframes megaFade { from { opacity:0; transform: translateX(4px); } to { opacity:1; transform: translateX(0); } }
   .mega-panel-title { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 12px;
-                      color: #76a9fa; text-transform: uppercase; letter-spacing: 0.08em;
+                      color: #225eaa; text-transform: uppercase; letter-spacing: 0.08em;
                       margin-bottom: 16px; }
   .mega-system { display: flex; align-items: flex-start; gap: 12px; padding: 10px 12px;
                  border-radius: 8px; transition: background .15s; margin-bottom: 2px; }
@@ -1434,7 +1474,7 @@ input[type="range"].range-clean::-moz-range-thumb {
   .mega-panel-cta { display: flex; align-items: center; justify-content: space-between;
                     margin-top: 18px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08); gap: 12px; }
   .mega-panel-cta .all-link { font-size: 12px; font-weight: 700; color: rgba(232,238,255,0.65); }
-  .mega-panel-cta .all-link:hover { color: #76a9fa; }
+  .mega-panel-cta .all-link:hover { color: #225eaa; }
   .nav-chev { font-size: 16px !important; transition: transform .2s; }
   .nav-item:hover .nav-chev { transform: rotate(180deg); }
   @media (max-width: 767px) { .mega-menu { display: none; } }
@@ -1461,15 +1501,16 @@ input[type="range"].range-clean::-moz-range-thumb {
   .filter-option > span:first-child > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .filter-option .check {
     width: 16px; height: 16px; min-width: 16px;
-    accent-color: #76a9fa; cursor: pointer; flex-shrink: 0;
+    accent-color: #225eaa; cursor: pointer; flex-shrink: 0;
   }
+  /* Zaehler: heller Grund + dunkler Text — 2,67:1 war unter der WCAG-AA-Grenze (BFSG) */
   .filter-option .count {
-    font-size: 11px; font-weight: 600; color: rgba(232,238,255,0.55);
-    background: rgba(118,169,250,0.10); padding: 2px 7px; border-radius: 999px;
+    font-size: 11px; font-weight: 600; color: #5b626b;
+    background: #eef2f8; padding: 2px 7px; border-radius: 999px;
     flex-shrink: 0; margin-left: 8px;
   }
-  .filter-option:has(.check:checked) { color: #fff; background: rgba(118,169,250,0.14); }
-  .filter-option:has(.check:checked) .count { color: #76a9fa; background: rgba(118,169,250,0.20); }
+  .filter-option:has(.check:checked) { color: #14181d; background: #eef4ff; }
+  .filter-option:has(.check:checked) .count { color: #fff; background: #225eaa; }
 </style>
 
 <div class="dfnav-util"><div class="dfnav-wrap">
@@ -1675,95 +1716,48 @@ input[type="range"].range-clean::-moz-range-thumb {
 </header>
 
 <!-- ===== Suchleiste (bleibt beim Scrollen stehen) ===== -->
-<div class="max-w-[1440px] mx-auto px-6 md:px-12 shop-top-offset">
+<div class="max-w-[1280px] mx-auto px-4 md:px-10 shop-top-offset">
+  <!-- Suche: eine Zeile, sonst nichts. Filter/Sortierung sitzen in der Werkzeugzeile unter den Kategorien. -->
   <div class="shop-searchbar" role="search">
     <div class="shop-searchbar-field">
       <span class="material-symbols-outlined shop-searchbar-icon" aria-hidden="true">search</span>
-      <input id="sucheInput" type="text" placeholder="Standnummer (z.B. 741B), Maße (z.B. 1200x800) oder Stichwort…" autocomplete="off" enterkeyhint="search" inputmode="search"/>
+      <input id="sucheInput" type="text" placeholder="Standnr., Maß oder Stichwort" autocomplete="off" enterkeyhint="search" inputmode="search"/>
       <button id="sucheClearBtn" class="hidden shop-searchbar-clear" aria-label="Suche leeren">
         <span class="material-symbols-outlined" aria-hidden="true">close</span>
       </button>
     </div>
-    <button id="filterTrigger" class="lg:hidden shop-searchbar-filter" type="button">
-      <span class="material-symbols-outlined" aria-hidden="true">tune</span>
-      Filter
-      <span id="filterCountBadge" class="hidden shop-searchbar-filter-badge">0</span>
-    </button>
-    <select id="sortSelect" class="shop-searchbar-sort" aria-label="Sortierung">
-      <option value="relevanz">Relevanz</option>
-      <option value="preis-auf">Preis aufsteigend</option>
-      <option value="preis-ab">Preis absteigend</option>
-      <option value="groesse-ab">Größe ↓</option>
-      <option value="groesse-auf">Größe ↑</option>
-    </select>
   </div>
-  <!-- Kategorien zum Anklicken, direkt ueber dem Shop -->
+
+  <!-- Kategorien als freigestellte Produktfotos auf gemeinsamer Grundlinie (wie im Menue) -->
   <nav id="katLeiste" class="kat-leiste" aria-label="Produktkategorien"></nav>
 
-  <!-- Trust-Leiste: Vertrauens-Signale oberhalb der Produkte (Baymard/CRO) -->
-  <div class="shop-trust" aria-label="Vorteile">
-        <span class="shop-trust-i"><span class="material-symbols-outlined" aria-hidden="true">storefront</span><span class="shop-trust-t">Selbstabholung<small>kostenfrei in Brandenburg</small></span></span>
-        <span class="shop-trust-i"><span class="material-symbols-outlined" aria-hidden="true">bolt</span><span class="shop-trust-t">Sofort verfügbar<small>tagesaktueller Bestand</small></span></span>
+  <!-- Werkzeugzeile: Filter, Sortierung, Trefferzahl -->
+  <div class="shop-tools">
+    <button id="filterTrigger" class="shop-tool lg:hidden" type="button">
+      <span class="material-symbols-outlined" aria-hidden="true">tune</span>
+      Filter
+      <span id="filterCountBadge" class="hidden shop-tool-badge">0</span>
+    </button>
+    <div class="shop-tool shop-tool--select">
+      <span class="material-symbols-outlined" aria-hidden="true">swap_vert</span>
+      <select id="sortSelect" aria-label="Sortierung">
+        <option value="relevanz">Relevanz</option>
+        <option value="preis-auf">Preis aufsteigend</option>
+        <option value="preis-ab">Preis absteigend</option>
+        <option value="groesse-ab">Größe ↓</option>
+        <option value="groesse-auf">Größe ↑</option>
+      </select>
+    </div>
+    <span class="shop-tools-count"><span id="toolsAnzahl">772</span> Artikel</span>
   </div>
+
   <div id="masseHinweis" class="hidden shop-masse-hinweis">
     <span class="material-symbols-outlined align-bottom" style="font-size:14px" aria-hidden="true">auto_awesome</span>
     Maße erkannt: <span id="masseAusSuche" class="font-bold"></span> — ähnliche Größen werden mit angezeigt.
     <button id="masseHinweisClose" class="shop-masse-hinweis-close">Maße entfernen</button>
   </div>
 
-  <!-- So läuft's — wichtige Infos als Disclosure -->
-  <details id="shopHeroInfo" class="shop-info2">
-    <summary class="shop-info2-summary">
-      <span class="shop-info2-toggle">
-        <span class="material-symbols-outlined" aria-hidden="true">info</span>
-        So läuft unser Lager-Shop
-        <span class="material-symbols-outlined chev" aria-hidden="true">expand_more</span>
-      </span>
-    </summary>
 
-    <!-- Inhalt (aufgeklappt): konkrete Erklärung zum Angebot + Ablauf -->
-    <div class="shop-hero-info-content">
-      <div class="shop-info-section">
-        <h4>Was wir anbieten</h4>
-        <p>Unser Lager hat unterschiedliche Sachen: <strong>Drutex-Neuware</strong> in gängigen Standardmaßen, <strong>gebrauchte Fenster und Türen</strong> aus Ankauf und Hofverkauf, <strong>falsch vermessene</strong> Neuware mit Aufmaß-Fehler (deutlich unter Neupreis). Dazu <strong>Dämmstoffe und Baumaterialien</strong> je nach Bestand.</p>
-      </div>
-      <div class="shop-info-section">
-        <h4>So findest du dein Fenster</h4>
-        <p><strong>Maß oder Eigenschaft suchen</strong> (z.B. „1200×800" oder „Anthrazit") — die Suche oben zeigt Treffer mit ähnlichen Größen. Wenn was passt: <strong>per WhatsApp oder E-Mail anfragen</strong>, wir bestätigen sofort ob's noch verfügbar ist. Oder einfach Freitag <strong>10–17 Uhr vorbeikommen und im Hof stöbern</strong>.</p>
-      </div>
-      <div class="shop-info-section">
-        <h4>Tagesaktuell — Bestand bewegt sich</h4>
-        <p>Artikel kommen rein und raus. <strong>Was heute weg ist, kann übermorgen wieder da sein</strong> — wir kaufen permanent zurück und stocken nach. Daher vor längerer Anfahrt kurz prüfen, ob dein Wunsch-Fenster noch im Hof steht.</p>
-      </div>
-      <div class="shop-info-section">
-        <h4>Abholen — selbst aufladen</h4>
-        <p>Adresse: Fohrder Landstraße 13, 14772 Brandenburg an der Havel — Freitag 10–17 Uhr. <strong>Wir laden nicht selbst auf</strong>: bitte genug Helfer (Fenster sind schwer, 2–4 Personen) und Transporter oder Anhänger mitbringen. <strong>Versand</strong> neuer Drutex-Ware deutschlandweit möglich, Gebrauchtware nur Selbstabholung.</p>
-      </div>
-      <div class="shop-info-section">
-        <h4>Preise</h4>
-        <p>Alle Preise <strong>inkl. 19 % MwSt.</strong>, zzgl. Versand bei Lieferung. Selbstabholung kostenfrei. <a href="agb.html#versand">Versand &amp; Lieferung Details</a></p>
-      </div>
-      <div class="shop-info-section">
-        <h4>Kontakt</h4>
-        <p>
-          WhatsApp <a href="https://wa.me/491717263776" target="_blank" rel="noopener">0171 7263776</a> — schnellste Antwort<br/>
-          Telefon <a href="tel:+4933812148373">03381 2148373</a> Fr 10–17 Uhr<br/>
-          E-Mail <a href="mailto:info@baustoffchrist.de">info@baustoffchrist.de</a> · <a href="https://www.google.com/maps/search/?api=1&amp;query=Fohrder+Landstra%C3%9Fe+13%2C+14772+Brandenburg+an+der+Havel" target="_blank" rel="noopener">Google Maps ↗</a>
-        </p>
-      </div>
-      <div class="shop-info-ctas">
-        <a href="https://wa.me/491717263776?text=Hallo,%20ich%20m%C3%B6chte%20die%20Verf%C3%BCgbarkeit%20pr%C3%BCfen." target="_blank" rel="noopener" class="shop-info-cta shop-info-cta--wa">
-          <span class="material-symbols-outlined" aria-hidden="true">chat</span> WhatsApp prüfen
-        </a>
-        <a href="tel:+4933812148373" class="shop-info-cta shop-info-cta--tel">
-          <span class="material-symbols-outlined" aria-hidden="true">call</span> 03381 2148373
-        </a>
-        <a href="/anfrage.html?produkt=lagerware" class="shop-info-cta shop-info-cta--mail">
-          <span class="material-symbols-outlined" aria-hidden="true">mail</span> Per Formular anfragen
-        </a>
-      </div>
-    </div>
-  </details>
 
 
   <!-- Gebraucht-Filter-Hinweis (nur sichtbar wenn Filter gesetzt) -->
@@ -1774,7 +1768,7 @@ input[type="range"].range-clean::-moz-range-thumb {
 
   <!-- PAngV-Mini-Hinweis (rechtlich-Pflicht, Detail in "So läuft's") -->
   <p class="shop-pangv-mini" aria-label="Preisangaben">
-    Alle Preise inkl. 19 % MwSt., zzgl. Versandkosten bei Lieferung. Selbstabholung in Brandenburg an der Havel kostenfrei. <a href="agb.html#versand">Versand &amp; Lieferung</a>
+    Preise inkl. 19 % MwSt., zzgl. Versand. Abholung kostenfrei. <a href="agb.html#versand">Versand &amp; Lieferung</a>
   </p>
 </div>
 
@@ -1787,18 +1781,18 @@ input[type="range"].range-clean::-moz-range-thumb {
     <!-- Mobile Header -->
     <div class="lg:hidden flex items-center justify-between mb-4">
       <h3 class="text-lg font-extrabold" style="color:#14233f;">Filter</h3>
-      <button id="filterClose" style="width:32px;height:32px;border-radius:8px;background:rgba(118,169,250,0.1);border:1px solid rgba(118,169,250,0.2);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#76a9fa;" aria-label="Filter schließen">
+      <button id="filterClose" style="width:32px;height:32px;border-radius:8px;background:#eef2f8;border:1px solid #d3d9e6;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#225eaa;" aria-label="Filter schließen">
         <span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">close</span>
       </button>
     </div>
 
     <!-- Header der Sidebar mit Reset -->
     <div class="hidden lg:flex items-center justify-between pb-3 mb-1" style="border-bottom:1px solid rgba(118,169,250,0.12);">
-      <h3 class="text-base font-extrabold" style="color:#e8eeff;">Filter</h3>
-      <button id="filterReset" style="font-size:12px;font-weight:600;color:#76a9fa;background:none;border:none;cursor:pointer;text-decoration:underline;">Zurücksetzen</button>
+      <h3 class="text-base font-extrabold" style="color:#14181d;">Filter</h3>
+      <button id="filterReset" style="font-size:12px;font-weight:600;color:#225eaa;background:none;border:none;cursor:pointer;text-decoration:underline;">Zurücksetzen</button>
     </div>
     <div class="lg:hidden mb-2 text-right">
-      <button id="filterResetMob" style="font-size:12px;font-weight:600;color:#76a9fa;background:none;border:none;cursor:pointer;text-decoration:underline;">Alle zurücksetzen</button>
+      <button id="filterResetMob" style="font-size:12px;font-weight:600;color:#225eaa;background:none;border:none;cursor:pointer;text-decoration:underline;">Alle zurücksetzen</button>
     </div>
 
     <!-- Produkttyp — ganz oben (interner Hinweis.05.2026): Fenster/Türen + Baumaterial-Untergruppe -->
@@ -1871,7 +1865,7 @@ input[type="range"].range-clean::-moz-range-thumb {
 
     <!-- Weitere (sekundäre Filter) — zugeklappte Akkordeons -->
     <div style="margin:10px 0 2px;padding-top:10px;border-top:1px solid rgba(118,169,250,0.14);">
-      <span style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#76a9fa;opacity:.75;">Weitere Filter</span>
+      <span style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#225eaa;opacity:.75;">Weitere Filter</span>
     </div>
 
     <!-- Eigenschaften -->
@@ -2007,8 +2001,8 @@ input[type="range"].range-clean::-moz-range-thumb {
     <!-- Empty State -->
     <div id="emptyState" class="empty hidden">
       <span class="material-symbols-outlined" style="font-size:56px;color:rgba(118,169,250,0.35);" aria-hidden="true">search_off</span>
-      <h3 class="text-xl font-extrabold mt-3" style="color:#e8eeff;">Keine Produkte gefunden</h3>
-      <p class="text-sm mt-1.5 max-w-md mx-auto" style="color:rgba(232,238,255,0.55);">Probier andere Filter oder Maße — oder geh zum <a href="konfigurator.html" style="color:#76a9fa;font-weight:600;text-decoration:underline;">Konfigurator</a> für eine Maßanfertigung.</p>
+      <h3 class="text-xl font-extrabold mt-3" style="color:#14181d;">Keine Produkte gefunden</h3>
+      <p class="text-sm mt-1.5 max-w-md mx-auto" style="color:#5b626b;">Probier andere Filter oder Maße — oder geh zum <a href="konfigurator.html" style="color:#225eaa;font-weight:700;text-decoration:underline;">Konfigurator</a> für eine Maßanfertigung.</p>
       <button id="resetFromEmpty" class="mt-4 inline-flex items-center gap-1.5 px-5 py-2.5 text-sm font-bold" style="border-radius:8px;background:#225eaa;color:#fff;border:none;cursor:pointer;">
         <span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">refresh</span>
         Filter zurücksetzen
@@ -2017,10 +2011,69 @@ input[type="range"].range-clean::-moz-range-thumb {
   </section>
 </main>
 
+<!-- Erklaerteil: bewusst UNTER der Ware — Kunde sieht erst Produkte, dann Details -->
+<div class="max-w-[1280px] mx-auto px-4 md:px-10 pb-10 shop-infoblock">
+  <!-- So laeuft's — Infos zum Ablauf, aufklappbar -->
+  <details id="shopHeroInfo" class="shop-info2">
+    <summary class="shop-info2-summary">
+      <span class="shop-info2-toggle">
+        <span class="material-symbols-outlined" aria-hidden="true">info</span>
+        So läuft unser Lager-Shop
+        <span class="material-symbols-outlined chev" aria-hidden="true">expand_more</span>
+      </span>
+    </summary>
+
+    <!-- Inhalt (aufgeklappt): konkrete Erklärung zum Angebot + Ablauf -->
+    <div class="shop-hero-info-content">
+      <div class="shop-info-section">
+        <h4>Was wir anbieten</h4>
+        <p>Unser Lager hat unterschiedliche Sachen: <strong>Drutex-Neuware</strong> in gängigen Standardmaßen, <strong>gebrauchte Fenster und Türen</strong> aus Ankauf und Hofverkauf, <strong>falsch vermessene</strong> Neuware mit Aufmaß-Fehler (deutlich unter Neupreis). Dazu <strong>Dämmstoffe und Baumaterialien</strong> je nach Bestand.</p>
+      </div>
+      <div class="shop-info-section">
+        <h4>So findest du dein Fenster</h4>
+        <p><strong>Maß oder Eigenschaft suchen</strong> (z.B. „1200×800" oder „Anthrazit") — die Suche oben zeigt Treffer mit ähnlichen Größen. Wenn was passt: <strong>per WhatsApp oder E-Mail anfragen</strong>, wir bestätigen sofort ob's noch verfügbar ist. Oder einfach Freitag <strong>10–17 Uhr vorbeikommen und im Hof stöbern</strong>.</p>
+      </div>
+      <div class="shop-info-section">
+        <h4>Tagesaktuell — Bestand bewegt sich</h4>
+        <p>Artikel kommen rein und raus. <strong>Was heute weg ist, kann übermorgen wieder da sein</strong> — wir kaufen permanent zurück und stocken nach. Daher vor längerer Anfahrt kurz prüfen, ob dein Wunsch-Fenster noch im Hof steht.</p>
+      </div>
+      <div class="shop-info-section">
+        <h4>Abholen — selbst aufladen</h4>
+        <p>Adresse: Fohrder Landstraße 13, 14772 Brandenburg an der Havel — Freitag 10–17 Uhr. <strong>Wir laden nicht selbst auf</strong>: bitte genug Helfer (Fenster sind schwer, 2–4 Personen) und Transporter oder Anhänger mitbringen. <strong>Versand</strong> neuer Drutex-Ware deutschlandweit möglich, Gebrauchtware nur Selbstabholung.</p>
+      </div>
+      <div class="shop-info-section">
+        <h4>Preise</h4>
+        <p>Alle Preise <strong>inkl. 19 % MwSt.</strong>, zzgl. Versand bei Lieferung. Selbstabholung kostenfrei. <a href="agb.html#versand">Versand &amp; Lieferung Details</a></p>
+      </div>
+      <div class="shop-info-section">
+        <h4>Kontakt</h4>
+        <p>
+          WhatsApp <a href="https://wa.me/491717263776" target="_blank" rel="noopener">0171 7263776</a> — schnellste Antwort<br/>
+          Telefon <a href="tel:+4933812148373">03381 2148373</a> Fr 10–17 Uhr<br/>
+          E-Mail <a href="mailto:info@baustoffchrist.de">info@baustoffchrist.de</a> · <a href="https://www.google.com/maps/search/?api=1&amp;query=Fohrder+Landstra%C3%9Fe+13%2C+14772+Brandenburg+an+der+Havel" target="_blank" rel="noopener">Google Maps ↗</a>
+        </p>
+      </div>
+      <div class="shop-info-ctas">
+        <a href="https://wa.me/491717263776?text=Hallo,%20ich%20m%C3%B6chte%20die%20Verf%C3%BCgbarkeit%20pr%C3%BCfen." target="_blank" rel="noopener" class="shop-info-cta shop-info-cta--wa">
+          <span class="material-symbols-outlined" aria-hidden="true">chat</span> WhatsApp prüfen
+        </a>
+        <a href="tel:+4933812148373" class="shop-info-cta shop-info-cta--tel">
+          <span class="material-symbols-outlined" aria-hidden="true">call</span> 03381 2148373
+        </a>
+        <a href="/anfrage.html?produkt=lagerware" class="shop-info-cta shop-info-cta--mail">
+          <span class="material-symbols-outlined" aria-hidden="true">mail</span> Per Formular anfragen
+        </a>
+      </div>
+    </div>
+  </details>
+</div>
+
 
 <!-- ─────────────────────────────────── DETAIL-MODAL ─────────────────────────────────── -->
 <div id="detailOverlay" class="overlay"></div>
 <aside id="detailModal" class="drawer" style="width: 540px;">
+  <!-- Griffbalken: nur auf dem Handy sichtbar, dort faehrt die Ansicht von unten hoch -->
+  <div id="detailGrip" class="sheet-grip" aria-hidden="true"><span></span></div>
   <header class="flex items-center justify-between px-5 py-4" style="border-bottom:1px solid rgba(34,94,170,0.14);background:#fff;position:sticky;top:0;z-index:4;">
     <h3 id="detailTitel" class="text-lg font-extrabold tracking-tight pr-4" style="color:#14233f;">Produkt</h3>
     <button id="detailCloseBtn" style="width:40px;height:40px;border-radius:10px;background:#eef4ff;border:1px solid #cfe0ff;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#225eaa;flex-shrink:0;" aria-label="Schließen">
@@ -2035,15 +2088,15 @@ input[type="range"].range-clean::-moz-range-thumb {
 <aside id="anfrageModal" class="drawer" style="width: 540px;">
   <header class="flex items-center justify-between px-5 py-4" style="border-bottom:1px solid rgba(34,94,170,0.14);background:#fff;position:sticky;top:0;z-index:4;">
     <h3 class="text-lg font-extrabold tracking-tight pr-4" style="color:#14233f;">Anfrage senden</h3>
-    <button id="anfrageCloseBtn" style="width:36px;height:36px;border-radius:8px;background:rgba(118,169,250,0.1);border:1px solid rgba(118,169,250,0.2);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#76a9fa;" aria-label="Schließen">
+    <button id="anfrageCloseBtn" style="width:36px;height:36px;border-radius:8px;background:#eef2f8;border:1px solid #d3d9e6;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#225eaa;" aria-label="Schließen">
       <span class="material-symbols-outlined" aria-hidden="true">close</span>
     </button>
   </header>
   <div class="flex-1 overflow-y-auto px-6 py-5">
-    <div style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.35);border-radius:10px;padding:14px 16px;margin-bottom:18px;color:rgba(232,238,255,0.85);font-size:13px;line-height:1.5;">
+    <div style="background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.35);border-radius:10px;padding:14px 16px;margin-bottom:18px;color:#14181d;font-size:13px;line-height:1.5;">
       <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;">
-        <span class="material-symbols-outlined" style="color:#76a9fa;font-size:18px;flex-shrink:0;margin-top:1px;" aria-hidden="true">info</span>
-        <strong style="color:#76a9fa;">Wichtiger Hinweis</strong>
+        <span class="material-symbols-outlined" style="color:#225eaa;font-size:18px;flex-shrink:0;margin-top:1px;" aria-hidden="true">info</span>
+        <strong style="color:#225eaa;">Wichtiger Hinweis</strong>
       </div>
       <ul style="margin:0;padding-left:24px;list-style:disc;">
         <li>Der Bestand ändert sich täglich.</li>
@@ -2058,28 +2111,28 @@ input[type="range"].range-clean::-moz-range-thumb {
       <input type="hidden" name="produkt_titel" id="anfrageProduktTitel"/>
 
       <label class="block mb-3">
-        <span style="display:block;font-size:12px;font-weight:700;color:rgba(232,238,255,0.75);margin-bottom:5px;">Ihr Name *</span>
-        <input type="text" name="name" id="anfrageName" required class="input-clean w-full px-3 py-2.5 text-sm" style="background:rgba(118,169,250,0.05);border:1px solid rgba(118,169,250,0.18);border-radius:8px;color:#e8eeff;" placeholder="Vor- und Nachname"/>
+        <span style="display:block;font-size:12px;font-weight:700;color:#5b626b;margin-bottom:5px;">Ihr Name *</span>
+        <input type="text" name="name" id="anfrageName" required class="input-clean w-full px-3 py-2.5 text-sm" style="background:#fff;border:1.5px solid #d3d9e6;border-radius:10px;color:#14181d;" placeholder="Vor- und Nachname"/>
       </label>
 
       <label class="block mb-3">
-        <span style="display:block;font-size:12px;font-weight:700;color:rgba(232,238,255,0.75);margin-bottom:5px;">E-Mail *</span>
-        <input type="email" name="email" id="anfrageEmail" required class="input-clean w-full px-3 py-2.5 text-sm" style="background:rgba(118,169,250,0.05);border:1px solid rgba(118,169,250,0.18);border-radius:8px;color:#e8eeff;" placeholder="ihre@email.de"/>
+        <span style="display:block;font-size:12px;font-weight:700;color:#5b626b;margin-bottom:5px;">E-Mail *</span>
+        <input type="email" name="email" id="anfrageEmail" required class="input-clean w-full px-3 py-2.5 text-sm" style="background:#fff;border:1.5px solid #d3d9e6;border-radius:10px;color:#14181d;" placeholder="ihre@email.de"/>
       </label>
 
       <label class="block mb-3">
-        <span style="display:block;font-size:12px;font-weight:700;color:rgba(232,238,255,0.75);margin-bottom:5px;">Telefon <span style="color:rgba(232,238,255,0.45);font-weight:500;">(optional)</span></span>
-        <input type="tel" name="telefon" id="anfrageTelefon" class="input-clean w-full px-3 py-2.5 text-sm" style="background:rgba(118,169,250,0.05);border:1px solid rgba(118,169,250,0.18);border-radius:8px;color:#e8eeff;" placeholder="0171 12345678"/>
+        <span style="display:block;font-size:12px;font-weight:700;color:#5b626b;margin-bottom:5px;">Telefon <span style="color:rgba(232,238,255,0.45);font-weight:500;">(optional)</span></span>
+        <input type="tel" name="telefon" id="anfrageTelefon" class="input-clean w-full px-3 py-2.5 text-sm" style="background:#fff;border:1.5px solid #d3d9e6;border-radius:10px;color:#14181d;" placeholder="0171 12345678"/>
       </label>
 
       <label class="block mb-4">
-        <span style="display:block;font-size:12px;font-weight:700;color:rgba(232,238,255,0.75);margin-bottom:5px;">Ihre Nachricht</span>
-        <textarea name="nachricht" id="anfrageNachricht" rows="7" class="input-clean w-full px-3 py-2.5 text-sm" style="background:rgba(118,169,250,0.05);border:1px solid rgba(118,169,250,0.18);border-radius:8px;color:#e8eeff;resize:vertical;font-family:Manrope,sans-serif;line-height:1.5;"></textarea>
+        <span style="display:block;font-size:12px;font-weight:700;color:#5b626b;margin-bottom:5px;">Ihre Nachricht</span>
+        <textarea name="nachricht" id="anfrageNachricht" rows="7" class="input-clean w-full px-3 py-2.5 text-sm" style="background:#fff;border:1.5px solid #d3d9e6;border-radius:10px;color:#14181d;resize:vertical;font-family:Manrope,sans-serif;line-height:1.5;"></textarea>
       </label>
 
       <label class="flex items-start gap-2 mb-4" style="font-size:12px;color:rgba(232,238,255,0.7);">
         <input type="checkbox" name="dse" id="anfrageDse" required style="margin-top:2px;flex-shrink:0;"/>
-        <span>Ich habe die <a href="datenschutz.html" target="_blank" style="color:#76a9fa;text-decoration:underline;">Datenschutzerklärung</a> gelesen und stimme der Verarbeitung meiner Daten zur Bearbeitung der Anfrage zu.</span>
+        <span>Ich habe die <a href="datenschutz.html" target="_blank" style="color:#225eaa;text-decoration:underline;">Datenschutzerklärung</a> gelesen und stimme der Verarbeitung meiner Daten zur Bearbeitung der Anfrage zu.</span>
       </label>
 
       <div id="anfrageStatus" class="hidden mb-3" style="padding:10px 14px;border-radius:8px;font-size:13px;"></div>
@@ -2091,7 +2144,7 @@ input[type="range"].range-clean::-moz-range-thumb {
 
       <p style="margin-top:12px;font-size:11px;color:rgba(232,238,255,0.45);text-align:center;">
         Oder direkt: <a href="https://wa.me/491717263776" target="_blank" rel="noopener" style="color:#25D366;font-weight:700;">WhatsApp 0171 7263776</a>
-        · <a href="mailto:info@baustoffchrist.de" style="color:#76a9fa;font-weight:700;">info@baustoffchrist.de</a>
+        · <a href="mailto:info@baustoffchrist.de" style="color:#225eaa;font-weight:700;">info@baustoffchrist.de</a>
       </p>
     </form>
   </div>
@@ -2516,30 +2569,69 @@ section[style*="#0a1530"], div[style*="#0a1530"] { background: #f4f7fc !importan
 
 
 
-  /* ── Kategorie-Leiste ueber dem Shop ── */
+  /* ── Kategorie-Leiste: freigestellte Produktfotos wie im Menue ──
+     WICHTIG: Die Bilder haben sehr verschiedene Seitenverhaeltnisse (Balkontuer 0,48 hochkant
+     bis Rollladen 1,18 quer). Feste Kachelhoehe + object-fit:contain + gemeinsame Grundlinie
+     (align-items:flex-end) stellen jedes Produkt gleich gross auf dieselbe Buehne. Ohne das
+     wirken die Produkte unterschiedlich gross — daran erkennt man selbstgebaute Kachelleisten.
+     Nicht aufbrechen. */
   .kat-leiste {
-    display: flex; gap: 9px; padding: 14px 0 4px;
-    flex-wrap: wrap;                 /* Desktop: umbrechen statt abschneiden */
+    display: flex; gap: 9px; padding: 15px 0 4px;
+    overflow-x: auto; scroll-snap-type: x proximity;
     scrollbar-width: none; -ms-overflow-style: none;
-  }
-  @media (max-width: 900px) {
-    /* Handy: eine Zeile zum Wischen, spart Hoehe ueber den Produkten */
-    .kat-leiste { flex-wrap: nowrap; overflow-x: auto; }
   }
   .kat-leiste::-webkit-scrollbar { display: none; }
   .kat-chip {
-    display: inline-flex; align-items: center; gap: 8px; flex: none; cursor: pointer;
-    padding: 9px 16px; border-radius: 999px; border: 1.5px solid #e7ebf1; background: #fff;
-    font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 600; font-size: 14px;
-    color: #14233f; white-space: nowrap; transition: border-color .16s, background .16s, color .16s;
+    flex: 0 0 92px; scroll-snap-align: start; cursor: pointer;
+    border: 0; background: transparent; padding: 0; text-align: center;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    /* min-width:auto ist der Flex-Standard und liesse lange Namen wie
+       „Garagentor (gebraucht)" die Kachel aufblaehen — dann greift die Kuerzung nie. */
+    min-width: 0; max-width: 92px;
   }
-  .kat-chip:hover { border-color: #76a9fa; color: #225eaa; }
-  .kat-chip .material-symbols-outlined { font-size: 19px; color: #8593aa; transition: color .16s; }
-  .kat-chip:hover .material-symbols-outlined { color: #225eaa; }
-  .kat-num { font-size: 12.5px; font-weight: 700; color: #8593aa; }
-  .kat-chip.on { background: #225eaa; border-color: #225eaa; color: #fff; }
-  .kat-chip.on .material-symbols-outlined,
-  .kat-chip.on .kat-num { color: rgba(255,255,255,.82); }
+  .kat-pic {
+    display: flex; align-items: flex-end; justify-content: center;
+    height: 66px; padding: 7px 8px 6px;
+    background: linear-gradient(180deg, #f7f9fd, #eef2f8);
+    border: 1px solid #e8edf5; border-radius: 12px;
+    transition: border-color .16s, box-shadow .16s;
+  }
+  .kat-pic img { max-height: 100%; max-width: 100%; object-fit: contain; display: block; }
+  .kat-chip:hover .kat-pic { border-color: #b9cbe6; }
+  .kat-chip.on .kat-pic { border-color: #225eaa; box-shadow: 0 0 0 2px rgba(34,94,170,0.16); }
+  .kat-name {
+    display: block; font-size: 11px; font-weight: 700; color: #14181d;
+    margin-top: 6px; line-height: 1.15;
+    /* Ein Wort pro Kachel — sonst reissen unterschiedlich lange Namen die Zeile auseinander */
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  /* Artikelzahl bleibt deutlich sichtbar — die Kategorien sind sehr unterschiedlich gross
+     (Fenster 622 vs. Garagentor 1); ohne Zahl verspricht ein schoenes Foto zu viel. */
+  .kat-num { display: block; font-size: 11px; font-weight: 600; color: #5b626b; margin-top: 1px; }
+  .kat-chip.on .kat-name { color: #225eaa; }
+  /* Kategorien ohne eigenes Foto */
+  .kat-nopic {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 2px; color: #a8b2c1; height: 100%;
+  }
+  .kat-nopic .material-symbols-outlined { font-size: 24px; }
+  /* „Alle" hat kein Produktfoto — statt eines blassen Symbols eine klare Wortmarke */
+  .kat-chip--alle .kat-pic { align-items: center; background: #225eaa; border-color: #225eaa; }
+  .kat-alle-txt { color: #fff; font-size: 11.5px; font-weight: 700; line-height: 1.2; text-align: center; }
+  .kat-chip--alle.on .kat-pic { box-shadow: 0 0 0 2px rgba(34,94,170,0.28); }
+
+  /* Handy: Kopfkarte optisch raus, damit die Ware nach oben rueckt. NICHT entfernen —
+     die H1 bleibt fuer Google im Dokument und shop.js schreibt in #shopHeaderTitle,
+     #produktAnzahl und #shopOpenBadge; ersatzloses Loeschen bricht das Skript. */
+  @media (max-width: 900px) {
+    #shopHeroCard {
+      position: absolute; width: 1px; height: 1px;
+      min-height: 0;              /* sonst gewinnt min-height aus .shop-hero3 */
+      margin: -1px; padding: 0; overflow: hidden;
+      clip-path: inset(50%); white-space: nowrap; border: 0;
+    }
+    .shop-top-offset { padding-top: 12px; }
+  }
 
   /* ── Massfilter: erster und auffaelligster Block in der Filterspalte ── */
   .filter-mass {
@@ -2646,14 +2738,19 @@ section[style*="#0a1530"], div[style*="#0a1530"] { background: #f4f7fc !importan
   .karte-bild { transition: transform .45s cubic-bezier(.4,0,.2,1); }
   .karte:hover .karte-bild { transform: scale(1.04); }
 
+  /* Marktplatz-Reihenfolge: Preis zuerst (Kaufkriterium beim Stoebern), dann Mass,
+     dann Titel, dann Standnummer. */
   .karte-body { padding: 0 !important; }
   .karte-titel {
-    font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700 !important;
-    font-size: 15px !important; line-height: 1.3 !important; margin: 0 0 4px !important;
+    font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 600 !important;
+    font-size: 13px !important; line-height: 1.3 !important; margin: 0 0 3px !important;
+    color: #5b626b;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
   }
-  .karte-spec { font-size: 12.5px; color: #5a6577; margin: 0 0 3px; }
-  .karte-nr { font-size: 12px; color: #46526a; font-weight: 600; margin: 0 0 9px; }
-  .karte-nr b { font-weight: 800; color: #225eaa; }
+  .karte-spec { font-size: 13px; color: #14181d; font-weight: 700; margin: 3px 0 2px; }
+  .karte-masse-unit { font-weight: 600; color: #5b626b; }
+  .karte-nr { font-size: 11.5px; color: #78818f; font-weight: 500; margin: 0 0 8px; }
+  .karte-nr b { font-weight: 700; color: #5b626b; }
   .karte-verf { color: #b45309; font-weight: 700; }
   .karte-meta-dot { opacity: .45; margin: 0 2px; }
 
@@ -2667,12 +2764,26 @@ section[style*="#0a1530"], div[style*="#0a1530"] { background: #f4f7fc !importan
     gap: 8px; margin-top: auto; flex-wrap: wrap; row-gap: 8px;
   }
   .karte-foot .shop-card-cta-anfrage { min-width: 0; }
-  .karte-pricewrap { display: flex; flex-direction: column; line-height: 1.1; flex: none; }
+  .karte-pricewrap {
+    display: flex; align-items: baseline; gap: 6px; line-height: 1.1;
+    margin-top: 9px; flex-wrap: wrap;
+  }
   .karte-preis {
     font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800 !important;
-    font-size: 19px !important; color: #14233f !important; white-space: nowrap;
+    font-size: 18px !important; color: #14181d !important; white-space: nowrap;
+    letter-spacing: -.01em;
   }
-  .karte-mwst { font-size: 11px; color: #828da0; font-weight: 500; margin-top: 2px; white-space: nowrap; }
+  .karte-mwst { font-size: 10.5px; color: #8b95a5; font-weight: 500; white-space: nowrap; }
+
+  /* Handy: „Anfragen" verschwindet von der Karte — das Bottom-Sheet uebernimmt.
+     Ein Knopf pro Karte machte die Liste unruhig und doppelte den Weg. */
+  @media (max-width: 900px) {
+    .shop-card-cta-row { display: none !important; }
+    .karte-nr { margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    /* Verfuegbarkeit („Nur 1 verfuegbar") brach auf zwei Zeilen und machte die Liste
+       unruhig — auf dem Handy steht sie im Bottom-Sheet, dort ist Platz dafuer. */
+    .karte-nr .karte-verf, .karte-nr .karte-meta-dot { display: none; }
+  }
 
   /* Zustandsmarke: Neu blau, Gebraucht dezent — beide oben links auf dem Bild */
   .karte-tag--neu { background: #225eaa; color: #fff; }

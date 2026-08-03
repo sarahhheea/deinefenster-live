@@ -63,6 +63,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadProdukte();
   baueFilterSidebar();
   bindeEventHandler();
+  initDetailSheetGeste();
   applyUrlFilter();
   rendere();
   updateCartUI();
@@ -448,6 +449,24 @@ const KAT_ICON = {
   daemmung: 'layers', baumaterialien: 'foundation', 'garagentor-gebraucht': 'garage'
 };
 
+// Kurznamen NUR fuer die Kachelbeschriftung — der volle Name bleibt in Filtern und
+// Daten erhalten. „(gebraucht)" steht ohnehin als Marke auf jeder Karte.
+const KAT_KURZ = { 'garagentor-gebraucht': 'Garagentor' };
+
+// Freigestellte Produktfotos fuer die Kategorie-Leiste — dieselben wie im Hauptmenue,
+// damit Shop und Website denselben Katalog-Look haben. Fehlt ein Bild, faellt die
+// Kachel auf ein neutrales Symbol zurueck (kein kaputtes Bild).
+const KAT_BILD = {
+  fenster:      'img/_p-window.webp',
+  holzfenster:  'img/_p-holzfenster.webp',
+  dachfenster:  'img/_p-dachfenster.webp',
+  balkontuer:   'img/_p-balkon.webp',
+  haustuer:     'img/_p-door.webp',
+  schiebetuer:  'img/_p-hst.webp',
+  daemmung:     'img/_p-daemmung.webp',
+  'garagentor-gebraucht': 'img/_p-garagentor.webp'
+};
+
 function baueKatLeiste() {
   const wrap = document.getElementById('katLeiste');
   if (!wrap) return;
@@ -455,9 +474,15 @@ function baueKatLeiste() {
   const ORDER = ['fenster', 'holzfenster', 'dachfenster', 'balkontuer', 'haustuer',
                  'schiebetuer', 'daemmung', 'baumaterialien', 'garagentor-gebraucht'];
   const aktive = STATE.filter.kategorien;
+  // Kachel-Innenleben: Foto wenn vorhanden, sonst neutrales Symbol
+  const pic = (k) => KAT_BILD[k]
+    ? `<img src="${KAT_BILD[k]}" alt="" loading="lazy" decoding="async"/>`
+    : `<span class="kat-nopic"><span class="material-symbols-outlined">${KAT_ICON[k] || 'category'}</span></span>`;
+
   const chips = [`
-    <button type="button" class="kat-chip${aktive.size === 0 ? ' on' : ''}" data-kat="">
-      <span class="material-symbols-outlined">grid_view</span>Alle
+    <button type="button" class="kat-chip kat-chip--alle${aktive.size === 0 ? ' on' : ''}" data-kat="">
+      <span class="kat-pic"><span class="kat-alle-txt">Alles<br/>ansehen</span></span>
+      <span class="kat-name">Alle</span>
       <span class="kat-num">${ZAEHL_BASIS.length}</span>
     </button>`];
   ORDER.filter(k => STATE.kategorien[k]).forEach(k => {
@@ -465,7 +490,8 @@ function baueKatLeiste() {
     if (!n) return;
     chips.push(`
       <button type="button" class="kat-chip${aktive.has(k) ? ' on' : ''}" data-kat="${k}">
-        <span class="material-symbols-outlined">${KAT_ICON[k] || 'category'}</span>${escapeHtml(STATE.kategorien[k])}
+        <span class="kat-pic">${pic(k)}</span>
+        <span class="kat-name">${escapeHtml(KAT_KURZ[k] || STATE.kategorien[k])}</span>
         <span class="kat-num">${n}</span>
       </button>`);
   });
@@ -997,6 +1023,8 @@ function naechsteStandnummern(query, n) {
 function rendere() {
   const result = gefilterteProdukte();
   document.getElementById('produktAnzahl').textContent = result.length;
+  const _toolsAnzahl = document.getElementById('toolsAnzahl');
+  if (_toolsAnzahl) _toolsAnzahl.textContent = result.length;
   const _applyBtn = document.getElementById('filterApplyMob');
   if (_applyBtn) _applyBtn.textContent = result.length + (result.length === 1 ? ' Ergebnis anzeigen' : ' Ergebnisse anzeigen');
   aktualisiereShopHeader();
@@ -1023,7 +1051,7 @@ function rendere() {
           : { name: 'Baumaterialien', detail: 'Sortiment wechselt — fragen Sie was Sie suchen' };
       emptyEl.innerHTML = `
         <span class="material-symbols-outlined" style="font-size:56px;color:rgba(118,169,250,0.45);">inventory_2</span>
-        <h3 class="text-xl font-extrabold mt-3" style="color:#e8eeff;">Wir führen ${sortiment.name} ab Lager</h3>
+        <h3 class="text-xl font-extrabold mt-3" style="color:#14181d;">Wir führen ${sortiment.name} ab Lager</h3>
         <p class="text-sm mt-1.5 max-w-md mx-auto" style="color:rgba(232,238,255,0.65);">
           ${sortiment.detail}.<br>
           Bestand wechselt — bitte aktuelle Verfügbarkeit kurz anfragen.
@@ -1046,11 +1074,11 @@ function rendere() {
       const vorschlaege = naeheste.length ? `
         <p class="text-xs mt-4 mb-2" style="color:rgba(232,238,255,0.6);">Diese Standnummern liegen in der Nähe:</p>
         <div class="flex flex-wrap items-center justify-center gap-2">
-          ${naeheste.map(nr => `<button type="button" class="nr-vorschlag" data-nr="${escapeHtml(nr)}" style="display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:9px;background:rgba(118,169,250,0.14);border:1px solid rgba(118,169,250,0.4);color:#e8eeff;font-weight:800;font-size:13px;cursor:pointer;">📍 ${escapeHtml(nr)}</button>`).join('')}
+          ${naeheste.map(nr => `<button type="button" class="nr-vorschlag" data-nr="${escapeHtml(nr)}" style="display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:9px;background:#eef4ff;border:1px solid #cfe0ff;color:#225eaa;font-weight:800;font-size:13px;cursor:pointer;">${escapeHtml(nr)}</button>`).join('')}
         </div>` : '';
       emptyEl.innerHTML = `
         <span class="material-symbols-outlined" style="font-size:56px;color:rgba(118,169,250,0.4);">wrong_location</span>
-        <h3 class="text-xl font-extrabold mt-3" style="color:#e8eeff;">Standnummer „${escapeHtml(q)}" nicht gefunden</h3>
+        <h3 class="text-xl font-extrabold mt-3" style="color:#14181d;">Standnummer „${escapeHtml(q)}" nicht gefunden</h3>
         <p class="text-sm mt-1.5 max-w-md mx-auto" style="color:rgba(232,238,255,0.6);">Vielleicht ist die Ware schon verkauft oder die Nummer weicht leicht ab. Rufen Sie uns kurz an — wir finden sie sofort.</p>
         ${vorschlaege}
         <div class="mt-5 flex flex-wrap items-center justify-center gap-2.5">
@@ -1080,8 +1108,8 @@ function rendere() {
     } else {
       emptyEl.innerHTML = `
         <span class="material-symbols-outlined" style="font-size:56px;color:rgba(118,169,250,0.35);">search_off</span>
-        <h3 class="text-xl font-extrabold mt-3" style="color:#e8eeff;">Keine Produkte gefunden</h3>
-        <p class="text-sm mt-1.5 max-w-md mx-auto" style="color:rgba(232,238,255,0.55);">Probier andere Filter oder Maße — oder geh zum <a href="konfigurator.html" style="color:#76a9fa;font-weight:600;text-decoration:underline;">Konfigurator</a> für eine Maßanfertigung.</p>
+        <h3 class="text-xl font-extrabold mt-3" style="color:#14181d;">Keine Produkte gefunden</h3>
+        <p class="text-sm mt-1.5 max-w-md mx-auto" style="color:#5b626b;">Probier andere Filter oder Maße — oder geh zum <a href="konfigurator.html" style="color:#225eaa;font-weight:700;text-decoration:underline;">Konfigurator</a> für eine Maßanfertigung.</p>
         <button id="resetFromEmpty" class="mt-4 inline-flex items-center gap-1.5 px-5 py-2.5 text-sm font-bold" style="border-radius:8px;background:#225eaa;color:#fff;border:none;cursor:pointer;">
           <span class="material-symbols-outlined" style="font-size:18px">refresh</span>
           Filter zurücksetzen
@@ -1284,16 +1312,14 @@ function karteHtml(p) {
           <span class="material-symbols-outlined">favorite</span></button>`}
       </div>
       <div class="karte-body">
-        <h3 class="karte-titel line-clamp-2">${escapeHtml(p.titel)}</h3>
-        ${specZeile}
-        ${standZeile}
-        <div class="karte-foot">
-          <div class="karte-pricewrap">
-            <span class="karte-preis">${preisPrefix ? preisPrefix + ' ' : ''}${formatPreis(p.preis_eur)}<span class="karte-preis-stern">${preisStern}</span></span>
-            <span class="karte-mwst">inkl. MwSt.</span>
-          </div>
-          ${ctaRow}
+        <div class="karte-pricewrap">
+          <span class="karte-preis">${preisPrefix ? preisPrefix + ' ' : ''}${formatPreis(p.preis_eur)}<span class="karte-preis-stern">${preisStern}</span></span>
+          <span class="karte-mwst">inkl. MwSt.</span>
         </div>
+        ${specZeile}
+        <h3 class="karte-titel">${escapeHtml(p.titel)}</h3>
+        ${standZeile}
+        ${ctaRow}
       </div>
     </article>`;
 }
@@ -1778,7 +1804,7 @@ function oeffneDetail(id) {
   if (!p) return;
   document.getElementById('detailTitel').textContent = p.titel;
   const eigList = (p.eigenschaften || []).map(e => `<li class="flex items-center gap-2"><span class="material-symbols-outlined text-success" style="font-size:16px">check_circle</span>${escapeHtml(eigenschaftAnzeige(e))}</li>`).join('');
-  const standnrInfo = p.standnummer ? `<div class="bg-bg-soft rounded-lg px-3 py-2"><span class="block text-[10px] text-ink-soft">📍 Standnummer</span><span class="font-bold text-ink">${escapeHtml(p.standnummer)}</span></div>` : '';
+  const standnrInfo = p.standnummer ? `<div class="bg-bg-soft rounded-lg px-3 py-2"><span class="block text-[10px] text-ink-soft">Standnummer</span><span class="font-bold text-ink">${escapeHtml(p.standnummer)}</span></div>` : '';
   const detail = document.getElementById('detailContent');
   // Bilder-Liste: alle hochgeladenen URLs, Fallback auf p.bild oder Platzhalter
   const bilderListe = (p.bilder && p.bilder.length > 0) ? p.bilder : [p.bild];
@@ -1940,7 +1966,9 @@ function setupCarousel(total) {
 let MERK_RUECKWEG = false;   // true, wenn die grosse Ansicht aus der Merkliste heraus geoeffnet wurde
 
 function schliesseDetail() {
-  document.getElementById('detailModal').classList.remove('open');
+  const _m = document.getElementById('detailModal');
+  _m.classList.remove('open');
+  _m.style.transform = '';                 // Rest aus einer Wischgeste entfernen
   document.getElementById('detailOverlay').classList.remove('open');
   document.body.style.overflow = '';
   if (MERK_RUECKWEG) {           // zurueck dorthin, wo der Kunde herkam
@@ -1949,6 +1977,56 @@ function schliesseDetail() {
   }
   // Deep-Link-Parameter aus der Adresse entfernen (sauberer Zustand)
   try { if (location.search.indexOf('produkt=') !== -1) history.replaceState(null, '', location.pathname); } catch (e) {}
+}
+
+/* ─── Bottom-Sheet: nach unten wischen schliesst (nur Handy) ───
+   Wichtig: Die Geste startet nur, wenn der Inhalt bereits ganz oben steht ODER
+   direkt am Griffbalken gezogen wird. Sonst kaempfen Innen-Scrollen und
+   Schliessen gegeneinander und das Sheet zuckt beim Hochscrollen. */
+function initDetailSheetGeste() {
+  const modal = document.getElementById('detailModal');
+  const inhalt = document.getElementById('detailContent');
+  if (!modal || !inhalt) return;
+
+  const SCHWELLE = 90;       // ab hier gilt die Geste als „schliessen"
+  let startY = null, dy = 0, aktiv = false;
+
+  const darfZiehen = (ziel) => window.matchMedia('(max-width: 900px)').matches &&
+                               (ziel.closest('.sheet-grip') || inhalt.scrollTop <= 0);
+
+  const start = (y, ziel) => {
+    if (!darfZiehen(ziel)) return;
+    startY = y; dy = 0; aktiv = true;
+    modal.classList.add('is-dragging');
+  };
+  const zieh = (y) => {
+    if (!aktiv) return;
+    dy = y - startY;
+    if (dy > 0) modal.style.transform = `translateY(${dy}px)`;
+  };
+  const ende = () => {
+    if (!aktiv) return;
+    aktiv = false;
+    modal.classList.remove('is-dragging');
+    modal.style.transform = '';
+    if (dy > SCHWELLE) schliesseDetail();
+    startY = null; dy = 0;
+  };
+
+  modal.addEventListener('touchstart', e => start(e.touches[0].clientY, e.target), { passive: true });
+  modal.addEventListener('touchmove',  e => zieh(e.touches[0].clientY),            { passive: true });
+  modal.addEventListener('touchend',   ende);
+  modal.addEventListener('touchcancel', ende);
+
+  // Maus: nur am Griffbalken, fuer den Test am Rechner
+  modal.addEventListener('mousedown', e => {
+    if (!e.target.closest('.sheet-grip')) return;
+    start(e.clientY, e.target);
+    const mv = ev => zieh(ev.clientY);
+    const up = () => { ende(); document.removeEventListener('mousemove', mv); document.removeEventListener('mouseup', up); };
+    document.addEventListener('mousemove', mv);
+    document.addEventListener('mouseup', up);
+  });
 }
 
 /* ─── Bild-Lightbox (Vollbild beim Antippen) + Teilen + Deep-Link ─── */
@@ -2029,7 +2107,7 @@ function teileProdukt(p) {
   if (navigator.share) {
     navigator.share({ title: p.titel || 'Produkt', text: (p.titel || '') + ' – DeineFenster.de', url }).catch(() => {});
   } else if (navigator.clipboard) {
-    navigator.clipboard.writeText(url).then(() => zeigeToast('Link kopiert ✓')).catch(() => zeigeToast(url));
+    navigator.clipboard.writeText(url).then(() => zeigeToast('Link kopiert')).catch(() => zeigeToast(url));
   } else {
     zeigeToast(url);
   }
