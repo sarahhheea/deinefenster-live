@@ -1673,11 +1673,27 @@ function haustuerStageSVG(){
     // Blendrahmen + Flügel (mit Gehrung)
     g+=`<rect x="0" y="0" width="${bMm}" height="${hMm}" fill="${fCol}" stroke="${line}" stroke-width="${Math.max(uu*0.004,3)}"/>`+gehr(0,0,bMm,hMm,FR);
     g+=`<rect x="${gx}" y="${gy}" width="${sashW}" height="${gh}" fill="${fCol}" stroke="${line}" stroke-width="${DW}"/>`+gehr(gx,gy,sashW,gh,SFR);
-    // Glasfeld bzw. Modell-Motiv (von innen spiegelverkehrt — man schaut von der anderen Seite darauf)
-    g+=`<rect x="${glx}" y="${gly}" width="${glw}" height="${glh}" fill="${GLASS}" stroke="${line}" stroke-width="${DW}"/>`;
-    if(DOOR_MOTIFS[key]){
-      const flip=aussen?'':` transform="translate(${(2*glx+glw).toFixed(1)},0) scale(-1,1)"`;
-      g+=`<image href="img/tuer-motive/${key}.png" x="${glx}" y="${gly}" width="${glw}" height="${glh}" preserveAspectRatio="xMidYMid meet" opacity="${dark?0.55:0.95}"${flip}/>`;
+    // Türblatt: bei einer Haustür ist das Blatt MASSIV in Türfarbe — nur Applikation und Ausschnitte sind hell.
+    // Vorher war die ganze Blattfläche als Glas (hellblau) gefüllt; dadurch sah keine Tür aus wie ihr Modell,
+    // und Vollglas/Halbglas waren nicht zu unterscheiden (beide nur eine leere blaue Fläche).
+    const INOX=dark?'#aab0b6':'#c3c9cf';                   // Edelstahl-Einfassung
+    const flip=aussen?'':` transform="translate(${(2*glx+glw).toFixed(1)},0) scale(-1,1)"`;   // innen spiegelverkehrt
+    const rEin=Math.max(SFR*0.28,uu*0.007);                // Breite der Edelstahl-Einfassung ums Glas
+    if(key==='vollglas-inox'){
+      // Vollglas: Glasfeld über nahezu die ganze Blattfläche, umlaufend eingefasst
+      g+=`<rect x="${glx}" y="${gly}" width="${glw}" height="${glh}" fill="${INOX}" stroke="${line}" stroke-width="${DW}"/>`
+        +`<rect x="${glx+rEin}" y="${gly+rEin}" width="${Math.max(glw-2*rEin,4)}" height="${Math.max(glh-2*rEin,4)}" fill="${GLASS}" stroke="${line}" stroke-width="${DW*0.7}"/>`;
+    } else if(key==='halbglas-inox'){
+      // Halbglas: oberes Feld verglast, unteres Blatt massiv (wie im Studio-Render)
+      const ghOben=glh*0.54;
+      g+=`<rect x="${glx}" y="${gly}" width="${glw}" height="${glh}" fill="${fCol}" stroke="${line}" stroke-width="${DW}"/>`
+        +`<rect x="${glx}" y="${gly}" width="${glw}" height="${ghOben}" fill="${INOX}" stroke="${line}" stroke-width="${DW}"/>`
+        +`<rect x="${glx+rEin}" y="${gly+rEin}" width="${Math.max(glw-2*rEin,4)}" height="${Math.max(ghOben-2*rEin,4)}" fill="${GLASS}" stroke="${line}" stroke-width="${DW*0.7}"/>`;
+    } else {
+      // Modelle mit Applikation: massives Blatt, darauf die Edelstahl-Applikation (das PNG bringt die
+      // Ausschnitte selbst mit und sitzt darin bereits an der richtigen Stelle — deshalb volle Blattfläche).
+      g+=`<rect x="${glx}" y="${gly}" width="${glw}" height="${glh}" fill="${fCol}" stroke="${line}" stroke-width="${DW}"/>`;
+      if(DOOR_MOTIFS[key]) g+=`<image href="img/tuer-motive/${key}.png" x="${glx}" y="${gly}" width="${glw}" height="${glh}" preserveAspectRatio="xMidYMid meet"${flip}/>`;
     }
     // DIN-Dreh-Symbol (Spitze zur Griffseite) + Beschlag-/Scharnier-Marken auf der Bandseite
     g+=`<g stroke="${DIN}" stroke-width="${Math.max(Math.min(glw,glh)*0.006,2.4)}" fill="none" stroke-linejoin="round" stroke-linecap="round">${sashOpenLines('dreh',hinge,glx,gly,glx+glw,gly+glh)}</g>`;
