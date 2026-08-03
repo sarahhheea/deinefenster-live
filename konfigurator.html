@@ -2174,8 +2174,11 @@ let editIndex=-1;
 function eur(n){ return (Math.round(n)).toLocaleString('de-DE',{style:'currency',currency:'EUR'}); }
 // S temporär auf eine Konfig setzen, Renderer aufrufen, S wiederherstellen — ohne Skizze-Code zu ändern.
 function withConf(conf,fn){ const bak={...S}; Object.assign(S,conf); let out; try{ out=fn(); } finally{ Object.assign(S,bak); } return out; }
-function cartCount(){ return cart.length; }
-function updateCartBadge(){ document.querySelectorAll('.js-cartcount').forEach(el=>{ el.textContent=cartCount(); el.style.display=cartCount()?'':'none'; }); }
+// Der Warenkorb-Zähler in der Navigation gehört NICHT hierher: /js/dfnav.js injiziert Korb-Icon + Badge
+// site-weit, liest df_cart_v1 und hört auf das Event 'df-cart-changed'. Das feuert saveCart() unten —
+// und jeder Änderungspfad (hinzufügen, Menge, entfernen, letzte Position) läuft über render() → saveCart().
+// Deshalb hier bewusst KEINE eigene Zähler-Logik: ein Zähler, eine Quelle. (Die frühere updateCartBadge()
+// suchte '.js-cartcount' — solche Elemente gibt es seit dem Drawer-Umbau nicht mehr, sie lief ins Leere.)
 // === Warenkorb-Persistenz (localStorage) — additiv, ändert die cart-Semantik nicht ===
 const CART_LS_KEY='df_cart_v1';
 // Preis-Revision: bei JEDER Preis-Engine-/Tabellen-Änderung um 1 hochzählen. warenkorb.html vergleicht dieselbe
@@ -2194,7 +2197,7 @@ function loadCart(){ try{ const d=JSON.parse(localStorage.getItem(CART_LS_KEY)||
 // Menge eines Artikels ändern
 function itemQty(i,d){ const it=cart[i]; if(!it)return; it.conf.anzahl=Math.max(1,(it.conf.anzahl||1)+d); if(i===editIndex)S.anzahl=it.conf.anzahl; render(); }
 // Freien Namen setzen (Raum o.ä.)
-function itemName(i,v){ if(cart[i])cart[i].name=v; updateCartBadge(); saveCart(); }
+function itemName(i,v){ if(cart[i])cart[i].name=v; saveCart(); }
 // Artikel entfernen
 function itemRemove(i){ cart.splice(i,1); if(editIndex===i)editIndex=-1; else if(editIndex>i)editIndex--; if(!cart.length){ backToPicker(); return; } render(); }
 // Artikel bearbeiten: Konfig zurück in S laden, passende STEPS, zu Schritt 0
@@ -2355,7 +2358,7 @@ function startProduct(id){
 function commitCurrent(){
   if(editIndex>=0&&cart[editIndex]){ cart[editIndex].conf={...S}; }        // bestehenden Artikel aktualisieren
   else { cart.unshift({conf:{...S},name:''}); editIndex=0; }               // neuen Artikel VORNE einfügen → neueste Position steht oben (Warenkorb, Zähler, Angebots-Mail konsistent)
-  saveCart(); updateCartBadge();
+  saveCart();   // persistiert + feuert 'df-cart-changed' → Nav-Zähler (dfnav.js) aktualisiert sich
   openCartDrawer();   // seitlicher Warenkorb-Drawer statt eigener Seite (bleibt im Kontext)
 }
 // Kurze Bestätigung nach dem Hinzufügen (Toast) — self-contained, injiziert eigenes CSS einmalig
@@ -3097,7 +3100,7 @@ function go(i){
   // Konfiguration sehen — vorher stand da „0 Artikel · 0,00 €", obwohl gerade konfiguriert wurde.
   // (Der Weiter-Knopf im letzten Schritt legt selbst ab und wechselt in den Warenkorb.)
   if(STEPS[ziel]&&STEPS[ziel].key==='anfrage'&&started&&editIndex<0){
-    cart.unshift({conf:{...S},name:''}); editIndex=0; saveCart(); updateCartBadge();
+    cart.unshift({conf:{...S},name:''}); editIndex=0; saveCart();
   }
   cur=ziel; render(); window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -3114,7 +3117,7 @@ function render(){
     document.getElementById('wizGrid').style.display='none';
     nav.style.display='none'; foot.style.display='none';
     document.body.classList.remove('wiz-active');
-    renderPicker(); updateCartBadge(); return;
+    renderPicker(); return;
   }
   document.body.classList.add('wiz-active');
   document.getElementById('pickerView').style.display='none';
@@ -3149,7 +3152,6 @@ function render(){
   updateMassValidity(); refreshPrice();
   document.getElementById('backLbl').textContent=cur===0?'Produkte':'Zurück';
   document.getElementById('nextLbl').textContent = cur===STEPS.length-2 ? (editIndex>=0?'Änderungen übernehmen':'In den Warenkorb legen') : 'Weiter';
-  updateCartBadge();
 }
 loadCart();   // gespeicherten Warenkorb wiederherstellen (Persistenz)
 render();
