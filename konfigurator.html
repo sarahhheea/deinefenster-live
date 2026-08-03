@@ -723,7 +723,13 @@ body:not(.wiz-active) .topbar{display:none}
   /* Im Wizard: Website-Nav-Extras + Legal-Footer raus → nur ein schlanker App-Kopf */
   body.wiz-active .dfnav-util{display:none}
   /* "Anderes Produkt"-Extraleiste raus (Zurück-zu-Produkten liegt in der Fußleiste auf Schritt 1) */
-  body.wiz-active .topbar .tb-row{display:none}
+  /* Frueher komplett ausgeblendet — dadurch stand auf dem Handy nirgends, WELCHES
+     Produkt konfiguriert wird. Jetzt kompakt sichtbar: nur Label + Produktname,
+     der Wechsel-Knopf wandert in die Fussleiste ("Produkte"). */
+  body.wiz-active .topbar .tb-row{display:flex;padding:7px 16px;min-height:0}
+  body.wiz-active .topbar .tb-link{display:none}
+  body.wiz-active .tb-prodlabel{font-size:9.5px;letter-spacing:.09em}
+  body.wiz-active .tb-prod{font-size:16px !important;line-height:1.2}
   /* Dünner Fortschrittsbalken + kompakte swipebare Schritt-Tabs (wie vorher: mehr Schritte sichtbar, durchziehbar), aktueller zentriert */
   body.wiz-active .wizprog{display:block;margin:10px 14px 4px}
   body.wiz-active .steps-inner{display:flex;gap:2px;padding:0 10px 4px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
@@ -903,6 +909,36 @@ body.checkout-focus .topbar{display:none}
 .cd-more:hover{background:rgba(34,94,170,.07)}
 .cd-more svg{flex:none}
 .cd-cont{min-height:44px}
+
+/* Warenkorb-Skizzen: waren 49x80px in einer 500px breiten Schublade — der Kunde
+   konnte nicht erkennen, was er anfragt. Jetzt gross und bei Tueren/Fenstern
+   beide Seiten, weil Griff und Scharniere nur innen sichtbar sind. */
+/* Beide Ansichten links nebeneinander, die Aufschluesselung rechts daneben. */
+.cd-item{display:flex !important;gap:16px;align-items:flex-start}
+.cd-draws{display:flex;gap:8px;flex:0 0 auto;margin:0}
+.cd-draws .cd-draw{flex:0 0 150px;width:150px;height:210px;margin:0;background:var(--bg);border:1px solid var(--line);
+  border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:10px 8px 6px;overflow:hidden;cursor:zoom-in;transition:border-color .15s}
+.cd-draws .cd-draw:hover{border-color:var(--primary,#225eaa)}
+.cd-draws .cd-draw svg,.cd-draws .cd-draw img{max-width:100%;max-height:100%;height:auto;flex:1 1 auto;min-height:0}
+.cd-draws figcaption{flex:none;margin-top:6px;font-size:11px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink-soft,#5b626b)}
+@media(max-width:560px){ .cd-draws .cd-draw{height:150px} }
+
+/* Die Skizzen waren nicht zu klein — die Schublade war zu schmal (440px).
+   Bei zwei Ansichten nebeneinander blieben je ~90px, da ist keine Bemassung lesbar.
+   Breitere Schublade auf grossen Schirmen, mobil die Ansichten untereinander. */
+.cd-panel{width:min(760px,100%) !important}
+.cd-draws .cd-draw svg,.cd-draws .cd-draw img{max-height:170px}
+.cd-main{flex:1 1 0;min-width:0}
+
+@media(max-width:820px){
+  /* Handy: Skizzen bleiben nebeneinander (Vergleich innen/aussen), Daten darunter */
+  .cd-item{flex-direction:column;gap:12px}
+  .cd-draws{width:100%}
+  .cd-draws .cd-draw{flex:1 1 0;width:auto;height:180px}
+  .cd-draws .cd-draw svg,.cd-draws .cd-draw img{max-height:140px}
+}
 </style>
 </head>
 <body>
@@ -1353,7 +1389,24 @@ function pdfSkizzeSrc(){
 }
 // Außenansicht zeigen wir NUR, wenn der Kunde gerade die Außenfarbe wählt (Farbe-Schritt, Toggle 'a').
 // Sonst immer Innenansicht (Endprodukt). Außenansicht = Außenfarbe OHNE Griff + OHNE Scharniere (Kunde 05.07.).
-function sketchAussen(){ try{ return started && STEPS[cur] && STEPS[cur].key==='farbe' && S.colorTarget==='a'; }catch(e){ return false; } }
+/* Ansicht erzwingbar: der Warenkorb zeigt Innen- UND Aussenseite, unabhaengig
+   davon, in welchem Schritt der Wizard gerade steht. null = normale Automatik. */
+let ANSICHT_ERZWUNGEN = null;
+function sketchAussen(){
+  if(ANSICHT_ERZWUNGEN !== null) return ANSICHT_ERZWUNGEN;
+  try{ return started && STEPS[cur] && STEPS[cur].key==='farbe' && S.colorTarget==='a'; }catch(e){ return false; }
+}
+function skizzeSeite(conf, aussen){
+  var vorher = ANSICHT_ERZWUNGEN;
+  ANSICHT_ERZWUNGEN = aussen;
+  try { return withConf(conf, function(){ return stageSVG(); }); }
+  finally { ANSICHT_ERZWUNGEN = vorher; }
+}
+/* Nur wo sich die Seiten unterscheiden, lohnt die zweite Ansicht:
+   Griff und Scharniere sitzen innen, aussen sind sie nicht sichtbar. */
+function hatZweiSeiten(conf){
+  return conf && (conf.prod==='haustuer' || conf.prod==='fenster' || conf.prod==='balkon');
+}
 function stageSVG(){
   const pdf=pdfSkizzeSrc();
   if(pdf) return `<img src="${pdf}" alt="Fenster-Skizze" style="width:100%;height:100%;object-fit:contain;display:block">`;
@@ -2398,11 +2451,18 @@ document.addEventListener('keydown',function(e){
 // === Warenkorb-Drawer (seitlich) — neue Ansicht der bestehenden cart-Daten, kein Duplikat der Logik ===
 function cdItemHTML(it,i){
   var conf=it.conf, q=conf.anzahl||1;
-  var sketch=withConf(conf,function(){return stageSVG();});
+  var sketch=skizzeSeite(conf,false);
+  var sketchAus=hatZweiSeiten(conf)?skizzeSeite(conf,true):'';
   var title=withConf(conf,configTitle);
   var unit=withConf(conf,price)||0;
   var specs=posKeySpecs(conf);
-  return '<div class="cd-item"><div class="cd-draw" onclick="skizzeGross('+i+')" role="button" tabindex="0" aria-label="Skizze groß ansehen" title="Skizze groß ansehen">'+sketch+'</div><div class="cd-main">'
+    var bilder = sketchAus
+    ? '<div class="cd-draws">'
+      + '<figure class="cd-draw" onclick="skizzeGross('+i+')" role="button" tabindex="0" aria-label="Skizze gro&szlig; ansehen">'+sketch+'<figcaption>Innen</figcaption></figure>'
+      + '<figure class="cd-draw" onclick="skizzeGross('+i+')" role="button" tabindex="0" aria-label="Skizze gro&szlig; ansehen">'+sketchAus+'<figcaption>Au&szlig;en</figcaption></figure>'
+      + '</div>'
+    : '<div class="cd-draws"><figure class="cd-draw" onclick="skizzeGross('+i+')" role="button" tabindex="0" aria-label="Skizze gro&szlig; ansehen">'+sketch+'</figure></div>';
+  return '<div class="cd-item">'+bilder+'<div class="cd-main">'
     +'<div class="cd-title">'+title+(it.name?' · '+it.name:'')+'</div>'
     +'<div class="cd-specs">'+specs+'</div>'
     +'<div class="cd-row"><div class="cd-qty"><button type="button" onclick="itemQty('+i+',-1);renderCartDrawer()" aria-label="Menge verringern">&minus;</button><span>'+q+'</span><button type="button" onclick="itemQty('+i+',1);renderCartDrawer()" aria-label="Menge erhöhen">+</button></div><div class="cd-price">'+eur(unit*q)+'</div></div>'
