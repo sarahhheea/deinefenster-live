@@ -429,13 +429,16 @@
 .nhero-dot.is-active{width:22px;background:var(--nprimary)}
 .nhero-dot:focus-visible{outline:2px solid var(--nprimary);outline-offset:3px}
 .nhero-card{position:absolute;left:50%;bottom:7%;transform:translateX(-50%);display:flex;align-items:center;gap:13px;padding:12px 16px;border-radius:16px;background:rgba(255,255,255,.82);backdrop-filter:blur(16px) saturate(1.2);-webkit-backdrop-filter:blur(16px) saturate(1.2);border:1px solid rgba(255,255,255,.85);box-shadow:0 22px 46px -16px rgba(28,58,108,.42);z-index:3;max-width:88%;min-width:min(300px,86%);transition:transform .4s var(--nease),box-shadow .3s;text-decoration:none}
-.nhero-card:hover{transform:translateX(-50%) translateY(-3px)}
+/* Nur mit echtem Zeiger: Touch kennt "sticky hover" — der Zustand bliebe nach dem
+   Antippen haengen und das translateX(-50%) schoebe die Karte aus dem Bild, weil
+   sie auf dem Handy statisch (margin:auto) sitzt statt absolut positioniert. */
+@media(hover:hover){.nhero-card:hover{transform:translateX(-50%) translateY(-3px)}}
 .nhero-card-tx{display:flex;flex-direction:column;line-height:1.18;transition:opacity .18s var(--nease),transform .18s var(--nease)}
 .nhero-card.swapping .nhero-card-tx{opacity:0;transform:translateY(3px)}
 .nhero-card-tx b{font-family:var(--ndisp);font-size:1.12rem;font-weight:600;color:var(--nink);letter-spacing:-.015em}
 .nhero-card-tx>span{font-size:.75rem;font-weight:500;letter-spacing:.005em;color:oklch(0.47 0.04 256);margin-top:2px;white-space:nowrap}
 .nhero-card-go{width:34px;height:34px;border-radius:50%;background:var(--nprimary);color:#fff;display:grid;place-items:center;font-size:20px;flex:none;margin-left:auto;transition:transform .25s var(--nease)}
-.nhero-card:hover .nhero-card-go{transform:translateX(3px)}
+@media(hover:hover){.nhero-card:hover .nhero-card-go{transform:translateX(3px)}}
 .nhero-inner{position:relative;z-index:2;width:100%;max-width:1240px;margin:0 auto;padding:0 clamp(20px,4vw,48px)}
 .nhero-head{max-width:600px}
 /* Logo fuehrt, Zusatztext ordnet sich unter: normale Schreibweise statt Versalien,
