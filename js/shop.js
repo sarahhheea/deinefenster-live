@@ -1019,12 +1019,28 @@ function naechsteStandnummern(query, n) {
   return uniq;
 }
 
+/* ─── „Weitere Eigenschaften": Zaehler aktiver Filter ───
+   Die selten genutzten Facetten liegen zugeklappt hinter einem Sammelschalter. Ohne
+   sichtbaren Zaehler wuesste niemand, dass dort noch ein Filter greift — die Trefferzahl
+   waere dann unerklaerlich niedrig. Der Zaehler oeffnet den Block ausserdem automatisch,
+   wenn beim Laden schon etwas gesetzt ist (z.B. per URL-Parameter). */
+function aktualisiereMehrZaehler() {
+  const box = document.querySelector('.filter-mehr');
+  const num = document.getElementById('filterMehrAktiv');
+  if (!box || !num) return;
+  const n = box.querySelectorAll('input[type="checkbox"]:checked').length;
+  num.textContent = n;
+  num.hidden = n === 0;
+  if (n > 0 && !box.open) box.open = true;
+}
+
 /* ─── Render-Pipeline ─── */
 function rendere() {
   const result = gefilterteProdukte();
   document.getElementById('produktAnzahl').textContent = result.length;
   const _toolsAnzahl = document.getElementById('toolsAnzahl');
   if (_toolsAnzahl) _toolsAnzahl.textContent = result.length;
+  aktualisiereMehrZaehler();
   const _applyBtn = document.getElementById('filterApplyMob');
   if (_applyBtn) _applyBtn.textContent = result.length + (result.length === 1 ? ' Ergebnis anzeigen' : ' Ergebnisse anzeigen');
   aktualisiereShopHeader();

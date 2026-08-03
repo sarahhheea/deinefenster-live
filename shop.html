@@ -1141,6 +1141,11 @@ input[type="range"].range-clean::-moz-range-thumb {
   gap: 6px;
   margin-top: 10px;
 }
+/* Karten-CTA bewusst SEKUNDAER (Umriss statt Vollflaeche).
+   Recherche (Product-Listing-Guides 2026) + Design-Regel „ein primaerer Knopf pro Ansicht":
+   Ein vollflaechig blauer Knopf auf jeder Karte erzeugt bei 12 sichtbaren Karten 12
+   gleichwertige CTAs und nimmt der Ware die Aufmerksamkeit. Der primaere Weg ist die
+   Karte selbst (oeffnet die Produktansicht); der Knopf ist die Abkuerzung fuer Entschlossene. */
 .shop-card-cta-anfrage {
   flex: 1;
   display: inline-flex;
@@ -1148,23 +1153,25 @@ input[type="range"].range-clean::-moz-range-thumb {
   justify-content: center;
   gap: 6px;
   padding: 11px 12px;
-  background: #225eaa;
-  color: #fff;
+  background: #fff;
+  color: #225eaa;
+  border: 1.5px solid #cfe0ff;
   border-radius: 10px;
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-weight: 800;
+  font-weight: 700;
   font-size: 14px;
   text-decoration: none;
-  box-shadow: 0 4px 12px rgba(34,94,170,0.28);
-  transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
-  min-height: 48px;
+  box-shadow: none;
+  transition: transform 0.15s, box-shadow 0.15s, background 0.15s, border-color 0.15s;
+  min-height: 44px;
   border: none;
   cursor: pointer;
 }
 .shop-card-cta-anfrage:hover {
-  background: #1b4d8c;
+  background: #eef4ff;
+  border-color: #225eaa;
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(34,94,170,0.38);
+  box-shadow: none;
 }
 .shop-card-cta-anfrage .material-symbols-outlined { font-size: 18px; }
 /* „⋯"-Menü auf der Karte (Teilen/Drucken) — sekundär, entlastet die Karte */
@@ -1658,7 +1665,7 @@ input[type="range"].range-clean::-moz-range-thumb {
 
 <!-- Login-Status-Bar — sichtbar nur wenn eingeloggt (von shop.js gesteuert) -->
 <div id="loginStatusBar" class="hidden text-white text-xs" style="background:#1a2f5e;border-bottom:1px solid rgba(118,169,250,0.2);">
-  <div class="max-w-[1440px] mx-auto px-6 md:px-12 py-2 flex items-center justify-between gap-3">
+  <div class="max-w-[1280px] mx-auto px-4 md:px-10 py-2 flex items-center justify-between gap-3">
     <span class="flex items-center gap-2">
       <span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">verified_user</span>
       Eingeloggt als <strong id="loginStatusEmail">—</strong> · Verwaltungsmodus aktiv
@@ -1696,7 +1703,7 @@ input[type="range"].range-clean::-moz-range-thumb {
     <img class="shop-hero3-img" src="img/lager/lager-tageslicht.jpg" alt="" loading="eager" decoding="async"/>
     <span class="shop-hero3-scrim"></span>
   </div>
-  <div class="shop-hero3-inner max-w-[1440px] mx-auto px-6 md:px-12">
+  <div class="shop-hero3-inner max-w-[1280px] mx-auto px-4 md:px-10">
     <div class="shop-hero3-eyebrow">
       <span id="shopHeaderLabel">Lager · Brandenburg a.d.H.</span>
       <span class="shop-hero3-sep" aria-hidden="true">·</span>
@@ -1773,7 +1780,10 @@ input[type="range"].range-clean::-moz-range-thumb {
 </div>
 
 <!-- ─────────────────────────────────── HAUPTBEREICH ─────────────────────────────────── -->
-<main class="max-w-[1440px] mx-auto px-6 md:px-12 pt-2 pb-8 grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-8" style="background:transparent;" id="main">
+<!-- Breite und Innenabstand MUESSEN mit dem Kopfbereich uebereinstimmen (max-w-1280 / px-4 md:px-10).
+     Standen die beiden auf verschiedenen Werten, lagen Filterspalte und Raster gegeneinander
+     versetzt — die Seite wirkte dadurch aus der Mitte gerutscht. -->
+<main class="max-w-[1280px] mx-auto px-4 md:px-10 pt-2 pb-8 grid grid-cols-1 gap-7" style="background:transparent;" id="main">
 
   <!-- ───── FILTER-SIDEBAR ───── -->
   <aside id="filterSidebar" class="filter-sidebar">
@@ -1863,12 +1873,20 @@ input[type="range"].range-clean::-moz-range-thumb {
       </div>
     </section>
 
-    <!-- Weitere (sekundäre Filter) — zugeklappte Akkordeons -->
-    <div style="margin:10px 0 2px;padding-top:10px;border-top:1px solid rgba(118,169,250,0.14);">
-      <span style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#225eaa;opacity:.75;">Weitere Filter</span>
-    </div>
+    <!-- Ehemalige Zwischenueberschrift „Weitere Filter" entfernt: der Sammelschalter
+         darunter heisst bereits „Weitere Eigenschaften" — zwei Zeilen sagten dasselbe. -->
 
     <!-- Eigenschaften -->
+    <!-- Baymard-Stufe 3: Facetten, die weniger als ~15 % der Kunden nutzen, liegen
+         gebuendelt hinter EINEM Schalter statt als sieben Einzel-Akkordeons untereinander.
+         Maß, Produkttyp, Preis und Zustand bleiben oben offen — das sind die haeufigen. -->
+    <details class="filter-mehr">
+      <summary class="filter-mehr-sum">
+        <span class="filter-mehr-txt">Weitere Eigenschaften</span>
+        <span class="filter-mehr-num" id="filterMehrAktiv" hidden>0</span>
+        <span class="material-symbols-outlined filter-mehr-chev" aria-hidden="true">expand_more</span>
+      </summary>
+      <div class="filter-mehr-body">
     <details class="filter-acc">
       <summary class="filter-acc-sum">Eigenschaften<span class="material-symbols-outlined filter-acc-chev" aria-hidden="true">expand_more</span></summary>
       <div class="filter-acc-body">
@@ -1978,6 +1996,8 @@ input[type="range"].range-clean::-moz-range-thumb {
             <span class="count" data-count="sonderpreis"></span>
           </label>
         </div>
+      </div>
+    </details>
       </div>
     </details>
 
@@ -2157,7 +2177,7 @@ input[type="range"].range-clean::-moz-range-thumb {
      Beantwortet 8 People-Also-Ask-Fragen direkt im Text — KIs zitieren.
 ═══════════════════════════════════════════════════════════════════════ -->
 <!-- STATIC INTRO am Page-Ende (für Crawler ohne JS — Speakable-Schema-Anker) -->
-<section class="max-w-[1440px] mx-auto px-6 md:px-12 py-10">
+<section class="max-w-[1280px] mx-auto px-4 md:px-10 py-10">
   <div class="speakable-faq" style="background:#ffffff;border-left:3px solid #225eaa;padding:18px 22px;border-radius:10px;">
     <h2 style="font-size:1.05rem;font-weight:800;color:#1f2937;margin:0 0 6px 0;font-family:'Plus Jakarta Sans',sans-serif;">Online-Shop: ca. 10.000 Artikel — Drutex-Neuware und gebrauchte Fenster, Türen, Garagentore</h2>
     <p style="margin:0;font-size:14px;line-height:1.65;color:rgba(31,41,55,0.92);">
@@ -2581,6 +2601,15 @@ section[style*="#0a1530"], div[style*="#0a1530"] { background: #f4f7fc !importan
     scrollbar-width: none; -ms-overflow-style: none;
   }
   .kat-leiste::-webkit-scrollbar { display: none; }
+  /* Ab Tablet fuellen die Kacheln die Zeile aus. Vorher endeten sie bei zwei Dritteln
+     und liessen rechts ein Loch — das laesst die ganze Seite aus der Mitte gerutscht wirken. */
+  @media (min-width: 900px) {
+    .kat-leiste { overflow-x: visible; gap: 12px; padding-top: 18px; }
+    .kat-leiste .kat-chip { flex: 1 1 0; max-width: none; }
+    .kat-leiste .kat-pic { height: 104px; padding: 12px 12px 9px; border-radius: 14px; }
+    .kat-leiste .kat-name { font-size: 13px; margin-top: 9px; }
+    .kat-leiste .kat-num { font-size: 12px; }
+  }
   .kat-chip {
     flex: 0 0 92px; scroll-snap-align: start; cursor: pointer;
     border: 0; background: transparent; padding: 0; text-align: center;
@@ -2758,6 +2787,13 @@ section[style*="#0a1530"], div[style*="#0a1530"] { background: #f4f7fc !importan
      breiter werden als die Spalte, sonst scrollt die ganze Seite quer.
      min-width:0 erlaubt Flex-Kindern zu schrumpfen; wrap ist das Sicherheitsnetz. */
   .karte, .karte-body, .karte-foot { min-width: 0; max-width: 100%; }
+
+  /* Unterschiedlich lange Titel ergaben unterschiedlich hohe Karten — die Knoepfe
+     standen dann auf verschiedenen Hoehen und die Zeile wirkte schief. Karte als
+     Spalte, Knopfzeile per auto-Abstand nach unten: eine gemeinsame Grundlinie. */
+  .karte { display: flex; flex-direction: column; height: 100%; }
+  .karte-body { display: flex; flex-direction: column; flex: 1; }
+  .shop-card-cta-row { margin-top: auto; padding-top: 10px; }
   .karte-titel, .karte-spec, .karte-nr { overflow-wrap: anywhere; }
   .karte-foot {
     display: flex; align-items: center; justify-content: space-between;
@@ -2814,10 +2850,38 @@ section[style*="#0a1530"], div[style*="#0a1530"] { background: #f4f7fc !importan
   }
 
   /* Spaltenzahl: xl:grid-cols-3 (ab 1280px) greift, xl:grid-cols-4 ist im
-     vorkompilierten css/tailwind.css nicht enthalten. Daher hier per CSS:
-     ab 1100px drei, ab 1400px vier Spalten. */
+     vorkompilierten css/tailwind.css nicht enthalten. Daher hier per CSS.
+     Drei statt vier Spalten ab 1100px: bei 1280er Container blieben pro Karte nur
+     254px, das Foto war 175px hoch. Mit drei Spalten sind es ~340px Karte und ein
+     deutlich groesseres Foto — die Ware ist das Verkaufsargument, nicht die Dichte. */
   @media (min-width: 1100px) { #produktGrid { grid-template-columns: repeat(3, minmax(0,1fr)) !important; } }
-  @media (min-width: 1400px) { #produktGrid { grid-template-columns: repeat(4, minmax(0,1fr)) !important; } }
+
+  /* Zweispaltiges Layout NICHT ueber Tailwind-Arbitrary-Values (lg:grid-cols-[232px_1fr]):
+     Die sind im vorkompilierten css/tailwind.css nicht enthalten, die Klasse laeuft ins
+     Leere und das Layout faellt einspaltig zusammen. Deshalb hier explizit. */
+  @media (min-width: 1024px) {
+    #main { grid-template-columns: 232px minmax(0, 1fr); }
+  }
+
+  /* ── „Weitere Eigenschaften": Sammelschalter fuer die selten genutzten Filter ── */
+  .filter-mehr { margin-top: 6px; border-top: 1px solid #e3e6ea; padding-top: 4px; }
+  .filter-mehr-sum {
+    list-style: none; cursor: pointer; display: flex; align-items: center; gap: 8px;
+    padding: 13px 2px; font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700; font-size: 13px; color: #14181d; user-select: none;
+  }
+  .filter-mehr-sum::-webkit-details-marker { display: none; }
+  .filter-mehr-sum:hover { color: #225eaa; }
+  .filter-mehr-txt { flex: 1; }
+  .filter-mehr-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 19px; height: 19px; padding: 0 6px; border-radius: 999px;
+    background: #225eaa; color: #fff; font-size: 10.5px; font-weight: 800;
+  }
+  .filter-mehr-chev { font-size: 20px; color: #5b626b; transition: transform .2s; }
+  .filter-mehr[open] .filter-mehr-chev { transform: rotate(180deg); }
+  /* Innenliegende Einzel-Akkordeons etwas einruecken, damit die Verschachtelung lesbar ist */
+  .filter-mehr-body { padding-left: 2px; border-left: 2px solid #eef2f8; margin-left: 2px; }
 
   /* Leere Filter-Chip-Zeile reservierte dauerhaft 44px, obwohl nichts drinsteht */
   #aktiveChips:empty { min-height: 0 !important; margin-bottom: 0 !important; }
