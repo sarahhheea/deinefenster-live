@@ -454,8 +454,31 @@ body:not(.wiz-active) .topbar{display:none}
 .co-form .opt{color:var(--ink-soft);font-weight:400;text-transform:none;letter-spacing:0}
 .co-summary{position:sticky;top:calc(120px + var(--banner-h,0px))}
 .co-items{margin-bottom:12px;border-bottom:1px solid var(--line);padding-bottom:6px}
-.co-item{display:flex;justify-content:space-between;gap:12px;font-size:13px;padding:6px 0;color:var(--ink)}
-.co-item span{color:var(--ink-soft)}
+/* Abschluss-Formular: jede Position mit ihrer Zeichnung — der Kunde sieht vor dem Absenden nochmal,
+   was er konfiguriert hat (Maße/Farbe/Glas), nicht nur eine Preiszeile. Antippen zeigt die Skizze groß. */
+.co-item{display:flex;align-items:flex-start;gap:11px;font-size:13px;padding:10px 0;color:var(--ink);border-bottom:1px solid var(--line)}
+.co-item:last-child{border-bottom:none}
+.co-draw{flex:0 0 78px;height:78px;background:var(--bg);border:1px solid var(--line);border-radius:9px;display:grid;place-items:center;padding:6px;overflow:hidden;cursor:zoom-in}
+.co-draw svg{max-width:100%;max-height:100%;height:auto;display:block}
+.co-info{flex:1 1 auto;min-width:0}
+.co-nm{font-weight:700;line-height:1.3;margin-bottom:3px}
+.co-sp{color:var(--ink-soft);font-size:11.5px;line-height:1.5}
+.co-pr{margin-top:5px;font-weight:800}
+/* ── Skizze groß ansehen: gemeinsames Overlay für Warenkorb-Drawer und Abschluss-Formular.
+   Die Zeichnung ist als Thumbnail zwangsläufig klein — hier ist sie vollständig einsehbar. ── */
+/* über dem Warenkorb-Drawer (z-index 100000) — die große Ansicht wird aus dem Drawer heraus geöffnet
+   und muss ihn überdecken, sonst liegt sie dahinter und ist rechts abgeschnitten. */
+.skz{position:fixed;inset:0;z-index:100010;background:rgba(12,22,40,.72);display:none;align-items:center;justify-content:center;padding:24px}
+.skz.on{display:flex}
+.skz-box{background:#fff;border-radius:16px;max-width:min(760px,94vw);width:100%;max-height:92vh;overflow:auto;padding:20px 22px 22px;box-shadow:0 24px 60px rgba(10,20,40,.34)}
+.skz-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:6px}
+.skz-t{font-weight:800;font-size:17px;line-height:1.3}
+.skz-s{color:var(--ink-soft);font-size:12.5px;line-height:1.55;margin-bottom:12px}
+.skz-x{flex:none;width:38px;height:38px;border:1px solid var(--line);background:#fff;border-radius:10px;font-size:20px;line-height:1;cursor:pointer;color:var(--ink)}
+.skz-x:hover{background:var(--bg)}
+.skz-draw{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;place-items:center}
+.skz-draw svg{width:100%;max-width:100%;max-height:64vh;height:auto;display:block}
+@media(max-width:600px){.skz{padding:12px}.skz-box{padding:16px}.skz-draw{padding:10px}.skz-draw svg{max-height:58vh}}
 @media(max-width:880px){.co-grid{grid-template-columns:1fr}.co-summary{position:static;order:-1}}
 /* Bestätigung */
 .ov-done{max-width:680px;margin:10px auto;text-align:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:40px 34px}
@@ -745,7 +768,7 @@ body.checkout-focus .topbar{display:none}
 .cd-x:hover{color:var(--ink)}
 .cd-body{flex:1;overflow-y:auto;padding:4px 22px}
 .cd-item{display:flex;gap:14px;padding:16px 0;border-bottom:1px solid var(--line)}
-.cd-draw{flex:0 0 86px;height:86px;background:var(--bg);border-radius:10px;display:grid;place-items:center;padding:8px;overflow:hidden}
+.cd-draw{flex:0 0 96px;height:96px;background:var(--bg);border-radius:10px;display:grid;place-items:center;padding:8px;overflow:hidden;cursor:zoom-in}
 .cd-draw svg{max-width:100%;max-height:100%;height:auto}
 .cd-main{flex:1;min-width:0}
 .cd-title{font-weight:700;font-size:15px;margin-bottom:5px;color:var(--ink);line-height:1.25}
@@ -2222,6 +2245,36 @@ function addAnother(){ editIndex=-1; anfrageView='cart'; backToPicker(); }
 function openCart(){ openCartDrawer(); }   // Korb = Drawer (eine Ansicht)
 // Zwischen Übersicht und Checkout-Formular wechseln
 function showCart(){ openCartDrawer(); }   // Korb = Drawer (eine Ansicht)
+// === Skizze groß ansehen — ein Overlay für Warenkorb-Drawer UND Abschluss-Formular ===
+// Beide Stellen zeigen die Zeichnung zwangsläufig als kleines Vorschaubild; hier ist sie vollständig
+// einsehbar (Maße lesbar). Rendert aus denselben cart-Daten, kein zweiter Zeichen-Weg.
+function skizzeGross(i){
+  var it=cart[i]; if(!it) return;
+  var box=document.getElementById('skzOverlay');
+  if(!box){
+    box=document.createElement('div');
+    box.id='skzOverlay'; box.className='skz'; box.setAttribute('role','dialog'); box.setAttribute('aria-modal','true');
+    box.innerHTML='<div class="skz-box"><div class="skz-head"><div><div class="skz-t"></div></div>'
+      +'<button type="button" class="skz-x" aria-label="Schließen">&times;</button></div>'
+      +'<div class="skz-s"></div><div class="skz-draw"></div></div>';
+    document.body.appendChild(box);
+    box.addEventListener('click',function(e){ if(e.target===box) skizzeGrossZu(); });
+    box.querySelector('.skz-x').addEventListener('click',skizzeGrossZu);
+  }
+  box.querySelector('.skz-t').textContent=withConf(it.conf,configTitle)+(it.name?' · '+it.name:'');
+  box.querySelector('.skz-s').textContent=withConf(it.conf,prodSpecs);
+  box.querySelector('.skz-draw').innerHTML=withConf(it.conf,function(){return stageSVG();});
+  box.classList.add('on'); document.body.style.overflow='hidden';
+  try{ box.querySelector('.skz-x').focus({preventScroll:true}); }catch(e){}
+}
+function skizzeGrossZu(){
+  var box=document.getElementById('skzOverlay'); if(!box) return;
+  box.classList.remove('on'); document.body.style.overflow='';
+}
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){ var b=document.getElementById('skzOverlay'); if(b&&b.classList.contains('on')) skizzeGrossZu(); }
+});
+
 // === Warenkorb-Drawer (seitlich) — neue Ansicht der bestehenden cart-Daten, kein Duplikat der Logik ===
 function cdItemHTML(it,i){
   var conf=it.conf, q=conf.anzahl||1;
@@ -2229,7 +2282,7 @@ function cdItemHTML(it,i){
   var title=withConf(conf,configTitle);
   var unit=withConf(conf,price)||0;
   var specs=posKeySpecs(conf);
-  return '<div class="cd-item"><div class="cd-draw">'+sketch+'</div><div class="cd-main">'
+  return '<div class="cd-item"><div class="cd-draw" onclick="skizzeGross('+i+')" role="button" tabindex="0" aria-label="Skizze groß ansehen" title="Skizze groß ansehen">'+sketch+'</div><div class="cd-main">'
     +'<div class="cd-title">'+title+(it.name?' · '+it.name:'')+'</div>'
     +'<div class="cd-specs">'+specs+'</div>'
     +'<div class="cd-row"><div class="cd-qty"><button type="button" onclick="itemQty('+i+',-1);renderCartDrawer()" aria-label="Menge verringern">&minus;</button><span>'+q+'</span><button type="button" onclick="itemQty('+i+',1);renderCartDrawer()" aria-label="Menge erhöhen">+</button></div><div class="cd-price">'+eur(unit*q)+'</div></div>'
@@ -2802,7 +2855,17 @@ function anfrageHTML(){
 }
 // Eigene Checkout-Seite: Formular links, kompakte Bestellung rechts (Branchen-Standard)
 function formHTML(t){
-  const mini=cart.map(it=>{ const q=it.conf.anzahl||1, nm=withConf(it.conf,configTitle); return `<div class="co-item"><span>${q} × ${nm}${it.name?' · '+it.name.replace(/</g,'&lt;'):''}</span><b class="tnum">${eur(withConf(it.conf,price)*q)}</b></div>`; }).join('');
+  // Jede Position mit Zeichnung + Kurzdaten statt nur einer Preiszeile: letzter Blick vor dem Absenden,
+  // ob Maße/Öffnung/Farbe stimmen. Zeichnung antippen → große Ansicht (skizzeGross).
+  const mini=cart.map((it,i)=>{
+    const q=it.conf.anzahl||1, nm=withConf(it.conf,configTitle);
+    const sk=withConf(it.conf,()=>stageSVG()), sp=withConf(it.conf,prodSpecs);
+    return `<div class="co-item">`
+      +`<div class="co-draw" onclick="skizzeGross(${i})" role="button" tabindex="0" aria-label="Skizze groß ansehen" title="Skizze groß ansehen">${sk}</div>`
+      +`<div class="co-info"><div class="co-nm">${q} × ${nm}${it.name?' · '+esc(it.name):''}</div>`
+      +`<div class="co-sp">${sp}</div>`
+      +`<div class="co-pr tnum">${eur(withConf(it.conf,price)*q)}</div></div></div>`;
+  }).join('');
   const lief=(liefer==='lieferung');
   const addr = lief ? `<div class="field"><label>Stra&szlig;e &amp; Hausnummer <span class="req">*</span></label><input name="strasse" required autocomplete="street-address" placeholder="Musterstra&szlig;e 1"></div>
         <div class="opts two"><div class="field"><label>PLZ <span class="req">*</span></label><input name="plz" required inputmode="numeric" autocomplete="postal-code" placeholder="14772"></div><div class="field"><label>Ort <span class="req">*</span></label><input name="ort" required autocomplete="address-level2" placeholder="Brandenburg a. d. Havel"></div></div>` : '';
