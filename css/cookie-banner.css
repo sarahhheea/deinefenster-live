@@ -115,8 +115,11 @@
   #df-cookie-banner { padding: 16px 18px; }
   .df-cookie-inner { grid-template-columns: 1fr; gap: 14px; }
   .df-cookie-actions { width: 100%; }
-  .df-cookie-btn { flex: 1; min-width: 0; padding: 12px 14px; }
-  .df-cookie-btn.df-settings { flex: 0 1 auto; min-width: 100px; }
+  /* Buttons duerfen NICHT unter ihre Textbreite schrumpfen — sonst schneidet
+     white-space:nowrap die Beschriftung ab. Ablehnen + Akzeptieren bleiben
+     gleich gross nebeneinander (BGH I ZR 7/16), Einstellungen rutscht in Zeile 2. */
+  .df-cookie-btn { flex: 1 1 132px; min-width: 132px; padding: 12px 10px; }
+  .df-cookie-btn.df-settings { flex: 1 1 100%; min-width: 0; order: 3; }
 }
 
 /* ── Settings-Modal ── */
