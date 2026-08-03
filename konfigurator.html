@@ -265,7 +265,16 @@ body:not(.wiz-active) .topbar{display:none}
   .wrap{padding:22px 16px 150px}.head h2{font-size:30px}
   .grid{grid-template-columns:1fr;gap:18px}
   .stage-card{position:sticky;top:calc(142px + var(--banner-h,0px))}.stage{padding:26px 22px 16px}.stage svg{max-width:210px}.floor{bottom:28px}
-  .summary{display:none}
+  /* Am Handy war die Zusammenfassung komplett ausgeblendet — der Kunde sah dort NUR die Zeichnung und
+     nirgends, welches Maß und welchen Anschlag er gewählt hat. Jetzt die Kernangaben (Maß + Öffnung)
+     unter der Zeichnung; die Detailliste bleibt dem großen Bildschirm vorbehalten, sonst wird die
+     mitlaufende Karte zu hoch. */
+  .summary{display:block;padding:2px 18px 12px;border-top:none}
+  .summary .eb,.summary h3{display:none}
+  .summary .sum-more,.summary .srow{display:none}
+  .sum-mass{margin:0 0 7px}.sum-mass b{font-size:18px}
+  .sum-key{padding:6px 9px;margin-bottom:6px}
+  .sum-key .kt{font-size:12.5px}.sum-key .ks{font-size:10.5px}
   .footer-inner{padding:13px 16px;gap:12px}.price .amt{font-size:22px}
   .btn-next{flex:1;padding:0 20px}.btn-back{padding:0 16px}
   .pk-head2 h1{font-size:34px}
@@ -518,6 +527,23 @@ body:not(.wiz-active) .topbar{display:none}
 .summary .eb{font-size:9.5px;letter-spacing:.16em}
 .summary h3{font-size:15px;margin:1px 0 4px}
 .summary .srow{padding:3px 0;font-size:11.5px}
+/* ── Zusammenfassung mit Rangfolge statt Zeilenwüste ──────────────────────────────────────────
+   Vorher standen alle Angaben in identischen Zeilen (gleiche Größe, gleiche Stärke) — der Kunde
+   musste jede lesen, um das Wesentliche zu finden. Jetzt drei Ebenen: Maß als Anker (die meist-
+   gesuchte Angabe), darauf die Öffnungsrichtung hervorgehoben (danach wird bestellt), Details
+   erst darunter und gedämpft. */
+.sum-mass{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:2px 0 8px}
+.sum-mass b{font-size:21px;font-weight:800;letter-spacing:-.01em;line-height:1.1}
+.sum-mass span{font-size:11.5px;color:var(--ink-soft);white-space:nowrap}
+.sum-key{background:var(--bg);border:1px solid var(--line);border-left:3px solid var(--accent);
+  border-radius:8px;padding:8px 11px;margin-bottom:9px}
+.sum-key .kt{font-size:13.5px;font-weight:800;line-height:1.25}
+.sum-key .kt em{font-style:normal;color:var(--accent)}
+.sum-key .ks{font-size:11px;color:var(--ink-soft);line-height:1.45;margin-top:2px}
+/* Richtungswörter in der Erklärzeile fett statt kursiv — genau die sucht der Kunde beim Prüfen */
+.sum-key .ks em{font-style:normal;font-weight:800;color:var(--ink)}
+.sum-more{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-soft);margin:10px 0 2px}
 .stageimg{width:100%;max-width:238px;height:auto;display:block;margin:0 auto;filter:drop-shadow(0 12px 24px rgba(20,40,80,.16))}
 .stagedim{text-align:center;margin-top:14px;font-size:12.5px;color:var(--ink-soft);line-height:1.55}
 .grid{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:28px;align-items:start}
@@ -587,7 +613,7 @@ body:not(.wiz-active) .topbar{display:none}
 #head{text-align:center;margin:6px auto 30px;max-width:720px}
 #head h2{font-size:40px}
 #head .sub,#head p{font-size:17px}
-@media(max-width:880px){.grid{grid-template-columns:1fr!important}.stage-card{top:auto;position:static;display:block}.stage{flex:none;padding:16px 24px 8px}.head h2{font-size:28px}.stageimg{max-width:190px}.summary{display:none}.steps-inner{gap:2px}.step{min-width:84px;flex:0 0 auto}.steps-hint{padding:8px 14px}.sh-jump{font-size:11px}}
+@media(max-width:880px){.grid{grid-template-columns:1fr!important}.stage-card{top:auto;position:static;display:block}.stage{flex:none;padding:16px 24px 8px}.head h2{font-size:28px}.stageimg{max-width:190px}.summary{display:block;padding:2px 18px 12px;border-top:none}.steps-inner{gap:2px}.step{min-width:84px;flex:0 0 auto}.steps-hint{padding:8px 14px}.sh-jump{font-size:11px}}
 /* === Handy: Auswahl-Schritte + Fußleiste === */
 /* Liefer-Info-Button/Overlay + Backdrop nur auf dem Handy — Basis versteckt (Desktop) */
 .lf-infobtn,.lf-backdrop,.lf-close{display:none}
@@ -2868,6 +2894,53 @@ const SPRO_DICKEN={aufgesetzt:['27','45','65'], szr:['18','26','45']};
 const SPRO_RASTER={senk2:{name:'Senkrecht',v:1,h:0}, waag2:{name:'Waagerecht',v:0,h:1}, kreuz:{name:'Kreuz · 4 Felder',v:1,h:1}, feld6:{name:'6 Felder',v:2,h:1}, feld9:{name:'9 Felder',v:2,h:2}};
 const SPROTYPN={keine:'Ohne',aufgesetzt:'Aufgesetzt',szr:'Im Glas (SZR)'};
 const GRIFFN={mistral:'Mistral',abschliessbar:'Mistral abschließbar'};
+// Zusammenfassung auf der Bühne — MIT Rangfolge, damit der Kunde in Sekunden erfasst, was er konfiguriert hat:
+// (1) das Maß als Anker, (2) die Öffnungsrichtung hervorgehoben — danach wird bestellt und dort passieren die
+// Fehler, (3) alles Übrige gedämpft darunter. Bewusst eine EIGENE Funktion: summaryRows() liefert weiterhin die
+// schlichten .srow-Zeilen, die die Mail-Erzeugung (_mailRows) per Textmuster in eine Tabelle übersetzt.
+function summaryPanel(){
+  const co=COLORS[S.outer], ci=COLORS[S.inner];
+  const esc2=t=>String(t==null?'':t);
+  const hebe=t=>esc2(t).replace(/\b(links|rechts|innen|außen)\b/gi,'<em>$1</em>');   // Richtungswörter hervorheben
+  const kopf=`<div class="sum-mass"><b class="tnum">${S.w} × ${S.h} mm</b><span>${S.anzahl} ${S.anzahl>1?'Stück':'Stück'}</span></div>`;
+  const key=(t,s)=>`<div class="sum-key"><div class="kt">${hebe(t)}</div>${s?`<div class="ks">${hebe(s)}</div>`:''}</div>`;
+  const row=(k,v)=>`<div class="srow"><span class="k">${k}</span><span class="v">${v}</span></div>`;
+  const farbe=(S.outer===S.inner)
+    ? row('Farbe',`<span class="dot" style="background:${co.c}"></span>${co.n}`)
+    : row('Farbe',`<span class="dot" style="background:${co.c}"></span>${co.n} / <span class="dot" style="background:${ci.c}"></span>${ci.n}`);
+  const mehr=`<div class="sum-more">Ausstattung</div>`;
+
+  if(S.prod==='haustuer'){
+    const dinR=(S.opening!=='dkl');
+    return kopf
+      +key(`Anschlag ${dinR?'rechts':'links'} (DIN)`,
+           `Bänder ${dinR?'rechts':'links'} · Griff ${dinR?'links':'rechts'} — von innen gesehen`)
+      +key(`${GRIFFT[_griffAussenVal()]||'Griff'} außen`, `Drückergarnitur innen`)
+      +mehr+row('Modell',DOORN[S.doorModel]||'—')+farbe
+      +row('Verglasung',`${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}`)
+      +row('Profil',PROFN[S.profile])
+      +row('Sicherheit',S.sicher?'Mehrfachverriegelung':'Standard');
+  }
+  if(S.prod==='schiebe'){
+    const psk=S.hstSystem!=='hs', li=(S.hstLauf==='links');
+    return kopf
+      +key(psk?`Kipp-Schiebe ${li?'links':'rechts'}`:`Läuft nach ${li?'links':'rechts'}`,
+           psk?'Schiebeflügel öffnet zur Seite und kippt':'Hebe-Schiebetür')
+      +mehr+row('System',psk?'PSK Schiebetür':'Hebe-Schiebetür')+farbe
+      +row('Verglasung',S.glass==='3'?'3-fach':'2-fach')
+      +row('Rollladen',S.roll==='motor'?'Motor':S.roll==='gurt'?'Gurtwickler':'—');
+  }
+  // Fenster + Balkontür
+  const ex=[]; if(S.roll==='gurt')ex.push('Rollladen · Gurtwickler'); if(S.roll==='motor')ex.push('Motorrolladen');
+  if(S.schall)ex.push('Schallschutz'); if(S.sicher)ex.push('RC1');
+  if(S.prod==='balkon'&&S.balkonSchwelle==='alu')ex.push('Aluschwelle');
+  return kopf
+    +key(openingName(),AUFTN[S.aufteilung])
+    +mehr+row('Profil',PROFN[S.profile])+farbe
+    +row('Verglasung',`${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}`)
+    +(S.sprossen&&S.sprossen!=='ohne'?row('Sprossen',SPROSN?(SPROSN[S.sprossen]||'ja'):'ja'):'')
+    +(ex.length?row('Extras',ex.join(' · ')):'');
+}
 function summaryRows(){
   const co=COLORS[S.outer],ci=COLORS[S.inner];
   const massRow=`<div class="srow"><span class="k">Maße</span><span class="v tnum">${S.w} × ${S.h} mm</span></div><div class="srow"><span class="k">Anzahl</span><span class="v tnum">${S.anzahl} Stück</span></div>`;
@@ -3371,7 +3444,7 @@ function render(){
   document.getElementById('hTitle').innerHTML=STEPS[cur].title[0]+'<span class="accent">'+STEPS[cur].title[1]+'</span>';
   document.getElementById('hSub').textContent=STEPS[cur].sub;
   document.getElementById('stage').innerHTML=stageSVG();
-  document.getElementById('summary').innerHTML='<div class="eb">Ihre Konfiguration</div><h3>'+configTitle()+'</h3>'+summaryRows();
+  document.getElementById('summary').innerHTML='<div class="eb">Ihre Konfiguration</div><h3>'+configTitle()+'</h3>'+summaryPanel();
   document.getElementById('panel').innerHTML=panelHTML();
   if(SKIP_KEYS.includes(STEPS[cur].key) && cur<STEPS.length-1){
     document.getElementById('panel').insertAdjacentHTML('afterbegin',
