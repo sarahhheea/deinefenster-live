@@ -125,15 +125,6 @@ body:not(.wiz-active) .topbar{display:none}
 .masswarn.shake{animation:mshake .4s}
 @keyframes mshake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
 .btn-next.disabled,.btn-next:disabled{opacity:.45;cursor:not-allowed;box-shadow:none;filter:grayscale(.3)}
-.massquick{margin:0 0 18px}
-.mq-titel{font-size:12.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted,#6b7280);margin:0 2px 9px;text-align:center}
-.mq-chips{display:flex;flex-wrap:wrap;gap:9px;justify-content:center}
-.mq-chip{display:flex;flex-direction:column;align-items:center;gap:1px;border:1px solid var(--line);border-radius:12px;padding:9px 14px;cursor:pointer;background:var(--surface);font:inherit;color:var(--ink);transition:.18s var(--ease);line-height:1.25}
-.mq-chip:hover{border-color:var(--accent);transform:translateY(-1px)}
-.mq-chip.on{border-color:var(--accent);border-width:2px;padding:8px 13px;background:rgba(37,99,235,.05)}
-.mq-maß{font-weight:700;font-size:14.5px;white-space:nowrap}
-.mq-preis{font-size:12.5px;font-weight:600;color:var(--accent)}
-@media (max-width:520px){.mq-chips{display:grid;grid-template-columns:1fr 1fr}.mq-chip{padding:9px 10px}.mq-maß{font-size:13.5px}}
 .spro-pills{display:flex;flex-wrap:wrap;gap:10px}
 .spro-pill{border:1px solid var(--line);border-radius:999px;padding:11px 20px;cursor:pointer;background:var(--surface);font:inherit;font-weight:600;font-size:14.5px;color:var(--ink);transition:.2s var(--ease)}
 .spro-pill:hover{border-color:var(--ink-soft)}
@@ -1915,27 +1906,6 @@ function _lp_haustuer(){
 }
 // ===== Mapping Mockup-State S → Live-State LS, dann Live-Engine aufrufen =====
 // Technische Maß-Grenzen je Produkt (Fenster je Aufteilung) — außerhalb ist keine Fertigung/kein Preis möglich
-/* Haeufige Maße als Schnellwahl. Wer sein Fenster gerade nicht gemessen hat, muesste sonst zwei
-   Zahlen raten und springt an dieser Stelle ab. Der Einstieg bleibt bewusst beim kleinsten Maß
-   (= der beworbene ab-Preis); die Schnellwahl ist nur eine Abkuerzung nach oben.
-   Die Listen sind nach Produkt und Aufteilung getrennt und werden zusaetzlich gegen die
-   technischen Grenzen gefiltert — es kann also nie ein unmoegliches Maß angeboten werden. */
-const MASS_WAHL={
-  fenster:{'1fl':[[600,800],[800,1000],[1000,1200],[1200,1400]],
-           '2fl':[[1000,1200],[1200,1400],[1400,1400],[1600,1400]],
-           '3fl':[[1800,1400],[2100,1400],[2400,1400]],
-           'ol' :[[1000,1200],[1200,1400]]},
-  balkon:  {'*':[[800,2000],[900,2100],[1000,2100],[1200,2100]]},
-  haustuer:{'*':[[900,2000],[1000,2100],[1100,2100]]},
-  schiebe: {'*':[[2000,2100],[2400,2100],[3000,2200]]}
-};
-function massWahlListe(){
-  const m=MASS_WAHL[S.prod]; if(!m) return [];
-  const liste=m[S.aufteilung]||m['*']||[];
-  const L=massLimits();
-  return liste.filter(function(x){ return x[0]>=L.bMin&&x[0]<=L.bMax&&x[1]>=L.hMin&&x[1]<=L.hMax; });
-}
-function setMassWahl(w,h){ S.w=w; S.h=h; render(); }
 function massLimits(){
   if(S.prod==='balkon') return {bMin:600,bMax:2500,hMin:1800,hMax:2400};
   if(S.prod==='haustuer') return {bMin:800,bMax:1400,hMin:1800,hMax:2400};
@@ -2847,17 +2817,7 @@ function panelHTML(){
   }
   if(k==='masse'){
     const L=massLimits();
-    const wahl=massWahlListe();
-    const chips=wahl.map(function(x){
-      const on=(+S.w===x[0]&&+S.h===x[1]);
-      const bak_w=S.w, bak_h=S.h; S.w=x[0]; S.h=x[1]; const pr=price(); S.w=bak_w; S.h=bak_h;
-      return `<button type="button" class="mq-chip${on?' on':''}" onclick="setMassWahl(${x[0]},${x[1]})">`
-        +`<span class="mq-maß">${x[0]} × ${x[1]}</span>`
-        +(pr!=null?`<span class="mq-preis">${Math.round(pr).toLocaleString('de-DE')} €</span>`:'')
-        +`</button>`;
-    }).join('');
     return `<div class="card massecard"><div class="grp-title">Maße eingeben</div>
-      ${chips?`<div class="massquick"><div class="mq-titel">Häufige Maße — oder unten selbst eintragen</div><div class="mq-chips">${chips}</div></div>`:''}
       <div class="mgrid">
         <div class="mfield"><label>Breite <span class="mrange">${L.bMin}–${L.bMax} mm</span></label><div class="mrow"><input id="mW" type="number" inputmode="numeric" enterkeyhint="next" min="0" value="${S.w}" oninput="setMass('w',this.value)" onfocus="this.select()" onkeydown="if(event.key==='Enter'){event.preventDefault();var h=document.getElementById('mH');if(h){h.focus();h.select();}}"><span class="unit">mm</span></div></div>
         <div class="mfield"><label>Höhe <span class="mrange">${L.hMin}–${L.hMax} mm</span></label><div class="mrow"><input id="mH" type="number" inputmode="numeric" enterkeyhint="done" min="0" value="${S.h}" oninput="setMass('h',this.value)" onfocus="this.select()" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}"><span class="unit">mm</span></div></div>
