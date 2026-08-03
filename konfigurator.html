@@ -1968,6 +1968,17 @@ function massLimits(){
   let hMin=500,hMax=1900; if(S.aufteilung==='ol'){ hMin=900; hMax=2400; }
   return {bMin,bMax,hMin,hMax};
 }
+/* Haelt das Maß im technisch moeglichen Bereich. Wird beim Wechsel der Aufteilung bzw. des
+   Schiebe-Systems gerufen: dort aendern sich die Grenzen (2-fluegelig braucht z.B. mind. 800 mm
+   Breite). Ohne das steht der Kunde nach dem Wechsel vor einem ungueltigen Maß, sieht statt eines
+   Preises nur „—" — und im Warenkorb landete fuer diesen Artikel 0,00 EUR, weil beim Speichern
+   der Preis eingefroren wird. Es wird immer auf das KLEINSTE moegliche Maß gesetzt, passend zum
+   Aufbau-Prinzip „faengt beim guenstigsten an". */
+function massKlemmen(){
+  const L=massLimits(), w=+S.w||0, h=+S.h||0;
+  if(w<L.bMin||w>L.bMax) S.w=Math.min(Math.max(w||L.bMin,L.bMin),L.bMax);
+  if(h<L.hMin||h>L.hMax) S.h=Math.min(Math.max(h||L.hMin,L.hMin),L.hMax);
+}
 function massOk(){ const L=massLimits(),b=+S.w||0,h=+S.h||0; return b>=L.bMin&&b<=L.bMax&&h>=L.hMin&&h<=L.hMax; }
 /* Preisregel (verbindlich, Stand 07/2026): Der Endpreis einer fertigen Konfiguration liegt IMMER
    unter dem Marktniveau, aber nie mehr als 5 EUR darunter. Alle vier Produkte ziehen denselben Betrag
@@ -2398,12 +2409,16 @@ const PRICE_REV=1;
 function cartSnapshot(it){
   const conf=it.conf, q=conf.anzahl||1;
   let r={};
-  try{ r={ sv:3, pv:PRICE_REV, price:(withConf(conf,price)||0), sketch:withConf(conf,()=>stageSVG()), title:withConf(conf,configTitle), specs:posKeySpecs(conf), full:withConf(conf,summaryRows) }; }catch(e){ r={sv:3,pv:PRICE_REV,price:0,sketch:'',title:'Artikel',specs:'',full:''}; }
+  /* Sicherheitsnetz: Ist der Preis im Moment des Speicherns nicht berechenbar (Maß voruebergehend
+     ausserhalb der Grenzen), wird der zuletzt gueltige Preis behalten. Vorher wurde 0 eingefroren —
+     der Kunde sah dann im Warenkorb 0,00 EUR fuer einen fertig konfigurierten Artikel. */
+  try{ const _p=withConf(conf,price); if(typeof _p==='number'&&_p>0) it.lastPrice=_p;
+       r={ sv:3, pv:PRICE_REV, price:((typeof _p==='number'&&_p>0)?_p:(it.lastPrice||0)), sketch:withConf(conf,()=>stageSVG()), title:withConf(conf,configTitle), specs:posKeySpecs(conf), full:withConf(conf,summaryRows) }; }catch(e){ r={sv:3,pv:PRICE_REV,price:(it.lastPrice||0),sketch:'',title:'Artikel',specs:'',full:''}; }
   return { conf, name:it.name||'', qty:q, r };
 }
 function saveCart(){ try{ localStorage.setItem(CART_LS_KEY, JSON.stringify({v:2,t:Date.now(),items:cart.map(cartSnapshot)})); }catch(e){}
   try{ window.dispatchEvent(new CustomEvent('df-cart-changed',{detail:{count:cart.length}})); }catch(e){} }
-function loadCart(){ try{ const d=JSON.parse(localStorage.getItem(CART_LS_KEY)||'null'); if(d&&Array.isArray(d.items)&&d.items.length){ cart=d.items.filter(o=>o&&o.conf).map(o=>({conf:o.conf,name:o.name||''})); } }catch(e){} }
+function loadCart(){ try{ const d=JSON.parse(localStorage.getItem(CART_LS_KEY)||'null'); if(d&&Array.isArray(d.items)&&d.items.length){ cart=d.items.filter(o=>o&&o.conf).map(o=>({conf:o.conf,name:o.name||'',lastPrice:(o.r&&Number(o.r.price))||0})); } }catch(e){} }
 // Menge eines Artikels ändern
 function itemQty(i,d){ const it=cart[i]; if(!it)return; it.conf.anzahl=Math.max(1,(it.conf.anzahl||1)+d); if(i===editIndex)S.anzahl=it.conf.anzahl; render(); }
 // Freien Namen setzen (Raum o.ä.)
@@ -2630,7 +2645,7 @@ function cartToast(){
   requestAnimationFrame(()=>t.classList.add('show'));
   clearTimeout(cartToast._h); cartToast._h=setTimeout(()=>t.classList.remove('show'),2200);
 }
-function setHstSystem(v){ S.hstSystem=v; S.hstTeilung='2'; STEPS=buildSchiebeSteps(); if(cur>=STEPS.length)cur=STEPS.length-1; render(); maybeAutoAdvance(); }
+function setHstSystem(v){ S.hstSystem=v; S.hstTeilung='2'; massKlemmen(); STEPS=buildSchiebeSteps(); if(cur>=STEPS.length)cur=STEPS.length-1; render(); maybeAutoAdvance(); }
 function backToPicker(){ started=false; anfrageView='cart'; window.scrollTo({top:0}); render(); }
 /* true, wenn die gerade sichtbare Konfiguration schon als Position im Korb liegt.
    Dann ist die Warnung "Eingaben gehen verloren" schlicht falsch. */
@@ -3340,7 +3355,11 @@ function maybeAutoAdvance(){
 }
 function set(k,v){S[k]=v;render();maybeAutoAdvance();}
 // Maße live setzen OHNE Neu-Rendern (sonst verliert das Feld den Fokus) — nur Preis unten aktualisieren
-function setMass(k,v){ S[k]=(+v||0); if(editIndex>=0&&cart[editIndex]) cart[editIndex].conf[k]=S[k]; updateMassValidity(); refreshPrice(); }
+function setMass(k,v){ S[k]=(+v||0);
+  // Beim Tippen wird nicht neu gerendert (sonst springt der Fokus aus dem Feld) — der Warenkorb
+  // muss hier trotzdem mitgeschrieben werden, sonst zeigt er noch den Preis von vor der Eingabe.
+  if(editIndex>=0&&cart[editIndex]){ cart[editIndex].conf[k]=S[k]; saveCart(); }
+  updateMassValidity(); refreshPrice(); }
 // Preis + Weiter-Knopf abhängig von Maß-Gültigkeit (kein Preis bei technisch unmöglichem Maß)
 let _letzterPreis=null;
 function refreshPrice(){
@@ -3378,7 +3397,7 @@ function updateMassValidity(){
 function setAufteilung(v){ const wechsel=(S.aufteilung!==v); S.aufteilung=v;
   // Nur bei echtem Wechsel die Oeffnungsart neu vorbelegen — sonst verliert ein zweiter Klick
   // auf die bereits gewaehlte Aufteilung die Festverglasung und verteuert still um ~52 EUR.
-  if(wechsel){ const set=anschlagSet(); S.anschlagIdx=Math.min(ANSCHLAG_DEFIDX[v]||0,set.length-1); }
+  if(wechsel){ const set=anschlagSet(); S.anschlagIdx=Math.min(ANSCHLAG_DEFIDX[v]||0,set.length-1); massKlemmen(); }
   syncOpening(); render(); maybeAutoAdvance(); }
 function setAnschlag(idx){ S.anschlagIdx=idx; syncOpening(); render(); maybeAutoAdvance(); }
 function setTuerOeff(idx,r){ S.anschlagIdx=idx; S.tuerOeffnung=r; syncOpening(); render(); maybeAutoAdvance(); }   // Haustür: DIN links/rechts + innen/außen
