@@ -1379,7 +1379,9 @@ function flatWindowSVG(isBalkon){
   const alu=isBalkon&&S.balkonSchwelle==='alu', schwH=alu?60:0;
   const winY=rollH, totalH=rollH+hMm+schwH, uu=Math.max(bMm,totalH);
   const DT=Math.max(uu*0.05,54), DW=Math.max(uu*0.0032,2), tick=DT*0.32;
-  const mL=(hasRoll?Math.max(uu*0.16,DT*3.4):Math.max(uu*0.13,DT*2.2)), mR=Math.max(uu*0.24,DT*4.8), mT=Math.max(uu*0.14,DT*2.8), mB=Math.max(uu*0.16,DT*3.2);
+  // Rechter Rand bei Rollladen breiter: dort stehen ZWEI Maßketten nebeneinander (Element innen, Gesamtmaß außen).
+  // DT*8.0 = Linie + Zahl (bis 4-stellig) + Luft + zweite Linie + zweite Zahl — sonst laufen die Maßzahlen ineinander.
+  const mL=(hasRoll?Math.max(uu*0.16,DT*3.4):Math.max(uu*0.13,DT*2.2)), mR=(hasRoll?Math.max(uu*0.40,DT*8.0):Math.max(uu*0.24,DT*4.8)), mT=Math.max(uu*0.14,DT*2.8), mB=Math.max(uu*0.16,DT*3.2);
   // Rahmen-/Flügelbreiten wie Drutex-Profil (Pos 1: Rahmen 50001 + Flügel 50011 → ~50 mm Blend- + ~66 mm Flügelrahmen sichtbar = 116 mm je Seite bei 1000 mm).
   const FR=Math.max(bMm*0.05,42), innerW=bMm-2*FR, sashW=innerW/nFl, gy=winY+FR, gh=hMm-2*FR;
   const SFR=Math.max(Math.min(sashW,gh)*0.075,30), pzH=hasRoll?Math.max(Math.min(gh*0.2,rollH*0.9),40):0;
@@ -1434,8 +1436,12 @@ function flatWindowSVG(isBalkon){
   if(nFl>1){ const botY=totalH+mB*0.42; for(let i=0;i<nFl;i++){ const x0=FR+i*sashW, x1=x0+sashW; s+=hb(x0,x1,botY)+ht((x0+x1)/2,botY+DT*0.72,Math.round(bMm/nFl)); } }
   const rxH=bMm+DT*0.85;
   if(hasRoll){
-    s+=vb(rxH,winY,winY+hMm)+vth(rxH+DT*0.5,winY+hMm/2,hMm);          // Fensterhöhe (Element) rechts — waagerecht
-    const lx=-mL*0.34; s+=vb(lx,0,rollH)+vthEnd(lx-DT*0.45,rollH/2,rollH);  // Rollladen-Kasten links — waagerecht (kein doppeltes Gesamtmaß)
+    s+=vb(rxH,winY,winY+hMm)+vth(rxH+DT*0.5,winY+hMm/2,hMm);          // Fensterhöhe (Element) rechts — innere Kette
+    const lx=-mL*0.34; s+=vb(lx,0,rollH)+vthEnd(lx-DT*0.45,rollH/2,rollH);  // Rollladen-Kasten links — waagerecht
+    // Gesamthöhe Kasten+Element als ÄUSSERE Maßkette rechts daneben. Das ist das Maß der Rohbauöffnung, nach dem
+    // bestellt und eingebaut wird — ohne es müsste der Kunde 215+Elementhöhe selbst addieren (klassische Fehlerquelle).
+    // Abstand zur inneren Kette: Linie + Zahl + Luft, damit sich die Maßzahlen nie berühren.
+    const rxG=bMm+DT*4.5; s+=vb(rxG,0,dimTot)+vth(rxG+DT*0.5,dimTot/2,dimTot);
   } else {
     s+=vb(rxH,0,dimTot)+vth(rxH+DT*0.5,dimTot/2,dimTot);             // Gesamthöhe rechts — waagerecht
   }
@@ -1495,7 +1501,9 @@ function schiebeStageSVG(){
   const sys=S.hstSystem||'psk', n=(sys==='psk')?2:((S.hstTeilung==='3')?3:2), slideIdx=(S.hstLauf==='links')?0:n-1;
   const hasRoll=(S.roll&&S.roll!=='kein'), rollH=hasRoll?215:0, winY=rollH, totalH=rollH+hMm, uu=Math.max(bMm,totalH);
   const DT=Math.max(uu*0.045,54), DW=Math.max(uu*0.0032,2), tick=DT*0.32;
-  const mL=(hasRoll?Math.max(uu*0.16,DT*3.4):Math.max(uu*0.13,DT*2.2)), mR=Math.max(uu*0.24,DT*4.8), mT=Math.max(uu*0.14,DT*2.8), mB=Math.max(uu*0.16,DT*3.2);
+  // Rechter Rand bei Rollladen breiter: dort stehen ZWEI Maßketten nebeneinander (Element innen, Gesamtmaß außen).
+  // DT*8.0 = Linie + Zahl (bis 4-stellig) + Luft + zweite Linie + zweite Zahl — sonst laufen die Maßzahlen ineinander.
+  const mL=(hasRoll?Math.max(uu*0.16,DT*3.4):Math.max(uu*0.13,DT*2.2)), mR=(hasRoll?Math.max(uu*0.40,DT*8.0):Math.max(uu*0.24,DT*4.8)), mT=Math.max(uu*0.14,DT*2.8), mB=Math.max(uu*0.16,DT*3.2);
   const FR=Math.max(Math.min(bMm,hMm)*0.05,40), innerW=bMm-2*FR, pw=innerW/n, gy=winY+FR, gh=hMm-2*FR;
   const SFR=Math.max(Math.min(pw,gh)*0.05,22), pzH=hasRoll?Math.max(Math.min(gh*0.2,rollH*0.9),40):0;
   const gehr=(x,y,w,h,fr)=>`<g stroke="${miter}" stroke-width="${Math.max(uu*0.0018,1.4)}" stroke-linecap="round"><line x1="${x}" y1="${y}" x2="${x+fr}" y2="${y+fr}"/><line x1="${x+w}" y1="${y}" x2="${x+w-fr}" y2="${y+fr}"/><line x1="${x}" y1="${y+h}" x2="${x+fr}" y2="${y+h-fr}"/><line x1="${x+w}" y1="${y+h}" x2="${x+w-fr}" y2="${y+h-fr}"/></g>`;
@@ -1533,8 +1541,11 @@ function schiebeStageSVG(){
   { const botY=totalH+mB*0.42; for(let i=0;i<n;i++){ const x0=FR+i*pw, x1=x0+pw; s+=hb(x0,x1,botY)+ht((x0+x1)/2,botY+DT*0.72,Math.round(bMm/n)); } }
   const rxH=bMm+DT*0.85;
   if(hasRoll){
-    s+=vb(rxH,winY,winY+hMm)+vth(rxH+DT*0.5,winY+hMm/2,hMm);          // Elementhöhe rechts — waagerecht
+    s+=vb(rxH,winY,winY+hMm)+vth(rxH+DT*0.5,winY+hMm/2,hMm);          // Elementhöhe rechts — innere Kette
     const lx=-mL*0.34; s+=vb(lx,0,rollH)+vthEnd(lx-DT*0.45,rollH/2,rollH);  // Rollladen-Kasten links — waagerecht
+    // Gesamthöhe Kasten+Element als ÄUSSERE Maßkette rechts daneben (Maß der Rohbauöffnung — siehe flatWindowSVG).
+    // Abstand zur inneren Kette: Linie + Zahl + Luft, damit sich die Maßzahlen nie berühren.
+    const rxG=bMm+DT*4.5; s+=vb(rxG,0,dimTot)+vth(rxG+DT*0.5,dimTot/2,dimTot);
   } else {
     s+=vb(rxH,0,dimTot)+vth(rxH+DT*0.5,dimTot/2,dimTot);             // Gesamthöhe rechts — waagerecht
   }
