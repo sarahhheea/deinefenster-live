@@ -110,7 +110,10 @@ body:not(.wiz-active) .topbar{display:none}
 @media(max-width:900px){ .spro-step .opts.spro-raster{grid-template-columns:repeat(5,1fr);gap:6px} }
 .ocard .vis svg{width:auto;height:100%}
 .ocard .vis img{max-height:100%;max-width:100%;object-fit:contain}
-.ocard .t{font-weight:600;font-size:14.5px}
+/* Lange Fachwörter ("Drückergarnitur") liefen ueber beide Kachelraender hinaus und wurden vorn UND hinten
+   abgeschnitten ("rückergarnitu"), weil der Titel zentriert ist. Jetzt sauber trennen statt abschneiden. */
+.ocard .t{font-weight:600;font-size:14.5px;overflow-wrap:break-word;hyphens:auto;max-width:100%}
+.ocard .s{overflow-wrap:break-word;hyphens:auto}
 .ocard .s{font-size:12px;color:var(--ink-soft);margin-top:2px;letter-spacing:.02em}
 .ocard .tick{position:absolute;top:10px;right:10px;width:20px;height:20px;border-radius:50%;background:var(--accent);display:none;place-items:center}
 .ocard .tick svg{width:11px;height:11px}
@@ -2934,8 +2937,28 @@ function summaryPanel(){
   const ex=[]; if(S.roll==='gurt')ex.push('Rollladen · Gurtwickler'); if(S.roll==='motor')ex.push('Motorrolladen');
   if(S.schall)ex.push('Schallschutz'); if(S.sicher)ex.push('RC1');
   if(S.prod==='balkon'&&S.balkonSchwelle==='alu')ex.push('Aluschwelle');
+  // Gleiche Klartext-Erklärung wie bei der Haustür: wo sitzt der Griff, wo das Band. Bei einem Flügel
+  // eindeutig ableitbar; bei mehreren Flügeln bleibt es bei der Aufteilung (sonst wird es unübersichtlich).
+  let erkl=AUFTN[S.aufteilung];
+  try{
+    const toks=(curAnschlag()||{}).oeff||[];
+    if(toks.length===1){
+      const t=tokSash(toks[0]);
+      if(t.open==='fest') erkl='Feststehend — lässt sich nicht öffnen';
+      else if(t.open==='kipp') erkl='Nur kippen — Griff oben';
+      else if(t.hinge) erkl=`Band ${t.hinge==='r'?'rechts':'links'} · Griff ${t.hinge==='r'?'links':'rechts'} — von innen gesehen`;
+    } else if(toks.length>1){
+      // Mehrflügelig: statt die Aufteilung zu wiederholen lieber das Merkmal nennen, das man sonst uebersieht —
+      // beim Stulp fehlt der feste Mittelpfosten, das Fenster laesst sich also ueber die volle Breite oeffnen.
+      // ACHTUNG: stulpAt ist ein INDEX, keine Ja/Nein-Angabe — 0 bedeutet Pfosten (kein Stulp),
+      // ein Wert > 0 markiert die Stulpstelle. Ein Test auf "!= null" waere immer wahr und wuerde
+      // bei jedem Pfosten-Fenster faelschlich "ohne Mittelpfosten" behaupten.
+      let bs=null; try{ bs=buildSashes(); }catch(e){}
+      erkl=(bs&&bs.stulpAt) ? 'Ohne festen Mittelpfosten — volle Breite frei' : 'Mit festem Mittelpfosten';
+    }
+  }catch(e){}
   return kopf
-    +key(openingName(),AUFTN[S.aufteilung])
+    +key(openingName(),erkl)
     +mehr+row('Profil',PROFN[S.profile])+farbe
     +row('Verglasung',`${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}`)
     +(S.sprossen&&S.sprossen!=='ohne'?row('Sprossen',SPROSN?(SPROSN[S.sprossen]||'ja'):'ja'):'')
