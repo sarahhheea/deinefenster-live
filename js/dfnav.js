@@ -70,3 +70,63 @@
   window.addEventListener('df-cart-changed', refresh);
   window.addEventListener('pageshow', refresh);
 })();
+
+/* dfnav — Merkliste (Herz) site-weit: liest localStorage (deinefenster_warenkorb_v1),
+   injiziert Herz + Zaehler neben den Warenkorb. Aufbau bewusst nach demselben Muster wie
+   der Warenkorb-Block darueber (self-contained, eigener Style), damit beide unabhaengig
+   voneinander bleiben.
+
+   Auf shop.html passiert hier NICHTS: dort baut js/shop.js denselben Knopf, aber als
+   <button>, der den Merklisten-Drawer direkt oeffnet — das ist dort die bessere Bedienung
+   als ein Seitenwechsel. Ueberall sonst fuehrt das Herz in den Shop und oeffnet die
+   Merkliste per ?merkliste=1. */
+(function(){
+  var LS='deinefenster_warenkorb_v1';
+  function aufShopSeite(){
+    return /(^|\/)shop\.html$/.test(location.pathname) || !!document.getElementById('produktGrid');
+  }
+  function anzahl(){
+    try{
+      var d=JSON.parse(localStorage.getItem(LS)||'null');
+      if(Array.isArray(d)) return d.length;
+      return (d&&d.items&&d.items.length)?d.items.length:0;
+    }catch(e){ return 0; }
+  }
+  function ensureStyle(){
+    if(document.getElementById('df-merk-style')) return;
+    var s=document.createElement('style'); s.id='df-merk-style';
+    s.textContent='.df-merk-link{position:relative;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:12px;color:#225eaa;text-decoration:none;transition:background .18s;flex:none}.df-merk-link:hover{background:rgba(34,94,170,.10)}.df-merk-link svg{width:23px;height:23px}.df-merk-badge{position:absolute;top:2px;right:2px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#e11d48;color:#fff;font:700 11px/18px system-ui,-apple-system,sans-serif;text-align:center;box-shadow:0 2px 6px rgba(225,29,72,.45);pointer-events:none}.df-merk-badge[hidden]{display:none}';
+    document.head.appendChild(s);
+  }
+  function build(){
+    var a=document.createElement('a');
+    a.className='df-merk-link'; a.href='/shop.html?merkliste=1';
+    a.setAttribute('aria-label','Merkliste ansehen'); a.title='Merkliste';
+    a.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span class="df-merk-badge" hidden>0</span>';
+    return a;
+  }
+  function inject(){
+    if(aufShopSeite()) return null;
+    ensureStyle();
+    var link=document.querySelector('.df-merk-link');
+    if(!link){
+      // vor den Warenkorb haengen, damit die Reihenfolge Herz -> Korb -> CTA ist
+      var korb=document.querySelector('.df-cart-link');
+      var cta=document.querySelector('.dfnav-cta')||document.querySelector('.nav-cta');
+      var anker=korb||cta;
+      if(!anker||!anker.parentNode) return null;
+      link=build(); anker.parentNode.insertBefore(link, anker);
+    }
+    return link;
+  }
+  function refresh(){
+    var link=inject(); if(!link) return;
+    var n=anzahl(); var b=link.querySelector('.df-merk-badge');
+    if(!b) return;
+    b.textContent=n; b.hidden = n===0;
+  }
+  if(document.readyState!=='loading') refresh(); else document.addEventListener('DOMContentLoaded', refresh);
+  window.addEventListener('storage', function(e){ if(e.key===LS) refresh(); });
+  window.addEventListener('df-merk-changed', refresh);
+  window.addEventListener('pageshow', refresh);
+})();

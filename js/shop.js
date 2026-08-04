@@ -507,7 +507,10 @@ function baueKatLeiste() {
   (function(){ var alt = document.getElementById('katLeisteAiNote'); if (alt) alt.remove();
     var p = document.createElement('p'); p.id = 'katLeisteAiNote';
     p.className = 'ai-note shop-ai-note';
-    p.textContent = 'Die Kategorie-Symbolbilder sind KI-generiert. Die Artikelfotos darunter sind echte Aufnahmen der vorrätigen Ware.';
+    // Kurz gefasst, aber inhaltlich vollstaendig: Kennzeichnung der KI-Bilder UND die
+    // Abgrenzung zu den echten Artikelfotos. Der lange Zweisatz brauchte ueber der
+    // Ware eine ganze Zeile mehr.
+    p.textContent = 'Kategoriebilder: KI-Symbolbilder. Artikelfotos: echte Aufnahmen.';
     wrap.insertAdjacentElement('afterend', p); })();
 
   wrap.querySelectorAll('.kat-chip').forEach(btn => {
@@ -1660,6 +1663,9 @@ function loadCart() {
 function saveCart() {
   try { localStorage.setItem(LS_KEY, JSON.stringify(STATE.warenkorb)); }
   catch (e) { console.warn('Warenkorb konnte nicht gespeichert werden'); }
+  // Das Herz in der site-weiten Navigation (js/dfnav.js) haengt an diesem Ereignis —
+  // ohne das bliebe sein Zaehler nach einem Seitenwechsel veraltet.
+  try { window.dispatchEvent(new Event('df-merk-changed')); } catch (e) {}
 }
 
 function addToCart(id) {
@@ -1899,6 +1905,14 @@ function oeffneDetail(id) {
       </div>
     </div>
     <div class="shop-detail-cta">
+      <!-- Abhol-Hinweis unmittelbar vor den Anfrage-Knoepfen: der Kunde soll VOR der
+           Anfrage wissen, dass er selbst laedt. Weiter oben oder im Aufklapp-Text
+           wuerde er ueberlesen und der Aerger entstuende erst am Hoftor. -->
+      <p class="shop-detail-abholung">
+        <span class="material-symbols-outlined" aria-hidden="true">local_shipping</span>
+        <span><strong>Selbstabholung — wir laden nicht auf.</strong> Bitte genug Helfer
+        (Fenster sind schwer, meist 2–4 Personen) und ein passendes Fahrzeug mitbringen.</span>
+      </p>
       <div class="shop-detail-cta-price">
         <span class="block text-[11px] text-ink-soft">${istSammelInserat(p) ? 'Preis ab' : 'Preis'}</span>
         <span class="text-2xl font-extrabold text-primary leading-none">${formatPreis(p.preis_eur)}</span>
@@ -2221,7 +2235,17 @@ function zeigeToast(text) {
   t._timer = setTimeout(() => t.classList.remove('show'), 2600);
 }
 function oeffneDeepLinkProdukt() {
-  const pid = new URLSearchParams(location.search).get('produkt');
+  const params = new URLSearchParams(location.search);
+
+  // Herz aus der site-weiten Navigation: fuehrt von jeder anderen Seite hierher und
+  // oeffnet die Merkliste direkt, statt den Kunden auf der Produktliste abzusetzen.
+  if (params.get('merkliste') === '1') {
+    oeffneCart();
+    try { history.replaceState(null, '', location.pathname); } catch (e) {}
+    return;
+  }
+
+  const pid = params.get('produkt');
   if (!pid) return;
   if (STATE.produkte && STATE.produkte.some(x => x.id === pid)) oeffneDetail(pid);
 }

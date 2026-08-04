@@ -754,12 +754,22 @@ input[type="range"].range-clean::-moz-range-thumb {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
+  gap: 14px 14px;
+  flex-wrap: wrap;                 /* Abhol-Hinweis liegt als eigene Zeile darueber */
   padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
   background: #ffffff;
   border-top: 1px solid rgba(34,94,170,0.16);
   box-shadow: 0 -10px 24px -12px rgba(8,21,46,0.25);
 }
+/* Abhol-Hinweis: sachlich, nicht als Warnung — es ist eine normale Bedingung,
+   keine Fehlermeldung. Deshalb neutrales Grau statt Rot/Amber. */
+.shop-detail-abholung {
+  flex: 1 0 100%; order: -1; margin: 0 0 2px;
+  display: flex; align-items: flex-start; gap: 7px;
+  font-size: 12px; line-height: 1.4; color: #5b626b;
+}
+.shop-detail-abholung strong { color: #14181d; font-weight: 700; }
+.shop-detail-abholung .material-symbols-outlined { font-size: 17px; color: #5b626b; flex: none; margin-top: 1px; }
 .shop-detail-cta-price { flex-shrink: 0; }
 .shop-detail-cta-btns { display: flex; gap: 10px; flex: 1; justify-content: flex-end; }
 .detail-cta-wa, .detail-cta-anfrage {
@@ -2116,6 +2126,7 @@ input[type="range"].range-clean::-moz-range-thumb {
         <strong style="color:#225eaa;">Wichtiger Hinweis</strong>
       </div>
       <ul style="margin:0;padding-left:24px;list-style:disc;">
+        <li><strong>Selbstabholung — wir laden nicht auf.</strong> Bitte genug Helfer (Fenster sind schwer, meist 2–4 Personen) und ein passendes Fahrzeug mitbringen.</li>
         <li>Der Bestand ändert sich täglich.</li>
         <li>Ihre Anfrage ist <strong>unverbindlich</strong>.</li>
         <li>Wir versuchen rechtzeitig zu antworten.</li>
@@ -2868,6 +2879,13 @@ section[style*="#0a1530"], div[style*="#0a1530"] { background: #f4f7fc !importan
      deutlich groesseres Foto — die Ware ist das Verkaufsargument, nicht die Dichte. */
   @media (min-width: 1100px) { #produktGrid { grid-template-columns: repeat(3, minmax(0,1fr)) !important; } }
 
+  /* KI-Kennzeichnung unter der Kategorie-Leiste: Pflicht, aber sie steht ueber der Ware —
+     deshalb so flach wie moeglich, ohne die Lesbarkeit zu opfern. */
+  #katLeisteAiNote.shop-ai-note {
+    margin: 4px 0 0; font-size: 11px; line-height: 1.3; gap: 5px;
+  }
+  #katLeisteAiNote.shop-ai-note::before { flex-basis: 11px; height: 11px; }
+
   /* ── Filterspalte: alles ausser „Maße" zugeklappt ──
      Der Kunde sieht saemtliche Filternamen untereinander und klappt gezielt auf, statt
      durch eine lange offene Liste zu scrollen. Der Zaehler zeigt an, wo etwas aktiv ist —
@@ -2939,6 +2957,13 @@ section[style*="#0a1530"], div[style*="#0a1530"] { background: #f4f7fc !importan
     <p style="font-size:11.5px;color:#828da0;margin:0 0 12px;line-height:1.45;">
       Inkl. 19&nbsp;% USt., zzgl. Versand. Unverbindliche Anfrage &mdash; kein Kauf.
       Der Bestand &auml;ndert sich t&auml;glich, wir best&auml;tigen die Verf&uuml;gbarkeit.
+    </p>
+    <!-- Bei mehreren Positionen besonders wichtig: der Kunde plant sonst mit einem
+         Kombi fuer sechs Fenster. Steht deshalb VOR dem Anfrage-Knopf. -->
+    <p style="font-size:12px;color:#5b626b;margin:0 0 12px;line-height:1.45;display:flex;align-items:flex-start;gap:7px;">
+      <span class="material-symbols-outlined" style="font-size:17px;color:#5b626b;flex:none;margin-top:1px;" aria-hidden="true">local_shipping</span>
+      <span><strong style="color:#14181d;">Selbstabholung &mdash; wir laden nicht auf.</strong>
+      Bitte genug Helfer (Fenster sind schwer, meist 2&ndash;4&nbsp;Personen) und ein passendes Fahrzeug mitbringen.</span>
     </p>
     <button type="button" onclick="oeffneSammelAnfrage()" class="w-full inline-flex items-center justify-center gap-2"
             style="background:#225eaa;color:#fff;border:0;border-radius:11px;padding:14px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:15px;cursor:pointer;">
