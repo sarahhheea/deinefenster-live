@@ -495,7 +495,21 @@ function baueKatLeiste() {
         <span class="kat-num">${n}</span>
       </button>`);
   });
-  wrap.innerHTML = chips.join('') + '<p class="ai-note shop-ai-note">Die Kategorie-Symbolbilder sind KI-generiert. Die Artikelfotos darunter sind echte Aufnahmen der vorrätigen Ware.</p>';
+  wrap.innerHTML = chips.join('');
+
+  // KI-Kennzeichnung (Art. 50 VO (EU) 2024/1689) — Pflicht, bleibt.
+  // ABER als Geschwister NACH der Leiste, nicht als deren Kind: #katLeiste ist ein
+  // Flex-Container, dessen Kacheln sich ab 900px die Breite teilen (flex:1 1 0). Ein
+  // <p> darin wird zum weiteren Flex-Element, nimmt Platz weg und quetscht die
+  // Kacheln auf ~19px zusammen. Nicht wieder hineinschreiben.
+  let note = document.getElementById('katAiNote');
+  if (!note) {
+    note = document.createElement('p');
+    note.id = 'katAiNote';
+    note.className = 'ai-note shop-ai-note';
+    note.textContent = 'Die Kategorie-Symbolbilder sind KI-generiert. Die Artikelfotos darunter sind echte Aufnahmen der vorrätigen Ware.';
+    wrap.insertAdjacentElement('afterend', note);
+  }
 
   wrap.querySelectorAll('.kat-chip').forEach(btn => {
     btn.addEventListener('click', () => {
