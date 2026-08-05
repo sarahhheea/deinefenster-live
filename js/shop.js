@@ -1310,8 +1310,9 @@ function karteHtml(p) {
 
   // Standnummer als „Held"-Marke aufs Bild (unten rechts) — nicht mehr klein in der Meta-Zeile.
   const standOverlay = '';
+  // Standnummer steht jetzt gross auf dem Foto — hier nur noch die Verfuegbarkeit,
+  // sonst stuende dieselbe Nummer zweimal untereinander.
   const standZeileParts = [];
-  if (p.standnummer) standZeileParts.push(`Standnr. <b>${escapeHtml(p.standnummer)}</b>`);
   if (verfTxt) standZeileParts.push(`<span class="karte-verf">${verfTxt}</span>`);
   const standZeile = standZeileParts.length
     ? `<div class="karte-nr">${standZeileParts.join(' <span class="karte-meta-dot">·</span> ')}</div>` : '';
@@ -1392,7 +1393,14 @@ function karteHtml(p) {
     <article class="karte" data-action="detail" data-id="${p.id}" style="${archivStyle}">
       <div class="karte-bild-wrap" style="position:relative">
         <img src="${escapeHtml(p.bild)}" alt="${escapeHtml(p.titel)}" class="karte-bild w-full" loading="lazy" decoding="async" onerror="this.src='img/fenster_standard.png'"/>
-        <span class="symbolbild-mini">Symbolbild</span>
+        ${/* Standnummer aufs Bild: damit findet der Kunde das Stueck im Hof wieder —
+              die wichtigste Angabe nach dem Preis. Stand vorher klein unter dem Titel. */''}
+        ${p.standnummer ? `<span class="karte-standnr-bild">Nr. ${escapeHtml(p.standnummer)}</span>` : ''}
+        ${/* „Symbolbild" NUR bei Sammelinseraten, wo ein Foto mehrere Stuecke zeigt und
+              der Kunde eines davon bekommt (dort ist der Hinweis Pflicht, sonst waere es
+              irrefuehrend). Bei Einzelstuecken ist es ein echtes Foto DIESER Ware — der
+              pauschale Hinweis widersprach der Kennzeichnung oben und kostete Vertrauen. */''}
+        ${istSammelInserat(p) ? '<span class="symbolbild-mini">Beispielbild</span>' : ''}
         ${zustandTag}
         ${archivBadge}
         ${druckIcon}
@@ -1912,7 +1920,8 @@ function oeffneDetail(id) {
                onerror="this.src='img/fenster_standard.png'"/>
         `).join('')}
       </div>
-      <span class="symbolbild-mini">Symbolbild</span>
+      ${p.standnummer ? `<span class="karte-standnr-bild">Nr. ${escapeHtml(p.standnummer)}</span>` : ''}
+      ${istSammelInserat(p) ? '<span class="symbolbild-mini">Beispielbild</span>' : ''}
       ${hatMehrere ? `
         <button class="carousel-btn carousel-prev" type="button" aria-label="Vorheriges Bild">
           <span class="material-symbols-outlined" style="font-size:24px">chevron_left</span>
