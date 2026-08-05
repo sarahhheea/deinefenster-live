@@ -1163,9 +1163,12 @@ input[type="range"].range-clean::-moz-range-thumb {
   justify-content: center;
   gap: 6px;
   padding: 11px 12px;
-  background: #fff;
-  color: #225eaa;
-  border: 1.5px solid #cfe0ff;
+  /* Heller Fond + kraeftiger Rahmen: der fast weisse Umriss war auf dem Desktop kaum als
+     Knopf zu erkennen. Trotzdem keine Vollflaeche — sonst konkurrieren die Knoepfe
+     wieder mit den Produktfotos. Beim Zeigen fuellt er sich ganz. */
+  background: #eef4ff;
+  color: #1b4d8c;
+  border: 1.5px solid #9dc0ee;
   border-radius: 10px;
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-weight: 700;
@@ -1178,10 +1181,11 @@ input[type="range"].range-clean::-moz-range-thumb {
   cursor: pointer;
 }
 .shop-card-cta-anfrage:hover {
-  background: #eef4ff;
-  border-color: #225eaa;
+  background: linear-gradient(135deg, #2a6cc4, #1c4f90);
+  border-color: #1c4f90;
+  color: #fff;
   transform: translateY(-1px);
-  box-shadow: none;
+  box-shadow: 0 6px 16px -6px rgba(34,94,170,.5);
 }
 .shop-card-cta-anfrage .material-symbols-outlined { font-size: 18px; }
 /* „⋯"-Menü auf der Karte (Teilen/Drucken) — sekundär, entlastet die Karte */
@@ -1321,14 +1325,24 @@ input[type="range"].range-clean::-moz-range-thumb {
 }
 .shop-searchbar-clear .material-symbols-outlined { font-size: 16px; }
 
-/* Suchzeile: am Handy Suche + Filter + Sortierung nebeneinander, ab 900px untereinander
-   (dort liegen die Kategorien dazwischen und es ist genug Platz). */
-.shop-suchzeile { display: flex; align-items: center; gap: 8px; }
-.shop-suchzeile .shop-searchbar { flex: 1 1 auto; min-width: 0; }
-.shop-suchzeile .shop-tools { margin-top: 0; flex: 0 0 auto; }
+/* Kopfbereich als EIN Flex-Container, Reihenfolge per `order` — dadurch koennen Handy
+   und Desktop dieselben Bausteine unterschiedlich anordnen, ohne doppeltes Markup.
+   Handy:   [Suche | Filter+Sortierung]  →  Kategorien  →  Zustand
+   Desktop:  Suche → Kategorien → Zustand → Filter+Sortierung (direkt ueber der Liste,
+             denn dort wirken sie — oben ueber den Kategorien stehen sie im Weg). */
+.shop-suchzeile { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 8px; row-gap: 0; }
+/* flex-basis 0 statt auto: mit auto beansprucht das Suchfeld seine Inhaltsbreite
+   (langer Platzhalter) und draengt Filter/Sortierung in eine zweite Zeile. */
+.shop-suchzeile .shop-searchbar { order: 1; flex: 1 1 0; min-width: 0; }
+.shop-suchzeile .shop-tools     { order: 2; margin-top: 0; flex: 0 0 auto; }
+.shop-suchzeile .kat-leiste     { order: 3; flex: 1 0 100%; }
+/* Der KI-Hinweis wird von js/shop.js hinter die Leiste eingefuegt und liegt damit IM
+   Flex-Container. Ohne order (=0) rutschte er vor die Suche. */
+.shop-suchzeile .shop-ai-note   { order: 4; flex: 1 0 100%; }
+.shop-suchzeile .zustand-chips  { order: 5; flex: 1 0 100%; margin-top: 6px; }
 @media (min-width: 900px) {
-  .shop-suchzeile { display: block; }
-  .shop-suchzeile .shop-tools { margin-top: 11px; }
+  .shop-suchzeile .shop-searchbar { flex: 1 0 100%; }
+  .shop-suchzeile .shop-tools     { order: 6; flex: 1 0 100%; margin-top: 10px; }
 }
 
 /* Werkzeugzeile: Filter · Sortierung · Trefferzahl */
@@ -1793,10 +1807,14 @@ input[type="range"].range-clean::-moz-range-thumb {
     </div>
     <span class="shop-tools-count"><span id="toolsAnzahl">772</span> Artikel</span>
   </div>
-  </div><!-- /.shop-suchzeile -->
-
   <!-- Kategorien als freigestellte Produktfotos auf gemeinsamer Grundlinie (wie im Menue) -->
   <nav id="katLeiste" class="kat-leiste" aria-label="Produktkategorien"></nav>
+
+  <!-- Neu/Gebraucht ist bei Lagerware das zweitwichtigste Kriterium nach dem Maß und
+       lag bisher zugeklappt in der Filterspalte. Als flache Chip-Zeile direkt hier —
+       spiegelt die Kaestchen im Filter (beide Richtungen), damit es nur EINEN Zustand gibt. -->
+  <div id="zustandChips" class="zustand-chips" role="group" aria-label="Zustand"></div>
+  </div><!-- /.shop-suchzeile -->
 
   <div id="masseHinweis" class="hidden shop-masse-hinweis">
     <span class="material-symbols-outlined align-bottom" style="font-size:14px" aria-hidden="true">auto_awesome</span>
@@ -1815,7 +1833,7 @@ input[type="range"].range-clean::-moz-range-thumb {
 
   <!-- PAngV-Mini-Hinweis (rechtlich-Pflicht, Detail in "So läuft's") -->
   <p class="shop-pangv-mini" aria-label="Preisangaben">
-    Preise inkl. 19 % MwSt., zzgl. Versand. Abholung kostenfrei. <a href="agb.html#versand">Versand &amp; Lieferung</a>
+    Preise inkl. MwSt., zzgl. Versand. <a href="agb.html#versand">Versand &amp; Lieferung</a>
   </p>
 </div>
 
@@ -2733,8 +2751,17 @@ section[style*="#0a1530"], div[style*="#0a1530"] { background: #f4f7fc !importan
   }
   .mass-finden:hover { background: #1b4d8c; }
 
-  /* Produkttyp steht jetzt oben als Leiste — in der Spalte waere er doppelt */
-  #filterKategorien, #filterKategorien + *, .filter-block:has(#filterKategorien) { display: none !important; }
+  /* Produkttyp steht oben als Bilderleiste — in der Spalte waere er doppelt.
+     Muss die GANZE Huelle treffen, sonst bleibt eine Akkordeon-Zeile stehen, die sich
+     aufklappen laesst und leer ist. (Frueher .filter-block, seit dem Umbau .filter-acc.) */
+  #filterKategorien,
+  .filter-acc:has(#filterKategorien),
+  .filter-block:has(#filterKategorien) { display: none !important; }
+
+  /* Zustand steht seit 05.08. als Chip-Zeile oben — in der Spalte waere er die zweite
+     Bedienstelle fuer dieselbe Sache. Die Kaestchen bleiben im Dokument (das Chip-Skript
+     schaltet ueber sie), nur die Huelle ist unsichtbar. */
+  .filter-acc:has(.filter-zustand) { display: none !important; }
 
   @media (max-width: 900px) {
     .kat-leiste { padding: 10px 0 2px; gap: 7px; }
@@ -2924,6 +2951,23 @@ section[style*="#0a1530"], div[style*="#0a1530"] { background: #f4f7fc !importan
      deutlich groesseres Foto — die Ware ist das Verkaufsargument, nicht die Dichte. */
   @media (min-width: 1100px) { #produktGrid { grid-template-columns: repeat(3, minmax(0,1fr)) !important; } }
 
+  /* Zustand-Chips (Alle · Neu · Gebraucht · …): flach halten, sie stehen ueber der Ware. */
+  .zustand-chips {
+    display: flex; gap: 7px; margin-top: 9px;
+    overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none;
+  }
+  .zustand-chips::-webkit-scrollbar { display: none; }
+  .zustand-chip {
+    flex: 0 0 auto; cursor: pointer; white-space: nowrap;
+    border: 1.5px solid #d3d9e6; background: #fff; color: #14181d;
+    font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12.5px; font-weight: 700;
+    padding: 7px 14px; border-radius: 999px; min-height: 34px;
+    transition: border-color .15s, background .15s, color .15s;
+  }
+  .zustand-chip:hover { border-color: #225eaa; }
+  .zustand-chip.on { background: #225eaa; border-color: #225eaa; color: #fff; }
+  .zustand-chip-num { font-weight: 600; opacity: .62; margin-left: 4px; }
+
   /* KI-Kennzeichnung unter der Kategorie-Leiste: Pflicht, aber sie steht ueber der Ware —
      deshalb so flach wie moeglich, ohne die Lesbarkeit zu opfern. */
   #katLeisteAiNote.shop-ai-note {
@@ -3004,11 +3048,15 @@ section[style*="#0a1530"], div[style*="#0a1530"] { background: #f4f7fc !importan
       Der Bestand &auml;ndert sich t&auml;glich, wir best&auml;tigen die Verf&uuml;gbarkeit.
     </p>
     <!-- Bei mehreren Positionen besonders wichtig: der Kunde plant sonst mit einem
-         Kombi fuer sechs Fenster. Steht deshalb VOR dem Anfrage-Knopf. -->
+         Kombi fuer sechs Fenster. Steht deshalb VOR dem Anfrage-Knopf.
+         Der Liefer-Satz bewusst ohne Preis: die Fahrt wird individuell berechnet, eine
+         Zahl hier waere nach PAngV eine Preisangabe, die wir nicht halten koennen. -->
     <p style="font-size:12px;color:#5b626b;margin:0 0 12px;line-height:1.45;display:flex;align-items:flex-start;gap:7px;">
       <span class="material-symbols-outlined" style="font-size:17px;color:#5b626b;flex:none;margin-top:1px;" aria-hidden="true">local_shipping</span>
       <span><strong style="color:#14181d;">Selbstabholung &mdash; wir laden nicht auf.</strong>
-      Bitte genug Helfer (Fenster sind schwer, meist 2&ndash;4&nbsp;Personen) und ein passendes Fahrzeug mitbringen.</span>
+      Bitte genug Helfer (Fenster sind schwer, meist 2&ndash;4&nbsp;Personen) und ein passendes Fahrzeug mitbringen.
+      <strong style="color:#14181d;">Lieferung auf Anfrage</strong> gegen Fahrtkosten &mdash; schreiben Sie einfach dazu,
+      wohin es gehen soll, wir rechnen es Ihnen aus.</span>
     </p>
     <button type="button" onclick="oeffneSammelAnfrage()" class="w-full inline-flex items-center justify-center gap-2"
             style="background:#225eaa;color:#fff;border:0;border-radius:11px;padding:14px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:15px;cursor:pointer;">

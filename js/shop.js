@@ -535,6 +535,49 @@ function baueKatLeiste() {
   });
 }
 
+/* ─── Zustand-Chips oben (Alle · Neu · Gebraucht · …) ───
+   Spiegeln die Kaestchen im Filter in BEIDE Richtungen: der Chip setzt das Kaestchen und
+   umgekehrt faerbt sich der Chip, wenn im Filter gewaehlt wird. Es gibt bewusst nur einen
+   Zustandsspeicher (STATE.filter.zustand) — zwei Bedienelemente, eine Wahrheit. */
+const ZUSTAND_CHIPS = [
+  { wert: '',            label: 'Alle' },
+  { wert: 'neu',         label: 'Neu' },
+  { wert: 'gebraucht',   label: 'Gebraucht' },
+  { wert: 'vermessen',   label: 'Vermessen' },
+  { wert: 'sonderposten', label: 'Sonderposten' }
+];
+
+function baueZustandChips() {
+  const wrap = document.getElementById('zustandChips');
+  if (!wrap) return;
+  const aktiv = STATE.filter.zustand;
+  const basis = (STATE.produkte || []).filter(p => !(p.eigenschaften || []).includes(TAG_AUSSEN));
+  wrap.innerHTML = ZUSTAND_CHIPS.map(c => {
+    const n = c.wert
+      ? basis.filter(p => _asArr(p.zustand).includes(c.wert)).length
+      : basis.length;
+    if (c.wert && !n) return '';          // Zustand ohne Ware gar nicht erst anbieten
+    const on = c.wert ? aktiv.has(c.wert) : aktiv.size === 0;
+    return `<button type="button" class="zustand-chip${on ? ' on' : ''}" data-zustand="${c.wert}"
+              aria-pressed="${on}">${c.label}<span class="zustand-chip-num">${n}</span></button>`;
+  }).join('');
+
+  wrap.querySelectorAll('.zustand-chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const wert = btn.dataset.zustand;
+      // ueber die vorhandenen Kaestchen gehen, damit die bestehende Logik greift
+      document.querySelectorAll('.filter-zustand').forEach(cb => {
+        const soll = !!wert && cb.value === wert && !aktiv.has(wert);
+        if (cb.checked !== soll) { cb.checked = soll; cb.dispatchEvent(new Event('change', { bubbles: true })); }
+      });
+      if (!wert) {                        // „Alle" — alles abwaehlen
+        STATE.filter.zustand.clear();
+        rendere();
+      }
+    });
+  });
+}
+
 function baueFilterSidebar() {
   // Zähler-Basis OHNE die nach außen öffnenden Artikel — die sind standardmäßig ausgeblendet,
   // also darf „Balkontüren 40" nicht mehr versprechen als die Liste danach zeigt.
@@ -1071,6 +1114,7 @@ function rendere() {
   const _toolsAnzahl = document.getElementById('toolsAnzahl');
   if (_toolsAnzahl) _toolsAnzahl.textContent = result.length;
   aktualisiereFilterZaehler();
+  baueZustandChips();
   const _applyBtn = document.getElementById('filterApplyMob');
   if (_applyBtn) _applyBtn.textContent = result.length + (result.length === 1 ? ' Ergebnis anzeigen' : ' Ergebnisse anzeigen');
   aktualisiereShopHeader();
@@ -1917,7 +1961,8 @@ function oeffneDetail(id) {
       <p class="shop-detail-abholung">
         <span class="material-symbols-outlined" aria-hidden="true">local_shipping</span>
         <span><strong>Selbstabholung — wir laden nicht auf.</strong> Bitte genug Helfer
-        (Fenster sind schwer, meist 2–4 Personen) und ein passendes Fahrzeug mitbringen.</span>
+        (Fenster sind schwer, meist 2–4 Personen) und ein passendes Fahrzeug mitbringen.
+        <strong>Lieferung auf Anfrage</strong> gegen Fahrtkosten.</span>
       </p>
       <div class="shop-detail-cta-price">
         <span class="block text-[11px] text-ink-soft">${istSammelInserat(p) ? 'Preis ab' : 'Preis'}</span>
