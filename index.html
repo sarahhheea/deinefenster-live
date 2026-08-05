@@ -916,7 +916,7 @@ body.scrolled .burger{color:var(--text)}
       <button type="button" role="tab" data-i="2" aria-selected="false"><img src="img/_p-door.webp" alt="Haust&uuml;r" width="120" height="120" loading="lazy" decoding="async"><span>Haust&uuml;r</span></button>
       <button type="button" role="tab" data-i="3" aria-selected="false"><img src="img/_p-hst.webp" alt="Schiebet&uuml;r" width="120" height="120" loading="lazy" decoding="async"><span>Schiebet&uuml;r</span></button>
     </div>
-    <a class="nhero-card" id="heroCard" href="konfigurator.html" aria-label="Fenster konfigurieren">
+    <a class="nhero-card" id="heroCard" href="konfigurator.html?prod=fenster" aria-label="Fenster konfigurieren">
       <span class="nhero-card-tx"><b id="heroCardTitle" aria-live="polite">Fenster</b><span>Jetzt konfigurieren</span></span>
       <span class="nhero-card-go material-symbols-outlined" aria-hidden="true">arrow_forward</span>
     </a>
@@ -927,7 +927,7 @@ body.scrolled .burger{color:var(--text)}
       <h1>Fenster &amp; T&uuml;ren nach Ma&szlig;. <span class="nhero-soft">Direkt aus dem Drutex-Werk.</span></h1>
       <p>Konfiguriere dein Wunschprodukt mit Live-Preis und Skizze, gefertigt nach deinem Ma&szlig; und geliefert deutschlandweit.</p>
       <div class="nhero-cta">
-        <a class="nhero-btn nhero-btn-primary" href="konfigurator.html">Jetzt konfigurieren</a>
+        <a class="nhero-btn nhero-btn-primary" id="heroCtaPrimary" href="konfigurator.html?prod=fenster">Jetzt konfigurieren</a>
         <a class="nhero-btn nhero-btn-ghost" href="shop.html">Zum Shop</a>
       </div>
       <div class="nhero-trust"><span class="nhero-stars" aria-label="4,7 von 5 Sternen">&#9733;&#9733;&#9733;&#9733;&#9733;</span> 4,7 &middot; 93 Google-Bewertungen
@@ -1491,7 +1491,11 @@ body.scrolled .burger{color:var(--text)}
     if(swapT) window.clearTimeout(swapT);
     swapT=window.setTimeout(function(){
       title.textContent=p.name;
-      card.setAttribute('href','konfigurator.html');
+      // Das im Hero gewaehlte Produkt muss mitwandern — sonst wirft der Klick die
+      // Wahl weg und der Kunde muss sie im Konfigurator ein zweites Mal treffen.
+      card.setAttribute('href','konfigurator.html?prod='+p.prod);
+      var ctaP=document.getElementById('heroCtaPrimary');
+      if(ctaP) ctaP.setAttribute('href','konfigurator.html?prod='+p.prod);
       card.setAttribute('aria-label',p.name+' konfigurieren');
       card.classList.remove('swapping');
       swapT=null;
