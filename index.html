@@ -1329,7 +1329,7 @@ body.scrolled .burger{color:var(--text)}
     </div>
   </div>
   <div class="foot-bottom">
-    <p>© 2026 DeineFenster.de · Türen und Fensterhandel Christ · Alle Rechte vorbehalten. · <span style="opacity:.8">Stand: <time datetime="2026-06-04">Juni 2026</time></span></p>
+    <p>© 2026 DeineFenster.de · Türen und Fensterhandel Christ · Alle Rechte vorbehalten. · <span>Stand: <time datetime="2026-06-04">Juni 2026</time></span></p>
     <div class="foot-legal">
       <a href="impressum.html">Impressum</a>
       <a href="datenschutz.html">Datenschutz</a>
@@ -1560,7 +1560,7 @@ body.scrolled .burger{color:var(--text)}
 .df-wa-float{transition:transform .2s,box-shadow .2s,bottom .28s cubic-bezier(.4,0,.2,1)}
 body.has-sticky-cta .df-wa-float{bottom:calc(18px + var(--sticky-cta-h,71px))}
 </style>
-<div class="df-sticky-cta" id="dfStickyCta" aria-hidden="true">
+<div class="df-sticky-cta" id="dfStickyCta" aria-label="Schnellzugriff" aria-hidden="true" inert>
   <a class="s-prim" href="konfigurator.html">Jetzt konfigurieren</a>
   <a class="s-ghost" href="shop.html">Zum Shop</a>
 </div>
@@ -1571,6 +1571,9 @@ body.has-sticky-cta .df-wa-float{bottom:calc(18px + var(--sticky-cta-h,71px))}
   function setOn(on){
     bar.classList.toggle('is-on',on);
     bar.setAttribute('aria-hidden', on?'false':'true');
+      // inert nimmt das Element zusaetzlich aus der Tabulator-Reihenfolge —
+      // aria-hidden allein wuerde die Links per Tastatur erreichbar lassen.
+      if(on) bar.removeAttribute('inert'); else bar.setAttribute('inert','');
     // echte Hoehe melden, damit der WhatsApp-Button exakt darueber ausweicht
     if(on) document.documentElement.style.setProperty('--sticky-cta-h', bar.offsetHeight+'px');
     document.body.classList.toggle('has-sticky-cta', on);
