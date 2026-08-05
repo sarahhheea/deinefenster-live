@@ -1245,6 +1245,18 @@ const HAUSTUER_ANSCHLAG=[{n:'DIN links',oeff:['dreh-l']},{n:'DIN rechts',oeff:['
 function anschlagSet(){ if(S.prod==='haustuer') return HAUSTUER_ANSCHLAG; if(S.prod==='balkon') return BALKON_ANSCHLAG[S.aufteilung]||BALKON_ANSCHLAG['1fl']; return ANSCHLAG[S.aufteilung]||ANSCHLAG['1fl']; }
 function curAnschlag(){ const set=anschlagSet(); return set[Math.min(S.anschlagIdx,set.length-1)]||set[0]; }
 function openingName(){ const o=curAnschlag(); return o?o.n:''; }
+// Anschlag im Klartext — muss bis in Positionsdaten und Anfrage-Mail durchlaufen.
+// Eine nach aussen oeffnende Haustuer ist konstruktiv ein anderes Produkt (Baender,
+// Dichtung, Schwelle); fehlt die Angabe, wird falsch gefertigt.
+// DIN 107: Bezugsseite ist die Seite, nach der der Fluegel aufschwingt — "DIN ist da, wo die
+// Baender sichtbar sind". Bei nach aussen oeffnenden Tueren wird also von AUSSEN bestimmt,
+// waehrend die Skizze weiter von innen gezeichnet bleibt. Darum nennen wir die Bezugsseite
+// ausdruecklich, statt sie implizit zu lassen.
+function tuerOeffnungName(){ return (S.tuerOeffnung==='aussen') ? 'nach außen öffnend' : 'nach innen öffnend'; }
+function anschlagKlartext(){
+  const n=openingName()||'';
+  return (S.prod==='haustuer') ? (n?n+' · ':'')+tuerOeffnungName() : n;
+}
 // Öffnungs-Token (dk-l,dk-r,dreh-l,dreh-r,kipp,fest) -> Flügel-Zustand {open,hinge}
 function tokSash(tok){
   if(tok==='kipp')return{open:'kipp',hinge:null};
@@ -1729,7 +1741,7 @@ function haustuerStageSVG(){
   const gap=Math.max(bMm*0.30,DT*3.2);     // Abstand zwischen den beiden Ansichten
   const totalW=bMm*2+gap;
   const mL=Math.max(uu*0.10,DT*2.0), mR=Math.max(uu*0.16,DT*3.6), mT=Math.max(uu*0.13,DT*2.6);
-  const mB=Math.max(uu*0.10,DT*2.0)+LBL*2.8;   // unten Platz für die zweizeilige Beschriftung
+  const mB=Math.max(uu*0.10,DT*2.0)+LBL*4.1;   // unten Platz für die dreizeilige Beschriftung (3. Zeile = Öffnungsrichtung)
   const FR=Math.max(bMm*0.06,64), gx=FR, gy=FR, sashW=bMm-2*FR, gh=hMm-2*FR;   // Türrahmen (Blendrahmen)
   const SFR=Math.max(Math.min(sashW,gh)*0.06,40);                              // Flügelrahmen
   const glx=gx+SFR, gly=gy+SFR, glw=Math.max(sashW-2*SFR,20), glh=Math.max(gh-2*SFR,20);
@@ -1810,6 +1822,12 @@ function haustuerStageSVG(){
   const ly=hMm+LBL*1.6;
   s+=lbl(bMm/2,ly,'Außenansicht')+lbl(bMm/2,ly+LBL*1.3,GRIFFT[griffAussen]||'Griff',1);
   s+=lbl(bMm+gap+bMm/2,ly,'Innenansicht')+lbl(bMm+gap+bMm/2,ly+LBL*1.3,'Drückergarnitur · DIN '+(dinLinks?'links':'rechts'),1);
+  // Öffnungsrichtung über die volle Breite: gilt für beide Ansichten und ist der Parameter,
+  // dessen Verlust die teuerste Fehlbestellung erzeugt. Nach außen wird zusätzlich rot gesetzt,
+  // weil es der seltene Fall ist, den Innendienst und Kunde beide gegenprüfen müssen.
+  const nachAussen=(S.tuerOeffnung==='aussen');
+  s+=`<text x="${totalW/2}" y="${ly+LBL*2.7}" text-anchor="middle" dominant-baseline="central" font-family="Inter,Arial" font-weight="700" font-size="${LBL}" fill="${nachAussen?'#c02626':DIMC}">`
+    +(nachAussen?'Öffnet nach außen · DIN von außen bestimmt':'Öffnet nach innen')+`</text>`;
   return s+`</svg>`;
 }
 
@@ -2967,10 +2985,12 @@ function summaryPanel(){
   const mehr=`<div class="sum-more">Ausstattung</div>`;
 
   if(S.prod==='haustuer'){
-    const dinR=(S.opening!=='dkl');
+    const dinR=(S.opening!=='dkl'), nachAussen=(S.tuerOeffnung==='aussen');
     return kopf
-      +key(`Anschlag ${dinR?'rechts':'links'} (DIN)`,
-           `Bänder ${dinR?'rechts':'links'} · Griff ${dinR?'links':'rechts'} — von innen gesehen`)
+      +key(`Anschlag ${dinR?'rechts':'links'} (DIN) · ${tuerOeffnungName()}`,
+           nachAussen
+             ? `Bänder ${dinR?'rechts':'links'} · öffnet nach außen — DIN von außen bestimmt`
+             : `Bänder ${dinR?'rechts':'links'} · Griff ${dinR?'links':'rechts'} — von innen gesehen`)
       +key(`${GRIFFT[_griffAussenVal()]||'Griff'} außen`, `Drückergarnitur innen`)
       +mehr+row('Modell',DOORN[S.doorModel]||'—')+farbe
       +row('Verglasung',`${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}`)
@@ -3074,9 +3094,11 @@ function posKeySpecs(conf){
     const add=(k,v)=>rows.push(`<div class="ps-row"><span>${k}</span><b>${v}</b></div>`);
     // Farbe immer klar beschriften: gleiche Farbe = eine Zeile, sonst Außen + Innen getrennt
     const addColor=()=>{ if(S.outer===S.inner) add('Farbe',`${co} (außen &amp; innen)`); else { add('Außenfarbe',co); add('Innenfarbe',ci); } };
-    if(S.prod==='haustuer'){ add('Modell',DOORN[S.doorModel]||'—'); add('Maße',`${S.w} × ${S.h} mm`); addColor(); add('Verglasung',`${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}`); }
-    else if(S.prod==='schiebe'){ add('System',S.hstSystem==='hs'?'Hebe-Schiebetür':'PSK Schiebetür'); add('Maße',`${S.w} × ${S.h} mm`); addColor(); add('Verglasung',S.glass==='3'?'3-fach':'2-fach'); }
-    else { add('Aufteilung',AUFTN[S.aufteilung]); add('Maße',`${S.w} × ${S.h} mm`); addColor(); add('Verglasung',`${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}`); }
+    // Anschlag/Öffnungsart gehören in JEDE Position: sie sind fertigungsrelevant und
+    // stehen sonst nirgends im Angebot — die Skizze allein wird im Innendienst überlesen.
+    if(S.prod==='haustuer'){ add('Modell',DOORN[S.doorModel]||'—'); add('Maße',`${S.w} × ${S.h} mm`); add('Anschlag',anschlagKlartext()); addColor(); add('Verglasung',`${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}`); }
+    else if(S.prod==='schiebe'){ add('System',S.hstSystem==='hs'?'Hebe-Schiebetür':'PSK Schiebetür'); add('Maße',`${S.w} × ${S.h} mm`); add('Laufrichtung',`${S.hstLauf==='links'?'nach links':'nach rechts'} — von innen gesehen`); addColor(); add('Verglasung',S.glass==='3'?'3-fach':'2-fach'); }
+    else { add('Aufteilung',AUFTN[S.aufteilung]); add('Maße',`${S.w} × ${S.h} mm`); add('Öffnungsart',openingName()||'—'); addColor(); add('Verglasung',`${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}`); }
     return rows.join('');
   });
 }
