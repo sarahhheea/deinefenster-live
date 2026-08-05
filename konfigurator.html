@@ -3534,7 +3534,11 @@ function render(){
     // Zusaetzlich ein Kurzlabel direkt auf jeder Bildkachel. Der Absatz allein
     // reicht bei langen Galerien nicht: er scrollt aus dem Bild, waehrend die
     // Kacheln noch sichtbar sind.
-    if (KI_HINWEIS[k]) {
+    // Schritte mit KI-Bildern. Glas/Rollladen/Sprossen bekommen ihren
+    // Absatzhinweis aus dem jeweiligen Baustein und stehen deshalb nicht in
+    // KI_HINWEIS — ein Kachel-Label brauchen sie trotzdem, weil der Absatz
+    // am Handy aus dem Bild scrollt.
+    if (KI_HINWEIS[k] || ['glas','rollladen','sprossen'].indexOf(k) >= 0) {
       panel.querySelectorAll('.ocard, .pc, .glass-card').forEach(card => {
         const im = card.querySelector('img');
         if (!im || card.querySelector('.ai-badge')) return;
