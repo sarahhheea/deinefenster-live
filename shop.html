@@ -1321,6 +1321,16 @@ input[type="range"].range-clean::-moz-range-thumb {
 }
 .shop-searchbar-clear .material-symbols-outlined { font-size: 16px; }
 
+/* Suchzeile: am Handy Suche + Filter + Sortierung nebeneinander, ab 900px untereinander
+   (dort liegen die Kategorien dazwischen und es ist genug Platz). */
+.shop-suchzeile { display: flex; align-items: center; gap: 8px; }
+.shop-suchzeile .shop-searchbar { flex: 1 1 auto; min-width: 0; }
+.shop-suchzeile .shop-tools { margin-top: 0; flex: 0 0 auto; }
+@media (min-width: 900px) {
+  .shop-suchzeile { display: block; }
+  .shop-suchzeile .shop-tools { margin-top: 11px; }
+}
+
 /* Werkzeugzeile: Filter · Sortierung · Trefferzahl */
 .shop-tools { display: flex; align-items: center; gap: 8px; margin-top: 11px; min-width: 0; }
 .shop-tool {
@@ -1355,11 +1365,27 @@ input[type="range"].range-clean::-moz-range-thumb {
   .shop-tool--select { flex: 0 1 auto; min-width: 0; }
   .shop-tool--select select { max-width: 92px; text-overflow: ellipsis; }
 }
-/* Sehr schmale Geraete (z.B. iPhone SE): Trefferzahl weg — sie steht ohnehin
-   auf der „Alle"-Kachel. Sonst ueberlappt sie den Sortier-Knopf. */
-@media (max-width: 360px) {
+/* Handy: Filter und Sortierung stehen als Symbole neben der Suche. Die Beschriftung
+   bleibt fuer Screenreader im Dokument (nicht display:none), nur optisch verborgen.
+   Die Trefferzahl entfaellt hier — sie steht ohnehin auf der „Alle"-Kachel. */
+@media (max-width: 899px) {
   .shop-tools-count { display: none; }
-  .shop-tool--select select { max-width: 78px; }
+  .shop-tool {
+    width: 46px; height: 46px; min-height: 46px; padding: 0;
+    justify-content: center; border-radius: 13px; position: relative;
+  }
+  .shop-tool .material-symbols-outlined { font-size: 21px; }
+  .shop-tool-text {
+    position: absolute; width: 1px; height: 1px; margin: -1px;
+    padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+  }
+  .shop-tool-badge { position: absolute; top: -4px; right: -4px; }
+  /* Select unsichtbar ueber das Symbol legen: native Auswahlliste, eigenes Aussehen */
+  .shop-tool--select { padding: 0; }
+  .shop-tool--select select {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    opacity: 0; background: none; max-width: none; cursor: pointer;
+  }
 }
 
 /* Trust-Leiste (Vertrauens-Signale oberhalb der Produkte) */
@@ -1427,7 +1453,7 @@ input[type="range"].range-clean::-moz-range-thumb {
 
 /* .hidden muss meine display-Regeln überstimmen (sonst Clear-X / Filter-Badge / Gebraucht-Hinweis immer sichtbar) */
 .shop-searchbar-clear.hidden,
-.shop-searchbar-filter-badge.hidden,
+.shop-tool-badge.hidden,
 .shop-gebraucht-hinweis.hidden { display: none !important; }
 </style>
 <link rel="stylesheet" href="css/global-design.css?v=20260630w"/>
@@ -1734,7 +1760,10 @@ input[type="range"].range-clean::-moz-range-thumb {
 
 <!-- ===== Suchleiste (bleibt beim Scrollen stehen) ===== -->
 <div class="max-w-[1280px] mx-auto px-4 md:px-10 shop-top-offset">
-  <!-- Suche: eine Zeile, sonst nichts. Filter/Sortierung sitzen in der Werkzeugzeile unter den Kategorien. -->
+  <!-- Suchzeile: am Handy liegen Suche, Filter und Sortierung in EINER Zeile — zwei
+       getrennte Zeilen kosteten 117px, bevor der Kunde ein Fenster sah. Ab 900px
+       stapeln sie wieder (Kategorien liegen dann dazwischen). -->
+  <div class="shop-suchzeile">
   <div class="shop-searchbar" role="search">
     <div class="shop-searchbar-field">
       <span class="material-symbols-outlined shop-searchbar-icon" aria-hidden="true">search</span>
@@ -1745,14 +1774,11 @@ input[type="range"].range-clean::-moz-range-thumb {
     </div>
   </div>
 
-  <!-- Kategorien als freigestellte Produktfotos auf gemeinsamer Grundlinie (wie im Menue) -->
-  <nav id="katLeiste" class="kat-leiste" aria-label="Produktkategorien"></nav>
-
   <!-- Werkzeugzeile: Filter, Sortierung, Trefferzahl -->
   <div class="shop-tools">
-    <button id="filterTrigger" class="shop-tool lg:hidden" type="button">
+    <button id="filterTrigger" class="shop-tool lg:hidden" type="button" aria-label="Filter">
       <span class="material-symbols-outlined" aria-hidden="true">tune</span>
-      Filter
+      <span class="shop-tool-text">Filter</span>
       <span id="filterCountBadge" class="hidden shop-tool-badge">0</span>
     </button>
     <div class="shop-tool shop-tool--select">
@@ -1767,6 +1793,10 @@ input[type="range"].range-clean::-moz-range-thumb {
     </div>
     <span class="shop-tools-count"><span id="toolsAnzahl">772</span> Artikel</span>
   </div>
+  </div><!-- /.shop-suchzeile -->
+
+  <!-- Kategorien als freigestellte Produktfotos auf gemeinsamer Grundlinie (wie im Menue) -->
+  <nav id="katLeiste" class="kat-leiste" aria-label="Produktkategorien"></nav>
 
   <div id="masseHinweis" class="hidden shop-masse-hinweis">
     <span class="material-symbols-outlined align-bottom" style="font-size:14px" aria-hidden="true">auto_awesome</span>
@@ -2720,9 +2750,15 @@ section[style*="#0a1530"], div[style*="#0a1530"] { background: #f4f7fc !importan
     transition: color .15s, transform .15s, background .15s;
   }
   .karte-merk:hover { color: #e11d48; transform: scale(1.08); background: #fff; }
-  .karte-merk .material-symbols-outlined { font-size: 20px; }
+  /* Herz als SVG (siehe HERZ_SVG in js/shop.js): die Icon-Schrift ist ein Subset ohne
+     FILL-Achse, dort blieb das gemerkte Herz ein Umriss. Hier schaltet schlicht `fill`. */
+  .karte-merk-svg { width: 20px; height: 20px; fill: none; transition: fill .15s; }
   .karte-merk.on { color: #e11d48; }
-  .karte-merk.on .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
+  .karte-merk.on .karte-merk-svg { fill: currentColor; }
+  /* kurzer Impuls beim Merken, damit die Aktion spuerbar ist */
+  @keyframes merkPop { 0%{transform:scale(1)} 45%{transform:scale(1.28)} 100%{transform:scale(1)} }
+  .karte-merk.on .karte-merk-svg { animation: merkPop .28s ease; }
+  @media (prefers-reduced-motion: reduce) { .karte-merk.on .karte-merk-svg { animation: none; } }
 
   .dfnav-merk {
     position: relative; display: inline-flex; align-items: center; justify-content: center;
@@ -2834,10 +2870,19 @@ section[style*="#0a1530"], div[style*="#0a1530"] { background: #f4f7fc !importan
   }
   .karte-mwst { font-size: 10.5px; color: #8b95a5; font-weight: 500; white-space: nowrap; }
 
-  /* Handy: „Anfragen" verschwindet von der Karte — das Bottom-Sheet uebernimmt.
-     Ein Knopf pro Karte machte die Liste unruhig und doppelte den Weg. */
+  /* Handy: „Anfragen" bleibt auf der Karte, damit der Weg zur Anfrage EIN Tipp ist
+     (vorher: Karte antippen -> Sheet -> Anfragen). Bewusst schlank und als Umriss —
+     zwoelf vollflaechig blaue Knoepfe wuerden der Ware wieder die Aufmerksamkeit nehmen.
+     Das „⋯"-Menue (Teilen/Drucken) entfaellt hier; es steckt in der Produktansicht. */
   @media (max-width: 900px) {
-    .shop-card-cta-row { display: none !important; }
+    .shop-card-cta-row { display: flex !important; margin-top: 7px; padding-top: 0; }
+    .shop-card-cta-anfrage {
+      min-height: 38px; padding: 8px 10px; font-size: 13px; border-radius: 9px;
+      /* leichter Fond, damit er als Knopf lesbar ist — ohne Rahmen wirkte er wie ein Link */
+      background: #eef4ff; border-color: #c3d9fb;
+    }
+    .shop-card-cta-anfrage .material-symbols-outlined { font-size: 16px; }
+    .shop-card-kebab-wrap { display: none; }
     .karte-nr { margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     /* Verfuegbarkeit („Nur 1 verfuegbar") brach auf zwei Zeilen und machte die Liste
        unruhig — auf dem Handy steht sie im Bottom-Sheet, dort ist Platz dafuer. */
