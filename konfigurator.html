@@ -406,6 +406,11 @@ body:not(.wiz-active) .topbar{display:none}
 .pos-specs{display:grid;grid-template-columns:1fr;gap:2px}
 .ps-row{display:flex;justify-content:space-between;gap:12px;font-size:13.5px;padding:3px 0;border-bottom:1px dotted var(--line)}
 .ps-row span{color:var(--ink-soft)}.ps-row b{color:var(--ink);font-weight:600;text-align:right}
+/* Anschlag/Oeffnungsart: erste Zeile, deutlich abgesetzt. Sie entscheidet ueber die
+   Fertigungsrichtung — wer sie ueberliest, bestellt spiegelverkehrt. */
+.ps-row.ps-key{font-size:14.5px;padding:7px 0 8px;border-bottom:1px solid var(--line);margin-bottom:2px}
+.ps-row.ps-key span{color:var(--ink);font-weight:700}
+.ps-row.ps-key b{font-weight:800;color:var(--accent-d,#1b4d8c)}
 .pos-more{margin-top:9px}
 .pos-more summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--primary);list-style:none;display:inline-flex;align-items:center;gap:5px}
 .pos-more summary::-webkit-details-marker{display:none}
@@ -531,6 +536,10 @@ body:not(.wiz-active) .topbar{display:none}
 .sum-mass span{font-size:11.5px;color:var(--ink-soft);white-space:nowrap}
 .sum-key{background:var(--bg);border:1px solid var(--line);border-left:3px solid var(--accent);
   border-radius:8px;padding:8px 11px;margin-bottom:9px}
+/* Der erste Block ist immer Anschlag bzw. Oeffnungs-/Laufrichtung — die Angabe, die ueber
+   die Fertigungsrichtung entscheidet. Deshalb staerker abgesetzt als die uebrigen. */
+.sum-key:first-of-type{border-left-width:4px;background:#eaf1fa}
+.sum-key:first-of-type .kt{font-size:15px}
 .sum-key .kt{font-size:13.5px;font-weight:800;line-height:1.25}
 .sum-key .kt em{font-style:normal;color:var(--accent)}
 .sum-key .ks{font-size:11px;color:var(--ink-soft);line-height:1.45;margin-top:2px}
@@ -3144,13 +3153,16 @@ function posKeySpecs(conf){
   return withConf(conf,()=>{
     const co=COLORS[S.outer].n, ci=COLORS[S.inner].n, rows=[];
     const add=(k,v)=>rows.push(`<div class="ps-row"><span>${k}</span><b>${v}</b></div>`);
+    // Anschlag/Oeffnungsart zuerst und hervorgehoben: das ist die fertigungsentscheidende
+    // Angabe. Zwischen Maass und Farbe wurde sie vom Kunden wie vom Innendienst ueberlesen.
+    const addKey=(k,v)=>rows.push(`<div class="ps-row ps-key"><span>${k}</span><b>${v}</b></div>`);
     // Farbe immer klar beschriften: gleiche Farbe = eine Zeile, sonst Außen + Innen getrennt
     const addColor=()=>{ if(S.outer===S.inner) add('Farbe',`${co} (außen &amp; innen)`); else { add('Außenfarbe',co); add('Innenfarbe',ci); } };
     // Anschlag/Öffnungsart gehören in JEDE Position: sie sind fertigungsrelevant und
     // stehen sonst nirgends im Angebot — die Skizze allein wird im Innendienst überlesen.
-    if(S.prod==='haustuer'){ add('Modell',DOORN[S.doorModel]||'—'); add('Maße',`${S.w} × ${S.h} mm`); add('Anschlag',anschlagKlartext()); addColor(); add('Verglasung',`${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}`); }
-    else if(S.prod==='schiebe'){ add('System',S.hstSystem==='hs'?'Hebe-Schiebetür':'PSK Schiebetür'); add('Maße',`${S.w} × ${S.h} mm`); add('Laufrichtung',`${S.hstLauf==='links'?'nach links':'nach rechts'} — von innen gesehen`); addColor(); add('Verglasung',S.glass==='3'?'3-fach':'2-fach'); }
-    else { add('Aufteilung',AUFTN[S.aufteilung]); add('Maße',`${S.w} × ${S.h} mm`); add('Öffnungsart',openingName()||'—'); addColor(); add('Verglasung',`${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}`); }
+    if(S.prod==='haustuer'){ addKey('Anschlag',anschlagKlartext()); add('Modell',DOORN[S.doorModel]||'—'); add('Maße',`${S.w} × ${S.h} mm`); addColor(); add('Verglasung',`${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}`); }
+    else if(S.prod==='schiebe'){ addKey('Laufrichtung',`${S.hstLauf==='links'?'nach links':'nach rechts'} — von innen gesehen`); add('System',S.hstSystem==='hs'?'Hebe-Schiebetür':'PSK Schiebetür'); add('Maße',`${S.w} × ${S.h} mm`); addColor(); add('Verglasung',S.glass==='3'?'3-fach':'2-fach'); }
+    else { addKey('Öffnungsart',openingName()||'—'); add('Aufteilung',AUFTN[S.aufteilung]); add('Maße',`${S.w} × ${S.h} mm`); addColor(); add('Verglasung',`${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}`); }
     return rows.join('');
   });
 }
