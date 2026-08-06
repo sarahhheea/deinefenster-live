@@ -1019,6 +1019,12 @@ function gefilterteProdukte(opt) {
 
   // Sortierung
   switch (STATE.sortierung) {
+    case 'neueste':
+      // Es gibt kein Datumsfeld, aber die Artikel-IDs des Shop-Editors tragen einen
+      // Millisekunden-Zeitstempel (p_1785943444699). 762 von 840 Artikeln haben ihn;
+      // die aelteren mit UUID-Format landen hinten, was sachlich stimmt.
+      result.sort((a, b) => zeitstempelAusId(b.id) - zeitstempelAusId(a.id));
+      break;
     case 'preis-auf':
       result.sort((a, b) => a.preis_eur - b.preis_eur);
       break;
@@ -1045,6 +1051,25 @@ function gefilterteProdukte(opt) {
   }
 
   return result;
+}
+
+/* Zeitstempel aus der Artikel-ID (p_<ms>) — Grundlage fuer „Neueste zuerst".
+   Artikel ohne diesen Aufbau (aeltere UUIDs) bekommen 0 und landen hinten. */
+/* Bild-URL fuer strukturierte Daten auf EINE Domain normalisieren.
+   Zwei Fehler steckten hier: die Domain wurde einer bereits vollstaendigen URL erneut
+   vorangestellt (…/deinefenster-live/https://… -> 404, Google sah die Artikel ohne Bild),
+   und die Adressen zeigten auf die GitHub-Bauadresse statt auf deinefenster.de. */
+function schemaBildUrl(bild) {
+  const pfad = String(bild || '');
+  const treffer = /\/img\/shop\/[^"'\s]+$/.exec(pfad);
+  if (treffer) return 'https://deinefenster.de' + treffer[0];
+  if (/^https?:\/\//i.test(pfad)) return pfad;
+  return 'https://deinefenster.de/' + pfad.replace(/^\//, '');
+}
+
+function zeitstempelAusId(id) {
+  const m = /^p_(\d{13})$/.exec(String(id || ''));
+  return m ? Number(m[1]) : 0;
 }
 
 /* ─── Shop-Header dynamisch je nach Zustand-Filter ─── */
@@ -2431,7 +2456,10 @@ function rendereSchemaOrg(produkte) {
       '@type': 'Product',
       'name': p.titel,
       'description': p.beschreibung || `${STATE.kategorien[p.kategorie] || 'Fenster'} ${p.breite_mm}×${p.hoehe_mm} mm`,
-      'image': p.bild ? `https://sarahhheea.github.io/deinefenster-live/${p.bild}` : undefined,
+      // p.bild ist bereits eine vollstaendige URL — die Domain nochmal voranzustellen
+      // ergab .../deinefenster-live/https://.../img/shop/... und damit einen 404. Google
+      // sah die Artikel dadurch ohne Bild.
+      'image': p.bild ? schemaBildUrl(p.bild) : undefined,
       'category': STATE.kategorien[p.kategorie] || 'Fenster und Türen',
       'brand': { '@type': 'Brand', 'name': p.system ? p.system.split(' ')[0] : 'Drutex' },
       'width':  { '@type': 'QuantitativeValue', 'value': p.breite_mm, 'unitCode': 'MMT' },
@@ -2442,11 +2470,11 @@ function rendereSchemaOrg(produkte) {
         'price': p.preis_eur,
         'priceCurrency': 'EUR',
         'availability': p.lagerbestand > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-        'url': `https://sarahhheea.github.io/deinefenster-live/shop.html#${p.id}`,
+        'url': `https://deinefenster.de/shop.html?produkt=${encodeURIComponent(p.id)}`,
         'seller': {
           '@type': 'Organization',
           'name': 'Türen und Fensterhandel Christ',
-          'url': 'https://sarahhheea.github.io/deinefenster-live/'
+          'url': 'https://deinefenster.de/'
         }
       }
     }
