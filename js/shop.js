@@ -1279,7 +1279,7 @@ function rendere() {
     btn.addEventListener('click', e => { e.stopPropagation(); toggleMerk(btn.dataset.id); });
   });
   gridEl.querySelectorAll('[data-action="anfrage"]').forEach(btn => {
-    btn.addEventListener('click', e => { e.stopPropagation(); const p = STATE.produkte.find(x => x.id === btn.dataset.id); if (p) oeffneAnfrageModal(p); });
+    btn.addEventListener('click', e => { e.stopPropagation(); const p = STATE.produkte.find(x => x.id === btn.dataset.id); if (p) oeffneAnfrageModal(p, istReservierbar(p) ? 'reservierung' : 'anfrage'); });
   });
   // Klick außerhalb / Escape schließt offene „⋯"-Menüs (nur einmal global registrieren)
   if (!window.__shopKebabInit) {
@@ -1383,9 +1383,9 @@ function karteHtml(p) {
   const ctaRow = istArchiviert ? '' : `
         <div class="shop-card-cta-row">
           <button type="button" class="shop-card-cta-anfrage" data-action="anfrage" data-id="${p.id}"
-             aria-label="${escapeHtml(p.titel)} anfragen">
-            <span class="material-symbols-outlined">mail</span>
-            Anfragen
+             aria-label="${escapeHtml(p.titel)} ${istReservierbar(p) ? 'reservieren' : 'anfragen'}">
+            <span class="material-symbols-outlined">${istReservierbar(p) ? 'inventory_2' : 'mail'}</span>
+            ${istReservierbar(p) ? 'Reservieren' : 'Anfragen'}
           </button>
           <div class="shop-card-kebab-wrap">
             <button type="button" class="shop-card-kebab" data-action="kebab" data-id="${p.id}"
@@ -1437,7 +1437,7 @@ function karteHtml(p) {
       <div class="karte-body">
         <div class="karte-pricewrap">
           <span class="karte-preis">${preisPrefix ? preisPrefix + ' ' : ''}${formatPreis(p.preis_eur)}<span class="karte-preis-stern">${preisStern}</span></span>
-          <span class="karte-mwst">inkl. MwSt.</span>
+          <span class="karte-mwst">inkl. MwSt.${grundpreisSuffix(p)}</span>
         </div>
         ${specZeile}
         <h3 class="karte-titel">${escapeHtml(p.titel)}</h3>
@@ -2001,6 +2001,7 @@ function oeffneDetail(id) {
       <div class="shop-detail-cta-price">
         <span class="block text-[11px] text-ink-soft">${istSammelInserat(p) ? 'Preis ab' : 'Preis'}</span>
         <span class="text-2xl font-extrabold text-primary leading-none">${formatPreis(p.preis_eur)}</span>
+        ${grundpreisZeile(p)}
       </div>
       <div class="shop-detail-cta-btns">
         <a href="https://wa.me/491717263776?text=${encodeURIComponent(`Hallo, ist "${p.titel}" (${p.breite_mm}×${p.hoehe_mm} mm, ${formatPreis(p.preis_eur)}, Art-Nr. ${p.id}) noch verfügbar?`)}"
@@ -2009,14 +2010,14 @@ function oeffneDetail(id) {
           WhatsApp
         </a>
         <button id="detailAddBtn" class="detail-cta-anfrage">
-          <span class="material-symbols-outlined" style="font-size:18px">mail</span>
-          Anfragen
+          <span class="material-symbols-outlined" style="font-size:18px">${istReservierbar(p) ? 'inventory_2' : 'mail'}</span>
+          ${istReservierbar(p) ? 'Reservieren' : 'Anfragen'}
         </button>
       </div>
     </div>`;
   detail.querySelector('#detailAddBtn').addEventListener('click', () => {
     schliesseDetail();
-    oeffneAnfrageModal(p);
+    oeffneAnfrageModal(p, istReservierbar(p) ? 'reservierung' : 'anfrage');
   });
   // Bilder-Carousel-Setup (nur wenn mehrere Bilder)
   if (hatMehrere) setupCarousel(bilderListe.length);
@@ -2338,14 +2339,35 @@ function oeffneDeepLinkProdukt() {
 /* ─── Anfrage-Modal: Produkt-spezifische Anfrage via Web3Forms ─── */
 const SHOP_WEB3FORMS_KEY = '440a94ff-9f42-46af-bf3d-47013dbd8f5f';
 
-function oeffneAnfrageModal(p) {
+/* Lagerware mit echtem Bestand laesst sich reservieren — Einzelstuecke nicht,
+ * die sind nach einem Verkauf weg. Der Unterschied steht auch so im Feed
+ * (in_stock vs. limited) und ist Voraussetzung fuer „Im Geschaeft abholen“. */
+function istReservierbar(p) {
+  return Number(p.lagerbestand) > 1;
+}
+
+function oeffneAnfrageModal(p, modus) {
+  const reservierung = modus === 'reservierung';
   document.getElementById('anfrageProduktId').value = p.id;
   document.getElementById('anfrageProduktTitel').value = p.titel;
+
   // Nachricht vorausfüllen mit Produkt-Daten
-  const lines = [
-    `Hallo,`,
-    ``,
-    `ich interessiere mich für folgendes Produkt aus Ihrem Lager-Shop:`,
+  const kopf = reservierung
+    ? [`Hallo,`, ``, `ich möchte folgenden Artikel zur Abholung reservieren:`]
+    : [`Hallo,`, ``, `ich interessiere mich für folgendes Produkt aus Ihrem Lager-Shop:`];
+
+  const fuss = reservierung
+    ? [`Gewünschte Menge: 1`,
+       `Wunschtermin zur Abholung:`,
+       ``,
+       `Bitte bestätigen Sie mir die Reservierung. Bezahlt wird vor Ort.`,
+       ``,
+       `Vielen Dank!`]
+    : [`Ist dieses Produkt noch verfügbar? Bitte um Rückmeldung.`,
+       ``,
+       `Vielen Dank!`];
+
+  const lines = kopf.concat([
     ``,
     `Produkt: ${p.titel}`,
     `Artikel-Nr.: ${p.id}`,
@@ -2353,11 +2375,8 @@ function oeffneAnfrageModal(p) {
     `Zustand: ${_asArr(p.zustand).includes('gebraucht') ? 'Gebraucht' : 'Neu'}`,
     `Preis: ${formatPreis(p.preis_eur)}`,
     p.standnummer ? `Standnummer: ${p.standnummer}` : '',
-    ``,
-    `Ist dieses Produkt noch verfügbar? Bitte um Rückmeldung.`,
-    ``,
-    `Vielen Dank!`
-  ].filter(Boolean).join('\n');
+    ``
+  ], fuss).filter(Boolean).join('\n');
   document.getElementById('anfrageNachricht').value = lines;
   // Status zurücksetzen
   const st = document.getElementById('anfrageStatus');
@@ -2365,7 +2384,13 @@ function oeffneAnfrageModal(p) {
   st.textContent = '';
   const btn = document.getElementById('anfrageSubmitBtn');
   btn.disabled = false;
-  btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px">send</span> Anfrage senden';
+  btn.innerHTML = reservierung
+    ? '<span class="material-symbols-outlined" style="font-size:18px">inventory_2</span> Reservierung anfragen'
+    : '<span class="material-symbols-outlined" style="font-size:18px">send</span> Anfrage senden';
+
+  // Ueberschrift mitziehen, sonst steht ueber einer Reservierung „Anfrage“.
+  const titelEl = document.getElementById('anfrageModalTitel');
+  if (titelEl) titelEl.textContent = reservierung ? 'Zur Abholung reservieren' : 'Produkt anfragen';
 
   document.getElementById('anfrageModal').classList.add('open');
   document.getElementById('anfrageOverlay').classList.add('open');
@@ -2502,6 +2527,27 @@ function rendereSchemaOrg(produkte) {
 /* ─── Helper ─── */
 function formatPreis(n) {
   return new Intl.NumberFormat('de-DE', {style: 'currency', currency: 'EUR', maximumFractionDigits: 0}).format(n);
+}
+
+/* Grundpreis je m² — Pflicht bei Ware nach Flaeche (§ 4 PAngV), bei uns die
+ * Daemmrollen. Muss in unmittelbarer Naehe des Endpreises stehen, deshalb
+ * sowohl auf der Karte als auch in der Detailansicht.
+ * Logik in js/shop-grundpreis-util.js, dort auch die Tests. */
+function grundpreisFuer(p) {
+  if (typeof ShopGrundpreis === 'undefined') return null;
+  return ShopGrundpreis.grundpreisFuerProdukt(p);
+}
+
+/* Karte: haengt sich an „inkl. MwSt.“ an, damit keine Zeile dazukommt. */
+function grundpreisSuffix(p) {
+  const g = grundpreisFuer(p);
+  return g ? ` · ${escapeHtml(g)}` : '';
+}
+
+/* Detailansicht: eigene Zeile direkt unter dem Preis. */
+function grundpreisZeile(p) {
+  const g = grundpreisFuer(p);
+  return g ? `<span class="block text-[11px] text-ink-soft mt-0.5">${escapeHtml(g)}</span>` : '';
 }
 
 function escapeHtml(str) {
