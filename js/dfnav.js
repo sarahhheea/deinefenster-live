@@ -32,7 +32,24 @@
 /* dfnav — Warenkorb-Symbol site-weit: liest localStorage (df_cart_v1), injiziert Icon+Zähler-Badge vor den „Angebot"-CTA. Self-contained (eigener Style), funktioniert in dfnav UND alter nav.main. */
 (function(){
   var LS='df_cart_v1';
-  function count(){ try{ var d=JSON.parse(localStorage.getItem(LS)||'null'); return (d&&d.items&&d.items.length)?d.items.length:0; }catch(e){ return 0; } }
+  /* Mengensumme, nicht Positionen: sonst zeigt das Symbol "1", waehrend im Korb daneben
+     "Zwischensumme (3)" steht. Gleiche Zahl an beiden Stellen. */
+  function count(){ try{ var d=JSON.parse(localStorage.getItem(LS)||'null');
+    if(!d||!d.items) return 0;
+    return d.items.reduce(function(s,it){ return s + ((it&&it.conf&&it.conf.anzahl)||1); },0);
+  }catch(e){ return 0; } }
+  /* Der Angebots-Knopf fuehrt auf ein Formular, das den Warenkorb nicht kennt — wer schon
+     konfiguriert hat, muesste dort alles noch einmal eintippen. Bei gefuelltem Korb zeigt er
+     deshalb in den Checkout. Das Originalziel bleibt in data-df-ziel gemerkt. */
+  function ctaZiel(){
+    var n=count();
+    var ctas=document.querySelectorAll('.dfnav-cta,.dfnav-mlcta,.nav-cta');
+    for(var i=0;i<ctas.length;i++){
+      var a=ctas[i];
+      if(!a.hasAttribute('data-df-ziel')) a.setAttribute('data-df-ziel', a.getAttribute('href')||'/anfrage.html');
+      a.setAttribute('href', n>0 ? '/konfigurator.html?checkout=1' : a.getAttribute('data-df-ziel'));
+    }
+  }
   function ensureStyle(){
     if(document.getElementById('df-cart-style')) return;
     var s=document.createElement('style'); s.id='df-cart-style';
@@ -57,6 +74,7 @@
   }
   var last=-1;
   function refresh(){
+    ctaZiel();
     var link=inject(); if(!link) return;
     var n=count(); var b=link.querySelector('.df-cart-badge');
     if(!b) return;
