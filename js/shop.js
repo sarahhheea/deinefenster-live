@@ -1992,9 +1992,19 @@ function oeffneDetail(id) {
       <!-- Abhol-Hinweis unmittelbar vor den Anfrage-Knoepfen: der Kunde soll VOR der
            Anfrage wissen, dass er selbst laedt. Weiter oben oder im Aufklapp-Text
            wuerde er ueberlesen und der Aerger entstuende erst am Hoftor. -->
+      ${/* Abholadresse gehoert HIER hin, nicht in einen Aufklappblock weiter unten:
+            der Kunde entscheidet an dieser Stelle, ob sich die Fahrt lohnt. Recherche
+            zu Click&Collect: Abholinfos frueh im Weg zeigen, nicht erst im Checkout. */''}
+      <p class="shop-detail-abholung">
+        <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
+        <span><strong>Abholung: Fohrder Landstraße 13, 14772 Brandenburg an der Havel</strong>
+        &nbsp;·&nbsp; freitags 10–17 Uhr
+        &nbsp;·&nbsp; <a href="https://www.google.com/maps/dir/?api=1&destination=Fohrder+Landstra%C3%9Fe+13%2C+14772+Brandenburg+an+der+Havel"
+           target="_blank" rel="noopener">Route planen</a></span>
+      </p>
       <p class="shop-detail-abholung">
         <span class="material-symbols-outlined" aria-hidden="true">local_shipping</span>
-        <span><strong>Selbstabholung — wir laden nicht auf.</strong> Bitte genug Helfer
+        <span><strong>Wir laden nicht auf.</strong> Bitte genug Helfer
         (Fenster sind schwer, meist 2–4 Personen) und ein passendes Fahrzeug mitbringen.
         <strong>Lieferung auf Anfrage</strong> gegen Fahrtkosten.</span>
       </p>
