@@ -1259,9 +1259,14 @@ function openingName(){ const o=curAnschlag(); return o?o.n:''; }
 // waehrend die Skizze weiter von innen gezeichnet bleibt. Darum nennen wir die Bezugsseite
 // ausdruecklich, statt sie implizit zu lassen.
 function tuerOeffnungName(){ return (S.tuerOeffnung==='aussen') ? 'nach außen öffnend' : 'nach innen öffnend'; }
+// Die Ansicht gehoert immer dazu: "DIN links" allein ist mehrdeutig, solange nicht dabeisteht,
+// von welcher Seite man schaut. Nach innen oeffnend wird von innen bestimmt, nach aussen
+// oeffnend von aussen — beides muss der Kunde im Konfigurator und im Angebot lesen koennen.
+function tuerAnsichtName(){ return (S.tuerOeffnung==='aussen') ? 'Ansicht von außen' : 'Ansicht von innen'; }
 function anschlagKlartext(){
   const n=openingName()||'';
-  return (S.prod==='haustuer') ? (n?n+' · ':'')+tuerOeffnungName() : n;
+  if(S.prod!=='haustuer') return n;
+  return (n?n+' · ':'')+tuerOeffnungName()+' · '+tuerAnsichtName();
 }
 // Öffnungs-Token (dk-l,dk-r,dreh-l,dreh-r,kipp,fest) -> Flügel-Zustand {open,hinge}
 function tokSash(tok){
@@ -1833,7 +1838,7 @@ function haustuerStageSVG(){
   // weil es der seltene Fall ist, den Innendienst und Kunde beide gegenprüfen müssen.
   const nachAussen=(S.tuerOeffnung==='aussen');
   s+=`<text x="${totalW/2}" y="${ly+LBL*2.7}" text-anchor="middle" dominant-baseline="central" font-family="Inter,Arial" font-weight="700" font-size="${LBL}" fill="${nachAussen?'#c02626':DIMC}">`
-    +(nachAussen?'Öffnet nach außen · DIN von außen bestimmt':'Öffnet nach innen')+`</text>`;
+    +(nachAussen?'Öffnet nach außen · DIN wird von außen bestimmt':'Öffnet nach innen · DIN von innen bestimmt')+`</text>`;
   return s+`</svg>`;
 }
 
@@ -2806,10 +2811,10 @@ function panelHTML(){
       const card=(idx,r,t,s)=>{ const on=(S.anschlagIdx===idx && richt===r), flip=(idx===1);
         return `<div class="ocard ${on?'on':''}" onclick="setTuerOeff(${idx},'${r}')">${tick}<div class="vis"><img src="img/karten/haus-fluegel/1-fluegel.webp?v=1"${flip?' style="transform:scaleX(-1)"':''} loading="lazy" decoding="async" alt="${t}"></div><div class="t">${t}</div><div class="s">${s}</div></div>`; };
       return `<div class="card"><div class="grp-title">Drehrichtung &amp; Anschlag (DIN)</div><div class="opts two">`
-        +card(0,'innen','Nach innen · links','Bänder links · Griff rechts')
-        +card(1,'innen','Nach innen · rechts','Bänder rechts · Griff links')
-        +card(0,'aussen','Nach außen · links','öffnet nach außen · Bänder links')
-        +card(1,'aussen','Nach außen · rechts','öffnet nach außen · Bänder rechts')
+        +card(0,'innen','Links · Ansicht von innen','nach innen öffnend · Bänder links · Griff rechts')
+        +card(1,'innen','Rechts · Ansicht von innen','nach innen öffnend · Bänder rechts · Griff links')
+        +card(0,'aussen','Links · Ansicht von außen','nach außen öffnend · Bänder links')
+        +card(1,'aussen','Rechts · Ansicht von außen','nach außen öffnend · Bänder rechts')
         +`</div></div>`;
     }
     // Fenster/Balkon: Öffnungs-Karten mit echten Live-Fotos (1-Flügel: img/karten/anschlag-1f/<oeff>.webp), Mehrflügel = Mini-Skizze.
@@ -2986,11 +2991,14 @@ function summaryPanel(){
 
   if(S.prod==='haustuer'){
     const dinR=(S.opening!=='dkl'), nachAussen=(S.tuerOeffnung==='aussen');
+    // Gleiche Sprache wie auf den Auswahlkarten, in der Skizze und in den Positionsdaten:
+    // Seite + Ansicht + Oeffnungsrichtung. Sonst liest der Kunde im Konfigurator etwas
+    // anderes als spaeter im Angebot.
     return kopf
-      +key(`Anschlag ${dinR?'rechts':'links'} (DIN) · ${tuerOeffnungName()}`,
+      +key(`${dinR?'Rechts':'Links'} · ${tuerAnsichtName()}`,
            nachAussen
-             ? `Bänder ${dinR?'rechts':'links'} · öffnet nach außen — DIN von außen bestimmt`
-             : `Bänder ${dinR?'rechts':'links'} · Griff ${dinR?'links':'rechts'} — von innen gesehen`)
+             ? `${tuerOeffnungName()} · Bänder ${dinR?'rechts':'links'} — DIN wird von außen bestimmt`
+             : `${tuerOeffnungName()} · Bänder ${dinR?'rechts':'links'} · Griff ${dinR?'links':'rechts'}`)
       +key(`${GRIFFT[_griffAussenVal()]||'Griff'} außen`, `Drückergarnitur innen`)
       +mehr+row('Modell',DOORN[S.doorModel]||'—')+farbe
       +row('Verglasung',`${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}`)
