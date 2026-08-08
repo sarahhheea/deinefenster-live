@@ -216,15 +216,45 @@ async function sheetsPost(data) {
   return { ok: false, error: 'Unbekannte Aktion: ' + action };
 }
 
-/* ─── Bild hochladen → img/shop/ ─────────────────────────────────────── */
+/* ─── Bild hochladen → Webspace ───────────────────────────────────────
+   Bis zum 07.08.2026 landeten die Fotos direkt im Git-Repository. Das ist auf
+   4 GB angewachsen und hat die Auslieferung der Website blockiert: GitHub
+   Pages liefert hoechstens 1 GB aus, seitdem scheiterte jeder Build — auch
+   fuer reine Textaenderungen.
+
+   Die Fotos gehen deshalb an den IONOS-Webspace, der ohnehin bezahlt wird und
+   73 GB frei hat. Dort wandelt bild-upload.php sie gleich nach WebP um (rund
+   ein Siebtel der Groesse), damit das Problem nicht zurueckkommt.
+
+   An der Bedienung aendert sich nichts: gleiche Eingabe, gleiche Rueckgabe.
+   Nur die Adresse im Ergebnis zeigt jetzt auf bilder.deinefenster.de.      */
+const _UPLOAD_URL = 'https://bilder.deinefenster.de/wp-content/bild-upload.php';
+
+function _uploadSchluessel() {
+  let k = localStorage.getItem('df_upload_key');
+  if (!k) {
+    k = (prompt('Einmalig: Schluessel fuer den Bild-Upload eingeben') || '').trim();
+    if (k) localStorage.setItem('df_upload_key', k);
+  }
+  return k;
+}
 
 async function _uploadBild(body) {
   try {
-    const fileName = body.fileName || `${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;
-    const path     = `img/shop/${fileName}`;
-    const result   = await _ghPutRaw(path, body.imageBase64, null, `Bild: ${fileName}`);
-    if (!result.ok) throw new Error(result.message);
-    return { url: `${_PAGES}/${path}` };
+    const key = _uploadSchluessel();
+    if (!key) throw new Error('Ohne Schluessel koennen keine Bilder hochgeladen werden');
+    const res = await fetch(_UPLOAD_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Upload-Key': key },
+      body: JSON.stringify({ imageBase64: body.imageBase64 }),
+    });
+    const daten = await res.json().catch(() => ({}));
+    if (!res.ok || daten.error) {
+      // Bei falschem Schluessel den gespeicherten verwerfen, sonst haengt es fest
+      if (res.status === 401) localStorage.removeItem('df_upload_key');
+      throw new Error(daten.error || `Upload fehlgeschlagen (${res.status})`);
+    }
+    return { url: daten.url };
   } catch (err) {
     return { error: err.message };
   }
