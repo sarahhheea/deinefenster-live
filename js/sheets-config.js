@@ -230,6 +230,8 @@ async function sheetsPost(data) {
    Nur die Adresse im Ergebnis zeigt jetzt auf bilder.deinefenster.de.      */
 const _UPLOAD_URL = 'https://bilder.deinefenster.de/wp-content/bild-upload.php';
 
+/* Rueckfalltuer fuer den Fall, dass jemand ohne Editor-Anmeldung hochlaedt.
+   Im Normalfall greift sie nicht - siehe _uploadBild. */
 function _uploadSchluessel() {
   let k = localStorage.getItem('df_upload_key');
   if (!k) {
@@ -241,17 +243,29 @@ function _uploadSchluessel() {
 
 async function _uploadBild(body) {
   try {
-    const key = _uploadSchluessel();
-    if (!key) throw new Error('Ohne Schluessel koennen keine Bilder hochgeladen werden');
+    /* Wer am Editor angemeldet ist, darf auch Fotos hochladen: Das ohnehin
+       vorhandene Zugangs-Token wird mitgeschickt und serverseitig gegen die
+       GitHub-Schnittstelle geprueft. Dadurch muss auf den Geraeten der
+       Familie nichts zusaetzlich eingegeben werden - sie melden sich an wie
+       bisher, und das Einstellen laeuft unveraendert weiter. */
+    const kopf = { 'Content-Type': 'application/json' };
+    const tok  = getShopToken();
+    if (tok) {
+      kopf['X-Gh-Token'] = tok;
+    } else {
+      const k = _uploadSchluessel();
+      if (!k) throw new Error('Bitte zuerst anmelden');
+      kopf['X-Upload-Key'] = k;
+    }
     const res = await fetch(_UPLOAD_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Upload-Key': key },
+      headers: kopf,
       body: JSON.stringify({ imageBase64: body.imageBase64 }),
     });
     const daten = await res.json().catch(() => ({}));
     if (!res.ok || daten.error) {
-      // Bei falschem Schluessel den gespeicherten verwerfen, sonst haengt es fest
-      if (res.status === 401) localStorage.removeItem('df_upload_key');
+      // Nur den Ersatzschluessel verwerfen - die Editor-Anmeldung nicht anfassen
+      if (res.status === 401 && !tok) localStorage.removeItem('df_upload_key');
       throw new Error(daten.error || `Upload fehlgeschlagen (${res.status})`);
     }
     return { url: daten.url };
