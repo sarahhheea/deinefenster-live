@@ -19,8 +19,10 @@ from xml.sax.saxutils import escape
 
 import json_to_google_feed as haupt
 
-# Filialnummer aus dem Google-Unternehmensprofil. Muss dort exakt so stehen.
-STORE_CODE = os.environ.get("DF_STORE_CODE", "HOFVERKAUF-BRB")
+# Filialnummer aus dem Google-Unternehmensprofil (Dashboard, Spalte
+# "Geschaeftscode"). Muss dort exakt so stehen, sonst meldet Google
+# "Ungueltiger Geschaeftscode" und der ganze Inventarfeed wird abgelehnt.
+STORE_CODE = os.environ.get("DF_STORE_CODE", "05675597633498123060")
 
 # Abholart: "reserve" = Kunde reserviert online, kauft und zahlt vor Ort.
 # Genau deshalb braucht der Shop keinen Bezahlvorgang.
@@ -32,7 +34,12 @@ ABHOLZEIT = "same day"
 
 
 def availability_of(produkt):
-    """limited bei Einzelstuecken, damit niemand zwei davon reserviert."""
+    """Einzelstuecke als knapp melden, damit niemand zwei davon reserviert.
+
+    ACHTUNG: Der Feed fuer lokales Inventar kennt andere Werte als der
+    Hauptfeed. Dort heisst es "limited_availability" - ein blosses "limited"
+    lehnt Google ab (Fehler "Dieser Wert muss einer der genannten Werte sein").
+    """
     bestand = produkt.get("lagerbestand")
     if bestand is None:
         return "in_stock"
@@ -43,7 +50,7 @@ def availability_of(produkt):
     if bestand <= 0:
         return "out_of_stock"
     if bestand <= 1:
-        return "limited"
+        return "limited_availability"
     return "in_stock"
 
 

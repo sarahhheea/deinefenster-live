@@ -80,8 +80,13 @@ check("Bestand 300 -> in_stock",
 check("Bestand 0 -> out_of_stock",
       lokal.build_rows([produkt(lagerbestand=0, aktiv=True)], "S")[0]["availability"], "out_of_stock")
 
-check("Einzelstueck (Bestand 1) -> limited, damit niemand zwei bestellt",
-      lokal.build_rows([produkt(lagerbestand=1)], "S")[0]["availability"], "limited")
+# Achtung: Im Feed fuer lokales Inventar heisst der Wert "limited_availability".
+# Das schlichte "limited" aus dem Hauptfeed lehnt Google hier ab.
+check("Einzelstueck (Bestand 1) -> limited_availability, damit niemand zwei bestellt",
+      lokal.build_rows([produkt(lagerbestand=1)], "S")[0]["availability"], "limited_availability")
+
+check("kein blosses 'limited' - das lehnt Google beim lokalen Inventar ab",
+      lokal.build_rows([produkt(lagerbestand=1)], "S")[0]["availability"] == "limited", False)
 
 check("Bestand nicht gepflegt (None) -> in_stock",
       lokal.build_rows([produkt(lagerbestand=None)], "S")[0]["availability"], "in_stock")
