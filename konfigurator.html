@@ -448,6 +448,10 @@ body:not(.wiz-active) .topbar{display:none}
 .ovs-deliv button.on{border-color:var(--primary);background:#f4f9ff;box-shadow:inset 0 0 0 1px var(--primary)}
 .ovs-deliv button.locked{opacity:.5;cursor:not-allowed;background:var(--bg)}
 .ovs-deliv button.locked:hover{border-color:var(--line-d)}
+/* Statt Sackgasse: Lieferung bei kleiner Menge anfragen. */
+.liefer-frage{display:flex;gap:9px;align-items:flex-start;margin:9px 0 4px;font-size:12.5px;
+  line-height:1.5;color:var(--ink-soft);background:#f4f8ff;border:1px solid #dbe7fa;border-radius:10px;padding:10px 12px;cursor:pointer}
+.liefer-frage input{margin-top:2px;flex:0 0 auto;width:17px;height:17px;accent-color:var(--primary)}
 .ovs-shipnote{font-size:11.5px;color:var(--ink-soft);margin:-2px 0 4px;text-align:right}
 .ovs-mwst{font-size:11.5px;color:var(--ink-soft);text-align:right;margin:-8px 0 16px}
 /* Consent + Textarea */
@@ -476,6 +480,9 @@ body:not(.wiz-active) .topbar{display:none}
 .co-form .cta{min-height:50px;margin-top:0}
 .co-form .trust{margin-top:9px}
 .co-form .req{color:var(--accent);font-weight:800}
+/* Am Handy blieben E-Mail und Telefon nebeneinander je ~141px breit — der Platzhalter
+   war mittendrin abgeschnitten ("Für schnelle Rü"). Unter 600px untereinander. */
+@media(max-width:600px){.co-form .opts.two{grid-template-columns:1fr}}
 .co-form .opt{color:var(--ink-soft);font-weight:400;text-transform:none;letter-spacing:0}
 /* Textarea war als einziges Feld grau hinterlegt und wirkte neben den weissen
    Inputs deaktiviert. */
@@ -493,8 +500,24 @@ body:not(.wiz-active) .topbar{display:none}
    was er konfiguriert hat (Maße/Farbe/Glas), nicht nur eine Preiszeile. Antippen zeigt die Skizze groß. */
 .co-item{display:flex;align-items:flex-start;gap:11px;font-size:13px;padding:10px 0;color:var(--ink);border-bottom:1px solid var(--line)}
 .co-item:last-child{border-bottom:none}
-.co-draw{flex:0 0 78px;height:78px;background:var(--bg);border:1px solid var(--line);border-radius:9px;display:grid;place-items:center;padding:6px;overflow:hidden;cursor:zoom-in}
+/* 78px waren zu klein: bei der Haustuer standen darin zwei Ansichten mit fuenf
+   Textzeilen, am Handy in etwa 4pt. Jetzt eine Ansicht auf 132px, mit sichtbarem
+   Lupenzeichen — vorher deutete nur cursor:zoom-in auf die Grossansicht hin, und
+   das gibt es am Handy nicht. */
+.co-draw{position:relative;flex:0 0 132px;height:132px;background:var(--bg);border:1px solid var(--line);border-radius:11px;display:grid;place-items:center;padding:8px;overflow:hidden;cursor:zoom-in}
 .co-draw svg{max-width:100%;max-height:100%;height:auto;display:block}
+.co-draw::after{content:"";position:absolute;right:5px;bottom:5px;width:22px;height:22px;border-radius:50%;
+  background:rgba(255,255,255,.94);border:1px solid var(--line-d);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23225eaa' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-4.3-4.3M11 8v6M8 11h6'/%3E%3C/svg%3E");
+  background-size:14px 14px;background-position:center;background-repeat:no-repeat}
+/* Letzter Blick vor dem Absenden: Produkt und Summe direkt ueber dem Knopf. Am Handy
+   steht die Bestelluebersicht oben (order:-1) und der Knopf rund 840px darunter —
+   im Moment der Entscheidung war weder zu sehen, was noch was es kostet. */
+.co-final{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  background:var(--bg);border:1px solid var(--line-d);border-radius:11px;padding:11px 13px;margin:2px 0 11px}
+.co-final .cf-was{font-size:13px;color:var(--ink-soft);line-height:1.4;min-width:0}
+.co-final .cf-sum{font-size:18px;font-weight:800;white-space:nowrap}
+.co-final .cf-note{flex:0 0 100%;font-size:11.5px;color:var(--ink-soft);margin-top:2px}
 .co-info{flex:1 1 auto;min-width:0}
 .co-nm{font-weight:700;line-height:1.3;margin-bottom:3px}
 .co-sp{color:var(--ink-soft);font-size:11.5px;line-height:1.5}
@@ -924,6 +947,11 @@ body.checkout-focus .dfnav-mlcta{display:none}
 #urlaub-banner-close::after,.mnav-close::after{
   content:"";position:absolute;top:50%;left:50%;width:44px;height:44px;
   transform:translate(-50%,-50%);pointer-events:auto}
+/* Die 44px-Trefferflaeche des Menue-Knopfs ragt rechts ueber den Bildschirmrand
+   hinaus — am Handy liess sich die Seite dadurch rund 20px seitlich wegziehen.
+   clip statt hidden, weil hidden einen Scroll-Container erzeugt und die sticky
+   Schrittleiste und die Bestelluebersicht damit ihr Kleben verlieren wuerden. */
+html,body{overflow-x:clip}
 
 @media(max-width:900px){
   /* Task 1: Schritte waren nach Textlaenge 74-85px breit und wirkten zusammengezogen.
@@ -1413,7 +1441,7 @@ function anschlagInfo(){
       ansicht:tuerAnsichtName(),
       kurz:'DIN '+(dinL?'links':'rechts')+' · '+(aussen?'nach außen':'nach innen'),
       warn:aussen,
-      warntext:aussen?'Nach außen öffnend — DIN wird von außen bestimmt':''
+      warntext:aussen?'DIN wird von außen bestimmt':''
     };
   }
   if(S.prod==='schiebe'){
@@ -1602,6 +1630,12 @@ function skizzeSeite(conf, aussen){
   try { return withConf(conf, function(){ return stageSVG(); }); }
   finally { ANSICHT_ERZWUNGEN = vorher; }
 }
+/* Skizze fuer enge Stellen (Warenkorb, Checkout-Liste, Mail): genau EINE Ansicht.
+   Bei der Haustuer waehlt haustuerStageSVG() dann selbst die Seite, auf die der
+   Kunde sich im Anschlag-Schritt festgelegt hat; beim Fenster bleibt es wie bisher
+   die Innenansicht. In der Buehne und in der grossen Ansicht wird stageSVG() ohne
+   Zwang aufgerufen — dort zeigt die Haustuer weiterhin beide Seiten. */
+function skizzeKompakt(conf){ return skizzeSeite(conf,false); }
 /* Eine Kachel pro Position. Die Haustuer zeigt Aussen- UND Innenansicht — dieses Paar
    rendert haustuerStageSVG() bereits selbst. Es zusaetzlich in zwei Kacheln zu legen ergab
    vier Zeichnungen mit widerspruechlichen Labels ("Innen" ueber einem Paar aus Aussen+Innen).
@@ -1912,24 +1946,41 @@ function schiebeStageSVG(){
 const DOOR_MOTIFS={'alaska-1-inox':1,'alaska-2-inox':1,'colorado-inox':1,'florida-lr-inox':1,'montana-1-inox':1,'montana-2-lr-inox':1,'montana-3-lr-inox':1,'nebraska-lcr-inox':1,'ohio-inox':1,'pennsylvania-1-inox':1,'pennsylvania-2-lr-inox':1,'pennsylvania-3-lr-inox':1,'texas-c-inox':1,'texas-lr-inox':1};
 // ---- Haustür: gezeichnete Skizze (farbiges Türblatt + Inox-Modellmotiv + Griff) — färbt sich mit der Farbe ----
 function haustuerStageSVG(){
-  // Haustür IMMER als Paar: Außenansicht + Innenansicht nebeneinander (Kundenwunsch 03.08.2026).
-  // Der Kunde muss vor der Bestellung sehen, wohin die Tür aufgeht und wo der Griff sitzt — das erklärt sich
-  // erst im Vergleich beider Seiten. Die Ansichten sind spiegelbildlich: liegt das Band innen links, liegt es
-  // außen rechts. Außen sitzt der gewählte Griff (Stoßgriff/Knauf/Klinke), innen IMMER die Drückergarnitur —
-  // so wird die Tür auch geliefert (siehe griffTuerFull(): "… außen · Drückergarnitur innen").
+  // Zwei Betriebsarten:
+  //   PAAR   (Buehne, grosse Ansicht) — Aussen- und Innenansicht nebeneinander. Dort ist Platz,
+  //          und erst im Vergleich beider Seiten versteht der Kunde, wohin die Tuer aufgeht.
+  //   EINZEL (Warenkorb, Checkout-Liste, beide Mails) — nur die Ansicht, auf die der Kunde sich
+  //          im Anschlag-Schritt festgelegt hat. Das Paar wurde an diesen engen Stellen auf halbe
+  //          Breite gequetscht; zwei Tueren in einer 90px-Miniatur kann niemand mehr lesen.
+  // Die Ansichten sind spiegelbildlich: liegt das Band innen links, liegt es aussen rechts. Aussen
+  // sitzt der gewaehlte Griff, innen IMMER die Drueckergarnitur — so wird die Tuer geliefert.
+  const einzel = (ANSICHT_ERZWUNGEN !== null);
+  const nurAussen = einzel ? (S.tuerOeffnung==='aussen') : false;   // gewaehlte Bezugsseite
   const key=S.doorModel||'nebraska-lcr-inox';
   const bMm=Math.max(+S.w||1100,400), hMm=Math.max(+S.h||2100,900);
   const uu=Math.max(bMm,hMm);
   const DIMC='#1e242b', DIML='#565b61';
-  // Schrift bewusst groesser als bei den Fenster-Skizzen: die Doppelansicht ist doppelt so breit und wird
-  // deshalb staerker verkleinert dargestellt — mit den Fenster-Faktoren waeren Maszahlen/Beschriftung auf der
-  // Buehne nur ~7px gross und unlesbar.
-  const DT=Math.max(uu*0.062,72), DW=Math.max(uu*0.0038,2.4), tick=DT*0.30;
-  const LBL=DT*0.86;                       // Beschriftung knapp unter Maszahlen-Groesse
-  const gap=Math.max(bMm*0.30,DT*3.2);     // Abstand zwischen den beiden Ansichten
-  const totalW=bMm*2+gap;
-  const mL=Math.max(uu*0.10,DT*2.0), mR=Math.max(uu*0.16,DT*3.6), mT=Math.max(uu*0.13,DT*2.6);
-  const mB=Math.max(uu*0.10,DT*2.0)+LBL*4.1;   // unten Platz für die dreizeilige Beschriftung (3. Zeile = Öffnungsrichtung)
+  // Schriftgroessen haengen an der Breite EINER Tuer und an der Zahl der Ansichten — nicht am
+  // Gesamtbild. Vorher war DT an max(Breite,Hoehe) gekoppelt: bei 1100x2100 ergab das 130
+  // Einheiten Schrift auf 1100 Einheiten Tuerbreite, also Textbloecke unter Miniaturtueren.
+  const ansichten = einzel ? 1 : 2;
+  const DT=bMm*(einzel?0.058:0.105), DW=Math.max(uu*0.0038,2.4), tick=DT*0.30;
+  const LBL=DT*0.78;                       // Beschriftung eine Stufe unter der Maszahl
+  const LBL2=DT*0.62;                      // Unterzeile eine weitere Stufe darunter
+  const gap=einzel?0:Math.max(bMm*0.30,DT*3.2);
+  const totalW=bMm*ansichten+gap;
+  // Raender an dem bemessen, was tatsaechlich darin steht. Links steht nichts — dort standen
+  // vorher 260 Einheiten Leerraum, unten 720 fuer drei Textzeilen. Das war der schiefe Rand.
+  // Oben: Maszlinie auf halber Randhoehe + Zahl darueber + halbe Zeilenhoehe.
+  // Unten: so viele Beschriftungszeilen, wie der jeweilige Fall wirklich hat.
+  // Links und rechts gleich viel: rechts braucht die Hoehenbemaszung Platz (Linie DT*0.9 +
+  // gedrehte Zahl DT*0.62 + halbe Zeilenhoehe), links steht nichts. Waeren die Raender
+  // verschieden, saesse die Zeichnung sichtbar aus der Mitte — genau der schiefe Eindruck.
+  // Unten: in der Einzelansicht steht dort NUR die Seitenbezeichnung. Griff und Anschlag
+  // stehen an diesen Stellen unmittelbar daneben im Klartext; in der Zeichnung waeren sie
+  // bei dieser Groesse wieder 6-7px gross und damit unlesbar.
+  const mR=DT*2.1, mL=mR, mT=DT*2.7;
+  const mB=einzel?DT*1.9:DT*3.7;
   const FR=Math.max(bMm*0.06,64), gx=FR, gy=FR, sashW=bMm-2*FR, gh=hMm-2*FR;   // Türrahmen (Blendrahmen)
   const SFR=Math.max(Math.min(sashW,gh)*0.06,40);                              // Flügelrahmen
   const glx=gx+SFR, gly=gy+SFR, glw=Math.max(sashW-2*SFR,20), glh=Math.max(gh-2*SFR,20);
@@ -1937,7 +1988,7 @@ function haustuerStageSVG(){
   const vb=(x,y0,y1)=>`<g stroke="${DIML}" stroke-width="${DW}" fill="none"><line x1="${x}" y1="${y0}" x2="${x}" y2="${y1}"/><line x1="${x-tick}" y1="${y0}" x2="${x+tick}" y2="${y0}"/><line x1="${x-tick}" y1="${y1}" x2="${x+tick}" y2="${y1}"/></g>`;
   const ht=(x,y,t)=>`<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-family="Inter,Arial" font-weight="700" font-size="${DT}" fill="${DIMC}">${t}</text>`;
   const vt=(x,y,t)=>`<text x="${x}" y="${y}" transform="rotate(-90 ${x} ${y})" text-anchor="middle" dominant-baseline="central" font-family="Inter,Arial" font-weight="700" font-size="${DT}" fill="${DIMC}">${t}</text>`;
-  const lbl=(x,y,t,soft)=>`<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-family="Inter,Arial" font-weight="${soft?500:700}" font-size="${soft?LBL*0.86:LBL}" fill="${soft?DIML:DIMC}">${t}</text>`;
+  const lbl=(x,y,t,soft,farbe)=>`<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-family="Inter,Arial" font-weight="${soft?500:700}" font-size="${soft?LBL2:LBL}" fill="${farbe||(soft?DIML:DIMC)}">${t}</text>`;
 
   // Anschlag: dkl = DIN links (Band innen links), dkr = DIN rechts — gleiche Lesart wie in der Zusammenfassung.
   const dinLinks=(S.opening==='dkl');
@@ -2001,21 +2052,28 @@ function haustuerStageSVG(){
     return g+`</g>`;
   }
 
-  let s=`<svg viewBox="${-mL} ${-mT} ${totalW+mL+mR} ${hMm+mT+mB}" role="img" aria-label="Haustür-Skizze ${DOORN[key]||''} — Außen- und Innenansicht" preserveAspectRatio="xMidYMid meet">${DEFS}`;
-  s+=ansicht(0,true)+ansicht(bMm+gap,false);
-  // Bemaßung nur einmal: Breite über der Außenansicht, Höhe rechts neben der Innenansicht (dieselbe Tür).
+  const nachAussen=(S.tuerOeffnung==='aussen');
+  const titel = einzel
+    ? (nurAussen?'Außenansicht':'Innenansicht')
+    : 'Außen- und Innenansicht';
+  let s=`<svg viewBox="${-mL} ${-mT} ${totalW+mL+mR} ${hMm+mT+mB}" role="img" aria-label="Haustür-Skizze ${DOORN[key]||''} — ${titel}" preserveAspectRatio="xMidYMid meet">${DEFS}`;
+  s+= einzel ? ansicht(0,nurAussen) : (ansicht(0,true)+ansicht(bMm+gap,false));
+  // Bemaszung: Breite ueber der linken Ansicht, Hoehe rechts aussen — dieselbe Tuer, also nur einmal.
   const topY=-mT*0.5; s+=hb(0,bMm,topY)+ht(bMm/2,topY-DT*0.72,bMm);
   const rxH=totalW+DT*0.9; s+=vb(rxH,0,hMm)+vt(rxH+DT*0.62,hMm/2,hMm);
-  // Beschriftung unter den Ansichten: welche Seite man sieht, welcher Griff, welcher Anschlag.
-  const ly=hMm+LBL*1.6;
-  s+=lbl(bMm/2,ly,'Außenansicht')+lbl(bMm/2,ly+LBL*1.3,GRIFFT[griffAussen]||'Griff',1);
-  s+=lbl(bMm+gap+bMm/2,ly,'Innenansicht')+lbl(bMm+gap+bMm/2,ly+LBL*1.3,'Drückergarnitur · DIN '+(dinLinks?'links':'rechts'),1);
-  // Öffnungsrichtung über die volle Breite: gilt für beide Ansichten und ist der Parameter,
-  // dessen Verlust die teuerste Fehlbestellung erzeugt. Nach außen wird zusätzlich rot gesetzt,
-  // weil es der seltene Fall ist, den Innendienst und Kunde beide gegenprüfen müssen.
-  const nachAussen=(S.tuerOeffnung==='aussen');
-  s+=`<text x="${totalW/2}" y="${ly+LBL*2.7}" text-anchor="middle" dominant-baseline="central" font-family="Inter,Arial" font-weight="700" font-size="${LBL}" fill="${nachAussen?'#c02626':DIMC}">`
-    +(nachAussen?'Öffnet nach außen · DIN wird von außen bestimmt':'Öffnet nach innen · DIN von innen bestimmt')+`</text>`;
+
+  const ly=hMm+LBL*1.5, ly2=ly+LBL*1.25;
+  if(einzel){
+    s+=lbl(bMm/2,ly,titel);
+  } else {
+    s+=lbl(bMm/2,ly,'Außenansicht')+lbl(bMm/2,ly2,GRIFFT[griffAussen]||'Griff',1);
+    s+=lbl(bMm+gap+bMm/2,ly,'Innenansicht')+lbl(bMm+gap+bMm/2,ly2,'Drückergarnitur · DIN '+(dinLinks?'links':'rechts'),1);
+    // Oeffnungsrichtung gilt fuer beide Ansichten. Der seltene Fall "nach aussen" bleibt
+    // farbig markiert, steht aber als ruhige Unterzeile statt als Querbalken.
+    s+=lbl(totalW/2,ly2+LBL2*1.6,
+        nachAussen?'Öffnet nach außen — DIN wird von außen bestimmt':'Öffnet nach innen',
+        1, nachAussen?'#c02626':DIML);
+  }
   return s+`</svg>`;
 }
 
@@ -2496,14 +2554,18 @@ function prodUnit(){ return {fenster:'Fenster',balkon:'Balkontür',haustuer:'Hau
 // Nur-Text-Teil der Anfrage-Mail. Der Anschlag gehoert an die zweite Stelle:
 // bei der Haustuer fehlte er hier komplett, dadurch kam die fertigungs-
 // entscheidende Angabe im Innendienst nirgends im Klartext an.
-function prodSpecs(){
+// rest=true laesst Anschlag und Maß weg — im Nur-Text-Teil der Mail stehen die beiden
+// bereits als eigene Zeilen darueber, sonst stuenden sie zweimal in derselben Position.
+function prodSpecs(rest){
   const co=COLORS[S.outer].n, ci=COLORS[S.inner].n;
   const c=(S.outer===S.inner)?`${co} (außen & innen)`:`außen ${co} · innen ${ci}`;
-  const a=anschlagInfo().kurz;
-  if(S.prod==='haustuer') return `${DOORN[S.doorModel]||'—'} · ${a} · ${griffTuerShort()} · ${S.w}×${S.h} mm · ${c}`;
-  if(S.prod==='schiebe') return `${S.hstSystem==='hs'?'Hebe-Schiebe':'PSK'} · ${a} · ${S.w}×${S.h} mm · ${c}`;
+  const teil=(...v)=>v.filter(Boolean).join(' · ');
+  const a=rest?'':anschlagInfo().kurz;
+  const m=rest?'':`${S.w}×${S.h} mm`;
+  if(S.prod==='haustuer') return teil(DOORN[S.doorModel]||'—', a, griffTuerShort(), m, c);
+  if(S.prod==='schiebe')  return teil(S.hstSystem==='hs'?'Hebe-Schiebe':'PSK', a, m, c);
   const ex=[]; if(S.roll==='gurt')ex.push('Rollladen'); if(S.roll==='motor')ex.push('Motorrolladen'); if(S.glass==='3')ex.push('3-fach'); if(S.prod==='balkon'&&S.balkonSchwelle==='alu')ex.push('Aluschwelle'); if(S.sicher)ex.push('RC1');
-  return `${AUFTN[S.aufteilung]} · ${a} · ${S.w}×${S.h} mm · ${c}${ex.length?' · '+ex.join(', '):''}`;
+  return teil(AUFTN[S.aufteilung], a, m, c, ex.length?ex.join(', '):'');
 }
 
 const OPEN={dkl:'Dreh-Kipp links',dkr:'Dreh-Kipp rechts',kipp:'Kipp',fest:'Festverglasung'};
@@ -2596,6 +2658,32 @@ function finishWithDefaults(){ commitCurrent(); }   // übernimmt aktuelle Konfi
 let cur=0;
 let started=false;
 let liefer='abholung';   // 'abholung' | 'lieferung'
+// Unter LIEFER_MIN Elementen war "Lieferung" ein toter, ausgegrauter Knopf: der Kunde
+// hat neun Schritte konfiguriert und erfaehrt im zehnten, dass er 300 km fahren soll —
+// der teuerste denkbare Zeitpunkt fuer einen Abbruch. Statt dessen kann er die Lieferung
+// jetzt anfragen. Das verspricht nichts und aendert keinen Preis; es haengt der Anfrage
+// nur die Notiz an, dass wir es pruefen sollen.
+let lieferWunsch=false;
+function setLieferWunsch(v){ lieferWunsch=!!v; saveCart();
+  if(document.getElementById('cdBody')) renderCartDrawer(); render(); }
+// Wahl + Wunsch in einem: Knoepfe fuer Abholung/Lieferung, darunter bei zu kleiner
+// Menge die Anfrage-Option. Wird von Drawer und Checkout gemeinsam genutzt, damit
+// beide Stellen nicht wieder auseinanderlaufen.
+function lieferWahlHTML(t,klasse){
+  var h='<div class="'+klasse+'">'
+    +'<button type="button" class="'+(liefer==='abholung'?'on':'')+'" onclick="setLiefer(\'abholung\')">'
+      +'<b>Abholung</b><span>Brandenburg a. d. H. &middot; kostenlos</span></button>'
+    +'<button type="button" class="'+(liefer==='lieferung'?'on':'')+(t.lieferOk?'':' locked')+'"'+(t.lieferOk?'':' disabled')+' onclick="setLiefer(\'lieferung\')">'
+      +'<b>Lieferung</b><span>'+(t.lieferOk?(t.ship?eur(t.ship):'kostenfrei'):'ab '+LIEFER_MIN+' Elementen')+'</span></button>'
+  +'</div>';
+  if(!t.lieferOk){
+    var fehlt=LIEFER_MIN-t.qty;
+    h+='<label class="liefer-frage"><input type="checkbox" '+(lieferWunsch?'checked':'')+' onchange="setLieferWunsch(this.checked)">'
+      +'<span>Sie brauchen trotzdem Lieferung? Ab '+LIEFER_MIN+' Elementen ist sie regulär möglich — Ihnen fehlen noch '
+      +fehlt+'. Haken setzen, dann prüfen wir es für Ihre Menge und nennen es Ihnen im Angebot.</span></label>';
+  }
+  return h;
+}
 var colAll=false;        // Farb-Schritt: alle 46 Farben zeigen (var → inline-onclick erreichbar)
 let anfrageView='cart';  // 'cart' (Übersicht) | 'form' (Checkout-Seite) | 'done' (Bestätigung)
 // === Echter Warenkorb ===
@@ -2627,10 +2715,11 @@ function cartSnapshot(it){
        r={ sv:3, pv:PRICE_REV, price:((typeof _p==='number'&&_p>0)?_p:(it.lastPrice||0)), sketch:skizzeSeite(conf,true), title:withConf(conf,configTitle), specs:posKeySpecs(conf), full:withConf(conf,summaryRows) }; }catch(e){ r={sv:3,pv:PRICE_REV,price:(it.lastPrice||0),sketch:'',title:'Artikel',specs:'',full:''}; }
   return { conf, name:it.name||'', qty:q, r };
 }
-function saveCart(){ try{ localStorage.setItem(CART_LS_KEY, JSON.stringify({v:2,t:Date.now(),liefer:liefer,items:cart.map(cartSnapshot)})); }catch(e){}
+function saveCart(){ try{ localStorage.setItem(CART_LS_KEY, JSON.stringify({v:2,t:Date.now(),liefer:liefer,lieferWunsch:lieferWunsch,items:cart.map(cartSnapshot)})); }catch(e){}
   try{ window.dispatchEvent(new CustomEvent('df-cart-changed',{detail:{count:cart.length}})); }catch(e){} }
 function loadCart(){ try{ const d=JSON.parse(localStorage.getItem(CART_LS_KEY)||'null'); if(d&&Array.isArray(d.items)&&d.items.length){ cart=d.items.filter(o=>o&&o.conf).map(o=>({conf:o.conf,name:o.name||'',lastPrice:(o.r&&Number(o.r.price))||0})); }
   if(d && (d.liefer==='abholung'||d.liefer==='lieferung')) liefer=d.liefer;   // Wahl wiederherstellen
+  if(d && typeof d.lieferWunsch==='boolean') lieferWunsch=d.lieferWunsch;
   }catch(e){} }
 // Nach erfolgreichem Absenden leeren: sonst zeigt der Zaehler die bereits gestellte Anfrage
 // weiter als offenen Korb — die haeufigste Ursache fuer versehentliche Doppelanfragen.
@@ -2721,12 +2810,7 @@ function renderCartDrawer(){
   // scrollt mit. Vorher belegte der Fuss 383 von 844 px — fuer die Positionen blieben 309 px
   // bei 622 px Inhalt, der Kunde sah nur die Skizze und weder Titel noch Preis noch Menge.
   body.innerHTML=cart.map(cdItemHTML).join('')
-    +'<div class="cd-liefer">'
-      +'<button type="button" class="'+(liefer==='abholung'?'on':'')+'" onclick="setLiefer(\'abholung\')">'
-        +'<b>Abholung</b><span>Brandenburg a. d. H. &middot; kostenlos</span></button>'
-      +'<button type="button" class="'+(liefer==='lieferung'?'on':'')+(t.lieferOk?'':' locked')+'"'+(t.lieferOk?'':' disabled')+' onclick="setLiefer(\'lieferung\')">'
-        +'<b>Lieferung</b><span>'+(t.lieferOk?'deutschlandweit':'ab '+LIEFER_MIN+' Elementen')+'</span></button>'
-    +'</div>'
+    +lieferWahlHTML(t,'cd-liefer')
     +'<div class="cd-sum"><span>Zwischensumme ('+t.qty+')</span><b>'+eur(t.sub)+'</b></div>'
     +'<div class="cd-note">'+(t.shipNote||'')+'</div>'
     +'<button type="button" class="cd-more" onclick="cdWeiteresProdukt()">'
@@ -2740,8 +2824,15 @@ function renderCartDrawer(){
     // Summe zaehlt Verlaesslichkeit mehr als der Preis.
     +'<div class="cd-trust"><span>4,7 &middot; 93 Google-Bewertungen</span><span>Familienbetrieb seit 1996</span>'
     +'<span>Antwort in 1&ndash;2 Werktagen</span><span>Kein Kaufzwang</span></div>';
+  // t.qty ist die STUECKZAHL, nicht die Zahl der Positionen. Zwei Positionen mit
+  // drei Stueck meldeten vorher "3 Positionen".
   var _tt=document.getElementById('cdTitel');
-  if(_tt) _tt.innerHTML = (t.qty>1? t.qty+' Positionen &mdash; <em>ein Angebot</em>.' : 'Ihr <em>Angebot</em>.');
+  if(_tt){
+    var _p=cart.length;
+    _tt.innerHTML = (_p>1)
+      ? _p+' Positionen'+(t.qty>_p?' &middot; '+t.qty+' St&uuml;ck':'')+' &mdash; <em>ein Angebot</em>.'
+      : (t.qty>1 ? t.qty+' St&uuml;ck &mdash; <em>ein Angebot</em>.' : 'Ihr <em>Angebot</em>.');
+  }
 }
 function openCartDrawer(){ renderCartDrawer(); var w=document.getElementById('cartDrawer'); if(!w)return; w.classList.add('on'); w.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; var x=w.querySelector('.cd-x'); if(x)x.focus(); }
 function closeCartDrawer(){ var w=document.getElementById('cartDrawer'); if(!w)return; w.classList.remove('on'); w.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
@@ -3182,7 +3273,7 @@ function summaryPanel(){
     // Checkout-Liste und beide Mails.
     const ai=anschlagInfo();
     return kopf
-      +key(`${ai.norm} · ${ai.ansicht}`, ai.klartext+(ai.warntext?' — '+ai.warntext:''))
+      +key(ai.norm, [ai.ansicht,ai.klartext,ai.warntext].filter(Boolean).join(' · '))
       +key(`${GRIFFT[_griffAussenVal()]||'Griff'} außen`, `Drückergarnitur innen`)
       +mehr+row('Modell',DOORN[S.doorModel]||'—')+farbe
       +row('Verglasung',`${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}`)
@@ -3296,7 +3387,7 @@ function posKeySpecs(conf){
 function posCard(it,i){
   const conf=it.conf, q=conf.anzahl||1;
   const unit=withConf(conf,price), line=unit*q;
-  const sketch=withConf(conf,()=>stageSVG());
+  const sketch=skizzeKompakt(conf);
   const title=withConf(conf,configTitle);
   return `<div class="pos-card">
     <div class="pos-head"><span class="pos-no">Pos. ${i+1}</span></div>
@@ -3348,7 +3439,7 @@ function formHTML(t){
   // ob Maße/Öffnung/Farbe stimmen. Zeichnung antippen → große Ansicht (skizzeGross).
   const mini=cart.map((it,i)=>{
     const q=it.conf.anzahl||1, nm=withConf(it.conf,configTitle);
-    const sk=withConf(it.conf,()=>stageSVG()), sp=withConf(it.conf,prodSpecs);
+    const sk=skizzeKompakt(it.conf), sp=withConf(it.conf,prodSpecs);
     return `<div class="co-item">`
       +`<div class="co-draw" onclick="skizzeGross(${i})" role="button" tabindex="0" aria-label="Skizze groß ansehen" title="Skizze groß ansehen">${sk}</div>`
       +`<div class="co-info"><div class="co-nm">${q} × ${nm}${it.name?' · '+esc(it.name):''}</div>`
@@ -3363,11 +3454,7 @@ function formHTML(t){
     <div class="co-grid">
       <form class="card co-form" novalidate onsubmit="submitAnfrage(event)">
         <div class="co-deliv-lbl">Wie möchten Sie es erhalten?</div>
-        <div class="ovs-deliv co-deliv">
-          <button type="button" class="${liefer==='abholung'?'on':''}" onclick="setLiefer('abholung')"><b>Abholung</b><span>Lager Brandenburg &middot; kostenlos</span></button>
-          <button type="button" class="${liefer==='lieferung'?'on':''} ${t.lieferOk?'':'locked'}" ${t.lieferOk?'':'disabled'} onclick="setLiefer('lieferung')"><b>Lieferung</b><span>${t.lieferOk?'deutschlandweit':'ab '+LIEFER_MIN+' Elem.'}</span></button>
-        </div>
-        ${t.lieferOk?'':`<div class="co-delivnote">Lieferung ist ab ${LIEFER_MIN} Elementen möglich — kleinere Mengen zur Abholung im Lager (kostenlos).</div>`}
+        ${lieferWahlHTML(t,'ovs-deliv co-deliv')}
         <div class="field"><label>Name <span class="req">*</span></label><input name="name" required autocomplete="name" placeholder="Vor- und Nachname"></div>
         <div class="opts two">
           <div class="field"><label>E-Mail <span class="req">*</span></label><input name="email" type="email" required autocomplete="email" inputmode="email" placeholder="ihre@email.de"></div>
@@ -3375,6 +3462,11 @@ function formHTML(t){
         ${addr}
         <div class="field"><label>Nachricht <span class="opt">(optional)</span></label><textarea name="msg" rows="2" placeholder="Anmerkungen, Wunsch-Liefertermin, Fragen …"></textarea></div>
         <label class="consent"><input type="checkbox" name="dse" required aria-required="true"><span>Ich habe die <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutzerkl&auml;rung</a> gelesen und stimme der Verarbeitung meiner Angaben zur Bearbeitung meiner Anfrage zu. <span class="req">*</span></span></label>
+        <div class="co-final">
+          <span class="cf-was">${cart.length===1 ? `${cart[0].conf.anzahl||1} × ${withConf(cart[0].conf,configTitle)}` : `${cart.length} Positionen · ${t.qty} Stück`}</span>
+          <span class="cf-sum tnum">${eur(t.total)}</span>
+          <span class="cf-note">inkl. 19 % MwSt · ${lief?'inkl. Lieferung':'Abholung im Lager'} · unverbindlich, kein Kaufvertrag</span>
+        </div>
         <div class="co-err" id="coErr" role="alert" aria-live="polite"></div>
         <button class="cta" type="submit">Anfrage kostenlos absenden</button>
         <div class="trust"><b>Kostenlos &amp; unverbindlich</b> &mdash; kein Kaufvertrag, keine Zahlung. Jede Konfiguration wird individuell gepr&uuml;ft; Sie erhalten Ihr gepr&uuml;ftes Angebot per E-Mail, i.&nbsp;d.&nbsp;R. innerhalb von 1&ndash;2 Werktagen.</div>
@@ -3451,26 +3543,43 @@ async function svgToPngDataURL(markup,W){
 
 // summaryRows() nutzt CSS-Klassen — E-Mail-Clients ignorieren <style>, daher
 // hier in eine inline-gestylte Tabelle umschreiben (Inhalt bleibt sonst als Text).
-function _mailRows(srowHtml){
-  var h=(srowHtml||'')
+// ohne: Zeilen, die in der Mail schon als eigener Block ueber der Tabelle stehen
+// (Maß, Anschlag) — sonst stuenden sie doppelt da.
+function _mailRows(srowHtml,ohne){
+  var h=(srowHtml||'');
+  (ohne||[]).forEach(function(k){
+    h=h.replace(new RegExp('<div class="srow"><span class="k">'+k+'<\\/span>[\\s\\S]*?<\\/span><\\/div>','g'),'');
+  });
+  h=h
     .replace(/class="dot" style="background:/g,'style="display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:middle;margin-right:6px;border:1px solid rgba(0,0,0,.15);background:')
     .replace(/<div class="srow"><span class="k[^"]*">([\s\S]*?)<\/span><span class="v[^"]*">([\s\S]*?)<\/span><\/div>/g,
       function(mm,k,v){ return '<tr><td style="padding:5px 14px 5px 0;color:#6b7280;font-size:13px;vertical-align:top;white-space:nowrap">'+k+'</td><td style="padding:5px 0;color:#111827;font-size:13px;font-weight:600;vertical-align:top">'+v+'</td></tr>'; });
   return '<table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse">'+h+'</table>';
 }
 
-function _posBlock(i,q,title,rowsTable,unit,line,cid){
+// Eine Position in der Mail. Rangfolge bewusst: Maß und Anschlag zuerst und
+// hervorgehoben, danach erst die uebrige Ausstattung. Vorher standen alle Angaben
+// gleichrangig untereinander — die fertigungsentscheidenden gingen darin unter.
+function _posBlock(i,q,title,rowsTable,unit,line,cid,mass,ai){
   var sketch = cid
-    ? '<td width="238" valign="top" style="padding-right:22px"><div style="background:#f6f9fc;border:1px solid #e6eaf1;border-radius:12px;padding:14px"><img src="cid:'+cid+'" width="210" style="width:210px;max-width:100%;display:block" alt="Skizze"></div></td>'
+    ? '<td width="262" valign="top" style="padding-right:22px"><div style="background:#f6f9fc;border:1px solid #e6eaf1;border-radius:12px;padding:14px"><img src="cid:'+cid+'" width="234" style="width:234px;max-width:100%;display:block" alt="Skizze"></div></td>'
     : '';
   var priceLine = (line==null)
-    ? '<div style="margin-top:12px;font-size:17px;font-weight:800;color:#225eaa">Preis auf Anfrage</div>'
-    : '<div style="margin-top:12px"><div style="font-size:17px;font-weight:800;color:#111827">'+eur(line)+'</div>'+((unit!=null&&q>1)?'<div style="font-size:12px;color:#6b7280;margin-top:2px">'+eur(unit)+' / Stück</div>':'')+'</div>';
+    ? '<div style="margin-top:14px;font-size:17px;font-weight:800;color:#225eaa">Preis auf Anfrage</div>'
+    : '<div style="margin-top:14px"><div style="font-size:19px;font-weight:800;color:#111827">'+eur(line)+'</div>'+((unit!=null&&q>1)?'<div style="font-size:12px;color:#6b7280;margin-top:2px">'+eur(unit)+' / Stück</div>':'')+'</div>';
+  var massBlock = mass ? '<div style="font-size:21px;font-weight:800;color:#111827;letter-spacing:-.01em">'+mass+'</div>' : '';
+  var anschlagBlock = ai ? '<div style="margin:11px 0 14px;background:#f3f8ff;border:1px solid #d8e6fa;border-left:4px solid #225eaa;border-radius:10px;padding:11px 13px">'+
+      '<div style="font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:#5b7fae;font-weight:700">'+esc(ai.label)+'</div>'+
+      '<div style="font-size:15px;font-weight:800;color:#14233f;margin-top:3px">'+esc(ai.norm)+'</div>'+
+      (ai.klartext?'<div style="font-size:13px;color:#4a5766;margin-top:2px">'+esc(ai.klartext)+'</div>':'')+
+      (ai.ansicht?'<div style="font-size:13px;color:#4a5766">'+esc(ai.ansicht)+'</div>':'')+
+      (ai.warntext?'<div style="font-size:12.5px;color:#b42318;font-weight:700;margin-top:4px">'+esc(ai.warntext)+'</div>':'')+
+    '</div>' : '';
   return '<div style="padding:22px 0;border-top:1px solid #edf1f6">'+
     '<div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#9aa2ac">Position '+(i+1)+' · '+q+' ×</div>'+
-    '<div style="font-size:18px;font-weight:800;color:#111827;margin:3px 0 16px">'+title+'</div>'+
+    '<div style="font-size:18px;font-weight:800;color:#111827;margin:3px 0 14px">'+title+'</div>'+
     '<table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse"><tr>'+sketch+
-    '<td valign="top">'+rowsTable+priceLine+'</td></tr></table></div>';
+    '<td valign="top">'+massBlock+anschlagBlock+rowsTable+priceLine+'</td></tr></table></div>';
 }
 function _mailTotals(t){
   var shipTxt=(liefer==='abholung')?'kostenlos':(t.ship?eur(t.ship):'kostenfrei');
@@ -3481,11 +3590,34 @@ function _mailTotals(t){
     '<tr><td colspan="2" style="color:#9aa2ac;font-size:11.5px;padding-top:3px">inkl. 19 % MwSt ('+eur(t.mwst)+') · unverbindlicher Richtpreis · kein Kaufvertrag</td></tr></table>';
 }
 
+// Kopf der internen Mail: was man beim Ueberfliegen im Posteingang braucht —
+// Vorgangsnummer, Eingangszeit, Umfang, Summe. Stand vorher nirgends zusammen.
+function _mailKopf(nr,t){
+  var d=new Date(), pad=function(n){return String(n).padStart(2,'0');};
+  var wann=pad(d.getDate())+'.'+pad(d.getMonth()+1)+'.'+d.getFullYear()+' um '+pad(d.getHours())+':'+pad(d.getMinutes())+' Uhr';
+  var zelle=function(k,v){ return '<td style="padding:0 18px 0 0;vertical-align:top">'+
+    '<div style="font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:#9aa2ac;font-weight:700">'+k+'</div>'+
+    '<div style="font-size:14px;font-weight:800;color:#111827;margin-top:2px;white-space:nowrap">'+v+'</div></td>'; };
+  return '<table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;background:#f3f8ff;border:1px solid #d8e6fa;border-radius:12px;margin:0 0 16px">'+
+    '<tr><td style="padding:13px 15px"><table cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr>'+
+      zelle('Anfrage-Nr.',esc(nr))+
+      zelle('Umfang',cart.length+(cart.length===1?' Position':' Positionen')+(t.qty>cart.length?' · '+t.qty+' Stück':''))+
+      zelle('Summe',eur(t.total))+
+    '</tr></table>'+
+    '<div style="font-size:11.5px;color:#6b7280;margin-top:8px">Eingegangen am '+wann+' über den Konfigurator</div>'+
+    '</td></tr></table>';
+}
 function _kundeBox(name,email,tel,adr,msg){
-  var row=function(k,v){ return v?'<tr><td style="padding:3px 14px 3px 0;color:#6b7280;font-size:13px;white-space:nowrap;vertical-align:top">'+k+'</td><td style="padding:3px 0;font-size:13px;font-weight:600;color:#111827">'+esc(v)+'</td></tr>':''; };
+  var row=function(k,v,link){ if(!v) return '';
+    var wert=link?('<a href="'+link+'" style="color:#225eaa;text-decoration:none">'+esc(v)+'</a>'):esc(v);
+    return '<tr><td style="padding:3px 14px 3px 0;color:#6b7280;font-size:13px;white-space:nowrap;vertical-align:top">'+k+'</td>'+
+      '<td style="padding:3px 0;font-size:13px;font-weight:600;color:#111827">'+wert+'</td></tr>'; };
   return '<div style="background:#f6f9fc;border:1px solid #e6eaf1;border-radius:10px;padding:12px 14px;margin:0 0 18px">'+
     '<div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#9aa2ac;margin-bottom:5px">Kundendaten</div>'+
-    '<table cellpadding="0" cellspacing="0" style="border-collapse:collapse">'+row('Name',name)+row('E-Mail',email)+row('Telefon',tel)+row('Abholung/Lieferung',adr)+(msg?row('Nachricht',msg):'')+'</table></div>';
+    '<table cellpadding="0" cellspacing="0" style="border-collapse:collapse">'+row('Name',name)+
+      row('E-Mail',email,email?'mailto:'+email:'')+
+      row('Telefon',tel,tel?'tel:'+String(tel).replace(/[^\d+]/g,''):'')+
+      row('Abholung/Lieferung',adr)+(msg?row('Nachricht',msg):'')+'</table></div>';
 }
 
 function _mailShell(inner){
@@ -3532,8 +3664,12 @@ async function submitAnfrage(ev){
   if(!_checkoutPruefen(f)) return;
   var name=g('name')||'—', email=g('email'), tel=g('tel'), plz=g('plz'), ort=g('ort'), strasse=g('strasse'), msg=g('msg');
   var nr='DF-'+new Date().toISOString().slice(2,10).replace(/-/g,'')+'-'+Math.floor(1000+Math.random()*9000);
+  var t0=cartTotals();
   var adr=(liefer==='lieferung') ? ('Lieferung nach: '+[strasse,(plz+' '+ort).trim()].filter(Boolean).join(', ')) : 'Abholung im Lager · Brandenburg a. d. Havel';
-  var t=cartTotals();
+  // Wunsch nach Lieferung unterhalb der Mindestmenge muss im Innendienst ankommen,
+  // sonst laeuft die Rueckfrage ins Leere.
+  if(lieferWunsch && !t0.lieferOk) adr += ' — KUNDE WÜNSCHT LIEFERUNG (Menge unter '+LIEFER_MIN+', bitte prüfen)';
+  var t=t0;
   var btn=f.querySelector('[type=submit]'), orig=btn?btn.textContent:'';
   if(btn){ btn.disabled=true; btn.textContent='Wird gesendet…'; }
   try{
@@ -3544,17 +3680,24 @@ async function submitAnfrage(ev){
       let it=cart[i], conf=it.conf, q=conf.anzahl||1;
       let unit=withConf(conf,price), line=(unit==null?null:unit*q);
       let title=withConf(conf,configTitle);
-      let rowsTable=_mailRows(withConf(conf,summaryRows));
+      let ai=withConf(conf,anschlagInfo);
+      let mass=conf.w+' × '+conf.h+' mm';
+      let rowsTable=_mailRows(withConf(conf,summaryRows),['Maße',ai.label]);
       let cid='pos'+i, hasSketch=false;
       try{
-        let svg=withConf(conf,function(){return stageSVG();});
+        let svg=skizzeKompakt(conf);
         let png=await svgToPngDataURL(svg,880);
         if(png && png.indexOf('base64,')>0){ sketches.push({filename:'skizze-pos'+(i+1)+'.png', content:png.split('base64,')[1], content_id:cid}); hasSketch=true; }
       }catch(e){}
-      posHtml+=_posBlock(i,q,title,rowsTable,unit,line,hasSketch?cid:null);
+      posHtml+=_posBlock(i,q,title,rowsTable,unit,line,hasSketch?cid:null,mass,ai);
+      // Nur-Text-Teil: dieselbe Rangfolge wie im HTML. Der Anschlag bekommt eine eigene
+      // Zeile, weil genau er hier vorher komplett fehlte.
       L.push('');
       L.push('Position '+(i+1)+': '+q+' × '+withConf(conf,configTitle));
-      L.push('  '+withConf(conf,prodSpecs));
+      L.push('  Maße:     '+mass);
+      L.push('  '+ai.label+': '+ai.norm+(ai.ansicht?' · '+ai.ansicht:''));
+      L.push('            '+ai.klartext+(ai.warntext?' ('+ai.warntext+')':''));
+      L.push('  '+withConf(conf,function(){ return prodSpecs(true); }));
       L.push('  Positionspreis: '+(line==null?'auf Anfrage':eur(line))+((unit!=null&&q>1)?'  ('+eur(unit)+' / Stück)':''));
     }
     L.push('');
@@ -3565,7 +3708,7 @@ async function submitAnfrage(ev){
     L.push(''); L.push('Anfrage-Nr.: '+nr);
 
     var totalsHtml=_mailTotals(t);
-    var internHtml=_mailShell(_kundeBox(name,email,tel,adr,msg)+posHtml+totalsHtml);
+    var internHtml=_mailShell(_mailKopf(nr,t)+_kundeBox(name,email,tel,adr,msg)+posHtml+totalsHtml);
     var detailsHtml=posHtml+totalsHtml;
     var prodName=cart.length?withConf(cart[0].conf,configTitle):'Konfiguration';
 
