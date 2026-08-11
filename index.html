@@ -433,7 +433,11 @@
 /* Nur mit echtem Zeiger: Touch kennt "sticky hover" — der Zustand bliebe nach dem
    Antippen haengen und das translateX(-50%) schoebe die Karte aus dem Bild, weil
    sie auf dem Handy statisch (margin:auto) sitzt statt absolut positioniert. */
-@media(hover:hover){.nhero-card:hover{transform:translateX(-50%) translateY(-3px)}}
+/* Nur ab 961px: darunter steht die Karte im normalen Fluss (position:static),
+   dort wuerde das translateX(-50%) aus der Desktop-Darstellung sie um ihre halbe
+   Breite nach links aus dem Bild schieben, sobald ein Zeiger darueber steht. */
+@media(hover:hover) and (min-width:961px){.nhero-card:hover{transform:translateX(-50%) translateY(-3px)}}
+@media(hover:hover) and (max-width:960px){.nhero-card:hover{transform:translateY(-3px)}}
 .nhero-card-tx{display:flex;flex-direction:column;line-height:1.18;transition:opacity .18s var(--nease),transform .18s var(--nease)}
 .nhero-card.swapping .nhero-card-tx{opacity:0;transform:translateY(3px)}
 .nhero-card-tx b{font-family:var(--ndisp);font-size:1.12rem;font-weight:600;color:var(--nink);letter-spacing:-.015em}
