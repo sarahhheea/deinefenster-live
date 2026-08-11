@@ -474,6 +474,16 @@ body:not(.wiz-active) .topbar{display:none}
 .co-form .trust{margin-top:9px}
 .co-form .req{color:var(--accent);font-weight:800}
 .co-form .opt{color:var(--ink-soft);font-weight:400;text-transform:none;letter-spacing:0}
+/* Textarea war als einziges Feld grau hinterlegt und wirkte neben den weissen
+   Inputs deaktiviert. */
+.co-form textarea{background:var(--surface)}
+/* Sammel-Validierung: alle fehlenden Felder auf einmal markieren statt drei
+   Browser-Blasen nacheinander — am Handy der haeufigste Ausstiegspunkt. */
+.co-form input.bad,.co-form textarea.bad{border-color:#dc2626;background:#fff7f7}
+.co-form .consent.bad span{color:#b91c1c}
+.co-err{display:none;margin:2px 0 12px;padding:11px 13px;border-radius:10px;font-size:13px;font-weight:700;
+  background:#fff5f5;border:1px solid #f3d0d0;color:#b91c1c;text-align:left}
+.co-err.on{display:block}
 .co-summary{position:sticky;top:calc(120px + var(--banner-h,0px))}
 .co-items{margin-bottom:12px;border-bottom:1px solid var(--line);padding-bottom:6px}
 /* Abschluss-Formular: jede Position mit ihrer Zeichnung — der Kunde sieht vor dem Absenden nochmal,
@@ -789,6 +799,13 @@ body:not(.wiz-active) .topbar{display:none}
 .legalbar a:hover{color:var(--primary);text-decoration:underline}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 body.checkout-focus .topbar{display:none}
+/* Im Checkout fuehrt der Nav-Knopf "Angebot anfragen" auf anfrage.html — und die
+   Seite liest den Warenkorb nicht. Wer ihn dort antippt, verliert Konfiguration,
+   Preis und Skizze und landet in einem leeren Textformular. Deshalb ist er
+   genau in diesem Zustand ausgeblendet; der Absende-Knopf im Formular ist der
+   einzige Weg nach vorn. */
+body.checkout-focus .dfnav-cta,
+body.checkout-focus .dfnav-mlcta{display:none}
 .co-trust{display:flex;flex-wrap:wrap;align-items:center;gap:9px 18px;margin-top:14px;font-size:13px;color:var(--ink-soft)}
 .co-tr-item{display:inline-flex;align-items:center;gap:6px}
 .co-tr-item svg{width:15px;height:15px;flex:0 0 auto}
@@ -1360,9 +1377,70 @@ function tuerOeffnungName(){ return (S.tuerOeffnung==='aussen') ? 'nach außen �
 // oeffnend von aussen — beides muss der Kunde im Konfigurator und im Angebot lesen koennen.
 function tuerAnsichtName(){ return (S.tuerOeffnung==='aussen') ? 'Ansicht von außen' : 'Ansicht von innen'; }
 function anschlagKlartext(){
-  const n=openingName()||'';
-  if(S.prod!=='haustuer') return n;
-  return (n?n+' · ':'')+tuerOeffnungName()+' · '+tuerAnsichtName();
+  const i=anschlagInfo();
+  return i.norm+(i.ansicht?' · '+i.ansicht:'');
+}
+// ── EINZIGE Quelle fuer die Anschlag-/Oeffnungs-Auskunft ────────────────────
+// Vorher formulierten fuenf Stellen diese Angabe unabhaengig voneinander
+// (Buehne, Warenkorb-Karte, Warenkorb-Drawer, Checkout-Liste, Mail). Sie sind
+// auseinandergelaufen: die Mail meldete bei der Haustuer nur "rechts (DIN)" —
+// ohne Oeffnungsrichtung und ohne Bezugsseite — und im Nur-Text-Teil der Mail
+// fehlte der Anschlag ganz. Bei einer Sonderanfertigung ohne Widerrufsrecht ist
+// das die teuerste Luecke im ganzen Ablauf.
+//
+// Rueckgabe:
+//   label    Ueberschrift ("Anschlag" / "Oeffnungsart" / "Laufrichtung")
+//   norm     Fachebene fuer die Bestellung ("DIN rechts · nach aussen oeffnend")
+//   klartext Laienebene zum Gegenpruefen ("Baender rechts · Griff links — von aussen gesehen")
+//   ansicht  Bezugsseite der Zeichnung, nur bei der Haustuer
+//   kurz     einzeilige Fassung fuer enge Stellen
+//   warn     true = seltener Fall, den beide Seiten gegenpruefen sollten
+function anschlagInfo(){
+  const seiteWort=s=>s==='r'?'rechts':'links';
+  if(S.prod==='haustuer'){
+    // DIN 107: der Buchstabe sagt, wo die BAENDER sitzen — nicht der Griff.
+    // Bei nach aussen oeffnenden Tueren ist die Bezugsseite die Aussenseite.
+    const dinL=(S.opening==='dkl'), aussen=(S.tuerOeffnung==='aussen');
+    const band=dinL?'links':'rechts', griff=dinL?'rechts':'links';
+    const blick=aussen?'von außen gesehen':'von innen gesehen';
+    return {
+      label:'Anschlag',
+      norm:'DIN '+(dinL?'links':'rechts')+' · '+tuerOeffnungName(),
+      klartext:'Bänder '+band+' · Griff '+griff+' — '+blick,
+      ansicht:tuerAnsichtName(),
+      kurz:'DIN '+(dinL?'links':'rechts')+' · '+(aussen?'nach außen':'nach innen'),
+      warn:aussen,
+      warntext:aussen?'Nach außen öffnend — DIN wird von außen bestimmt':''
+    };
+  }
+  if(S.prod==='schiebe'){
+    const psk=(S.hstSystem!=='hs'), li=(S.hstLauf==='links');
+    const norm=psk?('Kipp-Schiebe '+(li?'links':'rechts')):('Läuft nach '+(li?'links':'rechts'));
+    return {
+      label:'Laufrichtung', norm:norm,
+      klartext:'Schiebeflügel läuft nach '+(li?'links':'rechts')+' — von innen gesehen',
+      ansicht:'', kurz:norm, warn:false, warntext:''
+    };
+  }
+  // Fenster + Balkontuer
+  const n=openingName()||'—';
+  let klar=AUFTN[S.aufteilung]||'';
+  try{
+    const toks=(curAnschlag()||{}).oeff||[];
+    if(toks.length===1){
+      const t=tokSash(toks[0]);
+      if(t.open==='fest') klar='Feststehend — lässt sich nicht öffnen';
+      // Beim Kippfluegel liegt die Drehachse unten, der Griff sitzt seitlich —
+      // nicht oben. Das stand hier jahrelang falsch und widerspricht DIN 107.
+      else if(t.open==='kipp') klar='Nur kippen — Griff seitlich, Achse unten';
+      else if(t.hinge) klar='Band '+seiteWort(t.hinge)+' · Griff '+seiteWort(t.hinge==='r'?'l':'r')+' — von innen gesehen';
+    } else if(toks.length>1){
+      // stulpAt ist ein INDEX, kein Ja/Nein: 0 = Pfosten, >0 = Stulpstelle.
+      let bs=null; try{ bs=buildSashes(); }catch(e){}
+      klar=(bs&&bs.stulpAt) ? 'Ohne festen Mittelpfosten — volle Breite frei' : 'Mit festem Mittelpfosten';
+    }
+  }catch(e){}
+  return {label:'Öffnungsart', norm:n, klartext:klar, ansicht:'', kurz:n, warn:false, warntext:''};
 }
 // Öffnungs-Token (dk-l,dk-r,dreh-l,dreh-r,kipp,fest) -> Flügel-Zustand {open,hinge}
 function tokSash(tok){
@@ -2411,13 +2489,18 @@ function configTitle(){
 }
 function prodName(){ return {fenster:'Kunststofffenster',balkon:'Balkontür',haustuer:'Haustür',schiebe:'Schiebetür'}[S.prod]||'Kunststofffenster'; }
 function prodUnit(){ return {fenster:'Fenster',balkon:'Balkontür',haustuer:'Haustür',schiebe:'Schiebetür'}[S.prod]||'Fenster'; }
+// Einzeiler pro Position — steht in der Checkout-Zusammenfassung UND im
+// Nur-Text-Teil der Anfrage-Mail. Der Anschlag gehoert an die zweite Stelle:
+// bei der Haustuer fehlte er hier komplett, dadurch kam die fertigungs-
+// entscheidende Angabe im Innendienst nirgends im Klartext an.
 function prodSpecs(){
   const co=COLORS[S.outer].n, ci=COLORS[S.inner].n;
   const c=(S.outer===S.inner)?`${co} (außen & innen)`:`außen ${co} · innen ${ci}`;
-  if(S.prod==='haustuer') return `${DOORN[S.doorModel]||'—'} · ${griffTuerShort()} · ${S.w}×${S.h} mm · ${c}`;
-  if(S.prod==='schiebe') return `${S.hstSystem==='hs'?'Hebe-Schiebe':'PSK'} · ${S.hstLauf==='links'?'nach links':'nach rechts'} · ${S.w}×${S.h} mm · ${c}`;
+  const a=anschlagInfo().kurz;
+  if(S.prod==='haustuer') return `${DOORN[S.doorModel]||'—'} · ${a} · ${griffTuerShort()} · ${S.w}×${S.h} mm · ${c}`;
+  if(S.prod==='schiebe') return `${S.hstSystem==='hs'?'Hebe-Schiebe':'PSK'} · ${a} · ${S.w}×${S.h} mm · ${c}`;
   const ex=[]; if(S.roll==='gurt')ex.push('Rollladen'); if(S.roll==='motor')ex.push('Motorrolladen'); if(S.glass==='3')ex.push('3-fach'); if(S.prod==='balkon'&&S.balkonSchwelle==='alu')ex.push('Aluschwelle'); if(S.sicher)ex.push('RC1');
-  return `${AUFTN[S.aufteilung]} · ${openingName()} · ${S.w}×${S.h} mm · ${c}${ex.length?' · '+ex.join(', '):''}`;
+  return `${AUFTN[S.aufteilung]} · ${a} · ${S.w}×${S.h} mm · ${c}${ex.length?' · '+ex.join(', '):''}`;
 }
 
 const OPEN={dkl:'Dreh-Kipp links',dkr:'Dreh-Kipp rechts',kipp:'Kipp',fest:'Festverglasung'};
@@ -3092,15 +3175,11 @@ function summaryPanel(){
   const mehr=`<div class="sum-more">Ausstattung</div>`;
 
   if(S.prod==='haustuer'){
-    const dinR=(S.opening!=='dkl'), nachAussen=(S.tuerOeffnung==='aussen');
-    // Gleiche Sprache wie auf den Auswahlkarten, in der Skizze und in den Positionsdaten:
-    // Seite + Ansicht + Oeffnungsrichtung. Sonst liest der Kunde im Konfigurator etwas
-    // anderes als spaeter im Angebot.
+    // Formulierung kommt aus anschlagInfo() — derselben Quelle wie Warenkorb,
+    // Checkout-Liste und beide Mails.
+    const ai=anschlagInfo();
     return kopf
-      +key(`${dinR?'Rechts':'Links'} · ${tuerAnsichtName()}`,
-           nachAussen
-             ? `${tuerOeffnungName()} · Bänder ${dinR?'rechts':'links'} — DIN wird von außen bestimmt`
-             : `${tuerOeffnungName()} · Bänder ${dinR?'rechts':'links'} · Griff ${dinR?'links':'rechts'}`)
+      +key(`${ai.norm} · ${ai.ansicht}`, ai.klartext+(ai.warntext?' — '+ai.warntext:''))
       +key(`${GRIFFT[_griffAussenVal()]||'Griff'} außen`, `Drückergarnitur innen`)
       +mehr+row('Modell',DOORN[S.doorModel]||'—')+farbe
       +row('Verglasung',`${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}`)
@@ -3108,10 +3187,9 @@ function summaryPanel(){
       +row('Sicherheit',S.sicher?'Mehrfachverriegelung':'Standard');
   }
   if(S.prod==='schiebe'){
-    const psk=S.hstSystem!=='hs', li=(S.hstLauf==='links');
+    const psk=S.hstSystem!=='hs', ai=anschlagInfo();
     return kopf
-      +key(psk?`Kipp-Schiebe ${li?'links':'rechts'}`:`Läuft nach ${li?'links':'rechts'}`,
-           psk?'Schiebeflügel öffnet zur Seite und kippt':'Hebe-Schiebetür')
+      +key(ai.norm, ai.klartext)
       +mehr+row('System',psk?'PSK Schiebetür':'Hebe-Schiebetür')+farbe
       +row('Verglasung',S.glass==='3'?'3-fach':'2-fach')
       +row('Rollladen',S.roll==='motor'?'Motor':S.roll==='gurt'?'Gurtwickler':'—');
@@ -3120,28 +3198,11 @@ function summaryPanel(){
   const ex=[]; if(S.roll==='gurt')ex.push('Rollladen · Gurtwickler'); if(S.roll==='motor')ex.push('Motorrolladen');
   if(S.schall)ex.push('Schallschutz'); if(S.sicher)ex.push('RC1');
   if(S.prod==='balkon'&&S.balkonSchwelle==='alu')ex.push('Aluschwelle');
-  // Gleiche Klartext-Erklärung wie bei der Haustür: wo sitzt der Griff, wo das Band. Bei einem Flügel
-  // eindeutig ableitbar; bei mehreren Flügeln bleibt es bei der Aufteilung (sonst wird es unübersichtlich).
-  let erkl=AUFTN[S.aufteilung];
-  try{
-    const toks=(curAnschlag()||{}).oeff||[];
-    if(toks.length===1){
-      const t=tokSash(toks[0]);
-      if(t.open==='fest') erkl='Feststehend — lässt sich nicht öffnen';
-      else if(t.open==='kipp') erkl='Nur kippen — Griff oben';
-      else if(t.hinge) erkl=`Band ${t.hinge==='r'?'rechts':'links'} · Griff ${t.hinge==='r'?'links':'rechts'} — von innen gesehen`;
-    } else if(toks.length>1){
-      // Mehrflügelig: statt die Aufteilung zu wiederholen lieber das Merkmal nennen, das man sonst uebersieht —
-      // beim Stulp fehlt der feste Mittelpfosten, das Fenster laesst sich also ueber die volle Breite oeffnen.
-      // ACHTUNG: stulpAt ist ein INDEX, keine Ja/Nein-Angabe — 0 bedeutet Pfosten (kein Stulp),
-      // ein Wert > 0 markiert die Stulpstelle. Ein Test auf "!= null" waere immer wahr und wuerde
-      // bei jedem Pfosten-Fenster faelschlich "ohne Mittelpfosten" behaupten.
-      let bs=null; try{ bs=buildSashes(); }catch(e){}
-      erkl=(bs&&bs.stulpAt) ? 'Ohne festen Mittelpfosten — volle Breite frei' : 'Mit festem Mittelpfosten';
-    }
-  }catch(e){}
+  // Wo sitzt der Griff, wo das Band — dieselbe Herleitung wie in Warenkorb und Mail,
+  // deshalb aus anschlagInfo() statt hier noch einmal formuliert.
+  const ai=anschlagInfo();
   return kopf
-    +key(openingName(),erkl)
+    +key(ai.norm,ai.klartext)
     +mehr+row('Profil',PROFN[S.profile])+farbe
     +row('Verglasung',`${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}`)
     +(S.sprossen&&S.sprossen!=='ohne'?row('Sprossen',SPROSN?(SPROSN[S.sprossen]||'ja'):'ja'):'')
@@ -3151,9 +3212,17 @@ function summaryRows(){
   const co=COLORS[S.outer],ci=COLORS[S.inner];
   const massRow=`<div class="srow"><span class="k">Maße</span><span class="v tnum">${S.w} × ${S.h} mm</span></div><div class="srow"><span class="k">Anzahl</span><span class="v tnum">${S.anzahl} Stück</span></div>`;
   const colorRows=`<div class="srow"><span class="k">Außenfarbe</span><span class="v"><span class="dot" style="background:${co.c}"></span>${co.n}</span></div><div class="srow"><span class="k">Innenfarbe</span><span class="v"><span class="dot" style="background:${ci.c}"></span>${ci.n}</span></div>`;
+  // Anschlagzeile aus anschlagInfo(): Fachebene oben, Klartext als zweite Zeile
+  // darunter. Diese Zeilen werden von _mailRows() in die Mail-Tabelle uebersetzt —
+  // hier stand vorher nur "rechts (DIN)", ohne Oeffnungsrichtung und Bezugsseite.
+  const aRow=(()=>{ const ai=anschlagInfo();
+    return `<div class="srow"><span class="k">${ai.label}</span><span class="v">${ai.norm}`
+      +(ai.klartext?`<span class="vsub" style="display:block;font-weight:500;color:#6b7280;margin-top:2px">${ai.klartext}</span>`:'')
+      +(ai.ansicht?`<span class="vsub" style="display:block;font-weight:500;color:#6b7280">${ai.ansicht}</span>`:'')
+      +`</span></div>`; })();
   if(S.prod==='haustuer'){
     return `<div class="srow"><span class="k">Profil</span><span class="v">${PROFN[S.profile]}</span></div>
-      <div class="srow"><span class="k">Anschlag</span><span class="v">${S.opening==='dkl'?'links (DIN)':'rechts (DIN)'}</span></div>
+      ${aRow}
       <div class="srow"><span class="k">Modell</span><span class="v">${DOORN[S.doorModel]||'—'}</span></div>${massRow}${colorRows}
       <div class="srow"><span class="k">Verglasung</span><span class="v">${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}</span></div>
       <div class="srow"><span class="k">Griff</span><span class="v">${griffTuerFull()}</span></div>
@@ -3164,7 +3233,7 @@ function summaryRows(){
     const kammerRow=psk?`<div class="srow"><span class="k">PSK-System</span><span class="v">${S.pskKammer==='iglo-energy'?'IGLO Energy Classic PSK':'IGLO 5 Classic PSK'}</span></div>`:'';
     const griffN=(S.hstSystem==='hs'?'Innengriff + Außengriff':'PSK-Griff')+(S.hstSchloss==='innen-aussen'?' · abschließbar':'');
     return `<div class="srow"><span class="k">System</span><span class="v">${psk?'PSK Schiebetür':'Hebe-Schiebetür'}</span></div>${kammerRow}
-      <div class="srow"><span class="k">${psk?'Öffnung':'Laufrichtung'}</span><span class="v">${S.hstLauf==='links'?(psk?'Kipp-Schiebe links':'nach links'):(psk?'Kipp-Schiebe rechts':'nach rechts')}</span></div>${massRow}${colorRows}
+      ${aRow}${massRow}${colorRows}
       <div class="srow"><span class="k">Verglasung</span><span class="v">${S.glass==='3'?'3-fach':'2-fach'}</span></div>
       <div class="srow"><span class="k">Griff</span><span class="v">${griffN}</span></div>
       <div class="srow"><span class="k">Rollladen</span><span class="v">${S.roll==='motor'?'Motor':S.roll==='gurt'?'Gurtwickler':'—'}</span></div>`;
@@ -3176,7 +3245,7 @@ function summaryRows(){
   const schwelleRow = S.prod==='balkon'?`<div class="srow"><span class="k">Schwelle</span><span class="v">${S.balkonSchwelle==='alu'?'Aluschwelle':'ohne'}</span></div>`:'';
   return `<div class="srow"><span class="k">Profil</span><span class="v">${PROFN[S.profile]}</span></div>
     <div class="srow"><span class="k">Aufteilung</span><span class="v">${AUFTN[S.aufteilung]}</span></div>
-    <div class="srow"><span class="k">Öffnung</span><span class="v">${openingName()}</span></div>${massRow}${colorRows}
+    ${aRow}${massRow}${colorRows}
     <div class="srow"><span class="k">Verglasung</span><span class="v">${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}</span></div>${schwelleRow}
     ${sproRow}
     <div class="srow"><span class="k">Griff</span><span class="v">${GRIFFN[S.griff]}</span></div>
@@ -3213,9 +3282,11 @@ function posKeySpecs(conf){
     const addColor=()=>{ if(S.outer===S.inner) add('Farbe',`${co} (außen &amp; innen)`); else { add('Außenfarbe',co); add('Innenfarbe',ci); } };
     // Anschlag/Öffnungsart gehören in JEDE Position: sie sind fertigungsrelevant und
     // stehen sonst nirgends im Angebot — die Skizze allein wird im Innendienst überlesen.
-    if(S.prod==='haustuer'){ addKey('Anschlag',anschlagKlartext()); add('Modell',DOORN[S.doorModel]||'—'); add('Maße',`${S.w} × ${S.h} mm`); addColor(); add('Verglasung',`${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}`); }
-    else if(S.prod==='schiebe'){ addKey('Laufrichtung',`${S.hstLauf==='links'?'nach links':'nach rechts'} — von innen gesehen`); add('System',S.hstSystem==='hs'?'Hebe-Schiebetür':'PSK Schiebetür'); add('Maße',`${S.w} × ${S.h} mm`); addColor(); add('Verglasung',S.glass==='3'?'3-fach':'2-fach'); }
-    else { addKey('Öffnungsart',openingName()||'—'); add('Aufteilung',AUFTN[S.aufteilung]); add('Maße',`${S.w} × ${S.h} mm`); addColor(); add('Verglasung',`${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}`); }
+    const ai=anschlagInfo();
+    addKey(ai.label, ai.norm+(ai.ansicht?' · '+ai.ansicht:'')+(ai.klartext?`<span style="display:block;font-weight:500;opacity:.72;margin-top:2px">${ai.klartext}</span>`:''));
+    if(S.prod==='haustuer'){ add('Modell',DOORN[S.doorModel]||'—'); add('Maße',`${S.w} × ${S.h} mm`); addColor(); add('Verglasung',`${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}`); }
+    else if(S.prod==='schiebe'){ add('System',S.hstSystem==='hs'?'Hebe-Schiebetür':'PSK Schiebetür'); add('Maße',`${S.w} × ${S.h} mm`); addColor(); add('Verglasung',S.glass==='3'?'3-fach':'2-fach'); }
+    else { add('Aufteilung',AUFTN[S.aufteilung]); add('Maße',`${S.w} × ${S.h} mm`); addColor(); add('Verglasung',`${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}`); }
     return rows.join('');
   });
 }
@@ -3287,7 +3358,7 @@ function formHTML(t){
   return `<div class="co-head"><button class="co-back" onclick="showCart()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 18l-6-6 6-6"/></svg> Zurück zum Warenkorb</button>
       <h2>Angebot anfordern</h2><p>Kostenlos &amp; unverbindlich — wir senden Ihr geprüftes Angebot per E-Mail.</p><div class="co-trust"><span class="co-tr-item"><svg viewBox="0 0 24 24" fill="currentColor" class="star"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.9L12 17.8 5.9 21l1.2-6.9-5-4.9 6.9-1z"/></svg> <b>4,7</b>&nbsp;· 93 Google-Bewertungen</span><span class="co-tr-item chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg> Jede Konfiguration persönlich geprüft</span><a class="co-tr-item co-tr-tel" href="tel:+4933812148373"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg> 03381 / 2148373</a></div></div>
     <div class="co-grid">
-      <form class="card co-form" onsubmit="submitAnfrage(event)">
+      <form class="card co-form" novalidate onsubmit="submitAnfrage(event)">
         <div class="co-deliv-lbl">Wie möchten Sie es erhalten?</div>
         <div class="ovs-deliv co-deliv">
           <button type="button" class="${liefer==='abholung'?'on':''}" onclick="setLiefer('abholung')"><b>Abholung</b><span>Lager Brandenburg &middot; kostenlos</span></button>
@@ -3301,6 +3372,7 @@ function formHTML(t){
         ${addr}
         <div class="field"><label>Nachricht <span class="opt">(optional)</span></label><textarea name="msg" rows="2" placeholder="Anmerkungen, Wunsch-Liefertermin, Fragen …"></textarea></div>
         <label class="consent"><input type="checkbox" name="dse" required aria-required="true"><span>Ich habe die <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutzerkl&auml;rung</a> gelesen und stimme der Verarbeitung meiner Angaben zur Bearbeitung meiner Anfrage zu. <span class="req">*</span></span></label>
+        <div class="co-err" id="coErr" role="alert" aria-live="polite"></div>
         <button class="cta" type="submit">Anfrage kostenlos absenden</button>
         <div class="trust"><b>Kostenlos &amp; unverbindlich</b> &mdash; kein Kaufvertrag, keine Zahlung. Jede Konfiguration wird individuell gepr&uuml;ft; Sie erhalten Ihr gepr&uuml;ftes Angebot per E-Mail, i.&nbsp;d.&nbsp;R. innerhalb von 1&ndash;2 Werktagen.</div>
       </form>
@@ -3424,9 +3496,37 @@ function _mailShell(inner){
     inner+'</td></tr></table></td></tr></table></body></html>';
 }
 
+// Alle fehlenden Pflichtfelder auf einmal melden und markieren. Vorher liefen die
+// nativen Browser-Blasen: eine pro Anlauf, die Blase legte sich ueber das Feld,
+// das als naechstes dran war, und nach dem Ausblenden blieb keine Markierung —
+// drei Fehlversuche am Handy sind der Standard-Ausstiegspunkt.
+function _checkoutPruefen(f){
+  var fehlt=[];
+  var feld=function(n,titel,test){
+    var el=f.querySelector('[name="'+n+'"]'); if(!el) return;
+    var leer=test?!test(el):!(el.value||'').trim();
+    el.classList.toggle('bad',leer);
+    if(el.type==='checkbox'){ var lb=el.closest('.consent'); if(lb) lb.classList.toggle('bad',leer); }
+    if(leer) fehlt.push({el:el,titel:titel});
+  };
+  feld('name','Ihren Namen');
+  feld('email','Ihre E-Mail-Adresse',function(el){ var v=(el.value||'').trim(); return v && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v); });
+  if(f.querySelector('[name="strasse"]')){ feld('strasse','die Straße'); feld('plz','die PLZ'); feld('ort','den Ort'); }
+  feld('dse','die Zustimmung zur Datenschutzerklärung',function(el){ return el.checked; });
+
+  var box=document.getElementById('coErr');
+  if(!fehlt.length){ if(box){ box.classList.remove('on'); box.textContent=''; } return true; }
+  var t=fehlt.map(function(x){return x.titel;});
+  var liste=t.length>1 ? t.slice(0,-1).join(', ')+' und '+t[t.length-1] : t[0];
+  if(box){ box.textContent='Uns fehlt noch '+liste+'.'; box.classList.add('on'); }
+  fehlt[0].el.focus({preventScroll:true});
+  fehlt[0].el.scrollIntoView({block:'center',behavior:'smooth'});
+  return false;
+}
 async function submitAnfrage(ev){
   ev.preventDefault();
   var f=ev.target, g=function(n){ var el=f.querySelector('[name="'+n+'"]'); return el?(el.value||'').trim():''; };
+  if(!_checkoutPruefen(f)) return;
   var name=g('name')||'—', email=g('email'), tel=g('tel'), plz=g('plz'), ort=g('ort'), strasse=g('strasse'), msg=g('msg');
   var nr='DF-'+new Date().toISOString().slice(2,10).replace(/-/g,'')+'-'+Math.floor(1000+Math.random()*9000);
   var adr=(liefer==='lieferung') ? ('Lieferung nach: '+[strasse,(plz+' '+ort).trim()].filter(Boolean).join(', ')) : 'Abholung im Lager · Brandenburg a. d. Havel';
