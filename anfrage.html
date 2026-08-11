@@ -454,6 +454,26 @@
 .ctablock .ctabtns{display:flex;flex-wrap:wrap;gap:var(--s4)}
 .ctablock .ghost-d{display:inline-flex;align-items:center;gap:8px;font-weight:700;color:#bcd6ff;border:1px solid rgba(118,169,250,.55);border-radius:var(--pill);padding:14px 26px;transition:background .2s,transform .2s}
 .ctablock .ghost-d:hover{background:rgba(118,169,250,.12);transform:translateY(-2px)}
+
+/* Anfrageformular ---------------------------------------------------------
+   Zweispaltige Feldzeilen brechen unter 600px auf eine Spalte um. Vorher lagen
+   Name und E-Mail am Handy mit je ~130px nebeneinander, die Platzhalter waren
+   mittendrin abgeschnitten ("Max Musterm", "ihre@email.d"). */
+.kf-row{display:grid;gap:var(--s4);margin-bottom:var(--s4)}
+.kf-row.two{grid-template-columns:1fr 1fr}
+.kf-row.three{grid-template-columns:1fr 1fr 1fr}
+@media(max-width:600px){.kf-row.two,.kf-row.three{grid-template-columns:1fr}}
+.kf-lbl{display:block;font-size:.74rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--acc-text);margin-bottom:8px}
+.kf-in{width:100%;padding:12px 14px;font-family:var(--font-body);font-size:.95rem;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:10px;outline:none;transition:border-color .2s}
+.kf-in:focus{border-color:var(--acc)}
+/* Fehlerhafte Felder werden markiert — vorher nannte die Meldung Felder, die
+   gefuellt waren, und zeigte auf keines davon. */
+.kf-in.bad{border-color:#dc2626;background:#fff7f7}
+.kf-hint{font-size:.8rem;color:var(--soft);margin-top:7px;line-height:1.45}
+/* Bruecke zum Konfigurator: wer Masse kennt, bekommt dort sofort einen Preis
+   statt sie hier als Freitext zu tippen. */
+.kf-konf{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:rgba(118,169,250,.10);border:1px solid rgba(118,169,250,.4);border-radius:12px;padding:12px 15px;margin-bottom:var(--s5);font-size:.9rem;color:var(--text);line-height:1.45}
+.kf-konf a{font-weight:700;color:var(--acc-text);text-decoration:underline;text-underline-offset:2px}
 </style>
 </head>
 <body>
@@ -683,32 +703,49 @@
         <h3 style="font-family:var(--font-display);font-weight:800;font-size:1.4rem;color:var(--text);margin-bottom:var(--s2)">Direkt anfragen</h3>
         <p style="color:var(--soft);font-size:.92rem;line-height:1.55;margin-bottom:var(--s5)">Automatische Bestätigung sofort, persönliche Antwort innerhalb 24 Stunden.</p>
 
+        <p class="kf-konf">
+          <span>Maße schon bekannt? Im Konfigurator sehen Sie Preis und Zeichnung sofort.</span>
+          <a href="/konfigurator.html">Zum Konfigurator &rarr;</a>
+        </p>
+
         <form id="kontakt-form" novalidate>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--s4);margin-bottom:var(--s4)">
+          <div class="kf-row two">
             <div>
-              <label for="kf-name" style="display:block;font-size:.74rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--acc-text);margin-bottom:8px">Name *</label>
-              <input id="kf-name" type="text" required autocomplete="name" placeholder="Max Mustermann"
-                style="width:100%;padding:12px 14px;font-family:var(--font-body);font-size:.95rem;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:10px;outline:none;transition:border-color .2s"
-                onfocus="this.style.borderColor='var(--acc)'" onblur="this.style.borderColor='var(--border)'">
+              <label class="kf-lbl" for="kf-name">Name *</label>
+              <input class="kf-in" id="kf-name" type="text" required autocomplete="name" placeholder="Max Mustermann">
             </div>
             <div>
-              <label for="kf-email" style="display:block;font-size:.74rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--acc-text);margin-bottom:8px">E-Mail *</label>
-              <input id="kf-email" type="email" required autocomplete="email" placeholder="ihre@email.de"
-                style="width:100%;padding:12px 14px;font-family:var(--font-body);font-size:.95rem;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:10px;outline:none;transition:border-color .2s"
-                onfocus="this.style.borderColor='var(--acc)'" onblur="this.style.borderColor='var(--border)'">
+              <label class="kf-lbl" for="kf-email">E-Mail *</label>
+              <input class="kf-in" id="kf-email" type="email" required autocomplete="email" inputmode="email" placeholder="ihre@email.de">
             </div>
           </div>
-          <div style="margin-bottom:var(--s4)">
-            <label for="kf-tel" style="display:block;font-size:.74rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--acc-text);margin-bottom:8px">Telefon (optional)</label>
-            <input id="kf-tel" type="tel" autocomplete="tel" placeholder="03381 / ..."
-              style="width:100%;padding:12px 14px;font-family:var(--font-body);font-size:.95rem;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:10px;outline:none;transition:border-color .2s"
-              onfocus="this.style.borderColor='var(--acc)'" onblur="this.style.borderColor='var(--border)'">
+          <div class="kf-row">
+            <div>
+              <label class="kf-lbl" for="kf-tel">Telefon (optional)</label>
+              <input class="kf-in" id="kf-tel" type="tel" autocomplete="tel" inputmode="tel" placeholder="03381 / ...">
+            </div>
+          </div>
+          <!-- Masse und Anzahl als echte Felder. Vorher standen sie als Zeilen in einer
+               vorbefuellten Textvorlage, von der im 5-zeiligen Feld nur die Haelfte sichtbar
+               war — die Anfragen kamen regelmaessig ohne Masse und ohne Stueckzahl an. -->
+          <div class="kf-row three">
+            <div>
+              <label class="kf-lbl" for="kf-breite">Breite (mm)</label>
+              <input class="kf-in" id="kf-breite" type="text" inputmode="numeric" autocomplete="off" placeholder="z. B. 1100">
+            </div>
+            <div>
+              <label class="kf-lbl" for="kf-hoehe">Höhe (mm)</label>
+              <input class="kf-in" id="kf-hoehe" type="text" inputmode="numeric" autocomplete="off" placeholder="z. B. 1300">
+            </div>
+            <div>
+              <label class="kf-lbl" for="kf-anzahl">Anzahl</label>
+              <input class="kf-in" id="kf-anzahl" type="text" inputmode="numeric" autocomplete="off" placeholder="z. B. 3">
+            </div>
           </div>
           <div style="margin-bottom:var(--s5)">
-            <label for="kf-msg" style="display:block;font-size:.74rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--acc-text);margin-bottom:8px">Ihre Nachricht *</label>
-            <textarea id="kf-msg" required rows="5" placeholder="Ich interessiere mich für ..."
-              style="width:100%;padding:12px 14px;font-family:var(--font-body);font-size:.95rem;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:10px;outline:none;resize:vertical;transition:border-color .2s"
-              onfocus="this.style.borderColor='var(--acc)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+            <label class="kf-lbl" for="kf-msg">Ihre Nachricht *</label>
+            <textarea class="kf-in" id="kf-msg" required rows="4" style="resize:vertical" placeholder="Ich interessiere mich für ..."></textarea>
+            <div class="kf-hint">Richtmaße genügen. Je genauer die Angaben, desto schneller kommt Ihr Angebot.</div>
           </div>
 
           <div id="kf-err" class="hidden" style="display:none;margin-bottom:var(--s4);padding:12px 14px;border-radius:10px;font-size:.9rem;font-weight:600;background:#fff5f5;border:1px solid #f3d0d0;color:#b91c1c;"></div>
@@ -1032,7 +1069,9 @@
     const msgEl = document.getElementById('kf-msg');
     if (slug && msgEl && !msgEl.value.trim()) {
       const label = PRODUKT_LABEL[slug] || slug;
-      msgEl.value = 'Guten Tag,\n\nich interessiere mich für ein Angebot für ' + label + '.\n\nMaße (B × H):\nAnzahl:\nAusführung / Wunsch:\n\nVielen Dank!';
+      // Kurze Vorlage: Masse und Anzahl haben inzwischen eigene Felder, sie hier
+      // nochmal als Textzeilen zu fuehren hat das Feld ueberlaufen lassen.
+      msgEl.value = 'Guten Tag,\n\nich interessiere mich für ein Angebot für ' + label + '.\n\nVielen Dank!';
       msgEl.setAttribute('data-prefilled', '1');
     }
     if (slug || location.hash === '#kontakt-form') {
@@ -1077,34 +1116,67 @@
     const btn   = document.getElementById('kf-btn');
     const btnTxt= document.getElementById('kf-btn-txt');
     const dsgvo = document.getElementById('kf-dsgvo').checked;
+    const breite = document.getElementById('kf-breite').value.trim();
+    const hoehe  = document.getElementById('kf-hoehe').value.trim();
+    const anzahl = document.getElementById('kf-anzahl').value.trim();
     hideBox(err); hideBox(ok);
-    if (!name || !email || !msg) {
-      err.textContent = 'Bitte Name, E-Mail und Nachricht ausfüllen.';
-      showBox(err); return;
+
+    // Nur die tatsaechlich leeren Felder benennen, markieren und das erste
+    // fokussieren. Vorher nannte die Meldung immer alle drei Felder — auch die,
+    // die sichtbar gefuellt waren — und markierte keines davon.
+    ['kf-name','kf-email','kf-msg'].forEach(function(id){
+      document.getElementById(id).classList.remove('bad');
+    });
+    const fehlt = [];
+    if (!name)  fehlt.push(['kf-name','Name']);
+    if (!email) fehlt.push(['kf-email','E-Mail']);
+    if (!msg)   fehlt.push(['kf-msg','Nachricht']);
+    if (fehlt.length) {
+      fehlt.forEach(function(f){ document.getElementById(f[0]).classList.add('bad'); });
+      const namen = fehlt.map(function(f){ return f[1]; });
+      const liste = namen.length > 1
+        ? namen.slice(0,-1).join(', ') + ' und ' + namen[namen.length-1]
+        : namen[0];
+      err.textContent = 'Bitte noch ausfüllen: ' + liste + '.';
+      showBox(err);
+      const first = document.getElementById(fehlt[0][0]);
+      first.focus({preventScroll:true});
+      first.scrollIntoView({block:'center',behavior:'smooth'});
+      return;
     }
     if (!dsgvo) {
       err.textContent = 'Bitte stimmen Sie der Datenschutzerklärung zu.';
-      showBox(err); return;
+      showBox(err);
+      document.getElementById('kf-dsgvo').focus({preventScroll:true});
+      return;
     }
     btn.disabled = true; btnTxt.textContent = 'Wird gesendet …';
     const _d = new Date();
     const offerId = 'KT-' + (_d.getFullYear().toString().slice(2) + String(_d.getMonth()+1).padStart(2,'0') + String(_d.getDate()).padStart(2,'0')) + '-' + Math.random().toString(36).slice(2,6).toUpperCase();
     const datum   = new Date().toLocaleDateString('de-DE');
+    const masse = (breite || hoehe) ? ((breite || '?') + ' × ' + (hoehe || '?') + ' mm') : '';
     const internalText = [
       'Kontaktanfrage über DeineFenster.de',
       '══════════════════════════════════',
       '', 'Name:    ' + name,
       'E-Mail:  ' + email,
       'Telefon: ' + (tel || '–'),
+      '', 'Maße (B × H): ' + (masse || '– nicht angegeben –'),
+      'Anzahl:       ' + (anzahl || '– nicht angegeben –'),
       '', 'Nachricht:', msg,
       '', 'Datum: ' + datum,
     ].join('\n');
     // Detail-Block für die Kunden-Bestätigung: zeigt seine Nachricht zurück
     const esc = (s) => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const zeile = (k, v, letzte) =>
+      '<tr><td style="padding:9px 0;' + (letzte ? '' : 'border-bottom:1px solid #f0eadd;') + 'font-size:13px;color:#8a8273;width:32%;vertical-align:top;">' + k + '</td>' +
+      '<td style="padding:9px 0;' + (letzte ? '' : 'border-bottom:1px solid #f0eadd;') + 'font-size:13px;color:#1a2336;line-height:1.6;white-space:pre-wrap;">' + esc(v) + '</td></tr>';
     const detailsHtml =
       '<table width="100%" cellpadding="0" cellspacing="0" style="margin-top:6px;">' +
-        '<tr><td style="padding:9px 0;border-bottom:1px solid #f0eadd;font-size:13px;color:#8a8273;width:32%;vertical-align:top;">Telefon</td><td style="padding:9px 0;border-bottom:1px solid #f0eadd;font-size:13px;color:#1a2336;">' + esc(tel || '–') + '</td></tr>' +
-        '<tr><td style="padding:9px 0;font-size:13px;color:#8a8273;vertical-align:top;">Ihre Nachricht</td><td style="padding:9px 0;font-size:13px;color:#1a2336;line-height:1.6;white-space:pre-wrap;">' + esc(msg) + '</td></tr>' +
+        zeile('Telefon', tel || '–') +
+        (masse  ? zeile('Maße (B × H)', masse) : '') +
+        (anzahl ? zeile('Anzahl', anzahl) : '') +
+        zeile('Ihre Nachricht', msg, true) +
       '</table>';
     try {
       // Cloudflare Worker (Resend) — schickt interne Mail an info@baustoffchrist
@@ -1123,7 +1195,7 @@
       showBox(ok);
       document.getElementById('kontakt-form').reset();
     } catch(ex) {
-      err.textContent = 'Fehler beim Senden. Bitte versuchen Sie es erneut oder rufen Sie uns an: 03381 7039998';
+      err.textContent = 'Fehler beim Senden. Bitte versuchen Sie es erneut oder rufen Sie uns an: 03381 / 2148373';
       showBox(err);
     }
     btn.disabled = false; btnTxt.textContent = 'Nachricht senden';
