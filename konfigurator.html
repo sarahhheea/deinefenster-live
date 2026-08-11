@@ -156,7 +156,6 @@ body:not(.wiz-active) .topbar{display:none}
 .sw.on .chip::after{content:"";position:absolute;top:5px;right:5px;width:17px;height:17px;border-radius:50%;
   background:var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center/10px no-repeat}
 .sw .nm{font-size:12.5px;font-weight:500;color:var(--ink);margin-top:8px;line-height:1.2}
-.sw .dl{font-size:11.5px;font-weight:500;color:var(--ink-soft)}.sw .dl.inc{color:var(--accent)}
 .more{margin-top:18px;width:100%;padding:14px;border:1px solid var(--line);border-radius:var(--r);background:transparent;color:var(--ink);
   font:600 12px/1 var(--sans);text-transform:uppercase;letter-spacing:.12em;cursor:pointer;transition:.25s var(--ease)}
 .more:hover{border-color:var(--ink)}
@@ -167,7 +166,6 @@ body:not(.wiz-active) .topbar{display:none}
 .optrow.on .box{background:var(--ink);border-color:var(--ink)}
 .optrow .box svg{width:15px;height:15px;opacity:0;transition:.2s}.optrow.on .box svg{opacity:1}
 .optrow .ot{font-weight:600;font-size:15px}.optrow .os{font-size:13px;color:var(--ink-soft)}
-.optrow .delta{margin-left:auto;font-weight:600;font-size:15px}.optrow .delta.inc{color:var(--accent)}
 
 .mfield{margin-bottom:18px}
 .mfield label{display:block;font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.14em;color:var(--ink-soft);margin-bottom:8px}
@@ -302,10 +300,12 @@ body:not(.wiz-active) .topbar{display:none}
 .pcard:hover .pgo{background:var(--primary-d)}
 .price .sub{text-transform:none;letter-spacing:.02em}
 .tb-link:hover{border-color:var(--primary);color:var(--primary)}
-.price.preis-neu .amt{animation:preisPuls .45s cubic-bezier(.16,1,.3,1)}
-@keyframes preisPuls{0%{transform:scale(1)}38%{transform:scale(1.07)}100%{transform:scale(1)}}
-@media (prefers-reduced-motion:reduce){.price.preis-neu .amt{animation:none}}
-.ocard .pdl{color:var(--accent);font-weight:600;margin-top:2px}
+/* Die Optionskarten zeigen keine Aufpreise mehr — dafür MUSS der Kunde die Preisbewegung
+   in der Fußleiste bemerken. Deshalb kurz vergrößern UND in Blau aufleuchten. */
+.price.preis-neu .amt{animation:preisPuls .55s cubic-bezier(.16,1,.3,1)}
+@keyframes preisPuls{0%{transform:scale(1);color:var(--ink)}30%{transform:scale(1.09);color:var(--primary)}100%{transform:scale(1);color:var(--ink)}}
+@media (prefers-reduced-motion:reduce){.price.preis-neu .amt{animation:preisFarbe .55s ease}
+  @keyframes preisFarbe{0%,100%{color:var(--ink)}40%{color:var(--primary)}}}
 .ocard .fav{position:absolute;top:10px;left:10px;background:var(--primary);color:#fff;font-size:11px;font-weight:600;letter-spacing:.02em;padding:2px 9px;border-radius:20px;z-index:2}
 /* Ist die Karte ausgewaehlt, sitzt links oben der Haken — das Tag rueckt daneben. */
 .ocard.on .fav{left:38px}
@@ -658,7 +658,6 @@ body:not(.wiz-active) .topbar{display:none}
   .head{margin-bottom:14px}
   .grid.select .ocard .t{font-size:15px;margin-top:0}
   .grid.select .ocard .s{white-space:normal;margin-top:2px;font-size:12px;line-height:1.3;overflow-wrap:break-word}
-  .grid.select .ocard .pdl{white-space:nowrap;margin-top:2px}
   /* ── Wizard-Optionskarten (echter Container ist #wizGrid, NICHT .grid.select): Modell/Griff/Profil
         2 pro Reihe statt 3-Spalten-Überlauf; Bild groß, zentriert, voll sichtbar ── */
   #wizGrid .opts.three{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
@@ -874,7 +873,6 @@ body.checkout-focus .topbar{display:none}
   .grid:not(.select) .ocard:not(.door) .vis svg{width:auto!important;height:52px!important;max-height:52px!important}
   .grid:not(.select) .ocard:not(.door) .t{font-size:16px;line-height:1.25;margin-top:0}
   .grid:not(.select) .ocard:not(.door) .s{font-size:13px;line-height:1.3;min-height:34px;margin-top:3px;display:flex;align-items:flex-start;justify-content:center;text-align:center}
-  .grid:not(.select) .ocard:not(.door) .pdl{margin-top:auto;padding-top:8px}
 }
 
 /* ── Konfigurator-Feinschliff 2026-08-03 ────────────────────────────────
@@ -2476,7 +2474,7 @@ const STEPS_HAUSTUER=[  // Reihenfolge wie im Live-Konfigurator (WIZ_ALL, gilt:'
   {key:'anzahl',label:'Anzahl',title:['Die ','Anzahl'],sub:'Wie viele gleiche Haustüren benötigen Sie?'},
   {key:'modell',label:'Modell',title:['Ihr ','Türmodell'],sub:'Ihr Haustür-Design — die Vorschau zeigt es sofort.'},
   {key:'farbe',label:'Farbe',title:['Die ','Farbe'],sub:'Außen- und Innenfarbe des Türblatts.'},
-  {key:'glas',label:'Glas',title:['Die ','Verglasung'],sub:'2-fach ist inklusive, 3-fach dämmt noch besser.'},
+  {key:'glas',label:'Glas',title:['Die ','Verglasung'],sub:'2-fach ist Standard, 3-fach dämmt noch besser.'},
   {key:'motiv',label:'Motiv',title:['Das ','Glasmotiv'],sub:'Klarglas oder ein Sichtschutz-Dekor.'},
   {key:'griffTuer',label:'Griff',title:['Der ','Türgriff'],sub:'Innen Drückergarnitur, außen Klinke, Knauf oder Stoßgriff.'},
   {key:'sicherheit',label:'Sicherheit',title:['Die ','Sicherheit'],sub:'Mehrfachverriegelung für mehr Einbruchschutz.'},
@@ -2820,46 +2818,23 @@ function miniWin(opening){
   else l=`<path d="M${gx2} ${gy1} L${gx1} ${my} L${gx2} ${gy2}"/><path d="M${gx1} ${gy1} L${mx} ${gy2} L${gx2} ${gy1}"/>`;
   return `<svg viewBox="0 0 100 114"><rect x="6" y="4" width="88" height="106" rx="3" fill="#faf8f4" stroke="#DED9D0" stroke-width="1.4"/><rect x="14" y="10" width="72" height="94" fill="#eef1f4" stroke="#DED9D0"/><g stroke="#9aa3b0" stroke-width="1.4" fill="none">${l}</g></svg>`;
 }
-/* ---- Aufpreis-Anzeige: kommt IMMER aus der Preis-Engine, nie aus gepflegtem Text ----
-   Bezugspunkt ist die Standard-Ausstattung des Produkts (= der beworbene ab-Preis), aber gerechnet
-   mit den echten Maßen/Optionen des Kunden — so stimmt der Aufpreis auch bei großen Elementen.
-   Vorteil: die Labels bleiben stabil, wenn der Kunde innerhalb einer Gruppe hin- und herklickt. */
-const _DEFCFG={};
-function _defaultWert(field){
-  const p=S.prod||'fenster';
-  if(!_DEFCFG[p]) _DEFCFG[p]=defaultConfig(p);
-  return _DEFCFG[p][field];
-}
-// Aufpreis mehrerer zusammenhängender Felder (z.B. Farbe außen+innen, wenn innen der Außenfarbe folgt)
-function preisDeltaPatch(patch,bezug){
-  const keys=Object.keys(patch), bak={}, basis={};
-  for(const k of keys){ bak[k]=S[k]; basis[k]=(bezug&&k in bezug)?bezug[k]:_defaultWert(k); if(basis[k]===undefined) return null; }
-  try{
-    for(const k of keys) S[k]=basis[k];   const pB=price();
-    for(const k of keys) S[k]=patch[k];   const pV=price();
-    if(typeof pB!=='number'||typeof pV!=='number') return null;
-    return pV-pB;
-  }catch(e){ return null; }
-  finally{ for(const k of keys) S[k]=bak[k]; }
-}
-function preisDelta(field,val){ return preisDeltaPatch({[field]:val}); }
-function fmtDelta(d){
-  if(d==null) return '';
-  if(Math.abs(d)<0.5) return 'inklusive';
-  return (d>0?'+ ':'− ')+Math.round(Math.abs(d)).toLocaleString('de-DE')+' €';
-}
-function deltaLabel(field,val){ return fmtDelta(preisDelta(field,val)); }
+/* Karten tragen KEINE Preisangabe mehr (weder „inklusive" noch „+ 17 €").
+   Grund: die Aufschläge hängen an Maß und Menge, also zeigte dieselbe Option je nach
+   Schritt eine andere Zahl — das verunsichert mehr, als es hilft. Die Auswirkung der
+   Wahl steht dort, wo sie hingehört: im Gesamtpreis in der Fußleiste, der bei jeder
+   Änderung sichtbar aufblitzt. Die `delta`-Parameter bleiben in den Signaturen, damit
+   die Aufrufe unverändert bleiben. */
 function ocText(field,val,t,s,delta){
-  const on=S[field]===val; const vv=typeof val==='string'?`'${val}'`:val; const dl=deltaLabel(field,val)||delta||'';
-  return `<div class="ocard ${on?'on':''}" onclick="set('${field}',${vv})"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="t">${t}</div>${s?`<div class="s">${s}</div>`:''}${dl?`<div class="pdl${/inklusive/.test(dl)?' inc':''}">${dl}</div>`:''}</div>`;
+  const on=S[field]===val; const vv=typeof val==='string'?`'${val}'`:val;
+  return `<div class="ocard ${on?'on':''}" onclick="set('${field}',${vv})"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="t">${t}</div>${s?`<div class="s">${s}</div>`:''}</div>`;
 }
 function ocImg(field,val,img,t,s,delta){
-  const on=S[field]===val; const vv=typeof val==='string'?`'${val}'`:val; const dl=deltaLabel(field,val)||delta||'';
-  return `<div class="ocard ${on?'on':''}" onclick="set('${field}',${vv})"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="vis"><img src="${img}" alt="${t} (KI-generiertes Symbolbild)"></div><div class="t">${t}</div>${s?`<div class="s">${s}</div>`:''}${dl?`<div class="pdl${/inklusive/.test(dl)?' inc':''}">${dl}</div>`:''}</div>`;
+  const on=S[field]===val; const vv=typeof val==='string'?`'${val}'`:val;
+  return `<div class="ocard ${on?'on':''}" onclick="set('${field}',${vv})"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="vis"><img src="${img}" alt="${t} (KI-generiertes Symbolbild)"></div><div class="t">${t}</div>${s?`<div class="s">${s}</div>`:''}</div>`;
 }
 function ocIcon(field,val,icon,t,s,delta){
-  const on=S[field]===val; const vv=typeof val==='string'?`'${val}'`:val; const dl=deltaLabel(field,val)||delta||'';
-  return `<div class="ocard ${on?'on':''}" onclick="set('${field}',${vv})"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="vis" style="height:84px;place-items:center">${icon}</div><div class="t">${t}</div>${s?`<div class="s">${s}</div>`:''}${dl?`<div class="pdl${/inklusive/.test(dl)?' inc':''}">${dl}</div>`:''}</div>`;
+  const on=S[field]===val; const vv=typeof val==='string'?`'${val}'`:val;
+  return `<div class="ocard ${on?'on':''}" onclick="set('${field}',${vv})"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="vis" style="height:84px;place-items:center">${icon}</div><div class="t">${t}</div>${s?`<div class="s">${s}</div>`:''}</div>`;
 }
 function grp(title,cls,inner,aiNote){return `<div class="card"><div class="grp-title">${title}</div><div class="opts ${cls}">${inner}</div>${aiNote?`<p class="ai-note">${aiNote}</p>`:''}</div>`;}
 
@@ -2884,7 +2859,7 @@ function panelHTML(){
   const k=STEPS[cur].key;
   if(k==='profil'){
     if(S.prod==='schiebe'){
-      const c=(val,img,t,s)=>{ const dl=deltaLabel('hstSystem',val); return `<div class="ocard ${S.hstSystem===val?'on':''}" onclick="setHstSystem('${val}')"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="vis"><img src="${img}?v=1" loading="lazy" decoding="async" alt="${t}"></div><div class="t">${t}</div><div class="s">${s}</div>${dl?`<div class="pdl${/inklusive/.test(dl)?' inc':''}">${dl}</div>`:''}</div>`; };
+      const c=(val,img,t,s)=>`<div class="ocard ${S.hstSystem===val?'on':''}" onclick="setHstSystem('${val}')"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="vis"><img src="${img}?v=1" loading="lazy" decoding="async" alt="${t}"></div><div class="t">${t}</div><div class="s">${s}</div></div>`;
       return grp('Schiebe-System','two',
         c('psk','img/karten/profil/iglo-psk.webp','PSK Schiebetür','Kippen + seitlich schieben · mittelgroße Öffnungen · bis 160 kg')+
         c('hs','img/karten/profil/iglo-hs.webp','Hebe-Schiebetür','Anheben + schieben · große, raumhohe Terrassenfronten'));
@@ -2899,7 +2874,7 @@ function panelHTML(){
   }
   if(k==='griffhst'){
     const CHK='<span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span>';
-    const fix=(img,t)=>`<div class="ocard on">${CHK}<div class="vis"><img src="${img}" alt="${t} (KI-generiertes Symbolbild)"></div><div class="t">${t}</div><div class="pdl inc">inklusive</div></div>`;
+    const fix=(img,t)=>`<div class="ocard on">${CHK}<div class="vis"><img src="${img}" alt="${t} (KI-generiertes Symbolbild)"></div><div class="t">${t}</div></div>`;
     // Hinweis: Griffe sind weiß abgebildet, Farbe folgt der Rahmenfarbe (damit Kunden sich nicht wundern).
     const farbHinweis='<div style="font-size:12.5px;color:#6b7280;margin:-4px 4px 16px;line-height:1.5">Die Griffe sind hier weiß abgebildet — die <b>Griff-Farbe passt sich automatisch Ihrer gewählten Rahmenfarbe an</b>.</div>';
     // Abschließbar-Wahl (nur Text, kein Symbol) — gilt für PSK und HS.
@@ -2909,23 +2884,22 @@ function panelHTML(){
       +`</div></div>`;
     if(S.hstSystem==='hs'){
       // IGLO-HS: Innen- + Außengriff serienmäßig inklusive (zwei Karten, füllt die Reihe).
-      return `<div class="card"><div class="grp-title">Serien-Griffe — innen &amp; außen inklusive</div><div class="opts two griffvis">`
+      return `<div class="card"><div class="grp-title">Serien-Griffe — innen &amp; außen</div><div class="opts two griffvis">`
           +fix('img/drutex-griffe/hst-hebel-weiss-cut.webp','Innengriff')
           +fix('img/drutex-griffe/hst-muschel-weiss-cut.webp','Außengriff')
         +`</div></div>`+farbHinweis+schloss;
     }
     // PSK: EIN Standard-Griff → vollbreite horizontale „Inklusive"-Karte (kein leeres Feld rechts).
-    return `<div class="card"><div class="grp-title">PSK-Griff — Standard, inklusive</div>`
+    return `<div class="card"><div class="grp-title">PSK-Griff</div>`
         +`<div style="display:flex;align-items:center;gap:22px;border:2px solid var(--primary,#225eaa);border-radius:16px;padding:16px 22px;background:#fff;position:relative">`
           +`<span style="position:absolute;top:12px;right:12px;width:22px;height:22px;border-radius:50%;background:var(--primary,#225eaa);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span>`
           +`<div style="flex:0 0 100px;text-align:center"><img src="img/drutex-griffe/psk-set-weiss.webp" alt="PSK-Griff" style="max-width:100%;max-height:120px;display:block;margin:0 auto"></div>`
           +`<div style="flex:1"><div style="font-size:16px;font-weight:800;color:#111827">PSK-Griff</div><div style="font-size:13px;color:#6b7280;margin-top:3px">Serienmäßig bei PSK-Schiebetüren</div></div>`
-          +`<div style="font-weight:800;color:#1a7f4b;white-space:nowrap;font-size:14px">inklusive</div>`
         +`</div>`
       +`</div>`+farbHinweis+schloss;
   }
   if(k==='aufteilung'){
-    const auf=(val,img,t,dl0)=>{ const on=S.aufteilung===val; const dl=fmtDelta(preisDeltaPatch({aufteilung:val,anschlagIdx:(ANSCHLAG_DEFIDX[val]||0)},{aufteilung:'1fl',anschlagIdx:(ANSCHLAG_DEFIDX['1fl']||0)}))||dl0; return `<div class="ocard ${on?'on':''}" onclick="setAufteilung('${val}')"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="vis"><img src="${img}" alt="${t} (KI-generiertes Symbolbild)"></div><div class="t">${t}</div>${dl?`<div class="pdl">${dl}</div>`:''}</div>`; };
+    const auf=(val,img,t,dl0)=>{ const on=S.aufteilung===val; return `<div class="ocard ${on?'on':''}" onclick="setAufteilung('${val}')"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="vis"><img src="${img}" alt="${t} (KI-generiertes Symbolbild)"></div><div class="t">${t}</div></div>`; };
     const afd=S.prod==='balkon'?'balkon-fluegel':'fluegel';   // Balkon hat eigene Aufteilungs-Bilder
     let cards=auf('1fl',`img/karten/${afd}/1-fluegel.webp`,'1 Flügel')+auf('2fl',`img/karten/${afd}/2-fluegel.webp`,'2 Flügel','');
     if(S.prod!=='balkon') cards+=auf('3fl',`img/karten/${afd}/3-fluegel.webp`,'3 Flügel','');
@@ -2951,15 +2925,14 @@ function panelHTML(){
       const vis = oimg
         ? `<div class="vis"><img src="${oimg}?v=1" loading="lazy" decoding="async" alt="${o.n}"></div>`
         : `<div class="vis anschlagvis">${miniAnschlag(o.oeff,o.stulpAt||0)}</div>`;
-      const dl=deltaLabel('anschlagIdx',idx);
-      return `<div class="ocard ${on?'on':''}" onclick="setAnschlag(${idx})">${tick}${o.tag?`<span class="fav">${o.tag}</span>`:''}${vis}<div class="t">${o.n}</div>${dl?`<div class="pdl${/inklusive/.test(dl)?' inc':''}">${dl}</div>`:''}</div>`;
+      return `<div class="ocard ${on?'on':''}" onclick="setAnschlag(${idx})">${tick}${o.tag?`<span class="fav">${o.tag}</span>`:''}${vis}<div class="t">${o.n}</div></div>`;
     }).join('');
     const cols=set.length<=2?'two':(set.length===4?'two':'three');
     return `<div class="card"><div class="grp-title">Öffnungsart je Flügel</div><div class="opts ${cols}">${cards}</div></div>`;
   }
   if(k==='modell'){
-    const cards=DOORS.map(d=>{ const on=S.doorModel===d.k; const dl=deltaLabel('doorModel',d.k);
-      return `<div class="ocard door ${on?'on':''}" onclick="set('doorModel','${d.k}')"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="vis" style="height:300px;background:#f4f6f8;display:flex;align-items:center;justify-content:center;border-radius:10px 10px 0 0"><img src="${DOORIMG(d.k)}" style="max-width:94%;max-height:96%;object-fit:contain;display:block" loading="lazy" decoding="async" alt="${d.n}"></div><div class="t">${d.n}</div>${dl?`<div class="pdl${/inklusive/.test(dl)?' inc':''}">${dl}</div>`:''}</div>`;
+    const cards=DOORS.map(d=>{ const on=S.doorModel===d.k;
+      return `<div class="ocard door ${on?'on':''}" onclick="set('doorModel','${d.k}')"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="vis" style="height:300px;background:#f4f6f8;display:flex;align-items:center;justify-content:center;border-radius:10px 10px 0 0"><img src="${DOORIMG(d.k)}" style="max-width:94%;max-height:96%;object-fit:contain;display:block" loading="lazy" decoding="async" alt="${d.n}"></div><div class="t">${d.n}</div></div>`;
     }).join('');
     return `<div class="card"><div class="grp-title">Türmodell — ${DOORS.length} Designs</div><div class="opts three doorgrid">${cards}</div></div>`;
   }
@@ -2968,11 +2941,12 @@ function panelHTML(){
     if(!S.stossHoehe) S.stossHoehe='1200';
     S.griffTuer=S.griffAussen;
     const tick=`<span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span>`;
-    // Aussengriff: Stossgriff kostet am Markt echtes Geld (96-164 EUR je Laenge) — Aufpreis muss sichtbar sein
-    const ga=(val,img,t,sub)=>{ const dl=fmtDelta(preisDeltaPatch({griffAussen:val,griffTuer:val}))||'inklusive';
-      return `<div class="ocard ${S.griffAussen===val?'on':''}" onclick="setGriffAussen('${val}')">${tick}<div class="vis"><img src="${img}" alt="${t} (KI-generiertes Symbolbild)"></div><div class="t">${t}</div>${sub?`<div class="s">${sub}</div>`:''}<div class="pdl${/inklusive/.test(dl)?' inc':''}">${dl}</div></div>`; };
+    // Aussengriff: Stossgriff kostet am Markt echtes Geld (96-164 EUR je Laenge) — der Aufschlag steckt
+    // im Gesamtpreis unten, der bei der Wahl aufblitzt (keine Aufpreis-Zahl auf der Karte).
+    const ga=(val,img,t,sub)=>
+      `<div class="ocard ${S.griffAussen===val?'on':''}" onclick="setGriffAussen('${val}')">${tick}<div class="vis"><img src="${img}" alt="${t} (KI-generiertes Symbolbild)"></div><div class="t">${t}</div>${sub?`<div class="s">${sub}</div>`:''}</div>`;
     let html=`<div class="griff-cols">`
-      +`<div class="card"><div class="grp-title">Innen</div><div class="opts griff-innen"><div class="ocard on"><div class="vis"><img src="img/drutex-griffe/klinke-innen-silber-cut.webp" alt="Drückergarnitur innen"></div><div class="t">Drückergarnitur</div><div class="s">Klinke innen · fest</div><div class="pdl">inklusive</div></div></div></div>`
+      +`<div class="card"><div class="grp-title">Innen</div><div class="opts griff-innen"><div class="ocard on"><div class="vis"><img src="img/drutex-griffe/klinke-innen-silber-cut.webp" alt="Drückergarnitur innen"></div><div class="t">Drückergarnitur</div><div class="s">Klinke innen · fest</div></div></div></div>`
       +`<div class="card"><div class="grp-title">Außen</div><div class="opts three">`
       +ga('klinke','img/drutex-griffe/htg-flach-silber-cut.webp','Drückergarnitur','Klinke außen')
       +ga('knauf','img/drutex-griffe/knauf-silber-cut.webp','Knauf','fester Knauf außen')
@@ -2980,8 +2954,8 @@ function panelHTML(){
       +`</div></div>`
       +`</div>`;
     if(S.griffAussen==='stoss'){
-      const pills=STOSS_HOEHEN.map(mm=>{ const dl=deltaLabel('stossHoehe',mm);
-        return `<button type="button" class="spro-pill ${(S.stossHoehe||'1200')===mm?'on':''}" onclick="setStossHoehe('${mm}')">${mm} mm${dl&&!/inklusive/.test(dl)?` <small style="opacity:.75">${dl}</small>`:''}</button>`; }).join('');
+      const pills=STOSS_HOEHEN.map(mm=>
+        `<button type="button" class="spro-pill ${(S.stossHoehe||'1200')===mm?'on':''}" onclick="setStossHoehe('${mm}')">${mm} mm</button>`).join('');
       html+=`<div class="card"><div class="grp-title">Stoßgriff-Höhe</div><div class="spro-pills">${pills}</div></div>`;
     }
     return html;
@@ -3022,7 +2996,7 @@ function panelHTML(){
     ocImg('griff','abschliessbar','img/drutex-griffe/cdn/klamka-mistral-abschliessbar-weiss.webp','Mistral abschließbar','mit Schließzylinder',''));
   const ban=`<svg viewBox="0 0 24 24" fill="none" stroke="#9aa3b0" stroke-width="1.5" style="height:60px;width:auto"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg>`;
   if(k==='rollladen'){
-    const c=(val,vis,t,s,delta0)=>{ const delta=deltaLabel('roll',val)||delta0; return `<div class="ocard ${S.roll===val?'on':''}" onclick="set('roll','${val}')"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="vis">${vis}</div><div class="t">${t}</div>${s?`<div class="s">${s}</div>`:''}${delta?`<div class="pdl${/inklusive/.test(delta)?' inc':''}">${delta}</div>`:''}</div>`; };
+    const c=(val,vis,t,s,delta0)=>`<div class="ocard ${S.roll===val?'on':''}" onclick="set('roll','${val}')"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="vis">${vis}</div><div class="t">${t}</div>${s?`<div class="s">${s}</div>`:''}</div>`;
     const seite=S.rollSeite||'rechts';
     const seitpick = S.roll!=='kein'? `<div class="card" style="margin-top:16px"><div class="grp-title">Bedienseite (${S.roll==='motor'?'Motor/Kabel':'Gurtwickler'})</div>
       <div class="seg2">
@@ -3036,7 +3010,7 @@ function panelHTML(){
   if(k==='sprossen'){
     const tick=`<span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span>`;
     // 1) Art
-    const tc=(val,vis,t,s,delta0)=>{ const delta=deltaLabel('sproTyp',val)||delta0; return `<div class="ocard ${S.sproTyp===val?'on':''}" onclick="setSproTyp('${val}')">${tick}<div class="vis">${vis}</div><div class="t">${t}</div>${s?`<div class="s">${s}</div>`:''}${delta?`<div class="pdl${/inklusive/.test(delta)?' inc':''}">${delta}</div>`:''}</div>`; };
+    const tc=(val,vis,t,s,delta0)=>`<div class="ocard ${S.sproTyp===val?'on':''}" onclick="setSproTyp('${val}')">${tick}<div class="vis">${vis}</div><div class="t">${t}</div>${s?`<div class="s">${s}</div>`:''}</div>`;
     let html=`<div class="spro-step"><div class="card"><div class="grp-title">Sprossen — Art</div><div class="opts three">`
       +tc('keine',ban,'Ohne Sprossen','','inklusive')
       +tc('aufgesetzt','<img src="img/sprossen-aufgesetzt.webp" alt="Aufgesetzt">','Aufgesetzt','außen aufgesetzt · klassisch','')
@@ -3072,11 +3046,11 @@ function panelHTML(){
   if(k==='farbe'){
     const co=COLORS[S.outer],ci=COLORS[S.inner];
     const innenFarbig=(S.inner!==0);
-    // Farbaufschlag pro Farbe sichtbar — er hängt an der Elementgröße, wird also mit den echten Maßen gerechnet.
-    // Folgt die Innenfarbe der Außenfarbe, zeigt das Feld den Gesamtaufschlag für beide Seiten.
-    const sw=COLORS.map((c,i)=>{ const dl=fmtDelta(preisDeltaPatch(innenFarbig?{outer:i,inner:i}:{outer:i}));
-      return `<div class="sw ${S.outer===i?'on':''}" onclick="pickOuter(${i})"><div class="chip" style="background:${c.c}"></div><div class="nm">${c.n}</div>${dl?`<div class="dl${/inklusive/.test(dl)?' inc':''}">${dl}</div>`:''}</div>`;
-    }).join('');
+    // Kein Aufschlag am Farbfeld: er hängt an der Elementgröße und an der Innenfarb-Wahl, hätte also
+    // je nach Zeitpunkt eine andere Zahl gezeigt. Was die Farbe kostet, sieht der Kunde am Gesamtpreis.
+    const sw=COLORS.map((c,i)=>
+      `<div class="sw ${S.outer===i?'on':''}" onclick="pickOuter(${i})"><div class="chip" style="background:${c.c}"></div><div class="nm">${c.n}</div></div>`
+    ).join('');
     const innenStack=`<div class="innen-stack">`
       +`<button type="button" class="innen-pill ${S.inner===0?'on':''}" onclick="setInnenWeiss()"><span class="segdot" style="background:${COLORS[0].c}"></span>Weiß</button>`
       +`<button type="button" class="innen-pill ${innenFarbig?'on':''}" onclick="setInnenFarbig()"><span class="segdot" style="background:${co.c}"></span>Farbig</button>`
@@ -3087,8 +3061,8 @@ function panelHTML(){
       +`</div>`;
   }
   if(k==='extras'){
-    const row=(key,t,s,dl,inc)=>`<label class="optrow ${S[key]?'on':''}" onclick="toggle('${key}')"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><span><span class="ot">${t}</span><br><span class="os">${s}</span></span><span class="delta ${inc?'inc':''}">${dl}</span></label>`;
-    const glass=`<label class="optrow ${S.glass==='3'?'on':''}" onclick="toggleGlass()"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><span><span class="ot">3-fach Verglasung</span><br><span class="os">noch bessere Dämmung (sonst 2-fach inkl.)</span></span><span class="delta">+ 130 €</span></label>`;
+    const row=(key,t,s,dl,inc)=>`<label class="optrow ${S[key]?'on':''}" onclick="toggle('${key}')"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><span><span class="ot">${t}</span><br><span class="os">${s}</span></span></label>`;
+    const glass=`<label class="optrow ${S.glass==='3'?'on':''}" onclick="toggleGlass()"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><span><span class="ot">3-fach Verglasung</span><br><span class="os">noch bessere Dämmung (sonst 2-fach inkl.)</span></span></label>`;
     return `<div class="card"><div class="grp-title">Extras — alles freiwillig</div>${glass}${row('roll','Rollladenkasten','Sicht- & Sonnenschutz','+ 78 €')}${row('schall','Schallschutzglas','für ruhigere Räume','+ 95 €')}${row('sprossen','Sprossen','klassische Fenster-Optik','+ 60 €')}${row('sicher','Sicherheitsbeschlag RC1','erschwert Aufhebeln','+ 140 €')}</div>`;
   }
   if(k==='anfrage'){ return anfrageHTML(); }
