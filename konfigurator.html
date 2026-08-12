@@ -584,6 +584,35 @@ body:not(.wiz-active) .topbar{display:none}
 .sum-key .kt{font-size:13.5px;font-weight:800;line-height:1.25}
 .sum-key .kt em{font-style:normal;color:var(--accent)}
 .sum-key .ks{font-size:11px;color:var(--ink-soft);line-height:1.45;margin-top:2px}
+/* Anschlag als Bild statt als Textwand: das Symbol zeigt Bandseite und Schwenkrichtung,
+   daneben steht EIN Satz. Die Blickrichtung steht genau einmal — in der Marke darunter.
+   Vorher stapelten sich Normangabe, Ansicht, Klartext und Warnhinweis untereinander und
+   sagten viermal dasselbe. */
+.ak{display:flex;align-items:flex-start;gap:13px;padding:2px 0 13px;border-bottom:1px solid var(--line);margin-bottom:12px}
+.ak-pik{flex:0 0 auto;line-height:0}
+.ak-pik svg{display:block}
+.ak-txt{min-width:0}
+/* Mass und Stueckzahl auf einer Grundlinie, aber als eigene Kaesten — als <small> im
+   Fliesstext rutschte die Einheit zwischen Zahl und Wort ("1100 × 2100 mm 1 / Stück"). */
+.ak-mass{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.ak-mass b{font-family:var(--serif);font-weight:800;font-size:23px;letter-spacing:-.02em;line-height:1.12}
+.ak-mass span{font-weight:600;font-size:12.5px;color:var(--ink-soft);white-space:nowrap}
+.ak-satz{font-size:14px;color:var(--ink-soft);line-height:1.5;margin-top:5px}
+.ak-satz b{color:var(--ink);font-weight:700}
+/* Bewusst neutral: eine nach aussen oeffnende Tuer ist ein zulaessiger Sonderfall,
+   kein Fehler. Rot an dieser Stelle liest sich wie eine Fehlermeldung. */
+.ak-chip{display:inline-block;margin-top:9px;background:#eef4fc;border:1px solid #d5e3f6;border-radius:8px;
+  padding:4px 10px;font-size:11.5px;font-weight:700;color:#1d4d8c;letter-spacing:.01em;line-height:1.4}
+/* Ausstattung zweispaltig — kompakter als Zeile-fuer-Zeile und ruhiger zu lesen. */
+.ak-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
+.ak-p{padding:7px 0;border-bottom:1px solid var(--line);min-width:0}
+.ak-p em{display:block;font-style:normal;font-size:10px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-soft);opacity:.85}
+.ak-p b{display:block;font-size:13.5px;font-weight:700;margin-top:2px;line-height:1.35;word-break:break-word}
+.ak-p.voll{grid-column:1/-1}
+/* Erst unter 360px einspaltig — bei 390px passen die Werte ("Nebraska", "IGLO 5
+   Classic", "Anthrazitgrau") in zwei Spalten und die Karte bleibt halb so hoch. */
+@media(max-width:359px){.ak-grid{grid-template-columns:1fr}}
 /* Richtungswörter in der Erklärzeile fett statt kursiv — genau die sucht der Kunde beim Prüfen */
 .sum-key .ks em{font-style:normal;font-weight:800;color:var(--ink)}
 .sum-more{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
@@ -1433,15 +1462,19 @@ function anschlagInfo(){
     // Bei nach aussen oeffnenden Tueren ist die Bezugsseite die Aussenseite.
     const dinL=(S.opening==='dkl'), aussen=(S.tuerOeffnung==='aussen');
     const band=dinL?'links':'rechts', griff=dinL?'rechts':'links';
-    const blick=aussen?'von außen gesehen':'von innen gesehen';
     return {
       label:'Anschlag',
       norm:'DIN '+(dinL?'links':'rechts')+' · '+tuerOeffnungName(),
-      klartext:'Bänder '+band+' · Griff '+griff+' — '+blick,
+      klartext:'Bänder '+band+' · Griff '+griff+' — '+(aussen?'von außen gesehen':'von innen gesehen'),
       ansicht:tuerAnsichtName(),
       kurz:'DIN '+(dinL?'links':'rechts')+' · '+(aussen?'nach außen':'nach innen'),
       warn:aussen,
-      warntext:aussen?'DIN wird von außen bestimmt':''
+      warntext:aussen?'DIN wird von außen bestimmt':'',
+      // Ein Satz statt vier Zeilen Fachtext — die Blickrichtung steht dabei genau
+      // einmal, naemlich in der Marke darunter.
+      satz:'Öffnet nach '+(aussen?'außen':'innen')+', Bänder '+band+', Griff '+griff+'.',
+      chip:'DIN '+(dinL?'links':'rechts')+' · '+tuerAnsichtName(),
+      pikto:{typ:'dreh',hinge:dinL?'l':'r',richtung:aussen?'aussen':'innen'}
     };
   }
   if(S.prod==='schiebe'){
@@ -1450,28 +1483,93 @@ function anschlagInfo(){
     return {
       label:'Laufrichtung', norm:norm,
       klartext:'Schiebeflügel läuft nach '+(li?'links':'rechts')+' — von innen gesehen',
-      ansicht:'', kurz:norm, warn:false, warntext:''
+      ansicht:'', kurz:norm, warn:false, warntext:'',
+      satz:'Schiebeflügel läuft nach '+(li?'links':'rechts')+(psk?' und kippt zum Lüften':'')+' — von innen gesehen.',
+      chip:norm,
+      pikto:{typ:'schiebe',hinge:li?'l':'r',richtung:'innen'}
     };
   }
-  // Fenster + Balkontuer
+  // Fenster + Balkontuer — oeffnen immer nach innen.
   const n=openingName()||'—';
-  let klar=AUFTN[S.aufteilung]||'';
+  let klar=AUFTN[S.aufteilung]||'', satz=klar, pikto={typ:'mehr',hinge:'r',richtung:'innen'};
   try{
     const toks=(curAnschlag()||{}).oeff||[];
     if(toks.length===1){
       const t=tokSash(toks[0]);
-      if(t.open==='fest') klar='Feststehend — lässt sich nicht öffnen';
+      if(t.open==='fest'){
+        klar='Feststehend — lässt sich nicht öffnen';
+        satz='Feststehend — lässt sich nicht öffnen.';
+        pikto={typ:'fest',hinge:'r',richtung:'innen'};
+      }
       // Beim Kippfluegel liegt die Drehachse unten, der Griff sitzt seitlich —
       // nicht oben. Das stand hier jahrelang falsch und widerspricht DIN 107.
-      else if(t.open==='kipp') klar='Nur kippen — Griff seitlich, Achse unten';
-      else if(t.hinge) klar='Band '+seiteWort(t.hinge)+' · Griff '+seiteWort(t.hinge==='r'?'l':'r')+' — von innen gesehen';
+      else if(t.open==='kipp'){
+        klar='Nur kippen — Griff seitlich, Achse unten';
+        satz='Kippt nach innen, Achse unten, Griff seitlich.';
+        pikto={typ:'kipp',hinge:'r',richtung:'innen'};
+      }
+      else if(t.hinge){
+        const b=seiteWort(t.hinge), g=seiteWort(t.hinge==='r'?'l':'r');
+        klar='Band '+b+' · Griff '+g+' — von innen gesehen';
+        satz=(t.open==='dk'?'Öffnet und kippt nach innen, Band ':'Öffnet nach innen, Band ')+b+', Griff '+g+' — von innen gesehen.';
+        pikto={typ:'dreh',hinge:t.hinge,richtung:'innen'};
+      }
     } else if(toks.length>1){
       // stulpAt ist ein INDEX, kein Ja/Nein: 0 = Pfosten, >0 = Stulpstelle.
       let bs=null; try{ bs=buildSashes(); }catch(e){}
-      klar=(bs&&bs.stulpAt) ? 'Ohne festen Mittelpfosten — volle Breite frei' : 'Mit festem Mittelpfosten';
+      const stulp=!!(bs&&bs.stulpAt);
+      klar=stulp?'Ohne festen Mittelpfosten — volle Breite frei':'Mit festem Mittelpfosten';
+      satz=(AUFTN[S.aufteilung]||'Mehrere Flügel')+(stulp?' ohne festen Mittelpfosten — volle Breite frei.':' mit festem Mittelpfosten.');
+      pikto={typ:'mehr',hinge:'r',richtung:'innen'};
     }
   }catch(e){}
-  return {label:'Öffnungsart', norm:n, klartext:klar, ansicht:'', kurz:n, warn:false, warntext:''};
+  // Die Blickrichtung steht im Satz, die Marke traegt nur die Fachangabe — bei
+  // mehrfluegeligen Fenstern waere sonst beides zusammen eine dreizeilige Marke.
+  return {label:'Öffnungsart', norm:n, klartext:klar, ansicht:'', kurz:n, warn:false, warntext:'',
+          satz:satz, chip:n, pikto:pikto};
+}
+/* Kleines Symbol statt Fachtext: Tuer/Fenster von OBEN gesehen. Wandlinie waagerecht,
+   der Fluegel schwingt vom Band weg, gestrichelter Bogen zeigt den Weg. Wer "DIN rechts"
+   nicht kennt, sieht trotzdem sofort, wo die Baender sitzen und wohin es aufgeht.
+   Bewusst SVG im Markup (nicht in der Mail — dort strippen die meisten Programme SVG). */
+function anschlagPikto(px){
+  const ai=anschlagInfo(), p=ai.pikto||{typ:'mehr',hinge:'r',richtung:'innen'};
+  const W=100, H=76, A='#225eaa', G='#c3cbd6', D='#c9d4e4';
+  const w=px||68;
+  const kopf='<svg viewBox="0 0 '+W+' '+H+'" width="'+w+'" height="'+Math.round(w*H/W)+'" role="img" aria-label="'+esc(ai.satz)+'">';
+  const wand='<line x1="6" y1="58" x2="94" y2="58" stroke="'+G+'" stroke-width="7" stroke-linecap="round"/>';
+  if(p.typ==='fest'){
+    return kopf+wand+'<rect x="24" y="34" width="52" height="18" rx="3" fill="#eef3fa" stroke="'+A+'" stroke-width="3"/>'+
+      '<line x1="24" y1="34" x2="76" y2="52" stroke="'+D+'" stroke-width="2"/>'+
+      '<line x1="76" y1="34" x2="24" y2="52" stroke="'+D+'" stroke-width="2"/></svg>';
+  }
+  if(p.typ==='kipp'){
+    // Seitenansicht: Achse unten, Oberkante neigt sich nach innen.
+    return kopf+wand+'<line x1="30" y1="58" x2="46" y2="20" stroke="'+A+'" stroke-width="6" stroke-linecap="round"/>'+
+      '<path d="M30 58 A38 38 0 0 1 46 20" fill="none" stroke="'+D+'" stroke-width="2" stroke-dasharray="4 4"/>'+
+      '<circle cx="30" cy="58" r="6.5" fill="#fff" stroke="'+A+'" stroke-width="3.4"/><circle cx="30" cy="58" r="1.9" fill="'+A+'"/></svg>';
+  }
+  if(p.typ==='schiebe'){
+    const li=(p.hinge==='l');
+    const pfeil=li?'<path d="M34 30 L20 38 L34 46" fill="none" stroke="'+A+'" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>'
+                 :'<path d="M66 30 L80 38 L66 46" fill="none" stroke="'+A+'" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>';
+    return kopf+wand+'<rect x="'+(li?38:24)+'" y="30" width="38" height="16" rx="3" fill="#eef3fa" stroke="'+A+'" stroke-width="3"/>'+pfeil+'</svg>';
+  }
+  if(p.typ==='mehr'){
+    return kopf+wand+'<rect x="14" y="32" width="34" height="16" rx="3" fill="#eef3fa" stroke="'+A+'" stroke-width="3"/>'+
+      '<rect x="52" y="32" width="34" height="16" rx="3" fill="#eef3fa" stroke="'+A+'" stroke-width="3"/></svg>';
+  }
+  // Dreh: Band links oder rechts, Fluegel schwingt nach innen (unten) oder aussen (oben).
+  const re=(p.hinge==='r'), aus=(p.richtung==='aussen');
+  const bx=re?86:14, ex=re?47:53, ey=aus?17:78;   // Fluegelspitze
+  const bogen=aus
+    ? (re?'M86 58 A44 44 0 0 0 45 15':'M14 58 A44 44 0 0 1 55 15')
+    : (re?'M86 58 A26 26 0 0 1 60 78':'M14 58 A26 26 0 0 0 40 78');
+  return kopf+wand+
+    '<path d="'+bogen+'" fill="none" stroke="'+D+'" stroke-width="2" stroke-dasharray="4 4"/>'+
+    '<line x1="'+bx+'" y1="58" x2="'+ex+'" y2="'+ey+'" stroke="'+A+'" stroke-width="6" stroke-linecap="round"/>'+
+    '<circle cx="'+bx+'" cy="58" r="6.5" fill="#fff" stroke="'+A+'" stroke-width="3.4"/>'+
+    '<circle cx="'+bx+'" cy="58" r="1.9" fill="'+A+'"/></svg>';
 }
 // Öffnungs-Token (dk-l,dk-r,dreh-l,dreh-r,kipp,fest) -> Flügel-Zustand {open,hinge}
 function tokSash(tok){
@@ -2068,11 +2166,12 @@ function haustuerStageSVG(){
   } else {
     s+=lbl(bMm/2,ly,'Außenansicht')+lbl(bMm/2,ly2,GRIFFT[griffAussen]||'Griff',1);
     s+=lbl(bMm+gap+bMm/2,ly,'Innenansicht')+lbl(bMm+gap+bMm/2,ly2,'Drückergarnitur · DIN '+(dinLinks?'links':'rechts'),1);
-    // Oeffnungsrichtung gilt fuer beide Ansichten. Der seltene Fall "nach aussen" bleibt
-    // farbig markiert, steht aber als ruhige Unterzeile statt als Querbalken.
+    // Oeffnungsrichtung gilt fuer beide Ansichten. Bewusst in derselben ruhigen Farbe wie
+    // die uebrigen Unterzeilen: die Angabe steht daneben in der Zusammenfassung gross und
+    // eindeutig, hier waere Rot nur Laerm — und eine nach aussen oeffnende Tuer ist ein
+    // zulaessiger Sonderfall, kein Fehler.
     s+=lbl(totalW/2,ly2+LBL2*1.6,
-        nachAussen?'Öffnet nach außen — DIN wird von außen bestimmt':'Öffnet nach innen',
-        1, nachAussen?'#c02626':DIML);
+        nachAussen?'Öffnet nach außen · DIN von außen bestimmt':'Öffnet nach innen',1);
   }
   return s+`</svg>`;
 }
@@ -3256,51 +3355,65 @@ const GRIFFN={mistral:'Mistral',abschliessbar:'Mistral abschließbar'};
 // (1) das Maß als Anker, (2) die Öffnungsrichtung hervorgehoben — danach wird bestellt und dort passieren die
 // Fehler, (3) alles Übrige gedämpft darunter. Bewusst eine EIGENE Funktion: summaryRows() liefert weiterhin die
 // schlichten .srow-Zeilen, die die Mail-Erzeugung (_mailRows) per Textmuster in eine Tabelle übersetzt.
+/* Zusammenfassung neben der Skizze — "zeigen statt beschreiben" (Kundenwunsch 12.08.2026).
+   Aufbau: Symbol + Maß + EIN Satz + Marke mit Bezugsseite, darunter die vollständige
+   Ausstattung zweispaltig. Es geht nichts verloren; die Angaben stehen nur einmal
+   statt viermal. Vorher stapelten sich Normangabe, Ansicht, Klartext und Warnhinweis. */
 function summaryPanel(){
   const co=COLORS[S.outer], ci=COLORS[S.inner];
-  const esc2=t=>String(t==null?'':t);
-  const hebe=t=>esc2(t).replace(/\b(links|rechts|innen|außen)\b/gi,'<em>$1</em>');   // Richtungswörter hervorheben
-  const kopf=`<div class="sum-mass"><b class="tnum">${S.w} × ${S.h} mm</b><span>${S.anzahl} ${S.anzahl>1?'Stück':'Stück'}</span></div>`;
-  const key=(t,s)=>`<div class="sum-key"><div class="kt">${hebe(t)}</div>${s?`<div class="ks">${hebe(s)}</div>`:''}</div>`;
-  const row=(k,v)=>`<div class="srow"><span class="k">${k}</span><span class="v">${v}</span></div>`;
-  const farbe=(S.outer===S.inner)
-    ? row('Farbe',`<span class="dot" style="background:${co.c}"></span>${co.n}`)
-    : row('Farbe',`<span class="dot" style="background:${co.c}"></span>${co.n} / <span class="dot" style="background:${ci.c}"></span>${ci.n}`);
-  const mehr=`<div class="sum-more">Ausstattung</div>`;
+  const ai=anschlagInfo();
+  const hebe=t=>String(t==null?'':t).replace(/\b(links|rechts|innen|außen)\b/gi,'<b>$1</b>');
+  const p=(k,v,voll)=>v?`<div class="ak-p${voll?' voll':''}"><em>${k}</em><b>${v}</b></div>`:'';
+  const dot=c=>`<span class="dot" style="background:${c}"></span>`;
+
+  const kopf=`<div class="ak">
+      <div class="ak-pik">${anschlagPikto(64)}</div>
+      <div class="ak-txt">
+        <div class="ak-mass"><b class="tnum">${S.w} × ${S.h} mm</b><span>${S.anzahl} Stück</span></div>
+        <div class="ak-satz">${hebe(ai.satz)}</div>
+        <span class="ak-chip">${ai.chip}</span>
+      </div>
+    </div>`;
+
+  const farbP = (S.outer===S.inner)
+    ? p('Farbe',`${dot(co.c)}${co.n}`,1)
+    : p('Farbe außen',`${dot(co.c)}${co.n}`)+p('Farbe innen',`${dot(ci.c)}${ci.n}`);
 
   if(S.prod==='haustuer'){
-    // Formulierung kommt aus anschlagInfo() — derselben Quelle wie Warenkorb,
-    // Checkout-Liste und beide Mails.
-    const ai=anschlagInfo();
-    return kopf
-      +key(ai.norm, [ai.ansicht,ai.klartext,ai.warntext].filter(Boolean).join(' · '))
-      +key(`${GRIFFT[_griffAussenVal()]||'Griff'} außen`, `Drückergarnitur innen`)
-      +mehr+row('Modell',DOORN[S.doorModel]||'—')+farbe
-      +row('Verglasung',`${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}`)
-      +row('Profil',PROFN[S.profile])
-      +row('Sicherheit',S.sicher?'Mehrfachverriegelung':'Standard');
+    return kopf+`<div class="ak-grid">`
+      +p('Modell',DOORN[S.doorModel]||'—')
+      +p('Profil',PROFN[S.profile])
+      +farbP
+      +p('Verglasung',`${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}`)
+      +p('Sicherheit',S.sicher?'Mehrfachverriegelung':'Standard')
+      +p('Griff außen',(GRIFFT[_griffAussenVal()]||'—')+(_griffAussenVal()==='stoss'?` · ${S.stossHoehe||'1200'} mm`:''))
+      +p('Griff innen','Drückergarnitur')
+      +`</div>`;
   }
   if(S.prod==='schiebe'){
-    const psk=S.hstSystem!=='hs', ai=anschlagInfo();
-    return kopf
-      +key(ai.norm, ai.klartext)
-      +mehr+row('System',psk?'PSK Schiebetür':'Hebe-Schiebetür')+farbe
-      +row('Verglasung',S.glass==='3'?'3-fach':'2-fach')
-      +row('Rollladen',S.roll==='motor'?'Motor':S.roll==='gurt'?'Gurtwickler':'—');
+    const psk=S.hstSystem!=='hs';
+    return kopf+`<div class="ak-grid">`
+      +p('System',psk?'PSK Schiebetür':'Hebe-Schiebetür')
+      +p('Verglasung',S.glass==='3'?'3-fach':'2-fach')
+      +farbP
+      +p('Rollladen',S.roll==='motor'?'Motor':S.roll==='gurt'?'Gurtwickler':'—')
+      +p('Schloss',S.hstSchloss==='innen-aussen'?'abschließbar':'Standard')
+      +`</div>`;
   }
   // Fenster + Balkontür
   const ex=[]; if(S.roll==='gurt')ex.push('Rollladen · Gurtwickler'); if(S.roll==='motor')ex.push('Motorrolladen');
   if(S.schall)ex.push('Schallschutz'); if(S.sicher)ex.push('RC1');
   if(S.prod==='balkon'&&S.balkonSchwelle==='alu')ex.push('Aluschwelle');
-  // Wo sitzt der Griff, wo das Band — dieselbe Herleitung wie in Warenkorb und Mail,
-  // deshalb aus anschlagInfo() statt hier noch einmal formuliert.
-  const ai=anschlagInfo();
-  return kopf
-    +key(ai.norm,ai.klartext)
-    +mehr+row('Profil',PROFN[S.profile])+farbe
-    +row('Verglasung',`${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}`)
-    +(S.sprossen&&S.sprossen!=='ohne'?row('Sprossen',SPROSN?(SPROSN[S.sprossen]||'ja'):'ja'):'')
-    +(ex.length?row('Extras',ex.join(' · ')):'');
+  const sproN=(S.sproTyp&&S.sproTyp!=='keine')?((SPROTYPN[S.sproTyp]||'')+' · '+S.sproDicke+' mm'):'';
+  return kopf+`<div class="ak-grid">`
+    +p('Aufteilung',AUFTN[S.aufteilung])
+    +p('Profil',PROFN[S.profile])
+    +farbP
+    +p('Verglasung',`${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}`)
+    +p('Griff',GRIFFN[S.griff]||'—')
+    +p('Sprossen',sproN)
+    +p('Extras',ex.length?ex.join(' · '):'',1)
+    +`</div>`;
 }
 function summaryRows(){
   const co=COLORS[S.outer],ci=COLORS[S.inner];
@@ -3365,25 +3478,10 @@ function cartTotals(){
 function setLiefer(v){ if(v==='lieferung' && !cartTotals().lieferOk) return; liefer=v; saveCart(); render();
   if(document.getElementById('cdBody')) renderCartDrawer(); }
 // Kern-Eigenschaften je Produkt für die eingeklappte Ansicht (3-4 Zeilen)
-function posKeySpecs(conf){
-  return withConf(conf,()=>{
-    const co=COLORS[S.outer].n, ci=COLORS[S.inner].n, rows=[];
-    const add=(k,v)=>rows.push(`<div class="ps-row"><span>${k}</span><b>${v}</b></div>`);
-    // Anschlag/Oeffnungsart zuerst und hervorgehoben: das ist die fertigungsentscheidende
-    // Angabe. Zwischen Maass und Farbe wurde sie vom Kunden wie vom Innendienst ueberlesen.
-    const addKey=(k,v)=>rows.push(`<div class="ps-row ps-key"><span>${k}</span><b>${v}</b></div>`);
-    // Farbe immer klar beschriften: gleiche Farbe = eine Zeile, sonst Außen + Innen getrennt
-    const addColor=()=>{ if(S.outer===S.inner) add('Farbe',`${co} (außen &amp; innen)`); else { add('Außenfarbe',co); add('Innenfarbe',ci); } };
-    // Anschlag/Öffnungsart gehören in JEDE Position: sie sind fertigungsrelevant und
-    // stehen sonst nirgends im Angebot — die Skizze allein wird im Innendienst überlesen.
-    const ai=anschlagInfo();
-    addKey(ai.label, ai.norm+(ai.ansicht?' · '+ai.ansicht:'')+(ai.klartext?`<span style="display:block;font-weight:500;opacity:.72;margin-top:2px">${ai.klartext}</span>`:''));
-    if(S.prod==='haustuer'){ add('Modell',DOORN[S.doorModel]||'—'); add('Maße',`${S.w} × ${S.h} mm`); addColor(); add('Verglasung',`${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}`); }
-    else if(S.prod==='schiebe'){ add('System',S.hstSystem==='hs'?'Hebe-Schiebetür':'PSK Schiebetür'); add('Maße',`${S.w} × ${S.h} mm`); addColor(); add('Verglasung',S.glass==='3'?'3-fach':'2-fach'); }
-    else { add('Aufteilung',AUFTN[S.aufteilung]); add('Maße',`${S.w} × ${S.h} mm`); addColor(); add('Verglasung',`${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}`); }
-    return rows.join('');
-  });
-}
+/* Warenkorb-Karte zeigt dieselbe Darstellung wie die Buehne — Symbol, Mass, ein Satz,
+   Marke mit Bezugsseite, darunter die Ausstattung. Wer im Korb etwas anderes liest als
+   im Konfigurator, wird misstrauisch; deshalb eine Quelle und eine Form. */
+function posKeySpecs(conf){ return withConf(conf,summaryPanel); }
 function posCard(it,i){
   const conf=it.conf, q=conf.anzahl||1;
   const unit=withConf(conf,price), line=unit*q;
@@ -3568,12 +3666,12 @@ function _posBlock(i,q,title,rowsTable,unit,line,cid,mass,ai){
     ? '<div style="margin-top:14px;font-size:17px;font-weight:800;color:#225eaa">Preis auf Anfrage</div>'
     : '<div style="margin-top:14px"><div style="font-size:19px;font-weight:800;color:#111827">'+eur(line)+'</div>'+((unit!=null&&q>1)?'<div style="font-size:12px;color:#6b7280;margin-top:2px">'+eur(unit)+' / Stück</div>':'')+'</div>';
   var massBlock = mass ? '<div style="font-size:21px;font-weight:800;color:#111827;letter-spacing:-.01em">'+mass+'</div>' : '';
-  var anschlagBlock = ai ? '<div style="margin:11px 0 14px;background:#f3f8ff;border:1px solid #d8e6fa;border-left:4px solid #225eaa;border-radius:10px;padding:11px 13px">'+
-      '<div style="font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:#5b7fae;font-weight:700">'+esc(ai.label)+'</div>'+
-      '<div style="font-size:15px;font-weight:800;color:#14233f;margin-top:3px">'+esc(ai.norm)+'</div>'+
-      (ai.klartext?'<div style="font-size:13px;color:#4a5766;margin-top:2px">'+esc(ai.klartext)+'</div>':'')+
-      (ai.ansicht?'<div style="font-size:13px;color:#4a5766">'+esc(ai.ansicht)+'</div>':'')+
-      (ai.warntext?'<div style="font-size:12.5px;color:#b42318;font-weight:700;margin-top:4px">'+esc(ai.warntext)+'</div>':'')+
+  // Gleiche Sprache wie im Konfigurator: EIN Satz, darunter die Bezugsseite als Marke.
+  // Ohne Symbol — die meisten Mailprogramme entfernen eingebettetes SVG.
+  var anschlagBlock = ai ? '<div style="margin:10px 0 14px">'+
+      '<div style="font-size:15px;color:#14233f;line-height:1.5;font-weight:600">'+esc(ai.satz)+'</div>'+
+      '<div style="display:inline-block;margin-top:7px;background:#eef4fc;border:1px solid #d5e3f6;border-radius:8px;'+
+        'padding:4px 10px;font-size:11.5px;font-weight:700;color:#1d4d8c">'+esc(ai.chip)+'</div>'+
     '</div>' : '';
   return '<div style="padding:22px 0;border-top:1px solid #edf1f6">'+
     '<div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#9aa2ac">Position '+(i+1)+' · '+q+' ×</div>'+
