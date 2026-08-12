@@ -498,13 +498,20 @@ body:not(.wiz-active) .topbar{display:none}
 .co-items{margin-bottom:12px;border-bottom:1px solid var(--line);padding-bottom:6px}
 /* Abschluss-Formular: jede Position mit ihrer Zeichnung — der Kunde sieht vor dem Absenden nochmal,
    was er konfiguriert hat (Maße/Farbe/Glas), nicht nur eine Preiszeile. Antippen zeigt die Skizze groß. */
-.co-item{display:flex;align-items:flex-start;gap:11px;font-size:13px;padding:10px 0;color:var(--ink);border-bottom:1px solid var(--line)}
+/* Letzter Blick vor dem Absenden — hier stand nur eine Kurzzeile, in der die
+   Blickrichtung fehlte. Jetzt dieselbe Darstellung wie in Buehne und Warenkorb:
+   Zeichnung, Mass, Satz, Bezugsseite, vollstaendige Ausstattung. Untereinander
+   statt nebeneinander, weil die Spalte am Desktop nur rund 380px breit ist. */
+.co-item{font-size:13px;padding:14px 0;color:var(--ink);border-bottom:1px solid var(--line)}
 .co-item:last-child{border-bottom:none}
+.co-ihead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:8px}
+.co-ihead .co-nr{font-size:10.5px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-soft)}
+.co-ihead .co-anz{font-size:12px;font-weight:700;color:var(--ink-soft);white-space:nowrap}
 /* 78px waren zu klein: bei der Haustuer standen darin zwei Ansichten mit fuenf
    Textzeilen, am Handy in etwa 4pt. Jetzt eine Ansicht auf 132px, mit sichtbarem
    Lupenzeichen — vorher deutete nur cursor:zoom-in auf die Grossansicht hin, und
    das gibt es am Handy nicht. */
-.co-draw{position:relative;flex:0 0 132px;height:132px;background:var(--bg);border:1px solid var(--line);border-radius:11px;display:grid;place-items:center;padding:8px;overflow:hidden;cursor:zoom-in}
+.co-draw{position:relative;width:100%;height:186px;background:var(--bg);border:1px solid var(--line);border-radius:11px;display:grid;place-items:center;padding:10px;overflow:hidden;cursor:zoom-in}
 .co-draw svg{max-width:100%;max-height:100%;height:auto;display:block}
 .co-draw::after{content:"";position:absolute;right:5px;bottom:5px;width:22px;height:22px;border-radius:50%;
   background:rgba(255,255,255,.94);border:1px solid var(--line-d);
@@ -518,10 +525,16 @@ body:not(.wiz-active) .topbar{display:none}
 .co-final .cf-was{font-size:13px;color:var(--ink-soft);line-height:1.4;min-width:0}
 .co-final .cf-sum{font-size:18px;font-weight:800;white-space:nowrap}
 .co-final .cf-note{flex:0 0 100%;font-size:11.5px;color:var(--ink-soft);margin-top:2px}
-.co-info{flex:1 1 auto;min-width:0}
-.co-nm{font-weight:700;line-height:1.3;margin-bottom:3px}
-.co-sp{color:var(--ink-soft);font-size:11.5px;line-height:1.5}
-.co-pr{margin-top:5px;font-weight:800}
+.co-info{min-width:0}
+.co-nm{font-family:var(--serif);font-weight:800;font-size:15.5px;line-height:1.25;margin:9px 0 2px}
+.co-pr{margin-top:10px;font-weight:800;font-size:17px;text-align:right}
+.co-pr small{display:block;font-size:11.5px;font-weight:600;color:var(--ink-soft);margin-top:1px}
+/* In der schmalen Bestellspalte darf der Block etwas kompakter sein als auf der Buehne. */
+.co-item .ak{gap:11px;padding-bottom:11px;margin-bottom:10px}
+.co-item .ak-mass b{font-size:19px}
+.co-item .ak-satz{font-size:13px}
+.co-item .ak-p b{font-size:12.5px}
+.co-item .ak-p em{font-size:9.5px}
 /* ── Skizze groß ansehen: gemeinsames Overlay für Warenkorb-Drawer und Abschluss-Formular.
    Die Zeichnung ist als Thumbnail zwangsläufig klein — hier ist sie vollständig einsehbar. ── */
 /* über dem Warenkorb-Drawer (z-index 100000) — die große Ansicht wird aus dem Drawer heraus geöffnet
@@ -3404,7 +3417,9 @@ function summaryPanel(){
   const ex=[]; if(S.roll==='gurt')ex.push('Rollladen · Gurtwickler'); if(S.roll==='motor')ex.push('Motorrolladen');
   if(S.schall)ex.push('Schallschutz'); if(S.sicher)ex.push('RC1');
   if(S.prod==='balkon'&&S.balkonSchwelle==='alu')ex.push('Aluschwelle');
-  const sproN=(S.sproTyp&&S.sproTyp!=='keine')?((SPROTYPN[S.sproTyp]||'')+' · '+S.sproDicke+' mm'):'';
+  // "ohne Sprossen" und "keine Extras" werden bewusst ausgeschrieben statt weggelassen:
+  // beim letzten Blick vor dem Absenden ist die Abwesenheit selbst eine Aussage.
+  const sproN=(S.sproTyp&&S.sproTyp!=='keine')?((SPROTYPN[S.sproTyp]||'')+' · '+S.sproDicke+' mm'):'ohne';
   return kopf+`<div class="ak-grid">`
     +p('Aufteilung',AUFTN[S.aufteilung])
     +p('Profil',PROFN[S.profile])
@@ -3412,7 +3427,7 @@ function summaryPanel(){
     +p('Verglasung',`${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}`)
     +p('Griff',GRIFFN[S.griff]||'—')
     +p('Sprossen',sproN)
-    +p('Extras',ex.length?ex.join(' · '):'',1)
+    +p('Extras',ex.length?ex.join(' · '):'keine',1)
     +`</div>`;
 }
 function summaryRows(){
@@ -3537,12 +3552,15 @@ function formHTML(t){
   // ob Maße/Öffnung/Farbe stimmen. Zeichnung antippen → große Ansicht (skizzeGross).
   const mini=cart.map((it,i)=>{
     const q=it.conf.anzahl||1, nm=withConf(it.conf,configTitle);
-    const sk=skizzeKompakt(it.conf), sp=withConf(it.conf,prodSpecs);
+    const unit=withConf(it.conf,price)||0;
     return `<div class="co-item">`
-      +`<div class="co-draw" onclick="skizzeGross(${i})" role="button" tabindex="0" aria-label="Skizze groß ansehen" title="Skizze groß ansehen">${sk}</div>`
-      +`<div class="co-info"><div class="co-nm">${q} × ${nm}${it.name?' · '+esc(it.name):''}</div>`
-      +`<div class="co-sp">${sp}</div>`
-      +`<div class="co-pr tnum">${eur(withConf(it.conf,price)*q)}</div></div></div>`;
+      +`<div class="co-ihead"><span class="co-nr">Position ${i+1}</span><span class="co-anz">${q} Stück</span></div>`
+      +`<div class="co-draw" onclick="skizzeGross(${i})" role="button" tabindex="0" aria-label="Skizze groß ansehen" title="Skizze groß ansehen">${skizzeKompakt(it.conf)}</div>`
+      +`<div class="co-info">`
+        +`<div class="co-nm">${nm}${it.name?' · '+esc(it.name):''}</div>`
+        +posKeySpecs(it.conf)
+        +`<div class="co-pr tnum">${eur(unit*q)}${q>1?`<small>${eur(unit)} / Stück</small>`:''}</div>`
+      +`</div></div>`;
   }).join('');
   const lief=(liefer==='lieferung');
   const addr = lief ? `<div class="field"><label>Stra&szlig;e &amp; Hausnummer <span class="req">*</span></label><input name="strasse" required autocomplete="street-address" placeholder="Musterstra&szlig;e 1"></div>
