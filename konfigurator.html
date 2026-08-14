@@ -2216,7 +2216,7 @@ const _lp_F_OEFF={'fest':-98,'kipp':-23,'dreh-l':-14,'dreh-r':-14,'dk-l':0,'dk-r
 const _lp_F_GRIFF={'mistral':0,'nevada':0,'dublin':0,'kwadrat':0,'hoppe':7,'pz-beid':113};
 const _lp_F_SCHALL={'ohne':0,'extra':62};
 const _lp_F_SICHERGLAS={'kein':0,'esg':40,'vsg':61};
-const _lp_F_SICHER={'wk1':0,'rc2':87};
+const _lp_F_SICHER={'wk1':0,'rc2':87}; const _lp_SICH_B=[600,800,1000,1200,1400,1500], _lp_SICH_H=[600,900,1200,1500,1800]; const _lp_SICH_M=[[32.71,32.43,37.64,37.35,42.56,42.57],[37.35,37.35,37.64,42.57,42.27,42.56],[37.64,42.56,42.27,42.56,47.19,47.49],[42.28,42.28,47.48,47.49,47.48,52.41],[42.56,47.19,47.49,47.49,52.4,52.4]]; /* Sicherheitsaufpreis Fenster: 30 Messpunkte vom 14.08.2026 gegen die Preisreferenz. Ersetzt die Pauschale 87, die 30-46 EUR ueber Marktniveau lag. Nur Fenster gemessen - Balkontuer/Schiebetuer/Haustuer nutzen weiter _lp_F_SICHER. */ function _lp_sicherFenster(b,h){ const col=[]; for(let i=0;i<_lp_SICH_H.length;i++)col.push(_lp_interp1(b,_lp_SICH_B,_lp_SICH_M[i])); return _lp_interp1(h,_lp_SICH_H,col); } 
 const _lp_F_SPRO={'aufgesetzt':{'27':28,'45':38,'65':48},'szr':{'18':13,'26':18,'45':25}};
 const _lp_PROFIL_PCT={'iglo5':0,'iglo-energy':0.23};
 function _lp_griffLockAdd(){ return 5; }
@@ -2260,7 +2260,7 @@ function _lp_fenster(){
   const prof=(LS.profil==='iglo-energy')? _enUp : _profBaseF*(_lp_PROFIL_PCT[LS.profil]||0);
   const faCol=LS.fa&&LS.fa!=='weiss', fiCol=LS.fi&&LS.fi!=='weiss';
   const farbPct=((faCol&&fiCol)?0.19:((faCol||fiCol)?0.125:0))+_lp_farbPremDelta();
-  const bodyNoColor=frame+prof+oeff, colorAdd=bodyNoColor*farbPct;
+  const bodyNoColor=frame+prof+oeff; /* Bei breiten flachen Fluegeln (Beschlagzone, b>1.25*h) rechnet die Referenz die Farbe NICHT auf den Beschlagzuschlag. Gemessen 14.08.2026: der Abzug ist flaechenproportional, 67.9 EUR/m2 (8 Messpunkte, groesste Abweichung 0.05 EUR). Ohne diesen Abzug lagen farbige breite Fenster 6.5-9.9 EUR ueber Marktniveau. */ const _zoneAbzug=(_enFl==='1'&&typeof _fdkZone==='function'&&_fdkZone(b,h))?67.9*area:0; const colorAdd=Math.max(0,bodyNoColor-_zoneAbzug)*farbPct;
   const glas=(LS.glas==='3fach')?24*area:0;
   const schall=(LS.schall&&LS.schall!=='ohne')?52*area:0;
   const sicherGlas=(LS.sicherGlas==='esg')?33*area:(LS.sicherGlas==='vsg'?51*area:0);
@@ -2268,7 +2268,7 @@ function _lp_fenster(){
   let griff=_lp_F_GRIFF[LS.griff]||0; if(LS.griffLocked)griff+=_lp_griffLockAdd();
   const roll=_lp_rolladenDelta(b,h,LS.roll);
   let spro=0; if(LS.sproTyp&&LS.sproTyp!=='keine'&&_lp_F_SPRO[LS.sproTyp])spro=_lp_F_SPRO[LS.sproTyp][LS.sproDicke]||0;
-  const sicher=_lp_F_SICHER[LS.sicher]||0;
+  const sicher=(LS.sicher==='rc2')?_lp_sicherFenster(b,h):0;
   var _lp_isSingle=!isSingleFest&&String(LS.fluegel||'').charAt(0)!=='2'&&String(LS.fluegel||'').charAt(0)!=='3'&&LS.fluegel!=='stulp';
   var _lp_reinf=_lp_isSingle?_lp_reinfDelta(b,h):_lp_reinfMF(b,h);
   let unitMarkt=bodyNoColor+colorAdd+glas+schall+sicherGlas+dekor+griff+roll+spro+sicher+_lp_reinf;
@@ -2430,12 +2430,17 @@ function _lp_fensterNEU(){ var L=LS; var base=_pfBasis(L); if(base==null) return
   if(L.glas==='3fach') d+=24*area;
   if(L.schall&&L.schall!=='ohne') d+=51*area;
   if(L.glasdekor==='master-carre') d+=55*area; else if(L.glasdekor&&L.glasdekor!=='klar') d+=27*area;
-  if(L.sicher==='rc2') d+=87;
+  if(L.sicher==='rc2') d+=_lp_sicherFenster(L.bMm,L.hMm);   /* 30 Messpunkte 14.08.2026: Markt staffelt 32,43-52,41 nach Groesse; die alte Pauschale 87 lag 30-46 EUR ueber Marktniveau */
   if(L.griffLocked) d+=5;
   var roll=(L.roll&&L.roll!=='ohne')?(_lp_interp1(L.bMm,[700,1000,1400],[109,114,157])+0.04*Math.max(0,L.hMm-500)):0; if(L.roll==='motor') roll+=127; d+=roll;
   if(L.sproTyp==='aufgesetzt') d+=({'27':28,'45':38,'65':48})[L.sproDicke]||28; else if(L.sproTyp==='szr') d+=({'18':13,'26':18,'45':25})[L.sproDicke]||13;
   var fa=L.fa&&L.fa!=='weiss', fi=L.fi&&L.fi!=='weiss';   // Farbaufschlag nach Seite gestaffelt (an Marktniveau kalibriert 2026-07; Holzdekor == Normalfarbe)
-  if(fa&&fi) d+=base*0.196; else if(fi) d+=base*0.375; else if(fa) d+=base*0.125;   // beidseitig 19,6% · nur innen 37,5% · nur aussen 12,5%
+  var _einFl=String(L.fluegel||'').charAt(0)==='1';
+  /* Beschlagzone (breiter Fluegel, b>1.25*h): der Markt schlaegt die Farbe NICHT auf den Beschlagzuschlag.
+     Gemessen 14.08.2026 an 8 Punkten - der Abzug ist flaechenproportional, 67,9 EUR/m2, groesste Abweichung
+     0,05 EUR. Ohne diesen Abzug lagen farbige breite Fenster 6,5-9,9 EUR ueber Marktniveau. */
+  var _farbBasis=(_einFl&&typeof _fdkZone==='function'&&_fdkZone(L.bMm,L.hMm))?Math.max(0,base-67.9*area):base;
+  if(fa&&fi) d+=_farbBasis*0.196; else if(fi) d+=_farbBasis*0.375; else if(fa) d+=_farbBasis*0.125;   // beidseitig 19,6% · nur innen 37,5% · nur aussen 12,5%
   if(roll>0 && (fa||fi)) d+=18;   // Marktniveau färbt den Rollladenkasten in Fensterfarbe mit (~14€ gemessen 2026-07, konservativ +18)
   return Math.max(0, Math.ceil(base+d-_MARGE)); }
 
