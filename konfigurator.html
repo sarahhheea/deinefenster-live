@@ -3483,15 +3483,20 @@ function panelHTML(){
     };
     // Ein Bild je Antrieb, fuer die Gegenseite gespiegelt (class="mir") — dadurch ist das
     // Fenster in allen vier Kacheln identisch und nur das Bedienelement wechselt.
-    const rimg=(art,li)=>`<img src="img/rolladen-${art}-r.webp" ${li?'class="mir" ':''}alt="${art==='gurt'?'Rollladen mit Gurtwickler':'Rollladen mit Motor und Wandschalter'} ${li?'links':'rechts'}" loading="lazy" decoding="async">`;
+    // Beim Motor ist bewusst NICHTS neben dem Rollladen: aussen ist da real auch nichts zu
+    // sehen. Die beiden Motor-Kacheln zeigen deshalb dasselbe Bild, die Seite steht im Text.
+    // Gespiegelt wird nur beim Gurtwickler — dort wandert der Wickler sichtbar auf die andere
+    // Seite. Beim Motor gaebe es nichts zu spiegeln ausser dem Fenster selbst; das saehe nach
+    // Versehen aus. Die beiden Motor-Kacheln zeigen daher bewusst dasselbe Bild.
+    const rimg=(art,li)=>`<img src="img/rolladen-${art}-r.webp?v=2" ${(li&&art==='gurt')?'class="mir" ':''}alt="${art==='gurt'?'Rollladen mit Gurtwickler '+(li?'links':'rechts'):'Rollladen mit Motorantrieb'}" loading="lazy" decoding="async">`;
     return `<div class="card"><div class="grp-title">Rollladen</div><div class="opts roll5">`
       +rc('kein',null,ban,'Kein Rollladen','ohne')
-      +rc('gurt','links',rimg('gurt',1),'Gurtwickler links','von innen')
-      +rc('gurt','rechts',rimg('gurt',0),'Gurtwickler rechts','von innen')
-      +rc('motor','links',rimg('motor',1),'Motor links','von innen')
-      +rc('motor','rechts',rimg('motor',0),'Motor rechts','von innen')
+      +rc('gurt','links',rimg('gurt',1),'Gurtwickler links','Gurt links')
+      +rc('gurt','rechts',rimg('gurt',0),'Gurtwickler rechts','Gurt rechts')
+      +rc('motor','links',rimg('motor',1),'Motor links','Kabel links')
+      +rc('motor','rechts',rimg('motor',0),'Motor rechts','Kabel rechts')
       +`</div>
-      <div class="mhint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span>Gurtwickler heißt: Sie ziehen den Rollladen von Hand am Gurt hoch. Motor heißt: elektrisch per Wandschalter. Links und rechts sind von innen gesehen — so, wie Sie im Raum vor dem Fenster stehen.</span></div>
+      <div class="mhint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span>Gurtwickler: Sie ziehen den Rollladen von Hand am Gurt hoch — links oder rechts ist die Seite, an der der Gurt sitzt. Motor: elektrisch per Schalter — hier ist es die Seite, an der das Kabel herauskommt. Beides von innen gesehen, so wie Sie im Raum vor dem Fenster stehen.</span></div>
       <p class="ai-note">Die Rollladen-Abbildungen sind KI-generierte Symbolbilder.</p></div>${pzpick}`;
   }
   if(k==='sprossen'){
