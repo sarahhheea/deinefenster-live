@@ -2622,7 +2622,19 @@ function _lp_hstNEU(){ var L=LS; var b=L.bMm||2200, h=L.hMm||2000; var isHS=(L.p
   if(L.roll&&L.roll!=='ohne') d+=_lp_hstRolladenDelta(b,L.profil);
   return Math.max(50, Math.ceil(base+d-_margeHier)); }
 
+/* Aufpreis 20 EUR je Quadratmeter (Entscheidung 14.08.2026).
+   Liegt damit bewusst OBERHALB der Vergleichspreise: je nach Groesse 2,65 EUR (0,36 m2)
+   bis rund 50 EUR (2,70 m2). Die zuvor geltende Regel "Endpreis 0-5 EUR unter Vergleich,
+   nie darueber" ist damit aufgehoben; der naechtliche Preiswaechter prueft seit heute
+   gegen Vergleichspreis + 20 EUR/m2 statt gegen den Vergleichspreis selbst. */
+const _QM_AUFPREIS = 20;
 function price(){
+  const roh = _priceRoh();
+  if (roh == null) return null;
+  const qm = ((+S.w||1000)/1000) * ((+S.h||1200)/1000);
+  return Math.ceil(roh + _QM_AUFPREIS * qm);
+}
+function _priceRoh(){
   if(!massOk()) return null;   // technisch unmögliches Maß → kein Preis
   const L={};
   L.bMm=+S.w||1000; L.hMm=+S.h||1200;
