@@ -633,144 +633,152 @@
 
 <!-- Hero: Foto-Vollhintergrund, keine Buttons -->
 <!-- ===== SUB-HERO ===== -->
-<header class="subhero">
-  <div class="subhero-bg">
-    <img src="/img/ueber-uns-hof-einfahrt.jpg" alt="Einfahrt zum Hofverkauf von Türen und Fensterhandel Christ an der Fohrder Landstraße in Brandenburg an der Havel" fetchpriority="high">
-  </div>
+<style>
+/* Kontaktseite: schlicht. Kein Foto-Hero, kein Laufband, keine Zierschrift —
+   die Kontaktdaten stehen sofort im Bild, das Formular direkt darunter. */
+.kt-head{background:var(--bg);border-bottom:1px solid var(--border);
+  padding:calc(var(--nav-h,106px) + var(--banner-h,0px) + 34px) 0 clamp(26px,3vw,40px)}
+.kt-head h1{font-family:var(--font-display);font-weight:800;letter-spacing:-.02em;
+  font-size:clamp(1.75rem,1.3rem + 1.9vw,2.6rem);line-height:1.12;color:var(--text);margin:0}
+.kt-lead{color:var(--soft);font-size:clamp(1rem,.97rem + .2vw,1.1rem);line-height:1.6;
+  max-width:68ch;margin:14px 0 0}
+.kt-wege{list-style:none;margin:clamp(22px,2.6vw,32px) 0 0;padding:0;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.kt-wege a{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--surface);
+  border:1px solid var(--border);border-radius:12px;text-decoration:none;color:var(--text);
+  transition:border-color .2s,box-shadow .2s}
+.kt-wege a:hover{border-color:var(--acc);box-shadow:0 8px 22px -14px rgba(28,58,108,.45)}
+.kt-wege .material-symbols-outlined{font-size:22px;color:var(--acc-text);flex:none}
+.kt-wege b{display:block;font-family:var(--font-display);font-weight:700;font-size:.95rem;
+  letter-spacing:-.01em;line-height:1.25}
+.kt-wege small{display:block;color:var(--soft);font-size:.78rem;margin-top:2px;line-height:1.3}
+@media(max-width:960px){.kt-wege{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.kt-wege{grid-template-columns:1fr;gap:9px;margin-top:18px}
+  .kt-head{padding-top:calc(var(--nav-h,106px) + var(--banner-h,0px) + 10px);padding-bottom:20px}
+  .kt-wege a{padding:11px 13px}
+  .kt-lead{margin-top:10px}
+  .kt-form-sec{padding-top:22px}}
+
+/* Formular */
+.kt-form-sec{padding:clamp(30px,3.4vw,52px) 0}
+.kt-grid{display:grid;grid-template-columns:1fr 1.05fr;gap:clamp(24px,3vw,48px);align-items:start}
+@media(max-width:900px){.kt-grid{grid-template-columns:1fr}}
+.kt-form-sec h2{font-family:var(--font-display);font-weight:800;letter-spacing:-.02em;
+  font-size:clamp(1.35rem,1.2rem + .8vw,1.8rem);color:var(--text);margin:0 0 10px}
+.kt-side p{color:var(--soft);font-size:.96rem;line-height:1.6;margin:0 0 16px;max-width:46ch}
+.kt-fakten{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.kt-fakten li{display:flex;gap:10px;align-items:flex-start;color:var(--text);font-size:.93rem;line-height:1.5}
+.kt-fakten .material-symbols-outlined{font-size:19px;color:var(--acc-text);flex:none;margin-top:1px}
+.kt-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;
+  padding:clamp(20px,2.4vw,32px)}
+.kt-zeile{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:560px){.kt-zeile{grid-template-columns:1fr}}
+.kt-feld{margin-bottom:14px}
+.kt-feld label{display:block;font-size:.82rem;font-weight:600;color:var(--text);margin-bottom:6px}
+.kt-feld .opt{color:var(--soft);font-weight:400}
+.kt-feld input,.kt-feld textarea{width:100%;padding:12px 14px;font-family:var(--font-body);
+  font-size:1rem;color:var(--text);background:#fff;border:1px solid var(--border);
+  border-radius:10px;transition:border-color .15s,box-shadow .15s}
+.kt-feld input:focus,.kt-feld textarea:focus{outline:none;border-color:var(--acc-text);
+  box-shadow:0 0 0 3px rgba(34,94,170,.14)}
+.kt-feld input[aria-invalid="true"],.kt-feld textarea[aria-invalid="true"]{border-color:#c0392b;
+  box-shadow:0 0 0 3px rgba(192,57,43,.12)}
+.kt-feld .hint{display:none;color:#b3261e;font-size:.82rem;margin-top:5px}
+.kt-feld .hint.an{display:block}
+.kt-melde{margin-bottom:14px;padding:12px 14px;border-radius:10px;font-size:.92rem;line-height:1.5}
+.kt-melde.fehler{background:#fdf2f2;border:1px solid #f0d2d2;color:#b3261e}
+.kt-melde.gut{background:#f0faf4;border:1px solid #c9ecd8;color:#166534}
+.kt-hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.kt-senden{width:100%;justify-content:center;border:none;cursor:pointer;font-size:1rem;padding:14px 20px}
+.kt-senden[disabled]{opacity:.6;cursor:progress}
+.kt-dse{color:var(--soft);font-size:.84rem;line-height:1.5;margin:12px 0 0}
+.kt-dse a{color:var(--acc-text)}
+.kt-trust{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:0 0 16px;
+  color:var(--soft);font-size:.86rem}
+.kt-trust .st{color:#f0a202;letter-spacing:1px}
+.kt-noscript{margin-bottom:14px;padding:12px 14px;border-radius:10px;background:#fff8e6;
+  border:1px solid #f0dfae;color:#7a5b00;font-size:.92rem;line-height:1.5}
+</style>
+
+<header class="kt-head">
   <div class="wrap">
-    <span class="eyebrow">Türen und Fensterhandel Christ · Brandenburg</span>
-    <h1>Jetzt Angebot <span class="accent">anfragen.</span></h1>
-    <p class="lead">Unverbindlich &amp; kostenlos — füllen Sie einfach das Formular aus. Sofort automatische Bestätigung, persönliche Antwort meist binnen 24 Stunden.</p>
-    <div class="subhero-cta">
-      <a class="btn-primary" href="tel:+4933812148373">☎ 03381 / 2148373</a>
-      <a class="ghost-d" href="#kontakt-form">Per Formular anfragen</a>
-    </div>
-  </div>
-  <div class="subhero-badge">
-    <span><span class="dot"></span><b style="display:inline;color:#4ade80;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em">Hofverkauf</b></span>
-    <b>Freitag 10–17 Uhr</b>
-    <small>nach Absprache bis 20 Uhr · Fohrder Landstraße 13</small>
+    <h1>Angebot anfragen &mdash; kostenlos und unverbindlich.</h1>
+    <p class="kt-lead">F&uuml;llen Sie das Formular aus, wir melden uns in der Regel innerhalb von 24&nbsp;Stunden mit Ihrem pers&ouml;nlichen Angebot. Lieber telefonisch? Auch gern.</p>
+    <ul class="kt-wege">
+      <li><a href="tel:+4933812148373">
+        <span class="material-symbols-outlined" aria-hidden="true">call</span>
+        <span><b>03381 2148373</b><small>Mo&ndash;Fr 10&ndash;18 Uhr</small></span></a></li>
+      <li><a href="https://wa.me/491717263776" target="_blank" rel="noopener">
+        <span class="material-symbols-outlined" aria-hidden="true">chat</span>
+        <span><b>0171 7263776</b><small>WhatsApp &mdash; nur Nachrichten</small></span></a></li>
+      <li><a href="mailto:info@baustoffchrist.de">
+        <span class="material-symbols-outlined" aria-hidden="true">mail</span>
+        <span><b>info@baustoffchrist.de</b><small>Antwort binnen 24&nbsp;Stunden</small></span></a></li>
+      <li><a href="/konfigurator.html">
+        <span class="material-symbols-outlined" aria-hidden="true">tune</span>
+        <span><b>Preis sofort sehen</b><small>Im Konfigurator selbst rechnen</small></span></a></li>
+    </ul>
   </div>
 </header>
 
-<!-- ===== TICKER ===== -->
-<section class="trustbar"><div class="track">
-  <span class="ti">Telefon 03381 / 2148373</span><span class="sep">✦</span>
-  <span class="ti">WhatsApp 0171 7263776</span><span class="sep">✦</span>
-  <span class="ti">info@baustoffchrist.de</span><span class="sep">✦</span>
-  <span class="ti">Hofverkauf Freitag 10–17 Uhr</span><span class="sep">✦</span>
-  <span class="ti">Antwort meist binnen 24 Stunden</span><span class="sep">✦</span>
-  <span class="ti" aria-hidden="true">Telefon 03381 / 2148373</span><span class="sep" aria-hidden="true">✦</span>
-  <span class="ti" aria-hidden="true">WhatsApp 0171 7263776</span><span class="sep" aria-hidden="true">✦</span>
-  <span class="ti" aria-hidden="true">info@baustoffchrist.de</span><span class="sep" aria-hidden="true">✦</span>
-  <span class="ti" aria-hidden="true">Hofverkauf Freitag 10–17 Uhr</span><span class="sep" aria-hidden="true">✦</span>
-  <span class="ti" aria-hidden="true">Antwort meist binnen 24 Stunden</span><span class="sep" aria-hidden="true">✦</span>
-</div></section>
-
-<!-- ===== 01 FORMULAR + SCHNELLKONTAKT ===== -->
-<section style="padding-top:var(--s6)"><div class="wrap">
-  <div class="about2">
-    <!-- Weitere Kontaktwege (steht nach dem Formular, siehe order:-1) -->
-    <div>
-      <p class="lead">Wählen Sie den Weg, der Ihnen am liebsten ist. Für Fragen zu Lagerware schreiben Sie am besten per WhatsApp — dort geht es am schnellsten.</p>
-      <div class="svc">
-        <a class="svc-item" href="tel:+4933812148373">
-          <span class="svc-ic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.13.96.36 1.9.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0122 16.92z"/></svg></span>
-          <div><h3>Telefon · Festnetz</h3><p>03381 / 2148373 — Mo–Fr 10–18 Uhr. Neue Drutex-Fenster, Angebote und allgemeine Fragen.</p></div>
-        </a>
-        <a class="svc-item" href="https://wa.me/491717263776" target="_blank" rel="noopener">
-          <span class="svc-ic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></span>
-          <div><h3>WhatsApp · am schnellsten</h3><p>0171 7263776 — bitte nur Nachrichten, keine Anrufe. Ideal für Fragen zu aktueller Lagerware.</p></div>
-        </a>
-        <a class="svc-item" href="mailto:info@baustoffchrist.de">
-          <span class="svc-ic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></span>
-          <div><h3>E-Mail · rund um die Uhr</h3><p>info@baustoffchrist.de — Antwort in der Regel innerhalb von 24 Stunden.</p></div>
-        </a>
-        <a class="svc-item" href="https://www.google.com/maps/search/Fohrder+Landstraße+13+14772+Brandenburg+an+der+Havel" target="_blank" rel="noopener">
-          <span class="svc-ic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
-          <div><h3>Adresse · Hofverkauf</h3><p>Fohrder Landstraße 13, 14772 Brandenburg an der Havel. Freitag 10–17 Uhr, nur Selbstabholung.</p></div>
-        </a>
-      </div>
-      <div class="infocards" style="grid-template-columns:repeat(2,1fr);margin-top:var(--s5)">
-        <div class="infocard"><div class="k">Hofverkauf</div><div class="v">Freitag 10–17 Uhr</div><div class="s">Nach Absprache bis 20 Uhr</div></div>
-        
-      </div>
+<section class="kt-form-sec"><div class="wrap">
+  <div class="kt-grid">
+    <div class="kt-side">
+      <h2>Ihr Angebot &mdash; in einer Nachricht.</h2>
+      <p>Name, E-Mail und eine kurze Beschreibung gen&uuml;gen. Ma&szlig;e, St&uuml;ckzahl und W&uuml;nsche schreiben Sie einfach mit in die Nachricht &mdash; oder wir kl&auml;ren das am Telefon.</p>
+      <ul class="kt-fakten">
+        <li><span class="material-symbols-outlined" aria-hidden="true">check_circle</span><span>Kostenlos und unverbindlich, kein Abo, keine versteckten Kosten.</span></li>
+        <li><span class="material-symbols-outlined" aria-hidden="true">check_circle</span><span>Antwort in der Regel innerhalb von 24&nbsp;Stunden, pers&ouml;nlich.</span></li>
+        <li><span class="material-symbols-outlined" aria-hidden="true">tune</span><span>Ma&szlig;e schon bekannt? Im <a href="/konfigurator.html">Konfigurator</a> sehen Sie Preis und Zeichnung sofort.</span></li>
+        <li><span class="material-symbols-outlined" aria-hidden="true">local_shipping</span><span>Lieferung deutschlandweit, Abholung in Brandenburg an der Havel.</span></li>
+      </ul>
     </div>
 
-    <!-- Formular zuerst (order:-1) — Kunde soll sofort das Formular sehen -->
-    <div class="card" style="overflow:visible;order:-1">
-      <div class="body">
-        <span class="eyebrow" style="margin-bottom:var(--s4)">Ihr Angebot anfordern</span>
-        <h3 style="font-family:var(--font-display);font-weight:800;font-size:1.4rem;color:var(--text);margin-bottom:var(--s2)">Direkt anfragen</h3>
-        <p style="color:var(--soft);font-size:.92rem;line-height:1.55;margin-bottom:var(--s5)">Automatische Bestätigung sofort, persönliche Antwort innerhalb 24 Stunden.</p>
+    <div class="kt-card">
+      <p class="kt-trust"><span class="st" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span> 4,7 aus 93&nbsp;Google-Bewertungen &middot; Familienbetrieb seit 1996</p>
 
-        <p class="kf-konf">
-          <span>Maße schon bekannt? Im Konfigurator sehen Sie Preis und Zeichnung sofort.</span>
-          <a href="/konfigurator.html">Zum Konfigurator &rarr;</a>
-        </p>
+      <noscript><p class="kt-noscript">Das Formular ben&ouml;tigt JavaScript. Sie erreichen uns auch direkt unter
+        <a href="tel:+4933812148373">03381 2148373</a> oder
+        <a href="mailto:info@baustoffchrist.de">info@baustoffchrist.de</a>.</p></noscript>
 
-        <form id="kontakt-form" novalidate>
-          <div class="kf-row two">
-            <div>
-              <label class="kf-lbl" for="kf-name">Name *</label>
-              <input class="kf-in" id="kf-name" type="text" required autocomplete="name" placeholder="Max Mustermann">
-            </div>
-            <div>
-              <label class="kf-lbl" for="kf-email">E-Mail *</label>
-              <input class="kf-in" id="kf-email" type="email" required autocomplete="email" inputmode="email" placeholder="ihre@email.de">
-            </div>
+      <form id="kontakt-form" novalidate>
+        <div class="kt-zeile">
+          <div class="kt-feld">
+            <label for="kf-name">Name</label>
+            <input id="kf-name" name="name" type="text" required autocomplete="name" aria-describedby="kf-name-hint">
+            <span class="hint" id="kf-name-hint">Bitte tragen Sie Ihren Namen ein.</span>
           </div>
-          <div class="kf-row">
-            <div>
-              <label class="kf-lbl" for="kf-tel">Telefon (optional)</label>
-              <input class="kf-in" id="kf-tel" type="tel" autocomplete="tel" inputmode="tel" placeholder="03381 / ...">
-            </div>
+          <div class="kt-feld">
+            <label for="kf-email">E-Mail</label>
+            <input id="kf-email" name="email" type="email" required autocomplete="email" inputmode="email" aria-describedby="kf-email-hint">
+            <span class="hint" id="kf-email-hint">Bitte eine g&uuml;ltige E-Mail-Adresse eintragen.</span>
           </div>
-          <!-- Masse und Anzahl als echte Felder. Vorher standen sie als Zeilen in einer
-               vorbefuellten Textvorlage, von der im 5-zeiligen Feld nur die Haelfte sichtbar
-               war — die Anfragen kamen regelmaessig ohne Masse und ohne Stueckzahl an. -->
-          <div class="kf-row three">
-            <div>
-              <label class="kf-lbl" for="kf-breite">Breite (mm)</label>
-              <input class="kf-in" id="kf-breite" type="text" inputmode="numeric" autocomplete="off" placeholder="z. B. 1100">
-            </div>
-            <div>
-              <label class="kf-lbl" for="kf-hoehe">Höhe (mm)</label>
-              <input class="kf-in" id="kf-hoehe" type="text" inputmode="numeric" autocomplete="off" placeholder="z. B. 1300">
-            </div>
-            <div>
-              <label class="kf-lbl" for="kf-anzahl">Anzahl</label>
-              <input class="kf-in" id="kf-anzahl" type="text" inputmode="numeric" autocomplete="off" placeholder="z. B. 3">
-            </div>
-          </div>
-          <div style="margin-bottom:var(--s5)">
-            <label class="kf-lbl" for="kf-msg">Ihre Nachricht *</label>
-            <textarea class="kf-in" id="kf-msg" required rows="4" style="resize:vertical" placeholder="Ich interessiere mich für ..."></textarea>
-            <div class="kf-hint">Richtmaße genügen. Je genauer die Angaben, desto schneller kommt Ihr Angebot.</div>
-          </div>
+        </div>
+        <div class="kt-feld">
+          <label for="kf-tel">Telefon <span class="opt">(optional)</span></label>
+          <input id="kf-tel" name="telefon" type="tel" autocomplete="tel" inputmode="tel">
+        </div>
+        <div class="kt-feld">
+          <label for="kf-msg">Was brauchen Sie?</label>
+          <textarea id="kf-msg" name="nachricht" rows="6" required aria-describedby="kf-msg-hint"></textarea>
+          <span class="hint" id="kf-msg-hint">Bitte beschreiben Sie kurz, worum es geht.</span>
+        </div>
 
-          <div id="kf-err" class="hidden" style="display:none;margin-bottom:var(--s4);padding:12px 14px;border-radius:10px;font-size:.9rem;font-weight:600;background:#fff5f5;border:1px solid #f3d0d0;color:#b91c1c;"></div>
-          <div id="kf-ok" class="hidden" style="display:none;margin-bottom:var(--s4);padding:14px 16px;border-radius:10px;font-size:.9rem;background:#edfaf3;border:1px solid #c3eed8;">
-            <div style="font-weight:700;color:#15803d;margin-bottom:4px;">✅ Nachricht gesendet!</div>
-            <div style="color:#166534;">Wir haben Ihre Anfrage erhalten und Sie sofort per E-Mail bestätigt. Wir melden uns bei Ihnen.</div>
-          </div>
+        <div class="kt-hp" aria-hidden="true">
+          <label for="kf-web">Bitte nicht ausf&uuml;llen</label>
+          <input id="kf-web" name="website" type="text" tabindex="-1" autocomplete="off">
+        </div>
 
-          <!-- DSGVO-Einwilligung (Art. 6 Abs. 1 lit. a DSGVO) -->
-          <label style="display:flex;align-items:flex-start;gap:10px;margin-bottom:var(--s5);cursor:pointer;color:var(--soft);font-size:.86rem;line-height:1.5;">
-            <input id="kf-dsgvo" type="checkbox" required style="margin-top:3px;width:16px;height:16px;flex-shrink:0;cursor:pointer;accent-color:#225eaa;">
-            <span>
-              Ich habe die <a href="datenschutz.html" target="_blank" style="color:var(--acc-text);text-decoration:underline;">Datenschutzerklärung</a>
-              zur Kenntnis genommen und willige ein, dass meine Angaben zur Bearbeitung meiner Anfrage
-              elektronisch erhoben und gespeichert werden. <span style="color:#b91c1c;">*</span>
-            </span>
-          </label>
+        <div id="kf-melde" role="status" aria-live="polite"></div>
 
-          <button type="submit" id="kf-btn" class="btn-primary" style="width:100%;justify-content:center;border:none;cursor:pointer;">
-            <span id="kf-btn-txt">Nachricht senden</span>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
-          </button>
-        </form>
-      </div>
+        <button type="submit" id="kf-btn" class="btn-primary kt-senden">
+          <span id="kf-btn-txt">Angebot anfragen</span>
+        </button>
+
+        <p class="kt-dse">Ihre Angaben verwenden wir ausschlie&szlig;lich, um Ihre Anfrage zu beantworten
+          (Art.&nbsp;6 Abs.&nbsp;1 lit.&nbsp;b DSGVO). Mehr dazu in der
+          <a href="datenschutz.html">Datenschutzerkl&auml;rung</a>.</p>
+      </form>
     </div>
   </div>
 </div></section>
@@ -1051,155 +1059,123 @@
 <!-- KONTAKTFORMULAR — Prefill + Versand via Cloudflare Worker (Resend) -->
 <script>
 (function(){
+  var form = document.getElementById('kontakt-form');
+  if (!form) return;
 
-  // Prefill Nachrichtenfeld aus ?produkt=... — kommt von CTAs auf anderen Seiten
-  const PRODUKT_LABEL = {
-    kunststofffenster: 'Kunststofffenster',
-    balkontuer: 'Balkontür',
-    haustuer: 'Haustür',
-    schiebetuer: 'Schiebetür (HST)',
-    rollladen: 'Rollladen',
-    daemmung: 'Dämmung',
-    garagentor: 'Garagentor',
-    fenster: 'Fenster',
-    lagerware: 'Lagerware aus dem Shop'
-  };
+  // Nachricht aus ?produkt=... vorbefuellen — kommt von den Angebots-Knoepfen anderer Seiten
+  var LABEL = {kunststofffenster:'Kunststofffenster', balkontuer:'Balkont\u00fcr', haustuer:'Haust\u00fcr',
+    schiebetuer:'Schiebet\u00fcr (HST)', rollladen:'Rollladen', daemmung:'D\u00e4mmung',
+    garagentor:'Garagentor', fenster:'Fenster'};
   try {
-    const params = new URLSearchParams(location.search);
-    const slug = params.get('produkt');
-    const msgEl = document.getElementById('kf-msg');
+    var slug = new URLSearchParams(location.search).get('produkt');
+    var msgEl = document.getElementById('kf-msg');
     if (slug && msgEl && !msgEl.value.trim()) {
-      const label = PRODUKT_LABEL[slug] || slug;
-      // Kurze Vorlage: Masse und Anzahl haben inzwischen eigene Felder, sie hier
-      // nochmal als Textzeilen zu fuehren hat das Feld ueberlaufen lassen.
-      msgEl.value = 'Guten Tag,\n\nich interessiere mich für ein Angebot für ' + label + '.\n\nVielen Dank!';
-      msgEl.setAttribute('data-prefilled', '1');
+      msgEl.value = 'Guten Tag,\n\nich interessiere mich f\u00fcr ein Angebot f\u00fcr '
+        + (LABEL[slug] || slug) + '.\n\nMa\u00dfe (B \u00d7 H):\nAnzahl:\nAusf\u00fchrung / Wunsch:\n\nVielen Dank!';
     }
     if (slug || location.hash === '#kontakt-form') {
-      try { history.replaceState(null, '', location.pathname + (slug ? '?produkt='+encodeURIComponent(slug) : '')); } catch(e){}
-      const form = document.getElementById('kontakt-form');
-      const scrollTarget = form ? (form.closest('section') || form) : null;
-      if (scrollTarget) {
-        const scrollNow = () => {
-          const y = scrollTarget.getBoundingClientRect().top + window.scrollY - 100;
-          window.scrollTo(0, y);
-        };
-        let attempts = 0;
-        scrollNow();
-        const iv = setInterval(() => {
-          attempts++;
-          scrollNow();
-          const r = scrollTarget.getBoundingClientRect();
-          if (r.top > 70 && r.top < 140) { clearInterval(iv); }
-          if (attempts >= 20) { clearInterval(iv); }
-        }, 200);
-        if (slug) {
-          setTimeout(() => {
-            const nameEl = document.getElementById('kf-name');
-            if (nameEl) nameEl.focus({preventScroll:true});
-          }, 900);
-        }
-      }
+      form.scrollIntoView({block:'center'});
+      var n = document.getElementById('kf-name'); if (n) setTimeout(function(){ n.focus({preventScroll:true}); }, 300);
     }
   } catch(e){}
 
-  function showBox(el){ if(!el) return; el.classList.remove('hidden'); el.style.display='block'; }
-  function hideBox(el){ if(!el) return; el.classList.add('hidden'); el.style.display='none'; }
+  var melde = document.getElementById('kf-melde');
+  var btn   = document.getElementById('kf-btn');
+  var btnTx = document.getElementById('kf-btn-txt');
+  var geladen = Date.now();
 
-  document.getElementById('kontakt-form').addEventListener('submit', async function(e){
-    e.preventDefault();
-    const name  = document.getElementById('kf-name').value.trim();
-    const email = document.getElementById('kf-email').value.trim();
-    const tel   = document.getElementById('kf-tel').value.trim();
-    const msg   = document.getElementById('kf-msg').value.trim();
-    const err   = document.getElementById('kf-err');
-    const ok    = document.getElementById('kf-ok');
-    const btn   = document.getElementById('kf-btn');
-    const btnTxt= document.getElementById('kf-btn-txt');
-    const dsgvo = document.getElementById('kf-dsgvo').checked;
-    const breite = document.getElementById('kf-breite').value.trim();
-    const hoehe  = document.getElementById('kf-hoehe').value.trim();
-    const anzahl = document.getElementById('kf-anzahl').value.trim();
-    hideBox(err); hideBox(ok);
+  function zeigen(art, text){
+    melde.className = 'kt-melde ' + art;
+    melde.textContent = text;
+  }
+  function leeren(){ melde.className = ''; melde.textContent = ''; }
 
-    // Nur die tatsaechlich leeren Felder benennen, markieren und das erste
-    // fokussieren. Vorher nannte die Meldung immer alle drei Felder — auch die,
-    // die sichtbar gefuellt waren — und markierte keines davon.
-    ['kf-name','kf-email','kf-msg'].forEach(function(id){
-      document.getElementById(id).classList.remove('bad');
+  // Prueft ein Feld und blendet den Hinweis darunter ein
+  function pruefe(el){
+    var ok = el.value.trim().length > 0;
+    if (ok && el.type === 'email') ok = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(el.value.trim());
+    var hint = el.getAttribute('aria-describedby');
+    hint = hint ? document.getElementById(hint) : null;
+    el.setAttribute('aria-invalid', ok ? 'false' : 'true');
+    if (hint) hint.classList.toggle('an', !ok);
+    return ok;
+  }
+  ['kf-name','kf-email','kf-msg'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('blur', function(){ if (el.value.trim()) pruefe(el); });
+    el.addEventListener('input', function(){
+      if (el.getAttribute('aria-invalid') === 'true') pruefe(el);
     });
-    const fehlt = [];
-    if (!name)  fehlt.push(['kf-name','Name']);
-    if (!email) fehlt.push(['kf-email','E-Mail']);
-    if (!msg)   fehlt.push(['kf-msg','Nachricht']);
-    if (fehlt.length) {
-      fehlt.forEach(function(f){ document.getElementById(f[0]).classList.add('bad'); });
-      const namen = fehlt.map(function(f){ return f[1]; });
-      const liste = namen.length > 1
-        ? namen.slice(0,-1).join(', ') + ' und ' + namen[namen.length-1]
-        : namen[0];
-      err.textContent = 'Bitte noch ausfüllen: ' + liste + '.';
-      showBox(err);
-      const first = document.getElementById(fehlt[0][0]);
-      first.focus({preventScroll:true});
-      first.scrollIntoView({block:'center',behavior:'smooth'});
+  });
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    leeren();
+
+    // Spamschutz: unsichtbares Feld darf nicht ausgefuellt sein, und ein Mensch
+    // braucht laenger als drei Sekunden zum Ausfuellen
+    if (document.getElementById('kf-web').value !== '' || Date.now() - geladen < 3000) {
+      zeigen('gut', 'Vielen Dank, Ihre Nachricht ist eingegangen.');
       return;
     }
-    if (!dsgvo) {
-      err.textContent = 'Bitte stimmen Sie der Datenschutzerklärung zu.';
-      showBox(err);
-      document.getElementById('kf-dsgvo').focus({preventScroll:true});
+
+    var name  = document.getElementById('kf-name');
+    var email = document.getElementById('kf-email');
+    var tel   = document.getElementById('kf-tel');
+    var msg   = document.getElementById('kf-msg');
+
+    var felder = [name, email, msg];
+    var erstesFehlend = null;
+    felder.forEach(function(el){ if (!pruefe(el) && !erstesFehlend) erstesFehlend = el; });
+    if (erstesFehlend) {
+      zeigen('fehler', 'Bitte f\u00fcllen Sie die markierten Felder aus.');
+      erstesFehlend.focus();
       return;
     }
-    btn.disabled = true; btnTxt.textContent = 'Wird gesendet …';
-    const _d = new Date();
-    const offerId = 'KT-' + (_d.getFullYear().toString().slice(2) + String(_d.getMonth()+1).padStart(2,'0') + String(_d.getDate()).padStart(2,'0')) + '-' + Math.random().toString(36).slice(2,6).toUpperCase();
-    const datum   = new Date().toLocaleDateString('de-DE');
-    const masse = (breite || hoehe) ? ((breite || '?') + ' × ' + (hoehe || '?') + ' mm') : '';
-    const internalText = [
-      'Kontaktanfrage über DeineFenster.de',
-      '══════════════════════════════════',
-      '', 'Name:    ' + name,
-      'E-Mail:  ' + email,
-      'Telefon: ' + (tel || '–'),
-      '', 'Maße (B × H): ' + (masse || '– nicht angegeben –'),
-      'Anzahl:       ' + (anzahl || '– nicht angegeben –'),
-      '', 'Nachricht:', msg,
-      '', 'Datum: ' + datum,
+
+    btn.disabled = true; btnTx.textContent = 'Wird gesendet \u2026';
+
+    var d = new Date();
+    var nr = 'AN-' + (String(d.getFullYear()).slice(2) + String(d.getMonth()+1).padStart(2,'0')
+      + String(d.getDate()).padStart(2,'0')) + '-' + Math.random().toString(36).slice(2,6).toUpperCase();
+    var text = [
+      'Angebotsanfrage \u00fcber DeineFenster.de', '',
+      'Name:    ' + name.value.trim(),
+      'E-Mail:  ' + email.value.trim(),
+      'Telefon: ' + (tel.value.trim() || '\u2013'), '',
+      'Nachricht:', msg.value.trim(), '',
+      'Datum: ' + d.toLocaleDateString('de-DE')
     ].join('\n');
-    // Detail-Block für die Kunden-Bestätigung: zeigt seine Nachricht zurück
-    const esc = (s) => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    const zeile = (k, v, letzte) =>
-      '<tr><td style="padding:9px 0;' + (letzte ? '' : 'border-bottom:1px solid #f0eadd;') + 'font-size:13px;color:#8a8273;width:32%;vertical-align:top;">' + k + '</td>' +
-      '<td style="padding:9px 0;' + (letzte ? '' : 'border-bottom:1px solid #f0eadd;') + 'font-size:13px;color:#1a2336;line-height:1.6;white-space:pre-wrap;">' + esc(v) + '</td></tr>';
-    const detailsHtml =
-      '<table width="100%" cellpadding="0" cellspacing="0" style="margin-top:6px;">' +
-        zeile('Telefon', tel || '–') +
-        (masse  ? zeile('Maße (B × H)', masse) : '') +
-        (anzahl ? zeile('Anzahl', anzahl) : '') +
-        zeile('Ihre Nachricht', msg, true) +
-      '</table>';
-    try {
-      // Cloudflare Worker (Resend) — schickt interne Mail an info@baustoffchrist
-      // + Bestätigungsmail an den Kunden
-      const res = await fetch('https://deinefenster-email.sarahchrist.workers.dev', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          customer_email: email,
-          subject: '[DeineFenster.de] Kontaktanfrage von ' + name,
-          text: internalText,
-          confirmation: { name: name, offerId: offerId, detailsHtml: detailsHtml },
-        }),
-      });
+    var esc = function(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+    var detailsHtml =
+      '<table width="100%" cellpadding="0" cellspacing="0" style="margin-top:6px;">'
+      + '<tr><td style="padding:9px 0;border-bottom:1px solid #f0eadd;font-size:13px;color:#8a8273;width:32%;vertical-align:top;">Telefon</td>'
+      + '<td style="padding:9px 0;border-bottom:1px solid #f0eadd;font-size:13px;color:#1a2336;">' + esc(tel.value.trim() || '\u2013') + '</td></tr>'
+      + '<tr><td style="padding:9px 0;font-size:13px;color:#8a8273;vertical-align:top;">Ihre Nachricht</td>'
+      + '<td style="padding:9px 0;font-size:13px;color:#1a2336;line-height:1.6;white-space:pre-wrap;">' + esc(msg.value.trim()) + '</td></tr></table>';
+
+    fetch('https://deinefenster-email.sarahchrist.workers.dev', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        customer_email: email.value.trim(),
+        subject: '[DeineFenster.de] Angebotsanfrage von ' + name.value.trim(),
+        text: text,
+        confirmation: { name: name.value.trim(), offerId: nr, detailsHtml: detailsHtml }
+      })
+    }).then(function(res){
       if (!res.ok) throw new Error('worker-' + res.status);
-      showBox(ok);
-      document.getElementById('kontakt-form').reset();
-    } catch(ex) {
-      err.textContent = 'Fehler beim Senden. Bitte versuchen Sie es erneut oder rufen Sie uns an: 03381 / 2148373';
-      showBox(err);
-    }
-    btn.disabled = false; btnTxt.textContent = 'Nachricht senden';
+      zeigen('gut', 'Vielen Dank \u2014 Ihre Nachricht ist angekommen. Sie erhalten sofort eine Best\u00e4tigung per E-Mail, wir melden uns innerhalb von 24 Stunden.');
+      form.reset();
+      ['kf-name','kf-email','kf-msg'].forEach(function(id){
+        var el=document.getElementById(id); if(el) el.setAttribute('aria-invalid','false');
+      });
+      document.querySelectorAll('.kt-feld .hint').forEach(function(h){ h.classList.remove('an'); });
+    }).catch(function(){
+      zeigen('fehler', 'Das Senden hat nicht geklappt. Bitte versuchen Sie es noch einmal oder rufen Sie uns an: 03381 2148373.');
+    }).then(function(){
+      btn.disabled = false; btnTx.textContent = 'Angebot anfragen';
+    });
   });
 })();
 </script>
