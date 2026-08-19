@@ -645,6 +645,77 @@ body:not(.wiz-active) .topbar{display:none}
    Wichtig für die Lesbarkeit — die Maßzahlen skalieren mit der Zeichnung, bei 225px waren sie nur ~10px groß.
    (Achtung: es gibt weiter oben mehrere ältere `.stage svg`-Regeln; diese hier ist die zuletzt greifende.) */
 .stage svg{max-width:100%;max-height:400px}
+/* --- Preisleiste am Handy: zweizeilig statt zerquetscht -----------------
+   Mit "Produkte" und "In den Warenkorb legen" (statt vorher "Zurueck"/"Weiter")
+   blieb fuer den Preis eine Spalte von ~40 px. Das Ergebnis: "83,00", darunter
+   das Euro-Zeichen allein, darunter "pro Fe . inkl. MwSt . unverbindlich"
+   senkrecht hinter den Knoepfen. Jetzt: Preis in einer eigenen Zeile darueber. */
+@media(max-width:640px){
+  .footer-inner{display:grid;grid-template-columns:auto 1fr;
+    grid-template-areas:"preis preis" "zur korb";gap:9px 10px;align-items:center}
+  .price{grid-area:preis;margin-right:0;display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+  .price .amt{font-size:23px;line-height:1}
+  .price .sub{margin-top:0;font-size:11.5px;white-space:normal;line-height:1.25}
+  #btnBack{grid-area:zur;padding:0 16px}
+  #btnNext{grid-area:korb;width:100%}
+}
+/* --- Skizze am Handy: klebt jetzt wirklich ------------------------------
+   Als Grid-Element klebte sie nur innerhalb ihrer eigenen Zeile — und die ist
+   im Einspalten-Layout genau so hoch wie die Skizze selbst. Es gab also keinen
+   Bereich zum Kleben, sie scrollte einfach weg. Im normalen Blockfluss klebt
+   sie ueber die gesamte Laenge des Akkordeons. */
+@media(max-width:900px){
+  #wizGrid.akk-an{display:block}
+  #wizGrid.akk-an .pick{margin-top:12px}
+}
+
+/* ===================== AKKORDEON =====================================
+   Linke Spalte: Skizze + Zusammenfassung, klebt beim Scrollen.
+   Rechte Spalte: alle Auswahlpunkte untereinander, einer offen.
+   Kein Stepper, kein Fortschrittsbalken, kein "Schritt x von y".        */
+#wizGrid.akk-an{grid-template-columns:minmax(0,1.02fr) minmax(0,1fr);align-items:start;gap:26px}
+#wizGrid.akk-an .stage-card{flex-direction:column;position:sticky;top:92px;padding:0}
+#wizGrid.akk-an .stage{flex:0 0 auto;width:100%;padding:24px 20px 18px}
+#wizGrid.akk-an .stage svg{max-width:100%;max-height:min(54vh,540px)}
+#wizGrid.akk-an .summary{flex:0 0 auto;width:100%;border-left:0;border-top:1px solid var(--line)}
+
+.akk{display:flex;flex-direction:column;gap:10px}
+.akk-p{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;
+       transition:border-color .18s,box-shadow .18s}
+.akk-p.auf{border-color:var(--line-d);box-shadow:0 6px 22px -14px rgba(20,24,29,.35)}
+.akk-h{margin:0}
+.akk-btn{width:100%;display:flex;align-items:center;gap:13px;padding:14px 16px;background:none;border:0;
+         cursor:pointer;text-align:left;font-family:var(--sans);min-height:var(--tap)}
+.akk-btn:hover{background:#f7f9fc}
+.akk-btn:focus-visible{outline:2px solid var(--primary);outline-offset:-2px}
+.akk-nr{flex:0 0 auto;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;
+        background:#eaf0f9;color:var(--accent);font:800 12.5px/1 var(--sans)}
+.akk-p.auf .akk-nr{background:var(--primary);color:#fff}
+.akk-txt{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:2px}
+.akk-lb{font:700 15.5px/1.25 var(--serif);color:var(--ink);letter-spacing:-.01em}
+.akk-val{font:500 13px/1.3 var(--sans);color:var(--ink-soft);
+         overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.akk-p.auf .akk-val{display:none}
+.akk-chev{flex:0 0 auto;width:19px;height:19px;color:var(--ink-soft);transition:transform .2s}
+.akk-p.auf .akk-chev{transform:rotate(180deg);color:var(--primary)}
+.akk-body{padding:2px 16px 18px;border-top:1px solid var(--line)}
+.akk-sub{font:700 11.5px/1 var(--sans);letter-spacing:.09em;text-transform:uppercase;
+         color:var(--ink-soft);margin:18px 0 10px}
+.akk-body > .akk-sub:first-child{margin-top:14px}
+.akk-body .card{border:0;padding:0;background:none;box-shadow:none}
+.akk-body .grp-title{margin-top:14px}
+
+@media(max-width:900px){
+  #wizGrid.akk-an{grid-template-columns:1fr;gap:14px}
+  /* Skizze klebt als schmale Leiste oben, statt den halben Bildschirm zu belegen */
+  #wizGrid.akk-an .stage-card{position:sticky;top:0;z-index:30;flex-direction:column;
+      border-radius:0 0 var(--r) var(--r);box-shadow:0 8px 18px -14px rgba(20,24,29,.5)}
+  #wizGrid.akk-an .stage{padding:10px 12px 6px}
+  #wizGrid.akk-an .stage svg{max-height:26vh}
+  #wizGrid.akk-an .summary{display:none}
+  .akk-btn{padding:13px 13px}
+  .akk-body{padding:2px 12px 16px}
+}
 /* Ansichts-Umschalter der Haustuer (ersetzt das Nebeneinander beider Ansichten) */
 .tsu{display:flex;justify-content:center;gap:0;margin:10px auto 0;width:max-content;
      border:1px solid var(--line-d);border-radius:var(--pill,999px);overflow:hidden;background:#fff}
@@ -1194,6 +1265,17 @@ html,body{overflow-x:clip}
   .cd-draws{width:100%;flex:0 0 auto}
   .cd-draws .cd-draw{width:100%;height:auto}
 }
+
+/* ===== Nachtrag: muss nach allen aelteren Regeln stehen ==================
+   Zeile ~876 setzt .stage-card unter 600 px auf position:static!important.
+   Im Akkordeon soll die Skizze am Handy aber oben kleben, waehrend man die
+   Auswahlpunkte durchgeht — sonst konfiguriert man blind. */
+@media(max-width:900px){
+  #wizGrid.akk-an .stage-card{position:sticky!important;top:var(--tb-h,84px)!important;z-index:30!important;
+    margin-bottom:0!important;border-radius:0 0 var(--r) var(--r)}
+  #wizGrid.akk-an .stage{padding:10px 12px 6px}
+  #wizGrid.akk-an .stage svg{max-height:24vh}
+}
 </style>
 </head>
 <body>
@@ -1399,8 +1481,8 @@ html,body{overflow-x:clip}
 
 <div class="footer"><div class="footer-inner">
   <div class="price"><div class="amt tnum"><span id="pInt">0</span><span class="dec">,00</span> <span class="cur">€</span></div><div class="sub" id="pFootSub">pro Fenster · inkl. MwSt · unverbindlich</div></div>
-  <button class="btn btn-back" id="btnBack" onclick="back()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg><span id="backLbl">Zurück</span></button>
-  <button class="btn btn-next" id="btnNext" onclick="next()"><span id="nextLbl">Weiter</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></button>
+  <button class="btn btn-back" id="btnBack" onclick="backToPicker()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg><span id="backLbl">Zurück</span></button>
+  <button class="btn btn-next" id="btnNext" onclick="korbLegen()"><span id="nextLbl">Weiter</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></button>
 </div></div>
 
 <script>
@@ -2998,7 +3080,7 @@ function buildSchiebeSteps(){
 const STEPMAP={fenster:STEPS_FENSTER,balkon:STEPS_BALKON,haustuer:STEPS_HAUSTUER};
 let STEPS=STEPS_FENSTER;
 // Überspringbare Extras: alles vorbelegt → Kunde kann mit einem Tap die Standards übernehmen und direkt zum Angebot
-const SKIP_KEYS=['motiv','schall','griff','sicherheit','rollladen','sprossen'];
+const SKIP_KEYS=[];   // entfaellt: im Akkordeon ist nichts mehr versteckt, das man ueberspringen muesste
 function finishWithDefaults(){ commitCurrent(); }   // übernimmt aktuelle Konfig inkl. Standard-Extras → Warenkorb (gleiche sichere Logik wie „In den Warenkorb legen")
 let cur=0;
 let started=false;
@@ -3377,8 +3459,8 @@ const KI_HINWEIS = {
 };
 function kiHinweisHTML(key){ const h=KI_HINWEIS[key]; return h?`<p class="ai-note">${h}</p>`:''; }
 
-function panelHTML(){
-  const k=STEPS[cur].key;
+function panelHTML(kArg){
+  const k=kArg||STEPS[cur].key;   // Akkordeon rendert mehrere Punkte auf einmal
   if(k==='profil'){
     if(S.prod==='schiebe'){
       const c=(val,img,t,s)=>`<div class="ocard ${S.hstSystem===val?'on':''}" onclick="setHstSystem('${val}')"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="vis"><img src="${img}?v=1" loading="lazy" decoding="async" alt="${t}"></div><div class="t">${t}</div><div class="s">${s}</div></div>`;
@@ -4110,7 +4192,10 @@ async function submitAnfrage(ev){
 // Schritte, bei denen ein Klick auf die Option direkt weiterspringt (schnelle Struktur-Wahl).
 // NICHT dabei: farbe/modell/griff*/motiv (Wirkung sehen) + masse/anzahl (tippen) + anfrage.
 // rollladen NICHT dabei: hat Zweit-Wahlen (Bedienseite + Panzerfarbe) — würde sonst zu früh wegspringen.
-const AUTO_ADV={profil:1,aufteilung:1,oeffnung:1,psk:1,lauf:1,teilung:1,glas:1,schall:1,sicherheit:1,schwelle:1};
+/* Auto-Sprung entfaellt fast vollstaendig: im Akkordeon steht ohnehin alles sichtbar
+   untereinander, ein automatischer Sprung waere nur ein Scroll — und wuerde am Handy
+   die klebende Skizze aus dem Bild schieben. */
+const AUTO_ADV={};
 let _advTimer=null;
 function maybeAutoAdvance(){
   const k=STEPS[cur]&&STEPS[cur].key;
@@ -4241,6 +4326,140 @@ function go(i){
 }
 function next(){ if(STEPS[cur]&&STEPS[cur].key==='masse'&&!massOk()){ updateMassValidity(); const w=document.getElementById('massWarn'); if(w){w.style.display='flex'; w.classList.add('shake'); setTimeout(()=>w.classList.remove('shake'),450);} return; } if(cur===STEPS.length-2){ commitCurrent(); return; }   /* letzter Konfig-Schritt → bewusst in den Warenkorb legen */ if(cur<STEPS.length-1) go(cur+1); }
 function back(){ if(cur===0) backToPicker(); else go(cur-1); }
+/* ======================================================================
+   AKKORDEON  —  ersetzt den Schritt-fuer-Schritt-Wizard
+   ----------------------------------------------------------------------
+   Vorher: 13 nummerierte Schritte, einer pro Bildschirm, dazu eine
+   Kreis-Leiste oben, ein Fortschrittsbalken, eine "Schritt 6 von 11"-Zeile
+   und der Hinweis "Jeden Schritt frei anklickbar" — vier Elemente, die
+   dasselbe sagten.
+   Jetzt: alle Auswahlpunkte stehen untereinander und sind immer sichtbar.
+   Der offene Punkt zeigt seine Optionen, die anderen ihre Auswahl in einer
+   Zeile. Die Punktnamen SIND die Navigation.
+
+   STEPS bleibt unveraendert die Datengrundlage — jede bestehende Logik, die
+   STEPS[cur].key liest (Skizzen-Aussenansicht, Massprufung, KI-Hinweise),
+   funktioniert weiter. Die Gruppen fassen nur zusammen, was im Markt
+   ueblicherweise EINE Frage ist.
+   ====================================================================== */
+function akkLabelFuer(key){
+  var p=S.prod;
+  switch(key){
+    case 'profil':     return p==='schiebe' ? 'System' : 'Profil & Dämmung';
+    case 'psk': case 'lauf': case 'teilung': return 'Kammer & Laufrichtung';
+    case 'aufteilung': case 'oeffnung':
+      return p==='haustuer' ? 'Anschlag (DIN)'
+           : p==='balkon'   ? 'Türart & Öffnung'
+                            : 'Fensterart & Öffnung';
+    case 'masse': case 'anzahl': return 'Maße & Anzahl';
+    case 'modell':     return 'Türmodell';
+    case 'farbe':      return 'Farbe';
+    case 'glas': case 'schall': case 'motiv': return 'Verglasung';
+    case 'sprossen':   return 'Sprossen';
+    case 'griff': case 'griffTuer': case 'griffhst': case 'sicherheit':
+      return p==='schiebe' ? 'Griff & Verriegelung' : 'Beschlag & Sicherheit';
+    case 'schwelle':   return 'Schwelle';
+    case 'rollladen':  return 'Rollladen';
+    case 'anfrage':    return 'Übersicht & Anfrage';
+  }
+  return 'Weitere Optionen';
+}
+/* Gruppen aus STEPS ableiten. Gleiche Beschriftung = ein Punkt, auch wenn die
+   Schritte nicht direkt aufeinander folgen (bei der Balkontuer liegt "Schwelle"
+   zwischen Griff und Sicherheit). Reihenfolge = erstes Auftreten. */
+function akkGruppen(){
+  var raus=[], wo={};
+  STEPS.forEach(function(st,i){
+    var lb=akkLabelFuer(st.key);
+    if(wo[lb]===undefined){ wo[lb]=raus.length; raus.push({label:lb, idx:[], erste:i}); }
+    raus[wo[lb]].idx.push(i);
+  });
+  return raus;
+}
+function akkGruppeVon(stepIdx){
+  var g=akkGruppen();
+  for(var i=0;i<g.length;i++) if(g[i].idx.indexOf(stepIdx)>=0) return i;
+  return 0;
+}
+/* Einzeilige Zusammenfassung eines zugeklappten Punktes. */
+function akkWert(g){
+  var t=[];
+  g.idx.forEach(function(i){
+    var k=STEPS[i].key;
+    if(k==='profil')          t.push(S.prod==='schiebe' ? (S.hstSystem==='hs'?'Hebe-Schiebetür':'PSK Schiebetür') : (PROFN[S.profile]||''));
+    else if(k==='psk')        t.push({iglo5:'IGLO 5 Classic',energy:'IGLO Energy',edge:'IGLO EDGE'}[S.pskKammer]||'');   // PROFN kennt 'iglo5' nicht — eigene Zuordnung, sonst blieb die Kammer leer
+    else if(k==='lauf')       t.push('läuft nach '+(S.hstLauf==='links'?'links':'rechts'));
+    else if(k==='teilung')    t.push(S.hstTeilung+'-teilig');
+    else if(k==='aufteilung') t.push(AUFTN[S.aufteilung]||'');
+    else if(k==='oeffnung')   { var ai=anschlagInfo(); t.push((ai&&ai.kurz)||''); }
+    else if(k==='masse')      t.push(S.w+' × '+S.h+' mm');
+    else if(k==='anzahl')     t.push(S.anzahl>1 ? (S.anzahl+' Stück') : '1 Stück');
+    else if(k==='modell')     t.push(DOORN[S.doorModel]||'');
+    else if(k==='farbe')      t.push(COLORS[S.outer].n===COLORS[S.inner].n
+                                     ? COLORS[S.outer].n
+                                     : ('außen '+COLORS[S.outer].n+', innen '+COLORS[S.inner].n));
+    else if(k==='glas')       t.push(S.glass==='3'?'3-fach':'2-fach');
+    else if(k==='schall')     { if(S.schall) t.push('Schallschutz'); }
+    else if(k==='motiv')      t.push(DEKON[S.glasdekor]||'Klarglas');
+    else if(k==='sprossen')   t.push(S.sproTyp && S.sproTyp!=='keine' && S.sproTyp!=='ohne' ? (SPROTYPN[S.sproTyp]||'Sprossen')+' · '+S.sproDicke+' mm' : 'ohne Sprossen');
+    else if(k==='griff')      t.push(S.griff==='abschliessbar' ? 'Griff abschließbar' : 'Standardgriff');
+    else if(k==='griffTuer')  t.push(GRIFFT[S.griffAussen]||'');
+    else if(k==='griffhst')   t.push(S.hstSchloss==='ohne' ? 'nicht abschließbar' : 'abschließbar');
+    else if(k==='sicherheit') t.push(S.sicher ? 'Sicherheitsbeschlag' : 'Standardbeschlag');
+    else if(k==='schwelle')   t.push(S.balkonSchwelle==='ohne' ? 'Standardschwelle' : 'flache Schwelle');
+    else if(k==='rollladen')  t.push(!S.roll||S.roll==='kein'||S.roll==='ohne' ? 'ohne Rollladen'
+                                      : (S.roll==='motor' ? 'Rollladen mit Motor' : 'Rollladen mit Gurt'));
+  });
+  return t.filter(Boolean).join(' · ');
+}
+/* Zustand: welcher Punkt ist offen. Kein Zwang zur Reihenfolge — jeder Punkt
+   ist jederzeit anklickbar (ausdruecklicher Wunsch der Inhaberin). */
+function akkOeffne(gi){
+  var g=akkGruppen(); if(!g[gi]) return;
+  if(g[gi].idx.length===1 && STEPS[g[gi].idx[0]].key==='anfrage'){ cur=g[gi].idx[0]; anfrageView='form'; render(); window.scrollTo({top:0,behavior:'smooth'}); return; }
+  anfrageView=''; cur=g[gi].erste; render();
+  var el=document.getElementById('akk-'+gi);
+  if(el) el.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+function akkHTML(){
+  var g=akkGruppen(), offen=akkGruppeVon(cur);
+  return '<div class="akk">'+g.map(function(gr,gi){
+    var istAnfrage = (gr.idx.length===1 && STEPS[gr.idx[0]].key==='anfrage');
+    var auf = (gi===offen) && !istAnfrage;
+    var wert = istAnfrage ? 'Maße prüfen und absenden' : akkWert(gr);
+    var kopf = '<h3 class="akk-h">'
+      + '<button type="button" class="akk-btn" id="akk-'+gi+'" aria-expanded="'+(auf?'true':'false')+'"'
+      + ' aria-controls="akkbody-'+gi+'" onclick="akkOeffne('+gi+')">'
+      + '<span class="akk-nr" aria-hidden="true">'+(gi+1)+'</span>'
+      + '<span class="akk-txt"><span class="akk-lb">'+gr.label+'</span>'
+      + '<span class="akk-val">'+wert+'</span></span>'
+      + '<svg class="akk-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>'
+      + '</button></h3>';
+    if(!auf) return '<section class="akk-p">'+kopf+'</section>';
+    var koerper = gr.idx.map(function(i){
+      var k=STEPS[i].key, hinweis=kiHinweisHTML(k);
+      var vorne=(k==='modell'||k==='oeffnung'||k==='aufteilung');
+      var ueber = gr.idx.length>1 ? '<div class="akk-sub">'+STEPS[i].label+'</div>' : '';
+      var inhalt = vorne ? hinweis+panelHTML(k) : panelHTML(k)+hinweis;
+      return ueber+inhalt;
+    }).join('');
+    return '<section class="akk-p auf">'+kopf
+      + '<div class="akk-body" id="akkbody-'+gi+'" role="region" aria-labelledby="akk-'+gi+'">'
+      + koerper+'</div></section>';
+  }).join('')+'</div>';
+}
+/* Der eine Hauptknopf. Ein ungueltiges Mass sperrt ihn nicht weg, es fuehrt
+   sichtbar dorthin — anklicken darf man weiterhin alles. */
+function korbLegen(){
+  if(!massOk()){
+    akkOeffne(akkGruppeVon(STEPS.findIndex(function(s){return s.key==='masse';})));
+    updateMassValidity();
+    var w=document.getElementById('massWarn'); if(w){ w.style.display='flex'; w.scrollIntoView({block:'center',behavior:'smooth'}); }
+    return;
+  }
+  commitCurrent();
+}
+
 function render(){
   if(editIndex>=0&&cart[editIndex]) cart[editIndex].conf={...S};   // aktive Konfig live in den Warenkorb spiegeln
   document.body.classList.toggle('checkout-focus', started && anfrageView==='form');
@@ -4257,60 +4476,39 @@ function render(){
   document.body.classList.add('wiz-active');
   document.getElementById('pickerView').style.display='none';
   const key=STEPS[cur].key;
-  const selectMode=['profil','aufteilung','oeffnung','masse','anzahl','teilung','lauf','psk'].includes(key);
-  document.getElementById('head').style.display= selectMode ? 'block':'none';
+  const checkout = (key==='anfrage');            // Anfrage bleibt eine eigene, volle Ansicht
+  /* Die Kreis-Leiste, der Fortschrittsbalken und die "Schritt x von y"-Zeile sind
+     ersatzlos weg: im Akkordeon sind die Punktnamen selbst die Navigation, immer
+     sichtbar, immer anklickbar — und sie zeigen zusaetzlich die getroffene Wahl. */
+  nav.style.display='none';
+  document.getElementById('head').style.display='none';
   const g=document.getElementById('wizGrid');
   g.style.display='grid';
-  g.classList.toggle('full', key==='anfrage');
-  g.classList.toggle('select', selectMode);
-  nav.style.display='block'; foot.style.display=(key==='anfrage')?'none':'block';
-  document.getElementById('stepbar').innerHTML=STEPS.map((s,i)=>{
-    const cls=i===cur?'active':(i<cur?'done':'');
-    const num=i<cur?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg>`:(i+1);
-    return `<button class="step ${cls}" onclick="go(${i})" aria-current="${i===cur?'step':'false'}"><span class="num">${num}</span><span class="lb">${s.label}</span></button>`;
-  }).join('');
-  document.getElementById('stepNow').textContent='Schritt '+(cur+1)+' von '+STEPS.length+' · '+STEPS[cur].label;
+  g.classList.toggle('full', checkout);
+  g.classList.remove('select');
+  g.classList.toggle('akk-an', !checkout);
+  foot.style.display = checkout ? 'none' : 'block';
   {var _tp=document.getElementById('tbProd'); if(_tp) _tp.textContent=prodName();}
-  var _wpf=document.getElementById('wizprogFill'); if(_wpf) _wpf.style.width=Math.round(((cur+1)/STEPS.length)*100)+'%';
-  // aktuellen Schritt in der swipebaren Leiste mittig schieben (nur horizontal, ohne Seiten-Scroll zu stören)
-  (function(){var sc=document.getElementById('stepbar'),ac=sc&&sc.querySelector('.step.active');
-    if(sc&&ac){ sc.scrollLeft = Math.max(0, ac.offsetLeft - (sc.clientWidth - ac.offsetWidth)/2); }})();
-  document.getElementById('hTitle').innerHTML=STEPS[cur].title[0]+'<span class="accent">'+STEPS[cur].title[1]+'</span>';
-  document.getElementById('hSub').textContent=STEPS[cur].sub;
+  (function(){ var tb=document.querySelector('.topbar');
+    if(tb) document.documentElement.style.setProperty('--tb-h', tb.offsetHeight+'px'); })();
   document.getElementById('stage').innerHTML=stageSVG()+tuerSeitenUmschalter();
   document.getElementById('summary').innerHTML='<div class="eb">Ihre Konfiguration</div><h3>'+configTitle()+'</h3>'+summaryPanel();
-  (function(){ const k=STEPS[cur].key, h=kiHinweisHTML(k);
-    // Art. 50 Abs. 5: Offenlegung spaetestens bei der ersten Exposition.
-    // Bei grossen Galerien steht der Absatz VOR den Bildern, sonst dahinter.
-    const vorne = (k==='modell'||k==='oeffnung'||k==='aufteilung');
-    const panel = document.getElementById('panel');
-    panel.innerHTML = vorne ? h+panelHTML() : panelHTML()+h;
-    // Zusaetzlich ein Kurzlabel direkt auf jeder Bildkachel. Der Absatz allein
-    // reicht bei langen Galerien nicht: er scrollt aus dem Bild, waehrend die
-    // Kacheln noch sichtbar sind.
-    // Schritte mit KI-Bildern. Glas/Rollladen/Sprossen bekommen ihren
-    // Absatzhinweis aus dem jeweiligen Baustein und stehen deshalb nicht in
-    // KI_HINWEIS — ein Kachel-Label brauchen sie trotzdem, weil der Absatz
-    // am Handy aus dem Bild scrollt.
-    if (KI_HINWEIS[k] || ['glas','rollladen','sprossen'].indexOf(k) >= 0) {
-      panel.querySelectorAll('.ocard, .pc, .glass-card').forEach(card => {
-        const im = card.querySelector('img');
-        if (!im || card.querySelector('.ai-badge')) return;
-        if (im.getAttribute('alt') && !/KI-generiert/.test(im.getAttribute('alt')))
-          im.setAttribute('alt', im.getAttribute('alt') + ' (KI-generiertes Symbolbild)');
-        const b = document.createElement('span');
-        b.className = 'ai-badge ai-badge-sm';
-        b.textContent = 'KI-Bild';
-        card.appendChild(b);
-      });
-    } })();
-  if(SKIP_KEYS.includes(STEPS[cur].key) && cur<STEPS.length-1){
-    document.getElementById('panel').insertAdjacentHTML('afterbegin',
-      '<button type="button" class="skip-extras" onclick="finishWithDefaults()">Passt so — direkt zum Angebot <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg><span class="sub">Griff, Schall, Sicherheit &amp; Rollladen sind auf Standard vorbelegt</span></button>');
-  }
+  const panel=document.getElementById('panel');
+  panel.innerHTML = checkout ? panelHTML('anfrage') : akkHTML();
+  /* Kachel-Label fuer KI-Bilder: im Akkordeon stehen mehrere Bausteine gleichzeitig
+     im Panel, deshalb ueber das ganze Panel laufen statt nur ueber einen Schritt.
+     Mehr Label ist zulaessig, zu wenig nicht (Art. 50 Abs. 4 AI Act). */
+  panel.querySelectorAll('.ocard, .pc, .glass-card').forEach(function(card){
+    const im=card.querySelector('img');
+    if(!im || card.querySelector('.ai-badge')) return;
+    if(im.getAttribute('alt') && !/KI-generiert/.test(im.getAttribute('alt')))
+      im.setAttribute('alt', im.getAttribute('alt')+' (KI-generiertes Symbolbild)');
+    const b=document.createElement('span'); b.className='ai-badge ai-badge-sm'; b.textContent='KI-Bild';
+    card.appendChild(b);
+  });
   updateMassValidity(); refreshPrice();
-  document.getElementById('backLbl').textContent=cur===0?'Produkte':'Zurück';
-  document.getElementById('nextLbl').textContent = cur===STEPS.length-2 ? (editIndex>=0?'Änderungen übernehmen':'In den Warenkorb legen') : 'Weiter';
+  document.getElementById('backLbl').textContent='Produkte';
+  document.getElementById('nextLbl').textContent = (editIndex>=0?'Änderungen übernehmen':'In den Warenkorb legen');
 }
 loadCart();   // gespeicherten Warenkorb wiederherstellen (Persistenz)
 render();
