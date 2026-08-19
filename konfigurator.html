@@ -1925,6 +1925,20 @@ function skizzeHinges(open,hinge,gx,gy,sashW,gh,SFR,line){
 // Maßstäbliche Fenster/Balkon-Skizze 1:1 wie Drutex-Angebots-Skizze (PDF): Rahmen+Gehrung, flaches Glas,
 // Feld-Nr., DIN pro Flügel, Original-Griff + 3/2-Scharniere, Stulp/Pfosten, Rollladen-Kasten+Coil, Panzer. Bemaßung: Breite oben +
 // Einzelbreiten unten, Höhe rechts (Element+Gesamt), Kasten "215" oben-links. KEINE Griffhöhe.
+/* Unterschrift der Buehnen-Skizze: benennt die gezeigte Seite und beide Farben.
+   Grund: Die Buehne zeigt immer die INNENansicht (also die Innenfarbe). Wer "aussen
+   Anthrazit / innen Weiss" waehlte, sah danach wieder einen weissen Rahmen, ohne dass
+   irgendwo stand warum — die Farbwahl wirkte verloren. */
+function skizzeUnterschrift(x, y, breite, DT, aussenSeite){
+  var ca = (COLORS[S.outer]||{}).n || 'Wei\u00df', ci = (COLORS[S.inner]||{}).n || 'Wei\u00df';
+  var seite = aussenSeite ? 'Ansicht von au\u00dfen' : 'Ansicht von innen';
+  var farben = (ca===ci) ? ('Rahmen ' + ca) : ('au\u00dfen ' + ca + '   \u00b7   innen ' + ci);
+  var mitte = x + breite/2;
+  return '<text x="'+mitte+'" y="'+y+'" text-anchor="middle" font-family="Inter,Arial" font-weight="700"'
+       + ' font-size="'+(DT*0.62)+'" fill="#565b61">'+seite+'</text>'
+       + '<text x="'+mitte+'" y="'+(y+DT*0.85)+'" text-anchor="middle" font-family="Inter,Arial" font-weight="500"'
+       + ' font-size="'+(DT*0.55)+'" fill="#767d88">'+farben+'</text>';
+}
 function flatWindowSVG(isBalkon){
   const bMm=Math.max(+S.w||1000,300), hMm=Math.max(+S.h||1200,300);
   const av=sketchAussen(), ci=av?S.outer:S.inner;                 // Außenfarbe beim Außenfarbe-Wählen, sonst Innenfarbe
@@ -1936,7 +1950,7 @@ function flatWindowSVG(isBalkon){
   const hasRoll=(S.roll&&S.roll!=='kein'), rollH=hasRoll?215:0;
   const alu=isBalkon&&S.balkonSchwelle==='alu', schwH=alu?60:0;
   const winY=rollH, totalH=rollH+hMm+schwH, uu=Math.max(bMm,totalH);
-  const DT=Math.max(uu*0.05,54), DW=Math.max(uu*0.0032,2), tick=DT*0.32;
+  const DT=uu*0.05, DW=Math.max(uu*0.0032,2), tick=DT*0.32;   // Untergrenze entfernt: sonst trugen kleine Elemente relativ riesige Ziffern (500x500 = 6,1 % der Bildbreite) und grosse winzige (4000 = 2,9 %)
   // Rechter Rand bei Rollladen breiter: dort stehen ZWEI Maßketten nebeneinander (Element innen, Gesamtmaß außen).
   // DT*8.0 = Linie + Zahl (bis 4-stellig) + Luft + zweite Linie + zweite Zahl — sonst laufen die Maßzahlen ineinander.
   const mL=(hasRoll?Math.max(uu*0.16,DT*3.4):Math.max(uu*0.13,DT*2.2)), mR=(hasRoll?Math.max(uu*0.40,DT*8.0):Math.max(uu*0.24,DT*4.8)), mT=Math.max(uu*0.14,DT*2.8), mB=Math.max(uu*0.16,DT*3.2);
@@ -1950,7 +1964,7 @@ function flatWindowSVG(isBalkon){
   const ht=(x,y,t)=>`<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-family="Inter,Arial" font-weight="700" font-size="${DT}" fill="${DIMC}">${t}</text>`;
   const hb=(x0,x1,y)=>`<g stroke="${DIML}" stroke-width="${DW}" fill="none"><line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}"/><line x1="${x0}" y1="${y-tick}" x2="${x0}" y2="${y+tick}"/><line x1="${x1}" y1="${y-tick}" x2="${x1}" y2="${y+tick}"/></g>`;
   const vb=(x,y0,y1)=>`<g stroke="${DIML}" stroke-width="${DW}" fill="none"><line x1="${x}" y1="${y0}" x2="${x}" y2="${y1}"/><line x1="${x-tick}" y1="${y0}" x2="${x+tick}" y2="${y0}"/><line x1="${x-tick}" y1="${y1}" x2="${x+tick}" y2="${y1}"/></g>`;
-  let s=`<svg viewBox="${-mL} ${-mT} ${bMm+mL+mR} ${totalH+mT+mB}" role="img" aria-label="${isBalkon?'Balkontür':'Fenster'} ${co.n}" preserveAspectRatio="xMidYMid meet">${DEFS}`;
+  let s=`<svg viewBox="${-mL} ${-mT} ${bMm+mL+mR} ${totalH+mT+mB+DT*2.0}" role="img" aria-label="${isBalkon?'Balkontür':'Fenster'} ${co.n}, ${av?'Ansicht von außen':'Ansicht von innen'}" preserveAspectRatio="xMidYMid meet">${DEFS}`;
   if(hasRoll){
     s+=`<rect x="0" y="0" width="${bMm}" height="${rollH}" fill="${dark?fCol:'#eaecef'}" stroke="${frameStroke}" stroke-width="${DW}"/>`;
     if(!av) s+=rollKastenParts(bMm,rollH,dark);   // Coil/Stecker nur Innenansicht (von außen nicht sichtbar)
@@ -1982,7 +1996,7 @@ function flatWindowSVG(isBalkon){
     if(!av){ s+=skizzeHinges(sashes[i].open,sashes[i].hinge,gx,gy,sashW,gh,SFR,line);  // Scharniere nur Innenansicht
       if(!isStand) s+=skizzeHandle(sashes[i].open,sashes[i].hinge,gx,gy,sashW,gh,SFR,dark); }   // Griff nur Innenansicht, nicht am Standflügel
     if(i>0){ const dx=gx;
-      if(stulpAt===i){ s+=`<line x1="${dx}" y1="${gy+4}" x2="${dx}" y2="${gy+gh-4}" stroke="#d43a3a" stroke-width="${DW}" stroke-dasharray="${DT*0.2} ${DT*0.12}"/><text x="${dx-DT*0.32}" y="${gy+gh*0.62}" transform="rotate(-90 ${dx-DT*0.32} ${gy+gh*0.62})" text-anchor="middle" font-family="Inter,Arial" font-weight="800" font-size="${DT*0.5}" fill="#d43a3a">STULP</text>`; }
+      if(stulpAt===i){ s+=`<line x1="${dx}" y1="${gy+4}" x2="${dx}" y2="${gy+gh-4}" stroke="#7b828c" stroke-width="${DW}" stroke-dasharray="${DT*0.2} ${DT*0.12}"/><text x="${dx-DT*0.32}" y="${gy+gh*0.62}" transform="rotate(-90 ${dx-DT*0.32} ${gy+gh*0.62})" text-anchor="middle" font-family="Inter,Arial" font-weight="800" font-size="${DT*0.5}" fill="#7b828c">STULP</text>`; }
       else s+=`<rect x="${dx-SFR*0.5}" y="${gy}" width="${SFR}" height="${gh}" fill="${fCol}" stroke="${frameStroke}" stroke-width="${DW*0.7}"/>`+gehr(dx-SFR*0.5,gy,SFR,gh,SFR*0.5);
     }
   }
@@ -2003,6 +2017,7 @@ function flatWindowSVG(isBalkon){
   } else {
     s+=vb(rxH,0,dimTot)+vth(rxH+DT*0.5,dimTot/2,dimTot);             // Gesamthöhe rechts — waagerecht
   }
+  s+=skizzeUnterschrift(0, totalH+mB+DT*0.7, bMm, DT, av);
   return s+`</svg>`;
 }
 function fensterStageSVG(){ return flatWindowSVG(false); }
@@ -2058,7 +2073,7 @@ function schiebeStageSVG(){
   const GLASS='#dcebf6', GLASSST='#7f97ac', DIN='#1e242b', DIMC='#1e242b', DIML='#565b61';
   const sys=S.hstSystem||'psk', n=(sys==='psk')?2:((S.hstTeilung==='3')?3:2), slideIdx=(S.hstLauf==='links')?0:n-1;
   const hasRoll=(S.roll&&S.roll!=='kein'), rollH=hasRoll?215:0, winY=rollH, totalH=rollH+hMm, uu=Math.max(bMm,totalH);
-  const DT=Math.max(uu*0.045,54), DW=Math.max(uu*0.0032,2), tick=DT*0.32;
+  const DT=uu*0.045, DW=Math.max(uu*0.0032,2), tick=DT*0.32;  // wie Fenster-Renderer
   // Rechter Rand bei Rollladen breiter: dort stehen ZWEI Maßketten nebeneinander (Element innen, Gesamtmaß außen).
   // DT*8.0 = Linie + Zahl (bis 4-stellig) + Luft + zweite Linie + zweite Zahl — sonst laufen die Maßzahlen ineinander.
   const mL=(hasRoll?Math.max(uu*0.16,DT*3.4):Math.max(uu*0.13,DT*2.2)), mR=(hasRoll?Math.max(uu*0.40,DT*8.0):Math.max(uu*0.24,DT*4.8)), mT=Math.max(uu*0.14,DT*2.8), mB=Math.max(uu*0.16,DT*3.2);
@@ -2071,7 +2086,7 @@ function schiebeStageSVG(){
   const ht=(x,y,t)=>`<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-family="Inter,Arial" font-weight="700" font-size="${DT}" fill="${DIMC}">${t}</text>`;
   const hb=(x0,x1,y)=>`<g stroke="${DIML}" stroke-width="${DW}" fill="none"><line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}"/><line x1="${x0}" y1="${y-tick}" x2="${x0}" y2="${y+tick}"/><line x1="${x1}" y1="${y-tick}" x2="${x1}" y2="${y+tick}"/></g>`;
   const vb=(x,y0,y1)=>`<g stroke="${DIML}" stroke-width="${DW}" fill="none"><line x1="${x}" y1="${y0}" x2="${x}" y2="${y1}"/><line x1="${x-tick}" y1="${y0}" x2="${x+tick}" y2="${y0}"/><line x1="${x-tick}" y1="${y1}" x2="${x+tick}" y2="${y1}"/></g>`;
-  let s=`<svg viewBox="${-mL} ${-mT} ${bMm+mL+mR} ${totalH+mT+mB}" role="img" aria-label="Schiebetür ${co.n}" preserveAspectRatio="xMidYMid meet">${DEFS}`;
+  let s=`<svg viewBox="${-mL} ${-mT} ${bMm+mL+mR} ${totalH+mT+mB+DT*2.0}" role="img" aria-label="Schiebetür ${co.n}, ${av?'Ansicht von außen':'Ansicht von innen'}" preserveAspectRatio="xMidYMid meet">${DEFS}`;
   if(hasRoll){ s+=`<rect x="0" y="0" width="${bMm}" height="${rollH}" fill="${dark?fCol:'#eaecef'}" stroke="${frameStroke}" stroke-width="${DW}"/><line x1="${bMm*0.04}" y1="${rollH*0.62}" x2="${bMm*0.96}" y2="${rollH*0.62}" stroke="rgba(0,0,0,.09)" stroke-width="${DW*0.6}"/>`+rollKastenParts(bMm,rollH,dark); }
   s+=`<rect x="0" y="${winY}" width="${bMm}" height="${hMm}" fill="${fCol}" stroke="${frameStroke}" stroke-width="${Math.max(uu*0.004,3)}"/>`+gehr(0,winY,bMm,hMm,FR);
   for(let i=0;i<n;i++){
@@ -2093,7 +2108,8 @@ function schiebeStageSVG(){
     }
     if(i>0){ const dx=gx; s+=`<rect x="${dx-SFR*0.5}" y="${gy}" width="${SFR}" height="${gh}" fill="${fCol}" stroke="${frameStroke}" stroke-width="${DW*0.7}"/>`+gehr(dx-SFR*0.5,gy,SFR,gh,SFR*0.5); }
   }
-  if(sys==='hs') s+=`<text x="${FR+SFR*1.6}" y="${gy+SFR*1.4}" text-anchor="start" font-family="Inter,Arial" font-size="${Math.max(uu*0.03,44)}" font-weight="700" fill="#2f8f3f">VP</text>`;
+  /* Das gruene Kuerzel "VP" oben links im Glas ist entfernt: es stammt aus der Herstellerzeichnung
+     und sagt einem Kunden nichts. Die Laufrichtung zeigt bereits der Pfeil. */
   // Bemaßung wie PDF
   const dimTot=rollH+hMm, topY=-mT*0.5; s+=hb(0,bMm,topY)+ht(bMm/2,topY-DT*0.7,bMm);
   { const botY=totalH+mB*0.42; for(let i=0;i<n;i++){ const x0=FR+i*pw, x1=x0+pw; s+=hb(x0,x1,botY)+ht((x0+x1)/2,botY+DT*0.72,Math.round(bMm/n)); } }
@@ -2107,6 +2123,7 @@ function schiebeStageSVG(){
   } else {
     s+=vb(rxH,0,dimTot)+vth(rxH+DT*0.5,dimTot/2,dimTot);             // Gesamthöhe rechts — waagerecht
   }
+  s+=skizzeUnterschrift(0, totalH+mB+DT*0.7, bMm, DT, av);
   return s+`</svg>`;
 }
 const DOOR_MOTIFS={'alaska-1-inox':1,'alaska-2-inox':1,'colorado-inox':1,'florida-lr-inox':1,'montana-1-inox':1,'montana-2-lr-inox':1,'montana-3-lr-inox':1,'nebraska-lcr-inox':1,'ohio-inox':1,'pennsylvania-1-inox':1,'pennsylvania-2-lr-inox':1,'pennsylvania-3-lr-inox':1,'texas-c-inox':1,'texas-lr-inox':1};
@@ -4159,7 +4176,7 @@ function miniAnschlag(oeff,stulpAt){
     s+=`<g stroke="#2c3542" stroke-width="1.3" fill="none" stroke-linejoin="round">${sashOpenLines(sh.open,sh.hinge,gx1,gy1,gx2,gy2)}</g>`;
     if(i<n-1){ const dx=x+iw;
       s+= (stulpAt===i+1)
-        ? `<line x1="${dx}" y1="${pad+1}" x2="${dx}" y2="${H-pad-1}" stroke="#d43a3a" stroke-width="1.4" stroke-dasharray="4 2"/>`
+        ? `<line x1="${dx}" y1="${pad+1}" x2="${dx}" y2="${H-pad-1}" stroke="#7b828c" stroke-width="1.4" stroke-dasharray="4 2"/>`
         : `<rect x="${dx-2}" y="${pad+1}" width="4" height="${H-2*pad-2}" fill="#c6ccd3" stroke="#9aa3b0" stroke-width="0.6"/>`;
     }
   }
