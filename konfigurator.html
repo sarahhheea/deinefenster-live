@@ -717,6 +717,8 @@ body:not(.wiz-active) .topbar{display:none}
   .akk-body{padding:2px 12px 16px}
 }
 /* Ansichts-Umschalter der Haustuer (ersetzt das Nebeneinander beider Ansichten) */
+.cd-hinweis{background:#eef4fc;border:1px solid #d5e3f6;border-radius:10px;padding:9px 12px;
+  font:500 12.5px/1.45 var(--sans);color:#1d4d8c;margin-bottom:10px}
 .tsu{display:flex;justify-content:center;gap:0;margin:10px auto 0;width:max-content;
      border:1px solid var(--line-d);border-radius:var(--pill,999px);overflow:hidden;background:#fff}
 .tsu-btn{appearance:none;border:0;background:transparent;cursor:pointer;padding:7px 16px;
@@ -3130,7 +3132,8 @@ function withConf(conf,fn){ const bak={...S}; Object.assign(S,conf); let out; tr
 const CART_LS_KEY='df_cart_v1';
 // Preis-Revision: bei JEDER Preis-Engine-/Tabellen-Änderung um 1 hochzählen. warenkorb.html vergleicht dieselbe
 // Konstante und lässt veraltete Positionen im Konfigurator neu rechnen (Selbstheilung). IDENTISCH in warenkorb.html halten!
-const PRICE_REV=1;
+const PRICE_REV=3;            // 1 -> 2: Quadratmeter-Aufpreis 14.08.  |  2 -> 3: IGLO EDGE 18.08.
+const KORB_TAGE=30;           // Lebensdauer eines liegengebliebenen Warenkorbs
 // Fertig gerendertes Snapshot je Artikel (Skizze/Preis/Titel/Specs) → warenkorb.html braucht KEINE Rechen-Engine (kein Duplikat, kein Drift)
 function cartSnapshot(it){
   const conf=it.conf, q=conf.anzahl||1;
@@ -3144,7 +3147,21 @@ function cartSnapshot(it){
 }
 function saveCart(){ try{ localStorage.setItem(CART_LS_KEY, JSON.stringify({v:2,t:Date.now(),liefer:liefer,lieferWunsch:lieferWunsch,items:cart.map(cartSnapshot)})); }catch(e){}
   try{ window.dispatchEvent(new CustomEvent('df-cart-changed',{detail:{count:cart.length}})); }catch(e){} }
-function loadCart(){ try{ const d=JSON.parse(localStorage.getItem(CART_LS_KEY)||'null'); if(d&&Array.isArray(d.items)&&d.items.length){ cart=d.items.filter(o=>o&&o.conf).map(o=>({conf:o.conf,name:o.name||'',lastPrice:(o.r&&Number(o.r.price))||0})); }
+/* Zustand eines wiederhergestellten Warenkorbs — fuer den Hinweis im Kopf. */
+var korbAlterTage=null, korbPreiseNeu=false, korbVerfallen=false;
+function loadCart(){ try{ const d=JSON.parse(localStorage.getItem(CART_LS_KEY)||'null');
+  /* Ablauf. Der Zeitstempel wurde bisher zwar geschrieben, aber nie gelesen — ein
+     Warenkorb blieb unbegrenzt liegen und tauchte Monate spaeter unkommentiert wieder
+     auf, mitsamt der Preise von damals. */
+  if(d && d.t){
+    korbAlterTage = Math.floor((Date.now()-d.t)/86400000);
+    if(korbAlterTage >= KORB_TAGE){ korbVerfallen=true; try{ localStorage.removeItem(CART_LS_KEY); }catch(e){} return; }
+  }
+  /* Preisstand pruefen. Die "Selbstheilung" war tot: PRICE_REV wurde je Position
+     gespeichert, aber nirgends verglichen — die Stelle, die das tun sollte
+     (warenkorb.html), ist seit dem Drawer-Umbau nur noch eine Weiterleitung. */
+  if(d && Array.isArray(d.items)) korbPreiseNeu = d.items.some(function(o){ return o && o.r && o.r.pv !== PRICE_REV; });
+  if(d&&Array.isArray(d.items)&&d.items.length){ cart=d.items.filter(o=>o&&o.conf).map(o=>({conf:o.conf,name:o.name||'',lastPrice:(o.r&&Number(o.r.price))||0})); }
   if(d && (d.liefer==='abholung'||d.liefer==='lieferung')) liefer=d.liefer;   // Wahl wiederherstellen
   if(d && typeof d.lieferWunsch==='boolean') lieferWunsch=d.lieferWunsch;
   }catch(e){} }
@@ -3223,12 +3240,34 @@ function cdItemHTML(it,i){
 function renderCartDrawer(){
   var body=document.getElementById('cdBody'), foot=document.getElementById('cdFoot'), ship=document.getElementById('cdShip');
   if(!body||!foot) return;
-  if(ship){ if(!cart.length){ ship.innerHTML=''; } else { var _q=cartTotals().qty, _need=10-_q, _pct=Math.min(100,_q*10);
-    ship.innerHTML = _need>0
-      ? '<div class="cd-ship-msg">Noch <b>'+_need+' '+(_need===1?'Element':'Elemente')+'</b> bis zur kostenlosen Lieferung deutschlandweit</div><div class="cd-ship-bar"><i style="width:'+_pct+'%"></i></div>'
-      : '<div class="cd-ship-msg reached"><b>Kostenlose Lieferung</b> deutschlandweit erreicht</div><div class="cd-ship-bar reached"><i style="width:100%"></i></div>'; } }
+  /* Hinweis, wenn der Korb schon eine Weile liegt oder zwischenzeitlich neu
+     gerechnet wurde. Beides war vorher unsichtbar. */
+  if(ship && cart.length){
+    var _hw='';
+    if(korbPreiseNeu) _hw+='<div class="cd-hinweis">Ihre Zusammenstellung lag eine Weile — die Preise sind auf den aktuellen Stand gebracht.</div>';
+    else if(korbAlterTage!==null && korbAlterTage>=2) _hw+='<div class="cd-hinweis">Vor '+korbAlterTage+' Tagen zusammengestellt. Preise sind aktuell.</div>';
+    ship.dataset.hinweis=_hw;
+  }
+  if(ship){ if(!cart.length){ ship.innerHTML=''; } else {
+    /* Zwei Schwellen, nicht eine: ab LIEFER_MIN (5) ist Lieferung ueberhaupt
+       moeglich, ab 10 ist sie kostenfrei. Vorher zeigte die Leiste bei 1 Element
+       "Noch 9 Elemente bis zur kostenlosen Lieferung" — das las sich, als koennte
+       man schon liefern lassen und zahle nur dafuer. Tatsaechlich sperrt
+       cartTotals() die Lieferung unter 5 Elementen komplett. */
+    var _q=cartTotals().qty, _hs=cartTotals().hasHS;
+    var _rest = _q<LIEFER_MIN ? (LIEFER_MIN-_q) : (10-_q);
+    var _wort = _rest===1 ? 'Element' : 'Elemente';
+    var _pct  = Math.min(100, Math.round(_q/10*100));
+    if(_hs || _q>=10)
+      ship.innerHTML='<div class="cd-ship-msg reached"><b>Kostenlose Lieferung</b> deutschlandweit erreicht</div><div class="cd-ship-bar reached"><i style="width:100%"></i></div>';
+    else if(_q<LIEFER_MIN)
+      ship.innerHTML='<div class="cd-ship-msg">Bis '+(LIEFER_MIN-1)+' Elementen: <b>Abholung im Lager</b> (kostenlos). Noch <b>'+_rest+' '+_wort+'</b>, dann ist Lieferung m\u00f6glich.</div><div class="cd-ship-bar"><i style="width:'+_pct+'%"></i></div>';
+    else
+      ship.innerHTML='<div class="cd-ship-msg">Lieferung m\u00f6glich. Noch <b>'+_rest+' '+_wort+'</b> bis zur <b>kostenlosen</b> Lieferung.</div><div class="cd-ship-bar"><i style="width:'+_pct+'%"></i></div>';
+    ship.innerHTML = (ship.dataset.hinweis||'') + ship.innerHTML;
+  } }
   if(!cart.length){
-    body.innerHTML='<div class="cd-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="46" height="46" style="opacity:.35"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><p>Dein Warenkorb ist noch leer.</p></div>';
+    body.innerHTML='<div class="cd-empty">'+(korbVerfallen?'<div class="cd-hinweis" style="text-align:left">Ihre fr\u00fchere Zusammenstellung war '+KORB_TAGE+' Tage alt und wurde entfernt, damit Sie keine veralteten Preise sehen. Sie k\u00f6nnen sie in wenigen Schritten neu zusammenstellen.</div>':'')+'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="46" height="46" style="opacity:.35"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><p>Dein Warenkorb ist noch leer.</p></div>';
     foot.innerHTML='<button type="button" class="cd-cta" onclick="closeCartDrawer()">Jetzt konfigurieren</button>';
     return;
   }
@@ -3937,7 +3976,7 @@ function formHTML(t){
         <div class="trust"><b>Kostenlos &amp; unverbindlich</b> &mdash; kein Kaufvertrag, keine Zahlung. Jede Konfiguration wird individuell gepr&uuml;ft; Sie erhalten Ihr gepr&uuml;ftes Angebot per E-Mail, i.&nbsp;d.&nbsp;R. innerhalb von 1&ndash;2 Werktagen.</div>
       </form>
       <aside class="ov-summary co-summary">
-        <div class="ovs-title">Ihre Bestellung</div>
+        <div class="ovs-title">Ihre Anfrage</div>   <!-- kein Kauf: die Strecke endet mit einer unverbindlichen Anfrage -->
         <div class="co-items">${mini}</div>
         <div class="ovs-line"><span>Zwischensumme (${t.qty})</span><b class="tnum">${eur(t.sub)}</b></div>
         <div class="ovs-line"><span>${lief?'Lieferung':'Abholung im Lager'}</span><b>${lief?(t.ship?eur(t.ship):'kostenfrei'):'kostenlos'}</b></div>
