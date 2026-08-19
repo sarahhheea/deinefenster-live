@@ -645,6 +645,14 @@ body:not(.wiz-active) .topbar{display:none}
    Wichtig für die Lesbarkeit — die Maßzahlen skalieren mit der Zeichnung, bei 225px waren sie nur ~10px groß.
    (Achtung: es gibt weiter oben mehrere ältere `.stage svg`-Regeln; diese hier ist die zuletzt greifende.) */
 .stage svg{max-width:100%;max-height:400px}
+/* Ansichts-Umschalter der Haustuer (ersetzt das Nebeneinander beider Ansichten) */
+.tsu{display:flex;justify-content:center;gap:0;margin:10px auto 0;width:max-content;
+     border:1px solid var(--line-d);border-radius:var(--pill,999px);overflow:hidden;background:#fff}
+.tsu-btn{appearance:none;border:0;background:transparent;cursor:pointer;padding:7px 16px;
+     font:600 13px/1 var(--sans);color:var(--ink-soft);transition:background .16s,color .16s}
+.tsu-btn:hover{color:var(--ink)}
+.tsu-btn.an{background:var(--primary);color:#fff}
+.tsu-btn:focus-visible{outline:2px solid var(--primary);outline-offset:-2px}
 .summary{flex:1 1 48%;border-top:none;border-left:1px solid var(--line);padding:16px 22px;display:flex;flex-direction:column;justify-content:flex-start}
 .summary .eb{font-size:10.5px;letter-spacing:.2em}
 .summary h3{font-size:18px;margin:2px 0 10px}
@@ -1541,7 +1549,10 @@ function anschlagInfo(){
       // Ein Satz statt vier Zeilen Fachtext — die Blickrichtung steht dabei genau
       // einmal, naemlich in der Marke darunter.
       satz:'Öffnet nach '+(aussen?'außen':'innen')+', Bänder '+band+', Griff '+griff+'.',
-      chip:'DIN '+(dinL?'links':'rechts')+' · '+tuerAnsichtName(),
+      /* Der Merker nennt die BEZUGSSEITE der DIN-Bestimmung, nicht die gerade gezeigte
+         Ansicht. Sonst stand hier "Ansicht von innen", waehrend die Buehne per
+         Umschalter die Aussenansicht zeigte. */
+      chip:'DIN '+(dinL?'links':'rechts')+' \u00b7 Bezugsseite '+(aussen?'au\u00dfen':'innen'),
       pikto:{typ:'dreh',hinge:dinL?'l':'r',richtung:aussen?'aussen':'innen'}
     };
   }
@@ -1807,12 +1818,44 @@ function skizzeKompakt(conf){ return skizzeSeite(conf,false); }
    vier Zeichnungen mit widerspruechlichen Labels ("Innen" ueber einem Paar aus Aussen+Innen).
    Gemessen am Handy: zwei Kacheln liessen dem Fenster 75px und der Tuer 134px Breite, die
    Beschriftung landete bei 5px. Eine Kachel ueber die volle Breite loest beides. */
+/* Welche Seite die Buehne bei der Haustuer zeigt. null = die Seite, auf die der Kunde
+   sich im Anschlag-Schritt festgelegt hat. Der Umschalter unter der Buehne setzt sie. */
+var TUER_BUEHNE_SEITE = null;      // Umschalter unter der Buehne
+var TUER_SEITE_ERZWUNGEN = null;   // waehrend eines Buehnen-Aufrufs gesetzt; null = Bezugsseite des Kunden
+function tuerBuehneAussen(){
+  return (TUER_BUEHNE_SEITE !== null) ? TUER_BUEHNE_SEITE : (S.tuerOeffnung === 'aussen');
+}
+function tuerSeiteUmschalten(aussen){ TUER_BUEHNE_SEITE = !!aussen; render(); }
+/* Umschalter unter der Buehne. Nur bei der Haustuer: dort sind beide Seiten verschieden
+   (aussen der gewaehlte Griff, innen immer die Drueckergarnitur) und der Kunde muss sie
+   vergleichen koennen. Ersetzt das dauerhafte Nebeneinander beider Ansichten. */
+function tuerSeitenUmschalter(){
+  if(S.prod!=='haustuer') return '';
+  var a = tuerBuehneAussen();
+  var knopf = function(anAussen, text){
+    return '<button type="button" class="tsu-btn'+(anAussen===a?' an':'')+'"'
+         + ' aria-pressed="'+(anAussen===a?'true':'false')+'"'
+         + ' onclick="tuerSeiteUmschalten('+anAussen+')">'+text+'</button>';
+  };
+  return '<div class="tsu" role="group" aria-label="Ansicht der Haust\u00fcr">'
+       + knopf(false,'Von innen') + knopf(true,'Von au\u00dfen') + '</div>';
+}
 function stageSVG(){
   const pdf=pdfSkizzeSrc();
   if(pdf) return `<img src="${pdf}" alt="Fenster-Skizze" style="width:100%;height:100%;object-fit:contain;display:block">`;
   if(S.prod==='balkon') return balkonStageSVG();
   if(S.prod==='schiebe') return schiebeStageSVG();
-  if(S.prod==='haustuer') return haustuerStageSVG();
+  /* Haustuer: EINE Ansicht statt beider nebeneinander. Vorher belegte das Paar die volle
+     Breite und die einzelne Tuer war nur 36 % davon — die Zeichnung war gross, das Produkt
+     klein. skizzeSeite() erzwingt die Einzelansicht (der Mechanismus existierte schon fuer
+     Warenkorb und Mail, die Buehne nutzte ihn nur nicht). */
+  if(S.prod==='haustuer'){
+    if(ANSICHT_ERZWUNGEN !== null) return haustuerStageSVG();   // Aufruf kommt schon aus skizzeSeite() — sonst Endlosschleife
+    var v1 = ANSICHT_ERZWUNGEN, v2 = TUER_SEITE_ERZWUNGEN;
+    ANSICHT_ERZWUNGEN = true;                    // eine Ansicht statt zwei
+    TUER_SEITE_ERZWUNGEN = tuerBuehneAussen();   // und zwar diese
+    try { return haustuerStageSVG(); } finally { ANSICHT_ERZWUNGEN = v1; TUER_SEITE_ERZWUNGEN = v2; }
+  }
   return fensterStageSVG();
 }
 // Rollladen-Kasten-Teile aus der Original-PDF (Raster): Coil (Wickelwelle) + roter Pfeil, bei Motor zusätzlich Stecker.
@@ -2138,7 +2181,7 @@ function haustuerStageSVG(){
   // Die Ansichten sind spiegelbildlich: liegt das Band innen links, liegt es aussen rechts. Aussen
   // sitzt der gewaehlte Griff, innen IMMER die Drueckergarnitur — so wird die Tuer geliefert.
   const einzel = (ANSICHT_ERZWUNGEN !== null);
-  const nurAussen = einzel ? (S.tuerOeffnung==='aussen') : false;   // gewaehlte Bezugsseite
+  const nurAussen = einzel ? (TUER_SEITE_ERZWUNGEN !== null ? TUER_SEITE_ERZWUNGEN : (S.tuerOeffnung==='aussen')) : false;   // Buehnen-Umschalter, sonst gewaehlte Bezugsseite
   const key=S.doorModel||'nebraska-lcr-inox';
   const bMm=Math.max(+S.w||1100,400), hMm=Math.max(+S.h||2100,900);
   const uu=Math.max(bMm,hMm);
@@ -4234,7 +4277,7 @@ function render(){
     if(sc&&ac){ sc.scrollLeft = Math.max(0, ac.offsetLeft - (sc.clientWidth - ac.offsetWidth)/2); }})();
   document.getElementById('hTitle').innerHTML=STEPS[cur].title[0]+'<span class="accent">'+STEPS[cur].title[1]+'</span>';
   document.getElementById('hSub').textContent=STEPS[cur].sub;
-  document.getElementById('stage').innerHTML=stageSVG();
+  document.getElementById('stage').innerHTML=stageSVG()+tuerSeitenUmschalter();
   document.getElementById('summary').innerHTML='<div class="eb">Ihre Konfiguration</div><h3>'+configTitle()+'</h3>'+summaryPanel();
   (function(){ const k=STEPS[cur].key, h=kiHinweisHTML(k);
     // Art. 50 Abs. 5: Offenlegung spaetestens bei der ersten Exposition.
