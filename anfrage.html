@@ -10,8 +10,8 @@
 <link rel="icon" type="image/png" sizes="180x180" href="img/logo/deinefenster-profile-720.png?v=20260518"/>
 <link rel="apple-touch-icon" href="img/logo/apple-touch-icon-180.png?v=20260518"/>
 <link rel="manifest" href="/manifest.json"/>
-<title>Kontakt — Fensterhandel Christ Brandenburg | DeineFenster.de</title>
-<meta name="description" content="Türen und Fensterhandel Christ, Fohrder Landstr. 13, 14772 Brandenburg an der Havel. Telefon, WhatsApp, E-Mail, Öffnungszeiten und Anfahrt."/>
+<title>Angebot anfragen — Fenster &amp; Türen nach Maß | DeineFenster.de</title>
+<meta name="description" content="Kostenloses, unverbindliches Angebot für Fenster, Balkontüren, Haustüren und Schiebetüren nach Maß. Antwort in der Regel innerhalb von 24 Stunden — Fensterhandel Christ, Brandenburg an der Havel."/>
 <meta name="keywords" content="Fenster günstig kaufen, gebrauchte Fenster günstig, gebrauchte Fenster kaufen, Hofverkauf Fenster, Fenster Schnäppchen, Restposten Fenster, Drutex Fenster kaufen, Drutex Lagerfenster, Lagerräumung Fenster, Kunststofffenster online konfigurieren, IGLO 5 Classic, IGLO Energy, Balkontür Drutex, Haustür Drutex, Schiebetür, Türen und Fensterhandel Christ, Fenster Brandenburg, Fenster Berlin, Fenster Potsdam, gebrauchte Fenster Berlin, gebrauchte Fenster Brandenburg, Fenster Hamburg gebraucht"/>
 <meta name="author" content="Türen und Fensterhandel Christ"/>
 <meta name="geo.region" content="DE-BB"/>
@@ -19,12 +19,12 @@
 <meta name="geo.position" content="52.4292945;12.5395001"/>
 <meta name="ICBM" content="52.4292945, 12.5395001"/>
 <meta name="theme-color" content="#225eaa"/>
-<link rel="canonical" href="https://deinefenster.de/kontakt.html"/>
+<link rel="canonical" href="https://deinefenster.de/anfrage.html"/>
 <!-- Open Graph / Social Preview -->
-<meta property="og:title" content="Kontakt — Türen und Fensterhandel Christ Brandenburg"/>
-<meta property="og:description" content="Telefon: 03381 / 2148373. Hofverkauf jeden Freitag 10–17 Uhr. Fohrder Landstraße 13, Brandenburg an der Havel."/>
+<meta property="og:title" content="Angebot anfragen — Fenster &amp; Türen nach Maß"/>
+<meta property="og:description" content="Kostenlos und unverbindlich: Formular ausfüllen, wir melden uns in der Regel innerhalb von 24 Stunden mit Ihrem persönlichen Angebot."/>
 <meta property="og:type" content="website"/>
-<meta property="og:url" content="https://deinefenster.de/kontakt.html"/>
+<meta property="og:url" content="https://deinefenster.de/anfrage.html"/>
 <meta property="og:image" content="https://deinefenster.de/img/og-default.jpg"/>
 <meta property="og:locale" content="de_DE"/>
 <meta property="og:site_name" content="DeineFenster.de"/>
@@ -489,7 +489,7 @@
 <!-- BETRIEBSURLAUB-BANNER END -->
 
 <div class="dfnav-util"><div class="dfnav-wrap">
-  <a href="/gebrauchte-fenster-kaufen.html"><span style="color:oklch(0.8 0.15 85)">&#9733;</span> 4,7 &middot; 93 Google-Bewertungen &middot; Hofverkauf Fr 10&ndash;17 Uhr</a>
+  <span style="color:var(--dfn-soft)"><a href="/impressum.html#bewertungen" title="Wie diese Bewertungen zustande kommen"><span style="color:oklch(0.8 0.15 85)">&#9733;</span> 4,7 &middot; 93 Google-Bewertungen</a> &middot; <a href="/gebrauchte-fenster-kaufen.html">Hofverkauf Fr 10&ndash;17 Uhr</a></span>
   <div class="dfnav-uright">
     <a href="/ueber-uns.html">&Uuml;ber uns</a>
     <a href="/ueber-drutex.html">&Uuml;ber Drutex</a>
@@ -735,7 +735,7 @@
     </div>
 
     <div class="kt-card">
-      <p class="kt-trust"><span class="st" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span> 4,7 aus 93&nbsp;Google-Bewertungen &middot; Familienbetrieb seit 1996</p>
+      <p class="kt-trust"><span class="st" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span> <a href="/impressum.html#bewertungen" style="color:inherit;text-decoration:none">4,7 aus 93&nbsp;Google-Bewertungen</a> &middot; Familienbetrieb seit 1996</p>
 
       <noscript><p class="kt-noscript">Das Formular ben&ouml;tigt JavaScript. Sie erreichen uns auch direkt unter
         <a href="tel:+4933812148373">03381 2148373</a> oder
@@ -1113,12 +1113,15 @@
     e.preventDefault();
     leeren();
 
-    // Spamschutz: unsichtbares Feld darf nicht ausgefuellt sein, und ein Mensch
-    // braucht laenger als drei Sekunden zum Ausfuellen
-    if (document.getElementById('kf-web').value !== '' || Date.now() - geladen < 3000) {
-      zeigen('gut', 'Vielen Dank, Ihre Nachricht ist eingegangen.');
-      return;
-    }
+    /* Spamschutz: Verdacht wird MARKIERT, nie stillschweigend verworfen.
+       Vorher stand hier ein "Vielen Dank" OHNE Versand. Wer in unter drei
+       Sekunden abschickte (Autofill, Deep-Link mit Autofokus) oder dessen
+       Browser das unsichtbare Feld fuellte, bekam eine Bestaetigung fuer eine
+       Anfrage, die nie jemand erhalten hat. Jede Anfrage geht jetzt raus; der
+       Verdacht steht in der internen Mail und im Betreff. */
+    var verdacht = [];
+    if (document.getElementById('kf-web').value !== '') verdacht.push('unsichtbares Feld ausgefuellt');
+    if (Date.now() - geladen < 1500) verdacht.push('in unter 1,5 s abgesendet');
 
     var name  = document.getElementById('kf-name');
     var email = document.getElementById('kf-email');
@@ -1146,7 +1149,7 @@
       'Telefon: ' + (tel.value.trim() || '\u2013'), '',
       'Nachricht:', msg.value.trim(), '',
       'Datum: ' + d.toLocaleDateString('de-DE')
-    ].join('\n');
+    ].concat(verdacht.length ? ['', 'Hinweis Spamschutz: ' + verdacht.join(' / ') + ' \u2014 bitte pruefen, aber NICHT ignorieren.'] : []).join('\n');
     var esc = function(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
     var detailsHtml =
       '<table width="100%" cellpadding="0" cellspacing="0" style="margin-top:6px;">'
@@ -1159,8 +1162,9 @@
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
         customer_email: email.value.trim(),
-        subject: '[DeineFenster.de] Angebotsanfrage von ' + name.value.trim(),
+        subject: (verdacht.length ? '[Pruefen] ' : '') + '[DeineFenster.de] Angebotsanfrage von ' + name.value.trim(),
         text: text,
+        verdacht: verdacht,
         confirmation: { name: name.value.trim(), offerId: nr, detailsHtml: detailsHtml }
       })
     }).then(function(res){
