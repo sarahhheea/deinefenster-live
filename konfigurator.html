@@ -674,17 +674,32 @@ body:not(.wiz-active) .topbar{display:none}
    Rechte Spalte: alle Auswahlpunkte untereinander, einer offen.
    Kein Stepper, kein Fortschrittsbalken, kein "Schritt x von y".        */
 #wizGrid.akk-an{grid-template-columns:minmax(0,1.02fr) minmax(0,1fr);align-items:start;gap:26px}
-#wizGrid.akk-an .stage-card{flex-direction:column;position:sticky;top:92px;padding:0}
+#wizGrid.akk-an .stage-card{flex-direction:column;position:sticky;padding:0;
+  top:calc(var(--banner-h,0px) + var(--tb-h,84px) + 14px);
+  /* Sonst waechst die klebende Spalte unter die feste Preisleiste: unten waren
+     Verglasung und Griff abgeschnitten. */
+  max-height:calc(100vh - var(--banner-h,0px) - var(--tb-h,84px) - var(--fuss-h,96px) - 22px);
+  overflow:auto;overscroll-behavior:contain}
 #wizGrid.akk-an .stage{flex:0 0 auto;width:100%;padding:24px 20px 18px}
 #wizGrid.akk-an .stage svg{max-width:100%;max-height:min(54vh,540px)}
 #wizGrid.akk-an .summary{flex:0 0 auto;width:100%;border-left:0;border-top:1px solid var(--line)}
 
 .akk{display:flex;flex-direction:column;gap:10px}
-.akk-p{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;
+.akk-p{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
        transition:border-color .18s,box-shadow .18s}
+/* KEIN overflow:hidden hier: es haette den klebenden Kopf ausgehebelt.
+   Die runden Ecken uebernehmen Kopf und Koerper selbst. */
 .akk-p.auf{border-color:var(--line-d);box-shadow:0 6px 22px -14px rgba(20,24,29,.35)}
 .akk-h{margin:0}
+/* Der Kopf des OFFENEN Punktes bleibt stehen, solange man seine Optionen durchgeht.
+   Bei "Farbe" ist der Block 1.327 px hoch — ohne das waere man nach dem ersten
+   Scrollen ohne Orientierung und ohne Weg zurueck. Eine zweite Leiste oben braucht
+   es dafuer nicht; der Punktname selbst uebernimmt das. */
+.akk-p.auf .akk-h{position:sticky;top:calc(var(--banner-h,0px) + var(--tb-h,84px));z-index:6;
+  background:var(--surface);border-radius:var(--r) var(--r) 0 0;border-bottom:1px solid var(--line);
+  box-shadow:0 6px 14px -12px rgba(20,24,29,.5)}
 .akk-btn{width:100%;display:flex;align-items:center;gap:13px;padding:14px 16px;background:none;border:0;
+         border-radius:var(--r) var(--r) 0 0;
          cursor:pointer;text-align:left;font-family:var(--sans);min-height:var(--tap)}
 .akk-btn:hover{background:#f7f9fc}
 .akk-btn:focus-visible{outline:2px solid var(--primary);outline-offset:-2px}
@@ -698,7 +713,7 @@ body:not(.wiz-active) .topbar{display:none}
 .akk-p.auf .akk-val{display:none}
 .akk-chev{flex:0 0 auto;width:19px;height:19px;color:var(--ink-soft);transition:transform .2s}
 .akk-p.auf .akk-chev{transform:rotate(180deg);color:var(--primary)}
-.akk-body{padding:2px 16px 18px;border-top:1px solid var(--line)}
+.akk-body{padding:2px 16px 18px;border-top:1px solid var(--line);border-radius:0 0 var(--r) var(--r)}
 .akk-sub{font:700 11.5px/1 var(--sans);letter-spacing:.09em;text-transform:uppercase;
          color:var(--ink-soft);margin:18px 0 10px}
 .akk-body > .akk-sub:first-child{margin-top:14px}
@@ -1273,10 +1288,12 @@ html,body{overflow-x:clip}
    Im Akkordeon soll die Skizze am Handy aber oben kleben, waehrend man die
    Auswahlpunkte durchgeht — sonst konfiguriert man blind. */
 @media(max-width:900px){
-  #wizGrid.akk-an .stage-card{position:sticky!important;top:var(--tb-h,84px)!important;z-index:30!important;
+  #wizGrid.akk-an .stage-card{position:sticky!important;top:calc(var(--banner-h,0px) + var(--tb-h,84px))!important;z-index:30!important;
     margin-bottom:0!important;border-radius:0 0 var(--r) var(--r)}
   #wizGrid.akk-an .stage{padding:10px 12px 6px}
   #wizGrid.akk-an .stage svg{max-height:24vh}
+  /* Am Handy zusaetzlich unter der klebenden Skizze */
+  .akk-p.auf .akk-h{top:calc(var(--banner-h,0px) + var(--tb-h,84px) + var(--skizze-h,180px))}
 }
 </style>
 </head>
@@ -3756,6 +3773,20 @@ const GRIFFN={mistral:'Mistral',abschliessbar:'Mistral abschließbar'};
    Aufbau: Symbol + Maß + EIN Satz + Marke mit Bezugsseite, darunter die vollständige
    Ausstattung zweispaltig. Es geht nichts verloren; die Angaben stehen nur einmal
    statt viermal. Vorher stapelten sich Normangabe, Ansicht, Klartext und Warnhinweis. */
+/* Nur der Kopf: Piktogramm, Mass, Stueckzahl, Anschlagsatz. Alles Weitere steht
+   im Akkordeon daneben und muss hier nicht ein zweites Mal stehen. */
+function summaryKopf(){
+  const ai=anschlagInfo();
+  const hebe=t=>String(t==null?'':t).replace(/\b(links|rechts|innen|au\u00dfen)\b/gi,'<b>$1</b>');
+  return `<div class="ak">
+      <div class="ak-pik">${anschlagPikto(64)}</div>
+      <div class="ak-txt">
+        <div class="ak-mass"><b class="tnum">${S.w} \u00d7 ${S.h} mm</b><span>${S.anzahl} St\u00fcck</span></div>
+        <div class="ak-satz">${hebe(ai.satz)}</div>
+        <span class="ak-chip">${ai.chip}</span>
+      </div>
+    </div>`;
+}
 function summaryPanel(){
   const co=COLORS[S.outer], ci=COLORS[S.inner];
   const ai=anschlagInfo();
@@ -4550,10 +4581,17 @@ function render(){
   g.classList.toggle('akk-an', !checkout);
   foot.style.display = checkout ? 'none' : 'block';
   {var _tp=document.getElementById('tbProd'); if(_tp) _tp.textContent=prodName();}
-  (function(){ var tb=document.querySelector('.topbar');
-    if(tb) document.documentElement.style.setProperty('--tb-h', tb.offsetHeight+'px'); })();
+  (function(){ var tb=document.querySelector('.topbar'), sc=document.querySelector('.stage-card');
+    var w=document.documentElement.style;
+    if(tb) w.setProperty('--tb-h', tb.offsetHeight+'px');
+    var fs=document.querySelector('.footer');
+    if(fs) w.setProperty('--fuss-h', (fs.offsetHeight||96)+'px');
+    /* Am Handy klebt die Skizze unter der Kopfleiste; der Akkordeon-Kopf muss darunter. */
+    if(sc) requestAnimationFrame(function(){ w.setProperty('--skizze-h', Math.round(sc.getBoundingClientRect().height)+'px'); });
+  })();
   document.getElementById('stage').innerHTML=stageSVG()+tuerSeitenUmschalter();
-  document.getElementById('summary').innerHTML='<div class="eb">Ihre Konfiguration</div><h3>'+configTitle()+'</h3>'+summaryPanel();
+  document.getElementById('summary').innerHTML='<div class="eb">Ihre Konfiguration</div><h3>'+configTitle()+'</h3>'
+    + (checkout ? summaryPanel() : summaryKopf());
   const panel=document.getElementById('panel');
   panel.innerHTML = checkout ? panelHTML('anfrage') : akkHTML();
   /* Kachel-Label fuer KI-Bilder: im Akkordeon stehen mehrere Bausteine gleichzeitig
