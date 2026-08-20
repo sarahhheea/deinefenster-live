@@ -49,8 +49,9 @@ body:not(.wiz-active) .topbar{display:none}
 .tb-links{display:flex;gap:14px;align-items:center}
 .tb-prod{font-weight:800;font-size:15px;color:var(--ink);letter-spacing:.01em;display:inline-flex;align-items:center}
 .tb-prod::before{content:'';width:1px;height:20px;background:var(--line);margin-right:14px;display:inline-block}
-.tb-link{display:inline-flex;align-items:center;gap:8px;padding:11px 16px;border:1px solid var(--line);background:transparent;color:var(--ink);
-  font:600 11.5px/1 var(--sans);text-transform:uppercase;letter-spacing:.12em;cursor:pointer;border-radius:2px;transition:.2s var(--ease)}
+.tb-link{display:inline-flex;align-items:center;gap:9px;padding:0 18px;min-height:44px;border:1px solid var(--line-d);background:#fff;color:var(--ink-soft);
+  font:600 13.5px/1 var(--sans);text-transform:none;letter-spacing:.005em;cursor:pointer;
+  border-radius:var(--pill,999px);transition:border-color .18s,color .18s,background .18s}
 .tb-link:hover{border-color:var(--ink)}
 .tb-link svg{width:15px;height:15px}
 .tb-link .badge{background:var(--ink);color:#fff;border-radius:2px;font-size:11px;font-weight:700;padding:2px 6px}
@@ -233,6 +234,10 @@ body:not(.wiz-active) .topbar{display:none}
 .pcard .pt{font-family:var(--serif);font-weight:600;font-size:23px}
 .pcard .pp{color:var(--ink);font-weight:600;font-size:15px;margin-top:5px}
 .pcard .pp span{color:var(--ink-soft);font-weight:400;font-size:12.5px}
+/* Feste zweite Zeile fuer den Pflichtzusatz: vorher brach er nur bei den langen
+   Produktnamen um und die Knoepfe standen auf zwei verschiedenen Hoehen. */
+.pcard .pp-zus{display:block;margin-top:3px;font-size:12px;line-height:1.3}
+.pcard .pgo{margin-top:auto}   /* Knopf immer an der Unterkante = alle auf einer Linie */
 .pcard .pgo{margin-top:18px;padding:14px;border-radius:2px;background:var(--ink);color:#fff;
   font:600 12px/1 var(--sans);text-transform:uppercase;letter-spacing:.14em;display:flex;align-items:center;justify-content:center;gap:8px;transition:.25s var(--ease)}
 .pcard:hover .pgo{background:#332f2a}
@@ -305,7 +310,7 @@ body:not(.wiz-active) .topbar{display:none}
 .pcard .pgo{background:var(--primary);border-radius:10px;text-transform:none;letter-spacing:.02em;font-weight:700}
 .pcard:hover .pgo{background:var(--primary-d)}
 .price .sub{text-transform:none;letter-spacing:.02em}
-.tb-link:hover{border-color:var(--primary);color:var(--primary)}
+.tb-link:hover{border-color:var(--primary);color:var(--primary);background:#f5f9ff}
 /* Die Optionskarten zeigen keine Aufpreise mehr — dafür MUSS der Kunde die Preisbewegung
    in der Fußleiste bemerken. Deshalb kurz vergrößern UND in Blau aufleuchten. */
 .price.preis-neu .amt{animation:preisPuls .55s cubic-bezier(.16,1,.3,1)}
@@ -321,8 +326,8 @@ body:not(.wiz-active) .topbar{display:none}
 .qbtn{width:50px;height:50px;border:1px solid var(--line-d);border-radius:12px;background:#fff;font-size:26px;line-height:1;color:var(--primary);cursor:pointer;transition:.2s var(--ease)}
 .qbtn:hover{border-color:var(--primary);background:#f5f9ff}
 .qnum{font-size:30px;font-weight:700;min-width:70px;text-align:center;font-variant-numeric:tabular-nums}
-.steps-inner{gap:6px;max-width:1360px}
-.step{min-width:0;flex:1 1 0;flex-direction:column;gap:8px;padding:15px 6px 13px}   /* war 8px 3px 7px — die Punkte klebten aneinander */
+.steps-inner{gap:10px;max-width:1360px;justify-content:space-between}
+.step{min-width:0;flex:0 0 auto;flex-direction:column;gap:8px;padding:15px 10px 13px}   /* flex:0 0 auto: Feldbreite folgt dem Wort, der Abstand bleibt gleich */
 .step .num{width:27px;height:27px;font-size:11.5px}
 .step .lb{font-size:11px;letter-spacing:.04em;line-height:1.2}
 .steps-hint{max-width:1360px;margin:0 auto;padding:9px 0 10px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);font-size:12px;color:var(--ink-soft)}
@@ -689,7 +694,7 @@ body:not(.wiz-active) .topbar{display:none}
 .pk-sub{margin-bottom:14px}
 .pk-grid{gap:18px}
 .pcard{padding:16px 16px 16px}
-.pcard .pimg{height:206px}
+.pcard .pimg{height:206px;align-items:end;padding-bottom:6px}   /* Produkte stehen auf einer Grundlinie statt frei zu schweben */
 .pcard .pt{font-size:20px}
 .pcard .pp{font-size:14.5px;margin-top:4px}
 .pcard .pgo{margin-top:14px;padding:12px}
@@ -957,7 +962,7 @@ body.checkout-focus .dfnav-mlcta{display:none}
 .pw-title{font-size:20px;font-weight:800;color:var(--ink);margin:0 0 8px}
 .pw-text{font-size:14.5px;color:var(--ink-soft);line-height:1.5;margin:0 0 20px}
 .pw-actions{display:flex;flex-direction:column;gap:10px}
-.pw-btn{width:100%;padding:13px 18px;border-radius:12px;font-weight:700;font-size:15px;cursor:pointer;border:1.5px solid transparent}
+.pw-btn{width:100%;padding:0 18px;min-height:48px;border-radius:var(--pill,999px);font-weight:700;font-size:15px;cursor:pointer;border:1.5px solid transparent}   /* war 12px-Ecken — einzige Ausnahme im Dialog */
 .pw-primary{background:var(--primary);color:#fff}
 .pw-primary:hover{filter:brightness(1.06)}
 .pw-ghost{background:#fff;color:var(--ink-soft);border-color:var(--line)}
@@ -1050,7 +1055,7 @@ body.checkout-focus .dfnav-mlcta{display:none}
    zwei Schliessen-Symbolen. Hier nur die Hauptaktionen auf eine Stufe bringen. */
 #btnNext,#btnBack{min-height:var(--btn-gross)}
 .opt,.pill,.pcard button,.card-opt{min-height:var(--btn-mittel)}
-.tb-link{min-height:var(--btn-klein)}
+.tb-link{min-height:var(--btn-klein)}   /* 44px — gleiche Klasse wie der Navigations-Knopf */
 
 /* Task 3: Trefferflaeche mind. 44px — optische Groesse bleibt unveraendert */
 .icon-btn,.tb-icon,.cd-x,.dfnav-close,.dfnav-burger,#urlaub-banner-close,.mnav-close{position:relative}
@@ -3252,7 +3257,7 @@ function renderPicker(){
   const cards=PRODUCTS.map(p=>`<div class="pcard" onclick="startProduct('${p.id}')">
     <div class="pimg"><img src="${p.img}" alt="${p.t} (KI-generiertes Symbolbild)"><span class="ai-badge">KI-Symbolbild</span></div>
     <div class="pinfo">
-      <div class="pt">${p.t}</div><div class="pp">${abLabel(p)} <span>· nach Maß · inkl. MwSt · zzgl. Lieferung</span></div>
+      <div class="pt">${p.t}</div><div class="pp">${abLabel(p)} <span class="pp-mass">· nach Maß</span><span class="pp-zus">inkl. MwSt · zzgl. Lieferung</span></div>
       <div class="pgo">Konfigurieren <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div>
     </div></div>`).join('');
   const truck=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5v8h1"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>`;
