@@ -214,6 +214,9 @@ body:not(.wiz-active) .topbar{display:none}
 .btn{min-height:var(--tap);border-radius:2px;font:600 13px/1 var(--sans);text-transform:uppercase;letter-spacing:.14em;cursor:pointer;
   display:inline-flex;align-items:center;justify-content:center;gap:10px;transition:.2s var(--ease);white-space:nowrap}
 .btn svg{width:16px;height:16px}
+.btn-next .ic-korb{display:none}
+.btn-next.ist-korb .ic-weiter{display:none}
+.btn-next.ist-korb .ic-korb{display:block}
 .btn-back{padding:0 24px;background:transparent;border:1px solid var(--ink);color:var(--ink)}
 .btn-back:hover{background:rgba(28,27,25,.06)}
 .btn-next{padding:0 38px;background:var(--ink);border:1px solid var(--ink);color:#fff}
@@ -329,7 +332,7 @@ body:not(.wiz-active) .topbar{display:none}
 .grid.select .ocard .vis.anschlagvis{height:150px;overflow:visible;display:grid;place-items:center}
 .grid.select .ocard .vis.anschlagvis svg{height:100%;width:auto;max-width:100%}
 .qwrap{display:flex;align-items:center;gap:18px;justify-content:center;padding:14px 0}
-.qbtn{width:50px;height:50px;border:1px solid var(--line-d);border-radius:12px;background:#fff;font-size:26px;line-height:1;color:var(--primary);cursor:pointer;transition:.2s var(--ease)}
+.qbtn{width:var(--btn-mittel,48px);height:var(--btn-mittel,48px);border:1px solid var(--line-d);border-radius:12px;background:#fff;font-size:26px;line-height:1;color:var(--primary);cursor:pointer;transition:.2s var(--ease)}
 .qbtn:hover{border-color:var(--primary);background:#f5f9ff}
 .qnum{font-size:30px;font-weight:700;min-width:70px;text-align:center;font-variant-numeric:tabular-nums}
 .steps-inner{gap:0;max-width:1360px;justify-content:flex-start}
@@ -1058,7 +1061,16 @@ body.checkout-focus .dfnav-mlcta{display:none}
    Preis-Logik und Schritt-Reihenfolge bleiben unangetastet. */
 
 /* Task 4: Produkt gross und sofort erkennbar (war 15px neben dem Wechsel-Knopf) */
-.tb-prodwrap{display:flex;flex-direction:column;gap:1px;min-width:0}
+/* Der Kopf ist ein Knopf, sieht aber nicht wie einer aus: der Pfeil zeigt an,
+   dass sich hier etwas aufklappt — Standard bei Konfiguratoren. */
+.tb-prodwrap{display:flex;flex-direction:column;align-items:flex-start;gap:1px;min-width:0;
+  background:none;border:0;padding:6px 10px 6px 0;margin:0;text-align:left;cursor:pointer;
+  border-radius:12px;font:inherit;color:inherit;transition:color .18s}
+.tb-prodwrap:hover .tb-prod,.tb-prodwrap:focus-visible .tb-prod{color:var(--primary) !important}
+.tb-prodwrap:hover .tb-prodpfeil{color:var(--primary);transform:translateY(1px)}
+.tb-prodzeile{display:inline-flex;align-items:center;gap:8px;min-width:0}
+.tb-prodpfeil{width:20px;height:20px;flex:0 0 auto;color:var(--ink-3,#8b929b);
+  transition:color .18s,transform .18s var(--ease)}
 .tb-prodlabel{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
   color:var(--ink-soft,#5b626b);line-height:1.2}
 .tb-prod{font-family:var(--serif,'Plus Jakarta Sans',sans-serif);font-weight:800 !important;
@@ -1170,7 +1182,10 @@ html,body{overflow-x:clip}
 .cd-eb{display:block;font-size:11px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--accent);margin-bottom:5px}
 .cd-head h2{font-size:29px !important;letter-spacing:-.6px;line-height:1.12}
 .cd-head h2 em{font-style:normal;color:var(--accent)}
-.cd-x{background:#fff;border-radius:999px;box-shadow:0 10px 30px -18px rgba(8,21,46,.4)}
+/* Trefferflaeche auf die kleinste Stufe der Knopfskala — vorher 34px und damit
+   unter der empfohlenen Mindestgroesse. */
+.cd-x{background:#fff;border-radius:999px;box-shadow:0 10px 30px -18px rgba(8,21,46,.4);
+  width:var(--btn-klein,44px);height:var(--btn-klein,44px);align-items:center;justify-content:center}
 .cd-ship{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin:0 4px 14px}
 .cd-body{flex:none !important;overflow:visible !important;padding:0 4px !important}
 /* Positionskarte: Bild | Text | Preis, darunter die Aktionsleiste */
@@ -1199,7 +1214,11 @@ html,body{overflow-x:clip}
   box-shadow:0 18px 50px -24px rgba(8,21,46,.45)}
 .cd-tot{color:#fff}.cd-tot b{font-size:29px;letter-spacing:-.8px}
 .cd-mwst{color:#9fb3d0 !important;text-align:right}
-.cd-cta{background:#fff !important;color:var(--accent-d) !important;border-radius:12px;font-size:15.5px;padding:14px !important}
+/* Dieselbe Hauptaktion wie unten in der Fussleiste — also auch dieselbe Hoehe
+   und dieselbe Form. Vorher 46px hoch und eckiger als der Weiter-Knopf. */
+.cd-cta{background:#fff !important;color:var(--accent-d) !important;border-radius:999px;
+  font-size:15.5px;min-height:var(--btn-gross,56px);padding:0 20px !important;
+  display:flex !important;align-items:center;justify-content:center}
 .cd-liefer{margin:0 4px 14px}
 .cd-liefer button{border-radius:14px;padding:12px 14px;box-shadow:0 10px 30px -20px rgba(8,21,46,.4)}
 .cd-sum,.cd-note{padding:0 4px}
@@ -1241,11 +1260,26 @@ body.wiz-active .stage-card #stage svg{width:100%;height:auto;max-height:min(46v
 .sw .chip{min-width:0}
 .sw .nm,.sw span{overflow-wrap:anywhere}
 
-/* 3) Preis-Unterzeile am Handy: eine aeltere Regel deckelt sie auf 104 px und
-      macht daraus drei Zeilen, die die Fussleiste unnoetig hoch treiben. */
+/* Der Zurueck-Knopf heisst im ersten Schritt "Produkte" und war dadurch 14px
+   breiter — die ganze Knopfreihe rutschte beim ersten Weiter zur Seite. Feste
+   Mindestbreite haelt sie ruhig. Am Handy nicht, dort zaehlt jeder Pixel. */
+@media(min-width:641px){ .footer .btn-back{min-width:146px;justify-content:center} }
+
+/* 3) Fussleiste am Handy: Preis und Knoepfe passten nicht nebeneinander. Die
+      Unterzeile lief unter den Knoepfen durch und der Zurueck-Knopf lag beim
+      letzten Schritt ueber dem Preis. Jetzt zwei Zeilen — Preis oben, Knoepfe
+      darunter, Weiter fuellt die Restbreite. Der Versandhinweis bleibt dabei
+      vollstaendig lesbar (PAngV Paragraf 6 verlangt ihn an der Preisangabe). */
 @media(max-width:640px){
-  .price .sub{max-width:none!important;white-space:nowrap;font-size:10px;letter-spacing:.01em}
-  .footer-inner{padding:11px var(--seite-pad,24px) calc(11px + env(safe-area-inset-bottom))}
+  .footer-inner{flex-wrap:wrap;align-items:center;gap:8px 10px;
+    padding:9px var(--seite-pad,24px) calc(9px + env(safe-area-inset-bottom))}
+  .price{flex:1 0 100%;margin-right:0;min-width:0}
+  .price .amt{font-size:21px}
+  .price .sub{max-width:none!important;white-space:normal;font-size:10px;
+    letter-spacing:.01em;line-height:1.35;margin-top:1px}
+  .footer .btn{min-height:50px}
+  .footer .btn-back{flex:0 0 auto;padding:0 18px}
+  .footer .btn-next{flex:1 1 auto;padding:0 16px;justify-content:center}
 }
 </style>
 </head>
@@ -1404,13 +1438,14 @@ body.wiz-active .stage-card #stage svg{width:100%;height:auto;max-height:min(46v
 
 <header class="topbar">
   <div class="tb-row">
-    <div class="tb-links">
-      <button class="tb-link" onclick="askSwitchProduct()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span class="lbl">Anderes Produkt</span></button>
-      <div class="tb-prodwrap">
-        <span class="tb-prodlabel">Sie konfigurieren</span>
-        <div class="tb-prod" id="tbProd"></div>
-      </div>
-    </div>
+    <!-- Der Produktname ist selbst der Umschalter. Vorher stand daneben ein
+         eigener Knopf: am Rechner passte er nicht zum uebrigen Knopfsystem, bei
+         768px schrumpfte er auf ein Symbol ohne Wort, und am Handy war er ganz
+         ausgeblendet — dort liess sich das Produkt gar nicht mehr wechseln. -->
+    <button class="tb-prodwrap" id="tbSwitch" onclick="askSwitchProduct()" aria-label="Anderes Produkt waehlen">
+      <span class="tb-prodlabel">Sie konfigurieren</span>
+      <span class="tb-prodzeile"><span class="tb-prod" id="tbProd"></span><svg class="tb-prodpfeil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span>
+    </button>
   </div>
   <!-- Fortschrittsstrecke: eine Linie durch alle Schritte, die sich bis zum
        aktuellen fuellt. Die frueheren Zusatzstreifen ("Schritt 6 von 13 - Farbe"
@@ -1456,7 +1491,7 @@ body.wiz-active .stage-card #stage svg{width:100%;height:auto;max-height:min(46v
 <div class="footer"><div class="footer-inner">
   <div class="price"><div class="amt tnum"><span id="pInt">0</span><span class="dec">,00</span> <span class="cur">€</span></div><div class="sub" id="pFootSub">pro Fenster · inkl. MwSt · zzgl. Lieferung · unverbindlich</div></div>
   <button class="btn btn-back" id="btnBack" onclick="back()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg><span id="backLbl">Zurück</span></button>
-  <button class="btn btn-next" id="btnNext" onclick="next()"><span id="nextLbl">Weiter</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></button>
+  <button class="btn btn-next" id="btnNext" onclick="next()"><span id="nextLbl">Weiter</span><svg class="ic-weiter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg><svg class="ic-korb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 5h2.2l2 10.2a2 2 0 0 0 2 1.6h7.1a2 2 0 0 0 2-1.55L21 8H7"/><circle cx="10.5" cy="20" r="1.3"/><circle cx="18" cy="20" r="1.3"/></svg></button>
 </div></div>
 
 <script>
@@ -3393,6 +3428,13 @@ function startProduct(id){
 }
 // Bewusster „In den Warenkorb legen"-Moment — erst hier landet der Entwurf im Warenkorb (Zähler zählt erst jetzt)
 function commitCurrent(){
+  /* Die Maßpruefung sitzt hier und nicht im Weiter-Knopf, weil drei Wege in den
+     Warenkorb fuehren (Knopf in der Fussleiste, Knopf in der Uebersicht,
+     finishWithDefaults). Ueber die Schrittleiste laesst sich der Maß-Schritt
+     ueberspringen — dann landete eine unmoegliche Groesse mit Preis "null" im
+     Korb: der Kunde sah 0,00 Euro und der Betrieb bekam eine Anfrage, die sich
+     gar nicht bauen laesst. */
+  if(!massOk()){ zumMassSchritt(); return; }
   if(editIndex>=0&&cart[editIndex]){ cart[editIndex].conf={...S}; }        // bestehenden Artikel aktualisieren
   else { cart.unshift({conf:{...S},name:''}); editIndex=0; }               // neuen Artikel VORNE einfügen → neueste Position steht oben (Warenkorb, Zähler, Angebots-Mail konsistent)
   saveCart();   // persistiert + feuert 'df-cart-changed' → Nav-Zähler (dfnav.js) aktualisiert sich
@@ -4272,7 +4314,12 @@ function refreshPrice(){
     if(p!=null) _letzterPreis=p;
   }
   const sub=document.getElementById('pFootSub'), nb=document.getElementById('btnNext');
-  if(p==null && onMasse){ if(sub)sub.textContent='Maß außerhalb des möglichen Bereichs'; if(nb){nb.disabled=true;nb.classList.add('disabled');} }
+  /* Der Hinweis steht in JEDEM Schritt, nicht nur im Maß-Schritt — sonst wirkte
+     nach einem Sprung ueber die Schrittleiste alles in Ordnung. Der Knopf sieht
+     gesperrt aus, bleibt aber anklickbar und fuehrt zur Fehlerstelle. */
+  if(p==null){ if(sub)sub.textContent = onMasse ? 'Maß außerhalb des möglichen Bereichs'
+                                                : 'Maß prüfen — außerhalb des möglichen Bereichs';
+               if(nb){nb.disabled=false;nb.classList.add('disabled');} }
   else {
     // Bei mehreren Stueck den Gesamtpreis dazusagen — sonst rechnet der Kunde im Kopf
     const anz=Math.max(1,+S.anzahl||1);
@@ -4364,8 +4411,31 @@ function go(i){
   // Kunde etwas bestaetigt hatte. Abgelegt wird ausschliesslich ueber commitCurrent().
   cur=ziel; render(); window.scrollTo({top:0,behavior:'smooth'});
 }
-function next(){ if(STEPS[cur]&&STEPS[cur].key==='masse'&&!massOk()){ updateMassValidity(); const w=document.getElementById('massWarn'); if(w){w.style.display='flex'; w.classList.add('shake'); setTimeout(()=>w.classList.remove('shake'),450);} return; } if(cur===STEPS.length-2){ commitCurrent(); return; }   /* letzter Konfig-Schritt → bewusst in den Warenkorb legen */ if(cur<STEPS.length-1) go(cur+1); }
+/* Fuehrt zum Maß-Schritt und macht dort auf den Fehler aufmerksam. Ein
+   gesperrter Knopf ohne Reaktion waere die schlechtere Antwort: der Klick
+   bringt den Kunden jetzt direkt an die Stelle, die er aendern muss. */
+function zumMassSchritt(){
+  const i=STEPS.findIndex(function(st){return st&&st.key==='masse';});
+  if(i>=0&&cur!==i) go(i);
+  updateMassValidity();
+  const w=document.getElementById('massWarn');
+  if(w){w.style.display='flex'; w.classList.add('shake'); setTimeout(function(){w.classList.remove('shake');},450);}
+}
+function next(){
+  if(!massOk()){ zumMassSchritt(); return; }
+  if(cur===STEPS.length-2){ commitCurrent(); return; }   /* letzter Konfig-Schritt → bewusst in den Warenkorb legen */
+  if(cur<STEPS.length-1) go(cur+1);
+}
 function back(){ if(cur===0) backToPicker(); else go(cur-1); }
+function knopfBeschriftung(){
+  const nl=document.getElementById('nextLbl'), nb=document.getElementById('btnNext');
+  if(!nl||!nb||!started) return;
+  const korb=cur===STEPS.length-2, eng=window.innerWidth<=640;
+  nl.textContent = korb ? (editIndex>=0 ? (eng?'Übernehmen':'Änderungen übernehmen')
+                                        : (eng?'In den Warenkorb':'In den Warenkorb legen'))
+                        : 'Weiter';
+  nb.classList.toggle('ist-korb', korb);
+}
 function render(){
   if(editIndex>=0&&cart[editIndex]) cart[editIndex].conf={...S};   // aktive Konfig live in den Warenkorb spiegeln
   document.body.classList.toggle('checkout-focus', started && anfrageView==='form');
@@ -4474,7 +4544,9 @@ function render(){
     try{ document.fonts.ready.then(function(){ leisteVermessen(); }); }catch(e){} }
   if(!window.__leisteResize){ window.__leisteResize=1;
     var _t; window.addEventListener('resize',function(){
-      clearTimeout(_t); _t=setTimeout(leisteVermessen,120); }); }
+      clearTimeout(_t); _t=setTimeout(function(){ leisteVermessen();
+        /* auch die Knopfbeschriftung haengt an der Breite (Hochkant/Quer) */
+        try{ knopfBeschriftung(); }catch(e){} }, 120); }); }
   document.getElementById('hTitle').innerHTML=STEPS[cur].title[0]+'<span class="accent">'+STEPS[cur].title[1]+'</span>';
   document.getElementById('hSub').textContent=STEPS[cur].sub;
   document.getElementById('stage').innerHTML=stageSVG()+tuerSeitenUmschalter();
@@ -4510,7 +4582,10 @@ function render(){
   }
   updateMassValidity(); refreshPrice();
   document.getElementById('backLbl').textContent=cur===0?'Produkte':'Zurück';
-  document.getElementById('nextLbl').textContent = cur===STEPS.length-2 ? (editIndex>=0?'Änderungen übernehmen':'In den Warenkorb legen') : 'Weiter';
+  /* Der letzte Schritt ist keine Weiter-Bewegung, sondern eine eigene Handlung.
+     Deshalb Warenkorb-Symbol statt Pfeil — und am Handy die kurze Beschriftung,
+     sonst brach die Knopfreihe auf drei Zeilen um und die Fussleiste war 186px hoch. */
+  knopfBeschriftung();
 }
 loadCart();   // gespeicherten Warenkorb wiederherstellen (Persistenz)
 render();
