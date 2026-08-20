@@ -668,7 +668,7 @@ body:not(.wiz-active) .topbar{display:none}
 .grid:not(.select) #panel{display:flex;flex-direction:column;justify-content:flex-start}
 /* Vorschau-Schritte (ab Farbe): Skizze + Liste NEBENEINANDER, edel & großzügig, Optionen füllen die rechte Spalte */
 .stage-card{display:flex;flex-direction:row;align-items:stretch;overflow:hidden}
-.stage{flex:0 0 52%;padding:18px 14px;display:grid;place-items:center;background:linear-gradient(180deg,#f4f7fc,#eef2f8)}
+.stage{flex:0 0 60%;padding:18px 14px;display:grid;place-items:center;background:linear-gradient(180deg,#f4f7fc,#eef2f8)}
 /* Skizze füllt ihre Box statt auf einer festen Pixelbreite zu kleben: Breite voll ausnutzen, Höhe bis zur Kartenhöhe.
    Wichtig für die Lesbarkeit — die Maßzahlen skalieren mit der Zeichnung, bei 225px waren sie nur ~10px groß.
    (Achtung: es gibt weiter oben mehrere ältere `.stage svg`-Regeln; diese hier ist die zuletzt greifende.) */
@@ -880,7 +880,7 @@ body:not(.wiz-active) .topbar{display:none}
 /* Skip-Extras-Button: nur mobil im Wizard — Kunde übernimmt Standards & geht direkt zum Angebot */
 .skip-extras{display:none}
 @media(max-width:600px){
-  body.wiz-active .skip-extras{display:block;width:100%;margin:0 0 16px;padding:14px 16px;min-height:54px;
+  body.wiz-active .skip-extras{display:block;width:100%;margin:16px 0 0;padding:14px 16px;min-height:54px;
     border:1px solid color-mix(in srgb,var(--accent) 30%,var(--line));border-radius:12px;
     background:linear-gradient(180deg,#f4f8fd,#e9f1fb);color:var(--accent);
     font:800 14.5px/1.25 var(--sans);cursor:pointer;text-align:center;box-shadow:0 2px 8px rgba(34,94,170,.08)}
@@ -1281,6 +1281,47 @@ body.wiz-active .stage-card #stage svg{width:100%;height:auto;max-height:min(46v
   .footer .btn-back{flex:0 0 auto;padding:0 18px}
   .footer .btn-next{flex:1 1 auto;padding:0 16px;justify-content:center}
 }
+
+/* ════════ Handy: erst die Skizze, dann die Auswahl, dann die Eigenschaften ════════
+   Vorher stand die Eigenschaftsliste zwischen Skizze und Auswahl. Gemessen im
+   Farb-Schritt: die erste Farbe begann bei 1031px, der sichtbare Bereich endet bei
+   722px — man sah also keine einzige Farbe, ohne vorher zu scrollen.
+   display:contents loest die Buehnen-Karte auf, damit ihre beiden Teile in der
+   Reihenfolge des Rasters mitspielen; Rahmen und Schatten wandern an die Teile. */
+@media(max-width:880px){
+  /* align-items:stretch ist noetig: das Raster steht auf "start", und in einer
+     Spalten-Flexbox steuert align-items die BREITE — die Auswahlspalte war dadurch
+     nur 187px statt 342px breit und die Farbfelder standen untereinander. */
+  #wizGrid{display:flex!important;flex-direction:column;gap:10px;align-items:stretch}
+  .stage-card{display:contents}
+  .stage{order:1;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;
+    box-shadow:0 6px 16px rgba(10,18,37,.07)}
+  #panel{order:2}
+  .summary{order:3;background:var(--surface);border:1px solid var(--line);
+    border-radius:var(--r);box-shadow:0 6px 16px rgba(10,18,37,.07);padding:16px 18px 18px}
+}
+/* Die Buehnenkarte klebt beim Scrollen und hat overflow:hidden. Ist sie hoeher
+   als der Bildschirm, ist ihr unteres Ende damit UNERREICHBAR — die letzte
+   Eigenschaft ("Extras") liess sich am Rechner nicht anzeigen, egal wie weit man
+   scrollte. Jetzt ist die Karte auf die Bildschirmhoehe begrenzt und die
+   Eigenschaftsspalte scrollt in sich selbst. */
+@media(min-width:881px){
+  .stage-card{max-height:calc(100vh - 190px - var(--banner-h,0px));overflow:hidden}
+  .summary{overflow-y:auto;overscroll-behavior:contain}
+}
+
+/* Zeichnung so gross wie der Platz hergibt. Vorher war sie am Handy auf 216px
+   gedeckelt: die Maßziffern kamen dadurch mit 7,3px an, die Bildunterschrift mit
+   4,5px. Bei voller Breite sind es rund 12px. */
+@media(max-width:880px){
+  .stage{padding:10px 10px 6px}
+  .stage svg{max-width:100%!important;max-height:min(34vh,290px)!important}
+}
+
+/* Unterer Rand groesser als die feste Fussleiste, sonst verschwindet das Ende der
+   letzten Karte dahinter (Fussleiste ist am Handy 122px hoch, der Rand war 96px). */
+.wrap{padding-bottom:132px}
+@media(max-width:640px){ .wrap{padding-bottom:158px} }
 </style>
 </head>
 <body>
@@ -2069,9 +2110,12 @@ function skizzeUnterschrift(x, y, breite, DT, aussenSeite){
   var farben = (ca===ci) ? ('Rahmen ' + ca) : ('au\u00dfen ' + ca + '   \u00b7   innen ' + ci);
   var mitte = x + breite/2;
   return '<text x="'+mitte+'" y="'+y+'" text-anchor="middle" font-family="Inter,Arial" font-weight="700"'
-       + ' font-size="'+(DT*0.62)+'" fill="#565b61">'+seite+'</text>'
-       + '<text x="'+mitte+'" y="'+(y+DT*0.85)+'" text-anchor="middle" font-family="Inter,Arial" font-weight="500"'
-       + ' font-size="'+(DT*0.55)+'" fill="#767d88">'+farben+'</text>';
+       /* Gemessen gerendert: vorher 4,5px am Handy und 7px am Rechner — unlesbar.
+          Die Groesse steht in Zeichnungseinheiten, deshalb muss sie hier steigen;
+          die Zeichnung selbst wird zusaetzlich groesser dargestellt. */
+       + ' font-size="'+(DT*1.0)+'" fill="#3f454c">'+seite+'</text>'
+       + '<text x="'+mitte+'" y="'+(y+DT*1.35)+'" text-anchor="middle" font-family="Inter,Arial" font-weight="500"'
+       + ' font-size="'+(DT*0.85)+'" fill="#666d77">'+farben+'</text>';
 }
 function flatWindowSVG(isBalkon){
   const bMm=Math.max(+S.w||1000,300), hMm=Math.max(+S.h||1200,300);
@@ -2087,7 +2131,12 @@ function flatWindowSVG(isBalkon){
   const DT=uu*0.05, DW=Math.max(uu*0.0032,2), tick=DT*0.32;   // Untergrenze entfernt: sonst trugen kleine Elemente relativ riesige Ziffern (500x500 = 6,1 % der Bildbreite) und grosse winzige (4000 = 2,9 %)
   // Rechter Rand bei Rollladen breiter: dort stehen ZWEI Maßketten nebeneinander (Element innen, Gesamtmaß außen).
   // DT*8.0 = Linie + Zahl (bis 4-stellig) + Luft + zweite Linie + zweite Zahl — sonst laufen die Maßzahlen ineinander.
-  const mL=(hasRoll?Math.max(uu*0.16,DT*3.4):Math.max(uu*0.13,DT*2.2)), mR=(hasRoll?Math.max(uu*0.40,DT*8.0):Math.max(uu*0.24,DT*4.8)), mT=Math.max(uu*0.14,DT*2.8), mB=Math.max(uu*0.16,DT*3.2);
+  /* Linker und rechter Rand sind gleich breit. Vorher war der rechte Rand doppelt
+     so breit wie der linke (dort haengt die Hoehen-Maßkette) — dadurch sass die
+     Zeichnung sichtbar links aus der Mitte, am Rechner um 335px. Gleiche Raender
+     heisst: das Element selbst steht mittig, die Maßkette liegt im Rand. */
+  const _mSeite=(hasRoll?Math.max(uu*0.40,DT*8.0):Math.max(uu*0.24,DT*4.8)),
+        mL=_mSeite, mR=_mSeite, mT=Math.max(uu*0.14,DT*2.8), mB=Math.max(uu*0.16,DT*3.2);
   // Rahmen-/Flügelbreiten wie Drutex-Profil (Pos 1: Rahmen 50001 + Flügel 50011 → ~50 mm Blend- + ~66 mm Flügelrahmen sichtbar = 116 mm je Seite bei 1000 mm).
   const FR=Math.max(bMm*0.05,42), innerW=bMm-2*FR, sashW=innerW/nFl, gy=winY+FR, gh=hMm-2*FR;
   const SFR=Math.max(Math.min(sashW,gh)*0.075,30), pzH=hasRoll?Math.max(Math.min(gh*0.2,rollH*0.9),40):0;
@@ -2210,7 +2259,12 @@ function schiebeStageSVG(){
   const DT=uu*0.045, DW=Math.max(uu*0.0032,2), tick=DT*0.32;  // wie Fenster-Renderer
   // Rechter Rand bei Rollladen breiter: dort stehen ZWEI Maßketten nebeneinander (Element innen, Gesamtmaß außen).
   // DT*8.0 = Linie + Zahl (bis 4-stellig) + Luft + zweite Linie + zweite Zahl — sonst laufen die Maßzahlen ineinander.
-  const mL=(hasRoll?Math.max(uu*0.16,DT*3.4):Math.max(uu*0.13,DT*2.2)), mR=(hasRoll?Math.max(uu*0.40,DT*8.0):Math.max(uu*0.24,DT*4.8)), mT=Math.max(uu*0.14,DT*2.8), mB=Math.max(uu*0.16,DT*3.2);
+  /* Linker und rechter Rand sind gleich breit. Vorher war der rechte Rand doppelt
+     so breit wie der linke (dort haengt die Hoehen-Maßkette) — dadurch sass die
+     Zeichnung sichtbar links aus der Mitte, am Rechner um 335px. Gleiche Raender
+     heisst: das Element selbst steht mittig, die Maßkette liegt im Rand. */
+  const _mSeite=(hasRoll?Math.max(uu*0.40,DT*8.0):Math.max(uu*0.24,DT*4.8)),
+        mL=_mSeite, mR=_mSeite, mT=Math.max(uu*0.14,DT*2.8), mB=Math.max(uu*0.16,DT*3.2);
   const FR=Math.max(Math.min(bMm,hMm)*0.05,40), innerW=bMm-2*FR, pw=innerW/n, gy=winY+FR, gh=hMm-2*FR;
   const SFR=Math.max(Math.min(pw,gh)*0.05,22), pzH=hasRoll?Math.max(Math.min(gh*0.2,rollH*0.9),40):0;
   const gehr=(x,y,w,h,fr)=>`<g stroke="${miter}" stroke-width="${Math.max(uu*0.0018,1.4)}" stroke-linecap="round"><line x1="${x}" y1="${y}" x2="${x+fr}" y2="${y+fr}"/><line x1="${x+w}" y1="${y}" x2="${x+w-fr}" y2="${y+fr}"/><line x1="${x}" y1="${y+h}" x2="${x+fr}" y2="${y+h-fr}"/><line x1="${x+w}" y1="${y+h}" x2="${x+w-fr}" y2="${y+h-fr}"/></g>`;
@@ -3268,7 +3322,7 @@ function renderCartDrawer(){
     if(_hs || _q>=10)
       ship.innerHTML='<div class="cd-ship-msg reached"><b>Kostenlose Lieferung</b> deutschlandweit erreicht</div><div class="cd-ship-bar reached"><i style="width:100%"></i></div>';
     else if(_q<LIEFER_MIN)
-      ship.innerHTML='<div class="cd-ship-msg">Bis '+(LIEFER_MIN-1)+' Elementen: <b>Abholung im Lager</b> (kostenlos). Noch <b>'+_rest+' '+_wort+'</b>, dann ist Lieferung m\u00f6glich.</div><div class="cd-ship-bar"><i style="width:'+_pct+'%"></i></div>';
+      ship.innerHTML='<div class="cd-ship-msg"><b>Abholung im Lager</b> (kostenlos). Ab '+LIEFER_MIN+' Elementen liefern wir \u2014 noch <b>'+_rest+' '+_wort+'</b>.</div><div class="cd-ship-bar"><i style="width:'+_pct+'%"></i></div>';
     else
       ship.innerHTML='<div class="cd-ship-msg">Lieferung m\u00f6glich. Noch <b>'+_rest+' '+_wort+'</b> bis zur <b>kostenlosen</b> Lieferung.</div><div class="cd-ship-bar"><i style="width:'+_pct+'%"></i></div>';
     ship.innerHTML = (ship.dataset.hinweis||'') + ship.innerHTML;
@@ -4577,7 +4631,11 @@ function render(){
       });
     } })();
   if(SKIP_KEYS.includes(STEPS[cur].key) && cur<STEPS.length-1){
-    document.getElementById('panel').insertAdjacentHTML('afterbegin',
+    /* Die Abkuerzung steht UNTER der Auswahl, nicht davor. Vorher schob sie die
+       Optionen 80px nach unten — im Sicherheits-Schritt war am Handy dadurch keine
+       einzige Auswahlkarte sichtbar, ohne zu scrollen. Erst zeigen, was es gibt,
+       dann die Abkuerzung anbieten. */
+    document.getElementById('panel').insertAdjacentHTML('beforeend',
       '<button type="button" class="skip-extras" onclick="finishWithDefaults()">Passt so — direkt zum Angebot <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg><span class="sub">Griff, Schall, Sicherheit &amp; Rollladen sind auf Standard vorbelegt</span></button>');
   }
   updateMassValidity(); refreshPrice();
