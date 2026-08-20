@@ -1446,7 +1446,7 @@ const COLORS=[
 ];
 const _PREM_FARBE=['schwarzbr','basaltgr-gl','basaltgr-sa','betongrau','crown-plat','dunkelgr','dunkelrot','eiche-nat','eisengl','moosgruen','oregon','schiefgr-gl','schiefgr-sa','douglasie'];
 const S={ prod:'fenster', profile:'classic', aufteilung:'1fl', opening:'dkr', anschlagIdx:1, hstSystem:'psk', pskKammer:'iglo5', w:1000, h:1200, anzahl:1, outer:0, inner:0, balkonSchwelle:'ohne', doorModel:'nebraska-lcr-inox', griffTuer:'klinke', griffAussen:'klinke', stossHoehe:'1200', griffHst:'innen', hstSchloss:'ohne', hstTeilung:'2', hstLauf:'rechts',
-  glass:'2', glasdekor:'klar', schall:false, griff:'mistral', roll:'kein', panzer:null, sproTyp:'keine', sproDicke:'27', sproRaster:'kreuz', sicher:false, colorTarget:'a' };
+  glass:'2', glasdekor:'klar', schall:false, griff:'mistral', roll:'kein', panzer:null, endleiste:null, sproTyp:'keine', sproDicke:'27', sproRaster:'kreuz', sicher:false, colorTarget:'a' };
 
 // === Öffnung PRO FLÜGEL — 1:1 aus dem Live-Konfigurator (ANSCHLAG_SETS, geprüft 04.07.2026) ===
 // Jede Karte = eine Kombination; oeff = Öffnung je Flügel (links→rechts). stulpAt = Trennung nach Flügel i ist ein Stulp (statt Pfosten).
@@ -1694,7 +1694,8 @@ function panzerOnGlass(x,y,w,h){
   for(let yy=y+slatH; yy<y+h-3.4; yy+=slatH){
     s+=`<line x1="${x}" y1="${yy.toFixed(1)}" x2="${x+w}" y2="${yy.toFixed(1)}" stroke="${gap}" stroke-width="0.6"/>`;
   }
-  s+=`<rect x="${x}" y="${y+h-3.2}" width="${w}" height="3.6" fill="${shade(pz.c,pzDark?16:-18)}" stroke="${edge}" stroke-width="0.7"/>`; // Endleiste
+  const elc=(S.endleiste!=null?COLORS[S.endleiste].c:shade(pz.c,pzDark?16:-18));
+  s+=`<rect x="${x}" y="${y+h-3.2}" width="${w}" height="3.6" fill="${elc}" stroke="${edge}" stroke-width="0.7"/>`; // Endleiste
   return s;
 }
 // Flügel-Liste aus der gewählten Anschlag-Kombination (Öffnung PRO Flügel, 1:1 wie Live).
@@ -1973,6 +1974,7 @@ function flatWindowSVG(isBalkon){
     if(pzH>0){ const pz=(S.panzer!=null?COLORS[S.panzer]:co).c;
       s+=`<rect x="${glx}" y="${gly}" width="${glw}" height="${pzH}" fill="${pz}" stroke="rgba(0,0,0,.2)" stroke-width="${DW*0.6}"/>`;
       const lh=Math.max(pzH/5,10); for(let ly=gly+lh; ly<gly+pzH-lh*0.5; ly+=lh) s+=`<line x1="${glx+2}" y1="${ly}" x2="${glx+glw-2}" y2="${ly}" stroke="rgba(0,0,0,.18)" stroke-width="${DW*0.5}"/>`;
+     if(S.endleiste!=null){ const eh=Math.max(pzH*0.11,3); s+=`<rect x="${glx}" y="${gly+pzH-eh}" width="${glw}" height="${eh}" fill="${COLORS[S.endleiste].c}" stroke="rgba(0,0,0,.22)" stroke-width="${DW*0.5}"/>`; }
     }
     const cy=gly+pzH+(glh-pzH)/2;
     // Feld-Nummer bewusst weggelassen (Kundenwunsch 08.07.2026: saubere Skizze ohne Zahlen)
@@ -2079,7 +2081,7 @@ function schiebeStageSVG(){
     s+=`<rect x="${gx}" y="${gy}" width="${pw}" height="${gh}" fill="${fCol}" stroke="${frameStroke}" stroke-width="${DW}"/>`+gehr(gx,gy,pw,gh,SFR);
     const glx=gx+SFR, gly=gy+SFR, glw=Math.max(pw-2*SFR,20), glh=Math.max(gh-2*SFR,20), cx=glx+glw/2, cyy=gly+glh/2;
     s+=`<rect x="${glx}" y="${gly}" width="${glw}" height="${glh}" fill="${GLASS}" stroke="${GLASSST}" stroke-width="${DW}"/>`;
-    if(pzH>0){ const pz=(S.panzer!=null?COLORS[S.panzer]:co).c; s+=`<rect x="${glx}" y="${gly}" width="${glw}" height="${pzH}" fill="${pz}" stroke="rgba(0,0,0,.2)" stroke-width="${DW*0.6}"/>`; const lh=Math.max(pzH/5,10); for(let ly=gly+lh; ly<gly+pzH-lh*0.5; ly+=lh) s+=`<line x1="${glx+2}" y1="${ly}" x2="${glx+glw-2}" y2="${ly}" stroke="rgba(0,0,0,.18)" stroke-width="${DW*0.5}"/>`; }
+    if(pzH>0){ const pz=(S.panzer!=null?COLORS[S.panzer]:co).c; s+=`<rect x="${glx}" y="${gly}" width="${glw}" height="${pzH}" fill="${pz}" stroke="rgba(0,0,0,.2)" stroke-width="${DW*0.6}"/>`; const lh=Math.max(pzH/5,10); for(let ly=gly+lh; ly<gly+pzH-lh*0.5; ly+=lh) s+=`<line x1="${glx+2}" y1="${ly}" x2="${glx+glw-2}" y2="${ly}" stroke="rgba(0,0,0,.18)" stroke-width="${DW*0.5}"/>`; if(S.endleiste!=null){ const eh=Math.max(pzH*0.11,3); s+=`<rect x="${glx}" y="${gly+pzH-eh}" width="${glw}" height="${eh}" fill="${COLORS[S.endleiste].c}" stroke="rgba(0,0,0,.22)" stroke-width="${DW*0.5}"/>`; } }
     const isSlide=(i===slideIdx), dir=(cx<bMm/2)?'r':'l', SW=Math.max(Math.min(glw,glh)*0.012,4);
     if(isSlide){
       if(sys==='psk'){ s+=`<path d="M${glx+glw*0.14} ${gly+pzH+(glh-pzH)*0.9} L${cx} ${gly+pzH+glh*0.08} L${glx+glw*0.86} ${gly+pzH+(glh-pzH)*0.9}" stroke="${DIN}" stroke-width="${SW}" fill="none" stroke-linejoin="round"/>`; }
@@ -2849,7 +2851,8 @@ function prodSpecs(rest){
   const m=rest?'':`${S.w}×${S.h} mm`;
   if(S.prod==='haustuer') return teil(DOORN[S.doorModel]||'—', a, griffTuerShort(), m, c);
   if(S.prod==='schiebe')  return teil(S.hstSystem==='hs'?'Hebe-Schiebe':'PSK', a, m, c);
-  const ex=[]; if(S.roll==='gurt')ex.push('Rollladen'); if(S.roll==='motor')ex.push('Motorrolladen'); if(S.glass==='3')ex.push('3-fach'); if(S.prod==='balkon'&&S.balkonSchwelle==='alu')ex.push('Aluschwelle'); if(S.sicher)ex.push('RC1');
+  const ex=[]; if(S.roll==='gurt')ex.push('Rollladen'); if(S.roll==='motor')ex.push('Motorrolladen');
+  if(S.roll!=='kein')ex.push('Panzer '+panzerText(),'Endleiste '+endleisteText()); if(S.glass==='3')ex.push('3-fach'); if(S.prod==='balkon'&&S.balkonSchwelle==='alu')ex.push('Aluschwelle'); if(S.sicher)ex.push('RC1');
   return teil(AUFTN[S.aufteilung], a, m, c, ex.length?ex.join(', '):'');
 }
 
@@ -3215,7 +3218,7 @@ function defaultConfig(id){
     anschlagIdx:(p==='balkon')?0:(p==='fenster'?ANSCHLAG['1fl'].findIndex(function(o){return o.oeff&&o.oeff[0]==='fest';}):(ANSCHLAG_DEFIDX['1fl']||1)),
     profile:'classic',                 // Profil-System zurücksetzen (sonst schleppt ein Produktwechsel "Energy" mit und der ab-Preis stimmt nicht)
     hstSystem:'psk', pskKammer:'iglo5', hstSchloss:'ohne',   // Schiebetür startet auf dem günstigeren PSK-System
-    roll:'kein', panzer:null, rollSeite:'rechts',
+    roll:'kein', panzer:null, endleiste:null, rollSeite:'rechts',
     sproTyp:'keine', sproDicke:'27', sproRaster:'kreuz', sicher:false,
     glass:(p==='schiebe')?'3':'2', glasdekor:'klar', schall:false,
     outer:0, inner:0, colorTarget:'a', anzahl:1,
@@ -3470,9 +3473,15 @@ function panelHTML(){
   if(k==='rollladen'){
     const c=(val,vis,t,s,delta0)=>`<div class="ocard ${S.roll===val?'on':''}" onclick="set('roll','${val}')"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="vis">${vis}</div><div class="t">${t}</div>${s?`<div class="s">${s}</div>`:''}</div>`;
     const seite=(S.rollSeite==='links')?'links':'rechts';
+    const pzsw=(cur,key)=>COLORS.map((co,i)=>`<button class="pzsw ${cur===i?'on':''}" style="background:${co.c}" title="${co.n}" onclick="set('${key}',${i})"></button>`).join('');
+    // Endleiste als zweite Reihe IN derselben Karte statt als eigener Schritt: sie gehoert
+    // sichtbar zum Panzer, und 95 % lassen sie ohnehin auf „wie Panzer" stehen.
     const pzpick = S.roll!=='kein'? `<div class="card" style="margin-top:16px"><div class="grp-title">Panzerfarbe</div>
-      <div class="pzrow"><button class="pzsw txt ${S.panzer==null?'on':''}" onclick="set('panzer',null)">wie Rahmen</button>${COLORS.map((co,i)=>`<button class="pzsw ${S.panzer===i?'on':''}" style="background:${co.c}" title="${co.n}" onclick="set('panzer',${i})"></button>`).join('')}</div>
-      <div class="pzhint">Der Rollladenpanzer kann in einer eigenen Farbe geliefert werden.</div></div>`:'';
+      <div class="pzrow"><button class="pzsw txt ${S.panzer==null?'on':''}" onclick="set('panzer',null)">wie Rahmen</button>${pzsw(S.panzer,'panzer')}</div>
+      <div class="pzhint">Gewählt: <b>${panzerText()}</b> — der Rollladenpanzer kann in einer eigenen Farbe geliefert werden.</div>
+      <div class="grp-title" style="margin-top:18px">Farbe der Endleiste</div>
+      <div class="pzrow"><button class="pzsw txt ${S.endleiste==null?'on':''}" onclick="set('endleiste',null)">wie Panzer</button>${pzsw(S.endleiste,'endleiste')}</div>
+      <div class="pzhint">Gewählt: <b>${endleisteText()}</b> — die Endleiste ist die Abschlussleiste unten am Panzer.</div></div>`:'';
     // Eine Kachel = eine fertige Variante (Art + Bedienseite). Vorher war die Seite eine
     // eigene Karte unter dem KI-Hinweis — am Handy unter dem Fold, auf "rechts" vorbelegt,
     // also hat sie praktisch niemand bewusst gewaehlt.
@@ -3533,7 +3542,7 @@ function panelHTML(){
         <div class="mfield"><label>Höhe <span class="mrange">${L.hMin}–${L.hMax} mm</span></label><div class="mrow"><input id="mH" type="number" inputmode="numeric" enterkeyhint="done" min="0" value="${S.h}" oninput="setMass('h',this.value)" onfocus="this.select()" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}"><span class="unit">mm</span></div></div>
       </div>
       <div id="massWarn" class="masswarn" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg><span></span></div>
-      <div class="mhint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span>Richtmaße genügen für die Anfrage — die endgültigen Maße stimmen wir vor der Bestellung mit Ihnen ab.</span></div></div>`;
+      <div class="mhint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span>Richtmaße genügen für die Anfrage — die verbindlichen Maße bestätigen Sie vor der Bestellung.</span></div></div>`;
   }
   if(k==='farbe'){
     const co=COLORS[S.outer],ci=COLORS[S.inner];
@@ -3594,6 +3603,12 @@ function summaryPanel(){
   const farbP = (S.outer===S.inner)
     ? p('Farbe',`${dot(co.c)}${co.n}`,1)
     : p('Farbe außen',`${dot(co.c)}${co.n}`)+p('Farbe innen',`${dot(ci.c)}${ci.n}`);
+  // Panzer- und Endleistenfarbe stehen ueberall dort, wo die Konfiguration zusammengefasst
+  // wird — Uebersicht, Warenkorb, Anfrage-Mail, Bestaetigung. Ohne sie ist die Farbwahl
+  // beim Rollladen zwar getroffen, aber nirgends im Text transportiert.
+  const pzP = (S.roll!=='kein')
+    ? p('Panzerfarbe',`${dot(COLORS[panzerIdx()].c)}${panzerText()}`)+p('Endleiste',`${dot(COLORS[endleisteIdx()].c)}${endleisteText()}`)
+    : '';
 
   if(S.prod==='haustuer'){
     return kopf+`<div class="ak-grid">`
@@ -3613,6 +3628,7 @@ function summaryPanel(){
       +p('Verglasung',S.glass==='3'?'3-fach':'2-fach')
       +farbP
       +p('Rollladen',rollText())
+      +pzP
       +p('Schloss',S.hstSchloss==='innen-aussen'?'abschließbar':'Standard')
       +`</div>`;
   }
@@ -3630,11 +3646,16 @@ function summaryPanel(){
     +p('Verglasung',`${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}`)
     +p('Griff',GRIFFN[S.griff]||'—')
     +p('Sprossen',sproN)
+    +pzP
     +p('Extras',ex.length?ex.join(' · '):'keine',1)
     +`</div>`;
 }
 function summaryRows(){
   const co=COLORS[S.outer],ci=COLORS[S.inner];
+  const pzRows = (S.roll!=='kein')
+    ? `<div class="srow"><span class="k">Panzerfarbe</span><span class="v"><span class="dot" style="background:${COLORS[panzerIdx()].c}"></span>${panzerText()}</span></div>`
+      +`<div class="srow"><span class="k">Farbe Endleiste</span><span class="v"><span class="dot" style="background:${COLORS[endleisteIdx()].c}"></span>${endleisteText()}</span></div>`
+    : '';
   const massRow=`<div class="srow"><span class="k">Maße</span><span class="v tnum">${S.w} × ${S.h} mm</span></div><div class="srow"><span class="k">Anzahl</span><span class="v tnum">${S.anzahl} Stück</span></div>`;
   const colorRows=`<div class="srow"><span class="k">Außenfarbe</span><span class="v"><span class="dot" style="background:${co.c}"></span>${co.n}</span></div><div class="srow"><span class="k">Innenfarbe</span><span class="v"><span class="dot" style="background:${ci.c}"></span>${ci.n}</span></div>`;
   // Anschlagzeile aus anschlagInfo(): Fachebene oben, Klartext als zweite Zeile
@@ -3661,7 +3682,7 @@ function summaryRows(){
       ${aRow}${massRow}${colorRows}
       <div class="srow"><span class="k">Verglasung</span><span class="v">${S.glass==='3'?'3-fach':'2-fach'}</span></div>
       <div class="srow"><span class="k">Griff</span><span class="v">${griffN}</span></div>
-      <div class="srow"><span class="k">Rollladen</span><span class="v">${rollText()}</span></div>`;
+      <div class="srow"><span class="k">Rollladen</span><span class="v">${rollText()}</span></div>${pzRows}`;
   }
   // Rollladen als eigene Zeile (wie Sprossen) statt in „Extras" — die Bedienseite ist eine
   // Fertigungsangabe und darf in der Anfrage nicht zwischen Schallschutz und RC1 untergehen.
@@ -3677,7 +3698,7 @@ function summaryRows(){
     <div class="srow"><span class="k">Verglasung</span><span class="v">${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}</span></div>${schwelleRow}
     ${sproRow}
     <div class="srow"><span class="k">Griff</span><span class="v">${GRIFFN[S.griff]}</span></div>
-    ${rollRow}
+    ${rollRow}${pzRows}
     <div class="srow"><span class="k">Extras</span><span class="v">${ex.length?ex.join(' · '):'— keine —'}</span></div>`;
 }
 
@@ -4068,6 +4089,14 @@ function rollText(){
   if(S.roll!=='gurt'&&S.roll!=='motor') return '—';
   return (S.roll==='motor'?'Motor':'Gurtwickler')+' '+((S.rollSeite==='links')?'links':'rechts')+' (von innen)';
 }
+/* Panzer- und Endleistenfarbe. Der Panzer laeuft ohne eigene Wahl „wie Rahmen", die Endleiste
+   „wie Panzer" — fuer die Fertigung nuetzt eine relative Angabe nichts, deshalb steht der
+   aufgeloeste Farbname immer dabei. Die Endleiste ist die Abschlussleiste unten am Panzer und
+   im Handel eine eigene Farbwahl, nicht automatisch Teil der Panzerfarbe. */
+function panzerIdx(){ return (S.panzer!=null?S.panzer:S.outer); }
+function endleisteIdx(){ return (S.endleiste!=null?S.endleiste:panzerIdx()); }
+function panzerText(){ return COLORS[panzerIdx()].n+(S.panzer==null?' (wie Rahmen)':''); }
+function endleisteText(){ return COLORS[endleisteIdx()].n+(S.endleiste==null?' (wie Panzer)':''); }
 // Maße live setzen OHNE Neu-Rendern (sonst verliert das Feld den Fokus) — nur Preis unten aktualisieren
 function setMass(k,v){ S[k]=(+v||0);
   // Beim Tippen wird nicht neu gerendert (sonst springt der Fokus aus dem Feld) — der Warenkorb
