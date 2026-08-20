@@ -289,7 +289,13 @@ body:not(.wiz-active) .topbar{display:none}
   .swatches{gap:16px 11px}.sw .chip{height:48px}
 }
 /* ── Marken-Recolor (Blau) + Button-Anpassung ── */
-.step.active .num{background:var(--primary);border-color:var(--primary)}
+.step.active .num{background:var(--primary);border-color:var(--primary);color:#fff;
+  box-shadow:0 0 0 5px rgba(34,94,170,.14)}
+.step.done .num{background:var(--primary);border-color:var(--primary);color:#fff}
+.step.done .lb{color:var(--ink-soft)}
+.step.active .lb{color:var(--ink);font-weight:800}
+.step:not(.active):not(.done):hover .num{border-color:var(--primary);color:var(--primary)}
+.step.active{border-bottom-color:transparent}   /* Unterstrich entfaellt: die Bahn zeigt den Stand */
 .ocard.on{border-color:var(--primary);box-shadow:inset 0 0 0 1px var(--primary)}
 .seg2 button.on{border-color:var(--primary);box-shadow:inset 0 0 0 1px var(--primary)}
 .sw.on .chip{box-shadow:0 0 0 1px #fff,0 0 0 2px var(--primary)}
@@ -327,16 +333,23 @@ body:not(.wiz-active) .topbar{display:none}
 .qbtn:hover{border-color:var(--primary);background:#f5f9ff}
 .qnum{font-size:30px;font-weight:700;min-width:70px;text-align:center;font-variant-numeric:tabular-nums}
 .steps-inner{gap:10px;max-width:1360px;justify-content:space-between}
-.step{min-width:0;flex:0 0 auto;flex-direction:column;gap:8px;padding:15px 10px 13px}   /* flex:0 0 auto: Feldbreite folgt dem Wort, der Abstand bleibt gleich */
-.step .num{width:27px;height:27px;font-size:11.5px}
-.step .lb{font-size:11px;letter-spacing:.04em;line-height:1.2}
+.step{min-width:0;flex:0 0 auto;flex-direction:column;gap:9px;padding:18px 10px 15px;position:relative;z-index:1}   /* Feldbreite folgt dem Wort, Abstand bleibt gleich; ueber der Bahn */
+.step .num{width:28px;height:28px;font-size:12px;font-weight:700;background:var(--surface);
+  border:1.5px solid var(--line-d);color:var(--ink-3,#8b929b);
+  transition:background .2s,border-color .2s,color .2s,box-shadow .2s}
+.step .lb{font-size:11px;letter-spacing:.05em;line-height:1.2;transition:color .2s,font-weight .2s}
 .steps-hint{max-width:1360px;margin:0 auto;padding:9px 0 10px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);font-size:12px;color:var(--ink-soft)}
 #stepNow{font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:.06em;font-size:11.5px}
 .sh-jump{display:inline-flex;align-items:center;gap:7px;color:var(--primary);font-weight:600}
 .sh-jump svg{width:16px;height:16px}
 /* App-Fortschrittsbalken (nur mobil sichtbar, siehe @media unten) */
-.wizprog{display:none;height:6px;background:var(--line);border-radius:999px;overflow:hidden}
-.wizprog i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--acc));border-radius:999px;transition:width .4s var(--ease)}
+.steps-inner{position:relative}
+/* Fortschrittsstrecke hinter den Kreisen. Position und Breite setzt render() aus
+   den tatsaechlichen Kreismitten — dann endet die Fuellung exakt auf dem
+   aktuellen Schritt, egal wie breit die Woerter sind. */
+.wizprog{position:absolute;display:block;height:2px;background:var(--line);border-radius:2px;
+  z-index:0;pointer-events:none;transform:translateY(-1px)}
+.wizprog i{display:block;height:100%;width:0;background:var(--primary);border-radius:2px;transition:width .38s var(--ease)}
 .ocard .vis{height:132px;overflow:hidden}
 .ocard .vis img{max-height:120px;max-width:100%;width:auto;height:auto;object-fit:contain}
 .opts.three{grid-template-columns:repeat(3,1fr)}
@@ -1370,9 +1383,12 @@ html,body{overflow-x:clip}
       </div>
     </div>
   </div>
-  <nav class="steps"><div class="steps-inner" id="stepbar"></div>
-    <div class="wizprog" aria-hidden="true"><i id="wizprogFill"></i></div>
-    <div class="steps-hint"><span id="stepNow"></span><span class="sh-jump"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7h8M8 7l3-3M8 7l3 3M16 17H8M16 17l-3-3M16 17l-3 3"/></svg> Jeden Schritt frei anklickbar</span></div>
+  <!-- Fortschrittsstrecke: eine Linie durch alle Schritte, die sich bis zum
+       aktuellen fuellt. Die frueheren Zusatzstreifen ("Schritt 6 von 13 - Farbe"
+       und "Jeden Schritt frei anklickbar") sind entfallen: beide wiederholten,
+       was die Leiste selbst schon zeigt, und stapelten drei Baender uebereinander. -->
+  <nav class="steps" aria-label="Konfigurationsschritte">
+    <div class="steps-inner" id="stepbar"></div>
   </nav>
 </header>
 <div class="pw-modal" id="pwModal" role="dialog" aria-modal="true" aria-labelledby="pwTitle" onkeydown="if(event.key==='Escape')closePwModal()">
@@ -4344,14 +4360,44 @@ function render(){
   g.classList.toggle('full', key==='anfrage');
   g.classList.toggle('select', selectMode);
   nav.style.display='block'; foot.style.display=(key==='anfrage')?'none':'block';
-  document.getElementById('stepbar').innerHTML=STEPS.map((s,i)=>{
+  document.getElementById('stepbar').innerHTML='<div class="wizprog" aria-hidden="true"><i id="wizprogFill"></i></div>'+STEPS.map((s,i)=>{
     const cls=i===cur?'active':(i<cur?'done':'');
     const num=i<cur?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg>`:(i+1);
     return `<button class="step ${cls}" onclick="go(${i})" aria-current="${i===cur?'step':'false'}"><span class="num">${num}</span><span class="lb">${s.label}</span></button>`;
   }).join('');
-  document.getElementById('stepNow').textContent='Schritt '+(cur+1)+' von '+STEPS.length+' · '+STEPS[cur].label;
   {var _tp=document.getElementById('tbProd'); if(_tp) _tp.textContent=prodName();}
-  var _wpf=document.getElementById('wizprogFill'); if(_wpf) _wpf.style.width=Math.round(((cur+1)/STEPS.length)*100)+'%';
+  /* Die Fortschrittslinie wird aus den tatsaechlichen Kreismitten gerechnet, nicht
+     aus einem Prozentwert — dann endet die Fuellung exakt auf dem aktuellen Schritt,
+     egal wie breit die Woerter sind. */
+  (function(){
+    var sb=document.getElementById('stepbar'); if(!sb) return;
+    var schritte=sb.querySelectorAll('.step'),
+        bahn=sb.querySelector('.wizprog'), fuell=document.getElementById('wizprogFill');
+    if(!schritte.length||!bahn) return;
+    /* Layout-Koordinaten statt Bildschirmkoordinaten: die Leiste scrollt am Handy
+       seitlich, sonst wuerde der Scrollwert doppelt zaehlen. Der Kreis sitzt in
+       einem selbst positionierten .step, deshalb beide Ebenen addieren — sein
+       offsetLeft allein bezieht sich nur auf den Schritt. */
+    var mitte=function(st){ var n=st.querySelector('.num');
+      return n ? st.offsetLeft + n.offsetLeft + n.offsetWidth/2 : st.offsetLeft + st.offsetWidth/2; };
+    var erst=schritte[0], n0=erst.querySelector('.num');
+    var links=mitte(erst), rechts=mitte(schritte[schritte.length-1]);
+    bahn.style.left=links+'px';
+    bahn.style.width=Math.max(0,rechts-links)+'px';
+    bahn.style.top=(erst.offsetTop + (n0?n0.offsetTop + n0.offsetHeight/2:0))+'px';
+    /* Nachjustieren: offsetLeft misst ab der Aussenkante des Containers, die
+       Angabe "left" bei absoluter Lage ab der Innenkante. Der Unterschied ist der
+       Innenabstand und der aendert sich mit der Bildschirmbreite. Statt ihn
+       nachzurechnen, wird einmal gemessen und der Rest abgezogen — das stimmt in
+       jedem Layout. */
+    if(n0){
+      var soll=n0.getBoundingClientRect(), ist=bahn.getBoundingClientRect();
+      var korr=(soll.left+soll.width/2)-ist.left;
+      if(Math.abs(korr)>0.5) bahn.style.left=(links+korr)+'px';
+    }
+    var akt=sb.querySelector('.step.active');
+    if(fuell) fuell.style.width=(akt?Math.max(0,mitte(akt)-links):0)+'px';
+  })();
   // aktuellen Schritt in der swipebaren Leiste mittig schieben (nur horizontal, ohne Seiten-Scroll zu stören)
   (function(){var sc=document.getElementById('stepbar'),ac=sc&&sc.querySelector('.step.active');
     if(sc&&ac){ sc.scrollLeft = Math.max(0, ac.offsetLeft - (sc.clientWidth - ac.offsetWidth)/2); }})();
