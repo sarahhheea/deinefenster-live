@@ -1322,6 +1322,126 @@ body.wiz-active .stage-card #stage svg{width:100%;height:auto;max-height:min(46v
    letzten Karte dahinter (Fussleiste ist am Handy 122px hoch, der Rand war 96px). */
 .wrap{padding-bottom:132px}
 @media(max-width:640px){ .wrap{padding-bottom:158px} }
+
+/* ════════════════════════════════════════════════════════════════════════
+   EIN KARTEN-SYSTEM FUER ALLE AUSWAHLSCHRITTE
+   Vorher hatte jeder Schritt seine eigene Sprache: Rollladen quetschte fuenf
+   Karten in EINE Reihe (je rund 60px breit), Glas hatte zwei breite, Sicherheit
+   zeigte Symbole statt Bilder, Aufteilung hatte keine Unterzeile, Anzahl war ein
+   einzelner Zaehler in einem leeren Kasten und die Farbwahl bestand aus winzigen
+   Chips. Das wirkte zusammengewuerfelt.
+
+   Grundregel: nicht mehr die Spaltenzahl vorgeben, sondern eine MINDESTBREITE.
+   Der Browser bricht dann selbst um — fuenf Rollladen-Optionen werden 3+2 statt
+   fuenf gequetschter. Alle Karten haben dieselbe Bildhoehe, dieselbe Schrift und
+   denselben Auswahlzustand.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* --- Raster: Mindestbreite statt fester Spaltenzahl --------------------- */
+.opts,
+.opts.two,.opts.three,.opts.four,.opts.roll5{
+  display:grid;gap:14px;
+  grid-template-columns:repeat(auto-fit,minmax(176px,1fr));
+  align-items:stretch}
+.opts.griff-innen{grid-template-columns:1fr}
+/* Rollladen bleibt am Handy bei seinem eigenen Layout (eine Karte je Zeile,
+   Bild links, Text rechts). Die allgemeine Regel gab ihm zwei Spalten, wovon
+   88px aufs Bild gingen — der Titel brach dadurch buchstabenweise um ("Ke/in"). */
+@media(max-width:520px){
+  .opts,.opts.two,.opts.three,.opts.four{
+    grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:11px}
+}
+@media(max-width:880px){
+  .opts.roll5{grid-template-columns:1fr!important;gap:9px}
+}
+
+/* --- Die Karte: ueberall gleich ---------------------------------------- */
+.ocard{
+  display:flex;flex-direction:column;justify-content:flex-start;
+  padding:16px 13px 15px;border-radius:16px;border:1.5px solid var(--line);
+  background:var(--surface);box-shadow:0 1px 2px rgba(16,26,48,.04);
+  transition:border-color .18s var(--ease),box-shadow .18s var(--ease),background .18s var(--ease)}
+.ocard .vis{height:118px;margin-bottom:12px;flex:0 0 auto}
+.ocard .vis img{max-height:110px}
+.ocard .t{font-size:15px;font-weight:700;line-height:1.25;color:var(--ink)}
+.ocard .s{font-size:12.5px;line-height:1.35;margin-top:4px;color:var(--ink-soft)}
+.ocard:hover{border-color:var(--primary);box-shadow:0 6px 18px -10px rgba(34,94,170,.45)}
+
+/* Ausgewaehlt muss man auf einen Blick sehen — vorher nur eine duenne Linie. */
+.ocard.on{
+  border-color:var(--primary);background:#f6faff;
+  box-shadow:inset 0 0 0 1.5px var(--primary),0 8px 22px -12px rgba(34,94,170,.55)}
+.ocard .tick{width:24px;height:24px;top:11px;left:11px;background:var(--primary);
+  box-shadow:0 0 0 2.5px #fff,0 2px 6px rgba(16,26,48,.18)}
+.ocard .tick svg{width:13px;height:13px}
+
+/* --- Farbwahl: gleiche Sprache, nur groesser --------------------------- */
+/* 104px statt 128px: die Farbspalte ist am Rechner nur rund 370px breit — bei
+   128px passten nur noch zwei Felder nebeneinander und aus 46 Farben wurde eine
+   endlose Liste. Bei 104px bleiben es drei, die Felder sind trotzdem deutlich
+   groesser als die 54px vorher. */
+.swatches{grid-template-columns:repeat(auto-fill,minmax(104px,1fr))!important;gap:16px 12px}
+.sw .chip{height:66px;border-radius:13px;border:1.5px solid var(--line-d);
+  transition:box-shadow .18s var(--ease),transform .18s var(--ease)}
+.sw:hover .chip{transform:translateY(-1px);box-shadow:0 6px 16px -8px rgba(16,26,48,.4)}
+.sw.on .chip{box-shadow:0 0 0 2px var(--primary),0 0 0 5px rgba(34,94,170,.16)}
+.sw .nm{font-size:13px;font-weight:600;margin-top:9px;line-height:1.25}
+@media(max-width:520px){
+  .swatches{grid-template-columns:repeat(auto-fill,minmax(96px,1fr))!important;gap:14px 10px}
+  .sw .chip{height:60px}
+  .sw .nm{font-size:12px}
+}
+
+/* --- Gruppentitel: eine Groesse ueberall -------------------------------- */
+.grp-title{font-size:11.5px;font-weight:700;letter-spacing:.16em;
+  color:var(--ink-soft);text-transform:uppercase;margin-bottom:16px}
+
+/* --- Anzahl: der Zaehler sah aus wie vergessen ------------------------- */
+.qwrap{gap:22px;padding:6px 0 4px}
+.qbtn{border:1.5px solid var(--line-d);border-radius:14px;font-weight:400;
+  transition:border-color .18s,background .18s,color .18s}
+.qbtn:hover{border-color:var(--primary);background:#f4f9ff;color:var(--primary)}
+.qnum{font-size:34px;font-weight:800;letter-spacing:-.02em}
+
+/* ════════ Das Produkt ist in JEDEM Schritt zu sehen ════════
+   Bisher blendete `.grid.select .stage-card{display:none}` die Skizze in fuenf von
+   zwoelf Schritten aus (Profil, Aufteilung, Oeffnung, Maße, Anzahl). Genau dort
+   entscheidet der Kunde ueber Form und Groesse — und sah sein Fenster nicht. Kein
+   Fahrzeug-Konfigurator versteckt das Fahrzeug, waehrend man die Ausstattung waehlt.
+   Ab jetzt ueberall dasselbe Bild: links das Produkt, rechts die Auswahl. */
+@media(min-width:881px){
+  .grid.select{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);
+    max-width:var(--seite-max);margin:0}
+  .grid.select .stage-card{display:flex}
+  .grid.select .card{background:var(--surface);border:1px solid var(--line);
+    border-radius:var(--r);padding:22px;max-width:none;margin:0;width:auto}
+  .grid.select .grp-title{display:block}
+  .grid.select .opts.two,.grid.select .opts.three,.grid.select .opts.four{
+    max-width:none;margin:0;gap:14px;
+    grid-template-columns:repeat(auto-fit,minmax(176px,1fr))}
+  .grid.select .ocard{padding:16px 13px 15px;border-radius:16px}
+  .grid.select .ocard .vis{height:118px}
+  .grid.select .ocard .vis img{max-height:110px}
+  .grid.select .ocard .t{font-size:15px}
+  .grid.select .ocard .s{font-size:12.5px}
+  .grid.select .mrow input{height:56px;font-size:20px}
+}
+@media(max-width:880px){
+  /* auch am Handy: die Karte loest sich auf, damit Skizze, Auswahl und
+     Eigenschaften in dieser Reihenfolge untereinander stehen */
+  #wizGrid.select .stage-card{display:contents}
+  #wizGrid.select .card{background:var(--surface);border:1px solid var(--line);
+    border-radius:var(--r);padding:16px;max-width:none;margin:0}
+  #wizGrid.select .grp-title{display:block}
+}
+/* Der grosse zentrierte Schrittkopf passt nicht mehr zum zweispaltigen Aufbau —
+   er wird zur ruhigen Zeile ueber dem Raster. */
+@media(min-width:881px){
+  #head{text-align:left;margin:2px 0 16px;max-width:none;padding-bottom:0}
+  #head h2{font-size:27px}
+  #head .sub,#head p{font-size:15px;margin-top:6px}
+}
+
 </style>
 </head>
 <body>
