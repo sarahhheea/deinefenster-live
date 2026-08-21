@@ -4851,10 +4851,11 @@ function ausWert(k){
    waeren am Handy hunderte Bilder auf einmal. */
 function ausstattungHTML(){
   const st=STEPS[cur]; if(!st||!st.unter||!st.unter.length) return '';
-  if(_ausOffen===null){
-    const erst=st.unter.filter(function(u){ return !_ausBeruehrt[u.key]; })[0];
-    _ausOffen=erst?erst.key:null;
-  }
+  /* Beim Betreten bleibt alles zu. Vorher sprang der erste unentschiedene
+     Abschnitt auf — das ist bei Fenster, Balkon- und Schiebetuer die Farbe mit
+     44 Feldern und rund 2000px, die alle uebrigen Abschnitte unter den Rand
+     druecken. Der Sinn der Liste ist aber der Ueberblick: der Kunde sieht, dass
+     alles schon eingestellt ist, und macht gezielt auf, was er aendern will. */
   const pfeil='<svg class="aus-pf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
   const sek=st.unter.map(function(u){
     const offen=(_ausOffen===u.key);
