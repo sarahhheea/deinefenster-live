@@ -4062,51 +4062,76 @@ function summaryPanel(){
   const farbP = (S.outer===S.inner)
     ? p('Farbe',`${dot(co.c)}${co.n}`,1)
     : p('Farbe außen',`${dot(co.c)}${co.n}`)+p('Farbe innen',`${dot(ci.c)}${ci.n}`);
+  // Verglasung und Glasmotiv sind zwei getrennte Schritte im Konfigurator und stehen deshalb
+  // auch als zwei Zeilen. In einer Zeile zusammengezogen war nicht erkennbar, dass das Dekor
+  // eine eigene Wahl ist — der Kunde konnte es beim letzten Blick nicht gezielt pruefen.
+  const glasP = p('Verglasung',S.glass==='3'?'3-fach':'2-fach')+p('Glasmotiv',DEKON[S.glasdekor]||'Klarglas');
   // Panzer- und Endleistenfarbe stehen ueberall dort, wo die Konfiguration zusammengefasst
   // wird — Uebersicht, Warenkorb, Anfrage-Mail, Bestaetigung. Ohne sie ist die Farbwahl
   // beim Rollladen zwar getroffen, aber nirgends im Text transportiert.
   const pzP = (S.roll!=='kein')
     ? p('Panzerfarbe',`${dot(COLORS[panzerIdx()].c)}${panzerText()}`)+p('Endleiste',`${dot(COLORS[endleisteIdx()].c)}${endleisteText()}`)
     : '';
+  // Rollladen als eigene Zeile statt im Sammeleintrag "Extras": Antrieb UND Bedienseite sind
+  // Fertigungsangaben. In einer Extras-Kette hinter Schallschutz und Sicherheit gelesen,
+  // wirkte die Bedienseite wie ein Zusatz statt wie eine Festlegung.
+  const rollP = p('Rollladen', S.roll!=='kein'?rollText():'ohne');
 
   if(S.prod==='haustuer'){
     return kopf+`<div class="ak-grid">`
       +p('Modell',DOORN[S.doorModel]||'—')
       +p('Profil',PROFN[S.profile])
       +farbP
-      +p('Verglasung',`${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}`)
-      +p('Sicherheit',S.sicher?'Mehrfachverriegelung':'Standard')
+      +glasP
       +p('Griff außen',(GRIFFT[_griffAussenVal()]||'—')+(_griffAussenVal()==='stoss'?` · ${S.stossHoehe||'1200'} mm`:''))
       +p('Griff innen','Drückergarnitur')
+      +p('Sicherheit',S.sicher?'Mehrfachverriegelung':'Standard')
       +`</div>`;
   }
   if(S.prod==='schiebe'){
     const psk=S.hstSystem!=='hs';
+    // Kammer-System (PSK) bzw. Teilung (Hebe-Schiebe) fehlten hier komplett, obwohl beide
+    // die Konstruktion bestimmen. Je Bauart ist nur eine der beiden Angaben sinnvoll.
+    const bauP = psk
+      ? p('PSK-System',S.pskKammer==='iglo-energy'?'IGLO Energy Classic PSK':'IGLO 5 Classic PSK')
+      : p('Teilung',S.hstTeilung==='3'?'3-teilig · 2 fest + 1 schiebbar':'2-teilig · 1 fest + 1 schiebbar');
     return kopf+`<div class="ak-grid">`
       +p('System',psk?'PSK Schiebetür':'Hebe-Schiebetür')
-      +p('Verglasung',S.glass==='3'?'3-fach':'2-fach')
+      +bauP
       +farbP
-      +p('Rollladen',rollText())
-      +pzP
+      +glasP
+      +p('Griff',psk?'PSK-Griff':'Innengriff + Außengriff')
       +p('Schloss',S.hstSchloss==='innen-aussen'?'abschließbar':'Standard')
+      +rollP
+      +pzP
       +`</div>`;
   }
   // Fenster + Balkontür
-  const ex=[]; if(S.roll!=='kein')ex.push('Rollladen · '+rollText());
-  if(S.schall)ex.push('Schallschutz'); if(S.sicher)ex.push('RC1');
-  if(S.prod==='balkon'&&S.balkonSchwelle==='alu')ex.push('Aluschwelle');
-  // "ohne Sprossen" und "keine Extras" werden bewusst ausgeschrieben statt weggelassen:
+  // "ohne Sprossen" und "ohne Rollladen" werden bewusst ausgeschrieben statt weggelassen:
   // beim letzten Blick vor dem Absenden ist die Abwesenheit selbst eine Aussage.
-  const sproN=(S.sproTyp&&S.sproTyp!=='keine')?((SPROTYPN[S.sproTyp]||'')+' · '+S.sproDicke+' mm'):'ohne';
+  // Sprossen mit Raster, nicht nur Typ und Dicke — das Raster bestimmt die Optik und war
+  // bisher nur in der Detailliste zu finden, nicht in der Kurzfassung im Warenkorb.
+  const sproN=(S.sproTyp&&S.sproTyp!=='keine')
+    ? ((SPROTYPN[S.sproTyp]||'')+' · '+S.sproDicke+' mm · '+((SPRO_RASTER[S.sproRaster]||{}).name||''))
+    : 'ohne';
+  // Schwelle gibt es nur bei der Balkontür; beim Fenster waere die Zeile eine leere Aussage.
+  const schwelleP = (S.prod==='balkon') ? p('Schwelle',S.balkonSchwelle==='alu'?'Aluschwelle':'ohne') : '';
+  // Schallschutz hat keinen eigenen Wizard-Schritt und ist damit im Normalfall nicht gesetzt.
+  // Deshalb nur zeigen, wenn er tatsaechlich gewaehlt wurde — eine Dauerzeile "ohne" waere
+  // eine Angabe, die der Kunde nirgends beeinflussen kann.
+  const schallP = S.schall ? p('Schallschutz','Schallschutzglas') : '';
   return kopf+`<div class="ak-grid">`
     +p('Aufteilung',AUFTN[S.aufteilung])
     +p('Profil',PROFN[S.profile])
     +farbP
-    +p('Verglasung',`${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}`)
+    +glasP
+    +schallP
     +p('Griff',GRIFFN[S.griff]||'—')
+    +p('Sicherheit',S.sicher?'WK2 Sicherheit':'WK1 Standard')
     +p('Sprossen',sproN)
+    +schwelleP
+    +rollP
     +pzP
-    +p('Extras',ex.length?ex.join(' · '):'keine',1)
     +`</div>`;
 }
 function summaryRows(){
