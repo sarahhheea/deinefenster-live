@@ -1188,26 +1188,59 @@ html,body{overflow-x:clip}
   width:var(--btn-klein,44px);height:var(--btn-klein,44px);align-items:center;justify-content:center}
 .cd-ship{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin:0 4px 14px}
 .cd-body{flex:none !important;overflow:visible !important;padding:0 4px !important}
-/* Positionskarte: Bild | Text | Preis, darunter die Aktionsleiste */
-.cd-item{display:grid !important;grid-template-columns:300px 1fr auto;gap:22px !important;align-items:start;
-  background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px !important;margin-bottom:14px;
+/* Positionskarte in drei Spalten: links die Skizze mit Preis und Stueckzahl darunter,
+   in der Mitte die vollstaendige Eigenschaftsliste, rechts die Aktionen.
+   Warum nebeneinander statt untereinander: beim letzten Blick vor dem Absenden prueft der
+   Kunde Zeichnung, Daten und Preis gegeneinander. Untereinander sieht er nie beides
+   zugleich und muss scrollen. Ab 900px ist die Breite dafuer da. */
+.cd-item{display:grid !important;grid-template-columns:minmax(0,30fr) minmax(0,45fr) minmax(0,25fr);
+  grid-template-rows:auto 1fr;gap:14px 22px !important;align-items:start;
+  background:#fff;border:1px solid var(--line);border-radius:20px;padding:18px !important;margin-bottom:14px;
   box-shadow:0 10px 30px -18px rgba(8,21,46,.4)}
-.cd-draws{flex:none !important;width:auto !important;grid-column:1}
+.cd-draws{flex:none !important;width:auto !important;grid-column:1;grid-row:1}
 .cd-draws .cd-draw{background:linear-gradient(160deg,#eaf2fd,#f7fafe) !important;border:1px solid #dbe7f8 !important;
   border-radius:14px !important;padding:14px 12px !important}
 .cd-draws .cd-draw svg,.cd-draws .cd-draw img{max-height:310px !important}
-.cd-main{grid-column:2;min-width:0}
+/* Mitte ueber beide Zeilen: die Eigenschaftsliste ist meist hoeher als die Skizze. Die
+   zweite Rasterzeile ist 1fr, damit die Ueberlaenge dort landet und der Preisblock direkt
+   unter der Skizze stehen bleibt statt nach unten zu rutschen. */
+.cd-main{grid-column:2;grid-row:1/span 2;min-width:0}
 .cd-title{font-size:19px !important;font-weight:800;letter-spacing:-.3px;line-height:1.2}
 .cd-specs{margin-top:10px}
+/* Eigenschaften einspaltig — aber nur in der Dreispalten-Ansicht: dort ist die mittlere
+   Spalte so schmal, dass Werte wie "IGLO 5 Classic" umbrechen. Auf dem schmalen Schirm hat
+   die Liste die volle Breite, da bleiben zwei Spalten richtig (sonst waere die Karte doppelt
+   so hoch). */
+@media(min-width:900px){ .cd-specs .ak-grid{grid-template-columns:1fr !important} }
 .ps-row{border-bottom:0 !important;padding:2px 0 !important}
 .ps-row.ps-key{background:linear-gradient(90deg,#eaf1fa,#f7fafe);border-left:4px solid var(--accent);
   border-radius:0 10px 10px 0;padding:9px 13px !important;margin:0 0 10px !important;display:block !important}
 .ps-row.ps-key span{display:block;font-size:10.5px;letter-spacing:.9px;text-transform:uppercase;color:var(--accent-d)}
 .ps-row.ps-key b{display:block;text-align:left !important;font-size:15px;line-height:1.3;color:var(--ink)}
-.cd-row{grid-column:3;flex-direction:column !important;align-items:flex-end !important;gap:8px}
+/* Preis und Stueckzahl unter der Skizze, beide ueber die volle Spaltenbreite */
+.cd-row{grid-column:1;grid-row:2;align-self:start;display:flex;flex-direction:column !important;
+  align-items:stretch !important;gap:9px;margin-top:0}
 .cd-price{font-size:21px !important;font-weight:800;letter-spacing:-.5px}
-.cd-raum{grid-column:2;margin-top:12px !important}
-.cd-acts{grid-column:1/-1;border-top:1px solid var(--line);margin-top:14px;padding-top:12px;gap:18px !important}
+.cd-qty{display:flex;width:100%;justify-content:space-between;align-items:center;
+  border:1px solid var(--line-d);border-radius:999px}
+.cd-qty button{width:var(--btn-klein,44px);height:var(--btn-klein,44px);font-size:19px;border-radius:999px}
+.cd-qty span{flex:1;text-align:center}
+.cd-raum{margin-top:12px !important}
+/* Aktionen rechts untereinander, alle gleich breit. Gleiche Hoehe und Rundung wie die
+   uebrigen Knoepfe im Konfigurator — vorher waren es Textlinks und damit weder als Knopf
+   erkennbar noch gross genug zum Treffen. */
+.cd-acts{grid-column:3;grid-row:1/span 2;align-self:start;display:flex;flex-direction:column;
+  gap:9px !important;border-top:0;margin-top:0;padding-top:0}
+.cd-acts button{width:100%;min-height:var(--btn-klein,44px);padding:0 12px;border-radius:999px;
+  font:inherit;font-size:13.5px;font-weight:700;line-height:1.2;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;text-align:center;
+  transition:background .15s,color .15s,border-color .15s}
+.cd-edit{background:var(--primary,#225eaa);border:1px solid var(--primary,#225eaa);color:#fff}
+.cd-edit:hover{background:var(--primary-d,#1b4d8c);border-color:var(--primary-d,#1b4d8c)}
+.cd-dup{background:#fff;border:1px solid var(--primary,#225eaa);color:var(--primary,#225eaa)}
+.cd-dup:hover{background:rgba(34,94,170,.07)}
+.cd-del{background:var(--bg,#eef2f8);border:1px solid var(--line);color:var(--ink-soft,#5b626b)}
+.cd-del:hover{background:#fdf1ef;border-color:#e9c3bc;color:#c0392b;text-decoration:none}
 /* Abschluss: dunkler Block mit hellem Knopf — greift den Footer der Website auf */
 .cd-foot{border-top:0 !important;background:linear-gradient(160deg,#0f1620,#1b2b44) !important;
   border-radius:18px;padding:20px !important;margin:16px 4px 0;color:#fff;
@@ -1228,20 +1261,27 @@ html,body{overflow-x:clip}
 @media(max-width:820px){
   .cd-panel{padding:0 12px 22px}
   .cd-head h2{font-size:24px !important}
-  /* Handy: Zeichnung oben ueber die volle Breite — dort ist sie am groessten */
-  .cd-item{grid-template-columns:1fr !important;gap:12px !important}
-  .cd-draws,.cd-main,.cd-row,.cd-raum{grid-column:1 !important}
-  .cd-row{flex-direction:row !important;align-items:center !important;justify-content:space-between !important}
-  .cd-draws .cd-draw svg,.cd-draws .cd-draw img{max-height:245px !important}
 }
 
-@media(max-width:820px){
-  /* Handy: Skizze oben ueber die volle Breite, Daten darunter.
-     flex-basis muss hier zurueckgesetzt werden: in einer Spalten-Flexbox ist sie die HOEHE,
-     die 300px aus der Desktop-Regel erzeugten sonst eine Leerflaeche unter der Zeichnung. */
-  .cd-item{flex-direction:column;gap:12px}
-  .cd-draws{width:100%;flex:0 0 auto}
+/* Unter 900px reicht die Breite fuer drei Spalten nicht mehr: alles untereinander in der
+   Reihenfolge Skizze, Eigenschaften, Preis mit Stueckzahl, Aktionen. Die Reihenfolge kommt
+   aus dem Quelltext, hier wird nur das Raster aufgeloest — nichts umsortiert. */
+@media(max-width:899px){
+  .cd-item{grid-template-columns:1fr !important;grid-template-rows:none !important;gap:12px !important}
+  .cd-draws,.cd-main,.cd-row,.cd-acts{grid-column:1 !important;grid-row:auto !important}
+  .cd-draws{width:100% !important}
   .cd-draws .cd-draw{width:100%;height:auto}
+  .cd-draws .cd-draw svg,.cd-draws .cd-draw img{max-height:245px !important}
+  /* Preis und Stueckzahl nebeneinander: zwei kurze Angaben, die untereinander nur Hoehe
+     kosten wuerden. */
+  .cd-row{flex-direction:row !important;align-items:center !important;
+    justify-content:space-between !important;gap:12px}
+  .cd-qty{width:auto;flex:0 0 auto}
+  /* Drei gleich breite Knoepfe nebeneinander passen bei 390px nicht — "Duplizieren"
+     braucht allein rund 110px. Darum Bearbeiten ueber die volle Breite und darunter die
+     beiden selteneren Aktionen zu zweit. */
+  .cd-acts{display:grid;grid-template-columns:1fr 1fr;gap:9px !important}
+  .cd-edit{grid-column:1/-1}
 }
 
 /* ===== Nachtrag: unabhaengig von der Position der Schrittleiste ==========
@@ -3497,15 +3537,21 @@ function cdItemHTML(it,i){
   var title=withConf(conf,configTitle);
   var unit=withConf(conf,price)||0;
   var specs=posKeySpecs(conf);
-    var bilder = '<div class="cd-draws"><figure class="cd-draw" onclick="skizzeGross('+i+')" role="button" tabindex="0" aria-label="Skizze gro&szlig; ansehen">'+sketch+'</figure></div>';
-  return '<div class="cd-item">'+bilder+'<div class="cd-main">'
-    +'<div class="cd-pos-no">Pos. '+(i+1)+'</div>'
-    +'<div class="cd-title">'+title+(it.name?' · '+it.name:'')+'</div>'
-    +'<div class="cd-specs">'+specs+'</div>'
-    +'<div class="cd-row"><div class="cd-qty"><button type="button" onclick="itemQty('+i+',-1);renderCartDrawer()" aria-label="Menge verringern">&minus;</button><span>'+q+'</span><button type="button" onclick="itemQty('+i+',1);renderCartDrawer()" aria-label="Menge erhöhen">+</button></div><div class="cd-price">'+eur(unit*q)+'</div></div>'
-    +'<input class="cd-raum" type="text" maxlength="40" placeholder="Raum (optional, z. B. Bad OG)" value="'+String(it.name||'').replace(/"/g,'&quot;')+'" oninput="itemNameSetzen('+i+',this.value)" aria-label="Raumbezeichnung f&uuml;r Position '+(i+1)+'">'
+  var bilder = '<div class="cd-draws"><figure class="cd-draw" onclick="skizzeGross('+i+')" role="button" tabindex="0" aria-label="Skizze gro&szlig; ansehen">'+sketch+'</figure></div>';
+  /* Vier direkte Kinder der Karte statt zwei. Nur direkte Kinder lassen sich im Raster der
+     Karte frei platzieren: Skizze und Preisblock links, Eigenschaften in der Mitte, Aktionen
+     rechts. Die Reihenfolge im Quelltext ist zugleich die Reihenfolge auf dem schmalen
+     Schirm (Skizze, Eigenschaften, Preis, Aktionen) — dort ist keine Umsortierung noetig. */
+  return '<div class="cd-item">'+bilder
+    +'<div class="cd-main">'
+      +'<div class="cd-pos-no">Pos. '+(i+1)+'</div>'
+      +'<div class="cd-title">'+title+(it.name?' · '+it.name:'')+'</div>'
+      +'<div class="cd-specs">'+specs+'</div>'
+      +'<input class="cd-raum" type="text" maxlength="40" placeholder="Raum (optional, z. B. Bad OG)" value="'+String(it.name||'').replace(/"/g,'&quot;')+'" oninput="itemNameSetzen('+i+',this.value)" aria-label="Raumbezeichnung f&uuml;r Position '+(i+1)+'">'
+    +'</div>'
+    +'<div class="cd-row"><div class="cd-price">'+eur(unit*q)+'</div><div class="cd-qty"><button type="button" onclick="itemQty('+i+',-1);renderCartDrawer()" aria-label="Menge verringern">&minus;</button><span>'+q+'</span><button type="button" onclick="itemQty('+i+',1);renderCartDrawer()" aria-label="Menge erhöhen">+</button></div></div>'
     +'<div class="cd-acts"><button type="button" class="cd-edit" onclick="cdEdit('+i+')">Bearbeiten</button><button type="button" class="cd-dup" onclick="itemDuplizieren('+i+')">Duplizieren</button><button type="button" class="cd-del" onclick="itemRemove('+i+');renderCartDrawer()">Entfernen</button></div>'
-    +'</div></div>';
+    +'</div>';
 }
 function renderCartDrawer(){
   var body=document.getElementById('cdBody'), foot=document.getElementById('cdFoot'), ship=document.getElementById('cdShip');
