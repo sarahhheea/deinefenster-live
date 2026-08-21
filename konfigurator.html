@@ -1484,6 +1484,13 @@ body.wiz-active .stage-card #stage svg{width:100%;height:auto;max-height:min(46v
    Luecken mit den naechsten passenden Eintraegen. */
 .ak-grid{grid-auto-flow:row dense}
 .ak-p.voll{grid-column:1/-1}
+/* Vor der Maßeingabe keine Skizze: es gaebe nur ein Platzhalter-Fenster in einer
+   Groesse, die niemand eingegeben hat. Der Auswahlbereich nutzt dann die volle
+   Breite und die Karten stehen mittig. */
+#wizGrid.ohne-skizze .stage-card{display:none!important}
+#wizGrid.ohne-skizze{grid-template-columns:minmax(0,1fr)!important;max-width:1180px;margin:0 auto}
+#wizGrid.ohne-skizze .card{max-width:1060px;margin-left:auto;margin-right:auto}
+@media(max-width:880px){ #wizGrid.ohne-skizze{max-width:none;margin:0} }
 </style>
 </head>
 <body>
@@ -4771,6 +4778,12 @@ function render(){
   g.style.display='grid';
   g.classList.toggle('full', key==='anfrage');
   g.classList.toggle('select', selectMode);
+  /* Die Skizze erscheint erst, wenn es etwas zu zeichnen gibt. Vor der
+     Maßeingabe stuende dort ein Platzhalter-Fenster in einer Groesse, die der
+     Kunde nie eingegeben hat — das ist eher irrefuehrend als hilfreich.
+     Ab dem Maß-Schritt ist sie durchgehend dabei. */
+  const _vorMass=['profil','aufteilung','oeffnung','teilung','lauf','psk'].includes(key);
+  g.classList.toggle('ohne-skizze', _vorMass);
   nav.style.display='block'; foot.style.display=(key==='anfrage')?'none':'block';
   /* "Uebersicht/Anfrage" steht nicht in der Leiste: es ist keine
      Konfigurationsentscheidung, sondern der Abschluss. Die Zusammenfassung liegt
