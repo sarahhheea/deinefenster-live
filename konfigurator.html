@@ -1489,8 +1489,26 @@ body.wiz-active .stage-card #stage svg{width:100%;height:auto;max-height:min(46v
    Breite und die Karten stehen mittig. */
 #wizGrid.ohne-skizze .stage-card{display:none!important}
 #wizGrid.ohne-skizze{grid-template-columns:minmax(0,1fr)!important;max-width:1180px;margin:0 auto}
-#wizGrid.ohne-skizze .card{max-width:1060px;margin-left:auto;margin-right:auto}
+#wizGrid.ohne-skizze #panel{width:100%;display:block}
+#wizGrid.ohne-skizze .card{max-width:1060px;width:100%;margin-left:auto;margin-right:auto}
+#wizGrid.ohne-skizze .opts{max-width:none;width:100%}
 @media(max-width:880px){ #wizGrid.ohne-skizze{max-width:none;margin:0} }
+/* Profil, Aufteilung und Oeffnung bekommen ihre feste Anordnung zurueck.
+   Die automatische Mindestbreiten-Regel hat sie anders umbrechen lassen als
+   gewohnt (Oeffnung stand ploetzlich zu viert in einer Reihe statt 2x2).
+   Diese drei Schritte haben eine bekannte, feste Zahl an Optionen — da ist die
+   feste Spaltenzahl die richtige Wahl. Die automatische Regel bleibt dort, wo
+   sie gebraucht wird: beim Rollladen mit fuenf Optionen. */
+@media(min-width:881px){
+  #wizGrid.ohne-skizze .opts.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+  #wizGrid.ohne-skizze .opts.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #wizGrid.ohne-skizze .opts.four{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:880px){
+  #wizGrid.ohne-skizze .opts.three,
+  #wizGrid.ohne-skizze .opts.four{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #wizGrid.ohne-skizze .opts.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
 </style>
 </head>
 <body>
