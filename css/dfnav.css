@@ -122,17 +122,24 @@
 
 /* ---- Responsive ---- */
 @media(max-width:900px){.dfnav-prods{grid-template-columns:repeat(3,1fr)}.dfnav-mixed{grid-template-columns:1fr}.dfnav-services{border-left:0;padding-left:0}}
-@media(max-width:860px){
+/* Umschaltpunkt auf 1100px (war 860px). Gemessen: die fuenf Hauptpunkte passen
+   erst ab 1080px in EINE Zeile — bei 1024px wurde jeder Punkt dreizeilig (106px
+   statt 59px) und lief aus der 68px hohen Leiste heraus. */
+@media(max-width:1100px){
   .dfnav-links{display:none}
   .dfnav-cta{display:none}
   .dfnav-burger{display:inline-flex}
   .dfnav-util{display:none}
   .dfnav{top:var(--banner-h,0px)}
   :root{--dfn-h:68px}
-  /* Logo + Merkliste + Warenkorb + Burger brauchten mit 24px Rand und 32px Abstand
-     431px — bei 390px Bildschirm rutschte der Burger aus dem Bild. Wo die Nav fix
-     steht faellt das nicht auf, im Konfigurator (mitlaufende Nav) erzeugte es
-     Querscrollen. Abstaende hier so weit reduziert, dass die Zeile passt. */
+}
+/* Logo + Merkliste + Warenkorb + Burger brauchten mit 24px Rand und 32px Abstand
+   431px — bei 390px Bildschirm rutschte der Burger aus dem Bild. Wo die Nav fix
+   steht faellt das nicht auf, im Konfigurator (mitlaufende Nav) erzeugte es
+   Querscrollen. Abstaende hier so weit reduziert, dass die Zeile passt.
+   Bleibt bei 860px: zwischen 861 und 1100 ist Platz genug, dort soll die Nav in
+   derselben Flucht stehen wie der Seiteninhalt (clamp(24px,4.5vw,72px)). */
+@media(max-width:860px){
   .dfnav-wrap{padding:0 14px}
   .dfnav .dfnav-wrap{gap:14px}
 }
@@ -141,7 +148,7 @@
   .dfnav .dfnav-wrap{gap:10px}
   .dfnav-logo{font-size:1.08rem}
 }
-@media(min-width:861px){.dfnav-drawer{display:none}}
+@media(min-width:1101px){.dfnav-drawer{display:none}}
 
 /* ===== KI-Kennzeichnung — Art. 50 VO (EU) 2024/1689, gilt seit 02.08.2026 =====
    Pflicht: Hinweis unmittelbar AM Bild. Ein Sammelhinweis im Impressum genügt nicht.

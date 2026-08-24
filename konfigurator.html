@@ -43,7 +43,6 @@ h1,h2,h3{font-family:var(--serif);font-weight:700;letter-spacing:-.022em;line-he
 .topbar{position:sticky;top:var(--banner-h,0px);z-index:40;background:var(--surface);border-bottom:1px solid var(--line)}
 /* Auf der Produktauswahl (kein Wizard aktiv) ist die "Anderes Produkt"-Leiste sinnlos → ausblenden */
 body:not(.wiz-active) .topbar{display:none}
-.tb-row{max-width:1160px;margin:0 auto;padding:18px 32px;display:flex;align-items:center;justify-content:space-between;gap:16px}
 .brand{font-weight:800;font-size:17px;letter-spacing:.06em;text-transform:uppercase}
 .brand b{font-weight:800}
 .tb-links{display:flex;gap:14px;align-items:center}
@@ -78,7 +77,10 @@ body:not(.wiz-active) .topbar{display:none}
 .head p{color:var(--ink-soft);margin-top:12px;font-size:16px}
 .grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px;align-items:start}
 
-.stage-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);position:sticky;top:calc(170px + var(--banner-h,0px));overflow:hidden}
+/* Klebt unter dem Kopf. Fruehere feste 170px passten nur zur alten Kopfhoehe von
+   200px; nach dem Verschlanken (25.08.) waeren daraus 60px Loch geworden. --tb-h
+   meldet die tatsaechliche Kopfhoehe aus kopfMelden(), 14px sind der Sichtabstand. */
+.stage-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);position:sticky;top:calc(var(--tb-h,116px) + var(--banner-h,0px) + 14px);overflow:hidden}
 .stage{position:relative;padding:40px 40px 26px;display:grid;place-items:center;background:var(--bg)}
 .stage svg{width:100%;max-width:276px;height:auto;display:block;position:relative;z-index:1}
 .floor{position:absolute;left:50%;bottom:44px;width:50%;height:22px;transform:translateX(-50%);background:rgba(28,27,25,.13);filter:blur(20px);border-radius:50%;z-index:0}
@@ -269,11 +271,10 @@ body:not(.wiz-active) .topbar{display:none}
 
 @media(max-width:880px){
   .tb-links .lbl{display:none}
-  .tb-row{padding:16px}
   .steps-inner{padding:0 12px}.step{min-width:90px;padding:14px 5px}
   .wrap{padding:22px 16px 150px}.head h2{font-size:30px}
   .grid{grid-template-columns:1fr;gap:18px}
-  .stage-card{position:sticky;top:calc(142px + var(--banner-h,0px))}.stage{padding:26px 22px 16px}.stage svg{max-width:210px}.floor{bottom:28px}
+  .stage-card{position:sticky;top:calc(var(--tb-h,116px) + var(--banner-h,0px) + 8px)}.stage{padding:26px 22px 16px}.stage svg{max-width:210px}.floor{bottom:28px}
   /* Am Handy war die Zusammenfassung komplett ausgeblendet — der Kunde sah dort NUR die Zeichnung und
      nirgends, welches Maß und welchen Anschlag er gewählt hat. Jetzt die Kernangaben (Maß + Öffnung)
      unter der Zeichnung; die Detailliste bleibt dem großen Bildschirm vorbehalten, sonst wird die
@@ -412,7 +413,7 @@ body:not(.wiz-active) .topbar{display:none}
 /* Bestellübersicht Amazon-Stil: Artikel links, feste Zusammenfassung rechts */
 .ov-cart{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:26px;width:100%;align-items:start}
 .ov-items{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:6px 26px 20px}
-.ov-summary{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:24px 26px;position:sticky;top:calc(150px + var(--banner-h,0px))}
+.ov-summary{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:24px 26px;position:sticky;top:calc(var(--tb-h,116px) + var(--banner-h,0px) + 14px)}
 .ovs-title{font-weight:700;font-size:18px;margin-bottom:14px}
 .ovs-line{display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;font-size:14.5px;color:var(--ink-soft)}
 .ovs-line b{color:var(--ink);font-size:16px;font-weight:700}
@@ -691,7 +692,7 @@ body:not(.wiz-active) .topbar{display:none}
 .pick{gap:18px}
 :root{--seite-max:1520px;--seite-pad:clamp(24px,4.5vw,72px)}   /* identisch zu .dfnav-wrap (css/dfnav.css:21) — EINE Flucht fuer die ganze Seite */
 .wrap{max-width:var(--seite-max);padding:12px var(--seite-pad) 96px}
-.steps-inner,.steps-hint,.tb-row,.footer-inner{max-width:var(--seite-max);padding-left:var(--seite-pad);padding-right:var(--seite-pad)}
+.steps-inner,.steps-hint,.footer-inner{max-width:var(--seite-max);padding-left:var(--seite-pad);padding-right:var(--seite-pad)}
 .pk-grid{grid-template-columns:repeat(4,1fr);gap:18px}
 .pcard{padding:14px 14px 16px}
 .pcard .pimg{position:relative;height:250px;overflow:hidden}
@@ -859,10 +860,7 @@ body:not(.wiz-active) .topbar{display:none}
   /* Frueher komplett ausgeblendet — dadurch stand auf dem Handy nirgends, WELCHES
      Produkt konfiguriert wird. Jetzt kompakt sichtbar: nur Label + Produktname,
      der Wechsel-Knopf wandert in die Fussleiste ("Produkte"). */
-  body.wiz-active .topbar .tb-row{display:flex;padding:7px 16px;min-height:0}
   body.wiz-active .topbar .tb-link{display:none}
-  body.wiz-active .tb-prodlabel{font-size:9.5px;letter-spacing:.09em}
-  body.wiz-active .tb-prod{font-size:16px !important;line-height:1.2}
   /* Dünner Fortschrittsbalken + kompakte swipebare Schritt-Tabs (wie vorher: mehr Schritte sichtbar, durchziehbar), aktueller zentriert */
   /* Kein Rand: die Linie liegt absolut und wird von leisteBahn() gesetzt — ein
      Rand verschob sie am Handy um 14px gegen die Kreise. */
@@ -1068,16 +1066,12 @@ body.checkout-focus .dfnav-mlcta{display:none}
   border-radius:12px;font:inherit;color:inherit;transition:color .18s}
 .tb-prodwrap:hover .tb-prod,.tb-prodwrap:focus-visible .tb-prod{color:var(--primary) !important}
 .tb-prodwrap:hover .tb-prodpfeil{color:var(--primary);transform:translateY(1px)}
-.tb-prodzeile{display:inline-flex;align-items:center;gap:8px;min-width:0}
 .tb-prodpfeil{width:20px;height:20px;flex:0 0 auto;color:var(--ink-3,#8b929b);
   transition:color .18s,transform .18s var(--ease)}
-.tb-prodlabel{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
-  color:var(--ink-soft,#5b626b);line-height:1.2}
 .tb-prod{font-family:var(--serif,'Plus Jakarta Sans',sans-serif);font-weight:800 !important;
   font-size:clamp(19px,2.1vw,26px) !important;letter-spacing:-.02em;line-height:1.15;
   color:var(--ink) !important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tb-prod::before{display:none !important}   /* Trennstrich entfaellt, Label uebernimmt */
-.tb-row{align-items:center}
+.tb-prod::before{display:none !important}   /* Trennstrich entfaellt, die Schrittleiste daneben trennt */
 
 /* Task 2: Knopfgroessen auf drei Stufen statt acht verschiedener Hoehen */
 :root{--btn-gross:56px;--btn-mittel:48px;--btn-klein:44px}
@@ -1105,7 +1099,6 @@ html,body{overflow-x:clip}
      Feste gleiche Breite, die Leiste bleibt seitlich wischbar. */
   .steps-inner .step{flex:0 0 86px !important;min-width:86px !important;width:86px}
   .tb-prod{font-size:19px !important}
-  .tb-row{padding:12px 16px}
 }
 
 /* Warenkorb: zweiter Weg neben "Angebot anfordern" — weiteres Produkt anlegen */
@@ -1346,7 +1339,7 @@ body.wiz-active .stage-card #stage svg{width:100%;height:auto;max-height:min(46v
    scrollte. Jetzt ist die Karte auf die Bildschirmhoehe begrenzt und die
    Eigenschaftsspalte scrollt in sich selbst. */
 @media(min-width:881px){
-  .stage-card{max-height:calc(100vh - 190px - var(--banner-h,0px));overflow:hidden}
+  .stage-card{max-height:calc(100vh - var(--tb-h,116px) - var(--banner-h,0px) - 24px);overflow:hidden}
   .summary{overflow-y:auto;overscroll-behavior:contain}
 }
 
@@ -1570,6 +1563,70 @@ body.wiz-active .stage-card #stage svg{width:100%;height:auto;max-height:min(46v
 @media(max-width:640px){
   .steps-tipp{font-size:10.5px;padding-bottom:6px;gap:5px}
 }
+/* ══ Kopf verschlanken — 25.08.2026 ══════════════════════════════════════════
+   Gemessen vorher: vom Bildschirm blieben nur 43-51 % Arbeitsflaeche uebrig.
+   390x844 Kopf 292px / frei 431px · 1024x768 Kopf 345px / frei 334px ·
+   1440x900 Kopf 352px / frei 459px. Groesster Einzelposten war die eigene Zeile
+   fuer "SIE KONFIGURIEREN / Kunststofffenster": 58px am Handy, 92px am Rechner.
+   Sie steht jetzt LINKS in der Schrittleiste. Banner und Fussleiste bleiben
+   unangetastet (Vorgabe), die Tippzeile ebenfalls. */
+.steps-zeile{display:flex;align-items:stretch;max-width:var(--seite-max,1520px);margin:0 auto}
+/* Der Kopf beginnt jetzt direkt mit der Schrittleiste — die Trennlinie nach oben
+   traf auf nichts mehr und war eine unnoetige Kante unter der Navigation. */
+.topbar > .steps{border-top:0}
+
+/* Produktname als Knopf IN der Leiste. align-self:stretch, damit die Trennlinie
+   ueber die volle Zeilenhoehe laeuft; der Knopf ist dadurch so hoch wie die Zeile
+   (62px am Rechner, 54px am Handy) und liegt sicher ueber 44px Trefferflaeche. */
+.steps-zeile .tb-prodwrap{flex:0 0 auto;flex-direction:row;align-items:center;gap:7px;
+  align-self:stretch;padding:0 15px 0 var(--seite-pad,24px);border-radius:0;
+  border-right:1px solid var(--line)}
+.steps-zeile .tb-prod{font-size:clamp(15px,1.35vw,18px) !important;line-height:1.15}
+.tb-prod-kurz{display:none}
+.steps-zeile .tb-prodpfeil{width:17px;height:17px}
+
+/* Die Schrittleiste bekommt den Rest der Zeile. leisteVermessen() rechnet aus
+   sb.clientWidth — dadurch nimmt sie die verbleibende Breite automatisch als
+   Grundlage und die Kreisabstaende bleiben untereinander gleich. Der linke
+   Seitenrand liegt jetzt am Produktknopf, deshalb hier links nur der Abstand. */
+.steps .steps-zeile .steps-inner{flex:1 1 auto;min-width:0;max-width:none;margin:0;
+  padding-left:14px;padding-right:var(--seite-pad,24px)}
+
+/* Straffere Kopfzeile: die Schrittfelder hatten 18px/15px Innenabstand und einen
+   28px-Kreis (83-85px Zeilenhoehe). 9px/8px und ein 26px-Kreis ergeben 62px —
+   das Feld selbst bleibt als Trefferflaeche weit ueber 44px.
+   Gilt schon ab 601px: bei 768px (Tablet hochkant) galten sonst weiter die alten
+   14px und der Kopf war dort mit 105px hoeher als bei 1024px mit 82px. */
+@media(min-width:601px){
+  .steps .steps-zeile .steps-inner .step{padding:9px 5px 8px;gap:6px}
+  .steps .steps-zeile .steps-inner .step .num{width:26px;height:26px}
+}
+/* Handy: enger, und der Produktknopf steht in derselben Flucht wie das Logo der
+   Navigation — die geht ab 860px auf 14px Rand (dfnav.css). Der Knopf laesst hier
+   rund 3 statt 5 Schrittfelder gleichzeitig sehen; die Leiste ist wischbar und
+   schiebt den aktiven Schritt selbst in die Mitte, dafuer gibt es 58px Inhalt
+   zurueck. Ueber 860px steht beides wieder auf der Seitenflucht. */
+@media(max-width:860px){
+  .steps .steps-zeile .tb-prodwrap{padding:0 12px 0 14px}
+  .steps .steps-zeile .steps-inner{padding-left:10px;padding-right:12px}
+}
+@media(max-width:600px){
+  body.wiz-active .steps .steps-zeile .steps-inner .step{padding:8px 6px}
+  .steps-zeile #tbProd{display:none}
+  .steps-zeile #tbProdKurz{display:inline-flex}
+}
+/* Die Tippzeile bleibt (ausdruecklich gewuenscht), nur der Fussabstand geht von
+   7px auf 5px zurueck — spart 2px, ohne dass die Zeile klemmt. */
+.steps-tipp{padding-bottom:5px}
+
+/* Passt die Reihe nicht ganz in die Zeile, schneidet der rechte Rand das letzte
+   Wort mitten durch ("ROLLLA…") — das sieht nach kaputtem Layout aus statt nach
+   "hier geht es weiter". Weicher Auslauf, aber nur wenn wirklich mehr da ist als
+   hineinpasst; die Klasse setzt kopfMelden() aus scrollWidth/clientWidth.
+   Liegt auf der Zeile, nicht auf der Leiste selbst — sonst wuerde er mitscrollen. */
+.steps-zeile{position:relative}
+.steps-zeile.schiebbar::after{content:"";position:absolute;top:0;bottom:0;right:0;width:36px;
+  pointer-events:none;background:linear-gradient(90deg,rgba(255,255,255,0),var(--surface,#fff) 78%)}
 </style>
 </head>
 <body>
@@ -1726,22 +1783,26 @@ body.wiz-active .stage-card #stage svg{width:100%;height:auto;max-height:min(46v
 </div>
 
 <header class="topbar">
-  <div class="tb-row">
-    <!-- Der Produktname ist selbst der Umschalter. Vorher stand daneben ein
-         eigener Knopf: am Rechner passte er nicht zum uebrigen Knopfsystem, bei
-         768px schrumpfte er auf ein Symbol ohne Wort, und am Handy war er ganz
-         ausgeblendet — dort liess sich das Produkt gar nicht mehr wechseln. -->
-    <button class="tb-prodwrap" id="tbSwitch" onclick="askSwitchProduct()" aria-label="Anderes Produkt waehlen">
-      <span class="tb-prodlabel">Sie konfigurieren</span>
-      <span class="tb-prodzeile"><span class="tb-prod" id="tbProd"></span><svg class="tb-prodpfeil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span>
-    </button>
-  </div>
   <!-- Fortschrittsstrecke: eine Linie durch alle Schritte, die sich bis zum
        aktuellen fuellt. Die frueheren Zusatzstreifen ("Schritt 6 von 13 - Farbe"
        und "Jeden Schritt frei anklickbar") sind entfallen: beide wiederholten,
        was die Leiste selbst schon zeigt, und stapelten drei Baender uebereinander. -->
   <nav class="steps" aria-label="Konfigurationsschritte">
-    <div class="steps-inner" id="stepbar"></div>
+    <div class="steps-zeile">
+      <!-- Der Produktname ist selbst der Umschalter. Vorher stand daneben ein
+           eigener Knopf: am Rechner passte er nicht zum uebrigen Knopfsystem, bei
+           768px schrumpfte er auf ein Symbol ohne Wort, und am Handy war er ganz
+           ausgeblendet — dort liess sich das Produkt gar nicht mehr wechseln.
+           Seit 25.08. steht er LINKS IN der Schrittleiste statt in einer eigenen
+           Zeile: die eigene Zeile kostete 58px am Handy und 92px am Rechner, bei
+           390x844 blieben dadurch nur 431px fuer die eigentliche Auswahl. Die
+           Ueberzeile "Sie konfigurieren" ist mitentfallen — Pfeil und Position
+           sagen bereits, dass sich hier das Produkt wechseln laesst. -->
+      <button class="tb-prodwrap" id="tbSwitch" onclick="askSwitchProduct()" aria-label="Anderes Produkt waehlen">
+        <span class="tb-prod" id="tbProd"></span><span class="tb-prod tb-prod-kurz" id="tbProdKurz"></span><svg class="tb-prodpfeil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <div class="steps-inner" id="stepbar"></div>
+    </div>
     <!-- Die Kreise sind seit jeher anklickbar, aber nichts sagte es. Ein Kunde,
          der zurueck zur Farbe will, tippt sonst mehrfach auf "Zurueck". -->
     <p class="steps-tipp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>Jeden Schritt direkt anklickbar &mdash; auch zur&uuml;ck</p>
@@ -4882,7 +4943,13 @@ function render(){
     const num=i<cur?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg>`:(n+1);
     return `<button class="step ${cls}" onclick="go(${i})" aria-current="${i===cur?'step':'false'}"><span class="num">${num}</span><span class="lb">${st.label}</span></button>`;
   }).join('');
-  {var _tp=document.getElementById('tbProd'); if(_tp) _tp.textContent=prodName();}
+  {var _tp=document.getElementById('tbProd'); if(_tp) _tp.textContent=prodName();
+   /* Kurzform fuer schmale Bildschirme. Gemessen bei 390px: "Kunststofffenster"
+      belegt 164px der 390px breiten Zeile, dann sind von zwoelf Schrittfeldern
+      nur noch gut zwei zu sehen. "Fenster" belegt 110px und laesst gut drei
+      stehen. Welche Fassung sichtbar ist, entscheidet das Stylesheet bei 600px;
+      die drei anderen Produkte heissen in beiden Fassungen gleich. */
+   var _tk=document.getElementById('tbProdKurz'); if(_tk) _tk.textContent=prodUnit();}
   /* Die Fortschrittslinie wird aus den tatsaechlichen Kreismitten gerechnet, nicht
      aus einem Prozentwert — dann endet die Fuellung exakt auf dem aktuellen Schritt,
      egal wie breit die Woerter sind. */
@@ -4953,12 +5020,27 @@ function render(){
         br=feldBreite>0 ? feldBreite : a.offsetWidth;
       sb.scrollLeft=Math.max(0, lo-(sb.clientWidth-br)/2); }
   }
+  /* Die tatsaechliche Kopfhoehe ans Stylesheet melden. Vorschaukarte, mitlaufende
+     Skizze und Bestelluebersicht kleben darunter; vorher standen dort feste
+     116-190px, die nach dem Verschlanken des Kopfes um bis zu 60px danebenlagen.
+     Erst im naechsten Bildaufbau messen — direkt nach dem Setzen der Feldbreiten
+     liefert der Browser noch die alten Layoutwerte (siehe Hinweis oben). */
+  function kopfMelden(){
+    var tb=document.querySelector('.topbar');
+    if(tb){ var h=Math.round(tb.getBoundingClientRect().height);
+      if(h>0) document.documentElement.style.setProperty('--tb-h', h+'px'); }
+    /* Wisch-Auslauf nur, wenn die Schrittreihe breiter ist als die Zeile. */
+    var sb=document.getElementById('stepbar');
+    if(sb && sb.parentNode && sb.parentNode.classList.contains('steps-zeile')){
+      sb.parentNode.classList.toggle('schiebbar', sb.scrollWidth > sb.clientWidth+1); }
+  }
   leisteVermessen();
+  requestAnimationFrame(kopfMelden);
   if(!window.__leisteFonts && document.fonts && document.fonts.ready){ window.__leisteFonts=1;
-    try{ document.fonts.ready.then(function(){ leisteVermessen(); }); }catch(e){} }
+    try{ document.fonts.ready.then(function(){ leisteVermessen(); kopfMelden(); }); }catch(e){} }
   if(!window.__leisteResize){ window.__leisteResize=1;
     var _t; window.addEventListener('resize',function(){
-      clearTimeout(_t); _t=setTimeout(function(){ leisteVermessen();
+      clearTimeout(_t); _t=setTimeout(function(){ leisteVermessen(); kopfMelden();
         /* auch die Knopfbeschriftung haengt an der Breite (Hochkant/Quer) */
         try{ knopfBeschriftung(); }catch(e){} }, 120); }); }
   document.getElementById('hTitle').innerHTML=STEPS[cur].title[0]+'<span class="accent">'+STEPS[cur].title[1]+'</span>';
