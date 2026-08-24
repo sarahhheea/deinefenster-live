@@ -1489,17 +1489,25 @@ body.wiz-active .stage-card #stage svg{width:100%;height:auto;max-height:min(46v
 .aus-kopfzeile{margin:0 0 4px}
 .aus-kopfzeile h2{font-size:26px;line-height:1.15;font-weight:800;margin:0;letter-spacing:-.01em}
 .aus-kopfzeile p{font-size:14.5px;color:var(--ink-soft);margin:7px 0 0;line-height:1.5}
-.aus-list{display:flex;flex-direction:column;gap:10px}
+/* Raster 52px statt 72px: 46px Zeile (Kopf 44px + 2px Rahmen) + 6px Abstand.
+   Unter 44px Kopfhoehe wird die Trefferflaeche kleiner als die 44px aus
+   WCAG 2.5.5 — deshalb ist hier die Untergrenze erreicht. */
+.aus-list{display:flex;flex-direction:column;gap:6px}
 .aus-sec{border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
 .aus-sec.auf{border-color:var(--primary);box-shadow:0 2px 16px rgba(34,94,170,.09)}
-.aus-kopf{display:flex;align-items:center;gap:12px;width:100%;min-height:60px;
-  padding:12px 16px;border:0;background:none;cursor:pointer;text-align:left;
+.aus-kopf{display:flex;align-items:center;gap:12px;width:100%;min-height:44px;
+  padding:7px 14px;border:0;background:none;cursor:pointer;text-align:left;
   font:inherit;color:inherit;border-radius:var(--r)}
-.aus-nm{flex:0 0 auto;font-size:11px;font-weight:700;letter-spacing:.14em;
-  text-transform:uppercase;color:var(--ink-soft)}
+/* 13px in normaler Schreibweise statt 11px Grossbuchstaben mit 1,54px Sperrung:
+   gesperrte Versalien brauchen rund ein Drittel mehr Breite und lesen sich in
+   einer 46px-Zeile wie ein Etikett. nowrap haelt Wort und Wert einzeilig. */
+.aus-nm{flex:0 0 auto;font-size:13px;font-weight:600;letter-spacing:normal;
+  text-transform:none;line-height:1.25;white-space:nowrap;color:var(--ink-soft)}
 .aus-sec.auf .aus-nm{color:var(--primary)}
+/* Einzeilig mit Auslassungspunkten statt Umbruch mitten im Wort: die Zeile ist
+   nur noch 46px hoch, ein zweizeiliger Wert wuerde sie wieder auseinanderziehen. */
 .aus-wert{flex:1 1 auto;min-width:0;text-align:right;font-size:15px;font-weight:700;
-  line-height:1.3;overflow-wrap:anywhere}
+  line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .aus-wert .dot{width:12px;height:12px;border-radius:50%;margin-right:6px;vertical-align:-1px}
 .aus-pf{width:20px;height:20px;flex:0 0 auto;color:var(--primary);transition:transform .2s var(--ease)}
 .aus-sec.auf .aus-pf{transform:rotate(180deg)}
@@ -1509,12 +1517,22 @@ body.wiz-active .stage-card #stage svg{width:100%;height:auto;max-height:min(46v
 .aus-body>.ai-note:last-child{margin-bottom:0}
 .aus-body>.spro-step{margin:0}
 @media(max-width:640px){
-  .aus-kopfzeile h2{font-size:22px}
-  .aus-kopfzeile p{font-size:13.5px}
-  .aus-kopf{padding:10px 13px;gap:9px;min-height:56px}
-  .aus-nm{font-size:10px;letter-spacing:.1em}
+  /* Ueberschrift + Unterzeile zusammen von 73px auf rund 44px: sie standen vor
+     der ersten Optionszeile und kosteten am Handy fast so viel Hoehe wie eine
+     halbe Zeile Auswahl. 12,5px lassen den Satz in EINE Zeile passen. */
+  .aus-kopfzeile{margin:0}
+  .aus-kopfzeile h2{font-size:18px;line-height:1.15}
+  .aus-kopfzeile p{font-size:12.5px;margin-top:3px;line-height:1.35}
+  .aus-kopf{padding:7px 12px;gap:8px;min-height:44px}
+  .aus-nm{font-size:13px;letter-spacing:normal}
   .aus-wert{font-size:14px}
   .aus-body{padding:0 13px 14px}
+}
+/* Unter 360px reicht die Breite fuer den laengsten Wert ("Gurtwickler rechts
+   (von innen)", 30 Zeichen) nicht mehr — dort lieber zwei Zeilen als eine
+   abgeschnittene Angabe. Umbruch nur an Wortgrenzen, nie mitten im Wort. */
+@media(max-width:359px){
+  .aus-wert{white-space:normal;overflow:visible;overflow-wrap:normal;word-break:normal}
 }
 
 /* --- Panzer-/Endleistenfarbe: gewaehlte Farbe gross, Rest auf Tippen -------- */
@@ -1595,6 +1613,40 @@ body.wiz-active .stage-card #stage svg{width:100%;height:auto;max-height:min(46v
 .cd-draws .cd-draw:hover{background:rgba(34,94,170,.05)!important;border:0!important}
 .cd-draws .cd-draw svg,.cd-draws .cd-draw img{
   max-width:100%!important;max-height:none!important;width:100%!important;height:auto!important}
+
+/* ════════ Ausstattungsseite kompakt (Klasse aus-step, gesetzt in render()) ════════
+   Sie ist die einzige Seite mit bis zu neun Zeilen untereinander. Alle Regeln hier
+   gelten NUR fuer sie, damit die uebrigen Schritte unveraendert bleiben. */
+
+@media(min-width:881px){
+  /* Spaltenverhaeltnis 30 % / 59 % statt 48,6 % / 40,5 % (gemessen bei 1440px).
+     Grund: die linke Zusammenfassung wiederholt sieben von neun Werten, die rechts
+     in den Zeilen ohnehin stehen — die Auswahl braucht den Platz mehr.
+     1 : 1.967 ergibt bei 1310px Inhaltsbreite 432px links und 850px rechts. */
+  #wizGrid.aus-step{grid-template-columns:minmax(0,1fr) minmax(0,1.967fr)}
+  /* Skizze und Zusammenfassung standen in der linken Karte NEBENeinander. Bei 432px
+     Spaltenbreite waere die Skizze auf 259px geschrumpft. Untereinander bekommt sie
+     die vollen 432px — also mehr als die 420px von vorher. */
+  #wizGrid.aus-step .stage-card{flex-direction:column}
+  #wizGrid.aus-step .stage{flex:0 0 auto;padding:16px 14px 10px}
+  #wizGrid.aus-step .stage svg{max-height:min(38vh,320px)}
+  #wizGrid.aus-step .summary{flex:1 1 auto;min-height:0;border-left:0;
+    border-top:1px solid var(--line);padding:14px 18px}
+}
+
+@media(max-width:880px){
+  /* Der Vorlauf bis zur ersten Optionszeile war 598px — der groesste Hebel am Handy.
+     Seitenrand 24 -> 12px macht die Spalte von 342 auf 366px breit; dadurch passt
+     die Unterzeile in eine statt zwei Zeilen. */
+  body.aus-step .wrap{padding-left:12px;padding-right:12px;padding-top:6px}
+  #wizGrid.aus-step{gap:8px}
+  #wizGrid.aus-step.pick,#wizGrid.aus-step #panel{gap:8px}
+  /* Skizze von 208px auf rund 120px (104px Zeichnung + 16px Innenabstand). Sie
+     bleibt klebend oben stehen, ist also durchgehend sichtbar — die Hoehe zahlt
+     sich in sichtbaren Optionszeilen aus. */
+  body.wiz-active #wizGrid.aus-step .stage{padding:8px 10px 6px}
+  body.wiz-active #wizGrid.aus-step .stage svg{max-height:104px!important}
+}
 </style>
 </head>
 <body>
@@ -4955,7 +5007,7 @@ function ausstattungHTML(){
       +'</button>'+rumpf+'</section>';
   }).join('');
   return '<div class="aus-kopfzeile"><h2>Die <span class="accent">Ausstattung</span></h2>'
-    +'<p>Alles ist bereits vorbelegt — tippen Sie einen Punkt an, um ihn zu ändern.</p></div>'
+    +'<p>Alles ist vorbelegt — ändern Sie nur, was Sie möchten.</p></div>'
     +'<div class="aus-list">'+sek+'</div>';
 }
 /* Kurzlabel direkt auf jeder Bildkachel. Der Absatz allein reicht bei langen
@@ -4996,6 +5048,7 @@ function render(){
     document.getElementById('wizGrid').style.display='none';
     nav.style.display='none'; foot.style.display='none';
     document.body.classList.remove('wiz-active');
+    document.body.classList.remove('aus-step');
     renderPicker(); return;
   }
   document.body.classList.add('wiz-active');
@@ -5013,6 +5066,10 @@ function render(){
      Ab dem Maß-Schritt ist sie durchgehend dabei. */
   const _vorMass=['profil','aufteilung','oeffnung','teilung','lauf','psk'].includes(key);
   g.classList.toggle('ohne-skizze', _vorMass);
+  /* Nur die Ausstattungsseite bekommt das dichte 52px-Raster, das
+     Spaltenverhaeltnis 30/59 und den schmalen 12px-Rand am Handy. */
+  g.classList.toggle('aus-step', key==='ausstattung');
+  document.body.classList.toggle('aus-step', key==='ausstattung');
   nav.style.display='block'; foot.style.display=(key==='anfrage')?'none':'block';
   /* "Uebersicht/Anfrage" steht nicht in der Leiste: es ist keine
      Konfigurationsentscheidung, sondern der Abschluss. Die Zusammenfassung liegt
