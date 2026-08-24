@@ -1482,59 +1482,6 @@ body.wiz-active .stage-card #stage svg{width:100%;height:auto;max-height:min(46v
   #head .sub,#head p{font-size:15px;margin-top:6px}
 }
 
-/* --- Ausstattung: ein Schritt, aufklappbare Abschnitte --------------------
-   Der Abschnitt selbst IST der Kasten. Die Panel-Bausteine bringen ihren
-   eigenen Kartenrahmen mit; direkt darunter waere das ein Rand im Rand,
-   deshalb wird er fuer die oberste Ebene abgeschaltet. */
-.aus-kopfzeile{margin:0 0 4px}
-.aus-kopfzeile h2{font-size:26px;line-height:1.15;font-weight:800;margin:0;letter-spacing:-.01em}
-.aus-kopfzeile p{font-size:14.5px;color:var(--ink-soft);margin:7px 0 0;line-height:1.5}
-/* Raster 52px statt 72px: 46px Zeile (Kopf 44px + 2px Rahmen) + 6px Abstand.
-   Unter 44px Kopfhoehe wird die Trefferflaeche kleiner als die 44px aus
-   WCAG 2.5.5 — deshalb ist hier die Untergrenze erreicht. */
-.aus-list{display:flex;flex-direction:column;gap:6px}
-.aus-sec{border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
-.aus-sec.auf{border-color:var(--primary);box-shadow:0 2px 16px rgba(34,94,170,.09)}
-.aus-kopf{display:flex;align-items:center;gap:12px;width:100%;min-height:44px;
-  padding:7px 14px;border:0;background:none;cursor:pointer;text-align:left;
-  font:inherit;color:inherit;border-radius:var(--r)}
-/* 13px in normaler Schreibweise statt 11px Grossbuchstaben mit 1,54px Sperrung:
-   gesperrte Versalien brauchen rund ein Drittel mehr Breite und lesen sich in
-   einer 46px-Zeile wie ein Etikett. nowrap haelt Wort und Wert einzeilig. */
-.aus-nm{flex:0 0 auto;font-size:13px;font-weight:600;letter-spacing:normal;
-  text-transform:none;line-height:1.25;white-space:nowrap;color:var(--ink-soft)}
-.aus-sec.auf .aus-nm{color:var(--primary)}
-/* Einzeilig mit Auslassungspunkten statt Umbruch mitten im Wort: die Zeile ist
-   nur noch 46px hoch, ein zweizeiliger Wert wuerde sie wieder auseinanderziehen. */
-.aus-wert{flex:1 1 auto;min-width:0;text-align:right;font-size:15px;font-weight:700;
-  line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.aus-wert .dot{width:12px;height:12px;border-radius:50%;margin-right:6px;vertical-align:-1px}
-.aus-pf{width:20px;height:20px;flex:0 0 auto;color:var(--primary);transition:transform .2s var(--ease)}
-.aus-sec.auf .aus-pf{transform:rotate(180deg)}
-.aus-body{padding:0 16px 18px}
-.aus-body>.card{border:0;background:none;padding:0;border-radius:0}
-.aus-body>.card+.card{margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
-.aus-body>.ai-note:last-child{margin-bottom:0}
-.aus-body>.spro-step{margin:0}
-@media(max-width:640px){
-  /* Ueberschrift + Unterzeile zusammen von 73px auf rund 44px: sie standen vor
-     der ersten Optionszeile und kosteten am Handy fast so viel Hoehe wie eine
-     halbe Zeile Auswahl. 12,5px lassen den Satz in EINE Zeile passen. */
-  .aus-kopfzeile{margin:0}
-  .aus-kopfzeile h2{font-size:18px;line-height:1.15}
-  .aus-kopfzeile p{font-size:12.5px;margin-top:3px;line-height:1.35}
-  .aus-kopf{padding:7px 12px;gap:8px;min-height:44px}
-  .aus-nm{font-size:13px;letter-spacing:normal}
-  .aus-wert{font-size:14px}
-  .aus-body{padding:0 13px 14px}
-}
-/* Unter 360px reicht die Breite fuer den laengsten Wert ("Gurtwickler rechts
-   (von innen)", 30 Zeichen) nicht mehr — dort lieber zwei Zeilen als eine
-   abgeschnittene Angabe. Umbruch nur an Wortgrenzen, nie mitten im Wort. */
-@media(max-width:359px){
-  .aus-wert{white-space:normal;overflow:visible;overflow-wrap:normal;word-break:normal}
-}
-
 /* --- Panzer-/Endleistenfarbe: gewaehlte Farbe gross, Rest auf Tippen -------- */
 .fw-akt{display:flex;align-items:center;gap:14px;width:100%;padding:10px;
   border:1.5px solid var(--primary);background:#f6faff;border-radius:16px;
@@ -1613,40 +1560,6 @@ body.wiz-active .stage-card #stage svg{width:100%;height:auto;max-height:min(46v
 .cd-draws .cd-draw:hover{background:rgba(34,94,170,.05)!important;border:0!important}
 .cd-draws .cd-draw svg,.cd-draws .cd-draw img{
   max-width:100%!important;max-height:none!important;width:100%!important;height:auto!important}
-
-/* ════════ Ausstattungsseite kompakt (Klasse aus-step, gesetzt in render()) ════════
-   Sie ist die einzige Seite mit bis zu neun Zeilen untereinander. Alle Regeln hier
-   gelten NUR fuer sie, damit die uebrigen Schritte unveraendert bleiben. */
-
-@media(min-width:881px){
-  /* Spaltenverhaeltnis 30 % / 59 % statt 48,6 % / 40,5 % (gemessen bei 1440px).
-     Grund: die linke Zusammenfassung wiederholt sieben von neun Werten, die rechts
-     in den Zeilen ohnehin stehen — die Auswahl braucht den Platz mehr.
-     1 : 1.967 ergibt bei 1310px Inhaltsbreite 432px links und 850px rechts. */
-  #wizGrid.aus-step{grid-template-columns:minmax(0,1fr) minmax(0,1.967fr)}
-  /* Skizze und Zusammenfassung standen in der linken Karte NEBENeinander. Bei 432px
-     Spaltenbreite waere die Skizze auf 259px geschrumpft. Untereinander bekommt sie
-     die vollen 432px — also mehr als die 420px von vorher. */
-  #wizGrid.aus-step .stage-card{flex-direction:column}
-  #wizGrid.aus-step .stage{flex:0 0 auto;padding:16px 14px 10px}
-  #wizGrid.aus-step .stage svg{max-height:min(38vh,320px)}
-  #wizGrid.aus-step .summary{flex:1 1 auto;min-height:0;border-left:0;
-    border-top:1px solid var(--line);padding:14px 18px}
-}
-
-@media(max-width:880px){
-  /* Der Vorlauf bis zur ersten Optionszeile war 598px — der groesste Hebel am Handy.
-     Seitenrand 24 -> 12px macht die Spalte von 342 auf 366px breit; dadurch passt
-     die Unterzeile in eine statt zwei Zeilen. */
-  body.aus-step .wrap{padding-left:12px;padding-right:12px;padding-top:6px}
-  #wizGrid.aus-step{gap:8px}
-  #wizGrid.aus-step.pick,#wizGrid.aus-step #panel{gap:8px}
-  /* Skizze von 208px auf rund 120px (104px Zeichnung + 16px Innenabstand). Sie
-     bleibt klebend oben stehen, ist also durchgehend sichtbar — die Hoehe zahlt
-     sich in sichtbaren Optionszeilen aus. */
-  body.wiz-active #wizGrid.aus-step .stage{padding:8px 10px 6px}
-  body.wiz-active #wizGrid.aus-step .stage svg{max-height:104px!important}
-}
 </style>
 </head>
 <body>
@@ -2256,8 +2169,7 @@ function pdfSkizzeSrc(){
 let ANSICHT_ERZWUNGEN = null;
 function sketchAussen(){
   if(ANSICHT_ERZWUNGEN !== null) return ANSICHT_ERZWUNGEN;
-  /* aktKey() liefert auf der Ausstattungsseite den offenen Abschnitt, sonst den Schritt */
-  try{ return started && aktKey()==='farbe' && S.colorTarget==='a'; }catch(e){ return false; }
+  try{ return started && STEPS[cur] && STEPS[cur].key==='farbe' && S.colorTarget==='a'; }catch(e){ return false; }
 }
 function skizzeSeite(conf, aussen){
   var vorher = ANSICHT_ERZWUNGEN;
@@ -3469,51 +3381,7 @@ function buildSchiebeSteps(){
     ...common];
 }
 const STEPMAP={fenster:STEPS_FENSTER,balkon:STEPS_BALKON,haustuer:STEPS_HAUSTUER};
-/* Hybrid aus Wizard und Aufklapp-Liste. Bis einschliesslich "anzahl" bleibt jeder
-   Schritt eine eigene Seite: Bauform, Oeffnungsart und Groesse bestimmen alles Weitere
-   und muessen einzeln entschieden werden. Alles danach ist Ausstattung und bereits
-   vorbelegt — als zwoelf gleich gewichtete Seiten wog eine Farbwahl dort so schwer
-   wie die Aufteilung, und der Kunde musste sich durch Schritte klicken, an denen er
-   nichts aendern wollte. faltSteps() legt diese Rest-Schritte zu EINEM Schritt
-   "ausstattung" zusammen und haengt die Originaleintraege als .unter an. Die
-   Panel-Bausteine bleiben unveraendert, sie werden nur je Abschnitt aufgerufen. */
-const WIZ_LETZTER='anzahl';
-function faltSteps(list){
-  const i=list.findIndex(function(s){return s&&s.key===WIZ_LETZTER;});
-  const j=list.findIndex(function(s){return s&&s.key==='anfrage';});
-  if(i<0||j<0||j<=i+1) return list.slice();   // Notfall: unveraendert lassen statt raten
-  return list.slice(0,i+1).concat([{
-    key:'ausstattung', label:'Ausstattung', title:['Die ','Ausstattung'],
-    sub:'Alles ist bereits vorbelegt — ändern Sie nur, was Sie möchten.',
-    unter:list.slice(i+1,j)
-  }], list.slice(j));
-}
-let STEPS=faltSteps(STEPS_FENSTER);
-/* Welcher Abschnitt offen ist, liegt bewusst AUSSERHALB von render(): render()
-   baut das Panel bei jeder Auswahl neu auf, ein Zustand im Panel selbst waere
-   nach dem ersten Klick wieder zu (dieselbe Ueberlegung wie bei _pzOffen).
-   _ausBeruehrt merkt, welche Abschnitte der Kunde schon geoeffnet hat — beim
-   Betreten der Seite steht der erste noch nicht angesehene offen. */
-var _ausOffen=null;
-var _ausBeruehrt={};
-function ausReset(){ _ausOffen=null; _ausBeruehrt={}; }
-function ausToggle(k){
-  _ausBeruehrt[k]=1;
-  _ausOffen=(_ausOffen===k)?null:k;
-  render();
-  /* Nach dem Aufklappen den Abschnitt in den Blick holen: weiter unten in der
-     Liste oeffnet sich sonst etwas ausserhalb des Bildschirms. */
-  if(_ausOffen===k) requestAnimationFrame(function(){
-    var el=document.getElementById('aus-'+k); if(!el) return;
-    var o=el.getBoundingClientRect().top;
-    if(o<70||o>window.innerHeight*0.55)
-      window.scrollTo({top:Math.max(0,o+window.pageYOffset-90),behavior:'smooth'});
-  });
-}
-/* Worum es gerade geht — auf der Ausstattungsseite der offene Abschnitt.
-   Die Skizze schaltet daran ihre Aussenansicht um. */
-function aktKey(){ try{ var st=STEPS[cur]; if(!st) return null;
-  return st.key==='ausstattung' ? _ausOffen : st.key; }catch(e){ return null; } }
+let STEPS=STEPS_FENSTER;
 // Überspringbare Extras: alles vorbelegt → Kunde kann mit einem Tap die Standards übernehmen und direkt zum Angebot
 const SKIP_KEYS=['motiv','schall','griff','sicherheit','rollladen','sprossen'];
 function finishWithDefaults(){ commitCurrent(); }   // übernimmt aktuelle Konfig inkl. Standard-Extras → Warenkorb (gleiche sichere Logik wie „In den Warenkorb legen")
@@ -3636,7 +3504,7 @@ function itemName(i,v){ if(cart[i])cart[i].name=v; saveCart(); }
 // Artikel entfernen
 function itemRemove(i){ cart.splice(i,1); if(editIndex===i)editIndex=-1; else if(editIndex>i)editIndex--; if(!cart.length){ backToPicker(); return; } render(); }
 // Artikel bearbeiten: Konfig zurück in S laden, passende STEPS, zu Schritt 0
-function itemEdit(i){ const it=cart[i]; if(!it)return; Object.assign(S,it.conf); editIndex=i; anfrageView='cart'; STEPS=faltSteps((S.prod==='schiebe')?buildSchiebeSteps():(STEPMAP[S.prod]||STEPS_FENSTER)); ausReset(); started=true; cur=0; window.scrollTo({top:0}); render(); }
+function itemEdit(i){ const it=cart[i]; if(!it)return; Object.assign(S,it.conf); editIndex=i; anfrageView='cart'; STEPS=(S.prod==='schiebe')?buildSchiebeSteps():(STEPMAP[S.prod]||STEPS_FENSTER); started=true; cur=0; window.scrollTo({top:0}); render(); }
 // Weiteres Produkt: aktueller Artikel bleibt im cart, neuer Start über Produktwähler
 function addAnother(){ editIndex=-1; anfrageView='cart'; backToPicker(); }
 // Warenkorb öffnen (Übersicht-Schritt) — legt bei Bedarf einen Artikel an
@@ -3874,7 +3742,7 @@ function abPreis(id){
 function startProduct(id){
   // Neues Produkt = frischer Start (nichts vom vorherigen Produkt übernehmen) — wie in modernen Konfiguratoren üblich.
   Object.assign(S,defaultConfig(id));
-  STEPS=faltSteps((S.prod==='schiebe')?buildSchiebeSteps():(STEPMAP[S.prod]||STEPS_FENSTER)); ausReset(); started=true; cur=0;
+  STEPS=(S.prod==='schiebe')?buildSchiebeSteps():(STEPMAP[S.prod]||STEPS_FENSTER); started=true; cur=0;
   editIndex=-1;   // Entwurf lebt vorerst nur in S — wandert erst per „In den Warenkorb legen" in den cart (kein Geister-Artikel, Zähler bleibt korrekt)
   window.scrollTo({top:0}); render();
 }
@@ -3903,7 +3771,7 @@ function cartToast(){
   requestAnimationFrame(()=>t.classList.add('show'));
   clearTimeout(cartToast._h); cartToast._h=setTimeout(()=>t.classList.remove('show'),2200);
 }
-function setHstSystem(v){ S.hstSystem=v; S.hstTeilung='2'; massKlemmen(); STEPS=faltSteps(buildSchiebeSteps()); if(cur>=STEPS.length)cur=STEPS.length-1; render(); maybeAutoAdvance(); }
+function setHstSystem(v){ S.hstSystem=v; S.hstTeilung='2'; massKlemmen(); STEPS=buildSchiebeSteps(); if(cur>=STEPS.length)cur=STEPS.length-1; render(); maybeAutoAdvance(); }
 function backToPicker(){ started=false; anfrageView='cart'; window.scrollTo({top:0}); render(); }
 /* true, wenn die gerade sichtbare Konfiguration schon als Position im Korb liegt.
    Dann ist die Warnung "Eingaben gehen verloren" schlicht falsch. */
@@ -3964,10 +3832,8 @@ const KI_HINWEIS = {
 };
 function kiHinweisHTML(key){ const h=KI_HINWEIS[key]; return h?`<p class="ai-note">${h}</p>`:''; }
 
-function panelHTML(kArg){
-  /* kArg: auf der Ausstattungsseite wird derselbe Baustein je Abschnitt
-     aufgerufen. Ohne Argument gilt weiterhin der aktuelle Wizard-Schritt. */
-  const k=kArg||STEPS[cur].key;
+function panelHTML(){
+  const k=STEPS[cur].key;
   if(k==='profil'){
     if(S.prod==='schiebe'){
       const c=(val,img,t,s)=>`<div class="ocard ${S.hstSystem===val?'on':''}" onclick="setHstSystem('${val}')"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="vis"><img src="${img}?v=1" loading="lazy" decoding="async" alt="${t}"></div><div class="t">${t}</div><div class="s">${s}</div></div>`;
@@ -4956,78 +4822,6 @@ function back(){ if(cur===0) backToPicker(); else go(cur-1); }
    Farbwahl wieder zu. */
 var _pzOffen={panzer:false,endleiste:false};
 function pzToggle(k){ _pzOffen[k]=!_pzOffen[k]; render(); }
-/* Kurzfassung der Wahl fuer den zugeklappten Abschnitt. Bewusst dieselben
-   Bezeichnungen wie in Uebersicht, Warenkorb und Anfrage-Mail — sonst liest der
-   Kunde an vier Stellen vier Namen fuer dieselbe Sache. */
-function ausWert(k){
-  const dot=function(c){ return '<span class="dot" style="background:'+c+'"></span>'; };
-  if(k==='modell')     return DOORN[S.doorModel]||'—';
-  if(k==='farbe')      return (S.outer===S.inner)
-      ? dot(COLORS[S.outer].c)+COLORS[S.outer].n
-      : dot(COLORS[S.outer].c)+COLORS[S.outer].n+' außen · '+dot(COLORS[S.inner].c)+COLORS[S.inner].n+' innen';
-  if(k==='glas')       return S.glass==='3'?'3-fach':'2-fach';
-  if(k==='motiv')      return DEKON[S.glasdekor]||'Klarglas';
-  if(k==='schall')     return S.schall?'Schallschutzglas':'Standardglas';
-  if(k==='griff')      return GRIFFN[S.griff]||'—';
-  if(k==='griffTuer')  return griffTuerShort();
-  if(k==='griffhst')   return (S.hstSystem==='hs'?'Innen- + Außengriff':'PSK-Griff')
-                             +(S.hstSchloss==='innen-aussen'?' · abschließbar':'');
-  if(k==='schwelle')   return S.balkonSchwelle==='alu'?'Alu-Schwelle 20 mm':'ohne';
-  if(k==='sicherheit') return S.prod==='haustuer' ? (S.sicher?'Mehrfachverriegelung':'Standard')
-                                                  : (S.sicher?'WK2 Sicherheit':'WK1 Standard');
-  if(k==='rollladen')  return S.roll!=='kein' ? rollText() : 'ohne';
-  if(k==='sprossen')   return (S.sproTyp&&S.sproTyp!=='keine')
-      ? ((SPROTYPN[S.sproTyp]||'')+' · '+S.sproDicke+' mm') : 'ohne';
-  return '';
-}
-/* Die Ausstattungsseite. Es wird NUR der offene Abschnitt gebaut: die Galerien
-   (Farben, Tuermodelle, Rollladen) sind gross, alle gleichzeitig im Dokument
-   waeren am Handy hunderte Bilder auf einmal. */
-function ausstattungHTML(){
-  const st=STEPS[cur]; if(!st||!st.unter||!st.unter.length) return '';
-  /* Beim Betreten bleibt alles zu. Vorher sprang der erste unentschiedene
-     Abschnitt auf — das ist bei Fenster, Balkon- und Schiebetuer die Farbe mit
-     44 Feldern und rund 2000px, die alle uebrigen Abschnitte unter den Rand
-     druecken. Der Sinn der Liste ist aber der Ueberblick: der Kunde sieht, dass
-     alles schon eingestellt ist, und macht gezielt auf, was er aendern will. */
-  const pfeil='<svg class="aus-pf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
-  const sek=st.unter.map(function(u){
-    const offen=(_ausOffen===u.key);
-    /* Art. 50 Abs. 5: bei grossen Bildergalerien steht der KI-Hinweis VOR den
-       Bildern, sonst dahinter — dieselbe Regel wie auf den Wizard-Seiten. */
-    const h=kiHinweisHTML(u.key), vorne=(u.key==='modell');
-    const rumpf=offen
-      ? '<div class="aus-body" id="ausb-'+u.key+'">'+(vorne?h+panelHTML(u.key):panelHTML(u.key)+h)+'</div>'
-      : '';
-    return '<section class="aus-sec'+(offen?' auf':'')+'" id="aus-'+u.key+'">'
-      +'<button type="button" class="aus-kopf" onclick="ausToggle(\''+u.key+'\')" aria-expanded="'+offen+'" aria-controls="ausb-'+u.key+'">'
-        +'<span class="aus-nm">'+u.label+'</span>'
-        +'<span class="aus-wert">'+ausWert(u.key)+'</span>'
-        +pfeil
-      +'</button>'+rumpf+'</section>';
-  }).join('');
-  return '<div class="aus-kopfzeile"><h2>Die <span class="accent">Ausstattung</span></h2>'
-    +'<p>Alles ist vorbelegt — ändern Sie nur, was Sie möchten.</p></div>'
-    +'<div class="aus-list">'+sek+'</div>';
-}
-/* Kurzlabel direkt auf jeder Bildkachel. Der Absatz allein reicht bei langen
-   Galerien nicht: er scrollt aus dem Bild, waehrend die Kacheln noch sichtbar
-   sind. Glas/Rollladen/Sprossen holen ihren Absatz aus dem jeweiligen Baustein
-   und stehen deshalb nicht in KI_HINWEIS — ein Kachel-Label brauchen sie doch. */
-function kiBadges(wurzel,k){
-  if(!wurzel||!k) return;
-  if(!(KI_HINWEIS[k] || ['glas','rollladen','sprossen'].indexOf(k)>=0)) return;
-  wurzel.querySelectorAll('.ocard, .pc, .glass-card').forEach(function(card){
-    const im=card.querySelector('img');
-    if(!im || card.querySelector('.ai-badge')) return;
-    if(im.getAttribute('alt') && !/KI-generiert/.test(im.getAttribute('alt')))
-      im.setAttribute('alt', im.getAttribute('alt')+' (KI-generiertes Symbolbild)');
-    const b=document.createElement('span');
-    b.className='ai-badge ai-badge-sm';
-    b.textContent='KI-Bild';
-    card.appendChild(b);
-  });
-}
 function knopfBeschriftung(){
   const nl=document.getElementById('nextLbl'), nb=document.getElementById('btnNext');
   if(!nl||!nb||!started) return;
@@ -5048,7 +4842,6 @@ function render(){
     document.getElementById('wizGrid').style.display='none';
     nav.style.display='none'; foot.style.display='none';
     document.body.classList.remove('wiz-active');
-    document.body.classList.remove('aus-step');
     renderPicker(); return;
   }
   document.body.classList.add('wiz-active');
@@ -5066,10 +4859,6 @@ function render(){
      Ab dem Maß-Schritt ist sie durchgehend dabei. */
   const _vorMass=['profil','aufteilung','oeffnung','teilung','lauf','psk'].includes(key);
   g.classList.toggle('ohne-skizze', _vorMass);
-  /* Nur die Ausstattungsseite bekommt das dichte 52px-Raster, das
-     Spaltenverhaeltnis 30/59 und den schmalen 12px-Rand am Handy. */
-  g.classList.toggle('aus-step', key==='ausstattung');
-  document.body.classList.toggle('aus-step', key==='ausstattung');
   nav.style.display='block'; foot.style.display=(key==='anfrage')?'none':'block';
   /* "Uebersicht/Anfrage" steht nicht in der Leiste: es ist keine
      Konfigurationsentscheidung, sondern der Abschluss. Die Zusammenfassung liegt
@@ -5163,16 +4952,31 @@ function render(){
   document.getElementById('hSub').textContent=STEPS[cur].sub;
   document.getElementById('stage').innerHTML=stageSVG()+tuerSeitenUmschalter();
   document.getElementById('summary').innerHTML='<div class="eb">Ihre Konfiguration</div><h3>'+configTitle()+'</h3>'+summaryPanel();
-  (function(){ const panel=document.getElementById('panel');
-    /* Ausstattungsseite: die Abschnitte bringen ihren KI-Hinweis selbst mit,
-       das Kachel-Label gilt dem offenen Abschnitt. */
-    if(key==='ausstattung'){ panel.innerHTML=ausstattungHTML(); kiBadges(panel,_ausOffen); return; }
-    const k=key, h=kiHinweisHTML(k);
+  (function(){ const k=STEPS[cur].key, h=kiHinweisHTML(k);
     // Art. 50 Abs. 5: Offenlegung spaetestens bei der ersten Exposition.
     // Bei grossen Galerien steht der Absatz VOR den Bildern, sonst dahinter.
     const vorne = (k==='modell'||k==='oeffnung'||k==='aufteilung');
+    const panel = document.getElementById('panel');
     panel.innerHTML = vorne ? h+panelHTML() : panelHTML()+h;
-    kiBadges(panel,k); })();
+    // Zusaetzlich ein Kurzlabel direkt auf jeder Bildkachel. Der Absatz allein
+    // reicht bei langen Galerien nicht: er scrollt aus dem Bild, waehrend die
+    // Kacheln noch sichtbar sind.
+    // Schritte mit KI-Bildern. Glas/Rollladen/Sprossen bekommen ihren
+    // Absatzhinweis aus dem jeweiligen Baustein und stehen deshalb nicht in
+    // KI_HINWEIS — ein Kachel-Label brauchen sie trotzdem, weil der Absatz
+    // am Handy aus dem Bild scrollt.
+    if (KI_HINWEIS[k] || ['glas','rollladen','sprossen'].indexOf(k) >= 0) {
+      panel.querySelectorAll('.ocard, .pc, .glass-card').forEach(card => {
+        const im = card.querySelector('img');
+        if (!im || card.querySelector('.ai-badge')) return;
+        if (im.getAttribute('alt') && !/KI-generiert/.test(im.getAttribute('alt')))
+          im.setAttribute('alt', im.getAttribute('alt') + ' (KI-generiertes Symbolbild)');
+        const b = document.createElement('span');
+        b.className = 'ai-badge ai-badge-sm';
+        b.textContent = 'KI-Bild';
+        card.appendChild(b);
+      });
+    } })();
   if(SKIP_KEYS.includes(STEPS[cur].key) && cur<STEPS.length-1){
     /* Die Abkuerzung steht UNTER der Auswahl, nicht davor. Vorher schob sie die
        Optionen 80px nach unten — im Sicherheits-Schritt war am Handy dadurch keine
