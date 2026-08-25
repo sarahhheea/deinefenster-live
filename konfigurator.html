@@ -561,12 +561,12 @@ body:not(.wiz-active) .topbar{display:none}
 .co-nm{font-family:var(--serif);font-weight:800;font-size:15.5px;line-height:1.25;margin:9px 0 2px}
 .co-pr{margin-top:10px;font-weight:800;font-size:17px;text-align:right}
 .co-pr small{display:block;font-size:11.5px;font-weight:600;color:var(--ink-soft);margin-top:1px}
-/* In der schmalen Bestellspalte darf der Block etwas kompakter sein als auf der Buehne. */
-.co-item .ak{gap:11px;padding-bottom:11px;margin-bottom:10px}
+/* In der schmalen Bestellspalte darf der Kopfblock etwas kompakter sein als auf der Buehne.
+   Die Eigenschaftszeilen bleiben bewusst gleich gross wie ueberall sonst — eine Schriftgroesse
+   fuer alle Werte, damit die Liste im Warenkorb dieselbe ist wie im Konfigurator. */
+.co-item .ak{padding-bottom:9px;margin-bottom:8px}
 .co-item .ak-mass b{font-size:19px}
 .co-item .ak-satz{font-size:13px}
-.co-item .ak-p b{font-size:12.5px}
-.co-item .ak-p em{font-size:9.5px}
 /* ── Skizze groß ansehen: gemeinsames Overlay für Warenkorb-Drawer und Abschluss-Formular.
    Die Zeichnung ist als Thumbnail zwangsläufig klein — hier ist sie vollständig einsehbar. ── */
 /* über dem Warenkorb-Drawer (z-index 100000) — die große Ansicht wird aus dem Drawer heraus geöffnet
@@ -629,13 +629,11 @@ body:not(.wiz-active) .topbar{display:none}
 .sum-key .kt{font-size:13.5px;font-weight:800;line-height:1.25}
 .sum-key .kt em{font-style:normal;color:var(--accent)}
 .sum-key .ks{font-size:11px;color:var(--ink-soft);line-height:1.45;margin-top:2px}
-/* Anschlag als Bild statt als Textwand: das Symbol zeigt Bandseite und Schwenkrichtung,
-   daneben steht EIN Satz. Die Blickrichtung steht genau einmal — in der Marke darunter.
-   Vorher stapelten sich Normangabe, Ansicht, Klartext und Warnhinweis untereinander und
-   sagten viermal dasselbe. */
-.ak{display:flex;align-items:flex-start;gap:13px;padding:2px 0 13px;border-bottom:1px solid var(--line);margin-bottom:12px}
-.ak-pik{flex:0 0 auto;line-height:0}
-.ak-pik svg{display:block}
+/* Kopfblock der Zusammenfassung: Maß, EIN Satz zum Anschlag, darunter die Marke mit der
+   Bezugsseite. Die Blickrichtung steht genau einmal. Vorher stapelten sich Normangabe,
+   Ansicht, Klartext und Warnhinweis untereinander und sagten viermal dasselbe; das frueher
+   hier stehende Mini-Symbol ist ebenfalls weg — die grosse Skizze daneben zeigt dasselbe. */
+.ak{padding:0 0 10px;border-bottom:1px solid var(--line);margin-bottom:8px}
 .ak-txt{min-width:0}
 /* Mass und Stueckzahl auf einer Grundlinie, aber als eigene Kaesten — als <small> im
    Fliesstext rutschte die Einheit zwischen Zahl und Wort ("1100 × 2100 mm 1 / Stück"). */
@@ -648,16 +646,22 @@ body:not(.wiz-active) .topbar{display:none}
    kein Fehler. Rot an dieser Stelle liest sich wie eine Fehlermeldung. */
 .ak-chip{display:inline-block;margin-top:9px;background:#eef4fc;border:1px solid #d5e3f6;border-radius:8px;
   padding:4px 10px;font-size:11.5px;font-weight:700;color:#1d4d8c;letter-spacing:.01em;line-height:1.4}
-/* Ausstattung zweispaltig — kompakter als Zeile-fuer-Zeile und ruhiger zu lesen. */
-.ak-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
-.ak-p{padding:7px 0;border-bottom:1px solid var(--line);min-width:0}
-.ak-p em{display:block;font-style:normal;font-size:10px;font-weight:700;letter-spacing:.1em;
-  text-transform:uppercase;color:var(--ink-soft);opacity:.85}
-.ak-p b{display:block;font-size:13.5px;font-weight:700;margin-top:2px;line-height:1.35;word-break:break-word}
-.ak-p.voll{grid-column:1/-1}
-/* Erst unter 360px einspaltig — bei 390px passen die Werte ("Nebraska", "IGLO 5
-   Classic", "Anthrazitgrau") in zwei Spalten und die Karte bleibt halb so hoch. */
-@media(max-width:359px){.ak-grid{grid-template-columns:1fr}}
+/* Eine Zeile je Eigenschaft: Bezeichnung links, Wert rechts, duenne Trennlinie dazwischen.
+   Das fruehere Zweispalten-Raster liess bei ungerader Anzahl leere Zellen stehen (sah nach
+   vergessenen Feldern aus) und zwang lange Werte wie "IGLO Energy Classic PSK" in den Umbruch.
+   Untereinander steht jede Angabe auf einer Kante — man liest die Spalte einmal von oben nach
+   unten statt im Zickzack. */
+.ak-list{display:block}
+.ak-p{display:flex;align-items:baseline;justify-content:space-between;gap:16px;
+  padding:5px 0;border-bottom:1px solid var(--line)}
+/* Letzte Zeile ohne Linie: der Kasten hat selbst schon eine Kante. */
+.ak-p:last-child{border-bottom:0}
+/* Bezeichnung in normaler Schreibweise: Versalien mit Sperrung lesen sich langsamer und
+   verlangten eine eigene, kleinere Schriftgroesse. Jetzt traegt der Graustich die Rangfolge. */
+.ak-p em{flex:0 0 auto;font-style:normal;font-size:13px;font-weight:600;color:var(--ink-soft);line-height:1.35}
+/* overflow-wrap statt word-break: bricht nur, wenn ein Wort allein nicht passt — nie mitten im Wort. */
+.ak-p b{flex:1 1 auto;min-width:0;text-align:right;font-size:13px;font-weight:700;
+  line-height:1.35;overflow-wrap:break-word}
 /* Richtungswörter in der Erklärzeile fett statt kursiv — genau die sucht der Kunde beim Prüfen */
 .sum-key .ks em{font-style:normal;font-weight:800;color:var(--ink)}
 .sum-more{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
@@ -684,7 +688,10 @@ body:not(.wiz-active) .topbar{display:none}
 .tsu-btn:hover{color:var(--ink)}
 .tsu-btn.an{background:var(--primary);color:#fff}
 .tsu-btn:focus-visible{outline:2px solid var(--primary);outline-offset:-2px}
-.summary{flex:1 1 48%;border-top:none;border-left:1px solid var(--line);padding:16px 22px;display:flex;flex-direction:column;justify-content:flex-start}
+/* Innenabstand gestrafft (war 16/22): der Kasten enthaelt nur noch eine schmale Zeilenliste,
+   der breite Rand liess sie im Verhaeltnis verloren wirken und kostete Hoehe in einer Spalte,
+   die ohnehin scrollen muss. 12/16 bleibt weit genug weg von der Kante. */
+.summary{flex:1 1 48%;border-top:none;border-left:1px solid var(--line);padding:12px 16px;display:flex;flex-direction:column;justify-content:flex-start}
 .summary .eb{font-size:10.5px;letter-spacing:.2em}
 .summary h3{font-size:18px;margin:2px 0 10px}
 .summary .srow{padding:5px 0;font-size:12.5px}
@@ -1200,11 +1207,6 @@ html,body{overflow-x:clip}
 .cd-main{grid-column:2;grid-row:1/span 2;min-width:0}
 .cd-title{font-size:19px !important;font-weight:800;letter-spacing:-.3px;line-height:1.2}
 .cd-specs{margin-top:10px}
-/* Eigenschaften einspaltig — aber nur in der Dreispalten-Ansicht: dort ist die mittlere
-   Spalte so schmal, dass Werte wie "IGLO 5 Classic" umbrechen. Auf dem schmalen Schirm hat
-   die Liste die volle Breite, da bleiben zwei Spalten richtig (sonst waere die Karte doppelt
-   so hoch). */
-@media(min-width:900px){ .cd-specs .ak-grid{grid-template-columns:1fr !important} }
 .ps-row{border-bottom:0 !important;padding:2px 0 !important}
 .ps-row.ps-key{background:linear-gradient(90deg,#eaf1fa,#f7fafe);border-left:4px solid var(--accent);
   border-radius:0 10px 10px 0;padding:9px 13px !important;margin:0 0 10px !important;display:block !important}
@@ -1330,8 +1332,10 @@ body.wiz-active .stage-card #stage svg{width:100%;height:auto;max-height:min(46v
   .stage{order:1;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;
     box-shadow:0 6px 16px rgba(10,18,37,.07)}
   #panel{order:2}
+  /* Innenabstand gestrafft (war 16/18/18): am Handy zaehlt jede Zeile, die ohne Scrollen
+     sichtbar bleibt — und die Liste braucht keinen Rand wie ein Textblock. */
   .summary{order:3;background:var(--surface);border:1px solid var(--line);
-    border-radius:var(--r);box-shadow:0 6px 16px rgba(10,18,37,.07);padding:16px 18px 18px}
+    border-radius:var(--r);box-shadow:0 6px 16px rgba(10,18,37,.07);padding:12px 14px}
 }
 /* Die Buehnenkarte klebt beim Scrollen und hat overflow:hidden. Ist sie hoeher
    als der Bildschirm, ist ihr unteres Ende damit UNERREICHBAR — die letzte
@@ -1510,13 +1514,6 @@ body.wiz-active .stage-card #stage svg{width:100%;height:auto;max-height:min(46v
     background:linear-gradient(180deg,#f3f7fd,#e8eef7)}
   body.wiz-active .stage svg{max-height:min(24vh,190px)!important;transition:max-height .2s var(--ease)}
 }
-/* --- Eigenschaftsraster ohne Loecher -----------------------------------
-   Ein Eintrag ueber die volle Breite (z. B. "Farbe") erzwang einen
-   Zeilenumbruch; alles davor liess eine leere Zelle stehen. Im Warenkorb
-   sah das nach vergessenen Feldern aus. grid-auto-flow:dense fuellt die
-   Luecken mit den naechsten passenden Eintraegen. */
-.ak-grid{grid-auto-flow:row dense}
-.ak-p.voll{grid-column:1/-1}
 /* Vor der Maßeingabe keine Skizze: es gaebe nur ein Platzhalter-Fenster in einer
    Groesse, die niemand eingegeben hat. Der Auswahlbereich nutzt dann die volle
    Breite und die Karten stehen mittig. */
@@ -2099,6 +2096,8 @@ function anschlagInfo(){
    der Fluegel schwingt vom Band weg, gestrichelter Bogen zeigt den Weg. Wer "DIN rechts"
    nicht kennt, sieht trotzdem sofort, wo die Baender sitzen und wohin es aufgeht.
    Bewusst SVG im Markup (nicht in der Mail — dort strippen die meisten Programme SVG). */
+// Mini-Symbol des Anschlags. Steht seit dem Umbau der Eigenschaftsliste in keiner Ansicht
+// mehr — bewusst behalten, weil es fuer kompakte Darstellungen (Druck, Mail) wieder passt.
 function anschlagPikto(px){
   const ai=anschlagInfo(), p=ai.pikto||{typ:'mehr',hinge:'r',richtung:'innen'};
   const W=100, H=76, A='#225eaa', G='#c3cbd6', D='#c9d4e4';
@@ -4259,18 +4258,20 @@ const GRIFFN={mistral:'Mistral',abschliessbar:'Mistral abschließbar'};
 // Fehler, (3) alles Übrige gedämpft darunter. Bewusst eine EIGENE Funktion: summaryRows() liefert weiterhin die
 // schlichten .srow-Zeilen, die die Mail-Erzeugung (_mailRows) per Textmuster in eine Tabelle übersetzt.
 /* Zusammenfassung neben der Skizze — "zeigen statt beschreiben" (Kundenwunsch 12.08.2026).
-   Aufbau: Symbol + Maß + EIN Satz + Marke mit Bezugsseite, darunter die vollständige
-   Ausstattung zweispaltig. Es geht nichts verloren; die Angaben stehen nur einmal
-   statt viermal. Vorher stapelten sich Normangabe, Ansicht, Klartext und Warnhinweis. */
+   Aufbau: Maß + EIN Satz + Marke mit Bezugsseite, darunter die vollständige Ausstattung
+   als Liste — eine Zeile je Eigenschaft, Bezeichnung links, Wert rechts. Es geht nichts
+   verloren; die Angaben stehen nur einmal statt viermal. Dieselbe Liste erscheint ueber
+   posKeySpecs auch im Warenkorb und in der Anfrage-Uebersicht. */
 function summaryPanel(){
   const co=COLORS[S.outer], ci=COLORS[S.inner];
   const ai=anschlagInfo();
   const hebe=t=>String(t==null?'':t).replace(/\b(links|rechts|innen|außen)\b/gi,'<b>$1</b>');
-  const p=(k,v,voll)=>v?`<div class="ak-p${voll?' voll':''}"><em>${k}</em><b>${v}</b></div>`:'';
+  const p=(k,v)=>v?`<div class="ak-p"><em>${k}</em><b>${v}</b></div>`:'';
   const dot=c=>`<span class="dot" style="background:${c}"></span>`;
 
+  // Ohne Mini-Piktogramm: die Oeffnungsart ist in der grossen Skizze daneben bereits
+  // eingezeichnet. Zweimal dasselbe Symbol kostete nur Breite und Hoehe.
   const kopf=`<div class="ak">
-      <div class="ak-pik">${anschlagPikto(64)}</div>
       <div class="ak-txt">
         <div class="ak-mass"><b class="tnum">${S.w} × ${S.h} mm</b><span>${S.anzahl} Stück</span></div>
         <div class="ak-satz">${hebe(ai.satz)}</div>
@@ -4279,7 +4280,7 @@ function summaryPanel(){
     </div>`;
 
   const farbP = (S.outer===S.inner)
-    ? p('Farbe',`${dot(co.c)}${co.n}`,1)
+    ? p('Farbe',`${dot(co.c)}${co.n}`)
     : p('Farbe außen',`${dot(co.c)}${co.n}`)+p('Farbe innen',`${dot(ci.c)}${ci.n}`);
   // Verglasung und Glasmotiv sind zwei getrennte Schritte im Konfigurator und stehen deshalb
   // auch als zwei Zeilen. In einer Zeile zusammengezogen war nicht erkennbar, dass das Dekor
@@ -4297,7 +4298,7 @@ function summaryPanel(){
   const rollP = p('Rollladen', S.roll!=='kein'?rollText():'ohne');
 
   if(S.prod==='haustuer'){
-    return kopf+`<div class="ak-grid">`
+    return kopf+`<div class="ak-list">`
       +p('Modell',DOORN[S.doorModel]||'—')
       +p('Profil',PROFN[S.profile])
       +farbP
@@ -4314,7 +4315,7 @@ function summaryPanel(){
     const bauP = psk
       ? p('PSK-System',S.pskKammer==='iglo-energy'?'IGLO Energy Classic PSK':'IGLO 5 Classic PSK')
       : p('Teilung',S.hstTeilung==='3'?'3-teilig · 2 fest + 1 schiebbar':'2-teilig · 1 fest + 1 schiebbar');
-    return kopf+`<div class="ak-grid">`
+    return kopf+`<div class="ak-list">`
       +p('System',psk?'PSK Schiebetür':'Hebe-Schiebetür')
       +bauP
       +farbP
@@ -4339,7 +4340,7 @@ function summaryPanel(){
   // Deshalb nur zeigen, wenn er tatsaechlich gewaehlt wurde — eine Dauerzeile "ohne" waere
   // eine Angabe, die der Kunde nirgends beeinflussen kann.
   const schallP = S.schall ? p('Schallschutz','Schallschutzglas') : '';
-  return kopf+`<div class="ak-grid">`
+  return kopf+`<div class="ak-list">`
     +p('Aufteilung',AUFTN[S.aufteilung])
     +p('Profil',PROFN[S.profile])
     +farbP
