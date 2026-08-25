@@ -1656,7 +1656,10 @@ body.wiz-active .stage-card #stage svg{width:100%;height:auto;max-height:min(46v
      Buehnenkarte ist auf 100vh - Kopf - Banner - 24px begrenzt und schneidet ab
      (overflow:hidden). Davon gehen 26px Polster/Rahmen ab, plus --sk-extra fuer
      den Ansichts-Umschalter der Haustuer (nur dort steht eine Knopfzeile). */
-  --sk-hmax:calc(100vh - var(--tb-h,116px) - var(--banner-h,0px) - 54px - var(--sk-extra,0px));
+  /* 150px statt 54px: die feste Preisleiste unten ist 89px hoch und war hier nicht
+     abgezogen. Die Haustuer-Zeichnung hing dadurch 184px dahinter und war nie ganz
+     zu sehen; das Fenster passte zufaellig, weil es flacher ist. */
+  --sk-hmax:calc(100vh - var(--tb-h,116px) - var(--banner-h,0px) - 150px - var(--sk-extra,0px));
   --sk-wmax:60%;    /* alte Spaltenbreite aus flex:0 0 60% — Obergrenze, nie mehr */
   --sk-padx:28px;   /* seitliches Polster; muss zum padding unten passen, sonst stimmt die Hoehe nicht */
   width:min(var(--sk-wmax),calc(var(--sk-ar,1) * var(--sk-hmax) + var(--sk-padx)));
@@ -1697,7 +1700,10 @@ body.wiz-active .stage-card #stage svg{width:100%;height:auto;max-height:min(46v
   .summary{background:var(--surface);border:1px solid var(--line);
     border-radius:var(--r);border-left:1px solid var(--line)!important}
 }
-</style>
+/* Die Haustuer-Skizze war 747px hoch und hing 184px hinter der Preisleiste - man
+   sah sie nie ganz. Das Fenster passt mit 395px genau. Die Zeichnung wird deshalb
+   auf den tatsaechlich freien Platz begrenzt: Bildschirm minus gemessener Kopf
+   minus Fussleiste minus Luft. Damit haben alle vier Produkte dieselbe Obergrenze. */</style>
 </head>
 <body>
 
@@ -4306,9 +4312,10 @@ function summaryPanel(){
       </div>
     </div>`;
 
-  const farbP = (S.outer===S.inner)
-    ? p('Farbe',`${dot(co.c)}${co.n}`)
-    : p('Farbe außen',`${dot(co.c)}${co.n}`)+p('Farbe innen',`${dot(ci.c)}${ci.n}`);
+  /* Aussen und innen immer getrennt nennen, auch wenn beide gleich sind. Eine
+     einzelne Zeile "Farbe" verschweigt, dass es zwei Entscheidungen sind - der
+     Kunde soll sehen, dass die Innenseite anders sein koennte. */
+  const farbP = p('Farbe außen',`${dot(co.c)}${co.n}`)+p('Farbe innen',`${dot(ci.c)}${ci.n}`);
   // Verglasung und Glasmotiv sind zwei getrennte Schritte im Konfigurator und stehen deshalb
   // auch als zwei Zeilen. In einer Zeile zusammengezogen war nicht erkennbar, dass das Dekor
   // eine eigene Wahl ist — der Kunde konnte es beim letzten Blick nicht gezielt pruefen.
