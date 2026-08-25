@@ -1009,57 +1009,69 @@ body.checkout-focus .dfnav-mlcta{display:none}
   .grid:not(.select) .ocard:not(.door) .s{font-size:13px;line-height:1.3;min-height:34px;margin-top:3px;display:flex;align-items:flex-start;justify-content:center;text-align:center}
 }
 
-/* ── AUSNAHME vom Karten-Schema: Rollladen-Reihe (.opts.roll5) ──────────────────
-   Fuenf fertige Varianten (kein / Gurtwickler links+rechts / Motor links+rechts) stehen
-   in EINER Reihe, damit die Bedienseite Teil der Auswahl ist statt einer eigenen Karte
-   unter dem Fold, die praktisch niemand bewusst beantwortet hat.
-   Das Schema oben ist auf 2-3 Karten je Reihe ausgelegt (231px hoch, 16px Schrift) — bei
-   fuenf Kacheln von je ~97px zerlegt es jedes Wort in drei Zeilen. Deshalb hier bewusst
-   kompaktere Werte; das !important spiegelt nur das !important des Schemas.
-   Steht ABSICHTLICH nach dem Schema-Block: gleiche Spezifitaet, spaeter = gewinnt.
-   Erst ab 1280px, darunter ist die rechte Spalte zu schmal — dort Zeilen-Liste. ── */
-/* Weisser Rollladen auf weisser Kachel = keine Silhouette. Gleicher leichter Verlauf wie bei
-   den Tuermodell-Kacheln (.doorgrid), damit Gurt, Wickler und Schalter ueberhaupt zu sehen sind. */
-.opts.roll5 .ocard .vis{background:linear-gradient(180deg,#fbfcfd 0%,#eef1f5 100%);border-radius:9px}
-@media(min-width:1280px){
-  .opts.roll5{grid-template-columns:repeat(5,1fr);gap:8px}
-  .grid:not(.select) .opts.roll5 .ocard:not(.door){min-height:0;padding:11px 5px 10px}
-  .grid:not(.select) .opts.roll5 .ocard:not(.door) .vis{height:60px!important;margin-bottom:8px;display:block;overflow:visible}
-  /* display:block statt place-items:center — das zentrierte Grid schrumpft das Bild auf
-     ~66px Inhaltsbreite, und dann ist der Unterschied Gurtwickler/Schalter nicht mehr zu sehen. */
-  .grid:not(.select) .opts.roll5 .ocard:not(.door) .vis img{display:block;width:100%;height:100%;
+/* ── Rollladen-Schritt (.opts.roll3) ────────────────────────────────────────────
+   Der Schritt stellt in Wahrheit ZWEI Fragen: die Art (kein / Gurtwickler / Motor)
+   und die Bedienseite (links / rechts). Frueher standen alle fuenf Kombinationen als
+   gleichrangige Kacheln nebeneinander — sie brachen als 3+2 um und man sah der Reihe
+   nicht an, dass zwei davon dasselbe Bauteil sind. Jetzt drei Kacheln fuer die Art,
+   direkt darunter die Seitenwahl.
+   Ab 881px greift damit das normale Karten-Schema (231px Karte, 104px Bildflaeche) —
+   deshalb steht hier KEINE Desktop-Ausnahme mehr, der Schritt sieht aus wie die
+   anderen. Auch der graue Verlaufskasten hinter dem Bild ist weg: die Karte hat
+   bereits einen Rahmen, ein zweiter Rahmen im Rahmen wirkt wie ein Fehler.
+   Unter 881px stehen die drei Kacheln in EINER Reihe statt untereinander. Das ist
+   keine Kosmetik, sondern die Bedingung dafuer, dass die Seitenwahl am Handy ohne
+   Scrollen sichtbar ist: bei 390x844 bleiben zwischen Schrittleiste/Skizze und der
+   Preis-Fussleiste nur rund 240px, drei Zeilenkarten allein braeuchten schon 270px.
+   Die Seitenwahl laege dann wieder unter dem Fold — genau der Fehler, der schon
+   einmal dazu gefuehrt hat, dass sie praktisch niemand bewusst beantwortet hat.
+   Bei fuenf Kacheln ging eine Reihe nicht (die Titel brachen buchstabenweise um),
+   bei dreien mit kurzen Titeln passt sie. ── */
+@media(max-width:880px){
+  /* Drei Spalten setzt der Block "Raster" weiter unten (spaeter im Stylesheet, sonst
+     gewinnt die allgemeine Spaltenregel). Hier nur das Innenleben der Kachel. */
+  .grid:not(.select) .opts.roll3 .ocard:not(.door){display:flex;flex-direction:column;
+    align-items:center;text-align:center;min-height:0;padding:8px 5px 7px}
+  .grid:not(.select) .opts.roll3 .ocard:not(.door) .vis{height:56px!important;width:100%;
+    margin:0 0 5px;display:block;overflow:visible}
+  /* width/height 100% statt max-height: das zentrierte Grid schrumpft das Bild sonst auf
+     rund die halbe Kachelbreite, und dann ist der Unterschied Gurt/Motor nicht zu sehen. */
+  .grid:not(.select) .opts.roll3 .ocard:not(.door) .vis img{display:block;width:100%;height:100%;
     object-fit:contain;max-width:none;max-height:none!important}
-  .grid:not(.select) .opts.roll5 .ocard:not(.door) .vis svg{display:block;width:auto!important;
-    height:46px!important;max-height:46px!important;margin:0 auto}
-  /* Silbentrennung aus: "Gurt-wickler" ueber drei Zeilen liest sich schlechter als ein
-     sauberer Umbruch zwischen den Woertern. */
-  .grid:not(.select) .opts.roll5 .ocard:not(.door) .t{font-size:12.5px;line-height:1.2;
-    hyphens:none;overflow-wrap:normal}
-  .grid:not(.select) .opts.roll5 .ocard:not(.door) .s{font-size:10.5px;line-height:1.2;
-    min-height:0;margin-top:3px;hyphens:none}
-  .opts.roll5 .ocard .ai-badge-sm{font-size:8px;padding:1px 4px}
-}
-@media(max-width:1279px){
-  /* Zeilen-Liste: Bild links, Text rechts, untereinander (kein Karussell — Kundenwunsch). */
-  .opts.roll5{grid-template-columns:1fr;gap:8px}
-  /* Grid-Areas, nicht nur Spalten: .vis/.t/.s sind drei Geschwister — ohne Areas landet
-     die Unterzeile in der naechsten Zeile unter dem Bild statt neben dem Titel. */
-  .grid:not(.select) .opts.roll5 .ocard:not(.door){display:grid;grid-template-columns:88px minmax(0,1fr);
-    grid-template-rows:auto auto;grid-template-areas:"vis titel" "vis sub";
-    align-items:center;column-gap:13px;row-gap:1px;text-align:left;min-height:0;padding:10px 14px 10px 10px}
-  .grid:not(.select) .opts.roll5 .ocard:not(.door) .vis{grid-area:vis;align-self:center;
-    height:54px!important;width:auto;margin:0;display:block;overflow:visible}
-  .grid:not(.select) .opts.roll5 .ocard:not(.door) .t{grid-area:titel;align-self:end}
-  .grid:not(.select) .opts.roll5 .ocard:not(.door) .s{grid-area:sub;align-self:start}
-  .grid:not(.select) .opts.roll5 .ocard:not(.door) .vis img{display:block;width:100%;height:100%;
-    object-fit:contain;max-width:none;max-height:none!important}
-  .grid:not(.select) .opts.roll5 .ocard:not(.door) .vis svg{display:block;width:auto!important;
+  .grid:not(.select) .opts.roll3 .ocard:not(.door) .vis svg{display:block;width:auto!important;
     height:42px!important;max-height:42px!important;margin:0 auto}
-  .grid:not(.select) .opts.roll5 .ocard:not(.door) .t{font-size:15px;line-height:1.25;text-align:left}
-  .grid:not(.select) .opts.roll5 .ocard:not(.door) .s{font-size:12.5px;line-height:1.3;min-height:0;
-    margin-top:2px;display:block;text-align:left}
-  .opts.roll5 .ocard .tick{top:10px;right:12px}
+  /* 12px, damit "Kein Rollladen" in eine Zeile passt — zwei Zeilen kosten 15px Hoehe,
+     genau die, die unten fuer die Seitenwahl fehlen. Silbentrennung aus: "Gurt-wick-ler"
+     ueber drei Zeilen liest sich schlechter als ein Umbruch zwischen den Woertern. */
+  .grid:not(.select) .opts.roll3 .ocard:not(.door) .t{font-size:12px;line-height:1.2;
+    margin-top:0;hyphens:none;overflow-wrap:normal}
+  .grid:not(.select) .opts.roll3 .ocard:not(.door) .s{font-size:10.5px;line-height:1.2;
+    min-height:0;margin-top:2px;hyphens:none}
+  .opts.roll3 .ocard .tick{top:7px;left:7px;width:18px;height:18px}
+  .opts.roll3 .ocard .tick svg{width:10px;height:10px}
+  /* Das KI-Label bleibt Pflicht und muss lesbar auf dem Bild sitzen. Auf der schmalen
+     Kachel fuellt das Bild aber die ganze Breite, das Label deckte oben einen Streifen
+     ab. Kleiner gesetzt verdeckt es nur noch die Ecke — kleiner als hier nicht, sonst
+     ist der Hinweis nicht mehr deutlich erkennbar. */
+  .opts.roll3 .ocard .ai-badge-sm{top:4px;right:4px;font-size:8px;padding:1px 4px;letter-spacing:0}
 }
+
+/* ── Bedienseite: die zweite Frage des Rollladen-Schritts ───────────────────────
+   Steht DIREKT unter den drei Kacheln und erscheint erst, wenn eine Art mit Seite
+   gewaehlt ist. Als eigene Karte weiter unten lag sie unter dem Fold und blieb
+   faktisch immer auf der Vorbelegung stehen. 44px hohe Flaechen — die untere Grenze
+   fuer eine sichere Trefferflaeche am Handy. */
+.rollseite{margin-top:10px}
+.rs-frage{font-size:13.5px;font-weight:600;color:var(--ink);line-height:1.3;margin-bottom:8px}
+.rs-frage .rs-von{font-weight:500;color:var(--ink-soft);white-space:nowrap}
+.rs-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rs-btn{appearance:none;cursor:pointer;min-height:44px;padding:0 14px;
+  border:1.5px solid var(--line);border-radius:12px;background:var(--surface);
+  font:700 15px/1 var(--sans);color:var(--ink-soft);
+  transition:border-color .16s var(--ease),background .16s var(--ease),color .16s var(--ease)}
+.rs-btn:hover{border-color:var(--line-d);color:var(--ink)}
+.rs-btn.on{border-color:var(--primary);background:var(--primary);color:#fff}
+.rs-btn:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
 
 /* ── Konfigurator-Feinschliff 2026-08-03 ────────────────────────────────
    Nur Darstellung: Schrittbreiten, Knopfgroessen, Trefferflaechen, Kopf.
@@ -1376,20 +1388,25 @@ body.wiz-active .stage-card #stage svg{width:100%;height:auto;max-height:min(46v
 
 /* --- Raster: Mindestbreite statt fester Spaltenzahl --------------------- */
 .opts,
-.opts.two,.opts.three,.opts.four,.opts.roll5{
+.opts.two,.opts.three,.opts.four,.opts.roll3{
   display:grid;gap:14px;
   grid-template-columns:repeat(auto-fit,minmax(176px,1fr));
   align-items:stretch}
+/* Rollladen: immer genau drei Spalten. Mit der allgemeinen Mindestbreite von 176px passten
+   in die rund 545px breite Optionsspalte nur zwei — die drei Kacheln brachen als 2+1 um,
+   also wieder der unruhige Umbruch, den dieser Umbau gerade beseitigen soll. */
+.opts.roll3{grid-template-columns:repeat(3,1fr)}
 .opts.griff-innen{grid-template-columns:1fr}
-/* Rollladen bleibt am Handy bei seinem eigenen Layout (eine Karte je Zeile,
-   Bild links, Text rechts). Die allgemeine Regel gab ihm zwei Spalten, wovon
-   88px aufs Bild gingen — der Titel brach dadurch buchstabenweise um ("Ke/in"). */
 @media(max-width:520px){
   .opts,.opts.two,.opts.three,.opts.four{
     grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:11px}
 }
+/* Rollladen am Handy: drei feste Spalten statt der allgemeinen Mindestbreite. Die
+   allgemeine Regel machte aus drei Kacheln 2+1 — unruhig, und in zwei Reihen waere die
+   Seitenwahl darunter unter den Fold gerutscht. Begruendung im Block .opts.roll3 oben.
+   Das !important spiegelt nur das !important der 520px-Regel darueber. */
 @media(max-width:880px){
-  .opts.roll5{grid-template-columns:1fr!important;gap:9px}
+  .opts.roll3{grid-template-columns:repeat(3,1fr)!important;gap:8px}
 }
 
 /* --- Die Karte: ueberall gleich ---------------------------------------- */
@@ -1500,7 +1517,6 @@ body.wiz-active .stage-card #stage svg{width:100%;height:auto;max-height:min(46v
    Rollladen- und Tuerbilder sassen in einem grauen Verlaufskasten mit eigenem
    Radius. Dadurch hatte jedes Bild einen sichtbaren Rand im Rand — auf der
    Karte ein zweiter Rahmen. Die Bilder stehen jetzt frei, ueberall gleich. */
-.opts.roll5 .ocard .vis,
 .doorgrid .vis,
 .ocard .vis{background:none!important;border:0!important;border-radius:0!important}
 
@@ -4138,7 +4154,6 @@ function panelHTML(){
     ocImg('griff','abschliessbar','img/drutex-griffe/cdn/klamka-mistral-abschliessbar-weiss.webp','Mistral abschließbar','mit Schließzylinder',''));
   const ban=`<svg viewBox="0 0 24 24" fill="none" stroke="#9aa3b0" stroke-width="1.5" style="height:60px;width:auto"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg>`;
   if(k==='rollladen'){
-    const c=(val,vis,t,s,delta0)=>`<div class="ocard ${S.roll===val?'on':''}" onclick="set('roll','${val}')"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="vis">${vis}</div><div class="t">${t}</div>${s?`<div class="s">${s}</div>`:''}</div>`;
     const seite=(S.rollSeite==='links')?'links':'rechts';
     /* Panzer- und Endleistenfarbe in derselben Sprache wie die Rahmenfarbe:
        gleich grosse Felder MIT Namen darunter. Vorher waren es namenlose
@@ -4168,30 +4183,30 @@ function panelHTML(){
                 COLORS[endleisteIdx()].c, endleisteText(),
                 'Die Endleiste ist die Abschlussleiste unten am Panzer.')
       + `</div>`:'';
-    // Eine Kachel = eine fertige Variante (Art + Bedienseite). Vorher war die Seite eine
-    // eigene Karte unter dem KI-Hinweis — am Handy unter dem Fold, auf "rechts" vorbelegt,
-    // also hat sie praktisch niemand bewusst gewaehlt.
-    const rc=(rollV,seiteV,vis,t,s)=>{
-      const on=(S.roll===rollV)&&(rollV==='kein'||seite===seiteV);
-      const arg=seiteV?`'${rollV}','${seiteV}'`:`'${rollV}'`;
-      return `<div class="ocard ${on?'on':''}" onclick="setRoll(${arg})"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="vis">${vis}</div><div class="t">${t}</div>${s?`<div class="s">${s}</div>`:''}</div>`;
-    };
-    // Ein Bild je Antrieb, fuer die Gegenseite gespiegelt (class="mir") — dadurch ist das
-    // Fenster in allen vier Kacheln identisch und nur das Bedienelement wechselt.
-    // Beim Motor ist bewusst NICHTS neben dem Rollladen: aussen ist da real auch nichts zu
-    // sehen. Die beiden Motor-Kacheln zeigen deshalb dasselbe Bild, die Seite steht im Text.
-    // Gespiegelt wird nur beim Gurtwickler — dort wandert der Wickler sichtbar auf die andere
-    // Seite. Beim Motor gaebe es nichts zu spiegeln ausser dem Fenster selbst; das saehe nach
-    // Versehen aus. Die beiden Motor-Kacheln zeigen daher bewusst dasselbe Bild.
+    // Der Schritt enthaelt ZWEI Entscheidungen: die Art (kein / Gurtwickler / Motor) und
+    // die Bedienseite. Als fuenf gleichrangige Kacheln brachen sie 3+2 um und man sah der
+    // Reihe nicht an, dass "Gurtwickler links" und "Gurtwickler rechts" dasselbe Bauteil
+    // sind. Jetzt drei Kacheln fuer die Art, die Seite als eigene kleine Wahl darunter.
+    const rc=(rollV,vis,t,s)=>
+      `<div class="ocard ${S.roll===rollV?'on':''}" onclick="setRoll('${rollV}')"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="vis">${vis}</div><div class="t">${t}</div>${s?`<div class="s">${s}</div>`:''}</div>`;
+    // Ein Bild je Antrieb. Der Gurtwickler wird fuer "links" gespiegelt (class="mir"), damit
+    // die Kachel die gewaehlte Seite auch zeigt. Beim Motor ist aussen real nichts zu sehen —
+    // dort gaebe es nichts zu spiegeln ausser dem Fenster selbst, das saehe nach Versehen aus.
     const rimg=(art,li)=>`<img src="img/rolladen-${art}-r.webp?v=8" ${(li&&art==='gurt')?'class="mir" ':''}alt="${art==='gurt'?'Rollladen mit Gurtwickler '+(li?'links':'rechts'):'Rollladen mit Motorantrieb'}" loading="lazy" decoding="async">`;
-    return `<div class="card"><div class="grp-title">Rollladen</div><div class="opts roll5">`
-      +rc('kein',null,ban,'Kein Rollladen','ohne')
-      +rc('gurt','links',rimg('gurt',1),'Gurtwickler links','Gurt links')
-      +rc('gurt','rechts',rimg('gurt',0),'Gurtwickler rechts','Gurt rechts')
-      +rc('motor','links',rimg('motor',1),'Motor links','Kabel links')
-      +rc('motor','rechts',rimg('motor',0),'Motor rechts','Kabel rechts')
-      +`</div>
-      <!-- Erklaertext zum Gurtwickler entfernt: die Kacheln sagen es bereits -->
+    // Seitenwahl DIREKT unter den Kacheln, nicht als eigene Karte weiter unten: dort lag sie
+    // am Handy unter dem Fold und blieb faktisch immer auf der Vorbelegung "rechts" stehen.
+    // Sie erscheint erst, wenn eine Art gewaehlt ist, die ueberhaupt eine Seite hat.
+    const hatSeite=(S.roll==='gurt'||S.roll==='motor');
+    const sBtn=(v)=>`<button type="button" class="rs-btn${seite===v?' on':''}" aria-pressed="${seite===v}" onclick="setRollSeite('${v}')">${v}</button>`;
+    const seitenWahl = hatSeite ? `<div class="rollseite">
+        <div class="rs-frage">${S.roll==='motor'?'Auf welcher Seite soll das Kabel herauskommen?':'Auf welcher Seite soll der Gurt sitzen?'} <span class="rs-von">(von innen gesehen)</span></div>
+        <div class="rs-btns" role="group" aria-label="Bedienseite">${sBtn('links')}${sBtn('rechts')}</div>
+      </div>` : '';
+    return `<div class="card"><div class="grp-title">Rollladen</div><div class="opts roll3">`
+      +rc('kein',ban,'Kein Rollladen','ohne')
+      +rc('gurt',rimg('gurt',seite==='links'),'Gurtwickler','von Hand')
+      +rc('motor',rimg('motor',0),'Motor','Knopfdruck')
+      +`</div>${seitenWahl}
       <p class="ai-note">Die Rollladen-Abbildungen sind KI-generierte Symbolbilder.</p></div>${pzpick}`;
   }
   if(k==='sprossen'){
@@ -4816,9 +4831,13 @@ function maybeAutoAdvance(){
   _advTimer=setTimeout(()=>{ if(STEPS[cur]&&STEPS[cur].key===k) go(cur+1); }, 240);  // kurz aufleuchten lassen, dann weiter
 }
 function set(k,v){S[k]=v;render();maybeAutoAdvance();}
-// Rollladen-Kachel setzt Antrieb UND Bedienseite in einem Klick. Die zuletzt gewaehlte Seite
-// bleibt auch bei "kein Rollladen" erhalten, damit sie beim Zurueckwechseln nicht verfaellt.
+// Die Rollladen-Kachel waehlt nur die Art. Die zuletzt gewaehlte Seite bleibt dabei erhalten
+// (auch bei "kein Rollladen"), damit sie beim Zurueckwechseln nicht verfaellt. Der zweite
+// Parameter bleibt bestehen, weil aeltere Aufrufe Art und Seite zusammen setzen koennen.
 function setRoll(r,s){ S.roll=r; if(s) S.rollSeite=s; render(); }
+// Bedienseite getrennt: kein maybeAutoAdvance wie in set(), sonst springt der Schritt weg,
+// bevor der Kunde die gerade erschienene Seitenwahl ueberhaupt gesehen hat.
+function setRollSeite(s){ S.rollSeite=s; render(); }
 // Eine Schreibweise fuer Uebersicht, Warenkorb und Anfrage-Mail. Die Bedienseite stand bisher
 // NUR in der Skizze — im Text tauchte sie nirgends auf, also war sie fuer die Bestellung verloren.
 function rollText(){
