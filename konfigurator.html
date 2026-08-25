@@ -1669,6 +1669,18 @@ body.wiz-active .stage-card #stage svg{width:100%;height:auto;max-height:min(46v
          --sk-hmax:min(34vh,290px);padding:10px 10px 6px}
   body.wiz-active .stage{--sk-hmax:min(24vh,190px)}
 }
+/* Der helle Streifen ueber und unter der Zeichnung: die Buehnenkarte ist weiss
+   und hoeher als der getoente Skizzenkasten, seit dieser der Form der Zeichnung
+   folgt. Statt den Kasten wieder aufzublaehen, faellt die Karte weg — die
+   Zeichnung steht frei wie im Warenkorb, die Eigenschaftsliste wird ihre eigene
+   Karte. */
+@media(min-width:881px){
+  .stage-card{background:none!important;border:0!important;box-shadow:none!important;
+    overflow:visible!important;gap:18px}
+  .stage{border-radius:var(--r);overflow:hidden}
+  .summary{background:var(--surface);border:1px solid var(--line);
+    border-radius:var(--r);border-left:1px solid var(--line)!important}
+}
 </style>
 </head>
 <body>
@@ -4995,7 +5007,10 @@ function render(){
      Maßeingabe stuende dort ein Platzhalter-Fenster in einer Groesse, die der
      Kunde nie eingegeben hat — das ist eher irrefuehrend als hilfreich.
      Ab dem Maß-Schritt ist sie durchgehend dabei. */
-  const _vorMass=['profil','aufteilung','oeffnung','teilung','lauf','psk'].includes(key);
+  /* Auch im Maß-Schritt noch keine Skizze: dort gibt der Kunde die Zahlen erst
+     ein. Eine Zeichnung des alten Maßes daneben ist in dem Moment nur irritierend.
+     Ab dem naechsten Schritt ist sie durchgehend dabei. */
+  const _vorMass=['profil','aufteilung','oeffnung','teilung','lauf','psk','masse'].includes(key);
   g.classList.toggle('ohne-skizze', _vorMass);
   nav.style.display='block'; foot.style.display=(key==='anfrage')?'none':'block';
   /* "Uebersicht/Anfrage" steht nicht in der Leiste: es ist keine
