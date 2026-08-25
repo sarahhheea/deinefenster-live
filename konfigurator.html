@@ -1627,6 +1627,51 @@ body.wiz-active .stage-card #stage svg{width:100%;height:auto;max-height:min(46v
 .steps-zeile{position:relative}
 .steps-zeile.schiebbar::after{content:"";position:absolute;top:0;bottom:0;right:0;width:36px;
   pointer-events:none;background:linear-gradient(90deg,rgba(255,255,255,0),var(--surface,#fff) 78%)}
+
+/* ── Skizzen-Kasten nimmt die Form der Zeichnung an ─────────────────────────
+   Die vier Zeichnungen sind verschieden geformt: Fenster und Schiebetuer rund
+   1,06:1, Balkontuer 0,58:1, Haustuer 0,50:1. Der Kasten hatte dagegen eine
+   feste Hoehe (volle Spaltenbreite x Hoehendeckel); die Zeichnung passte sich
+   per preserveAspectRatio hinein und liess bei 1440px 61 % (Balkontuer) bzw.
+   64 % (Haustuer) der Kastenflaeche leer, am Handy 71 % bzw. 75 %.
+   --sk-ar traegt skizzenFormMelden() aus der viewBox ein. Damit gilt:
+   Hoehe = Breite / ar; wo die Hoehe gedeckelt ist (--sk-hmax), folgt die Breite
+   der Hoehe. Breiter als bisher wird der Kasten nie: --sk-wmax ist die alte
+   Spaltenbreite (60 % am Rechner, volle Breite am Handy). */
+.stage{
+  /* Am Rechner ist der Deckel der Platz bis zum unteren Bildschirmrand: die
+     Buehnenkarte ist auf 100vh - Kopf - Banner - 24px begrenzt und schneidet ab
+     (overflow:hidden). Davon gehen 26px Polster/Rahmen ab, plus --sk-extra fuer
+     den Ansichts-Umschalter der Haustuer (nur dort steht eine Knopfzeile). */
+  --sk-hmax:calc(100vh - var(--tb-h,116px) - var(--banner-h,0px) - 54px - var(--sk-extra,0px));
+  --sk-wmax:60%;    /* alte Spaltenbreite aus flex:0 0 60% — Obergrenze, nie mehr */
+  --sk-padx:28px;   /* seitliches Polster; muss zum padding unten passen, sonst stimmt die Hoehe nicht */
+  width:min(var(--sk-wmax),calc(var(--sk-ar,1) * var(--sk-hmax) + var(--sk-padx)));
+  min-width:min-content;   /* die Knopfzeile der Haustuer darf nicht aus dem Kasten laufen */
+  height:auto;align-self:center;flex:0 0 auto;padding:12px 14px}
+.stage svg,body.wiz-active .stage svg{
+  width:min(100%,calc(var(--sk-ar,1) * var(--sk-hmax)))!important;
+  height:auto!important;max-width:100%!important;max-height:var(--sk-hmax)!important;
+  aspect-ratio:var(--sk-ar,auto)}
+/* Der Ansichts-Umschalter der Haustuer stand NEBEN der Zeichnung und nahm ihr
+   rund 120px Breite (Zeichnung 261px statt 339px am Rechner). Als eigene Zeile
+   kostet er nur seine Hoehe. column-reverse, weil der Kasten am Rechner bis zu
+   747px hoch wird: unter der Zeichnung stuenden die Knoepfe ungescrollt unter
+   dem Bildrand. Nur am Rechner — am Handy haengt die Zeichnung an der Hoehe,
+   dort waeren die 35px Zeile verschenkt. */
+@media(min-width:881px){
+  body.wiz-active .stage-card #stage{flex-direction:column-reverse;gap:6px}
+}
+@media(max-width:880px){
+  /* Am Handy behaelt der Kasten die volle Breite: er klebt beim Scrollen oben und
+     deckt dabei die durchlaufenden Optionen ab. Ein Kasten in der schmalen Form
+     der Zeichnung stuende als 122px-Insel ueber den Farbkacheln — ausprobiert,
+     sieht kaputt aus. Die Zeichnung haengt hier ohnehin am Hoehenbudget der
+     klebenden Leiste (24vh/190px), nicht an der Breite. */
+  .stage{--sk-wmax:100%;width:100%;min-width:0;align-self:stretch;
+         --sk-hmax:min(34vh,290px);padding:10px 10px 6px}
+  body.wiz-active .stage{--sk-hmax:min(24vh,190px)}
+}
 </style>
 </head>
 <body>
@@ -2283,6 +2328,24 @@ function tuerSeitenUmschalter(){
   };
   return '<div class="tsu" role="group" aria-label="Ansicht der Haust\u00fcr">'
        + knopf(false,'Von innen') + knopf(true,'Von au\u00dfen') + '</div>';
+}
+/* Meldet dem Skizzen-Kasten, welche Form die aktuelle Zeichnung hat.
+   Die vier Produkte sind unterschiedlich proportioniert (Fenster/Schiebetuer
+   rund 1,06:1, Balkontuer 0,58:1, Haustuer 0,50:1). Ohne diese Zahl haette der
+   Kasten eine feste Hoehe und die hochkanten Produkte stuenden in bis zu 75 %
+   Leerflaeche. Quelle ist die viewBox — sie kennt die wahre Form inklusive
+   Bemassung. --sk-ar liest das Stylesheet (Block "Skizzen-Kasten"). */
+function skizzenFormMelden(){
+  var box=document.getElementById('stage'), kasten=box&&box.closest('.stage');
+  if(!kasten) return;
+  var svg=box.querySelector('svg'), vb=svg&&svg.getAttribute('viewBox');
+  var m=vb?vb.trim().split(/[\s,]+/).map(Number):null;
+  if(m&&m.length===4&&m[2]>0&&m[3]>0) kasten.style.setProperty('--sk-ar',(m[2]/m[3]).toFixed(4));
+  else kasten.style.removeProperty('--sk-ar');
+  // Die Haustuer hat eine eigene Knopfzeile (innen/aussen): 29px hoch
+  // plus 6px Abstand, aufgerundet 40px. Ohne diesen Abzug waere der Kasten hoeher
+  // als die Buehnenkarte und ihr unteres Ende (overflow:hidden) abgeschnitten.
+  kasten.style.setProperty('--sk-extra', box.querySelector('.tsu') ? '40px' : '0px');
 }
 function stageSVG(){
   const pdf=pdfSkizzeSrc();
@@ -5046,6 +5109,7 @@ function render(){
   document.getElementById('hTitle').innerHTML=STEPS[cur].title[0]+'<span class="accent">'+STEPS[cur].title[1]+'</span>';
   document.getElementById('hSub').textContent=STEPS[cur].sub;
   document.getElementById('stage').innerHTML=stageSVG()+tuerSeitenUmschalter();
+  skizzenFormMelden();   // Form der frischen Zeichnung an den Kasten melden (Funktion weiter oben)
   document.getElementById('summary').innerHTML='<div class="eb">Ihre Konfiguration</div><h3>'+configTitle()+'</h3>'+summaryPanel();
   (function(){ const k=STEPS[cur].key, h=kiHinweisHTML(k);
     // Art. 50 Abs. 5: Offenlegung spaetestens bei der ersten Exposition.
