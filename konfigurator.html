@@ -1289,6 +1289,7 @@ html,body{overflow-x:clip}
 .cd-row{grid-column:1;grid-row:2;align-self:start;display:flex;flex-direction:column !important;
   align-items:stretch !important;gap:9px;margin-top:0}
 .cd-price{font-size:21px !important;font-weight:800;letter-spacing:-.5px}
+  .cd-price.is-offen{font-size:15px !important;letter-spacing:0;line-height:1.35;color:var(--ink-soft,#5b626b)}
 .cd-qty{display:flex;width:100%;justify-content:space-between;align-items:center;
   border:1px solid var(--line-d);border-radius:999px}
 .cd-qty button{width:var(--btn-klein,44px);height:var(--btn-klein,44px);font-size:19px;border-radius:999px}
@@ -3785,6 +3786,20 @@ let cart=[];
 let editIndex=-1;
 // Preis-Formatierung DE (1.234,00 €)
 function eur(n){ return (Math.round(n)).toLocaleString('de-DE',{style:'currency',currency:'EUR'}); }
+/* Ein Positionspreis kann fehlen: Material noch nicht bepreist (Holz/Alu) oder eine
+   Kombination ohne gemessene Flaeche (IGLO EDGE 3-fluegelig). Vorher wurde daraus
+   still eine 0 — der Kunde sah 0,00 EUR fuer ein fertig konfiguriertes Fenster und
+   die Summe war zu niedrig. Fehlt der Preis, steht ueberall "Auf Anfrage". */
+function posUnit(conf){ const p=withConf(conf,price); return (typeof p==='number'&&p>0)?p:null; }
+function eurOffen(n){ return (n==null)?'Auf Anfrage':eur(n); }
+function totalOffen(t){ return !!(t && t.offen && !t.sub); }
+function totalText(t){ return totalOffen(t) ? 'Auf Anfrage' : eur(t.total); }
+/* Hinweiszeile fuer Korb, Uebersicht und Checkout: die Summe unten enthaelt die
+   Positionen ohne Preis NICHT — das muss dort stehen, wo die Summe steht. */
+function offenNote(t,cls){
+  if(!t||!t.offen) return '';
+  return '<div class="'+(cls||'cd-note')+'">'+t.offen+(t.offen===1?' Position':' Positionen')+' auf Anfrage \u2014 Preis nennen wir im Angebot; in der Summe noch nicht enthalten.</div>';
+}
 // S temporär auf eine Konfig setzen, Renderer aufrufen, S wiederherstellen — ohne Skizze-Code zu ändern.
 function withConf(conf,fn){ const bak={...S}; Object.assign(S,conf); let out; try{ out=fn(); } finally{ Object.assign(S,bak); } return out; }
 // Der Warenkorb-Zähler in der Navigation gehört NICHT hierher: /js/dfnav.js injiziert Korb-Icon + Badge
@@ -3805,8 +3820,12 @@ function cartSnapshot(it){
   /* Sicherheitsnetz: Ist der Preis im Moment des Speicherns nicht berechenbar (Maß voruebergehend
      ausserhalb der Grenzen), wird der zuletzt gueltige Preis behalten. Vorher wurde 0 eingefroren —
      der Kunde sah dann im Warenkorb 0,00 EUR fuer einen fertig konfigurierten Artikel. */
+  /* Ohne gemessenen Preis (Holz/Alu) wird bewusst null gespeichert statt 0 — sonst
+     zeigt ein wiederhergestellter Korb 0,00 EUR und die Anfrage-Mail nennt eine
+     Summe, die es nie gab. lastPrice greift weiter fuer den kurzzeitig ungueltigen Fall. */
+  const _kein = conf.prod==='fenster' && conf.material && conf.material!=='kunststoff';
   try{ const _p=withConf(conf,price); if(typeof _p==='number'&&_p>0) it.lastPrice=_p;
-       r={ sv:3, pv:PRICE_REV, price:((typeof _p==='number'&&_p>0)?_p:(it.lastPrice||0)), sketch:skizzeSeite(conf,true), title:withConf(conf,configTitle), specs:posKeySpecs(conf), full:withConf(conf,summaryRows) }; }catch(e){ r={sv:3,pv:PRICE_REV,price:(it.lastPrice||0),sketch:'',title:'Artikel',specs:'',full:''}; }
+       r={ sv:3, pv:PRICE_REV, price:((typeof _p==='number'&&_p>0)?_p:(_kein?null:(it.lastPrice||0))), sketch:skizzeSeite(conf,true), title:withConf(conf,configTitle), specs:posKeySpecs(conf), full:withConf(conf,summaryRows) }; }catch(e){ r={sv:3,pv:PRICE_REV,price:(it.lastPrice||0),sketch:'',title:'Artikel',specs:'',full:''}; }
   return { conf, name:it.name||'', qty:q, r };
 }
 function saveCart(){ try{ localStorage.setItem(CART_LS_KEY, JSON.stringify({v:3,t:Date.now(),liefer:liefer,lieferWunsch:lieferWunsch,items:cart.map(cartSnapshot)})); }catch(e){}
@@ -3914,7 +3933,7 @@ function cdItemHTML(it,i){
   var conf=it.conf, q=conf.anzahl||1;
   var sketch=skizzeSeite(conf,false);
   var title=withConf(conf,configTitle);
-  var unit=withConf(conf,price)||0;
+  var unit=posUnit(conf);
   var specs=posKeySpecs(conf);
   var bilder = '<div class="cd-draws"><figure class="cd-draw" onclick="skizzeGross('+i+')" role="button" tabindex="0" aria-label="Skizze gro&szlig; ansehen">'+sketch+'</figure></div>';
   /* Vier direkte Kinder der Karte statt zwei. Nur direkte Kinder lassen sich im Raster der
@@ -3928,7 +3947,7 @@ function cdItemHTML(it,i){
       +'<div class="cd-specs">'+specs+'</div>'
       +'<input class="cd-raum" type="text" maxlength="40" placeholder="Raum (optional, z. B. Bad OG)" value="'+String(it.name||'').replace(/"/g,'&quot;')+'" oninput="itemNameSetzen('+i+',this.value)" aria-label="Raumbezeichnung f&uuml;r Position '+(i+1)+'">'
     +'</div>'
-    +'<div class="cd-row"><div class="cd-price">'+eur(unit*q)+'</div><div class="cd-qty"><button type="button" onclick="itemQty('+i+',-1);renderCartDrawer()" aria-label="Menge verringern">&minus;</button><span>'+q+'</span><button type="button" onclick="itemQty('+i+',1);renderCartDrawer()" aria-label="Menge erhöhen">+</button></div></div>'
+    +'<div class="cd-row"><div class="cd-price'+(unit==null?' is-offen':'')+'">'+eurOffen(unit==null?null:unit*q)+'</div><div class="cd-qty"><button type="button" onclick="itemQty('+i+',-1);renderCartDrawer()" aria-label="Menge verringern">&minus;</button><span>'+q+'</span><button type="button" onclick="itemQty('+i+',1);renderCartDrawer()" aria-label="Menge erhöhen">+</button></div></div>'
     +'<div class="cd-acts"><button type="button" class="cd-edit" onclick="cdEdit('+i+')">Bearbeiten</button><button type="button" class="cd-dup" onclick="itemDuplizieren('+i+')">Duplizieren</button><button type="button" class="cd-del" onclick="itemRemove('+i+');renderCartDrawer()">Entfernen</button></div>'
     +'</div>';
 }
@@ -3972,14 +3991,15 @@ function renderCartDrawer(){
   // bei 622 px Inhalt, der Kunde sah nur die Skizze und weder Titel noch Preis noch Menge.
   body.innerHTML=cart.map(cdItemHTML).join('')
     +lieferWahlHTML(t,'cd-liefer')
-    +'<div class="cd-sum"><span>Zwischensumme ('+t.qty+')</span><b>'+eur(t.sub)+'</b></div>'
+    +'<div class="cd-sum"><span>Zwischensumme ('+t.qty+')</span><b>'+(totalOffen(t)?'Auf Anfrage':eur(t.sub))+'</b></div>'
+    +offenNote(t)
     +'<div class="cd-note">'+(t.shipNote||'')+'</div>'
     +'<button type="button" class="cd-more" onclick="cdWeiteresProdukt()">'
     +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="17" height="17"><path d="M12 5v14M5 12h14"/></svg>'
     +'Weiteres Produkt konfigurieren</button>'
     +'<button type="button" class="cd-cont" onclick="closeCartDrawer()">Zur&uuml;ck zur Konfiguration</button>';
-  foot.innerHTML='<div class="cd-tot"><span>Gesamt</span><b>'+eur(t.total)+'</b></div>'
-    +'<div class="cd-mwst">inkl. 19 % MwSt · unverbindlich, kein Kaufvertrag</div>'
+  foot.innerHTML='<div class="cd-tot"><span>Gesamt</span><b>'+totalText(t)+'</b></div>'
+    +'<div class="cd-mwst">'+(totalOffen(t)?'Preis nennen wir im Angebot · unverbindlich, kein Kaufvertrag':'inkl. 19 % MwSt · unverbindlich, kein Kaufvertrag')+'</div>'
     +'<button type="button" class="cd-cta" onclick="cdToAnfrage()">Angebot anfordern &rarr;</button>'
     // Vertrauen an der Stelle, an der die Anfrage abgeschickt wird: bei einer vierstelligen
     // Summe zaehlt Verlaesslichkeit mehr als der Preis.
@@ -4698,15 +4718,17 @@ function summaryRows(){
 // === Bestellübersicht: Summen + Rendering ===
 const LIEFER_MIN=5;   // Lieferung erst ab dieser Element-Menge (Live: 1–4 nur Abholung), Hebe-Schiebetür immer lieferbar
 function cartTotals(){
-  let sub=0,qty=0,hasHS=false;
-  cart.forEach(it=>{ const q=it.conf.anzahl||1; qty+=q; sub+=(withConf(it.conf,price)||0)*q; if(it.conf.prod==='schiebe'&&it.conf.hstSystem==='hs')hasHS=true; });
+  let sub=0,qty=0,hasHS=false,offen=0;
+  cart.forEach(it=>{ const q=it.conf.anzahl||1; qty+=q; const u=posUnit(it.conf);
+    if(u==null) offen++; else sub+=u*q;
+    if(it.conf.prod==='schiebe'&&it.conf.hstSystem==='hs')hasHS=true; });
   const lieferOk=(qty>=LIEFER_MIN||hasHS);
   if(!lieferOk && liefer==='lieferung') liefer='abholung';   // nicht erlaubte Auswahl zurücksetzen
   let ship=0,shipNote='';
   if(liefer==='abholung'){ ship=0; shipNote='Abholung im Lager · Brandenburg a. d. H.'; }
   else { if(qty>=10){ ship=0; shipNote='ab 10 Elementen kostenfrei · deutschlandweit'; } else if(hasHS){ ship=300; shipNote='Hebe-Schiebetür · Direktlieferung vom Hersteller'; } else { ship=239; shipNote='Spedition deutschlandweit'; } }
   const total=sub+ship, mwst=total-total/1.19;
-  return {sub,qty,ship,shipNote,total,mwst,hasHS,lieferOk};
+  return {sub,qty,ship,shipNote,total,mwst,hasHS,lieferOk,offen};
 }
 // Die Wahl gehoert dorthin, wo der Preis steht, und muss den Seitenwechsel ueberleben.
 // Vorher lag sie als nicht gespeicherte Variable doppelt vor (hier und in warenkorb.html):
@@ -4720,7 +4742,7 @@ function setLiefer(v){ if(v==='lieferung' && !cartTotals().lieferOk) return; lie
 function posKeySpecs(conf){ return withConf(conf,summaryPanel); }
 function posCard(it,i){
   const conf=it.conf, q=conf.anzahl||1;
-  const unit=withConf(conf,price), line=unit*q;
+  const unit=posUnit(conf), line=(unit==null)?null:unit*q;
   const sketch=skizzeKompakt(conf);
   const title=withConf(conf,configTitle);
   return `<div class="pos-card">
@@ -4735,7 +4757,7 @@ function posCard(it,i){
     </div>
     <div class="pos-foot">
       <div class="qty"><button onclick="itemQty(${i},-1)" aria-label="weniger">−</button><span class="tnum">${q}</span><button onclick="itemQty(${i},1)" aria-label="mehr">+</button></div>
-      <div class="pos-price"><span class="pp-unit">${eur(unit)} / Stück</span><b class="tnum">${eur(line)}</b></div>
+      <div class="pos-price">${unit==null?'':`<span class="pp-unit">${eur(unit)} / Stück</span>`}<b class="tnum">${eurOffen(line)}</b></div>
       <div class="pos-act"><button onclick="itemEdit(${i})">Bearbeiten</button><button class="rm" onclick="itemRemove(${i})">Entfernen</button></div>
     </div>
   </div>`;
@@ -4773,14 +4795,14 @@ function formHTML(t){
   // ob Maße/Öffnung/Farbe stimmen. Zeichnung antippen → große Ansicht (skizzeGross).
   const mini=cart.map((it,i)=>{
     const q=it.conf.anzahl||1, nm=withConf(it.conf,configTitle);
-    const unit=withConf(it.conf,price)||0;
+    const unit=posUnit(it.conf);
     return `<div class="co-item">`
       +`<div class="co-ihead"><span class="co-nr">Position ${i+1}</span><span class="co-anz">${q} Stück</span></div>`
       +`<div class="co-draw" onclick="skizzeGross(${i})" role="button" tabindex="0" aria-label="Skizze groß ansehen" title="Skizze groß ansehen">${skizzeKompakt(it.conf)}</div>`
       +`<div class="co-info">`
         +`<div class="co-nm">${nm}${it.name?' · '+esc(it.name):''}</div>`
         +posKeySpecs(it.conf)
-        +`<div class="co-pr tnum">${eur(unit*q)}${q>1?`<small>${eur(unit)} / Stück</small>`:''}</div>`
+        +`<div class="co-pr tnum">${eurOffen(unit==null?null:unit*q)}${(unit!=null&&q>1)?`<small>${eur(unit)} / Stück</small>`:''}</div>`
       +`</div></div>`;
   }).join('');
   const lief=(liefer==='lieferung');
@@ -4801,8 +4823,8 @@ function formHTML(t){
         <label class="consent"><input type="checkbox" name="dse" required aria-required="true"><span>Ich habe die <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutzerkl&auml;rung</a> gelesen und stimme der Verarbeitung meiner Angaben zur Bearbeitung meiner Anfrage zu. <span class="req">*</span></span></label>
         <div class="co-final">
           <span class="cf-was">${cart.length===1 ? `${cart[0].conf.anzahl||1} × ${withConf(cart[0].conf,configTitle)}` : `${cart.length} Positionen · ${t.qty} Stück`}</span>
-          <span class="cf-sum tnum">${eur(t.total)}</span>
-          <span class="cf-note">inkl. 19 % MwSt · ${lief?'inkl. Lieferung':'Abholung im Lager'} · unverbindlich, kein Kaufvertrag</span>
+          <span class="cf-sum tnum">${totalText(t)}</span>
+          <span class="cf-note">${t.offen?`${t.offen===1?'1 Position':t.offen+' Positionen'} auf Anfrage${t.sub?' \u2014 in dieser Summe nicht enthalten':''} · `:''}${totalOffen(t)?'':'inkl. 19 % MwSt · '}${lief?'inkl. Lieferung':'Abholung im Lager'} · unverbindlich, kein Kaufvertrag</span>
         </div>
         <div class="co-err" id="coErr" role="alert" aria-live="polite"></div>
         <button class="cta" type="submit">Anfrage kostenlos absenden</button>
@@ -4811,10 +4833,11 @@ function formHTML(t){
       <aside class="ov-summary co-summary">
         <div class="ovs-title">Ihre Anfrage</div>   <!-- kein Kauf: die Strecke endet mit einer unverbindlichen Anfrage -->
         <div class="co-items">${mini}</div>
-        <div class="ovs-line"><span>Zwischensumme (${t.qty})</span><b class="tnum">${eur(t.sub)}</b></div>
+        <div class="ovs-line"><span>Zwischensumme (${t.qty})</span><b class="tnum">${totalOffen(t)?'Auf Anfrage':eur(t.sub)}</b></div>
+        ${offenNote(t,'ovs-offen')}
         <div class="ovs-line"><span>${lief?'Lieferung':'Abholung im Lager'}</span><b>${lief?(t.ship?eur(t.ship):'kostenfrei'):'kostenlos'}</b></div>
-        <div class="ovs-total"><span>Gesamt</span><b class="tnum">${eur(t.total)}</b></div>
-        <div class="ovs-mwst">inkl. 19 % MwSt (${eur(t.mwst)}) · unverbindlich, kein Kaufvertrag</div>
+        <div class="ovs-total"><span>Gesamt</span><b class="tnum">${totalText(t)}</b></div>
+        <div class="ovs-mwst">${totalOffen(t)?'Preis nennen wir im Angebot':`inkl. 19 % MwSt (${eur(t.mwst)})`} · unverbindlich, kein Kaufvertrag</div>
       </aside>
     </div>`;
 }
@@ -4927,9 +4950,9 @@ function _posBlock(i,q,title,rowsTable,unit,line,cid,mass,ai){
 function _mailTotals(t){
   var shipTxt=(liefer==='abholung')?'kostenlos':(t.ship?eur(t.ship):'kostenfrei');
   return '<table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;border-top:2px solid #eef1f5;margin-top:4px">'+
-    '<tr><td style="padding:7px 0 3px;color:#6b7280;font-size:13px">Zwischensumme ('+t.qty+')</td><td align="right" style="padding:7px 0 3px;font-size:13px;font-weight:600">'+eur(t.sub)+'</td></tr>'+
+    '<tr><td style="padding:7px 0 3px;color:#6b7280;font-size:13px">Zwischensumme ('+t.qty+')</td><td align="right" style="padding:7px 0 3px;font-size:13px;font-weight:600">'+(totalOffen(t)?'auf Anfrage':eur(t.sub))+'</td></tr>'+
     '<tr><td style="padding:2px 0;color:#6b7280;font-size:13px">'+(liefer==='abholung'?'Abholung im Lager':'Lieferung')+'</td><td align="right" style="padding:2px 0;font-size:13px;font-weight:600">'+shipTxt+'</td></tr>'+
-    '<tr><td style="padding:8px 0 2px;font-size:15px;font-weight:800">Gesamt</td><td align="right" style="padding:8px 0 2px;font-size:15px;font-weight:800">'+eur(t.total)+'</td></tr>'+
+    '<tr><td style="padding:8px 0 2px;font-size:15px;font-weight:800">Gesamt</td><td align="right" style="padding:8px 0 2px;font-size:15px;font-weight:800">'+totalText(t)+'</td></tr>'+
     '<tr><td colspan="2" style="color:#9aa2ac;font-size:11.5px;padding-top:3px">inkl. 19 % MwSt ('+eur(t.mwst)+') · unverbindlicher Richtpreis · kein Kaufvertrag</td></tr></table>';
 }
 
@@ -5057,9 +5080,12 @@ async function submitAnfrage(ev){
       L.push('  Positionspreis: '+(line==null?'auf Anfrage':eur(line))+((unit!=null&&q>1)?'  ('+eur(unit)+' / Stück)':''));
     }
     L.push('');
-    L.push('Zwischensumme ('+t.qty+'): '+eur(t.sub));
+    L.push('Zwischensumme ('+t.qty+'): '+(totalOffen(t)?'auf Anfrage':eur(t.sub)));
+    if(t.offen) L.push('Hinweis: '+t.offen+(t.offen===1?' Position ist':' Positionen sind')+' auf Anfrage und in dieser Summe nicht enthalten.');
     L.push(liefer==='abholung'?'Abholung im Lager: kostenlos':'Lieferung: '+(t.ship?eur(t.ship):'kostenfrei'));
-    L.push('Gesamt: '+eur(t.total)+'  (inkl. 19 % MwSt '+eur(t.mwst)+' · unverbindlicher Richtpreis · kein Kaufvertrag)');
+    L.push(totalOffen(t)
+      ? 'Gesamt: auf Anfrage  (Preis nennen wir im Angebot · kein Kaufvertrag)'
+      : 'Gesamt: '+eur(t.total)+'  (inkl. 19 % MwSt '+eur(t.mwst)+' · unverbindlicher Richtpreis · kein Kaufvertrag)');
     if(msg){ L.push(''); L.push('Anmerkung: '+msg); }
     L.push(''); L.push('Anfrage-Nr.: '+nr);
     if(skizzeFehler.length){ L.push(''); L.push('HINWEIS an uns: Skizze fehlgeschlagen -> '+skizzeFehler.join(' | ')); }
