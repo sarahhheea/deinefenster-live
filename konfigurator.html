@@ -742,7 +742,23 @@ body.wiz-active .dfnav-tel:hover{background:rgba(34,94,170,.10)}
 .summary .srow{padding:5px 0;font-size:12.5px}
 .pick>.card{align-self:stretch;width:100%}
 .pick{gap:18px}
-:root{--seite-max:1520px;--seite-pad:clamp(24px,4.5vw,72px)}   /* identisch zu .dfnav-wrap (css/dfnav.css:21) — EINE Flucht fuer die ganze Seite */
+/* Die Flucht waechst ab 1678px mit dem Bildschirm mit.
+   Gemessen 26.08. mit dem festen Deckel von 1520px: 1440px-Schirm 1310px Inhalt
+   (91 %, 65px Rand) — passt. 1920px aber nur 1376px (72 %, 272px Rand) und
+   2560px dieselben 1376px (54 %, 592px Rand je Seite). Der Deckel war fuer
+   1440er gebaut und wurde nie darueber geprueft.
+   Neue Regel: 82 % der Bildschirmbreite plus die beiden 72px Innenabstaende
+   (= calc(82vw + 144px)). Der Boden von 1520px haelt alles bis 1678px exakt so
+   wie bisher — bei 1678px trifft die Formel genau 1520px, der Uebergang ist
+   stufenlos. Der Deckel von 2464px stoppt den Inhalt bei 2320px: darueber
+   werden die Optionskarten zu langen duennen Baendern und die
+   Eigenschaftsliste reisst auseinander. */
+:root{--seite-max:clamp(1520px,calc(82vw + 144px),2464px);--seite-pad:clamp(24px,4.5vw,72px)}   /* --seite-pad identisch zu .dfnav-wrap (css/dfnav.css:21) — EINE Flucht fuer die ganze Seite */
+/* Der Website-Kopf steht in css/dfnav.css hart auf 1520px. Ohne diese Zeile
+   staende er ab 1678px eingerueckt neben Schrittleiste, Inhalt und Fussleiste —
+   vier Baender, drei verschiedene Kanten. Nur hier ueberschrieben, damit die
+   uebrigen Seiten ihre 1520px behalten. */
+.dfnav-wrap{max-width:var(--seite-max)}
 .wrap{max-width:var(--seite-max);padding:12px var(--seite-pad) 96px}
 .steps-inner,.steps-hint,.footer-inner{max-width:var(--seite-max);padding-left:var(--seite-pad);padding-right:var(--seite-pad)}
 .pk-grid{grid-template-columns:repeat(4,1fr);gap:18px}
@@ -1779,7 +1795,35 @@ body.wiz-active .stage-card #stage svg{width:100%;height:auto;max-height:min(46v
 
 /* Der Hinweis stand als graue Kleinschrift unter der Leiste und ging unter. */
 .steps-tipp{color:var(--primary)!important;font-weight:600}
-.steps-tipp svg{color:var(--primary)}</style>
+.steps-tipp svg{color:var(--primary)}
+
+/* ════════ Grosse Monitore: der Platz unter dem Inhalt blieb leer ════════
+   Die Flucht oben waechst ab 1678px mit (siehe --seite-max). Zwei Stellen
+   folgten ihr nicht und standen danach als kleine Insel in einem breiten Band:
+
+   1) Die Schritte OHNE Zeichnung (Profil, Aufteilung, Oeffnung, Maße). Gemessen
+      bei 2560x1440: Karte fest 1060px breit in einer 2099px breiten Flucht, und
+      unter der Karte blieben 840px Bildschirm leer. Die Karte waechst jetzt auf
+      76 % der Flucht (max. 1560px — breiter werden aus drei Kacheln drei lange
+      Baender), die Kachelbilder duerfen von 118px auf bis zu 180px wachsen. Die
+      Hoehe haengt an vh, damit ein flacher 1920x900-Schirm nichts abschneidet.
+   2) Die Produktauswahl. Die Karten wurden mit der Flucht 500px breit, das Bild
+      blieb bei 206px Hoehe — vier fast leere Kacheln. Bis 300px, ebenfalls an vh.
+
+   Alles erst ab 1678px: bis dahin bleibt der Konfigurator Pixel fuer Pixel wie
+   bisher (1440er-Schirm gemessen: unveraendert). */
+@media(min-width:1678px){
+  #wizGrid.ohne-skizze{max-width:none}
+  #wizGrid.ohne-skizze .card{max-width:min(1560px,76%)}
+  /* Kastenhoehe und Bilddeckel MUESSEN dieselbe Zahl tragen, darum die Variable:
+     max-height:100% greift hier nicht — .vis ist ein Grid, und das Bild richtet
+     sich dann nach der Spaltenbreite (gemessen: 467px hohes Bild in einem 180px
+     hohen Kasten, es lief ueber die Beschriftung). 8px Luft wie bisher (118/110). */
+  #wizGrid.ohne-skizze{--kachelbild:clamp(118px,14vh,180px)}
+  #wizGrid.ohne-skizze .ocard .vis{height:var(--kachelbild)}
+  #wizGrid.ohne-skizze .ocard .vis img{max-height:calc(var(--kachelbild) - 8px)}
+  .pk-grid .pcard .pimg{height:clamp(206px,22vh,300px)}
+}</style>
 </head>
 <body>
 
