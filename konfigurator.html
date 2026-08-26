@@ -43,6 +43,51 @@ h1,h2,h3{font-family:var(--serif);font-weight:700;letter-spacing:-.022em;line-he
 .topbar{position:sticky;top:var(--banner-h,0px);z-index:40;background:var(--surface);border-bottom:1px solid var(--line)}
 /* Auf der Produktauswahl (kein Wizard aktiv) ist die "Anderes Produkt"-Leiste sinnlos → ausblenden */
 body:not(.wiz-active) .topbar{display:none}
+
+/* ════════ FOKUS-KOPF — nur diese Seite, nur ab dem ersten Schritt ════════
+   Gemessen 26.08. im Wizard: der Kopf stapelte fuenf Baender — 1440px 237px
+   (Banner 44 + Info-Zeile 39 + Nav 69 + Schrittleiste 85), 390px 230px. Darin
+   standen 16 sichtbare Links, die alle VOM Konfigurator wegfuehren, direkt ueber
+   den Schritten, die hindurchfuehren sollen. Am Handy versteckt der Menue-Knopf
+   nochmal rund 20 weitere.
+   Konfiguratoren und Kassen zeigen an dieser Stelle nur: Logo (Ausstieg mit
+   Absicht), Telefonnummer (Rueckfrage) und Warenkorb (Fortschritt). Genau das
+   bleibt hier stehen; Produktname mit Umschalter und Schrittleiste sind
+   unveraendert.
+   Bewusst NICHT im Picker-Zustand (body ohne .wiz-active): dort hat der Kunde
+   noch nichts investiert, was ein Fehlklick kosten koennte, und braucht die
+   normalen Wege (Shop, Gebraucht, Ratgeber) — ein Kopf ohne Navigation waere
+   dort eine Sackgasse.
+   Alles steht in dieser Datei; css/dfnav.css bleibt unberuehrt, andere Seiten
+   aendern sich nicht. Ausgeblendet statt entfernt, weil js/dfnav.js den
+   Warenkorb per insertBefore vor .dfnav-cta einhaengt — der Knopf muss im
+   Baum bleiben, damit der Zaehler weiter erscheint. */
+body.wiz-active .dfnav-util,
+body.wiz-active .dfnav-links,
+body.wiz-active .dfnav-cta,
+body.wiz-active .dfnav-burger,
+body.wiz-active .dfnav-drawer,
+body.wiz-active .df-merk-link{display:none!important}
+/* Telefon: die Nummer stand vorher nur in der Info-Zeile, die hier wegfaellt —
+   und die war ab 1100px ohnehin ausgeblendet, am Handy also nie zu sehen.
+   Im Fokus-Kopf ist sie der einzige Weg zu einer Rueckfrage, deshalb fest
+   neben dem Warenkorb. margin-left:auto schiebt Telefon + Korb nach rechts,
+   weil .dfnav-links mit seinem margin:0 auto als Platzhalter wegfaellt. */
+.dfnav-tel{display:none}
+body.wiz-active .dfnav-tel{display:inline-flex;align-items:center;gap:8px;flex:none;
+  margin-left:auto;height:44px;padding:0 13px;border-radius:12px;
+  font:700 15px/1 var(--sans);color:#225eaa;text-decoration:none;white-space:nowrap;
+  transition:background .18s}
+body.wiz-active .dfnav-tel:hover{background:rgba(34,94,170,.10)}
+.dfnav-tel svg{width:19px;height:19px;flex:none}
+/* Gemessen bei 390px: Logo 161 + Nummer 143 + Korb 44 + 2x14 Rand + 2x14 Abstand
+   = 404px — der Warenkorb wurde rechts abgeschnitten. Unter 430px bleibt deshalb
+   nur der Hoerer stehen; als 44px-Flaeche ist er weiter gut zu treffen und
+   waehlt dieselbe Nummer. */
+@media(max-width:430px){
+  body.wiz-active .dfnav-tel{width:44px;padding:0;justify-content:center}
+  .dfnav-tel-nr{display:none}
+}
 .brand{font-weight:800;font-size:17px;letter-spacing:.06em;text-transform:uppercase}
 .brand b{font-weight:800}
 .tb-links{display:flex;gap:14px;align-items:center}
@@ -1827,6 +1872,14 @@ body.wiz-active .stage-card #stage svg{width:100%;height:auto;max-height:min(46v
       </div>
     </div>
   </div>
+  <!-- Telefon nur fuer den Fokus-Kopf (siehe CSS-Block "Fokus-Kopf"). Steht per
+       Vorgabe auf display:none und erscheint erst ab dem ersten Schritt, weil dann
+       die Info-Zeile mit derselben Nummer wegfaellt. Am Rechner war sie dort ohnehin
+       nur bis 1100px zu sehen. -->
+  <a class="dfnav-tel" href="tel:+4933812148373" aria-label="Anrufen: 03381 2148373"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span class="dfnav-tel-nr">03381 / 2148373</span></a>
+  <!-- Der Knopf bleibt im Markup, auch wenn ihn der Fokus-Kopf ausblendet:
+       js/dfnav.js haengt Warenkorb und Merkliste per insertBefore genau VOR
+       diesen Knopf. Entfernt man ihn, wird der Warenkorb nirgends eingesetzt. -->
   <a class="dfnav-cta" href="/anfrage.html">Angebot anfragen</a>
   <button class="dfnav-burger" id="dfnav-burger" type="button" aria-label="Men&uuml; &ouml;ffnen" aria-expanded="false" aria-controls="dfnav-drawer">
     <span class="material-symbols-outlined" aria-hidden="true">menu</span>
