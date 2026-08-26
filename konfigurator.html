@@ -3711,13 +3711,28 @@ const PROFILE_KAT={
   kunststoff:[{v:'classic',t:'IGLO 5 Classic',s:'5-Kammer \u00b7 Uw 0,83'},
               {v:'energy', t:'IGLO Energy Classic',s:'7-Kammer \u00b7 Uw 0,71'},
               {v:'edge',   t:'IGLO EDGE',s:'7-Kammer \u00b7 Uw 0,66'}],
-  holz:      [{v:'softline68',t:'Softline 68 mm',s:'68 mm Bautiefe \u00b7 1 Dichtung'},
-              {v:'softline78',t:'Softline 78 mm',s:'78 mm Bautiefe \u00b7 2 Dichtungen'},
-              {v:'softline88',t:'Softline 88 mm',s:'88 mm Bautiefe \u00b7 2 Dichtungen'}],
-  alu:       [{v:'mb70',  t:'MB-70',  s:'70 mm Bautiefe \u00b7 2 EPDM-Dichtungen'},
-              {v:'mb70hi',t:'MB-70HI',s:'70 mm Bautiefe \u00b7 erh\u00f6hte D\u00e4mmung'},
-              {v:'mb86si',t:'MB-86SI',s:'77 mm Bautiefe \u00b7 3 EPDM-Dichtungen'}]
+  holz:      [{v:'softline68',img:'softline68',t:'Softline 68 mm',s:'68 mm Bautiefe \u00b7 1 Dichtung'},
+              {v:'softline78',img:'softline78',t:'Softline 78 mm',s:'78 mm Bautiefe \u00b7 2 Dichtungen'},
+              {v:'softline88',img:'softline88',t:'Softline 88 mm',s:'88 mm Bautiefe \u00b7 2 Dichtungen'}],
+  alu:       [{v:'mb70',img:'mb70',  t:'MB-70',  s:'70 mm Bautiefe \u00b7 2 EPDM-Dichtungen'},
+              {v:'mb70hi',img:'mb70hi',t:'MB-70HI',s:'70 mm Bautiefe \u00b7 erh\u00f6hte D\u00e4mmung'},
+              {v:'mb86si',img:'mb86si',t:'MB-86SI',s:'77 mm Bautiefe \u00b7 3 EPDM-Dichtungen'}]
 };
+const KARTE_PFAD='img/karten/profil/';
+/* Bildpfad einer Profilkarte. Bei Holz haengt das Bild zusaetzlich an der Holzart:
+   dieselbe Bautiefe sieht in Kiefer und Meranti voellig anders aus, ein gemeinsames
+   Bild wuerde bei einer der beiden Wahlen luegen. */
+function profilBild(mat,p){
+  return KARTE_PFAD + p.img + ((mat==='holz')?('-'+(S.holzart||'kiefer')):'') + '.webp?v=1';
+}
+/* Material- und Holzart-Karten zeigen dasselbe Bildmaterial wie die Profilkarten,
+   damit der Kunde wiedererkennt, was er im Schritt davor gewaehlt hat. */
+function materialBild(m){
+  if(m==='holz') return KARTE_PFAD+'softline78-kiefer.webp?v=1';
+  if(m==='alu')  return KARTE_PFAD+'mb70.webp?v=1';
+  return KARTE_PFAD+'iglo5-zentriert.webp?v=1';
+}
+function holzartBild(h){ return KARTE_PFAD+'softline68-'+h+'.webp?v=1'; }
 function profilDefault(m){ return (PROFILE_KAT[m]||PROFILE_KAT.kunststoff)[0].v; }
 /* Holzfenster fuehrt der Hersteller ohne Aufsatz-Rollladenkasten. Der Rollladen-Schritt
    faellt deshalb bei Holz komplett weg \u2014 sonst verkauft der Konfigurator ein Zubehoer,
@@ -4207,6 +4222,8 @@ function grp(title,cls,inner,aiNote){return `<div class="card"><div class="grp-t
 /* KI-Kennzeichnung Art. 50 VO (EU) 2024/1689 — Auswahlbilder je Schritt.
    Belegt über die Higgsfield-Generierungshistorie des Betreibers. */
 const KI_HINWEIS = {
+  material:  'Die Material-Abbildungen sind KI-generierte Symbolbilder.',
+  holzart:   'Die Holzart-Abbildungen sind KI-generierte Symbolbilder; der echte Farbton haengt von Holz und Lasur ab.',
   profil:    'Die Profil-Abbildungen sind KI-generierte Symbolbilder.',
   psk:       'Die Profil-Abbildungen sind KI-generierte Symbolbilder.',
   lauf:      'Die System-Abbildungen sind KI-generierte Symbolbilder.',
@@ -4219,57 +4236,31 @@ const KI_HINWEIS = {
   griffTuer: 'Die Griff-Abbildungen sind KI-generierte Symbolbilder.',
   schwelle:  'Die Schwellen-Abbildungen sind KI-generierte Symbolbilder.'
 };
-function kiHinweisHTML(key){
-  if(key==='profil' && S.prod==='fenster' && S.material!=='kunststoff') return '';   // Zeichnungen, keine KI-Bilder
-  const h=KI_HINWEIS[key]; return h?`<p class="ai-note">${h}</p>`:'';
-}
+function kiHinweisHTML(key){ const h=KI_HINWEIS[key]; return h?`<p class="ai-note">${h}</p>`:''; }
 
 /* Auswahlkarte mit freiem Klickziel \u2014 wie ocIcon(), aber der Setter darf mehr tun
    als ein Feld schreiben (Material zieht Profil, Rollladen und Schrittliste nach). */
-function choiceCard(on,fn,icon,t,s){
-  return `<div class="ocard ${on?'on':''}" onclick="${fn}"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="vis" style="height:84px;place-items:center">${icon}</div><div class="t">${t}</div>${s?`<div class="s">${s}</div>`:''}</div>`;
-}
-/* Zeichnungen, keine Fotos \u2014 daher keine KI-Kennzeichnung noetig (Art. 50 greift
-   nur bei Bildern, die fuer echte Aufnahmen gehalten werden koennen). */
-const MAT_ICON={
-  kunststoff:'<svg width="56" height="56" viewBox="0 0 56 56" fill="none" aria-hidden="true"><rect x="6" y="6" width="44" height="44" rx="3" fill="#f4f6f8" stroke="#c2cbd4" stroke-width="3"/><rect x="14" y="14" width="28" height="28" rx="1.5" fill="#dbeafe" stroke="#c2cbd4" stroke-width="2"/></svg>',
-  holz:'<svg width="56" height="56" viewBox="0 0 56 56" fill="none" aria-hidden="true"><rect x="6" y="6" width="44" height="44" rx="3" fill="#b07a44" stroke="#8a5c2e" stroke-width="3"/><rect x="14" y="14" width="28" height="28" rx="1.5" fill="#dbeafe" stroke="#8a5c2e" stroke-width="2"/><path d="M9 16h4M9 26h4M9 36h4M43 16h4M43 26h4M43 36h4" stroke="#8a5c2e" stroke-width="1.6" stroke-linecap="round"/></svg>',
-  alu:'<svg width="56" height="56" viewBox="0 0 56 56" fill="none" aria-hidden="true"><rect x="6" y="6" width="44" height="44" rx="2" fill="#9aa3ab" stroke="#69727e" stroke-width="3"/><rect x="12" y="12" width="32" height="32" rx="1" fill="#dbeafe" stroke="#69727e" stroke-width="2"/></svg>'
-};
-const HOLZ_ICON={
-  kiefer:'<svg width="56" height="56" viewBox="0 0 56 56" aria-hidden="true"><rect x="6" y="10" width="44" height="36" rx="4" fill="#e2bb8b"/><path d="M12 20c8 3 24 3 32 0M12 28c8 3 24 3 32 0M12 36c8 3 24 3 32 0" stroke="#c39a68" stroke-width="2" fill="none" stroke-linecap="round"/></svg>',
-  meranti:'<svg width="56" height="56" viewBox="0 0 56 56" aria-hidden="true"><rect x="6" y="10" width="44" height="36" rx="4" fill="#8f4c36"/><path d="M12 20c8 3 24 3 32 0M12 28c8 3 24 3 32 0M12 36c8 3 24 3 32 0" stroke="#6d3626" stroke-width="2" fill="none" stroke-linecap="round"/></svg>'
-};
-/* Profilkarte: Rahmenstaerke waechst mit der Bautiefe (68/78/88 mm bzw. 70/70/77 mm),
-   damit die drei Karten nicht dreimal dasselbe Bild zeigen. */
-function profIcon(mat,i){
-  const dick=[7,10,13][i]||7, holz=(mat==='holz');
-  const f=holz?'#b07a44':'#9aa3ab', st=holz?'#8a5c2e':'#69727e';
-  const innen=6+dick, gr=56-2*innen;
-  const maser=holz?'<path d="M9 18h4M9 28h4M9 38h4M43 18h4M43 28h4M43 38h4" stroke="'+st+'" stroke-width="1.5" stroke-linecap="round"/>':'';
-  return '<svg width="56" height="56" viewBox="0 0 56 56" fill="none" aria-hidden="true">'
-    +'<rect x="6" y="6" width="44" height="44" rx="3" fill="'+f+'" stroke="'+st+'" stroke-width="2.5"/>'
-    +'<rect x="'+innen+'" y="'+innen+'" width="'+gr+'" height="'+gr+'" rx="1.5" fill="#dbeafe" stroke="'+st+'" stroke-width="2"/>'
-    +maser+'</svg>';
+function choiceCardImg(on,fn,img,t,s){
+  return `<div class="ocard ${on?'on':''}" onclick="${fn}"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="vis"><img src="${img}" loading="lazy" decoding="async" alt="${t} (KI-generiertes Symbolbild)"></div><div class="t">${t}</div>${s?`<div class="s">${s}</div>`:''}</div>`;
 }
 function panelHTML(){
   const k=STEPS[cur].key;
   if(k==='material'){
     return grp('Material','three', Object.keys(MATERIALS).map(function(m){
-      return choiceCard(S.material===m, "setMaterial('"+m+"')", MAT_ICON[m], MATERIALS[m].n, MATERIALS[m].s);
+      return choiceCardImg(S.material===m, "setMaterial('"+m+"')", materialBild(m), MATERIALS[m].n, MATERIALS[m].s);
     }).join(''));
   }
   if(k==='holzart'){
     return grp('Holzart','two', Object.keys(HOLZARTEN).map(function(h){
-      return choiceCard(S.holzart===h, "setHolzart('"+h+"')", HOLZ_ICON[h], HOLZARTEN[h].n, HOLZARTEN[h].s);
+      return choiceCardImg(S.holzart===h, "setHolzart('"+h+"')", holzartBild(h), HOLZARTEN[h].n, HOLZARTEN[h].s);
     }).join(''));
   }
   if(k==='profil'){
     /* Holz und Alu: Karten aus dem Katalog, Abbildungen folgen. Kunststoff laeuft
        unveraendert ueber die bestehenden Profilbilder weiter. */
     if(S.prod==='fenster' && S.material!=='kunststoff'){
-      return grp('Profil-System','three', PROFILE_KAT[S.material].map(function(p,i){
-        return choiceCard(S.profile===p.v, "set('profile','"+p.v+"')", profIcon(S.material,i), p.t, p.s);
+      return grp('Profil-System','three', PROFILE_KAT[S.material].map(function(p){
+        return choiceCardImg(S.profile===p.v, "set('profile','"+p.v+"')", profilBild(S.material,p), p.t, p.s);
       }).join(''));
     }
     if(S.prod==='schiebe'){
@@ -4281,7 +4272,7 @@ function panelHTML(){
     // IGLO EDGE nur bei Fenster und Balkontuer: der Hersteller fuehrt in diesem System keine
     // Haustueren (die EDGE-Tueren im Handel sind Nebeneingangstueren). Preise gemessen 14.08.2026.
     return grp('Profil-System', S.prod!=='haustuer'?'three':'two',
-      ocImg('profile','classic','img/karten/profil/iglo5-zentriert.png','IGLO 5 Classic','5-Kammer · Uw 0,83')+ocImg('profile','energy','img/karten/profil/iglo-energy-classic-zentriert.png','IGLO Energy Classic','7-Kammer · Uw 0,71')+(S.prod!=='haustuer'?ocImg('profile','edge','img/karten/profil/iglo-edge-zentriert.webp','IGLO EDGE','7-Kammer · Uw 0,66'):''));
+      ocImg('profile','classic','img/karten/profil/iglo5-zentriert.webp','IGLO 5 Classic','5-Kammer · Uw 0,83')+ocImg('profile','energy','img/karten/profil/iglo-energy-classic-zentriert.webp','IGLO Energy Classic','7-Kammer · Uw 0,71')+(S.prod!=='haustuer'?ocImg('profile','edge','img/karten/profil/iglo-edge-zentriert.webp','IGLO EDGE','7-Kammer · Uw 0,66'):''));
   }
   if(k==='psk'){
     return grp('PSK-Kammer-System','three',
