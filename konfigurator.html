@@ -2356,6 +2356,10 @@ function tokSash(tok){
 }
 
 function shade(hex,a){const n=parseInt(hex.slice(1),16);let r=(n>>16)+a,g=((n>>8)&255)+a,b=(n&255)+a;r=Math.max(0,Math.min(255,r));g=Math.max(0,Math.min(255,g));b=Math.max(0,Math.min(255,b));return '#'+(r<<16|g<<8|b).toString(16).padStart(6,'0');}
+/* Glasfarbe der Skizze. Sie richtet sich NICHT nach dem Rahmen: ein Holzfenster
+   soll dieselbe Scheibe zeigen wie dasselbe Fenster in Kunststoff. Nur bei den
+   dunklen Kunststoff-Folien bleibt die alte, abgestimmte Darstellung erhalten. */
+function glasHell(){ return !(typeof S!=='undefined' && S.prod==='fenster' && (S.material==='holz'||S.material==='alu')); }
 function isDarkCol(i){ const h=(COLORS_AKT()[i]&&COLORS_AKT()[i].c)||'#ffffff'; const n=parseInt(h.slice(1),16); const r=(n>>16)&255,g=(n>>8)&255,b=n&255; return (0.299*r+0.587*g+0.114*b) < 150; }
 // Rollladen-KASTEN wie in der Drutex-Zeichnung: Band mit feinen Lamellen-Linien, KEIN rundes Ding.
 // Motor = kleines Stecker-Symbol rechts oben. Gurt = dezente Marke.
@@ -2708,7 +2712,8 @@ function flatWindowSVG(isBalkon){
   const co=COLORS_AKT()[ci], dark=isDarkCol(ci), fCol=co.c;
   const line=dark?'#17181a':'#111';
   const frameStroke=line, miter=line;
-  const GLASS=dark?'#cdd3d5':'#d7e7f7', GLASSST=line, DIN=dark?'#5e6772':'#9ca8b4', DIMC='#1e242b', DIML='#565b61';
+  const _gd=dark&&glasHell();
+  const GLASS=_gd?'#cdd3d5':'#d7e7f7', GLASSST=line, DIN=_gd?'#5e6772':'#9ca8b4', DIMC='#1e242b', DIML='#565b61';
   const {sashes,stulpAt}=buildSashes(), nFl=sashes.length;
   const hasRoll=(S.roll&&S.roll!=='kein'), rollH=hasRoll?215:0;
   const alu=isBalkon&&S.balkonSchwelle==='alu', schwH=alu?60:0;
@@ -2955,7 +2960,8 @@ function haustuerStageSVG(){
   function ansicht(ox,aussen){
     const ci=aussen?S.outer:S.inner, co=COLORS_AKT()[ci], dark=isDarkCol(ci), fCol=co.c;
     const line=dark?'#17181a':'#111';
-    const GLASS=dark?'#cdd3d5':'#d7e7f7', DIN=dark?'#5e6772':'#9ca8b4';
+    const _gd=dark&&glasHell();
+    const GLASS=_gd?'#cdd3d5':'#d7e7f7', DIN=_gd?'#5e6772':'#9ca8b4';
     const hinge=aussen ? (dinLinks?'r':'l') : (dinLinks?'l':'r');   // außen spiegelbildlich zu innen
     const handleSide=(hinge==='r')?'l':'r';                          // Griff immer gegenüber dem Band
     const gehr=(x,y,w,h,fr)=>`<g stroke="${line}" stroke-width="${Math.max(uu*0.0018,1.4)}" stroke-linecap="round"><line x1="${x}" y1="${y}" x2="${x+fr}" y2="${y+fr}"/><line x1="${x+w}" y1="${y}" x2="${x+w-fr}" y2="${y+fr}"/><line x1="${x}" y1="${y+h}" x2="${x+fr}" y2="${y+h-fr}"/><line x1="${x+w}" y1="${y+h}" x2="${x+w-fr}" y2="${y+h-fr}"/></g>`;
@@ -4313,6 +4319,12 @@ function materialBild(m){
   return KARTE_PFAD+'iglo5-zentriert.webp?v=1';
 }
 function holzartBild(h){ return KARTE_PFAD+'softline68-'+h+'.webp?v=1'; }
+/* Standardton je Holzart. Ein Holzfenster in Weiss als Erstansicht ergibt keinen
+   Sinn — der Kunde waehlt Holz, um Holz zu sehen. Weiss bleibt waehlbar (der
+   Hersteller fuehrt es als Deckfarbe), es ist nur nicht mehr die Vorbelegung.
+   Index in COLORS_HOLZ_*: 1 = Eiche Hell, 4 = Mahagoni. */
+const HOLZ_STANDARDTON={kiefer:1, meranti:4};
+function holzTonDefault(){ return HOLZ_STANDARDTON[S.holzart||'kiefer']||1; }
 function profilDefault(m){ return (PROFILE_KAT[m]||PROFILE_KAT.kunststoff)[0].v; }
 /* Holzfenster fuehrt der Hersteller ohne Aufsatz-Rollladenkasten. Der Rollladen-Schritt
    faellt deshalb bei Holz komplett weg \u2014 sonst verkauft der Konfigurator ein Zubehoer,
@@ -4336,11 +4348,19 @@ function setMaterial(v){
   S.material=v;
   S.profile=profilDefault(v);            /* sonst zeigt der Profil-Schritt eine Wahl, die es im neuen Material nicht gibt */
   if(v!=='holz'){ S.holzart='kiefer'; } else { S.roll='kein'; S.panzer=null; S.endleiste=null; }
-  S.outer=0; S.inner=0;   /* Farbindex zeigt in die Liste des Materials — sonst falscher Ton */
+  /* Farbindex zeigt in die Liste des Materials — sonst falscher Ton. Bei Holz nicht
+     auf Weiss, sondern auf den typischen Ton der Holzart. */
+  S.outer=(v==='holz')?holzTonDefault():0; S.inner=S.outer;
   STEPS=stepsFor(); if(cur>=STEPS.length) cur=STEPS.length-1;
   render(); maybeAutoAdvance();
 }
-function setHolzart(v){ S.holzart=v; render(); maybeAutoAdvance(); }
+function setHolzart(v){
+  /* Holzart wechseln heisst anderes Holz — der Ton wird auf den typischen Ton der
+     neuen Holzart gesetzt. Kiefer und Meranti zeigen denselben Lasurton verschieden;
+     eine mitgeschleppte Wahl waere hier eher irrefuehrend als hilfreich. */
+  S.holzart=v; S.outer=holzTonDefault(); S.inner=S.outer;
+  render(); maybeAutoAdvance();
+}
 let STEPS=STEPS_FENSTER;
 // Überspringbare Extras: alles vorbelegt → Kunde kann mit einem Tap die Standards übernehmen und direkt zum Angebot
 const SKIP_KEYS=['motiv','schall','griff','sicherheit','rollladen','sprossen'];
@@ -5796,25 +5816,31 @@ function setSproDicke(v){ S.sproDicke=v; render(); }
 // Echtes Live-Foto je Öffnungs-Karte. Balkon hat eigene Bilder; Fenster 1-Flügel = anschlag-1f; Mehrflügel-Fenster = null (Mini-Skizze).
 function oeffCardImg(o){
   const of=o.oeff, stulp=(o.stulpAt>0);
+  /* Die Oeffnungskarte zeigt dasselbe Fenster wie der Schritt davor — in Holz oder
+     Alu, nicht in weissem Kunststoff. Die Ordner -kiefer/-meranti/-alu enthalten
+     dieselben Varianten mit denselben Dateinamen; erzeugt von
+     scripts/draw-anschlag-material.py (DIN-Symbole auf die Grundfotos gezeichnet). */
+  const _matOrd=(S.prod==='fenster'&&S.material==='holz') ? '-'+(S.holzart||'kiefer')
+               :(S.prod==='fenster'&&S.material==='alu')  ? '-alu' : '';
   if(S.prod==='balkon'){
     const m={'dk-l':'dk-links','dk-r':'dk-rechts','dreh-l':'dreh-links','dreh-r':'dreh-rechts'};
     if(of.length===1) return 'img/karten/balkon-anschlag-1f/'+(m[of[0]]||of[0])+'.webp';
     return 'img/karten/balkon-anschlag-2f/'+(of[0]==='dreh-l'?'dl-stulp-dkr':'dkl-stulp-dr')+'.webp';
   }
   // Fenster: echte WEISSE Wizard-Bilder wie online (img/karten/anschlag-1f/-2f/-3f), Zuordnung 1:1 wie ANSCHLAG_SETS
-  if(of.length===1) return 'img/karten/anschlag-1f/'+of[0]+'.webp';
+  if(of.length===1) return 'img/karten/anschlag-1f'+_matOrd+'/'+of[0]+'.webp';
   if(of.length===2){
     const a=of[0],b=of[1];
-    if(a==='fest'||b==='fest') return 'img/karten/anschlag-2f/'+(a==='fest'?'fest-dkr':'dkl-fest')+'.webp';
+    if(a==='fest'||b==='fest') return 'img/karten/anschlag-2f'+_matOrd+'/'+(a==='fest'?'fest-dkr':'dkl-fest')+'.webp';
     const type=stulp?'stulp':'pfosten';
     const m2={'dk-l|dk-r|pfosten':'dkl-pfosten-dkr','dreh-l|dk-r|stulp':'dl-stulp-dkr','dreh-l|dk-r|pfosten':'dl-pfosten-dkr','dk-l|dreh-r|stulp':'dkl-stulp-dr','dk-l|dreh-r|pfosten':'dkl-pfosten-dr'};
-    const f=m2[a+'|'+b+'|'+type]; return f?('img/karten/anschlag-2f/'+f+'.webp'):null;
+    const f=m2[a+'|'+b+'|'+type]; return f?('img/karten/anschlag-2f'+_matOrd+'/'+f+'.webp'):null;
   }
   if(of.length===3){
-    if(of[1]==='fest') return 'img/karten/anschlag-3f/dkl-fest-dkr.webp';
+    if(of[1]==='fest') return 'img/karten/anschlag-3f'+_matOrd+'/dkl-fest-dkr.webp';
     const mid=of[1]==='dreh-l'?'dl':'dr';
     const f = o.stulpAt===1?('dkl-stulp-'+mid+'-pf-dkr') : (o.stulpAt===2?('dkl-pf-'+mid+'-stulp-dkr') : ('dkl-pf-'+mid+'-pf-dkr'));
-    return 'img/karten/anschlag-3f/'+f+'.webp';
+    return 'img/karten/anschlag-3f'+_matOrd+'/'+f+'.webp';
   }
   return null;
 }
