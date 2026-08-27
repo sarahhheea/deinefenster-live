@@ -2069,7 +2069,7 @@ body.wiz-active .stage-card #stage svg{width:100%;height:auto;max-height:min(46v
 
 <script>
 const HERO_IMG="";
-const COLORS=[
+const COLORS_PVC=[
   {key:'weiss',n:'Weiß',c:'#f4f4f0'},
   {key:'anthrazit',n:'Anthrazitgrau',c:'#373d3f'},
   {key:'anthraz-gl',n:'Anthrazitgrau Glatt',c:'#373d3f'},
@@ -2115,6 +2115,26 @@ const COLORS=[
   {key:'brillblau',n:'Brilliantblau',c:'#2a5c8c'},
   {key:'dunkelrot',n:'Dunkelrot',c:'#6c1c1c'},
 ];
+/* Holz-Farbtoene laut Hersteller (drutex.de/de/produkte/softline.html, 27.08.2026):
+   Deckfarben und Beizfarben. Bewusst die HERSTELLER-Liste und nicht die kuerzere
+   Liste des Marktes — der gemessene Farbaufpreis haengt nicht vom Ton ab
+   (Nussbaum und Teak kosten auf den Cent gleich), also lassen sich alle sieben
+   Toene bepreisen. Weiss kostet nichts, jeder andere Ton 32,3 % vom Grundpreis. */
+const COLORS_HOLZ=[
+  {key:'weiss',            n:'Wei\u00df',        c:'#f4f4f0'},
+  {key:'holz-eiche-hell',  n:'Eiche Hell',    c:'#d4bc98'},
+  {key:'holz-eiche-dunkel',n:'Eiche Dunkel',  c:'#6b4a2f'},
+  {key:'holz-teak',        n:'Teak',          c:'#a9702f'},
+  {key:'holz-nussbaum',    n:'Nussbaum',      c:'#6e4828'},
+  {key:'holz-mahagoni',    n:'Mahagoni',      c:'#7b3f2a'},
+  {key:'holz-schwarzbraun',n:'Schwarzbraun',  c:'#26211e'}
+];
+/* EINE Stelle entscheidet, welche Farbliste gilt. Die Indizes in S.outer/S.inner
+   beziehen sich immer auf die Liste des aktuellen Materials; setMaterial() setzt
+   sie deshalb auf 0 zurueck, sonst zeigt ein Holzfenster den 30. Folienton. */
+function COLORS_AKT(){
+  return (typeof S!=='undefined' && S.prod==='fenster' && S.material==='holz') ? COLORS_HOLZ : COLORS_PVC;
+}
 const _PREM_FARBE=['schwarzbr','basaltgr-gl','basaltgr-sa','betongrau','crown-plat','dunkelgr','dunkelrot','eiche-nat','eisengl','moosgruen','oregon','schiefgr-gl','schiefgr-sa','douglasie'];
 const S={ prod:'fenster', material:'kunststoff', holzart:'kiefer', profile:'classic', aufteilung:'1fl', opening:'dkr', anschlagIdx:1, hstSystem:'psk', pskKammer:'iglo5', w:1000, h:1200, anzahl:1, outer:0, inner:0, balkonSchwelle:'ohne', doorModel:'nebraska-lcr-inox', griffTuer:'klinke', griffAussen:'klinke', stossHoehe:'1200', griffHst:'innen', hstSchloss:'ohne', hstTeilung:'2', hstLauf:'rechts',
   glass:'2', glasdekor:'klar', schall:false, griff:'mistral', roll:'kein', panzer:null, endleiste:null, sproTyp:'keine', sproDicke:'27', sproRaster:'kreuz', sicher:false, colorTarget:'a' };
@@ -2323,7 +2343,7 @@ function tokSash(tok){
 }
 
 function shade(hex,a){const n=parseInt(hex.slice(1),16);let r=(n>>16)+a,g=((n>>8)&255)+a,b=(n&255)+a;r=Math.max(0,Math.min(255,r));g=Math.max(0,Math.min(255,g));b=Math.max(0,Math.min(255,b));return '#'+(r<<16|g<<8|b).toString(16).padStart(6,'0');}
-function isDarkCol(i){ const h=(COLORS[i]&&COLORS[i].c)||'#ffffff'; const n=parseInt(h.slice(1),16); const r=(n>>16)&255,g=(n>>8)&255,b=n&255; return (0.299*r+0.587*g+0.114*b) < 150; }
+function isDarkCol(i){ const h=(COLORS_AKT()[i]&&COLORS_AKT()[i].c)||'#ffffff'; const n=parseInt(h.slice(1),16); const r=(n>>16)&255,g=(n>>8)&255,b=n&255; return (0.299*r+0.587*g+0.114*b) < 150; }
 // Rollladen-KASTEN wie in der Drutex-Zeichnung: Band mit feinen Lamellen-Linien, KEIN rundes Ding.
 // Motor = kleines Stecker-Symbol rechts oben. Gurt = dezente Marke.
 // Spirale (Gurtwickler-/Motor-Rad) wie in der Drutex-Skizze: Kreis mit eingerollter Spirale.
@@ -2337,7 +2357,7 @@ function coilSymbol(cx,cy,r){
 // Rollladen-Kasten wie Drutex-Angebots-Skizze (PDF Pos 7-13): schlichter Kasten (Höhe 215) +
 // runder Gurtwickler-/Motor-Coil an der Antriebsseite + roter Wickel-Pfeil; Motor zusätzlich Stecker-Kabel.
 function rollKasten(x,boxY,w,boxH){
-  const co=COLORS[S.outer], dark=isDarkCol(S.outer);
+  const co=COLORS_AKT()[S.outer], dark=isDarkCol(S.outer);
   const edge=dark?'rgba(255,255,255,.34)':'rgba(30,40,55,.52)';
   const isMotor=S.roll==='motor';
   const seite=S.rollSeite||'rechts';
@@ -2362,7 +2382,7 @@ function rollKasten(x,boxY,w,boxH){
 }
 // Panzer als heruntergelassene Lamellen, die ein Stück AUFS GLAS kommen (mit Endleiste unten).
 function panzerOnGlass(x,y,w,h){
-  const pzi=(S.panzer!=null?S.panzer:S.outer), pz=COLORS[pzi], pzDark=isDarkCol(pzi);
+  const pzi=(S.panzer!=null?S.panzer:S.outer), pz=COLORS_AKT()[pzi], pzDark=isDarkCol(pzi);
   const edge='rgba(28,36,50,.42)';
   const gap=pzDark?'rgba(255,255,255,.28)':'rgba(28,38,54,.34)';
   const slatH=3.2;
@@ -2370,7 +2390,7 @@ function panzerOnGlass(x,y,w,h){
   for(let yy=y+slatH; yy<y+h-3.4; yy+=slatH){
     s+=`<line x1="${x}" y1="${yy.toFixed(1)}" x2="${x+w}" y2="${yy.toFixed(1)}" stroke="${gap}" stroke-width="0.6"/>`;
   }
-  const elc=(S.endleiste!=null?COLORS[S.endleiste].c:shade(pz.c,pzDark?16:-18));
+  const elc=(S.endleiste!=null?COLORS_AKT()[S.endleiste].c:shade(pz.c,pzDark?16:-18));
   s+=`<rect x="${x}" y="${y+h-3.2}" width="${w}" height="3.6" fill="${elc}" stroke="${edge}" stroke-width="0.7"/>`; // Endleiste
   return s;
 }
@@ -2657,7 +2677,7 @@ function skizzeHinges(open,hinge,gx,gy,sashW,gh,SFR,line){
    Anthrazit / innen Weiss" waehlte, sah danach wieder einen weissen Rahmen, ohne dass
    irgendwo stand warum — die Farbwahl wirkte verloren. */
 function skizzeUnterschrift(x, y, breite, DT, aussenSeite){
-  var ca = (COLORS[S.outer]||{}).n || 'Wei\u00df', ci = (COLORS[S.inner]||{}).n || 'Wei\u00df';
+  var ca = (COLORS_AKT()[S.outer]||{}).n || 'Wei\u00df', ci = (COLORS_AKT()[S.inner]||{}).n || 'Wei\u00df';
   var seite = aussenSeite ? 'Ansicht von au\u00dfen' : 'Ansicht von innen';
   var farben = (ca===ci) ? ('Rahmen ' + ca) : ('au\u00dfen ' + ca + '   \u00b7   innen ' + ci);
   var mitte = x + breite/2;
@@ -2672,7 +2692,7 @@ function skizzeUnterschrift(x, y, breite, DT, aussenSeite){
 function flatWindowSVG(isBalkon){
   const bMm=Math.max(+S.w||1000,300), hMm=Math.max(+S.h||1200,300);
   const av=sketchAussen(), ci=av?S.outer:S.inner;                 // Außenfarbe beim Außenfarbe-Wählen, sonst Innenfarbe
-  const co=COLORS[ci], dark=isDarkCol(ci), fCol=co.c;
+  const co=COLORS_AKT()[ci], dark=isDarkCol(ci), fCol=co.c;
   const line=dark?'#17181a':'#111';
   const frameStroke=line, miter=line;
   const GLASS=dark?'#cdd3d5':'#d7e7f7', GLASSST=line, DIN=dark?'#5e6772':'#9ca8b4', DIMC='#1e242b', DIML='#565b61';
@@ -2719,10 +2739,10 @@ function flatWindowSVG(isBalkon){
       if(S.sproTyp==='aufgesetzt') s+=`<g stroke="${miter}" stroke-width="${bw*1.5}" fill="none" stroke-linecap="square">${sl}</g><g stroke="${fCol}" stroke-width="${bw}" fill="none" stroke-linecap="square">${sl}</g>`;
       else s+=`<g stroke="${dark?'rgba(232,240,248,.95)':'rgba(96,116,142,.98)'}" stroke-width="${Math.max(bw*0.62,3)}" fill="none" stroke-linecap="round">${sl}</g>`;
     }
-    if(pzH>0){ const pz=(S.panzer!=null?COLORS[S.panzer]:co).c;
+    if(pzH>0){ const pz=(S.panzer!=null?COLORS_AKT()[S.panzer]:co).c;
       s+=`<rect x="${glx}" y="${gly}" width="${glw}" height="${pzH}" fill="${pz}" stroke="rgba(0,0,0,.2)" stroke-width="${DW*0.6}"/>`;
       const lh=Math.max(pzH/5,10); for(let ly=gly+lh; ly<gly+pzH-lh*0.5; ly+=lh) s+=`<line x1="${glx+2}" y1="${ly}" x2="${glx+glw-2}" y2="${ly}" stroke="rgba(0,0,0,.18)" stroke-width="${DW*0.5}"/>`;
-     if(S.endleiste!=null){ const eh=Math.max(pzH*0.11,3); s+=`<rect x="${glx}" y="${gly+pzH-eh}" width="${glw}" height="${eh}" fill="${COLORS[S.endleiste].c}" stroke="rgba(0,0,0,.22)" stroke-width="${DW*0.5}"/>`; }
+     if(S.endleiste!=null){ const eh=Math.max(pzH*0.11,3); s+=`<rect x="${glx}" y="${gly+pzH-eh}" width="${glw}" height="${eh}" fill="${COLORS_AKT()[S.endleiste].c}" stroke="rgba(0,0,0,.22)" stroke-width="${DW*0.5}"/>`; }
     }
     const cy=gly+pzH+(glh-pzH)/2;
     // Feld-Nummer bewusst weggelassen (Kundenwunsch 08.07.2026: saubere Skizze ohne Zahlen)
@@ -2804,7 +2824,7 @@ function slidePanel(x,y,w,h,type,dir,ctx,num,sys){
 function schiebeStageSVG(){
   const bMm=Math.max(+S.w||2000,600), hMm=Math.max(+S.h||2000,600);
   const av=sketchAussen(), ci=av?S.outer:S.inner;                 // Außenfarbe beim Außenfarbe-Wählen, sonst Innenfarbe
-  const co=COLORS[ci], dark=isDarkCol(ci), fCol=co.c;
+  const co=COLORS_AKT()[ci], dark=isDarkCol(ci), fCol=co.c;
   const frameStroke=dark?'rgba(255,255,255,.42)':'#333940', miter=dark?shade(fCol,30):'#333940';
   const GLASS='#dcebf6', GLASSST='#7f97ac', DIN='#1e242b', DIMC='#1e242b', DIML='#565b61';
   const sys=S.hstSystem||'psk', n=(sys==='psk')?2:((S.hstTeilung==='3')?3:2), slideIdx=(S.hstLauf==='links')?0:n-1;
@@ -2835,7 +2855,7 @@ function schiebeStageSVG(){
     s+=`<rect x="${gx}" y="${gy}" width="${pw}" height="${gh}" fill="${fCol}" stroke="${frameStroke}" stroke-width="${DW}"/>`+gehr(gx,gy,pw,gh,SFR);
     const glx=gx+SFR, gly=gy+SFR, glw=Math.max(pw-2*SFR,20), glh=Math.max(gh-2*SFR,20), cx=glx+glw/2, cyy=gly+glh/2;
     s+=`<rect x="${glx}" y="${gly}" width="${glw}" height="${glh}" fill="${GLASS}" stroke="${GLASSST}" stroke-width="${DW}"/>`;
-    if(pzH>0){ const pz=(S.panzer!=null?COLORS[S.panzer]:co).c; s+=`<rect x="${glx}" y="${gly}" width="${glw}" height="${pzH}" fill="${pz}" stroke="rgba(0,0,0,.2)" stroke-width="${DW*0.6}"/>`; const lh=Math.max(pzH/5,10); for(let ly=gly+lh; ly<gly+pzH-lh*0.5; ly+=lh) s+=`<line x1="${glx+2}" y1="${ly}" x2="${glx+glw-2}" y2="${ly}" stroke="rgba(0,0,0,.18)" stroke-width="${DW*0.5}"/>`; if(S.endleiste!=null){ const eh=Math.max(pzH*0.11,3); s+=`<rect x="${glx}" y="${gly+pzH-eh}" width="${glw}" height="${eh}" fill="${COLORS[S.endleiste].c}" stroke="rgba(0,0,0,.22)" stroke-width="${DW*0.5}"/>`; } }
+    if(pzH>0){ const pz=(S.panzer!=null?COLORS_AKT()[S.panzer]:co).c; s+=`<rect x="${glx}" y="${gly}" width="${glw}" height="${pzH}" fill="${pz}" stroke="rgba(0,0,0,.2)" stroke-width="${DW*0.6}"/>`; const lh=Math.max(pzH/5,10); for(let ly=gly+lh; ly<gly+pzH-lh*0.5; ly+=lh) s+=`<line x1="${glx+2}" y1="${ly}" x2="${glx+glw-2}" y2="${ly}" stroke="rgba(0,0,0,.18)" stroke-width="${DW*0.5}"/>`; if(S.endleiste!=null){ const eh=Math.max(pzH*0.11,3); s+=`<rect x="${glx}" y="${gly+pzH-eh}" width="${glw}" height="${eh}" fill="${COLORS_AKT()[S.endleiste].c}" stroke="rgba(0,0,0,.22)" stroke-width="${DW*0.5}"/>`; } }
     const isSlide=(i===slideIdx), dir=(cx<bMm/2)?'r':'l', SW=Math.max(Math.min(glw,glh)*0.012,4);
     if(isSlide){
       if(sys==='psk'){ s+=`<path d="M${glx+glw*0.14} ${gly+pzH+(glh-pzH)*0.9} L${cx} ${gly+pzH+glh*0.08} L${glx+glw*0.86} ${gly+pzH+(glh-pzH)*0.9}" stroke="${DIN}" stroke-width="${SW}" fill="none" stroke-linejoin="round"/>`; }
@@ -2920,7 +2940,7 @@ function haustuerStageSVG(){
 
   // Eine Ansicht zeichnen. aussen=true → Außenseite (Außenfarbe, gewählter Griff, spiegelbildliche Seiten).
   function ansicht(ox,aussen){
-    const ci=aussen?S.outer:S.inner, co=COLORS[ci], dark=isDarkCol(ci), fCol=co.c;
+    const ci=aussen?S.outer:S.inner, co=COLORS_AKT()[ci], dark=isDarkCol(ci), fCol=co.c;
     const line=dark?'#17181a':'#111';
     const GLASS=dark?'#cdd3d5':'#d7e7f7', DIN=dark?'#5e6772':'#9ca8b4';
     const hinge=aussen ? (dinLinks?'r':'l') : (dinLinks?'l':'r');   // außen spiegelbildlich zu innen
@@ -3004,8 +3024,8 @@ function haustuerStageSVG(){
 
 const COLIMG=['weiss','anthrazit','anthraz-gl','cremeweiss','weiss-fx','achatgrau','lichtgrau','signalgrau'];
 function stageHTML(){
-  return `<img class="stageimg" src="img/fenster/${COLIMG[S.outer]||(isDarkCol(S.outer)?'anthrazit':'weiss')}.webp" alt="Fenster ${COLORS[S.outer].n}">
-    <div class="stagedim">${AUFTN[S.aufteilung]} · ${OPEN[S.opening]}<br>${S.w} × ${S.h} mm · Außen ${COLORS[S.outer].n}</div>`;
+  return `<img class="stageimg" src="img/fenster/${COLIMG[S.outer]||(isDarkCol(S.outer)?'anthrazit':'weiss')}.webp" alt="Fenster ${COLORS_AKT()[S.outer].n}">
+    <div class="stagedim">${AUFTN[S.aufteilung]} · ${OPEN[S.opening]}<br>${S.w} × ${S.h} mm · Außen ${COLORS_AKT()[S.outer].n}</div>`;
 }
 // ===== LIVE-PREIS-ENGINE — 1:1 aus df-fenster/konfigurator.html übernommen (Preise identisch zum Live-Konfigurator). =====
 // Nur die Unit-Preis-Berechnung; das Feld-Mapping (Mockup-State S → Live-State LS) passiert unten in price().
@@ -3148,7 +3168,31 @@ function _lp_haustuer(){
 }
 // ===== Mapping Mockup-State S → Live-State LS, dann Live-Engine aufrufen =====
 // Technische Maß-Grenzen je Produkt (Fenster je Aufteilung) — außerhalb ist keine Fertigung/kein Preis möglich
+/* Welche gemessene Flaeche gilt fuer die AKTUELLE Auswahl? Dieselbe Zuordnung wie
+   in _holzaluFlaeche(), nur aus S statt aus L — massLimits() laeuft, bevor L gebaut ist. */
+function _haFlaecheAusS(){
+  if(S.aufteilung==='3fl') return 'f3';
+  if(S.aufteilung==='2fl'){
+    const set=(typeof anschlagSet==='function')?anschlagSet():[];
+    const a=set[S.anschlagIdx];
+    return (a&&a.stulpAt!=null)?'s2':'p2';
+  }
+  const set=(typeof anschlagSet==='function')?anschlagSet():[];
+  const a=set[S.anschlagIdx], oe=(a&&a.oeff&&a.oeff[0])||'dk-r';
+  if(oe==='fest') return 'fest';
+  if(oe==='kipp') return 'kipp';
+  if(oe==='dreh-l'||oe==='dreh-r') return 'dreh';
+  return 'dk';
+}
 function massLimits(){
+  /* Holz und Alu: nur zulassen, was auch bestellbar UND bepreist ist. Die Grenzen
+     unterscheiden sich je Oeffnungsart — Kipp gibt es nur bis 1000 mm Hoehe,
+     festverglast bis 2400 mm. Ohne diesen Zweig konfiguriert der Kunde ein Fenster,
+     das es nicht gibt, und bekommt am Ende keinen Preis. */
+  if(S.prod==='fenster' && (S.material==='holz'||S.material==='alu')){
+    const g=(_HOLZALU_GRENZ[S.material]||{})[_haFlaecheAusS()];
+    if(g) return {bMin:g.bMin,bMax:g.bMax,hMin:g.hMin,hMax:g.hMax};
+  }
   if(S.prod==='balkon') return {bMin:600,bMax:2500,hMin:1800,hMax:2400};
   if(S.prod==='haustuer') return {bMin:800,bMax:1400,hMin:1800,hMax:2400};
   if(S.prod==='schiebe') return {bMin:1800,bMax:6500,hMin:1800,hMax:2600};
@@ -3251,7 +3295,50 @@ function _edgeFenTeil(L){ const fl=String(L.fluegel||'').charAt(0), oe=L.oeff1;
   if(oe==='kipp') return 'kipp';
   return 'dk'; }
 
-function _pfBasis(L){ var e=(L.profil==='iglo-energy'), fl=L.fluegel, oe=L.oeff1, b=L.bMm, h=L.hMm;
+/* Schluessel der Preisflaeche aus Material, Profil und Holzart. */
+function _holzaluKey(L){
+  /* NICHT L.profil verwenden — das Feld ist weiter unten mit dem Marktprofil
+     belegt und ueberschrieb den Schluessel (Holzfenster bekam Kunststoffpreis). */
+  if(L.material==='holz')  return L.haProfil+'_'+(L.holzart||'kiefer');
+  if(L.material==='alu')   return L.haProfil;
+  return null;
+}
+/* Welche gemessene Flaeche gehoert zu dieser Fenster-Art? */
+function _holzaluFlaeche(L){
+  var fl=L.fluegel, oe=L.oeff1;
+  if(fl==='stulp') return 's2';
+  if((''+fl).charAt(0)==='2') return 'p2';
+  if((''+fl).charAt(0)==='3') return 'f3';
+  if(oe==='fest') return 'fest';
+  if(oe==='kipp') return 'kipp';
+  if(oe==='dreh-l'||oe==='dreh-r') return 'dreh';
+  return 'dk';
+}
+/* Bilinear zwischen den Stuetzstellen. Ausserhalb des gemessenen Rasters wird
+   bewusst NICHT extrapoliert — dort gibt es keinen Preis, nur eine Anfrage. */
+function _holzaluLook(t,b,h){
+  if(!t) return null;
+  var W=t.W, H=t.H, M=t.M;
+  if(b<W[0]||b>W[W.length-1]||h<H[0]||h>H[H.length-1]) return null;
+  function idx(a,v){ for(var i=0;i<a.length-1;i++){ if(v<=a[i+1]) return i; } return a.length-2; }
+  var i=idx(W,b), j=idx(H,h);
+  var w0=W[i],w1=W[i+1],h0=H[j],h1=H[j+1];
+  var q11=M[j][i],q21=M[j][i+1],q12=M[j+1][i],q22=M[j+1][i+1];
+  if(q11==null||q21==null||q12==null||q22==null) return null;
+  var tw=(w1===w0)?0:(b-w0)/(w1-w0), th=(h1===h0)?0:(h-h0)/(h1-h0);
+  return (q11*(1-tw)+q21*tw)*(1-th) + (q12*(1-tw)+q22*tw)*th;
+}
+function _pfBasis(L){
+  /* Holz und Alu rechnen aus eigenen gemessenen Flaechen. Ohne diesen Zweig
+     faellt die Funktion unten still auf die Kunststoff-Flaechen zurueck und
+     gaebe fuer ein Holzfenster einen Kunststoffpreis aus. */
+  if(L.material==='holz'||L.material==='alu'){
+    var k=_holzaluKey(L); if(!k) return null;
+    return _holzaluLook(_HOLZALU[k+'_'+_holzaluFlaeche(L)], L.bMm, L.hMm);
+  }
+  return _pfBasisKunststoff(L);
+}
+function _pfBasisKunststoff(L){ var e=(L.profil==='iglo-energy'), fl=L.fluegel, oe=L.oeff1, b=L.bMm, h=L.hMm;
   if(fl==='1-fluegel'){ if(oe==='fest'){ var vf=_pfLook(_PF.c_fest,b,h); return e?vf*1.20:vf; }
     if(oe==='kipp'){ var vk=_pfLook(_PF.c_kipp,b,h); return e?vk*1.20:vk; }
     if(oe==='dreh-l'||oe==='dreh-r'){ var vd=e?_pfLook(_PF.e_dk,b,h):_fdkBasis(b,h); return vd-14; }
@@ -3265,6 +3352,398 @@ function _pfBasis(L){ var e=(L.profil==='iglo-energy'), fl=L.fluegel, oe=L.oeff1
   if((''+fl).charAt(0)==='2') return _pfLook(e?_PF.e_p2:_PF.c_p2,b,h);
   if((''+fl).charAt(0)==='3') return _pfLook(e?_PF.e_f3:_PF.c_f3,b,h);
   return _pfLook(e?_PF.e_dk:_PF.c_dk,b,h); }
+/* === Holz- und Alu-Grundpreise ============================================
+   Gemessene Marktpreise, umgerechnet auf unseren Grundpreis nach der Hausregel:
+       Grundflaeche = Marktpreis - _MARGE - _QM_AUFPREIS * qm
+   Der Endpreis liegt damit 3-5 EUR unter Markt, nie darueber. 1800 Messpunkte,
+   Stand 27.08.2026. M[hIndex][wIndex], Stuetzstellen in W und H.
+
+   Zwei Fallen, die beim Messen aufgefallen sind und hier festgehalten gehoeren:
+   1) Die Grenzen unterscheiden sich JE OEFFNUNGSART — Kipp gibt es nur bis
+      1000 mm Hoehe, festverglast bis 2400 mm. Deshalb _HOLZALU_GRENZ.
+   2) Ausserhalb des gemessenen Rasters wird NICHT extrapoliert. Lieber kein
+      Preis als ein geschaetzter (gleiche Regel wie bei IGLO EDGE 3-fluegelig).
+   ========================================================================== */
+const _HOLZALU={
+  softline68_kiefer_fest:{W:[330,564,798,1032,1266,1500],H:[350,863,1375,1888,2400],M:[
+    [87.79,189.23,205.83,256.6,287.97,320.78],
+    [212.95,208.92,242.23,306.24,346.79,385.6],
+    [290.07,283.64,337.72,420.46,474.24,527.75],
+    [375.86,367.02,433.76,538.42,604.29,671.6],
+    [459.92,448.69,528.67,653.8,734.35,812.59]]},
+  softline68_kiefer_kipp:{W:[530,724,918,1112,1306,1500],H:[430,573,715,858,1000],M:[
+    [326.15,365.88,409.39,458.97,528.23,609.08],
+    [324.64,363.81,406.76,455.79,524.49,604.79],
+    [364.53,406.93,459.45,526.17,592.3,683.34],
+    [384.16,433.81,494.76,558.89,629.97,722.19],
+    [406.68,463.31,541.37,603.79,688.51,771.78]]},
+  softline68_kiefer_dk:{W:[450,640,830,1020,1210,1400],H:[430,748,1065,1383,1700],M:[
+    [354.34,393.33,440.98,500.52,571.05,611.19],
+    [392.89,410.89,462.76,589.19,672.14,720.35],
+    [465.6,485.59,558.55,646.29,723.03,882.76],
+    [555.97,581.99,659.53,768.36,855.46,902.33],
+    [640.85,677.53,764.3,885.81,990.83,1038.22]]},
+  softline68_kiefer_dreh:{W:[420,616,812,1008,1204,1400],H:[430,748,1065,1383,1700],M:[
+    [334.33,372.52,420.83,480.13,550.73,590.92],
+    [373.07,391.26,442.77,568.42,651.77,700.66],
+    [445.97,466.41,538.67,626.28,703.46,862.49],
+    [536.82,562.38,639.77,748.42,835.37,882.35],
+    [621.6,658.66,744.64,865.96,970.76,1017.95]]},
+  softline68_kiefer_s2:{W:[980,1264,1548,1832,2116,2400],H:[580,860,1140,1420,1700],M:[
+    [594.11,636.27,779.39,891.54,1000.78,1082.82],
+    [737.73,791.34,884.02,999.3,1117.75,1358.28],
+    [889.18,957.4,1071.09,1206.19,1349.12,1449.19],
+    [1066.68,1149.52,1278.7,1431.33,1592.64,1705.31],
+    [1186.56,1269.26,1414.51,1581.76,1763.2,1886.73]]},
+  softline68_kiefer_p2:{W:[830,1144,1458,1772,2086,2400],H:[480,785,1090,1395,1700],M:[
+    [588.53,608.97,724.66,832.72,942.5,1060.12],
+    [683.07,703.04,779.47,884.28,1121.87,1256.2],
+    [828.28,854.44,951.83,1076.14,1205.68,1349.1],
+    [989.41,1024.37,1140.4,1281.62,1433.84,1596.2],
+    [1167.33,1202.98,1338.82,1496.07,1673.6,1862.99]]},
+  softline68_kiefer_f3:{W:[1470,1716,1962,2208,2454,2700],H:[480,785,1090,1395,1700],M:[
+    [927.52,961.06,1076.32,1150.03,1210.7,1269.93],
+    [1056.95,1093.62,1139.85,1217.92,1285.58,1351.79],
+    [1269.77,1311.6,1377.18,1477.79,1563.91,1639.04],
+    [1514.73,1568.08,1646.35,1765.73,1873.51,1951.78],
+    [1761.42,1847.45,1930.57,2067.85,2188.62,2282.46]]},
+  softline78_kiefer_fest:{W:[330,564,798,1032,1266,1500],H:[350,863,1375,1888,2400],M:[
+    [223,221.36,241.73,300.03,336.32,374.64],
+    [249.44,245.41,283.64,359.51,406.72,452.48],
+    [339.3,332.86,396.2,493.42,557.06,620.11],
+    [439.56,430.72,509.33,631.65,709.39,788.57],
+    [537.23,526,619.87,767.3,862.91,955.62]]},
+  softline78_kiefer_kipp:{W:[490,692,894,1096,1298,1500],H:[500,625,750,875,1000],M:[
+    [379.66,399.93,448.58,507.95,575.12,698.76],
+    [400.73,424.55,473.27,533.58,613,741.63],
+    [425.85,447.14,505.5,575.43,648.55,787.68],
+    [448.94,472.34,537.43,616.7,692.5,834.02],
+    [474.65,505.07,581.81,657.68,746.29,892.52]]},
+  softline78_kiefer_dk:{W:[490,672,854,1036,1218,1400],H:[500,800,1100,1400,1700],M:[
+    [411.8,457.87,513.27,582.29,663.76,709.9],
+    [456.92,478.04,538.83,681.06,776.55,831.79],
+    [541.71,565.8,650.96,752.94,843.31,1013.91],
+    [647.06,678.15,768.61,896.12,997.87,1053.86],
+    [745.17,789.94,891.45,1033.52,1156.75,1213.39]]},
+  softline78_kiefer_dreh:{W:[490,672,854,1036,1218,1400],H:[500,800,1100,1400,1700],M:[
+    [391.53,437.6,493.3,562.31,643.49,689.92],
+    [436.94,457.78,518.56,661.08,756.57,811.52],
+    [521.44,545.53,630.7,732.96,823.63,993.93],
+    [626.79,658.17,748.34,875.85,977.6,1033.59],
+    [724.9,769.67,871.19,1013.83,1136.48,1193.12]]},
+  softline78_kiefer_s2:{W:[880,1184,1488,1792,2096,2400],H:[590,868,1145,1423,1700],M:[
+    [692.96,715.14,855.07,981.45,1109.01,1245.24],
+    [861.78,888.94,985.87,1118.99,1255.29,1558.52],
+    [1038.16,1073.77,1197.96,1349.08,1511.5,1691.01],
+    [1245.22,1288.96,1435.21,1604.34,1791.71,1990.37],
+    [1385.97,1430.07,1589.12,1773.34,1981.62,2202.33]]},
+  softline78_kiefer_p2:{W:[900,1200,1500,1800,2100,2400],H:[500,800,1100,1400,1700],M:[
+    [683.92,708.42,838.47,961.56,1088.42,1222.51],
+    [794.04,818.2,907.21,1030.67,1289.64,1443.22],
+    [962.94,993.98,1108.7,1254.11,1406.46,1573.59],
+    [1150.38,1192.65,1329.88,1494.05,1673.85,1863.49],
+    [1357.79,1401.15,1560.91,1744.99,1953.39,2175.4]]},
+  softline78_kiefer_f3:{W:[1470,1716,1962,2208,2454,2700],H:[500,800,1100,1400,1700],M:[
+    [1078.94,1117.3,1243.44,1327.68,1397.74,1464.9],
+    [1230.23,1272.91,1328.04,1419.07,1497.95,1575.37],
+    [1478.81,1528.41,1604.94,1722.29,1823.72,1911.54],
+    [1764.45,1827.63,1919.18,2058.52,2185.39,2276.95],
+    [2052.12,2153.78,2251.38,2411.53,2553.43,2663.2]]},
+  softline88_kiefer_fest:{W:[330,564,798,1032,1266,1500],H:[350,863,1375,1888,2400],M:[
+    [247.9,246.26,268.08,333.91,374.25,417.2],
+    [277.23,273.2,316.94,400.34,453.33,504.89],
+    [376.94,370.5,441.94,549.59,621.34,691.62],
+    [488.2,479.36,567.82,704.62,791.33,880.36],
+    [597.16,585.93,691.39,856.48,962.22,1066.52]]},
+  softline88_kiefer_kipp:{W:[490,692,894,1096,1298,1500],H:[500,625,750,875,1000],M:[
+    [421.06,443.94,498.38,563.83,639.4,770.28],
+    [444.74,471.17,526.84,593.22,681.32,818.65],
+    [472.47,496.94,561.38,639.71,720.64,869.33],
+    [498.75,525.9,597.36,685.61,770.67,921.17],
+    [528.21,560.95,646.95,730.64,830.26,986.33]]},
+  softline88_kiefer_dk:{W:[490,672,854,1036,1218,1400],H:[500,800,1100,1400,1700],M:[
+    [456.97,505.93,566.84,642.51,732.38,783.15],
+    [507.3,531.32,599.06,749.68,854.43,914.02],
+    [601.94,628.34,723.93,836.9,937.7,1114.66],
+    [718.57,753.43,854.6,996.59,1109.34,1171.99],
+    [828.26,877.38,991.05,1149.62,1285.88,1349.18]]},
+  softline88_kiefer_dreh:{W:[490,672,854,1036,1218,1400],H:[500,800,1100,1400,1700],M:[
+    [436.7,485.95,546.57,622.25,712.11,762.88],
+    [487.61,511.05,578.79,729.42,834.17,894.04],
+    [581.67,608.07,703.66,817.21,917.44,1094.4],
+    [698.31,733.74,834.33,976.32,1089.65,1151.72],
+    [808,857.11,970.79,1129.35,1266.2,1328.92]]},
+  softline88_kiefer_s2:{W:[880,1184,1488,1792,2096,2400],H:[590,868,1145,1423,1700],M:[
+    [769.11,794.47,942.51,1081.06,1221.35,1371.76],
+    [956.46,987.96,1095.31,1242.91,1394.56,1714.58],
+    [1152.24,1193.34,1330.56,1499.35,1680.3,1879.78],
+    [1382.46,1431.99,1595.33,1783.27,1991.78,2212.15],
+    [1539.43,1588.73,1766.02,1971.68,2202.53,2449.01]]},
+  softline88_kiefer_p2:{W:[900,1200,1500,1800,2100,2400],H:[500,800,1100,1400,1700],M:[
+    [759.49,786.02,924.46,1060.58,1199.31,1346.73],
+    [881.77,909.11,1008.83,1145.04,1418.2,1586.83],
+    [1069.2,1104.88,1232.62,1395.11,1563.1,1749.34],
+    [1277.19,1325.25,1477.55,1660.82,1859.73,2071.67],
+    [1507.77,1556.63,1734.92,1940.43,2171.7,2418.61]]},
+  softline88_kiefer_f3:{W:[1470,1716,1962,2208,2454,2700],H:[500,800,1100,1400,1700],M:[
+    [1197.07,1240.65,1372,1464.05,1540.77,1615.17],
+    [1366.03,1413.33,1474.84,1576.58,1664.43,1749.96],
+    [1642.11,1698.08,1783.3,1913.67,2026.39,2123.48],
+    [1959.31,2029.73,2132.57,2287.54,2428.32,2530.87],
+    [2279.11,2392.07,2501.83,2679.93,2838.05,2960.27]]},
+  softline68_meranti_fest:{W:[330,564,798,1032,1266,1500],H:[350,863,1375,1888,2400],M:[
+    [210.26,208.62,227.54,284.11,318.66,355.53],
+    [235.83,231.8,268.58,339.24,383.56,427.58],
+    [320.48,314.04,373.62,465.91,526.37,586.52],
+    [415.24,406.4,480.38,596.04,670.02,745.72],
+    [508.28,497.05,585.71,724.16,815.14,902.93]]},
+  softline68_meranti_kipp:{W:[530,724,918,1112,1306,1500],H:[430,573,715,858,1000],M:[
+    [359.73,404.68,451.95,506.74,582.67,666.12],
+    [358.22,402.61,449.32,503.56,578.93,661.83],
+    [403.33,449.49,507.8,580.6,653.97,749.35],
+    [424.11,478.98,547.16,618.54,696.57,791.97],
+    [449.24,511.66,598.41,666.62,760.03,847.35]]},
+  softline68_meranti_dk:{W:[450,640,830,1020,1210,1400],H:[430,748,1065,1383,1700],M:[
+    [389.95,430.97,483.83,548.87,625.48,669.09],
+    [433.42,453.74,511.12,644.78,734.97,786.95],
+    [513.95,536.26,616.75,714.62,798.89,963.54],
+    [613.58,643.08,728.44,849.14,944.64,996.14],
+    [708.31,749.04,843.92,977.89,1095.35,1147.67]]},
+  softline68_meranti_dreh:{W:[420,616,812,1008,1204,1400],H:[430,748,1065,1383,1700],M:[
+    [370.53,410.16,463.39,528.19,605.74,648.83],
+    [413.6,433.83,491.12,624.01,714.31,766.97],
+    [494.32,516.5,596.86,694.9,778.74,943.85],
+    [594.73,623.47,708.97,829.78,924.54,976.16],
+    [689.06,730.17,824.55,958.32,1075.28,1127.4]]},
+  softline68_meranti_s2:{W:[980,1264,1548,1832,2116,2400],H:[580,860,1140,1420,1700],M:[
+    [655.2,702,853.22,976.08,1094.01,1183.87],
+    [815.04,873.85,975.8,1104.11,1233.86,1483.65],
+    [980.38,1057,1182.27,1332.14,1490.13,1599.75],
+    [1176.7,1269.1,1411.31,1580.15,1759.13,1883.67],
+    [1310.19,1401,1562.18,1747.08,1947.35,2085.35]]},
+  softline68_meranti_p2:{W:[830,1144,1458,1772,2086,2400],H:[480,785,1090,1395,1700],M:[
+    [648.76,671.51,793.57,911.47,1032.55,1160.01],
+    [754.01,776.01,859.67,976.06,1224.37,1371.44],
+    [913.12,942.75,1050.86,1187.62,1332.2,1489.52],
+    [1092.19,1131.21,1259.69,1414.81,1584.11,1764.13],
+    [1288.07,1327.77,1478.95,1652.71,1848.77,2057.85]]},
+  softline68_meranti_f3:{W:[1470,1716,1962,2208,2454,2700],H:[480,785,1090,1395,1700],M:[
+    [1021.91,1059.51,1179.98,1259.47,1326.52,1390.09],
+    [1165.24,1206.54,1258.28,1344.45,1419.35,1492.21],
+    [1400.35,1447.39,1520.21,1630.95,1726.34,1810.16],
+    [1671.37,1730.22,1816.89,1949.29,2068.95,2155.9],
+    [1943.25,2038.55,2131.8,2282.98,2416.77,2520.75]]},
+  softline78_meranti_fest:{W:[330,564,798,1032,1266,1500],H:[350,863,1375,1888,2400],M:[
+    [286.41,284.77,310.64,386.03,432.74,482.35],
+    [320.95,316.92,367.6,464.61,525.43,585.67],
+    [436.57,430.14,512.88,638.19,720.93,803.67],
+    [564.93,556.09,658.73,817.83,919.89,1023.39],
+    [691.55,680.32,803.44,993.72,1118.28,1240.24]]},
+  softline78_meranti_kipp:{W:[490,692,894,1096,1298,1500],H:[500,625,750,875,1000],M:[
+    [487.08,513.43,575.69,652.42,739.58,881.75],
+    [514.23,545.29,608.78,686.46,788.16,937.36],
+    [546.59,574.25,649.97,739.31,834.14,997.02],
+    [576.05,607.84,691.75,793.61,891.12,1057.54],
+    [610.15,649.54,749.16,845.01,960.26,1133.42]]},
+  softline78_meranti_dk:{W:[490,672,854,1036,1218,1400],H:[500,800,1100,1400,1700],M:[
+    [527.32,579.76,649.07,735.75,838.06,896.65],
+    [586.06,613.84,692.29,857.39,975.75,1043.73],
+    [695.17,726.49,837.43,968.06,1084.5,1270.15],
+    [830.05,870.98,988.66,1152.07,1283.93,1356.14],
+    [956.53,1014.62,1146.54,1329.42,1488.56,1561.7]]},
+  softline78_meranti_dreh:{W:[490,672,854,1036,1218,1400],H:[500,800,1100,1400,1700],M:[
+    [507.06,559.5,629.09,715.48,818.37,876.38],
+    [566.37,593.57,672.02,837.12,955.48,1023.46],
+    [674.9,706.22,817.16,947.79,1064.81,1250.46],
+    [810.36,850.72,968.68,1132.38,1263.66,1335.87],
+    [936.55,994.64,1126.85,1309.16,1468.29,1542.02]]},
+  softline78_meranti_s2:{W:[880,1184,1488,1792,2096,2400],H:[590,868,1145,1423,1700],M:[
+    [888.4,917.24,1078.3,1236.54,1396.52,1567.78],
+    [1104.13,1141.42,1266.14,1437.19,1612.29,1956.92],
+    [1331.47,1378.94,1538.45,1734.17,1943.2,2174.24],
+    [1597.29,1655.23,1844.04,2062.1,2303.03,2558.73],
+    [1777.72,1836.87,2042.82,2281.19,2548.53,2834.1]]},
+  softline78_meranti_p2:{W:[900,1200,1500,1800,2100,2400],H:[500,800,1100,1400,1700],M:[
+    [876.75,907.34,1058.23,1214.04,1373.03,1542.16],
+    [1018.43,1050.41,1165.47,1323.39,1619.71,1811.8],
+    [1235.4,1277.15,1425.45,1612.56,1808.05,2023.53],
+    [1475.82,1531.69,1708.6,1921.69,2152.16,2397.11],
+    [1742,1798.98,2006.51,2244.73,2512.78,2799.06]]},
+  softline78_meranti_f3:{W:[1470,1716,1962,2208,2454,2700],H:[500,800,1100,1400,1700],M:[
+    [1382.08,1431.45,1572.07,1678.02,1764.58,1848.82],
+    [1576.81,1632.51,1704.44,1821.53,1922.99,2022.71],
+    [1896.61,1961.27,2060.96,2212.76,2342.57,2456.16],
+    [2264.19,2346.48,2465.54,2645.12,2808.19,2926.67],
+    [2632.64,2765.29,2892.13,3099.48,3282.2,3424.69]]},
+  softline88_meranti_fest:{W:[330,564,798,1032,1266,1500],H:[350,863,1375,1888,2400],M:[
+    [321.74,320.1,348.86,434.38,487.17,542.57],
+    [361.2,357.17,413.93,523.39,593.47,660.95],
+    [491.01,484.58,577.75,720.13,813.01,907.33],
+    [635.29,626.45,743.28,922.35,1038.02,1155.13],
+    [777.55,766.32,905.94,1121.11,1261.89,1399.77]]},
+  softline88_meranti_kipp:{W:[490,692,894,1096,1298,1500],H:[500,625,750,875,1000],M:[
+    [547.59,577.71,647.21,733.21,830.79,984.83],
+    [578.5,612.75,684.93,771.58,886.02,1047.38],
+    [614.05,645.77,730.76,831.38,937.8,1114.57],
+    [647.57,683.99,777.75,892.92,1002.88,1182.91],
+    [686.3,730.33,841.81,951.27,1080.42,1268.34]]},
+  softline88_meranti_dk:{W:[490,672,854,1036,1218,1400],H:[500,800,1100,1400,1700],M:[
+    [592.18,648.67,726.37,822.32,937.08,1000.88],
+    [658.73,690.85,778.86,955.83,1088.09,1163.31],
+    [781.74,817.12,941.66,1089.38,1220.29,1414.63],
+    [933.12,979.85,1112.58,1296.84,1444.62,1526.09],
+    [1075.24,1141.72,1289.57,1495.62,1675.02,1758.01]]},
+  softline88_meranti_dreh:{W:[490,672,854,1036,1218,1400],H:[500,800,1100,1400,1700],M:[
+    [572.49,628.98,706.11,802.05,916.81,980.62],
+    [638.46,670.88,758.59,936.15,1067.82,1143.33],
+    [761.47,796.85,921.39,1069.11,1200.6,1394.94],
+    [912.85,960.16,1092.31,1277.15,1424.35,1505.83],
+    [1055.55,1121.46,1269.88,1475.64,1654.76,1737.74]]},
+  softline88_meranti_s2:{W:[880,1184,1488,1792,2096,2400],H:[590,868,1145,1423,1700],M:[
+    [997.55,1031.31,1203.96,1379.57,1557.79,1748.45],
+    [1240.5,1283.29,1423.65,1615.83,1813.23,2180.44],
+    [1496.21,1550.06,1730.71,1950.16,2185.84,2445.25],
+    [1795.05,1861.09,2074.22,2320.08,2591.7,2878.67],
+    [1998.06,2065.6,2297.61,2566.1,2867.89,3189.36]]},
+  softline88_meranti_p2:{W:[900,1200,1500,1800,2100,2400],H:[500,800,1100,1400,1700],M:[
+    [984.46,1019.97,1181.86,1355.91,1532.57,1721.68],
+    [1144.38,1180.7,1310.53,1489.3,1805.31,2019.11],
+    [1387.7,1436.11,1603.23,1814.36,2034.18,2276.29],
+    [1659.09,1722.79,1922.86,2161.72,2421.72,2697.36],
+    [1958,2023.37,2257.25,2526.16,2827.22,3149.69]]},
+  softline88_meranti_f3:{W:[1470,1716,1962,2208,2454,2700],H:[500,800,1100,1400,1700],M:[
+    [1552.04,1608.07,1757.08,1875.2,1971.31,2065.11],
+    [1772.25,1835.19,1915.23,2047.08,2162.44,2274.89],
+    [2132.59,2205.35,2317.49,2487.82,2634.42,2762.2],
+    [2544.47,2637.76,2772.16,2974.33,3158.53,3293.22],
+    [2959.53,3108.97,3252.31,3485.43,3691.61,3852.92]]},
+  mb70_fest:{W:[300,720,1140,1560,1980,2400],H:[300,850,1400,1950,2500],M:[
+    [83.09,282.67,359.19,437.45,513.39,590.5],
+    [300.99,337.29,415.27,494.41,572.69,650.67],
+    [397.59,434.18,517.68,603.2,686.12,769.62],
+    [513.57,551.63,641.51,735.15,1039.5,1250.72],
+    [609.59,647.94,743.91,1059.36,1292.72,1493.65]]},
+  mb70_kipp:{W:[450,840,1230,1620,2010,2400],H:[500,625,750,875,1000],M:[
+    [421.17,559.73,706.97,899.95,1042.85,1152.16],
+    [487.51,629.72,780.03,976.1,1122.37,1233.02],
+    [519.68,662.37,813.73,1010.85,1158.17,1269.29],
+    [552.14,697.62,850.03,1048.2,1196.58,1308.46],
+    [597.35,738.37,891.55,1090.48,1240.48,1352.84]]},
+  mb70_dk:{W:[460,668,876,1084,1292,1500],H:[590,868,1145,1423,1700],M:[
+    [502.76,535.06,642.19,722.09,802.85,882.45],
+    [571.72,604.01,672.79,744.74,901.6,986.03],
+    [680.94,712.65,783.75,857.17,931.15,1134.17],
+    [788.4,820.7,893.83,968.69,1044.13,1118.99],
+    [855.34,887.07,961.07,1036.22,1113.12,1188.85]]},
+  mb70_dreh:{W:[460,668,876,1084,1292,1500],H:[590,868,1145,1423,1700],M:[
+    [429.8,496.84,602.53,683.29,759.71,835.55],
+    [530.89,599.38,667.86,741.85,895.52,977.93],
+    [641.85,712.65,782.88,857.74,928.54,1129.25],
+    [747.58,820.12,891.8,968.98,1041.81,1114.36],
+    [811.91,885.04,958.18,1035.64,1108.77,1182.19]]},
+  mb70_s2:{W:[1100,1440,1780,2120,2460,2800],H:[590,868,1145,1423,1700],M:[
+    [880.59,1015.56,1208.01,1361.23,1482.62,1599.95],
+    [985.36,1123.07,1237.62,1377.65,1646.01,1772.22],
+    [1176.73,1317.48,1434.2,1579.57,1688.77,1795.34],
+    [1364.03,1507.52,1627.26,1776.83,1889.06,1997.8],
+    [1478.96,1624.62,1744.51,1895.67,2008.61,2119.24]]},
+  mb70_p2:{W:[1100,1440,1780,2120,2460,2800],H:[590,868,1145,1423,1700],M:[
+    [915.91,1052.04,1231.46,1391.34,1510.7,1627.16],
+    [1038.35,1176.92,1278.44,1425.13,1692.34,1816.52],
+    [1237.25,1380.6,1484.58,1634.59,1742.62,1847.17],
+    [1429.46,1577.01,1683.72,1837.92,1948.7,2056.28],
+    [1547.29,1697.01,1803.87,1959.08,2070.86,2178.88]]},
+  mb70hi_fest:{W:[300,720,1140,1560,1980,2400],H:[300,850,1400,1950,2500],M:[
+    [275.63,317.41,404.07,491.3,576.8,663.46],
+    [338.92,378.98,467.68,557.24,646.23,734.35],
+    [446.81,489.48,583.98,681.09,775.59,870.67],
+    [576.98,621.12,724.32,831.28,1148.36,1381.3],
+    [684.58,730.75,840.62,1170.83,1427.06,1644.21]]},
+  mb70hi_kipp:{W:[450,840,1230,1620,2010,2400],H:[500,625,750,875,1000],M:[
+    [473,628.35,793.54,1003.89,1164.74,1287.37],
+    [546.87,706.74,875.59,1089.6,1254.39,1378.36],
+    [583.67,744.02,913.91,1129.27,1294.83,1420.43],
+    [620.18,783.32,954.85,1170.97,1338.44,1465.39],
+    [670.89,829.57,1002.15,1219.33,1388.43,1515.27]]},
+  mb70hi_dk:{W:[460,668,876,1084,1292,1500],H:[590,868,1145,1423,1700],M:[
+    [564.14,600.49,716.32,805.19,894.05,982.63],
+    [641.21,677.84,755.59,837.11,1002.65,1096.35],
+    [764.62,800.67,881.03,963.14,1046.96,1258.96],
+    [885.69,922.04,1004.14,1088.85,1174.13,1259.13],
+    [960.16,996.81,1080.07,1165.06,1252.09,1338.26]]},
+  mb70hi_dreh:{W:[460,668,876,1084,1292,1500],H:[590,868,1145,1423,1700],M:[
+    [482.21,557.64,672.02,761.76,846.86,930.23],
+    [596.33,673.5,750.38,833.05,995.7,1086.79],
+    [720.32,800.67,879.59,964,1044.36,1253.46],
+    [838.78,921.46,1002.69,1089.42,1171.81,1253.33],
+    [911.8,994.2,1076.89,1164.49,1247.75,1330.44]]},
+  mb70hi_s2:{W:[1100,1440,1780,2120,2460,2800],H:[590,868,1145,1423,1700],M:[
+    [988.01,1140.06,1346.4,1516.71,1650.84,1781.49],
+    [1106.39,1261.18,1389.63,1547.6,1830.45,1969.39],
+    [1321.21,1479.91,1611.69,1775.01,1898.68,2018.87],
+    [1531.96,1693.98,1829.36,1997.46,2124.45,2247.67],
+    [1661.37,1825.56,1962.24,2132.51,2259.93,2385.9]]},
+  mb70hi_p2:{W:[1100,1440,1780,2120,2460,2800],H:[590,868,1145,1423,1700],M:[
+    [1027.67,1180.3,1372.75,1551.17,1682.98,1811.6],
+    [1165.74,1321.4,1435.95,1600.3,1881.7,2018.62],
+    [1389.26,1550.27,1668.15,1836.97,1958.62,2076.78],
+    [1605.5,1772.16,1892.48,2066.08,2191.04,2312.81],
+    [1737.81,1907.21,2027.97,2202.87,2330.58,2451.92]]},
+  mb86si_fest:{W:[300,720,1140,1560,1980,2400],H:[300,850,1400,1950,2500],M:[
+    [187.03,281.22,355.14,429.92,504.42,578.92],
+    [285.07,392.59,475.78,560.43,645.36,729.42],
+    [365.74,485.14,575.58,667.19,759.95,851.56],
+    [463.77,596.51,696.52,797.4,1115.07,1261.43],
+    [544.73,687.32,794.29,1117.84,1287.22,1482.93]]},
+  mb86si_kipp:{W:[800,1120,1440,1760,2080,2400],H:[500,625,750,875,1000],M:[
+    [536.38,676.51,794.04,948.06,1058.36,1177.92],
+    [603,746.09,866.01,1022.13,1135.1,1257.63],
+    [635.75,781.51,902.37,1060.58,1174.2,1297.95],
+    [667.91,815.19,936.99,1095.56,1209.82,1334.81],
+    [705.87,854.08,976.53,1136.61,1251.53,1377.16]]},
+  mb86si_dk:{W:[800,940,1080,1220,1360,1500],H:[700,950,1200,1450,1700],M:[
+    [594.28,716.44,758.4,838.3,880.55,923.38],
+    [702.04,776.97,812.53,975.74,1021.7,1067.96],
+    [767.24,843.21,880.39,957.52,994.4,1031],
+    [871.81,951.14,989.64,1068.97,1107.18,1144.82],
+    [938.46,1019.4,1058.37,1139.31,1178.27,1216.07]]},
+  mb86si_dreh:{W:[800,940,1080,1220,1360,1500],H:[600,875,1150,1425,1700],M:[
+    [592.69,672.55,713.02,789.11,829.59,869.49],
+    [657.49,733.51,769.56,921.76,966.33,1010.02],
+    [766.3,844.15,881.47,955.84,992.87,1158.38],
+    [870.19,951.03,989.89,1066.97,1104.68,1140.64],
+    [935.57,1017.96,1056.92,1134.68,1174.21,1210.28]]},
+  mb86si_s2:{W:[1300,1600,1900,2200,2500,2800],H:[700,950,1200,1450,1700],M:[
+    [1027.66,1132.33,1346.01,1464.72,1597.32,1716.32],
+    [1232.53,1341.19,1457.97,1565.77,1865.31,1994.75],
+    [1349.66,1459.72,1579.05,1689.11,1811.63,1921.69],
+    [1543.52,1657.87,1781.2,1894.4,2021.2,2134.98],
+    [1660.94,1777.85,1903.73,2019.48,2148.26,2264.59]]},
+  mb86si_p2:{W:[1300,1600,1900,2200,2500,2800],H:[700,950,1200,1450,1700],M:[
+    [1040.69,1145.36,1357.59,1476.88,1599.35,1721.53],
+    [1233.68,1341.77,1457.68,1565.19,1854.89,1986.94],
+    [1357.19,1467.83,1585.71,1695.19,1807.86,1921.11],
+    [1546.99,1661.35,1783.23,1897,2013.67,2129.76],
+    [1666.15,1782.19,1906.63,2022.38,2141.6,2260.53]]}
+};
+const _HOLZALU_GRENZ={
+  alu:{
+    dk:{bMin:800,bMax:1500,hMin:700,hMax:1700},
+    dreh:{bMin:800,bMax:1500,hMin:600,hMax:1700},
+    fest:{bMin:300,bMax:2400,hMin:300,hMax:2500},
+    kipp:{bMin:800,bMax:2400,hMin:500,hMax:1000},
+    p2:{bMin:1300,bMax:2800,hMin:700,hMax:1700},
+    s2:{bMin:1300,bMax:2800,hMin:700,hMax:1700}},
+  holz:{
+    dk:{bMin:490,bMax:1400,hMin:500,hMax:1700},
+    dreh:{bMin:490,bMax:1400,hMin:500,hMax:1700},
+    f3:{bMin:1470,bMax:2700,hMin:500,hMax:1700},
+    fest:{bMin:330,bMax:1500,hMin:350,hMax:2400},
+    kipp:{bMin:530,bMax:1500,hMin:500,hMax:1000},
+    p2:{bMin:900,bMax:2400,hMin:500,hMax:1700},
+    s2:{bMin:980,bMax:2400,hMin:590,hMax:1700}}
+};
+
 /* Fenster 1-fluegelig Dreh-Kipp (IGLO 5): gemessenes Gitter aus Kanten-Stuetzstellen + 50-mm-Raster (31.07.2026, 1087 Messpunkte).
 
    Der Knackpunkt: Die Flaeche ist NICHT monoton. Ist ein Fluegel breiter als das 1,25-fache
@@ -3315,10 +3794,33 @@ function _lp_fensterNEU(){ var L=LS; var base=_pfBasis(L);
   if(L.edge){ var _et=_edgeFenTeil(L); var _eb=_et?_edgeLook(_et,L.bMm,L.hMm):null;
     if(_eb==null) return null;   /* fuer EDGE nicht gemessen -> lieber kein Preis als ein geschaetzter */
     base=_eb; }
+  /* Liefert die gemessene Holz-/Alu-Flaeche keinen Wert (Mass ausserhalb des
+     gemessenen Rasters), dann gibt es KEINEN Preis. Der Notfallpfad _lp_fenster()
+     ist eine Kunststoff-Schaetzung und lag hier um mehrere hundert Euro daneben. */
+  if(base==null && (L.material==='holz'||L.material==='alu')) return null;
   if(base==null) return _lp_fenster();
   var area=(L.bMm/1000)*(L.hMm/1000), d=0;
   /* IGLO EDGE fuehrt 3-fach serienmaessig — beim Hersteller gibt es gar keine 2-fach-Variante,
      der gemessene Grundpreis enthaelt sie bereits. Ein Aufschlag waere doppelt gezaehlt. */
+  /* Aufpreise sind bei Holz und Alu andere als bei Kunststoff — mit der
+     Kunststoff-Logik lag die Farbe dreistellig daneben. Gemessen 27.08.2026:
+     Holz: Farbe 32,3 % vom Grundpreis (unabhaengig von Groesse UND Farbton),
+           3-fach 27,80 EUR/m2, Sicherheitsbeschlag flach 77,70 EUR.
+     Alu:  3-fach 27,00 EUR/m2, Sicherheitsbeschlag flach 75,57 EUR.
+           Der Farbaufpreis ist NOCH NICHT gemessen — deshalb bleibt Alu vorerst
+           ohne Preis (Sperre in _priceRoh). */
+  if(L.material==='holz'||L.material==='alu'){
+    var _haQm=area;
+    if(L.glas==='3fach') d+=(L.material==='holz'?27.80:27.00)*_haQm;
+    if(L.schall&&L.schall!=='ohne') d+=51*_haQm;
+    if(L.glasdekor==='master-carre') d+=55*_haQm; else if(L.glasdekor&&L.glasdekor!=='klar') d+=27*_haQm;
+    if(L.sicher==='rc2') d+=(L.material==='holz'?77.70:75.57);
+    if(L.griffLocked) d+=5;
+    if(L.material==='holz' && ((L.fa&&L.fa!=='weiss')||(L.fi&&L.fi!=='weiss'))) d+=base*0.323;
+    if(L.sproTyp==='aufgesetzt') d+=({'27':28,'45':38,'65':48})[L.sproDicke]||28;
+    else if(L.sproTyp==='szr') d+=({'18':13,'26':18,'45':25})[L.sproDicke]||13;
+    return base+d;
+  }
   if(!L.edge && L.glas==='3fach') d+=24*area;
   if(L.schall&&L.schall!=='ohne') d+=51*area;
   if(L.glasdekor==='master-carre') d+=55*area; else if(L.glasdekor&&L.glasdekor!=='klar') d+=27*area;
@@ -3544,14 +4046,14 @@ function price(){
 }
 function _priceRoh(){
   if(!massOk()) return null;   // technisch unmögliches Maß → kein Preis
-  /* Holz und Alu sind waehlbar, aber noch nicht gemessen. Ohne diese Sperre faellt
-     _pfBasis() still auf die Kunststoff-Flaechen zurueck und gaebe fuer ein Holzfenster
-     einen Kunststoffpreis aus. Lieber kein Preis als ein falscher — gleiche Regel wie
-     bei EDGE 3-fluegelig. */
-  if(S.material && S.material!=='kunststoff') return null;
+  /* Holz rechnet seit 27.08.2026 aus eigenen gemessenen Flaechen. Alu bleibt
+     ohne Preis, weil der Farbaufpreis dort noch nicht gemessen ist und ein
+     Alufenster fast immer farbig bestellt wird — lieber kein Preis als einer,
+     dem der groesste Aufschlag fehlt. */
+  if(S.prod==='fenster' && S.material==='alu') return null;
   const L={};
   L.bMm=+S.w||1000; L.hMm=+S.h||1200;
-  L.fa=(COLORS[S.outer]&&COLORS[S.outer].key)||'weiss'; L.fi=(COLORS[S.inner]&&COLORS[S.inner].key)||'weiss';   // echter Farb-Key → korrekter (auch Premium-)Preis
+  L.fa=(COLORS_AKT()[S.outer]&&COLORS_AKT()[S.outer].key)||'weiss'; L.fi=(COLORS_AKT()[S.inner]&&COLORS_AKT()[S.inner].key)||'weiss';   // echter Farb-Key → korrekter (auch Premium-)Preis
   L.glas=(S.glass==='3')?'3fach':'2fach';
   L.schall=S.schall?'extra':'ohne';
   L.sicherGlas='kein';                                                              // Mockup hat kein separates Sicherheitsglas
@@ -3564,6 +4066,10 @@ function _priceRoh(){
   L.edge=(S.prod==='schiebe')
     ? (S.hstSystem!=='hs' && S.pskKammer==='edge')   /* Hebe-Schiebe gibt es in EDGE nicht */
     : ((S.profile==='edge') && S.prod!=='haustuer');
+  /* Material, Profil und Holzart gehoeren in L: _pfBasis() entscheidet daran,
+     aus welcher gemessenen Flaeche der Grundpreis kommt. */
+  L.material=(S.prod==='fenster')?(S.material||'kunststoff'):'kunststoff';
+  L.haProfil=S.profile; L.holzart=S.holzart||'kiefer';
   L.sproTyp=S.sproTyp||'keine';
   L.sproDicke=S.sproDicke||'27';
   L.griff='mistral'; L.griffLocked=(S.griff==='abschliessbar');
@@ -3609,7 +4115,7 @@ function prodUnit(){ return {fenster:'Fenster',balkon:'Balkontür',haustuer:'Hau
 // rest=true laesst Anschlag und Maß weg — im Nur-Text-Teil der Mail stehen die beiden
 // bereits als eigene Zeilen darueber, sonst stuenden sie zweimal in derselben Position.
 function prodSpecs(rest){
-  const co=COLORS[S.outer].n, ci=COLORS[S.inner].n;
+  const co=COLORS_AKT()[S.outer].n, ci=COLORS_AKT()[S.inner].n;
   const c=(S.outer===S.inner)?`${co} (außen & innen)`:`außen ${co} · innen ${ci}`;
   const teil=(...v)=>v.filter(Boolean).join(' · ');
   const a=rest?'':anschlagInfo().kurz;
@@ -3799,6 +4305,7 @@ function setMaterial(v){
   S.material=v;
   S.profile=profilDefault(v);            /* sonst zeigt der Profil-Schritt eine Wahl, die es im neuen Material nicht gibt */
   if(v!=='holz'){ S.holzart='kiefer'; } else { S.roll='kein'; S.panzer=null; S.endleiste=null; }
+  S.outer=0; S.inner=0;   /* Farbindex zeigt in die Liste des Materials — sonst falscher Ton */
   STEPS=stepsFor(); if(cur>=STEPS.length) cur=STEPS.length-1;
   render(); maybeAutoAdvance();
 }
@@ -4471,7 +4978,7 @@ function panelHTML(){
        (er war mit beiden offenen Rastern 1824px hoch). */
     const fwFelder=(key,cur,ersteLabel,ersteFarbe)=>
       `<div class="sw ${cur==null?'on':''}" onclick="set('${key}',null)"><div class="chip" style="background:${ersteFarbe}"></div><div class="nm">${ersteLabel}</div></div>`
-      + COLORS.map((co,i)=>`<div class="sw ${cur===i?'on':''}" onclick="set('${key}',${i})"><div class="chip" style="background:${co.c}"></div><div class="nm">${co.n}</div></div>`).join('');
+      + COLORS_AKT().map((co,i)=>`<div class="sw ${cur===i?'on':''}" onclick="set('${key}',${i})"><div class="chip" style="background:${co.c}"></div><div class="nm">${co.n}</div></div>`).join('');
     const fwBlock=(titel,key,cur,ersteLabel,ersteFarbe,aktFarbe,aktText,hinweis)=>{
       const offen=_pzOffen[key];
       return `<div class="grp-title"${titel==='Farbe der Endleiste'?' style="margin-top:22px"':''}>${titel}</div>
@@ -4481,15 +4988,15 @@ function panelHTML(){
           <svg class="fw-pf${offen?' auf':''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         ${offen?`<div class="swatches fw-raster">${fwFelder(key,cur,ersteLabel,ersteFarbe)}</div>`
-               :`<button type="button" class="fw-mehr" onclick="pzToggle('${key}')">Alle ${COLORS.length} Farben zeigen</button>`}
+               :`<button type="button" class="fw-mehr" onclick="pzToggle('${key}')">Alle ${COLORS_AKT().length} Farben zeigen</button>`}
         <div class="pzhint">${hinweis}</div>`;
     };
     const pzpick = S.roll!=='kein'? `<div class="card" style="margin-top:16px">`
-      + fwBlock('Panzerfarbe','panzer',S.panzer,'wie Rahmen',COLORS[S.outer].c,
-                COLORS[panzerIdx()].c, panzerText(),
+      + fwBlock('Panzerfarbe','panzer',S.panzer,'wie Rahmen',COLORS_AKT()[S.outer].c,
+                COLORS_AKT()[panzerIdx()].c, panzerText(),
                 'Der Rollladenpanzer kann in einer eigenen Farbe geliefert werden.')
-      + fwBlock('Farbe der Endleiste','endleiste',S.endleiste,'wie Panzer',COLORS[panzerIdx()].c,
-                COLORS[endleisteIdx()].c, endleisteText(),
+      + fwBlock('Farbe der Endleiste','endleiste',S.endleiste,'wie Panzer',COLORS_AKT()[panzerIdx()].c,
+                COLORS_AKT()[endleisteIdx()].c, endleisteText(),
                 'Die Endleiste ist die Abschlussleiste unten am Panzer.')
       + `</div>`:'';
     // Der Schritt enthaelt ZWEI Entscheidungen: die Art (kein / Gurtwickler / Motor) und
@@ -4558,15 +5065,15 @@ function panelHTML(){
       </div>`;
   }
   if(k==='farbe'){
-    const co=COLORS[S.outer],ci=COLORS[S.inner];
+    const co=COLORS_AKT()[S.outer],ci=COLORS_AKT()[S.inner];
     const innenFarbig=(S.inner!==0);
     // Kein Aufschlag am Farbfeld: er hängt an der Elementgröße und an der Innenfarb-Wahl, hätte also
     // je nach Zeitpunkt eine andere Zahl gezeigt. Was die Farbe kostet, sieht der Kunde am Gesamtpreis.
-    const sw=COLORS.map((c,i)=>
+    const sw=COLORS_AKT().map((c,i)=>
       `<div class="sw ${S.outer===i?'on':''}" onclick="pickOuter(${i})"><div class="chip" style="background:${c.c}"></div><div class="nm">${c.n}</div></div>`
     ).join('');
     const innenStack=`<div class="innen-stack">`
-      +`<button type="button" class="innen-pill ${S.inner===0?'on':''}" onclick="setInnenWeiss()"><span class="segdot" style="background:${COLORS[0].c}"></span>Weiß</button>`
+      +`<button type="button" class="innen-pill ${S.inner===0?'on':''}" onclick="setInnenWeiss()"><span class="segdot" style="background:${COLORS_AKT()[0].c}"></span>Weiß</button>`
       +`<button type="button" class="innen-pill ${innenFarbig?'on':''}" onclick="setInnenFarbig()"><span class="segdot" style="background:${co.c}"></span>Farbig</button>`
       +`<span class="innen-hint">Farbig = innen wie außen</span></div>`;
     return `<div class="farbe-cols">`
@@ -4607,7 +5114,7 @@ const GRIFFN={mistral:'Mistral',abschliessbar:'Mistral abschließbar'};
    verloren; die Angaben stehen nur einmal statt viermal. Dieselbe Liste erscheint ueber
    posKeySpecs auch im Warenkorb und in der Anfrage-Uebersicht. */
 function summaryPanel(){
-  const co=COLORS[S.outer], ci=COLORS[S.inner];
+  const co=COLORS_AKT()[S.outer], ci=COLORS_AKT()[S.inner];
   const ai=anschlagInfo();
   const hebe=t=>String(t==null?'':t).replace(/\b(links|rechts|innen|außen)\b/gi,'<b>$1</b>');
   const p=(k,v)=>v?`<div class="ak-p"><em>${k}</em><b>${v}</b></div>`:'';
@@ -4635,7 +5142,7 @@ function summaryPanel(){
   // wird — Uebersicht, Warenkorb, Anfrage-Mail, Bestaetigung. Ohne sie ist die Farbwahl
   // beim Rollladen zwar getroffen, aber nirgends im Text transportiert.
   const pzP = (S.roll!=='kein')
-    ? p('Panzerfarbe',`${dot(COLORS[panzerIdx()].c)}${panzerText()}`)+p('Endleiste',`${dot(COLORS[endleisteIdx()].c)}${endleisteText()}`)
+    ? p('Panzerfarbe',`${dot(COLORS_AKT()[panzerIdx()].c)}${panzerText()}`)+p('Endleiste',`${dot(COLORS_AKT()[endleisteIdx()].c)}${endleisteText()}`)
     : '';
   // Rollladen als eigene Zeile statt im Sammeleintrag "Extras": Antrieb UND Bedienseite sind
   // Fertigungsangaben. In einer Extras-Kette hinter Schallschutz und Sicherheit gelesen,
@@ -4700,10 +5207,10 @@ function summaryPanel(){
     +`</div>`;
 }
 function summaryRows(){
-  const co=COLORS[S.outer],ci=COLORS[S.inner];
+  const co=COLORS_AKT()[S.outer],ci=COLORS_AKT()[S.inner];
   const pzRows = (S.roll!=='kein')
-    ? `<div class="srow"><span class="k">Panzerfarbe</span><span class="v"><span class="dot" style="background:${COLORS[panzerIdx()].c}"></span>${panzerText()}</span></div>`
-      +`<div class="srow"><span class="k">Farbe Endleiste</span><span class="v"><span class="dot" style="background:${COLORS[endleisteIdx()].c}"></span>${endleisteText()}</span></div>`
+    ? `<div class="srow"><span class="k">Panzerfarbe</span><span class="v"><span class="dot" style="background:${COLORS_AKT()[panzerIdx()].c}"></span>${panzerText()}</span></div>`
+      +`<div class="srow"><span class="k">Farbe Endleiste</span><span class="v"><span class="dot" style="background:${COLORS_AKT()[endleisteIdx()].c}"></span>${endleisteText()}</span></div>`
     : '';
   const massRow=`<div class="srow"><span class="k">Maße</span><span class="v tnum">${S.w} × ${S.h} mm</span></div><div class="srow"><span class="k">Anzahl</span><span class="v tnum">${S.anzahl} Stück</span></div>`;
   const colorRows=`<div class="srow"><span class="k">Außenfarbe</span><span class="v"><span class="dot" style="background:${co.c}"></span>${co.n}</span></div><div class="srow"><span class="k">Innenfarbe</span><span class="v"><span class="dot" style="background:${ci.c}"></span>${ci.n}</span></div>`;
@@ -5174,8 +5681,8 @@ function rollText(){
    im Handel eine eigene Farbwahl, nicht automatisch Teil der Panzerfarbe. */
 function panzerIdx(){ return (S.panzer!=null?S.panzer:S.outer); }
 function endleisteIdx(){ return (S.endleiste!=null?S.endleiste:panzerIdx()); }
-function panzerText(){ return COLORS[panzerIdx()].n+(S.panzer==null?' (wie Rahmen)':''); }
-function endleisteText(){ return COLORS[endleisteIdx()].n+(S.endleiste==null?' (wie Panzer)':''); }
+function panzerText(){ return COLORS_AKT()[panzerIdx()].n+(S.panzer==null?' (wie Rahmen)':''); }
+function endleisteText(){ return COLORS_AKT()[endleisteIdx()].n+(S.endleiste==null?' (wie Panzer)':''); }
 // Maße live setzen OHNE Neu-Rendern (sonst verliert das Feld den Fokus) — nur Preis unten aktualisieren
 function setMass(k,v){ S[k]=(+v||0);
   // Beim Tippen wird nicht neu gerendert (sonst springt der Fokus aus dem Feld) — der Warenkorb
