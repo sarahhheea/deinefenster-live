@@ -1481,14 +1481,21 @@ body.wiz-active .stage-card #stage svg{width:100%;height:auto;max-height:min(46v
 .ocard .vis img{max-height:110px}
 .ocard .t{font-size:15px;font-weight:700;line-height:1.25;color:var(--ink)}
 .ocard .s{font-size:12.5px;line-height:1.35;margin-top:4px;color:var(--ink-soft)}
-  /* Herstellerangaben auf den Profilkarten. Linksbuendig, weil untereinander stehende
-     Zeilen zentriert unruhig wirken — die Karte selbst bleibt zentriert. */
-  .ocard .pfacts{list-style:none;margin:11px 0 0;padding:0;text-align:left;display:grid;gap:3px}
-  .ocard .pfacts li{font-size:12px;line-height:1.35;color:var(--ink-soft);padding-left:13px;position:relative;overflow-wrap:break-word;hyphens:manual}  /* hyphens:manual statt auto: am Handy trennte der Browser sonst mitten im Wort
-     ("Aluminiumleiste ge-gen"). Ganze Woerter umbrechen liest sich ruhiger;
-     overflow-wrap faengt ein einzelnes ueberlanges Wort weiterhin ab. */
-  .ocard .pfacts li::before{content:'';position:absolute;left:2px;top:7px;width:4px;height:4px;border-radius:50%;background:var(--primary);opacity:.55}
-  @media(max-width:767px){ .ocard .pfacts li{font-size:11.5px;line-height:1.3} .ocard .pfacts{margin-top:9px;gap:2px} }
+  /* Herstellerangaben auf der Profilkarte: dasselbe Zeilenmuster wie die uebrigen
+     Eigenschaftslisten (Bezeichnung links, Wert rechts, Haarlinie dazwischen).
+     Bei allen Karten dieselben drei Zeilen in derselben Reihenfolge — dadurch
+     stehen die Werte ueber die Karten hinweg auf einer Linie. */
+  .ocard .pspecs{margin:12px 0 0;padding:0;text-align:left;border-top:1px solid var(--line)}
+  .ocard .pspec{display:flex;justify-content:space-between;align-items:baseline;gap:8px;
+    padding:6px 0;border-bottom:1px solid var(--line)}
+  .ocard .pspec dt{margin:0;font-size:12px;color:var(--ink-soft);white-space:nowrap}
+  .ocard .pspec dd{margin:0;font-size:12.5px;font-weight:600;color:var(--ink);white-space:nowrap;font-variant-numeric:tabular-nums}
+  @media(max-width:767px){
+    .ocard .pspec dt{font-size:11.5px}
+    .ocard .pspec dd{font-size:12px}
+    .ocard .pspec{padding:5px 0}
+  }
+ }
 .ocard:hover{border-color:var(--primary);box-shadow:0 6px 18px -10px rgba(34,94,170,.45)}
 
 /* Ausgewaehlt muss man auf einen Blick sehen — vorher nur eine duenne Linie. */
@@ -3718,26 +3725,36 @@ const HOLZARTEN={
 const PROFILE_KAT={
   kunststoff:[
     {v:'classic', img:'iglo5-zentriert',               t:'IGLO 5 Classic',
-     f:['70 mm Bautiefe','5 Kammern','2 EPDM-Dichtungen','Uw 0,86 W/(m²K)','1,5 mm Stahlverstärkung']},
+     sp:[['Bautiefe','70 mm'],['Dichtungen','2 EPDM'],['Uw in W/(m²K)','0,86']]},
     {v:'energy',  img:'iglo-energy-classic-zentriert', t:'IGLO Energy Classic',
-     f:['82 mm Bautiefe','7 Kammern','3 Dichtungen inkl. Mitteldichtung','Uw 0,73 W/(m²K)']},
+     sp:[['Bautiefe','82 mm'],['Dichtungen','3'],['Uw in W/(m²K)','0,73']]},
     {v:'edge',    img:'iglo-edge-zentriert',           t:'IGLO EDGE',
-     f:['82 mm Bautiefe','7 Kammern','3 EPDM-Dichtungen inkl. Mitteldichtung','Uw 0,66 W/(m²K)','serienmäßig 3-fach verglast']}],
+     sp:[['Bautiefe','82 mm'],['Dichtungen','3 EPDM'],['Uw in W/(m²K)','0,66']]}],
   holz:[
     {v:'softline68', img:'softline68', t:'Softline 68 mm',
-     f:['68 mm Bautiefe','2 Dichtungen','Uw 1,08 W/(m²K)','Aluminiumleiste gegen UV und Wasser','MACO MULTI-MATIC KS-Beschlag']},
+     sp:[['Bautiefe','68 mm'],['Dichtungen','2'],['Uw in W/(m²K)','1,08']]},
     {v:'softline78', img:'softline78', t:'Softline 78 mm',
-     f:['78 mm Bautiefe','2 Dichtungen','Uw 0,90 W/(m²K)','Aluminiumleiste gegen UV und Wasser','MACO MULTI-MATIC KS-Beschlag']},
+     sp:[['Bautiefe','78 mm'],['Dichtungen','2'],['Uw in W/(m²K)','0,90']]},
     {v:'softline88', img:'softline88', t:'Softline 88 mm',
-     f:['88 mm Bautiefe','2 Dichtungen','Uw 0,80 W/(m²K)','Aluminiumleiste gegen UV und Wasser','MACO MULTI-MATIC KS-Beschlag']}],
+     sp:[['Bautiefe','88 mm'],['Dichtungen','2'],['Uw in W/(m²K)','0,80']]}],
   alu:[
     {v:'mb70',   img:'mb70',   t:'MB-70',
-     f:['70 mm Bautiefe','3 EPDM-Dichtungen','Uw 1,06 W/(m²K)','Standard: 2-fach-Verglasung']},
+     sp:[['Bautiefe','70 mm'],['Dichtungen','3 EPDM'],['Uw in W/(m²K)','1,06']]},
     {v:'mb70hi', img:'mb70hi', t:'MB-70HI',
-     f:['70 mm Bautiefe','3 EPDM-Dichtungen','Uw 0,96 W/(m²K)','Standard: 2-fach-Verglasung']},
+     sp:[['Bautiefe','70 mm'],['Dichtungen','3 EPDM'],['Uw in W/(m²K)','0,96']]},
     {v:'mb86si', img:'mb86si', t:'MB-86N SI',
-     f:['77 mm Bautiefe','3 EPDM-Dichtungen','Uw 0,76 W/(m²K)','Standard: 2-fach-Verglasung']}]
+     sp:[['Bautiefe','77 mm'],['Dichtungen','3 EPDM'],['Uw in W/(m²K)','0,76']]}]
 };
+/* Drei Werte je Profil, bei allen neun dieselben drei in derselben Reihenfolge —
+   nur so stehen die Zeilen ueber die Karten hinweg auf einer Linie und lassen sich
+   vergleichen. Bautiefe, Dichtungen und Uw sind die einzigen Angaben, die es bei
+   Kunststoff, Holz UND Alu gibt; Kammern gibt es beim Holzfenster nicht.
+   Alle Werte belegt an den Herstellerseiten (drutex.de, geprueft 27.08.2026):
+   iglo5-classic.html, iglo-energy-classic.html, iglo-edge.html, softline.html,
+   mb-70-fenster-alu.html, mb-70hi-fenster-alu.html, mb-86si-fenster-alu.html.
+   Wer hier etwas aendert, belegt es bitte wieder dort — ein zu guter Uw-Wert auf
+   der Karte ist eine irrefuehrende Angabe, kein Detail. Die Einheit steht in der
+   Beschriftung, nicht als Fusszeile — sonst stuende sie dreimal nebeneinander. */
 /* Alle Angaben oben stammen aus den Herstellerseiten (drutex.de, geprueft 27.08.2026):
    iglo5-classic.html, iglo-energy-classic.html, iglo-edge.html, softline.html,
    mb-70-fenster-alu.html, mb-70hi-fenster-alu.html, mb-86si-fenster-alu.html.
@@ -4266,8 +4283,10 @@ function kiHinweisHTML(key){ const h=KI_HINWEIS[key]; return h?`<p class="ai-not
 
 /* Auswahlkarte mit freiem Klickziel \u2014 wie ocIcon(), aber der Setter darf mehr tun
    als ein Feld schreiben (Material zieht Profil, Rollladen und Schrittliste nach). */
-function choiceCardImg(on,fn,img,t,s,fakten){
-  const liste=(fakten&&fakten.length)?`<ul class="pfacts">${fakten.map(f=>`<li>${f}</li>`).join('')}</ul>`:'';
+function choiceCardImg(on,fn,img,t,s,werte){
+  const liste=(werte&&werte.length)
+    ? `<dl class="pspecs">${werte.map(([k,v])=>`<div class="pspec"><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>`
+    : '';
   return `<div class="ocard ${on?'on':''}" onclick="${fn}"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="vis"><img src="${img}" loading="lazy" decoding="async" alt="${t} (KI-generiertes Symbolbild)"></div><div class="t">${t}</div>${s?`<div class="s">${s}</div>`:''}${liste}</div>`;
 }
 function panelHTML(){
@@ -4297,7 +4316,7 @@ function panelHTML(){
     const _mat=(S.prod==='fenster')?(S.material||'kunststoff'):'kunststoff';
     const _liste=PROFILE_KAT[_mat].filter(function(p){ return !(p.v==='edge' && S.prod==='haustuer'); });
     return grp('Profil-System', _liste.length>2?'three':'two', _liste.map(function(p){
-      return choiceCardImg(S.profile===p.v, "set('profile','"+p.v+"')", profilBild(_mat,p), p.t, '', p.f);
+      return choiceCardImg(S.profile===p.v, "set('profile','"+p.v+"')", profilBild(_mat,p), p.t, '', p.sp);
     }).join(''));
   }
   if(k==='psk'){
