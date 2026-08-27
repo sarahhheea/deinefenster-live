@@ -2115,25 +2115,38 @@ const COLORS_PVC=[
   {key:'brillblau',n:'Brilliantblau',c:'#2a5c8c'},
   {key:'dunkelrot',n:'Dunkelrot',c:'#6c1c1c'},
 ];
-/* Holz-Farbtoene laut Hersteller (drutex.de/de/produkte/softline.html, 27.08.2026):
-   Deckfarben und Beizfarben. Bewusst die HERSTELLER-Liste und nicht die kuerzere
-   Liste des Marktes — der gemessene Farbaufpreis haengt nicht vom Ton ab
-   (Nussbaum und Teak kosten auf den Cent gleich), also lassen sich alle sieben
-   Toene bepreisen. Weiss kostet nichts, jeder andere Ton 32,3 % vom Grundpreis. */
-const COLORS_HOLZ=[
-  {key:'weiss',            n:'Wei\u00df',        c:'#f4f4f0'},
-  {key:'holz-eiche-hell',  n:'Eiche Hell',    c:'#d4bc98'},
-  {key:'holz-eiche-dunkel',n:'Eiche Dunkel',  c:'#6b4a2f'},
-  {key:'holz-teak',        n:'Teak',          c:'#a9702f'},
-  {key:'holz-nussbaum',    n:'Nussbaum',      c:'#6e4828'},
-  {key:'holz-mahagoni',    n:'Mahagoni',      c:'#7b3f2a'},
-  {key:'holz-schwarzbraun',n:'Schwarzbraun',  c:'#26211e'}
+/* Holz-Farbtoene: die sieben Toene des Herstellers, mit den ECHTEN Farbwerten aus
+   seinen eigenen Produktrenders (drutex.de, kolor-front, gemessen am Rahmen 27.08.2026).
+   Zwei Dinge, die dabei herauskamen und vorher falsch waren:
+   1) Es gibt KEIN Schwarzbraun. Der siebte Ton heisst Palisander.
+   2) Derselbe Lasurton sieht auf Kiefer und auf Meranti verschieden aus — der
+      Hersteller zeigt dafuer getrennte Renders. Deshalb zwei Listen statt einer.
+   Die Schluessel sind in beiden Listen gleich: der Preis haengt nur daran, ob der
+   Ton weiss ist oder nicht (Aufpreis 32,3 %, unabhaengig vom Ton). */
+const COLORS_HOLZ_KIEFER=[
+  {key:'weiss',            n:'Wei\u00df',       c:'#ebebeb'},
+  {key:'holz-eiche-hell',  n:'Eiche Hell',   c:'#925938'},
+  {key:'holz-eiche-dunkel',n:'Eiche Dunkel', c:'#863f24'},
+  {key:'holz-teak',        n:'Teak',         c:'#763221'},
+  {key:'holz-mahagoni',    n:'Mahagoni',     c:'#762f22'},
+  {key:'holz-nussbaum',    n:'Nussbaum',     c:'#2d1f20'},
+  {key:'holz-palisander',  n:'Palisander',   c:'#291619'}
+];
+const COLORS_HOLZ_MERANTI=[
+  {key:'weiss',            n:'Wei\u00df',       c:'#ebebeb'},
+  {key:'holz-eiche-hell',  n:'Eiche Hell',   c:'#9e5128'},
+  {key:'holz-eiche-dunkel',n:'Eiche Dunkel', c:'#683322'},
+  {key:'holz-teak',        n:'Teak',         c:'#753622'},
+  {key:'holz-mahagoni',    n:'Mahagoni',     c:'#5b2821'},
+  {key:'holz-nussbaum',    n:'Nussbaum',     c:'#301f1e'},
+  {key:'holz-palisander',  n:'Palisander',   c:'#231517'}
 ];
 /* EINE Stelle entscheidet, welche Farbliste gilt. Die Indizes in S.outer/S.inner
    beziehen sich immer auf die Liste des aktuellen Materials; setMaterial() setzt
    sie deshalb auf 0 zurueck, sonst zeigt ein Holzfenster den 30. Folienton. */
 function COLORS_AKT(){
-  return (typeof S!=='undefined' && S.prod==='fenster' && S.material==='holz') ? COLORS_HOLZ : COLORS_PVC;
+  if(typeof S==='undefined' || S.prod!=='fenster' || S.material!=='holz') return COLORS_PVC;
+  return (S.holzart==='meranti') ? COLORS_HOLZ_MERANTI : COLORS_HOLZ_KIEFER;
 }
 const _PREM_FARBE=['schwarzbr','basaltgr-gl','basaltgr-sa','betongrau','crown-plat','dunkelgr','dunkelrot','eiche-nat','eisengl','moosgruen','oregon','schiefgr-gl','schiefgr-sa','douglasie'];
 const S={ prod:'fenster', material:'kunststoff', holzart:'kiefer', profile:'classic', aufteilung:'1fl', opening:'dkr', anschlagIdx:1, hstSystem:'psk', pskKammer:'iglo5', w:1000, h:1200, anzahl:1, outer:0, inner:0, balkonSchwelle:'ohne', doorModel:'nebraska-lcr-inox', griffTuer:'klinke', griffAussen:'klinke', stossHoehe:'1200', griffHst:'innen', hstSchloss:'ohne', hstTeilung:'2', hstLauf:'rechts',
