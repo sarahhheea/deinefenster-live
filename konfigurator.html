@@ -3185,17 +3185,18 @@ function _haFlaecheAusS(){
   return 'dk';
 }
 function massLimits(){
-  /* Holz und Alu: nur zulassen, was auch bestellbar UND bepreist ist. Die Grenzen
-     unterscheiden sich je Oeffnungsart — Kipp gibt es nur bis 1000 mm Hoehe,
-     festverglast bis 2400 mm. Ohne diesen Zweig konfiguriert der Kunde ein Fenster,
-     das es nicht gibt, und bekommt am Ende keinen Preis. */
-  if(S.prod==='fenster' && (S.material==='holz'||S.material==='alu')){
-    const g=(_HOLZALU_GRENZ[S.material]||{})[_haFlaecheAusS()];
-    if(g) return {bMin:g.bMin,bMax:g.bMax,hMin:g.hMin,hMax:g.hMax};
-  }
+  /* Holz und Alu haben DIESELBEN Masse wie unsere Kunststofffenster. Bewusst keine
+     fremden Grenzen: die Masse sind unsere eigene Festlegung, nicht die von
+     irgendwem uebernommene. Der Hersteller veroeffentlicht keine Maximalmasse
+     (drutex.de, geprueft 27.08.2026) — sobald es ein Datenblatt gibt, gehoert es
+     hierher und nirgendwo anders her. */
   if(S.prod==='balkon') return {bMin:600,bMax:2500,hMin:1800,hMax:2400};
   if(S.prod==='haustuer') return {bMin:800,bMax:1400,hMin:1800,hMax:2400};
   if(S.prod==='schiebe') return {bMin:1800,bMax:6500,hMin:1800,hMax:2600};
+  return _massEigen();
+}
+/* Unsere eigenen Fenstergrenzen — eine Quelle fuer alle Materialien. */
+function _massEigen(){
   const sash=parseInt(S.aufteilung)||1;   // '1fl'/'2fl'/'3fl' → 1/2/3, 'ol' → 1
   const bMin=sash>=3?1200:(sash===2?800:500), bMax=sash>=3?4000:(sash===2?2700:1500);
   let hMin=500,hMax=1900; if(S.aufteilung==='ol'){ hMin=900; hMax=2400; }
@@ -3319,14 +3320,31 @@ function _holzaluFlaeche(L){
 function _holzaluLook(t,b,h){
   if(!t) return null;
   var W=t.W, H=t.H, M=t.M;
-  if(b<W[0]||b>W[W.length-1]||h<H[0]||h>H[H.length-1]) return null;
+  /* Ausserhalb des gemessenen Rasters wird die EIGENE Kurve fortgeschrieben, nach
+     unten wie nach oben — damit kein Fenster ohne Preis dasteht. Zwei Leitplanken:
+     nach unten nie unter 80 % des kleinsten gemessenen Punktes, nach oben nie
+     unter den groessten gemessenen Punkt. Ein zu hoher Preis kostet einen Auftrag,
+     ein zu niedriger kostet Geld — deshalb im Zweifel nach oben. */
+  var _u=(b<W[0]||h<H[0]), _o=(b>W[W.length-1]||h>H[H.length-1]);
+  var _fb=b, _fh=h;
+  if(_u){ b=Math.max(b,W[0]*0.55); h=Math.max(h,H[0]*0.55); }
+  if(_o){ b=Math.min(b,W[W.length-1]); h=Math.min(h,H[H.length-1]); }
   function idx(a,v){ for(var i=0;i<a.length-1;i++){ if(v<=a[i+1]) return i; } return a.length-2; }
   var i=idx(W,b), j=idx(H,h);
   var w0=W[i],w1=W[i+1],h0=H[j],h1=H[j+1];
   var q11=M[j][i],q21=M[j][i+1],q12=M[j+1][i],q22=M[j+1][i+1];
   if(q11==null||q21==null||q12==null||q22==null) return null;
   var tw=(w1===w0)?0:(b-w0)/(w1-w0), th=(h1===h0)?0:(h-h0)/(h1-h0);
-  return (q11*(1-tw)+q21*tw)*(1-th) + (q12*(1-tw)+q22*tw)*th;
+  var v=(q11*(1-tw)+q21*tw)*(1-th) + (q12*(1-tw)+q22*tw)*th;
+  if(_u) v=Math.max(v, M[0][0]*0.80);
+  if(_o){
+    /* Ueber dem Raster: mit der Flaeche weiterrechnen, mindestens der groesste
+       gemessene Wert. So bleibt der Preis mit der Groesse steigend. */
+    var _aGem=(W[W.length-1]/1000)*(H[H.length-1]/1000), _aIst=(_fb/1000)*(_fh/1000);
+    var _gr=M[M.length-1][W.length-1];
+    v=Math.max(v*(_aIst/Math.max(_aGem,0.01)), _gr);
+  }
+  return v;
 }
 function _pfBasis(L){
   /* Holz und Alu rechnen aus eigenen gemessenen Flaechen. Ohne diesen Zweig
