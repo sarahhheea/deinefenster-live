@@ -2141,11 +2141,21 @@ const COLORS_HOLZ_MERANTI=[
   {key:'holz-nussbaum',    n:'Nussbaum',     c:'#301f1e'},
   {key:'holz-palisander',  n:'Palisander',   c:'#231517'}
 ];
+/* Alu-Farbtoene: drei RAL-Toene, wie beim Anbieter gefuehrt. Die RGB-Werte stehen
+   in den Dateinamen seiner Farbmuster (ral9016-rgb246246246 usw.), sind also
+   abgelesen und nicht geschaetzt. Die 41 Kunststoff-Folien gibt es bei Alu nicht. */
+const COLORS_ALU=[
+  {key:'weiss',         n:'Wei\u00df RAL 9016',      c:'#f6f6f6'},
+  {key:'alu-anthrazit', n:'Anthrazitgrau RAL 7016', c:'#293133'},
+  {key:'alu-braun',     n:'Braun RAL 8019',         c:'#59351f'}
+];
 /* EINE Stelle entscheidet, welche Farbliste gilt. Die Indizes in S.outer/S.inner
    beziehen sich immer auf die Liste des aktuellen Materials; setMaterial() setzt
    sie deshalb auf 0 zurueck, sonst zeigt ein Holzfenster den 30. Folienton. */
 function COLORS_AKT(){
-  if(typeof S==='undefined' || S.prod!=='fenster' || S.material!=='holz') return COLORS_PVC;
+  if(typeof S==='undefined' || S.prod!=='fenster') return COLORS_PVC;
+  if(S.material==='alu') return COLORS_ALU;
+  if(S.material!=='holz') return COLORS_PVC;
   return (S.holzart==='meranti') ? COLORS_HOLZ_MERANTI : COLORS_HOLZ_KIEFER;
 }
 const _PREM_FARBE=['schwarzbr','basaltgr-gl','basaltgr-sa','betongrau','crown-plat','dunkelgr','dunkelrot','eiche-nat','eisengl','moosgruen','oregon','schiefgr-gl','schiefgr-sa','douglasie'];
@@ -3853,7 +3863,21 @@ function _lp_fensterNEU(){ var L=LS; var base=_pfBasis(L);
     if(L.glasdekor==='master-carre') d+=55*_haQm; else if(L.glasdekor&&L.glasdekor!=='klar') d+=27*_haQm;
     if(L.sicher==='rc2') d+=(L.material==='holz'?77.70:75.57);
     if(L.griffLocked) d+=5;
-    if(L.material==='holz' && ((L.fa&&L.fa!=='weiss')||(L.fi&&L.fi!=='weiss'))) d+=base*0.323;
+    /* Farbaufpreis: bei Holz ein fester Prozentsatz, bei Alu einer JE PROFIL.
+       Gemessen 28.08.2026 an drei Groessen je Profil, Abweichung unter 0,1 %-Punkt:
+       MB-70 12,50 %, MB-70HI 11,72 %, MB-86N SI 17,25 %. Die Innenfarbe kostet beim
+       Anbieter nichts extra (Aufpreis-Parameter 0,00 im Bedienelement). */
+    var _farbig=((L.fa&&L.fa!=='weiss')||(L.fi&&L.fi!=='weiss'));
+    /* Der Prozentsatz gilt fuer den MARKTPREIS, nicht fuer unseren Grundpreis. Unser
+       Grundpreis ist um die Marge und den Quadratmeter-Aufschlag niedriger; rechnet
+       man den Prozentsatz darauf, liegt ein farbiges Fenster weiter als 5 EUR unter
+       Markt und wir verschenken Geld. Deshalb erst zurueckrechnen. */
+    var _marktBasis = base + _MARGE + _QM_AUFPREIS*area;
+    if(_farbig){
+      var _pct = (L.material==='holz') ? 0.323
+               : ({mb70:0.1250, mb70hi:0.1172, mb86si:0.1725}[L.haProfil]||0.1250);
+      d += _marktBasis * _pct;
+    }
     if(L.sproTyp==='aufgesetzt') d+=({'27':28,'45':38,'65':48})[L.sproDicke]||28;
     else if(L.sproTyp==='szr') d+=({'18':13,'26':18,'45':25})[L.sproDicke]||13;
     return base+d;
@@ -4083,11 +4107,9 @@ function price(){
 }
 function _priceRoh(){
   if(!massOk()) return null;   // technisch unmögliches Maß → kein Preis
-  /* Holz rechnet seit 27.08.2026 aus eigenen gemessenen Flaechen. Alu bleibt
-     ohne Preis, weil der Farbaufpreis dort noch nicht gemessen ist und ein
-     Alufenster fast immer farbig bestellt wird — lieber kein Preis als einer,
-     dem der groesste Aufschlag fehlt. */
-  if(S.prod==='fenster' && S.material==='alu') return null;
+  /* Holz und Alu rechnen aus eigenen gemessenen Flaechen. Die Alu-Sperre ist am
+     28.08.2026 gefallen, nachdem auch der Farbaufpreis gemessen war — vorher haette
+     ein Alufenster einen Preis gezeigt, dem der groesste Aufschlag fehlt. */
   const L={};
   L.bMm=+S.w||1000; L.hMm=+S.h||1200;
   L.fa=(COLORS_AKT()[S.outer]&&COLORS_AKT()[S.outer].key)||'weiss'; L.fi=(COLORS_AKT()[S.inner]&&COLORS_AKT()[S.inner].key)||'weiss';   // echter Farb-Key → korrekter (auch Premium-)Preis
@@ -4348,6 +4370,9 @@ function setMaterial(v){
   S.material=v;
   S.profile=profilDefault(v);            /* sonst zeigt der Profil-Schritt eine Wahl, die es im neuen Material nicht gibt */
   if(v!=='holz'){ S.holzart='kiefer'; } else { S.roll='kein'; S.panzer=null; S.endleiste=null; }
+  /* Wer bei drei Fluegeln auf Alu wechselt, haette sonst eine Aufteilung stehen,
+     die es in Alu nicht gibt. */
+  if(v==='alu' && S.aufteilung==='3fl'){ S.aufteilung='2fl'; S.anschlagIdx=Math.min(ANSCHLAG_DEFIDX['2fl']||0,(ANSCHLAG['2fl']||[]).length-1); massKlemmen(); }
   /* Farbindex zeigt in die Liste des Materials — sonst falscher Ton. Bei Holz nicht
      auf Weiss, sondern auf den typischen Ton der Holzart. */
   S.outer=(v==='holz')?holzTonDefault():0; S.inner=S.outer;
@@ -4926,7 +4951,11 @@ function panelHTML(){
                    : (S.prod==='fenster'&&S.material==='alu') ? '-alu' : '';
     const fbild=(nr)=>`img/karten/${afd}/${nr}-fluegel${afd==='fluegel'?matSuffix:''}.webp`;
     let cards=auf('1fl',fbild(1),'1 Flügel')+auf('2fl',fbild(2),'2 Flügel','');
-    if(S.prod!=='balkon') cards+=auf('3fl',fbild(3),'3 Flügel','');
+    /* Aluminium fuehrt der Hersteller nicht dreifluegelig — die Aufteilung gibt es
+       dort gar nicht. Ohne diese Ausnahme waehlt der Kunde drei Fluegel und landet
+       bei "Auf Anfrage", ohne zu erfahren warum. */
+    const _kein3=(S.prod==='fenster' && S.material==='alu');
+    if(S.prod!=='balkon' && !_kein3) cards+=auf('3fl',fbild(3),'3 Flügel','');
     return grp('Aufteilung',S.prod==='balkon'?'two':'three',cards);
   }
   if(k==='oeffnung'){
