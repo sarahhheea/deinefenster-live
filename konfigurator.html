@@ -2070,7 +2070,7 @@ body.wiz-active .stage-card #stage svg{width:100%;height:auto;max-height:min(46v
 <script>
 const HERO_IMG="";
 const COLORS_PVC=[
-  {key:'weiss',n:'Weiß',c:'#f4f4f0'},
+  {key:'weiss',n:'Weiß',c:'#f7f7f5'},
   {key:'anthrazit',n:'Anthrazitgrau',c:'#373d3f'},
   {key:'anthraz-gl',n:'Anthrazitgrau Glatt',c:'#373d3f'},
   {key:'cremeweiss',n:'Cremeweiß',c:'#fdf6e3'},
@@ -2589,6 +2589,10 @@ function stageSVG(){
   }
   return fensterStageSVG();
 }
+/* Massstab der laufenden Skizze: Blatt-Einheiten je Millimeter. Die Zeichenhelfer
+   haben feste Deckel in Millimetern (Griffhoehe, Gurtwickler, Lamellen); ohne
+   diesen Faktor waeren sie im Blattmassstab mal winzig, mal riesig. */
+var SKZ_K=1;
 // Rollladen-Kasten-Teile aus der Original-PDF (Raster): Coil (Wickelwelle) + roter Pfeil, bei Motor zusätzlich Stecker.
 // Montageseite = S.rollSeite (links → gespiegelt, Pfeil dreht mit). dark → helle Variante für dunklen Kasten.
 function rollKastenParts(bMm,rollH,dark){
@@ -2604,7 +2608,7 @@ function rollKastenParts(bMm,rollH,dark){
 // Achteck wird in Rahmenfarbe HINTERLEGT → deckt die Rahmenlinien dahinter ab, keine Striche über der Hand (Kunde 06.07.).
 function gurtwicklerDevice(bMm,winY,hMm,FR,uu,dark,frameFill){
   const R=(S.rollSeite==='links');
-  const h=Math.min(hMm*0.13,160), w=h*32/34;
+  const h=Math.min(hMm*0.13,160*SKZ_K), w=h*32/34;
   let griffSide=null; try{ const t=tokSash(curAnschlag().oeff[0]); if(t.open==='dk'||t.open==='dreh') griffSide=(t.hinge==='l')?'rechts':'links'; }catch(e){}
   const sameSide=(griffSide===(R?'links':'rechts'));   // Gurtwickler auf Griffseite → unter den Griff setzen
   const cx=R?FR*0.35:bMm-FR*0.35, cy=winY+hMm*(sameSide?0.74:0.52), x=cx-w/2, y=cy-h*0.42;
@@ -2667,13 +2671,13 @@ function skizzeHandle(open,hinge,gx,gy,sashW,gh,SFR,dark){
   const cy=gy+gh*0.5;
   if(S.prod==='haustuer'){   // Tür-Klinke: Langschild + Drücker + Zylinder (Original aus PDF), Hebel zeigt zur Glasmitte
     const img=dark?'img/skizze/klinke-dunkel.webp':'img/skizze/klinke-grau.webp';
-    const kH=Math.min(gh*0.12,300), kW=kH*24/50;
+    const kH=Math.min(gh*0.12,300*SKZ_K), kW=kH*24/50;
     const x=griffRight ? gx+sashW-SFR*0.35-kW : gx+SFR*0.35;
     const flip=griffRight ? ` transform="translate(${(2*x+kW).toFixed(1)},0) scale(-1,1)"` : '';
     return `<image href="${img}" x="${x.toFixed(1)}" y="${(cy-kH*0.5).toFixed(1)}" width="${kW.toFixed(1)}" height="${kH.toFixed(1)}"${flip}/>`;
   }
   const img=dark?'img/skizze/griff-dunkel.webp':'img/skizze/griff-grau.webp';
-  const hH=Math.min(gh*0.17,220), hW=hH*16/58;
+  const hH=Math.min(gh*0.17,220*SKZ_K), hW=hH*16/58;
   if(open==='kipp'){ const cx=gx+sashW/2, cy2=gy+SFR*0.95;
     return `<image href="${img}" x="${cx-hH/2}" y="${cy2-hW/2}" width="${hH}" height="${hW}" transform="rotate(90 ${cx} ${cy2})"/>`; }
   const x=griffRight ? gx+sashW-SFR*0.5-hW*0.5 : gx+SFR*0.5-hW*0.5;
@@ -2717,17 +2721,27 @@ function skizzeUnterschrift(x, y, breite, DT, aussenSeite){
        + ' font-size="'+(DT*0.85)+'" fill="#666d77">'+farben+'</text>';
 }
 function flatWindowSVG(isBalkon){
-  const bMm=Math.max(+S.w||1000,300), hMm=Math.max(+S.h||1200,300);
+  const bR=Math.max(+S.w||1000,300), hR=Math.max(+S.h||1200,300);   // bestellte Masse in mm — nur fuer die Beschriftung
   const av=sketchAussen(), ci=av?S.outer:S.inner;                 // Außenfarbe beim Außenfarbe-Wählen, sonst Innenfarbe
   const co=COLORS_AKT()[ci], dark=isDarkCol(ci), fCol=co.c;
   const line=dark?'#17181a':'#111';
   const frameStroke=line, miter=line;
   const _gd=dark&&glasHell();
-  const GLASS=_gd?'#cdd3d5':'#d7e7f7', GLASSST=line, DIN=_gd?'#5e6772':'#9ca8b4', DIMC='#1e242b', DIML='#565b61';
+  const GLASS=_gd?'#cdd3d5':'#e4eef6', GLASSST=line, DIN=_gd?'#5e6772':'#8895a4', DIMC='#1e242b', DIML='#565b61';
   const {sashes,stulpAt}=buildSashes(), nFl=sashes.length;
-  const hasRoll=(S.roll&&S.roll!=='kein'), rollH=hasRoll?215:0;
-  const alu=isBalkon&&S.balkonSchwelle==='alu', schwH=alu?60:0;
-  const winY=rollH, totalH=rollH+hMm+schwH, uu=Math.max(bMm,totalH);
+  const hasRoll=(S.roll&&S.roll!=='kein'), rollHR=hasRoll?215:0;
+  const alu=isBalkon&&S.balkonSchwelle==='alu', schwHR=alu?60:0;
+  const totalHR=rollHR+hR+schwHR;
+  /* Fester Blattmassstab: Die laengste Kante des Elements ist in JEDER Skizze gleich
+     lang, egal ob 500 mm oder 3000 mm bestellt wurden. Erst dadurch sind Schrift,
+     Strichstaerke, Griffe und Massketten in allen Skizzen gleich gross. Vorher hing
+     jede Groesse am Element: die Haustuer-Bemassung landete bei 4 px, das kleine
+     Fenster trug Ziffern von 6 % der Bildbreite. Millimeter-Konstanten (Kastenhoehe,
+     Rahmenbreite, Griff) rechnet k in den Blattmassstab um. */
+  const BLATT=1000, k=BLATT/Math.max(bR,totalHR);
+  SKZ_K=k;
+  const bMm=bR*k, hMm=hR*k, rollH=rollHR*k, schwH=schwHR*k;
+  const winY=rollH, totalH=totalHR*k, uu=BLATT;
   const DT=uu*0.05, DW=Math.max(uu*0.0032,2), tick=DT*0.32;   // Untergrenze entfernt: sonst trugen kleine Elemente relativ riesige Ziffern (500x500 = 6,1 % der Bildbreite) und grosse winzige (4000 = 2,9 %)
   // Rechter Rand bei Rollladen breiter: dort stehen ZWEI Maßketten nebeneinander (Element innen, Gesamtmaß außen).
   // DT*8.0 = Linie + Zahl (bis 4-stellig) + Luft + zweite Linie + zweite Zahl — sonst laufen die Maßzahlen ineinander.
@@ -2738,19 +2752,24 @@ function flatWindowSVG(isBalkon){
   const _mSeite=(hasRoll?Math.max(uu*0.40,DT*8.0):Math.max(uu*0.24,DT*4.8)),
         mL=_mSeite, mR=_mSeite, mT=Math.max(uu*0.14,DT*2.8), mB=Math.max(uu*0.16,DT*3.2);
   // Rahmen-/Flügelbreiten wie Drutex-Profil (Pos 1: Rahmen 50001 + Flügel 50011 → ~50 mm Blend- + ~66 mm Flügelrahmen sichtbar = 116 mm je Seite bei 1000 mm).
-  const FR=Math.max(bMm*0.05,42), innerW=bMm-2*FR, sashW=innerW/nFl, gy=winY+FR, gh=hMm-2*FR;
-  const SFR=Math.max(Math.min(sashW,gh)*0.075,30), pzH=hasRoll?Math.max(Math.min(gh*0.2,rollH*0.9),40):0;
+  const FR=Math.max(bMm*0.05,42*k), innerW=bMm-2*FR, sashW=innerW/nFl, gy=winY+FR, gh=hMm-2*FR;
+  const SFR=Math.max(Math.min(sashW,gh)*0.075,30*k), pzH=hasRoll?Math.max(Math.min(gh*0.11,rollH*0.55),34*k):0;
   const gehr=(x,y,w,h,fr)=>`<g stroke="${miter}" stroke-width="${Math.max(uu*0.0018,1.4)}" stroke-linecap="round"><line x1="${x}" y1="${y}" x2="${x+fr}" y2="${y+fr}"/><line x1="${x+w}" y1="${y}" x2="${x+w-fr}" y2="${y+fr}"/><line x1="${x}" y1="${y+h}" x2="${x+fr}" y2="${y+h-fr}"/><line x1="${x+w}" y1="${y+h}" x2="${x+w-fr}" y2="${y+h-fr}"/></g>`;
   const vt=(x,y,t)=>`<text x="${x}" y="${y}" transform="rotate(-90 ${x} ${y})" text-anchor="middle" dominant-baseline="central" font-family="Inter,Arial" font-weight="700" font-size="${DT}" fill="${DIMC}">${t}</text>`;
   const vth=(x,y,t)=>`<text x="${x}" y="${y}" text-anchor="start" dominant-baseline="central" font-family="Inter,Arial" font-weight="700" font-size="${DT}" fill="${DIMC}">${t}</text>`;
   const vthEnd=(x,y,t)=>`<text x="${x}" y="${y}" text-anchor="end" dominant-baseline="central" font-family="Inter,Arial" font-weight="700" font-size="${DT}" fill="${DIMC}">${t}</text>`;
   const ht=(x,y,t)=>`<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-family="Inter,Arial" font-weight="700" font-size="${DT}" fill="${DIMC}">${t}</text>`;
-  const hb=(x0,x1,y)=>`<g stroke="${DIML}" stroke-width="${DW}" fill="none"><line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}"/><line x1="${x0}" y1="${y-tick}" x2="${x0}" y2="${y+tick}"/><line x1="${x1}" y1="${y-tick}" x2="${x1}" y2="${y+tick}"/></g>`;
-  const vb=(x,y0,y1)=>`<g stroke="${DIML}" stroke-width="${DW}" fill="none"><line x1="${x}" y1="${y0}" x2="${x}" y2="${y1}"/><line x1="${x-tick}" y1="${y0}" x2="${x+tick}" y2="${y0}"/><line x1="${x-tick}" y1="${y1}" x2="${x+tick}" y2="${y1}"/></g>`;
-  let s=`<svg viewBox="${-mL} ${-mT} ${bMm+mL+mR} ${totalH+mT+mB+DT*2.0}" role="img" aria-label="${isBalkon?'Balkontür':'Fenster'} ${co.n}, ${av?'Ansicht von außen':'Ansicht von innen'}" preserveAspectRatio="xMidYMid meet">${DEFS}`;
+  const _hilf=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${DIML}" stroke-width="${DW*0.55}" opacity=".5"/>`;
+  const hb=(x0,x1,y,von)=>{ const hoch=(von!=null&&y<von), h=(von==null)?'':_hilf(x0,von+(hoch?-tick*0.5:tick*0.5),x0,y+(hoch?-tick:tick))+_hilf(x1,von+(hoch?-tick*0.5:tick*0.5),x1,y+(hoch?-tick:tick));
+    return h+`<g stroke="${DIML}" stroke-width="${DW}" fill="none"><line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}"/><line x1="${x0}" y1="${y-tick}" x2="${x0}" y2="${y+tick}"/><line x1="${x1}" y1="${y-tick}" x2="${x1}" y2="${y+tick}"/></g>`; };
+  const vb=(x,y0,y1,von)=>{ const links=(von!=null&&x<von), h=(von==null)?'':_hilf(von+(links?-tick*0.5:tick*0.5),y0,x+(links?-tick:tick),y0)+_hilf(von+(links?-tick*0.5:tick*0.5),y1,x+(links?-tick:tick),y1);
+    return h+`<g stroke="${DIML}" stroke-width="${DW}" fill="none"><line x1="${x}" y1="${y0}" x2="${x}" y2="${y1}"/><line x1="${x-tick}" y1="${y0}" x2="${x+tick}" y2="${y0}"/><line x1="${x-tick}" y1="${y1}" x2="${x+tick}" y2="${y1}"/></g>`; };
+  let s=`<svg viewBox="${-mL} ${-mT} ${bMm+mL+mR} ${totalH+mT+mB+DT*2.9}" role="img" aria-label="${isBalkon?'Balkontür':'Fenster'} ${co.n}, ${av?'Ansicht von außen':'Ansicht von innen'}" preserveAspectRatio="xMidYMid meet">${DEFS}`;
   if(hasRoll){
     s+=`<rect x="0" y="0" width="${bMm}" height="${rollH}" fill="${dark?fCol:'#eaecef'}" stroke="${frameStroke}" stroke-width="${DW}"/>`;
-    if(!av) s+=rollKastenParts(bMm,rollH,dark);   // Coil/Stecker nur Innenansicht (von außen nicht sichtbar)
+    // Feine Trennfuge zwischen Kasten und Blendrahmen — zeigt den Aufsatzkasten als
+    // eigenes Bauteil, ohne den Kasten mit Symbolen zu fuellen.
+    s+=`<line x1="${bMm*0.03}" y1="${rollH*0.66}" x2="${bMm*0.97}" y2="${rollH*0.66}" stroke="rgba(0,0,0,.10)" stroke-width="${DW*0.6}"/>`;
   }
   s+=`<rect x="0" y="${winY}" width="${bMm}" height="${hMm}" fill="${fCol}" stroke="${frameStroke}" stroke-width="${Math.max(uu*0.004,3)}"/>`+gehr(0,winY,bMm,hMm,FR);
   for(let i=0;i<nFl;i++){
@@ -2769,8 +2788,8 @@ function flatWindowSVG(isBalkon){
     }
     if(pzH>0){ const pz=(S.panzer!=null?COLORS_AKT()[S.panzer]:co).c;
       s+=`<rect x="${glx}" y="${gly}" width="${glw}" height="${pzH}" fill="${pz}" stroke="rgba(0,0,0,.2)" stroke-width="${DW*0.6}"/>`;
-      const lh=Math.max(pzH/5,10); for(let ly=gly+lh; ly<gly+pzH-lh*0.5; ly+=lh) s+=`<line x1="${glx+2}" y1="${ly}" x2="${glx+glw-2}" y2="${ly}" stroke="rgba(0,0,0,.18)" stroke-width="${DW*0.5}"/>`;
-     if(S.endleiste!=null){ const eh=Math.max(pzH*0.11,3); s+=`<rect x="${glx}" y="${gly+pzH-eh}" width="${glw}" height="${eh}" fill="${COLORS_AKT()[S.endleiste].c}" stroke="rgba(0,0,0,.22)" stroke-width="${DW*0.5}"/>`; }
+      const lh=Math.max(pzH/5,10*k); for(let ly=gly+lh; ly<gly+pzH-lh*0.5; ly+=lh) s+=`<line x1="${glx+2}" y1="${ly}" x2="${glx+glw-2}" y2="${ly}" stroke="rgba(0,0,0,.18)" stroke-width="${DW*0.5}"/>`;
+     if(S.endleiste!=null){ const eh=Math.max(pzH*0.11,3*k); s+=`<rect x="${glx}" y="${gly+pzH-eh}" width="${glw}" height="${eh}" fill="${COLORS_AKT()[S.endleiste].c}" stroke="rgba(0,0,0,.22)" stroke-width="${DW*0.5}"/>`; }
     }
     const cy=gly+pzH+(glh-pzH)/2;
     // Feld-Nummer bewusst weggelassen (Kundenwunsch 08.07.2026: saubere Skizze ohne Zahlen)
@@ -2785,21 +2804,21 @@ function flatWindowSVG(isBalkon){
     }
   }
   if(hasRoll && S.roll==='gurt' && !av) s+=gurtwicklerDevice(bMm,winY,hMm,FR,uu, dark, fCol);   // Gurtwickler nur Innenansicht (innen zum Kurbeln)
-  if(alu){ const sy=winY+hMm; s+=`<rect x="${-FR*0.3}" y="${sy}" width="${bMm+FR*0.6}" height="${schwH}" rx="${schwH*0.15}" fill="url(#metg)" stroke="rgba(28,36,50,.4)" stroke-width="${DW}"/><line x1="0" y1="${sy+schwH*0.5}" x2="${bMm}" y2="${sy+schwH*0.5}" stroke="rgba(28,36,50,.22)" stroke-width="${DW*0.5}"/>`; }
+  if(alu){ const sy=winY+hMm; s+=`<rect x="${-FR*0.3}" y="${sy}" width="${bMm+FR*0.6}" height="${schwH}" rx="${schwH*0.15}" fill="url(#metg)" stroke="${line}" stroke-width="${DW}"/><line x1="0" y1="${sy+schwH*0.55}" x2="${bMm}" y2="${sy+schwH*0.55}" stroke="rgba(28,36,50,.45)" stroke-width="${DW*0.7}"/>`; }
   // ── Bemaßung wie PDF: Breite gesamt OBEN, Einzelbreiten UNTEN (nur Mehrflügel), Höhe RECHTS (Element+Gesamt), Kasten "215" oben-links ──
-  const dimTot=rollH+hMm;                                            // Kasten + Element (ohne Schwelle)
-  const topY=-mT*0.5; s+=hb(0,bMm,topY)+ht(bMm/2,topY-DT*0.7,bMm);   // Breite gesamt oben
-  if(nFl>1){ const botY=totalH+mB*0.42; for(let i=0;i<nFl;i++){ const x0=FR+i*sashW, x1=x0+sashW; s+=hb(x0,x1,botY)+ht((x0+x1)/2,botY+DT*0.72,Math.round(bMm/nFl)); } }
+  const dimTot=rollH+hMm, dimTotR=rollHR+hR;                         // Kasten + Element (ohne Schwelle)
+  const topY=-mT*0.5; s+=hb(0,bMm,topY,0)+ht(bMm/2,topY-DT*0.7,bR);   // Breite gesamt oben
+  if(nFl>1){ const botY=totalH+mB*0.42; for(let i=0;i<nFl;i++){ const x0=FR+i*sashW, x1=x0+sashW; s+=hb(x0,x1,botY,totalH)+ht((x0+x1)/2,botY+DT*0.72,Math.round(bR/nFl)); } }
   const rxH=bMm+DT*0.85;
   if(hasRoll){
-    s+=vb(rxH,winY,winY+hMm)+vth(rxH+DT*0.5,winY+hMm/2,hMm);          // Fensterhöhe (Element) rechts — innere Kette
-    const lx=-mL*0.34; s+=vb(lx,0,rollH)+vthEnd(lx-DT*0.45,rollH/2,rollH);  // Rollladen-Kasten links — waagerecht
+    s+=vb(rxH,winY,winY+hMm,bMm)+vth(rxH+DT*0.5,winY+hMm/2,hR);          // Fensterhöhe (Element) rechts — innere Kette
+    const lx=-mL*0.34; s+=vb(lx,0,rollH,0)+vthEnd(lx-DT*0.45,rollH/2,rollHR);  // Rollladen-Kasten links — waagerecht
     // Gesamthöhe Kasten+Element als ÄUSSERE Maßkette rechts daneben. Das ist das Maß der Rohbauöffnung, nach dem
     // bestellt und eingebaut wird — ohne es müsste der Kunde 215+Elementhöhe selbst addieren (klassische Fehlerquelle).
     // Abstand zur inneren Kette: Linie + Zahl + Luft, damit sich die Maßzahlen nie berühren.
-    const rxG=bMm+DT*4.5; s+=vb(rxG,0,dimTot)+vth(rxG+DT*0.5,dimTot/2,dimTot);
+    const rxG=bMm+DT*4.5; s+=vb(rxG,0,dimTot,bMm)+vth(rxG+DT*0.5,dimTot/2,dimTotR);
   } else {
-    s+=vb(rxH,0,dimTot)+vth(rxH+DT*0.5,dimTot/2,dimTot);             // Gesamthöhe rechts — waagerecht
+    s+=vb(rxH,0,dimTot,bMm)+vth(rxH+DT*0.5,dimTot/2,dimTotR);             // Gesamthöhe rechts — waagerecht
   }
   s+=skizzeUnterschrift(0, totalH+mB+DT*0.7, bMm, DT, av);
   return s+`</svg>`;
@@ -2850,14 +2869,18 @@ function slidePanel(x,y,w,h,type,dir,ctx,num,sys){
 // Maßstäbliche Schiebetür-Skizze 1:1 wie PDF: PSK (Pos 20) = Kipp-Dreieck (Spitze oben) + Schiebe-Pfeil + "» S160kg «",
 // HS (Pos 25) = Schiebe-Pfeil + "VP" oben-links; ruhendes Feld = Fest-Kreuz. Gleiche PDF-Bemaßung wie Fenster.
 function schiebeStageSVG(){
-  const bMm=Math.max(+S.w||2000,600), hMm=Math.max(+S.h||2000,600);
+  const bR=Math.max(+S.w||2000,600), hR=Math.max(+S.h||2000,600);   // bestellte Masse in mm — nur fuer die Beschriftung
   const av=sketchAussen(), ci=av?S.outer:S.inner;                 // Außenfarbe beim Außenfarbe-Wählen, sonst Innenfarbe
   const co=COLORS_AKT()[ci], dark=isDarkCol(ci), fCol=co.c;
   const frameStroke=dark?'rgba(255,255,255,.42)':'#333940', miter=dark?shade(fCol,30):'#333940';
-  const GLASS='#dcebf6', GLASSST='#7f97ac', DIN='#1e242b', DIMC='#1e242b', DIML='#565b61';
+  const GLASS='#e4eef6', GLASSST='#8ea4b6', DIN='#1e242b', DIMC='#1e242b', DIML='#565b61';
   const sys=S.hstSystem||'psk', n=(sys==='psk')?2:((S.hstTeilung==='3')?3:2), slideIdx=(S.hstLauf==='links')?0:n-1;
-  const hasRoll=(S.roll&&S.roll!=='kein'), rollH=hasRoll?215:0, winY=rollH, totalH=rollH+hMm, uu=Math.max(bMm,totalH);
-  const DT=uu*0.045, DW=Math.max(uu*0.0032,2), tick=DT*0.32;  // wie Fenster-Renderer
+  const hasRoll=(S.roll&&S.roll!=='kein'), rollHR=hasRoll?215:0, totalHR=rollHR+hR;
+  // Blattmassstab wie beim Fenster (siehe flatWindowSVG): konstante Schrift und Striche.
+  const BLATT=1000, k=BLATT/Math.max(bR,totalHR);
+  SKZ_K=k;
+  const bMm=bR*k, hMm=hR*k, rollH=rollHR*k, winY=rollH, totalH=totalHR*k, uu=BLATT;
+  const DT=uu*0.05, DW=Math.max(uu*0.0032,2), tick=DT*0.32;   // gleiche Schriftgroesse wie Fenster/Balkontuer
   // Rechter Rand bei Rollladen breiter: dort stehen ZWEI Maßketten nebeneinander (Element innen, Gesamtmaß außen).
   // DT*8.0 = Linie + Zahl (bis 4-stellig) + Luft + zweite Linie + zweite Zahl — sonst laufen die Maßzahlen ineinander.
   /* Linker und rechter Rand sind gleich breit. Vorher war der rechte Rand doppelt
@@ -2866,27 +2889,30 @@ function schiebeStageSVG(){
      heisst: das Element selbst steht mittig, die Maßkette liegt im Rand. */
   const _mSeite=(hasRoll?Math.max(uu*0.40,DT*8.0):Math.max(uu*0.24,DT*4.8)),
         mL=_mSeite, mR=_mSeite, mT=Math.max(uu*0.14,DT*2.8), mB=Math.max(uu*0.16,DT*3.2);
-  const FR=Math.max(Math.min(bMm,hMm)*0.05,40), innerW=bMm-2*FR, pw=innerW/n, gy=winY+FR, gh=hMm-2*FR;
-  const SFR=Math.max(Math.min(pw,gh)*0.05,22), pzH=hasRoll?Math.max(Math.min(gh*0.2,rollH*0.9),40):0;
+  const FR=Math.max(Math.min(bMm,hMm)*0.05,40*k), innerW=bMm-2*FR, pw=innerW/n, gy=winY+FR, gh=hMm-2*FR;
+  const SFR=Math.max(Math.min(pw,gh)*0.05,22*k), pzH=hasRoll?Math.max(Math.min(gh*0.11,rollH*0.55),34*k):0;
   const gehr=(x,y,w,h,fr)=>`<g stroke="${miter}" stroke-width="${Math.max(uu*0.0018,1.4)}" stroke-linecap="round"><line x1="${x}" y1="${y}" x2="${x+fr}" y2="${y+fr}"/><line x1="${x+w}" y1="${y}" x2="${x+w-fr}" y2="${y+fr}"/><line x1="${x}" y1="${y+h}" x2="${x+fr}" y2="${y+h-fr}"/><line x1="${x+w}" y1="${y+h}" x2="${x+w-fr}" y2="${y+h-fr}"/></g>`;
   const vt=(x,y,t)=>`<text x="${x}" y="${y}" transform="rotate(-90 ${x} ${y})" text-anchor="middle" dominant-baseline="central" font-family="Inter,Arial" font-weight="700" font-size="${DT}" fill="${DIMC}">${t}</text>`;
   const vth=(x,y,t)=>`<text x="${x}" y="${y}" text-anchor="start" dominant-baseline="central" font-family="Inter,Arial" font-weight="700" font-size="${DT}" fill="${DIMC}">${t}</text>`;
   const vthEnd=(x,y,t)=>`<text x="${x}" y="${y}" text-anchor="end" dominant-baseline="central" font-family="Inter,Arial" font-weight="700" font-size="${DT}" fill="${DIMC}">${t}</text>`;
   const ht=(x,y,t)=>`<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-family="Inter,Arial" font-weight="700" font-size="${DT}" fill="${DIMC}">${t}</text>`;
-  const hb=(x0,x1,y)=>`<g stroke="${DIML}" stroke-width="${DW}" fill="none"><line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}"/><line x1="${x0}" y1="${y-tick}" x2="${x0}" y2="${y+tick}"/><line x1="${x1}" y1="${y-tick}" x2="${x1}" y2="${y+tick}"/></g>`;
-  const vb=(x,y0,y1)=>`<g stroke="${DIML}" stroke-width="${DW}" fill="none"><line x1="${x}" y1="${y0}" x2="${x}" y2="${y1}"/><line x1="${x-tick}" y1="${y0}" x2="${x+tick}" y2="${y0}"/><line x1="${x-tick}" y1="${y1}" x2="${x+tick}" y2="${y1}"/></g>`;
-  let s=`<svg viewBox="${-mL} ${-mT} ${bMm+mL+mR} ${totalH+mT+mB+DT*2.0}" role="img" aria-label="Schiebetür ${co.n}, ${av?'Ansicht von außen':'Ansicht von innen'}" preserveAspectRatio="xMidYMid meet">${DEFS}`;
-  if(hasRoll){ s+=`<rect x="0" y="0" width="${bMm}" height="${rollH}" fill="${dark?fCol:'#eaecef'}" stroke="${frameStroke}" stroke-width="${DW}"/><line x1="${bMm*0.04}" y1="${rollH*0.62}" x2="${bMm*0.96}" y2="${rollH*0.62}" stroke="rgba(0,0,0,.09)" stroke-width="${DW*0.6}"/>`+rollKastenParts(bMm,rollH,dark); }
+  const _hilf=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${DIML}" stroke-width="${DW*0.55}" opacity=".5"/>`;
+  const hb=(x0,x1,y,von)=>{ const hoch=(von!=null&&y<von), h=(von==null)?'':_hilf(x0,von+(hoch?-tick*0.5:tick*0.5),x0,y+(hoch?-tick:tick))+_hilf(x1,von+(hoch?-tick*0.5:tick*0.5),x1,y+(hoch?-tick:tick));
+    return h+`<g stroke="${DIML}" stroke-width="${DW}" fill="none"><line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}"/><line x1="${x0}" y1="${y-tick}" x2="${x0}" y2="${y+tick}"/><line x1="${x1}" y1="${y-tick}" x2="${x1}" y2="${y+tick}"/></g>`; };
+  const vb=(x,y0,y1,von)=>{ const links=(von!=null&&x<von), h=(von==null)?'':_hilf(von+(links?-tick*0.5:tick*0.5),y0,x+(links?-tick:tick),y0)+_hilf(von+(links?-tick*0.5:tick*0.5),y1,x+(links?-tick:tick),y1);
+    return h+`<g stroke="${DIML}" stroke-width="${DW}" fill="none"><line x1="${x}" y1="${y0}" x2="${x}" y2="${y1}"/><line x1="${x-tick}" y1="${y0}" x2="${x+tick}" y2="${y0}"/><line x1="${x-tick}" y1="${y1}" x2="${x+tick}" y2="${y1}"/></g>`; };
+  let s=`<svg viewBox="${-mL} ${-mT} ${bMm+mL+mR} ${totalH+mT+mB+DT*2.9}" role="img" aria-label="Schiebetür ${co.n}, ${av?'Ansicht von außen':'Ansicht von innen'}" preserveAspectRatio="xMidYMid meet">${DEFS}`;
+  if(hasRoll){ s+=`<rect x="0" y="0" width="${bMm}" height="${rollH}" fill="${dark?fCol:'#eaecef'}" stroke="${frameStroke}" stroke-width="${DW}"/><line x1="${bMm*0.03}" y1="${rollH*0.66}" x2="${bMm*0.97}" y2="${rollH*0.66}" stroke="rgba(0,0,0,.10)" stroke-width="${DW*0.6}"/>`; }
   s+=`<rect x="0" y="${winY}" width="${bMm}" height="${hMm}" fill="${fCol}" stroke="${frameStroke}" stroke-width="${Math.max(uu*0.004,3)}"/>`+gehr(0,winY,bMm,hMm,FR);
   for(let i=0;i<n;i++){
     const gx=FR+i*pw;
     s+=`<rect x="${gx}" y="${gy}" width="${pw}" height="${gh}" fill="${fCol}" stroke="${frameStroke}" stroke-width="${DW}"/>`+gehr(gx,gy,pw,gh,SFR);
     const glx=gx+SFR, gly=gy+SFR, glw=Math.max(pw-2*SFR,20), glh=Math.max(gh-2*SFR,20), cx=glx+glw/2, cyy=gly+glh/2;
     s+=`<rect x="${glx}" y="${gly}" width="${glw}" height="${glh}" fill="${GLASS}" stroke="${GLASSST}" stroke-width="${DW}"/>`;
-    if(pzH>0){ const pz=(S.panzer!=null?COLORS_AKT()[S.panzer]:co).c; s+=`<rect x="${glx}" y="${gly}" width="${glw}" height="${pzH}" fill="${pz}" stroke="rgba(0,0,0,.2)" stroke-width="${DW*0.6}"/>`; const lh=Math.max(pzH/5,10); for(let ly=gly+lh; ly<gly+pzH-lh*0.5; ly+=lh) s+=`<line x1="${glx+2}" y1="${ly}" x2="${glx+glw-2}" y2="${ly}" stroke="rgba(0,0,0,.18)" stroke-width="${DW*0.5}"/>`; if(S.endleiste!=null){ const eh=Math.max(pzH*0.11,3); s+=`<rect x="${glx}" y="${gly+pzH-eh}" width="${glw}" height="${eh}" fill="${COLORS_AKT()[S.endleiste].c}" stroke="rgba(0,0,0,.22)" stroke-width="${DW*0.5}"/>`; } }
+    if(pzH>0){ const pz=(S.panzer!=null?COLORS_AKT()[S.panzer]:co).c; s+=`<rect x="${glx}" y="${gly}" width="${glw}" height="${pzH}" fill="${pz}" stroke="rgba(0,0,0,.2)" stroke-width="${DW*0.6}"/>`; const lh=Math.max(pzH/5,10*k); for(let ly=gly+lh; ly<gly+pzH-lh*0.5; ly+=lh) s+=`<line x1="${glx+2}" y1="${ly}" x2="${glx+glw-2}" y2="${ly}" stroke="rgba(0,0,0,.18)" stroke-width="${DW*0.5}"/>`; if(S.endleiste!=null){ const eh=Math.max(pzH*0.11,3*k); s+=`<rect x="${glx}" y="${gly+pzH-eh}" width="${glw}" height="${eh}" fill="${COLORS_AKT()[S.endleiste].c}" stroke="rgba(0,0,0,.22)" stroke-width="${DW*0.5}"/>`; } }
     const isSlide=(i===slideIdx), dir=(cx<bMm/2)?'r':'l', SW=Math.max(Math.min(glw,glh)*0.012,4);
     if(isSlide){
-      if(sys==='psk'){ s+=`<path d="M${glx+glw*0.14} ${gly+pzH+(glh-pzH)*0.9} L${cx} ${gly+pzH+glh*0.08} L${glx+glw*0.86} ${gly+pzH+(glh-pzH)*0.9}" stroke="${DIN}" stroke-width="${SW}" fill="none" stroke-linejoin="round"/>`; }
+      if(sys==='psk'){ s+=`<path d="M${glx+glw*0.20} ${gly+pzH+(glh-pzH)*0.82} L${cx} ${gly+pzH+(glh-pzH)*0.26} L${glx+glw*0.80} ${gly+pzH+(glh-pzH)*0.82}" stroke="${DIN}" stroke-width="${SW*0.8}" fill="none" stroke-linejoin="round"/>`; }
       const ay=cyy+(sys==='psk'?glh*0.10:0), ah=glw*0.20;
       const head=dir==='l'?`<polyline points="${cx-ah+ah*0.5},${ay-ah*0.35} ${cx-ah},${ay} ${cx-ah+ah*0.5},${ay+ah*0.35}" fill="none" stroke="${DIN}" stroke-width="${SW}" stroke-linejoin="round"/>`:`<polyline points="${cx+ah-ah*0.5},${ay-ah*0.35} ${cx+ah},${ay} ${cx+ah-ah*0.5},${ay+ah*0.35}" fill="none" stroke="${DIN}" stroke-width="${SW}" stroke-linejoin="round"/>`;
       s+=`<line x1="${cx-ah}" y1="${ay}" x2="${cx+ah}" y2="${ay}" stroke="${DIN}" stroke-width="${SW}"/>${head}`;
@@ -2900,17 +2926,17 @@ function schiebeStageSVG(){
   /* Das gruene Kuerzel "VP" oben links im Glas ist entfernt: es stammt aus der Herstellerzeichnung
      und sagt einem Kunden nichts. Die Laufrichtung zeigt bereits der Pfeil. */
   // Bemaßung wie PDF
-  const dimTot=rollH+hMm, topY=-mT*0.5; s+=hb(0,bMm,topY)+ht(bMm/2,topY-DT*0.7,bMm);
-  { const botY=totalH+mB*0.42; for(let i=0;i<n;i++){ const x0=FR+i*pw, x1=x0+pw; s+=hb(x0,x1,botY)+ht((x0+x1)/2,botY+DT*0.72,Math.round(bMm/n)); } }
+  const dimTot=rollH+hMm, dimTotR=rollHR+hR, topY=-mT*0.5; s+=hb(0,bMm,topY,0)+ht(bMm/2,topY-DT*0.7,bR);
+  { const botY=totalH+mB*0.42; for(let i=0;i<n;i++){ const x0=FR+i*pw, x1=x0+pw; s+=hb(x0,x1,botY,totalH)+ht((x0+x1)/2,botY+DT*0.72,Math.round(bR/n)); } }
   const rxH=bMm+DT*0.85;
   if(hasRoll){
-    s+=vb(rxH,winY,winY+hMm)+vth(rxH+DT*0.5,winY+hMm/2,hMm);          // Elementhöhe rechts — innere Kette
-    const lx=-mL*0.34; s+=vb(lx,0,rollH)+vthEnd(lx-DT*0.45,rollH/2,rollH);  // Rollladen-Kasten links — waagerecht
+    s+=vb(rxH,winY,winY+hMm,bMm)+vth(rxH+DT*0.5,winY+hMm/2,hR);          // Elementhöhe rechts — innere Kette
+    const lx=-mL*0.34; s+=vb(lx,0,rollH,0)+vthEnd(lx-DT*0.45,rollH/2,rollHR);  // Rollladen-Kasten links — waagerecht
     // Gesamthöhe Kasten+Element als ÄUSSERE Maßkette rechts daneben (Maß der Rohbauöffnung — siehe flatWindowSVG).
     // Abstand zur inneren Kette: Linie + Zahl + Luft, damit sich die Maßzahlen nie berühren.
-    const rxG=bMm+DT*4.5; s+=vb(rxG,0,dimTot)+vth(rxG+DT*0.5,dimTot/2,dimTot);
+    const rxG=bMm+DT*4.5; s+=vb(rxG,0,dimTot,bMm)+vth(rxG+DT*0.5,dimTot/2,dimTotR);
   } else {
-    s+=vb(rxH,0,dimTot)+vth(rxH+DT*0.5,dimTot/2,dimTot);             // Gesamthöhe rechts — waagerecht
+    s+=vb(rxH,0,dimTot,bMm)+vth(rxH+DT*0.5,dimTot/2,dimTotR);             // Gesamthöhe rechts — waagerecht
   }
   s+=skizzeUnterschrift(0, totalH+mB+DT*0.7, bMm, DT, av);
   return s+`</svg>`;
@@ -2929,18 +2955,24 @@ function haustuerStageSVG(){
   const einzel = (ANSICHT_ERZWUNGEN !== null);
   const nurAussen = einzel ? (TUER_SEITE_ERZWUNGEN !== null ? TUER_SEITE_ERZWUNGEN : (S.tuerOeffnung==='aussen')) : false;   // Buehnen-Umschalter, sonst gewaehlte Bezugsseite
   const key=S.doorModel||'nebraska-lcr-inox';
-  const bMm=Math.max(+S.w||1100,400), hMm=Math.max(+S.h||2100,900);
-  const uu=Math.max(bMm,hMm);
+  const bR=Math.max(+S.w||1100,400), hR=Math.max(+S.h||2100,900);   // bestellte Masse in mm — nur fuer die Beschriftung
   const DIMC='#1e242b', DIML='#565b61';
   // Schriftgroessen haengen an der Breite EINER Tuer und an der Zahl der Ansichten — nicht am
   // Gesamtbild. Vorher war DT an max(Breite,Hoehe) gekoppelt: bei 1100x2100 ergab das 130
   // Einheiten Schrift auf 1100 Einheiten Tuerbreite, also Textbloecke unter Miniaturtueren.
   const ansichten = einzel ? 1 : 2;
-  const DT=bMm*(einzel?0.058:0.105), DW=Math.max(uu*0.0038,2.4), tick=DT*0.30;
+  /* Blattmassstab wie bei Fenster, Balkontuer und Schiebetuer (siehe flatWindowSVG):
+     die komplette Zeichnung — bei zwei Ansichten also beide Tueren samt Abstand —
+     ist immer gleich gross. Erst dadurch traegt die Haustuer dieselbe Schrift wie
+     jede andere Skizze. Vorher hing die Schrift an der Tuerbreite und war rund ein
+     Drittel kleiner als beim Fenster: gemessene 7 px gegen 11 px im selben Kasten. */
+  const gapR=einzel?0:bR*0.30, totalWR=bR*ansichten+gapR;
+  const BLATT=1000, k=BLATT/Math.max(totalWR,hR);
+  SKZ_K=k;
+  const bMm=bR*k, hMm=hR*k, gap=gapR*k, totalW=totalWR*k, uu=BLATT;
+  const DT=uu*0.05, DW=Math.max(uu*0.0032,2), tick=DT*0.32;
   const LBL=DT*0.78;                       // Beschriftung eine Stufe unter der Maszahl
   const LBL2=DT*0.62;                      // Unterzeile eine weitere Stufe darunter
-  const gap=einzel?0:Math.max(bMm*0.30,DT*3.2);
-  const totalW=bMm*ansichten+gap;
   // Raender an dem bemessen, was tatsaechlich darin steht. Links steht nichts — dort standen
   // vorher 260 Einheiten Leerraum, unten 720 fuer drei Textzeilen. Das war der schiefe Rand.
   // Oben: Maszlinie auf halber Randhoehe + Zahl darueber + halbe Zeilenhoehe.
@@ -2952,12 +2984,15 @@ function haustuerStageSVG(){
   // stehen an diesen Stellen unmittelbar daneben im Klartext; in der Zeichnung waeren sie
   // bei dieser Groesse wieder 6-7px gross und damit unlesbar.
   const mR=DT*2.1, mL=mR, mT=DT*2.7;
-  const mB=einzel?DT*1.9:DT*3.7;
-  const FR=Math.max(bMm*0.06,64), gx=FR, gy=FR, sashW=bMm-2*FR, gh=hMm-2*FR;   // Türrahmen (Blendrahmen)
-  const SFR=Math.max(Math.min(sashW,gh)*0.06,40);                              // Flügelrahmen
+  const mB=einzel?DT*3.1:DT*3.7;   // Einzelansicht traegt zwei Zeilen: Seite + Farbe
+  const FR=Math.max(bMm*0.06,64*k), gx=FR, gy=FR, sashW=bMm-2*FR, gh=hMm-2*FR;   // Türrahmen (Blendrahmen)
+  const SFR=Math.max(Math.min(sashW,gh)*0.06,40*k);                              // Flügelrahmen
   const glx=gx+SFR, gly=gy+SFR, glw=Math.max(sashW-2*SFR,20), glh=Math.max(gh-2*SFR,20);
-  const hb=(x0,x1,y)=>`<g stroke="${DIML}" stroke-width="${DW}" fill="none"><line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}"/><line x1="${x0}" y1="${y-tick}" x2="${x0}" y2="${y+tick}"/><line x1="${x1}" y1="${y-tick}" x2="${x1}" y2="${y+tick}"/></g>`;
-  const vb=(x,y0,y1)=>`<g stroke="${DIML}" stroke-width="${DW}" fill="none"><line x1="${x}" y1="${y0}" x2="${x}" y2="${y1}"/><line x1="${x-tick}" y1="${y0}" x2="${x+tick}" y2="${y0}"/><line x1="${x-tick}" y1="${y1}" x2="${x+tick}" y2="${y1}"/></g>`;
+  const _hilf=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${DIML}" stroke-width="${DW*0.55}" opacity=".5"/>`;
+  const hb=(x0,x1,y,von)=>{ const hoch=(von!=null&&y<von), h=(von==null)?'':_hilf(x0,von+(hoch?-tick*0.5:tick*0.5),x0,y+(hoch?-tick:tick))+_hilf(x1,von+(hoch?-tick*0.5:tick*0.5),x1,y+(hoch?-tick:tick));
+    return h+`<g stroke="${DIML}" stroke-width="${DW}" fill="none"><line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}"/><line x1="${x0}" y1="${y-tick}" x2="${x0}" y2="${y+tick}"/><line x1="${x1}" y1="${y-tick}" x2="${x1}" y2="${y+tick}"/></g>`; };
+  const vb=(x,y0,y1,von)=>{ const links=(von!=null&&x<von), h=(von==null)?'':_hilf(von+(links?-tick*0.5:tick*0.5),y0,x+(links?-tick:tick),y0)+_hilf(von+(links?-tick*0.5:tick*0.5),y1,x+(links?-tick:tick),y1);
+    return h+`<g stroke="${DIML}" stroke-width="${DW}" fill="none"><line x1="${x}" y1="${y0}" x2="${x}" y2="${y1}"/><line x1="${x-tick}" y1="${y0}" x2="${x+tick}" y2="${y0}"/><line x1="${x-tick}" y1="${y1}" x2="${x+tick}" y2="${y1}"/></g>`; };
   const ht=(x,y,t)=>`<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-family="Inter,Arial" font-weight="700" font-size="${DT}" fill="${DIMC}">${t}</text>`;
   const vt=(x,y,t)=>`<text x="${x}" y="${y}" transform="rotate(-90 ${x} ${y})" text-anchor="middle" dominant-baseline="central" font-family="Inter,Arial" font-weight="700" font-size="${DT}" fill="${DIMC}">${t}</text>`;
   const lbl=(x,y,t,soft,farbe)=>`<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-family="Inter,Arial" font-weight="${soft?500:700}" font-size="${soft?LBL2:LBL}" fill="${farbe||(soft?DIML:DIMC)}">${t}</text>`;
@@ -2971,7 +3006,7 @@ function haustuerStageSVG(){
     const ci=aussen?S.outer:S.inner, co=COLORS_AKT()[ci], dark=isDarkCol(ci), fCol=co.c;
     const line=dark?'#17181a':'#111';
     const _gd=dark&&glasHell();
-    const GLASS=_gd?'#cdd3d5':'#d7e7f7', DIN=_gd?'#5e6772':'#9ca8b4';
+    const GLASS=_gd?'#cdd3d5':'#e4eef6', DIN=_gd?'#5e6772':'#8895a4';
     const hinge=aussen ? (dinLinks?'r':'l') : (dinLinks?'l':'r');   // außen spiegelbildlich zu innen
     const handleSide=(hinge==='r')?'l':'r';                          // Griff immer gegenüber dem Band
     const gehr=(x,y,w,h,fr)=>`<g stroke="${line}" stroke-width="${Math.max(uu*0.0018,1.4)}" stroke-linecap="round"><line x1="${x}" y1="${y}" x2="${x+fr}" y2="${y+fr}"/><line x1="${x+w}" y1="${y}" x2="${x+w-fr}" y2="${y+fr}"/><line x1="${x}" y1="${y+h}" x2="${x+fr}" y2="${y+h-fr}"/><line x1="${x+w}" y1="${y+h}" x2="${x+w-fr}" y2="${y+h-fr}"/></g>`;
@@ -3006,7 +3041,7 @@ function haustuerStageSVG(){
     g+=skizzeHinges('dreh',hinge,gx,gy,sashW,gh,SFR,line);
     // Griff auf Griffhöhe ~1050 mm: außen der gewählte, innen immer die Drückergarnitur (Klinke).
     const holmX=(handleSide==='r')? gx+sashW-SFR*0.5 : gx+SFR*0.5;
-    const cyH=Math.max(gy+SFR*1.6, Math.min(gy+gh-SFR*1.6, hMm-1050));
+    const cyH=Math.max(gy+SFR*1.6, Math.min(gy+gh-SFR*1.6, hMm-1050*k));   // 1050 mm Griffhoehe im Blattmassstab
     const hw=Math.max(uu*0.0032,2.2);
     const art=aussen?griffAussen:'klinke';
     if(art==='knauf'){
@@ -3026,21 +3061,26 @@ function haustuerStageSVG(){
   }
 
   const nachAussen=(S.tuerOeffnung==='aussen');
+  /* Wortlaut wie bei allen anderen Skizzen (skizzeUnterschrift). Vorher stand hier
+     "Innenansicht", darueber im Warenkorb "Ansicht von innen" — zwei Bezeichnungen
+     fuer dieselbe Sache im selben Angebot. */
   const titel = einzel
-    ? (nurAussen?'Außenansicht':'Innenansicht')
-    : 'Außen- und Innenansicht';
+    ? (nurAussen?'Ansicht von außen':'Ansicht von innen')
+    : 'Ansicht von außen und innen';
   let s=`<svg viewBox="${-mL} ${-mT} ${totalW+mL+mR} ${hMm+mT+mB}" role="img" aria-label="Haustür-Skizze ${DOORN[key]||''} — ${titel}" preserveAspectRatio="xMidYMid meet">${DEFS}`;
   s+= einzel ? ansicht(0,nurAussen) : (ansicht(0,true)+ansicht(bMm+gap,false));
   // Bemaszung: Breite ueber der linken Ansicht, Hoehe rechts aussen — dieselbe Tuer, also nur einmal.
-  const topY=-mT*0.5; s+=hb(0,bMm,topY)+ht(bMm/2,topY-DT*0.72,bMm);
-  const rxH=totalW+DT*0.9; s+=vb(rxH,0,hMm)+vt(rxH+DT*0.62,hMm/2,hMm);
+  const topY=-mT*0.5; s+=hb(0,bMm,topY,0)+ht(bMm/2,topY-DT*0.72,bR);
+  const rxH=totalW+DT*0.9; s+=vb(rxH,0,hMm,totalW)+vt(rxH+DT*0.62,hMm/2,hR);
 
   const ly=hMm+LBL*1.5, ly2=ly+LBL*1.25;
   if(einzel){
-    s+=lbl(bMm/2,ly,titel);
+    // Zweite Zeile wie beim Fenster: welche Farbe der Kunde gewaehlt hat.
+    var _ca=(COLORS_AKT()[S.outer]||{}).n||'Weiß', _ci=(COLORS_AKT()[S.inner]||{}).n||'Weiß';
+    s+=lbl(bMm/2,ly,titel)+lbl(bMm/2,ly2,(_ca===_ci)?('Rahmen '+_ca):('außen '+_ca+'   ·   innen '+_ci),1);
   } else {
-    s+=lbl(bMm/2,ly,'Außenansicht')+lbl(bMm/2,ly2,GRIFFT[griffAussen]||'Griff',1);
-    s+=lbl(bMm+gap+bMm/2,ly,'Innenansicht')+lbl(bMm+gap+bMm/2,ly2,'Drückergarnitur · DIN '+(dinLinks?'links':'rechts'),1);
+    s+=lbl(bMm/2,ly,'Ansicht von außen')+lbl(bMm/2,ly2,GRIFFT[griffAussen]||'Griff',1);
+    s+=lbl(bMm+gap+bMm/2,ly,'Ansicht von innen')+lbl(bMm+gap+bMm/2,ly2,'Drückergarnitur · DIN '+(dinLinks?'links':'rechts'),1);
     // Oeffnungsrichtung gilt fuer beide Ansichten. Bewusst in derselben ruhigen Farbe wie
     // die uebrigen Unterzeilen: die Angabe steht daneben in der Zusammenfassung gross und
     // eindeutig, hier waere Rot nur Laerm — und eine nach aussen oeffnende Tuer ist ein
