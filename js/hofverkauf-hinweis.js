@@ -22,19 +22,14 @@
   var vorlauf = monat === 8;                 // im August als Ankuendigung
 
   function titel() {
-    if (vorlauf) return 'Ab September auch samstags ge&ouml;ffnet';
-    if (saison)  return 'Jetzt auch samstags ge&ouml;ffnet';
+    if (vorlauf || saison) return 'Jetzt auch samstags ge&ouml;ffnet';
     return 'Hofverkauf in Brandenburg an der Havel';
   }
 
   function zeilen() {
     var s = '<div class="dfh-zeile"><span class="dfh-tag">Freitag</span>'
           + '<span class="dfh-zeit">10&ndash;17 Uhr</span></div>';
-    if (saison) {
-      s += '<div class="dfh-zeile"><span class="dfh-tag">Samstag'
-         + '<span class="dfh-neu">Neu</span></span>'
-         + '<span class="dfh-zeit">10&ndash;13 Uhr</span></div>';
-    } else if (vorlauf) {
+    if (saison || vorlauf) {
       s += '<div class="dfh-zeile"><span class="dfh-tag">Samstag'
          + '<span class="dfh-neu">Neu</span></span>'
          + '<span class="dfh-zeit">10&ndash;13 Uhr</span></div>';
@@ -53,8 +48,7 @@
         '<h2 class="dfh-titel" id="dfh-titel">' + titel() + '</h2>' +
         '<div class="dfh-zeiten">' + zeilen() + '</div>' +
         '<p class="dfh-adresse"><b>Fohrder Landstra&szlig;e 13</b><br>14772 Brandenburg an der Havel</p>' +
-        (vorlauf ? '<p class="dfh-befristung">Samstags ge&ouml;ffnet vom 1. September bis 30. November.</p>'
-                 : (saison ? '<p class="dfh-befristung">Die Samstagszeiten gelten bis 30. November.</p>' : '')) +
+        (saison || vorlauf ? '<p class="dfh-befristung">Die Samstagszeiten gelten bis 30. November.</p>' : '') +
         '<div class="dfh-knoepfe">' +
           '<a class="dfh-primaer" href="https://www.google.com/maps?cid=9402028850820563054" ' +
              'target="_blank" rel="noopener">Route berechnen &rarr;</a>' +
@@ -124,8 +118,9 @@
      deshalb hier gesetzt statt fest im HTML zu stehen - sonst veraltet er still.
      Im HTML steht die Freitagszeit, die immer stimmt. */
   function kopfleiste() {
-    var txt = saison ? 'Hofverkauf Fr 10\u201317 &middot; Sa 10\u201313 Uhr'
-            : (vorlauf ? 'Hofverkauf Fr 10\u201317 Uhr &middot; ab Sept. auch Sa' : null);
+    var txt = (saison || vorlauf)
+            ? '<span class="df-zeiten-lang">Hofverkauf </span>Fr 10\u201317 &middot; Sa 10\u201313 Uhr'
+            : null;
     if (!txt) return;
     var n = document.querySelectorAll('.df-zeiten-txt');
     for (var i = 0; i < n.length; i++) n[i].innerHTML = txt;
