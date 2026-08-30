@@ -2525,6 +2525,18 @@ function oeffneAnfrageModal(p, modus) {
     ? '<span class="material-symbols-outlined" style="font-size:18px">inventory_2</span> Reservierung anfragen'
     : '<span class="material-symbols-outlined" style="font-size:18px">send</span> Anfrage senden';
 
+  // Abholzeiten: Samstag gilt nur in der Hauptsaison (Sept.-Nov.) und wird deshalb
+  // nach Datum gesetzt statt fest im HTML zu stehen - sonst veraltet die Angabe still.
+  const zeitenEl = document.getElementById('abholZeiten');
+  if (zeitenEl) {
+    const monat = new Date().getMonth() + 1;
+    zeitenEl.innerHTML = (monat >= 9 && monat <= 11)
+      ? 'Freitag 10\u201317 Uhr &middot; Samstag 10\u201313 Uhr'
+      : (monat === 8
+          ? 'Freitag 10\u201317 Uhr &middot; ab 1. September auch Samstag 10\u201313 Uhr'
+          : 'Freitag 10\u201317 Uhr');
+  }
+
   // Ueberschrift mitziehen, sonst steht ueber einer Reservierung „Anfrage“.
   const titelEl = document.getElementById('anfrageModalTitel');
   if (titelEl) titelEl.textContent = reservierung ? 'Zur Abholung reservieren' : 'Produkt anfragen';
