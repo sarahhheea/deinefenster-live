@@ -1846,7 +1846,7 @@ body.wiz-active .stage-card #stage svg{width:100%;height:auto;max-height:min(46v
 <!-- BETRIEBSURLAUB-BANNER START -->
 <style>#urlaub-banner{position:fixed;top:0;left:0;right:0;z-index:99999;background:oklch(0.99 0.006 240);border-bottom:2px solid oklch(0.45 0.13 256);color:oklch(0.26 0.055 256);font-family:'Inter','Manrope',-apple-system,Segoe UI,Arial,sans-serif;font-size:13px;line-height:1.35;text-align:center;padding:9px 46px;font-weight:600;letter-spacing:.005em}#urlaub-banner .ub-in{display:inline-flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 13px;max-width:1200px;margin:0 auto}#urlaub-banner strong{font-weight:800;color:oklch(0.26 0.055 256)}#urlaub-banner svg{vertical-align:-2px;margin-right:3px}#urlaub-banner .ub-sep{color:oklch(0.4 0.05 256);opacity:.45;font-weight:400}#urlaub-banner .ub-hi{background:oklch(0.45 0.13 256);color:#fff;font-weight:800;padding:3px 12px;border-radius:999px}#urlaub-banner-close{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:transparent;border:0;color:oklch(0.4 0.05 256);font-size:22px;line-height:1;cursor:pointer;padding:2px 8px;opacity:.6}#urlaub-banner-close:hover{opacity:1}@media(max-width:640px){#urlaub-banner{font-size:12px;padding:8px 38px 8px 12px}#urlaub-banner .ub-in{gap:4px 8px}#urlaub-banner .ub-sep{display:none}}</style>
 <div id="urlaub-banner" role="status" aria-label="&Ouml;ffnungszeiten Hofverkauf und Betriebsurlaub">
-  <span class="ub-in"><span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="oklch(0.45 0.13 256)" stroke-width="2"/><path d="M12 7v5l3 2" stroke="oklch(0.45 0.13 256)" stroke-width="2" stroke-linecap="round"/></svg>Hofverkauf: <strong>jeden Freitag 10&ndash;17 Uhr</strong></span><span class="ub-sep">&middot;</span><span class="ub-hi">Hauptsaison 1. Sept.&ndash;30. Nov.: auch Sa 10&ndash;13 Uhr</span><span class="ub-sep">&middot;</span><span>Betriebsurlaub 15.&ndash;27. Aug.</span></span>
+  <span class="ub-in"><span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="oklch(0.45 0.13 256)" stroke-width="2"/><path d="M12 7v5l3 2" stroke="oklch(0.45 0.13 256)" stroke-width="2" stroke-linecap="round"/></svg>Hofverkauf: <strong>jeden Freitag 10&ndash;17 Uhr</strong></span><span class="ub-sep">&middot;</span><span class="ub-hi">Hauptsaison 1. Sept.&ndash;30. Nov.: auch Sa 10&ndash;13 Uhr</span></span>
   <button id="urlaub-banner-close" type="button" aria-label="Hinweis schlie&szlig;en">&times;</button>
 </div>
 <script>(function(){var KEY='urlaubBannerClosed_2026_0726_hell';var b=document.getElementById('urlaub-banner');if(!b)return;if(window.__urlaubBanner)return;window.__urlaubBanner=1;try{if(localStorage.getItem(KEY)){b.parentNode&&b.parentNode.removeChild(b);return;}}catch(e){}var root=document.documentElement,basePad=null;function apply(){if(basePad===null){basePad=parseFloat(getComputedStyle(document.body).paddingTop)||0;}var h=b.offsetHeight;root.style.setProperty('--banner-h',h+'px');document.body.style.paddingTop=(basePad+h)+'px';}function reset(){root.style.removeProperty('--banner-h');document.body.style.paddingTop=(basePad&&basePad>0)?basePad+'px':'';}apply();if(document.fonts&&document.fonts.ready){try{document.fonts.ready.then(apply);}catch(e){}}window.addEventListener('resize',apply);var x=document.getElementById('urlaub-banner-close');if(x){x.addEventListener('click',function(){reset();b.parentNode&&b.parentNode.removeChild(b);try{localStorage.setItem(KEY,'1');}catch(e){}});}})();</script>
@@ -5076,7 +5076,7 @@ function _lp_fensterNEU(){ var L=LS; var base=_pfBasis(L);
   if(!L.edge && L.glas==='3fach') d+=24*area;
   if(L.schall&&L.schall!=='ohne') d+=51*area;
   if(L.glasdekor==='master-carre') d+=55*area; else if(L.glasdekor&&L.glasdekor!=='klar') d+=27*area;
-  /* Sicherheit: bei IGLO 5 nach Groesse gestaffelt, bei EDGE ein flacher Betrag (rc2n/WK2,
+  /* Sicherheit: bei IGLO 5 nach Groesse gestaffelt, bei EDGE ein flacher Betrag (Stufe Sicherheit,
      an 5 Groessen gemessen 14.08.2026: konstant 68,91). Die Stufe 4 ist bei EDGE Standard. */
   if(L.sicher==='rc2') d+= L.edge?68.91:_lp_sicherFenster(L.bMm,L.hMm);   /* 30 Messpunkte 14.08.2026: Markt staffelt 32,43-52,41 nach Groesse; die alte Pauschale 87 lag 30-46 EUR ueber Marktniveau */
   if(L.griffLocked) d+=5;
@@ -5378,7 +5378,7 @@ function prodSpecs(rest){
   if(S.prod==='haustuer') return teil(DOORN[S.doorModel]||'—', a, griffTuerShort(), m, c);
   if(S.prod==='schiebe')  return teil(S.hstSystem==='hs'?'Hebe-Schiebe':'PSK', a, m, c);
   const ex=[]; if(S.roll==='gurt')ex.push('Rollladen'); if(S.roll==='motor')ex.push('Motorrolladen');
-  if(S.roll!=='kein')ex.push('Panzer '+panzerText(),'Endleiste '+endleisteText()); if(S.glass==='3')ex.push('3-fach'); if(S.prod==='balkon'&&S.balkonSchwelle==='alu')ex.push('Aluschwelle'); if(S.sicher)ex.push('RC1');
+  if(S.roll!=='kein')ex.push('Panzer '+panzerText(),'Endleiste '+endleisteText()); if(S.glass==='3')ex.push('3-fach'); if(S.prod==='balkon'&&S.balkonSchwelle==='alu')ex.push('Aluschwelle'); if(S.sicher)ex.push('Sicherheitsbeschlag');
   return teil(AUFTN[S.aufteilung], a, m, c, ex.length?ex.join(', '):'');
 }
 
@@ -6102,7 +6102,7 @@ function panelHTML(){
     return grp('PSK-Kammer-System','three',
       ocImg('pskKammer','iglo5','img/karten/profil/iglo5-zentriert.webp','IGLO 5 Classic PSK','5-Kammer · 70 mm','inklusive')+
       ocImg('pskKammer','iglo-energy','img/karten/profil/iglo-energy-classic-zentriert.webp','IGLO Energy Classic PSK','7-Kammer · 82 mm','')+
-      ocImg('pskKammer','edge','img/karten/profil/iglo-edge-zentriert.webp','IGLO EDGE PSK','7-Kammer · 82 mm · Uw 0,66',''));
+      ocImg('pskKammer','edge','img/karten/profil/iglo-edge-zentriert.webp','IGLO EDGE PSK','7-Kammer · 82 mm',''));
   }
   if(k==='griffhst'){
     const CHK='<span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span>';
@@ -6331,10 +6331,10 @@ function panelHTML(){
   }
   if(k==='sicherheit'){
     const shield=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" style="height:60px;width:auto"><path d="M12 2 4 5v6.5c0 4.8 3.4 8 8 9.5 4.6-1.5 8-4.7 8-9.5V5l-8-3Z"/><path d="M9.3 14v-2.2M12 14v-4.2M14.7 14v-6.2" stroke-width="2" stroke-linecap="round"/></svg>`;
-    /* WK1 und WK2 trugen dasselbe Schild — das Symbol sagte nichts aus. WK2 zeigt jetzt
+    /* Standard und Sicherheit trugen dasselbe Schild — das Symbol sagte nichts aus. Sicherheit zeigt jetzt
        ein Schild mit Schloss. Beide in currentColor, damit die Auswahl sichtbar ist. */
     const shieldLock=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" style="height:60px;width:auto"><path d="M12 2 4 5v6.5c0 4.8 3.4 8 8 9.5 4.6-1.5 8-4.7 8-9.5V5l-8-3Z"/><rect x="9" y="11.2" width="6" height="5" rx="1.3" stroke-width="1.5"/><path d="M10.4 11.2v-1.5a1.6 1.6 0 0 1 3.2 0v1.5" stroke-width="1.5"/></svg>`;
-    return grp('Einbruchschutz','two', ocIcon('sicher',false,shield,'WK1 Standard','2 Pilzkopfverriegelungen','inklusive')+ocIcon('sicher',true,shieldLock,'WK2 Sicherheit','abschließbarer Griff · VSG',''));
+    return grp('Einbruchschutz','two', ocIcon('sicher',false,shield,'Standardbeschlag','2 Pilzkopfverriegelungen','inklusive')+ocIcon('sicher',true,shieldLock,'Sicherheitsbeschlag','abschließbarer Griff · Verbundsicherheitsglas',''));
   }
   if(k==='masse'){
     const L=massLimits();
@@ -6366,7 +6366,7 @@ function panelHTML(){
   if(k==='extras'){
     const row=(key,t,s,dl,inc)=>`<label class="optrow ${S[key]?'on':''}" onclick="toggle('${key}')"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><span><span class="ot">${t}</span><br><span class="os">${s}</span></span></label>`;
     const glass=`<label class="optrow ${S.glass==='3'?'on':''}" onclick="toggleGlass()"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><span><span class="ot">3-fach Verglasung</span><br><span class="os">noch bessere Dämmung (sonst 2-fach inkl.)</span></span></label>`;
-    return `<div class="card"><div class="grp-title">Extras — alles freiwillig</div>${glass}${row('roll','Rollladenkasten','Sicht- & Sonnenschutz','+ 78 €')}${row('schall','Schallschutzglas','für ruhigere Räume','+ 95 €')}${row('sprossen','Sprossen','klassische Fenster-Optik','+ 60 €')}${row('sicher','Sicherheitsbeschlag RC1','erschwert Aufhebeln','+ 140 €')}</div>`;
+    return `<div class="card"><div class="grp-title">Extras — alles freiwillig</div>${glass}${row('roll','Rollladenkasten','Sicht- & Sonnenschutz','+ 78 €')}${row('schall','Schallschutzglas','für ruhigere Räume','+ 95 €')}${row('sprossen','Sprossen','klassische Fenster-Optik','+ 60 €')}${row('sicher','Sicherheitsbeschlag','erschwert Aufhebeln','+ 140 €')}</div>`;
   }
   if(k==='anfrage'){ return anfrageHTML(); }
 }
@@ -6481,7 +6481,7 @@ function summaryPanel(){
     +glasP
     +schallP
     +p('Griff',GRIFFN[S.griff]||'—')
-    +p('Sicherheit',S.sicher?'WK2 Sicherheit':'WK1 Standard')
+    +p('Sicherheit',S.sicher?'Sicherheitsbeschlag':'Standardbeschlag')
     +p('Sprossen',sproN)
     +schwelleP
     +rollP
@@ -6523,9 +6523,9 @@ function summaryRows(){
       <div class="srow"><span class="k">Rollladen</span><span class="v">${rollText()}</span></div>${pzRows}`;
   }
   // Rollladen als eigene Zeile (wie Sprossen) statt in „Extras" — die Bedienseite ist eine
-  // Fertigungsangabe und darf in der Anfrage nicht zwischen Schallschutz und RC1 untergehen.
+  // Fertigungsangabe und darf in der Anfrage nicht zwischen Schallschutz und Sicherheitsbeschlag untergehen.
   const rollRow=`<div class="srow"><span class="k">Rollladen</span><span class="v">${rollText()}</span></div>`;
-  const ex=[]; if(S.schall)ex.push('Schallschutz'); if(S.sicher)ex.push('RC1');
+  const ex=[]; if(S.schall)ex.push('Schallschutz'); if(S.sicher)ex.push('Sicherheitsbeschlag');
   // Sprossen als eigene, klar sichtbare Zeile (aufgesetzt / im Glas = innenliegend) statt in „Extras" versteckt
   const sproN=(S.sproTyp&&S.sproTyp!=='keine')?((SPROTYPN[S.sproTyp]||'')+' · '+S.sproDicke+' mm · '+((SPRO_RASTER[S.sproRaster]||{}).name||'')):'ohne';
   const sproRow=`<div class="srow"><span class="k">Sprossen</span><span class="v">${sproN}</span></div>`;
@@ -6592,7 +6592,7 @@ function anfrageHTML(){
   const truck=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5v8h1"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>`;
   const check=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>`;
   if(anfrageView==='done'){
-    const steps=[['Konfiguriert','Ihre Wunsch-Elemente sind erfasst'],['Angebot per E-Mail','Wir prüfen und senden Ihr geprüftes Festpreis-Angebot'],['Bestätigen','Passt alles? Sie geben grünes Licht'],['Lieferung','Fertigung & Anlieferung ca. 14 Tage']];
+    const steps=[['Konfiguriert','Ihre Wunsch-Elemente sind erfasst'],['Angebot per E-Mail','Wir prüfen und senden Ihr geprüftes Festpreis-Angebot'],['Bestätigen','Passt alles? Sie geben grünes Licht'],['Lieferung','Fertigungs- und Lieferzeit nennen wir Ihnen im Angebot']];
     return `<div class="ov-done">
       <div class="done-badge">${check}</div>
       <h2>Vielen Dank — Ihre Anfrage ist eingegangen.</h2>
