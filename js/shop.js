@@ -846,7 +846,7 @@ function pruefeMassErkennung(text) {
     STATE.filter.hoehe = hoehe;
     document.getElementById('filterBreite').value = breite;
     document.getElementById('filterHoehe').value = hoehe;
-    document.getElementById('masseAusSuche').textContent = `${breite} × ${hoehe} mm (Toleranz ±${STATE.filter.toleranz}%)`;
+    document.getElementById('masseAusSuche').textContent = `${breite} × ${hoehe} mm`;
     hinweis.classList.remove('hidden');
   } else {
     hinweis.classList.add('hidden');
@@ -862,6 +862,101 @@ function parseMasse(text) {
     out.push([parseInt(m[1], 10), parseInt(m[2], 10)]);
   }
   return out;
+}
+
+/* ─── Wie genau trifft ein Artikel das gesuchte Maß? ─────────────────────────
+   Ohne Kennzeichnung sieht der Kunde in der Ergebnisliste nicht, welcher Artikel
+   sein Maß wirklich hat und welcher 8 cm daneben liegt — beide stehen gleich da.
+   Geprüft werden die Hauptmaße des Inserats und jedes Maß-Paar aus Titel und
+   Beschreibung (Sammel-Auktionen), jeweils in beiden Orientierungen. Es gewinnt
+   das Paar, das am nächsten am Wunsch liegt.
+   Rückgabe: { stufe, breite, hoehe, db, dh, summe } — db/dh sind vorzeichenbehaftet
+   (negativ = Artikel ist kleiner als gewünscht), oder null wenn nichts passt. */
+const MASS_FAST_MM = 20;   // bis 2 cm je Seite gilt als „fast genau" — so weit geht
+                           // ein Fenster real noch in dieselbe Öffnung
+
+function massBewertung(p, f) {
+  if (f.breite === null && f.hoehe === null) return null;
+  const tol = f.toleranz / 100;
+  const inTol = (val, ziel) => ziel == null || (val >= ziel * (1 - tol) && val <= ziel * (1 + tol));
+
+  const kandidaten = [];
+  if (p.breite_mm > 0 && p.hoehe_mm > 0) kandidaten.push([p.breite_mm, p.hoehe_mm]);
+  parseMasse((p.titel || '') + ' \n ' + (p.beschreibung || '')).forEach(([b, h]) => {
+    kandidaten.push([b, h]);
+    kandidaten.push([h, b]);   // quer eingebaut ist dasselbe Fenster
+  });
+
+  let best = null;
+  for (const [b, h] of kandidaten) {
+    if (!inTol(b, f.breite) || !inTol(h, f.hoehe)) continue;
+    const db = f.breite === null ? 0 : b - f.breite;
+    const dh = f.hoehe === null ? 0 : h - f.hoehe;
+    const summe = Math.abs(db) + Math.abs(dh);
+    if (!best || summe < best.summe) best = { breite: b, hoehe: h, db: db, dh: dh, summe: summe };
+  }
+  if (!best) return null;
+
+  const groesste = Math.max(Math.abs(best.db), Math.abs(best.dh));
+  best.stufe = groesste === 0 ? 'exakt' : (groesste <= MASS_FAST_MM ? 'fast' : 'aehnlich');
+  return best;
+}
+
+/* Millimeter kundenlesbar: glatte Werte als Zentimeter, krumme bleiben Millimeter. */
+function laengeTxt(mm, inMm) {
+  return (!inMm && mm % 10 === 0) ? (mm / 10) + ' cm' : mm + ' mm';
+}
+
+/* „2 cm schmaler · 1 cm höher" — Richtung nennen, nicht nur den Betrag: bei Fenstern
+   ist kleiner meist einbaubar, größer passt nicht in die Öffnung.
+   Beide Werte teilen sich eine Einheit: „3 cm schmaler · 5 mm niedriger" stimmt zwar,
+   liest sich aber wie ein Fehler. Ist einer krumm, stehen beide in Millimetern. */
+function massAbweichungText(m) {
+  const krumm = (m.db && m.db % 10 !== 0) || (m.dh && m.dh % 10 !== 0);
+  const teile = [];
+  if (m.db) teile.push(laengeTxt(Math.abs(m.db), krumm) + (m.db < 0 ? ' schmaler' : ' breiter'));
+  if (m.dh) teile.push(laengeTxt(Math.abs(m.dh), krumm) + (m.dh < 0 ? ' niedriger' : ' höher'));
+  return teile.join(' · ');
+}
+
+/* Das Band ganz oben auf der Karte. Weicht das getroffene Maß von den Hauptmaßen der
+   Karte ab (Sammelinserat oder quer eingebaut), wird es genannt — sonst stünde auf der
+   Karte ein anderes Maß als das, wegen dem sie im Ergebnis auftaucht. */
+function massBandHTML(m, p) {
+  if (!m) return '';
+  let fund = '';
+  if (m.breite !== p.breite_mm || m.hoehe !== p.hoehe_mm) {
+    const gedreht = m.breite === p.hoehe_mm && m.hoehe === p.breite_mm;
+    fund = ' <span class="mass-band-fund">' + m.breite + ' × ' + m.hoehe + ' mm'
+         + (gedreht ? ' (gedreht)' : '') + '</span>';
+  }
+  if (m.stufe === 'exakt') {
+    return '<div class="mass-band mass-band--exakt">'
+         + '<span class="material-symbols-outlined" aria-hidden="true">check_circle</span>'
+         + '<span>Genau dein Maß' + fund + '</span></div>';
+  }
+  if (m.stufe === 'fast') {
+    return '<div class="mass-band mass-band--fast">'
+         + '<span class="material-symbols-outlined" aria-hidden="true">straighten</span>'
+         + '<span>Fast genau · ' + massAbweichungText(m) + fund + '</span></div>';
+  }
+  // Alles darueber bekommt bewusst KEINEN Balken: bei 140 Treffern haetten 130 einen,
+  // und ein Signal, das auf jeder Karte steht, ist keins mehr. Die Abweichung steht
+  // stattdessen als ruhige Zeile direkt am Maß (siehe massDiffHTML).
+  return '';
+}
+
+/* Abweichung im Kartenkoerper, direkt unter dem Maß — fuer alle Treffer, die weder
+   genau noch fast genau sind. Ohne Farbflaeche, damit die echten Treffer oben
+   die einzigen bleiben, die ins Auge springen. */
+function massDiffHTML(m, p) {
+  if (!m || m.stufe === 'exakt' || m.stufe === 'fast') return '';
+  let fund = '';
+  if (m.breite !== p.breite_mm || m.hoehe !== p.hoehe_mm) {
+    const gedreht = m.breite === p.hoehe_mm && m.hoehe === p.breite_mm;
+    fund = ' (' + m.breite + ' × ' + m.hoehe + ' mm' + (gedreht ? ', gedreht' : '') + ')';
+  }
+  return '<p class="karte-mass-diff">' + massAbweichungText(m) + ' als gesucht' + fund + '</p>';
 }
 
 /* ─── „Nach außen öffnend" ist standardmäßig AUSGEBLENDET (Inhaberin 29.07.2026) ──
@@ -925,6 +1020,10 @@ function gefilterteProdukte(opt) {
   const f = STATE.filter;
   // opt.nurAussen: dieselben Filter, aber genau andersherum — liefert die ausgeblendeten Artikel
   const nurAussen = !!(opt && opt.nurAussen);
+  // Trefferbewertung der Maß-Suche. Sie landet NICHT am Produkt, sondern in einer Map:
+  // rendereAussenHinweis() laesst denselben Filter ein zweites Mal laufen (nurAussen) und
+  // wuerde eine am Objekt haengende Bewertung leeren, bevor die Karten gebaut sind.
+  const massTreffer = nurAussen ? new Map() : (STATE.massTreffer = new Map());
 
   let result = STATE.produkte.filter(p => {
     // Öffnungsrichtung (s.o.) — vor allen anderen Regeln
@@ -969,23 +1068,14 @@ function gefilterteProdukte(opt) {
         else if (!(p.eigenschaften || []).includes(e)) return false;
       }
     }
-    // Maße mit Toleranz (Fuzzy-Match) — strukturierte Hauptmaße ODER Maße irgendwo im Text.
-    // So tauchen auch Sammel-Auktionen auf, deren viele Fenster-Maße nur in der Beschreibung stehen.
+    // Maße mit Toleranz — strukturierte Hauptmaße ODER Maße irgendwo im Text, damit auch
+    // Sammel-Auktionen auftauchen, deren Fenster-Maße nur in der Beschreibung stehen.
+    // Das Ergebnis wird gemerkt: Karte und Sortierung zeigen exakt den Treffer, wegen
+    // dem der Artikel ueberhaupt in der Liste steht — sonst laufen beide auseinander.
     if (f.breite !== null || f.hoehe !== null) {
-      const tol = f.toleranz / 100;
-      const passt = (val, ziel) => ziel == null || (val >= ziel * (1 - tol) && val <= ziel * (1 + tol));
-      // 1) strukturierte Hauptmaße des Inserats
-      let massOk = passt(p.breite_mm, f.breite) && passt(p.hoehe_mm, f.hoehe) &&
-                   (f.breite === null || p.breite_mm > 0) && (f.hoehe === null || p.hoehe_mm > 0);
-      // 2) jedes Maß-Paar aus Titel + Beschreibung (beide Orientierungen erlaubt)
-      if (!massOk) {
-        const paare = parseMasse((p.titel || '') + ' \n ' + (p.beschreibung || ''));
-        massOk = paare.some(([pb, ph]) =>
-          (passt(pb, f.breite) && passt(ph, f.hoehe)) ||
-          (passt(ph, f.breite) && passt(pb, f.hoehe))
-        );
-      }
-      if (!massOk) return false;
+      const m = massBewertung(p, f);
+      if (!m) return false;
+      massTreffer.set(p.id, m);
     }
     // Preis
     if (f.preisVon !== null && p.preis_eur < f.preisVon) return false;
@@ -1039,12 +1129,16 @@ function gefilterteProdukte(opt) {
       break;
     case 'relevanz':
     default:
-      // Wenn Maße gefiltert: nach Nähe zur Wunschgröße sortieren
-      if (f.breite !== null && f.hoehe !== null) {
+      // Wenn Maße gefiltert: erst die genauen Treffer, dann die fast passenden, dann der Rest.
+      // Grundlage ist dieselbe Bewertung wie auf der Karte — vorher zaehlte hier nur das
+      // Hauptmass, wodurch ein exakter Treffer aus der Beschreibung weit hinten landen konnte.
+      if (f.breite !== null || f.hoehe !== null) {
+        const rang = { exakt: 0, fast: 1, aehnlich: 2 };
         result.sort((a, b) => {
-          const dA = Math.abs(a.breite_mm - f.breite) + Math.abs(a.hoehe_mm - f.hoehe);
-          const dB = Math.abs(b.breite_mm - f.breite) + Math.abs(b.hoehe_mm - f.hoehe);
-          return dA - dB;
+          const ma = massTreffer.get(a.id), mb = massTreffer.get(b.id);
+          const ra = ma ? rang[ma.stufe] : 3, rb = mb ? rang[mb.stufe] : 3;
+          if (ra !== rb) return ra - rb;
+          return (ma ? ma.summe : 0) - (mb ? mb.summe : 0);
         });
       }
       break;
@@ -1133,6 +1227,29 @@ function aktualisiereFilterZaehler() {
 }
 
 /* ─── Render-Pipeline ─── */
+/* ─── Zaehlung in der Maß-Hinweisleiste ──────────────────────────────────────
+   „Maße erkannt: 1200 × 800" allein sagt dem Kunden nicht, ob sein Maß ueberhaupt
+   dabei ist. Die Zahl der genauen Treffer beantwortet genau das — und fuehrt bei
+   0 Treffern nicht in die Sackgasse, weil die aehnlichen ja trotzdem dastehen. */
+function rendereMassHinweis(result) {
+  const el = document.getElementById('masseTrefferZahl');
+  if (!el) return;
+  const f = STATE.filter;
+  if (f.breite === null && f.hoehe === null) { el.textContent = ''; return; }
+  const treffer = STATE.massTreffer || new Map();
+  const exakt = result.filter(p => (treffer.get(p.id) || {}).stufe === 'exakt').length;
+  const fast  = result.filter(p => (treffer.get(p.id) || {}).stufe === 'fast').length;
+  // Steht mitten im Satz („Maße erkannt: 800 × 1200 mm · 6 Artikel haben genau dieses Maß"),
+  // damit die Antwort auf „ist mein Maß dabei?" vor der Erklaerung kommt und nicht dahinter.
+  if (exakt) {
+    el.textContent = ' · ' + (exakt === 1 ? '1 Artikel hat' : exakt + ' Artikel haben') + ' genau dieses Maß';
+  } else if (fast) {
+    el.textContent = ' · keiner trifft es genau, ' + (fast === 1 ? '1 kommt' : fast + ' kommen') + ' auf 2 cm heran';
+  } else {
+    el.textContent = ' · keiner trifft es genau';
+  }
+}
+
 function rendere() {
   const result = gefilterteProdukte();
   document.getElementById('produktAnzahl').textContent = result.length;
@@ -1148,6 +1265,7 @@ function rendere() {
   // Aktive Chips
   rendereAktiveChips();
   rendereAussenHinweis();
+  rendereMassHinweis(result);
 
   // Empty State
   const emptyEl = document.getElementById('emptyState');
@@ -1414,8 +1532,16 @@ function karteHtml(p) {
   const specZeile = specParts.length
     ? `<p class="karte-spec">${specParts.join(' <span class="karte-meta-dot">·</span> ')}</p>` : '';
 
+  // Trefferkennzeichnung bei aktiver Maß-Suche: Band ganz oben, exakte Treffer zusaetzlich
+  // mit gruenem Rahmen — beim Scrollen durch 20 aehnliche Fenster ist das der Unterschied
+  // zwischen „irgendwas in der Naehe" und „genau meins".
+  const massTreffer = STATE.massTreffer && STATE.massTreffer.get(p.id);
+  const massBand = massBandHTML(massTreffer, p);
+  const massKlasse = massTreffer ? ' karte--mass-' + massTreffer.stufe : '';
+
   return `
-    <article class="karte" data-action="detail" data-id="${p.id}" style="${archivStyle}">
+    <article class="karte${massKlasse}" data-action="detail" data-id="${p.id}" style="${archivStyle}">
+      ${massBand}
       <div class="karte-bild-wrap" style="position:relative">
         <img src="${escapeHtml(p.bild)}" alt="${escapeHtml(p.titel)}" class="karte-bild w-full" loading="lazy" decoding="async" onerror="this.src='img/fenster_standard.png'"/>
         ${/* Standnummer aufs Bild: damit findet der Kunde das Stueck im Hof wieder —
@@ -1440,6 +1566,7 @@ function karteHtml(p) {
           <span class="karte-mwst">inkl. MwSt.${grundpreisSuffix(p)}</span>
         </div>
         ${specZeile}
+        ${massDiffHTML(massTreffer, p)}
         <h3 class="karte-titel">${escapeHtml(p.titel)}</h3>
         ${standZeile}
         ${ctaRow}

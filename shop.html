@@ -466,6 +466,62 @@ input[type="range"].range-clean::-moz-range-thumb {
 .shop-availability-note .desktop-hide { display: none; }
 
 /* Produkt-Karten */
+/* ─── Trefferkennzeichnung bei Maß-Suche ───────────────────────────────
+   Sitzt als volle Zeile ganz oben in der Karte, damit es beim Scrollen im Raster
+   sofort auffaellt — auch am Handy, wo pro Bildschirm nur zwei Karten sichtbar sind.
+   Kein text-transform: uppercase, sonst wird aus „Maß" ein „MASS". */
+.mass-band {
+  display: flex;
+  align-items: flex-start;   /* bei zwei Zeilen bleibt das Zeichen an der ersten kleben,
+                                zentriert saehe es aus, als gehoerte es zur zweiten */
+  gap: 6px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.3;
+  border-radius: 14px 14px 0 0;   /* schliesst buendig ans Bild an, siehe unten */
+}
+.mass-band .material-symbols-outlined { font-size: 17px; flex: 0 0 auto; margin-top: 1px; }
+/* Am Handy stehen zwei Karten nebeneinander — die Zeile wird sonst dreizeilig. */
+@media (max-width: 520px) {
+  .mass-band { font-size: 12px; padding: 7px 10px; gap: 5px; }
+  .mass-band .material-symbols-outlined { font-size: 15px; }
+  .karte-mass-diff { font-size: 11.5px; }
+}
+.mass-band-fund { font-weight: 700; opacity: 0.85; }
+.mass-band--exakt    { background: #0a8a3a; color: #ffffff; }
+.mass-band--fast     { background: #e3f5e9; color: #06622a; }
+.mass-band--aehnlich { background: #f1f3f6; color: #5b626b; font-weight: 700; }
+/* Das Band sitzt als Kopf direkt auf dem Bild: oben abgerundet, unten eckig, und das
+   Bild verliert dafuer seine oberen Rundungen — sonst klaffte eine Delle dazwischen.
+   Die Karte selbst ist im aktuellen Design rahmenlos (siehe .karte weiter unten),
+   sichtbare Box ist das Bild — der gruene Rahmen gehoert deshalb ans Bild. */
+.karte--mass-exakt .karte-bild-wrap,
+.karte--mass-fast .karte-bild-wrap {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+/* Rahmen nur beim genauen Treffer — waere er auch bei „fast" da, verloere er seine
+   Aussage. outline statt box-shadow, weil .karte:hover den box-shadow des Bildes setzt. */
+.karte--mass-exakt .karte-bild-wrap {
+  outline: 2px solid #0a8a3a;
+  outline-offset: -1px;
+}
+/* Abweichung bei den uebrigen Treffern: bewusst neutral, keine Signalfarbe. In einer
+   Liste, in der 130 von 143 Artikeln abweichen, waere ein gelber Balken auf jeder Karte
+   Grundrauschen — Gruen bleibt so das einzige Farbsignal und meint wirklich „passt". */
+.karte-mass-diff {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #4c5666;
+  background: #eef1f5;
+  border-radius: 6px;
+  padding: 2px 7px;
+  margin: 3px 0 0;
+  display: inline-block;
+}
+.shop-masse-treffer { color: #06622a; }
+
 .karte {
   background: var(--c-bg-raised);
   border: 1px solid var(--c-border);
@@ -1848,7 +1904,7 @@ input[type="range"].range-clean::-moz-range-thumb {
 
   <div id="masseHinweis" class="hidden shop-masse-hinweis">
     <span class="material-symbols-outlined align-bottom" style="font-size:14px" aria-hidden="true">auto_awesome</span>
-    Maße erkannt: <span id="masseAusSuche" class="font-bold"></span> — ähnliche Größen werden mit angezeigt.
+    Maße erkannt: <span id="masseAusSuche" class="font-bold"></span><strong id="masseTrefferZahl" class="shop-masse-treffer"></strong> — ähnliche Größen stehen mit in der Liste.
     <button id="masseHinweisClose" class="shop-masse-hinweis-close">Maße entfernen</button>
   </div>
 
