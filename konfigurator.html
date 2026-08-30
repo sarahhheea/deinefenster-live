@@ -2663,6 +2663,33 @@ function gurtDevice(bMm,rollH,hMm,winY,FR,uu){
   s+=`<rect x="${bx-bw*0.6}" y="${wy+wh*0.12}" width="${bw*1.2}" height="${wh*0.13}" rx="${bw*0.3}" fill="rgba(90,94,100,.32)"/>`;
   return s;
 }
+/* Fenstergriff als Vektor.
+   Vorher war der Griff ein 16x58-Pixel-Graubild aus der Herstellerzeichnung. Bei einem
+   Fluegel sah das gut aus; bei zwei und drei Fluegeln schrumpfte es auf wenige Pixel und
+   war als Griff nicht mehr zu erkennen — zwei blasse Striche am Pfosten. Der Vektor
+   bleibt in jeder Groesse scharf, haelt eine sichtbare Mindestgroesse ein und ueberlebt
+   den PNG-Export fuer die Mail (externe Bildverweise koennen dabei ausfallen). */
+function skizzeGriffVektor(open,hinge,gx,gy,sashW,gh,SFR,dark){
+  if(open==='fest'||open==='transom') return '';
+  const kante  = dark?'#0e1013':'#2c3542';
+  const flaeche= dark?'#e9ecef':'#ffffff';
+  // Maszstaeblich (ein Griff ist rund 200 mm lang), aber nie unter 10 % der Blattgroesse.
+  const H  = Math.max(Math.min(gh*0.17, 210*SKZ_K), 100);
+  const sw = Math.max(H*0.05, 2.4);
+  const rw = H*0.26, rh = H*0.30, hw = H*0.145, hl = H*0.70;   // Rosette und Hebel
+  const teil=(cx,cy,waagerecht)=>{
+    const r=`<rect x="${(cx-rw/2).toFixed(1)}" y="${(cy-rh/2).toFixed(1)}" width="${rw.toFixed(1)}" height="${rh.toFixed(1)}" rx="${(rw*0.34).toFixed(1)}" fill="${flaeche}" stroke="${kante}" stroke-width="${sw.toFixed(1)}"/>`;
+    const h=waagerecht
+      ? `<rect x="${cx.toFixed(1)}" y="${(cy-hw/2).toFixed(1)}" width="${hl.toFixed(1)}" height="${hw.toFixed(1)}" rx="${(hw*0.5).toFixed(1)}" fill="${flaeche}" stroke="${kante}" stroke-width="${sw.toFixed(1)}"/>`
+      : `<rect x="${(cx-hw/2).toFixed(1)}" y="${cy.toFixed(1)}" width="${hw.toFixed(1)}" height="${hl.toFixed(1)}" rx="${(hw*0.5).toFixed(1)}" fill="${flaeche}" stroke="${kante}" stroke-width="${sw.toFixed(1)}"/>`;
+    return h+r+`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${(rw*0.13).toFixed(1)}" fill="${kante}"/>`;
+  };
+  // Kipp: Griff waagerecht oben in der Fluegelmitte. Sonst: auf dem Holm gegenueber dem Band.
+  if(open==='kipp') return teil(gx+sashW/2-hl/2, gy+SFR*0.9, true);
+  const griffRechts=(hinge==='l');
+  const hx = griffRechts ? gx+sashW-SFR*0.62 : gx+SFR*0.62;   // ganz auf dem Fluegelrahmen, nicht ueber dem Pfosten
+  return teil(hx, gy+gh*0.56, false);
+}
 // Original-Griff aus dem PDF (Raster, 16x58) — grau auf hellem Rahmen, dunkel auf farbigem. Griffseite = Gegenseite Band.
 // Kipp: Griff oben-mitte waagerecht. Fest: kein Griff. KEINE Griffhöhe.
 function skizzeHandle(open,hinge,gx,gy,sashW,gh,SFR,dark){
@@ -2797,7 +2824,7 @@ function flatWindowSVG(isBalkon){
     // Stulp: der reine „dreh"-Flügel im Stulp-Paar ist der Standflügel → KEIN Griff (öffnet als Zweites per Kantriegel).
     const isStand = stulpAt>0 && sashes[i].open==='dreh' && (i===stulpAt || i===stulpAt-1);
     if(!av){ s+=skizzeHinges(sashes[i].open,sashes[i].hinge,gx,gy,sashW,gh,SFR,line);  // Scharniere nur Innenansicht
-      if(!isStand) s+=skizzeHandle(sashes[i].open,sashes[i].hinge,gx,gy,sashW,gh,SFR,dark); }   // Griff nur Innenansicht, nicht am Standflügel
+      if(!isStand) s+=skizzeGriffVektor(sashes[i].open,sashes[i].hinge,gx,gy,sashW,gh,SFR,dark); }   // Griff nur Innenansicht, nicht am Standflügel
     if(i>0){ const dx=gx;
       if(stulpAt===i){ s+=`<line x1="${dx}" y1="${gy+4}" x2="${dx}" y2="${gy+gh-4}" stroke="#7b828c" stroke-width="${DW}" stroke-dasharray="${DT*0.2} ${DT*0.12}"/><text x="${dx-DT*0.32}" y="${gy+gh*0.62}" transform="rotate(-90 ${dx-DT*0.32} ${gy+gh*0.62})" text-anchor="middle" font-family="Inter,Arial" font-weight="800" font-size="${DT*0.5}" fill="#7b828c">STULP</text>`; }
       else s+=`<rect x="${dx-SFR*0.5}" y="${gy}" width="${SFR}" height="${gh}" fill="${fCol}" stroke="${frameStroke}" stroke-width="${DW*0.7}"/>`+gehr(dx-SFR*0.5,gy,SFR,gh,SFR*0.5);
@@ -2824,7 +2851,9 @@ function flatWindowSVG(isBalkon){
   return s+`</svg>`;
 }
 function fensterStageSVG(){ return flatWindowSVG(false); }
-const DEFS=`<defs><linearGradient id="glassg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dcebf6"/><stop offset="1" stop-color="#dcebf6"/></linearGradient>
+const DEFS=`<defs><filter id="inoxklar" x="-12%" y="-12%" width="124%" height="124%" color-interpolation-filters="sRGB">
+    <feComponentTransfer><feFuncR type="linear" slope="1.30" intercept="-0.12"/><feFuncG type="linear" slope="1.30" intercept="-0.12"/><feFuncB type="linear" slope="1.30" intercept="-0.12"/></feComponentTransfer>
+    <feDropShadow dx="0" dy="2.2" stdDeviation="2.6" flood-color="#0b1016" flood-opacity=".38"/></filter><linearGradient id="glassg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dcebf6"/><stop offset="1" stop-color="#dcebf6"/></linearGradient>
   <linearGradient id="reflg" x1="0" y1="0" x2="1" y2="0.35"><stop offset="0" stop-color="#ffffff" stop-opacity=".20"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/></linearGradient>
   <linearGradient id="metg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f3f5f7"/><stop offset=".45" stop-color="#d3d8de"/><stop offset=".55" stop-color="#c7cdd4"/><stop offset="1" stop-color="#e6e9ed"/></linearGradient>
   <linearGradient id="metv" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3f5f7"/><stop offset=".5" stop-color="#cfd4da"/><stop offset="1" stop-color="#e6e9ed"/></linearGradient>
@@ -2873,7 +2902,7 @@ function schiebeStageSVG(){
   const av=sketchAussen(), ci=av?S.outer:S.inner;                 // Außenfarbe beim Außenfarbe-Wählen, sonst Innenfarbe
   const co=COLORS_AKT()[ci], dark=isDarkCol(ci), fCol=co.c;
   const frameStroke=dark?'rgba(255,255,255,.42)':'#333940', miter=dark?shade(fCol,30):'#333940';
-  const GLASS='#e4eef6', GLASSST='#8ea4b6', DIN='#1e242b', DIMC='#1e242b', DIML='#565b61';
+  const GLASS='#e4eef6', GLASSST='#8ea4b6', DIN='#8895a4', DIMC='#1e242b', DIML='#565b61';
   const sys=S.hstSystem||'psk', n=(sys==='psk')?2:((S.hstTeilung==='3')?3:2), slideIdx=(S.hstLauf==='links')?0:n-1;
   const hasRoll=(S.roll&&S.roll!=='kein'), rollHR=hasRoll?215:0, totalHR=rollHR+hR;
   // Blattmassstab wie beim Fenster (siehe flatWindowSVG): konstante Schrift und Striche.
@@ -2912,14 +2941,16 @@ function schiebeStageSVG(){
     if(pzH>0){ const pz=(S.panzer!=null?COLORS_AKT()[S.panzer]:co).c; s+=`<rect x="${glx}" y="${gly}" width="${glw}" height="${pzH}" fill="${pz}" stroke="rgba(0,0,0,.2)" stroke-width="${DW*0.6}"/>`; const lh=Math.max(pzH/5,10*k); for(let ly=gly+lh; ly<gly+pzH-lh*0.5; ly+=lh) s+=`<line x1="${glx+2}" y1="${ly}" x2="${glx+glw-2}" y2="${ly}" stroke="rgba(0,0,0,.18)" stroke-width="${DW*0.5}"/>`; if(S.endleiste!=null){ const eh=Math.max(pzH*0.11,3*k); s+=`<rect x="${glx}" y="${gly+pzH-eh}" width="${glw}" height="${eh}" fill="${COLORS_AKT()[S.endleiste].c}" stroke="rgba(0,0,0,.22)" stroke-width="${DW*0.5}"/>`; } }
     const isSlide=(i===slideIdx), dir=(cx<bMm/2)?'r':'l', SW=Math.max(Math.min(glw,glh)*0.012,4);
     if(isSlide){
-      if(sys==='psk'){ s+=`<path d="M${glx+glw*0.20} ${gly+pzH+(glh-pzH)*0.82} L${cx} ${gly+pzH+(glh-pzH)*0.26} L${glx+glw*0.80} ${gly+pzH+(glh-pzH)*0.82}" stroke="${DIN}" stroke-width="${SW*0.8}" fill="none" stroke-linejoin="round"/>`; }
+      if(sys==='psk'){ s+=`<path d="M${glx+glw*0.28} ${gly+pzH+(glh-pzH)*0.70} L${cx} ${gly+pzH+(glh-pzH)*0.34} L${glx+glw*0.72} ${gly+pzH+(glh-pzH)*0.70}" stroke="${DIN}" stroke-width="${SW*0.9}" fill="none" stroke-linejoin="round"/>`; }
       const ay=cyy+(sys==='psk'?glh*0.10:0), ah=glw*0.20;
       const head=dir==='l'?`<polyline points="${cx-ah+ah*0.5},${ay-ah*0.35} ${cx-ah},${ay} ${cx-ah+ah*0.5},${ay+ah*0.35}" fill="none" stroke="${DIN}" stroke-width="${SW}" stroke-linejoin="round"/>`:`<polyline points="${cx+ah-ah*0.5},${ay-ah*0.35} ${cx+ah},${ay} ${cx+ah-ah*0.5},${ay+ah*0.35}" fill="none" stroke="${DIN}" stroke-width="${SW}" stroke-linejoin="round"/>`;
       s+=`<line x1="${cx-ah}" y1="${ay}" x2="${cx+ah}" y2="${ay}" stroke="${DIN}" stroke-width="${SW}"/>${head}`;
       const ge=(cx<bMm/2)?glx+SFR*0.6:glx+glw-SFR*0.6, gr=Math.max(glh*0.14,SFR*1.2);   // Stangengriff an der Außenkante
       s+=`<rect x="${ge-SW*1.4}" y="${cyy-gr}" width="${SW*2.8}" height="${gr*2}" rx="${SW*1.4}" fill="#fff" stroke="${DIN}" stroke-width="${SW}"/>`;
+      s+=`<text x="${cx}" y="${gly+pzH+(glh-pzH)*(sys==='psk'?0.80:0.66)}" text-anchor="middle" dominant-baseline="hanging" font-family="Inter,Arial" font-weight="600" font-size="${DT*0.58}" fill="${DIML}">${sys==='psk'?'schiebt und kippt':'schiebt'}</text>`;
     } else {
       const cs=Math.min(glw,glh)*0.14; s+=`<path d="M${cx-cs} ${cyy} L${cx+cs} ${cyy} M${cx} ${cyy-cs} L${cx} ${cyy+cs}" stroke="${DIN}" stroke-width="${SW}" fill="none"/>`;
+      s+=`<text x="${cx}" y="${cyy+cs*2.4}" text-anchor="middle" dominant-baseline="hanging" font-family="Inter,Arial" font-weight="600" font-size="${DT*0.58}" fill="${DIML}">fest</text>`;
     }
     if(i>0){ const dx=gx; s+=`<rect x="${dx-SFR*0.5}" y="${gy}" width="${SFR}" height="${gh}" fill="${fCol}" stroke="${frameStroke}" stroke-width="${DW*0.7}"/>`+gehr(dx-SFR*0.5,gy,SFR,gh,SFR*0.5); }
   }
@@ -3017,7 +3048,7 @@ function haustuerStageSVG(){
     // Türblatt: bei einer Haustür ist das Blatt MASSIV in Türfarbe — nur Applikation und Ausschnitte sind hell.
     // Vorher war die ganze Blattfläche als Glas (hellblau) gefüllt; dadurch sah keine Tür aus wie ihr Modell,
     // und Vollglas/Halbglas waren nicht zu unterscheiden (beide nur eine leere blaue Fläche).
-    const INOX=dark?'#aab0b6':'#c3c9cf';                   // Edelstahl-Einfassung
+    const INOX=dark?'#9fa7ae':'#b2bbc3';                   // Edelstahl-Einfassung (dunkler: hob sich auf hellem Blatt nicht ab)
     const flip=aussen?'':` transform="translate(${(2*glx+glw).toFixed(1)},0) scale(-1,1)"`;   // innen spiegelverkehrt
     const rEin=Math.max(SFR*0.28,uu*0.007);                // Breite der Edelstahl-Einfassung ums Glas
     if(key==='vollglas-inox'){
@@ -3034,7 +3065,7 @@ function haustuerStageSVG(){
       // Modelle mit Applikation: massives Blatt, darauf die Edelstahl-Applikation (das PNG bringt die
       // Ausschnitte selbst mit und sitzt darin bereits an der richtigen Stelle — deshalb volle Blattfläche).
       g+=`<rect x="${glx}" y="${gly}" width="${glw}" height="${glh}" fill="${fCol}" stroke="${line}" stroke-width="${DW}"/>`;
-      if(DOOR_MOTIFS[key]) g+=`<image href="img/tuer-motive/${key}.png" x="${glx}" y="${gly}" width="${glw}" height="${glh}" preserveAspectRatio="xMidYMid meet"${flip}/>`;
+      if(DOOR_MOTIFS[key]) g+=`<image href="img/tuer-motive/${key}.png" x="${glx}" y="${gly}" width="${glw}" height="${glh}" preserveAspectRatio="xMidYMid meet" filter="url(#inoxklar)"${flip}/>`;
     }
     // DIN-Dreh-Symbol (Spitze zur Griffseite) + Beschlag-/Scharnier-Marken auf der Bandseite
     g+=`<g stroke="${DIN}" stroke-width="${Math.max(Math.min(glw,glh)*0.006,2.4)}" fill="none" stroke-linejoin="round" stroke-linecap="round">${sashOpenLines('dreh',hinge,glx,gly,glx+glw,gly+glh)}</g>`;
