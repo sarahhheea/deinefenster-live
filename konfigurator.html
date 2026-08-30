@@ -2663,33 +2663,6 @@ function gurtDevice(bMm,rollH,hMm,winY,FR,uu){
   s+=`<rect x="${bx-bw*0.6}" y="${wy+wh*0.12}" width="${bw*1.2}" height="${wh*0.13}" rx="${bw*0.3}" fill="rgba(90,94,100,.32)"/>`;
   return s;
 }
-/* Fenstergriff als Vektor.
-   Vorher war der Griff ein 16x58-Pixel-Graubild aus der Herstellerzeichnung. Bei einem
-   Fluegel sah das gut aus; bei zwei und drei Fluegeln schrumpfte es auf wenige Pixel und
-   war als Griff nicht mehr zu erkennen — zwei blasse Striche am Pfosten. Der Vektor
-   bleibt in jeder Groesse scharf, haelt eine sichtbare Mindestgroesse ein und ueberlebt
-   den PNG-Export fuer die Mail (externe Bildverweise koennen dabei ausfallen). */
-function skizzeGriffVektor(open,hinge,gx,gy,sashW,gh,SFR,dark){
-  if(open==='fest'||open==='transom') return '';
-  const kante  = dark?'#0e1013':'#2c3542';
-  const flaeche= dark?'#e9ecef':'#ffffff';
-  // Maszstaeblich (ein Griff ist rund 200 mm lang), aber nie unter 10 % der Blattgroesse.
-  const H  = Math.max(Math.min(gh*0.17, 210*SKZ_K), 100);
-  const sw = Math.max(H*0.05, 2.4);
-  const rw = H*0.26, rh = H*0.30, hw = H*0.145, hl = H*0.70;   // Rosette und Hebel
-  const teil=(cx,cy,waagerecht)=>{
-    const r=`<rect x="${(cx-rw/2).toFixed(1)}" y="${(cy-rh/2).toFixed(1)}" width="${rw.toFixed(1)}" height="${rh.toFixed(1)}" rx="${(rw*0.34).toFixed(1)}" fill="${flaeche}" stroke="${kante}" stroke-width="${sw.toFixed(1)}"/>`;
-    const h=waagerecht
-      ? `<rect x="${cx.toFixed(1)}" y="${(cy-hw/2).toFixed(1)}" width="${hl.toFixed(1)}" height="${hw.toFixed(1)}" rx="${(hw*0.5).toFixed(1)}" fill="${flaeche}" stroke="${kante}" stroke-width="${sw.toFixed(1)}"/>`
-      : `<rect x="${(cx-hw/2).toFixed(1)}" y="${cy.toFixed(1)}" width="${hw.toFixed(1)}" height="${hl.toFixed(1)}" rx="${(hw*0.5).toFixed(1)}" fill="${flaeche}" stroke="${kante}" stroke-width="${sw.toFixed(1)}"/>`;
-    return h+r+`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${(rw*0.13).toFixed(1)}" fill="${kante}"/>`;
-  };
-  // Kipp: Griff waagerecht oben in der Fluegelmitte. Sonst: auf dem Holm gegenueber dem Band.
-  if(open==='kipp') return teil(gx+sashW/2-hl/2, gy+SFR*0.9, true);
-  const griffRechts=(hinge==='l');
-  const hx = griffRechts ? gx+sashW-SFR*0.62 : gx+SFR*0.62;   // ganz auf dem Fluegelrahmen, nicht ueber dem Pfosten
-  return teil(hx, gy+gh*0.56, false);
-}
 // Original-Griff aus dem PDF (Raster, 16x58) — grau auf hellem Rahmen, dunkel auf farbigem. Griffseite = Gegenseite Band.
 // Kipp: Griff oben-mitte waagerecht. Fest: kein Griff. KEINE Griffhöhe.
 function skizzeHandle(open,hinge,gx,gy,sashW,gh,SFR,dark){
@@ -2704,14 +2677,14 @@ function skizzeHandle(open,hinge,gx,gy,sashW,gh,SFR,dark){
     return `<image href="${img}" x="${x.toFixed(1)}" y="${(cy-kH*0.5).toFixed(1)}" width="${kW.toFixed(1)}" height="${kH.toFixed(1)}"${flip}/>`;
   }
   const img=dark?'img/skizze/griff-dunkel.webp':'img/skizze/griff-grau.webp';
-  const hH=Math.min(gh*0.17,220*SKZ_K), hW=hH*16/58;
+  const hH=Math.min(Math.max(Math.min(gh*0.17,220*SKZ_K), 96), gh*0.34), hW=hH*16/58;   // Untergrenze, damit er bei mehreren Fluegeln nicht verschwindet; Obergrenze fuer flache Fenster
   if(open==='kipp'){ const cx=gx+sashW/2, cy2=gy+SFR*0.95;
-    return `<image href="${img}" x="${cx-hH/2}" y="${cy2-hW/2}" width="${hH}" height="${hW}" transform="rotate(90 ${cx} ${cy2})"/>`; }
+    return `<image href="${img}" x="${cx-hH/2}" y="${cy2-hW/2}" width="${hH}" height="${hW}" transform="rotate(90 ${cx} ${cy2})" filter="url(#beschlagklar)"/>`; }
   const x=griffRight ? gx+sashW-SFR*0.5-hW*0.5 : gx+SFR*0.5-hW*0.5;
   const gyTop=gy+gh*0.6-hH*0.5;   // Griff tiefer wie PDF (Griffhöhe ~420, unter der Mitte) → klar getrennt von der Dreh-Spitze
   // Griffbild ist für Griff-LINKS orientiert → Griff-rechts spiegeln, damit zwei Griffe am Pfosten symmetrisch sitzen (wie Drutex).
   const flip=griffRight ? ` transform="translate(${(2*x+hW).toFixed(1)},0) scale(-1,1)"` : '';
-  return `<image href="${img}" x="${x.toFixed(1)}" y="${gyTop.toFixed(1)}" width="${hW.toFixed(1)}" height="${hH.toFixed(1)}"${flip}/>`;
+  return `<image href="${img}" x="${x.toFixed(1)}" y="${gyTop.toFixed(1)}" width="${hW.toFixed(1)}" height="${hH.toFixed(1)}" filter="url(#beschlagklar)"${flip}/>`;
 }
 // Scharniere/Bänder wie Drutex-PDF: kleine Kästchen mit Quer-Teilern (oben 3 Zellen, unten 2) an der Bandseite.
 function skizzeHinges(open,hinge,gx,gy,sashW,gh,SFR,line){
@@ -2824,7 +2797,7 @@ function flatWindowSVG(isBalkon){
     // Stulp: der reine „dreh"-Flügel im Stulp-Paar ist der Standflügel → KEIN Griff (öffnet als Zweites per Kantriegel).
     const isStand = stulpAt>0 && sashes[i].open==='dreh' && (i===stulpAt || i===stulpAt-1);
     if(!av){ s+=skizzeHinges(sashes[i].open,sashes[i].hinge,gx,gy,sashW,gh,SFR,line);  // Scharniere nur Innenansicht
-      if(!isStand) s+=skizzeGriffVektor(sashes[i].open,sashes[i].hinge,gx,gy,sashW,gh,SFR,dark); }   // Griff nur Innenansicht, nicht am Standflügel
+      if(!isStand) s+=skizzeHandle(sashes[i].open,sashes[i].hinge,gx,gy,sashW,gh,SFR,dark); }   // Griff nur Innenansicht, nicht am Standflügel
     if(i>0){ const dx=gx;
       if(stulpAt===i){ s+=`<line x1="${dx}" y1="${gy+4}" x2="${dx}" y2="${gy+gh-4}" stroke="#7b828c" stroke-width="${DW}" stroke-dasharray="${DT*0.2} ${DT*0.12}"/><text x="${dx-DT*0.32}" y="${gy+gh*0.62}" transform="rotate(-90 ${dx-DT*0.32} ${gy+gh*0.62})" text-anchor="middle" font-family="Inter,Arial" font-weight="800" font-size="${DT*0.5}" fill="#7b828c">STULP</text>`; }
       else s+=`<rect x="${dx-SFR*0.5}" y="${gy}" width="${SFR}" height="${gh}" fill="${fCol}" stroke="${frameStroke}" stroke-width="${DW*0.7}"/>`+gehr(dx-SFR*0.5,gy,SFR,gh,SFR*0.5);
@@ -2851,7 +2824,9 @@ function flatWindowSVG(isBalkon){
   return s+`</svg>`;
 }
 function fensterStageSVG(){ return flatWindowSVG(false); }
-const DEFS=`<defs><filter id="inoxklar" x="-12%" y="-12%" width="124%" height="124%" color-interpolation-filters="sRGB">
+const DEFS=`<defs><filter id="beschlagklar" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB">
+    <feComponentTransfer><feFuncR type="linear" slope="1.22" intercept="-0.14"/><feFuncG type="linear" slope="1.22" intercept="-0.14"/><feFuncB type="linear" slope="1.22" intercept="-0.14"/></feComponentTransfer>
+    <feDropShadow dx="0" dy="1.2" stdDeviation="1.4" flood-color="#0b1016" flood-opacity=".30"/></filter><filter id="inoxklar" x="-12%" y="-12%" width="124%" height="124%" color-interpolation-filters="sRGB">
     <feComponentTransfer><feFuncR type="linear" slope="1.30" intercept="-0.12"/><feFuncG type="linear" slope="1.30" intercept="-0.12"/><feFuncB type="linear" slope="1.30" intercept="-0.12"/></feComponentTransfer>
     <feDropShadow dx="0" dy="2.2" stdDeviation="2.6" flood-color="#0b1016" flood-opacity=".38"/></filter><linearGradient id="glassg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dcebf6"/><stop offset="1" stop-color="#dcebf6"/></linearGradient>
   <linearGradient id="reflg" x1="0" y1="0" x2="1" y2="0.35"><stop offset="0" stop-color="#ffffff" stop-opacity=".20"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/></linearGradient>
