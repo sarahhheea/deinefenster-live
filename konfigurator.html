@@ -5055,7 +5055,11 @@ function _lp_fensterNEU(){ var L=LS; var base=_pfBasis(L);
        Grundpreis ist um die Marge und den Quadratmeter-Aufschlag niedriger; rechnet
        man den Prozentsatz darauf, liegt ein farbiges Fenster weiter als 5 EUR unter
        Markt und wir verschenken Geld. Deshalb erst zurueckrechnen. */
-    var _marktBasis = base + _MARGE + _QM_AUFPREIS*area;
+    /* Der Prozentsatz gehoert auf den MARKTPREIS, und der ist bei Holz/Alu seit der
+       Staffel-Umstellung genau "unser Grundpreis + Marge" — ohne Quadratmeter-Aufschlag,
+       den es hier nicht mehr gibt. Mit ihm lag ein farbiges Fenster nur 2,38 EUR statt
+       3 bis 5 EUR unter Markt. */
+    var _marktBasis = base + _MARGE;
     if(_farbig){
       var _pct = (L.material==='holz') ? 0.323
                : ({mb70:0.1250, mb70hi:0.1172, mb86si:0.1725}[L.haProfil]||0.1250);
