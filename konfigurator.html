@@ -1837,6 +1837,60 @@ body.wiz-active .stage-card #stage svg{width:100%;height:auto;max-height:min(46v
   #wizGrid.ohne-skizze .ocard .vis img{max-height:calc(var(--kachelbild) - 8px)}
   .pk-grid .pcard .pimg{height:clamp(206px,22vh,300px)}
 }</style>
+<style>
+/* ── Schritt-Zeile statt waagerechter Schrittreihe ──────────────────────────
+   Ein einziges Bedienelement: sagt wo man ist und oeffnet die Liste aller
+   Schritte. Mindestens 44px hoch, damit es am Handy sicher zu treffen ist. */
+.stepnow{display:flex;align-items:center;gap:12px;width:100%;min-height:46px;
+  padding:7px 12px;background:none;border:0;border-radius:10px;cursor:pointer;
+  font:inherit;color:var(--ink,#161d26);text-align:left}
+.stepnow:hover{background:rgba(34,94,170,.06)}
+.stepnow:focus-visible{outline:2px solid var(--accent,#225eaa);outline-offset:-2px}
+.sn-txt{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
+.sn-zahl{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--soft,#5b626b)}
+.sn-name{font-size:16px;font-weight:800;line-height:1.15;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+.sn-icon{width:22px;height:22px;flex:none;color:var(--accent,#225eaa)}
+.sn-bahn{height:3px;background:rgba(34,94,170,.14);border-radius:2px;margin:0 12px 6px}
+.sn-bahn i{display:block;height:100%;background:var(--accent,#225eaa);border-radius:2px;
+  transition:width .25s ease}
+@media(max-width:600px){ .sn-name{font-size:15px} .stepnow{padding:6px 10px} }
+
+/* ── Liste aller Schritte ─────────────────────────────────────────────────── */
+.sl-modal{position:fixed;inset:0;z-index:100000;display:none}
+.sl-modal.auf{display:block}
+.sl-back{position:absolute;inset:0;background:rgba(16,24,36,.45)}
+.sl-card{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:min(520px,calc(100vw - 32px));max-height:min(78vh,720px);display:flex;
+  flex-direction:column;background:#fff;border-radius:16px;overflow:hidden;
+  box-shadow:0 24px 60px rgba(16,24,36,.28)}
+.sl-kopf{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:16px 18px;border-bottom:1px solid #e6eaf1}
+.sl-kopf h2{margin:0;font-size:17px;font-weight:800}
+.sl-x{width:40px;height:40px;border:0;background:none;border-radius:10px;cursor:pointer;
+  font-size:22px;line-height:1;color:var(--soft,#5b626b)}
+.sl-x:hover{background:#f2f5fa}
+.sl-liste{overflow-y:auto;padding:6px 0 10px}
+.sl-zeile{display:flex;align-items:center;gap:12px;width:100%;min-height:52px;
+  padding:10px 18px;background:none;border:0;cursor:pointer;font:inherit;text-align:left}
+.sl-zeile:hover{background:#f4f7fc}
+.sl-zeile:focus-visible{outline:2px solid var(--accent,#225eaa);outline-offset:-2px}
+.sl-nr{width:24px;height:24px;flex:none;border-radius:50%;display:grid;place-items:center;
+  font-size:11px;font-weight:800;background:#eef2f8;color:var(--soft,#5b626b)}
+.sl-zeile.jetzt .sl-nr{background:var(--accent,#225eaa);color:#fff}
+.sl-zeile.fertig .sl-nr{background:#dbe7f7;color:var(--accent,#225eaa)}
+.sl-mitte{flex:1;min-width:0}
+.sl-lb{display:block;font-size:14.5px;font-weight:700;color:var(--ink,#161d26)}
+.sl-zeile.jetzt .sl-lb{color:var(--accent,#225eaa)}
+.sl-wert{display:block;font-size:13px;color:var(--soft,#5b626b);white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+.sl-pfeil{width:18px;height:18px;flex:none;color:#9aa4b2}
+@media(max-width:600px){
+  .sl-card{left:0;right:0;bottom:0;top:auto;transform:none;width:100%;
+    max-height:86vh;border-radius:18px 18px 0 0}
+}
+</style>
 <link rel="stylesheet" href="/css/hofverkauf-hinweis.css">
 </head>
 <body>
@@ -2013,11 +2067,22 @@ body.wiz-active .stage-card #stage svg{width:100%;height:auto;max-height:min(46v
       </button>
       <div class="steps-inner" id="stepbar"></div>
     </div>
-    <!-- Die Kreise sind seit jeher anklickbar, aber nichts sagte es. Ein Kunde,
-         der zurueck zur Farbe will, tippt sonst mehrfach auf "Zurueck". -->
-    <p class="steps-tipp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>Jeden Schritt direkt anklickbar &mdash; auch zur&uuml;ck</p>
   </nav>
 </header>
+
+<!-- Liste aller Schritte: ersetzt die waagerechte Schrittreihe und ist zugleich der
+     schnelle Weg, aus dem Warenkorb heraus genau eine Sache zu aendern. -->
+<div class="sl-modal" id="slModal" role="dialog" aria-modal="true" aria-labelledby="slTitel"
+     onkeydown="if(event.key==='Escape')schliesseSchritte()">
+  <div class="sl-back" onclick="schliesseSchritte()"></div>
+  <div class="sl-card">
+    <div class="sl-kopf">
+      <h2 id="slTitel">Alle Schritte</h2>
+      <button class="sl-x" type="button" onclick="schliesseSchritte()" aria-label="Liste schlie&szlig;en">&times;</button>
+    </div>
+    <div class="sl-liste" id="slListe"></div>
+  </div>
+</div>
 <div class="pw-modal" id="pwModal" role="dialog" aria-modal="true" aria-labelledby="pwTitle" onkeydown="if(event.key==='Escape')closePwModal()">
   <div class="pw-back" onclick="closePwModal()"></div>
   <div class="pw-card">
@@ -5907,7 +5972,10 @@ function renderCartDrawer(){
 }
 function openCartDrawer(){ renderCartDrawer(); var w=document.getElementById('cartDrawer'); if(!w)return; w.classList.add('on'); w.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; var x=w.querySelector('.cd-x'); if(x)x.focus(); }
 function closeCartDrawer(){ var w=document.getElementById('cartDrawer'); if(!w)return; w.classList.remove('on'); w.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
-function cdEdit(i){ closeCartDrawer(); itemEdit(i); }
+/* Aus dem Warenkorb heraus will der Kunde meist EINE Sache aendern. Vorher landete er
+   auf Schritt 1 und musste sich durch alles klicken. Jetzt oeffnet sich direkt die Liste
+   aller Schritte — eine Zeile antippen, aendern, uebernehmen. */
+function cdEdit(i){ closeCartDrawer(); itemEdit(i); setTimeout(oeffneSchritte,60); }
 /* Weiteres Produkt aus dem Warenkorb heraus: die fertige Position liegt bereits im
    Korb, es geht also nichts verloren -> bewusst OHNE die "Eingaben gehen verloren"-
    Rueckfrage, die den Kunden sonst vom zweiten Produkt abhaelt. */
@@ -7147,6 +7215,69 @@ function pickColor(i){if(S.colorTarget==='a')S.outer=i;else S.inner=i;render();}
 function pickOuter(i){ if(S.inner!==0) S.inner=i; S.outer=i; S.colorTarget='a'; render(); }
 function setInnenWeiss(){ S.inner=0; S.colorTarget='i'; render(); }
 function setInnenFarbig(){ S.inner=S.outer; S.colorTarget='i'; render(); }
+
+/* ── Liste aller Schritte ───────────────────────────────────────────────────
+   Ersetzt die waagerechte Schrittreihe. Zeigt je Schritt die getroffene Wahl,
+   damit der Kunde ohne Durchklicken sieht, was schon steht — und genau die eine
+   Zeile antippen kann, die er aendern will. */
+function schrittWert(k){
+  try{
+    switch(k){
+      case 'material':   return (MATERIALS[S.material]||{}).n||'';
+      case 'holzart':    return (HOLZARTEN[S.holzart]||{}).n||'';
+      case 'profil':     return S.prod==='schiebe' ? (S.hstSystem==='hs'?'Hebe-Schiebet\u00fcr':'PSK Schiebet\u00fcr')
+                                                   : (PROFN[S.profile]||'');
+      case 'modell':     return DOORN[S.doorModel]||'';
+      case 'aufteilung': return ({'1fl':'1 Fl\u00fcgel','2fl':'2 Fl\u00fcgel','3fl':'3 Fl\u00fcgel'})[S.aufteilung]||'';
+      case 'masse':      return S.w+' \u00d7 '+S.h+' mm';
+      case 'anzahl':     return S.anzahl+(S.anzahl==1?' St\u00fcck':' St\u00fcck');
+      case 'farbe':      { var c=COLORS_AKT()||[], a=c[S.outer]||{}, i=c[S.inner]||{};
+                           var na=a.n||a.name||'', ni=i.n||i.name||'';
+                           return na===ni ? na : (na+' / '+ni); }
+      case 'glas':       return S.glass==='3'?'3-fach':'2-fach';
+      case 'motiv':      return DEKON[S.glasdekor]||'Klarglas';
+      case 'griff':      return S.prod==='haustuer' ? (GRIFFT[S.griffAussen]||'') : (S.griff?String(S.griff).charAt(0).toUpperCase()+String(S.griff).slice(1):'');
+      case 'sicherheit': return S.sicher?'Sicherheitsbeschlag':'Standardbeschlag';
+      case 'rollladen':  return S.roll!=='kein'?rollText():'ohne';
+      case 'sprossen':   return S.sproTyp&&S.sproTyp!=='keine'?'mit Sprossen':'ohne';
+      case 'schall':     return S.schall?'Schallschutzglas':'ohne';
+      case 'schwelle':   return S.balkonSchwelle==='alu'?'Aluschwelle':'Standard';
+      case 'oeffnung':   { if(S.prod==='haustuer') return (S.tuerAnschlag||'')||'';
+                           var a=(ANSCHLAG[S.aufteilung]||[])[S.anschlagIdx];
+                           return a&&a.n?a.n:''; }
+      default:           return '';
+    }
+  }catch(e){ return ''; }
+}
+function renderSchritteListe(){
+  var box=document.getElementById('slListe'); if(!box||!STEPS) return;
+  var sichtbar=STEPS.map(function(st,i){return {st:st,i:i};}).filter(function(o){return o.st.key!=='anfrage';});
+  var pfeil='<svg class="sl-pfeil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>';
+  box.innerHTML=sichtbar.map(function(o,n){
+    var jetzt=o.i===cur, fertig=o.i<cur, wert=schrittWert(o.st.key);
+    return '<button type="button" class="sl-zeile '+(jetzt?'jetzt':(fertig?'fertig':''))+'"'
+      +(jetzt?' aria-current="step"':'')+' onclick="springeZuSchritt('+o.i+')">'
+      +'<span class="sl-nr">'+(n+1)+'</span>'
+      +'<span class="sl-mitte"><span class="sl-lb">'+o.st.label+'</span>'
+      +(wert?'<span class="sl-wert">'+wert+'</span>':'')+'</span>'+pfeil+'</button>';
+  }).join('');
+}
+function oeffneSchritte(){
+  if(!started) return;
+  renderSchritteListe();
+  var m=document.getElementById('slModal'); if(!m) return;
+  m.classList.add('auf');
+  document.body.style.overflow='hidden';
+  var akt=m.querySelector('.sl-zeile.jetzt')||m.querySelector('.sl-zeile');
+  if(akt){ akt.focus(); akt.scrollIntoView({block:'center'}); }
+}
+function schliesseSchritte(){
+  var m=document.getElementById('slModal'); if(!m) return;
+  m.classList.remove('auf');
+  document.body.style.overflow='';
+}
+function springeZuSchritt(i){ schliesseSchritte(); go(i); }
+
 function go(i){
   const ziel=Math.max(0,Math.min(STEPS.length-1,i));
   // Die Schrittleiste ist frei anklickbar. Wer auf die Uebersicht springt, sieht seinen Entwurf
@@ -7221,11 +7352,20 @@ function render(){
      Konfigurationsentscheidung, sondern der Abschluss. Die Zusammenfassung liegt
      im Warenkorb. In STEPS bleibt der Eintrag, weil der Checkout darauf aufsetzt. */
   const sichtbar = STEPS.map((st,i)=>({st,i})).filter(o=>o.st.key!=='anfrage');
-  document.getElementById('stepbar').innerHTML='<div class="wizprog" aria-hidden="true"><i id="wizprogFill"></i></div>'+sichtbar.map(({st,i},n)=>{
-    const cls=i===cur?'active':(i<cur?'done':'');
-    const num=i<cur?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg>`:(n+1);
-    return `<button class="step ${cls}" onclick="go(${i})" aria-current="${i===cur?'step':'false'}"><span class="num">${num}</span><span class="lb">${st.label}</span></button>`;
-  }).join('');
+  /* Die waagerechte Schrittreihe ist entfallen. Am Handy waren von dreizehn Feldern
+     zweieinhalb zu sehen: winzige Tippziele bei gleichzeitig hohem Platzverbrauch, und
+     nach jedem Tippen sprang die Reihe. Stattdessen eine Zeile, die sagt wo man ist und
+     sich antippen laesst — dahinter die Liste aller Schritte mit der getroffenen Wahl.
+     Das ist zugleich der Weg, EINE Sache zu aendern, ohne sich durch alles zu klicken. */
+  const nAkt=sichtbar.findIndex(o=>o.i===cur), gesamt=sichtbar.length;
+  const anteil=gesamt>1?Math.max(0,Math.min(1,nAkt/(gesamt-1))):1;
+  document.getElementById('stepbar').innerHTML=
+    `<button class="stepnow" type="button" onclick="oeffneSchritte()" aria-haspopup="dialog"
+       aria-label="Schritt ${nAkt+1} von ${gesamt}: ${STEPS[cur].label}. Alle Schritte anzeigen">
+       <span class="sn-txt"><span class="sn-zahl">Schritt ${nAkt+1} von ${gesamt}</span><span class="sn-name">${STEPS[cur].label}</span></span>
+       <svg class="sn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+     </button>
+     <div class="sn-bahn" aria-hidden="true"><i style="width:${(anteil*100).toFixed(1)}%"></i></div>`;
   {var _tp=document.getElementById('tbProd'); if(_tp) _tp.textContent=prodName();
    /* Kurzform fuer schmale Bildschirme. Gemessen bei 390px: "Kunststofffenster"
       belegt 164px der 390px breiten Zeile, dann sind von zwoelf Schrittfeldern
