@@ -23,7 +23,7 @@
      Betriebsurlaub monatelang stehen. */
   var PLAN = {
     samstagVon : '2026-09-01',   // zusaetzlicher Samstag in der Hauptsaison
-    samstagBis : '2026-11-30',
+    samstagBis : '2026-12-05',
     sonderVon  : '2026-12-01',   // Sonderwoche zum Jahresende, taeglich
     sonderBis  : '2026-12-07',
     sonderZu   : ['2026-12-06'], // Sonntag dazwischen
@@ -85,7 +85,7 @@
                            + 'Danach Jahrespause bis zum 15. Januar 2027.';
     if (sonderBald)   return 'Zum Jahresabschluss haben wir vom 1. bis 7. Dezember t\u00e4glich '
                            + 'ge\u00f6ffnet. Danach Jahrespause bis zum 15. Januar 2027.';
-    if (samstagLaeuft || samstagBald) return 'Die Samstagszeiten gelten bis 30. November.';
+    if (samstagLaeuft || samstagBald) return 'Samstags ge\u00f6ffnet noch bis zum 5. Dezember 2026.';
     return '';
   }
 
