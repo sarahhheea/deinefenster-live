@@ -1891,6 +1891,23 @@ body.wiz-active .stage-card #stage svg{width:100%;height:auto;max-height:min(46v
     max-height:86vh;border-radius:18px 18px 0 0}
 }
 </style>
+<style>
+/* ── Farb-Schritt: Seitenwahl Außen/Innen ─────────────────────────────────── */
+.fseite{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 14px}
+.fs-tab{display:flex;align-items:center;gap:10px;min-height:56px;padding:9px 14px;
+  background:#fff;border:1.5px solid #dde4ee;border-radius:12px;cursor:pointer;
+  font:inherit;text-align:left;transition:border-color .15s,box-shadow .15s}
+.fs-tab:hover{border-color:#b9c8de}
+.fs-tab.on{border-color:var(--accent,#225eaa);box-shadow:0 0 0 3px rgba(34,94,170,.12)}
+.fs-tab:focus-visible{outline:2px solid var(--accent,#225eaa);outline-offset:2px}
+.fs-dot{width:26px;height:26px;flex:none;border-radius:8px;border:1px solid rgba(16,24,36,.18)}
+.fs-txt{display:flex;flex-direction:column;min-width:0}
+.fs-lb{font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--soft,#5b626b)}
+.fs-tab.on .fs-lb{color:var(--accent,#225eaa)}
+.fs-wert{font-size:14.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.grp-zus{font-weight:600;color:var(--soft,#5b626b)}
+</style>
 <link rel="stylesheet" href="/css/hofverkauf-hinweis.css">
 </head>
 <body>
@@ -6479,10 +6496,23 @@ function panelHTML(){
       +`<button type="button" class="innen-pill ${S.inner===0?'on':''}" onclick="setInnenWeiss()"><span class="segdot" style="background:${COLORS_AKT()[0].c}"></span>Weiß</button>`
       +`<button type="button" class="innen-pill ${innenFarbig?'on':''}" onclick="setInnenFarbig()"><span class="segdot" style="background:${co.c}"></span>Farbig</button>`
       +`<span class="innen-hint">Farbig = innen wie außen</span></div>`;
-    return `<div class="farbe-cols">`
-      +`<div class="card"><div class="grp-title">Außenfarbe</div><div class="swatches">${sw}</div></div>`
-      +`<div class="card"><div class="grp-title">Innenfarbe</div>${innenStack}</div>`
+    /* Zwei Reiter statt zweier untereinander stehender Karten. Am Handy lag die Innenfarbe
+       vorher unter rund 45 Aussenfarb-Kacheln — der Kunde sah nie, dass es sie gibt, und
+       vor allem nicht, WELCHE Seite er gerade faerbt. Der Reiter sagt es und nennt gleich
+       den gewaehlten Ton; die Skizze schaltet ueber colorTarget auf dieselbe Seite um. */
+    const aussen=S.colorTarget!=='i';
+    const reiter=`<div class="fseite" role="tablist" aria-label="Welche Seite färben?">`
+      +`<button type="button" role="tab" class="fs-tab ${aussen?'on':''}" aria-selected="${aussen}" onclick="setFarbSeite('a')">`
+        +`<span class="fs-dot" style="background:${co.c}"></span>`
+        +`<span class="fs-txt"><span class="fs-lb">Außen</span><span class="fs-wert">${co.n}</span></span></button>`
+      +`<button type="button" role="tab" class="fs-tab ${!aussen?'on':''}" aria-selected="${!aussen}" onclick="setFarbSeite('i')">`
+        +`<span class="fs-dot" style="background:${ci.c}"></span>`
+        +`<span class="fs-txt"><span class="fs-lb">Innen</span><span class="fs-wert">${ci.n}</span></span></button>`
       +`</div>`;
+    const inhalt = aussen
+      ? `<div class="card"><div class="grp-title">Außenfarbe <span class="grp-zus">zur Straße</span></div><div class="swatches">${sw}</div></div>`
+      : `<div class="card"><div class="grp-title">Innenfarbe <span class="grp-zus">zum Raum</span></div>${innenStack}</div>`;
+    return reiter+inhalt;
   }
   if(k==='extras'){
     const row=(key,t,s,dl,inc)=>`<label class="optrow ${S[key]?'on':''}" onclick="toggle('${key}')"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><span><span class="ot">${t}</span><br><span class="os">${s}</span></span></label>`;
@@ -7213,6 +7243,9 @@ function toggle(k){S[k]=!S[k];render();}
 function toggleGlass(){S.glass=S.glass==='3'?'2':'3';render();}
 function pickColor(i){if(S.colorTarget==='a')S.outer=i;else S.inner=i;render();}
 function pickOuter(i){ if(S.inner!==0) S.inner=i; S.outer=i; S.colorTarget='a'; render(); }
+/* Reiterwechsel im Farb-Schritt: setzt nur, welche Seite gerade bearbeitet und in der
+   Skizze gezeigt wird — die Farben selbst bleiben unveraendert. */
+function setFarbSeite(t){ S.colorTarget=(t==='i')?'i':'a'; render(); }
 function setInnenWeiss(){ S.inner=0; S.colorTarget='i'; render(); }
 function setInnenFarbig(){ S.inner=S.outer; S.colorTarget='i'; render(); }
 
