@@ -334,7 +334,12 @@ function istNachAussenOeffnend(p) {
 }
 /* Eigenschaften-Liste eines Produkts: Frei-Text-Varianten raus, Bauart- + Richtungs-Tag rein */
 function baueEigenschaften(p, kat) {
-  const base = (Array.isArray(p.eigenschaften) ? p.eigenschaften : []).filter(e => !istFreitextAussen(e));
+  // Bei „nach innen" im Titel muss auch der gesetzte Haken weg — sonst zieht das
+  // Inserat weiterhin im Filter „nach aussen oeffnend" mit.
+  const titelSagtInnen = RE_INNEN_TEXT.test(String(p.titel || ''));
+  const base = (Array.isArray(p.eigenschaften) ? p.eigenschaften : [])
+    .filter(e => !istFreitextAussen(e))
+    .filter(e => !(titelSagtInnen && e === TAG_AUSSEN));
   const bauart = deriveBauartTags(kat).filter(t => !base.includes(t));
   const richtung = (istNachAussenOeffnend(p) && !base.includes(TAG_AUSSEN)) ? [TAG_AUSSEN] : [];
   return [...base, ...bauart, ...richtung];
@@ -1014,7 +1019,11 @@ function massDiffHTML(m, p) {
 function zeigeAussenOeffnend() {
   const f = STATE.filter;
   if (f.eigenschaften.has(TAG_AUSSEN)) return true;
-  return !!f.suche && RE_AUSSEN_TAG.test(f.suche);
+  if (!f.suche) return false;
+  // Suchtext ueber dieselbe Normalisierung wie die Volltextsuche, damit auch
+  // „aussen oeffnend" und „oeffnet nach aussen" die Ware sichtbar machen.
+  const q = typeof normSuche === 'function' ? normSuche(f.suche) : String(f.suche).toLowerCase();
+  return /au(ss|ß)en/.test(q) || RE_AUSSEN_TAG.test(f.suche);
 }
 /* Suchtext ohne Maß-Angabe (die deckt der Maß-Filter ab) — gleiche Aufbereitung wie unten in der Suche */
 function sucheReinText() {
@@ -1082,9 +1091,33 @@ function rendereAussenHinweis() {
   });
 }
 
+/* Alle durchsuchbaren Felder eines Produkts als ein Text. */
+function sucheHaystack(p) {
+  return [
+    p.titel,
+    p.beschreibung,
+    [...gruppenVonProdukt(p)].map(g => STATE.kategorien[g] || '').join(' '),
+    p.system,
+    _asArr(p.farbe).join(' '),
+    p.standnummer || '',
+    (p.eigenschaften || []).join(' ')
+  ].join(' ').toLowerCase();
+}
+
+/* Steht die Eingabe im Artikel als zusammenhaengende Wendung? Solche Treffer sind
+   die gemeinten und werden bei „Relevanz" nach oben sortiert — ausgeblendet wird
+   aber nichts: wer „haustuer weiss" sucht, will alle 41 weissen Haustueren sehen,
+   nicht nur die 5, die es woertlich so im Titel stehen haben. */
+function istPhraseTreffer(p, q) {
+  if (typeof normSuche !== 'function' || typeof normText !== 'function') return false;
+  const ph = normSuche(q);
+  return !!ph && normText(sucheHaystack(p)).includes(ph);
+}
+
 /* ─── Filter-/Sort-Logik ─── */
 function gefilterteProdukte(opt) {
   const f = STATE.filter;
+
   // opt.nurAussen: dieselben Filter, aber genau andersherum — liefert die ausgeblendeten Artikel
   const nurAussen = !!(opt && opt.nurAussen);
   // Trefferbewertung der Maß-Suche. Sie landet NICHT am Produkt, sondern in einer Map:
@@ -1157,19 +1190,17 @@ function gefilterteProdukte(opt) {
         //    Trifft die Nummer, ist das Produkt sofort gemeint (unabhängig vom Volltext).
         if (typeof nummerTreffer === 'function' && nummerTreffer(reinText, p.standnummer)) return true;
         // 2) Sonst normale Volltextsuche über alle Felder.
-        const haystack = [
-          p.titel,
-          p.beschreibung,
-          STATE.kategorien[p.kategorie] || '',
-          p.system,
-          _asArr(p.farbe).join(' '),
-          p.standnummer || '',
-          (p.eigenschaften || []).join(' ')
-        ].join(' ').toLowerCase();
-        // ß/ss vereinheitlichen: „nach aussen" findet jetzt auch „nach außen"
-        // (Kunden tippen beides — vorher gab die ss-Schreibweise 0 Treffer)
-        const ohneSz = s => s.replace(/ß/g, 'ss');
-        if (!ohneSz(haystack).includes(ohneSz(reinText))) return false;
+        const haystack = sucheHaystack(p);
+        // Wortweiser Vergleich mit ausgeschriebenen Umlauten, Synonymen und
+        // abgeschnittener Plural-Endung (siehe shop-suche-util.js): findet
+        // „haustuer", „Haustüren", „Eingangstür" und „nach aussen öffnend"
+        // gleichermassen. Reihenfolge der Woerter egal, alle muessen vorkommen.
+        if (typeof textTreffer === 'function') {
+          if (!textTreffer(reinText, haystack)) return false;
+        } else {
+          const ohneSz = s => s.replace(/ß/g, 'ss');
+          if (!ohneSz(haystack).includes(ohneSz(reinText))) return false;
+        }
       }
     }
     return true;
@@ -1196,7 +1227,7 @@ function gefilterteProdukte(opt) {
       result.sort((a, b) => (a.breite_mm * a.hoehe_mm) - (b.breite_mm * b.hoehe_mm));
       break;
     case 'relevanz':
-    default:
+    default: {
       // Wenn Maße gefiltert: erst die genauen Treffer, dann die fast passenden, dann der Rest.
       // Grundlage ist dieselbe Bewertung wie auf der Karte — vorher zaehlte hier nur das
       // Hauptmass, wodurch ein exakter Treffer aus der Beschreibung weit hinten landen konnte.
@@ -1209,7 +1240,18 @@ function gefilterteProdukte(opt) {
           return (ma ? ma.summe : 0) - (mb ? mb.summe : 0);
         });
       }
+      // Wortweise Treffer sind wertvoll (sonst fehlt Ware), gehoeren aber hinter die,
+      // in denen die Suche woertlich so steht. sort() ist stabil — die Mass-Reihenfolge
+      // von oben bleibt innerhalb beider Gruppen erhalten.
+      const q = sucheReinText();
+      if (q) {
+        const phrase = new Set(result.filter(p => istPhraseTreffer(p, q)).map(p => p.id));
+        if (phrase.size && phrase.size < result.length) {
+          result.sort((a, b) => (phrase.has(b.id) ? 1 : 0) - (phrase.has(a.id) ? 1 : 0));
+        }
+      }
       break;
+    }
   }
 
   return result;
