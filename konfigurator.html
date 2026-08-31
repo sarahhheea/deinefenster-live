@@ -1908,6 +1908,27 @@ body.wiz-active .stage-card #stage svg{width:100%;height:auto;max-height:min(46v
 .fs-wert{font-size:14.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .grp-zus{font-weight:600;color:var(--soft,#5b626b)}
 </style>
+<style>
+/* ── Haustuer-Griffe ───────────────────────────────────────────────────────
+   Aussen sind es genau drei Ausfuehrungen. Die allgemeine Regel fuer Dreier-Raster
+   rechnet mit der vollen Panelbreite; in der schmalen rechten Spalte dieses Schritts
+   ergab das zwei Kacheln plus eine allein in der zweiten Reihe. */
+.griff-cols .opts.griff-aussen{grid-template-columns:repeat(3,minmax(0,1fr))}
+/* Am Handy gilt bewusst die site-weite Regel: zwei Kacheln nebeneinander, wie in
+   allen anderen Dreier-Schritten. */
+/* Die linke Spalte ist bewusst schmal (minmax(120px,.8fr)). Nebeneinander lief der Text
+   aus dem Kasten heraus und wurde abgeschnitten, deshalb Bild ueber Text. */
+.griff-fest{display:flex;flex-direction:column;align-items:center;gap:8px;
+  padding:14px 12px;background:#f6f8fc;border:1px solid #e3e9f3;border-radius:12px;
+  text-align:center}
+.griff-fest img{width:auto;max-width:100%;max-height:96px;flex:none}
+.gf-txt{display:flex;flex-direction:column;gap:3px;min-width:0;max-width:100%}
+.gf-t{font-size:14.5px;font-weight:800;color:var(--ink,#161d26);line-height:1.25;
+  overflow-wrap:break-word;hyphens:auto}
+.gf-s{font-size:12.5px;color:var(--soft,#5b626b);line-height:1.35;overflow-wrap:break-word}
+@media(max-width:600px){ .griff-fest{flex-direction:row;text-align:left;gap:14px}
+  .griff-fest img{max-height:64px} }
+</style>
 <link rel="stylesheet" href="/css/hofverkauf-hinweis.css">
 </head>
 <body>
@@ -6333,8 +6354,11 @@ function panelHTML(){
     const ga=(val,img,t,sub)=>
       `<div class="ocard ${S.griffAussen===val?'on':''}" onclick="setGriffAussen('${val}')">${tick}<div class="vis"><img src="${img}" alt="${t} (KI-generiertes Symbolbild)"></div><div class="t">${t}</div>${sub?`<div class="s">${sub}</div>`:''}</div>`;
     let html=`<div class="griff-cols">`
-      +`<div class="card"><div class="grp-title">Innen</div><div class="opts griff-innen"><div class="ocard on"><div class="vis"><img src="img/drutex-griffe/klinke-innen-silber-cut.webp" alt="Drückergarnitur innen"></div><div class="t">Drückergarnitur</div><div class="s">Klinke innen · fest</div></div></div></div>`
-      +`<div class="card"><div class="grp-title">Außen</div><div class="opts three">`
+      /* Innen gibt es nur eine Ausfuehrung. Als Auswahlkachel mit Haken sah das aus wie eine
+         Wahl, bei der es nichts zu waehlen gibt — und stand ausserdem in einem anders hohen
+         Kasten neben der Aussenwahl. Jetzt eine schlichte Angabe. */
+      +`<div class="card"><div class="grp-title">Innen</div><div class="griff-fest"><img src="img/drutex-griffe/klinke-innen-silber-cut.webp" alt="Drückergarnitur innen"><div class="gf-txt"><span class="gf-t">Drückergarnitur</span><span class="gf-s">Klinke innen · immer enthalten</span></div></div></div>`
+      +`<div class="card"><div class="grp-title">Außen</div><div class="opts three griff-aussen">`
       +ga('klinke','img/drutex-griffe/htg-flach-silber-cut.webp','Drückergarnitur','Klinke außen')
       +ga('knauf','img/drutex-griffe/knauf-silber-cut.webp','Knauf','fester Knauf außen')
       +ga('stoss','img/drutex-griffe/stoss-q45r-cut.webp','Stoßgriff','Edelstahl-Stange')
