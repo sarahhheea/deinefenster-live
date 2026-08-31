@@ -2686,7 +2686,7 @@ function skizzeHandle(open,hinge,gx,gy,sashW,gh,SFR,dark){
      dreifluegeligen Fenster blieben davon 9 % der Blattgroesse uebrig, beim
      einfluegeligen 16 % — derselbe Beschlag wirkte je nach Fenster wie ein anderer.
      gh*0.34 deckelt ihn nur dort, wo das Glasfeld selbst zu flach ist. */
-  const hH=Math.min(150, open==='kipp' ? sashW*0.42 : gh*0.34), hW=hH*16/58;   // Kippgriff liegt waagerecht — dort begrenzt die Fluegelbreite, nicht die Hoehe
+  const hH=Math.min(175, open==='kipp' ? sashW*0.42 : gh*0.34), hW=hH*16/58;   // Kippgriff liegt waagerecht — dort begrenzt die Fluegelbreite, nicht die Hoehe
   if(open==='kipp'){ const cx=gx+sashW/2, cy2=gy+SFR*0.95;
     return `<image href="${img}" x="${cx-hH/2}" y="${cy2-hW/2}" width="${hH}" height="${hW}" transform="rotate(90 ${cx} ${cy2})" filter="url(#beschlagklar)"/>`; }
   const x=griffRight ? gx+sashW-SFR*0.5-hW*0.5 : gx+SFR*0.5-hW*0.5;
@@ -2833,9 +2833,12 @@ function flatWindowSVG(isBalkon){
   return s+`</svg>`;
 }
 function fensterStageSVG(){ return flatWindowSVG(false); }
-const DEFS=`<defs><filter id="beschlagklar" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB">
-    <feComponentTransfer><feFuncR type="linear" slope="1.22" intercept="-0.14"/><feFuncG type="linear" slope="1.22" intercept="-0.14"/><feFuncB type="linear" slope="1.22" intercept="-0.14"/></feComponentTransfer>
-    <feDropShadow dx="0" dy="1.2" stdDeviation="1.4" flood-color="#0b1016" flood-opacity=".30"/></filter><filter id="inoxklar" x="-12%" y="-12%" width="124%" height="124%" color-interpolation-filters="sRGB">
+const DEFS=`<defs><filter id="beschlagklar" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB">
+    <feMorphology in="SourceAlpha" operator="dilate" radius="5" result="dick"/>
+    <feFlood flood-color="#ffffff" flood-opacity=".97"/><feComposite in2="dick" operator="in" result="saum"/>
+    <feComponentTransfer in="SourceGraphic"><feFuncR type="linear" slope="1.22" intercept="-0.14"/><feFuncG type="linear" slope="1.22" intercept="-0.14"/><feFuncB type="linear" slope="1.22" intercept="-0.14"/></feComponentTransfer>
+    <feDropShadow dx="0" dy="1.2" stdDeviation="1.4" flood-color="#0b1016" flood-opacity=".30" result="griff"/>
+    <feMerge><feMergeNode in="saum"/><feMergeNode in="griff"/></feMerge></filter><filter id="inoxklar" x="-12%" y="-12%" width="124%" height="124%" color-interpolation-filters="sRGB">
     <feComponentTransfer><feFuncR type="linear" slope="1.30" intercept="-0.12"/><feFuncG type="linear" slope="1.30" intercept="-0.12"/><feFuncB type="linear" slope="1.30" intercept="-0.12"/></feComponentTransfer>
     <feDropShadow dx="0" dy="2.2" stdDeviation="2.6" flood-color="#0b1016" flood-opacity=".38"/></filter><linearGradient id="glassg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dcebf6"/><stop offset="1" stop-color="#dcebf6"/></linearGradient>
   <linearGradient id="reflg" x1="0" y1="0" x2="1" y2="0.35"><stop offset="0" stop-color="#ffffff" stop-opacity=".20"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/></linearGradient>
