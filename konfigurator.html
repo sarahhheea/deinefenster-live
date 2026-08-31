@@ -2676,13 +2676,17 @@ function skizzeHandle(open,hinge,gx,gy,sashW,gh,SFR,dark){
     const flip=griffRight ? ` transform="translate(${(2*x+kW).toFixed(1)},0) scale(-1,1)"` : '';
     return `<image href="${img}" x="${x.toFixed(1)}" y="${(cy-kH*0.5).toFixed(1)}" width="${kW.toFixed(1)}" height="${kH.toFixed(1)}"${flip}/>`;
   }
-  const img=dark?'img/skizze/griff-dunkel.webp':'img/skizze/griff-grau.webp';
+  /* Auf hellem Rahmen wurde bisher die graue Fassung des Griffbildes gezeichnet — sie
+     verlor sich darauf. Beide Fassungen stammen aus derselben Herstellerzeichnung;
+     die dunkle steht auf hellem Grund einfach im Kontrast, so wie die graue auf
+     dunklem Rahmen. */
+  const img=dark?'img/skizze/griff-grau.webp':'img/skizze/griff-dunkel.webp';
   /* Der Griff wird in jeder Skizze gleich gross gezeichnet — wie die Bemassung auch.
      Massstaeblich mitwachsen zu lassen klingt richtig, sieht aber falsch aus: beim
      dreifluegeligen Fenster blieben davon 9 % der Blattgroesse uebrig, beim
      einfluegeligen 16 % — derselbe Beschlag wirkte je nach Fenster wie ein anderer.
      gh*0.34 deckelt ihn nur dort, wo das Glasfeld selbst zu flach ist. */
-  const hH=Math.min(150, gh*0.34), hW=hH*16/58;
+  const hH=Math.min(150, open==='kipp' ? sashW*0.42 : gh*0.34), hW=hH*16/58;   // Kippgriff liegt waagerecht — dort begrenzt die Fluegelbreite, nicht die Hoehe
   if(open==='kipp'){ const cx=gx+sashW/2, cy2=gy+SFR*0.95;
     return `<image href="${img}" x="${cx-hH/2}" y="${cy2-hW/2}" width="${hH}" height="${hW}" transform="rotate(90 ${cx} ${cy2})" filter="url(#beschlagklar)"/>`; }
   const x=griffRight ? gx+sashW-SFR*0.5-hW*0.5 : gx+SFR*0.5-hW*0.5;
