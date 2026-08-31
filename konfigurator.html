@@ -1929,6 +1929,15 @@ body.wiz-active .stage-card #stage svg{width:100%;height:auto;max-height:min(46v
 @media(max-width:600px){ .griff-fest{flex-direction:row;text-align:left;gap:14px}
   .griff-fest img{max-height:64px} }
 </style>
+<style>
+/* Rechner: anklickbare Schrittreihe. Handy: Zeile + Liste. */
+.leiste-breit{display:none}
+.leiste-schmal{display:block}
+@media(min-width:901px){
+  .leiste-breit{display:flex;position:relative;flex:1;min-width:0}
+  .leiste-schmal{display:none}
+}
+</style>
 <link rel="stylesheet" href="/css/hofverkauf-hinweis.css">
 </head>
 <body>
@@ -7416,13 +7425,25 @@ function render(){
      Das ist zugleich der Weg, EINE Sache zu aendern, ohne sich durch alles zu klicken. */
   const nAkt=sichtbar.findIndex(o=>o.i===cur), gesamt=sichtbar.length;
   const anteil=gesamt>1?Math.max(0,Math.min(1,nAkt/(gesamt-1))):1;
+  /* Zwei Fassungen, das Stylesheet entscheidet bei 900px:
+     Am Rechner die anklickbare Reihe — mit Maus ist jeder Schritt ein Ziel und alle
+     dreizehn sind gleichzeitig zu sehen.
+     Am Handy die Zeile "Schritt X von Y" plus Liste — dort waren von dreizehn Feldern
+     zweieinhalb sichtbar, die Tippziele winzig und die Reihe sprang nach jedem Tippen. */
+  const reiheBreit=sichtbar.map(({st,i},n)=>{
+    const cls=i===cur?'active':(i<cur?'done':'');
+    const num=i<cur?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg>`:(n+1);
+    return `<button class="step ${cls}" onclick="go(${i})" aria-current="${i===cur?'step':'false'}"><span class="num">${num}</span><span class="lb">${st.label}</span></button>`;
+  }).join('');
   document.getElementById('stepbar').innerHTML=
-    `<button class="stepnow" type="button" onclick="oeffneSchritte()" aria-haspopup="dialog"
+    `<div class="leiste-breit"><div class="wizprog" aria-hidden="true"><i id="wizprogFill"></i></div>${reiheBreit}</div>`
+   +`<div class="leiste-schmal">`
+   +`<button class="stepnow" type="button" onclick="oeffneSchritte()" aria-haspopup="dialog"
        aria-label="Schritt ${nAkt+1} von ${gesamt}: ${STEPS[cur].label}. Alle Schritte anzeigen">
        <span class="sn-txt"><span class="sn-zahl">Schritt ${nAkt+1} von ${gesamt}</span><span class="sn-name">${STEPS[cur].label}</span></span>
        <svg class="sn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
      </button>
-     <div class="sn-bahn" aria-hidden="true"><i style="width:${(anteil*100).toFixed(1)}%"></i></div>`;
+     <div class="sn-bahn" aria-hidden="true"><i style="width:${(anteil*100).toFixed(1)}%"></i></div></div>`;
   {var _tp=document.getElementById('tbProd'); if(_tp) _tp.textContent=prodName();
    /* Kurzform fuer schmale Bildschirme. Gemessen bei 390px: "Kunststofffenster"
       belegt 164px der 390px breiten Zeile, dann sind von zwoelf Schrittfeldern
