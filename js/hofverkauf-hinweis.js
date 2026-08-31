@@ -9,6 +9,12 @@
 (function () {
   'use strict';
 
+  /* Nicht ueber Konfigurator, Warenkorb oder Anfrage legen. Dort ist der Kunde mitten in
+     der Kaufentscheidung; das Fenster verdeckt die Auswahl und schluckt Klicks auf die
+     Auswahlkacheln — es sah dann so aus, als reagiere der Konfigurator nicht mehr. */
+  var OHNE_HINWEIS = /\/(konfigurator|warenkorb|anfrage)\.html$/;
+  if (OHNE_HINWEIS.test(location.pathname)) return;
+
   var KEY        = 'dfHofHinweis_2026_09';
   var CONSENT    = 'df_cookie_consent';
   var VERZOEGERT = 2000;

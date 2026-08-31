@@ -1210,7 +1210,7 @@ html,body{overflow-x:clip}
 .cd-pos-no{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft,#5b626b);margin-bottom:3px}
 .cd-raum{width:100%;box-sizing:border-box;margin-top:8px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:13px;color:var(--ink)}
 .cd-raum:focus{outline:none;border-color:var(--primary,#225eaa)}
-.cd-dup{background:none;border:0;padding:0;color:var(--primary,#225eaa);font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+
 .cd-liefer{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
 .cd-liefer button{background:#fff;border:1px solid var(--line);border-radius:8px;padding:9px 10px;text-align:left;cursor:pointer;font:inherit}
 .cd-liefer button.on{border-color:var(--primary,#225eaa);border-width:2px;background:#f3f7fd}
@@ -1305,8 +1305,7 @@ html,body{overflow-x:clip}
   transition:background .15s,color .15s,border-color .15s}
 .cd-edit{background:var(--primary,#225eaa);border:1px solid var(--primary,#225eaa);color:#fff}
 .cd-edit:hover{background:var(--primary-d,#1b4d8c);border-color:var(--primary-d,#1b4d8c)}
-.cd-dup{background:#fff;border:1px solid var(--primary,#225eaa);color:var(--primary,#225eaa)}
-.cd-dup:hover{background:rgba(34,94,170,.07)}
+
 .cd-del{background:var(--bg,#eef2f8);border:1px solid var(--line);color:var(--ink-soft,#5b626b)}
 .cd-del:hover{background:#fdf1ef;border-color:#e9c3bc;color:#c0392b;text-decoration:none}
 /* Abschluss: dunkler Block mit hellem Knopf — greift den Footer der Website auf */
@@ -1345,9 +1344,8 @@ html,body{overflow-x:clip}
   .cd-row{flex-direction:row !important;align-items:center !important;
     justify-content:space-between !important;gap:12px}
   .cd-qty{width:auto;flex:0 0 auto}
-  /* Drei gleich breite Knoepfe nebeneinander passen bei 390px nicht — "Duplizieren"
-     braucht allein rund 110px. Darum Bearbeiten ueber die volle Breite und darunter die
-     beiden selteneren Aktionen zu zweit. */
+  /* Bearbeiten ueber die volle Breite, Entfernen darunter — der haeufige Griff steht oben.
+     Mehrere gleiche Elemente laufen ueber die Stueckzahl, nicht ueber eine Kopie. */
   .cd-acts{display:grid;grid-template-columns:1fr 1fr;gap:9px !important}
   .cd-edit{grid-column:1/-1}
 }
@@ -5619,7 +5617,10 @@ function stepsFor(){
   return STEPMAP[S.prod]||STEPS_FENSTER;
 }
 function setMaterial(v){
-  if(S.material===v) return;
+  /* Klick auf das BEREITS gewaehlte Material (Kunststoff ist Vorauswahl) hat vorher gar
+     nichts gemacht — der Kunde tippt seine Wahl an und die Seite reagiert nicht. Die Wahl
+     bleibt unveraendert, aber sie gilt als bestaetigt und springt weiter. */
+  if(S.material===v){ maybeAutoAdvance(); return; }
   S.material=v;
   S.profile=profilDefault(v);            /* sonst zeigt der Profil-Schritt eine Wahl, die es im neuen Material nicht gibt */
   if(v!=='holz'){ S.holzart='kiefer'; } else { S.roll='kein'; S.panzer=null; S.endleiste=null; }
@@ -5766,11 +5767,6 @@ function loadCart(){ try{ const d=JSON.parse(localStorage.getItem(CART_LS_KEY)||
 // weiter als offenen Korb — die haeufigste Ursache fuer versehentliche Doppelanfragen.
 function cartLeeren(){ cart=[]; editIndex=-1; try{ localStorage.removeItem(CART_LS_KEY); }catch(e){}
   try{ window.dispatchEvent(new Event('df-cart-changed')); }catch(e){} }
-// Duplizieren: bei mehreren gleichen Fenstern der meistgebrauchte Knopf — vorher musste der
-// Kunde jedes Element von vorn konfigurieren. Die Kopie steht direkt hinter dem Original.
-function itemDuplizieren(i){ const q=cart[i]; if(!q) return;
-  cart.splice(i+1,0,{conf:JSON.parse(JSON.stringify(q.conf)),name:q.name||''});
-  saveCart(); renderCartDrawer(); }
 // Raumbezeichnung: gibt Kunde und Innendienst am Telefon denselben Bezug ("Position 3, Bad OG").
 function itemNameSetzen(i,txt){ if(!cart[i]) return; cart[i].name=String(txt||'').slice(0,40); saveCart(); }
 // Menge eines Artikels ändern
@@ -5842,7 +5838,7 @@ function cdItemHTML(it,i){
       +'<input class="cd-raum" type="text" maxlength="40" placeholder="Raum (optional, z. B. Bad OG)" value="'+String(it.name||'').replace(/"/g,'&quot;')+'" oninput="itemNameSetzen('+i+',this.value)" aria-label="Raumbezeichnung f&uuml;r Position '+(i+1)+'">'
     +'</div>'
     +'<div class="cd-row"><div class="cd-price'+(unit==null?' is-offen':'')+'">'+eurOffen(unit==null?null:unit*q)+'</div><div class="cd-qty"><button type="button" onclick="itemQty('+i+',-1);renderCartDrawer()" aria-label="Menge verringern">&minus;</button><span>'+q+'</span><button type="button" onclick="itemQty('+i+',1);renderCartDrawer()" aria-label="Menge erhöhen">+</button></div></div>'
-    +'<div class="cd-acts"><button type="button" class="cd-edit" onclick="cdEdit('+i+')">Bearbeiten</button><button type="button" class="cd-dup" onclick="itemDuplizieren('+i+')">Duplizieren</button><button type="button" class="cd-del" onclick="itemRemove('+i+');renderCartDrawer()">Entfernen</button></div>'
+    +'<div class="cd-acts"><button type="button" class="cd-edit" onclick="cdEdit('+i+')">Bearbeiten</button><button type="button" class="cd-del" onclick="itemRemove('+i+');renderCartDrawer()">Entfernen</button></div>'
     +'</div>';
 }
 function renderCartDrawer(){
