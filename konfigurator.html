@@ -3384,7 +3384,15 @@ function _holzaluLook(t,b,h){
     var aGem=(W[W.length-1]/1000)*(H[H.length-1]/1000), aIst=(_fb/1000)*(_fh/1000);
     v=Math.max(v*(aIst/Math.max(aGem,0.01)), M[M.length-1][W.length-1]);
   }
-  if(_u) v=Math.max(v*0.92, M[0][0]*0.80);
+  /* Unterhalb der gemessenen Flaeche wird NICHT abgezogen. Der Markt macht es
+     genauso: seine Alu-Mindesthoehe ist 590 mm, und jede kleinere Eingabe wird dort
+     still auf 590 hochgesetzt und zum 590er-Preis berechnet (nachgemessen 31.08.2026:
+     500x500, 500x550 und 500x600 kosten alle 512,19 EUR). Ein kleineres Fenster ist
+     unterhalb dieser Grenze also nicht billiger — genau eine solche Mindestgroesse
+     rechnen Hersteller ab.
+     Vorher standen hier 92 % des geklemmten Werts. Dieser Abschlag war frei gegriffen
+     und machte ein Alu-Fenster 500x500 um 44 EUR billiger als dasselbe Fenster am
+     Markt — also weit unter unserer Regel von 3 bis 5 EUR Abstand. */
   return v;
 }
 function _pfBasis(L){
@@ -5050,7 +5058,16 @@ function _lp_fensterNEU(){ var L=LS; var base=_pfBasis(L);
        Gemessen 28.08.2026 an drei Groessen je Profil, Abweichung unter 0,1 %-Punkt:
        MB-70 12,50 %, MB-70HI 11,72 %, MB-86N SI 17,25 %. Die Innenfarbe kostet beim
        Anbieter nichts extra (Aufpreis-Parameter 0,00 im Bedienelement). */
-    var _farbig=((L.fa&&L.fa!=='weiss')||(L.fi&&L.fi!=='weiss'));
+    /* Der Aufschlag faellt an, wenn AUSSEN UND INNEN VERSCHIEDEN sind — nicht,
+       sobald eine Seite farbig ist. Gemessen als vollstaendige Farbmatrix
+       (6x6 Toene bei Holz, 3x3 bei Alu, je zwei Groessen, 31.08.2026): auf der
+       Diagonale, also beidseitig derselbe Ton, kostet es NICHTS extra; jede
+       Mischung kostet den vollen Aufschlag. Handwerklich einleuchtend: einmal
+       lasieren gegen zweimal.
+       Vorher wurde der Aufschlag berechnet, sobald irgendeine Seite nicht weiss
+       war — also gerade im haeufigsten Fall (beidseitig derselbe Holzton), der
+       beim Markt kostenlos ist. Ein Holzfenster war dadurch rund 32 % zu teuer. */
+    var _farbig=(L.fa!==L.fi);
     /* Der Prozentsatz gilt fuer den MARKTPREIS, nicht fuer unseren Grundpreis. Unser
        Grundpreis ist um die Marge und den Quadratmeter-Aufschlag niedriger; rechnet
        man den Prozentsatz darauf, liegt ein farbiges Fenster weiter als 5 EUR unter
@@ -5060,9 +5077,21 @@ function _lp_fensterNEU(){ var L=LS; var base=_pfBasis(L);
        den es hier nicht mehr gibt. Mit ihm lag ein farbiges Fenster nur 2,38 EUR statt
        3 bis 5 EUR unter Markt. */
     var _marktBasis = base + _MARGE;
+    /* VORLAEUFIG VORSICHTIG GERECHNET (31.08.2026).
+       Der Aufschlag ist NICHT ueberall derselbe Anteil vom angezeigten Grundpreis.
+       Bei breiten, niedrigen Fenstern ist der Grundpreis erhoeht, der Aufschlag folgt
+       dem aber nicht: 900x700 kostet als Grundpreis 498,73 und der Aufschlag betraegt
+       145,06 (= 29,1 %), waehrend 700x840 mit Grundpreis 449,65 GENAU denselben
+       Aufschlag 145,06 hat (= 32,3 %). An 12 von 14 Zufallsmassen sind es 32,27 %,
+       an den breiten niedrigen bis zu 3 Prozentpunkte weniger.
+       Bis die Aufschlagsflaeche fertig gemessen ist, wird deshalb mit dem NIEDRIGSTEN
+       gemessenen Anteil gerechnet (Holz 29,0 %, Alu entsprechend um 10 % gekuerzt).
+       Damit liegen wir nie ueber Markt — dafuer bei gemischter Farbe voruebergehend
+       weiter darunter als die erlaubten 5 EUR. Sobald die Flaeche vorliegt, kommt hier
+       ein Nachschlag in einer gemessenen Tabelle hin statt eines Prozentsatzes. */
     if(_farbig){
-      var _pct = (L.material==='holz') ? 0.323
-               : ({mb70:0.1250, mb70hi:0.1172, mb86si:0.1725}[L.haProfil]||0.1250);
+      var _pct = (L.material==='holz') ? 0.290
+               : ({mb70:0.1125, mb70hi:0.1055, mb86si:0.1553}[L.haProfil]||0.1125);
       d += _marktBasis * _pct;
     }
     if(L.sproTyp==='aufgesetzt') d+=({'27':28,'45':38,'65':48})[L.sproDicke]||28;
