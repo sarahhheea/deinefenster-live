@@ -406,6 +406,26 @@ body.wiz-active .dfnav-tel:hover{background:rgba(34,94,170,.10)}
 .ocard .vis{height:132px;overflow:hidden}
 .ocard .vis img{max-height:120px;max-width:100%;width:auto;height:auto;object-fit:contain}
 .opts.three{grid-template-columns:repeat(3,1fr)}
+/* Rahmenverbreiterung: vier Zeilen, je Seite eine Reihe Breiten zum Antippen. Keine
+   Karten — bei bis zu zehn Breiten mal vier Seiten waeren das vierzig Kacheln. */
+.opts.vb-grp{display:block}
+.vb-intro,.vb-hinweis{font-size:13px;color:var(--ink-soft);margin:0 0 12px;line-height:1.45}
+.vb-zeile{display:flex;align-items:flex-start;gap:14px;padding:9px 0;border-top:1px solid var(--line)}
+.vb-zeile:first-of-type{border-top:0}
+.vb-seite{flex:0 0 116px;font-weight:600;font-size:14px;display:flex;flex-direction:column}
+.vb-laenge{font-weight:500;font-size:11.5px;color:var(--ink-soft);margin-top:1px}
+.vb-chips{display:flex;flex-wrap:wrap;gap:6px;flex:1 1 auto}
+.vb-chip{appearance:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;
+  padding:6px 12px;font:inherit;font-size:13px;cursor:pointer;transition:.18s var(--ease);color:var(--ink)}
+.vb-chip:hover{border-color:#9fb2d4}
+.vb-chip.on{background:var(--brand,#1f5ed6);border-color:var(--brand,#1f5ed6);color:#fff;font-weight:600}
+.vb-summe{margin-top:12px;font-size:13.5px;font-weight:600}
+@media(max-width:600px){
+  .vb-zeile{flex-direction:column;gap:6px}
+  .vb-seite{flex:none;flex-direction:row;align-items:baseline;gap:8px}
+  .vb-laenge{margin-top:0}
+  .vb-chip{padding:7px 11px;font-size:13px}
+}
 /* Angebrochene letzte Reihe mittig statt linksbuendig — sonst klafft rechts eine Luecke.
    Gleiche Kartenbreite wie im Raster: (100% - 2x12px Abstand) / 3. */
 /* Profilkarten flach halten: mit fuenf Systemen muessen alle auf einen Blick sichtbar
@@ -3721,6 +3741,72 @@ function _farbAufschlag(L){
   var d=t.D[stufe(t.H,L.hMm)][stufe(t.W,L.bMm)];
   return (typeof d==='number')?d:null;
 }
+/* === Rahmenverbreiterung ==================================================
+   Verbreiterungsprofile werden aussen an den Rahmen gesetzt. Bei einer Renovierung
+   ist die alte Oeffnung fast immer groesser als das neue Fenster — ohne Verbreiterung
+   bliebe ringsum ein Spalt.
+
+   Gemessen 01.09.2026 an 1872 Punkten ueber 14 Profile. Das Ergebnis ist eine gerade
+   Linie, keine Staffel:
+
+       Aufpreis je Seite = Fixbetrag je Profilstueck + Preis je Meter x Laenge dieser Seite
+       Laenge = Fensterhoehe bei links/rechts, Fensterbreite bei oben/unten
+
+   Groesste Abweichung ueber alle Profile: 0,28 EUR. Belegt ist ausserdem:
+   - Jede Seite wird EINZELN gewaehlt; links und rechts sind auf den Cent gleich,
+     oben und unten ebenso (952 Paarvergleiche, groesste Abweichung 0,00).
+   - Die Seiten sind additiv: alle vier zusammen kosten die Summe der Einzelwerte.
+   - Gestapelte Breiten sind exakt die Summe ihrer Teile: ein 120er ist zweimal ein
+     60er, Fixbetrag und Metersatz verdoppeln sich beide.
+   - Bei Holz ist die HOLZART ohne Belang. Kiefer und Meranti derselben Profiltiefe
+     stimmen auf 0,35 EUR je Meter ueberein, obwohl die Fenster selbst 28 Prozent
+     auseinanderliegen. Es zaehlt allein die Profiltiefe.
+   - Das eingegebene Fenstermass ist IMMER ohne Verbreiterung. Die Verbreiterung kommt
+     aussen dazu, das Fenster selbst bleibt gleich gross. */
+var _VERBR={"k_classic":[{"mm":15,"t":"15 mm","f":9.71,"m":5.58},{"mm":35,"t":"35 mm","f":9.65,"m":10.85},{"mm":60,"t":"60 mm","f":9.78,"m":16.03},{"mm":100,"t":"100 mm","f":9.81,"m":22.11},{"mm":120,"t":"120 mm (60 + 60)","f":19.39,"m":32.21},{"mm":160,"t":"160 mm (100 + 60)","f":19.35,"m":38.31},{"mm":180,"t":"180 mm (60 + 60 + 60)","f":28.99,"m":48.38},{"mm":200,"t":"200 mm (100 + 100)","f":19.34,"m":44.47}],"k_energy":[{"mm":15,"t":"15 mm","f":8.98,"m":6.7},{"mm":35,"t":"35 mm","f":9.0,"m":15.94},{"mm":60,"t":"60 mm","f":9.05,"m":19.79},{"mm":95,"t":"95 mm (35 + 60)","f":18.05,"m":35.73,"z":1},{"mm":100,"t":"100 mm","f":9.25,"m":36.5},{"mm":120,"t":"120 mm (60 + 60)","f":18.1,"m":39.58,"z":1},{"mm":155,"t":"155 mm (35 + 60 + 60)","f":27.1,"m":55.52,"z":1},{"mm":180,"t":"180 mm (60 + 60 + 60)","f":27.15,"m":59.37,"z":1},{"mm":200,"t":"200 mm (100 + 100)","f":18.5,"m":73.0,"z":1},{"mm":240,"t":"240 mm (60 + 60 + 60 + 60)","f":36.2,"m":79.16,"z":1}],"k_light":[{"mm":15,"t":"15 mm","f":10.6,"m":6.1},{"mm":35,"t":"35 mm","f":10.06,"m":12.35},{"mm":60,"t":"60 mm","f":10.35,"m":17.73},{"mm":100,"t":"100 mm","f":10.24,"m":24.55},{"mm":120,"t":"120 mm (60 + 60)","f":20.7,"m":35.46,"z":1},{"mm":160,"t":"160 mm (100 + 60)","f":20.59,"m":42.28,"z":1},{"mm":180,"t":"180 mm (60 + 60 + 60)","f":31.05,"m":53.19,"z":1},{"mm":200,"t":"200 mm (100 + 100)","f":20.48,"m":49.1,"z":1}],"k_ext":[{"mm":15,"t":"15 mm","f":9.85,"m":6.65},{"mm":35,"t":"35 mm","f":10.69,"m":11.6},{"mm":60,"t":"60 mm","f":11.58,"m":16.5},{"mm":100,"t":"100 mm","f":11.29,"m":23.45},{"mm":120,"t":"120 mm (60 + 60)","f":23.16,"m":33.0,"z":1},{"mm":160,"t":"160 mm (100 + 60)","f":22.87,"m":39.95,"z":1},{"mm":180,"t":"180 mm (60 + 60 + 60)","f":34.74,"m":49.5,"z":1},{"mm":200,"t":"200 mm (100 + 100)","f":22.58,"m":46.9,"z":1}],"k_edge":[{"mm":15,"t":"15 mm","f":9.72,"m":6.68},{"mm":35,"t":"35 mm","f":10.34,"m":15.83},{"mm":60,"t":"60 mm","f":9.95,"m":20.21},{"mm":95,"t":"95 mm (35 + 60)","f":20.29,"m":36.04,"z":1},{"mm":100,"t":"100 mm","f":9.75,"m":38.26},{"mm":120,"t":"120 mm (60 + 60)","f":19.9,"m":40.42,"z":1},{"mm":155,"t":"155 mm (35 + 60 + 60)","f":30.24,"m":56.25,"z":1},{"mm":180,"t":"180 mm (60 + 60 + 60)","f":29.85,"m":60.63,"z":1},{"mm":200,"t":"200 mm (100 + 100)","f":19.5,"m":76.52,"z":1},{"mm":240,"t":"240 mm (60 + 60 + 60 + 60)","f":39.8,"m":80.84,"z":1}],"h_softline68_kiefer":[{"mm":40,"t":"40 mm","f":11.29,"m":26.06},{"mm":80,"t":"80 mm","f":11.56,"m":34.13},{"mm":110,"t":"110 mm","f":11.1,"m":40.33},{"mm":140,"t":"140 mm","f":11.13,"m":47.99},{"mm":180,"t":"180 mm (40 + 140)","f":23.0,"m":73.52},{"mm":220,"t":"220 mm (110 + 110)","f":22.69,"m":79.98}],"a_mb70":[{"mm":34,"t":"34 mm","f":10.91,"m":37.97},{"mm":56,"t":"56 mm","f":10.92,"m":43.51},{"mm":68,"t":"68 mm (34 + 34)","f":21.8,"m":75.95},{"mm":90,"t":"90 mm (34 + 56)","f":21.83,"m":81.47},{"mm":124,"t":"124 mm (34 + 34 + 56)","f":32.9,"m":119.35},{"mm":168,"t":"168 mm (56 + 56 + 56)","f":32.8,"m":130.39},{"mm":224,"t":"224 mm (56 + 56 + 56 + 56)","f":43.91,"m":173.77}],"h_softline78_kiefer":[{"mm":40,"t":"40 mm","f":11.44,"m":31.59},{"mm":80,"t":"80 mm","f":11.64,"m":41.27},{"mm":110,"t":"110 mm","f":11.51,"m":48.65},{"mm":140,"t":"140 mm","f":11.33,"m":57.67},{"mm":180,"t":"180 mm (40 + 140)","f":22.96,"m":89.03},{"mm":220,"t":"220 mm (110 + 110)","f":22.92,"m":97.33}],"h_softline88_kiefer":[{"mm":40,"t":"40 mm","f":11.57,"m":37.7},{"mm":80,"t":"80 mm","f":11.61,"m":50.13},{"mm":110,"t":"110 mm","f":11.43,"m":58.56},{"mm":140,"t":"140 mm","f":11.72,"m":69.66},{"mm":180,"t":"180 mm (40 + 140)","f":22.85,"m":107.78},{"mm":220,"t":"220 mm (110 + 110)","f":22.79,"m":117.19}],"h_softline68_meranti":[{"mm":40,"t":"40 mm","f":11.47,"m":25.91},{"mm":80,"t":"80 mm","f":11.46,"m":34.22},{"mm":110,"t":"110 mm","f":11.45,"m":39.88},{"mm":140,"t":"140 mm","f":11.37,"m":47.77},{"mm":180,"t":"180 mm (40 + 140)","f":22.81,"m":73.63},{"mm":220,"t":"220 mm (110 + 110)","f":22.69,"m":79.93}],"h_softline78_meranti":[{"mm":40,"t":"40 mm","f":11.5,"m":31.53},{"mm":80,"t":"80 mm","f":11.58,"m":41.33},{"mm":110,"t":"110 mm","f":11.42,"m":48.68},{"mm":140,"t":"140 mm","f":11.59,"m":57.34},{"mm":180,"t":"180 mm (40 + 140)","f":22.93,"m":89.0},{"mm":220,"t":"220 mm (110 + 110)","f":22.92,"m":97.36}],"h_softline88_meranti":[{"mm":40,"t":"40 mm","f":11.37,"m":37.8},{"mm":80,"t":"80 mm","f":11.42,"m":50.23},{"mm":110,"t":"110 mm","f":11.49,"m":58.48},{"mm":140,"t":"140 mm","f":11.33,"m":70.0},{"mm":180,"t":"180 mm (40 + 140)","f":22.69,"m":107.81},{"mm":220,"t":"220 mm (110 + 110)","f":22.72,"m":117.1}],"a_mb70hi":[{"mm":34,"t":"34 mm","f":10.93,"m":45.91},{"mm":56,"t":"56 mm","f":11.04,"m":57.46},{"mm":68,"t":"68 mm (34 + 34)","f":22.12,"m":91.68},{"mm":90,"t":"90 mm (34 + 56)","f":21.96,"m":103.48},{"mm":124,"t":"124 mm (34 + 34 + 56)","f":33.14,"m":149.22},{"mm":168,"t":"168 mm (56 + 56 + 56)","f":33.1,"m":172.4},{"mm":224,"t":"224 mm (56 + 56 + 56 + 56)","f":44.14,"m":229.84}],"a_mb86si":[{"mm":26,"t":"26 mm","f":11.19,"m":44.22},{"mm":34,"t":"34 mm","f":11.28,"m":48.7},{"mm":56,"t":"56 mm","f":11.16,"m":59.89},{"mm":90,"t":"90 mm (34 + 56)","f":22.24,"m":108.75},{"mm":112,"t":"112 mm (56 + 56)","f":21.99,"m":120.06},{"mm":138,"t":"138 mm (26 + 56 + 56)","f":33.37,"m":164.14},{"mm":168,"t":"168 mm (56 + 56 + 56)","f":33.25,"m":179.85},{"mm":224,"t":"224 mm (56 + 56 + 56 + 56)","f":44.51,"m":239.63}]};
+var _VERBR_FARBE={"beid":{"15":5.99,"60":13.38,"100":10.89},"aussen":{"15":4.42,"60":11.17,"100":9.01}};
+/* Welche Tarifgruppe gilt fuer die aktuelle Wahl? */
+function _verbrKey(L){
+  var m=(L&&L.material)||S.material||'kunststoff';
+  if(m==='holz')  return 'h_'+((L&&L.haProfil)||S.profile||'softline68')+'_'+((L&&L.holzart)||S.holzart||'kiefer');
+  if(m==='alu')   return 'a_'+((L&&L.haProfil)||S.profile||'mb70');
+  return 'k_'+((L&&L.haProfil)||S.profile||'classic');
+}
+function _verbrBreiten(){ return _VERBR[_verbrKey(null)]||[]; }
+/* Aufpreis fuer alle vier Seiten zusammen. */
+function _verbrPreis(L){
+  var t=_VERBR[_verbrKey(L)]; if(!t) return 0;
+  var b=(L.bMm||0)/1000, h=(L.hMm||0)/1000;
+  /* Farbe treibt den Metersatz mit: eine folierte Verbreiterung kostet deutlich mehr
+     als eine weisse. Gemessen ist das nur bei Kunststoff (an einem System, drei
+     Breiten). Fuer Breiten ohne eigene Messung wird der KLEINSTE gemessene Aufschlag
+     genommen, damit wir nie ueber Vergleichsniveau landen. Bei Holz und Alu ist die
+     Farbabhaengigkeit NICHT gemessen — dort bleibt der Aufschlag aus, wir liegen dort
+     also eher zu niedrig als zu hoch. Gehoert nachgemessen. */
+  var farbig=null;
+  if((L.material||'kunststoff')==='kunststoff'){
+    var fa=L.fa&&L.fa!=='weiss', fi=L.fi&&L.fi!=='weiss';
+    if(fa&&fi) farbig=_VERBR_FARBE.beid; else if(fa||fi) farbig=_VERBR_FARBE.aussen;
+  }
+  var minAuf=0;
+  if(farbig){ minAuf=Infinity; for(var k in farbig){ if(farbig[k]<minAuf) minAuf=farbig[k]; } }
+  function seite(mmWert, laenge){
+    if(!mmWert) return 0;
+    var e=null; for(var i=0;i<t.length;i++){ if(t[i].mm===mmWert){ e=t[i]; break; } }
+    if(!e) return 0;
+    var proM=e.m + (farbig ? (farbig[mmWert]!=null?farbig[mmWert]:minAuf) : 0);
+    return e.f + proM*laenge;
+  }
+  return seite(+L.vbL||0,h) + seite(+L.vbR||0,h) + seite(+L.vbO||0,b) + seite(+L.vbU||0,b);
+}
+function verbrAktiv(){ return (+S.vbL||0)+(+S.vbR||0)+(+S.vbO||0)+(+S.vbU||0) > 0; }
+/* Eine Schreibweise fuer Uebersicht, Warenkorb und Anfrage-Mail — sonst formuliert
+   jede Stelle es anders und in der Fertigung fehlt am Ende eine Seite. */
+function verbrText(){
+  var t=[['vbL','links'],['vbR','rechts'],['vbO','oben'],['vbU','unten']], out=[];
+  t.forEach(function(x){ var v=+S[x[0]]||0; if(v) out.push(x[1]+' '+v+' mm'); });
+  return out.length?out.join(' · '):'ohne';
+}
 function _pfBasis(L){
   /* Holz und Alu rechnen aus eigenen gemessenen Flaechen. Ohne diesen Zweig
      faellt die Funktion unten still auf die Kunststoff-Flaechen zurueck und
@@ -5462,6 +5548,7 @@ function _lp_fensterNEU(){ var L=LS; var base=_pfBasis(L);
     }
     if(L.sproTyp==='aufgesetzt') d+=({'27':28,'45':38,'65':48})[L.sproDicke]||28;
     else if(L.sproTyp==='szr') d+=({'18':13,'26':18,'45':25})[L.sproDicke]||13;
+    d+=_verbrPreis(L);
     return base+d;
   }
   if(!L.edge && L.glas==='3fach') d+=24*area;
@@ -5509,6 +5596,7 @@ function _lp_fensterNEU(){ var L=LS; var base=_pfBasis(L);
   var _premA=fa&&_PREM_FARBE.indexOf(L.fa)>=0, _premI=fi&&_PREM_FARBE.indexOf(L.fi)>=0;
   if(_premA||_premI) d+=_farbBasis*(L.edge?0.0830:0.0888);
   if(roll>0 && (fa||fi)) d+=18;   // Marktniveau färbt den Rollladenkasten in Fensterfarbe mit (~14€ gemessen 2026-07, konservativ +18)
+  d+=_verbrPreis(L);
   return Math.max(0, Math.ceil(base+d-_MARGE)); }
 
 /* Balkontuer-Preistabellen */
@@ -5733,6 +5821,7 @@ function _priceRoh(){
      aus welcher gemessenen Flaeche der Grundpreis kommt. */
   L.material=(S.prod==='fenster')?(S.material||'kunststoff'):'kunststoff';
   L.haProfil=S.profile; L.holzart=S.holzart||'kiefer';
+  L.vbL=+S.vbL||0; L.vbR=+S.vbR||0; L.vbO=+S.vbO||0; L.vbU=+S.vbU||0;   // Rahmenverbreiterung je Seite
   L.sproTyp=S.sproTyp||'keine';
   L.sproDicke=S.sproDicke||'27';
   L.griff='mistral'; L.griffLocked=(S.griff==='abschliessbar');
@@ -5811,6 +5900,7 @@ const STEPS_FENSTER=[  // Reihenfolge exakt wie Live-Konfigurator (STEP_ORDER)
   {key:'aufteilung',label:'Aufteilung',title:['Die ','Aufteilung'],sub:'Wie viele Flügel soll Ihr Fenster haben?'},
   {key:'oeffnung',label:'Öffnung',title:['Die ','Öffnungsart'],sub:'In welche Richtung öffnet das Fenster?'},
   {key:'masse',label:'Maße',title:['Ihre ','Maße'],sub:'Breite und Höhe der Öffnung in Millimeter.'},
+  {key:'verbreiterung',label:'Verbreiterung',title:['Die ','Verbreiterung'],sub:'Füllt den Spalt, wenn die alte Öffnung größer ist als das neue Fenster.'},
   {key:'anzahl',label:'Anzahl',title:['Die ','Anzahl'],sub:'Wie viele gleiche Fenster benötigen Sie?'},
   {key:'farbe',label:'Farbe',title:['Die ','Farbe'],sub:'Außen- und Innenfarbe — die Vorschau zeigt Ihre Wahl.'},
   {key:'glas',label:'Glas',title:['Die ','Verglasung'],sub:'2-fach oder 3-fach Wärmeschutz.'},
@@ -6012,7 +6102,7 @@ function setHolzart(v){
 }
 let STEPS=STEPS_FENSTER;
 // Überspringbare Extras: alles vorbelegt → Kunde kann mit einem Tap die Standards übernehmen und direkt zum Angebot
-const SKIP_KEYS=['motiv','schall','griff','sicherheit','rollladen','sprossen'];
+const SKIP_KEYS=['motiv','schall','griff','sicherheit','rollladen','sprossen','verbreiterung'];
 function finishWithDefaults(){ commitCurrent(); }   // übernimmt aktuelle Konfig inkl. Standard-Extras → Warenkorb (gleiche sichere Logik wie „In den Warenkorb legen")
 let cur=0;
 let started=false;
@@ -6819,6 +6909,29 @@ function panelHTML(){
       <div id="massWarn" class="masswarn" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg><span></span></div>
       </div>`;
   }
+  if(k==='verbreiterung'){
+    /* Vier getrennte Seiten statt einer umlaufenden Angabe: bei einer Renovierung ist
+       der Spalt fast nie ringsum gleich. Links und rechts rechnen mit der Hoehe, oben
+       und unten mit der Breite — deshalb steht die jeweilige Laenge an der Zeile. */
+    const br=_verbrBreiten();
+    if(!br.length) return grp('Rahmenverbreiterung','two',
+      '<div class="vb-hinweis">Für dieses Profil ist noch kein Verbreiterungspreis hinterlegt. '
+      +'Schreiben Sie es uns bei der Anfrage dazu — wir rechnen es von Hand.</div>');
+    const seiten=[['vbL','Links','Höhe',S.h],['vbR','Rechts','Höhe',S.h],
+                  ['vbO','Oben','Breite',S.w],['vbU','Unten','Breite',S.w]];
+    const zeilen=seiten.map(function(x){
+      const feld=x[0], akt=+S[feld]||0;
+      const knoepfe=[`<button type="button" class="vb-chip ${akt===0?'on':''}" onclick="setVerbr('${feld}',0)">ohne</button>`]
+        .concat(br.map(function(b){
+          return `<button type="button" class="vb-chip ${akt===b.mm?'on':''}" onclick="setVerbr('${feld}',${b.mm})" title="${b.t}">${b.mm}</button>`;
+        })).join('');
+      return `<div class="vb-zeile"><div class="vb-seite">${x[1]}<span class="vb-laenge">${x[2]} ${x[3]} mm</span></div>`
+           + `<div class="vb-chips">${knoepfe}</div></div>`;
+    }).join('');
+    const summe = verbrAktiv() ? `<div class="vb-summe">Gewählt: ${verbrText()}</div>` : '';
+    return grp('Rahmenverbreiterung','vb-grp',
+      `<div class="vb-intro">Alle Breiten in Millimeter. Ihr Fenstermaß bleibt unverändert — die Verbreiterung kommt außen dazu.</div>${zeilen}${summe}`);
+  }
   if(k==='farbe'){
     const co=COLORS_AKT()[S.outer],ci=COLORS_AKT()[S.inner];
     const innenFarbig=(S.inner!==0);
@@ -7033,6 +7146,7 @@ function summaryRows(){
     ${aRow}${massRow}${colorRows}
     <div class="srow"><span class="k">Verglasung</span><span class="v">${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}</span></div>${schwelleRow}
     ${sproRow}
+    <div class="srow"><span class="k">Verbreiterung</span><span class="v">${verbrText()}</span></div>
     <div class="srow"><span class="k">Griff</span><span class="v">${GRIFFN[S.griff]}</span></div>
     ${rollRow}${pzRows}
     <div class="srow"><span class="k">Extras</span><span class="v">${ex.length?ex.join(' · '):'— keine —'}</span></div>`;
@@ -7608,6 +7722,9 @@ function maybeAutoAdvance(){
   _advTimer=setTimeout(()=>{ if(STEPS[cur]&&STEPS[cur].key===k) go(cur+1); }, 240);  // kurz aufleuchten lassen, dann weiter
 }
 function set(k,v){S[k]=v;render();maybeAutoAdvance();}
+/* Verbreiterung: kein maybeAutoAdvance — der Kunde waehlt hier bis zu vier Seiten
+   nacheinander, ein Sprung nach der ersten Wahl waere mitten im Vorgang. */
+function setVerbr(feld,mm){ S[feld]=mm; render(); }
 /* Profilwechsel ist mehr als ein Feld setzen: IGLO 5 Classic EXT bringt eine eigene
    Anschlagliste (nur DIN links/rechts, nach aussen) und eigene Massgrenzen mit. Ohne
    das Nachziehen stand nach dem Wechsel ein Anschlag da, den es dort nicht gibt, und
