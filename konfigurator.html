@@ -5540,6 +5540,36 @@ function fetchToDataURL(url){
     .then(function(b){ return new Promise(function(res,rej){ var fr=new FileReader(); fr.onload=function(){res(fr.result);}; fr.onerror=rej; fr.readAsDataURL(b); }); });
 }
 
+/* Skizze fuer die Mail auf eine feste Leinwand setzen.
+   Bisher wurde jede Skizze auf ihren eigenen Inhalt zugeschnitten: ein hochkantes
+   Balkontuer-Bild war schmal und hoch, ein flaches Fenster breit und niedrig. In der
+   Mail sass jede Position dadurch in einem anders hohen Kasten, und unter flachen
+   Skizzen klaffte ein Loch von mehreren hundert Pixeln.
+   Jetzt wird die zugeschnittene Zeichnung mittig in eine immer gleich grosse weisse
+   Flaeche gesetzt — vollstaendig, nie beschnitten. Alle Positionen sind gleich hoch,
+   und der weisse Grund gehoert zum Bild: er ueberlebt auch die Dunkelmodus-Umkehr
+   mancher Mailprogramme, die sonst eine leuchtende Flaeche daraus machen. */
+async function skizzeAufLeinwand(markup, breite, hoehe){
+  var png = await svgToPngDataURL(markup, breite);
+  return await new Promise(function(fertig, fehler){
+    var img = new Image();
+    img.onload = function(){
+      try{
+        var cv = document.createElement('canvas'); cv.width = breite; cv.height = hoehe;
+        var cx = cv.getContext('2d');
+        cx.fillStyle = '#fff'; cx.fillRect(0, 0, breite, hoehe);
+        var luft = Math.round(Math.min(breite, hoehe) * 0.05);
+        var mass = Math.min((breite - 2*luft) / img.naturalWidth, (hoehe - 2*luft) / img.naturalHeight);
+        var w = Math.round(img.naturalWidth * mass), h = Math.round(img.naturalHeight * mass);
+        cx.imageSmoothingEnabled = true; cx.imageSmoothingQuality = 'high';
+        cx.drawImage(img, Math.round((breite - w)/2), Math.round((hoehe - h)/2), w, h);
+        fertig(cv.toDataURL('image/png'));
+      }catch(e){ fehler(e); }
+    };
+    img.onerror = function(){ fehler(new Error('Skizze liess sich nicht laden')); };
+    img.src = png;
+  });
+}
 function _drawToPng(src,W,H){
   return new Promise(function(res,rej){
     var img=new Image();
@@ -5597,91 +5627,226 @@ function _mailRows(srowHtml,ohne){
   (ohne||[]).forEach(function(k){
     h=h.replace(new RegExp('<div class="srow"><span class="k">'+k+'<\\/span>[\\s\\S]*?<\\/span><\\/div>','g'),'');
   });
-  h=h
-    .replace(/class="dot" style="background:/g,'style="display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:middle;margin-right:6px;border:1px solid rgba(0,0,0,.15);background:')
-    .replace(/<div class="srow"><span class="k[^"]*">([\s\S]*?)<\/span><span class="v[^"]*">([\s\S]*?)<\/span><\/div>/g,
-      function(mm,k,v){ return '<tr><td style="padding:5px 14px 5px 0;color:#6b7280;font-size:13px;vertical-align:top;white-space:nowrap">'+k+'</td><td style="padding:5px 0;color:#111827;font-size:13px;font-weight:600;vertical-align:top">'+v+'</td></tr>'; });
-  return '<table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse">'+h+'</table>';
+  /* Farbmuster als Quadrat mit fester Randfarbe. Der Kreis mit halbtransparentem
+     Rand war bei Weiss auf Weiss unsichtbar und las sich wie ein kaputter
+     Aufzaehlungspunkt; ein Quadrat liest sich als Farbmuster. Als Tabelle gebaut,
+     weil Outlook Innenabstand auf inline-block-Elementen ignoriert. */
+  h=h.replace(/<span class="dot" style="background:([^"]*)"><\/span>/g,
+      '<table role="presentation" cellpadding="0" cellspacing="0" align="left" style="border-collapse:collapse;margin-right:7px"><tr>'
+      + '<td width="12" height="12" bgcolor="$1" style="width:12px;height:12px;background:$1;border:1px solid #c9ced6;font-size:0;line-height:0">&nbsp;</td></tr></table>');
+  h=h.replace(/class="dot" style="background:/g,'style="display:inline-block;width:11px;height:11px;vertical-align:middle;margin-right:6px;border:1px solid #c9ced6;background:');
+
+  var zeilen=[];
+  h.replace(/<div class="srow"><span class="k[^"]*">([\s\S]*?)<\/span><span class="v[^"]*">([\s\S]*?)<\/span><\/div>/g,
+    function(mm,k,v){ zeilen.push([k,v]); return ''; });
+
+  /* Angaben, die schon in der Kopfzeile der Position stehen, wuerden hier nur
+     doppelt erscheinen. Leere Werte werden nicht mit Gedankenstrich gezeigt —
+     das sah aus wie ein Datenfehler — sondern ausgeschrieben. */
+  var doppelt={'Anzahl':1,'System':1};
+  var Z=zeilen.filter(function(r){ return !doppelt[r[0].replace(/<[^>]*>/g,'').trim()]; })
+    .map(function(r){
+      var wert=r[1], nur=wert.replace(/<[^>]*>/g,'').replace(/\u00a0/g,' ').trim();
+      if(nur==='—' || nur==='-' || nur==='— keine —' || nur==='') wert='ohne';
+      return [r[0],wert];
+    });
+
+  var out='';
+  Z.forEach(function(r,i){
+    var linie = (i<Z.length-1) ? 'border-bottom:1px solid #f2f5f9;' : '';
+    out+='<tr>'
+      + '<td width="108" style="width:108px;'+linie+'padding:7px 12px 7px 0;vertical-align:top;'
+      + 'font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:16px;color:#5b6472;white-space:nowrap">'+r[0]+'</td>'
+      + '<td style="'+linie+'padding:7px 0;vertical-align:top;'
+      + 'font-family:Arial,Helvetica,sans-serif;font-size:13px;line-height:18px;font-weight:600;color:#131a24">'+r[1]+'</td></tr>';
+  });
+  return '<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse">'+out+'</table>';
 }
 
 // Eine Position in der Mail. Rangfolge bewusst: Maß und Anschlag zuerst und
 // hervorgehoben, danach erst die uebrige Ausstattung. Vorher standen alle Angaben
 // gleichrangig untereinander — die fertigungsentscheidenden gingen darin unter.
 function _posBlock(i,q,title,rowsTable,unit,line,cid,mass,ai){
-  /* Faellt die Skizze aus, stand hier vorher eine leere Spalte — die Position sah
-     dann aus, als fehle etwas. Jetzt kommt an dieselbe Stelle eine lesbare
-     Kurzbeschreibung, damit nie ein Loch entsteht. */
-  var sketch = cid
-    ? '<td width="262" valign="top" style="padding-right:22px"><div style="background:#f6f9fc;border:1px solid #e6eaf1;border-radius:12px;padding:14px"><img src="cid:'+cid+'" width="234" style="width:234px;max-width:100%;display:block" alt="Ma\u00dfskizze der Position ' + (i+1) + '"></div></td>'
-    : '<td width="262" valign="top" style="padding-right:22px"><div style="background:#f6f9fc;border:1px solid #e6eaf1;border-radius:12px;padding:16px;font-size:12.5px;line-height:1.55;color:#5b626b">'
-      + '<div style="font-weight:700;color:#14233f;margin-bottom:4px">' + esc(mass||'') + '</div>'
-      + esc(title||'') + (ai&&ai.satz ? '<br>'+esc(ai.satz) : '')
-      + '<div style="margin-top:8px;font-size:11.5px;color:#8b929b">Ma\u00dfskizze siehe Angebot</div></div></td>';
-  var priceLine = (line==null)
-    ? '<div style="margin-top:14px;font-size:17px;font-weight:800;color:#225eaa">Preis auf Anfrage</div>'
-    : '<div style="margin-top:14px"><div style="font-size:19px;font-weight:800;color:#111827">'+eur(line)+'</div>'+((unit!=null&&q>1)?'<div style="font-size:12px;color:#6b7280;margin-top:2px">'+eur(unit)+' / Stück</div>':'')+'</div>';
-  var massBlock = mass ? '<div style="font-size:21px;font-weight:800;color:#111827;letter-spacing:-.01em">'+mass+'</div>' : '';
-  // Gleiche Sprache wie im Konfigurator: EIN Satz, darunter die Bezugsseite als Marke.
-  // Ohne Symbol — die meisten Mailprogramme entfernen eingebettetes SVG.
-  var anschlagBlock = ai ? '<div style="margin:10px 0 14px">'+
-      '<div style="font-size:15px;color:#14233f;line-height:1.5;font-weight:600">'+esc(ai.satz)+'</div>'+
-      '<div style="display:inline-block;margin-top:7px;background:#eef4fc;border:1px solid #d5e3f6;border-radius:8px;'+
-        'padding:4px 10px;font-size:11.5px;font-weight:700;color:#1d4d8c">'+esc(ai.chip)+'</div>'+
-    '</div>' : '';
-  return '<div style="padding:22px 0;border-top:1px solid #edf1f6">'+
-    '<div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#9aa2ac">Position '+(i+1)+' · '+q+' ×</div>'+
-    '<div style="font-size:18px;font-weight:800;color:#111827;margin:3px 0 14px">'+title+'</div>'+
-    '<table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse"><tr>'+sketch+
-    '<td valign="top">'+massBlock+anschlagBlock+rowsTable+priceLine+'</td></tr></table></div>';
+  var AR='font-family:Arial,Helvetica,sans-serif;';   // Outlook erbt Schriften nicht in Tabellen
+  /* Aufbau in zwei Stufen: oben eine Kopfzeile ueber die volle Breite (Nummer,
+     Bezeichnung, Preis rechts), darunter Skizze links und alle Eigenschaften rechts.
+     Vorher lag die Skizze in einem eigenen Kasten neben der Datenspalte; weil die
+     Zeichnung flach war und die Liste lang, stand unter der Skizze ein Loch von
+     mehreren hundert Pixeln — die halbe Mailbreite leer. Der Preis steht jetzt oben
+     rechts, damit alle Positionspreise und die Endsumme auf einer Kante sitzen. */
+  var preisOben = (line==null)
+    ? '<div style="'+AR+'font-size:15px;line-height:22px;font-weight:700;color:#225eaa">auf Anfrage</div>'
+    : '<div style="'+AR+'font-size:20px;line-height:22px;font-weight:700;color:#131a24">'+eur(line)+'</div>'
+      + ((unit!=null&&q>1)?'<div style="'+AR+'font-size:12px;line-height:16px;color:#5b6472;padding-top:3px">'+eur(unit)+' / Stück</div>':'');
+
+  var kopf = '<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse"><tr>'
+    + '<td width="26" valign="top" style="width:26px">'
+      + '<table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr>'
+      + '<td width="26" height="26" align="center" bgcolor="#225eaa" style="width:26px;height:26px;background:#225eaa;border-radius:6px;'
+      + AR+'font-size:12px;line-height:26px;font-weight:700;color:#ffffff">'+(i+1)+'</td></tr></table></td>'
+    + '<td valign="top" style="padding:0 12px">'
+      + '<div style="'+AR+'font-size:17px;line-height:22px;font-weight:700;color:#131a24">'+title+'</div>'
+      + '<div style="'+AR+'font-size:12px;line-height:17px;color:#5b6472;padding-top:3px">'+q+' Stück'+(mass?' · '+esc(mass):'')+'</div></td>'
+    + '<td width="118" valign="top" align="right" style="width:118px">'+preisOben+'</td>'
+    + '</tr></table>';
+
+  /* Die Skizze steht ohne Kasten auf der Seite: sie ist selbst schon eine Zeichnung
+     mit Rahmen, ein zweiter Rahmen drumherum liess sie wie ein Vorschaubildchen in
+     einer Galerie wirken. Feste Groesse 264 x 320, weil jede Skizze auf dieselbe
+     Leinwand gerendert wird — dadurch stehen alle Positionen im gleichen Takt und
+     bei blockierten Bildern bricht das Layout nicht zusammen. */
+  var skizze = cid
+    ? '<img class="skizze" src="cid:'+cid+'" width="264" height="320" alt="'+esc('Skizze Position '+(i+1)+' — '+(mass||''))+'"'
+      + ' style="width:264px;height:320px;max-width:100%;display:block;border:0;outline:none;'
+      + AR+'font-size:12px;line-height:17px;font-weight:600;color:#5b6472">'
+    : '<table role="presentation" cellpadding="0" cellspacing="0" style="width:264px;height:320px;border-collapse:collapse;background:#f5f7fa;border:1px solid #e4e9f0"><tr>'
+      + '<td align="center" valign="middle" style="'+AR+'font-size:12.5px;line-height:18px;color:#5b6472;padding:16px">'
+      + '<div style="font-weight:700;color:#131a24;padding-bottom:4px">'+esc(mass||'')+'</div>'+esc(title||'')
+      + '<div style="padding-top:8px;font-size:11.5px;color:#8b929b">Maßskizze im Angebot</div></td></tr></table>';
+
+  var chip = (ai&&ai.chip) ? '<table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr>'
+      + '<td bgcolor="#eef4fc" style="background:#eef4fc;border:1px solid #d5e3f6;border-radius:6px;padding:5px 10px;'
+      + AR+'font-size:11px;line-height:15px;font-weight:700;color:#1d4d8c">'+esc(ai.chip)+'</td></tr></table>'
+      + '<div style="height:10px;line-height:10px;font-size:0">&nbsp;</div>' : '';
+
+  var daten = '<div style="'+AR+'font-size:20px;line-height:24px;font-weight:700;color:#131a24;letter-spacing:-.01em">'+esc(mass||'')+'</div>'
+    + '<div style="height:8px;line-height:8px;font-size:0">&nbsp;</div>'
+    + chip
+    + (ai&&ai.satz ? '<div style="'+AR+'font-size:13px;line-height:19px;color:#4b5563;padding-top:2px">'+esc(ai.satz)+'</div>' : '')
+    + '<div style="height:14px;line-height:14px;font-size:0">&nbsp;</div>'
+    + '<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse"><tr>'
+      + '<td height="1" bgcolor="#e6eaf1" style="height:1px;line-height:1px;font-size:0;background:#e6eaf1">&nbsp;</td></tr></table>'
+    + '<div style="height:10px;line-height:10px;font-size:0">&nbsp;</div>'
+    + rowsTable;
+
+  return '<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse">'
+    + '<tr><td height="1" bgcolor="#e9edf3" style="height:1px;line-height:1px;font-size:0;background:#e9edf3">&nbsp;</td></tr>'
+    + '<tr><td style="padding:26px 0 0">'+kopf+'</td></tr>'
+    + '<tr><td style="padding:18px 0 26px">'
+      + '<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse"><tr>'
+      + '<td class="stapel" width="264" valign="top" style="width:264px">'+skizze+'</td>'
+      + '<td class="luecke" width="24" style="width:24px;font-size:0;line-height:0">&nbsp;</td>'
+      + '<td class="stapel" valign="top">'+daten+'</td>'
+      + '</tr></table></td></tr></table>';
 }
+
 function _mailTotals(t){
+  var AR='font-family:Arial,Helvetica,sans-serif;';
   var shipTxt=(liefer==='abholung')?'kostenlos':(t.ship?eur(t.ship):'kostenfrei');
-  return '<table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;border-top:2px solid #eef1f5;margin-top:4px">'+
-    '<tr><td style="padding:7px 0 3px;color:#6b7280;font-size:13px">Zwischensumme ('+t.qty+')</td><td align="right" style="padding:7px 0 3px;font-size:13px;font-weight:600">'+(totalOffen(t)?'auf Anfrage':eur(t.sub))+'</td></tr>'+
-    '<tr><td style="padding:2px 0;color:#6b7280;font-size:13px">'+(liefer==='abholung'?'Abholung im Lager':'Lieferung')+'</td><td align="right" style="padding:2px 0;font-size:13px;font-weight:600">'+shipTxt+'</td></tr>'+
-    '<tr><td style="padding:8px 0 2px;font-size:15px;font-weight:800">Gesamt</td><td align="right" style="padding:8px 0 2px;font-size:15px;font-weight:800">'+totalText(t)+'</td></tr>'+
-    '<tr><td colspan="2" style="color:#9aa2ac;font-size:11.5px;padding-top:3px">inkl. 19 % MwSt ('+eur(t.mwst)+') · unverbindlicher Richtpreis · kein Kaufvertrag</td></tr></table>';
+  /* Der Summenblock schloss vorher 4 px unter der letzten Position an — enger als der
+     Abstand zwischen zwei Positionen, er las sich wie eine weitere Position. Jetzt
+     Luft davor, eine kraeftige Linie in Hausfarbe als Schlusszeichen, und die Endsumme
+     ist die groesste Zahl der Mail. Vorher war sie mit 15 px die kleinste. */
+  var zeile=function(k,v){ return '<tr>'
+    + '<td style="padding:6px 0;'+AR+'font-size:13px;line-height:18px;color:#5b6472">'+k+'</td>'
+    + '<td align="right" style="padding:6px 0;'+AR+'font-size:14px;line-height:18px;font-weight:600;color:#131a24">'+v+'</td></tr>'; };
+  return '<div style="height:24px;line-height:24px;font-size:0">&nbsp;</div>'
+    + '<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse">'
+    + '<tr><td height="2" bgcolor="#225eaa" colspan="2" style="height:2px;line-height:2px;font-size:0;background:#225eaa">&nbsp;</td></tr>'
+    + '<tr><td colspan="2" style="height:12px;line-height:12px;font-size:0">&nbsp;</td></tr>'
+    + zeile('Zwischensumme ('+t.qty+(t.qty===1?' Stück':' Stück')+')', (totalOffen(t)?'auf Anfrage':eur(t.sub)))
+    + zeile((liefer==='abholung'?'Abholung im Lager':'Lieferung'), shipTxt)
+    + '<tr><td colspan="2" style="padding:10px 0 0"><table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse">'
+      + '<tr><td height="1" bgcolor="#e6eaf1" style="height:1px;line-height:1px;font-size:0;background:#e6eaf1">&nbsp;</td></tr></table></td></tr>'
+    + '<tr><td style="padding:12px 0 0;'+AR+'font-size:15px;line-height:26px;font-weight:700;color:#131a24">Gesamt</td>'
+      + '<td align="right" style="padding:12px 0 0;'+AR+'font-size:24px;line-height:26px;font-weight:700;color:#131a24">'+totalText(t)+'</td></tr>'
+    + '<tr><td colspan="2" style="padding:6px 0 0;'+AR+'font-size:12px;line-height:17px;color:#5b6472">inkl. 19 % MwSt. ('+eur(t.mwst)+')</td></tr>'
+    + '<tr><td colspan="2" style="padding:2px 0 0;'+AR+'font-size:12px;line-height:17px;color:#5b6472">Unverbindlicher Richtpreis — dies ist kein Kaufvertrag.</td></tr>'
+    + '</table>';
 }
 
 // Kopf der internen Mail: was man beim Ueberfliegen im Posteingang braucht —
 // Vorgangsnummer, Eingangszeit, Umfang, Summe. Stand vorher nirgends zusammen.
 function _mailKopf(nr,t){
+  var AR='font-family:Arial,Helvetica,sans-serif;';
   var d=new Date(), pad=function(n){return String(n).padStart(2,'0');};
   var wann=pad(d.getDate())+'.'+pad(d.getMonth()+1)+'.'+d.getFullYear()+' um '+pad(d.getHours())+':'+pad(d.getMinutes())+' Uhr';
-  var zelle=function(k,v){ return '<td style="padding:0 18px 0 0;vertical-align:top">'+
-    '<div style="font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:#9aa2ac;font-weight:700">'+k+'</div>'+
-    '<div style="font-size:14px;font-weight:800;color:#111827;margin-top:2px;white-space:nowrap">'+v+'</div></td>'; };
-  return '<table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;background:#f3f8ff;border:1px solid #d8e6fa;border-radius:12px;margin:0 0 16px">'+
-    '<tr><td style="padding:13px 15px"><table cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr>'+
-      zelle('Anfrage-Nr.',esc(nr))+
-      zelle('Umfang',cart.length+(cart.length===1?' Position':' Positionen')+(t.qty>cart.length?' · '+t.qty+' Stück':''))+
-      zelle('Summe',eur(t.total))+
-    '</tr></table>'+
-    '<div style="font-size:11.5px;color:#6b7280;margin-top:8px">Eingegangen am '+wann+' über den Konfigurator</div>'+
-    '</td></tr></table>';
+  /* Zwei Angaben statt vier: Vorgangsnummer und Summe. Der Umfang steht ohnehin in
+     der Zwischensumme, die Uhrzeit gehoert unter die Ueberschrift. Feste Breiten
+     statt nicht umbrechender Zellen — drei nowrap-Zellen erzwangen auf dem Handy
+     seitliches Schieben. */
+  var zelle=function(k,v,br){ return '<td width="'+br+'" valign="top" style="width:'+br+'px;padding:0 16px 0 0">'
+    + '<div style="'+AR+'font-size:11px;line-height:15px;color:#5b6472;font-weight:700">'+k+'</div>'
+    + '<div style="'+AR+'font-size:15px;line-height:20px;font-weight:700;color:#131a24;padding-top:3px">'+v+'</div></td>'; };
+  return '<div style="'+AR+'font-size:22px;line-height:28px;font-weight:700;color:#131a24">Neue Anfrage aus dem Konfigurator</div>'
+    + '<div style="'+AR+'font-size:13px;line-height:19px;color:#5b6472;padding-top:5px">Eingegangen am '+wann+'</div>'
+    + '<div style="height:18px;line-height:18px;font-size:0">&nbsp;</div>'
+    + '<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;background:#f3f8ff;border:1px solid #d8e6fa;border-radius:10px">'
+    + '<tr><td style="padding:14px 16px"><table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr>'
+    + zelle('Anfrage-Nr.',esc(nr),200) + zelle('Summe',eur(t.total),160)
+    + '</tr></table></td></tr></table>'
+    + '<div style="height:18px;line-height:18px;font-size:0">&nbsp;</div>';
 }
 function _kundeBox(name,email,tel,adr,msg){
-  var row=function(k,v,link){ if(!v) return '';
-    var wert=link?('<a href="'+link+'" style="color:#225eaa;text-decoration:none">'+esc(v)+'</a>'):esc(v);
-    return '<tr><td style="padding:3px 14px 3px 0;color:#6b7280;font-size:13px;white-space:nowrap;vertical-align:top">'+k+'</td>'+
-      '<td style="padding:3px 0;font-size:13px;font-weight:600;color:#111827">'+wert+'</td></tr>'; };
-  return '<div style="background:#f6f9fc;border:1px solid #e6eaf1;border-radius:10px;padding:12px 14px;margin:0 0 18px">'+
-    '<div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#9aa2ac;margin-bottom:5px">Kundendaten</div>'+
-    '<table cellpadding="0" cellspacing="0" style="border-collapse:collapse">'+row('Name',name)+
-      row('E-Mail',email,email?'mailto:'+email:'')+
-      row('Telefon',tel,tel?'tel:'+String(tel).replace(/[^\d+]/g,''):'')+
-      row('Abholung/Lieferung',adr)+(msg?row('Nachricht',msg):'')+'</table></div>';
+  var AR='font-family:Arial,Helvetica,sans-serif;';
+  /* Fuer den Innendienst ist die wichtigste Frage: wer ruft an und unter welcher
+     Nummer erreiche ich ihn. Telefon und E-Mail sind deshalb Schaltflaechen — ein
+     Tipp auf dem Handy genuegt. Die freie Nachricht steht als eigener Block, nicht
+     als Tabellenzeile neben einem nicht umbrechenden Label. */
+  var knopf=function(text,ziel){ return ziel ? '<table role="presentation" cellpadding="0" cellspacing="0" align="left" style="border-collapse:collapse;margin:0 8px 0 0"><tr>'
+    + '<td bgcolor="#225eaa" style="background:#225eaa;border-radius:8px;padding:11px 18px">'
+    + '<a href="'+ziel+'" style="'+AR+'font-size:13px;line-height:16px;font-weight:700;color:#ffffff;text-decoration:none">'+esc(text)+'</a>'
+    + '</td></tr></table>' : ''; };
+  var zeile=function(k,v){ if(!v) return '';
+    return '<tr><td width="120" style="width:120px;padding:4px 14px 4px 0;vertical-align:top;'+AR+'font-size:12px;line-height:17px;color:#5b6472;white-space:nowrap">'+k+'</td>'
+      + '<td style="padding:4px 0;'+AR+'font-size:13px;line-height:18px;font-weight:600;color:#131a24">'+esc(v)+'</td></tr>'; };
+  return '<div style="'+AR+'font-size:12px;line-height:16px;font-weight:700;color:#5b6472">Kundendaten</div>'
+    + '<div style="height:8px;line-height:8px;font-size:0">&nbsp;</div>'
+    + '<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse">'
+    + zeile('Name',name) + zeile('E-Mail',email) + zeile('Telefon',tel) + zeile('Abholung/Lieferung',adr) + '</table>'
+    + ((tel||email) ? '<div style="height:12px;line-height:12px;font-size:0">&nbsp;</div>'
+        + knopf('Anrufen', tel?('tel:'+String(tel).replace(/[^\d+]/g,'')):'')
+        + knopf('Antworten', email?('mailto:'+email):'')
+        + '<div style="clear:both;height:0;line-height:0;font-size:0">&nbsp;</div>' : '')
+    + (msg ? '<div style="height:14px;line-height:14px;font-size:0">&nbsp;</div>'
+        + '<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;background:#f6f9fc"><tr>'
+        + '<td style="padding:12px 14px;border-left:4px solid #225eaa;'+AR+'font-size:13px;line-height:19px;color:#374151">'
+        + '<span style="color:#5b6472">Nachricht: </span>'+esc(msg)+'</td></tr></table>' : '')
+    + '<div style="height:22px;line-height:22px;font-size:0">&nbsp;</div>';
 }
 
-function _mailShell(inner){
-  return '<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>'+
-    '<body style="margin:0;padding:0;background:#eef2f7;font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;color:#111827">'+
-    '<table width="100%" cellpadding="0" cellspacing="0" style="background:#eef2f7;padding:24px 0"><tr><td align="center">'+
-    '<table width="640" cellpadding="0" cellspacing="0" style="max-width:640px;width:100%;background:#fff;border:1px solid #e6eaf1;border-radius:16px">'+
-    '<tr><td style="padding:30px 34px">'+
-    '<div style="font-size:16px;font-weight:800;color:#225eaa">Deine<span style="color:#111827">Fenster</span>.de</div>'+
-    '<div style="font-size:14px;font-weight:700;margin:12px 0 16px">Neue Konfigurator-Anfrage</div>'+
-    inner+'</td></tr></table></td></tr></table></body></html>';
+function _mailShell(inner,vorschau){
+  var AR='font-family:Arial,Helvetica,sans-serif;';
+  /* Geruest nach den Regeln, die Mailprogramme 2026 wirklich einhalten: Tabellen statt
+     Bloecke, Abstaende ueber Zellen statt margin, feste Breite statt max-width (die
+     Word-Engine in Outlook ignoriert max-width), Schriftfamilie an jeder Textzelle
+     (Outlook vererbt sie nicht) und ein sichtbarer Hintergrund per bgcolor, damit der
+     Dunkelmodus die Karte nicht willkuerlich einfaerbt. Die Vorschauzeile bestimmt,
+     was im Posteingang neben dem Betreff steht. */
+  return '<!DOCTYPE html><html lang="de" xmlns:o="urn:schemas-microsoft-com:office:office"><head>'
+    + '<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+    + '<meta name="x-apple-disable-message-reformatting">'
+    + '<meta name="format-detection" content="telephone=no,date=no,address=no,email=no">'
+    + '<meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light">'
+    + '<title>Neue Anfrage — DeineFenster.de</title>'
+    + '<!--[if mso]><noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>'
+    + '<style>*{font-family:Arial,Helvetica,sans-serif !important}table,td{border-collapse:collapse}</style><![endif]-->'
+    + '<style>body,table,td,a{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%}'
+    + 'table,td{mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse}'
+    + 'img{-ms-interpolation-mode:bicubic;border:0;outline:none;text-decoration:none}'
+    + '@media only screen and (max-width:620px){.px{padding-left:18px !important;padding-right:18px !important}'
+    + '.stapel{display:block !important;width:100% !important}.luecke{display:none !important}'
+    + '.skizze{width:100% !important;height:auto !important;max-width:264px !important;margin:0 auto !important}}'
+    + '</style></head>'
+    + '<body style="margin:0;padding:0;background:#eef2f7;'+AR+'color:#131a24">'
+    + '<div style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden">'+esc(vorschau||'')+'</div>'
+    + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#eef2f7" style="background:#eef2f7"><tr>'
+    + '<td align="center" style="padding:24px 12px">'
+    + '<table role="presentation" width="640" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="width:640px;max-width:640px;background:#ffffff;border:1px solid #e6eaf1;border-radius:14px">'
+    + '<tr><td class="px" style="padding:28px 32px 0">'
+      + '<div style="'+AR+'font-size:20px;line-height:26px;font-weight:700;color:#225eaa">Deine<span style="color:#131a24">Fenster</span>.de</div>'
+      + '<div style="height:18px;line-height:18px;font-size:0">&nbsp;</div>'
+      + '<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse"><tr>'
+      + '<td height="1" bgcolor="#e9edf3" style="height:1px;line-height:1px;font-size:0;background:#e9edf3">&nbsp;</td></tr></table>'
+      + '<div style="height:22px;line-height:22px;font-size:0">&nbsp;</div>'
+    + '</td></tr>'
+    + '<tr><td class="px" style="padding:0 32px 30px">'+inner+'</td></tr>'
+    + '<tr><td class="px" bgcolor="#f6f9fc" style="background:#f6f9fc;padding:20px 32px;border-top:1px solid #e9edf3;border-radius:0 0 14px 14px;'
+      + AR+'font-size:12px;line-height:19px;color:#5b6472">'
+      + 'Fensterhandel Christ · Fohrder Landstraße 13 · 14776 Brandenburg an der Havel<br>'
+      + 'Telefon 03381 / 2148373 · info@baustoffchrist.de · USt-IdNr. DE169107776'
+    + '</td></tr>'
+    + '</table></td></tr></table></body></html>';
 }
 
 // Alle fehlenden Pflichtfelder auf einmal melden und markieren. Vorher liefen die
@@ -5735,7 +5900,7 @@ async function submitAnfrage(ev){
       let title=withConf(conf,configTitle);
       let ai=withConf(conf,anschlagInfo);
       let mass=conf.w+' × '+conf.h+' mm';
-      let rowsTable=_mailRows(withConf(conf,summaryRows),['Maße',ai.label]);
+      let rowsTable=_mailRows(withConf(conf,summaryRows),['Maße',ai.label]);   // Maß und Anschlag stehen bereits gross im Kopf
       let cid='pos'+i, hasSketch=false;
       try{
         /* Zweiter Versuch bei Fehlschlag. Die Umwandlung laeuft ueber ein Bild-Objekt
@@ -5746,7 +5911,7 @@ async function submitAnfrage(ev){
         let svg=skizzeKompakt(conf), png=null;
         for(let versuch=0; versuch<2 && !hasSketch; versuch++){
           try{
-            png=await svgToPngDataURL(svg,880);
+            png=await skizzeAufLeinwand(svg, 528, 640);   // 264 x 320 in der Mail, doppelt aufgeloest
             if(png && png.indexOf('base64,')>0){
               sketches.push({filename:'skizze-pos'+(i+1)+'.png', content:png.split('base64,')[1], content_id:cid});
               hasSketch=true;
@@ -5778,7 +5943,8 @@ async function submitAnfrage(ev){
     if(skizzeFehler.length){ L.push(''); L.push('HINWEIS an uns: Skizze fehlgeschlagen -> '+skizzeFehler.join(' | ')); }
 
     var totalsHtml=_mailTotals(t);
-    var internHtml=_mailShell(_mailKopf(nr,t)+_kundeBox(name,email,tel,adr,msg)+posHtml+totalsHtml);
+    var vorschau=cart.length+(cart.length===1?' Position':' Positionen')+' · '+(totalOffen(t)?'Preis auf Anfrage':eur(t.total))+' · '+name+(tel?' · '+tel:'');
+    var internHtml=_mailShell(_mailKopf(nr,t)+_kundeBox(name,email,tel,adr,msg)+posHtml+totalsHtml, vorschau);
     var detailsHtml=posHtml+totalsHtml;
     var prodName=cart.length?withConf(cart[0].conf,configTitle):'Konfiguration';
 
