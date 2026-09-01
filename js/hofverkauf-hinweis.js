@@ -12,8 +12,16 @@
   /* Nicht ueber Konfigurator, Warenkorb oder Anfrage legen. Dort ist der Kunde mitten in
      der Kaufentscheidung; das Fenster verdeckt die Auswahl und schluckt Klicks auf die
      Auswahlkacheln — es sah dann so aus, als reagiere der Konfigurator nicht mehr. */
-  var OHNE_HINWEIS = /\/(konfigurator|warenkorb|anfrage)\.html$/;
-  if (OHNE_HINWEIS.test(location.pathname)) return;
+  /* Der Pfad wird zuerst normalisiert. Vorher stand hier nur ein Test auf
+     "konfigurator.html" - der Webserver liefert dieselbe Seite aber auch unter
+     "/konfigurator" und "/konfigurator/" aus, und dort erschien der Hinweis dann
+     doch ueber dem Konfigurator (nachgewiesen am 01.09.2026 im Browser). */
+  var pfad = location.pathname
+    .replace(/\/index\.html$/, '/')
+    .replace(/\.html$/, '')
+    .replace(/\/+$/, '');
+  var OHNE_HINWEIS = /(^|\/)(konfigurator|warenkorb|anfrage)$/;
+  if (OHNE_HINWEIS.test(pfad)) return;
 
   var KEY        = 'dfHofHinweis_2026_09';
   var CONSENT    = 'df_cookie_consent';
@@ -100,19 +108,15 @@
     w.id = 'df-hofhinweis';
     var z = zusatz();
     w.innerHTML =
-      '<div class="dfh-schleier" data-schliessen="1"></div>' +
-      '<div class="dfh-box" role="dialog" aria-modal="true" aria-labelledby="dfh-titel" tabindex="-1">' +
+      '<div class="dfh-karte" role="status" aria-labelledby="dfh-titel">' +
         '<button type="button" class="dfh-zu" data-schliessen="1" aria-label="Hinweis schlie&szlig;en">&times;</button>' +
         '<p class="dfh-eyebrow">Hofverkauf Brandenburg</p>' +
         '<h2 class="dfh-titel" id="dfh-titel">' + titel() + '</h2>' +
         '<div class="dfh-zeiten">' + zeilen() + '</div>' +
-        '<p class="dfh-adresse"><b>Fohrder Landstra&szlig;e 13</b><br>14772 Brandenburg an der Havel</p>' +
+        '<p class="dfh-adresse"><b>Fohrder Landstra&szlig;e 13</b> &middot; 14772 Brandenburg an der Havel</p>' +
         (z ? '<p class="dfh-befristung">' + z + '</p>' : '') +
-        '<div class="dfh-knoepfe">' +
-          '<a class="dfh-primaer" href="https://www.google.com/maps?cid=9402028850820563054" ' +
-             'target="_blank" rel="noopener">Route berechnen &rarr;</a>' +
-          '<button type="button" class="dfh-sekundaer" data-schliessen="1">Sp&auml;ter</button>' +
-        '</div>' +
+        '<a class="dfh-route" href="https://www.google.com/maps?cid=9402028850820563054" ' +
+           'target="_blank" rel="noopener">Route ansehen &rarr;</a>' +
       '</div>';
     return w;
   }
@@ -120,37 +124,26 @@
   function zeige() {
     if (gesehen() || document.getElementById('df-hofhinweis')) return;
 
-    var vorher = document.activeElement;
     var w = baue();
     document.body.appendChild(w);
     requestAnimationFrame(function () { w.classList.add('offen'); });
 
-    var box = w.querySelector('.dfh-box');
-    if (box) box.focus();
-
+    /* Bewusst ohne Fokuswechsel und ohne aria-modal: der Hinweis liegt neben dem
+       Inhalt, nicht darueber. Wer gerade liest oder tippt, wird nicht unterbrochen. */
     function schliesse() {
       merken();
       w.classList.remove('offen');
       document.removeEventListener('keydown', taste);
       setTimeout(function () {
         if (w.parentNode) w.parentNode.removeChild(w);
-        if (vorher && vorher.focus) { try { vorher.focus(); } catch (e) {} }
-      }, 300);
+      }, 260);
     }
-    function taste(e) {
-      if (e.key === 'Escape') { schliesse(); return; }
-      if (e.key !== 'Tab') return;
-      var z = box.querySelectorAll('a[href], button');
-      if (!z.length) return;
-      var a = z[0], b = z[z.length - 1];
-      if (e.shiftKey && document.activeElement === a) { e.preventDefault(); b.focus(); }
-      else if (!e.shiftKey && document.activeElement === b) { e.preventDefault(); a.focus(); }
-    }
+    function taste(e) { if (e.key === 'Escape') schliesse(); }
 
     w.addEventListener('click', function (e) {
       if (e.target.closest('[data-schliessen]')) schliesse();
     });
-    var route = w.querySelector('.dfh-primaer');
+    var route = w.querySelector('.dfh-route');
     if (route) route.addEventListener('click', merken);
     document.addEventListener('keydown', taste);
   }
