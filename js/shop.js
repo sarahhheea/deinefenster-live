@@ -257,7 +257,49 @@ function kategorieZuGruppe(kat) {
   // Einstell-Formular speichert den Schlüssel 'garagentor' — Shop-Hauptgruppe heißt aber 'garagentor-gebraucht'. Beide akzeptieren.
   if (kat === 'garagentor' || kat === 'garagentor-gebraucht') return 'garagentor-gebraucht';
   if (['daemmung','baumaterialien'].includes(kat)) return kat;
+  // Freitext-Schluessel aus dem Einstell-Formular (z.B. "Wohnungstuer", "Blumenfenster"):
+  // ueber die Wort-Erkennung retten, statt das Inserat aus allen Kategorie-Filtern fallen zu lassen.
+  return gruppeAusText(kat);
+}
+
+/* ─── Produktwort → Hauptgruppe (Inhaberin-Wunsch 31.08.2026) ──────────────
+   Bisher entschied AUSSCHLIESSLICH der Kategorie-Schluessel, in welchem Filter
+   ein Inserat auftaucht. Wird der beim Einstellen vergessen, falsch gesetzt
+   oder frei getippt, verschwindet das Inserat aus jedem Kategorie-Filter —
+   der Kunde findet es dann nur noch ueber die Suche. Hier wird die
+   Produktbezeichnung selbst als zweite Quelle gelesen: steht "Haustuer" drin,
+   gehoert das Inserat in den Haustuer-Filter. Rein additiv — eine bestehende
+   Zuordnung wird nie entfernt, nur ergaenzt.
+   Wortgrenze am Ende (mit Plural/Fugen-Formen), damit z.B. "Fensterbank"
+   nicht als Fenster durchgeht. */
+const GRUPPEN_WORTE = [
+  [/haus\s*-?\s*t(ü|ue)r(en)?\b/i,                                  'haustuer'],
+  [/(wohnungs|eingangs|nebeneingangs|neben)\s*-?\s*t(ü|ue)r(en)?\b/i, 'haustuer'],
+  [/(balkon|terrassen)\s*-?\s*t(ü|ue)r(en)?\b/i,                     'balkontuer'],
+  [/balkonelement(e)?\b/i,                                           'balkontuer'],
+  [/(schiebe\s*-?\s*t(ü|ue)r(en)?|hebe\s*-?schiebe|\bpsk\b|\bhst\b)/i, 'schiebetuer'],
+  [/(dach\s*-?fenster|dachflächenfenster|\bvelux\b|\broto\b)/i,      'dachfenster'],
+  [/garagen\s*-?tor(e)?\b/i,                                         'garagentor-gebraucht'],
+  [/holz\s*-?fenster\b/i,                                            'holzfenster'],
+  [/(keller|rund|rundbogen|stichbogen|dreiecks|blumen|giebel)\s*-?fenster\b/i, 'fenster'],
+  [/festverglasung|festelement(e)?\b/i,                              'fenster']
+];
+function gruppeAusText(txt) {
+  const t = String(txt || '');
+  if (!t) return '';
+  for (const [rx, g] of GRUPPEN_WORTE) if (rx.test(t)) return g;
   return '';
+}
+
+/* ─── Alle Hauptgruppen eines Produkts — EINE Quelle fuer Filter, Kategorie-
+       Leiste und Sidebar-Zaehler, damit die drei nie auseinanderlaufen.
+       Quelle 1: gesetzte Kategorie-Schluessel. Quelle 2: die Produktbezeichnung. */
+function gruppenVonProdukt(p) {
+  const g = new Set();
+  _asArr(p.kategorie_keys).forEach(k => { const x = kategorieZuGruppe(k); if (x) g.add(x); });
+  if (!g.size) { const x = kategorieZuGruppe(p.kategorie || p.kategorie_key); if (x) g.add(x); }
+  GRUPPEN_WORTE.forEach(([rx, gr]) => { if (rx.test(String(p.titel || ''))) g.add(gr); });
+  return g;
 }
 
 /* ─── Öffnungsrichtung „nach außen" (Inhaberin-Wunsch 29.07.2026) ──────────
@@ -276,7 +318,13 @@ const RE_AUSSEN_TEXT = /nach\s*au(ss|ß)en\s*(auf|öffn|oeffn|aufgeh)/i;
 function istFreitextAussen(v) {
   return typeof v === 'string' && v !== TAG_AUSSEN && RE_AUSSEN_TAG.test(v);
 }
+// Beim Einstellen kann der Haken „nach außen" gesetzt sein, obwohl der Titel
+// „nach innen öffnend" sagt (kam im Bestand vor). Der Titel ist das, was der Kunde
+// liest — bei Widerspruch gewinnt er, sonst zeigt die Karte „innen" und der Filter
+// sortiert die Tür unter „außen" ein.
+const RE_INNEN_TEXT = /nach\s*innen\s*(auf|öffn|oeffn|aufgeh)/i;
 function istNachAussenOeffnend(p) {
+  if (RE_INNEN_TEXT.test(String(p.titel || ''))) return false;
   const baseEig = Array.isArray(p.eigenschaften) ? p.eigenschaften : [];
   if (baseEig.includes(TAG_AUSSEN)) return true;
   if (baseEig.some(istFreitextAussen)) return true;
@@ -286,7 +334,12 @@ function istNachAussenOeffnend(p) {
 }
 /* Eigenschaften-Liste eines Produkts: Frei-Text-Varianten raus, Bauart- + Richtungs-Tag rein */
 function baueEigenschaften(p, kat) {
-  const base = (Array.isArray(p.eigenschaften) ? p.eigenschaften : []).filter(e => !istFreitextAussen(e));
+  // Bei „nach innen" im Titel muss auch der gesetzte Haken weg — sonst zieht das
+  // Inserat weiterhin im Filter „nach aussen oeffnend" mit.
+  const titelSagtInnen = RE_INNEN_TEXT.test(String(p.titel || ''));
+  const base = (Array.isArray(p.eigenschaften) ? p.eigenschaften : [])
+    .filter(e => !istFreitextAussen(e))
+    .filter(e => !(titelSagtInnen && e === TAG_AUSSEN));
   const bauart = deriveBauartTags(kat).filter(t => !base.includes(t));
   const richtung = (istNachAussenOeffnend(p) && !base.includes(TAG_AUSSEN)) ? [TAG_AUSSEN] : [];
   return [...base, ...bauart, ...richtung];
@@ -476,7 +529,7 @@ const KAT_BILD = {
 function baueKatLeiste() {
   const wrap = document.getElementById('katLeiste');
   if (!wrap) return;
-  const ZAEHL_BASIS = STATE.produkte.filter(p => !(p.eigenschaften || []).includes(TAG_AUSSEN));
+  const ZAEHL_BASIS = zaehlBasis();
   const ORDER = ['fenster', 'holzfenster', 'dachfenster', 'balkontuer', 'haustuer',
                  'schiebetuer', 'daemmung', 'baumaterialien', 'garagentor-gebraucht'];
   const aktive = STATE.filter.kategorien;
@@ -492,7 +545,7 @@ function baueKatLeiste() {
       <span class="kat-num">${ZAEHL_BASIS.length}</span>
     </button>`];
   ORDER.filter(k => STATE.kategorien[k]).forEach(k => {
-    const n = ZAEHL_BASIS.filter(p => _asArr(p.kategorie_keys).some(x => kategorieZuGruppe(x) === k)).length;
+    const n = ZAEHL_BASIS.filter(p => gruppenVonProdukt(p).has(k)).length;
     if (!n) return;
     chips.push(`
       <button type="button" class="kat-chip${aktive.has(k) ? ' on' : ''}" data-kat="${k}">
@@ -551,7 +604,7 @@ function baueZustandChips() {
   const wrap = document.getElementById('zustandChips');
   if (!wrap) return;
   const aktiv = STATE.filter.zustand;
-  const basis = (STATE.produkte || []).filter(p => !(p.eigenschaften || []).includes(TAG_AUSSEN));
+  const basis = zaehlBasis();
   wrap.innerHTML = ZUSTAND_CHIPS.map(c => {
     const n = c.wert
       ? basis.filter(p => _asArr(p.zustand).includes(c.wert)).length
@@ -582,12 +635,12 @@ function baueFilterSidebar() {
   // Zähler-Basis OHNE die nach außen öffnenden Artikel — die sind standardmäßig ausgeblendet,
   // also darf „Balkontüren 40" nicht mehr versprechen als die Liste danach zeigt.
   // Einzige Ausnahme: der Zähler des Filters „Nach außen öffnend" selbst (s. eigCount).
-  const ZAEHL_BASIS = STATE.produkte.filter(p => !(p.eigenschaften || []).includes(TAG_AUSSEN));
+  const ZAEHL_BASIS = zaehlBasis();
   // Reihenfolge der Hauptgruppen (interner Hinweis.05.2026: Untertypen wandern zu Eigenschaften)
   const katWrap = document.getElementById('filterKategorien');
   const ORDER = ['fenster', 'holzfenster', 'dachfenster', 'balkontuer', 'haustuer', 'schiebetuer', 'daemmung', 'baumaterialien', 'garagentor-gebraucht'];
   const renderItem = (key, label) => {
-    const count = ZAEHL_BASIS.filter(p => _asArr(p.kategorie_keys).some(k => kategorieZuGruppe(k) === key)).length;
+    const count = ZAEHL_BASIS.filter(p => gruppenVonProdukt(p).has(key)).length;
     return `
       <label class="filter-option">
         <span class="flex items-center gap-2"><input type="checkbox" class="check filter-kategorie" value="${key}"/><span>${escapeHtml(label)}</span></span>
@@ -966,13 +1019,36 @@ function massDiffHTML(m, p) {
 function zeigeAussenOeffnend() {
   const f = STATE.filter;
   if (f.eigenschaften.has(TAG_AUSSEN)) return true;
-  return !!f.suche && RE_AUSSEN_TAG.test(f.suche);
+  if (!f.suche) return false;
+  // Suchtext ueber dieselbe Normalisierung wie die Volltextsuche, damit auch
+  // „aussen oeffnend" und „oeffnet nach aussen" die Ware sichtbar machen.
+  const q = typeof normSuche === 'function' ? normSuche(f.suche) : String(f.suche).toLowerCase();
+  return /au(ss|ß)en/.test(q) || RE_AUSSEN_TAG.test(f.suche);
 }
 /* Suchtext ohne Maß-Angabe (die deckt der Maß-Filter ab) — gleiche Aufbereitung wie unten in der Suche */
 function sucheReinText() {
   const s = STATE.filter.suche;
   return s ? s.replace(/\d{3,4}\s*[x×*]\s*\d{3,4}/i, '').trim().toLowerCase() : '';
 }
+/* ─── Wo das Ausblenden gilt (Inhaberin-Wunsch 31.08.2026) ─────────────────
+   Nach außen öffnende Artikel wurden bisher pauschal ausgeblendet. Bei Fenstern
+   ist das richtig — dort ist es die Ausnahme. Bei TÜREN nicht: 14 der 54
+   Haustüren im Bestand öffnen nach außen (Altbau, Windfang, Fluchtweg). Ein
+   Viertel des Haustür-Sortiments war damit unsichtbar, obwohl der Kunde gezielt
+   den Haustür-Filter gesetzt hatte — er musste erst einen Extra-Knopf drücken.
+   Bei Türen ist die Öffnungsrichtung ein normales Merkmal, kein Kuriosum:
+   dort wird nichts mehr versteckt, gefiltert werden kann weiterhin. */
+const AUSSEN_NIE_AUSBLENDEN = ['haustuer', 'balkontuer', 'schiebetuer'];
+function aussenAusblendbar(p) {
+  const g = gruppenVonProdukt(p);
+  return !AUSSEN_NIE_AUSBLENDEN.some(k => g.has(k));
+}
+/* Basis ALLER Zaehler (Kategorie-Kacheln, Sidebar, Zustand-Chips): was der Kunde
+   ohne Zusatzklick wirklich sieht. Eine Quelle, damit die Zahlen nie auseinanderlaufen. */
+function zaehlBasis() {
+  return (STATE.produkte || []).filter(p => !((p.eigenschaften || []).includes(TAG_AUSSEN) && aussenAusblendbar(p)));
+}
+
 /* Wie viele „nach außen"-Artikel blendet der aktuelle Filter gerade aus? (für den Hinweis) */
 function anzahlAusgeblendetAussen() {
   if (zeigeAussenOeffnend()) return 0;
@@ -1015,9 +1091,33 @@ function rendereAussenHinweis() {
   });
 }
 
+/* Alle durchsuchbaren Felder eines Produkts als ein Text. */
+function sucheHaystack(p) {
+  return [
+    p.titel,
+    p.beschreibung,
+    [...gruppenVonProdukt(p)].map(g => STATE.kategorien[g] || '').join(' '),
+    p.system,
+    _asArr(p.farbe).join(' '),
+    p.standnummer || '',
+    (p.eigenschaften || []).join(' ')
+  ].join(' ').toLowerCase();
+}
+
+/* Steht die Eingabe im Artikel als zusammenhaengende Wendung? Solche Treffer sind
+   die gemeinten und werden bei „Relevanz" nach oben sortiert — ausgeblendet wird
+   aber nichts: wer „haustuer weiss" sucht, will alle 41 weissen Haustueren sehen,
+   nicht nur die 5, die es woertlich so im Titel stehen haben. */
+function istPhraseTreffer(p, q) {
+  if (typeof normSuche !== 'function' || typeof normText !== 'function') return false;
+  const ph = normSuche(q);
+  return !!ph && normText(sucheHaystack(p)).includes(ph);
+}
+
 /* ─── Filter-/Sort-Logik ─── */
 function gefilterteProdukte(opt) {
   const f = STATE.filter;
+
   // opt.nurAussen: dieselben Filter, aber genau andersherum — liefert die ausgeblendeten Artikel
   const nurAussen = !!(opt && opt.nurAussen);
   // Trefferbewertung der Maß-Suche. Sie landet NICHT am Produkt, sondern in einer Map:
@@ -1028,8 +1128,9 @@ function gefilterteProdukte(opt) {
   let result = STATE.produkte.filter(p => {
     // Öffnungsrichtung (s.o.) — vor allen anderen Regeln
     const istAussen = (p.eigenschaften || []).includes(TAG_AUSSEN);
-    if (nurAussen) { if (!istAussen) return false; }
-    else if (istAussen && !zeigeAussenOeffnend()) {
+    // nurAussen zaehlt fuer den Hinweis die WIRKLICH versteckten — Tueren sind nie versteckt
+    if (nurAussen) { if (!istAussen || !aussenAusblendbar(p)) return false; }
+    else if (istAussen && aussenAusblendbar(p) && !zeigeAussenOeffnend()) {
       // Ausnahme: wer die Standnummer eingibt, meint genau diesen Artikel — der taucht immer auf
       const q = sucheReinText();
       const perNummer = q && typeof nummerTreffer === 'function' && nummerTreffer(q, p.standnummer);
@@ -1048,7 +1149,7 @@ function gefilterteProdukte(opt) {
     // Glasart (mehrere Filter UND mehrere Produkt-Werte kombinierbar)
     if (f.glasart.size && !_hatTreffer(p.glasart, f.glasart)) return false;
     // Kategorie (Hauptgruppe matched alle gewählten Kategorien des Produkts via kategorieZuGruppe)
-    if (f.kategorien.size && !_asArr(p.kategorie_keys).some(k => f.kategorien.has(kategorieZuGruppe(k)))) return false;
+    if (f.kategorien.size) { const g = gruppenVonProdukt(p); if (![...f.kategorien].some(k => g.has(k))) return false; }
     // Größen-Klasse
     if (f.groesse.size && (!p.groesse_klasse || !f.groesse.has(p.groesse_klasse))) return false;
     // Sonderpreis
@@ -1089,19 +1190,17 @@ function gefilterteProdukte(opt) {
         //    Trifft die Nummer, ist das Produkt sofort gemeint (unabhängig vom Volltext).
         if (typeof nummerTreffer === 'function' && nummerTreffer(reinText, p.standnummer)) return true;
         // 2) Sonst normale Volltextsuche über alle Felder.
-        const haystack = [
-          p.titel,
-          p.beschreibung,
-          STATE.kategorien[p.kategorie] || '',
-          p.system,
-          _asArr(p.farbe).join(' '),
-          p.standnummer || '',
-          (p.eigenschaften || []).join(' ')
-        ].join(' ').toLowerCase();
-        // ß/ss vereinheitlichen: „nach aussen" findet jetzt auch „nach außen"
-        // (Kunden tippen beides — vorher gab die ss-Schreibweise 0 Treffer)
-        const ohneSz = s => s.replace(/ß/g, 'ss');
-        if (!ohneSz(haystack).includes(ohneSz(reinText))) return false;
+        const haystack = sucheHaystack(p);
+        // Wortweiser Vergleich mit ausgeschriebenen Umlauten, Synonymen und
+        // abgeschnittener Plural-Endung (siehe shop-suche-util.js): findet
+        // „haustuer", „Haustüren", „Eingangstür" und „nach aussen öffnend"
+        // gleichermassen. Reihenfolge der Woerter egal, alle muessen vorkommen.
+        if (typeof textTreffer === 'function') {
+          if (!textTreffer(reinText, haystack)) return false;
+        } else {
+          const ohneSz = s => s.replace(/ß/g, 'ss');
+          if (!ohneSz(haystack).includes(ohneSz(reinText))) return false;
+        }
       }
     }
     return true;
@@ -1128,7 +1227,7 @@ function gefilterteProdukte(opt) {
       result.sort((a, b) => (a.breite_mm * a.hoehe_mm) - (b.breite_mm * b.hoehe_mm));
       break;
     case 'relevanz':
-    default:
+    default: {
       // Wenn Maße gefiltert: erst die genauen Treffer, dann die fast passenden, dann der Rest.
       // Grundlage ist dieselbe Bewertung wie auf der Karte — vorher zaehlte hier nur das
       // Hauptmass, wodurch ein exakter Treffer aus der Beschreibung weit hinten landen konnte.
@@ -1141,7 +1240,18 @@ function gefilterteProdukte(opt) {
           return (ma ? ma.summe : 0) - (mb ? mb.summe : 0);
         });
       }
+      // Wortweise Treffer sind wertvoll (sonst fehlt Ware), gehoeren aber hinter die,
+      // in denen die Suche woertlich so steht. sort() ist stabil — die Mass-Reihenfolge
+      // von oben bleibt innerhalb beider Gruppen erhalten.
+      const q = sucheReinText();
+      if (q) {
+        const phrase = new Set(result.filter(p => istPhraseTreffer(p, q)).map(p => p.id));
+        if (phrase.size && phrase.size < result.length) {
+          result.sort((a, b) => (phrase.has(b.id) ? 1 : 0) - (phrase.has(a.id) ? 1 : 0));
+        }
+      }
       break;
+    }
   }
 
   return result;
@@ -2524,6 +2634,18 @@ function oeffneAnfrageModal(p, modus) {
   btn.innerHTML = reservierung
     ? '<span class="material-symbols-outlined" style="font-size:18px">inventory_2</span> Reservierung anfragen'
     : '<span class="material-symbols-outlined" style="font-size:18px">send</span> Anfrage senden';
+
+  // Abholzeiten: Samstag gilt nur in der Hauptsaison (Sept.-Nov.) und wird deshalb
+  // nach Datum gesetzt statt fest im HTML zu stehen - sonst veraltet die Angabe still.
+  const zeitenEl = document.getElementById('abholZeiten');
+  if (zeitenEl) {
+    const monat = new Date().getMonth() + 1;
+    zeitenEl.innerHTML = (monat >= 9 && monat <= 11)
+      ? 'Freitag 10\u201317 Uhr &middot; Samstag 10\u201313 Uhr'
+      : (monat === 8
+          ? 'Freitag 10\u201317 Uhr &middot; ab 1. September auch Samstag 10\u201313 Uhr'
+          : 'Freitag 10\u201317 Uhr');
+  }
 
   // Ueberschrift mitziehen, sonst steht ueber einer Reservierung „Anfrage“.
   const titelEl = document.getElementById('anfrageModalTitel');

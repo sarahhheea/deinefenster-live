@@ -183,9 +183,8 @@ check_true("leere Beschreibung bekommt Ersatztext",
            len(gen.description_of(produkt(beschreibung=""))) > 20,
            "197 Artikel im Live-Datensatz haben keinen Text")
 
-check("vorhandene Beschreibung bleibt erhalten",
-      gen.description_of(produkt(beschreibung="Ein gutes Fenster.")),
-      "Ein gutes Fenster.")
+check_true("vorhandene Beschreibung bleibt erhalten",
+           "Ein gutes Fenster." in gen.description_of(produkt(beschreibung="Ein gutes Fenster.")))
 
 check_true("zu lange Beschreibung wird auf 5000 Zeichen gekuerzt",
            len(gen.description_of(produkt(beschreibung="x" * 6000))) <= 5000)
@@ -214,8 +213,8 @@ item = root.find("./channel/item")
 
 check_true("Feed ist gueltiges XML", item is not None)
 check("id landet im Feed", item.findtext(G + "id"), "p_x")
-check("Sonderzeichen werden escaped statt das XML zu zerstoeren",
-      item.findtext(G + "title"), "Fenster & Tuer <Test>")
+check_true("Sonderzeichen werden escaped statt das XML zu zerstoeren",
+           item.findtext(G + "title").startswith("Fenster & Tuer <Test>"))
 check("link zeigt auf die Produktseite im Shop",
       item.findtext(G + "link"),
       "https://deinefenster.de/shop.html?produkt=p_x")
@@ -242,6 +241,107 @@ check_true("Daemmung bekommt den fuer die Suche optimierten Titel",
 check_true("Daemmung-Titel enthaelt '150 mm'", "150 mm" in d_item["title"])
 check("Daemmung nutzt das freigegebene Foto",
       d_item["image_link"], "https://deinefenster.de/img/shop/daemmung-rolle.webp")
+
+
+# --- Versandkosten: regional gestaffelt statt Konto-Pauschale --------------
+
+v_item = gen.build_items([produkt()])[0]
+versand = v_item["shipping"]
+
+check("Versand deckt alle 16 Bundeslaender ab", len(versand), 16)
+check("jedes Bundesland genau einmal",
+      len({v["region"] for v in versand}), 16)
+check_true("Versand immer Land DE",
+           all(v["country"] == "DE" for v in versand))
+
+nah = {v["region"]: v["price"] for v in versand if v["region"] in ("BE", "BB")}
+check("Berlin bekommt den Nahpreis", nah.get("BE"), "99.00 EUR")
+check("Brandenburg bekommt den Nahpreis", nah.get("BB"), "99.00 EUR")
+
+fern = [v for v in versand if v["region"] not in ("BE", "BB")]
+check("14 Bundeslaender bekommen den Fernpreis", len(fern), 14)
+check_true("Fernpreis ist ueberall 250.00 EUR",
+           all(v["price"] == "250.00 EUR" for v in fern),
+           f"abweichend: {[v for v in fern if v['price'] != '250.00 EUR']}")
+
+x = gen.build_feed([produkt()])
+check("XML enthaelt 16 Versandbloecke", x.count("<g:shipping>"), 16)
+check_true("XML nennt Brandenburg mit 99 EUR",
+           "<g:region>BB</g:region>" in x and "99.00 EUR" in x)
+check_true("XML nennt kein Bundesland doppelt",
+           x.count("<g:region>BE</g:region>") == 1)
+
+
+# --- Selbstabholung: Hinweis gehoert an jede Beschreibung ------------------
+
+check_true("Beschreibung nennt kostenlose Selbstabholung",
+           "Selbstabholung" in v_item["description"]
+           and "kostenlos" in v_item["description"])
+check_true("Abholhinweis steht vorn, Google zeigt den Anfang",
+           v_item["description"].startswith("Selbstabholung"))
+check_true("Produkttext folgt dahinter",
+           "Ein gutes Fenster." in v_item["description"])
+check_true("Abholhinweis nennt den Ort",
+           "Brandenburg an der Havel" in v_item["description"])
+
+leer = gen.build_items([produkt(beschreibung="")])[0]
+check_true("auch ohne eigenen Text kommt der Abholhinweis",
+           "Selbstabholung" in leer["description"])
+check_true("Hinweis sagt, dass Lieferung nicht garantiert ist",
+           "nicht garantiert" in leer["description"]
+           and "angefragt" in leer["description"])
+check_true("Abholhinweis steht nur einmal drin",
+           leer["description"].count("Selbstabholung") == 1)
+
+lang = gen.build_items([produkt(beschreibung="W" * 5200)])[0]
+check_true("sehr lange Beschreibung bleibt unter dem Limit",
+           len(lang["description"]) <= gen.MAX_DESCRIPTION,
+           f"Laenge: {len(lang['description'])}")
+check_true("bei langer Beschreibung ueberlebt der Abholhinweis",
+           "Selbstabholung" in lang["description"])
+
+
+# --- Titel: 'gebraucht' muss rein, damit Kunden uns finden -----------------
+
+g1 = gen.build_items([produkt(titel="Festverglasung Holzfenster Einzelstueck 970 x 1280",
+                              zustand=["gebraucht"])])[0]
+check("gebraucht wird vor den Massen ergaenzt",
+      g1["title"], "Festverglasung Holzfenster Einzelstueck gebraucht 970 x 1280")
+
+g2 = gen.build_items([produkt(titel="2 Fluegel Fenster gebraucht 1160 x 1365",
+                              zustand=["gebraucht"])])[0]
+check("vorhandenes 'gebraucht' wird nicht verdoppelt",
+      g2["title"], "2 Fluegel Fenster gebraucht 1160 x 1365")
+
+g3 = gen.build_items([produkt(titel="Kunststofffenster weiss 1000 x 1200",
+                              zustand=["neu"])])[0]
+check("Neuware bekommt kein 'gebraucht'",
+      g3["title"], "Kunststofffenster weiss 1000 x 1200")
+
+g4 = gen.build_items([produkt(titel="Fenster Sonderposten 800 x 900",
+                              zustand=["sonderposten"])])[0]
+check_true("Sonderposten bekommt kein 'gebraucht'",
+           "gebraucht" not in g4["title"])
+
+g5 = gen.build_items([produkt(titel="Altes Holzfenster ohne Massangabe",
+                              zustand=["gebraucht"])])[0]
+check("ohne Massangabe wird angehaengt",
+      g5["title"], "Altes Holzfenster ohne Massangabe gebraucht")
+
+g6 = gen.build_items([produkt(titel="Grossformatiges Kunststofffenster " + "sehr " * 30 + "1000 x 1200",
+                              zustand=["gebraucht"])])[0]
+check_true("Titel bleibt unter 150 Zeichen", len(g6["title"]) <= gen.MAX_TITLE,
+           f"Laenge: {len(g6['title'])}")
+
+g7 = gen.build_items([produkt(id="p_1779382702846", titel="Daemmung Klemmfilz",
+                              zustand=["neu"], preis_eur=42)])[0]
+check_true("die feste Daemmung-Ueberschreibung bleibt unberuehrt",
+           "gebraucht" not in g7["title"])
+
+g8 = gen.build_items([produkt(titel="1 Fluegel Fenster Gebraucht 900 x 1440",
+                              zustand=["gebraucht"])])[0]
+check("grossgeschriebenes 'Gebraucht' zaehlt auch",
+      g8["title"], "1 Fluegel Fenster Gebraucht 900 x 1440")
 
 
 # --- Ergebnis --------------------------------------------------------------

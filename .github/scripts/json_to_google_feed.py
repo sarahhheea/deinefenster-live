@@ -21,6 +21,31 @@ MAX_TITLE = 150
 MAX_DESCRIPTION = 5000
 MAX_ADDITIONAL_IMAGES = 10
 
+# Versandkosten. Google verlangt fuer Deutschland zwingend eine Angabe -
+# ohne sie wurden im August 2026 alle Produkte abgelehnt. Die Zahl ist eine
+# Obergrenze; weniger berechnen ist ausdruecklich erlaubt.
+# Berlin und Brandenburg liegen im Liefergebiet (rund 100 km), der Rest der
+# Republik geht nur per Spedition zum hoeheren Satz.
+VERSAND_NAH = "99.00 EUR"
+VERSAND_FERN = "250.00 EUR"
+NAHE_REGIONEN = ("BE", "BB")
+
+# ISO 3166-2:DE - alle 16 Laender einzeln, damit sich keine Regel mit einer
+# anderen ueberschneidet und Google nichts interpretieren muss.
+BUNDESLAENDER = (
+    "BW", "BY", "BE", "BB", "HB", "HH", "HE", "MV",
+    "NI", "NW", "RP", "SL", "SN", "ST", "SH", "TH",
+)
+
+# Steht unter jeder Beschreibung. Die Abholung ist der eigentliche Vorteil
+# gegenueber den bundesweiten Versendern, taucht in Googles Versandzeile
+# aber nicht auf - Abholung wird in Deutschland nicht unterstuetzt.
+ABHOL_HINWEIS = (
+    "Selbstabholung bei uns in Brandenburg an der Havel: jederzeit kostenlos. "
+    "Eine Lieferung ist nicht garantiert - sie muss vorher angefragt werden, "
+    "erfolgt per Spedition, und der angezeigte Lieferpreis ist ein Hoechstwert."
+)
+
 # Interne Standplatz-Angabe, die nicht zu Google gehoert:
 #   "Nr. 1219" | "Nr 400 A" | "Nr.1502" | "Nr. 1007 AB" | "Nr.2808 DDD"
 #   "Nr. 0311/1  A" | "Standort Nr 0018"
@@ -95,6 +120,35 @@ def availability_of(produkt):
         return "in_stock"
 
 
+def shipping_of():
+    """Ein Eintrag je Bundesland - ueberschreibt die Konto-Pauschale."""
+    return [
+        {
+            "country": "DE",
+            "region": land,
+            "price": VERSAND_NAH if land in NAHE_REGIONEN else VERSAND_FERN,
+        }
+        for land in BUNDESLAENDER
+    ]
+
+
+def ensure_gebraucht(titel, condition):
+    """Setzt 'gebraucht' in den Titel - danach suchen die Leute.
+
+    Vor die Massangabe, weil die uebrigen Titel es genau dort stehen haben.
+    Fehlt eine Massangabe, wird angehaengt.
+    """
+    if condition != "used" or not titel:
+        return titel
+    if "gebraucht" in titel.lower():
+        return titel
+
+    mass = re.search(r"\d{3,4}\s*[xX\u00d7]\s*\d{3,4}", titel)
+    if mass:
+        return f"{titel[:mass.start()]}gebraucht {titel[mass.start():]}".strip()
+    return f"{titel} gebraucht"
+
+
 def description_of(produkt):
     text = (produkt.get("beschreibung") or "").strip()
     if not text:
@@ -104,7 +158,9 @@ def description_of(produkt):
             "Abholung vor Ort im Hofverkauf oder Lieferung nach Absprache. "
             "Maße und Zustand auf Anfrage."
         )
-    return text[:MAX_DESCRIPTION]
+    # Nach vorne, weil Google bei den Produktdetails den Anfang zeigt.
+    platz = MAX_DESCRIPTION - len(ABHOL_HINWEIS) - 2
+    return f"{ABHOL_HINWEIS}\n\n{text[:platz].rstrip()}"
 
 
 def _has_price(produkt):
@@ -131,9 +187,12 @@ def build_items(produkte, kategorien=None):
         if not pid:
             continue
 
-        titel = TITEL_UEBERSCHREIBUNG.get(pid) or clean_title(p.get("titel", ""))
+        fester_titel = TITEL_UEBERSCHREIBUNG.get(pid)
+        titel = fester_titel or clean_title(p.get("titel", ""))
         if not titel:
             continue
+        if not fester_titel:
+            titel = ensure_gebraucht(titel, condition_of(p))
 
         bilder = [normalize_image_url(b) for b in p["bilder"]]
         bilder = [b for b in bilder if b]
@@ -154,6 +213,7 @@ def build_items(produkte, kategorien=None):
             "availability": availability_of(p),
             "condition": condition_of(p),
             "identifier_exists": "no",
+            "shipping": shipping_of(),
             "product_type": kategorien.get(p.get("kategorie_key"), "") or "",
         })
 
@@ -184,6 +244,12 @@ def build_feed(produkte, kategorien=None):
             out.append(_tag("product_type", it["product_type"]))
         for bild in it["additional_image_link"]:
             out.append(_tag("additional_image_link", bild))
+        for v in it["shipping"]:
+            out.append("      <g:shipping>\n")
+            out.append(f"        <g:country>{v['country']}</g:country>\n")
+            out.append(f"        <g:region>{v['region']}</g:region>\n")
+            out.append(f"        <g:price>{v['price']}</g:price>\n")
+            out.append("      </g:shipping>\n")
         out.append("    </item>\n")
 
     out.append("  </channel>\n</rss>\n")

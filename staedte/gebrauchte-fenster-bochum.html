@@ -17,10 +17,6 @@
 <link rel="stylesheet" href="/css/dfnav.css">
 <link href="/fonts/material-symbols.css" rel="stylesheet"/>
 <style>
-#urlaub-banner{position:fixed;top:0;left:0;right:0;z-index:99999;background:linear-gradient(90deg,#112455 0%,#0d1b33 100%);color:#fff;font-family:var(--font-body);font-size:13px;line-height:1.4;text-align:center;padding:10px 18px;font-weight:600;letter-spacing:.01em;border-bottom:1px solid rgba(255,255,255,.16);box-shadow:0 2px 16px rgba(8,21,46,.35)}
-#urlaub-banner strong{font-weight:800;color:#fff}
-#urlaub-banner-close{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:transparent;border:0;color:#eaf1ff;font-size:21px;line-height:1;cursor:pointer;padding:2px 8px;opacity:.85}
-#urlaub-banner-close:hover{opacity:1}
 .stadt-bg img{width:100%;height:100%;object-fit:cover}
 .answer-box{background:rgba(118,169,250,.12);border-left:4px solid var(--acc-text);border-radius:0 var(--r) var(--r) 0;padding:var(--s5);margin:var(--s5) 0 var(--s6);max-width:70ch}
 .answer-box p{margin:0;color:var(--text);font-size:1rem;line-height:1.65}
@@ -73,12 +69,28 @@
         "addressCountry": "DE"
       },
       "areaServed": ["Bochum", "Brandenburg", "Deutschland"],
-      "openingHoursSpecification": {
-        "@type": "OpeningHoursSpecification",
-        "dayOfWeek": "Friday",
-        "opens": "10:00",
-        "closes": "17:00"
-      },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": "Friday",
+          "opens": "10:00",
+          "closes": "17:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": "Saturday",
+          "opens": "10:00",
+          "closes": "13:00",
+          "validFrom": "2026-09-01",
+          "validThrough": "2026-11-28"
+        }
+      ],
+      "specialOpeningHoursSpecification": [
+        {"@type": "OpeningHoursSpecification", "opens": "10:00", "closes": "17:00", "validFrom": "2026-12-01", "validThrough": "2026-12-05"},
+        {"@type": "OpeningHoursSpecification", "opens": "00:00", "closes": "00:00", "validFrom": "2026-12-06", "validThrough": "2026-12-06"},
+        {"@type": "OpeningHoursSpecification", "opens": "10:00", "closes": "17:00", "validFrom": "2026-12-07", "validThrough": "2026-12-07"},
+        {"@type": "OpeningHoursSpecification", "opens": "00:00", "closes": "00:00", "validFrom": "2026-12-08", "validThrough": "2027-01-14"}
+      ],
       "priceRange": "€"
     },
     {
@@ -123,20 +135,13 @@
     }
   ]
   </script>
+<link rel="stylesheet" href="/css/hofverkauf-hinweis.css">
 </head>
 <body class="stadt">
-<!-- BETRIEBSURLAUB-BANNER START -->
-<style>#urlaub-banner{position:fixed;top:0;left:0;right:0;z-index:99999;background:oklch(0.99 0.006 240);border-bottom:2px solid oklch(0.45 0.13 256);color:oklch(0.26 0.055 256);font-family:'Inter','Manrope',-apple-system,Segoe UI,Arial,sans-serif;font-size:13px;line-height:1.35;text-align:center;padding:9px 46px;font-weight:600;letter-spacing:.005em}#urlaub-banner .ub-in{display:inline-flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 13px;max-width:1200px;margin:0 auto}#urlaub-banner strong{font-weight:800;color:oklch(0.26 0.055 256)}#urlaub-banner svg{vertical-align:-2px;margin-right:3px}#urlaub-banner .ub-sep{color:oklch(0.4 0.05 256);opacity:.45;font-weight:400}#urlaub-banner .ub-hi{background:oklch(0.45 0.13 256);color:#fff;font-weight:800;padding:3px 12px;border-radius:999px}#urlaub-banner-close{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:transparent;border:0;color:oklch(0.4 0.05 256);font-size:22px;line-height:1;cursor:pointer;padding:2px 8px;opacity:.6}#urlaub-banner-close:hover{opacity:1}@media(max-width:640px){#urlaub-banner{font-size:12px;padding:8px 38px 8px 12px}#urlaub-banner .ub-in{gap:4px 8px}#urlaub-banner .ub-sep{display:none}}</style>
-<div id="urlaub-banner" role="status" aria-label="&Ouml;ffnungszeiten Hofverkauf und Betriebsurlaub">
-  <span class="ub-in"><span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="oklch(0.45 0.13 256)" stroke-width="2"/><path d="M12 7v5l3 2" stroke="oklch(0.45 0.13 256)" stroke-width="2" stroke-linecap="round"/></svg>Hofverkauf: <strong>jeden Freitag 10&ndash;17 Uhr</strong></span><span class="ub-sep">&middot;</span><span class="ub-hi">Hauptsaison 1. Sept.&ndash;30. Nov.: auch Sa 10&ndash;13 Uhr</span><span class="ub-sep">&middot;</span><span>Betriebsurlaub 15.&ndash;27. Aug.</span></span>
-  <button id="urlaub-banner-close" type="button" aria-label="Hinweis schlie&szlig;en">&times;</button>
-</div>
-<script>(function(){var KEY='urlaubBannerClosed_2026_0726_hell';var b=document.getElementById('urlaub-banner');if(!b)return;if(window.__urlaubBanner)return;window.__urlaubBanner=1;try{if(localStorage.getItem(KEY)){b.parentNode&&b.parentNode.removeChild(b);return;}}catch(e){}var root=document.documentElement,basePad=null;function apply(){if(basePad===null){basePad=parseFloat(getComputedStyle(document.body).paddingTop)||0;}var h=b.offsetHeight;root.style.setProperty('--banner-h',h+'px');document.body.style.paddingTop=(basePad+h)+'px';}function reset(){root.style.removeProperty('--banner-h');document.body.style.paddingTop=(basePad&&basePad>0)?basePad+'px':'';}apply();if(document.fonts&&document.fonts.ready){try{document.fonts.ready.then(apply);}catch(e){}}window.addEventListener('resize',apply);var x=document.getElementById('urlaub-banner-close');if(x){x.addEventListener('click',function(){reset();b.parentNode&&b.parentNode.removeChild(b);try{localStorage.setItem(KEY,'1');}catch(e){}});}})();</script>
-<!-- BETRIEBSURLAUB-BANNER END -->
 
 
 <div class="dfnav-util"><div class="dfnav-wrap">
-  <span style="color:var(--dfn-soft)"><a href="/impressum.html#bewertungen" title="Wie diese Bewertungen zustande kommen"><span style="color:oklch(0.8 0.15 85)">&#9733;</span> 4,7 &middot; 93 Google-Bewertungen</a> &middot; <a href="/gebrauchte-fenster-kaufen.html">Hofverkauf Fr 10&ndash;17 Uhr</a></span>
+  <span style="color:var(--dfn-soft)"><a href="/impressum.html#bewertungen" title="Wie diese Bewertungen zustande kommen"><span style="color:oklch(0.8 0.15 85)">&#9733;</span> 4,7 &middot; 93 Google-Bewertungen</a> &middot; <a class="df-zeiten" href="/kontakt.html#zeiten" title="&Ouml;ffnungszeiten, Adresse und Anfahrt"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="vertical-align:-2px;margin-right:4px"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span class="df-zeiten-txt">Hofverkauf Fr 10&ndash;17 Uhr</span></a></span>
   <div class="dfnav-uright">
     <a href="/ueber-uns.html">&Uuml;ber uns</a>
     <a href="/ueber-drutex.html">&Uuml;ber Drutex</a>
@@ -309,6 +314,8 @@
 <section><div class="wrap">
   <div class="sec-head"><span class="eyebrow">Anfahrt</span><h2>Von Bochum zum Hofverkauf</h2></div>
   <p class="lead">Bochum ist mit rund 366.000 Einwohnern eine gr&ouml;&szlig;ere Stadt in Nordrhein-Westfalen. Zu unserem Hof in Brandenburg an der Havel sind es &uuml;ber die A 2 rund 450 km &mdash; rund 4 Std. 25 Min. reine Fahrzeit.</p>
+  <p class="route-cta" style="margin:18px 0 0"><a class="btn-primary" href="https://www.google.com/maps/dir/?api=1&amp;origin=Bochum&amp;destination=Fohrder%20Landstra%C3%9Fe%2013%2C%2014772%20Brandenburg%20an%20der%20Havel" target="_blank" rel="noopener">Route ab Bochum berechnen &rarr;</a></p>
+  <p style="margin:10px 0 0;font-size:.94rem;color:var(--soft)">Hofverkauf Fohrder Landstra&szlig;e 13, 14772 Brandenburg an der Havel &middot; Freitag 10&ndash;17 Uhr, September bis November auch samstags 10&ndash;13 Uhr.</p>
   <div class="uspgrid">
     <div class="usp"><h3>Ein ganzer Tag</h3><p>Hin und zur&uuml;ck sind Sie rund 8 Std. 55 Min. unterwegs &mdash; das ist ein Tagesausflug. Bei der Entfernung sollten es mehrere Fenster sein, damit sich die Fahrt rechnet. Fragen Sie vorher per WhatsApp nach den Gr&ouml;&szlig;en, die Sie brauchen: Der Bestand wechselt st&auml;ndig, und wir sagen ehrlich, wenn wir gerade nichts Passendes haben.</p></div>
     <div class="usp"><h3>Transport</h3><p>Bei dieser Entfernung lohnt sich gleich ein Transporter statt zweier Fahrten. Decken oder Gurte mitbringen &mdash; Glas mag keine harten Kanten. Verladen m&uuml;ssen Sie selbst &mdash; bringen Sie also jemanden zum Anpacken mit.</p></div>
@@ -322,7 +329,7 @@
   <div class="faq">
     <details open><summary>Ist die Fahrt von Bochum nach Brandenburg die werte?</summary><div class="faq-a">Viele unserer Kunden fahren extra aus Bochum und weiter — weil gebrauchte Fenster bei uns 50–70 % günstiger sind als neu. Ein 2-flügeliges Gebrauchtfenster gibt es bei uns ab 80 € — deutlich günstiger als Neuware. Bei größeren Mengen oder einem ganzen Haus rechnet sich die Fahrt sehr schnell.</div></details>
     <details><summary>Was kosten gebrauchte Fenster?</summary><div class="faq-a">Ab 80 € für ein einfaches Fenster. Je nach Größe, Verglasung und Zustand. Zweiflügelige Fenster und Haustüren auf Anfrage je nach Modell. Alle Preise inkl. MwSt., Rechnung wird ausgestellt.</div></details>
-    <details><summary>Wann ist der Hof geöffnet?</summary><div class="faq-a">Freitag 10–17 Uhr, außerhalb nach Voranmeldung. Urlaubs- und Ferienzeiten können variieren — vor der Anreise aus Bochum kurz per WhatsApp 0171 7263776 bestätigen lassen.</div></details>
+    <details><summary>Wann ist der Hof geöffnet?</summary><div class="faq-a">Freitag 10–17 Uhr, zusätzlich samstags 10–13 Uhr bis zum 5. Dezember 2026, außerhalb nach Voranmeldung. Urlaubs- und Ferienzeiten können variieren — vor der Anreise aus Bochum kurz per WhatsApp 0171 7263776 bestätigen lassen.</div></details>
     <details><summary>Liefern Sie auch nach Bochum?</summary><div class="faq-a">Gebrauchte Fenster: Nein — nur Selbstabholung in Brandenburg. Neue Drutex-Fenster (Maßanfertigung): Ja, deutschlandweit per Spedition in ca. 14 Werktagen. <a href="fenster-bochum.html" style="color:#225eaa;">Mehr zu neuen Fenstern für Bochum →</a></div></details>
   </div>
 </div></section>
@@ -389,5 +396,6 @@
 
 <!-- Cloudflare Web Analytics (cookieless, DSGVO-konform) --><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "2cf67e72370843bc8998180837703d02"}'></script><!-- End Cloudflare Web Analytics -->
 <script src="/js/dfnav.js?v=cart3" defer></script>
+<script defer src="/js/hofverkauf-hinweis.js"></script>
 </body>
 </html>

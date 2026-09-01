@@ -1,0 +1,85 @@
+/* Hofverkauf-Hinweis — kleine Karte am unteren Rand, bewusst KEIN Vollbild-Fenster.
+   Vorher lag hier ein Dialog mit Schleier ueber der ganzen Seite. Er hat den Inhalt
+   verdeckt und mit "Route berechnen" den auffaelligsten Knopf auf einen Weg gelegt,
+   der aus der Seite hinausfuehrt. Der Hinweis soll nur eines leisten: dass jemand
+   die Samstagsoeffnung mitbekommt. Dafuer reicht eine Karte daneben.
+   Farben, Radien und Schriften stammen aus den Tokens der Website. */
+
+#df-hofhinweis{position:fixed;z-index:100000;
+  right:20px;bottom:20px;left:auto;width:min(340px,calc(100vw - 40px));
+  font-family:'Inter','Switzer',system-ui,sans-serif;
+  color:oklch(0.26 0.055 256)}
+
+#df-hofhinweis .dfh-karte{position:relative;
+  background:oklch(0.99 0.006 240);
+  border:1px solid oklch(0.9 0.02 244);
+  border-radius:14px;
+  box-shadow:0 1px 2px hsl(214 60% 45% / .05),0 4px 10px hsl(214 60% 45% / .06),
+             0 18px 44px -14px hsl(214 60% 45% / .30);
+  padding:18px 20px 16px;
+  opacity:0;transform:translateY(12px);
+  transition:opacity .26s ease,transform .26s cubic-bezier(.16,1,.3,1)}
+#df-hofhinweis.offen .dfh-karte{opacity:1;transform:none}
+
+#df-hofhinweis .dfh-zu{position:absolute;top:8px;right:8px;width:36px;height:36px;
+  display:flex;align-items:center;justify-content:center;background:transparent;border:0;
+  border-radius:9px;color:oklch(0.48 0.04 256);font-size:22px;line-height:1;cursor:pointer;
+  transition:background .16s,color .16s}
+#df-hofhinweis .dfh-zu:hover{background:oklch(0.955 0.015 240);color:oklch(0.26 0.055 256)}
+#df-hofhinweis .dfh-zu:focus-visible{outline:2px solid oklch(0.45 0.13 256);outline-offset:-2px}
+
+#df-hofhinweis .dfh-eyebrow{margin:0 0 5px;font-family:'Switzer','Inter',sans-serif;
+  font-size:10.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;
+  color:oklch(0.45 0.13 256)}
+#df-hofhinweis .dfh-titel{margin:0 0 12px;font-family:'Switzer','Inter',sans-serif;
+  font-size:1.05rem;line-height:1.25;font-weight:800;color:oklch(0.26 0.055 256);
+  padding-right:34px;letter-spacing:-.012em;text-wrap:balance}
+
+#df-hofhinweis .dfh-zeiten{margin:0 0 11px;border:1px solid oklch(0.9 0.02 244);
+  border-radius:10px;overflow:hidden;background:#fff}
+#df-hofhinweis .dfh-zeile{display:flex;align-items:center;justify-content:space-between;
+  gap:10px;padding:0 12px;min-height:40px;font-size:.9rem}
+#df-hofhinweis .dfh-zeile + .dfh-zeile{border-top:1px solid oklch(0.94 0.012 244)}
+#df-hofhinweis .dfh-tag{font-weight:600;color:oklch(0.4 0.05 256)}
+#df-hofhinweis .dfh-zeit{font-family:'Switzer','Inter',sans-serif;font-weight:800;
+  color:oklch(0.26 0.055 256);white-space:nowrap;font-variant-numeric:tabular-nums}
+#df-hofhinweis .dfh-neu{background:oklch(0.45 0.13 256);color:#fff;
+  font-family:'Switzer','Inter',sans-serif;
+  font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  padding:2px 7px;border-radius:999px;margin-left:7px;vertical-align:1px}
+
+#df-hofhinweis .dfh-adresse{margin:0 0 4px;font-size:.82rem;line-height:1.45;
+  color:oklch(0.45 0.045 256)}
+#df-hofhinweis .dfh-adresse b{font-weight:700;color:oklch(0.3 0.05 256)}
+#df-hofhinweis .dfh-befristung{margin:0 0 4px;font-size:.78rem;line-height:1.4;
+  color:oklch(0.55 0.035 256)}
+
+/* Bewusst ein Textlink, kein gefuellter Knopf: der Weg nach Google Maps darf nicht
+   auffaelliger sein als der Inhalt der Seite, auf der der Kunde gerade ist. */
+#df-hofhinweis .dfh-route{display:inline-block;margin-top:8px;
+  font-family:'Switzer','Inter',sans-serif;font-weight:700;font-size:.86rem;
+  color:oklch(0.45 0.13 256);text-decoration:none;
+  padding:6px 2px;border-radius:6px}
+#df-hofhinweis .dfh-route:hover{text-decoration:underline;color:oklch(0.38 0.13 256)}
+#df-hofhinweis .dfh-route:focus-visible{outline:2px solid oklch(0.45 0.13 256);outline-offset:2px}
+
+@media(max-width:560px){
+  #df-hofhinweis{right:10px;left:10px;bottom:10px;width:auto;
+    bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+  #df-hofhinweis .dfh-karte{padding:15px 16px 13px;border-radius:13px}
+  #df-hofhinweis .dfh-titel{font-size:1rem;padding-right:32px;margin-bottom:10px}
+  #df-hofhinweis .dfh-zeile{padding:0 11px;min-height:38px;font-size:.87rem}
+}
+@media(prefers-reduced-motion:reduce){
+  #df-hofhinweis .dfh-karte{transition:none}
+}
+
+
+/* Zeitangabe in der Kopfleiste: als eine Einheit halten. Als reiner Inline-Text
+   riss der Umbruch das Uhrsymbol vom Text und sprengte die Leiste auf zwei Zeilen. */
+.df-zeiten{display:inline-flex;align-items:center;white-space:nowrap}
+.df-zeiten svg{flex-shrink:0}
+@media(max-width:900px){
+  /* Auf schmalen Fenstern nur die Zeiten, ohne das Wort davor */
+  .df-zeiten .df-zeiten-lang{display:none}
+}

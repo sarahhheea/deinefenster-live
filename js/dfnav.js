@@ -148,3 +148,51 @@
   window.addEventListener('df-merk-changed', refresh);
   window.addEventListener('pageshow', refresh);
 })();
+
+/* dfnav — Adresse und Route site-weit: setzt einen Verweis aufs Kartenprofil in die
+   Kopfleiste (Desktop) und ins ausklappbare Menue (Handy). Bewusst NICHT in die
+   Symbolreihe der Navigation: dort ist die Reihe bereits voll, ein weiteres Symbol
+   liess die Navigation auf zwei Zeilen umbrechen und wurde am Handy auf 23 px
+   zusammengedrueckt. In der Kopfleiste steht der Verweis ausserdem direkt neben den
+   Oeffnungszeiten, was zusammengehoert. Reiner Link, keine eingebettete Karte —
+   damit ist keine Einwilligung noetig. */
+(function(){
+  'use strict';
+  var ZIEL = 'https://www.google.com/maps?cid=9402028850820563054';
+  var PIN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" '
+    + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" '
+    + 'style="width:1em;height:1em;vertical-align:-2px;margin-right:4px">'
+    + '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>'
+    + '<circle cx="12" cy="10" r="3"/></svg>';
+
+  function inKopfleiste(){
+    if(document.querySelector('.df-ort-kopf')) return;
+    var rechts = document.querySelector('.dfnav-uright') || document.querySelector('.util .right');
+    if(!rechts) return;
+    var a=document.createElement('a');
+    a.className='df-ort-kopf'; a.href=ZIEL; a.target='_blank'; a.rel='noopener';
+    a.title='Adresse und Anfahrt zum Hofverkauf';
+    /* als Einheit halten, sonst rutscht das Symbol ueber das Wort */
+    a.style.cssText='display:inline-flex;align-items:center;white-space:nowrap';
+    a.innerHTML=PIN+'Route';
+    rechts.insertBefore(a, rechts.firstChild);
+  }
+
+  function inMenue(){
+    if(document.querySelector('.df-ort-menue')) return;
+    var d = document.querySelector('#dfnav-drawer .dfnav-panel') || document.querySelector('#dfnav-drawer');
+    if(!d) return;
+    var a=document.createElement('a');
+    a.className='df-ort-menue'; a.href=ZIEL; a.target='_blank'; a.rel='noopener';
+    a.innerHTML=PIN+'Adresse &amp; Route';
+    a.style.cssText='display:flex;align-items:center;gap:2px;padding:14px 20px;'
+      +'font-weight:700;color:#225eaa;text-decoration:none;'
+      +'border-bottom:1px solid rgba(34,94,170,.14)';
+    d.insertBefore(a, d.firstChild);
+  }
+
+  function los(){ inKopfleiste(); inMenue(); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',los);
+  else los();
+  setTimeout(los, 500);
+})();
