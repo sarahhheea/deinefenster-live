@@ -410,20 +410,21 @@ body.wiz-active .dfnav-tel:hover{background:rgba(34,94,170,.10)}
    Karten — bei bis zu zehn Breiten mal vier Seiten waeren das vierzig Kacheln. */
 .opts.vb-grp{display:block}
 .vb-intro,.vb-hinweis{font-size:13px;color:var(--ink-soft);margin:0 0 12px;line-height:1.45}
-.vb-zeile{display:flex;align-items:flex-start;gap:14px;padding:9px 0;border-top:1px solid var(--line)}
+/* Seitenname UEBER den Breiten, nicht daneben: der Schritt steht in einer schmalen
+   Spalte neben Skizze und Zusammenfassung. Nebeneinander blieb fuer die Knoepfe zu
+   wenig Platz und die letzte Breite fiel allein in eine zweite Zeile. */
+.vb-zeile{display:flex;flex-direction:column;gap:7px;padding:10px 0;border-top:1px solid var(--line)}
 .vb-zeile:first-of-type{border-top:0}
-.vb-seite{flex:0 0 116px;font-weight:600;font-size:14px;display:flex;flex-direction:column}
-.vb-laenge{font-weight:500;font-size:11.5px;color:var(--ink-soft);margin-top:1px}
-.vb-chips{display:flex;flex-wrap:wrap;gap:6px;flex:1 1 auto}
+.vb-seite{font-weight:600;font-size:14px;display:flex;align-items:baseline;gap:8px}
+.vb-laenge{font-weight:500;font-size:11.5px;color:var(--ink-soft)}
+.vb-chips{display:flex;flex-wrap:wrap;gap:6px}
 .vb-chip{appearance:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;
   padding:6px 12px;font:inherit;font-size:13px;cursor:pointer;transition:.18s var(--ease);color:var(--ink)}
 .vb-chip:hover{border-color:#9fb2d4}
 .vb-chip.on{background:var(--brand,#1f5ed6);border-color:var(--brand,#1f5ed6);color:#fff;font-weight:600}
 .vb-summe{margin-top:12px;font-size:13.5px;font-weight:600}
+.vb-summe.vb-offen{font-weight:500;color:var(--ink-soft)}
 @media(max-width:600px){
-  .vb-zeile{flex-direction:column;gap:6px}
-  .vb-seite{flex:none;flex-direction:row;align-items:baseline;gap:8px}
-  .vb-laenge{margin-top:0}
   .vb-chip{padding:7px 11px;font-size:13px}
 }
 /* Angebrochene letzte Reihe mittig statt linksbuendig — sonst klafft rechts eine Luecke.
@@ -5900,7 +5901,6 @@ const STEPS_FENSTER=[  // Reihenfolge exakt wie Live-Konfigurator (STEP_ORDER)
   {key:'aufteilung',label:'Aufteilung',title:['Die ','Aufteilung'],sub:'Wie viele Flügel soll Ihr Fenster haben?'},
   {key:'oeffnung',label:'Öffnung',title:['Die ','Öffnungsart'],sub:'In welche Richtung öffnet das Fenster?'},
   {key:'masse',label:'Maße',title:['Ihre ','Maße'],sub:'Breite und Höhe der Öffnung in Millimeter.'},
-  {key:'verbreiterung',label:'Verbreiterung',title:['Die ','Verbreiterung'],sub:'Füllt den Spalt, wenn die alte Öffnung größer ist als das neue Fenster.'},
   {key:'anzahl',label:'Anzahl',title:['Die ','Anzahl'],sub:'Wie viele gleiche Fenster benötigen Sie?'},
   {key:'farbe',label:'Farbe',title:['Die ','Farbe'],sub:'Außen- und Innenfarbe — die Vorschau zeigt Ihre Wahl.'},
   {key:'glas',label:'Glas',title:['Die ','Verglasung'],sub:'2-fach oder 3-fach Wärmeschutz.'},
@@ -5909,6 +5909,10 @@ const STEPS_FENSTER=[  // Reihenfolge exakt wie Live-Konfigurator (STEP_ORDER)
   {key:'sicherheit',label:'Sicherheit',title:['Die ','Sicherheit'],sub:'Sicherheitsbeschlag erschwert das Aufhebeln.'},
   {key:'rollladen',label:'Rollladen',title:['Der ','Rollladen'],sub:'Sicht- und Sonnenschutz als Aufsatzkasten.'},
   {key:'sprossen',label:'Sprossen',title:['Die ','Sprossen'],sub:'Klassische Fenster-Optik mit Sprossen.'},
+  /* Die Verbreiterung steht bewusst ganz hinten bei den Zusatzteilen und nicht bei den
+     Massen: sie betrifft nur die Renovierung, und wer schnell durchklicken will, soll
+     nicht mitten im Ablauf vier Seiten durchgehen muessen. */
+  {key:'verbreiterung',label:'Verbreiterung',title:['Die ','Verbreiterung'],sub:'Füllt den Spalt, wenn die alte Öffnung größer ist als das neue Fenster.'},
   {key:'anfrage',label:'Übersicht',title:['Übersicht & ','Anfrage'],sub:'Kostenlos anfordern — Sie gehen keinerlei Verpflichtung ein.'},
 ];
 const STEPS_BALKON=[  // Reihenfolge wie Live-Konfigurator (WIZ_ALL, gilt:'balkontuer')
@@ -6919,6 +6923,12 @@ function panelHTML(){
       +'Schreiben Sie es uns bei der Anfrage dazu — wir rechnen es von Hand.</div>');
     const seiten=[['vbL','Links','Höhe',S.h],['vbR','Rechts','Höhe',S.h],
                   ['vbO','Oben','Breite',S.w],['vbU','Unten','Breite',S.w]];
+    const rahmenIcon='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="4" width="14" height="16" rx="1"/><path d="M9 4v16"/></svg>';
+    const rahmenPlus='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="7" y="6" width="10" height="12" rx="1"/><path d="M10 6v12"/><path d="M3.5 3.5v17M20.5 3.5v17" stroke-dasharray="2.5 2"/></svg>';
+    const karten=
+      `<div class="ocard ${!S.vbAn?'on':''}" onclick="setVerbrAn(false)"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="vis" style="height:84px;place-items:center">${rahmenIcon}</div><div class="t">Ohne Verbreiterung</div><div class="s">Das Fenster passt genau in die Öffnung.</div></div>`
+     +`<div class="ocard ${S.vbAn?'on':''}" onclick="setVerbrAn(true)"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="vis" style="height:84px;place-items:center">${rahmenPlus}</div><div class="t">Mit Verbreiterung</div><div class="s">Die alte Öffnung ist größer — der Spalt wird gefüllt.</div></div>`;
+    if(!S.vbAn) return grp('Rahmenverbreiterung','two',karten);
     const zeilen=seiten.map(function(x){
       const feld=x[0], akt=+S[feld]||0;
       const knoepfe=[`<button type="button" class="vb-chip ${akt===0?'on':''}" onclick="setVerbr('${feld}',0)">ohne</button>`]
@@ -6928,9 +6938,12 @@ function panelHTML(){
       return `<div class="vb-zeile"><div class="vb-seite">${x[1]}<span class="vb-laenge">${x[2]} ${x[3]} mm</span></div>`
            + `<div class="vb-chips">${knoepfe}</div></div>`;
     }).join('');
-    const summe = verbrAktiv() ? `<div class="vb-summe">Gewählt: ${verbrText()}</div>` : '';
-    return grp('Rahmenverbreiterung','vb-grp',
-      `<div class="vb-intro">Alle Breiten in Millimeter. Ihr Fenstermaß bleibt unverändert — die Verbreiterung kommt außen dazu.</div>${zeilen}${summe}`);
+    const summe = verbrAktiv()
+      ? `<div class="vb-summe">Gewählt: ${verbrText()}</div>`
+      : `<div class="vb-summe vb-offen">Noch keine Seite gewählt.</div>`;
+    return grp('Rahmenverbreiterung','two',karten)
+      + grp('Welche Seiten?','vb-grp',
+        `<div class="vb-intro">Alle Breiten in Millimeter. Ihr Fenstermaß bleibt unverändert — die Verbreiterung kommt außen dazu.</div>${zeilen}${summe}`);
   }
   if(k==='farbe'){
     const co=COLORS_AKT()[S.outer],ci=COLORS_AKT()[S.inner];
@@ -7725,6 +7738,14 @@ function set(k,v){S[k]=v;render();maybeAutoAdvance();}
 /* Verbreiterung: kein maybeAutoAdvance — der Kunde waehlt hier bis zu vier Seiten
    nacheinander, ein Sprung nach der ersten Wahl waere mitten im Vorgang. */
 function setVerbr(feld,mm){ S[feld]=mm; render(); }
+/* Erst die Frage, ob ueberhaupt — dann erst die vier Seiten. Vier Zeilen mit je zehn
+   Breiten schrecken ab, wenn man sie gar nicht braucht. Beim Abwaehlen werden die
+   Seiten geleert, sonst bliebe eine unsichtbare Wahl im Preis stehen. */
+function setVerbrAn(an){
+  S.vbAn=!!an;
+  if(!an){ S.vbL=0; S.vbR=0; S.vbO=0; S.vbU=0; }
+  render();
+}
 /* Profilwechsel ist mehr als ein Feld setzen: IGLO 5 Classic EXT bringt eine eigene
    Anschlagliste (nur DIN links/rechts, nach aussen) und eigene Massgrenzen mit. Ohne
    das Nachziehen stand nach dem Wechsel ein Anschlag da, den es dort nicht gibt, und
