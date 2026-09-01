@@ -2858,7 +2858,11 @@ function skizzeHandle(open,hinge,gx,gy,sashW,gh,SFR,dark){
      verlor sich darauf. Beide Fassungen stammen aus derselben Herstellerzeichnung;
      die dunkle steht auf hellem Grund einfach im Kontrast, so wie die graue auf
      dunklem Rahmen. */
+  /* Helle Rahmen bekommen die dunkle Fassung des Griffbildes mit hellem Saum,
+     dunkle Rahmen die helle Fassung mit dunklem Saum — sonst verschwindet der Griff
+     entweder im weissen Rahmen oder sitzt als weisser Fleck auf Anthrazit. */
   const img=dark?'img/skizze/griff-grau.webp':'img/skizze/griff-dunkel.webp';
+  const beschlagFilter=dark?'url(#beschlagdunkel)':'url(#beschlagklar)';
   /* Der Griff wird in jeder Skizze gleich gross gezeichnet — wie die Bemassung auch.
      Massstaeblich mitwachsen zu lassen klingt richtig, sieht aber falsch aus: beim
      dreifluegeligen Fenster blieben davon 9 % der Blattgroesse uebrig, beim
@@ -2866,12 +2870,12 @@ function skizzeHandle(open,hinge,gx,gy,sashW,gh,SFR,dark){
      gh*0.34 deckelt ihn nur dort, wo das Glasfeld selbst zu flach ist. */
   const hH=Math.min(175, open==='kipp' ? sashW*0.42 : gh*0.34), hW=hH*16/58;   // Kippgriff liegt waagerecht — dort begrenzt die Fluegelbreite, nicht die Hoehe
   if(open==='kipp'){ const cx=gx+sashW/2, cy2=gy+SFR*0.95;
-    return `<image href="${img}" x="${cx-hH/2}" y="${cy2-hW/2}" width="${hH}" height="${hW}" transform="rotate(90 ${cx} ${cy2})" filter="url(#beschlagklar)"/>`; }
+    return `<image href="${img}" x="${cx-hH/2}" y="${cy2-hW/2}" width="${hH}" height="${hW}" transform="rotate(90 ${cx} ${cy2})" filter="${beschlagFilter}"/>`; }
   const x=griffRight ? gx+sashW-SFR*0.5-hW*0.5 : gx+SFR*0.5-hW*0.5;
   const gyTop=gy+gh*0.6-hH*0.5;   // Griff tiefer wie PDF (Griffhöhe ~420, unter der Mitte) → klar getrennt von der Dreh-Spitze
   // Griffbild ist für Griff-LINKS orientiert → Griff-rechts spiegeln, damit zwei Griffe am Pfosten symmetrisch sitzen (wie Drutex).
   const flip=griffRight ? ` transform="translate(${(2*x+hW).toFixed(1)},0) scale(-1,1)"` : '';
-  return `<image href="${img}" x="${x.toFixed(1)}" y="${gyTop.toFixed(1)}" width="${hW.toFixed(1)}" height="${hH.toFixed(1)}" filter="url(#beschlagklar)"${flip}/>`;
+  return `<image href="${img}" x="${x.toFixed(1)}" y="${gyTop.toFixed(1)}" width="${hW.toFixed(1)}" height="${hH.toFixed(1)}" filter="${beschlagFilter}"${flip}/>`;
 }
 // Scharniere/Bänder wie Drutex-PDF: kleine Kästchen mit Quer-Teilern (oben 3 Zellen, unten 2) an der Bandseite.
 function skizzeHinges(open,hinge,gx,gy,sashW,gh,SFR,line){
@@ -3011,7 +3015,12 @@ function flatWindowSVG(isBalkon){
   return s+`</svg>`;
 }
 function fensterStageSVG(){ return flatWindowSVG(false); }
-const DEFS=`<defs><filter id="beschlagklar" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB">
+const DEFS=`<defs><filter id="beschlagdunkel" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB">
+    <feMorphology in="SourceAlpha" operator="dilate" radius="5" result="dick"/>
+    <feFlood flood-color="#20242a" flood-opacity=".92"/><feComposite in2="dick" operator="in" result="saum"/>
+    <feComponentTransfer in="SourceGraphic"><feFuncR type="linear" slope="1.15" intercept="0.06"/><feFuncG type="linear" slope="1.15" intercept="0.06"/><feFuncB type="linear" slope="1.15" intercept="0.06"/></feComponentTransfer>
+    <feDropShadow dx="0" dy="1.2" stdDeviation="1.4" flood-color="#000000" flood-opacity=".35" result="griff"/>
+    <feMerge><feMergeNode in="saum"/><feMergeNode in="griff"/></feMerge></filter><filter id="beschlagklar" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB">
     <feMorphology in="SourceAlpha" operator="dilate" radius="5" result="dick"/>
     <feFlood flood-color="#ffffff" flood-opacity=".97"/><feComposite in2="dick" operator="in" result="saum"/>
     <feComponentTransfer in="SourceGraphic"><feFuncR type="linear" slope="1.22" intercept="-0.14"/><feFuncG type="linear" slope="1.22" intercept="-0.14"/><feFuncB type="linear" slope="1.22" intercept="-0.14"/></feComponentTransfer>
@@ -5711,7 +5720,7 @@ function _priceRoh(){
 function configTitle(){
   if(S.prod==='haustuer') return 'Haustür · '+(DOORN[S.doorModel]||'Modell');
   if(S.prod==='schiebe') return (S.hstSystem==='hs'?'Hebe-Schiebetür':'PSK Schiebetür');
-  if(S.prod==='balkon') return 'Balkontür · '+PROFN[S.profile];
+  if(S.prod==='balkon') return 'Balkontür · '+profilName(S.profile);
   return profilText();
 }
 const MAT_PRODN={kunststoff:'Kunststofffenster',holz:'Holzfenster',alu:'Aluminiumfenster'};
@@ -6799,13 +6808,25 @@ function panelHTML(){
   }
   if(k==='anfrage'){ return anfrageHTML(); }
 }
-const PROFN={classic:'IGLO 5 Classic',energy:'IGLO Energy Classic',edge:'IGLO EDGE',
-  softline68:'Softline 68 mm',softline78:'Softline 78 mm',softline88:'Softline 88 mm',
-  mb70:'MB-70',mb70hi:'MB-70HI',mb86si:'MB-86N SI'};
+/* Profilnamen kommen aus derselben Liste wie die Auswahlkarten (PROFILE_KAT).
+   Vorher standen sie ein zweites Mal von Hand hier — als IGLO Light und IGLO 5
+   Classic EXT dazukamen, waren sie in den Karten waehlbar, aber in Uebersicht,
+   Warenkorb und Mail stand "undefined". Eine Liste, ueberall derselbe Name: neue
+   Profile erscheinen ab sofort von allein. */
+const PROFN=(function(){
+  var namen={};
+  try{ Object.keys(PROFILE_KAT).forEach(function(mat){
+    (PROFILE_KAT[mat]||[]).forEach(function(k){ if(k&&k.v&&k.t) namen[k.v]=k.t; });
+  }); }catch(e){}
+  return namen;
+})();
+/* Fallback fuer den Fall, dass ein Profil doch einmal ohne Karte auftaucht: lieber
+   der technische Schluessel als das Wort "undefined" in einer Kundenmail. */
+function profilName(schluessel){ return PROFN[schluessel] || (schluessel ? String(schluessel) : '—'); }
 /* Holzart gehoert bei Holz mit in den Klartext — "Softline 68 mm" allein sagt weder
    dem Kunden noch der Fertigung, ob Kiefer oder Meranti gemeint ist. */
 function profilText(){
-  const p=PROFN[S.profile]||'—';
+  const p=profilName(S.profile)||'—';
   return (S.prod==='fenster'&&S.material==='holz'&&HOLZARTEN[S.holzart]) ? (p+' \u00b7 '+HOLZARTEN[S.holzart].n) : p;
 }
 const AUFTN={'1fl':'1 Flügel','2fl':'2 Flügel','3fl':'3 Flügel',ol:'Mit Oberlicht'};
@@ -6863,7 +6884,7 @@ function summaryPanel(){
   if(S.prod==='haustuer'){
     return kopf+`<div class="ak-list">`
       +p('Modell',DOORN[S.doorModel]||'—')
-      +p('Profil',PROFN[S.profile])
+      +p('Profil',profilName(S.profile))
       +farbP
       +glasP
       +p('Griff außen',(GRIFFT[_griffAussenVal()]||'—')+(_griffAussenVal()==='stoss'?` · ${S.stossHoehe||'1200'} mm`:''))
@@ -6905,7 +6926,7 @@ function summaryPanel(){
   const schallP = S.schall ? p('Schallschutz','Schallschutzglas') : '';
   return kopf+`<div class="ak-list">`
     +p('Aufteilung',AUFTN[S.aufteilung])
-    +p('Profil',PROFN[S.profile])
+    +p('Profil',profilName(S.profile))
     +farbP
     +glasP
     +schallP
@@ -6934,7 +6955,7 @@ function summaryRows(){
       +(ai.ansicht?`<span class="vsub" style="display:block;font-weight:500;color:#6b7280">${ai.ansicht}</span>`:'')
       +`</span></div>`; })();
   if(S.prod==='haustuer'){
-    return `<div class="srow"><span class="k">Profil</span><span class="v">${PROFN[S.profile]}</span></div>
+    return `<div class="srow"><span class="k">Profil</span><span class="v">${profilName(S.profile)}</span></div>
       ${aRow}
       <div class="srow"><span class="k">Modell</span><span class="v">${DOORN[S.doorModel]||'—'}</span></div>${massRow}${colorRows}
       <div class="srow"><span class="k">Verglasung</span><span class="v">${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}</span></div>
@@ -6959,7 +6980,7 @@ function summaryRows(){
   const sproN=(S.sproTyp&&S.sproTyp!=='keine')?((SPROTYPN[S.sproTyp]||'')+' · '+S.sproDicke+' mm · '+((SPRO_RASTER[S.sproRaster]||{}).name||'')):'ohne';
   const sproRow=`<div class="srow"><span class="k">Sprossen</span><span class="v">${sproN}</span></div>`;
   const schwelleRow = S.prod==='balkon'?`<div class="srow"><span class="k">Schwelle</span><span class="v">${S.balkonSchwelle==='alu'?'Aluschwelle':'ohne'}</span></div>`:'';
-  return `<div class="srow"><span class="k">Profil</span><span class="v">${PROFN[S.profile]}</span></div>
+  return `<div class="srow"><span class="k">Profil</span><span class="v">${profilName(S.profile)}</span></div>
     <div class="srow"><span class="k">Aufteilung</span><span class="v">${AUFTN[S.aufteilung]}</span></div>
     ${aRow}${massRow}${colorRows}
     <div class="srow"><span class="k">Verglasung</span><span class="v">${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}</span></div>${schwelleRow}
@@ -7725,7 +7746,7 @@ function schrittWert(k){
       case 'material':   return (MATERIALS[S.material]||{}).n||'';
       case 'holzart':    return (HOLZARTEN[S.holzart]||{}).n||'';
       case 'profil':     return S.prod==='schiebe' ? (S.hstSystem==='hs'?'Hebe-Schiebet\u00fcr':'PSK Schiebet\u00fcr')
-                                                   : (PROFN[S.profile]||'');
+                                                   : (profilName(S.profile)||'');
       case 'modell':     return DOORN[S.doorModel]||'';
       case 'aufteilung': return ({'1fl':'1 Fl\u00fcgel','2fl':'2 Fl\u00fcgel','3fl':'3 Fl\u00fcgel'})[S.aufteilung]||'';
       case 'masse':      return S.w+' \u00d7 '+S.h+' mm';
