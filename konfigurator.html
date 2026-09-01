@@ -408,6 +408,48 @@ body.wiz-active .dfnav-tel:hover{background:rgba(34,94,170,.10)}
 .opts.three{grid-template-columns:repeat(3,1fr)}
 /* Angebrochene letzte Reihe mittig statt linksbuendig — sonst klafft rechts eine Luecke.
    Gleiche Kartenbreite wie im Raster: (100% - 2x12px Abstand) / 3. */
+/* Profilkarten flach halten: mit fuenf Systemen muessen alle auf einen Blick sichtbar
+   sein, ohne zu scrollen. Ungekuerzt endete die letzte Karte bei 948 px — auf einem
+   1280x800-Bildschirm fehlten 147 px. Gekuerzt wird am Bild und an den Zeilenabstaenden,
+   NICHT an der Schriftgroesse der Werte: die drei Zahlen sind der Grund fuer die Karte.
+   Der Vorsatz `.grid` steht davor, weil weiter unten `.grid.select .ocard .vis` mit
+   derselben Gewichtung eine groessere Bildhoehe setzt und als spaetere Regel gewinnen
+   wuerde — ohne den Vorsatz blieb die Karte unveraendert hoch. */
+.grid .opts.profilw .ocard{padding:11px}
+.grid .opts.profilw .ocard .vis{height:74px;margin-bottom:6px}
+.grid .opts.profilw .ocard .vis img{max-height:74px;width:auto;object-fit:contain}
+.grid .opts.profilw .ocard .pspecs{margin-top:8px}
+.grid .opts.profilw .ocard .pspec{padding:4px 0}
+.grid .opts.profilw .ocard .s{margin-top:1px}
+/* Am Handy stehen zwei Karten nebeneinander, also drei Reihen. Damit auch dort alle
+   fuenf Systeme ohne Scrollen sichtbar sind, faellt das Bild kleiner aus und die
+   Unterzeile muss in EINE Zeile passen — zweizeilig kostet sie 31 statt 16 Pixel, und
+   das dreimal. Der Vorsatz `#wizGrid` ist noetig, weil die Handy-Regeln der Karten
+   ueber diese Kennung laufen und sonst gewinnen. */
+@media(max-width:600px){
+  /* `!important` ist hier bewusst gesetzt: die bestehende Handy-Regel fuer Kartenbilder
+     hat dieselbe Gewichtung und steht weiter unten in der Datei, gewinnt also sonst.
+     Nur Bildhoehe und Innenabstand sind so gesetzt, nichts anderes. */
+  #wizGrid .opts.profilw .ocard{padding:9px !important}
+  #wizGrid .opts.profilw .ocard .vis{height:46px !important;margin-bottom:4px !important}
+  #wizGrid .opts.profilw .ocard .vis img{max-height:46px !important;width:auto;object-fit:contain}
+  /* Am Handy steht ueber den Karten schon die Ueberschrift "Ihr Profil" — die
+     Zwischenzeile "Profil-System" sagt dasselbe noch einmal und kostet den Platz,
+     der fuer die letzte Kartenreihe fehlt. */
+  #wizGrid .card:has(.opts.profilw) .grp-title{display:none}
+  #wizGrid .opts.profilw .ocard .t{font-size:13px;line-height:1.2}
+  #wizGrid .opts.profilw .ocard .s{font-size:10.5px;line-height:1.2;letter-spacing:0}
+  /* Am Handy passen lange Namen wie "IGLO Energy Classic" nur zweizeilig, kurze
+     einzeilig — dadurch standen die Wertezeilen zweier nebeneinander liegender Karten
+     auf verschiedener Hoehe und liessen sich nicht mehr vergleichen. Name und
+     Unterzeile bekommen deshalb feste Hoehe fuer zwei Zeilen. */
+  #wizGrid .opts.profilw .ocard .t{min-height:2.4em}
+  #wizGrid .opts.profilw .ocard .s{min-height:2.4em}
+  #wizGrid .opts.profilw .ocard .pspec{padding:2px 0}
+  #wizGrid .opts.profilw .ocard .pspec dt,
+  #wizGrid .opts.profilw .ocard .pspec dd{font-size:11px}
+  #wizGrid .opts.profilw .ocard .pspecs{margin-top:6px}
+}
 .opts.three.mitte{display:flex;flex-wrap:wrap;justify-content:center}
 /* border-box, sonst kommen Innenabstand und Rahmen oben drauf. Und bewusst 12px statt
    des rechnerischen Minimums abziehen: der Abstand zwischen den Karten ist je nach
@@ -5850,24 +5892,27 @@ const HOLZARTEN={
    Bei Holz/Alu stehen nur Bautiefe und Dichtungen: pruefbare Konstruktionsangaben.
    Uw-Werte kommen erst aus den Drutex-Datenblaettern dazu, nicht aus Fremdquellen. */
 const PROFILE_KAT={
-  /* Unterzeile: die Kammerzahl und das, was das System ausmacht. Ohne sie stand auf
-     der EXT-Karte nirgends, dass dieses Fenster nach AUSSEN oeffnet — die wichtigste
-     Eigenschaft des Profils. Und IGLO Light sah aus wie ein teureres IGLO 5 Classic
-     mit schlechterem Uw, weil sein Vorteil (schmaler Rahmen, mehr Glasflaeche) in
-     keiner der drei Zahlenzeilen vorkommt. Die Unterzeile bekommen ALLE fuenf Karten,
-     sonst verrutschen die Zahlenzeilen gegeneinander und lassen sich nicht mehr
-     vergleichen. Angaben von den Herstellerseiten. */
+  /* Unterzeile: das, was das System ausmacht. Ohne sie stand auf der EXT-Karte nirgends,
+     dass dieses Fenster nach AUSSEN oeffnet — die wichtigste Eigenschaft des Profils.
+     Und IGLO Light sah aus wie ein teureres IGLO 5 Classic mit schlechterem Uw, weil
+     sein Vorteil (schmaler Rahmen, mehr Glasflaeche) in keiner der drei Zahlenzeilen
+     vorkommt. Die Unterzeile bekommen ALLE fuenf Karten, sonst verrutschen die
+     Zahlenzeilen gegeneinander und lassen sich nicht mehr vergleichen.
+     Die Kammerzahl steht in der ersten Wertezeile statt in der Unterzeile: am Handy
+     bricht die Unterzeile sonst auf zwei Zeilen um, und das kostet fuenfmal 15 Pixel —
+     genug, damit nicht mehr alle Profile ohne Scrollen sichtbar sind.
+     Alle Angaben von den Herstellerseiten. */
   kunststoff:[
-    {v:'classic', img:'iglo5-zentriert',               t:'IGLO 5 Classic', s:'5 Kammern · flächenversetzt',
-     sp:[['Bautiefe','70 mm'],['Dichtungen','2 EPDM'],['Uw in W/(m²K)','0,86']]},
-    {v:'energy',  img:'iglo-energy-classic-zentriert', t:'IGLO Energy Classic', s:'7 Kammern · flächenversetzt',
-     sp:[['Bautiefe','82 mm'],['Dichtungen','3'],['Uw in W/(m²K)','0,73']]},
-    {v:'light',   img:'iglo-light-zentriert',          t:'IGLO Light', s:'5 Kammern · schmaler Rahmen',
-     sp:[['Bautiefe','70 mm'],['Dichtungen','2 EPDM'],['Uw in W/(m²K)','0,88']]},
-    {v:'ext',     img:'iglo-ext-zentriert',            t:'IGLO 5 Classic EXT', s:'5 Kammern · nach außen öffnend',
-     sp:[['Bautiefe','70 mm'],['Dichtungen','2 EPDM'],['Uw in W/(m²K)','0,89']]},
-    {v:'edge',    img:'iglo-edge-zentriert',           t:'IGLO EDGE', s:'7 Kammern · flächenversetzt',
-     sp:[['Bautiefe','82 mm'],['Dichtungen','3 EPDM'],['Uw in W/(m²K)','0,66']]}],
+    {v:'classic', img:'iglo5-zentriert',               t:'IGLO 5 Classic', s:'flächenversetzt',
+     sp:[['Bautiefe · Kammern','70 mm · 5'],['Dichtungen','2 EPDM'],['Uw in W/(m²K)','0,86']]},
+    {v:'energy',  img:'iglo-energy-classic-zentriert', t:'IGLO Energy Classic', s:'flächenversetzt',
+     sp:[['Bautiefe · Kammern','82 mm · 7'],['Dichtungen','3'],['Uw in W/(m²K)','0,73']]},
+    {v:'light',   img:'iglo-light-zentriert',          t:'IGLO Light', s:'schmaler Rahmen, mehr Glas',
+     sp:[['Bautiefe · Kammern','70 mm · 5'],['Dichtungen','2 EPDM'],['Uw in W/(m²K)','0,88']]},
+    {v:'ext',     img:'iglo-ext-zentriert',            t:'IGLO 5 Classic EXT', s:'öffnet nach außen',
+     sp:[['Bautiefe · Kammern','70 mm · 5'],['Dichtungen','2 EPDM'],['Uw in W/(m²K)','0,89']]},
+    {v:'edge',    img:'iglo-edge-zentriert',           t:'IGLO EDGE', s:'flächenversetzt',
+     sp:[['Bautiefe · Kammern','82 mm · 7'],['Dichtungen','3 EPDM'],['Uw in W/(m²K)','0,66']]}],
   holz:[
     {v:'softline68', img:'softline68', t:'Softline 68 mm',
      sp:[['Bautiefe','68 mm'],['Dichtungen','2'],['Uw in W/(m²K)','1,08']]},
@@ -6515,7 +6560,7 @@ function panelHTML(){
     /* Bei fuenf Karten bleibt in der zweiten Reihe rechts eine Luecke stehen. Mit
        'mitte' ruecken die uebrigen Karten mittig unter die obere Reihe, statt
        linksbuendig zu kleben. Greift nur, wenn die Zahl nicht durch drei teilbar ist. */
-    const _cls=(_liste.length>2) ? ('three'+((_liste.length%3)?' mitte':'')) : 'two';
+    const _cls=((_liste.length>2) ? ('three'+((_liste.length%3)?' mitte':'')) : 'two')+' profilw';
     return grp('Profil-System', _cls, _liste.map(function(p){
       return choiceCardImg(S.profile===p.v, "setProfil('"+p.v+"')", profilBild(_mat,p), p.t, p.s||'', p.sp);
     }).join(''));
