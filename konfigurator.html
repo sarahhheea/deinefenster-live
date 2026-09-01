@@ -1407,6 +1407,15 @@ html,body{overflow-x:clip}
   border-radius:18px;padding:20px !important;margin:16px 4px 0;color:#fff;
   box-shadow:0 18px 50px -24px rgba(8,21,46,.45)}
 .cd-tot{color:#fff}.cd-tot b{font-size:29px;letter-spacing:-.8px}
+/* Zwischensumme und Lieferung ueber dem Gesamtpreis - auf dem dunklen Block, also
+   gedaempft, damit die Endsumme die Hauptzahl bleibt. */
+.cd-zeile{display:flex;justify-content:space-between;gap:12px;font-size:13.5px;
+  color:#9fb3d0;padding:3px 0;font-variant-numeric:tabular-nums}
+.cd-zeile+.cd-zeile{margin-bottom:6px}
+.cd-tot{border-top:1px solid rgba(159,179,208,.28);padding-top:9px}
+/* Stueckpreis unter der Zeilensumme. */
+.cd-stueck{display:block;font-size:12.5px;font-weight:600;color:var(--ink-soft);
+  margin-top:2px;font-variant-numeric:tabular-nums}
 .cd-mwst{color:#9fb3d0 !important;text-align:right}
 /* Dieselbe Hauptaktion wie unten in der Fussleiste — also auch dieselbe Hoehe
    und dieselbe Form. Vorher 46px hoch und eckiger als der Weiter-Knopf. */
@@ -6210,7 +6219,19 @@ function cartSnapshot(it){
        r={ sv:3, pv:PRICE_REV, price:((typeof _p==='number'&&_p>0)?_p:(_kein?null:(it.lastPrice||0))), sketch:skizzeSeite(conf,true), title:withConf(conf,configTitle), specs:posKeySpecs(conf), full:withConf(conf,summaryRows) }; }catch(e){ r={sv:3,pv:PRICE_REV,price:(it.lastPrice||0),sketch:'',title:'Artikel',specs:'',full:''}; }
   return { conf, name:it.name||'', qty:q, r };
 }
-function saveCart(){ try{ localStorage.setItem(CART_LS_KEY, JSON.stringify({v:4,t:Date.now(),liefer:liefer,lieferWunsch:lieferWunsch,items:cart.map(cartSnapshot)})); }catch(e){}
+/* Der Fehlschlag beim Speichern war frueher ein leeres catch. Im privaten Fenster oder
+   bei vollem Speicher lief alles normal weiter - nach dem naechsten Laden war der Korb
+   leer, ohne dass der Kunde je einen Hinweis bekommen hatte. Neun Konfigurationsschritte
+   still verloren. Jetzt merken wir den Fehlschlag und sagen es einmal. */
+var korbSpeicherFehler=false;
+function saveCart(){
+  try{
+    localStorage.setItem(CART_LS_KEY, JSON.stringify({v:4,t:Date.now(),liefer:liefer,lieferWunsch:lieferWunsch,items:cart.map(cartSnapshot)}));
+    korbSpeicherFehler=false;
+  }catch(e){
+    korbSpeicherFehler=true;
+    try{ if(document.getElementById('cdBody')) renderCartDrawer(); }catch(_){}
+  }
   try{ window.dispatchEvent(new CustomEvent('df-cart-changed',{detail:{count:cart.length}})); }catch(e){} }
 /* Farbindex-Migration. Farben stehen als INDEX im Warenkorb, nicht als Name — wer die
    Liste anfasst, muss alte Koerbe umrechnen, sonst zeigt ein liegengebliebener Korb
@@ -6262,6 +6283,29 @@ function _migColorsV4(conf){
   });
   return conf;
 }
+/* Sicherheitsnetz fuer Farbindizes. Farben liegen als INDEX im Korb. Zeigt ein
+   gespeicherter Korb auf eine Position, die es in der heutigen Liste nicht mehr gibt,
+   warf flatWindowSVG bisher einen TypeError - und weil cdItemHTML ungeschuetzt in
+   cart.map() laeuft, riss eine kaputte Position den GANZEN Warenkorb mit: der Kunde
+   tippte aufs Korb-Symbol und es passierte nichts. Die Migration deckt nur bekannte
+   Umbauten ab; das hier faengt alles ab, was sie nicht kennt. */
+function _klemmFarbIdx(conf){
+  if(!conf) return conf;
+  function liste(k){
+    if(k==='panzer'||k==='endleiste') return COLORS_ROLL;
+    if(conf.prod!=='fenster') return COLORS_PVC;
+    if(conf.material==='alu')  return COLORS_ALU;
+    if(conf.material==='holz') return (conf.holzart==='meranti')?COLORS_HOLZ_MERANTI:COLORS_HOLZ_KIEFER;
+    return COLORS_PVC;
+  }
+  ['outer','inner','panzer','endleiste'].forEach(function(k){
+    var v=conf[k];
+    if(v===null||v===undefined) return;             // 'passend zum Rahmen' bleibt
+    var L=liste(k)||[];
+    if(typeof v!=='number' || !isFinite(v) || v<0 || v>=L.length) conf[k]=(k==='panzer'||k==='endleiste')?null:0;
+  });
+  return conf;
+}
 /* Zustand eines wiederhergestellten Warenkorbs — fuer den Hinweis im Kopf. */
 var korbAlterTage=null, korbPreiseNeu=false, korbVerfallen=false;
 function loadCart(){ try{ const d=JSON.parse(localStorage.getItem(CART_LS_KEY)||'null');
@@ -6284,6 +6328,7 @@ function loadCart(){ try{ const d=JSON.parse(localStorage.getItem(CART_LS_KEY)||
       var c=o.conf;
       if(altV3) c=_migColors(c);                    // Bergkiefer-Luecke zuerst schliessen
       if(altV4) c=_migColorsV4(c);                  // danach auf die geprueste Herstellerliste
+      c=_klemmFarbIdx(c);                           // und zuletzt alles abfangen, was keine Migration kennt
       return {conf:c,name:o.name||'',lastPrice:(o.r&&Number(o.r.price))||0};
     });
     if(altV4) setTimeout(saveCart,0); }
@@ -6364,7 +6409,12 @@ function cdItemHTML(it,i){
       +'<div class="cd-specs">'+specs+'</div>'
       +'<input class="cd-raum" type="text" maxlength="40" placeholder="Raum (optional, z. B. Bad OG)" value="'+String(it.name||'').replace(/"/g,'&quot;')+'" oninput="itemNameSetzen('+i+',this.value)" aria-label="Raumbezeichnung f&uuml;r Position '+(i+1)+'">'
     +'</div>'
-    +'<div class="cd-row"><div class="cd-price'+(unit==null?' is-offen':'')+'">'+eurOffen(unit==null?null:unit*q)+'</div><div class="cd-qty"><button type="button" onclick="itemQty('+i+',-1);renderCartDrawer()" aria-label="Menge verringern">&minus;</button><span>'+q+'</span><button type="button" onclick="itemQty('+i+',1);renderCartDrawer()" aria-label="Menge erhöhen">+</button></div></div>'
+    +'<div class="cd-row"><div class="cd-price'+(unit==null?' is-offen':'')+'">'+eurOffen(unit==null?null:unit*q)
+      /* Bei Menge > 1 stand hier nur die Zeilensumme: "635,00 EUR" ohne zu sagen, dass das
+         5 x 127 EUR sind. Checkout und Mail nannten den Stueckpreis, der Korb als einzige
+         Stelle nicht. */
+      +((unit!=null && q>1) ? '<span class="cd-stueck">'+eur(unit)+' / St\u00fcck</span>' : '')
+      +'</div><div class="cd-qty"><button type="button" onclick="itemQty('+i+',-1);renderCartDrawer()" aria-label="Menge verringern">&minus;</button><span>'+q+'</span><button type="button" onclick="itemQty('+i+',1);renderCartDrawer()" aria-label="Menge erhöhen">+</button></div></div>'
     +'<div class="cd-acts"><button type="button" class="cd-edit" onclick="cdEdit('+i+')">Bearbeiten</button><button type="button" class="cd-del" onclick="itemRemove('+i+');renderCartDrawer()">Entfernen</button></div>'
     +'</div>';
 }
@@ -6389,12 +6439,23 @@ function renderCartDrawer(){
     var _rest = _q<LIEFER_MIN ? (LIEFER_MIN-_q) : (10-_q);
     var _wort = _rest===1 ? 'Element' : 'Elemente';
     var _pct  = Math.min(100, Math.round(_q/10*100));
-    if(_hs || _q>=10)
+    /* Die Hebe-Schiebetuer stand hier frueher mit "_hs ||" in derselben Zeile wie
+       "ab 10 Elementen": die Leiste meldete "Kostenlose Lieferung erreicht", waehrend
+       cartTotals() 300 EUR berechnete und in die Endsumme nahm. Eine falsche
+       Preisangabe unmittelbar am Preis. Die Leiste sagt jetzt dasselbe wie die
+       Rechnung - die HS-Tuer darf frueher geliefert werden, aber nicht umsonst. */
+    if(_q>=10)
       ship.innerHTML='<div class="cd-ship-msg reached"><b>Kostenlose Lieferung</b> deutschlandweit erreicht</div><div class="cd-ship-bar reached"><i style="width:100%"></i></div>';
+    else if(_hs)
+      ship.innerHTML='<div class="cd-ship-msg"><b>Hebe-Schiebet\u00fcr:</b> Direktlieferung vom Hersteller f\u00fcr <b>300 \u20ac</b> \u2014 auch unter '+LIEFER_MIN+' Elementen. Ab 10 Elementen kostenfrei.</div><div class="cd-ship-bar"><i style="width:'+_pct+'%"></i></div>';
     else if(_q<LIEFER_MIN)
       ship.innerHTML='<div class="cd-ship-msg"><b>Abholung im Lager</b> (kostenlos). Ab '+LIEFER_MIN+' Elementen liefern wir \u2014 noch <b>'+_rest+' '+_wort+'</b>.</div><div class="cd-ship-bar"><i style="width:'+_pct+'%"></i></div>';
     else
       ship.innerHTML='<div class="cd-ship-msg">Lieferung m\u00f6glich. Noch <b>'+_rest+' '+_wort+'</b> bis zur <b>kostenlosen</b> Lieferung.</div><div class="cd-ship-bar"><i style="width:'+_pct+'%"></i></div>';
+    if(korbSpeicherFehler)
+      ship.innerHTML = '<div class="cd-hinweis" style="text-align:left">Ihr Browser speichert diese Zusammenstellung nicht '
+        + '(privates Fenster oder voller Speicher). Bitte schlie\u00dfen Sie die Anfrage in dieser Sitzung ab \u2014 '
+        + 'nach dem Schlie\u00dfen des Tabs w\u00e4re sie verloren.</div>' + ship.innerHTML;
     ship.innerHTML = (ship.dataset.hinweis||'') + ship.innerHTML;
   } }
   if(!cart.length){
@@ -6406,7 +6467,14 @@ function renderCartDrawer(){
   // Sticky bleibt nur, was sticky sein MUSS: Gesamtpreis und der Haupt-Knopf. Alles andere
   // scrollt mit. Vorher belegte der Fuss 383 von 844 px — fuer die Positionen blieben 309 px
   // bei 622 px Inhalt, der Kunde sah nur die Skizze und weder Titel noch Preis noch Menge.
-  body.innerHTML=cart.map(cdItemHTML).join('')
+  /* Je Position abgesichert: faellt eine aus (defekte gespeicherte Konfiguration),
+     bleibt der Rest des Warenkorbs bedienbar statt dass der Drawer leer aufgeht. */
+  body.innerHTML=cart.map(function(it,i){
+    try{ return cdItemHTML(it,i); }
+    catch(e){ return '<div class="cd-item"><div class="cd-hinweis" style="text-align:left">'
+      +'Diese Position l\u00e4sst sich nicht mehr anzeigen. Bitte entfernen und neu zusammenstellen.'
+      +'</div><button type="button" class="cd-del" onclick="itemRemove('+i+');renderCartDrawer()">Entfernen</button></div>'; }
+  }).join('')
     +lieferWahlHTML(t,'cd-liefer')
     +'<div class="cd-sum"><span>Zwischensumme ('+t.qty+')</span><b>'+(totalOffen(t)?'Auf Anfrage':eur(t.sub))+'</b></div>'
     +offenNote(t)
@@ -6415,7 +6483,17 @@ function renderCartDrawer(){
     +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="17" height="17"><path d="M12 5v14M5 12h14"/></svg>'
     +'Weiteres Produkt konfigurieren</button>'
     +'<button type="button" class="cd-cont" onclick="closeCartDrawer()">Zur&uuml;ck zur Konfiguration</button>';
-  foot.innerHTML='<div class="cd-tot"><span>Gesamt</span><b>'+totalText(t)+'</b></div>'
+  /* Zwischensumme und Lieferung als eigene Zeilen. Vorher sprang die Summe zwischen
+     Positionsliste und "Gesamt" um bis zu 300 EUR, ohne dass irgendwo stand warum -
+     der Betrag stand nur klein im Lieferung-Knopf weiter oben. Der Checkout hat es
+     immer richtig gemacht; der Korb zieht jetzt nach. */
+  var _aufschluss = '';
+  if(!totalOffen(t) && cart.length){
+    _aufschluss = '<div class="cd-zeile"><span>Zwischensumme</span><span>'+eur(t.sub)+'</span></div>'
+      + '<div class="cd-zeile"><span>'+(liefer==='abholung'?'Abholung im Lager':'Lieferung')+'</span><span>'
+      + (t.ship>0 ? eur(t.ship) : 'kostenlos')+'</span></div>';
+  }
+  foot.innerHTML=_aufschluss+'<div class="cd-tot"><span>Gesamt</span><b>'+totalText(t)+'</b></div>'
     +'<div class="cd-mwst">'+(totalOffen(t)?'Preis nennen wir im Angebot · unverbindlich, kein Kaufvertrag':'inkl. 19 % MwSt · unverbindlich, kein Kaufvertrag')+'</div>'
     +'<button type="button" class="cd-cta" onclick="cdToAnfrage()">Angebot anfordern &rarr;</button>'
     // Vertrauen an der Stelle, an der die Anfrage abgeschickt wird: bei einer vierstelligen
@@ -6821,7 +6899,7 @@ function panelHTML(){
   }
   if(k==='anzahl') return `<div class="card"><div class="grp-title">Anzahl gleicher ${prodUnit()==='Fenster'?'Fenster':prodUnit()+'en'}</div>
     <div class="qwrap"><button class="qbtn" onclick="set('anzahl',Math.max(1,S.anzahl-1))">−</button><div class="qnum">${S.anzahl}</div><button class="qbtn" onclick="set('anzahl',Math.min(99,S.anzahl+1))">+</button></div>
-    <div class="mhint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span>Der Preis gilt pro ${prodUnit()}. Der Versand richtet sich nach der Gesamtanzahl (ab 10 kostenfrei).</span></div></div>`;
+    <div class="mhint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span>Der Preis gilt pro ${prodUnit()}. Abholung im Lager ist kostenlos. Geliefert wird ab 5 Elementen (5\u20139 St\u00fcck 239 \u20ac, ab 10 kostenfrei).</span></div></div>`;
   if(k==='glas'){
     // IGLO EDGE gibt es beim Hersteller ausschliesslich mit 3-fach-Verglasung — eine 2-fach-Variante
     // existiert nicht. Sie hier zur Wahl zu stellen hiesse, eine nicht baubare Bestellung zuzulassen.
@@ -7579,7 +7657,13 @@ function _mailTotals(t){
       + '<tr><td height="1" bgcolor="#e6eaf1" style="height:1px;line-height:1px;font-size:0;background:#e6eaf1">&nbsp;</td></tr></table></td></tr>'
     + '<tr><td style="padding:12px 0 0;'+AR+'font-size:15px;line-height:26px;font-weight:700;color:#131a24">Gesamt</td>'
       + '<td align="right" style="padding:12px 0 0;'+AR+'font-size:24px;line-height:26px;font-weight:700;color:#131a24">'+totalText(t)+'</td></tr>'
-    + '<tr><td colspan="2" style="padding:6px 0 0;'+AR+'font-size:12px;line-height:17px;color:#5b6472">inkl. 19 % MwSt. ('+eur(t.mwst)+')</td></tr>'
+    /* Bei einem Korb ganz ohne gemessenen Preis (Holz/Alu) stand hier frueher
+       "Gesamt: Auf Anfrage" und direkt darunter "inkl. 19 % MwSt. (0,00 EUR)" - und
+       dieser Block geht ueber confirmation.detailsHtml auch an den Kunden. Eine
+       Null-Euro-Steuer neben "auf Anfrage" ist schlicht falsch. */
+    + (totalOffen(t)
+        ? '<tr><td colspan="2" style="padding:6px 0 0;'+AR+'font-size:12px;line-height:17px;color:#5b6472">Preise inkl. 19 % MwSt. \u2014 den Betrag nennen wir im Angebot.</td></tr>'
+        : '<tr><td colspan="2" style="padding:6px 0 0;'+AR+'font-size:12px;line-height:17px;color:#5b6472">inkl. 19 % MwSt. ('+eur(t.mwst)+')</td></tr>')
     + '<tr><td colspan="2" style="padding:2px 0 0;'+AR+'font-size:12px;line-height:17px;color:#5b6472">Unverbindlicher Richtpreis — dies ist kein Kaufvertrag.</td></tr>'
     + '</table>';
 }
@@ -7602,7 +7686,7 @@ function _mailKopf(nr,t){
     + '<div style="height:18px;line-height:18px;font-size:0">&nbsp;</div>'
     + '<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;background:#f3f8ff;border:1px solid #d8e6fa;border-radius:10px">'
     + '<tr><td style="padding:14px 16px"><table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr>'
-    + zelle('Anfrage-Nr.',esc(nr),200) + zelle('Summe',eur(t.total),160)
+    + zelle('Anfrage-Nr.',esc(nr),200) + zelle('Summe',totalText(t),160)
     + '</tr></table></td></tr></table>'
     + '<div style="height:18px;line-height:18px;font-size:0">&nbsp;</div>';
 }
