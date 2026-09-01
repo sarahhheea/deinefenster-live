@@ -234,6 +234,29 @@ body.wiz-active .dfnav-tel:hover{background:rgba(34,94,170,.10)}
 .massecard .mfield label{text-align:center}
 .massecard .mrow{padding:0 14px}
 .massecard .mrow input{text-align:center;letter-spacing:.5px}
+/* Messhilfe: der Kernsatz steht immer da, die Anleitung klappt auf. Wer weiss wie
+   gemessen wird, wird nicht aufgehalten; wer unsicher ist, muss die Seite nicht verlassen. */
+.messhilfe{margin-top:18px;text-align:left}
+.messhilfe .mh-kern{margin:0;padding:13px 15px;background:#eef2f8;border:1px solid var(--line);
+  border-radius:12px;font-size:13.5px;line-height:1.5;color:var(--ink-soft)}
+.messhilfe .mh-kern b{color:var(--ink);font-weight:700}
+.messhilfe .mh-mehr{margin-top:9px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.messhilfe .mh-mehr summary{cursor:pointer;list-style:none;padding:12px 15px;min-height:var(--tap);
+  display:flex;align-items:center;font-family:var(--serif);font-weight:700;font-size:14px;color:var(--accent)}
+.messhilfe .mh-mehr summary::-webkit-details-marker{display:none}
+.messhilfe .mh-mehr summary::after{content:'';margin-left:auto;width:9px;height:9px;
+  border-right:2px solid currentColor;border-bottom:2px solid currentColor;
+  transform:rotate(45deg) translateY(-2px);transition:transform .2s var(--ease)}
+.messhilfe .mh-mehr[open] summary::after{transform:rotate(225deg) translateY(-2px)}
+.messhilfe .mh-mehr summary:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:12px}
+.messhilfe .mh-inhalt{padding:0 15px 15px;border-top:1px solid var(--line)}
+.messhilfe .mh-skizze{display:block;width:100%;max-width:280px;height:auto;margin:14px auto 4px}
+.messhilfe .mh-schritte{margin:6px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:7px}
+.messhilfe .mh-schritte li{font-size:13.5px;line-height:1.5;color:var(--ink-soft)}
+.messhilfe .mh-schritte b{color:var(--ink);font-weight:700}
+.messhilfe .mh-fuss{margin:13px 0 0;font-size:12.5px;line-height:1.5;color:var(--ink-soft)}
+.messhilfe .mh-fuss a{color:var(--accent);font-weight:600}
+@media(prefers-reduced-motion:reduce){.messhilfe .mh-mehr summary::after{transition:none}}
 .mhint{background:var(--bg);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;font-size:13.5px;color:var(--ink-soft);display:flex;gap:10px}
 .mhint svg{width:19px;height:19px;flex:0 0 auto;color:var(--accent)}
 .pzrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
@@ -5900,7 +5923,7 @@ const STEPS_FENSTER=[  // Reihenfolge exakt wie Live-Konfigurator (STEP_ORDER)
   {key:'profil',label:'Profil',title:['Ihr ','Profil'],sub:'Das Drutex-System für Ihr Fenster.'},
   {key:'aufteilung',label:'Aufteilung',title:['Die ','Aufteilung'],sub:'Wie viele Flügel soll Ihr Fenster haben?'},
   {key:'oeffnung',label:'Öffnung',title:['Die ','Öffnungsart'],sub:'In welche Richtung öffnet das Fenster?'},
-  {key:'masse',label:'Maße',title:['Ihre ','Maße'],sub:'Breite und Höhe der Öffnung in Millimeter.'},
+  {key:'masse',label:'Maße',title:['Ihre ','Maße'],sub:'Breite und Höhe der Maueröffnung (Rohbaumaß) in Millimeter.'},
   {key:'anzahl',label:'Anzahl',title:['Die ','Anzahl'],sub:'Wie viele gleiche Fenster benötigen Sie?'},
   {key:'farbe',label:'Farbe',title:['Die ','Farbe'],sub:'Außen- und Innenfarbe — die Vorschau zeigt Ihre Wahl.'},
   {key:'glas',label:'Glas',title:['Die ','Verglasung'],sub:'2-fach oder 3-fach Wärmeschutz.'},
@@ -5919,7 +5942,7 @@ const STEPS_BALKON=[  // Reihenfolge wie Live-Konfigurator (WIZ_ALL, gilt:'balko
   {key:'profil',label:'Profil',title:['Ihr ','Profil'],sub:'Das Drutex-System für Ihre Balkontür.'},
   {key:'aufteilung',label:'Aufteilung',title:['Die ','Aufteilung'],sub:'Ein- oder zweiflügelige Balkontür?'},
   {key:'oeffnung',label:'Öffnung',title:['Die ','Öffnungsart'],sub:'In welche Richtung öffnet die Tür?'},
-  {key:'masse',label:'Maße',title:['Ihre ','Maße'],sub:'Breite und Höhe der Öffnung in Millimeter.'},
+  {key:'masse',label:'Maße',title:['Ihre ','Maße'],sub:'Breite und Höhe der Maueröffnung (Rohbaumaß) in Millimeter.'},
   {key:'anzahl',label:'Anzahl',title:['Die ','Anzahl'],sub:'Wie viele gleiche Balkontüren benötigen Sie?'},
   {key:'farbe',label:'Farbe',title:['Die ','Farbe'],sub:'Außen- und Innenfarbe — die Vorschau zeigt Ihre Wahl.'},
   {key:'glas',label:'Glas',title:['Die ','Verglasung'],sub:'2-fach oder 3-fach Wärmeschutz.'},
@@ -5934,7 +5957,7 @@ const STEPS_BALKON=[  // Reihenfolge wie Live-Konfigurator (WIZ_ALL, gilt:'balko
 const STEPS_HAUSTUER=[  // Reihenfolge wie im Live-Konfigurator (WIZ_ALL, gilt:'haustuere')
   {key:'profil',label:'Profil',title:['Ihr ','Profil'],sub:'Das Drutex-System für Ihre Haustür.'},
   {key:'oeffnung',label:'Anschlag',title:['Der ','Anschlag'],sub:'Öffnet die Tür nach links oder rechts (DIN)?'},
-  {key:'masse',label:'Maße',title:['Ihre ','Maße'],sub:'Breite und Höhe der Türöffnung in Millimeter.'},
+  {key:'masse',label:'Maße',title:['Ihre ','Maße'],sub:'Breite und Höhe der Türöffnung im Rohbau in Millimeter.'},
   {key:'anzahl',label:'Anzahl',title:['Die ','Anzahl'],sub:'Wie viele gleiche Haustüren benötigen Sie?'},
   {key:'modell',label:'Modell',title:['Ihr ','Türmodell'],sub:'Ihr Haustür-Design — die Vorschau zeigt es sofort.'},
   {key:'farbe',label:'Farbe',title:['Die ','Farbe'],sub:'Außen- und Innenfarbe des Türblatts.'},
@@ -5950,7 +5973,7 @@ const STEPS_HAUSTUER=[  // Reihenfolge wie im Live-Konfigurator (WIZ_ALL, gilt:'
 function buildSchiebeSteps(){
   const profil={key:'profil',label:'System',title:['Ihr ','Schiebe-System'],sub:'Parallel-Schiebe-Kipp oder Hebe-Schiebe-Tür?'};
   const common=[
-    {key:'masse',label:'Maße',title:['Ihre ','Maße'],sub:'Breite und Höhe der Öffnung in Millimeter.'},
+    {key:'masse',label:'Maße',title:['Ihre ','Maße'],sub:'Breite und Höhe der Maueröffnung (Rohbaumaß) in Millimeter.'},
     {key:'anzahl',label:'Anzahl',title:['Die ','Anzahl'],sub:'Wie viele gleiche Schiebetüren benötigen Sie?'},
     {key:'farbe',label:'Farbe',title:['Die ','Farbe'],sub:'Außen- und Innenfarbe — die Vorschau zeigt Ihre Wahl.'},
     {key:'motiv',label:'Motiv',title:['Das ','Glasmotiv'],sub:'Klarglas oder ein Sichtschutz-Dekor.'},
@@ -6911,6 +6934,7 @@ function panelHTML(){
         <div class="mfield"><label for="mH">Höhe <span class="mrange">${L.hMin}–${L.hMax} mm</span></label><div class="mrow"><input id="mH" type="number" inputmode="numeric" enterkeyhint="done" min="0" value="${S.h}" oninput="setMass('h',this.value)" onfocus="this.select()" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}"><span class="unit">mm</span></div></div>
       </div>
       <div id="massWarn" class="masswarn" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg><span></span></div>
+      ${messhilfeHTML()}
       </div>`;
   }
   if(k==='verbreiterung'){
@@ -6945,6 +6969,48 @@ function panelHTML(){
       + grp('Welche Seiten?','vb-grp',
         `<div class="vb-intro">Alle Breiten in Millimeter. Ihr Fenstermaß bleibt unverändert — die Verbreiterung kommt außen dazu.</div>${zeilen}${summe}`);
   }
+/* Messhilfe im Mass-Schritt. Vorher stand dort ein einziger Satz ("Breite und Hoehe
+   der Oeffnung"), der offen liess, ob Maueroeffnung oder Rahmenaussenmass gemeint ist.
+   Bei Massanfertigung ohne Widerrufsrecht ist das die teuerste Unklarheit der Seite.
+   Der Wortlaut ist mit der Antwort in faq.html abgeglichen und muss es bleiben:
+   zwei verschiedene Messanleitungen auf derselben Website waeren ein Eigentor.
+   KEIN Aufmass-Angebot - der Betrieb misst nicht vor Ort. */
+function messhilfeHTML(){
+  return `<div class="messhilfe">
+    <p class="mh-kern"><b>Gemessen wird die Maueröffnung ohne Putz</b> — das Rohbaumaß.
+      Den Abzug für die Montagefuge machen wir: Ihr Fenster wird 10–20 mm kleiner gefertigt.</p>
+    <details class="mh-mehr">
+      <summary>So messen Sie richtig</summary>
+      <div class="mh-inhalt">
+        <svg class="mh-skizze" viewBox="0 0 260 170" role="img" aria-label="Skizze: Breite und Höhe der Maueröffnung werden an je drei Stellen gemessen.">
+          <rect x="4" y="4" width="252" height="162" rx="4" fill="#eef2f8" stroke="#d3d9e6"/>
+          <rect x="46" y="34" width="168" height="104" fill="#fff" stroke="#225eaa" stroke-width="2"/>
+          <g stroke="#225eaa" stroke-width="1.4" stroke-dasharray="4 3" opacity=".75">
+            <line x1="46" y1="48" x2="214" y2="48"/><line x1="46" y1="86" x2="214" y2="86"/><line x1="46" y1="124" x2="214" y2="124"/>
+            <line x1="62" y1="34" x2="62" y2="138"/><line x1="130" y1="34" x2="130" y2="138"/><line x1="198" y1="34" x2="198" y2="138"/>
+          </g>
+          <g stroke="#14181d" stroke-width="1.6" fill="none">
+            <line x1="46" y1="152" x2="214" y2="152"/>
+            <path d="M46 148v8M214 148v8"/>
+            <line x1="26" y1="34" x2="26" y2="138"/>
+            <path d="M22 34h8M22 138h8"/>
+          </g>
+          <text x="130" y="165" text-anchor="middle" font-size="11" font-weight="700" fill="#14181d" font-family="Manrope,sans-serif">Breite</text>
+          <text x="16" y="90" text-anchor="middle" font-size="11" font-weight="700" fill="#14181d" font-family="Manrope,sans-serif" transform="rotate(-90 16 90)">Höhe</text>
+          <text x="130" y="24" text-anchor="middle" font-size="10.5" fill="#5b626b" font-family="Manrope,sans-serif">Maueröffnung — Putz nicht mitmessen</text>
+        </svg>
+        <ol class="mh-schritte">
+          <li>Breite an <b>drei Stellen</b> messen: oben, in der Mitte, unten.</li>
+          <li>Höhe ebenso an <b>drei Stellen</b>: links, Mitte, rechts.</li>
+          <li>Vom jeweiligen Ergebnis das <b>kleinste Maß</b> eintragen.</li>
+        </ol>
+        <p class="mh-fuss">Alte Fenster sitzen selten gerade — deshalb die drei Punkte.
+          Im Zweifel lieber zweimal messen: für die Maße im Auftrag haften Sie selbst.
+          <a href="/faq.html#aufmass" target="_blank" rel="noopener">Ausführlich in den häufigen Fragen</a></p>
+      </div>
+    </details>
+  </div>`;
+}
   if(k==='farbe'){
     const co=COLORS_AKT()[S.outer],ci=COLORS_AKT()[S.inner];
     const innenFarbig=(S.inner!==0);

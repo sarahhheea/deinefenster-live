@@ -727,7 +727,7 @@
       <summary><span class="q">Was ist in der 10-Jahre-Garantie abgedeckt?</span><span class="pm" aria-hidden="true"></span></summary>
       <div class="ans"><p>Die <strong>Drutex-Herstellergarantie</strong>: <strong>10 Jahre</strong> auf das Profil (Verzug, Vergilbung, Versprödung), <strong>5 Jahre</strong> auf den Beschlag (Mechanik), plus <strong>2 Jahre gesetzliche Gewährleistung</strong> auf Material- und Verarbeitungsfehler. <strong>NICHT abgedeckt:</strong> Transportschäden (müssen bei Anlieferung sofort gemeldet werden), Schäden durch unfachgemäße Montage, Kratzer durch Bauarbeiten.</p></div>
     </details>
-    <details>
+    <details id="aufmass">
       <summary><span class="q">Kann ich das Aufmaß selbst machen?</span><span class="pm" aria-hidden="true"></span></summary>
       <div class="ans"><p>Ja — viele Kunden messen selbst. Wichtig: Sie messen das <a href="glossar.html#rohbaumass"><strong>Rohbaumaß</strong></a> (die Maueröffnung ohne Putz), an drei Stellen oben/unten und links/rechts (das kleinere Maß zählt). Im Konfigurator geben Sie dieses Rohbaumaß ein, das Fenster wird 10–20 mm kleiner gefertigt. Messen Sie im Zweifel lieber zweimal — für die Maße im Auftrag haften Sie selbst.</p></div>
     </details>
@@ -902,5 +902,24 @@
 </script>
 <script src="/js/dfnav.js?v=cart3" defer></script>
 <script defer src="/js/hofverkauf-hinweis.js"></script>
+<script>
+/* Ein <details> oeffnet sich beim Sprung ueber #anker nicht von selbst. Ohne das hier
+   landet ein Link wie /faq.html#aufmass zwar an der richtigen Stelle, die Antwort
+   bliebe aber zugeklappt - der Konfigurator verlinkt genau dorthin. */
+(function(){
+  function auf(){
+    var h = location.hash && location.hash.slice(1);
+    if(!h) return;
+    var el = document.getElementById(h);
+    if(el && el.tagName === 'DETAILS' && !el.open){
+      el.open = true;
+      el.scrollIntoView({block:'center'});
+    }
+  }
+  window.addEventListener('hashchange', auf);
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', auf);
+  else auf();
+})();
+</script>
 </body>
 </html>
