@@ -2408,7 +2408,14 @@ const _PREM_FARBE=['schwarzbr','basaltgr-gl','basaltgr-sa','betongrau','crown-pl
    Jet Black und Shine Deep Bronze wie Eisenglimmer) — bewusst in die teurere Gruppe,
    damit kein Angebot zu billig herausgeht. GESCHAETZT, beim naechsten Preislauf messen. */
 const S={ prod:'fenster', material:'kunststoff', holzart:'kiefer', profile:'classic', aufteilung:'1fl', opening:'dkr', anschlagIdx:1, hstSystem:'psk', pskKammer:'iglo5', w:1000, h:1200, anzahl:1, outer:0, inner:0, balkonSchwelle:'ohne', doorModel:'nebraska-lcr-inox', griffTuer:'klinke', griffAussen:'klinke', stossHoehe:'1200', griffHst:'innen', hstSchloss:'ohne', hstTeilung:'2', hstLauf:'rechts',
-  glass:'2', glasdekor:'klar', schall:false, griff:'mistral', roll:'kein', panzer:null, endleiste:null, sproTyp:'keine', sproDicke:'27', sproRaster:'kreuz', sicher:false, colorTarget:'a' };
+  glass:'2', glasdekor:'klar', schall:false, griff:'mistral', roll:'kein', panzer:null, endleiste:null, sproTyp:'keine', sproDicke:'27', sproRaster:'kreuz', sicher:false, colorTarget:'a',
+  /* Rahmenverbreiterung gehoert in den Ausgangszustand, auch wenn sie meistens 0 ist:
+     Werkzeuge, die den Zustand sichern und wiederherstellen, arbeiten mit
+     Object.assign — und das loescht keine Schluessel, die es im Ausgangszustand nicht
+     gab. Der naechtliche Preis-Waechter hat sich genau daran verschluckt und eine
+     Abweichung von 63 Euro gemeldet, die es nicht gab: die Verbreiterung des vorigen
+     Falls stand im naechsten noch drin. */
+  vbAn:false, vbL:0, vbR:0, vbO:0, vbU:0 };
 
 // === Öffnung PRO FLÜGEL — 1:1 aus dem Live-Konfigurator (ANSCHLAG_SETS, geprüft 04.07.2026) ===
 // Jede Karte = eine Kombination; oeff = Öffnung je Flügel (links→rechts). stulpAt = Trennung nach Flügel i ist ein Stulp (statt Pfosten).
