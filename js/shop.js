@@ -534,8 +534,13 @@ function baueKatLeiste() {
                  'schiebetuer', 'daemmung', 'baumaterialien', 'garagentor-gebraucht'];
   const aktive = STATE.filter.kategorien;
   // Kachel-Innenleben: Foto wenn vorhanden, sonst neutrales Symbol
+  // Kennzeichnung unmittelbar AM Bild (Art. 50 VO (EU) 2024/1689) — wie im
+  // Konfigurator, wo jede Auswahlkachel ihr eigenes Badge traegt. Der Sammelhinweis
+  // unter der Leiste bleibt zusaetzlich stehen, weil er die Abgrenzung zu den
+  // echten Artikelfotos benennt. Nur an den Foto-Kacheln: die Icon-Kacheln sind
+  // Symbole, kein KI-Bild — die duerfen nicht mitgekennzeichnet werden.
   const pic = (k) => KAT_BILD[k]
-    ? `<img src="${KAT_BILD[k]}" alt="KI-generiertes Symbolbild" loading="lazy" decoding="async"/>`
+    ? `<img src="${KAT_BILD[k]}" alt="KI-generiertes Symbolbild" loading="lazy" decoding="async"/><span class="ai-badge ai-badge-kat" aria-hidden="true">KI</span>`
     : `<span class="kat-nopic"><span class="material-symbols-outlined">${KAT_ICON[k] || 'category'}</span></span>`;
 
   const chips = [`
