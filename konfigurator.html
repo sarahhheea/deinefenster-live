@@ -7021,11 +7021,13 @@ function panelHTML(){
        sind Teil der Aufteilung, nicht ein Zubehoer. Ein Fenster mit Oberlicht ist ein
        anderes Fenster, kein Fenster mit Zusatz.
        Angeordnet wird nach Flügelzahl in Zeilen — erst waehlt man die Flügel, dann in
-       derselben Zeile, ob oben oder unten ein festes Glasfeld dazukommt. Die
-       Lichtbilder gibt es bisher nur in Weiss; bei Holz zeigt die Kachel deshalb das
-       weisse Fenster, waehrend die Zeile ohne Licht im Holzton steht. Gehoert
-       nachgezogen, sobald die Holzvarianten erzeugt sind. */
-    const lbild=(nr,art)=>`img/karten/fluegel/${nr}-${art}.webp`;
+       derselben Zeile, ob oben oder unten ein festes Glasfeld dazukommt.
+       Die Lichtkacheln tragen denselben Material-Suffix wie die Zeile ohne Licht —
+       sonst stuende in einer Zeile ein Holzfenster neben drei weissen Kunststoff-
+       fenstern. Es gibt sie nur in Weiss und in Kiefer, und mehr braucht es nicht:
+       _lichtKey() erlaubt ein Lichtfeld ausschliesslich bei Kunststoff und bei
+       Holz Softline 68 Kiefer — Meranti und Alu haben gar keins. */
+    const lbild=(nr,art)=>`img/karten/fluegel/${nr}-${art}${matSuffix}.webp`;
     const kachel=(aufv,licht,img,t)=>{
       const on=(S.aufteilung===aufv && (S.licht||'ohne')===licht);
       return `<div class="ocard ${on?'on':''}" onclick="setAufteilungLicht('${aufv}','${licht}')"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="vis"><img src="${img}" loading="lazy" decoding="async" alt="${t} (KI-generiertes Symbolbild)"></div><div class="t">${t}</div></div>`;
