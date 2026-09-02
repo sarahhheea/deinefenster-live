@@ -8406,27 +8406,46 @@ function oeffCardImg(o){
      Alu, nicht in weissem Kunststoff. Die Ordner -kiefer/-meranti/-alu enthalten
      dieselben Varianten mit denselben Dateinamen; erzeugt von
      scripts/draw-anschlag-material.py (DIN-Symbole auf die Grundfotos gezeichnet). */
-  const _matOrd=(S.prod==='fenster'&&S.material==='holz') ? '-'+(S.holzart||'kiefer')
-               :(S.prod==='fenster'&&S.material==='alu')  ? '-alu' : '';
+  let _matOrd=(S.prod==='fenster'&&S.material==='holz') ? '-'+(S.holzart||'kiefer')
+             :(S.prod==='fenster'&&S.material==='alu')  ? '-alu' : '';
+  /* Mit Ober- oder Unterlicht zeigt die Karte das Fenster MIT dem Glasfeld. Sonst
+     waehlt der Kunde "1 Flügel mit Oberlicht" und bekommt im naechsten Schritt ein
+     Fenster ohne Oberlicht zu sehen — technisch falsch und verwirrend.
+     Die Bilder sind gezeichnet, nicht generiert: 60 Varianten einzeln erzeugt saessen
+     die Symbole nie an derselben Stelle. scripts/draw-licht-anschlag.py nimmt die
+     Grundfotos mit Licht und zeichnet die DIN-Symbole pixelgenau darauf.
+     Es gibt sie bisher nur in Weiss, deshalb faellt der Materialzusatz hier weg. */
+  const _lichtOrd = (S.prod==='fenster' && typeof lichtAktiv==='function' && lichtAktiv())
+    ? ({ober:'-oberlicht', unter:'-unterlicht', beide:'-ober-unter'})[S.licht] : '';
+  if(_lichtOrd) _matOrd=_lichtOrd;
   if(S.prod==='balkon'){
     const m={'dk-l':'dk-links','dk-r':'dk-rechts','dreh-l':'dreh-links','dreh-r':'dreh-rechts'};
     if(of.length===1) return 'img/karten/balkon-anschlag-1f/'+(m[of[0]]||of[0])+'.webp';
     return 'img/karten/balkon-anschlag-2f/'+(of[0]==='dreh-l'?'dl-stulp-dkr':'dkl-stulp-dr')+'.webp';
   }
   // Fenster: echte WEISSE Wizard-Bilder wie online (img/karten/anschlag-1f/-2f/-3f), Zuordnung 1:1 wie ANSCHLAG_SETS
-  if(of.length===1) return 'img/karten/anschlag-1f'+_matOrd+'/'+of[0]+'.webp';
+  /* Bei Licht haengt an den Dateinamen, welches Licht sich kippen laesst — das Symbol
+     im Glasfeld ist Teil des Bildes. Die Zahl der KACHELN bleibt gleich, es wechselt
+     nur die Datei; als eigene Kachel je Kombination waeren es bei zwei Fluegeln mit
+     Ober- und Unterlicht 28 Kacheln fuer dieselbe Entscheidung. */
+  let _lk='';
+  if(_lichtOrd){
+    if((S.licht==='ober'||S.licht==='beide') && S.olTyp==='kipp') _lk+='-olk';
+    if((S.licht==='unter'||S.licht==='beide') && S.ulTyp==='kipp') _lk+='-ulk';
+  }
+  if(of.length===1) return 'img/karten/anschlag-1f'+_matOrd+'/'+of[0]+_lk+'.webp';
   if(of.length===2){
     const a=of[0],b=of[1];
-    if(a==='fest'||b==='fest') return 'img/karten/anschlag-2f'+_matOrd+'/'+(a==='fest'?'fest-dkr':'dkl-fest')+'.webp';
+    if(a==='fest'||b==='fest') return 'img/karten/anschlag-2f'+_matOrd+'/'+(a==='fest'?'fest-dkr':'dkl-fest')+_lk+'.webp';
     const type=stulp?'stulp':'pfosten';
     const m2={'dk-l|dk-r|pfosten':'dkl-pfosten-dkr','dreh-l|dk-r|stulp':'dl-stulp-dkr','dreh-l|dk-r|pfosten':'dl-pfosten-dkr','dk-l|dreh-r|stulp':'dkl-stulp-dr','dk-l|dreh-r|pfosten':'dkl-pfosten-dr'};
-    const f=m2[a+'|'+b+'|'+type]; return f?('img/karten/anschlag-2f'+_matOrd+'/'+f+'.webp'):null;
+    const f=m2[a+'|'+b+'|'+type]; return f?('img/karten/anschlag-2f'+_matOrd+'/'+f+_lk+'.webp'):null;
   }
   if(of.length===3){
-    if(of[1]==='fest') return 'img/karten/anschlag-3f'+_matOrd+'/dkl-fest-dkr.webp';
+    if(of[1]==='fest') return 'img/karten/anschlag-3f'+_matOrd+'/dkl-fest-dkr'+_lk+'.webp';
     const mid=of[1]==='dreh-l'?'dl':'dr';
     const f = o.stulpAt===1?('dkl-stulp-'+mid+'-pf-dkr') : (o.stulpAt===2?('dkl-pf-'+mid+'-stulp-dkr') : ('dkl-pf-'+mid+'-pf-dkr'));
-    return 'img/karten/anschlag-3f'+_matOrd+'/'+f+'.webp';
+    return 'img/karten/anschlag-3f'+_matOrd+'/'+f+_lk+'.webp';
   }
   return null;
 }
