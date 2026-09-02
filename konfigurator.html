@@ -429,6 +429,20 @@ body.wiz-active .dfnav-tel:hover{background:rgba(34,94,170,.10)}
 .ocard .vis{height:132px;overflow:hidden}
 .ocard .vis img{max-height:120px;max-width:100%;width:auto;height:auto;object-fit:contain}
 .opts.three{grid-template-columns:repeat(3,1fr)}
+/* Aufteilung mit Licht: vier Spalten — je Zeile eine Fluegelzahl, in der Zeile ohne
+   Licht, mit Oberlicht, mit Unterlicht, mit beidem. Zwoelf Kacheln brauchen flache
+   Karten, sonst scrollt die Wahl aus dem Bild. */
+.opts.auft4{grid-template-columns:repeat(4,1fr)}
+.grid .opts.auft4 .ocard{padding:10px}
+.grid .opts.auft4 .ocard .vis{height:104px;margin-bottom:6px}
+.grid .opts.auft4 .ocard .vis img{max-height:104px;width:auto;object-fit:contain}
+.grid .opts.auft4 .ocard .t{font-size:13.5px;line-height:1.25;min-height:2.5em}
+@media(max-width:900px){ .opts.auft4{grid-template-columns:repeat(2,1fr)} }
+@media(max-width:600px){
+  #wizGrid .opts.auft4 .ocard .vis{height:78px !important;margin-bottom:5px !important}
+  #wizGrid .opts.auft4 .ocard .vis img{max-height:78px !important}
+  #wizGrid .opts.auft4 .ocard .t{font-size:12.5px}
+}
 /* Rahmenverbreiterung: vier Zeilen, je Seite eine Reihe Breiten zum Antippen. Keine
    Karten — bei bis zu zehn Breiten mal vier Seiten waeren das vierzig Kacheln. */
 .opts.vb-grp{display:block}
@@ -2432,7 +2446,7 @@ const S={ prod:'fenster', material:'kunststoff', holzart:'kiefer', profile:'clas
      gab. Der naechtliche Preis-Waechter hat sich genau daran verschluckt und eine
      Abweichung von 63 Euro gemeldet, die es nicht gab: die Verbreiterung des vorigen
      Falls stand im naechsten noch drin. */
-  vbAn:false, vbL:0, vbR:0, vbO:0, vbU:0, licht:'ohne', olTyp:'fest', ulTyp:'fest', olH:0, ulH:0 };
+  vbAn:false, vbL:0, vbR:0, vbO:0, vbU:0, licht:'ohne', olTyp:'fest', ulTyp:'fest', olH:0, ulH:0, flgB:null };
 
 // === Öffnung PRO FLÜGEL — 1:1 aus dem Live-Konfigurator (ANSCHLAG_SETS, geprüft 04.07.2026) ===
 // Jede Karte = eine Kombination; oeff = Öffnung je Flügel (links→rechts). stulpAt = Trennung nach Flügel i ist ein Stulp (statt Pfosten).
@@ -3876,6 +3890,44 @@ function _lichtPreis(L){
   return summe;
 }
 function lichtAktiv(){ return S.licht && S.licht!=='ohne'; }
+/* === Fluegelaufteilung ====================================================
+   Bei zwei und drei Fluegeln laesst sich einstellen, wie breit die einzelnen
+   Fluegel sind — das Fenster muss nicht in gleiche Teile geteilt sein. Am Markt
+   nachgemessen (02.09.2026): frei einstellbar, und es kostet NICHTS extra. Bei
+   1600 mm Gesamtbreite wird 400 bis 1200 uebernommen, bei 2400 mm 900 bis 1500.
+   Beides folgt derselben Regel: jeder Fluegel zwischen 400 und 1500 mm.
+   Voreingestellt ist die gleichmaessige Teilung. */
+const FLG_MIN=400, FLG_MAX=1500;
+function flgAnzahl(){ return (S.prod!=='fenster')?1:(S.aufteilung==='3fl'?3:(S.aufteilung==='2fl'?2:1)); }
+function flgBreiten(){
+  var n=flgAnzahl(), b=+S.w||0;
+  if(n<2) return [b];
+  var a=Array.isArray(S.flgB)?S.flgB.slice(0,n).map(function(x){return +x||0;}):[];
+  var summe=a.reduce(function(x,y){return x+y;},0);
+  if(a.length!==n || Math.abs(summe-b)>0.5 || a.some(function(x){return x<FLG_MIN||x>FLG_MAX;})){
+    var g=Math.round(b/n), r=[];
+    for(var i=0;i<n-1;i++) r.push(g);
+    r.push(b-g*(n-1));
+    return r;
+  }
+  return a;
+}
+function flgText(){
+  var n=flgAnzahl(); if(n<2) return '';
+  return flgBreiten().join(' · ')+' mm';
+}
+/* Eine Fluegelbreite setzen; der letzte Fluegel gleicht immer aus, damit die Summe
+   stimmt. Eine Teilung, die eine Breite ausserhalb 400 bis 1500 ergaebe, wird nicht
+   uebernommen — genauso haelt es der Hersteller. */
+function setFlg(i,v){
+  var n=flgAnzahl(), b=+S.w||0, a=flgBreiten().slice();
+  a[i]=Math.max(FLG_MIN, Math.min(FLG_MAX, parseInt(v,10)||0));
+  var rest=b-a.slice(0,n-1).reduce(function(x,y){return x+y;},0);
+  if(i<n-1) a[n-1]=rest;
+  var ok=a.every(function(x){return x>=FLG_MIN && x<=FLG_MAX;}) && Math.abs(a.reduce(function(x,y){return x+y;},0)-b)<0.5;
+  if(ok) S.flgB=a;
+  render();
+}
 function lichtGesamtHoehe(){
   var h=+S.h||0;
   if(S.licht==='ober'||S.licht==='beide') h+=(+S.olH||0);
@@ -6057,9 +6109,6 @@ const STEPS_FENSTER=[  // Reihenfolge exakt wie Live-Konfigurator (STEP_ORDER)
   {key:'profil',label:'Profil',title:['Ihr ','Profil'],sub:'Das Drutex-System für Ihr Fenster.'},
   {key:'aufteilung',label:'Aufteilung',title:['Die ','Aufteilung'],sub:'Wie viele Flügel soll Ihr Fenster haben?'},
   {key:'oeffnung',label:'Öffnung',title:['Die ','Öffnungsart'],sub:'In welche Richtung öffnet das Fenster?'},
-  /* Das Licht steht VOR den Massen: es aendert, was die Hoehe bedeutet. Die
-     eingegebene Hoehe ist die des Hauptfensters, das Licht kommt oben bzw. unten dazu. */
-  {key:'licht',label:'Oberlicht',title:['Ober- und ','Unterlicht'],sub:'Ein festes Glasfeld über oder unter dem Fenster.'},
   {key:'masse',label:'Maße',title:['Ihre ','Maße'],sub:'Breite und Höhe der Maueröffnung (Rohbaumaß) in Millimeter.'},
   {key:'anzahl',label:'Anzahl',title:['Die ','Anzahl'],sub:'Wie viele gleiche Fenster benötigen Sie?'},
   {key:'farbe',label:'Farbe',title:['Die ','Farbe'],sub:'Außen- und Innenfarbe — die Vorschau zeigt Ihre Wahl.'},
@@ -6233,7 +6282,6 @@ function buildFensterSteps(){
      nicht. Dann faellt der Schritt weg, statt eine leere Auswahl zu zeigen. */
   const rest=STEPS_FENSTER.filter(function(st){
     if(S.material==='holz' && st.key==='rollladen') return false;
-    if(st.key==='licht' && !lichtMoeglich()) return false;
     return true;
   });
   return (S.material==='holz') ? [material,holzart].concat(rest) : [material].concat(rest);
@@ -6272,7 +6320,7 @@ function setHolzart(v){
 }
 let STEPS=STEPS_FENSTER;
 // Überspringbare Extras: alles vorbelegt → Kunde kann mit einem Tap die Standards übernehmen und direkt zum Angebot
-const SKIP_KEYS=['motiv','schall','griff','sicherheit','rollladen','sprossen','verbreiterung','licht'];
+const SKIP_KEYS=['motiv','schall','griff','sicherheit','rollladen','sprossen','verbreiterung'];
 function finishWithDefaults(){ commitCurrent(); }   // übernimmt aktuelle Konfig inkl. Standard-Extras → Warenkorb (gleiche sichere Logik wie „In den Warenkorb legen")
 let cur=0;
 let started=false;
@@ -6848,6 +6896,43 @@ function ocImg(field,val,img,t,s,delta){
   const on=S[field]===val; const vv=typeof val==='string'?`'${val}'`:val;
   return `<div class="ocard ${on?'on':''}" onclick="set('${field}',${vv})"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="vis"><img src="${img}" alt="${t} (KI-generiertes Symbolbild)"></div><div class="t">${t}</div>${s?`<div class="s">${s}</div>`:''}</div>`;
 }
+/* Zusatzmasse im Mass-Schritt: die Hoehen der Lichter und die Fluegelaufteilung.
+   Beides gehoert hierher und nicht in eigene Schritte — es sind Masse. Die Hoehe oben
+   ist die des HAUPTFENSTERS; was das Licht dazu bringt, steht als Gesamthoehe darunter. */
+function massZusatz(){
+  if(S.prod!=='fenster') return '';
+  var teile='';
+  if(lichtAktiv() && _LICHT[_lichtKey(null)]){
+    var zeile=function(feld,typFeld,titel){
+      var typ=S[typFeld]||'fest', g=lichtGrenzen(typ), gK=lichtGrenzen('kipp');
+      var wert=+S[feld]||g.min;
+      var kippGeht = gK && gK.da && (+S.w||0)>=gK.bMin;
+      var knoepfe='<button type="button" class="vb-chip '+(typ==='fest'?'on':'')+'" onclick="setLichtTyp(\''+typFeld+'\',\'fest\')">fest</button>'
+        + ((gK&&gK.da) ? '<button type="button" class="vb-chip '+(typ==='kipp'?'on':'')+'"'+(kippGeht?'':' disabled title="Zum Kippen muss das Fenster mindestens '+gK.bMin+' mm breit sein."')+' onclick="setLichtTyp(\''+typFeld+'\',\'kipp\')">zum Kippen</button>' : '');
+      return '<div class="vb-zeile"><div class="vb-seite">'+titel+'<span class="vb-laenge">'+g.min+'–'+g.max+' mm</span></div>'
+        +'<div class="vb-chips">'+knoepfe+'</div>'
+        +'<div class="mrow lichtrow"><input type="number" inputmode="numeric" min="'+g.min+'" max="'+g.max+'" value="'+wert+'" oninput="setLichtH(\''+feld+'\',this.value)" onfocus="this.select()"><span class="unit">mm</span></div></div>';
+    };
+    var z='';
+    if(S.licht==='ober'||S.licht==='beide') z+=zeile('olH','olTyp','Höhe Oberlicht');
+    if(S.licht==='unter'||S.licht==='beide') z+=zeile('ulH','ulTyp','Höhe Unterlicht');
+    teile+=grp('Höhe der Lichter','vb-grp',
+      '<div class="vb-intro">Die Höhe oben ist die des <b>Hauptfensters</b>. Das Licht kommt oben bzw. unten dazu.</div>'
+      +z+'<div class="vb-summe">Gesamthöhe: '+lichtGesamtHoehe()+' mm</div>');
+  }
+  var n=flgAnzahl();
+  if(n>1){
+    var br=flgBreiten(), zz='';
+    for(var i=0;i<n-1;i++){
+      zz+='<div class="vb-zeile"><div class="vb-seite">'+(i+1)+'. Flügel<span class="vb-laenge">'+FLG_MIN+'–'+FLG_MAX+' mm</span></div>'
+        +'<div class="mrow lichtrow"><input type="number" inputmode="numeric" min="'+FLG_MIN+'" max="'+FLG_MAX+'" value="'+br[i]+'" oninput="setFlg('+i+',this.value)" onfocus="this.select()"><span class="unit">mm</span></div></div>';
+    }
+    teile+=grp('Aufteilung der Flügel','vb-grp',
+      '<div class="vb-intro">Die Flügel müssen nicht gleich breit sein. Der letzte Flügel gleicht immer auf die Gesamtbreite aus — ein Aufpreis entsteht dadurch nicht.</div>'
+      +zz+'<div class="vb-summe">Flügelbreiten: '+flgText()+'</div>');
+  }
+  return teile;
+}
 function ocIcon(field,val,icon,t,s,delta){
   const on=S[field]===val; const vv=typeof val==='string'?`'${val}'`:val;
   return `<div class="ocard ${on?'on':''}" onclick="set('${field}',${vv})"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="vis" style="height:84px;place-items:center">${icon}</div><div class="t">${t}</div>${s?`<div class="s">${s}</div>`:''}</div>`;
@@ -6969,13 +7054,38 @@ function panelHTML(){
     const matSuffix=(S.prod==='fenster'&&S.material==='holz') ? '-'+(S.holzart||'kiefer')
                    : (S.prod==='fenster'&&S.material==='alu') ? '-alu' : '';
     const fbild=(nr)=>`img/karten/${afd}/${nr}-fluegel${afd==='fluegel'?matSuffix:''}.webp`;
-    let cards=auf('1fl',fbild(1),'1 Flügel')+auf('2fl',fbild(2),'2 Flügel','');
     /* Aluminium fuehrt der Hersteller nicht dreifluegelig — die Aufteilung gibt es
        dort gar nicht. Ohne diese Ausnahme waehlt der Kunde drei Fluegel und landet
        bei "Auf Anfrage", ohne zu erfahren warum. */
     const _kein3=(S.prod==='fenster' && S.material==='alu');
-    if(S.prod!=='balkon' && !_kein3) cards+=auf('3fl',fbild(3),'3 Flügel','');
-    return grp('Aufteilung',S.prod==='balkon'?'two':'three',cards);
+    if(S.prod==='balkon'){
+      return grp('Aufteilung','two', auf('1fl',fbild(1),'1 Flügel')+auf('2fl',fbild(2),'2 Flügel',''));
+    }
+    /* Ober- und Unterlicht gehoeren HIERHER und nicht in einen eigenen Schritt: sie
+       sind Teil der Aufteilung, nicht ein Zubehoer. Ein Fenster mit Oberlicht ist ein
+       anderes Fenster, kein Fenster mit Zusatz.
+       Angeordnet wird nach Flügelzahl in Zeilen — erst waehlt man die Flügel, dann in
+       derselben Zeile, ob oben oder unten ein festes Glasfeld dazukommt. Die
+       Lichtbilder gibt es bisher nur in Weiss; bei Holz zeigt die Kachel deshalb das
+       weisse Fenster, waehrend die Zeile ohne Licht im Holzton steht. Gehoert
+       nachgezogen, sobald die Holzvarianten erzeugt sind. */
+    const lbild=(nr,art)=>`img/karten/fluegel/${nr}-${art}.webp`;
+    const kachel=(aufv,licht,img,t)=>{
+      const on=(S.aufteilung===aufv && (S.licht||'ohne')===licht);
+      return `<div class="ocard ${on?'on':''}" onclick="setAufteilungLicht('${aufv}','${licht}')"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="vis"><img src="${img}" loading="lazy" decoding="async" alt="${t} (KI-generiertes Symbolbild)"></div><div class="t">${t}</div></div>`;
+    };
+    const zeile=(nr,aufv,wort)=>{
+      let c=kachel(aufv,'ohne',fbild(nr),wort);
+      if(lichtMoeglich()){
+        c+=kachel(aufv,'ober',lbild(nr,'oberlicht'),wort+' + Oberlicht')
+          +kachel(aufv,'unter',lbild(nr,'unterlicht'),wort+' + Unterlicht')
+          +kachel(aufv,'beide',lbild(nr,'ober-unter'),wort+' + Ober- und Unterlicht');
+      }
+      return c;
+    };
+    let cards=zeile(1,'1fl','1 Flügel')+zeile(2,'2fl','2 Flügel');
+    if(!_kein3) cards+=zeile(3,'3fl','3 Flügel');
+    return grp('Aufteilung', lichtMoeglich()?'auft4':'three', cards);
   }
   if(k==='oeffnung'){
     const tick=`<span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span>`;
@@ -7171,7 +7281,7 @@ function panelHTML(){
       </div>
       <div id="massWarn" class="masswarn" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg><span></span></div>
       ${messhilfeHTML()}
-      </div>`;
+      </div>`+massZusatz();
   }
   if(k==='licht'){
     const e=_LICHT[_lichtKey(null)];
@@ -7500,6 +7610,7 @@ function summaryRows(){
     <div class="srow"><span class="k">Verglasung</span><span class="v">${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}</span></div>${schwelleRow}
     ${sproRow}
     <div class="srow"><span class="k">Ober-/Unterlicht</span><span class="v">${lichtText()}</span></div>
+    ${flgAnzahl()>1?`<div class="srow"><span class="k">Flügelbreiten</span><span class="v tnum">${flgText()}</span></div>`:''}
     <div class="srow"><span class="k">Verbreiterung</span><span class="v">${verbrText()}</span></div>
     <div class="srow"><span class="k">Griff</span><span class="v">${GRIFFN[S.griff]}</span></div>
     ${rollRow}${pzRows}
@@ -8087,6 +8198,19 @@ function set(k,v){S[k]=v;render();maybeAutoAdvance();}
 function setVerbr(feld,mm){ S[feld]=mm; render(); }
 /* Licht: beim Einschalten die Hoehe auf das Mindestmass setzen, sonst stuende dort 0
    und der Preis waere still falsch. Beim Ausschalten alles zuruecksetzen. */
+/* Aufteilung und Licht in einem Zug. Beim Einschalten eines Lichts bekommt es sofort
+   seine Mindesthoehe, sonst stuende dort 0 und der Preis waere still falsch; beim
+   Abwaehlen werden beide Hoehen geleert. Der Anschlag wird mitgezogen, weil die Liste
+   je Aufteilung eine andere ist. */
+function setAufteilungLicht(aufv,licht){
+  const wechsel=(S.aufteilung!==aufv);
+  S.aufteilung=aufv;
+  if(wechsel){
+    S.anschlagIdx=Math.min(ANSCHLAG_DEFIDX[aufv]||0, (anschlagSet()||[]).length-1);
+    massKlemmen();
+  }
+  setLicht(licht);
+}
 function setLicht(art){
   S.licht=art;
   const g=lichtGrenzen('fest');
