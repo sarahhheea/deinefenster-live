@@ -2446,7 +2446,7 @@ const S={ prod:'fenster', material:'kunststoff', holzart:'kiefer', profile:'clas
      gab. Der naechtliche Preis-Waechter hat sich genau daran verschluckt und eine
      Abweichung von 63 Euro gemeldet, die es nicht gab: die Verbreiterung des vorigen
      Falls stand im naechsten noch drin. */
-  vbAn:false, vbL:0, vbR:0, vbO:0, vbU:0, licht:'ohne', olTyp:'fest', ulTyp:'fest', olH:0, ulH:0, flgB:null };
+  vbAn:false, vbL:0, vbR:0, vbO:0, vbU:0, licht:'ohne', olTyp:'fest', ulTyp:'fest', olH:0, ulH:0 };
 
 // === Öffnung PRO FLÜGEL — 1:1 aus dem Live-Konfigurator (ANSCHLAG_SETS, geprüft 04.07.2026) ===
 // Jede Karte = eine Kombination; oeff = Öffnung je Flügel (links→rechts). stulpAt = Trennung nach Flügel i ist ein Stulp (statt Pfosten).
@@ -3890,44 +3890,10 @@ function _lichtPreis(L){
   return summe;
 }
 function lichtAktiv(){ return S.licht && S.licht!=='ohne'; }
-/* === Fluegelaufteilung ====================================================
-   Bei zwei und drei Fluegeln laesst sich einstellen, wie breit die einzelnen
-   Fluegel sind — das Fenster muss nicht in gleiche Teile geteilt sein. Am Markt
-   nachgemessen (02.09.2026): frei einstellbar, und es kostet NICHTS extra. Bei
-   1600 mm Gesamtbreite wird 400 bis 1200 uebernommen, bei 2400 mm 900 bis 1500.
-   Beides folgt derselben Regel: jeder Fluegel zwischen 400 und 1500 mm.
-   Voreingestellt ist die gleichmaessige Teilung. */
-const FLG_MIN=400, FLG_MAX=1500;
-function flgAnzahl(){ return (S.prod!=='fenster')?1:(S.aufteilung==='3fl'?3:(S.aufteilung==='2fl'?2:1)); }
-function flgBreiten(){
-  var n=flgAnzahl(), b=+S.w||0;
-  if(n<2) return [b];
-  var a=Array.isArray(S.flgB)?S.flgB.slice(0,n).map(function(x){return +x||0;}):[];
-  var summe=a.reduce(function(x,y){return x+y;},0);
-  if(a.length!==n || Math.abs(summe-b)>0.5 || a.some(function(x){return x<FLG_MIN||x>FLG_MAX;})){
-    var g=Math.round(b/n), r=[];
-    for(var i=0;i<n-1;i++) r.push(g);
-    r.push(b-g*(n-1));
-    return r;
-  }
-  return a;
-}
-function flgText(){
-  var n=flgAnzahl(); if(n<2) return '';
-  return flgBreiten().join(' · ')+' mm';
-}
-/* Eine Fluegelbreite setzen; der letzte Fluegel gleicht immer aus, damit die Summe
-   stimmt. Eine Teilung, die eine Breite ausserhalb 400 bis 1500 ergaebe, wird nicht
-   uebernommen — genauso haelt es der Hersteller. */
-function setFlg(i,v){
-  var n=flgAnzahl(), b=+S.w||0, a=flgBreiten().slice();
-  a[i]=Math.max(FLG_MIN, Math.min(FLG_MAX, parseInt(v,10)||0));
-  var rest=b-a.slice(0,n-1).reduce(function(x,y){return x+y;},0);
-  if(i<n-1) a[n-1]=rest;
-  var ok=a.every(function(x){return x>=FLG_MIN && x<=FLG_MAX;}) && Math.abs(a.reduce(function(x,y){return x+y;},0)-b)<0.5;
-  if(ok) S.flgB=a;
-  render();
-}
+/* Die Fluegel eines mehrfluegeligen Fensters werden bei uns immer GLEICH breit
+   geteilt. Der Hersteller laesst zwar eine ungleiche Teilung zu (nachgemessen: jeder
+   Fluegel zwischen 400 und 1500 mm, ohne Aufpreis) — Sarah-Entscheidung 02.09.2026:
+   wir bieten das bewusst nicht an. Einstellbar ist nur die Hoehe der Lichter. */
 function lichtGesamtHoehe(){
   var h=+S.h||0;
   if(S.licht==='ober'||S.licht==='beide') h+=(+S.olH||0);
@@ -6921,17 +6887,6 @@ function massZusatz(){
       '<div class="vb-intro">Die Höhe oben ist die des <b>Hauptfensters</b>. Das Licht kommt oben bzw. unten dazu.</div>'
       +z+'<div class="vb-summe">Gesamthöhe: '+lichtGesamtHoehe()+' mm</div>');
   }
-  var n=flgAnzahl();
-  if(n>1){
-    var br=flgBreiten(), zz='';
-    for(var i=0;i<n-1;i++){
-      zz+='<div class="vb-zeile"><div class="vb-seite">'+(i+1)+'. Flügel<span class="vb-laenge">'+FLG_MIN+'–'+FLG_MAX+' mm</span></div>'
-        +'<div class="mrow lichtrow"><input type="number" inputmode="numeric" min="'+FLG_MIN+'" max="'+FLG_MAX+'" value="'+br[i]+'" oninput="setFlg('+i+',this.value)" onfocus="this.select()"><span class="unit">mm</span></div></div>';
-    }
-    teile+=grp('Aufteilung der Flügel','vb-grp',
-      '<div class="vb-intro">Die Flügel müssen nicht gleich breit sein. Der letzte Flügel gleicht immer auf die Gesamtbreite aus — ein Aufpreis entsteht dadurch nicht.</div>'
-      +zz+'<div class="vb-summe">Flügelbreiten: '+flgText()+'</div>');
-  }
   return teile;
 }
 function ocIcon(field,val,icon,t,s,delta){
@@ -7640,7 +7595,6 @@ function summaryRows(){
     <div class="srow"><span class="k">Verglasung</span><span class="v">${S.glass==='3'?'3-fach':'2-fach'} · ${DEKON[S.glasdekor]}</span></div>${schwelleRow}
     ${sproRow}
     <div class="srow"><span class="k">Ober-/Unterlicht</span><span class="v">${lichtText()}</span></div>
-    ${flgAnzahl()>1?`<div class="srow"><span class="k">Flügelbreiten</span><span class="v tnum">${flgText()}</span></div>`:''}
     <div class="srow"><span class="k">Verbreiterung</span><span class="v">${verbrText()}</span></div>
     <div class="srow"><span class="k">Griff</span><span class="v">${GRIFFN[S.griff]}</span></div>
     ${rollRow}${pzRows}
