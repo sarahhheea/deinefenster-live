@@ -6907,10 +6907,11 @@ function massZusatz(){
       var typ=S[typFeld]||'fest', g=lichtGrenzen(typ), gK=lichtGrenzen('kipp');
       var wert=+S[feld]||g.min;
       var kippGeht = gK && gK.da && (+S.w||0)>=gK.bMin;
-      var knoepfe='<button type="button" class="vb-chip '+(typ==='fest'?'on':'')+'" onclick="setLichtTyp(\''+typFeld+'\',\'fest\')">fest</button>'
-        + ((gK&&gK.da) ? '<button type="button" class="vb-chip '+(typ==='kipp'?'on':'')+'"'+(kippGeht?'':' disabled title="Zum Kippen muss das Fenster mindestens '+gK.bMin+' mm breit sein."')+' onclick="setLichtTyp(\''+typFeld+'\',\'kipp\')">zum Kippen</button>' : '');
-      return '<div class="vb-zeile"><div class="vb-seite">'+titel+'<span class="vb-laenge">'+g.min+'–'+g.max+' mm</span></div>'
-        +'<div class="vb-chips">'+knoepfe+'</div>'
+      /* Hier nur noch die HOEHE. Ob das Licht fest ist oder sich kippen laesst, wird
+         einen Schritt vorher bei der Oeffnungsart gewaehlt — dort gehoert es hin. Der
+         Zusatz in Klammern sagt, was dort eingestellt ist, damit die Grenzen
+         nachvollziehbar sind: ein Kipp-Licht darf nur 360 bis 1000 mm hoch sein. */
+      return '<div class="vb-zeile"><div class="vb-seite">'+titel+'<span class="vb-laenge">'+(typ==='kipp'?'zum Kippen · ':'fest · ')+g.min+'–'+g.max+' mm</span></div>'
         +'<div class="mrow lichtrow"><input type="number" inputmode="numeric" min="'+g.min+'" max="'+g.max+'" value="'+wert+'" oninput="setLichtH(\''+feld+'\',this.value)" onfocus="this.select()"><span class="unit">mm</span></div></div>';
     };
     var z='';
@@ -7110,7 +7111,36 @@ function panelHTML(){
       return `<div class="ocard ${on?'on':''}" onclick="setAnschlag(${idx})">${tick}${o.tag?`<span class="fav">${o.tag}</span>`:''}${vis}<div class="t">${o.n}</div></div>`;
     }).join('');
     const cols=set.length<=2?'two':(set.length===4?'two':'three');
-    return `<div class="card"><div class="grp-title">Öffnungsart je Flügel</div><div class="opts ${cols}">${cards}</div></div>`;
+    /* Ist ein Ober- oder Unterlicht gewaehlt, gehoert auch DESSEN Oeffnungsart hierher.
+       Sonst waere der Schritt unvollstaendig: der Kunde legt fest, wie die Fluegel
+       aufgehen, aber nicht, ob das Glasfeld darueber fest ist oder sich kippen laesst —
+       obwohl das ein anderes Fenster und ein anderer Preis ist.
+       Bewusst als eigener Block mit zwei Knoepfen je Licht und nicht als Kachel je
+       Kombination: bei zwei Fluegeln mit Ober- UND Unterlicht waeren das sonst
+       28 Kacheln fuer dieselbe Entscheidung. */
+    let lichtBlock='';
+    if(S.prod==='fenster' && lichtAktiv() && _LICHT[_lichtKey(null)]){
+      const gK=lichtGrenzen('kipp');
+      const kippGeht = gK && gK.da && (+S.w||0)>=gK.bMin;
+      const zeile=(typFeld,titel)=>{
+        const typ=S[typFeld]||'fest';
+        const k=`<button type="button" class="vb-chip ${typ==='fest'?'on':''}" onclick="setLichtTyp('${typFeld}','fest')">fest verglast</button>`
+          + ((gK&&gK.da)?`<button type="button" class="vb-chip ${typ==='kipp'?'on':''}"${kippGeht?'':' disabled title="Zum Kippen muss das Fenster mindestens '+gK.bMin+' mm breit sein."'} onclick="setLichtTyp('${typFeld}','kipp')">zum Kippen</button>`:'');
+        return `<div class="vb-zeile"><div class="vb-seite">${titel}</div><div class="vb-chips">${k}</div></div>`;
+      };
+      let z='';
+      if(S.licht==='ober'||S.licht==='beide') z+=zeile('olTyp','Oberlicht');
+      if(S.licht==='unter'||S.licht==='beide') z+=zeile('ulTyp','Unterlicht');
+      lichtBlock=grp('Öffnungsart des Lichts','vb-grp',
+        `<div class="vb-intro">Das Glasfeld über bzw. unter dem Fenster kann fest verglast sein oder sich zum Lüften kippen lassen.</div>${z}`);
+    }
+    /* Die Bilder zeigen nur die Fluegel, nicht das Licht darueber — dafuer braeuchte es
+       einen eigenen Bildersatz je Aufteilung und Lichtvariante. Das gehoert nachgezogen;
+       bis dahin steht es dort, statt dass der Kunde sich wundert. */
+    const lichtNote = (S.prod==='fenster' && lichtAktiv())
+      ? `<div class="vb-intro" style="margin:0 0 10px">Ihr Fenster hat zusätzlich ${S.licht==='beide'?'ein Ober- und ein Unterlicht':(S.licht==='ober'?'ein Oberlicht':'ein Unterlicht')}. Die Bilder zeigen nur die Flügel; wie das Glasfeld öffnet, wählen Sie darunter.</div>`
+      : '';
+    return `<div class="card"><div class="grp-title">Öffnungsart je Flügel</div>${lichtNote}<div class="opts ${cols}">${cards}</div></div>`+lichtBlock;
   }
   if(k==='modell'){
     const cards=DOORS.map(d=>{ const on=S.doorModel===d.k;
