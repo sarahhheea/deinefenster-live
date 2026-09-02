@@ -1405,32 +1405,46 @@ html,body{overflow-x:clip}
 
 .cd-del{background:var(--bg,#eef2f8);border:1px solid var(--line);color:var(--ink-soft,#5b626b)}
 .cd-del:hover{background:#fdf1ef;border-color:#e9c3bc;color:#c0392b;text-decoration:none}
-/* Abschluss: dunkler Block mit hellem Knopf — greift den Footer der Website auf */
-.cd-foot{border-top:0 !important;background:linear-gradient(160deg,#0f1620,#1b2b44) !important;
-  border-radius:18px;padding:20px !important;margin:16px 4px 0;color:#fff;
-  box-shadow:0 18px 50px -24px rgba(8,21,46,.45)}
-.cd-tot{color:#fff}.cd-tot b{font-size:29px;letter-spacing:-.8px}
-/* Zwischensumme und Lieferung ueber dem Gesamtpreis - auf dem dunklen Block, also
-   gedaempft, damit die Endsumme die Hauptzahl bleibt. */
+/* Abschluss: helle Karte in derselben Sprache wie die Positionen darueber — weiss,
+   20px-Radius, weicher Schatten, gleicher Rahmen. Der dunkle Kasten war der einzige
+   dunkle Block einer durchgehend hellen Seite und stand ausgerechnet dort, wo der
+   Kunde absendet; ausserdem musste der Hauptknopf darin weiss werden und sah damit
+   anders aus als jeder andere Hauptknopf im Konfigurator. Jetzt traegt die blaue
+   Flaeche des Knopfs den Blick allein. */
+.cd-foot{border-top:0 !important;background:var(--surface,#fff) !important;
+  border:1px solid var(--line-d,#d3d9e6);
+  border-radius:20px;padding:20px !important;margin:16px 4px 0;color:var(--ink);
+  box-shadow:0 10px 30px -18px rgba(8,21,46,.4)}
+/* Leerer Korb: dort steht nur ein einzelner Knopf im Fuss — eine Karte darum haette
+   nichts einzurahmen und saehe wie ein doppelter Rahmen aus. */
+.cd-foot.is-leer{background:transparent !important;border:0;box-shadow:none;padding:0 !important}
+.cd-tot{color:var(--ink)}.cd-tot b{font-size:29px;letter-spacing:-.8px;color:var(--ink)}
+/* Zwischensumme und Lieferung ueber dem Gesamtpreis - gedaempft, damit die
+   Endsumme die Hauptzahl bleibt. */
 .cd-zeile{display:flex;justify-content:space-between;gap:12px;font-size:13.5px;
-  color:#9fb3d0;padding:3px 0;font-variant-numeric:tabular-nums}
+  color:var(--ink-soft);padding:3px 0;font-variant-numeric:tabular-nums}
 .cd-zeile+.cd-zeile{margin-bottom:6px}
-.cd-tot{border-top:1px solid rgba(159,179,208,.28);padding-top:9px}
+.cd-tot{border-top:1px solid var(--line);padding-top:9px}
 /* Stueckpreis unter der Zeilensumme. */
 .cd-stueck{display:block;font-size:12.5px;font-weight:600;color:var(--ink-soft);
   margin-top:2px;font-variant-numeric:tabular-nums}
-.cd-mwst{color:#9fb3d0 !important;text-align:right}
-/* Dieselbe Hauptaktion wie unten in der Fussleiste — also auch dieselbe Hoehe
-   und dieselbe Form. Vorher 46px hoch und eckiger als der Weiter-Knopf. */
-.cd-cta{background:#fff !important;color:var(--accent-d) !important;border-radius:999px;
+.cd-mwst{color:var(--ink-soft) !important;text-align:right}
+/* Dieselbe Hauptaktion wie unten in der Fussleiste — also auch dieselbe Hoehe,
+   Form und Farbe. Vorher 46px hoch und eckiger als der Weiter-Knopf. */
+.cd-cta{background:var(--primary,#225eaa) !important;color:#fff !important;border-radius:999px;
   font-size:15.5px;min-height:var(--btn-gross,56px);padding:0 20px !important;
-  display:flex !important;align-items:center;justify-content:center}
+  display:flex !important;align-items:center;justify-content:center;
+  box-shadow:0 14px 30px -18px rgba(34,94,170,.8)}
+.cd-cta:hover{background:var(--primary-d,#1b4d8c) !important;filter:none}
 .cd-liefer{margin:0 4px 14px}
 .cd-liefer button{border-radius:14px;padding:12px 14px;box-shadow:0 10px 30px -20px rgba(8,21,46,.4)}
 .cd-sum,.cd-note{padding:0 4px}
 .cd-more,.cd-cont{margin-top:10px}
-.cd-trust{display:flex;gap:8px;flex-wrap:wrap;margin:14px 4px 0}
-.cd-trust span{font-size:11.5px;background:#eaf1fa;color:var(--accent-d);padding:5px 11px;border-radius:999px;font-weight:700}
+.cd-trust{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 0}
+/* Dieselbe Chip-Sprache wie die Eigenschafts-Chips auf den Positionskarten daueber —
+   auf der hellen Karte ist die Markentoenung lesbarer als reines Grau. */
+.cd-trust span{font-size:11.5px;background:#eaf1fa;border:1px solid #dbe7f8;
+  color:var(--accent-d);padding:5px 11px;border-radius:999px;font-weight:700}
 @media(max-width:820px){
   .cd-panel{padding:0 12px 22px}
   .cd-head h2{font-size:24px !important}
@@ -6597,9 +6611,11 @@ function renderCartDrawer(){
   if(!cart.length){
     body.innerHTML='<div class="cd-empty">'+(korbVerfallen?'<div class="cd-hinweis" style="text-align:left">Ihre fr\u00fchere Zusammenstellung war '+KORB_TAGE+' Tage alt und wurde entfernt, damit Sie keine veralteten Preise sehen. Sie k\u00f6nnen sie in wenigen Schritten neu zusammenstellen.</div>':'')+'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="46" height="46" style="opacity:.35"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><p>Dein Warenkorb ist noch leer.</p></div>';
     foot.innerHTML='<button type="button" class="cd-cta" onclick="closeCartDrawer()">Jetzt konfigurieren</button>';
+    foot.classList.add('is-leer');   /* leerer Korb: kein Karten-Rahmen um den einzelnen Knopf */
     return;
   }
   var t=cartTotals();
+  foot.classList.remove('is-leer');
   // Sticky bleibt nur, was sticky sein MUSS: Gesamtpreis und der Haupt-Knopf. Alles andere
   // scrollt mit. Vorher belegte der Fuss 383 von 844 px — fuer die Positionen blieben 309 px
   // bei 622 px Inhalt, der Kunde sah nur die Skizze und weder Titel noch Preis noch Menge.
