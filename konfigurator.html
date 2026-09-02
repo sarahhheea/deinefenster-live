@@ -8205,13 +8205,23 @@ function setVerbr(feld,mm){ S[feld]=mm; render(); }
 function setAufteilungLicht(aufv,licht){
   const wechsel=(S.aufteilung!==aufv);
   S.aufteilung=aufv;
+  /* Nur bei echtem Wechsel die Oeffnungsart neu vorbelegen — sonst verliert ein
+     zweiter Klick auf dieselbe Kachel die Festverglasung und verteuert still. */
   if(wechsel){
-    S.anschlagIdx=Math.min(ANSCHLAG_DEFIDX[aufv]||0, (anschlagSet()||[]).length-1);
+    const set=anschlagSet();
+    S.anschlagIdx=Math.min(ANSCHLAG_DEFIDX[aufv]||0, set.length-1);
     massKlemmen();
   }
-  setLicht(licht);
+  _lichtSetzen(licht);
+  /* syncOpening und das Weiterspringen gehoeren dazu wie beim Aufteilungs-Setzer:
+     ohne sie bleibt S.opening auf der alten Oeffnungsart stehen, und ein Klick auf die
+     BEREITS gewaehlte Kachel tut gar nichts — der Kunde tippt seine Wahl an und die
+     Seite reagiert nicht, er muss unten auf "Weiter" druecken. */
+  syncOpening(); render(); maybeAutoAdvance();
 }
-function setLicht(art){
+/* Nur den Zustand setzen — Zeichnen und Weiterspringen macht der Aufrufer, damit es
+   nicht zweimal passiert. */
+function _lichtSetzen(art){
   S.licht=art;
   const g=lichtGrenzen('fest');
   if(art==='ohne'){ S.olH=0; S.ulH=0; S.olTyp='fest'; S.ulTyp='fest'; }
@@ -8219,8 +8229,8 @@ function setLicht(art){
     if((art==='ober'||art==='beide') && !(+S.olH>=g.min)) S.olH=g.min;
     if((art==='unter'||art==='beide') && !(+S.ulH>=g.min)) S.ulH=g.min;
   }
-  render();
 }
+function setLicht(art){ _lichtSetzen(art); render(); }
 function setLichtTyp(feld,typ){
   const g=lichtGrenzen(typ); if(!g||!g.da) return;
   if(typ==='kipp' && (+S.w||0)<g.bMin) return;      // zu schmal fuer ein Kipp-Licht
