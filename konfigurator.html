@@ -2423,9 +2423,16 @@ const S={ prod:'fenster', material:'kunststoff', holzart:'kiefer', profile:'clas
 // === Öffnung PRO FLÜGEL — 1:1 aus dem Live-Konfigurator (ANSCHLAG_SETS, geprüft 04.07.2026) ===
 // Jede Karte = eine Kombination; oeff = Öffnung je Flügel (links→rechts). stulpAt = Trennung nach Flügel i ist ein Stulp (statt Pfosten).
 const ANSCHLAG={
+  /* Reihenfolge nach Haeufigkeit, nicht nach Katalog: Dreh-Kipp zuerst, dann die
+     reinen Drehfluegel, zuletzt Kipp und Festverglasung. Wer ein normales Fenster
+     konfiguriert, findet seine Wahl damit in den ersten beiden Kacheln.
+     Dreh rechts und Dreh links (ohne Kipp) waren bisher gar nicht waehlbar, obwohl es
+     sie gibt, die Bilder im Repo lagen und die Preisflaechen dafuer gemessen sind. */
   '1fl':[
-    {n:'Dreh-Kipp links',oeff:['dk-l']},
     {n:'Dreh-Kipp rechts',oeff:['dk-r']},
+    {n:'Dreh-Kipp links',oeff:['dk-l']},
+    {n:'Dreh rechts',oeff:['dreh-r']},
+    {n:'Dreh links',oeff:['dreh-l']},
     {n:'Kipp',oeff:['kipp']},
     {n:'Festverglasung',oeff:['fest']},
   ],
@@ -2458,7 +2465,7 @@ const BALKON_ANSCHLAG={
     {n:'Dreh-Kipp links · Stulp · Dreh rechts',oeff:['dk-l','dreh-r'],stulpAt:1},
   ],
 };
-const ANSCHLAG_DEFIDX={'1fl':1,'2fl':0,'3fl':0};
+const ANSCHLAG_DEFIDX={'1fl':0,'2fl':0,'3fl':0};   // 1-fluegelig: Dreh-Kipp rechts steht jetzt vorn
 /* IGLO 5 Classic EXT oeffnet nach AUSSEN. Dort gibt es kein Dreh-Kipp und keinen
    Kippfluegel — der Hersteller fuehrt nur Drehfluegel, benannt nach DIN links und
    DIN rechts. Deshalb eine eigene Anschlagliste statt der normalen Fensterliste.
@@ -3590,6 +3597,17 @@ function _massEigen(){
   }
   const bMin=sash>=3?1200:(sash===2?800:500), bMax=sash>=3?4000:(sash===2?2700:1500);
   let hMin=500,hMax=1900; if(S.aufteilung==='ol'){ hMin=900; hMax=2400; }
+  /* Ein KIPPFLUEGEL gibt es nur bis 1000 mm Hoehe — der Beschlag traegt darueber nicht.
+     Belegt in allen drei Materialien: die gemessenen Kipp-Flaechen enden bei 1000, und
+     am Markt ist die Hoehe fuer Kipp auf 360 bis 1000 begrenzt, waehrend Dreh-Kipp bis
+     1700 geht. Ohne diese Grenze bot der Konfigurator ein 1200 mm hohes Kippfenster an
+     und schrieb den Preis ueber die gemessene Flaeche hinaus fort: in Alu kam ein
+     Kippfenster dann auf 1401 EUR gegenueber 846 fuer dasselbe Fenster als Dreh-Kipp.
+     Ein Fenster, das es nicht gibt, zu einem Preis, den niemand gemessen hat. */
+  try{
+    const a=(typeof curAnschlag==='function')?curAnschlag():null;
+    if(a && a.oeff && a.oeff.length===1 && a.oeff[0]==='kipp'){ hMax=Math.min(hMax,1000); }
+  }catch(e){}
   return {bMin,bMax,hMin,hMax};
 }
 /* Haelt das Maß im technisch moeglichen Bereich. Wird beim Wechsel der Aufteilung bzw. des
@@ -6328,7 +6346,7 @@ function cartSnapshot(it){
 var korbSpeicherFehler=false;
 function saveCart(){
   try{
-    localStorage.setItem(CART_LS_KEY, JSON.stringify({v:4,t:Date.now(),liefer:liefer,lieferWunsch:lieferWunsch,items:cart.map(cartSnapshot)}));
+    localStorage.setItem(CART_LS_KEY, JSON.stringify({v:5,t:Date.now(),liefer:liefer,lieferWunsch:lieferWunsch,items:cart.map(cartSnapshot)}));
     korbSpeicherFehler=false;
   }catch(e){
     korbSpeicherFehler=true;
@@ -6359,6 +6377,21 @@ function _colNeuIdx(key){ for(var i=0;i<COLORS_PVC.length;i++) if(COLORS_PVC[i].
    nicht: die Angabe geht so in die Bestellung. */
 const _ROLL_VON_FENSTER={'weiss':'roll-weiss','weiss-fx':'roll-weiss','anthrazit':'roll-anthrazit','anthraz-gl':'roll-anthrazit','anthraz-um':'roll-anthrazit','basaltgr-sa':'roll-basaltgrau','basaltgr-gl':'roll-basaltgrau','quarzgr-sa':'roll-quarzgrau','quarzgr-gl':'roll-quarzgrau','golden-oak':'roll-goldenoak','turner-oak':'roll-turneroak','winchester':'roll-winchester','nussbaum':'roll-nussbaum','moosgruen':'roll-moosgruen','schwarz-um':'roll-schwarz','schwarzbr':'roll-dunkelbraun'};
 function _rollNeuIdx(key){ var z=_ROLL_VON_FENSTER[key]; if(!z) return -1; for(var i=0;i<COLORS_ROLL.length;i++) if(COLORS_ROLL[i].key===z) return i; return -1; }
+/* Die 1-fluegeligen Anschlaege sind am 02.09.2026 umsortiert worden (Dreh-Kipp rechts
+   nach vorn) und um Dreh rechts / Dreh links erweitert. Im Warenkorb steht aber nur die
+   NUMMER der Auswahl — ohne Umrechnung haette ein liegen gebliebener Korb still eine
+   andere Oeffnungsart gezeigt: aus "Dreh-Kipp links" waere "Dreh-Kipp rechts" geworden,
+   aus "Festverglasung" ein Kippfluegel. Betrifft nur einfluegelige Fenster; Balkontuer,
+   Haustuer und IGLO 5 Classic EXT haben eigene Listen.
+       alt: 0 dk-l · 1 dk-r · 2 kipp · 3 fest
+       neu: 0 dk-r · 1 dk-l · 2 dreh-r · 3 dreh-l · 4 kipp · 5 fest */
+function _migAnschlagV5(conf){
+  if(!conf || conf.prod!=='fenster' || conf.aufteilung!=='1fl') return conf;
+  if(conf.profile==='ext') return conf;                 // eigene Liste, unveraendert
+  var m={0:1, 1:0, 2:4, 3:5}, alt=+conf.anschlagIdx;
+  if(m[alt]!==undefined) conf.anschlagIdx=m[alt];
+  return conf;
+}
 function _migColors(conf){
   ['outer','inner','panzer','endleiste'].forEach(function(k){
     var v=conf[k];
@@ -6425,15 +6458,16 @@ function loadCart(){ try{ const d=JSON.parse(localStorage.getItem(CART_LS_KEY)||
   /* Beides zusammengefuehrt: Ablauf und Preisstand (mein Zweig) UND die
      Farbindex-Umrechnung aus dem Live-Stand. Ohne die Umrechnung zeigte ein alter
      Korb nach dem Wegfall von 'Bergkiefer' stillschweigend die naechste Farbe. */
-  if(d&&Array.isArray(d.items)&&d.items.length){ const v=(+d.v||0), altV3=(v<3), altV4=(v<4);
+  if(d&&Array.isArray(d.items)&&d.items.length){ const v=(+d.v||0), altV3=(v<3), altV4=(v<4), altV5=(v<5);
     cart=d.items.filter(o=>o&&o.conf).map(function(o){
       var c=o.conf;
       if(altV3) c=_migColors(c);                    // Bergkiefer-Luecke zuerst schliessen
       if(altV4) c=_migColorsV4(c);                  // danach auf die geprueste Herstellerliste
+      if(altV5) c=_migAnschlagV5(c);                // 1-fluegelige Anschlaege wurden umsortiert
       c=_klemmFarbIdx(c);                           // und zuletzt alles abfangen, was keine Migration kennt
       return {conf:c,name:o.name||'',lastPrice:(o.r&&Number(o.r.price))||0};
     });
-    if(altV4) setTimeout(saveCart,0); }
+    if(altV5) setTimeout(saveCart,0); }
   if(d && (d.liefer==='abholung'||d.liefer==='lieferung')) liefer=d.liefer;   // Wahl wiederherstellen
   if(d && typeof d.lieferWunsch==='boolean') lieferWunsch=d.lieferWunsch;
   }catch(e){} }
