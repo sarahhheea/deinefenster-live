@@ -611,3 +611,30 @@ section.dark .tstrip{background:#fff!important;border-color:var(--border)!import
 .btn-primary:hover,.promo-cta:hover,.nav-cta:hover{filter:none!important;transform:translateY(-2px)}
 /* Abschluss-CTA: dunkelnavy → lebendiges Marken-Blau */
 .ctablock{background:linear-gradient(130deg,oklch(0.52 0.13 255),oklch(0.42 0.13 256))!important}
+
+/* Lange Beschriftungen duerfen den Knopf nicht ueber den Bildschirmrand schieben.
+   inline-flex laesst den Text sonst in einer Zeile stehen — auf den Ortsseiten
+   ("Fenster fuer Brandenburg an der Havel konfigurieren") sprengte das am Handy
+   die Seitenbreite, der Inhalt rechts wurde abgeschnitten und war nicht lesbar.
+   Knoepfe, die ohnehin passen, aendern sich dadurch nicht. */
+.btn-primary,.btn-secondary{max-width:100%;flex-wrap:wrap;justify-content:center;text-wrap:balance}
+
+/* Grid-Spalten mit 1fr schrumpfen nicht unter die Breite ihres Inhalts — „1fr" heisst
+   minmax(auto,1fr), und „auto" ist die Inhaltsbreite. Ein breites Bild oder eine lange
+   Zeile sprengt so die Spalte, die Seite laeuft seitlich ueber und der Inhalt am rechten
+   Rand wird abgeschnitten (auf Handy nicht wegscrollbar, also unlesbar). */
+.minigrid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.minigrid>*,.gcard{min-width:0}
+/* Bei aspect-ratio leitet der Browser die Breite aus der Hoehe ab, wenn die Hoehe
+   von aussen kommt (hier aus der Grid-Zeile). Die Karte wurde dadurch breiter als
+   ihre Spalte. Die Deckelung laesst die Zuschnitte unveraendert — object-fit:cover
+   am Bild fuellt weiterhin die ganze Flaeche. */
+.gcard{max-width:100%}
+
+/* Vergleichstabellen (Uw-Werte u. ae.) sind am Handy breiter als der Bildschirm.
+   Sie duerfen dort in sich seitlich scrollen, statt die ganze Seite zu sprengen —
+   sonst wird der Text rechts abgeschnitten und ist gar nicht mehr lesbar.
+   Auf grossen Schirmen bleibt die Tabelle eine normale Tabelle. */
+@media (max-width:760px){
+  main table,article table,.prose table,.article table,.ratgeber table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+}
