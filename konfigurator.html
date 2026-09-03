@@ -7059,15 +7059,38 @@ function panelHTML(){
         +card(1,'aussen','Rechts · Ansicht von außen','nach außen öffnend · Bänder rechts')
         +`</div></div>`;
     }
+    /* Ein Fluegel mit einem Licht: eine Kachel je Kombination aus Fluegel und
+       Glasfeld (siehe lichtKombis). Der getrennte Block darunter entfaellt dann. */
+    const kombi=lichtKombis();
+    if(kombi){
+      const kk=kombi.map(c=>{
+        const on=(S.anschlagIdx===c.idx && (S[c.feld]||'fest')===c.typ);
+        return `<div class="ocard ${on?'on':''}" onclick="setAnschlagLicht(${c.idx},'${c.feld}','${c.typ}')">${tick}<div class="vis"><img src="${c.img}?v=1" loading="lazy" decoding="async" alt="${c.n}, ${c.s}"></div><div class="t">${c.n}</div><div class="s">${c.s}</div></div>`;
+      }).join('');
+      const wort=(S.licht==='ober')?'Oberlicht':'Unterlicht';
+      return `<div class="card"><div class="grp-title">Öffnungsart</div>`
+        +`<div class="vb-intro" style="margin:0 0 10px">Ihr Fenster hat ein ${wort}. Die Kachel zeigt beides zusammen: wie der Flügel öffnet und ob das Glasfeld fest verglast ist oder sich kippen lässt.</div>`
+        +`<div class="opts ${kombi.length>4?'three':'two'}">${kk}</div></div>`;
+    }
     // Fenster/Balkon: Öffnungs-Karten mit echten Live-Fotos (1-Flügel: img/karten/anschlag-1f/<oeff>.webp), Mehrflügel = Mini-Skizze.
     const set=anschlagSet();
-    const cards=set.map((o,idx)=>{ const on=S.anschlagIdx===idx; const oimg=oeffCardImg(o);
+    /* Sobald ein Licht dran ist, fallen der reine Kippfluegel und die Festverglasung
+       weg: ein einfluegeliges Fenster, das sich nur kippen laesst oder gar nicht
+       oeffnet, wird mit Ober- oder Unterlicht nicht gebaut (Sarah 03.09.2026).
+       Der urspruengliche Index bleibt am Eintrag haengen — er steckt in den
+       Positionsdaten und im Warenkorb, eine neu durchnummerierte Liste wuerde
+       gespeicherte Anfragen auf eine andere Oeffnungsart zeigen lassen. */
+    let liste=set.map((o,idx)=>({o:o,idx:idx}));
+    if(S.prod==='fenster' && lichtAktiv() && S.aufteilung==='1fl')
+      liste=liste.filter(x=>x.o.oeff.length!==1 || (x.o.oeff[0]!=='kipp' && x.o.oeff[0]!=='fest'));
+    if(liste.length && !liste.some(x=>x.idx===S.anschlagIdx)){ S.anschlagIdx=liste[0].idx; syncOpening(); }
+    const cards=liste.map(({o,idx})=>{ const on=S.anschlagIdx===idx; const oimg=oeffCardImg(o);
       const vis = oimg
         ? `<div class="vis"><img src="${oimg}?v=1" loading="lazy" decoding="async" alt="${o.n}"></div>`
         : `<div class="vis anschlagvis">${miniAnschlag(o.oeff,o.stulpAt||0)}</div>`;
       return `<div class="ocard ${on?'on':''}" onclick="setAnschlag(${idx})">${tick}${o.tag?`<span class="fav">${o.tag}</span>`:''}${vis}<div class="t">${o.n}</div></div>`;
     }).join('');
-    const cols=set.length<=2?'two':(set.length===4?'two':'three');
+    const cols=liste.length<=2?'two':(liste.length===4?'two':'three');
     /* Ist ein Ober- oder Unterlicht gewaehlt, gehoert auch DESSEN Oeffnungsart hierher.
        Sonst waere der Schritt unvollstaendig: der Kunde legt fest, wie die Fluegel
        aufgehen, aber nicht, ob das Glasfeld darueber fest ist oder sich kippen laesst —
@@ -8283,9 +8306,35 @@ function endleisteC(){ var f=endleisteFarbe(); return f ? f.c : panzerC(); }
 function panzerText(){ var f=panzerFarbe(); return f ? f.n : 'Passend zum Rahmen'; }
 function endleisteText(){ var f=endleisteFarbe(); return f ? f.n : 'Wie Panzer'; }
 // Maße live setzen OHNE Neu-Rendern (sonst verliert das Feld den Fokus) — nur Preis unten aktualisieren
+/* Ein Kipp-Licht braucht eine Mindestbreite (bei Kunststoff 455 mm). Wer erst ein
+   Kipp-Licht waehlt und das Fenster danach schmaler macht, stand vorher in einem
+   Zustand, den es nicht gibt: die Auswahl zeigte kein Kipp mehr an, S.olTyp/S.ulTyp
+   blieben aber auf "kipp" — _lichtEins liefert dort keinen Preis, und der Kunde sah
+   nur noch einen Strich statt einer Summe, ohne zu erfahren warum.
+   Deshalb wird die Lichtart beim Maßwechsel zurueckgeholt: kein Kipp moeglich -> fest.
+   Zusaetzlich rutscht die Lichthoehe in die Grenzen der jetzt gueltigen Art. */
+function lichtNormalisieren(){
+  if(!lichtAktiv() || !_LICHT[_lichtKey(null)]) return false;
+  /* Nur bei einer fertig eingegebenen Breite. setMass laeuft bei JEDEM Tastendruck:
+     wer "600" tippt, ist zwischendurch bei 6 und 60 — dort waere kein Kipp-Licht
+     moeglich und die Wahl des Kunden waere still weg, bevor er die Zahl zu Ende
+     geschrieben hat. Unterhalb des Mindestmasses steht ohnehin kein Preis. */
+  const _L=massLimits(); if((+S.w||0) < _L.bMin) return false;
+  const gK=lichtGrenzen('kipp'), gF=lichtGrenzen('fest');
+  const kippGeht=!!(gK && gK.da && (+S.w||0)>=gK.bMin);
+  let geaendert=false;
+  [['olTyp','olH'],['ulTyp','ulH']].forEach(([tf,hf])=>{
+    if((S[tf]||'fest')==='kipp' && !kippGeht){ S[tf]='fest'; geaendert=true; }
+    const g=lichtGrenzen(S[tf]||'fest'); if(!g) return;
+    const neuH=Math.min(Math.max(+S[hf]||g.min, g.min), g.max);
+    if(neuH!==+S[hf]){ S[hf]=neuH; geaendert=true; }
+  });
+  return geaendert;
+}
 function setMass(k,v){ S[k]=(+v||0);
   // Beim Tippen wird nicht neu gerendert (sonst springt der Fokus aus dem Feld) — der Warenkorb
   // muss hier trotzdem mitgeschrieben werden, sonst zeigt er noch den Preis von vor der Eingabe.
+  lichtNormalisieren();
   if(editIndex>=0&&cart[editIndex]){ cart[editIndex].conf[k]=S[k]; saveCart(); }
   updateMassValidity(); refreshPrice(); }
 // Preis + Weiter-Knopf abhängig von Maß-Gültigkeit (kein Preis bei technisch unmöglichem Maß)
@@ -8347,6 +8396,53 @@ function setAufteilung(v){ const wechsel=(S.aufteilung!==v); S.aufteilung=v;
   // auf die bereits gewaehlte Aufteilung die Festverglasung und verteuert still um ~52 EUR.
   if(wechsel){ const set=anschlagSet(); S.anschlagIdx=Math.min(ANSCHLAG_DEFIDX[v]||0,set.length-1); massKlemmen(); }
   syncOpening(); render(); maybeAutoAdvance(); }
+/* Ein einfluegeliges Fenster mit EINEM Licht wird nicht in zwei getrennten
+   Entscheidungen bestimmt. Vorher stand oben "Oeffnungsart je Fluegel" mit sechs
+   Kacheln und darunter ein zweiter Block fuer das Glasfeld — der Kunde musste sich
+   das Fenster aus zwei Listen zusammendenken. Jetzt zeigt eine Kachel die ganze
+   Kombination, so wie das Fenster spaeter gebaut wird.
+   Welche Kombinationen (Sarah-Vorgabe 03.09.2026):
+     Licht fest verglast  -> Fluegel Dreh-Kipp rechts / links
+     Licht zum Kippen     -> Fluegel Dreh-Kipp rechts / links UND Dreh rechts / links
+   Kippfluegel und Festverglasung als FLUEGEL fallen weg, sobald ein Licht dran ist —
+   die Kombination wird nicht gebaut.
+   Ein "Dreh"-Licht gibt es bewusst nicht: gemessen sind nur fest und kipp, alles
+   andere waere ein geratener Preis.
+   Nur bei EINEM Licht. Bei Ober- UND Unterlicht waeren es 24 Kacheln fuer dieselbe
+   Entscheidung; dort bleibt der getrennte Block. */
+function lichtKombis(){
+  if(S.prod!=='fenster' || S.aufteilung!=='1fl') return null;
+  if(S.licht!=='ober' && S.licht!=='unter') return null;
+  if(!_LICHT[_lichtKey(null)]) return null;
+  lichtNormalisieren();   // Maß kann aus Warenkorb oder Link kommen, nicht nur aus dem Feld
+  const set=anschlagSet(), idxOf=o=>set.findIndex(x=>x.oeff.length===1 && x.oeff[0]===o);
+  const gK=lichtGrenzen('kipp');
+  const kippGeht=!!(gK && gK.da && (+S.w||0)>=gK.bMin);
+  const feld=(S.licht==='ober')?'olTyp':'ulTyp', wort=(S.licht==='ober')?'Oberlicht':'Unterlicht';
+  const ord=(S.licht==='ober')?'-oberlicht':'-unterlicht', ksuf=(S.licht==='ober')?'-olk':'-ulk';
+  /* Laesst die Breite kein Kipp-Licht zu, blieben sonst nur zwei Kacheln stehen und
+     die beiden reinen Drehfluegel waeren gar nicht mehr waehlbar. Dann bekommen alle
+     vier Fluegel das feste Licht. */
+  const paare = kippGeht
+    ? [['dk-r','fest'],['dk-l','fest'],['dk-r','kipp'],['dk-l','kipp'],['dreh-r','kipp'],['dreh-l','kipp']]
+    : [['dk-r','fest'],['dk-l','fest'],['dreh-r','fest'],['dreh-l','fest']];
+  const namen={'dk-r':'Dreh-Kipp rechts','dk-l':'Dreh-Kipp links','dreh-r':'Dreh rechts','dreh-l':'Dreh links'};
+  return paare.map(([oe,typ])=>({
+    oeff:oe, typ:typ, feld:feld, idx:idxOf(oe),
+    n:namen[oe], s:wort+(typ==='kipp'?' zum Kippen':' fest verglast'),
+    img:'img/karten/anschlag-1f'+ord+'/'+oe+(typ==='kipp'?ksuf:'')+'.webp'
+  })).filter(c=>c.idx>=0);
+}
+function setAnschlagLicht(idx,feld,typ){
+  S.anschlagIdx=idx;
+  const g=lichtGrenzen(typ);
+  if(g&&g.da&&!(typ==='kipp'&&(+S.w||0)<g.bMin)){
+    S[feld]=typ;
+    const h=(feld==='olTyp')?'olH':'ulH';
+    S[h]=Math.min(Math.max(+S[h]||g.min, g.min), g.max);   // Hoehe in die Grenzen der neuen Art ziehen
+  }
+  syncOpening(); render(); maybeAutoAdvance();
+}
 function setAnschlag(idx){ S.anschlagIdx=idx; syncOpening(); render(); maybeAutoAdvance(); }
 function setTuerOeff(idx,r){ S.anschlagIdx=idx; S.tuerOeffnung=r; syncOpening(); render(); maybeAutoAdvance(); }   // Haustür: DIN links/rechts + innen/außen
 // Sprossen: Art (wählt gültige Breite), Aufteilung, Breite — bewusst KEIN Auto-Weiter (Detailauswahl)
