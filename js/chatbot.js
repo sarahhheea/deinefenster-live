@@ -144,7 +144,7 @@ const RULES = [
   // ── Bewertungen ─────────────────────────────────────────────────────────────
   {
     keys: ['bewertung','bewertungen','erfahrungen','referenzen','rezension','rezensionen','google bewertung','wie seid ihr bewertet','sterne','reviews','feedback kunden','kundenstimmen','seriös','vertrauen','wie zufrieden','was sagen kunden'],
-    answer: '⭐ Unsere Google-Bewertungen kannst du dir direkt anschauen:<br><br><a href="https://www.google.com/maps?cid=9402028850820563054" target="_blank" rel="noopener" style="display:inline-block;margin-top:4px;padding:7px 14px;background:rgba(118,169,250,0.15);border:1px solid rgba(118,169,250,0.3);border-radius:8px;color:#76a9fa;text-decoration:none;font-weight:700;font-size:12px;">→ Bewertungen Fensterhandel Christ (Google)</a><br><br>Eine Auswahl findest du auch auf unserer <a href="index.html#bewertungen">Startseite im Bewertungsbereich</a>.'
+    answer: '⭐ Unsere Google-Bewertungen kannst du dir direkt anschauen:<br><br><a href="https://www.google.com/maps?cid=9401727711250777966" target="_blank" rel="noopener" style="display:inline-block;margin-top:4px;padding:7px 14px;background:rgba(118,169,250,0.15);border:1px solid rgba(118,169,250,0.3);border-radius:8px;color:#76a9fa;text-decoration:none;font-weight:700;font-size:12px;">→ Bewertungen Fensterhandel Christ (Google)</a><br><br>Eine Auswahl findest du auch auf unserer <a href="index.html#bewertungen">Startseite im Bewertungsbereich</a>.'
   },
 
   // ── Farbproben / Muster ─────────────────────────────────────────────────────
@@ -400,7 +400,7 @@ TERMIN: Außerhalb Hofverkauf (Fr 10-17) kann man nach Termin FRAGEN — keine G
 
 NICHT IM ANGEBOT: Keine Farbproben/Muster verschicken (41 Farben digital im Konfigurator ansehen). Keine Ersatzteile (Dichtungen/Beschläge/Griffe) — nur Garantiefälle abwickeln. Keine Sammelbestellungen.
 
-BEWERTUNGEN: Google-Bewertungen unter https://www.google.com/maps?cid=9402028850820563054 — bei Frage zu Bewertungen/Erfahrungen darauf verweisen.
+BEWERTUNGEN: Google-Bewertungen unter https://www.google.com/maps?cid=9401727711250777966 — bei Frage zu Bewertungen/Erfahrungen darauf verweisen.
 
 FÖRDERUNG: BAFA BEG EM bis 15% Zuschuss (IGLO Energy + Edge). Antrag VOR Bestellung auf bafa.de! KfW 458 gilt nicht mehr für Einzelmaßnahmen. §35a EStG: 20% Handwerkerlohn steuerlich absetzbar (nicht Material).
 
