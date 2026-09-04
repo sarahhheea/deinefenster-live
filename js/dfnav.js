@@ -149,7 +149,7 @@
   window.addEventListener('pageshow', refresh);
 })();
 
-/* dfnav — Adresse und Route site-weit: setzt einen Verweis aufs Kartenprofil in die
+/* dfnav — Route site-weit: setzt den Verweis auf die Routenplanung in die
    Kopfleiste (Desktop) und ins ausklappbare Menue (Handy). Bewusst NICHT in die
    Symbolreihe der Navigation: dort ist die Reihe bereits voll, ein weiteres Symbol
    liess die Navigation auf zwei Zeilen umbrechen und wurde am Handy auf 23 px
@@ -158,7 +158,12 @@
    damit ist keine Einwilligung noetig. */
 (function(){
   'use strict';
-  var ZIEL = 'https://www.google.com/maps?cid=9402028850820563054';
+  /* Routenplanung, NICHT das Unternehmensprofil (cid=...): das Profil zeigt nur den
+     Eintrag, der Kunde muesste dort erst selbst auf "Route" tippen — am Handy landete
+     er in der Karten-App auf dem Eintrag und kam ohne zweiten Schritt nicht weiter.
+     Mit dir/?api=1 startet die Navigation sofort, Start ist der eigene Standort. */
+  var ZIEL = 'https://www.google.com/maps/dir/?api=1&destination='
+    + encodeURIComponent('Fohrder Landstra\u00dfe 13, 14772 Brandenburg an der Havel');
   var PIN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" '
     + 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" '
     + 'style="width:1em;height:1em;vertical-align:-2px;margin-right:4px">'
@@ -171,7 +176,7 @@
     if(!rechts) return;
     var a=document.createElement('a');
     a.className='df-ort-kopf'; a.href=ZIEL; a.target='_blank'; a.rel='noopener';
-    a.title='Adresse und Anfahrt zum Hofverkauf';
+    a.title='Route zum Hofverkauf berechnen (Google Maps)';
     /* als Einheit halten, sonst rutscht das Symbol ueber das Wort */
     a.style.cssText='display:inline-flex;align-items:center;white-space:nowrap';
     a.innerHTML=PIN+'Route';
@@ -184,11 +189,20 @@
     if(!d) return;
     var a=document.createElement('a');
     a.className='df-ort-menue'; a.href=ZIEL; a.target='_blank'; a.rel='noopener';
-    a.innerHTML=PIN+'Adresse &amp; Route';
-    a.style.cssText='display:flex;align-items:center;gap:2px;padding:14px 20px;'
-      +'font-weight:700;color:#225eaa;text-decoration:none;'
-      +'border-bottom:1px solid rgba(34,94,170,.14)';
-    d.insertBefore(a, d.firstChild);
+    a.title='Route zum Hofverkauf berechnen (Google Maps)';
+    a.innerHTML=PIN+'Route zum Hofverkauf';
+    /* gleiche Metrik wie die uebrigen Menuepunkte (padding 13px 0, Anzeigeschrift,
+       1.05rem), sonst steht der Eintrag eingerueckt und kleiner daneben. Nur die
+       Farbe weicht ab, damit er als Handlung erkennbar bleibt. */
+    a.style.cssText='display:flex;align-items:center;padding:13px 0;'
+      +'font-family:var(--dfn-disp,inherit);font-weight:700;font-size:1.05rem;'
+      +'color:var(--dfn-acc-text,#225eaa);text-decoration:none;'
+      +'border-bottom:1px solid var(--dfn-border,rgba(34,94,170,.14))';
+    /* hinter die Kopfzeile mit Logo und Schliessen-Knopf, nicht davor: als erstes Kind
+       hing der Verweis ueber dem Menuekopf und sah wie ein Fremdkoerper aus. */
+    var kopf = d.querySelector('.dfnav-dhead');
+    if(kopf && kopf.parentNode===d) d.insertBefore(a, kopf.nextSibling);
+    else d.insertBefore(a, d.firstChild);
   }
 
   function los(){ inKopfleiste(); inMenue(); }

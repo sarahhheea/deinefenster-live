@@ -115,8 +115,8 @@
         '<div class="dfh-zeiten">' + zeilen() + '</div>' +
         '<p class="dfh-adresse"><b>Fohrder Landstra&szlig;e 13</b> &middot; 14772 Brandenburg an der Havel</p>' +
         (z ? '<p class="dfh-befristung">' + z + '</p>' : '') +
-        '<a class="dfh-route" href="https://www.google.com/maps?cid=9402028850820563054" ' +
-           'target="_blank" rel="noopener">Route ansehen &rarr;</a>' +
+        '<a class="dfh-route" href="https://www.google.com/maps/dir/?api=1&destination=Fohrder+Landstra%C3%9Fe+13%2C+14772+Brandenburg+an+der+Havel" ' +
+           'target="_blank" rel="noopener">Route berechnen &rarr;</a>' +
       '</div>';
     return w;
   }
