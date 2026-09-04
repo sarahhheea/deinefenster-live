@@ -3866,11 +3866,35 @@ function _lichtKey(L){
 function lichtMoeglich(){ return !!_LICHT[_lichtKey(null)]; }
 function lichtGrenzen(typ){
   var e=_LICHT[_lichtKey(null)]; if(!e) return null;
-  return (typ==='kipp') ? {min:e.kippMin, max:e.kippMax, bMin:e.kippB, da:!!e.kipp}
-                        : {min:e.festMin, max:e.festMax, bMin:0, da:true};
+  /* Das Dreh-Kipp-Glasfeld rechnet auf dem gemessenen Kipp-Licht auf, also gelten
+     dessen Grenzen: dieselbe Mindestbreite, dieselbe Hoehenspanne. */
+  var kippArtig=(typ==='kipp'||typ==='dk-l'||typ==='dk-r');
+  if(!kippArtig) return {min:e.festMin, max:e.festMax, bMin:0, da:true};
+  /* Ein Dreh-Kipp-Fluegel braucht mehr Hoehe als ein reiner Kippfluegel: der
+     Hersteller baut ihn ab 395 mm (Katalogwert, nachgesehen 03.09.2026), ein
+     Kippfluegel geht ab 360 mm. Ein 360 mm hohes Dreh-Kipp-Glasfeld liesse sich
+     also gar nicht fertigen — die Staffel wuerde trotzdem einen Preis ausgeben. */
+  var min=(typ==='kipp') ? e.kippMin : Math.max(e.kippMin, 395);
+  return {min:min, max:e.kippMax, bMin:e.kippB, da:!!e.kipp};
 }
-/* Preis eines Lichtfeldes: dasselbe wie ein einfluegeliges Fenster dieser Breite. */
-function _lichtEins(e,typ,b,h){
+/* Preis eines Lichtfeldes: dasselbe wie ein einfluegeliges Fenster dieser Breite.
+   Nachgerechnet 03.09.2026: ein festes Lichtfeld 600x500 kostet 79,04 — ein
+   einfluegeliges Festfenster derselben Groesse 78. Bei Kipp 115,82 zu 116. Die
+   Gleichsetzung stimmt also, sie ist nicht bloss eine Annahme im Kommentar.
+
+   Dreh-Kipp-Glasfeld: der Markt fuehrt das Licht selbst nur als "fest" oder "kipp"
+   (nachgesehen in allen Profilkatalogen), gemessene Flaechen gibt es entsprechend
+   nur fuer diese beiden. Sarah-Entscheidung 03.09.2026: wir bieten es trotzdem an.
+   Der Preis wird NICHT geschaetzt, sondern aus zwei gemessenen Groessen abgeleitet:
+       Dreh-Kipp-Licht = gemessenes Kipp-Licht
+                       + (gemessener Dreh-Kipp-Fluegel - gemessener Kipp-Fluegel)
+   beides bei genau derselben Breite und Hoehe. Der Zuschlag ist damit der echte
+   Marktabstand zwischen den beiden Beschlaegen. Gegenprobe gegen den Rohpreis eines
+   einfluegeligen Dreh-Kipp-Fensters: Kunststoff 130,17 zu 131 und 249,86 zu 252 —
+   also knapp darunter, nie darueber. Bei Holz deckungsgleich bis auf die Marge.
+   Die Grenzen des Kipp-Lichts gelten weiter: ausserhalb kein Preis, kein Raten. */
+function _lichtEins(e,typ,b,h,L){
+  if(typ==='dk-l'||typ==='dk-r') return _lichtDrehKipp(e,typ,b,h,L);
   var t=(typ==='kipp')?e.kipp:e.fest;
   if(!t) return null;
   /* Ausserhalb der gemessenen Breite KEIN Preis. _holzaluLook wuerde dort
@@ -3881,12 +3905,31 @@ function _lichtEins(e,typ,b,h){
   if(h < t.H[0] || h > t.H[t.H.length-1]) return null;
   return _holzaluLook(t,b,h);
 }
+function _lichtDrehKipp(e,typ,b,h,L){
+  var grund=_lichtEins(e,'kipp',b,h,L); if(grund==null) return null;
+  /* Der Aufschlag kommt aus derselben Quelle wie der Fensterpreis: _pfBasis liest die
+     gemessenen Flaechen (Kunststoff wie Holz). Ein synthetisches L, weil die Funktion
+     ein Fenster erwartet — Groesse ist die des Glasfeldes, nicht die des Fensters. */
+  var l0=L||LS||{}, mk=function(oe){ return {material:l0.material||'kunststoff', haProfil:l0.haProfil,
+      holzart:l0.holzart||'kiefer', profil:l0.profil||'iglo5',
+      edge:!!l0.edge, fluegel:'1-fluegel', oeff1:oe, cnt:1, bMm:b, hMm:h}; };
+  /* IGLO EDGE rechnet aus eigenen Flaechen (_edgeLook), nicht aus _pfBasis. Ohne
+     diesen Zweig kaeme der Aufschlag aus der Classic-Flaeche — also aus einem
+     anderen Profil als dem, das der Kunde gewaehlt hat. */
+  var hole=(l0.edge)
+    ? function(L2){ var t=_edgeFenTeil(L2); return t?_edgeLook(t,L2.bMm,L2.hMm):null; }
+    : _pfBasis;
+  var a=hole(mk(typ)), k=hole(mk('kipp'));
+  if(a==null||k==null) return null;
+  var auf=a-k; if(!(auf>0)) return null;   // kein negativer oder fehlender Abstand
+  return grund+auf;
+}
 function _lichtPreis(L){
   var e=_LICHT[_lichtKey(L)]; if(!e) return 0;
   var art=L.licht||'ohne'; if(art==='ohne') return 0;
   var b=L.bMm||0, summe=0;
-  if(art==='ober'||art==='beide'){ var a=_lichtEins(e,L.olTyp||'fest',b,+L.olH||e.festMin); if(a==null) return null; summe+=a; }
-  if(art==='unter'||art==='beide'){ var u=_lichtEins(e,L.ulTyp||'fest',b,+L.ulH||e.festMin); if(u==null) return null; summe+=u; }
+  if(art==='ober'||art==='beide'){ var a=_lichtEins(e,L.olTyp||'fest',b,+L.olH||e.festMin,L); if(a==null) return null; summe+=a; }
+  if(art==='unter'||art==='beide'){ var u=_lichtEins(e,L.ulTyp||'fest',b,+L.ulH||e.festMin,L); if(u==null) return null; summe+=u; }
   return summe;
 }
 function lichtAktiv(){ return S.licht && S.licht!=='ohne'; }
@@ -3905,8 +3948,12 @@ function lichtGesamtHoehe(){
 function lichtText(){
   if(!lichtAktiv()) return 'ohne';
   var t=[];
-  if(S.licht==='ober'||S.licht==='beide') t.push('Oberlicht '+(+S.olH||0)+' mm'+((S.olTyp==='kipp')?' (kipp)':''));
-  if(S.licht==='unter'||S.licht==='beide') t.push('Unterlicht '+(+S.ulH||0)+' mm'+((S.ulTyp==='kipp')?' (kipp)':''));
+  /* Die Art des Glasfeldes gehoert in den Klartext: fest, kipp und dreh-kipp sind
+     drei verschiedene Fenster zu drei verschiedenen Preisen. Ohne die Angabe stuende
+     in der Anfrage-Mail dieselbe Zeile fuer alle drei. */
+  var _lart=function(v){ return (v==='kipp')?' (kipp)' : (v==='dk-l')?' (Dreh-Kipp links)' : (v==='dk-r')?' (Dreh-Kipp rechts)' : ''; };
+  if(S.licht==='ober'||S.licht==='beide') t.push('Oberlicht '+(+S.olH||0)+' mm'+_lart(S.olTyp));
+  if(S.licht==='unter'||S.licht==='beide') t.push('Unterlicht '+(+S.ulH||0)+' mm'+_lart(S.ulTyp));
   return t.join(' · ')+' · Gesamthöhe '+lichtGesamtHoehe()+' mm';
 }
 /* === Rahmenverbreiterung ==================================================
@@ -6877,7 +6924,7 @@ function massZusatz(){
          einen Schritt vorher bei der Oeffnungsart gewaehlt — dort gehoert es hin. Der
          Zusatz in Klammern sagt, was dort eingestellt ist, damit die Grenzen
          nachvollziehbar sind: ein Kipp-Licht darf nur 360 bis 1000 mm hoch sein. */
-      return '<div class="vb-zeile"><div class="vb-seite">'+titel+'<span class="vb-laenge">'+(typ==='kipp'?'zum Kippen · ':'fest · ')+g.min+'–'+g.max+' mm</span></div>'
+      return '<div class="vb-zeile"><div class="vb-seite">'+titel+'<span class="vb-laenge">'+(typ==='kipp'?'zum Kippen · ':(typ==='dk-l'||typ==='dk-r')?'dreh- und kippbar · ':'fest · ')+g.min+'–'+g.max+' mm</span></div>'
         +'<div class="mrow lichtrow"><input type="number" inputmode="numeric" min="'+g.min+'" max="'+g.max+'" value="'+wert+'" oninput="setLichtH(\''+feld+'\',this.value)" onfocus="this.select()"><span class="unit">mm</span></div></div>';
     };
     var z='';
@@ -7069,7 +7116,7 @@ function panelHTML(){
       }).join('');
       const wort=(S.licht==='ober')?'Oberlicht':'Unterlicht';
       return `<div class="card"><div class="grp-title">Öffnungsart</div>`
-        +`<div class="vb-intro" style="margin:0 0 10px">Ihr Fenster hat ein ${wort}. Die Kachel zeigt beides zusammen: wie der Flügel öffnet und ob das Glasfeld fest verglast ist oder sich kippen lässt.</div>`
+        +`<div class="vb-intro" style="margin:0 0 10px">Ihr Fenster hat ein ${wort}. Die Kachel zeigt beides zusammen: wie der Flügel öffnet und ob das Glasfeld fest verglast ist, sich kippen oder auch drehen lässt.</div>`
         +`<div class="opts ${kombi.length>4?'three':'two'}">${kk}</div></div>`;
     }
     // Fenster/Balkon: Öffnungs-Karten mit echten Live-Fotos (1-Flügel: img/karten/anschlag-1f/<oeff>.webp), Mehrflügel = Mini-Skizze.
@@ -8242,7 +8289,7 @@ function _lichtSetzen(art){
 function setLicht(art){ _lichtSetzen(art); render(); }
 function setLichtTyp(feld,typ){
   const g=lichtGrenzen(typ); if(!g||!g.da) return;
-  if(typ==='kipp' && (+S.w||0)<g.bMin) return;      // zu schmal fuer ein Kipp-Licht
+  if(typ!=='fest' && (+S.w||0)<g.bMin) return;      // zu schmal fuer ein oeffnendes Lichtfeld
   S[feld]=typ;
   const h=(feld==='olTyp')?'olH':'ulH';
   S[h]=Math.min(Math.max(+S[h]||g.min, g.min), g.max);   // Hoehe in die neuen Grenzen ziehen
@@ -8324,7 +8371,7 @@ function lichtNormalisieren(){
   const kippGeht=!!(gK && gK.da && (+S.w||0)>=gK.bMin);
   let geaendert=false;
   [['olTyp','olH'],['ulTyp','ulH']].forEach(([tf,hf])=>{
-    if((S[tf]||'fest')==='kipp' && !kippGeht){ S[tf]='fest'; geaendert=true; }
+    if((S[tf]||'fest')!=='fest' && !kippGeht){ S[tf]='fest'; geaendert=true; }
     const g=lichtGrenzen(S[tf]||'fest'); if(!g) return;
     const neuH=Math.min(Math.max(+S[hf]||g.min, g.min), g.max);
     if(neuH!==+S[hf]){ S[hf]=neuH; geaendert=true; }
@@ -8420,23 +8467,26 @@ function lichtKombis(){
   const kippGeht=!!(gK && gK.da && (+S.w||0)>=gK.bMin);
   const feld=(S.licht==='ober')?'olTyp':'ulTyp', wort=(S.licht==='ober')?'Oberlicht':'Unterlicht';
   const ord=(S.licht==='ober')?'-oberlicht':'-unterlicht', ksuf=(S.licht==='ober')?'-olk':'-ulk';
+  const dsu=(S.licht==='ober')?'-oldk':'-uldk';   // Glasfeld selbst dreh- und kippbar
   /* Laesst die Breite kein Kipp-Licht zu, blieben sonst nur zwei Kacheln stehen und
      die beiden reinen Drehfluegel waeren gar nicht mehr waehlbar. Dann bekommen alle
      vier Fluegel das feste Licht. */
   const paare = kippGeht
-    ? [['dk-r','fest'],['dk-l','fest'],['dk-r','kipp'],['dk-l','kipp'],['dreh-r','kipp'],['dreh-l','kipp']]
-    : [['dk-r','fest'],['dk-l','fest'],['dreh-r','fest'],['dreh-l','fest']];
+    ? [['dk-r','fest'],['dk-l','fest'],['dk-r','kipp'],['dk-l','kipp'],['dk-r','dk-r'],['dk-l','dk-l']]
+    : [['dk-r','fest'],['dk-l','fest']];
   const namen={'dk-r':'Dreh-Kipp rechts','dk-l':'Dreh-Kipp links','dreh-r':'Dreh rechts','dreh-l':'Dreh links'};
+  const lwort={fest:' fest verglast', kipp:' zum Kippen', 'dk-r':' dreh- und kippbar', 'dk-l':' dreh- und kippbar'};
+  const dsuf={fest:'', kipp:ksuf, 'dk-r':dsu, 'dk-l':dsu};
   return paare.map(([oe,typ])=>({
     oeff:oe, typ:typ, feld:feld, idx:idxOf(oe),
-    n:namen[oe], s:wort+(typ==='kipp'?' zum Kippen':' fest verglast'),
-    img:'img/karten/anschlag-1f'+ord+'/'+oe+(typ==='kipp'?ksuf:'')+'.webp'
+    n:namen[oe], s:wort+lwort[typ],
+    img:'img/karten/anschlag-1f'+ord+'/'+oe+dsuf[typ]+'.webp'
   })).filter(c=>c.idx>=0);
 }
 function setAnschlagLicht(idx,feld,typ){
   S.anschlagIdx=idx;
   const g=lichtGrenzen(typ);
-  if(g&&g.da&&!(typ==='kipp'&&(+S.w||0)<g.bMin)){
+  if(g&&g.da&&!(typ!=='fest'&&(+S.w||0)<g.bMin)){
     S[feld]=typ;
     const h=(feld==='olTyp')?'olH':'ulH';
     S[h]=Math.min(Math.max(+S[h]||g.min, g.min), g.max);   // Hoehe in die Grenzen der neuen Art ziehen
@@ -8482,8 +8532,8 @@ function oeffCardImg(o){
      Ober- und Unterlicht 28 Kacheln fuer dieselbe Entscheidung. */
   let _lk='';
   if(_lichtOrd){
-    if((S.licht==='ober'||S.licht==='beide') && S.olTyp==='kipp') _lk+='-olk';
-    if((S.licht==='unter'||S.licht==='beide') && S.ulTyp==='kipp') _lk+='-ulk';
+    if(S.licht==='ober'||S.licht==='beide'){ if(S.olTyp==='kipp') _lk+='-olk'; else if((S.olTyp||'').indexOf('dk-')===0) _lk+='-oldk'; }
+    if(S.licht==='unter'||S.licht==='beide'){ if(S.ulTyp==='kipp') _lk+='-ulk'; else if((S.ulTyp||'').indexOf('dk-')===0) _lk+='-uldk'; }
   }
   if(of.length===1) return 'img/karten/anschlag-1f'+_matOrd+'/'+of[0]+_lk+'.webp';
   if(of.length===2){
