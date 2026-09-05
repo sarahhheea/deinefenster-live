@@ -299,7 +299,7 @@ body.wiz-active .dfnav-tel:hover{background:rgba(34,94,170,.10)}
 .pk-head2 h1{font-size:52px}
 .pk-head2 p{color:var(--ink-soft);margin-top:14px;font-size:17px}
 .pk-sub{text-align:center;font-size:11px;font-weight:700;letter-spacing:.24em;color:var(--ink-soft);text-transform:uppercase;margin-bottom:22px}
-.pk-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px}
+.pk-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:22px}   /* Spaltenzahl = Anzahl Produkte: mit fester 4 stand das fuenfte Produkt allein in einer zweiten Reihe */
 .pcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px 20px 22px;cursor:pointer;transition:.28s var(--ease);text-align:center;display:flex;flex-direction:column}
 .pcard:hover{border-color:var(--ink);transform:translateY(-4px)}
 .pcard .pimg{position:relative;height:236px;display:grid;place-items:center;background:#fff;border-radius:var(--r);margin-bottom:16px;overflow:hidden}
@@ -814,7 +814,12 @@ body.wiz-active .dfnav-tel:hover{background:rgba(34,94,170,.10)}
 .ak-p:last-child{border-bottom:0}
 /* Bezeichnung in normaler Schreibweise: Versalien mit Sperrung lesen sich langsamer und
    verlangten eine eigene, kleinere Schriftgroesse. Jetzt traegt der Graustich die Rangfolge. */
-.ak-p em{flex:0 0 auto;font-style:normal;font-size:13px;font-weight:600;color:var(--ink-soft);line-height:1.35}
+/* Die Bezeichnung darf schrumpfen und umbrechen. Mit flex:0 0 auto behielt sie ihre
+   volle Breite und quetschte den WERT auf wenige Pixel: bei "Führungsschienen"
+   blieben rechts 14 px, in denen "Anthrazitgrau" Buchstabe fuer Buchstabe
+   untereinander stand. Trifft jede lange Bezeichnung, nicht nur diese. */
+.ak-p em{flex:0 1 auto;min-width:0;font-style:normal;font-size:13px;font-weight:600;color:var(--ink-soft);line-height:1.35}
+.ak-p b{white-space:normal}
 /* overflow-wrap statt word-break: bricht nur, wenn ein Wort allein nicht passt — nie mitten im Wort. */
 .ak-p b{flex:1 1 auto;min-width:0;text-align:right;font-size:13px;font-weight:700;
   line-height:1.35;overflow-wrap:break-word}
@@ -872,7 +877,7 @@ body.wiz-active .dfnav-tel:hover{background:rgba(34,94,170,.10)}
 .dfnav-wrap{max-width:var(--seite-max)}
 .wrap{max-width:var(--seite-max);padding:12px var(--seite-pad) 96px}
 .steps-inner,.steps-hint,.footer-inner{max-width:var(--seite-max);padding-left:var(--seite-pad);padding-right:var(--seite-pad)}
-.pk-grid{grid-template-columns:repeat(4,1fr);gap:18px}
+.pk-grid{grid-template-columns:repeat(5,1fr);gap:14px}
 .pcard{padding:14px 14px 16px}
 .pcard .pimg{position:relative;height:250px;overflow:hidden}
 .pcard .pimg img{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:contain!important;padding:6px}
@@ -1066,6 +1071,7 @@ body.wiz-active .dfnav-tel:hover{background:rgba(34,94,170,.10)}
   .skip-extras:active{transform:scale(.99)}
 }
 /* Tablet-Fix: Produkt-Kacheln 2-spaltig (600–880px); schlägt die spätere 4-Spalten-Basisregel, verhindert Horizontal-Überlauf */
+@media(max-width:1180px) and (min-width:881px){ .pk-grid{grid-template-columns:repeat(3,1fr)} }
 @media(max-width:880px){ .pk-grid{grid-template-columns:1fr 1fr} }
 /* Einstieg (Produktauswahl) auf Desktop/Tablet vertikal mittig statt oben klebend — nur Picker (kein Wizard) */
 @media(min-width:880px){
@@ -1181,6 +1187,11 @@ body.checkout-focus .dfnav-mlcta{display:none}
   .grid:not(.select) .ocard:not(.door) .s{font-size:13px;line-height:1.3;min-height:34px;margin-top:3px;display:flex;align-items:flex-start;justify-content:center;text-align:center}
 }
 
+/* Nicht waehlbare Optionskarte: sichtbar, aber erkennbar gesperrt. Sie ganz zu
+   verstecken waere schlechter — der Kunde soll sehen, dass es die Groesse gibt und
+   warum sie bei seiner Hoehe nicht geht. */
+.ocard.aus{opacity:.42;cursor:not-allowed;filter:grayscale(1)}
+.ocard.aus:hover{border-color:var(--line);box-shadow:none;transform:none}
 /* ── Rollladen-Schritt (.opts.roll3) ────────────────────────────────────────────
    Der Schritt stellt in Wahrheit ZWEI Fragen: die Art (kein / Gurtwickler / Motor)
    und die Bedienseite (links / rechts). Frueher standen alle fuenf Kombinationen als
@@ -2552,6 +2563,24 @@ function anschlagKlartext(){
 //   warn     true = seltener Fall, den beide Seiten gegenpruefen sollten
 function anschlagInfo(){
   const seiteWort=s=>s==='r'?'rechts':'links';
+  /* Der Vorsatzrollladen hat keinen Anschlag. Ohne diesen Zweig lieferte die Funktion
+     die Werte des zuletzt gesetzten FENSTERS — in der Anfrage-Mail und im Warenkorb
+     haette dann bei einem Rollladen "Dreh-Kipp rechts" gestanden. An seine Stelle
+     tritt die Angabe, die beim Rollladen wirklich fertigungsentscheidend ist:
+     auf welcher Seite der Antrieb sitzt. */
+  if(S.prod==='rollladen'){
+    const kas=rollKast();
+    return {
+      label:'Antrieb',
+      norm:rollAntriebText(),
+      klartext:'Bedienseite von außen gesehen',
+      ansicht:'',
+      kurz:rollAntriebText(),
+      warn:false, warntext:'',
+      satz:'Vorsatzrollladen mit '+ROLL_FORM[kas.form].n+' '+kas.n+', '+rollAntriebText()+'.',
+      chip:'Maß inkl. Kasten'
+    };
+  }
   if(S.prod==='haustuer'){
     // DIN 107: der Buchstabe sagt, wo die BAENDER sitzen — nicht der Griff.
     // Bei nach aussen oeffnenden Tueren ist die Bezugsseite die Aussenseite.
@@ -2894,6 +2923,7 @@ function stageSVG(){
   if(pdf) return `<img src="${pdf}" alt="Fenster-Skizze" style="width:100%;height:100%;object-fit:contain;display:block">`;
   if(S.prod==='balkon') return balkonStageSVG();
   if(S.prod==='schiebe') return schiebeStageSVG();
+  if(S.prod==='rollladen') return rollStageSVG();
   /* Haustuer: EINE Ansicht statt beider nebeneinander. Vorher belegte das Paar die volle
      Breite und die einzelne Tuer war nur 36 % davon — die Zeichnung war gross, das Produkt
      klein. skizzeSeite() erzwingt die Einzelansicht (der Mechanismus existierte schon fuer
@@ -3155,6 +3185,110 @@ function flatWindowSVG(isBalkon){
   return s+`</svg>`;
 }
 function fensterStageSVG(){ return flatWindowSVG(false); }
+/* ════════ Skizze Vorsatzrollladen ═══════════════════════════════════════════
+   Gezeichnet in derselben Sprache wie Fenster/Balkontuer/Haustuer: fester
+   Blattmassstab, dieselben Massketten, dieselben Strichstaerken. Bauteile nach
+   Drutex-Katalog (siehe ROLL_KASTEN). Die eingegebene Hoehe ist das GESAMTMASS
+   inklusive Kasten — so wird bestellt und so misst der Kunde die Oeffnung.
+   Reihenfolge der Bauteile ist bewusst: erst Panzer, dann Schienen DARUEBER. Die
+   Schiene steht am echten Rollladen vor dem Panzer; zeichnet man sie darunter,
+   verschwindet sie bei gleicher Farbe (weiss auf weiss, anthrazit auf anthrazit)
+   und der Kunde sieht nur eine graue Flaeche. */
+function rollStageSVG(){
+  const kas=rollKast();
+  const bR=+S.w||700, hR=+S.h||600;
+  const kastHR=kas.kh, panzHR=Math.max(hR-kastHR, 120);
+  const BLATT=1000, k=BLATT/Math.max(bR,hR);
+  const bMm=bR*k, totalH=hR*k, kastH=kastHR*k, panzH=panzHR*k;
+  const uu=BLATT, DT=uu*0.05, DW=Math.max(uu*0.0032,2), tick=DT*0.32;
+  const DIMC='#1e242b', DIML='#565b61';
+  const mL=Math.max(uu*0.40,DT*8.0), mR=mL, mT=Math.max(uu*0.14,DT*2.8), mB=Math.max(uu*0.16,DT*3.2);
+
+  const kc=rollFarbe('KastenF'), sc=rollFarbe('Schiene'), pc=rollFarbe('Panzer'), ec=rollEndC();
+  const kant=c=>_darkHex(c)?'rgba(255,255,255,.40)':'rgba(30,40,55,.55)';
+  const symC=_darkHex(kc)?'#e9edf2':'#3a4756';
+
+  // Fuehrungsschiene 44 mm laut Katalog; Untergrenze, damit sie bei breiten Elementen
+  // nicht zum Haarstrich wird.
+  const SW=Math.max(44*k, bMm*0.026);
+  const schY=kastH, schH=totalH-kastH;
+  const px=SW*0.42, pw=Math.max(bMm-2*SW*0.42, 20);   // Panzer laeuft IN den Schienen
+
+  let s=`<svg viewBox="${-mL} ${-mT} ${bMm+mL+mR} ${totalH+mT+mB+DT*2.9}" role="img" `
+      +`aria-label="Vorsatzrollladen ${bR} mal ${hR} Millimeter, Ansicht von außen" preserveAspectRatio="xMidYMid meet">`;
+
+  // Panzer: Aluminium-Lamellen, heruntergelassen
+  s+=`<rect x="${px.toFixed(1)}" y="${kastH.toFixed(1)}" width="${pw.toFixed(1)}" height="${panzH.toFixed(1)}" fill="${pc}" stroke="${kant(pc)}" stroke-width="${(DW*0.8).toFixed(2)}"/>`;
+  const lamH=Math.max(37*k, panzH/26), fuge=_darkHex(pc)?'rgba(255,255,255,.28)':'rgba(28,38,54,.32)';
+  for(let y=kastH+lamH; y<kastH+panzH-lamH*0.4; y+=lamH)
+    s+=`<line x1="${px.toFixed(1)}" y1="${y.toFixed(1)}" x2="${(px+pw).toFixed(1)}" y2="${y.toFixed(1)}" stroke="${fuge}" stroke-width="${(DW*0.55).toFixed(2)}"/>`;
+  const elH=Math.max(lamH*1.6, 10*k);   // Endleiste mit verdecktem Stopper
+  s+=`<rect x="${px.toFixed(1)}" y="${(totalH-elH).toFixed(1)}" width="${pw.toFixed(1)}" height="${elH.toFixed(1)}" fill="${ec}" stroke="${kant(ec)}" stroke-width="${(DW*0.8).toFixed(2)}"/>`;
+
+  // Fuehrungsschienen, VOR dem Panzer
+  [0, bMm-SW].forEach((x,i)=>{
+    s+=`<rect x="${x.toFixed(1)}" y="${schY.toFixed(1)}" width="${SW.toFixed(1)}" height="${schH.toFixed(1)}" fill="${sc}" stroke="${kant(sc)}" stroke-width="${DW.toFixed(2)}"/>`;
+    const nx=(i===0)? x+SW*0.66 : x+SW*0.34;   // Nut, in der der Panzer laeuft
+    s+=`<line x1="${nx.toFixed(1)}" y1="${schY.toFixed(1)}" x2="${nx.toFixed(1)}" y2="${totalH.toFixed(1)}" stroke="${kant(sc)}" stroke-width="${(DW*0.6).toFixed(2)}" opacity=".75"/>`;
+    // Fuge hell auf dunkel und dunkel auf hell — sonst verschwindet die Schiene, wenn
+    // Panzer und Schiene dieselbe Farbe haben.
+    const fx=(i===0)? x+SW : x;
+    s+=`<line x1="${fx.toFixed(1)}" y1="${schY.toFixed(1)}" x2="${fx.toFixed(1)}" y2="${totalH.toFixed(1)}" stroke="${_darkHex(pc)?'rgba(255,255,255,.42)':'rgba(28,36,50,.34)'}" stroke-width="${(DW*0.6).toFixed(2)}"/>`;
+  });
+
+  // Kasten
+  const rxK=(kas.form==='o')? kastH*0.30 : 0;
+  s+=`<rect x="0" y="0" width="${bMm.toFixed(1)}" height="${kastH.toFixed(1)}" rx="${rxK.toFixed(1)}" fill="${kc}" stroke="${kant(kc)}" stroke-width="${Math.max(uu*0.004,3).toFixed(2)}"/>`;
+  if(kas.form==='e')   // abgekantete vordere Oberkante — Merkmal gegenueber dem Ovalkasten
+    s+=`<line x1="0" y1="${(kastH*0.20).toFixed(1)}" x2="${bMm.toFixed(1)}" y2="${(kastH*0.20).toFixed(1)}" stroke="${kant(kc)}" stroke-width="${(DW*0.7).toFixed(2)}" opacity=".8"/>`;
+  s+=`<line x1="${(bMm*0.02+rxK*0.5).toFixed(1)}" y1="${(kastH*0.72).toFixed(1)}" x2="${(bMm*0.98-rxK*0.5).toFixed(1)}" y2="${(kastH*0.72).toFixed(1)}" stroke="${kant(kc)}" stroke-width="${(DW*0.6).toFixed(2)}" opacity=".6"/>`;   // Revisionsfuge
+
+  /* Antriebs-Zeichen sitzen auf der Fuehrungsschiene der gewaehlten Seite, nicht auf
+     dem Panzer. Ein Strich quer ueber die Lamellen sieht aus wie ein Kratzer, und
+     ausserhalb des Elements liefe er in die Masskette. Gurt, Kurbel und Motor sind an
+     der Form des Endstuecks zu unterscheiden: Querstrich, Handrad, Stecker. */
+  const links=(S.rlSeite==='links');
+  const acx=links? Math.max(bMm*0.13, SW*1.8) : Math.min(bMm*0.87, bMm-SW*1.8), acy=kastH*0.5;
+  const ar=Math.min(kastH*0.28, bMm*0.030);
+  let pts=[]; const turns=2.4, steps=Math.round(turns*18);
+  for(let i=0;i<=steps;i++){ const t=i/steps*turns*2*Math.PI, rr=(ar-DW)*i/steps+DW*0.5;
+    pts.push((acx+rr*Math.cos(t)).toFixed(1)+' '+(acy+rr*Math.sin(t)).toFixed(1)); }
+  s+=`<circle cx="${acx.toFixed(1)}" cy="${acy.toFixed(1)}" r="${ar.toFixed(1)}" fill="none" stroke="${symC}" stroke-width="${(DW*0.9).toFixed(2)}"/>`
+    +`<path d="M${pts.join(' L')}" fill="none" stroke="${symC}" stroke-width="${(DW*0.7).toFixed(2)}"/>`;
+  const rx0=links? SW*0.5 : bMm-SW*0.5, ende=kastH+panzH*0.11;
+  s+=`<line x1="${rx0.toFixed(1)}" y1="${kastH.toFixed(1)}" x2="${rx0.toFixed(1)}" y2="${ende.toFixed(1)}" stroke="${symC}" stroke-width="${(DW*0.9).toFixed(2)}" stroke-linecap="round"/>`;
+  if(S.rlAntrieb==='motor'){
+    const pw2=SW*0.78, ph=SW*0.58;
+    s+=`<rect x="${(rx0-pw2/2).toFixed(1)}" y="${ende.toFixed(1)}" width="${pw2.toFixed(1)}" height="${ph.toFixed(1)}" rx="${(ph*0.24).toFixed(1)}" fill="#fff" stroke="${symC}" stroke-width="${(DW*0.85).toFixed(2)}"/>`;
+  }else if(S.rlAntrieb==='kurbel'){
+    s+=`<circle cx="${rx0.toFixed(1)}" cy="${(ende+SW*0.30).toFixed(1)}" r="${(SW*0.30).toFixed(1)}" fill="#fff" stroke="${symC}" stroke-width="${(DW*0.85).toFixed(2)}"/>`;
+  }else{
+    s+=`<line x1="${(rx0-SW*0.26).toFixed(1)}" y1="${ende.toFixed(1)}" x2="${(rx0+SW*0.26).toFixed(1)}" y2="${ende.toFixed(1)}" stroke="${symC}" stroke-width="${(DW*0.9).toFixed(2)}" stroke-linecap="round"/>`;
+  }
+
+  // Bemassung: Breite oben, Kastenhoehe links, Panzer und Gesamt rechts
+  const _hilf=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${DIML}" stroke-width="${DW*0.55}" opacity=".5"/>`;
+  const hb=(x0,x1,y,von)=>{ const hoch=(von!=null&&y<von), h=(von==null)?'':_hilf(x0,von+(hoch?-tick*0.5:tick*0.5),x0,y+(hoch?-tick:tick))+_hilf(x1,von+(hoch?-tick*0.5:tick*0.5),x1,y+(hoch?-tick:tick));
+    return h+`<g stroke="${DIML}" stroke-width="${DW}" fill="none"><line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}"/><line x1="${x0}" y1="${y-tick}" x2="${x0}" y2="${y+tick}"/><line x1="${x1}" y1="${y-tick}" x2="${x1}" y2="${y+tick}"/></g>`; };
+  const vb=(x,y0,y1,von)=>{ const li=(von!=null&&x<von), h=(von==null)?'':_hilf(von+(li?-tick*0.5:tick*0.5),y0,x+(li?-tick:tick),y0)+_hilf(von+(li?-tick*0.5:tick*0.5),y1,x+(li?-tick:tick),y1);
+    return h+`<g stroke="${DIML}" stroke-width="${DW}" fill="none"><line x1="${x}" y1="${y0}" x2="${x}" y2="${y1}"/><line x1="${x-tick}" y1="${y0}" x2="${x+tick}" y2="${y0}"/><line x1="${x-tick}" y1="${y1}" x2="${x+tick}" y2="${y1}"/></g>`; };
+  const ht=(x,y,t)=>`<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-family="Inter,Arial" font-weight="700" font-size="${DT}" fill="${DIMC}">${t}</text>`;
+  const vth=(x,y,t)=>`<text x="${x}" y="${y}" text-anchor="start" dominant-baseline="central" font-family="Inter,Arial" font-weight="700" font-size="${DT}" fill="${DIMC}">${t}</text>`;
+  const vthEnd=(x,y,t)=>`<text x="${x}" y="${y}" text-anchor="end" dominant-baseline="central" font-family="Inter,Arial" font-weight="700" font-size="${DT}" fill="${DIMC}">${t}</text>`;
+
+  const topY=-mT*0.5; s+=hb(0,bMm,topY,0)+ht(bMm/2,topY-DT*0.7,bR);
+  const lx=-mL*0.34; s+=vb(lx,0,kastH,0)+vthEnd(lx-DT*0.45,kastH/2,kastHR);
+  const rxH=bMm+DT*0.85; s+=vb(rxH,kastH,totalH,bMm)+vth(rxH+DT*0.5,kastH+panzH/2,panzHR);
+  const rxG=bMm+DT*4.5; s+=vb(rxG,0,totalH,bMm)+vth(rxG+DT*0.5,totalH/2,hR);
+  /* Eigene Unterschrift statt skizzeUnterschrift(): die schreibt "Rahmen Weiss" aus den
+     FENSTERfarben — der Vorsatzrollladen hat keinen Rahmen und eigene Farben. */
+  const _u=(rollFarbeName('Panzer')===rollFarbeName('KastenF'))
+    ? ('Panzer und Kasten '+rollFarbeName('Panzer'))
+    : ('Panzer '+rollFarbeName('Panzer')+'   \u00b7   Kasten '+rollFarbeName('KastenF'));
+  s+=`<text x="${(bMm/2).toFixed(1)}" y="${(totalH+mB+DT*0.7).toFixed(1)}" text-anchor="middle" font-family="Inter,Arial" font-weight="700" font-size="${(DT*0.62).toFixed(1)}" fill="#6E6A63">Ansicht von au\u00dfen   \u00b7   ${_u}</text>`;
+  return s+`</svg>`;
+}
+
 const DEFS=`<defs><filter id="beschlagdunkel" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB">
     <feMorphology in="SourceAlpha" operator="dilate" radius="5" result="dick"/>
     <feFlood flood-color="#20242a" flood-opacity=".92"/><feComposite in2="dick" operator="in" result="saum"/>
@@ -3610,6 +3744,9 @@ function massLimits(){
   if(S.prod==='balkon') return {bMin:600,bMax:2500,hMin:1800,hMax:2400};
   if(S.prod==='haustuer') return {bMin:800,bMax:1400,hMin:1800,hMax:2400};
   if(S.prod==='schiebe') return {bMin:1800,bMax:6500,hMin:1800,hMax:2600};
+  /* Vorsatzrollladen: die Hoehe haengt am Kasten (der aufgerollte Panzer muss hinein).
+     Grenzen am Marktniveau gemessen (Sept. 2026), Herstellerdatenblatt liegt nicht vor. */
+  if(S.prod==='rollladen') return {bMin:700,bMax:2600,hMin:600,hMax:2700};
   return _massEigen();
 }
 /* Unsere eigenen Fenstergrenzen — eine Quelle fuer alle Materialien. */
@@ -6007,6 +6144,260 @@ function _lp_hstNEU(){ var L=LS; var b=L.bMm||2200, h=L.hMm||2000; var isHS=(L.p
    nie darueber" ist damit aufgehoben; der naechtliche Preiswaechter prueft seit heute
    gegen Vergleichspreis + 20 EUR/m2 statt gegen den Vergleichspreis selbst. */
 const _QM_AUFPREIS = 20;
+/* ════════ Preis Vorsatzrollladen ════════════════════════════════════════════
+   Der Markt rechnet den Vorsatzrollladen NICHT ueber die Flaeche, sondern ueber eine
+   Staffel: der Preis bleibt innerhalb eines 100-mm-Bandes konstant und springt an der
+   vollen Hundertermarke. Nachgemessen (Sept. 2026): Breite 2000 mm und 2001 mm liegen
+   6,89 EUR auseinander, 2001 bis 2100 kosten dasselbe. Deshalb wird hier NICHT
+   zwischengerechnet — jedes Kundenmass wird auf sein Band aufgerundet und der dort
+   gemessene Wert genommen. Zwischenrechnen wuerde uns bei jedem zweiten Mass ueber
+   den Marktpreis heben, und darueber darf unser Preis nie liegen.
+   _ROLL_TAB wird aus der Messung erzeugt; solange eine Variante fehlt, gibt es fuer
+   sie keinen Preis und der Konfigurator schreibt ehrlich "Auf Anfrage". */
+/* UNSERE Preisliste in vollen Euro — je Kastenvariante und 100-mm-Band.
+   Hier stehen bewusst die Preise, die der Kunde bezahlt, und keine fremden Werte:
+   das Repo ist oeffentlich. Wie das Niveau zustande kam, steht in der lokalen
+   Preisanalyse und gehoert nicht hierher. */
+var _ROLL_TAB={
+ 'e137':{bMin:700,bMax:2600,hMin:600,hMax:1300,
+  W:[700,800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000,2100,2200,2300,2400,2500,2600],
+  H:[600,700,800,900,1000,1100,1200,1300],
+  M:[[96,96,96,96,104,110,116,123,129,136,142,149,155,161,168,175,180,187,194,202],
+     [96,96,96,96,104,110,116,123,129,136,142,149,155,161,168,175,180,187,194,202],
+     [96,96,96,96,104,110,116,123,129,136,142,149,155,161,168,175,180,187,194,202],
+     [96,96,96,96,104,110,116,123,129,136,142,149,155,161,168,175,180,187,194,202],
+     [96,96,96,96,104,110,116,123,129,136,142,149,155,161,168,175,180,187,194,202],
+     [101,101,101,101,108,115,122,128,135,142,149,155,162,169,176,183,189,196,202,209],
+     [107,107,107,107,114,122,129,136,144,151,158,165,172,179,186,194,201,208,215,221],
+     [111,111,111,111,119,126,134,142,150,157,164,172,179,186,194,202,209,216,223,231]]},
+ 'e165':{bMin:700,bMax:2600,hMin:600,hMax:2200,
+  W:[700,800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000,2100,2200,2300,2400,2500,2600],
+  H:[600,700,800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000,2100,2200],
+  M:[[103,103,103,103,111,118,125,131,138,148,153,159,166,173,181,187,194,201,208,215],
+     [103,103,103,103,111,118,125,131,138,148,153,159,166,173,181,187,194,201,208,215],
+     [103,103,103,103,111,118,125,131,138,148,153,159,166,173,181,187,194,201,208,215],
+     [103,103,103,103,111,118,125,131,138,148,153,159,166,173,181,187,194,201,208,215],
+     [103,103,103,103,111,118,125,131,138,148,153,159,166,173,181,187,194,201,208,215],
+     [109,109,109,109,117,124,132,140,147,154,162,169,176,184,191,199,206,213,220,227],
+     [114,114,114,114,122,129,137,145,153,160,168,176,183,191,199,207,214,221,229,236],
+     [120,120,120,120,128,136,144,153,161,169,177,185,193,201,209,217,225,233,241,249],
+     [125,125,125,125,134,143,152,160,169,178,186,194,202,211,219,228,237,245,253,262],
+     [130,130,130,130,139,148,157,166,175,184,192,201,210,218,227,236,245,253,262,271],
+     [136,136,136,136,145,154,164,173,182,191,200,210,219,228,238,247,256,265,274,283],
+     [140,140,140,140,150,159,169,179,188,198,208,217,226,236,246,255,264,274,283,292],
+     [146,146,146,146,156,166,177,186,196,207,217,226,236,246,256,266,276,285,295,305],
+     [151,151,151,151,161,171,182,192,202,213,223,233,243,253,264,274,284,294,304,314],
+     [156,156,156,156,167,178,189,200,211,221,232,242,252,263,274,285,295,306,316,327],
+     [162,162,162,162,174,185,196,207,218,230,241,251,262,274,284,296,307,317,328,339],
+     [167,167,167,167,179,190,201,213,224,236,247,258,269,281,292,304,315,326,337,348]]},
+ 'e180':{bMin:700,bMax:2600,hMin:600,hMax:2700,
+  W:[700,800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000,2100,2200,2300,2400,2500,2600],
+  H:[600,700,800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000,2100,2200,2300,2400,2500,2600,2700],
+  M:[[107,107,107,107,116,122,129,136,143,151,157,164,171,178,186,193,200,207,214,221],
+     [107,107,107,107,116,122,129,136,143,151,157,164,171,178,186,193,200,207,214,221],
+     [107,107,107,107,116,122,129,136,143,151,157,164,171,178,186,193,200,207,214,221],
+     [107,107,107,107,116,122,129,136,143,151,157,164,171,178,186,193,200,207,214,221],
+     [107,107,107,107,116,122,129,136,143,151,157,164,171,178,186,193,200,207,214,221],
+     [112,112,112,112,119,126,134,142,149,156,164,171,178,186,193,201,208,216,223,231],
+     [117,117,117,117,125,133,141,149,157,165,173,180,188,196,204,212,219,227,235,243],
+     [122,122,122,122,130,138,147,154,163,171,179,187,195,203,211,219,227,235,244,252],
+     [127,127,127,127,136,145,154,162,171,180,188,196,205,213,222,231,239,247,256,265],
+     [133,133,133,133,143,152,160,170,179,188,197,205,214,223,232,242,250,259,268,278],
+     [138,138,138,138,147,156,166,175,185,194,203,212,221,231,240,249,258,267,277,286],
+     [144,144,144,144,154,163,173,183,193,203,213,222,231,241,250,260,270,280,289,299],
+     [148,148,148,148,158,168,179,188,199,209,218,228,238,248,258,268,278,288,298,308],
+     [154,154,154,154,164,175,186,196,207,217,227,237,248,258,269,279,289,300,310,321],
+     [158,158,158,158,169,180,191,202,213,223,234,244,254,265,276,287,297,308,319,330],
+     [164,164,164,164,176,187,198,209,220,232,243,253,264,276,287,298,309,320,331,343],
+     [169,169,169,169,181,192,203,215,226,238,249,260,272,283,294,306,317,328,340,351],
+     [175,175,175,175,186,198,211,222,234,246,258,269,281,293,305,317,328,340,352,364],
+     [181,181,181,181,193,205,217,230,242,254,267,279,291,303,315,328,340,352,364,377],
+     [185,185,185,185,198,210,223,236,248,261,273,285,298,311,323,336,348,360,373,386],
+     [191,191,191,191,204,217,230,243,256,269,282,295,308,320,334,346,359,372,385,399],
+     [195,195,195,195,209,222,235,249,262,276,288,301,314,328,341,354,368,380,394,407]]},
+ 'o139':{bMin:700,bMax:2600,hMin:600,hMax:1300,
+  W:[700,800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000,2100,2200,2300,2400,2500,2600],
+  H:[600,700,800,900,1000,1100,1200,1300],
+  M:[[160,160,160,160,174,186,199,212,224,238,250,263,276,288,302,314,326,340,353,367],
+     [160,160,160,160,174,186,199,212,224,238,250,263,276,288,302,314,326,340,353,367],
+     [160,160,160,160,174,186,199,212,224,238,250,263,276,288,302,314,326,340,353,367],
+     [160,160,160,160,174,186,199,212,224,238,250,263,276,288,302,314,326,340,353,367],
+     [160,160,160,160,174,186,199,212,224,238,250,263,276,288,302,314,326,340,353,367],
+     [164,164,164,164,178,191,204,217,230,244,257,270,282,296,309,322,335,348,361,374],
+     [170,170,170,170,184,198,211,225,239,252,266,279,292,306,319,333,346,360,373,386],
+     [175,175,175,175,188,203,217,230,245,258,272,285,299,313,327,341,355,368,382,396]]},
+ 'o167':{bMin:700,bMax:2600,hMin:600,hMax:2200,
+  W:[700,800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000,2100,2200,2300,2400,2500,2600],
+  H:[600,700,800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000,2100,2200],
+  M:[[170,170,170,170,185,198,211,225,238,254,266,280,293,306,320,334,347,361,374,388],
+     [170,170,170,170,185,198,211,225,238,254,266,280,293,306,320,334,347,361,374,388],
+     [170,170,170,170,185,198,211,225,238,254,266,280,293,306,320,334,347,361,374,388],
+     [170,170,170,170,185,198,211,225,238,254,266,280,293,306,320,334,347,361,374,388],
+     [170,170,170,170,185,198,211,225,238,254,266,280,293,306,320,334,347,361,374,388],
+     [176,176,176,176,190,204,218,233,247,261,275,289,303,316,331,345,359,373,386,401],
+     [181,181,181,181,195,209,224,238,252,267,281,295,310,324,339,353,367,381,395,409],
+     [186,186,186,186,201,216,231,246,261,276,290,305,319,334,349,364,378,393,407,422],
+     [192,192,192,192,208,223,238,253,269,284,299,314,329,344,359,375,390,405,420,435],
+     [197,197,197,197,212,228,244,259,275,290,306,321,336,351,367,382,398,413,429,444],
+     [202,202,202,202,218,234,250,266,282,298,313,330,345,362,377,394,409,425,440,456],
+     [207,207,207,207,223,240,256,272,288,305,320,337,352,369,385,402,417,434,449,465],
+     [213,213,213,213,229,246,263,280,296,313,330,346,362,379,396,412,429,445,462,478],
+     [217,217,217,217,234,251,268,285,302,319,336,353,369,386,403,420,437,454,470,487],
+     [223,223,223,223,241,258,276,293,310,328,344,362,379,396,414,431,448,466,482,500],
+     [229,229,229,229,247,265,282,300,318,336,354,371,389,407,424,442,460,477,495,512],
+     [233,233,233,233,251,270,288,306,324,342,360,378,396,414,432,450,468,486,503,521]]},
+ 'o182':{bMin:700,bMax:2600,hMin:600,hMax:2700,
+  W:[700,800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000,2100,2200,2300,2400,2500,2600],
+  H:[600,700,800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000,2100,2200,2300,2400,2500,2600,2700],
+  M:[[175,175,175,175,191,204,217,231,245,259,273,287,301,314,329,343,356,370,384,399],
+     [175,175,175,175,191,204,217,231,245,259,273,287,301,314,329,343,356,370,384,399],
+     [175,175,175,175,191,204,217,231,245,259,273,287,301,314,329,343,356,370,384,399],
+     [175,175,175,175,191,204,217,231,245,259,273,287,301,314,329,343,356,370,384,399],
+     [175,175,175,175,191,204,217,231,245,259,273,287,301,314,329,343,356,370,384,399],
+     [180,180,180,180,194,208,222,237,251,266,280,294,308,322,336,351,365,379,393,407],
+     [186,186,186,186,200,215,230,245,259,274,288,303,317,332,347,362,376,390,406,420],
+     [190,190,190,190,205,220,235,250,265,280,295,310,324,340,354,370,384,399,414,429],
+     [196,196,196,196,211,227,242,257,273,288,304,319,334,349,365,380,396,411,426,442],
+     [202,202,202,202,217,233,249,265,281,297,312,328,344,360,375,391,407,422,439,455],
+     [206,206,206,206,222,238,254,271,287,303,319,335,351,367,383,399,415,431,447,464],
+     [212,212,212,212,228,245,262,279,295,312,328,344,360,377,394,410,427,443,460,476],
+     [217,217,217,217,233,250,267,284,301,318,334,351,368,384,401,418,435,451,468,485],
+     [222,222,222,222,240,257,274,291,309,326,343,360,377,394,411,429,446,463,480,498],
+     [227,227,227,227,244,262,280,297,314,332,349,367,384,402,419,437,454,471,489,507],
+     [233,233,233,233,250,269,286,305,323,341,358,376,394,412,430,448,466,483,502,520],
+     [237,237,237,237,255,274,292,310,329,347,365,383,401,419,438,456,474,492,510,529],
+     [243,243,243,243,261,281,299,318,337,355,374,392,410,429,448,467,485,503,522,541],
+     [249,249,249,249,268,287,306,325,344,364,382,401,420,439,459,478,497,515,534,554],
+     [253,253,253,253,273,292,312,331,350,370,389,408,427,447,466,485,504,524,543,563],
+     [259,259,259,259,279,299,318,339,358,378,398,417,437,457,476,497,516,535,556,575],
+     [263,263,263,263,283,304,324,344,364,384,404,424,444,464,484,504,524,544,564,585]]},
+ 'e165-netz':{bMin:750,bMax:1800,hMin:600,hMax:1500,
+  W:[800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800],
+  H:[600,700,800,900,1000,1100,1200,1300,1400,1500],
+  M:[[171,171,171,183,194,205,215,226,239,249,259],
+     [171,171,171,183,194,205,215,226,239,249,259],
+     [171,171,171,183,194,205,215,226,239,249,259],
+     [171,171,171,183,194,205,215,226,239,249,259],
+     [171,171,171,183,194,205,215,226,239,249,259],
+     [177,177,177,189,200,212,223,235,246,257,268],
+     [182,182,182,193,205,217,229,241,252,264,275],
+     [187,187,187,200,212,224,236,249,260,273,284],
+     [193,193,193,206,218,231,244,256,269,281,294],
+     [198,198,198,211,224,237,249,262,275,288,300]]},
+ 'e180-netz':{bMin:750,bMax:1800,hMin:600,hMax:2100,
+  W:[800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800],
+  H:[600,700,800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000,2100],
+  M:[[175,175,175,188,198,209,219,230,242,253,264],
+     [175,175,175,188,198,209,219,230,242,253,264],
+     [175,175,175,188,198,209,219,230,242,253,264],
+     [175,175,175,188,198,209,219,230,242,253,264],
+     [175,175,175,188,198,209,219,230,242,253,264],
+     [180,180,180,191,202,214,225,237,248,259,271],
+     [185,185,185,197,209,221,233,245,256,268,280],
+     [189,189,189,202,214,226,238,250,263,275,286],
+     [195,195,195,208,221,233,246,258,271,283,296],
+     [201,201,201,215,227,240,253,266,280,292,305],
+     [206,206,206,219,232,246,259,272,285,299,312],
+     [212,212,212,225,239,253,267,281,295,308,321],
+     [216,216,216,230,244,258,272,286,300,314,328],
+     [222,222,222,236,251,265,280,294,309,323,337],
+     [226,226,226,241,256,271,285,300,315,329,344],
+     [232,232,232,248,263,278,293,308,323,338,353]]},
+ 'o167-netz':{bMin:750,bMax:1800,hMin:600,hMax:1500,
+  W:[800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800],
+  H:[600,700,800,900,1000,1100,1200,1300,1400,1500],
+  M:[[238,238,238,256,274,291,309,326,346,361,379],
+     [238,238,238,256,274,291,309,326,346,361,379],
+     [238,238,238,256,274,291,309,326,346,361,379],
+     [238,238,238,256,274,291,309,326,346,361,379],
+     [238,238,238,256,274,291,309,326,346,361,379],
+     [244,244,244,262,280,298,316,335,352,370,388],
+     [249,249,249,267,285,304,322,340,359,377,395],
+     [254,254,254,273,292,311,329,348,367,385,404],
+     [260,260,260,280,299,318,337,356,375,394,413],
+     [265,265,265,284,304,323,343,362,382,401,420]]},
+ 'o182-netz':{bMin:750,bMax:1800,hMin:600,hMax:2100,
+  W:[800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800],
+  H:[600,700,800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000,2100],
+  M:[[243,243,243,263,280,297,314,332,351,369,386],
+     [243,243,243,263,280,297,314,332,351,369,386],
+     [243,243,243,263,280,297,314,332,351,369,386],
+     [243,243,243,263,280,297,314,332,351,369,386],
+     [243,243,243,263,280,297,314,332,351,369,386],
+     [248,248,248,266,284,302,320,339,357,375,393],
+     [253,253,253,272,291,310,328,347,366,384,402],
+     [258,258,258,277,296,314,334,353,372,390,409],
+     [264,264,264,283,303,322,341,361,380,399,418],
+     [270,270,270,289,309,329,349,369,388,408,428],
+     [274,274,274,294,314,334,354,375,395,414,434],
+     [280,280,280,300,321,342,362,383,404,424,444],
+     [284,284,284,305,326,347,368,388,409,430,450],
+     [290,290,290,312,333,354,375,396,417,439,460],
+     [295,295,295,316,338,359,381,402,424,445,466],
+     [301,301,301,322,344,366,388,410,432,454,475]]}
+};
+function _rollBand(v,liste){
+  v=+v||0;
+  for(var i=0;i<liste.length;i++){ if(v<=liste[i]) return i; }
+  return -1;                                     // groesser als das groesste Band -> kein Preis
+}
+/* ── Aufschlaege ─────────────────────────────────────────────────────────────
+   Gemessen am Marktniveau (Sept. 2026), nicht geschaetzt:
+   - Motor: +85,41 EUR PAUSCHAL. An drei Groessen gegengeprueft (1,0 / 2,56 / 5,28 m2):
+     85,41 / 85,42 / 85,41 — der Betrag haengt nicht am Mass.
+   - Handantrieb kostet nichts extra. Fuer die KURBEL gibt es am Markt keinen Wert
+     (dort wird nur Gurt und Motor gefuehrt); der Hersteller listet das Kurbelgetriebe
+     PKR/PKS als gleichwertigen Handantrieb neben dem Gurtwickler. Sie laeuft deshalb
+     wie der Gurtwickler. Sollte sie real teurer sein, liegen wir darunter — nie darueber.
+   - Panzerfarbe: nur BEIGE und NUSSBAUM kosten extra, alle uebrigen gefuehrten Farben
+     sind aufpreisfrei (auch Golden Oak, nachgemessen). Der Aufschlag waechst mit der
+     Flaeche und ist selbst gestaffelt: bei Nussbaum 19,31 EUR/m2 bei 0,42 m2 und nur
+     noch 10,53 EUR/m2 ab 5,28 m2. Zwischen zwei Messpunkten gilt deshalb der Wert des
+     naechstkleineren Punktes — nie hochgerechnet, sonst stuende unser Preis ueber dem
+     Marktniveau.
+   - Kasten- und Schienenfarbe: aufpreisfrei in allen gefuehrten Farben (nachgemessen).
+   - Fuer Basaltgrau, Quarzgrau, Turner Oak, Winchester und Schwarz gibt es am Markt
+     keinen Vergleichswert; sie laufen ohne Aufschlag. Auch hier gilt: eher darunter. */
+var _ROLL_AUF={
+  motor:85,
+  panzer:{
+    'roll-beige':    [[1.00,2],[2.56,7],[5.28,15]],
+    'roll-nussbaum': [[0.42,8],[0.72,11],[1.00,14],[1.20,17],[1.68,22],
+                      [2.56,30],[3.60,40],[5.28,55],[5.72,60]]
+  }
+};
+/* Wert des naechstkleineren Messpunktes. Der Aufschlag steigt mit der Flaeche, also
+   liegt dieser Wert immer unter dem echten — die sichere Richtung. */
+function _rollAufStufe(liste,qm){
+  var v=0;
+  for(var i=0;i<liste.length;i++){ if(qm>=liste[i][0]) v=liste[i][1]; }
+  return v;
+}
+function _rollAufschlag(){
+  var qm=((+S.w||0)/1000)*((+S.h||0)/1000), a=0;
+  var pk=(S.rlPanzer!=null && COLORS_ROLL[S.rlPanzer]) ? COLORS_ROLL[S.rlPanzer].key : null;
+  if(pk && _ROLL_AUF.panzer[pk]) a+=_rollAufStufe(_ROLL_AUF.panzer[pk], qm);
+  if(S.rlAntrieb==='motor') a+=_ROLL_AUF.motor;
+  return a;
+}
+function _rollPreis(){
+  var kas=rollKast();
+  var schl=kas.v+(S.rlNetz?'-netz':'');
+  var t=_ROLL_TAB[schl];
+  if(!t) return null;
+  var b=+S.w||0, h=+S.h||0;
+  if(b<t.bMin||b>t.bMax||h<t.hMin||h>t.hMax) return null;
+  var i=_rollBand(b,t.W), j=_rollBand(h,t.H);
+  if(i<0||j<0) return null;
+  var v=t.M[j][i];
+  if(v==null) return null;
+  /* In der Staffel steht der Grundpreis fuer weissen Panzer mit Gurtwickler. Farbe und
+     Motor kommen als eigene Betraege dazu — ohne sie stuende hier ein Motor-Rollladen
+     zum Preis eines handbedienten. Kein weiterer Abzug und kein Quadratmeter-Aufschlag:
+     die Tabelle enthaelt bereits den fertigen Preis, und innerhalb eines Bandes darf er
+     sich nicht bewegen. */
+  return v+_rollAufschlag();
+}
 function price(){
   const roh = _priceRoh();
   if (roh == null) return null;
@@ -6015,6 +6406,7 @@ function price(){
      einer Staffel mit dem Mass, der Marktpreis aber nicht, dadurch wuerde unser
      Preis innerhalb derselben Staffel um bis zu 3 EUR wandern. */
   if(S.prod==='fenster' && (S.material==='holz' || S.material==='alu')) return Math.ceil(roh);
+  if(S.prod==='rollladen') return Math.ceil(roh);   // Staffelpreis, siehe _rollPreis()
   const qm = ((+S.w||1000)/1000) * ((+S.h||1200)/1000);
   return Math.ceil(roh + _QM_AUFPREIS * qm);
 }
@@ -6023,6 +6415,7 @@ function _priceRoh(){
   /* Holz und Alu rechnen aus eigenen gemessenen Flaechen. Die Alu-Sperre ist am
      28.08.2026 gefallen, nachdem auch der Farbaufpreis gemessen war — vorher haette
      ein Alufenster einen Preis gezeigt, dem der groesste Aufschlag fehlt. */
+  if(S.prod==='rollladen') return _rollPreis();
   const L={};
   L.bMm=+S.w||1000; L.hMm=+S.h||1200;
   L.fa=(COLORS_AKT()[S.outer]&&COLORS_AKT()[S.outer].key)||'weiss'; L.fi=(COLORS_AKT()[S.inner]&&COLORS_AKT()[S.inner].key)||'weiss';   // echter Farb-Key → korrekter (auch Premium-)Preis
@@ -6072,6 +6465,7 @@ function _priceRoh(){
   LS=L; return _lp_fensterNEU();
 }
 function configTitle(){
+  if(S.prod==='rollladen'){ const k=rollKast(); return 'Vorsatzrollladen · '+ROLL_FORM[k.form].n+' '+k.n; }
   if(S.prod==='haustuer') return 'Haustür · '+(DOORN[S.doorModel]||'Modell');
   if(S.prod==='schiebe') return (S.hstSystem==='hs'?'Hebe-Schiebetür':'PSK Schiebetür');
   if(S.prod==='balkon') return 'Balkontür · '+profilName(S.profile);
@@ -6080,9 +6474,9 @@ function configTitle(){
 const MAT_PRODN={kunststoff:'Kunststofffenster',holz:'Holzfenster',alu:'Aluminiumfenster'};
 function prodName(){
   if(S.prod==='fenster') return MAT_PRODN[S.material]||'Kunststofffenster';
-  return {balkon:'Balkontür',haustuer:'Haustür',schiebe:'Schiebetür'}[S.prod]||'Kunststofffenster';
+  return {balkon:'Balkontür',haustuer:'Haustür',schiebe:'Schiebetür',rollladen:'Vorsatzrollladen'}[S.prod]||'Kunststofffenster';
 }
-function prodUnit(){ return {fenster:'Fenster',balkon:'Balkontür',haustuer:'Haustür',schiebe:'Schiebetür'}[S.prod]||'Fenster'; }
+function prodUnit(){ return {fenster:'Fenster',balkon:'Balkontür',haustuer:'Haustür',schiebe:'Schiebetür',rollladen:'Rollladen'}[S.prod]||'Fenster'; }
 // Einzeiler pro Position — steht in der Checkout-Zusammenfassung UND im
 // Nur-Text-Teil der Anfrage-Mail. Der Anschlag gehoert an die zweite Stelle:
 // bei der Haustuer fehlte er hier komplett, dadurch kam die fertigungs-
@@ -6299,11 +6693,30 @@ function buildFensterSteps(){
   });
   return (S.material==='holz') ? [material,holzart].concat(rest) : [material].concat(rest);
 }
+/* Vorsatzrollladen. Reihenfolge bewusst anders als bei Fenster/Tuer: die MASSE
+   stehen vorn, weil sie bestimmen, welche Kaesten ueberhaupt in Frage kommen. Wer
+   erst den Kasten waehlt, bekommt danach seine Hoehe verboten — genau der Fehler,
+   den man in der Branche haeufig sieht. */
+const STEPS_ROLL=[
+  {key:'masse',label:'Maße',title:['Ihre ','Maße'],sub:'Breite und Höhe des fertigen Rollladens in Millimeter — Kasten eingerechnet.'},
+  {key:'rlkasten',label:'Kasten',title:['Der ','Kasten'],sub:'Form und Größe des Rollladenkastens.'},
+  {key:'anzahl',label:'Anzahl',title:['Die ','Anzahl'],sub:'Wie viele gleiche Rollläden benötigen Sie?'},
+  {key:'rlfarbe',label:'Farbe',title:['Die ','Farben'],sub:'Panzer, Endleiste, Kasten und Führungsschienen — die Vorschau zeigt Ihre Wahl.'},
+  {key:'rlantrieb',label:'Antrieb',title:['Der ','Antrieb'],sub:'Von Hand oder auf Knopfdruck — und auf welcher Seite.'},
+  {key:'rlnetz',label:'Insektenschutz',title:['Der ','Insektenschutz'],sub:'Fliegengitter im selben Kasten, mit eigener Schiene.'},
+  {key:'anfrage',label:'Übersicht',title:['Übersicht & ','Anfrage'],sub:'Kostenlos anfordern — unverbindlich.'},
+];
+function buildRollSteps(){
+  /* Insektenschutz fuehrt der Hersteller nur in den Kaesten ab 165 mm. Beim kleinen
+     Kasten faellt der Schritt weg, statt eine Wahl zu zeigen, die niemand liefern kann. */
+  return STEPS_ROLL.filter(function(st){ return st.key!=='rlnetz' || rollNetzMoeglich(); });
+}
 const STEPMAP={fenster:STEPS_FENSTER,balkon:STEPS_BALKON,haustuer:STEPS_HAUSTUER};
 /* Eine Stelle, die entscheidet welche Schrittliste gilt \u2014 vorher stand dieselbe
    Bedingung doppelt in startProduct() und itemEdit() und lief auseinander. */
 function stepsFor(){
   if(S.prod==='schiebe') return buildSchiebeSteps();
+  if(S.prod==='rollladen') return buildRollSteps();
   if(S.prod==='fenster') return buildFensterSteps();
   return STEPMAP[S.prod]||STEPS_FENSTER;
 }
@@ -6745,6 +7158,7 @@ const PRODUCTS=[
   {id:'balkon',t:'Balkontür',img:'img/karten/balkontuer-weiss.webp?v=norm1',fallback:'ab 274 €'},
   {id:'haustuer',t:'Haustür',img:'img/karten/haustuer-weiss.webp?v=norm1',fallback:'ab 872 €'},
   {id:'schiebe',t:'Schiebetür',img:'img/karten/hst-weiss.webp?v=norm1',fallback:'ab 1.411 €'},
+  {id:'rollladen',t:'Vorsatzrollladen',img:'img/karten/vorsatzrollladen-weiss.webp?v=1',fallback:'auf Anfrage'},
 ];
 // ab-Preis wird gerechnet, nicht gepflegt: exakt der Preis, den der Kunde nach dem Klick sieht.
 // (Vorher hartkodierter Text — lief nach jeder Preis-Anpassung still auseinander.)
@@ -6812,9 +7226,77 @@ function setupPkCarousel(){
 }
 // Startzustand eines Produkts als reines Objekt — EINZIGE Quelle fuer "frischer Start" UND für den beworbenen ab-Preis.
 // Bewusst ohne render()/Seiteneffekte, damit der ab-Preis aus derselben Rechnung kommt, die der Kunde danach sieht.
+/* ════════ Vorsatzrollladen — eigenes Produkt ═════════════════════════════════
+   Nicht zu verwechseln mit dem Aufsatzrollladen am Fenster (S.roll): das ist ein
+   PVC-Kasten, der auf dem Fensterrahmen sitzt und nur zusammen mit einem Fenster
+   bestellt wird. Der Vorsatzrollladen haengt vor der Fassade oder in der Laibung,
+   wird nachtraeglich montiert und ist allein bestellbar.
+   Herstellerangaben aus dem Drutex-Katalog "Rolllaeden / Raffstoren / Insekten-
+   schutz" (drutex.de, geprueft 05.09.2026):
+     - 45-Grad-Kasten  137x137, 165x165, 180x180 mm, Revision von vorne
+     - Ovalkasten      139x144, 167x171, 182x188 mm, Revision von vorne
+     - Panzer: Aluminium-Lamellen 37/42/55 mm, mit Polyurethan gefuellt
+     - Fuehrungsschienen 44 mm; Endleiste mit verdecktem Stopper
+     - Stabilisierungskonsole ab 1800 mm Breite serienmaessig
+     - Insektenschutz nur in den Kaesten ab 165 mm
+   Die Hoehengrenzen je Kasten stehen NICHT im Katalog. Sie sind am Marktniveau
+   gemessen (Sept. 2026) und hier als solche gekennzeichnet — sobald der Hersteller
+   ein Datenblatt dazu veroeffentlicht, gehoert es hierher und nichts anderes. */
+const ROLL_KASTEN=[
+  {v:'e137', form:'e', kh:137, n:'137 mm', hMax:1300},
+  {v:'e165', form:'e', kh:165, n:'165 mm', hMax:2200},
+  {v:'e180', form:'e', kh:180, n:'180 mm', hMax:2700},
+  {v:'o139', form:'o', kh:144, n:'139 mm', hMax:1300},   // 139 breit x 144 hoch
+  {v:'o167', form:'o', kh:171, n:'167 mm', hMax:2200},   // 167 x 171
+  {v:'o182', form:'o', kh:188, n:'182 mm', hMax:2700},   // 182 x 188
+];
+const ROLL_FORM={e:{n:'45°-Kasten', s:'kantig · Revision vorne'}, o:{n:'Ovalkasten', s:'gerundet · Revision vorne'}};
+const ROLL_ANTRIEB={
+  gurt:  {n:'Gurtwickler', s:'von Hand · Gurt im Mauerwerk'},
+  kurbel:{n:'Kurbel',      s:'von Hand · abnehmbare Kurbel'},
+  motor: {n:'Motor',       s:'auf Knopfdruck · Schalter innen'},
+};
+function rollKast(){ return ROLL_KASTEN.find(function(x){return x.v===S.rlKasten;}) || ROLL_KASTEN[0]; }
+/* Welche Kaesten tragen die gewaehlte Hoehe. Der Kasten muss den ganzen aufgerollten
+   Panzer fassen — je hoeher der Rollladen, desto groesser der Kasten. Deshalb ist die
+   Kastengroesse keine freie Wahl, sondern haengt an der Hoehe. */
+function rollKastenMoeglich(h){ h=+h||0; return ROLL_KASTEN.filter(function(x){ return h<=x.hMax; }); }
+function rollKastenPasst(){ return (+S.h||0) <= rollKast().hMax; }
+/* Hoehe geaendert und der Kasten traegt sie nicht mehr -> auf den kleinsten Kasten
+   derselben Form wechseln, der sie traegt. Ohne das stuende eine Kombination im Korb,
+   die der Hersteller nicht baut, und der Preis waere ein fortgeschriebener Fantasiewert. */
+function rollKastenNachziehen(){
+  if(S.prod!=='rollladen' || rollKastenPasst()) return false;
+  var form=rollKast().form;
+  var neu=ROLL_KASTEN.filter(function(x){ return x.form===form && (+S.h||0)<=x.hMax; })[0]
+        || ROLL_KASTEN.filter(function(x){ return x.form===form; }).slice(-1)[0];
+  if(neu && neu.v!==S.rlKasten){ S.rlKasten=neu.v; return true; }
+  return false;
+}
+function rollFarbe(k){ var i=S['rl'+k]; return (i!=null && COLORS_ROLL[i]) ? COLORS_ROLL[i].c : COLORS_ROLL[0].c; }
+function rollFarbeName(k){ var i=S['rl'+k]; return (i!=null && COLORS_ROLL[i]) ? COLORS_ROLL[i].n : COLORS_ROLL[0].n; }
+function rollEndC(){ return (S.rlEndleiste!=null && COLORS_ROLL[S.rlEndleiste]) ? COLORS_ROLL[S.rlEndleiste].c : rollFarbe('Panzer'); }
+function rollEndName(){ return (S.rlEndleiste!=null && COLORS_ROLL[S.rlEndleiste]) ? COLORS_ROLL[S.rlEndleiste].n : 'wie Panzer'; }
+function rollNetzMoeglich(){ return rollKast().kh>=165; }
+function rollAntriebText(){
+  var a=ROLL_ANTRIEB[S.rlAntrieb]||ROLL_ANTRIEB.gurt;
+  return a.n+' '+(S.rlSeite==='links'?'links':'rechts');
+}
+function setRollKasten(v){
+  S.rlKasten=v;
+  /* Der Insektenschutz-Schritt haengt an der Kastengroesse. Ohne Neuaufbau der
+     Schrittliste bliebe er stehen (oder fehlte), obwohl die Wahl ihn gerade
+     moeglich oder unmoeglich gemacht hat. */
+  if(!rollNetzMoeglich()) S.rlNetz=false;
+  STEPS=stepsFor(); if(cur>=STEPS.length) cur=STEPS.length-1;
+  render(); maybeAutoAdvance();
+}
+function setRollAntrieb(art,seite){ S.rlAntrieb=art; S.rlSeite=seite; render(); maybeAutoAdvance(); }
+function setRollNetz(v){ S.rlNetz=!!v; render(); maybeAutoAdvance(); }
+
 function defaultConfig(id){
   const p=id||'fenster';
-  const dim={fenster:[500,500],balkon:[600,1800],haustuer:[900,2000],schiebe:[1800,1800]}[p]||[1000,1200];
+  const dim={fenster:[500,500],balkon:[600,1800],haustuer:[900,2000],schiebe:[1800,1800],rollladen:[700,600]}[p]||[1000,1200];
   return {
     prod:p,
     aufteilung:'1fl',
@@ -6829,6 +7311,10 @@ function defaultConfig(id){
     outer:0, inner:0, colorTarget:'a', anzahl:1,
     griff:'mistral', griffTuer:'klinke', griffAussen:'klinke', stossHoehe:'1200', hstTeilung:'2', hstLauf:'rechts', balkonSchwelle:'ohne',
     doorModel:'vollglas-inox',         // Haustür startet am günstigsten Modell (Vollglas) → baut sich mit teureren Modellen auf
+    /* Vorsatzrollladen: eigene Felder mit Praefix rl, damit sie sich nie mit dem
+       Aufsatzrollladen am Fenster (roll/panzer/endleiste/rollSeite) vermischen. */
+    rlKasten:'e137', rlAntrieb:'gurt', rlSeite:'rechts', rlNetz:false,
+    rlPanzer:0, rlKastenF:0, rlSchiene:0, rlEndleiste:null,
     w:dim[0], h:dim[1]
   };
 }
@@ -7329,6 +7815,106 @@ function panelHTML(){
     const shieldLock=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" style="height:60px;width:auto"><path d="M12 2 4 5v6.5c0 4.8 3.4 8 8 9.5 4.6-1.5 8-4.7 8-9.5V5l-8-3Z"/><rect x="9" y="11.2" width="6" height="5" rx="1.3" stroke-width="1.5"/><path d="M10.4 11.2v-1.5a1.6 1.6 0 0 1 3.2 0v1.5" stroke-width="1.5"/></svg>`;
     return grp('Einbruchschutz','two', ocIcon('sicher',false,shield,'Standardbeschlag','2 Pilzkopfverriegelungen','inklusive')+ocIcon('sicher',true,shieldLock,'Sicherheitsbeschlag','abschließbarer Griff · Verbundsicherheitsglas',''));
   }
+  /* ── Vorsatzrollladen ─────────────────────────────────────────────────── */
+  if(k==='rlkasten'){
+    const tick=`<span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span>`;
+    /* Querschnitt statt Foto: von vorne sehen 45-Grad-Kasten und Ovalkasten fast gleich
+       aus — der Unterschied ist die Bauform. Ein Foto koennte ihn gar nicht zeigen. */
+    const quer=(form)=>{
+      const c='#3a4756';
+      /* Querschnitt von der Seite. Der 45-Grad-Kasten hat eine abgeschraegte vordere
+         Oberkante, der Ovalkasten eine gerundete Front — von vorne sieht man den
+         Unterschied nicht, im Schnitt sofort. */
+      const koerper = (form==='e')
+        ? `<path d="M14 16 h30 l14 14 v16 h-44 z" fill="#f2f3f4" stroke="${c}" stroke-width="2" stroke-linejoin="round"/>`
+        : `<path d="M14 30 a22 14 0 0 1 44 0 v16 h-44 z" fill="#f2f3f4" stroke="${c}" stroke-width="2" stroke-linejoin="round"/>`;
+      return `<svg viewBox="0 0 72 62" style="height:74px;width:auto" aria-hidden="true">${koerper}`
+        +`<circle cx="36" cy="33" r="7.5" fill="none" stroke="${c}" stroke-width="1.6"/>`
+        +`<rect x="30" y="46" width="12" height="12" fill="#e2e5e9" stroke="${c}" stroke-width="1.6"/></svg>`;
+    };
+    const hoehe=+S.h||0;
+    const kk=ROLL_KASTEN.map(x=>{
+      const geht=hoehe<=x.hMax, on=(S.rlKasten===x.v);
+      const f=ROLL_FORM[x.form];
+      return `<div class="ocard ${on?'on':''}${geht?'':' aus'}" ${geht?`onclick="setRollKasten('${x.v}')"`:''} aria-disabled="${!geht}">`
+        +`${tick}<div class="vis">${quer(x.form)}</div>`
+        +`<div class="t">${f.n} ${x.n}</div>`
+        +`<div class="s">${geht?('bis '+x.hMax.toLocaleString('de-DE')+' mm Höhe'):('trägt Ihre '+hoehe.toLocaleString('de-DE')+' mm nicht')}</div></div>`;
+    }).join('');
+    return `<div class="card"><div class="grp-title">Kastenform und -größe</div>`
+      +`<div class="vb-intro" style="margin:0 0 10px">Im Kasten liegt der aufgerollte Panzer. Je höher der Rollladen, desto größer muss der Kasten sein — deshalb sind bei Ihrer Höhe von ${hoehe.toLocaleString('de-DE')} mm nicht alle Größen wählbar.</div>`
+      +`<div class="opts three">${kk}</div>`
+      +`<p class="ai-note">Die Zeichnungen zeigen den Kasten im Querschnitt.</p></div>`;
+  }
+  if(k==='rlfarbe'){
+    /* Vier Bauteile, vier Farben — in derselben Sprache wie die Panzerfarbe beim
+       Fenster: zugeklappt steht nur die gewaehlte Farbe da, sonst waere der Schritt
+       mit vier offenen Rastern ueber 3000px hoch. */
+    const felder=(key,cur,ersteLabel,ersteFarbe)=>
+      (ersteLabel?`<div class="sw ${cur==null?'on':''}" onclick="set('${key}',null)"><div class="chip" style="background:${ersteFarbe}"></div><div class="nm">${ersteLabel}</div></div>`:'')
+      + COLORS_ROLL.map((co,i)=>`<div class="sw ${cur===i?'on':''}" onclick="set('${key}',${i})"><div class="chip" style="background:${co.c}"></div><div class="nm">${co.n}</div></div>`).join('');
+    const block=(titel,key,cur,ersteLabel,ersteFarbe,aktFarbe,aktText,hinweis,erstesFeld)=>{
+      const offen=_pzOffen[key];
+      return `<div class="grp-title"${erstesFeld?'':' style="margin-top:22px"'}>${titel}</div>
+        <button type="button" class="fw-akt" onclick="pzToggle('${key}')" aria-expanded="${offen}">
+          <span class="fw-feld" style="background:${aktFarbe}"></span>
+          <span class="fw-txt"><span class="fw-lbl">Gewählt</span><span class="fw-nm">${aktText}</span></span>
+          <svg class="fw-pf${offen?' auf':''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        ${offen?`<div class="swatches fw-raster">${felder(key,cur,ersteLabel,ersteFarbe)}</div>`
+               :`<button type="button" class="fw-mehr" onclick="pzToggle('${key}')">Alle ${COLORS_ROLL.length} Farben zeigen</button>`}
+        <div class="pzhint">${hinweis}</div>`;
+    };
+    return `<div class="card">`
+      + block('Farbe des Panzers','rlPanzer',S.rlPanzer,null,null,rollFarbe('Panzer'),rollFarbeName('Panzer'),
+              'Der Panzer besteht aus Aluminium-Lamellen, die mit Polyurethan gefüllt sind.',true)
+      + block('Farbe der Endleiste','rlEndleiste',S.rlEndleiste,'wie Panzer',rollFarbe('Panzer'),rollEndC(),rollEndName(),
+              'Die Endleiste ist die Abschlussleiste unten am Panzer — mit verdecktem Stopper.')
+      + block('Farbe des Kastens','rlKastenF',S.rlKastenF,null,null,rollFarbe('KastenF'),rollFarbeName('KastenF'),
+              'Kasten und Führungsschienen liefert der Hersteller auch in der RAL-Palette.')
+      + block('Farbe der Führungsschienen','rlSchiene',S.rlSchiene,null,null,rollFarbe('Schiene'),rollFarbeName('Schiene'),
+              'In den Schienen läuft der Panzer. Sie sind 44 mm breit.')
+      + `</div>`;
+  }
+  if(k==='rlantrieb'){
+    const tick=`<span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span>`;
+    /* Antrieb UND Seite in einer Kachel — dieselbe Loesung wie beim Fenster-Rollladen:
+       als getrennte Frage blieb die Seite faktisch immer auf der Vorbelegung stehen. */
+    const sym=(art,li)=>{
+      const c='#3a4756', x=li?18:54, dir=li?-1:1;
+      let end='';
+      if(art==='motor') end=`<rect x="${x-7}" y="46" width="14" height="10" rx="2.5" fill="#fff" stroke="${c}" stroke-width="1.8"/>`;
+      else if(art==='kurbel') end=`<circle cx="${x}" cy="51" r="5.5" fill="#fff" stroke="${c}" stroke-width="1.8"/>`;
+      else end=`<line x1="${x-6}" y1="49" x2="${x+6}" y2="49" stroke="${c}" stroke-width="2" stroke-linecap="round"/>`;
+      return `<svg viewBox="0 0 72 62" style="height:74px;width:auto" aria-hidden="true">`
+        +`<rect x="6" y="8" width="60" height="16" rx="2" fill="#f2f3f4" stroke="${c}" stroke-width="2"/>`
+        +`<circle cx="${x}" cy="16" r="4.6" fill="none" stroke="${c}" stroke-width="1.6"/>`
+        +`<rect x="${li?10:52}" y="24" width="10" height="34" fill="#e6e9ec" stroke="${c}" stroke-width="1.6"/>`
+        +`<rect x="20" y="24" width="32" height="34" fill="#f4f5f7" stroke="${c}" stroke-width="1.4"/>`
+        +`<line x1="20" y1="34" x2="52" y2="34" stroke="${c}" stroke-width="1" opacity=".5"/><line x1="20" y1="42" x2="52" y2="42" stroke="${c}" stroke-width="1" opacity=".5"/><line x1="20" y1="50" x2="52" y2="50" stroke="${c}" stroke-width="1" opacity=".5"/>`
+        +`<line x1="${x}" y1="24" x2="${x}" y2="46" stroke="${c}" stroke-width="1.8"/>${end}</svg>`;
+    };
+    const kk=[['gurt','links'],['gurt','rechts'],['kurbel','links'],['kurbel','rechts'],['motor','links'],['motor','rechts']]
+      .map(([art,seite])=>{
+        const a=ROLL_ANTRIEB[art], on=(S.rlAntrieb===art && S.rlSeite===seite);
+        return `<div class="ocard ${on?'on':''}" onclick="setRollAntrieb('${art}','${seite}')">${tick}`
+          +`<div class="vis">${sym(art,seite==='links')}</div>`
+          +`<div class="t">${a.n} ${seite}</div><div class="s">${a.s}</div></div>`;
+      }).join('');
+    return `<div class="card"><div class="grp-title">Antrieb</div>`
+      +`<div class="vb-intro" style="margin:0 0 10px">Die Seite ist von außen gesehen — dort, wo der Gurt, die Kurbel oder das Motorkabel aus dem Kasten kommt.</div>`
+      +`<div class="opts three">${kk}</div></div>`;
+  }
+  if(k==='rlnetz'){
+    const tick=`<span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span>`;
+    const ban=`<svg viewBox="0 0 24 24" fill="none" stroke="#9aa3b0" stroke-width="1.5" style="height:60px;width:auto"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg>`;
+    const netz=`<svg viewBox="0 0 60 60" style="height:66px;width:auto" aria-hidden="true"><rect x="6" y="6" width="48" height="48" fill="#f7f8f9" stroke="#3a4756" stroke-width="2"/><g stroke="#8895a4" stroke-width="1">`
+      +[12,18,24,30,36,42,48].map(v=>`<line x1="${v}" y1="6" x2="${v}" y2="54"/><line x1="6" y1="${v}" x2="54" y2="${v}"/>`).join('')+`</g></svg>`;
+    const c=(v,vis,t,sub)=>`<div class="ocard ${S.rlNetz===v?'on':''}" onclick="setRollNetz(${v})">${tick}<div class="vis">${vis}</div><div class="t">${t}</div><div class="s">${sub}</div></div>`;
+    return `<div class="card"><div class="grp-title">Insektenschutz</div>`
+      +`<div class="vb-intro" style="margin:0 0 10px">Das Fliegengitter liegt im selben Kasten und läuft in einer eigenen Schiene — der Hersteller führt es ab dem ${rollKast().n}-Kasten.</div>`
+      +`<div class="opts two">`+c(false,ban,'Ohne Insektenschutz','')+c(true,netz,'Mit Insektenschutz','Gitter im selben Kasten')+`</div></div>`;
+  }
   if(k==='masse'){
     const L=massLimits();
     return `<div class="card massecard"><div class="grp-title">Maße eingeben</div>
@@ -7528,6 +8114,27 @@ const GRIFFN={mistral:'Mistral',abschliessbar:'Mistral abschließbar'};
    posKeySpecs auch im Warenkorb und in der Anfrage-Uebersicht. */
 function summaryPanel(){
   const co=COLORS_AKT()[S.outer], ci=COLORS_AKT()[S.inner];
+  /* Der Vorsatzrollladen hat weder Anschlag noch Fensterfarben. Er bekommt deshalb
+     einen eigenen Zweig VOR anschlagInfo() — sonst stuende in der Uebersicht ein
+     Satz ueber eine Oeffnungsrichtung, die es an diesem Produkt nicht gibt. */
+  if(S.prod==='rollladen'){
+    const _p=(k,v)=>v?`<div class="ak-p"><em>${k}</em><b>${v}</b></div>`:'';
+    const _d=c=>`<span class="dot" style="background:${c}"></span>`;
+    const kas=rollKast();
+    return `<div class="ak"><div class="ak-txt">
+        <div class="ak-mass"><b class="tnum">${S.w} × ${S.h} mm</b><span>${S.anzahl} Stück</span></div>
+        <div class="ak-satz">Vorsatzrollladen mit <b>${ROLL_FORM[kas.form].n} ${kas.n}</b>, ${rollAntriebText()}.</div>
+        <span class="ak-chip">Maß inkl. Kasten</span>
+      </div></div><div class="ak-list">`
+      +_p('Kasten',`${ROLL_FORM[kas.form].n} · ${kas.n}`)
+      +_p('Panzer',`${_d(rollFarbe('Panzer'))}${rollFarbeName('Panzer')}`)
+      +_p('Endleiste',`${_d(rollEndC())}${rollEndName()}`)
+      +_p('Kastenfarbe',`${_d(rollFarbe('KastenF'))}${rollFarbeName('KastenF')}`)
+      +_p('Führungsschienen',`${_d(rollFarbe('Schiene'))}${rollFarbeName('Schiene')}`)
+      +_p('Antrieb',rollAntriebText())
+      +_p('Insektenschutz',S.rlNetz?'mit Fliegengitter':'ohne')
+      +`</div>`;
+  }
   const ai=anschlagInfo();
   const hebe=t=>String(t==null?'':t).replace(/\b(links|rechts|innen|außen)\b/gi,'<b>$1</b>');
   const p=(k,v)=>v?`<div class="ak-p"><em>${k}</em><b>${v}</b></div>`:'';
@@ -7635,6 +8242,19 @@ function summaryRows(){
       +(ai.klartext?`<span class="vsub" style="display:block;font-weight:500;color:#6b7280;margin-top:2px">${ai.klartext}</span>`:'')
       +(ai.ansicht?`<span class="vsub" style="display:block;font-weight:500;color:#6b7280">${ai.ansicht}</span>`:'')
       +`</span></div>`; })();
+  if(S.prod==='rollladen'){
+    const kas=rollKast(), d=c=>`<span class="dot" style="background:${c}"></span>`;
+    const r=(k,v)=>`<div class="srow"><span class="k">${k}</span><span class="v">${v}</span></div>`;
+    return r('Produkt','Vorsatzrollladen')
+      +r('Kasten',`${ROLL_FORM[kas.form].n} · ${kas.n}`)
+      +massRow
+      +r('Panzerfarbe',`${d(rollFarbe('Panzer'))}${rollFarbeName('Panzer')}`)
+      +r('Farbe Endleiste',`${d(rollEndC())}${rollEndName()}`)
+      +r('Kastenfarbe',`${d(rollFarbe('KastenF'))}${rollFarbeName('KastenF')}`)
+      +r('Führungsschienen',`${d(rollFarbe('Schiene'))}${rollFarbeName('Schiene')}`)
+      +r('Antrieb',rollAntriebText())
+      +r('Insektenschutz',S.rlNetz?'mit Fliegengitter':'ohne');
+  }
   if(S.prod==='haustuer'){
     return `<div class="srow"><span class="k">Profil</span><span class="v">${profilName(S.profile)}</span></div>
       ${aRow}
@@ -8382,6 +9002,9 @@ function setMass(k,v){ S[k]=(+v||0);
   // Beim Tippen wird nicht neu gerendert (sonst springt der Fokus aus dem Feld) — der Warenkorb
   // muss hier trotzdem mitgeschrieben werden, sonst zeigt er noch den Preis von vor der Eingabe.
   lichtNormalisieren();
+  // Hoehe geaendert -> Kasten muss sie tragen (sonst Preis aus dem Nichts). Wechselt der
+  // Kasten, aendert sich auch, ob es den Insektenschutz-Schritt gibt.
+  if(rollKastenNachziehen()){ STEPS=stepsFor(); if(cur>=STEPS.length) cur=STEPS.length-1; }
   if(editIndex>=0&&cart[editIndex]){ cart[editIndex].conf[k]=S[k]; saveCart(); }
   updateMassValidity(); refreshPrice(); }
 // Preis + Weiter-Knopf abhängig von Maß-Gültigkeit (kein Preis bei technisch unmöglichem Maß)
@@ -8669,7 +9292,7 @@ function back(){ if(cur===0) backToPicker(); else go(cur-1); }
 /* Aufklappzustand der beiden Farbwahlen. render() baut das Panel neu auf,
    deshalb muss der Zustand ausserhalb liegen — sonst klappt es bei jeder
    Farbwahl wieder zu. */
-var _pzOffen={panzer:false,endleiste:false};
+var _pzOffen={panzer:false,endleiste:false,rlPanzer:false,rlEndleiste:false,rlKastenF:false,rlSchiene:false};
 function pzToggle(k){ _pzOffen[k]=!_pzOffen[k]; render(); }
 function knopfBeschriftung(){
   const nl=document.getElementById('nextLbl'), nb=document.getElementById('btnNext');
