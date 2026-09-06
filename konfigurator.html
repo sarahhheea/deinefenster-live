@@ -6779,7 +6779,9 @@ function setLieferWunsch(v){ lieferWunsch=!!v; saveCart();
 function lieferWahlHTML(t,klasse){
   var h='<div class="'+klasse+'">'
     +'<button type="button" class="'+(liefer==='abholung'?'on':'')+'" onclick="setLiefer(\'abholung\')">'
-      +'<b>Abholung</b><span>Brandenburg a. d. H. &middot; kostenlos</span></button>'
+      /* Abholtag steht dabei. "Kostenlos" allein hat schon Kunden an einem Dienstag vor
+         ein geschlossenes Tor fahren lassen — der Hofverkauf ist nur freitags offen. */
+      +'<b>Abholung</b><span>Brandenburg a. d. H. &middot; freitags 10&ndash;17 Uhr &middot; kostenlos</span></button>'
     +'<button type="button" class="'+(liefer==='lieferung'?'on':'')+(t.lieferOk?'':' locked')+'"'+(t.lieferOk?'':' disabled')+' onclick="setLiefer(\'lieferung\')">'
       +'<b>Lieferung</b><span>'+(t.lieferOk?(t.ship?eur(t.ship):'kostenfrei'):'ab '+LIEFER_MIN+' Elementen')+'</span></button>'
   +'</div>';
@@ -8379,7 +8381,7 @@ function cartTotals(){
   const lieferOk=(qty>=LIEFER_MIN||hasHS);
   if(!lieferOk && liefer==='lieferung') liefer='abholung';   // nicht erlaubte Auswahl zurücksetzen
   let ship=0,shipNote='';
-  if(liefer==='abholung'){ ship=0; shipNote='Abholung im Lager · Brandenburg a. d. H.'; }
+  if(liefer==='abholung'){ ship=0; shipNote='Abholung im Lager · Brandenburg a. d. H. · freitags 10–17 Uhr'; }
   else { if(qty>=10){ ship=0; shipNote='ab 10 Elementen kostenfrei · deutschlandweit'; } else if(hasHS){ ship=300; shipNote='Hebe-Schiebetür · Direktlieferung vom Hersteller'; } else { ship=239; shipNote='Spedition deutschlandweit'; } }
   const total=sub+ship, mwst=total-total/1.19;
   return {sub,qty,ship,shipNote,total,mwst,hasHS,lieferOk,offen};
