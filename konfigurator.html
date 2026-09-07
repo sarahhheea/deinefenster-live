@@ -304,14 +304,22 @@ body.wiz-active .dfnav-tel:hover{background:rgba(34,94,170,.10)}
 .pcard:hover{border-color:var(--ink);transform:translateY(-4px)}
 .pcard .pimg{position:relative;height:236px;display:grid;place-items:center;background:#fff;border-radius:var(--r);margin-bottom:16px;overflow:hidden}
 .pcard .pimg img{max-height:96%;max-width:92%;width:auto;height:auto;object-fit:contain}
+/* pinfo als Spalte ueber die Resthoehe: sonst greift margin-top:auto am Knopf nicht
+   und die Karte mit der Material-Unterzeile schob ihren Knopf 22px tiefer als die
+   vier daneben. */
+.pcard .pinfo{flex:1;display:flex;flex-direction:column}
 .pcard .pt{font-family:var(--serif);font-weight:600;font-size:23px}
+.pcard .psub{color:var(--ink-soft);font:400 12.5px/1.35 var(--sans);margin-top:5px;letter-spacing:.01em}
 .pcard .pp{color:var(--ink);font-weight:600;font-size:15px;margin-top:5px}
 .pcard .pp span{color:var(--ink-soft);font-weight:400;font-size:12.5px}
 /* Feste zweite Zeile fuer den Pflichtzusatz: vorher brach er nur bei den langen
    Produktnamen um und die Knoepfe standen auf zwei verschiedenen Hoehen. */
 .pcard .pp-zus{display:block;margin-top:3px;font-size:12px;line-height:1.3}
-.pcard .pgo{margin-top:auto}   /* Knopf immer an der Unterkante = alle auf einer Linie */
-.pcard .pgo{margin-top:18px;padding:14px;border-radius:2px;background:var(--ink);color:#fff;
+/* Knopf immer an der Unterkante = alle Karten auf einer Linie. Der Mindestabstand
+   sitzt als padding-bottom am Preisblock, weil ein margin-top hier das auto
+   ueberschreiben wuerde — genau daran scheiterte die Ausrichtung vorher. */
+.pcard .pp{padding-bottom:18px}
+.pcard .pgo{margin-top:auto;padding:14px;border-radius:2px;background:var(--ink);color:#fff;
   font:600 12px/1 var(--sans);text-transform:uppercase;letter-spacing:.14em;display:flex;align-items:center;justify-content:center;gap:8px;transition:.25s var(--ease)}
 .pcard:hover .pgo{background:#332f2a}
 .pcard .pgo svg{width:14px;height:14px}
@@ -915,7 +923,8 @@ body.wiz-active .dfnav-tel:hover{background:rgba(34,94,170,.10)}
 .pcard .pimg{height:206px;align-items:end;padding-bottom:6px}   /* Produkte stehen auf einer Grundlinie statt frei zu schweben */
 .pcard .pt{font-size:20px}
 .pcard .pp{font-size:14.5px;margin-top:4px}
-.pcard .pgo{margin-top:14px;padding:12px}
+.pcard .pp{padding-bottom:14px}
+.pcard .pgo{margin-top:auto;padding:12px}
 .pk-trust{margin-top:16px}
 /* Auswahl-Modus: vor den Maßen — große Kacheln direkt auf dem Hintergrund, keine Zeichnung, kein Kasten-im-Kasten */
 .grid.select{grid-template-columns:1fr;max-width:1180px;margin:0 auto}
@@ -1002,8 +1011,10 @@ body.wiz-active .dfnav-tel:hover{background:rgba(34,94,170,.10)}
   .pcard .pimg img{max-height:178px}
   .pcard .pinfo{width:100%;display:flex;flex-direction:column;align-items:center}
   .pcard .pt{font-size:23px}
+  .pcard .psub{font-size:13.5px;margin-top:4px}
   .pcard .pp{margin-top:4px;font-size:15px}
-  .pcard .pgo{margin-top:14px;padding:15px;width:100%;justify-content:center;font-size:15.5px;border-radius:12px}
+  .pcard .pp{padding-bottom:14px}
+  .pcard .pgo{margin-top:auto;padding:15px;width:100%;justify-content:center;font-size:15.5px;border-radius:12px}
   .pk-head2{margin:2px auto 16px}
   .pk-head2 h1{font-size:29px;line-height:1.12}
   .pk-head2 p{font-size:14px;margin-top:6px}
@@ -7110,7 +7121,11 @@ function cdToAnfrage(){ if(!cart.length){ closeCartDrawer(); return; } closeCart
 // Nav-Warenkorb-Icon (und alle warenkorb-Links) auf dieser Seite öffnen den Drawer statt zu navigieren
 document.addEventListener('click',function(e){ if(!e.target.closest)return; var a=e.target.closest('a[href*="warenkorb"]'); if(a){ e.preventDefault(); openCartDrawer(); } });
 const PRODUCTS=[
-  {id:'fenster',t:'Kunststofffenster',img:'img/karten/fenster-weiss.webp?v=norm1',fallback:'ab 79 €'},
+  /* Heisst 'Fenster', nicht 'Kunststofffenster': der naechste Schritt fragt nach dem
+     Material. Ein Kunde, der auf 'Kunststofffenster' geklickt hat und dann gefragt
+     wird, ob er Kunststoff, Holz oder Aluminium will, haelt das fuer einen Fehler.
+     Die Unterzeile nennt die drei Materialien, damit die Karte trotzdem sagt, was drin ist. */
+  {id:'fenster',t:'Fenster',sub:'Kunststoff · Holz · Aluminium',img:'img/karten/fenster-weiss.webp?v=norm1',fallback:'ab 79 €'},
   {id:'balkon',t:'Balkontür',img:'img/karten/balkontuer-weiss.webp?v=norm1',fallback:'ab 274 €'},
   {id:'haustuer',t:'Haustür',img:'img/karten/haustuer-weiss.webp?v=norm1',fallback:'ab 872 €'},
   {id:'schiebe',t:'Schiebetür',img:'img/karten/hst-weiss.webp?v=norm1',fallback:'ab 1.411 €'},
@@ -7126,7 +7141,7 @@ function renderPicker(){
   const cards=PRODUCTS.map(p=>`<div class="pcard" onclick="startProduct('${p.id}')">
     <div class="pimg"><img src="${p.img}" alt="${p.t} (KI-generiertes Symbolbild)"><span class="ai-badge">KI-Symbolbild</span></div>
     <div class="pinfo">
-      <div class="pt">${p.t}</div><div class="pp">${abLabel(p)} <span class="pp-mass">· nach Maß</span><span class="pp-zus">inkl. MwSt · zzgl. Lieferung</span></div>
+      <div class="pt">${p.t}</div>${p.sub?`<div class="psub">${p.sub}</div>`:''}<div class="pp">${abLabel(p)} <span class="pp-mass">· nach Maß</span><span class="pp-zus">inkl. MwSt · zzgl. Lieferung</span></div>
       <div class="pgo">Konfigurieren <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div>
     </div></div>`).join('');
   const truck=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5v8h1"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>`;
