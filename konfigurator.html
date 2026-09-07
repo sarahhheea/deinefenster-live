@@ -445,9 +445,6 @@ body.wiz-active .dfnav-tel:hover{background:rgba(34,94,170,.10)}
 .opts.formvis .ocard .vis img,
 .opts.kastenvis .ocard .vis img,
 .opts.antriebvis .ocard .vis img{max-height:150px;width:100%;object-fit:contain}
-/* Marke an der Groesse, die zur eingegebenen Hoehe passt. */
-.kg-tipp{display:inline-block;margin-left:6px;padding:2px 7px;border-radius:999px;
-  background:#e8f3ea;color:#1a7a3c;font-size:11px;font-weight:800;vertical-align:middle}
 .ocard .vis img{max-height:120px;max-width:100%;width:auto;height:auto;object-fit:contain}
 .opts.three{grid-template-columns:repeat(3,1fr)}
 /* Aufteilung mit Licht: vier Spalten — je Zeile eine Fluegelzahl, in der Zeile ohne
@@ -7275,7 +7272,7 @@ function rollAntriebText(){
 function setRollKasten(v){
   S.rlKasten=v;
   S.rlKastenManuell=true;   // ab jetzt nicht mehr automatisch verkleinern
-  render();
+  render(); maybeAutoAdvance();
 }
 /* Form wechseln, ohne die Groessenwahl zu verlieren: wer den mittleren Kasten gewaehlt
    hat, bekommt in der anderen Form wieder den mittleren. Die Form wird bewusst NICHT
@@ -7292,7 +7289,19 @@ function setRollForm(f){
   rollKastenNachziehen();                       // traegt der Kasten die eingestellte Hoehe?
   render(); maybeAutoAdvance();
 }
-function setRollAntrieb(art,seite){ S.rlAntrieb=art; S.rlSeite=seite; render(); maybeAutoAdvance(); }
+/* Der Antriebsschritt traegt ZWEI Entscheidungen: womit und auf welcher Seite. Ein
+   Sprung gleich nach der Kachel wuerde die Seite auf der Vorbelegung stehen lassen —
+   genau der Fehler, der beim Rollladen am Fenster schon einmal drin war. Deshalb geht
+   es erst weiter, wenn die Seite angetippt wurde. */
+function setRollAntrieb(art,seite,vonSeite){
+  S.rlAntrieb=art; S.rlSeite=seite; render();
+  if(vonSeite) _rollWeiter();
+}
+function _rollWeiter(){
+  if(cur>=STEPS.length-1) return;
+  clearTimeout(_advTimer);
+  _advTimer=setTimeout(function(){ if(STEPS[cur]&&STEPS[cur].key==='rlantrieb') go(cur+1); }, 240);
+}
 
 function defaultConfig(id){
   const p=id||'fenster';
@@ -7857,7 +7866,7 @@ function panelHTML(){
                          : ('geht auch — größerer Kasten, trägt bis '+x.hMax.toLocaleString('de-DE')+' mm');
       return `<div class="ocard ${on?'on':''}${geht?'':' aus'}" ${geht?`onclick="setRollKasten('${x.v}')"`:''} aria-disabled="${!geht}">`
         +`${tick}<div class="vis"><img src="${formBild}?v=2" loading="lazy" decoding="async" alt="Vorsatzrollladen mit ${ROLL_FORM[form].n} (KI-generiertes Symbolbild)"><span class="ai-badge">KI-Symbolbild</span></div>`
-        +`<div class="t">Kasten ${x.n}${empf&&geht?' <span class="kg-tipp">passt</span>':''}</div>`
+        +`<div class="t">Kasten ${x.n}</div>`
         +`<div class="s">${satz}</div></div>`;
     }).join('');
     return `<div class="card"><div class="grp-title">Größe des Kastens</div>`
@@ -7914,7 +7923,7 @@ function panelHTML(){
       +`<div class="vis"><img src="${formBild}?v=2" loading="lazy" decoding="async" alt="Vorsatzrollladen, ${t} (KI-generiertes Symbolbild)"><span class="ai-badge">KI-Symbolbild</span></div>`
       +`<div class="t">${t}</div><div class="s">${s2}</div></div>`;
     const seite=(S.rlSeite==='links')?'links':'rechts';
-    const sBtn=v=>`<button type="button" class="rs-btn${seite===v?' on':''}" aria-pressed="${seite===v}" onclick="setRollAntrieb('${S.rlAntrieb||'gurt'}','${v}')">${v}</button>`;
+    const sBtn=v=>`<button type="button" class="rs-btn${seite===v?' on':''}" aria-pressed="${seite===v}" onclick="setRollAntrieb('${S.rlAntrieb||'gurt'}','${v}',true)">${v}</button>`;
     const frage=(S.rlAntrieb==='motor')?'Auf welcher Seite soll das Kabel herauskommen?'
               :(S.rlAntrieb==='kurbel')?'Auf welcher Seite soll die Kurbel sitzen?'
               :'Auf welcher Seite soll der Gurt sitzen?';
@@ -8871,7 +8880,12 @@ async function submitAnfrage(ev){
 // Schritte, bei denen ein Klick auf die Option direkt weiterspringt (schnelle Struktur-Wahl).
 // NICHT dabei: farbe/modell/griff*/motiv (Wirkung sehen) + masse/anzahl (tippen) + anfrage.
 // rollladen NICHT dabei: hat Zweit-Wahlen (Bedienseite + Panzerfarbe) — würde sonst zu früh wegspringen.
-const AUTO_ADV={material:1,holzart:1,profil:1,aufteilung:1,oeffnung:1,psk:1,lauf:1,teilung:1,glas:1,schall:1,sicherheit:1,schwelle:1};
+/* Schritte, die nach einem Klick von selbst weitergehen: alles, wo EINE Wahl den
+   Schritt beendet. Nicht dabei sind Schritte mit zwei Entscheidungen (Farbe aussen
+   und innen, Antrieb und Seite) oder mit mehreren Feldern — dort waere der Sprung
+   mitten im Vorgang. */
+const AUTO_ADV={material:1,holzart:1,profil:1,aufteilung:1,oeffnung:1,psk:1,lauf:1,teilung:1,glas:1,schall:1,sicherheit:1,schwelle:1,
+                rlform:1,rlkasten:1};
 let _advTimer=null;
 function maybeAutoAdvance(){
   const k=STEPS[cur]&&STEPS[cur].key;
