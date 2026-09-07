@@ -84,7 +84,7 @@ const RULES = [
   // ── Transportschaden ─────────────────────────────────────────────────────────
   {
     keys: ['transportschaden','lieferschaden','beschädigt angekommen','kaputt geliefert','schaden bei lieferung','kaputt angekommen'],
-    answer: '⚠️ <strong>Transportschäden sofort bei Anlieferung melden!</strong><br><br>1. Lieferschein <strong>vor</strong> dem Unterschreiben auf Schäden prüfen<br>2. Schäden auf dem Lieferschein notieren oder Annahme verweigern<br>3. Fotos machen → sofort kontaktieren: <a href="https://wa.me/4915211344756" target="_blank">WhatsApp</a> oder <a href="tel:+493381214837">03381 / 214 83 73</a><br><br>Nachträglich gemeldete Transportschäden sind kaum durchsetzbar!'
+    answer: '⚠️ <strong>Transportschäden sofort bei Anlieferung melden!</strong><br><br>1. Lieferschein <strong>vor</strong> dem Unterschreiben auf Schäden prüfen<br>2. Schäden auf dem Lieferschein notieren oder Annahme verweigern<br>3. Fotos machen → sofort kontaktieren: <a href="https://wa.me/4915211344756" target="_blank">WhatsApp</a> oder <a href="tel:+4933812148373">03381 / 214 83 73</a><br><br>Nachträglich gemeldete Transportschäden sind kaum durchsetzbar!'
   },
 
   // ── Lieferzeit ──────────────────────────────────────────────────────────────
@@ -132,7 +132,7 @@ const RULES = [
   // ── Beratungstermin / Showroom ──────────────────────────────────────────────
   {
     keys: ['beratungstermin','termin machen','termin','besuch außerhalb','außerhalb freitag','wochentags','beraten lassen','beratung vor ort','vorbeikommen außerhalb','außerhalb öffnungszeit','außerhalb des hofverkauf','andere zeit','außer freitag'],
-    answer: '📅 Außerhalb vom Hofverkauf (Fr 10–17 Uhr) kannst du <strong>nach einem Termin fragen</strong> — Garantie können wir aber nicht geben. Einfach kurz anrufen: <a href="tel:+493381214837">03381 / 214 83 73</a> (Mo–Fr 10–18 Uhr) oder per <a href="https://wa.me/4915211344756" target="_blank">WhatsApp</a> nachfragen.'
+    answer: '📅 Außerhalb vom Hofverkauf (Fr 10–17 Uhr) kannst du <strong>nach einem Termin fragen</strong> — Garantie können wir aber nicht geben. Einfach kurz anrufen: <a href="tel:+4933812148373">03381 / 214 83 73</a> (Mo–Fr 10–18 Uhr) oder per <a href="https://wa.me/4915211344756" target="_blank">WhatsApp</a> nachfragen.'
   },
 
   // ── Mindestbestellmenge / 1 Fenster ─────────────────────────────────────────
@@ -192,7 +192,7 @@ const RULES = [
   // ── Gebrauchte kaufen ───────────────────────────────────────────────────────
   {
     keys: ['gebraucht','gebrauchte','occasion','hofverkauf','hof','besichtigen','vor ort','second hand','lagerware','lagerfenster'],
-    answer: '♻️ Gebrauchte Fenster (wechselnder Bestand) gibt es jeden <strong>Freitag 10–17 Uhr</strong> auf dem Hof (Fohrder Landstraße 13, Brandenburg). Keine Reservierungen, kein Vorabverkauf. Selbstverladung, eigenes Fahrzeug mitbringen. Bis 20 Uhr nach Voranmeldung: <a href="tel:+493381214837">03381 / 214 83 73</a>.'
+    answer: '♻️ Gebrauchte Fenster (wechselnder Bestand) gibt es jeden <strong>Freitag 10–17 Uhr</strong> auf dem Hof (Fohrder Landstraße 13, Brandenburg). Keine Reservierungen, kein Vorabverkauf. Selbstverladung, eigenes Fahrzeug mitbringen. Bis 20 Uhr nach Voranmeldung: <a href="tel:+4933812148373">03381 / 214 83 73</a>.'
   },
 
   // ── Gebrauchte verkaufen ────────────────────────────────────────────────────
@@ -210,7 +210,7 @@ const RULES = [
   // ── Öffnungszeiten ──────────────────────────────────────────────────────────
   {
     keys: ['öffnungszeit','geöffnet','wann offen','wann da','freitag','wann auf','vorbeikommen','wann habt','besuch','aufgemacht','aufgemacht','öffnet','wann öffnet','wann kann ich kommen','öffnungszeiten'],
-    answer: '🕙 <strong>Hofverkauf:</strong> Freitags <strong>10–17 Uhr</strong> (Fohrder Landstraße 13, Brandenburg). Bis 20 Uhr nach Voranmeldung: <a href="tel:+493381214837">03381 / 214 83 73</a>. Mo–Do und Sa–So kein Hofverkauf.<br><br>⚠️ Sommerferien und Feiertage: ggf. abweichende Zeiten — vorher kurz anrufen!<br><br><a href="kontakt.html" style="display:inline-block;margin-top:6px;padding:7px 14px;background:rgba(118,169,250,0.15);border:1px solid rgba(118,169,250,0.3);border-radius:8px;color:#76a9fa;text-decoration:none;font-weight:700;font-size:12px;">→ Kontaktseite</a>'
+    answer: '🕙 <strong>Hofverkauf:</strong> Freitags <strong>10–17 Uhr</strong> (Fohrder Landstraße 13, Brandenburg). Bis 20 Uhr nach Voranmeldung: <a href="tel:+4933812148373">03381 / 214 83 73</a>. Mo–Do und Sa–So kein Hofverkauf.<br><br>⚠️ Sommerferien und Feiertage: ggf. abweichende Zeiten — vorher kurz anrufen!<br><br><a href="kontakt.html" style="display:inline-block;margin-top:6px;padding:7px 14px;background:rgba(118,169,250,0.15);border:1px solid rgba(118,169,250,0.3);border-radius:8px;color:#76a9fa;text-decoration:none;font-weight:700;font-size:12px;">→ Kontaktseite</a>'
   },
 
   // ── Schallschutz ─────────────────────────────────────────────────────────────
@@ -318,7 +318,7 @@ const RULES = [
   // ── Rollladen ───────────────────────────────────────────────────────────────
   {
     keys: ['rollladen','rolladen','sonnenschutz','beschattung','jalousie'],
-    answer: 'Ja, wir führen <strong>Drutex-Rollladen</strong> passend zu den Fenstern. Angebot: <a href="tel:+493381214837">03381 / 214 83 73</a> oder <a href="https://wa.me/4915211344756" target="_blank">WhatsApp</a>.'
+    answer: 'Ja, wir führen <strong>Drutex-Rollladen</strong> passend zu den Fenstern. Angebot: <a href="tel:+4933812148373">03381 / 214 83 73</a> oder <a href="https://wa.me/4915211344756" target="_blank">WhatsApp</a>.'
   },
 
   // ── Konfigurator / Bestellung ───────────────────────────────────────────────
@@ -330,7 +330,7 @@ const RULES = [
   // ── Kontakt ──────────────────────────────────────────────────────────────────
   {
     keys: ['kontakt','telefon','anrufen','whatsapp','mail','email','erreichbar','wann erreichbar','wie erreiche','telefonnummer','erreichen','wie komme ich in kontakt','schreiben'],
-    answer: '📞 <a href="tel:+493381214837"><strong>03381 / 214 83 73</strong></a> — Mo–Fr 10–18 Uhr<br>💬 <a href="https://wa.me/4915211344756" target="_blank"><strong>WhatsApp 01521 1344756</strong></a> — nur schreiben (kein Anruf)<br>📧 info@baustoffchrist.de — Antwort i.d.R. innerhalb 24h'
+    answer: '📞 <a href="tel:+4933812148373"><strong>03381 / 214 83 73</strong></a> — Mo–Fr 10–18 Uhr<br>💬 <a href="https://wa.me/4915211344756" target="_blank"><strong>WhatsApp 01521 1344756</strong></a> — nur schreiben (kein Anruf)<br>📧 info@baustoffchrist.de — Antwort i.d.R. innerhalb 24h'
   },
 
   // ── Adresse ──────────────────────────────────────────────────────────────────
@@ -348,7 +348,7 @@ const RULES = [
   // ── Danke ────────────────────────────────────────────────────────────────────
   {
     keys: ['danke','vielen dank','super','perfekt','toll','prima','klasse','hilfreich','hat geholfen'],
-    answer: 'Gerne! 😊 Weitere Fragen: <a href="tel:+493381214837">03381 / 214 83 73</a> oder <a href="https://wa.me/4915211344756" target="_blank">WhatsApp 01521 1344756</a>. Viel Erfolg!'
+    answer: 'Gerne! 😊 Weitere Fragen: <a href="tel:+4933812148373">03381 / 214 83 73</a> oder <a href="https://wa.me/4915211344756" target="_blank">WhatsApp 01521 1344756</a>. Viel Erfolg!'
   },
 ];
 
@@ -382,7 +382,7 @@ const SYSTEM_PROMPT = `Du bist der automatische Assistent von DeineFenster.de (F
 
 REGELN: Niemals konkrete Preise nennen — bei Preisfragen Kunden bitten, Maße/Typ/Farbe per WhatsApp zu schicken. Keine genauen Lieferdaten versprechen. Nur Fenster/Türen-Themen. Bei Unsicherheit: Telefon oder WhatsApp empfehlen. Angaben ohne Gewähr.
 
-FIRMA: Fohrder Landstraße 13, 14772 Brandenburg a.d.H. | Tel: 03381/214837 (Mo-Fr 10-18h) | WhatsApp: 01521 1344756 (nur schreiben, kein Anruf) | Hofverkauf: Freitag 10-17h
+FIRMA: Fohrder Landstraße 13, 14772 Brandenburg a.d.H. | Tel: 03381/2148373 (Mo-Fr 10-18h) | WhatsApp: 01521 1344756 (nur schreiben, kein Anruf) | Hofverkauf: Freitag 10-17h
 
 PRODUKTE: Nur Drutex PVC-Fenster (neu+Maß) + Gebrauchtware (Freitag vor Ort, Selbstverladung, keine Reservierung). Haustüren (3D-Konfigurator: haustuer-3d.html), Balkontüren, Hebe-Schiebetüren bis 6500mm, Rollladen. KEIN Einbau, KEIN Ankauf gebraucht, KEIN Dachfenster, NICHT nach Österreich/Schweiz.
 
@@ -396,7 +396,7 @@ ANGEBOT: Gültig 3 Tage (Drutex-Materialpreise schwanken). Nach Ablauf neues Ang
 
 BESTELLMENGE: Keine Mindestbestellmenge — auch 1 einzelnes Fenster möglich. Aber Versandkosten bei wenigen Elementen relativ hoch — Selbstabholung in Brandenburg dann oft sinnvoller. Sammelbestellungen mit Nachbarn NICHT möglich — versandkostenfrei-Grenze gilt pro Auftrag.
 
-TERMIN: Außerhalb Hofverkauf (Fr 10-17) kann man nach Termin FRAGEN — keine Garantie. Anruf 03381/214837 oder WhatsApp.
+TERMIN: Außerhalb Hofverkauf (Fr 10-17) kann man nach Termin FRAGEN — keine Garantie. Anruf 03381/2148373 oder WhatsApp.
 
 NICHT IM ANGEBOT: Keine Farbproben/Muster verschicken (41 Farben digital im Konfigurator ansehen). Keine Ersatzteile (Dichtungen/Beschläge/Griffe) — nur Garantiefälle abwickeln. Keine Sammelbestellungen.
 
@@ -830,9 +830,9 @@ if (!IS_AI_MODE) {
       } else {
         noMatchCount++;
         if (noMatchCount >= 2) {
-          addMsg('Dazu habe ich gerade keine fertige Antwort — am schnellsten hilft dir unser Team direkt weiter:<br><br><a href="https://wa.me/4915211344756" target="_blank" style="display:inline-block;margin-top:4px;padding:7px 14px;background:rgba(118,169,250,0.15);border:1px solid rgba(118,169,250,0.3);border-radius:8px;color:#76a9fa;text-decoration:none;font-weight:700;font-size:12px;">💬 WhatsApp 01521 1344756</a>&nbsp;&nbsp;<a href="tel:+493381214837" style="display:inline-block;margin-top:4px;padding:7px 14px;background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.2);border-radius:8px;color:#76a9fa;text-decoration:none;font-weight:700;font-size:12px;">📞 03381 / 214 83 73</a>', 'bot');
+          addMsg('Dazu habe ich gerade keine fertige Antwort — am schnellsten hilft dir unser Team direkt weiter:<br><br><a href="https://wa.me/4915211344756" target="_blank" style="display:inline-block;margin-top:4px;padding:7px 14px;background:rgba(118,169,250,0.15);border:1px solid rgba(118,169,250,0.3);border-radius:8px;color:#76a9fa;text-decoration:none;font-weight:700;font-size:12px;">💬 WhatsApp 01521 1344756</a>&nbsp;&nbsp;<a href="tel:+4933812148373" style="display:inline-block;margin-top:4px;padding:7px 14px;background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.2);border-radius:8px;color:#76a9fa;text-decoration:none;font-weight:700;font-size:12px;">📞 03381 / 214 83 73</a>', 'bot');
         } else {
-          addMsg('Dazu habe ich leider keine direkte Antwort. Versuch es mit anderen Worten — oder ruf uns an: <a href="tel:+493381214837">03381 / 214 83 73</a>.', 'bot');
+          addMsg('Dazu habe ich leider keine direkte Antwort. Versuch es mit anderen Worten — oder ruf uns an: <a href="tel:+4933812148373">03381 / 214 83 73</a>.', 'bot');
         }
       }
       return;
@@ -853,7 +853,7 @@ if (!IS_AI_MODE) {
     } catch(err) {
       console.warn('[Chatbot]', err);
       setLoading(false);
-      addMsg('Technischer Fehler. Ruf uns bitte an: <a href="tel:+493381214837">03381 / 214 83 73</a>', 'bot');
+      addMsg('Technischer Fehler. Ruf uns bitte an: <a href="tel:+4933812148373">03381 / 214 83 73</a>', 'bot');
     }
   }
 
