@@ -24,13 +24,13 @@ const RULES = [
   // ── Kondensation / Beschlag ──────────────────────────────────────────────────
   {
     keys: ['kondensation','beschlägt','beschlagen','schwitzwasser','tauwasser','wasser am fenster','fenster schwitzen','innen beschlagen','außen beschlagen','feuchtigkeit fenster','schwitzt','wasser zwischen','zwischen den scheiben','zwischen scheiben'],
-    answer: '🌡️ <strong>Beschlag am Fenster — was steckt dahinter:</strong><br><br>• <strong>Innen beschlagen</strong> = zu hohe Luftfeuchtigkeit im Raum. Lösung: 3–4× täglich <strong>stoßlüften</strong> (5 Min. voll öffnen — nicht kippen!).<br>• <strong>Außen beschlagen</strong> (morgens) = sehr gute Dämmung. Das ist ein Qualitätsmerkmal, kein Fehler!<br>• <strong>Zwischen den Scheiben</strong> = defekte Dichtung → Garantiefall. Bitte Foto per <a href="https://wa.me/491717263776" target="_blank">WhatsApp</a> schicken.'
+    answer: '🌡️ <strong>Beschlag am Fenster — was steckt dahinter:</strong><br><br>• <strong>Innen beschlagen</strong> = zu hohe Luftfeuchtigkeit im Raum. Lösung: 3–4× täglich <strong>stoßlüften</strong> (5 Min. voll öffnen — nicht kippen!).<br>• <strong>Außen beschlagen</strong> (morgens) = sehr gute Dämmung. Das ist ein Qualitätsmerkmal, kein Fehler!<br>• <strong>Zwischen den Scheiben</strong> = defekte Dichtung → Garantiefall. Bitte Foto per <a href="https://wa.me/4915211344756" target="_blank">WhatsApp</a> schicken.'
   },
 
   // ── Pflege / Wartung ──────────────────────────────────────────────────────────
   {
     keys: ['pflege','warten','wartung','reinigen','putzen','ölen','schmieren','dichtung','gummidichtung','fenster einstellen','klemmt','schließt nicht','knarrt'],
-    answer: '🧹 <strong>Fenster richtig pflegen:</strong><br><br>• <strong>Rahmen</strong>: mildes Seifenwasser, keine Lösungsmittel oder Scheuermittel<br>• <strong>Beschläge ölen</strong>: 1× jährlich (Maschinenöl oder Fensterpflegeöl)<br>• <strong>Dichtungen</strong>: 1× jährlich mit Glycerin einreiben — bleiben elastisch und dichten besser<br>• <strong>Klemmt / schließt schlecht</strong>: meist durch einfaches Nachstellen des Beschlags zu beheben — Anleitung auf Anfrage per <a href="https://wa.me/491717263776" target="_blank">WhatsApp</a>.'
+    answer: '🧹 <strong>Fenster richtig pflegen:</strong><br><br>• <strong>Rahmen</strong>: mildes Seifenwasser, keine Lösungsmittel oder Scheuermittel<br>• <strong>Beschläge ölen</strong>: 1× jährlich (Maschinenöl oder Fensterpflegeöl)<br>• <strong>Dichtungen</strong>: 1× jährlich mit Glycerin einreiben — bleiben elastisch und dichten besser<br>• <strong>Klemmt / schließt schlecht</strong>: meist durch einfaches Nachstellen des Beschlags zu beheben — Anleitung auf Anfrage per <a href="https://wa.me/4915211344756" target="_blank">WhatsApp</a>.'
   },
 
   // ── Lüften / Schimmel ────────────────────────────────────────────────────────
@@ -60,31 +60,31 @@ const RULES = [
   // ── Haustüren ────────────────────────────────────────────────────────────────
   {
     keys: ['haustür','haustüren','eingangstür','außentür'],
-    answer: 'Ja, wir führen <strong>Drutex-Haustüren</strong> in vielen Modellen — RAL-Farben und Holzdekore verfügbar. Im <a href="haustuer-3d.html">Haustür-3D-Konfigurator</a> kannst du Modell und Farbe direkt visualisieren. Angebot: <a href="https://wa.me/491717263776" target="_blank">WhatsApp 0171 7263776</a>.'
+    answer: 'Ja, wir führen <strong>Drutex-Haustüren</strong> in vielen Modellen — RAL-Farben und Holzdekore verfügbar. Im <a href="haustuer-3d.html">Haustür-3D-Konfigurator</a> kannst du Modell und Farbe direkt visualisieren. Angebot: <a href="https://wa.me/4915211344756" target="_blank">WhatsApp 01521 1344756</a>.'
   },
 
   // ── Haustür Maße / DIN ───────────────────────────────────────────────────────
   {
     keys: ['haustür maße','haustür größe','haustür breite','haustür höhe','türmaße','türgröße','norm haustür','din haustür','standard haustür'],
-    answer: '📐 <strong>Standard-Haustürmaße (nach DIN):</strong><br><br>• Türblatt: <strong>1000 × 2100 mm</strong> (Breite × Höhe) — häufigste Variante<br>• Auch üblich: 900 mm oder 1100 mm Breite<br>• Rohbauöffnung: ca. 60–80 mm größer als Türblatt einrechnen<br><br>Wir fertigen auch Sondermaße — einfach Rohbaumaß per <a href="https://wa.me/491717263776" target="_blank">WhatsApp</a> schicken.'
+    answer: '📐 <strong>Standard-Haustürmaße (nach DIN):</strong><br><br>• Türblatt: <strong>1000 × 2100 mm</strong> (Breite × Höhe) — häufigste Variante<br>• Auch üblich: 900 mm oder 1100 mm Breite<br>• Rohbauöffnung: ca. 60–80 mm größer als Türblatt einrechnen<br><br>Wir fertigen auch Sondermaße — einfach Rohbaumaß per <a href="https://wa.me/4915211344756" target="_blank">WhatsApp</a> schicken.'
   },
 
   // ── Haustür Einbruchschutz ───────────────────────────────────────────────────
   {
     keys: ['haustür einbruch','haustür sicherheit','einbruchsichere haustür','türschloss','mehrfachverriegelung haustür'],
-    answer: 'Drutex-Haustüren haben standardmäßig <strong>3-Punkt-Verriegelung</strong> + Stahlverstärkung. Auf Anfrage auch <strong>RC2-zertifiziert</strong> (für Erdgeschoss empfohlen). Details per <a href="https://wa.me/491717263776" target="_blank">WhatsApp</a>.'
+    answer: 'Drutex-Haustüren haben standardmäßig <strong>3-Punkt-Verriegelung</strong> + Stahlverstärkung. Auf Anfrage auch <strong>RC2-zertifiziert</strong> (für Erdgeschoss empfohlen). Details per <a href="https://wa.me/4915211344756" target="_blank">WhatsApp</a>.'
   },
 
   // ── Preis ───────────────────────────────────────────────────────────────────
   {
     keys: ['preis','kosten','kostet','wie viel','wieviel','teuer','günstig','budget','ab welchem','was kostet ein'],
-    answer: 'Der Preis hängt von Maßen, Profil, Farbe und Verglasung ab — wir erstellen für jede Anfrage ein individuelles Angebot.<br><br>📩 <strong>Schreib uns:</strong> Maße, Fenstertyp und Farbe — wir melden uns mit einem konkreten Preis:<br><br><a href="https://wa.me/491717263776" target="_blank" style="display:inline-block;margin-top:4px;padding:7px 14px;background:rgba(118,169,250,0.15);border:1px solid rgba(118,169,250,0.3);border-radius:8px;color:#76a9fa;text-decoration:none;font-weight:700;font-size:12px;">💬 WhatsApp 0171 7263776</a>'
+    answer: 'Der Preis hängt von Maßen, Profil, Farbe und Verglasung ab — wir erstellen für jede Anfrage ein individuelles Angebot.<br><br>📩 <strong>Schreib uns:</strong> Maße, Fenstertyp und Farbe — wir melden uns mit einem konkreten Preis:<br><br><a href="https://wa.me/4915211344756" target="_blank" style="display:inline-block;margin-top:4px;padding:7px 14px;background:rgba(118,169,250,0.15);border:1px solid rgba(118,169,250,0.3);border-radius:8px;color:#76a9fa;text-decoration:none;font-weight:700;font-size:12px;">💬 WhatsApp 01521 1344756</a>'
   },
 
   // ── Transportschaden ─────────────────────────────────────────────────────────
   {
     keys: ['transportschaden','lieferschaden','beschädigt angekommen','kaputt geliefert','schaden bei lieferung','kaputt angekommen'],
-    answer: '⚠️ <strong>Transportschäden sofort bei Anlieferung melden!</strong><br><br>1. Lieferschein <strong>vor</strong> dem Unterschreiben auf Schäden prüfen<br>2. Schäden auf dem Lieferschein notieren oder Annahme verweigern<br>3. Fotos machen → sofort kontaktieren: <a href="https://wa.me/491717263776" target="_blank">WhatsApp</a> oder <a href="tel:+493381214837">03381 / 214 83 73</a><br><br>Nachträglich gemeldete Transportschäden sind kaum durchsetzbar!'
+    answer: '⚠️ <strong>Transportschäden sofort bei Anlieferung melden!</strong><br><br>1. Lieferschein <strong>vor</strong> dem Unterschreiben auf Schäden prüfen<br>2. Schäden auf dem Lieferschein notieren oder Annahme verweigern<br>3. Fotos machen → sofort kontaktieren: <a href="https://wa.me/4915211344756" target="_blank">WhatsApp</a> oder <a href="tel:+493381214837">03381 / 214 83 73</a><br><br>Nachträglich gemeldete Transportschäden sind kaum durchsetzbar!'
   },
 
   // ── Lieferzeit ──────────────────────────────────────────────────────────────
@@ -102,7 +102,7 @@ const RULES = [
   // ── Ausmessen ───────────────────────────────────────────────────────────────
   {
     keys: ['ausmessen','aufmaß','maße nehmen','maß nehmen','fenster messen','wie messe','richtig messen','richtig ausmessen','lichte weite','rohbaumaß','einbaumaß','maße ermitteln'],
-    answer: '📏 <strong>Fenster richtig ausmessen:</strong><br><br>Nicht das alte Fenster — sondern das <strong>Wandloch (Lichte Weite)</strong> messen:<br>• Breite: oben, mitte, unten → <strong>kleinsten Wert nehmen</strong><br>• Höhe: links, mitte, rechts → <strong>kleinsten Wert nehmen</strong><br>• Montagefuge: ca. <strong>1 cm pro Seite</strong> abziehen<br><br>📌 Beispiel: Wandloch 1182 × 982 mm → Bestellung <strong>1180 × 980 mm</strong><br><br>Unsicher? Foto per <a href="https://wa.me/491717263776" target="_blank">WhatsApp</a> schicken — wir schauen drüber!'
+    answer: '📏 <strong>Fenster richtig ausmessen:</strong><br><br>Nicht das alte Fenster — sondern das <strong>Wandloch (Lichte Weite)</strong> messen:<br>• Breite: oben, mitte, unten → <strong>kleinsten Wert nehmen</strong><br>• Höhe: links, mitte, rechts → <strong>kleinsten Wert nehmen</strong><br>• Montagefuge: ca. <strong>1 cm pro Seite</strong> abziehen<br><br>📌 Beispiel: Wandloch 1182 × 982 mm → Bestellung <strong>1180 × 980 mm</strong><br><br>Unsicher? Foto per <a href="https://wa.me/4915211344756" target="_blank">WhatsApp</a> schicken — wir schauen drüber!'
   },
 
   // ── Fehlmessung ─────────────────────────────────────────────────────────────
@@ -114,7 +114,7 @@ const RULES = [
   // ── Angebot-Gültigkeit ──────────────────────────────────────────────────────
   {
     keys: ['angebot gültig','wie lange gültig','angebot läuft','gültigkeit','angebot abgelaufen','noch gültig','angebot frist','wie lange angebot','angebot zeit','angebotsfrist'],
-    answer: '🕒 <strong>Angebote sind 3 Tage gültig.</strong> Grund: Drutex-Materialpreise schwanken — danach müssen wir neu kalkulieren. Wenn dein Angebot abgelaufen ist, fordere einfach kurz ein neues an: <a href="https://wa.me/491717263776" target="_blank">WhatsApp 0171 7263776</a>.'
+    answer: '🕒 <strong>Angebote sind 3 Tage gültig.</strong> Grund: Drutex-Materialpreise schwanken — danach müssen wir neu kalkulieren. Wenn dein Angebot abgelaufen ist, fordere einfach kurz ein neues an: <a href="https://wa.me/4915211344756" target="_blank">WhatsApp 01521 1344756</a>.'
   },
 
   // ── Rechnung / MwSt ─────────────────────────────────────────────────────────
@@ -132,7 +132,7 @@ const RULES = [
   // ── Beratungstermin / Showroom ──────────────────────────────────────────────
   {
     keys: ['beratungstermin','termin machen','termin','besuch außerhalb','außerhalb freitag','wochentags','beraten lassen','beratung vor ort','vorbeikommen außerhalb','außerhalb öffnungszeit','außerhalb des hofverkauf','andere zeit','außer freitag'],
-    answer: '📅 Außerhalb vom Hofverkauf (Fr 10–17 Uhr) kannst du <strong>nach einem Termin fragen</strong> — Garantie können wir aber nicht geben. Einfach kurz anrufen: <a href="tel:+493381214837">03381 / 214 83 73</a> (Mo–Fr 10–18 Uhr) oder per <a href="https://wa.me/491717263776" target="_blank">WhatsApp</a> nachfragen.'
+    answer: '📅 Außerhalb vom Hofverkauf (Fr 10–17 Uhr) kannst du <strong>nach einem Termin fragen</strong> — Garantie können wir aber nicht geben. Einfach kurz anrufen: <a href="tel:+493381214837">03381 / 214 83 73</a> (Mo–Fr 10–18 Uhr) oder per <a href="https://wa.me/4915211344756" target="_blank">WhatsApp</a> nachfragen.'
   },
 
   // ── Mindestbestellmenge / 1 Fenster ─────────────────────────────────────────
@@ -150,13 +150,13 @@ const RULES = [
   // ── Farbproben / Muster ─────────────────────────────────────────────────────
   {
     keys: ['farbprobe','farbproben','farbmuster','muster zuschicken','probe schicken','schickt ihr muster','farbmuster bestellen','fenstermuster','probestück','probestücke','probefenster','musterstück'],
-    answer: '🎨 <strong>Wir verschicken keine Farbproben.</strong> Alle 41 Farben & Holzdekore kannst du dir aber in der <a href="farben-vorschau.html">Farben-Vorschau</a> und direkt im <a href="konfigurator.html">3D-Konfigurator</a> am Fenster anzeigen lassen. Bei Unsicherheit zu einer bestimmten Farbe: kurz per <a href="https://wa.me/491717263776" target="_blank">WhatsApp</a> fragen — wir helfen weiter.'
+    answer: '🎨 <strong>Wir verschicken keine Farbproben.</strong> Alle 41 Farben & Holzdekore kannst du dir aber in der <a href="farben-vorschau.html">Farben-Vorschau</a> und direkt im <a href="konfigurator.html">3D-Konfigurator</a> am Fenster anzeigen lassen. Bei Unsicherheit zu einer bestimmten Farbe: kurz per <a href="https://wa.me/4915211344756" target="_blank">WhatsApp</a> fragen — wir helfen weiter.'
   },
 
   // ── Ersatzteile ─────────────────────────────────────────────────────────────
   {
     keys: ['ersatzteil','ersatzteile','dichtung kaufen','dichtung bestellen','beschlag ersatz','griff ersatz','ersatzdichtung','ersatzbeschlag','reparaturteile','nachkaufen','teile nachkaufen'],
-    answer: '🔧 <strong>Ersatzteile verkaufen wir nicht</strong> (keine Dichtungen, Beschläge oder Griffe als Einzelteile). Bei Defekten innerhalb der Garantiezeit (10 Jahre Profil / 5 Jahre Beschlag) Foto per <a href="https://wa.me/491717263776" target="_blank">WhatsApp</a> schicken — wir prüfen den Garantiefall mit Drutex.'
+    answer: '🔧 <strong>Ersatzteile verkaufen wir nicht</strong> (keine Dichtungen, Beschläge oder Griffe als Einzelteile). Bei Defekten innerhalb der Garantiezeit (10 Jahre Profil / 5 Jahre Beschlag) Foto per <a href="https://wa.me/4915211344756" target="_blank">WhatsApp</a> schicken — wir prüfen den Garantiefall mit Drutex.'
   },
 
   // ── Sammelbestellung / Nachbarn dazuholen ───────────────────────────────────
@@ -168,19 +168,19 @@ const RULES = [
   // ── PSK vs HST ───────────────────────────────────────────────────────────────
   {
     keys: ['psk unterschied','hst unterschied','unterschied hebeschiebe','unterschied psk','parallel schiebe kipp','welche schiebetür besser','psk oder hst','welches system besser'],
-    answer: '🔄 <strong>PSK vs. Hebe-Schiebetür (HST):</strong><br><br><strong>PSK (Parallel-Schiebe-Kipp)</strong>:<br>✓ Günstiger · Kippfunktion zum Lüften<br>✗ Nicht barrierefrei (hohe Bodenschwelle)<br><br><strong>HST (Hebe-Schiebetür)</strong>:<br>✓ Sehr leichtgängig auch bei großen Elementen · Null-Schwelle möglich<br>✗ Teurer · Keine Kippfunktion<br><br>Empfehlung: HST ab 2.500 mm Breite oder wenn barrierefrei gewünscht. Beratung: <a href="https://wa.me/491717263776" target="_blank">WhatsApp</a>.'
+    answer: '🔄 <strong>PSK vs. Hebe-Schiebetür (HST):</strong><br><br><strong>PSK (Parallel-Schiebe-Kipp)</strong>:<br>✓ Günstiger · Kippfunktion zum Lüften<br>✗ Nicht barrierefrei (hohe Bodenschwelle)<br><br><strong>HST (Hebe-Schiebetür)</strong>:<br>✓ Sehr leichtgängig auch bei großen Elementen · Null-Schwelle möglich<br>✗ Teurer · Keine Kippfunktion<br><br>Empfehlung: HST ab 2.500 mm Breite oder wenn barrierefrei gewünscht. Beratung: <a href="https://wa.me/4915211344756" target="_blank">WhatsApp</a>.'
   },
 
   // ── Schiebetüren ────────────────────────────────────────────────────────────
   {
     keys: ['schiebetür','schiebtür','hebe-schiebe','hebeschiebe','hebe schiebe','psk','panoramatür','terrassenschiebe','große öffnung','sliding door'],
-    answer: 'Wir fertigen <strong>Drutex Hebe-Schiebetüren</strong> bis zu <strong>6.500 mm Breite</strong> — ideal für große Terrassenöffnungen. Profile: IGLO HS, IGLO Energy PSK, IGLO 5 Classic PSK, IGLO Slide. Angebot: <a href="https://wa.me/491717263776" target="_blank">WhatsApp 0171 7263776</a>.'
+    answer: 'Wir fertigen <strong>Drutex Hebe-Schiebetüren</strong> bis zu <strong>6.500 mm Breite</strong> — ideal für große Terrassenöffnungen. Profile: IGLO HS, IGLO Energy PSK, IGLO 5 Classic PSK, IGLO Slide. Angebot: <a href="https://wa.me/4915211344756" target="_blank">WhatsApp 01521 1344756</a>.'
   },
 
   // ── Balkontüren ──────────────────────────────────────────────────────────────
   {
     keys: ['balkontür','balkontüren','terrassentür','terrassentüren','balkon','terrasse','terrassenausgang','balkonausgang'],
-    answer: 'Ja, wir fertigen <strong>Drutex Balkontüren & Terrassentüren</strong> in allen IGLO-Profilen, maßgefertigt. Einzel- oder Doppeltür, mit oder ohne Rollo. Anfragen: <a href="https://wa.me/491717263776" target="_blank">WhatsApp</a> oder direkt im <a href="konfigurator.html">Konfigurator</a>.'
+    answer: 'Ja, wir fertigen <strong>Drutex Balkontüren & Terrassentüren</strong> in allen IGLO-Profilen, maßgefertigt. Einzel- oder Doppeltür, mit oder ohne Rollo. Anfragen: <a href="https://wa.me/4915211344756" target="_blank">WhatsApp</a> oder direkt im <a href="konfigurator.html">Konfigurator</a>.'
   },
 
   // ── Zahlung ─────────────────────────────────────────────────────────────────
@@ -216,7 +216,7 @@ const RULES = [
   // ── Schallschutz ─────────────────────────────────────────────────────────────
   {
     keys: ['schallschutz','schallschutzklasse','ssk','lärm','lärmschutz','straßenlärm','dezibel','db ','geräusche','lärmdämmung','laut','schallgedämmt'],
-    answer: '🔇 <strong>Schallschutzklassen (SSK):</strong><br><br>• <strong>SSK 1</strong> (25 dB) — ruhige Wohnlage<br>• <strong>SSK 2</strong> (30 dB) — normale Wohnstraße, Standard 3-fach-Verglasung<br>• <strong>SSK 3</strong> (35 dB) — Hauptstraßen, städtische Lage (empfohlen)<br>• <strong>SSK 4</strong> (40 dB) — stark befahrene Straßen, Bahnlinien<br><br>Für SSK 3–4 gibt es VSG-Verbundsicherheitsglas und asymmetrische Scheibenstärken. Anfrage per <a href="https://wa.me/491717263776" target="_blank">WhatsApp</a>.'
+    answer: '🔇 <strong>Schallschutzklassen (SSK):</strong><br><br>• <strong>SSK 1</strong> (25 dB) — ruhige Wohnlage<br>• <strong>SSK 2</strong> (30 dB) — normale Wohnstraße, Standard 3-fach-Verglasung<br>• <strong>SSK 3</strong> (35 dB) — Hauptstraßen, städtische Lage (empfohlen)<br>• <strong>SSK 4</strong> (40 dB) — stark befahrene Straßen, Bahnlinien<br><br>Für SSK 3–4 gibt es VSG-Verbundsicherheitsglas und asymmetrische Scheibenstärken. Anfrage per <a href="https://wa.me/4915211344756" target="_blank">WhatsApp</a>.'
   },
 
   // ── IGLO Profile ────────────────────────────────────────────────────────────
@@ -252,7 +252,7 @@ const RULES = [
   // ── Milchglas / Satinato ──────────────────────────────────────────────────
   {
     keys: ['milchglas','satinato','ornamentglas','badezimmer fenster','badezimmer','bad fenster','wc fenster','sichtschutzglas','blickdicht','opak','mattes glas','sichtschutz glas'],
-    answer: 'Ja, <strong>Satinato (Milchglas)</strong> ist als Verglasung verfügbar — für Bad, WC oder Treppe. Im <a href="konfigurator.html">Konfigurator</a> als Glasoption wählbar oder per <a href="https://wa.me/491717263776" target="_blank">WhatsApp</a> anfragen.'
+    answer: 'Ja, <strong>Satinato (Milchglas)</strong> ist als Verglasung verfügbar — für Bad, WC oder Treppe. Im <a href="konfigurator.html">Konfigurator</a> als Glasoption wählbar oder per <a href="https://wa.me/4915211344756" target="_blank">WhatsApp</a> anfragen.'
   },
 
   // ── Standardmaße ─────────────────────────────────────────────────────────────
@@ -312,13 +312,13 @@ const RULES = [
   // ── Sprossen / Sonderform ───────────────────────────────────────────────────
   {
     keys: ['sprosse','sprossen','rund','bogenfenster','sonderform','rundbogen','dreieck','trapez'],
-    answer: 'Sprossen im <a href="konfigurator.html">Konfigurator</a> wählbar. Sonderformen (Rundbogen, Dreieck, Trapez) auf Anfrage möglich — nicht im Standard-Konfigurator, bitte per <a href="https://wa.me/491717263776" target="_blank">WhatsApp</a> anfragen.'
+    answer: 'Sprossen im <a href="konfigurator.html">Konfigurator</a> wählbar. Sonderformen (Rundbogen, Dreieck, Trapez) auf Anfrage möglich — nicht im Standard-Konfigurator, bitte per <a href="https://wa.me/4915211344756" target="_blank">WhatsApp</a> anfragen.'
   },
 
   // ── Rollladen ───────────────────────────────────────────────────────────────
   {
     keys: ['rollladen','rolladen','sonnenschutz','beschattung','jalousie'],
-    answer: 'Ja, wir führen <strong>Drutex-Rollladen</strong> passend zu den Fenstern. Angebot: <a href="tel:+493381214837">03381 / 214 83 73</a> oder <a href="https://wa.me/491717263776" target="_blank">WhatsApp</a>.'
+    answer: 'Ja, wir führen <strong>Drutex-Rollladen</strong> passend zu den Fenstern. Angebot: <a href="tel:+493381214837">03381 / 214 83 73</a> oder <a href="https://wa.me/4915211344756" target="_blank">WhatsApp</a>.'
   },
 
   // ── Konfigurator / Bestellung ───────────────────────────────────────────────
@@ -330,7 +330,7 @@ const RULES = [
   // ── Kontakt ──────────────────────────────────────────────────────────────────
   {
     keys: ['kontakt','telefon','anrufen','whatsapp','mail','email','erreichbar','wann erreichbar','wie erreiche','telefonnummer','erreichen','wie komme ich in kontakt','schreiben'],
-    answer: '📞 <a href="tel:+493381214837"><strong>03381 / 214 83 73</strong></a> — Mo–Fr 10–18 Uhr<br>💬 <a href="https://wa.me/491717263776" target="_blank"><strong>WhatsApp 0171 7263776</strong></a> — nur schreiben (kein Anruf)<br>📧 info@baustoffchrist.de — Antwort i.d.R. innerhalb 24h'
+    answer: '📞 <a href="tel:+493381214837"><strong>03381 / 214 83 73</strong></a> — Mo–Fr 10–18 Uhr<br>💬 <a href="https://wa.me/4915211344756" target="_blank"><strong>WhatsApp 01521 1344756</strong></a> — nur schreiben (kein Anruf)<br>📧 info@baustoffchrist.de — Antwort i.d.R. innerhalb 24h'
   },
 
   // ── Adresse ──────────────────────────────────────────────────────────────────
@@ -348,7 +348,7 @@ const RULES = [
   // ── Danke ────────────────────────────────────────────────────────────────────
   {
     keys: ['danke','vielen dank','super','perfekt','toll','prima','klasse','hilfreich','hat geholfen'],
-    answer: 'Gerne! 😊 Weitere Fragen: <a href="tel:+493381214837">03381 / 214 83 73</a> oder <a href="https://wa.me/491717263776" target="_blank">WhatsApp 0171 7263776</a>. Viel Erfolg!'
+    answer: 'Gerne! 😊 Weitere Fragen: <a href="tel:+493381214837">03381 / 214 83 73</a> oder <a href="https://wa.me/4915211344756" target="_blank">WhatsApp 01521 1344756</a>. Viel Erfolg!'
   },
 ];
 
@@ -382,7 +382,7 @@ const SYSTEM_PROMPT = `Du bist der automatische Assistent von DeineFenster.de (F
 
 REGELN: Niemals konkrete Preise nennen — bei Preisfragen Kunden bitten, Maße/Typ/Farbe per WhatsApp zu schicken. Keine genauen Lieferdaten versprechen. Nur Fenster/Türen-Themen. Bei Unsicherheit: Telefon oder WhatsApp empfehlen. Angaben ohne Gewähr.
 
-FIRMA: Fohrder Landstraße 13, 14772 Brandenburg a.d.H. | Tel: 03381/214837 (Mo-Fr 10-18h) | WhatsApp: 0171 7263776 (nur schreiben, kein Anruf) | Hofverkauf: Freitag 10-17h
+FIRMA: Fohrder Landstraße 13, 14772 Brandenburg a.d.H. | Tel: 03381/214837 (Mo-Fr 10-18h) | WhatsApp: 01521 1344756 (nur schreiben, kein Anruf) | Hofverkauf: Freitag 10-17h
 
 PRODUKTE: Nur Drutex PVC-Fenster (neu+Maß) + Gebrauchtware (Freitag vor Ort, Selbstverladung, keine Reservierung). Haustüren (3D-Konfigurator: haustuer-3d.html), Balkontüren, Hebe-Schiebetüren bis 6500mm, Rollladen. KEIN Einbau, KEIN Ankauf gebraucht, KEIN Dachfenster, NICHT nach Österreich/Schweiz.
 
@@ -734,7 +734,7 @@ if (!IS_AI_MODE) {
 
   const waHeaderBtn = document.getElementById('df-wa-header-btn');
   if (waHeaderBtn) waHeaderBtn.addEventListener('click', () => {
-    window.open('https://wa.me/491717263776?text=' + buildWaContext(), '_blank');
+    window.open('https://wa.me/4915211344756?text=' + buildWaContext(), '_blank');
   });
 
   btn.addEventListener('click', toggleChat);
@@ -782,7 +782,7 @@ if (!IS_AI_MODE) {
     msgs.insertBefore(card, typing);
     scrollBottom();
     card.querySelector('[data-wa]').addEventListener('click', () => {
-      window.open('https://wa.me/491717263776?text=' + buildWaContext(), '_blank');
+      window.open('https://wa.me/4915211344756?text=' + buildWaContext(), '_blank');
     });
     card.querySelector('[data-skip]').addEventListener('click', () => card.remove());
   }
@@ -830,7 +830,7 @@ if (!IS_AI_MODE) {
       } else {
         noMatchCount++;
         if (noMatchCount >= 2) {
-          addMsg('Dazu habe ich gerade keine fertige Antwort — am schnellsten hilft dir unser Team direkt weiter:<br><br><a href="https://wa.me/491717263776" target="_blank" style="display:inline-block;margin-top:4px;padding:7px 14px;background:rgba(118,169,250,0.15);border:1px solid rgba(118,169,250,0.3);border-radius:8px;color:#76a9fa;text-decoration:none;font-weight:700;font-size:12px;">💬 WhatsApp 0171 7263776</a>&nbsp;&nbsp;<a href="tel:+493381214837" style="display:inline-block;margin-top:4px;padding:7px 14px;background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.2);border-radius:8px;color:#76a9fa;text-decoration:none;font-weight:700;font-size:12px;">📞 03381 / 214 83 73</a>', 'bot');
+          addMsg('Dazu habe ich gerade keine fertige Antwort — am schnellsten hilft dir unser Team direkt weiter:<br><br><a href="https://wa.me/4915211344756" target="_blank" style="display:inline-block;margin-top:4px;padding:7px 14px;background:rgba(118,169,250,0.15);border:1px solid rgba(118,169,250,0.3);border-radius:8px;color:#76a9fa;text-decoration:none;font-weight:700;font-size:12px;">💬 WhatsApp 01521 1344756</a>&nbsp;&nbsp;<a href="tel:+493381214837" style="display:inline-block;margin-top:4px;padding:7px 14px;background:rgba(118,169,250,0.08);border:1px solid rgba(118,169,250,0.2);border-radius:8px;color:#76a9fa;text-decoration:none;font-weight:700;font-size:12px;">📞 03381 / 214 83 73</a>', 'bot');
         } else {
           addMsg('Dazu habe ich leider keine direkte Antwort. Versuch es mit anderen Worten — oder ruf uns an: <a href="tel:+493381214837">03381 / 214 83 73</a>.', 'bot');
         }
