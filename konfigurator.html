@@ -9521,7 +9521,8 @@ try{
   else if(mEdit && cart[+mEdit[1]]){ itemEdit(+mEdit[1]); }
   else if(/[?&]checkout=1(?:&|$)/.test(qs) && cart.length){ openCart(); showAnfrage(); }
   else if(/[?&]cart=1(?:&|$)/.test(qs) && cart.length){ openCart(); }
-  else { // ?prod=<id> springt direkt ins Produkt — spart den Zwischenschritt ueber die Auswahl
+  else { // ?prod=<id> springt direkt ins Produkt. Die Website verlinkt das nicht mehr
+         // (jeder Weg beginnt bei der Produktauswahl) — bleibt fuer alte Links/Lesezeichen.
     const mProd=qs.match(/[?&]prod=([a-z]+)/);
     if(mProd && PRODUCTS.some(x=>x.id===mProd[1])) startProduct(mProd[1]);
   }
