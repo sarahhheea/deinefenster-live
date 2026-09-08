@@ -2589,7 +2589,11 @@ function oeffneDeepLinkProdukt() {
 }
 
 /* ─── Anfrage-Modal: Produkt-spezifische Anfrage via Web3Forms ─── */
-const SHOP_WEB3FORMS_KEY = '440a94ff-9f42-46af-bf3d-47013dbd8f5f';
+// Eigener Cloudflare-Worker statt Fremddienst: der Worker loest den Preis
+// selbst aus dem Katalog auf und verschickt beide Mails im Haus-Layout.
+// Cloudflare und Resend stehen in der Datenschutzerklaerung - der frueher
+// hier genutzte Fremddienst stand dort nicht (Art. 13 DSGVO).
+const SHOP_ANFRAGE_URL = 'https://deinefenster-email.sarahchrist.workers.dev/shop-anfrage';
 
 /* Lagerware mit echtem Bestand laesst sich reservieren — Einzelstuecke nicht,
  * die sind nach einem Verkauf weg. Der Unterschied steht auch so im Feed
@@ -2598,44 +2602,70 @@ function istReservierbar(p) {
   return Number(p.lagerbestand) > 1;
 }
 
+// Sonderpreis schlaegt den regulaeren Preis - gleiche Regel wie im Worker.
+function preisVon(p) {
+  const sonder = Number(p && p.sonderpreis_eur);
+  if (Number.isFinite(sonder) && sonder > 0) return sonder;
+  return Number(p && p.preis_eur);
+}
+
 function oeffneAnfrageModal(p, modus) {
   const reservierung = modus === 'reservierung';
+
+  // Es geht NUR die Artikel-Nummer mit. Titel, Masse, Standnummer und Preis
+  // liest der Server aus dem Katalog - vorher standen sie im beschreibbaren
+  // Nachrichtenfeld und liessen sich vor dem Absenden aendern (08.09.2026:
+  // Reservierung kam mit 120 EUR herein, im Inserat standen 160 EUR).
   document.getElementById('anfrageProduktId').value = p.id;
-  document.getElementById('anfrageProduktTitel').value = p.titel;
 
-  // Nachricht vorausfüllen mit Produkt-Daten
-  const kopf = reservierung
-    ? [`Hallo,`, ``, `ich möchte folgenden Artikel zur Abholung reservieren:`]
-    : [`Hallo,`, ``, `ich interessiere mich für folgendes Produkt aus Ihrem Lager-Shop:`];
+  const bild = document.getElementById('anfrageProduktBild');
+  const bilder = Array.isArray(p.bilder) ? p.bilder : [];
+  if (bild) {
+    if (bilder.length) { bild.src = bilder[0]; bild.alt = p.titel || ''; bild.style.display = ''; }
+    else { bild.removeAttribute('src'); bild.style.display = 'none'; }
+  }
+  document.getElementById('anfrageProduktName').textContent  = p.titel || '';
+  document.getElementById('anfrageProduktMasse').textContent = `${p.breite_mm} × ${p.hoehe_mm} mm`;
+  const standEl = document.getElementById('anfrageProduktStand');
+  standEl.textContent = p.standnummer ? 'Standnummer ' + p.standnummer : '';
+  standEl.style.display = p.standnummer ? '' : 'none';
+  document.getElementById('anfrageProduktPreis').textContent = formatPreis(preisVon(p));
 
-  const fuss = reservierung
-    ? [`Gewünschte Menge: 1`,
-       `Wunschtermin zur Abholung:`,
-       ``,
-       `Bitte bestätigen Sie mir die Reservierung. Bezahlt wird vor Ort.`,
-       ``,
-       `Vielen Dank!`]
-    : [`Ist dieses Produkt noch verfügbar? Bitte um Rückmeldung.`,
-       ``,
-       `Vielen Dank!`];
+  // Menge zuruecksetzen; Hinweis, wenn mehr angefragt wird als im Inserat steht.
+  const mengeEl = document.getElementById('anfrageMenge');
+  const hinweisEl = document.getElementById('anfrageMengeHinweis');
+  if (mengeEl) {
+    mengeEl.value = 1;
+    const bestand = Number(p.lagerbestand) || 1;
+    const pruefen = () => {
+      const gewuenscht = Number(mengeEl.value) || 1;
+      if (gewuenscht > bestand) {
+        hinweisEl.textContent = `Im Inserat steht ${bestand} Stück — wir prüfen, ob mehr da ist, und melden uns.`;
+        hinweisEl.classList.remove('hidden');
+      } else {
+        hinweisEl.classList.add('hidden');
+      }
+    };
+    mengeEl.oninput = pruefen;
+    pruefen();
+  }
 
-  const lines = kopf.concat([
-    ``,
-    `Produkt: ${p.titel}`,
-    `Artikel-Nr.: ${p.id}`,
-    `Maße: ${p.breite_mm} × ${p.hoehe_mm} mm`,
-    `Zustand: ${_asArr(p.zustand).includes('gebraucht') ? 'Gebraucht' : 'Neu'}`,
-    `Preis: ${formatPreis(p.preis_eur)}`,
-    p.standnummer ? `Standnummer: ${p.standnummer}` : '',
-    ``
-  ], fuss).filter(Boolean).join('\n');
-  document.getElementById('anfrageNachricht').value = lines;
-  // Status zurücksetzen
+  // Nachrichtenfeld bleibt leer: hier gehoert hin, was der Kunde sagen will,
+  // nicht was wir ihm vorschreiben.
+  const nachrichtEl = document.getElementById('anfrageNachricht');
+  if (nachrichtEl) nachrichtEl.value = '';
+
+  const terminWrap = document.getElementById('anfrageTerminWrap');
+  if (terminWrap) terminWrap.classList.toggle('hidden', !reservierung);
+  const terminEl = document.getElementById('anfrageTermin');
+  if (terminEl) terminEl.value = '';
+
   const st = document.getElementById('anfrageStatus');
   st.classList.add('hidden');
   st.textContent = '';
   const btn = document.getElementById('anfrageSubmitBtn');
   btn.disabled = false;
+  btn.dataset.modus = reservierung ? 'reservierung' : 'anfrage';
   btn.innerHTML = reservierung
     ? '<span class="material-symbols-outlined" style="font-size:18px">inventory_2</span> Reservierung anfragen'
     : '<span class="material-symbols-outlined" style="font-size:18px">send</span> Anfrage senden';
@@ -2673,54 +2703,61 @@ async function sendeAnfrage(ev) {
   const form = ev.target;
   const status = document.getElementById('anfrageStatus');
   const btn = document.getElementById('anfrageSubmitBtn');
+  const reservierung = btn.dataset.modus === 'reservierung';
+
+  const zeigeStatus = (text, art) => {
+    const farben = {
+      fehler:  'background:rgba(239,68,68,0.10);border:1px solid rgba(239,68,68,0.35);color:#b91c1c;',
+      erfolg:  'background:rgba(34,197,94,0.10);border:1px solid rgba(34,197,94,0.35);color:#15803d;',
+    };
+    status.textContent = text;
+    status.style.cssText = 'padding:10px 14px;border-radius:8px;font-size:13px;line-height:1.5;' + (farben[art] || farben.fehler);
+    status.classList.remove('hidden');
+  };
 
   const name = form.name.value.trim();
   const email = form.email.value.trim();
   const dse = form.dse.checked;
   if (!name || !email || !dse) {
-    status.textContent = 'Bitte Name, E-Mail und Datenschutz-Zustimmung ausfüllen.';
-    status.style.cssText = 'padding:10px 14px;border-radius:8px;font-size:13px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.35);color:#fca5a5;';
-    status.classList.remove('hidden');
+    zeigeStatus('Bitte Name, E-Mail und Datenschutz-Zustimmung ausfüllen.', 'fehler');
     return;
   }
 
   btn.disabled = true;
   btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px">hourglass_empty</span> Wird gesendet …';
 
+  // Bewusst OHNE Preis, Titel und Maße: die holt der Server aus dem Katalog.
+  // Was hier steht, kann der Kunde ändern - was der Server nachschlägt, nicht.
   const payload = {
-    access_key: SHOP_WEB3FORMS_KEY,
-    subject: `Lager-Anfrage · ${form.produkt_titel.value}`,
-    from_name: 'DeineFenster.de Shop-Anfrage',
-    botcheck: '',
-    Name: name,
-    Email: email,
-    Telefon: form.telefon.value.trim() || '—',
-    Produkt: form.produkt_titel.value,
-    'Artikel-Nr': form.produkt_id.value,
-    Nachricht: form.nachricht.value,
-    'Datenschutz-Zustimmung': dse ? 'Ja, akzeptiert' : 'Nein'
+    artikel_id:   form.produkt_id.value,
+    modus:        reservierung ? 'reservierung' : 'anfrage',
+    name:         name,
+    email:        email,
+    telefon:      form.telefon.value.trim(),
+    menge:        form.menge ? form.menge.value : 1,
+    nachricht:    form.nachricht.value.trim(),
+    wunschtermin: form.wunschtermin ? form.wunschtermin.value.trim() : '',
+    dse:          true,
   };
 
   try {
-    const res = await fetch('https://api.web3forms.com/submit', {
+    const res = await fetch(SHOP_ANFRAGE_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify(payload)
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
     });
-    const data = await res.json();
-    if (res.ok && data.success) {
-      status.textContent = 'Danke! Ihre Anfrage ist bei uns angekommen — wir melden uns so schnell wie möglich zurück.';
-      status.style.cssText = 'padding:10px 14px;border-radius:8px;font-size:13px;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.35);color:#86efac;';
-      status.classList.remove('hidden');
-      btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px">check</span> Gesendet';
-      setTimeout(schliesseAnfrageModal, 2500);
-    } else {
-      throw new Error(data.message || 'Unbekannter Fehler');
-    }
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.ok) throw new Error(data.error || 'Senden fehlgeschlagen.');
+
+    const nr = data.vorgang ? ' Ihre Vorgangsnummer: ' + data.vorgang + '.' : '';
+    const bis = data.frist ? ' Wir legen die Ware bis zum ' + data.frist + ' für Sie zurück, sobald wir bestätigt haben.' : '';
+    zeigeStatus('Danke! ' + (reservierung ? 'Ihre Reservierungsanfrage' : 'Ihre Anfrage') +
+      ' ist bei uns angekommen.' + nr + bis + ' Eine Bestätigung liegt in Ihrem Postfach.', 'erfolg');
+    btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px">check</span> Gesendet';
+    setTimeout(schliesseAnfrageModal, 6000);
   } catch (err) {
-    status.textContent = 'Senden fehlgeschlagen. Bitte direkt per WhatsApp (01521 1344756) oder E-Mail (info@baustoffchrist.de) melden.';
-    status.style.cssText = 'padding:10px 14px;border-radius:8px;font-size:13px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.35);color:#fca5a5;';
-    status.classList.remove('hidden');
+    zeigeStatus((err && err.message ? err.message + ' ' : '') +
+      'Bitte direkt per WhatsApp (01521 1344756) oder E-Mail (info@baustoffchrist.de) melden.', 'fehler');
     btn.disabled = false;
     btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px">send</span> Erneut versuchen';
   }
