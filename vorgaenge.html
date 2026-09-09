@@ -79,6 +79,16 @@ body{
 .marke.verfallen,.marke.abgesagt{background:#eef0f3;color:var(--text-blass)}
 .marke.erledigt{background:var(--gruen-hell);color:var(--gruen)}
 
+.ware{display:flex;gap:12px;align-items:flex-start}
+.ware img{
+  width:74px;height:74px;flex:none;object-fit:cover;border-radius:9px;
+  border:1px solid var(--linie);background:var(--grund);
+}
+.ware .kein-bild{
+  width:74px;height:74px;flex:none;border-radius:9px;border:1px solid var(--linie);
+  background:var(--grund);display:grid;place-items:center;color:var(--text-blass);font-size:11px;
+}
+.ware .text{min-width:0;flex:1}
 .titel{font-size:15px;font-weight:700;line-height:1.35;margin-bottom:3px}
 .unter{font-size:13.5px;color:var(--text-leise)}
 .stand{font-family:ui-monospace,Menlo,monospace;font-weight:700;color:var(--text);word-spacing:-.2em}
@@ -100,6 +110,21 @@ body{
 .uhr .warnung{color:var(--gelb);font-weight:700}
 .uhr .alarm{color:var(--rot);font-weight:700}
 .aktionen{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.bearbeiten{
+  margin-top:11px;padding-top:11px;border-top:1px dashed var(--linie);
+  display:none;
+}
+.bearbeiten.auf{display:block}
+.feldzeile{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.feldzeile label{font-size:12.5px;color:var(--text-leise);font-weight:700;min-width:78px}
+.bearbeiten textarea{
+  width:100%;padding:8px 10px;font-size:13px;border:1.5px solid var(--linie);
+  border-radius:8px;font-family:inherit;resize:vertical;min-height:52px;color:var(--text);
+}
+.notizAnzeige{
+  margin-top:9px;padding:8px 11px;background:var(--gelb-hell);border-radius:8px;
+  font-size:13px;color:var(--gelb);white-space:pre-wrap;
+}
 .aktionen input[type="date"]{
   padding:7px 10px;font-size:13px;border:1.5px solid var(--linie);
   border-radius:8px;font-family:inherit;color:var(--text);
@@ -189,11 +214,37 @@ function karteHtml(v){
   const abholZeile = v.abholtag
     ? `<span>Abholung <b>${datumKurz(v.abholtag)}</b>${v.abholtag===HEUTE?' <span class="warnung">heute</span>':''}</span>` : '';
 
-  const offenAktionen = (st!=='erledigt' && st!=='abgesagt') ? `
+  const bild = v.bild_url
+    ? `<img src="${esc(v.bild_url)}" alt="" loading="lazy" decoding="async"/>`
+    : `<div class="kein-bild">kein Bild</div>`;
+
+  const laeuft = (st!=='erledigt' && st!=='abgesagt');
+
+  // Bearbeiten-Bereich: Abholtag, Frist verlaengern, interne Notiz.
+  // Eingeklappt, damit die Liste am Handy ueberschaubar bleibt.
+  const bearbeiten = laeuft ? `
+    <div class="bearbeiten" id="bearb-${esc(v.nr)}">
+      <div class="feldzeile">
+        <label for="ab-${esc(v.nr)}">Abholtag</label>
+        <input type="date" id="ab-${esc(v.nr)}" value="${esc(v.abholtag||'')}" class="abholFeld" data-nr="${esc(v.nr)}"/>
+      </div>
+      <div class="feldzeile">
+        <label for="fr-${esc(v.nr)}">Frist bis</label>
+        <input type="date" id="fr-${esc(v.nr)}" value="${esc(v.frist||'')}" class="fristFeld" data-nr="${esc(v.nr)}"/>
+        <button class="knopf klein stumm" data-tun="plus7" data-nr="${esc(v.nr)}">+7 Tage</button>
+      </div>
+      <div class="feldzeile" style="align-items:flex-start">
+        <label for="no-${esc(v.nr)}">Notiz</label>
+        <textarea id="no-${esc(v.nr)}" class="notizFeld" data-nr="${esc(v.nr)}"
+          placeholder="Nur für euch — z.B. „ruft Donnerstag nochmal an&quot;">${esc(v.notiz||'')}</textarea>
+      </div>
+      <button class="knopf klein" data-tun="speichern" data-nr="${esc(v.nr)}">Änderungen speichern</button>
+    </div>` : '';
+
+  const aktionen = laeuft ? `
     <div class="aktionen">
-      <input type="date" value="${esc(v.abholtag||'')}" data-nr="${esc(v.nr)}" class="abholFeld" aria-label="Abholtag"/>
-      <button class="knopf klein" data-tun="abholtag" data-nr="${esc(v.nr)}">Abholtag speichern</button>
-      <button class="knopf klein stumm" data-tun="erledigt" data-nr="${esc(v.nr)}">Abgeholt</button>
+      <button class="knopf klein stumm" data-tun="aufklappen" data-nr="${esc(v.nr)}">Bearbeiten</button>
+      <button class="knopf klein" data-tun="erledigt" data-nr="${esc(v.nr)}">Abgeholt</button>
       <button class="knopf klein gefahr" data-tun="abgesagt" data-nr="${esc(v.nr)}">Absagen</button>
     </div>` : `
     <div class="aktionen">
@@ -205,13 +256,19 @@ function karteHtml(v){
       <span class="nr">${esc(v.nr)}</span>
       <span class="marke ${esc(st)}">${esc(STATUS_TEXT[st]||st)}</span>
     </div>
-    <div class="titel">${esc(v.titel||'—')}</div>
-    <div class="unter">
-      ${v.standnummer?`Standnummer <span class="stand">${esc(v.standnummer)}</span> · `:''}
-      ${v.breite_mm||'?'} × ${v.hoehe_mm||'?'} mm
-    </div>
-    <div class="unter" style="margin-top:4px">
-      <b style="color:var(--text)">${v.menge}×</b> ${einzel} · Gesamt <b style="color:var(--text)">${gesamt}</b>
+
+    <div class="ware">
+      ${bild}
+      <div class="text">
+        <div class="titel">${esc(v.titel||'—')}</div>
+        <div class="unter">
+          ${v.standnummer?`Standnummer <span class="stand">${esc(v.standnummer)}</span><br>`:''}
+          ${v.breite_mm||'?'} × ${v.hoehe_mm||'?'} mm
+        </div>
+        <div class="unter" style="margin-top:4px">
+          <b style="color:var(--text)">${v.menge}×</b> ${einzel} · Gesamt <b style="color:var(--text)">${gesamt}</b>
+        </div>
+      </div>
     </div>
 
     <div class="kunde">
@@ -221,12 +278,14 @@ function karteHtml(v){
       ${v.wunschtermin?`<br>Wunsch: ${esc(v.wunschtermin)}`:''}
     </div>
     ${v.nachricht?`<div class="nachricht">${esc(v.nachricht)}</div>`:''}
+    ${v.notiz?`<div class="notizAnzeige">Notiz: ${esc(v.notiz)}</div>`:''}
 
     <div class="uhr">
       <span>Angefragt <b>${datumKurz(v.angelegt_tag)}</b> · ${tageText(v.tage_offen,'offen')}</span>
       ${fristZeile}${abholZeile}
     </div>
-    ${offenAktionen}
+    ${aktionen}
+    ${bearbeiten}
   </div>`;
 }
 
@@ -317,15 +376,47 @@ document.addEventListener('DOMContentLoaded', ()=>{
     const b = e.target.closest('button[data-tun]');
     if (!b) return;
     const nr = b.dataset.nr, tun = b.dataset.tun;
-    if (tun==='abholtag'){
-      const feld = document.querySelector(`.abholFeld[data-nr="${CSS.escape(nr)}"]`);
-      const tag = feld ? feld.value : '';
-      aendern(nr, { abholtag: tag, status: tag ? 'abholtag' : 'reserviert' });
-    } else if (tun==='abgesagt'){
-      if (confirm('Vorgang absagen? Die Ware wird im Shop wieder frei.')) aendern(nr, { status:'abgesagt' });
-    } else {
-      aendern(nr, { status: tun });
+    const feld = k => document.querySelector(`.${k}[data-nr="${CSS.escape(nr)}"]`);
+
+    if (tun==='aufklappen'){
+      const box = document.getElementById('bearb-'+nr);
+      if (box){
+        const auf = box.classList.toggle('auf');
+        b.textContent = auf ? 'Zuklappen' : 'Bearbeiten';
+      }
+      return;
     }
+
+    if (tun==='plus7'){
+      // Rechnet ab heute, nicht ab der alten Frist - sonst verlaengert man
+      // eine laengst abgelaufene Reservierung in die Vergangenheit hinein.
+      const f = feld('fristFeld');
+      if (f){
+        const basis = new Date(HEUTE + 'T00:00:00Z');
+        basis.setUTCDate(basis.getUTCDate() + 7);
+        f.value = basis.toISOString().slice(0,10);
+      }
+      return;
+    }
+
+    if (tun==='speichern'){
+      const abholtag = feld('abholFeld')?.value || '';
+      const frist    = feld('fristFeld')?.value || '';
+      const notiz    = feld('notizFeld')?.value || '';
+      const daten = { abholtag, frist, notiz };
+      // Ein gesetzter Abholtag hebt den Status - aber nur, solange der
+      // Vorgang laeuft.
+      if (abholtag) daten.status = 'abholtag';
+      aendern(nr, daten);
+      return;
+    }
+
+    if (tun==='abgesagt'){
+      if (confirm('Vorgang absagen? Die Ware wird im Shop wieder frei.')) aendern(nr, { status:'abgesagt' });
+      return;
+    }
+
+    aendern(nr, { status: tun });
   });
 });
 </script>
