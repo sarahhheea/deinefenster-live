@@ -1508,6 +1508,31 @@ function rendere() {
   gridEl.querySelectorAll('[data-action="teilen"]').forEach(btn => {
     btn.addEventListener('click', e => { e.stopPropagation(); schliesseKebabMenus(); const p = STATE.produkte.find(x => x.id === btn.dataset.id); if (p) teileProdukt(p); });
   });
+  // Reservierungs-Link fuer WhatsApp: Kersten kopiert ihn im Chat, der Kunde
+  // fuellt auf der Seite aus. Nur fuer eingeloggte Mitarbeiter sichtbar.
+  gridEl.querySelectorAll('[data-action="reslink"]').forEach(btn => {
+    btn.addEventListener('click', async e => {
+      e.stopPropagation();
+      const p = STATE.produkte.find(x => x.id === btn.dataset.id);
+      if (!p) return;
+      const link = 'https://deinefenster.de/r.html?nr='
+                 + encodeURIComponent(p.standnummer || p.id);
+      const text = `Alles klar, ich lege das für Sie zurück.\n`
+                 + `Bitte hier kurz bestätigen, dauert 30 Sekunden:\n${link}`;
+      try {
+        await navigator.clipboard.writeText(text);
+        btn.querySelector('span:last-child').textContent = 'Kopiert!';
+        setTimeout(() => { const t = btn.querySelector('span:last-child');
+          if (t) t.textContent = 'Reservierungs-Link kopieren'; }, 2000);
+      } catch (err) {
+        // Zwischenablage kann der Browser verweigern (z.B. ohne HTTPS) -
+        // dann den Link zeigen, statt still zu scheitern.
+        prompt('Link zum Kopieren:', text);
+      }
+      schliesseKebabMenus();
+    });
+  });
+
   gridEl.querySelectorAll('[data-action="kundendruck"]').forEach(btn => {
     btn.addEventListener('click', e => { e.stopPropagation(); schliesseKebabMenus(); const p = STATE.produkte.find(x => x.id === btn.dataset.id); if (p) druckeProduktblatt(p); });
   });
@@ -1668,6 +1693,10 @@ function karteHtml(p) {
               <button type="button" role="menuitem" data-action="teilen" data-id="${p.id}">
                 <span class="material-symbols-outlined">share</span><span>Teilen</span>
               </button>
+              ${STATE.loggedIn ? `
+              <button type="button" role="menuitem" data-action="reslink" data-id="${p.id}">
+                <span class="material-symbols-outlined">link</span><span>Reservierungs-Link kopieren</span>
+              </button>` : ''}
               <button type="button" role="menuitem" data-action="kundendruck" data-id="${p.id}">
                 <span class="material-symbols-outlined">print</span><span>Drucken</span>
               </button>
