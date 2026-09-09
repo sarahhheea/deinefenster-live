@@ -9,7 +9,7 @@
 <title>Fenster online konfigurieren — Maßfenster & Türen | DeineFenster.de</title>
 <meta name="theme-color" content="#225eaa">
 <meta name="description" content="Kunststofffenster, Balkon-, Schiebe- und Haustüren nach Maß online konfigurieren und unverbindliches Angebot anfordern. Drutex-Qualität vom Familienbetrieb in Brandenburg an der Havel.">
-<link rel="canonical" href="https://www.deinefenster.de/konfigurator.html">
+<link rel="canonical" href="https://deinefenster.de/konfigurator.html">
 <!-- DSGVO: Fonts über bunny.net (EU, kein Google-Fonts-Abmahnrisiko LG München/OLG Stuttgart) -->
 <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
 <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:500,600,700,800|manrope:400,500,600,700,800|fraunces:400i,500i&display=swap" rel="stylesheet">
@@ -265,7 +265,10 @@ body.wiz-active .dfnav-tel:hover{background:rgba(34,94,170,.10)}
 .pk-head2 p{color:var(--ink-soft);margin-top:14px;font-size:17px}
 .pk-sub{text-align:center;font-size:11px;font-weight:700;letter-spacing:.24em;color:var(--ink-soft);text-transform:uppercase;margin-bottom:22px}
 .pk-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:22px}
-.pcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px 20px 22px;cursor:pointer;transition:.28s var(--ease);text-align:center;display:flex;flex-direction:column}
+.pcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px 20px 22px;cursor:pointer;transition:.28s var(--ease);text-align:center;display:flex;flex-direction:column;-webkit-appearance:none;appearance:none;font:inherit;color:inherit;width:100%}
+.pcard:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.sprunglink{position:absolute;left:-9999px;top:0;z-index:100001;background:var(--ink);color:#fff;padding:12px 18px;border-radius:0 0 10px 0;font-weight:700;text-decoration:none}
+.sprunglink:focus{left:0}
 .pcard:hover{border-color:var(--ink);transform:translateY(-4px)}
 .pcard .pimg{position:relative;height:236px;display:grid;place-items:center;background:#fff;border-radius:var(--r);margin-bottom:16px;overflow:hidden}
 .pcard .pimg img{max-height:96%;max-width:92%;width:auto;height:auto;object-fit:contain}
@@ -1675,6 +1678,7 @@ body.wiz-active .stage-card #stage svg{width:100%;height:auto;max-height:min(46v
 <link rel="stylesheet" href="/css/hofverkauf-hinweis.css">
 </head>
 <body>
+<a class="sprunglink" href="#inhalt">Zum Inhalt springen</a>
 
 <div class="dfnav-util dfnav--flow"><div class="dfnav-wrap">
   <span style="color:var(--dfn-soft)"><span style="white-space:nowrap"><a href="https://www.google.com/maps?cid=9401727711250777966" target="_blank" rel="noopener" title="Alle Bewertungen bei Google ansehen"><span style="color:oklch(0.8 0.15 85)">&#9733;</span> 4,7 &middot; 93 Google-Bewertungen</a><a href="/impressum.html#bewertungen" title="Wie diese Bewertungen zustande kommen" aria-label="Wie diese Bewertungen zustande kommen" style="margin-left:3px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="vertical-align:-1px"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 11v5.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="7.4" r="1.15" fill="currentColor"/></svg></a></span> &middot; <a class="df-zeiten" href="/kontakt.html#zeiten" title="&Ouml;ffnungszeiten, Adresse und Anfahrt"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="vertical-align:-2px;margin-right:4px"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span class="df-zeiten-txt">Hofverkauf Fr 10&ndash;17 Uhr</span></a></span>
@@ -1885,7 +1889,7 @@ body.wiz-active .stage-card #stage svg{width:100%;height:auto;max-height:min(46v
     <div class="cd-foot" id="cdFoot"></div>
   </aside>
 </div>
-<main class="wrap">
+<main class="wrap" id="inhalt" tabindex="-1">
   <section id="pickerView"></section>
   <div class="head" id="head"><h2 id="hTitle"></h2><p id="hSub"></p></div>
   <div class="grid" id="wizGrid">
@@ -6009,12 +6013,12 @@ function abLabel(p){
   return (v==null)?p.fallback:('ab '+Math.round(v).toLocaleString('de-DE')+' €');
 }
 function renderPicker(){
-  const cards=PRODUCTS.map(p=>`<div class="pcard" onclick="startProduct('${p.id}')">
+  const cards=PRODUCTS.map(p=>`<button type="button" class="pcard" onclick="startProduct('${p.id}')">
     <div class="pimg"><img src="${p.img}" alt="${p.t} (KI-generiertes Symbolbild)"><span class="ai-badge">KI-Symbolbild</span></div>
     <div class="pinfo">
       <div class="pt">${p.t}</div>${p.sub?`<div class="psub">${p.sub}</div>`:''}<div class="pp">${abLabel(p)} <span class="pp-mass">· nach Maß</span><span class="pp-zus">inkl. MwSt · zzgl. Lieferung</span></div>
       <div class="pgo">Konfigurieren <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div>
-    </div></div>`).join('');
+    </div></button>`).join('');
   const truck=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5v8h1"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>`;
   const fork=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4v11h8V9h5l4 4v2h-2"/><circle cx="6" cy="18" r="2"/><path d="M14 4h4"/></svg>`;
   const door=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M12 3v18M9 12h.01"/></svg>`;
@@ -7391,6 +7395,11 @@ function _mailShell(inner,vorschau){
 }
 
 function _checkoutPruefen(f){
+  var box0=document.getElementById('coErr');
+  if(!cart.length){
+    if(box0){ box0.textContent='In Ihrer Zusammenstellung ist noch kein Produkt. Bitte konfigurieren Sie zuerst eines \u2014 dann k\u00f6nnen wir Ihnen ein Angebot rechnen.'; box0.classList.add('on'); box0.scrollIntoView({block:'center',behavior:'smooth'}); }
+    return false;
+  }
   var fehlt=[];
   var feld=function(n,titel,test){
     var el=f.querySelector('[name="'+n+'"]'); if(!el) return;
