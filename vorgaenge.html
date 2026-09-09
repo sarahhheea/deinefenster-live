@@ -121,6 +121,13 @@ body{
   width:100%;padding:8px 10px;font-size:13px;border:1.5px solid var(--linie);
   border-radius:8px;font-family:inherit;resize:vertical;min-height:52px;color:var(--text);
 }
+.nachweis{
+  margin-top:10px;padding:9px 12px;border-radius:9px;font-size:13px;
+  display:flex;align-items:flex-start;gap:8px;line-height:1.45;
+}
+.nachweis.ja{background:var(--gruen-hell);color:var(--gruen)}
+.nachweis.warte{background:var(--grund);color:var(--leise)}
+.nachweis b{font-weight:800}
 .notizAnzeige{
   margin-top:9px;padding:8px 11px;background:var(--gelb-hell);border-radius:8px;
   font-size:13px;color:var(--gelb);white-space:pre-wrap;
@@ -194,6 +201,32 @@ function tageText(n, art){
   if(n<0)  return `${Math.abs(n)} ${Math.abs(n)===1?'Tag':'Tage'} überfällig`;
   if(n===0) return 'läuft heute ab';
   return n===1 ? 'noch 1 Tag' : `noch ${n} Tage`;
+}
+
+// Der Beleg, auf den es im Streitfall ankommt: der Kunde hat per Klick aus
+// unserer E-Mail bestaetigt, was zugesagt wurde. Nur sichtbar, sobald wir
+// zugesagt haben - vorher gibt es nichts zu bestaetigen.
+function zeitpunktText(iso){
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d)) return '';
+  const zwei = n => String(n).padStart(2,'0');
+  return `${zwei(d.getDate())}.${zwei(d.getMonth()+1)}.${String(d.getFullYear()).slice(2)}`
+       + ` um ${zwei(d.getHours())}:${zwei(d.getMinutes())} Uhr`;
+}
+
+function nachweisHtml(v){
+  if (!v.zugesagt_am) return '';
+  if (v.bestaetigt_am){
+    return `<div class="nachweis ja">
+      <span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">verified</span>
+      <span>Vom Kunden <b>bestätigt</b> am ${zeitpunktText(v.bestaetigt_am)} — per Klick aus unserer E-Mail.</span>
+    </div>`;
+  }
+  return `<div class="nachweis warte">
+    <span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">schedule</span>
+    <span>Bestätigung angefragt am ${zeitpunktText(v.zugesagt_am)} — der Kunde hat noch nicht geklickt.</span>
+  </div>`;
 }
 
 function karteHtml(v){
@@ -291,6 +324,8 @@ function karteHtml(v){
     ${v.nachricht?`<div class="nachricht">${esc(v.nachricht)}</div>`:''}
     ${v.notiz?`<div class="notizAnzeige">Notiz: ${esc(v.notiz)}</div>`:''}
 
+    ${nachweisHtml(v)}
+
     <div class="uhr">
       <span>Angefragt <b>${datumKurz(v.angelegt_tag)}</b> · ${tageText(v.tage_offen,'offen')}</span>
       ${fristZeile}${abholZeile}
@@ -350,6 +385,8 @@ async function aendern(nr, feld){
     body: JSON.stringify(Object.assign({ nr }, feld)),
   });
   if (!r.ok){ alert('Konnte nicht gespeichert werden. Bitte nochmal versuchen.'); return; }
+  const erg = await r.json().catch(()=>({}));
+  if (erg.mail_raus) alert('Zugesagt. Der Kunde hat eine E-Mail mit Bestätigungslink bekommen.');
   await laden();
 }
 
