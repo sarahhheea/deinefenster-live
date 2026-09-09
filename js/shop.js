@@ -1552,6 +1552,15 @@ async function belegteLaden() {
 
 function istBelegt(p) { return Object.prototype.hasOwnProperty.call(BELEGT, p.id); }
 
+// Klartext fuers Band auf der Karte. Bewusst mit Datum: "Reserviert" allein
+// laesst offen, ob es sich lohnt zu warten.
+function belegtBandText(p) {
+  const bis = BELEGT[p.id];
+  if (!bis) return 'Zur Zeit reserviert — Anfrage trotzdem möglich';
+  const [j, m, t] = String(bis).split('-');
+  return `Reserviert bis ${t}.${m}.${j.slice(2)} — Anfrage trotzdem möglich`;
+}
+
 function belegtBadgeHtml(p) {
   if (!istBelegt(p)) return '';
   const bis = BELEGT[p.id];
@@ -1687,6 +1696,7 @@ function karteHtml(p) {
   return `
     <article class="karte${massKlasse}" data-action="detail" data-id="${p.id}" style="${archivStyle}">
       ${massBand}
+      ${istBelegt(p) ? `<p class="karte-reserviert-band">${belegtBandText(p)}</p>` : ''}
       <div class="karte-bild-wrap" style="position:relative">
         <img src="${escapeHtml(p.bild)}" alt="${escapeHtml(p.titel)}" class="karte-bild w-full" loading="lazy" decoding="async" onerror="this.src='img/fenster_standard.png'"/>
         ${/* Standnummer aufs Bild: damit findet der Kunde das Stueck im Hof wieder —
