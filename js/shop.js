@@ -2197,13 +2197,13 @@ function stelleCartAnfrageWhatsApp() {
     const p = STATE.produkte.find(x => x.id === e.id);
     if (!p) return '';
     const nr = p.standnummer ? `Nr. ${p.standnummer}` : `Art. ${p.id}`;
-    return `${e.menge}× ${nr} · ${p.breite_mm}×${p.hoehe_mm} mm · ${formatPreis(preisVon(p) * e.menge)}\n   ${artikelLink(p)}`;
+    return `${e.menge}× ${nr} · ${p.breite_mm}×${p.hoehe_mm} mm\n   ${artikelLink(p)}`;
   }).filter(Boolean).join('\n');
   const subtotal = STATE.warenkorb.reduce((s, e) => {
     const p = STATE.produkte.find(x => x.id === e.id);
     return s + (p ? p.preis_eur * e.menge : 0);
   }, 0);
-  const text = encodeURIComponent(`Hallo, ich interessiere mich für folgende Lagerware:\n\n${items}\n\nGesamt: ${formatPreis(subtotal)}\n\nBitte um Rückmeldung. Danke!`);
+  const text = encodeURIComponent(`Hallo, ich interessiere mich für folgende Lagerware:\n\n${items}\n\nBitte um Rückmeldung. Danke!`);
   window.open(`https://wa.me/4915211344756?text=${text}`, '_blank');
 }
 
@@ -2655,11 +2655,18 @@ function artikelLink(p) {
 // etwas anfangen, mit "0289 AA" schon. Der Kunde kann den Text in WhatsApp
 // aendern - das laesst sich technisch nicht verhindern. Verbindlich ist
 // deshalb nie diese Nachricht, sondern erst unsere Bestaetigung.
+// BEWUSST OHNE PREIS. Der Kunde kann den Text in WhatsApp aendern, bevor er
+// sendet - das laesst sich technisch nicht verhindern. Wenn wir aber selbst
+// nie einen Preis hineinschreiben, ist jede Preisangabe in einer Anfrage
+// erkennbar seine eigene Behauptung und nie ein Zitat aus unserem Shop.
+// Genau darum ging der Fall vom 08.09.2026 (Anfrage mit 120 statt 160 EUR).
+// Den gueltigen Preis nennen wir in der Bestaetigung, wo er aus dem Katalog
+// kommt und nicht veraenderbar ist.
 function waTextEinzel(p) {
   const nr = p.standnummer ? `Standnummer ${p.standnummer}` : `Artikel ${p.id}`;
   return `Hallo, ist ${nr} noch da?\n`
        + `${p.titel}\n`
-       + `${p.breite_mm} × ${p.hoehe_mm} mm · ${formatPreis(preisVon(p))}\n`
+       + `${p.breite_mm} × ${p.hoehe_mm} mm\n`
        + artikelLink(p);
 }
 
