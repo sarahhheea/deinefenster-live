@@ -68,6 +68,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   rendere();
   updateCartUI();
   oeffneDeepLinkProdukt();
+  // Nachgelagert und ohne await: der Shop steht sofort, die Kennzeichnung
+  // reservierter Ware kommt eine Sekunde spaeter dazu.
+  belegteLaden();
 });
 
 /* ─── Tab-Navigation für Shop-Hero-Card (BFSG-konform mit Tastatur) ─── */
@@ -1531,8 +1534,44 @@ function schliesseKebabMenus() {
 // Bestands-Badge zentral. "Nur X verfügbar" auf jedem Einzelprodukt (neu + gebraucht).
 // AUSNAHME: Sammel-Inserate (Beschreibung listet mehrere Größen/Preise, zeigen "ab") —
 // dort wäre "Nur 1 verfügbar" ein Widerspruch, also kein Knappheits-Badge.
+/* ─── Reservierte Ware kennzeichnen ─────────────────────────────────────
+   Der Server nennt nur Artikelnummer und Datum, nie Kundendaten. Faellt der
+   Abruf aus, sieht der Shop aus wie vorher - eine Reservierung darf den
+   Laden nie blockieren. */
+const BELEGT = {};
+
+async function belegteLaden() {
+  try {
+    const r = await fetch('https://deinefenster-email.sarahchrist.workers.dev/belegt');
+    if (!r.ok) return;
+    const d = await r.json();
+    Object.assign(BELEGT, d.belegt || {});
+    if (Object.keys(BELEGT).length && typeof rendere === 'function') rendere();
+  } catch (e) { /* still: ohne Kennzeichnung weiterlaufen */ }
+}
+
+function istBelegt(p) { return Object.prototype.hasOwnProperty.call(BELEGT, p.id); }
+
+// Klartext fuers Band auf der Karte. Bewusst mit Datum: "Reserviert" allein
+// laesst offen, ob es sich lohnt zu warten.
+function belegtBandText(p) {
+  const bis = BELEGT[p.id];
+  if (!bis) return 'Zur Zeit reserviert — Anfrage trotzdem möglich';
+  const [j, m, t] = String(bis).split('-');
+  return `Reserviert bis ${t}.${m}.${j.slice(2)} — Anfrage trotzdem möglich`;
+}
+
+function belegtBadgeHtml(p) {
+  if (!istBelegt(p)) return '';
+  const bis = BELEGT[p.id];
+  if (!bis) return '<span class="pill is-warning">Reserviert</span>';
+  const [j, m, t] = String(bis).split('-');
+  return `<span class="pill is-warning">Reserviert bis ${t}.${m}.</span>`;
+}
+
 function lagerBadgeHtml(p) {
   if (istSammelInserat(p)) return '';
+  if (istBelegt(p)) return belegtBadgeHtml(p);
   return p.lagerbestand > 1
     ? `<span class="pill is-success">${p.lagerbestand} auf Lager</span>`
     : `<span class="pill is-warning">Nur ${p.lagerbestand} verfügbar</span>`;
@@ -1618,7 +1657,7 @@ function karteHtml(p) {
           <button type="button" class="shop-card-cta-anfrage" data-action="anfrage" data-id="${p.id}"
              aria-label="${escapeHtml(p.titel)} ${istReservierbar(p) ? 'reservieren' : 'anfragen'}">
             <span class="material-symbols-outlined">${istReservierbar(p) ? 'inventory_2' : 'mail'}</span>
-            ${istReservierbar(p) ? 'Reservieren' : 'Anfragen'}
+            ${istBelegt(p) ? 'Trotzdem anfragen' : (istReservierbar(p) ? 'Reservieren' : 'Anfragen')}
           </button>
           <div class="shop-card-kebab-wrap">
             <button type="button" class="shop-card-kebab" data-action="kebab" data-id="${p.id}"
@@ -1657,6 +1696,7 @@ function karteHtml(p) {
   return `
     <article class="karte${massKlasse}" data-action="detail" data-id="${p.id}" style="${archivStyle}">
       ${massBand}
+      ${istBelegt(p) ? `<p class="karte-reserviert-band">${belegtBandText(p)}</p>` : ''}
       <div class="karte-bild-wrap" style="position:relative">
         <img src="${escapeHtml(p.bild)}" alt="${escapeHtml(p.titel)}" class="karte-bild w-full" loading="lazy" decoding="async" onerror="this.src='img/fenster_standard.png'"/>
         ${/* Standnummer aufs Bild: damit findet der Kunde das Stueck im Hof wieder —
@@ -2100,7 +2140,7 @@ function updateCartUI() {
   // Subtotal
   const subtotal = STATE.warenkorb.reduce((s, e) => {
     const p = STATE.produkte.find(x => x.id === e.id);
-    return s + (p ? p.preis_eur * e.menge : 0);
+    return s + (p ? preisVon(p) * e.menge : 0);
   }, 0);
   document.getElementById('cartSubtotal').textContent = formatPreis(subtotal);
 }
@@ -2156,13 +2196,14 @@ function stelleCartAnfrageWhatsApp() {
   const items = STATE.warenkorb.map(e => {
     const p = STATE.produkte.find(x => x.id === e.id);
     if (!p) return '';
-    return `${e.menge}× ${p.titel} (${p.breite_mm}×${p.hoehe_mm}mm) – ${formatPreis(p.preis_eur * e.menge)}`;
+    const nr = p.standnummer ? `Nr. ${p.standnummer}` : `Art. ${p.id}`;
+    return `${e.menge}× ${nr} · ${p.breite_mm}×${p.hoehe_mm} mm\n   ${artikelLink(p)}`;
   }).filter(Boolean).join('\n');
   const subtotal = STATE.warenkorb.reduce((s, e) => {
     const p = STATE.produkte.find(x => x.id === e.id);
     return s + (p ? p.preis_eur * e.menge : 0);
   }, 0);
-  const text = encodeURIComponent(`Hallo, ich interessiere mich für folgende Lagerware:\n\n${items}\n\nGesamt: ${formatPreis(subtotal)}\n\nBitte um Rückmeldung. Danke!`);
+  const text = encodeURIComponent(`Hallo, ich interessiere mich für folgende Lagerware:\n\n${items}\n\nBitte um Rückmeldung. Danke!`);
   window.open(`https://wa.me/4915211344756?text=${text}`, '_blank');
 }
 
@@ -2256,7 +2297,7 @@ function oeffneDetail(id) {
         ${grundpreisZeile(p)}
       </div>
       <div class="shop-detail-cta-btns">
-        <a href="https://wa.me/4915211344756?text=${encodeURIComponent(`Hallo, ist "${p.titel}" (${p.breite_mm}×${p.hoehe_mm} mm, ${formatPreis(p.preis_eur)}, Art-Nr. ${p.id}) noch verfügbar?`)}"
+        <a href="https://wa.me/4915211344756?text=${encodeURIComponent(waTextEinzel(p))}"
            target="_blank" rel="noopener" class="detail-cta-wa" aria-label="Per WhatsApp anfragen">
           <span class="material-symbols-outlined" style="font-size:18px">chat</span>
           WhatsApp
@@ -2600,6 +2641,33 @@ const SHOP_ANFRAGE_URL = 'https://deinefenster-email.sarahchrist.workers.dev/sho
  * (in_stock vs. limited) und ist Voraussetzung fuer „Im Geschaeft abholen“. */
 function istReservierbar(p) {
   return Number(p.lagerbestand) > 1;
+}
+
+// Link auf das Inserat. Die Suche im Shop findet die Standnummer auch bei
+// Tippfehlern; ohne Standnummer bleibt die interne Nummer als Rueckfallweg.
+function artikelLink(p) {
+  const such = p.standnummer || p.id;
+  return 'https://deinefenster.de/shop.html?q=' + encodeURIComponent(such);
+}
+
+// Text der WhatsApp-Anfrage. Bewusst mit Standnummer und Link statt der
+// internen Datenbank-Nummer: mit "p_1788795827972" kann auf dem Hof niemand
+// etwas anfangen, mit "0289 AA" schon. Der Kunde kann den Text in WhatsApp
+// aendern - das laesst sich technisch nicht verhindern. Verbindlich ist
+// deshalb nie diese Nachricht, sondern erst unsere Bestaetigung.
+// BEWUSST OHNE PREIS. Der Kunde kann den Text in WhatsApp aendern, bevor er
+// sendet - das laesst sich technisch nicht verhindern. Wenn wir aber selbst
+// nie einen Preis hineinschreiben, ist jede Preisangabe in einer Anfrage
+// erkennbar seine eigene Behauptung und nie ein Zitat aus unserem Shop.
+// Genau darum ging der Fall vom 08.09.2026 (Anfrage mit 120 statt 160 EUR).
+// Den gueltigen Preis nennen wir in der Bestaetigung, wo er aus dem Katalog
+// kommt und nicht veraenderbar ist.
+function waTextEinzel(p) {
+  const nr = p.standnummer ? `Standnummer ${p.standnummer}` : `Artikel ${p.id}`;
+  return `Hallo, ist ${nr} noch da?\n`
+       + `${p.titel}\n`
+       + `${p.breite_mm} × ${p.hoehe_mm} mm\n`
+       + artikelLink(p);
 }
 
 // Sonderpreis schlaegt den regulaeren Preis - gleiche Regel wie im Worker.
