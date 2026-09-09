@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="robots" content="noindex, nofollow"/>
+<title>Reservierungen &amp; Anfragen — Mitarbeiterbereich</title>
+<link rel="icon" href="favicon.ico"/>
+<link rel="stylesheet" href="css/icons.css"/>
+<style>
+/* Eigenständige Seite: bewusst ohne die grossen Shop-Stylesheets, damit sie
+   auch am Hof bei schlechtem Netz sofort da ist. Farben aus dem Shop. */
+:root{
+  --blau:#225eaa; --blau-tief:#17406f; --blau-hell:#eaf1fa;
+  --grund:#f4f6fa; --karte:#ffffff; --linie:#dbe3ee;
+  --text:#14233f; --text-leise:#5b626b; --text-blass:#8a93a3;
+  --gruen:#146c43; --gruen-hell:#e4f2ea;
+  --gelb:#9a5b08; --gelb-hell:#fbf0df;
+  --rot:#b3261e;   --rot-hell:#fbeae9;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--grund);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;
+}
+.kopf{
+  background:var(--karte);border-bottom:1px solid var(--linie);
+  padding:14px 18px;position:sticky;top:0;z-index:10;
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+}
+.kopf h1{font-size:18px;font-weight:800;margin:0;flex:1;min-width:180px}
+.kopf a{color:var(--blau);font-size:13px;font-weight:700;text-decoration:none}
+.huelle{max-width:900px;margin:0 auto;padding:16px 14px 60px}
+
+/* Login */
+#loginBox{max-width:420px;margin:60px auto;background:var(--karte);
+  border:1px solid var(--linie);border-radius:14px;padding:26px 22px;text-align:center}
+#loginBox h2{margin:0 0 6px;font-size:19px}
+#loginBox p{margin:0 0 18px;color:var(--text-leise);font-size:14px}
+#loginBox input{width:100%;padding:11px 13px;font-size:15px;border:1.5px solid var(--linie);
+  border-radius:10px;margin-bottom:12px;font-family:inherit}
+.knopf{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  background:var(--blau);color:#fff;border:none;border-radius:10px;
+  padding:11px 18px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;
+}
+.knopf:hover{background:var(--blau-tief)}
+.knopf.stumm{background:var(--karte);color:var(--blau);border:1.5px solid var(--linie)}
+.knopf.gefahr{background:var(--karte);color:var(--rot);border:1.5px solid var(--linie)}
+.knopf:disabled{opacity:.5;cursor:default}
+.knopf.klein{padding:7px 12px;font-size:12.5px;border-radius:8px}
+
+/* Filterleiste */
+.filter{display:flex;gap:7px;overflow-x:auto;padding:2px 0 12px;-webkit-overflow-scrolling:touch}
+.filter button{
+  flex:none;background:var(--karte);border:1.5px solid var(--linie);color:var(--text-leise);
+  border-radius:20px;padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;
+}
+.filter button[aria-pressed="true"]{background:var(--blau);border-color:var(--blau);color:#fff}
+
+/* Vorgangs-Karte */
+.karte{
+  background:var(--karte);border:1px solid var(--linie);border-radius:12px;
+  padding:14px 15px;margin-bottom:11px;
+}
+.karte.faellig{border-left:4px solid var(--gelb)}
+.karte.abgelaufen{border-left:4px solid var(--rot)}
+.karte.heute{border-left:4px solid var(--gruen)}
+.zeile1{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}
+.nr{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;color:var(--text-blass);flex:1}
+.marke{
+  flex:none;font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:20px;
+  text-transform:uppercase;letter-spacing:.03em;
+}
+.marke.reserviert{background:var(--blau-hell);color:var(--blau-tief)}
+.marke.abholtag{background:var(--gruen-hell);color:var(--gruen)}
+.marke.offen{background:var(--gelb-hell);color:var(--gelb)}
+.marke.verfallen,.marke.abgesagt{background:#eef0f3;color:var(--text-blass)}
+.marke.erledigt{background:var(--gruen-hell);color:var(--gruen)}
+
+.titel{font-size:15px;font-weight:700;line-height:1.35;margin-bottom:3px}
+.unter{font-size:13.5px;color:var(--text-leise)}
+.stand{font-family:ui-monospace,Menlo,monospace;font-weight:700;color:var(--text)}
+.kunde{
+  margin-top:10px;padding-top:10px;border-top:1px solid var(--linie);
+  font-size:13.5px;color:var(--text-leise);
+}
+.kunde b{color:var(--text);font-weight:700}
+.kunde a{color:var(--blau);text-decoration:none}
+.nachricht{
+  margin-top:8px;padding:9px 11px;background:var(--grund);border-radius:8px;
+  font-size:13px;color:var(--text-leise);white-space:pre-wrap;
+}
+.uhr{
+  margin-top:10px;display:flex;flex-wrap:wrap;gap:8px 16px;
+  font-size:13px;color:var(--text-leise);
+}
+.uhr b{color:var(--text)}
+.uhr .warnung{color:var(--gelb);font-weight:700}
+.uhr .alarm{color:var(--rot);font-weight:700}
+.aktionen{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.aktionen input[type="date"]{
+  padding:7px 10px;font-size:13px;border:1.5px solid var(--linie);
+  border-radius:8px;font-family:inherit;color:var(--text);
+}
+.hinweis{padding:26px 16px;text-align:center;color:var(--text-leise);font-size:14px}
+.fehler{background:var(--rot-hell);border:1px solid var(--rot);color:var(--rot);
+  padding:11px 14px;border-radius:10px;font-size:13.5px;margin-bottom:14px}
+.zaehler{font-size:13px;color:var(--text-leise);margin:0 0 12px}
+@media(max-width:520px){ .huelle{padding:12px 10px 50px} .karte{padding:12px 13px} }
+</style>
+</head>
+<body>
+
+<div class="kopf">
+  <h1>Reservierungen &amp; Anfragen</h1>
+  <a href="admin.html">&larr; Mitarbeiterbereich</a>
+  <button class="knopf klein stumm" id="neuLaden" style="display:none">Aktualisieren</button>
+</div>
+
+<div class="huelle">
+  <div id="loginBox">
+    <h2>Anmelden</h2>
+    <p>Mit demselben Zugangsschlüssel wie im Shop.</p>
+    <input type="password" id="schluessel" placeholder="Zugangsschlüssel" autocomplete="current-password"/>
+    <div id="loginFehler" class="fehler" style="display:none">Zugangsschlüssel stimmt nicht.</div>
+    <button class="knopf" id="loginKnopf" style="width:100%">Anmelden</button>
+  </div>
+
+  <div id="inhalt" style="display:none">
+    <div class="filter" id="filter"></div>
+    <p class="zaehler" id="zaehler"></p>
+    <div id="liste"></div>
+  </div>
+</div>
+
+<script src="js/sheets-config.js?v=2026-09-09"></script>
+<script>
+const WORKER = 'https://deinefenster-email.sarahchrist.workers.dev';
+
+const STATUS_TEXT = {
+  offen:      'Anfrage',
+  reserviert: 'Reserviert',
+  abholtag:   'Abholtag steht',
+  erledigt:   'Abgeholt',
+  verfallen:  'Frist abgelaufen',
+  abgesagt:   'Abgesagt',
+};
+
+let ALLE = [], HEUTE = '', FILTER = 'aktiv';
+
+function esc(s){ return String(s==null?'':s)
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+  .replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+function datumKurz(iso){
+  if(!iso) return '—';
+  const [j,m,t] = iso.split('-');
+  return `${t}.${m}.${j.slice(2)}`;
+}
+
+// "seit 3 Tagen" / "noch 2 Tage" - so, wie man es sagen wuerde.
+function tageText(n, art){
+  if(n==null) return '';
+  if(art==='offen')  return n===0 ? 'heute gekommen' : (n===1 ? 'seit 1 Tag' : `seit ${n} Tagen`);
+  if(n<0)  return `${Math.abs(n)} ${Math.abs(n)===1?'Tag':'Tage'} überfällig`;
+  if(n===0) return 'läuft heute ab';
+  return n===1 ? 'noch 1 Tag' : `noch ${n} Tage`;
+}
+
+function karteHtml(v){
+  const st = v.status || 'offen';
+  const restTage = v.tage_bis_frist;
+  let klasse = '';
+  if (st==='reserviert' && restTage!=null){
+    if (restTage < 0) klasse = 'abgelaufen';
+    else if (restTage <= 2) klasse = 'faellig';
+  }
+  if (st==='abholtag' && v.abholtag === HEUTE) klasse = 'heute';
+
+  const gesamt = (v.einzelpreis_eur!=null && v.menge)
+    ? (v.einzelpreis_eur * v.menge).toFixed(2).replace('.',',') + ' €' : '—';
+  const einzel = v.einzelpreis_eur!=null
+    ? v.einzelpreis_eur.toFixed(2).replace('.',',') + ' €' : '—';
+
+  const fristZeile = (st==='reserviert' && v.frist)
+    ? `<span>Frist <b>${datumKurz(v.frist)}</b> <span class="${restTage<0?'alarm':(restTage<=2?'warnung':'')}">${tageText(restTage,'frist')}</span></span>` : '';
+  const abholZeile = v.abholtag
+    ? `<span>Abholung <b>${datumKurz(v.abholtag)}</b>${v.abholtag===HEUTE?' <span class="warnung">heute</span>':''}</span>` : '';
+
+  const offenAktionen = (st!=='erledigt' && st!=='abgesagt') ? `
+    <div class="aktionen">
+      <input type="date" value="${esc(v.abholtag||'')}" data-nr="${esc(v.nr)}" class="abholFeld" aria-label="Abholtag"/>
+      <button class="knopf klein" data-tun="abholtag" data-nr="${esc(v.nr)}">Abholtag speichern</button>
+      <button class="knopf klein stumm" data-tun="erledigt" data-nr="${esc(v.nr)}">Abgeholt</button>
+      <button class="knopf klein gefahr" data-tun="abgesagt" data-nr="${esc(v.nr)}">Absagen</button>
+    </div>` : `
+    <div class="aktionen">
+      <button class="knopf klein stumm" data-tun="reserviert" data-nr="${esc(v.nr)}">Wieder aufnehmen</button>
+    </div>`;
+
+  return `<div class="karte ${klasse}">
+    <div class="zeile1">
+      <span class="nr">${esc(v.nr)}</span>
+      <span class="marke ${esc(st)}">${esc(STATUS_TEXT[st]||st)}</span>
+    </div>
+    <div class="titel">${esc(v.titel||'—')}</div>
+    <div class="unter">
+      ${v.standnummer?`Standnummer <span class="stand">${esc(v.standnummer)}</span> · `:''}
+      ${v.breite_mm||'?'} × ${v.hoehe_mm||'?'} mm
+    </div>
+    <div class="unter" style="margin-top:4px">
+      <b style="color:var(--text)">${v.menge}×</b> ${einzel} · Gesamt <b style="color:var(--text)">${gesamt}</b>
+    </div>
+
+    <div class="kunde">
+      <b>${esc(v.kunde_name||'—')}</b><br>
+      ${v.kunde_email?`<a href="mailto:${esc(v.kunde_email)}">${esc(v.kunde_email)}</a>`:''}
+      ${v.kunde_telefon?` · <a href="tel:${esc(String(v.kunde_telefon).replace(/\s/g,''))}">${esc(v.kunde_telefon)}</a>`:''}
+      ${v.wunschtermin?`<br>Wunsch: ${esc(v.wunschtermin)}`:''}
+    </div>
+    ${v.nachricht?`<div class="nachricht">${esc(v.nachricht)}</div>`:''}
+
+    <div class="uhr">
+      <span>Angefragt <b>${datumKurz(v.angelegt_tag)}</b> · ${tageText(v.tage_offen,'offen')}</span>
+      ${fristZeile}${abholZeile}
+    </div>
+    ${offenAktionen}
+  </div>`;
+}
+
+function zeichne(){
+  const liste = document.getElementById('liste');
+  const aktiv = new Set(['offen','reserviert','abholtag']);
+  let zeigen = ALLE;
+  if (FILTER==='aktiv')      zeigen = ALLE.filter(v=>aktiv.has(v.status));
+  else if (FILTER==='heute') zeigen = ALLE.filter(v=>v.abholtag===HEUTE);
+  else if (FILTER!=='alle')  zeigen = ALLE.filter(v=>v.status===FILTER);
+
+  document.getElementById('zaehler').textContent =
+    zeigen.length ? `${zeigen.length} ${zeigen.length===1?'Vorgang':'Vorgänge'}` : '';
+  liste.innerHTML = zeigen.length
+    ? zeigen.map(karteHtml).join('')
+    : '<p class="hinweis">Hier ist gerade nichts.</p>';
+}
+
+function filterZeichnen(){
+  const zaehl = s => ALLE.filter(v=>v.status===s).length;
+  const aktivN = ALLE.filter(v=>['offen','reserviert','abholtag'].includes(v.status)).length;
+  const heuteN = ALLE.filter(v=>v.abholtag===HEUTE).length;
+  const knoepfe = [
+    ['aktiv',      `Aktuell (${aktivN})`],
+    ['heute',      `Heute abholen (${heuteN})`],
+    ['reserviert', `Reserviert (${zaehl('reserviert')})`],
+    ['offen',      `Anfragen (${zaehl('offen')})`],
+    ['verfallen',  `Abgelaufen (${zaehl('verfallen')})`],
+    ['alle',       `Alle (${ALLE.length})`],
+  ];
+  document.getElementById('filter').innerHTML = knoepfe.map(([k,t])=>
+    `<button data-filter="${k}" aria-pressed="${FILTER===k}">${t}</button>`).join('');
+}
+
+async function laden(){
+  const key = getShopToken();
+  const r = await fetch(WORKER+'/vorgaenge', { headers:{ 'X-Shop-Key': key } });
+  if (r.status===401){ abmelden(); return; }
+  const d = await r.json();
+  ALLE = d.vorgaenge || [];
+  HEUTE = d.heute || '';
+  filterZeichnen();
+  zeichne();
+}
+
+async function aendern(nr, feld){
+  const key = getShopToken();
+  const r = await fetch(WORKER+'/vorgang', {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json', 'X-Shop-Key': key },
+    body: JSON.stringify(Object.assign({ nr }, feld)),
+  });
+  if (!r.ok){ alert('Konnte nicht gespeichert werden. Bitte nochmal versuchen.'); return; }
+  await laden();
+}
+
+function anmelden(){ document.getElementById('loginBox').style.display='none';
+  document.getElementById('inhalt').style.display='';
+  document.getElementById('neuLaden').style.display='';
+  laden(); }
+function abmelden(){ clearShopToken();
+  document.getElementById('loginBox').style.display='';
+  document.getElementById('inhalt').style.display='none';
+  document.getElementById('neuLaden').style.display='none'; }
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  if (isShopLoggedIn()) anmelden();
+
+  document.getElementById('loginKnopf').addEventListener('click', async ()=>{
+    const wert = document.getElementById('schluessel').value;
+    const erg = await shopLogin(wert);
+    if (erg.ok) anmelden();
+    else document.getElementById('loginFehler').style.display='block';
+  });
+  document.getElementById('schluessel').addEventListener('keydown', e=>{
+    if (e.key==='Enter') document.getElementById('loginKnopf').click();
+  });
+  document.getElementById('neuLaden').addEventListener('click', laden);
+
+  document.getElementById('filter').addEventListener('click', e=>{
+    const b = e.target.closest('button[data-filter]');
+    if (!b) return;
+    FILTER = b.dataset.filter;
+    filterZeichnen(); zeichne();
+  });
+
+  document.getElementById('liste').addEventListener('click', e=>{
+    const b = e.target.closest('button[data-tun]');
+    if (!b) return;
+    const nr = b.dataset.nr, tun = b.dataset.tun;
+    if (tun==='abholtag'){
+      const feld = document.querySelector(`.abholFeld[data-nr="${CSS.escape(nr)}"]`);
+      const tag = feld ? feld.value : '';
+      aendern(nr, { abholtag: tag, status: tag ? 'abholtag' : 'reserviert' });
+    } else if (tun==='abgesagt'){
+      if (confirm('Vorgang absagen? Die Ware wird im Shop wieder frei.')) aendern(nr, { status:'abgesagt' });
+    } else {
+      aendern(nr, { status: tun });
+    }
+  });
+});
+</script>
+</body>
+</html>
