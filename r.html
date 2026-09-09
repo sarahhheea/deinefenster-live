@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <meta name="robots" content="noindex, nofollow"/>
-<title>Reservierung bestätigen — DeineFenster.de</title>
+<title>Reservierung anfragen — DeineFenster.de</title>
 <link rel="icon" href="img/logo/favicon-32.png?v=20260518"/>
 <link rel="stylesheet" href="fonts/material-symbols.css"/>
 <style>
@@ -96,8 +96,8 @@ textarea{resize:vertical;min-height:60px}
 
   <div class="kopf">
     <div class="marke">DeineFenster.de · Fensterhandel Christ</div>
-    <h1 id="ueberschrift">Reservierung bestätigen</h1>
-    <p id="unterzeile">Bitte prüfen Sie kurz, ob alles stimmt.</p>
+    <h1 id="ueberschrift">Reservierung anfragen</h1>
+    <p id="unterzeile">Wir sehen im Lager nach und melden uns. Zurückgelegt ist noch nichts.</p>
   </div>
 
   <div id="laden" class="laden">Einen Moment, wir holen die Angaben …</div>
@@ -135,12 +135,13 @@ textarea{resize:vertical;min-height:60px}
         </div>
       </div>
       <p class="fest">Diese Angaben stammen aus unserem Inserat und stehen fest.
-         Es gilt der hier genannte Preis.</p>
+         Es gilt der hier genannte Preis — nicht, was in einer Nachricht steht.</p>
       <p class="fest" id="mengeHinweis" style="display:none;color:var(--gelb);font-weight:600"></p>
     </div>
 
     <div class="block">
       <h3>Abholen oder liefern lassen?</h3>
+      <p style="margin:-4px 0 12px;font-size:13px;color:var(--leise)">Abholung freitags 10–17 Uhr und samstags 10–13 Uhr. Wenn Sie dann nicht können, schreiben Sie es unten dazu — wir finden einen Termin.</p>
       <div class="wahl">
         <button type="button" id="wAbholung" aria-pressed="true">Ich hole ab</button>
         <button type="button" id="wLieferung" aria-pressed="false">Bitte liefern</button>
@@ -157,7 +158,7 @@ textarea{resize:vertical;min-height:60px}
         <textarea id="adresse" autocomplete="street-address" placeholder="Straße, Hausnummer&#10;PLZ Ort"></textarea></label>
 
       <label class="feld"><span>Anmerkung <span style="color:var(--blass);font-weight:500">(optional)</span></span>
-        <textarea id="nachricht" placeholder="Wunschtermin oder Rückfragen"></textarea></label>
+        <textarea id="nachricht" placeholder="z.B. Wunschtermin, wenn Sie freitags oder samstags nicht können"></textarea></label>
 
       <label class="dse">
         <input type="checkbox" id="dse" required/>
@@ -172,11 +173,11 @@ textarea{resize:vertical;min-height:60px}
         das, weil der Kauf dann vor Ort geschlossen wird.
       </div>
 
-      <button type="submit" class="senden" id="senden" style="margin-top:14px">Verbindlich reservieren</button>
+      <button type="submit" class="senden" id="senden" style="margin-top:14px">Reservierung anfragen</button>
       <div id="meldung" class="meldung fehler" style="display:none"></div>
       <p class="fest" style="text-align:center;margin-top:11px">
-        Sie erhalten sofort eine Bestätigung per E-Mail.
-        Wir legen die Ware für Sie zurück, sobald wir bestätigt haben.
+        Sie erhalten sofort eine Eingangsbestätigung per E-Mail. Wir prüfen dann im Lager,
+        ob das Stück noch steht, und sagen Ihnen Bescheid — der Bestand ändert sich täglich.
       </p>
     </div>
   </form>
@@ -184,7 +185,7 @@ textarea{resize:vertical;min-height:60px}
   <div id="danke" style="display:none">
     <div class="block danke">
       <div class="ring" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="4,12.5 9.5,18 20,6.5"/></svg></div>
-      <h2>Danke, das ist bei uns angekommen</h2>
+      <h2>Ihre Anfrage ist da</h2>
       <p id="dankeText"></p>
       <div class="vnr" id="dankeNr"></div>
     </div>
@@ -335,9 +336,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
       document.getElementById('formular').style.display = 'none';
       document.querySelector('.kopf').style.display = 'none';
-      document.getElementById('dankeText').textContent = d.frist
-        ? `Wir legen die Ware bis zum ${d.frist} für Sie zurück, sobald wir bestätigt haben. Eine Bestätigung liegt in Ihrem Postfach.`
-        : 'Eine Bestätigung liegt in Ihrem Postfach.';
+      document.getElementById('dankeText').textContent =
+        'Wir sehen im Lager nach, ob das Stück noch steht, und melden uns bei Ihnen — '
+        + 'meist noch am selben oder am nächsten Werktag. Zurückgelegt ist es erst, '
+        + 'wenn wir Ihnen zusagen. Eine Eingangsbestätigung liegt in Ihrem Postfach.';
       document.getElementById('dankeNr').textContent = d.vorgang || '';
       document.getElementById('danke').style.display = '';
       window.scrollTo(0,0);
@@ -345,7 +347,7 @@ document.addEventListener('DOMContentLoaded', () => {
       zeige((err && err.message ? err.message + ' ' : '')
         + 'Bitte melden Sie sich direkt: WhatsApp 01521 1344756 oder 03381 214 83 73.');
       knopf.disabled = false;
-      knopf.textContent = 'Verbindlich reservieren';
+      knopf.textContent = 'Reservierung anfragen';
     }
   });
 });

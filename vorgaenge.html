@@ -164,8 +164,10 @@ body{
 <script>
 const WORKER = 'https://deinefenster-email.sarahchrist.workers.dev';
 
+// "offen" heisst: der Kunde hat gefragt, WIR haben noch nicht im Lager
+// nachgesehen. Reserviert wird erst per Knopf, nie automatisch.
 const STATUS_TEXT = {
-  offen:      'Anfrage',
+  offen:      'Zu prüfen',
   reserviert: 'Reserviert',
   abholtag:   'Abholtag steht',
   erledigt:   'Abgeholt',
@@ -209,8 +211,10 @@ function karteHtml(v){
   const einzel = v.einzelpreis_eur!=null
     ? v.einzelpreis_eur.toFixed(2).replace('.',',') + ' €' : '—';
 
-  const fristZeile = (st==='reserviert' && v.frist)
-    ? `<span>Frist <b>${datumKurz(v.frist)}</b> <span class="${restTage<0?'alarm':(restTage<=2?'warnung':'')}">${tageText(restTage,'frist')}</span></span>` : '';
+  const fristZeile = st!=='reserviert' ? ''
+    : (v.frist
+        ? `<span>Frist <b>${datumKurz(v.frist)}</b> <span class="${restTage<0?'alarm':(restTage<=2?'warnung':'')}">${tageText(restTage,'frist')}</span></span>`
+        : `<span>Liegt zurück <b>ohne Frist</b></span>`);
   const abholZeile = v.abholtag
     ? `<span>Abholung <b>${datumKurz(v.abholtag)}</b>${v.abholtag===HEUTE?' <span class="warnung">heute</span>':''}</span>` : '';
 
@@ -241,7 +245,14 @@ function karteHtml(v){
       <button class="knopf klein" data-tun="speichern" data-nr="${esc(v.nr)}">Änderungen speichern</button>
     </div>` : '';
 
-  const aktionen = laeuft ? `
+  // Ein neuer Vorgang muss zuerst im Lager geprueft werden. Deshalb steht bei
+  // "offen" das Zusagen vorn und nicht das Bearbeiten.
+  const aktionen = st === 'offen' ? `
+    <div class="aktionen">
+      <button class="knopf klein" data-tun="zusagen" data-nr="${esc(v.nr)}">Ist da — reservieren</button>
+      <button class="knopf klein gefahr" data-tun="abgesagt" data-nr="${esc(v.nr)}">Nicht mehr da</button>
+      <button class="knopf klein stumm" data-tun="aufklappen" data-nr="${esc(v.nr)}">Bearbeiten</button>
+    </div>` : (laeuft ? `
     <div class="aktionen">
       <button class="knopf klein stumm" data-tun="aufklappen" data-nr="${esc(v.nr)}">Bearbeiten</button>
       <button class="knopf klein" data-tun="erledigt" data-nr="${esc(v.nr)}">Abgeholt</button>
@@ -249,7 +260,7 @@ function karteHtml(v){
     </div>` : `
     <div class="aktionen">
       <button class="knopf klein stumm" data-tun="reserviert" data-nr="${esc(v.nr)}">Wieder aufnehmen</button>
-    </div>`;
+    </div>`);
 
   return `<div class="karte ${klasse}">
     <div class="zeile1">
@@ -411,8 +422,38 @@ document.addEventListener('DOMContentLoaded', ()=>{
       return;
     }
 
+    if (tun==='zusagen'){
+      // Wie lange zurueckgelegt wird, ist bei Christ Absprache - mal eine Woche
+      // ohne Anzahlung, mal laenger wenn vorab bezahlt wird, mal offen. Deshalb
+      // hier fragen statt eine Frist zu erfinden.
+      const wahl = prompt(
+        'Reservierung zusagen.\n\n' +
+        'Wie lange legen wir zurück?\n' +
+        '  Zahl = so viele Tage (z.B. 7)\n' +
+        '  Datum = bis dahin (TT.MM.JJJJ)\n' +
+        '  leer lassen = ohne Frist, bis wir etwas anderes sagen',
+        '7');
+      if (wahl === null) return;              // abgebrochen
+      const t = String(wahl).trim();
+      let frist = '';
+      if (/^\d{1,3}$/.test(t)){
+        const d = new Date(HEUTE + 'T00:00:00Z');
+        d.setUTCDate(d.getUTCDate() + Number(t));
+        frist = d.toISOString().slice(0,10);
+      } else if (/^\d{1,2}\.\d{1,2}\.\d{4}$/.test(t)){
+        const [tg,mo,ja] = t.split('.');
+        frist = `${ja}-${mo.padStart(2,'0')}-${tg.padStart(2,'0')}`;
+      } else if (t !== ''){
+        alert('Bitte eine Zahl (Tage), ein Datum TT.MM.JJJJ oder nichts eingeben.');
+        return;
+      }
+      aendern(nr, { status:'reserviert', frist });
+      return;
+    }
+
     if (tun==='abgesagt'){
-      if (confirm('Vorgang absagen? Die Ware wird im Shop wieder frei.')) aendern(nr, { status:'abgesagt' });
+      const txt = 'Vorgang absagen? Die Ware wird im Shop wieder frei.';
+      if (confirm(txt)) aendern(nr, { status:'abgesagt' });
       return;
     }
 
