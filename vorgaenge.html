@@ -270,6 +270,13 @@ function karteHtml(v){
         <input type="date" id="fr-${esc(v.nr)}" value="${esc(v.frist||'')}" class="fristFeld" data-nr="${esc(v.nr)}"/>
         <button class="knopf klein stumm" data-tun="plus7" data-nr="${esc(v.nr)}">+7 Tage</button>
       </div>
+      <div class="feldzeile">
+        <label for="lk-${esc(v.nr)}">Lieferung</label>
+        <input type="number" id="lk-${esc(v.nr)}" class="lkFeld" data-nr="${esc(v.nr)}"
+          min="0" step="0.01" inputmode="decimal" style="width:110px"
+          placeholder="leer = Abholung" value="${v.lieferkosten_eur != null ? esc(v.lieferkosten_eur) : ''}"/>
+        <span style="font-size:12.5px;color:var(--text-blass)">€ — steht dann in der Bestätigung</span>
+      </div>
       <div class="feldzeile" style="align-items:flex-start">
         <label for="no-${esc(v.nr)}">Notiz</label>
         <textarea id="no-${esc(v.nr)}" class="notizFeld" data-nr="${esc(v.nr)}"
@@ -310,7 +317,10 @@ function karteHtml(v){
           ${v.breite_mm||'?'} × ${v.hoehe_mm||'?'} mm
         </div>
         <div class="unter" style="margin-top:4px">
-          <b style="color:var(--text)">${v.menge}×</b> ${einzel} · Gesamt <b style="color:var(--text)">${gesamt}</b>
+          <b style="color:var(--text)">${v.menge}×</b> ${einzel} · Ware <b style="color:var(--text)">${gesamt}</b>
+          ${v.lieferkosten_eur != null && v.lieferkosten_eur > 0
+            ? `<br>+ Lieferung ${Number(v.lieferkosten_eur).toFixed(2).replace('.',',')} € · Gesamt <b style="color:var(--text)">${((v.einzelpreis_eur||0)*v.menge + Number(v.lieferkosten_eur)).toFixed(2).replace('.',',')} €</b>`
+            : `<br><span style="color:var(--text-blass)">Abholung auf dem Hof</span>`}
         </div>
       </div>
     </div>
@@ -451,7 +461,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
       const abholtag = feld('abholFeld')?.value || '';
       const frist    = feld('fristFeld')?.value || '';
       const notiz    = feld('notizFeld')?.value || '';
-      const daten = { abholtag, frist, notiz };
+      const lkRoh    = feld('lkFeld')?.value?.trim() || '';
+      const daten = { abholtag, frist, notiz, lieferkosten_eur: lkRoh === '' ? null : Number(lkRoh) };
       // Ein gesetzter Abholtag hebt den Status - aber nur, solange der
       // Vorgang laeuft.
       if (abholtag) daten.status = 'abholtag';
@@ -484,7 +495,22 @@ document.addEventListener('DOMContentLoaded', ()=>{
         alert('Bitte eine Zahl (Tage), ein Datum TT.MM.JJJJ oder nichts eingeben.');
         return;
       }
-      aendern(nr, { status:'reserviert', frist });
+      // Lieferkosten werden im Chat ausgehandelt und stehen in keinem Katalog.
+      // Ohne sie bestaetigt der Kunde nur den Warenpreis.
+      const lk = prompt(
+        'Lieferkosten in Euro?\n\n' +
+        'Leer lassen = Abholung auf dem Hof (kostenfrei).\n' +
+        'Der Betrag steht dann in der Bestätigungsmail und im Gesamtpreis.',
+        '');
+      if (lk === null) return;
+      const lkT = String(lk).trim().replace(',', '.');
+      let lieferkosten = null;
+      if (lkT !== ''){
+        const n = Number(lkT);
+        if (!Number.isFinite(n) || n < 0){ alert('Bitte einen Betrag eingeben, z.B. 145 — oder leer lassen.'); return; }
+        lieferkosten = n;
+      }
+      aendern(nr, { status:'reserviert', frist, lieferkosten_eur: lieferkosten });
       return;
     }
 
