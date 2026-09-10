@@ -7195,6 +7195,21 @@ async function svgToPngDataURL(markup,W){
   return await _drawToPng('data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg),W,H);
 }
 
+// Die Angaben einer Position als reine Textzeilen "Label: Wert".
+// Gleiche Quelle wie _mailRows, nur ohne Auszeichnung — die Mail wird nicht
+// hier gesetzt, es gehen nur Daten hinaus.
+function _specZeilen(srowHtml,ohne){
+  var weg=(ohne||[]).concat(['Anzahl','System']), raus=[];
+  String(srowHtml||'').replace(/<div class="srow"><span class="k[^"]*">([\s\S]*?)<\/span><span class="v[^"]*">([\s\S]*?)<\/span><\/div>/g,
+    function(mm,k,v){
+      var kk=k.replace(/<[^>]*>/g,'').replace(/\u00a0/g,' ').trim();
+      var vv=v.replace(/<[^>]*>/g,' ').replace(/\u00a0/g,' ').replace(/\s+/g,' ').trim();
+      if(kk && vv && weg.indexOf(kk)===-1) raus.push(kk+': '+vv);
+      return '';
+    });
+  return raus;
+}
+
 function _mailRows(srowHtml,ohne){
   var h=(srowHtml||'');
   (ohne||[]).forEach(function(k){
@@ -7429,14 +7444,15 @@ async function submitAnfrage(ev){
   try{
     var L=['Neue Anfrage über den DeineFenster.de-Konfigurator','','KONTAKTDATEN',
       'Name:    '+name,'E-Mail:  '+email,'Telefon: '+(tel||'–'),adr,'','KONFIGURATION ('+cart.length+' Position'+(cart.length===1?'':'en')+')'];
-    var posHtml='', sketches=[], skizzeFehler=[];
+    var posHtml='', positionen=[], sketches=[], skizzeFehler=[];
     for(let i=0;i<cart.length;i++){
       let it=cart[i], conf=it.conf, q=conf.anzahl||1;
-      let unit=withConf(conf,price), line=(unit==null?null:unit*q);
+      let unit=posUnit(conf), line=(unit==null?null:unit*q);
       let title=withConf(conf,configTitle);
       let ai=withConf(conf,anschlagInfo);
       let mass=conf.w+' × '+conf.h+' mm';
-      let rowsTable=_mailRows(withConf(conf,summaryRows),['Maße',ai.label]);
+      let srows=withConf(conf,summaryRows);
+      let rowsTable=_mailRows(srows,['Maße',ai.label]);
       let cid='pos'+i, hasSketch=false;
       try{
 
@@ -7453,6 +7469,16 @@ async function submitAnfrage(ev){
         if(!hasSketch) skizzeFehler.push('Position '+(i+1)+': Skizze konnte nicht erzeugt werden');
       }catch(e){ skizzeFehler.push('Position '+(i+1)+': '+(e&&e.message||e)); }
       posHtml+=_posBlock(i,q,title,rowsTable,unit,line,hasSketch?cid:null,mass,ai);
+
+      // Dieselbe Position noch einmal als reine Daten.
+      positionen.push({
+        menge:q, titel:title, masse:mass,
+        anschlag:[ai.label+': '+ai.norm, ai.ansicht, ai.klartext, ai.warntext?'('+ai.warntext+')':'']
+          .filter(Boolean).join(' \u00b7 '),
+        zeilen:_specZeilen(srows,['Maße',ai.label]),
+        einzelpreis:unit, gesamtpreis:line,
+        skizzeId:hasSketch?cid:null
+      });
 
       L.push('');
       L.push('Position '+(i+1)+': '+q+' × '+withConf(conf,configTitle));
@@ -7479,8 +7505,23 @@ async function submitAnfrage(ev){
     var detailsHtml=posHtml+totalsHtml;
     var prodName=cart.length?withConf(cart[0].conf,configTitle):'Konfiguration';
 
+    // Angaben der Anfrage in strukturierter Form.
+    var _d=new Date(), _z=function(n){ return String(n).padStart(2,'0'); };
+    var anfrage={
+      nr:nr,
+      eingang:_z(_d.getDate())+'.'+_z(_d.getMonth()+1)+'.'+_d.getFullYear()
+             +' um '+_z(_d.getHours())+':'+_z(_d.getMinutes())+' Uhr',
+      kunde:{ name:name, email:email, telefon:tel||'', adresse:adr, anmerkung:msg },
+      positionen:positionen,
+      zwischensumme:totalOffen(t)?null:t.sub,
+      lieferung:{ text:(liefer==='abholung'?'Abholung im Lager':'Lieferung'),
+                  betrag:(liefer==='abholung'?0:t.ship) },
+      mwst:totalOffen(t)?null:Math.round(t.mwst*100)/100,
+      summe:totalOffen(t)?null:t.total
+    };
+
     var r=await fetch('https://deinefenster-email.sarahchrist.workers.dev',{ method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ quelle:'konfigurator', customer_email:email, subject:'[DeineFenster.de] Neue Anfrage '+nr+': '+prodName, text:L.join('\n'), html:internHtml, confirmation:{name:name,offerId:nr,detailsHtml:detailsHtml}, sketches:sketches, website:'' }) });
+      body:JSON.stringify({ quelle:'konfigurator', customer_email:email, subject:'[DeineFenster.de] Neue Anfrage '+nr+': '+prodName, text:L.join('\n'), html:internHtml, anfrage:anfrage, confirmation:{name:name,offerId:nr,detailsHtml:detailsHtml}, sketches:sketches, website:'' }) });
     if(!r.ok) throw new Error('HTTP '+r.status);
 
     lastAnfrageNr=nr; cartLeeren(); anfrageView='done'; window.scrollTo({top:0,behavior:'smooth'}); render();
