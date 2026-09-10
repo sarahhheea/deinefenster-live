@@ -378,8 +378,14 @@ function filterZeichnen(){
 
 async function laden(){
   const key = getShopToken();
-  const r = await fetch(WORKER+'/vorgaenge', { headers:{ 'X-Shop-Key': key } });
+  const melde = (text) => { document.getElementById('liste').innerHTML =
+    '<p class="fehler" style="display:block">' + text + '</p>'; };
+  let r;
+  // Ohne diesen Fang blieb die Seite bei Funkloch oder Serverstoerung einfach leer.
+  try { r = await fetch(WORKER+'/vorgaenge', { headers:{ 'X-Shop-Key': key } }); }
+  catch { melde('Keine Verbindung zum Server. Bitte Internet prüfen und neu laden.'); return; }
   if (r.status===401){ abmelden(); return; }
+  if (!r.ok){ melde('Die Liste konnte nicht geladen werden (Fehler ' + r.status + '). Bitte später noch einmal versuchen.'); return; }
   const d = await r.json();
   ALLE = d.vorgaenge || [];
   HEUTE = d.heute || '';
