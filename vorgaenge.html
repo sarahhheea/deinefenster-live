@@ -78,6 +78,11 @@ body{
 .marke.offen{background:var(--gelb-hell);color:var(--gelb)}
 .marke.verfallen,.marke.abgesagt{background:#eef0f3;color:var(--text-blass)}
 .marke.erledigt{background:var(--gruen-hell);color:var(--gruen)}
+/* Woher die Anfrage kam: bewusst dezenter als die Statusmarke. Der Status sagt,
+   was zu tun ist - die Quelle ordnet nur ein. Kein uppercase, sonst schreit
+   "KONTAKTFORMULAR" lauter als der Status daneben. */
+.marke.quelle{background:transparent;border:1px solid var(--linie);color:var(--text-leise);
+  text-transform:none;letter-spacing:0;font-weight:700}
 
 .ware{display:flex;gap:12px;align-items:flex-start}
 .ware img{
@@ -182,6 +187,15 @@ const STATUS_TEXT = {
   abgesagt:   'Abgesagt',
 };
 
+// Woher die Anfrage kam. Seit 10.09.2026 laufen alle Wege in diese Liste -
+// vorher stand hier nur der Lager-Shop, der Rest lag im Mailpostfach.
+const QUELLE_TEXT = {
+  shop:         'Lager-Shop',
+  konfigurator: 'Konfigurator',
+  anfrage:      'Angebotsanfrage',
+  kontakt:      'Kontaktformular',
+};
+
 let ALLE = [], HEUTE = '', FILTER = 'aktiv';
 
 function esc(s){ return String(s==null?'':s)
@@ -231,6 +245,7 @@ function nachweisHtml(v){
 
 function karteHtml(v){
   const st = v.status || 'offen';
+  const istShop = (v.quelle || 'shop') === 'shop';
   const restTage = v.tage_bis_frist;
   let klasse = '';
   if (st==='reserviert' && restTage!=null){
@@ -261,6 +276,7 @@ function karteHtml(v){
   // Eingeklappt, damit die Liste am Handy ueberschaubar bleibt.
   const bearbeiten = laeuft ? `
     <div class="bearbeiten" id="bearb-${esc(v.nr)}">
+      ${istShop ? `
       <div class="feldzeile">
         <label for="ab-${esc(v.nr)}">Abholtag</label>
         <input type="date" id="ab-${esc(v.nr)}" value="${esc(v.abholtag||'')}" class="abholFeld" data-nr="${esc(v.nr)}"/>
@@ -269,7 +285,7 @@ function karteHtml(v){
         <label for="fr-${esc(v.nr)}">Frist bis</label>
         <input type="date" id="fr-${esc(v.nr)}" value="${esc(v.frist||'')}" class="fristFeld" data-nr="${esc(v.nr)}"/>
         <button class="knopf klein stumm" data-tun="plus7" data-nr="${esc(v.nr)}">+7 Tage</button>
-      </div>
+      </div>` : ''}
       <div class="feldzeile">
         <label for="lk-${esc(v.nr)}">Lieferung</label>
         <input type="number" id="lk-${esc(v.nr)}" class="lkFeld" data-nr="${esc(v.nr)}"
@@ -285,9 +301,11 @@ function karteHtml(v){
       <button class="knopf klein" data-tun="speichern" data-nr="${esc(v.nr)}">Änderungen speichern</button>
     </div>` : '';
 
-  // Ein neuer Vorgang muss zuerst im Lager geprueft werden. Deshalb steht bei
-  // "offen" das Zusagen vorn und nicht das Bearbeiten.
-  const aktionen = st === 'offen' ? `
+  // Ein neuer Lager-Vorgang muss zuerst im Lager geprueft werden. Deshalb steht
+  // bei "offen" das Zusagen vorn und nicht das Bearbeiten. Bei einer Anfrage aus
+  // Konfigurator oder Kontaktformular haengt keine Ware dran - "Ist da" waere
+  // dort sinnlos, hier zaehlt nur: beantwortet oder nicht.
+  const aktionen = (st === 'offen' && istShop) ? `
     <div class="aktionen">
       <button class="knopf klein" data-tun="zusagen" data-nr="${esc(v.nr)}">Ist da — reservieren</button>
       <button class="knopf klein gefahr" data-tun="abgesagt" data-nr="${esc(v.nr)}">Nicht mehr da</button>
@@ -295,16 +313,49 @@ function karteHtml(v){
     </div>` : (laeuft ? `
     <div class="aktionen">
       <button class="knopf klein stumm" data-tun="aufklappen" data-nr="${esc(v.nr)}">Bearbeiten</button>
-      <button class="knopf klein" data-tun="erledigt" data-nr="${esc(v.nr)}">Abgeholt</button>
+      <button class="knopf klein" data-tun="erledigt" data-nr="${esc(v.nr)}">${istShop ? 'Abgeholt' : 'Erledigt'}</button>
       <button class="knopf klein gefahr" data-tun="abgesagt" data-nr="${esc(v.nr)}">Absagen</button>
     </div>` : `
     <div class="aktionen">
       <button class="knopf klein stumm" data-tun="reserviert" data-nr="${esc(v.nr)}">Wieder aufnehmen</button>
     </div>`);
 
+  // Anfragen aus Konfigurator, Anfrage-Seite und Kontaktformular haengen an
+  // keinem Lagerartikel: kein Bild, keine Masse, kein Preis. Dafuer den
+  // Artikelblock zu zeigen ergaebe "? × ? mm" und "Gesamt —".
+  const quelleMarke = `<span class="marke quelle">${esc(QUELLE_TEXT[v.quelle] || QUELLE_TEXT.shop)}</span>`;
+
+  if (!istShop) {
+    return `<div class="karte ${klasse}">
+      <div class="zeile1">
+        <span class="nr">${esc(v.nr)}</span>
+        ${quelleMarke}
+        <span class="marke ${esc(st)}">${esc(STATUS_TEXT[st]||st)}</span>
+      </div>
+
+      <div class="ware">
+        <div class="text">
+          <div class="titel">${esc(v.titel||'Anfrage')}</div>
+          <div class="unter">${tageText(v.tage_offen,'offen')||''}</div>
+        </div>
+      </div>
+
+      <div class="kunde">
+        <b>${esc(v.kunde_name||'—')}</b><br>
+        ${v.kunde_email?`<a href="mailto:${esc(v.kunde_email)}">${esc(v.kunde_email)}</a>`:''}
+        ${v.kunde_telefon?` · <a href="tel:${esc(String(v.kunde_telefon).replace(/\s/g,''))}">${esc(v.kunde_telefon)}</a>`:''}
+      </div>
+      ${v.nachricht?`<div class="nachricht">${esc(v.nachricht)}</div>`:''}
+      ${v.notiz?`<div class="notizAnzeige">Notiz: ${esc(v.notiz)}</div>`:''}
+      ${bearbeiten}
+      ${aktionen}
+    </div>`;
+  }
+
   return `<div class="karte ${klasse}">
     <div class="zeile1">
       <span class="nr">${esc(v.nr)}</span>
+      ${quelleMarke}
       <span class="marke ${esc(st)}">${esc(STATUS_TEXT[st]||st)}</span>
     </div>
 
@@ -351,6 +402,7 @@ function zeichne(){
   let zeigen = ALLE;
   if (FILTER==='aktiv')      zeigen = ALLE.filter(v=>aktiv.has(v.status));
   else if (FILTER==='heute') zeigen = ALLE.filter(v=>v.abholtag===HEUTE);
+  else if (FILTER.startsWith('q:')) zeigen = ALLE.filter(v=>(v.quelle||'shop')===FILTER.slice(2));
   else if (FILTER!=='alle')  zeigen = ALLE.filter(v=>v.status===FILTER);
 
   document.getElementById('zaehler').textContent =
@@ -372,6 +424,11 @@ function filterZeichnen(){
     ['verfallen',  `Abgelaufen (${zaehl('verfallen')})`],
     ['alle',       `Alle (${ALLE.length})`],
   ];
+  // Herkunft nur anbieten, wenn es sie auch gibt - leere Knoepfe helfen niemandem.
+  for (const [schluessel, text] of Object.entries(QUELLE_TEXT)) {
+    const n = ALLE.filter(v => (v.quelle||'shop') === schluessel).length;
+    if (n) knoepfe.push(['q:'+schluessel, `${text} (${n})`]);
+  }
   document.getElementById('filter').innerHTML = knoepfe.map(([k,t])=>
     `<button data-filter="${k}" aria-pressed="${FILTER===k}">${t}</button>`).join('');
 }

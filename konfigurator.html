@@ -7480,7 +7480,7 @@ async function submitAnfrage(ev){
     var prodName=cart.length?withConf(cart[0].conf,configTitle):'Konfiguration';
 
     var r=await fetch('https://deinefenster-email.sarahchrist.workers.dev',{ method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ customer_email:email, subject:'[DeineFenster.de] Neue Anfrage '+nr+': '+prodName, text:L.join('\n'), html:internHtml, confirmation:{name:name,offerId:nr,detailsHtml:detailsHtml}, sketches:sketches, website:'' }) });
+      body:JSON.stringify({ quelle:'konfigurator', customer_email:email, subject:'[DeineFenster.de] Neue Anfrage '+nr+': '+prodName, text:L.join('\n'), html:internHtml, confirmation:{name:name,offerId:nr,detailsHtml:detailsHtml}, sketches:sketches, website:'' }) });
     if(!r.ok) throw new Error('HTTP '+r.status);
 
     lastAnfrageNr=nr; cartLeeren(); anfrageView='done'; window.scrollTo({top:0,behavior:'smooth'}); render();
