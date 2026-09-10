@@ -939,54 +939,11 @@ function pruefeMassErkennung(text) {
   }
 }
 
-/* ─── Alle Maß-Paare (Breite×Höhe) aus einem Text ziehen ───
-   Für Sammel-Auktionen, wo viele Fenster-Maße im Beschreibungstext untereinander stehen. */
-function parseMasse(text) {
-  const re = /(\d{3,4})\s*[x×*]\s*(\d{3,4})/gi;
-  const out = []; let m;
-  while ((m = re.exec(text)) !== null) {
-    out.push([parseInt(m[1], 10), parseInt(m[2], 10)]);
-  }
-  return out;
-}
-
-/* ─── Wie genau trifft ein Artikel das gesuchte Maß? ─────────────────────────
-   Ohne Kennzeichnung sieht der Kunde in der Ergebnisliste nicht, welcher Artikel
-   sein Maß wirklich hat und welcher 8 cm daneben liegt — beide stehen gleich da.
-   Geprüft werden die Hauptmaße des Inserats und jedes Maß-Paar aus Titel und
-   Beschreibung (Sammel-Auktionen), jeweils in beiden Orientierungen. Es gewinnt
-   das Paar, das am nächsten am Wunsch liegt.
-   Rückgabe: { stufe, breite, hoehe, db, dh, summe } — db/dh sind vorzeichenbehaftet
-   (negativ = Artikel ist kleiner als gewünscht), oder null wenn nichts passt. */
-const MASS_FAST_MM = 20;   // bis 2 cm je Seite gilt als „fast genau" — so weit geht
-                           // ein Fenster real noch in dieselbe Öffnung
-
-function massBewertung(p, f) {
-  if (f.breite === null && f.hoehe === null) return null;
-  const tol = f.toleranz / 100;
-  const inTol = (val, ziel) => ziel == null || (val >= ziel * (1 - tol) && val <= ziel * (1 + tol));
-
-  const kandidaten = [];
-  if (p.breite_mm > 0 && p.hoehe_mm > 0) kandidaten.push([p.breite_mm, p.hoehe_mm]);
-  parseMasse((p.titel || '') + ' \n ' + (p.beschreibung || '')).forEach(([b, h]) => {
-    kandidaten.push([b, h]);
-    kandidaten.push([h, b]);   // quer eingebaut ist dasselbe Fenster
-  });
-
-  let best = null;
-  for (const [b, h] of kandidaten) {
-    if (!inTol(b, f.breite) || !inTol(h, f.hoehe)) continue;
-    const db = f.breite === null ? 0 : b - f.breite;
-    const dh = f.hoehe === null ? 0 : h - f.hoehe;
-    const summe = Math.abs(db) + Math.abs(dh);
-    if (!best || summe < best.summe) best = { breite: b, hoehe: h, db: db, dh: dh, summe: summe };
-  }
-  if (!best) return null;
-
-  const groesste = Math.max(Math.abs(best.db), Math.abs(best.dh));
-  best.stufe = groesste === 0 ? 'exakt' : (groesste <= MASS_FAST_MM ? 'fast' : 'aehnlich');
-  return best;
-}
+/* ─── Maß-Bewertung: parseMasse() und massBewertung() ─────────────────────────
+   Liegen in js/shop-mass-util.js, weil sie dort ohne Browser prüfbar sind
+   (test/shop-mass.test.js). Breite bleibt Breite, Höhe bleibt Höhe — die frühere
+   Zusatzprüfung „quer eingebaut ist dasselbe Fenster" hat 1200 × 1500 als genauen
+   Treffer für die Suche 1500 × 1200 ausgegeben und ist deshalb entfallen. */
 
 /* Millimeter kundenlesbar: glatte Werte als Zentimeter, krumme bleiben Millimeter. */
 function laengeTxt(mm, inMm) {
@@ -1005,21 +962,28 @@ function massAbweichungText(m) {
   return teile.join(' · ');
 }
 
+/* Was auf dem Band steht, muss halten, was es verspricht: „Genau dein Maß" nur, wenn
+   der Kunde Breite UND Höhe vorgegeben hat und beide stimmen. Wer nur ein Feld ausfüllt,
+   liest „Genau deine Breite" — geprüft wurde ja auch nur die. */
+function massTrefferLabel(m) {
+  if (m.achsen === 'breite') return 'Genau deine Breite';
+  if (m.achsen === 'hoehe')  return 'Genau deine Höhe';
+  return 'Genau dein Maß';
+}
+
 /* Das Band ganz oben auf der Karte. Weicht das getroffene Maß von den Hauptmaßen der
-   Karte ab (Sammelinserat oder quer eingebaut), wird es genannt — sonst stünde auf der
+   Karte ab (Sammelinserat mit Preistabelle), wird es genannt — sonst stünde auf der
    Karte ein anderes Maß als das, wegen dem sie im Ergebnis auftaucht. */
 function massBandHTML(m, p) {
   if (!m) return '';
   let fund = '';
   if (m.breite !== p.breite_mm || m.hoehe !== p.hoehe_mm) {
-    const gedreht = m.breite === p.hoehe_mm && m.hoehe === p.breite_mm;
-    fund = ' <span class="mass-band-fund">' + m.breite + ' × ' + m.hoehe + ' mm'
-         + (gedreht ? ' (gedreht)' : '') + '</span>';
+    fund = ' <span class="mass-band-fund">' + m.breite + ' × ' + m.hoehe + ' mm</span>';
   }
   if (m.stufe === 'exakt') {
     return '<div class="mass-band mass-band--exakt">'
          + '<span class="material-symbols-outlined" aria-hidden="true">check_circle</span>'
-         + '<span>Genau dein Maß' + fund + '</span></div>';
+         + '<span>' + massTrefferLabel(m) + fund + '</span></div>';
   }
   if (m.stufe === 'fast') {
     return '<div class="mass-band mass-band--fast">'
@@ -1039,8 +1003,7 @@ function massDiffHTML(m, p) {
   if (!m || m.stufe === 'exakt' || m.stufe === 'fast') return '';
   let fund = '';
   if (m.breite !== p.breite_mm || m.hoehe !== p.hoehe_mm) {
-    const gedreht = m.breite === p.hoehe_mm && m.hoehe === p.breite_mm;
-    fund = ' (' + m.breite + ' × ' + m.hoehe + ' mm' + (gedreht ? ', gedreht' : '') + ')';
+    fund = ' (' + m.breite + ' × ' + m.hoehe + ' mm)';
   }
   return '<p class="karte-mass-diff">' + massAbweichungText(m) + ' als gesucht' + fund + '</p>';
 }
