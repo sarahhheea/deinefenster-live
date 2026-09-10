@@ -1969,6 +1969,32 @@ const COLORS_ROLL=[
   {key:'roll-moosgruen',  n:'Moosgrün',             c:'#334b35'},
   {key:'roll-schwarz',    n:'Schwarz',              c:'#141414'}
 ];
+
+// Die Panzerfarben haengen von der Lamellenhoehe ab; nicht jeder Ton ist bei
+// jeder Hoehe lieferbar. Welche Hoehe verbaut wird, ergibt sich aus der
+// Rollladengroesse und steht hier nicht fest. Toene, die davon abhaengen,
+// werden deshalb nicht zur Auswahl gestellt, sondern mit dem Angebot bestaetigt.
+//
+// Bewusst KEIN Eintrag aus COLORS_ROLL entfernt: Farben stehen im Warenkorb als
+// Index. Ein geloeschter Eintrag verschiebt alle folgenden, gespeicherte Koerbe
+// zeigten sonst stillschweigend eine andere Farbe.
+//
+// Kasten und Fuehrungsschienen sind nicht betroffen -- die kommen aus der
+// RAL-Palette.
+const PANZER_GESPERRT=['roll-quarzgrau'];
+function _istPanzerteil(k){
+  return k==='panzer'||k==='endleiste'||k==='rlPanzer'||k==='rlEndleiste'; }
+function _rollGesperrt(k,co){
+  return _istPanzerteil(k) && PANZER_GESPERRT.indexOf(co.key)>=0; }
+// Liefert [{co,i}] -- der Index bleibt der COLORS_ROLL-Index, damit gespeicherte
+// Auswahlen weiter stimmen.
+function rollFarbenFuer(k){
+  var raus=[];
+  for(var i=0;i<COLORS_ROLL.length;i++){
+    if(!_rollGesperrt(k,COLORS_ROLL[i])) raus.push({co:COLORS_ROLL[i],i:i});
+  }
+  return raus;
+}
 const COLORS_HOLZ_KIEFER=[
   {key:'weiss',            n:'Wei\u00df',       c:'#ebebeb'},
   {key:'holz-eiche-hell',  n:'Eiche Hell',   c:'#925938'},
@@ -3772,6 +3798,15 @@ function _klemmFarbIdx(conf){
     var L=liste(k)||[];
     if(typeof v!=='number' || !isFinite(v) || v<0 || v>=L.length) conf[k]=(k==='panzer'||k==='endleiste')?null:0;
   });
+  // Ein aelterer Korb kann eine Panzerfarbe enthalten, die nicht mehr zur
+  // Auswahl steht. Sie wird sichtbar zurueckgesetzt -- "passend zum Rahmen"
+  // bzw. "wie Panzer" -- statt still stehen zu bleiben.
+  ['panzer','endleiste','rlPanzer','rlEndleiste'].forEach(function(k){
+    var v=conf[k];
+    if(typeof v!=='number' || !COLORS_ROLL[v]) return;
+    if(!_rollGesperrt(k,COLORS_ROLL[v])) return;
+    conf[k]=(k==='rlPanzer')?0:null;
+  });
   return conf;
 }
 
@@ -4484,7 +4519,7 @@ function panelHTML(){
 
     const fwFelder=(key,cur,ersteLabel,ersteFarbe)=>
       `<div class="sw ${cur==null?'on':''}" onclick="set('${key}',null)"><div class="chip" style="background:${ersteFarbe}"></div><div class="nm">${ersteLabel}</div></div>`
-      + COLORS_ROLL.map((co,i)=>`<div class="sw ${cur===i?'on':''}" onclick="set('${key}',${i})"><div class="chip" style="background:${co.c}"></div><div class="nm">${co.n}</div></div>`).join('');
+      + rollFarbenFuer(key).map(({co,i})=>`<div class="sw ${cur===i?'on':''}" onclick="set('${key}',${i})"><div class="chip" style="background:${co.c}"></div><div class="nm">${co.n}</div></div>`).join('');
     const fwBlock=(titel,key,cur,ersteLabel,ersteFarbe,aktFarbe,aktText,hinweis)=>{
       const offen=_pzOffen[key];
       return `<div class="grp-title"${titel==='Farbe der Endleiste'?' style="margin-top:22px"':''}>${titel}</div>
@@ -4494,13 +4529,13 @@ function panelHTML(){
           <svg class="fw-pf${offen?' auf':''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         ${offen?`<div class="swatches fw-raster">${fwFelder(key,cur,ersteLabel,ersteFarbe)}</div>`
-               :`<button type="button" class="fw-mehr" onclick="pzToggle('${key}')">Alle ${COLORS_ROLL.length} Rollladenfarben zeigen</button>`}
+               :`<button type="button" class="fw-mehr" onclick="pzToggle('${key}')">Alle ${rollFarbenFuer(key).length} Rollladenfarben zeigen</button>`}
         <div class="pzhint">${hinweis}</div>`;
     };
     const pzpick = S.roll!=='kein'? `<div class="card" style="margin-top:16px">`
       + fwBlock('Panzerfarbe','panzer',S.panzer,'passend zum Rahmen',COLORS_AKT()[S.outer].c,
                 panzerC(), panzerText(),
-                'Den Rollladen fertigt der Hersteller in 16 eigenen Farben — nicht in den Fensterfolien.')
+                'Den Panzer fertigt der Hersteller in eigenen Farben — nicht in den Fensterfolien. Welche Töne möglich sind, hängt zusätzlich von der Lamellenhöhe ab; wir bestätigen die Farbe mit dem Angebot.')
       + fwBlock('Farbe der Endleiste','endleiste',S.endleiste,'wie Panzer',panzerC(),
                 endleisteC(), endleisteText(),
                 'Die Endleiste ist die Abschlussleiste unten am Panzer.')
@@ -4597,7 +4632,7 @@ function panelHTML(){
 
     const felder=(key,cur,ersteLabel,ersteFarbe)=>
       (ersteLabel?`<div class="sw ${cur==null?'on':''}" onclick="set('${key}',null)"><div class="chip" style="background:${ersteFarbe}"></div><div class="nm">${ersteLabel}</div></div>`:'')
-      + COLORS_ROLL.map((co,i)=>`<div class="sw ${cur===i?'on':''}" onclick="set('${key}',${i})"><div class="chip" style="background:${co.c}"></div><div class="nm">${co.n}</div></div>`).join('');
+      + rollFarbenFuer(key).map(({co,i})=>`<div class="sw ${cur===i?'on':''}" onclick="set('${key}',${i})"><div class="chip" style="background:${co.c}"></div><div class="nm">${co.n}</div></div>`).join('');
     const block=(titel,key,cur,ersteLabel,ersteFarbe,aktFarbe,aktText,hinweis,erstesFeld)=>{
       const offen=_pzOffen[key];
       return `<div class="grp-title"${erstesFeld?'':' style="margin-top:22px"'}>${titel}</div>
@@ -4607,12 +4642,12 @@ function panelHTML(){
           <svg class="fw-pf${offen?' auf':''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         ${offen?`<div class="swatches fw-raster">${felder(key,cur,ersteLabel,ersteFarbe)}</div>`
-               :`<button type="button" class="fw-mehr" onclick="pzToggle('${key}')">Alle ${COLORS_ROLL.length} Farben zeigen</button>`}
+               :`<button type="button" class="fw-mehr" onclick="pzToggle('${key}')">Alle ${rollFarbenFuer(key).length} Farben zeigen</button>`}
         <div class="pzhint">${hinweis}</div>`;
     };
     return `<div class="card">`
       + block('Farbe des Panzers','rlPanzer',S.rlPanzer,null,null,rollFarbe('Panzer'),rollFarbeName('Panzer'),
-              'Der Panzer besteht aus Aluminium-Lamellen, die mit Polyurethan gefüllt sind.',true)
+              'Der Panzer besteht aus Aluminium-Lamellen, die mit Polyurethan gefüllt sind. Welche Farben möglich sind, hängt von der Lamellenhöhe ab; wir bestätigen die Farbe mit dem Angebot.',true)
       + block('Farbe der Endleiste','rlEndleiste',S.rlEndleiste,'wie Panzer',rollFarbe('Panzer'),rollEndC(),rollEndName(),
               'Die Endleiste ist die Abschlussleiste unten am Panzer — mit verdecktem Stopper.')
       + block('Farbe des Kastens','rlKastenF',S.rlKastenF,null,null,rollFarbe('KastenF'),rollFarbeName('KastenF'),
