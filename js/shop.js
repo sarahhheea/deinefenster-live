@@ -216,9 +216,34 @@ async function checkAuth() {
 }
 
 function setupLoggedInUI() {
-  // Login-Bar oben sichtbar machen + Email + Logout
+  // Verwaltungsmodus am Body markieren (blendet u. a. den WhatsApp-Knopf aus,
+  // der sonst den "Inserat anlegen"-Knopf unten rechts verdeckt).
+  document.body.classList.add('df-adminmodus');
+
+  // Login-Bar oben sichtbar machen + Email + Logout.
+  // Die Leiste liegt im Quelltext hinter der fixierten Navigation, war deshalb
+  // unsichtbar. Sie wird jetzt als oberstes Band fixiert und ihre Hoehe in
+  // --banner-h geschrieben - dieselbe Variable, mit der Nav, Util-Leiste,
+  // Warenkorb-Drawer und die sticky-Offsets rechnen. Dadurch rueckt alles
+  // automatisch um genau die Leistenhoehe nach unten.
   const bar = document.getElementById('loginStatusBar');
-  if (bar) bar.classList.remove('hidden');
+  if (bar) {
+    bar.classList.remove('hidden');
+    bar.classList.add('df-adminbar-fixed');
+    const setzeOffset = () => {
+      const h = bar.offsetHeight || 0;
+      document.documentElement.style.setProperty('--banner-h', h + 'px');
+      // Der Seiteninhalt startet bei 0 und wird von den fixen Leisten ueberdeckt;
+      // ohne dieses Padding wuerde die Leiste die oberste Zeile verschlucken.
+      document.body.style.paddingTop = h + 'px';
+    };
+    setzeOffset();
+    window.addEventListener('resize', setzeOffset);
+    // Nachmessen, wenn die Leiste erst durch Schriftnachladen oder Umbruch waechst -
+    // sonst steht --banner-h auf einem zu kleinen Wert und die Nav ueberdeckt sie wieder.
+    if (window.ResizeObserver) new ResizeObserver(setzeOffset).observe(bar);
+    window.addEventListener('load', setzeOffset);
+  }
   const eml = document.getElementById('loginStatusEmail');
   if (eml && STATE.user) eml.textContent = STATE.user.email;
   const logout = document.getElementById('logoutShopBtn');

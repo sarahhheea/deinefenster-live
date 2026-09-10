@@ -1807,12 +1807,24 @@ input[type="range"].range-clean::-moz-range-thumb {
   </div>
 </div>
 
+<!-- Verwaltungsmodus: Leiste als oberstes Band einhaengen.
+     Vorher lag sie im normalen Fluss unter der fixierten Navigation und war damit
+     unsichtbar - inklusive Logout-Knopf. Jetzt fixed auf top:0; shop.js setzt
+     --banner-h auf ihre Hoehe, wodurch Util-Leiste, Nav, Warenkorb-Drawer und alle
+     sticky-Offsets (die alle mit var(--banner-h) rechnen) automatisch nachruecken. -->
+<style>
+  #loginStatusBar.df-adminbar-fixed { position: fixed; top: 0; left: 0; right: 0; z-index: 61; }
+  /* Im Verwaltungsmodus ist der WhatsApp-Knopf ein reines Kunden-CTA und verdeckt
+     ausserdem den "Inserat anlegen"-Knopf (beide unten rechts). Daher ausblenden. */
+  body.df-adminmodus .df-wa-float { display: none !important; }
+  @media (max-width: 640px) { #loginStatusBar .df-adminbar-wer { display: none; } }
+</style>
 <!-- Login-Status-Bar — sichtbar nur wenn eingeloggt (von shop.js gesteuert) -->
 <div id="loginStatusBar" class="hidden text-white text-xs" style="background:#1a2f5e;border-bottom:1px solid rgba(118,169,250,0.2);">
   <div class="max-w-[1440px] mx-auto px-4 md:px-10 py-2 flex items-center justify-between gap-3">
     <span class="flex items-center gap-2">
       <span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">verified_user</span>
-      Eingeloggt als <strong id="loginStatusEmail">—</strong> · Verwaltungsmodus aktiv
+      <span class="df-adminbar-wer">Eingeloggt als <strong id="loginStatusEmail">—</strong> · </span>Verwaltungsmodus aktiv
     </span>
     <span class="flex items-center gap-3">
       <a href="shop-einstellen.html" class="hidden sm:inline-flex items-center gap-1 hover:underline"><span class="material-symbols-outlined" style="font-size:14px" aria-hidden="true">add</span>Neues Inserat</a>
@@ -2621,7 +2633,7 @@ input[type="range"].range-clean::-moz-range-thumb {
 <script src="js/sheets-config.js?v=2026-06-19-1mb" defer></script>
 <script src="js/shop-suche-util.js?v=2026-07-08-nrsuche" defer></script>
 <script src="js/shop-grundpreis-util.js?v=2026-08-05-grundpreis" defer></script>
-<script src="js/shop.js?v=2026-08-05-grundpreis" defer></script>
+<script src="js/shop.js?v=2026-09-10-adminbar" defer></script>
 
 <style>
 /* ===== NAV/Topbar/Mega/Mobile auf HELL (Shop-only Override, nav.css unangetastet) 2026-06-01 ===== */
