@@ -804,15 +804,18 @@
 function dfQuickFormSubmit(e){
   e.preventDefault();
   var form = e.target, msg = document.getElementById('dfQuickFormMsg'), btn = document.getElementById('dfQuickSubmit');
-  if(form.botcheck&&form.botcheck.value){return false;}
+  // Verdacht wird markiert, nie stillschweigend verworfen. Fuellt ein Browser
+  // das unsichtbare Feld selbst aus, ginge die Anfrage sonst spurlos verloren -
+  // ohne Meldung, ohne Mail, ohne dass es jemand merkt.
+  var _verdacht = (form.botcheck && form.botcheck.value) ? 'unsichtbares Feld ausgefuellt' : '';
   var _n=(form.Name.value||'').trim(),_k=(form.Kontakt.value||'').trim(),_a=(form.Anfrage.value||'').trim();
   var _subj=(form.subject&&form.subject.value)||'Quick-Anfrage';
   var _isMail=/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(_k);
   var _d=new Date();
   var _oid='QF-'+(_d.getFullYear().toString().slice(2)+String(_d.getMonth()+1).padStart(2,'0')+String(_d.getDate()).padStart(2,'0'))+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
   var _esc=function(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');};
-  var _txt=[_subj,'══════════════════════════════════','','Name:    '+_n,'Kontakt: '+_k+(_isMail?' (E-Mail)':' (Telefon)'),'','Anfrage:',_a,'','Anfrage-Nr.: '+_oid,'Datum: '+_d.toLocaleDateString('de-DE')].join('\n');
-  var payload={subject:'[DeineFenster.de] '+_subj+' – '+_n,text:_txt};
+  var _txt=[_subj,'══════════════════════════════════','','Name:    '+_n,'Kontakt: '+_k+(_isMail?' (E-Mail)':' (Telefon)'),'','Anfrage:',_a,'','Anfrage-Nr.: '+_oid,'Datum: '+_d.toLocaleDateString('de-DE')].concat(_verdacht?['','Hinweis Spamschutz: '+_verdacht+' — bitte pruefen, aber NICHT ignorieren.']:[]).join('\n');
+  var payload={subject:'[DeineFenster.de] '+(_verdacht?'[PRUEFEN] ':'')+_subj+' – '+_n,text:_txt};
   if(_isMail){payload.customer_email=_k;payload.confirmation={name:_n,offerId:_oid,detailsHtml:'<table width="100%" cellpadding="0" cellspacing="0" style="margin-top:6px;"><tr><td style="padding:9px 0;font-size:13px;color:#8a8273;vertical-align:top;width:32%;">Ihre Anfrage</td><td style="padding:9px 0;font-size:13px;color:#1a2336;line-height:1.6;white-space:pre-wrap;">'+_esc(_a)+'</td></tr></table>'};}
   btn.disabled = true; btn.style.opacity = '0.6'; btn.textContent = 'Wird gesendet…';
   fetch('https://deinefenster-email.sarahchrist.workers.dev', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) })
