@@ -2351,14 +2351,21 @@ function sketchAussen(){
   if(ANSICHT_ERZWUNGEN !== null) return ANSICHT_ERZWUNGEN;
   try{ return started && STEPS[cur] && STEPS[cur].key==='farbe' && S.colorTarget==='a'; }catch(e){ return false; }
 }
-function skizzeSeite(conf, aussen){
-  var vorher = ANSICHT_ERZWUNGEN;
+// Nummer, die in der Unterschrift der Skizze auftaucht. Nur fuer die Bilder in
+// der Mail gesetzt: dort liegen mehrere Skizzen untereinander und ohne Nummer
+// ist nicht erkennbar, welche Zeichnung zu welcher Zeile gehoert. Am Bildschirm
+// steht die Nummer schon daneben, deshalb bleibt sie dort leer.
+var SKIZZE_POSNR = null;
+
+function skizzeSeite(conf, aussen, posNr){
+  var vorher = ANSICHT_ERZWUNGEN, vorherNr = SKIZZE_POSNR;
   ANSICHT_ERZWUNGEN = aussen;
+  SKIZZE_POSNR = (posNr == null) ? null : posNr;
   try { return withConf(conf, function(){ return stageSVG(); }); }
-  finally { ANSICHT_ERZWUNGEN = vorher; }
+  finally { ANSICHT_ERZWUNGEN = vorher; SKIZZE_POSNR = vorherNr; }
 }
 
-function skizzeKompakt(conf){ return skizzeSeite(conf,false); }
+function skizzeKompakt(conf, posNr){ return skizzeSeite(conf,false,posNr); }
 
 var TUER_BUEHNE_SEITE = null;
 var TUER_SEITE_ERZWUNGEN = null;
@@ -2517,6 +2524,7 @@ function skizzeHinges(open,hinge,gx,gy,sashW,gh,SFR,line){
 function skizzeUnterschrift(x, y, breite, DT, aussenSeite){
   var ca = (COLORS_AKT()[S.outer]||{}).n || 'Wei\u00df', ci = (COLORS_AKT()[S.inner]||{}).n || 'Wei\u00df';
   var seite = aussenSeite ? 'Ansicht von au\u00dfen' : 'Ansicht von innen';
+  if (SKIZZE_POSNR != null) seite = 'Position ' + SKIZZE_POSNR + '   \u00b7   ' + seite;
   var farben = (ca===ci) ? ('Rahmen ' + ca) : ('au\u00dfen ' + ca + '   \u00b7   innen ' + ci);
   var mitte = x + breite/2;
   return '<text x="'+mitte+'" y="'+y+'" text-anchor="middle" font-family="Inter,Arial" font-weight="700"'
@@ -5420,6 +5428,13 @@ function configTitle(){
   if(S.prod==='balkon') return 'Balkontür · '+profilName(S.profile);
   return profilText();
 }
+// Was der Kunde liest. "IGLO 5 Classic" allein sagt einer Privatperson nichts —
+// davor gehoert, um was fuer ein Bauteil es sich handelt. Steht die Gattung
+// schon im Titel (Balkontuer, Haustuer, PSK Schiebetuer), bleibt er, wie er ist.
+function configTitleLang(){
+  var t=configTitle(), p=prodName();
+  return (t.indexOf(p)>=0) ? t : (p+' \u00b7 '+t);
+}
 const MAT_PRODN={kunststoff:'Kunststofffenster',holz:'Holzfenster',alu:'Aluminiumfenster'};
 function prodName(){
   if(S.prod==='fenster') return MAT_PRODN[S.material]||'Kunststofffenster';
@@ -7025,7 +7040,7 @@ function posCard(it,i){
   const conf=it.conf, q=conf.anzahl||1;
   const unit=posUnit(conf), line=(unit==null)?null:unit*q;
   const sketch=skizzeKompakt(conf);
-  const title=withConf(conf,configTitle);
+  const title=withConf(conf,configTitleLang);
   return `<div class="pos-card">
     <div class="pos-head"><span class="pos-no">Pos. ${i+1}</span></div>
     <div class="pos-body">
@@ -7072,7 +7087,7 @@ function anfrageHTML(){
 function formHTML(t){
 
   const mini=cart.map((it,i)=>{
-    const q=it.conf.anzahl||1, nm=withConf(it.conf,configTitle);
+    const q=it.conf.anzahl||1, nm=withConf(it.conf,configTitleLang);
     const unit=posUnit(it.conf);
     return `<div class="co-item">`
       +`<div class="co-ihead"><span class="co-nr">Position ${i+1}</span><span class="co-anz">${q} Stück</span></div>`
@@ -7100,7 +7115,7 @@ function formHTML(t){
         <div class="field"><label for="co-msg">Nachricht <span class="opt">(optional)</span></label><textarea id="co-msg" name="msg" rows="2" placeholder="Anmerkungen, Wunsch-Liefertermin, Fragen …"></textarea></div>
         <label class="consent"><input type="checkbox" name="dse" required aria-required="true"><span>Ich habe die <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutzerkl&auml;rung</a> gelesen und stimme der Verarbeitung meiner Angaben zur Bearbeitung meiner Anfrage zu. <span class="req">*</span></span></label>
         <div class="co-final">
-          <span class="cf-was">${cart.length===1 ? `${cart[0].conf.anzahl||1} × ${withConf(cart[0].conf,configTitle)}` : `${cart.length} Positionen · ${t.qty} Stück`}</span>
+          <span class="cf-was">${cart.length===1 ? `${cart[0].conf.anzahl||1} × ${withConf(cart[0].conf,configTitleLang)}` : `${cart.length} Positionen · ${t.qty} Stück`}</span>
           <span class="cf-sum tnum">${totalText(t)}</span>
           <span class="cf-note">${t.offen?`${t.offen===1?'1 Position':t.offen+' Positionen'} auf Anfrage${t.sub?' \u2014 in dieser Summe nicht enthalten':''} · `:''}${totalOffen(t)?'':'inkl. 19 % MwSt · '}${lief?'inkl. Lieferung':'Abholung im Lager'} · unverbindlich, kein Kaufvertrag</span>
         </div>
@@ -7448,7 +7463,7 @@ async function submitAnfrage(ev){
     for(let i=0;i<cart.length;i++){
       let it=cart[i], conf=it.conf, q=conf.anzahl||1;
       let unit=posUnit(conf), line=(unit==null?null:unit*q);
-      let title=withConf(conf,configTitle);
+      let title=withConf(conf,configTitleLang);
       let ai=withConf(conf,anschlagInfo);
       let mass=conf.w+' × '+conf.h+' mm';
       let srows=withConf(conf,summaryRows);
@@ -7456,7 +7471,7 @@ async function submitAnfrage(ev){
       let cid='pos'+i, hasSketch=false;
       try{
 
-        let svg=skizzeKompakt(conf), png=null;
+        let svg=skizzeKompakt(conf, i+1), png=null;
         for(let versuch=0; versuch<2 && !hasSketch; versuch++){
           try{
             png=await skizzeAufLeinwand(svg, 528, 640);
@@ -7481,7 +7496,7 @@ async function submitAnfrage(ev){
       });
 
       L.push('');
-      L.push('Position '+(i+1)+': '+q+' × '+withConf(conf,configTitle));
+      L.push('Position '+(i+1)+': '+q+' × '+title);
       L.push('  Maße:     '+mass);
       L.push('  '+ai.label+': '+ai.norm+(ai.ansicht?' · '+ai.ansicht:''));
       L.push('            '+ai.klartext+(ai.warntext?' ('+ai.warntext+')':''));
@@ -7503,7 +7518,7 @@ async function submitAnfrage(ev){
     var vorschau=cart.length+(cart.length===1?' Position':' Positionen')+' · '+(totalOffen(t)?'Preis auf Anfrage':eur(t.total))+' · '+name+(tel?' · '+tel:'');
     var internHtml=_mailShell(_mailKopf(nr,t)+_kundeBox(name,email,tel,adr,msg)+posHtml+totalsHtml, vorschau);
     var detailsHtml=posHtml+totalsHtml;
-    var prodName=cart.length?withConf(cart[0].conf,configTitle):'Konfiguration';
+    var betreffName=cart.length?withConf(cart[0].conf,configTitleLang):'Konfiguration';
 
     // Angaben der Anfrage in strukturierter Form.
     var _d=new Date(), _z=function(n){ return String(n).padStart(2,'0'); };
@@ -7521,7 +7536,7 @@ async function submitAnfrage(ev){
     };
 
     var r=await fetch('https://deinefenster-email.sarahchrist.workers.dev',{ method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ quelle:'konfigurator', customer_email:email, subject:'[DeineFenster.de] Neue Anfrage '+nr+': '+prodName, text:L.join('\n'), html:internHtml, anfrage:anfrage, confirmation:{name:name,offerId:nr,detailsHtml:detailsHtml}, sketches:sketches, website:'' }) });
+      body:JSON.stringify({ quelle:'konfigurator', customer_email:email, subject:'[DeineFenster.de] Neue Anfrage '+nr+': '+betreffName, text:L.join('\n'), html:internHtml, anfrage:anfrage, confirmation:{name:name,offerId:nr,detailsHtml:detailsHtml}, sketches:sketches, website:'' }) });
     if(!r.ok) throw new Error('HTTP '+r.status);
 
     lastAnfrageNr=nr; cartLeeren(); anfrageView='done'; window.scrollTo({top:0,behavior:'smooth'}); render();
@@ -8018,7 +8033,7 @@ function render(){
   document.getElementById('hSub').textContent=STEPS[cur].sub;
   document.getElementById('stage').innerHTML=stageSVG()+tuerSeitenUmschalter();
   skizzenFormMelden();
-  document.getElementById('summary').innerHTML='<div class="eb">Ihre Konfiguration</div><h3>'+configTitle()+'</h3>'+summaryPanel();
+  document.getElementById('summary').innerHTML='<div class="eb">Ihre Konfiguration</div><h3>'+configTitleLang()+'</h3>'+summaryPanel();
   (function(){ const k=STEPS[cur].key, h=kiHinweisHTML(k);
 
     const vorne = (k==='modell'||k==='oeffnung'||k==='aufteilung');
