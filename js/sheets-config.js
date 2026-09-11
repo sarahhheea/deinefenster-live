@@ -53,6 +53,15 @@ async function shopLogin(tokenOrPassword) {
       },
     });
     if (r.status === 200) {
+      // Ein 200 allein beweist nichts: das Repo ist oeffentlich, also antwortet
+      // GitHub jedem gueltigen Konto mit 200. Erst das Schreibrecht auf DIESES
+      // Repo unterscheidet den Betreiber von einem beliebigen Besucher.
+      // Der Server prueft genauso (zugangPruefen im Worker) -- hier gleichziehen,
+      // damit nicht zwei verschiedene Massstaebe fuer dieselbe Anmeldung gelten.
+      const daten = await r.json().catch(() => null);
+      if (!daten || !daten.permissions || daten.permissions.push !== true) {
+        return { ok: false, error: 'Dieser Zugangsschluessel hat keine Schreibrechte.' };
+      }
       setShopToken(t);
       return { ok: true, token: 'ok' };
     }

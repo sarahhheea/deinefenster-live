@@ -2,11 +2,18 @@
 <html lang="de">
 <head>
 <meta charset="utf-8"/>
+  <!-- Schutzregeln fuer den Browser. GitHub Pages kann keine echten Header setzen,
+       deshalb hier im Seitenkopf. Schuetzt davor, dass eingeschleuster Code nachlaedt
+       oder Daten an fremde Adressen schickt. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; script-src 'self' 'unsafe-inline' https://plausible.io; style-src 'self' 'unsafe-inline' https://fonts.bunny.net; font-src 'self' data: https://fonts.bunny.net; img-src 'self' data: blob: https://bilder.deinefenster.de; connect-src 'self' https://deinefenster-email.sarahchrist.workers.dev https://plausible.io https://api.github.com https://bilder.deinefenster.de; frame-src https://maps.google.com https://www.google.com">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <meta name="robots" content="noindex, nofollow"/>
-<title>Reservierung bestätigen — DeineFenster.de</title>
+<title>Bitte bestätigen — DeineFenster.de</title>
 <link rel="icon" href="img/logo/favicon-32.png?v=20260518"/>
 <link rel="stylesheet" href="fonts/material-symbols.css"/>
+<script src="js/shop-suche-util.js?v=2026-09-11"></script>
 <style>
 /* Eigenstaendige Seite, bewusst schlank: sie wird aus einem WhatsApp-Chat
    heraus geoeffnet, oft unterwegs bei schlechtem Netz. Farben aus dem Shop. */
@@ -24,10 +31,12 @@ body{margin:0;background:var(--grund);color:var(--text);
   font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
 .huelle{max-width:520px;margin:0 auto;padding:0 0 50px}
 
-.kopf{background:var(--karte);border-bottom:1px solid var(--linie);padding:16px 18px}
-.marke{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--blau)}
-.kopf h1{font-size:20px;font-weight:800;margin:5px 0 0}
-.kopf p{margin:5px 0 0;font-size:14px;color:var(--leise)}
+/* Kopf in Markenblau: die Seite soll wie der Beleg wirken, den der Kunde
+   gleich per Mail bekommt - nicht wie ein Formular. */
+.kopf{background:var(--blau);padding:22px 20px;text-align:center}
+.marke{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#a8c8f2}
+.kopf h1{font-size:21px;font-weight:800;margin:7px 0 0;color:#fff}
+.kopf p{margin:5px 0 0;font-size:14px;color:#d6e4f7}
 
 .block{background:var(--karte);border:1px solid var(--linie);border-radius:12px;
   margin:14px 12px;padding:15px 16px}
@@ -44,10 +53,19 @@ body{margin:0;background:var(--grund);color:var(--text);
   background:var(--grund);border:1px solid var(--linie);border-radius:6px;padding:3px 9px}
 .stand .l{font-size:11px;color:var(--blass);font-weight:600}
 .stand .v{font-family:ui-monospace,Menlo,monospace;font-weight:700;font-size:13.5px;word-spacing:-.2em}
-.preisbox{margin-top:13px;padding-top:12px;border-top:1px solid var(--linie);
-  display:flex;justify-content:space-between;align-items:flex-end}
-.preisbox .l{font-size:12px;color:var(--blass)}
-.preisbox .v{font-size:22px;font-weight:800;color:var(--blau)}
+/* Positionsliste wie auf einem Beleg - der gaengige Aufbau einer
+   Bestellzusammenfassung, damit die Seite nicht wie ein Formular wirkt. */
+.posliste{margin-top:14px;padding-top:12px;border-top:1px solid var(--linie)}
+.poszeile{display:flex;justify-content:space-between;gap:12px;padding:8px 0;
+  font-size:14px;border-bottom:1px solid #f0f3f7}
+.poszeile:last-of-type{border-bottom:none}
+.poszeile .k{color:var(--blass);flex:none}
+.poszeile .v{font-weight:700;text-align:right}
+.mono{font-family:ui-monospace,Menlo,monospace;word-spacing:-.2em}
+.mengeklein{width:62px;text-align:center;padding:5px 6px;font-size:14px;
+  border:1.5px solid var(--linie);border-radius:7px;font-family:inherit;color:var(--text)}
+.possumme{display:flex;justify-content:space-between;margin-top:10px;padding-top:11px;
+  border-top:2px solid var(--linie);font-size:18px;font-weight:800;color:var(--text)}
 .fest{margin-top:9px;font-size:12px;color:var(--blass);line-height:1.5}
 
 /* Formular */
@@ -69,6 +87,22 @@ textarea{resize:vertical;min-height:60px}
   font-size:12px;color:var(--leise);line-height:1.55}
 .recht b{color:var(--text)}
 
+.knopf-such{
+  flex:none;background:var(--blau);color:#fff;border:none;border-radius:10px;
+  padding:11px 20px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;
+}
+.knopf-such:hover{background:var(--blau-tief)}
+.treffer{
+  display:flex;gap:11px;align-items:center;width:100%;text-align:left;
+  background:#fff;border:1.5px solid var(--linie);border-radius:10px;
+  padding:10px 12px;margin-bottom:8px;cursor:pointer;font-family:inherit;
+}
+.treffer:hover{border-color:var(--blau);background:var(--blau-hell)}
+.treffer img{width:52px;height:52px;flex:none;object-fit:cover;border-radius:7px;border:1px solid var(--linie)}
+.treffer .tt{min-width:0;flex:1}
+.treffer .t1{font-size:14px;font-weight:700;color:var(--text);line-height:1.3}
+.treffer .t2{font-size:12.5px;color:var(--leise);margin-top:2px}
+.treffer .t3{font-size:15px;font-weight:800;color:var(--blau);flex:none}
 .senden{width:100%;padding:15px;background:var(--blau);color:#fff;border:none;
   border-radius:11px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer}
 .senden:hover{background:var(--blau-tief)}
@@ -95,12 +129,29 @@ textarea{resize:vertical;min-height:60px}
 <div class="huelle">
 
   <div class="kopf">
-    <div class="marke">DeineFenster.de · Fensterhandel Christ</div>
-    <h1 id="ueberschrift">Reservierung bestätigen</h1>
-    <p id="unterzeile">Nur noch Ihre Daten — dann legen wir es für Sie zurück.</p>
+    <div class="marke">Türen und Fensterhandel Christ</div>
+    <h1 id="ueberschrift">Bitte bestätigen</h1>
+    <p id="unterzeile">Das haben wir für Sie zurückgelegt.</p>
   </div>
 
   <div id="laden" class="laden">Einen Moment, wir holen die Angaben …</div>
+
+  <!-- Ohne Nummer im Link: der Kunde kennt seine Standnummer, er hat ja danach
+       gefragt. So bleibt die WhatsApp-Schnellantwort immer derselbe Text. -->
+  <div id="suchBox" class="block" style="display:none">
+    <h3 style="margin-bottom:4px">Welches Stück möchten Sie reservieren?</h3>
+    <p style="margin:0 0 14px;font-size:14px;color:var(--leise);line-height:1.55">
+      Geben Sie die Standnummer ein — die steht in unserem Inserat und in Ihrer Nachricht,
+      zum Beispiel <b>0289 AA</b>.
+    </p>
+    <div style="display:flex;gap:9px">
+      <input type="text" id="suchFeld" placeholder="z.B. 0289 AA" autocomplete="off"
+             autocapitalize="characters" style="flex:1"/>
+      <button type="button" class="knopf-such" id="suchKnopf">Suchen</button>
+    </div>
+    <div id="suchFehler" class="meldung fehler" style="display:none"></div>
+    <div id="suchTreffer" style="margin-top:14px"></div>
+  </div>
 
   <div id="fehlerBox" class="block" style="display:none">
     <h3>Artikel nicht gefunden</h3>
@@ -122,30 +173,27 @@ textarea{resize:vertical;min-height:60px}
           <div class="stand" id="wStandBox"><span class="l">Standplatz</span><span class="v" id="wStand"></span></div>
         </div>
       </div>
-      <div class="preisbox">
-        <div>
-          <div class="l" id="preisLabel">Preis</div>
-          <div class="v" id="wPreis"></div>
-        </div>
-        <div style="text-align:right">
-          <label class="feld" style="margin:0">
-            <span>Menge</span>
-            <input type="number" id="menge" min="1" max="99" value="1" inputmode="numeric" style="width:88px;text-align:center"/>
-          </label>
-        </div>
+      <div class="posliste">
+        <div class="poszeile"><span class="k">Standplatz</span><span class="v mono" id="pStand">—</span></div>
+        <div class="poszeile"><span class="k">Maße</span><span class="v mono" id="pMasse">—</span></div>
+        <div class="poszeile"><span class="k">Menge</span><span class="v">
+          <input type="number" id="menge" min="1" max="99" step="1" value="1" inputmode="numeric" class="mengeklein"/> Stück
+        </span></div>
+        <div class="poszeile"><span class="k" id="preisLabel">Preis</span><span class="v mono" id="wPreis">—</span></div>
+        <div class="possumme"><span>Gesamt</span><span class="mono" id="wSumme">—</span></div>
       </div>
       <p class="fest">Diese Angaben stammen aus unserem Inserat und stehen fest.
          Es gilt der hier genannte Preis — nicht, was in einer Nachricht steht.</p>
+      <div id="bestaetigenHinweis" style="margin-top:12px;padding:11px 13px;background:var(--gruen-hell);border-radius:9px;font-size:13.5px;color:var(--gruen);line-height:1.55;">
+        <b>Das ist Ihr Stück.</b> Tragen Sie unten kurz Ihre Daten ein und bestätigen Sie —
+        mehr ist nicht nötig.
+      </div>
       <p class="fest" id="mengeHinweis" style="display:none;color:var(--gelb);font-weight:600"></p>
     </div>
 
     <div class="block">
-      <h3>Abholen oder liefern lassen?</h3>
-      <p style="margin:-4px 0 12px;font-size:13px;color:var(--leise)">Abholung freitags 10–17 Uhr und samstags 10–13 Uhr. Wenn Sie dann nicht können, schreiben Sie es unten dazu — wir finden einen Termin.</p>
-      <div class="wahl">
-        <button type="button" id="wAbholung" aria-pressed="true">Ich hole ab</button>
-        <button type="button" id="wLieferung" aria-pressed="false">Bitte liefern</button>
-      </div>
+      <h3>Für wen legen wir zurück?</h3>
+      <p style="margin:-4px 0 14px;font-size:13px;color:var(--leise)">Damit wir wissen, für wen wir zurücklegen.</p>
 
       <label class="feld"><span>Ihr Name *</span>
         <input type="text" id="name" required autocomplete="name" placeholder="Vor- und Nachname"/></label>
@@ -154,11 +202,23 @@ textarea{resize:vertical;min-height:60px}
       <label class="feld"><span>Telefon</span>
         <input type="tel" id="telefon" autocomplete="tel" placeholder="0171 12345678"/></label>
 
-      <label class="feld" id="adrFeld" style="display:none"><span>Lieferadresse *</span>
-        <textarea id="adresse" autocomplete="street-address" placeholder="Straße, Hausnummer&#10;PLZ Ort"></textarea></label>
-
       <label class="feld"><span>Anmerkung <span style="color:var(--blass);font-weight:500">(optional)</span></span>
         <textarea id="nachricht" placeholder="z.B. Wunschtermin, wenn Sie freitags oder samstags nicht können"></textarea></label>
+
+      <!-- Abholung oder Lieferung wird im Gespraech geklaert - die Seite fragt
+           es nicht mehr ab. Die Widerrufsbelehrung darf deshalb trotzdem nicht
+           fehlen: bei Lieferung an Verbraucher liegt Fernabsatz vor (14 Tage,
+           bei fehlender Belehrung 12 Monate + 14 Tage). Deshalb steht sie hier
+           fuer beide Faelle, mit klarer Abgrenzung. -->
+      <div class="recht">
+        <b>Abholung oder Lieferung</b> haben Sie mit uns abgesprochen — die Angaben dazu
+        stehen in Ihrer Bestätigung.<br><br>
+        <b>Widerrufsrecht bei Lieferung.</b> Wenn wir zu Ihnen liefern, können Sie als
+        Verbraucher innerhalb von 14 Tagen ab Erhalt der Ware ohne Angabe von Gründen
+        widerrufen. Die vollständige Belehrung samt Muster-Formular finden Sie in unseren
+        <a href="agb.html" target="_blank" rel="noopener">AGB</a>. Bei Abholung auf dem Hof
+        besteht kein Widerrufsrecht, weil der Kauf dann vor Ort geschlossen wird.
+      </div>
 
       <label class="dse">
         <input type="checkbox" id="dse" required/>
@@ -166,14 +226,7 @@ textarea{resize:vertical;min-height:60px}
         gelesen und stimme der Verarbeitung meiner Daten zur Bearbeitung zu.</span>
       </label>
 
-      <div class="recht" id="widerruf" style="display:none">
-        <b>Widerrufsrecht.</b> Weil wir zu Ihnen liefern, können Sie den Kauf innerhalb von
-        14 Tagen ohne Angabe von Gründen widerrufen. Die vollständige Belehrung finden Sie in
-        unseren <a href="agb.html" target="_blank">AGB</a>. Bei Abholung auf dem Hof entfällt
-        das, weil der Kauf dann vor Ort geschlossen wird.
-      </div>
-
-      <button type="submit" class="senden" id="senden" style="margin-top:14px">Jetzt verbindlich reservieren</button>
+      <button type="submit" class="senden" id="senden" style="margin-top:14px">Ja, so ist es richtig</button>
       <div id="meldung" class="meldung fehler" style="display:none"></div>
       <p class="fest" style="text-align:center;margin-top:11px">
         Sie erhalten sofort eine Bestätigung per E-Mail mit allen Angaben.
@@ -199,7 +252,7 @@ textarea{resize:vertical;min-height:60px}
 <script>
 const WORKER   = 'https://deinefenster-email.sarahchrist.workers.dev/shop-anfrage';
 const KATALOG  = 'data/shop-produkte.json';
-let ARTIKEL = null, MODUS = 'abholung';
+let ARTIKEL = null;
 
 function esc(s){ return String(s==null?'':s)
   .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
@@ -241,13 +294,25 @@ function zeigeArtikel(p){
   if (p.standnummer) document.getElementById('wStand').textContent = p.standnummer;
   else document.getElementById('wStandBox').style.display = 'none';
   document.getElementById('wPreis').textContent = euro(preisVon(p));
+  document.getElementById('pStand').textContent = p.standnummer || '—';
+  document.getElementById('pMasse').textContent = `${p.breite_mm} × ${p.hoehe_mm} mm`;
+  rechneSumme();
   document.getElementById('laden').style.display = 'none';
+  document.getElementById('suchBox').style.display = 'none';
   document.getElementById('formular').style.display = '';
   pruefeMenge();
+  window.scrollTo(0,0);
+}
+
+function rechneSumme(){
+  if (!ARTIKEL) return;
+  const n = Number(document.getElementById('menge').value) || 1;
+  document.getElementById('wSumme').textContent = euro(preisVon(ARTIKEL) * n);
 }
 
 function pruefeMenge(){
   if (!ARTIKEL) return;
+  rechneSumme();
   const el = document.getElementById('menge');
   const hin = document.getElementById('mengeHinweis');
   const n = Number(el.value) || 1;
@@ -259,28 +324,73 @@ function pruefeMenge(){
   } else { hin.style.display = 'none'; }
 }
 
-function setzeModus(m){
-  MODUS = m;
-  const ab = m === 'abholung';
-  document.getElementById('wAbholung').setAttribute('aria-pressed', ab);
-  document.getElementById('wLieferung').setAttribute('aria-pressed', !ab);
-  document.getElementById('adrFeld').style.display = ab ? 'none' : '';
-  document.getElementById('widerruf').style.display = ab ? 'none' : '';
-  document.getElementById('adresse').required = !ab;
-}
+let LISTE = [];
 
 async function laden(){
   const par = new URLSearchParams(location.search);
   const wunsch = par.get('nr') || par.get('id') || par.get('q');
-  if (!wunsch){ zeigeFehler(); return; }
   try {
     const r = await fetch(KATALOG, { cache: 'no-store' });
     const d = await r.json();
-    const liste = Array.isArray(d) ? d : (d.produkte || []);
-    const treffer = artikelSuchen(liste, wunsch);
-    if (!treffer) { zeigeFehler(); return; }
-    zeigeArtikel(treffer);
-  } catch(e){ zeigeFehler(); }
+    LISTE = (Array.isArray(d) ? d : (d.produkte || [])).filter(p => p && p.aktiv !== false);
+  } catch(e){ zeigeFehler(); return; }
+
+  if (wunsch){
+    const treffer = artikelSuchen(LISTE, wunsch);
+    if (treffer){ zeigeArtikel(treffer); return; }
+    // Nummer im Link passt nicht: nicht abweisen, sondern suchen lassen
+    zeigeSuche(wunsch);
+    return;
+  }
+  zeigeSuche('');
+}
+
+function zeigeSuche(vorbelegt){
+  document.getElementById('laden').style.display = 'none';
+  document.getElementById('suchBox').style.display = '';
+  const feld = document.getElementById('suchFeld');
+  if (vorbelegt){ feld.value = vorbelegt; suchen(); }
+  feld.focus();
+}
+
+// Nutzt die tolerante Standnummer-Erkennung des Shops (js/shop-suche-util.js):
+// "741B", "Nr 741" und "741 B" finden dasselbe Stueck.
+function suchen(){
+  const q = document.getElementById('suchFeld').value.trim();
+  const fehler = document.getElementById('suchFehler');
+  const box = document.getElementById('suchTreffer');
+  fehler.style.display = 'none';
+  box.innerHTML = '';
+  if (!q){ return; }
+
+  const passt = typeof nummerTreffer === 'function'
+    ? LISTE.filter(p => nummerTreffer(q, p.standnummer))
+    : LISTE.filter(p => schluessel(p.standnummer) === schluessel(q));
+
+  if (!passt.length){
+    fehler.textContent = 'Dazu finden wir nichts. Bitte prüfen Sie die Nummer — '
+      + 'oder melden Sie sich kurz bei uns, wir schauen nach.';
+    fehler.style.display = '';
+    return;
+  }
+  if (passt.length === 1){ zeigeArtikel(passt[0]); return; }
+
+  box.innerHTML = '<p style="font-size:13px;color:var(--leise);margin:0 0 9px">'
+    + passt.length + ' Treffer — bitte auswählen:</p>'
+    + passt.slice(0,12).map((p,i) => {
+        const bild = Array.isArray(p.bilder) && p.bilder.length ? p.bilder[0] : '';
+        return `<button type="button" class="treffer" data-i="${i}">
+          ${bild ? `<img src="${esc(bild)}" alt="" loading="lazy"/>` : ''}
+          <span class="tt">
+            <span class="t1">${esc(p.titel || '')}</span>
+            <span class="t2">${p.breite_mm} × ${p.hoehe_mm} mm · Nr. ${esc(p.standnummer || '')}</span>
+          </span>
+          <span class="t3">${euro(preisVon(p))}</span>
+        </button>`;
+      }).join('');
+  box.querySelectorAll('.treffer').forEach(b => {
+    b.addEventListener('click', () => zeigeArtikel(passt[Number(b.dataset.i)]));
+  });
 }
 
 function zeigeFehler(){
@@ -291,8 +401,10 @@ function zeigeFehler(){
 document.addEventListener('DOMContentLoaded', () => {
   laden();
   document.getElementById('menge').addEventListener('input', pruefeMenge);
-  document.getElementById('wAbholung').addEventListener('click', () => setzeModus('abholung'));
-  document.getElementById('wLieferung').addEventListener('click', () => setzeModus('lieferung'));
+  document.getElementById('suchKnopf').addEventListener('click', suchen);
+  document.getElementById('suchFeld').addEventListener('keydown', e => {
+    if (e.key === 'Enter'){ e.preventDefault(); suchen(); }
+  });
 
   document.getElementById('formular').addEventListener('submit', async e => {
     e.preventDefault();
@@ -303,12 +415,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const name  = document.getElementById('name').value.trim();
     const email = document.getElementById('email').value.trim();
-    const adr   = document.getElementById('adresse').value.trim();
     if (!name || !email || !document.getElementById('dse').checked){
       zeige('Bitte Name, E-Mail und die Zustimmung ausfüllen.'); return;
-    }
-    if (MODUS === 'lieferung' && !adr){
-      zeige('Für die Lieferung brauchen wir Ihre Adresse.'); return;
     }
 
     knopf.disabled = true;
@@ -322,8 +430,7 @@ document.addEventListener('DOMContentLoaded', () => {
       name, email,
       telefon: document.getElementById('telefon').value.trim(),
       menge: document.getElementById('menge').value,
-      nachricht: (MODUS === 'lieferung' ? 'Lieferung erwünscht an:\n' + adr : 'Abholung auf dem Hof')
-                 + (anmerkung ? '\n\n' + anmerkung : ''),
+      nachricht: anmerkung,
       dse: true,
     };
 
@@ -347,7 +454,7 @@ document.addEventListener('DOMContentLoaded', () => {
       zeige((err && err.message ? err.message + ' ' : '')
         + 'Bitte melden Sie sich direkt: WhatsApp 01521 1344756 oder 03381 214 83 73.');
       knopf.disabled = false;
-      knopf.textContent = 'Jetzt verbindlich reservieren';
+      knopf.textContent = 'Ja, so ist es richtig';
     }
   });
 });
