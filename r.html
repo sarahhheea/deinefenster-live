@@ -51,10 +51,19 @@ body{margin:0;background:var(--grund);color:var(--text);
   background:var(--grund);border:1px solid var(--linie);border-radius:6px;padding:3px 9px}
 .stand .l{font-size:11px;color:var(--blass);font-weight:600}
 .stand .v{font-family:ui-monospace,Menlo,monospace;font-weight:700;font-size:13.5px;word-spacing:-.2em}
-.preisbox{margin-top:13px;padding-top:12px;border-top:1px solid var(--linie);
-  display:flex;justify-content:space-between;align-items:flex-end}
-.preisbox .l{font-size:12px;color:var(--blass)}
-.preisbox .v{font-size:22px;font-weight:800;color:var(--blau)}
+/* Positionsliste wie auf einem Beleg - der gaengige Aufbau einer
+   Bestellzusammenfassung, damit die Seite nicht wie ein Formular wirkt. */
+.posliste{margin-top:14px;padding-top:12px;border-top:1px solid var(--linie)}
+.poszeile{display:flex;justify-content:space-between;gap:12px;padding:8px 0;
+  font-size:14px;border-bottom:1px solid #f0f3f7}
+.poszeile:last-of-type{border-bottom:none}
+.poszeile .k{color:var(--blass);flex:none}
+.poszeile .v{font-weight:700;text-align:right}
+.mono{font-family:ui-monospace,Menlo,monospace;word-spacing:-.2em}
+.mengeklein{width:62px;text-align:center;padding:5px 6px;font-size:14px;
+  border:1.5px solid var(--linie);border-radius:7px;font-family:inherit;color:var(--text)}
+.possumme{display:flex;justify-content:space-between;margin-top:10px;padding-top:11px;
+  border-top:2px solid var(--linie);font-size:18px;font-weight:800;color:var(--text)}
 .fest{margin-top:9px;font-size:12px;color:var(--blass);line-height:1.5}
 
 /* Formular */
@@ -184,12 +193,8 @@ textarea{resize:vertical;min-height:60px}
     </div>
 
     <div class="block">
-      <h3>Abholen oder liefern lassen?</h3>
-      <p style="margin:-4px 0 12px;font-size:13px;color:var(--leise)">Abholung freitags 10–17 Uhr und samstags 10–13 Uhr. Wenn Sie dann nicht können, schreiben Sie es unten dazu — wir finden einen Termin.</p>
-      <div class="wahl">
-        <button type="button" id="wAbholung" aria-pressed="true">Ich hole ab</button>
-        <button type="button" id="wLieferung" aria-pressed="false">Bitte liefern</button>
-      </div>
+      <h3>Ihre Daten</h3>
+      <p style="margin:-4px 0 14px;font-size:13px;color:var(--leise)">Damit wir wissen, für wen wir zurücklegen.</p>
 
       <label class="feld"><span>Ihr Name *</span>
         <input type="text" id="name" required autocomplete="name" placeholder="Vor- und Nachname"/></label>
@@ -198,24 +203,29 @@ textarea{resize:vertical;min-height:60px}
       <label class="feld"><span>Telefon</span>
         <input type="tel" id="telefon" autocomplete="tel" placeholder="0171 12345678"/></label>
 
-      <label class="feld" id="adrFeld" style="display:none"><span>Lieferadresse *</span>
-        <textarea id="adresse" autocomplete="street-address" placeholder="Straße, Hausnummer&#10;PLZ Ort"></textarea></label>
-
       <label class="feld"><span>Anmerkung <span style="color:var(--blass);font-weight:500">(optional)</span></span>
         <textarea id="nachricht" placeholder="z.B. Wunschtermin, wenn Sie freitags oder samstags nicht können"></textarea></label>
+
+      <!-- Abholung oder Lieferung wird im Gespraech geklaert - die Seite fragt
+           es nicht mehr ab. Die Widerrufsbelehrung darf deshalb trotzdem nicht
+           fehlen: bei Lieferung an Verbraucher liegt Fernabsatz vor (14 Tage,
+           bei fehlender Belehrung 12 Monate + 14 Tage). Deshalb steht sie hier
+           fuer beide Faelle, mit klarer Abgrenzung. -->
+      <div class="recht">
+        <b>Abholung oder Lieferung</b> haben Sie mit uns abgesprochen — die Angaben dazu
+        stehen in Ihrer Bestätigung.<br><br>
+        <b>Widerrufsrecht bei Lieferung.</b> Wenn wir zu Ihnen liefern, können Sie als
+        Verbraucher innerhalb von 14 Tagen ab Erhalt der Ware ohne Angabe von Gründen
+        widerrufen. Die vollständige Belehrung samt Muster-Formular finden Sie in unseren
+        <a href="agb.html" target="_blank" rel="noopener">AGB</a>. Bei Abholung auf dem Hof
+        besteht kein Widerrufsrecht, weil der Kauf dann vor Ort geschlossen wird.
+      </div>
 
       <label class="dse">
         <input type="checkbox" id="dse" required/>
         <span>Ich habe die <a href="datenschutz.html" target="_blank">Datenschutzerklärung</a>
         gelesen und stimme der Verarbeitung meiner Daten zur Bearbeitung zu.</span>
       </label>
-
-      <div class="recht" id="widerruf" style="display:none">
-        <b>Widerrufsrecht.</b> Weil wir zu Ihnen liefern, können Sie den Kauf innerhalb von
-        14 Tagen ohne Angabe von Gründen widerrufen. Die vollständige Belehrung finden Sie in
-        unseren <a href="agb.html" target="_blank">AGB</a>. Bei Abholung auf dem Hof entfällt
-        das, weil der Kauf dann vor Ort geschlossen wird.
-      </div>
 
       <button type="submit" class="senden" id="senden" style="margin-top:14px">Jetzt verbindlich reservieren</button>
       <div id="meldung" class="meldung fehler" style="display:none"></div>
@@ -243,7 +253,7 @@ textarea{resize:vertical;min-height:60px}
 <script>
 const WORKER   = 'https://deinefenster-email.sarahchrist.workers.dev/shop-anfrage';
 const KATALOG  = 'data/shop-produkte.json';
-let ARTIKEL = null, MODUS = 'abholung';
+let ARTIKEL = null;
 
 function esc(s){ return String(s==null?'':s)
   .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
@@ -285,6 +295,9 @@ function zeigeArtikel(p){
   if (p.standnummer) document.getElementById('wStand').textContent = p.standnummer;
   else document.getElementById('wStandBox').style.display = 'none';
   document.getElementById('wPreis').textContent = euro(preisVon(p));
+  document.getElementById('pStand').textContent = p.standnummer || '—';
+  document.getElementById('pMasse').textContent = `${p.breite_mm} × ${p.hoehe_mm} mm`;
+  rechneSumme();
   document.getElementById('laden').style.display = 'none';
   document.getElementById('suchBox').style.display = 'none';
   document.getElementById('formular').style.display = '';
@@ -292,8 +305,15 @@ function zeigeArtikel(p){
   window.scrollTo(0,0);
 }
 
+function rechneSumme(){
+  if (!ARTIKEL) return;
+  const n = Number(document.getElementById('menge').value) || 1;
+  document.getElementById('wSumme').textContent = euro(preisVon(ARTIKEL) * n);
+}
+
 function pruefeMenge(){
   if (!ARTIKEL) return;
+  rechneSumme();
   const el = document.getElementById('menge');
   const hin = document.getElementById('mengeHinweis');
   const n = Number(el.value) || 1;
@@ -303,16 +323,6 @@ function pruefeMenge(){
     hin.textContent = `Im Inserat steht ${bestand} Stück — wir prüfen, ob mehr da ist, und melden uns.`;
     hin.style.display = '';
   } else { hin.style.display = 'none'; }
-}
-
-function setzeModus(m){
-  MODUS = m;
-  const ab = m === 'abholung';
-  document.getElementById('wAbholung').setAttribute('aria-pressed', ab);
-  document.getElementById('wLieferung').setAttribute('aria-pressed', !ab);
-  document.getElementById('adrFeld').style.display = ab ? 'none' : '';
-  document.getElementById('widerruf').style.display = ab ? 'none' : '';
-  document.getElementById('adresse').required = !ab;
 }
 
 let LISTE = [];
@@ -396,8 +406,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('suchFeld').addEventListener('keydown', e => {
     if (e.key === 'Enter'){ e.preventDefault(); suchen(); }
   });
-  document.getElementById('wAbholung').addEventListener('click', () => setzeModus('abholung'));
-  document.getElementById('wLieferung').addEventListener('click', () => setzeModus('lieferung'));
 
   document.getElementById('formular').addEventListener('submit', async e => {
     e.preventDefault();
@@ -408,12 +416,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const name  = document.getElementById('name').value.trim();
     const email = document.getElementById('email').value.trim();
-    const adr   = document.getElementById('adresse').value.trim();
     if (!name || !email || !document.getElementById('dse').checked){
       zeige('Bitte Name, E-Mail und die Zustimmung ausfüllen.'); return;
-    }
-    if (MODUS === 'lieferung' && !adr){
-      zeige('Für die Lieferung brauchen wir Ihre Adresse.'); return;
     }
 
     knopf.disabled = true;
@@ -427,8 +431,7 @@ document.addEventListener('DOMContentLoaded', () => {
       name, email,
       telefon: document.getElementById('telefon').value.trim(),
       menge: document.getElementById('menge').value,
-      nachricht: (MODUS === 'lieferung' ? 'Lieferung erwünscht an:\n' + adr : 'Abholung auf dem Hof')
-                 + (anmerkung ? '\n\n' + anmerkung : ''),
+      nachricht: anmerkung,
       dse: true,
     };
 
