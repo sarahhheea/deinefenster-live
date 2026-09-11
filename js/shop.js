@@ -216,9 +216,34 @@ async function checkAuth() {
 }
 
 function setupLoggedInUI() {
-  // Login-Bar oben sichtbar machen + Email + Logout
+  // Verwaltungsmodus am Body markieren (blendet u. a. den WhatsApp-Knopf aus,
+  // der sonst den "Inserat anlegen"-Knopf unten rechts verdeckt).
+  document.body.classList.add('df-adminmodus');
+
+  // Login-Bar oben sichtbar machen + Email + Logout.
+  // Die Leiste liegt im Quelltext hinter der fixierten Navigation, war deshalb
+  // unsichtbar. Sie wird jetzt als oberstes Band fixiert und ihre Hoehe in
+  // --banner-h geschrieben - dieselbe Variable, mit der Nav, Util-Leiste,
+  // Warenkorb-Drawer und die sticky-Offsets rechnen. Dadurch rueckt alles
+  // automatisch um genau die Leistenhoehe nach unten.
   const bar = document.getElementById('loginStatusBar');
-  if (bar) bar.classList.remove('hidden');
+  if (bar) {
+    bar.classList.remove('hidden');
+    bar.classList.add('df-adminbar-fixed');
+    const setzeOffset = () => {
+      const h = bar.offsetHeight || 0;
+      document.documentElement.style.setProperty('--banner-h', h + 'px');
+      // Der Seiteninhalt startet bei 0 und wird von den fixen Leisten ueberdeckt;
+      // ohne dieses Padding wuerde die Leiste die oberste Zeile verschlucken.
+      document.body.style.paddingTop = h + 'px';
+    };
+    setzeOffset();
+    window.addEventListener('resize', setzeOffset);
+    // Nachmessen, wenn die Leiste erst durch Schriftnachladen oder Umbruch waechst -
+    // sonst steht --banner-h auf einem zu kleinen Wert und die Nav ueberdeckt sie wieder.
+    if (window.ResizeObserver) new ResizeObserver(setzeOffset).observe(bar);
+    window.addEventListener('load', setzeOffset);
+  }
   const eml = document.getElementById('loginStatusEmail');
   if (eml && STATE.user) eml.textContent = STATE.user.email;
   const logout = document.getElementById('logoutShopBtn');
@@ -914,54 +939,11 @@ function pruefeMassErkennung(text) {
   }
 }
 
-/* ─── Alle Maß-Paare (Breite×Höhe) aus einem Text ziehen ───
-   Für Sammel-Auktionen, wo viele Fenster-Maße im Beschreibungstext untereinander stehen. */
-function parseMasse(text) {
-  const re = /(\d{3,4})\s*[x×*]\s*(\d{3,4})/gi;
-  const out = []; let m;
-  while ((m = re.exec(text)) !== null) {
-    out.push([parseInt(m[1], 10), parseInt(m[2], 10)]);
-  }
-  return out;
-}
-
-/* ─── Wie genau trifft ein Artikel das gesuchte Maß? ─────────────────────────
-   Ohne Kennzeichnung sieht der Kunde in der Ergebnisliste nicht, welcher Artikel
-   sein Maß wirklich hat und welcher 8 cm daneben liegt — beide stehen gleich da.
-   Geprüft werden die Hauptmaße des Inserats und jedes Maß-Paar aus Titel und
-   Beschreibung (Sammel-Auktionen), jeweils in beiden Orientierungen. Es gewinnt
-   das Paar, das am nächsten am Wunsch liegt.
-   Rückgabe: { stufe, breite, hoehe, db, dh, summe } — db/dh sind vorzeichenbehaftet
-   (negativ = Artikel ist kleiner als gewünscht), oder null wenn nichts passt. */
-const MASS_FAST_MM = 20;   // bis 2 cm je Seite gilt als „fast genau" — so weit geht
-                           // ein Fenster real noch in dieselbe Öffnung
-
-function massBewertung(p, f) {
-  if (f.breite === null && f.hoehe === null) return null;
-  const tol = f.toleranz / 100;
-  const inTol = (val, ziel) => ziel == null || (val >= ziel * (1 - tol) && val <= ziel * (1 + tol));
-
-  const kandidaten = [];
-  if (p.breite_mm > 0 && p.hoehe_mm > 0) kandidaten.push([p.breite_mm, p.hoehe_mm]);
-  parseMasse((p.titel || '') + ' \n ' + (p.beschreibung || '')).forEach(([b, h]) => {
-    kandidaten.push([b, h]);
-    kandidaten.push([h, b]);   // quer eingebaut ist dasselbe Fenster
-  });
-
-  let best = null;
-  for (const [b, h] of kandidaten) {
-    if (!inTol(b, f.breite) || !inTol(h, f.hoehe)) continue;
-    const db = f.breite === null ? 0 : b - f.breite;
-    const dh = f.hoehe === null ? 0 : h - f.hoehe;
-    const summe = Math.abs(db) + Math.abs(dh);
-    if (!best || summe < best.summe) best = { breite: b, hoehe: h, db: db, dh: dh, summe: summe };
-  }
-  if (!best) return null;
-
-  const groesste = Math.max(Math.abs(best.db), Math.abs(best.dh));
-  best.stufe = groesste === 0 ? 'exakt' : (groesste <= MASS_FAST_MM ? 'fast' : 'aehnlich');
-  return best;
-}
+/* ─── Maß-Bewertung: parseMasse() und massBewertung() ─────────────────────────
+   Liegen in js/shop-mass-util.js, weil sie dort ohne Browser prüfbar sind
+   (test/shop-mass.test.js). Breite bleibt Breite, Höhe bleibt Höhe — die frühere
+   Zusatzprüfung „quer eingebaut ist dasselbe Fenster" hat 1200 × 1500 als genauen
+   Treffer für die Suche 1500 × 1200 ausgegeben und ist deshalb entfallen. */
 
 /* Millimeter kundenlesbar: glatte Werte als Zentimeter, krumme bleiben Millimeter. */
 function laengeTxt(mm, inMm) {
@@ -980,21 +962,28 @@ function massAbweichungText(m) {
   return teile.join(' · ');
 }
 
+/* Was auf dem Band steht, muss halten, was es verspricht: „Genau dein Maß" nur, wenn
+   der Kunde Breite UND Höhe vorgegeben hat und beide stimmen. Wer nur ein Feld ausfüllt,
+   liest „Genau deine Breite" — geprüft wurde ja auch nur die. */
+function massTrefferLabel(m) {
+  if (m.achsen === 'breite') return 'Genau deine Breite';
+  if (m.achsen === 'hoehe')  return 'Genau deine Höhe';
+  return 'Genau dein Maß';
+}
+
 /* Das Band ganz oben auf der Karte. Weicht das getroffene Maß von den Hauptmaßen der
-   Karte ab (Sammelinserat oder quer eingebaut), wird es genannt — sonst stünde auf der
+   Karte ab (Sammelinserat mit Preistabelle), wird es genannt — sonst stünde auf der
    Karte ein anderes Maß als das, wegen dem sie im Ergebnis auftaucht. */
 function massBandHTML(m, p) {
   if (!m) return '';
   let fund = '';
   if (m.breite !== p.breite_mm || m.hoehe !== p.hoehe_mm) {
-    const gedreht = m.breite === p.hoehe_mm && m.hoehe === p.breite_mm;
-    fund = ' <span class="mass-band-fund">' + m.breite + ' × ' + m.hoehe + ' mm'
-         + (gedreht ? ' (gedreht)' : '') + '</span>';
+    fund = ' <span class="mass-band-fund">' + m.breite + ' × ' + m.hoehe + ' mm</span>';
   }
   if (m.stufe === 'exakt') {
     return '<div class="mass-band mass-band--exakt">'
          + '<span class="material-symbols-outlined" aria-hidden="true">check_circle</span>'
-         + '<span>Genau dein Maß' + fund + '</span></div>';
+         + '<span>' + massTrefferLabel(m) + fund + '</span></div>';
   }
   if (m.stufe === 'fast') {
     return '<div class="mass-band mass-band--fast">'
@@ -1014,8 +1003,7 @@ function massDiffHTML(m, p) {
   if (!m || m.stufe === 'exakt' || m.stufe === 'fast') return '';
   let fund = '';
   if (m.breite !== p.breite_mm || m.hoehe !== p.hoehe_mm) {
-    const gedreht = m.breite === p.hoehe_mm && m.hoehe === p.breite_mm;
-    fund = ' (' + m.breite + ' × ' + m.hoehe + ' mm' + (gedreht ? ', gedreht' : '') + ')';
+    fund = ' (' + m.breite + ' × ' + m.hoehe + ' mm)';
   }
   return '<p class="karte-mass-diff">' + massAbweichungText(m) + ' als gesucht' + fund + '</p>';
 }
@@ -1508,6 +1496,33 @@ function rendere() {
   gridEl.querySelectorAll('[data-action="teilen"]').forEach(btn => {
     btn.addEventListener('click', e => { e.stopPropagation(); schliesseKebabMenus(); const p = STATE.produkte.find(x => x.id === btn.dataset.id); if (p) teileProdukt(p); });
   });
+  // Reservierungs-Link fuer WhatsApp: Kersten kopiert ihn im Chat, der Kunde
+  // fuellt auf der Seite aus. Nur fuer eingeloggte Mitarbeiter sichtbar.
+  gridEl.querySelectorAll('[data-action="reslink"]').forEach(btn => {
+    btn.addEventListener('click', async e => {
+      e.stopPropagation();
+      const p = STATE.produkte.find(x => x.id === btn.dataset.id);
+      if (!p) return;
+      // Nummer MIT in den Link: dann sieht der Kunde sein Fenster sofort und
+      // muss nichts eintippen - nur noch Daten eintragen und bestaetigen.
+      const link = 'https://deinefenster.de/r.html?nr='
+                 + encodeURIComponent(p.standnummer || p.id);
+      const text = `Ja, das ist noch da – ich lege es für Sie zurück.\n\n`
+                 + `Bitte hier kurz bestätigen:\n${link}`;
+      try {
+        await navigator.clipboard.writeText(text);
+        btn.querySelector('span:last-child').textContent = 'Kopiert!';
+        setTimeout(() => { const t = btn.querySelector('span:last-child');
+          if (t) t.textContent = 'Reservierungs-Link kopieren'; }, 2000);
+      } catch (err) {
+        // Zwischenablage kann der Browser verweigern (z.B. ohne HTTPS) -
+        // dann den Link zeigen, statt still zu scheitern.
+        prompt('Link zum Kopieren:', text);
+      }
+      schliesseKebabMenus();
+    });
+  });
+
   gridEl.querySelectorAll('[data-action="kundendruck"]').forEach(btn => {
     btn.addEventListener('click', e => { e.stopPropagation(); schliesseKebabMenus(); const p = STATE.produkte.find(x => x.id === btn.dataset.id); if (p) druckeProduktblatt(p); });
   });
@@ -1654,11 +1669,18 @@ function karteHtml(p) {
   // wäre redundant. Teilen/Drucken (selten genutzt) stecken in einem kompakten „⋯"-Menü.
   const ctaRow = istArchiviert ? '' : `
         <div class="shop-card-cta-row">
+          ${STATE.loggedIn ? `
+          <button type="button" class="shop-card-cta-anfrage" data-action="reslink" data-id="${p.id}"
+             aria-label="Reservierungs-Link für ${escapeHtml(p.titel)} kopieren"
+             title="Fertigen Text mit Link kopieren — dann in WhatsApp einfügen">
+            <span class="material-symbols-outlined">content_copy</span>
+            Link für WhatsApp
+          </button>` : `
           <button type="button" class="shop-card-cta-anfrage" data-action="anfrage" data-id="${p.id}"
              aria-label="${escapeHtml(p.titel)} ${istReservierbar(p) ? 'reservieren' : 'anfragen'}">
             <span class="material-symbols-outlined">${istReservierbar(p) ? 'inventory_2' : 'mail'}</span>
             ${istBelegt(p) ? 'Trotzdem anfragen' : (istReservierbar(p) ? 'Reservieren' : 'Anfragen')}
-          </button>
+          </button>`}
           <div class="shop-card-kebab-wrap">
             <button type="button" class="shop-card-kebab" data-action="kebab" data-id="${p.id}"
                aria-haspopup="true" aria-expanded="false" aria-label="Weitere Aktionen" title="Weitere Aktionen">

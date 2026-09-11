@@ -2,6 +2,12 @@
 <html lang="de">
 <head>
 <meta charset="utf-8"/>
+  <!-- Schutzregeln fuer den Browser. GitHub Pages kann keine echten Header setzen,
+       deshalb hier im Seitenkopf. Schuetzt davor, dass eingeschleuster Code nachlaedt
+       oder Daten an fremde Adressen schickt. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; script-src 'self' 'unsafe-inline' https://plausible.io; style-src 'self' 'unsafe-inline' https://fonts.bunny.net; font-src 'self' data: https://fonts.bunny.net; img-src 'self' data: blob: https://bilder.deinefenster.de; connect-src 'self' https://deinefenster-email.sarahchrist.workers.dev https://plausible.io https://api.github.com https://bilder.deinefenster.de; frame-src https://maps.google.com https://www.google.com">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <meta name="robots" content="noindex, nofollow"/>
 <title>Reservierungen &amp; Anfragen — Mitarbeiterbereich</title>
@@ -78,6 +84,11 @@ body{
 .marke.offen{background:var(--gelb-hell);color:var(--gelb)}
 .marke.verfallen,.marke.abgesagt{background:#eef0f3;color:var(--text-blass)}
 .marke.erledigt{background:var(--gruen-hell);color:var(--gruen)}
+/* Woher die Anfrage kam: bewusst dezenter als die Statusmarke. Der Status sagt,
+   was zu tun ist - die Quelle ordnet nur ein. Kein uppercase, sonst schreit
+   "KONTAKTFORMULAR" lauter als der Status daneben. */
+.marke.quelle{background:transparent;border:1px solid var(--linie);color:var(--text-leise);
+  text-transform:none;letter-spacing:0;font-weight:700}
 
 .ware{display:flex;gap:12px;align-items:flex-start}
 .ware img{
@@ -121,6 +132,13 @@ body{
   width:100%;padding:8px 10px;font-size:13px;border:1.5px solid var(--linie);
   border-radius:8px;font-family:inherit;resize:vertical;min-height:52px;color:var(--text);
 }
+.nachweis{
+  margin-top:10px;padding:9px 12px;border-radius:9px;font-size:13px;
+  display:flex;align-items:flex-start;gap:8px;line-height:1.45;
+}
+.nachweis.ja{background:var(--gruen-hell);color:var(--gruen)}
+.nachweis.warte{background:var(--grund);color:var(--leise)}
+.nachweis b{font-weight:800}
 .notizAnzeige{
   margin-top:9px;padding:8px 11px;background:var(--gelb-hell);border-radius:8px;
   font-size:13px;color:var(--gelb);white-space:pre-wrap;
@@ -164,13 +182,24 @@ body{
 <script>
 const WORKER = 'https://deinefenster-email.sarahchrist.workers.dev';
 
+// "offen" heisst: der Kunde hat gefragt, WIR haben noch nicht im Lager
+// nachgesehen. Reserviert wird erst per Knopf, nie automatisch.
 const STATUS_TEXT = {
-  offen:      'Anfrage',
+  offen:      'Zu prüfen',
   reserviert: 'Reserviert',
   abholtag:   'Abholtag steht',
   erledigt:   'Abgeholt',
   verfallen:  'Frist abgelaufen',
   abgesagt:   'Abgesagt',
+};
+
+// Woher die Anfrage kam. Seit 10.09.2026 laufen alle Wege in diese Liste -
+// vorher stand hier nur der Lager-Shop, der Rest lag im Mailpostfach.
+const QUELLE_TEXT = {
+  shop:         'Lager-Shop',
+  konfigurator: 'Konfigurator',
+  anfrage:      'Angebotsanfrage',
+  kontakt:      'Kontaktformular',
 };
 
 let ALLE = [], HEUTE = '', FILTER = 'aktiv';
@@ -194,8 +223,35 @@ function tageText(n, art){
   return n===1 ? 'noch 1 Tag' : `noch ${n} Tage`;
 }
 
+// Der Beleg, auf den es im Streitfall ankommt: der Kunde hat per Klick aus
+// unserer E-Mail bestaetigt, was zugesagt wurde. Nur sichtbar, sobald wir
+// zugesagt haben - vorher gibt es nichts zu bestaetigen.
+function zeitpunktText(iso){
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d)) return '';
+  const zwei = n => String(n).padStart(2,'0');
+  return `${zwei(d.getDate())}.${zwei(d.getMonth()+1)}.${String(d.getFullYear()).slice(2)}`
+       + ` um ${zwei(d.getHours())}:${zwei(d.getMinutes())} Uhr`;
+}
+
+function nachweisHtml(v){
+  if (!v.zugesagt_am) return '';
+  if (v.bestaetigt_am){
+    return `<div class="nachweis ja">
+      <span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">verified</span>
+      <span>Vom Kunden <b>bestätigt</b> am ${zeitpunktText(v.bestaetigt_am)} — per Klick aus unserer E-Mail.</span>
+    </div>`;
+  }
+  return `<div class="nachweis warte">
+    <span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">schedule</span>
+    <span>Bestätigung angefragt am ${zeitpunktText(v.zugesagt_am)} — der Kunde hat noch nicht geklickt.</span>
+  </div>`;
+}
+
 function karteHtml(v){
   const st = v.status || 'offen';
+  const istShop = (v.quelle || 'shop') === 'shop';
   const restTage = v.tage_bis_frist;
   let klasse = '';
   if (st==='reserviert' && restTage!=null){
@@ -209,8 +265,10 @@ function karteHtml(v){
   const einzel = v.einzelpreis_eur!=null
     ? v.einzelpreis_eur.toFixed(2).replace('.',',') + ' €' : '—';
 
-  const fristZeile = (st==='reserviert' && v.frist)
-    ? `<span>Frist <b>${datumKurz(v.frist)}</b> <span class="${restTage<0?'alarm':(restTage<=2?'warnung':'')}">${tageText(restTage,'frist')}</span></span>` : '';
+  const fristZeile = st!=='reserviert' ? ''
+    : (v.frist
+        ? `<span>Frist <b>${datumKurz(v.frist)}</b> <span class="${restTage<0?'alarm':(restTage<=2?'warnung':'')}">${tageText(restTage,'frist')}</span></span>`
+        : `<span>Liegt zurück <b>ohne Frist</b></span>`);
   const abholZeile = v.abholtag
     ? `<span>Abholung <b>${datumKurz(v.abholtag)}</b>${v.abholtag===HEUTE?' <span class="warnung">heute</span>':''}</span>` : '';
 
@@ -224,6 +282,7 @@ function karteHtml(v){
   // Eingeklappt, damit die Liste am Handy ueberschaubar bleibt.
   const bearbeiten = laeuft ? `
     <div class="bearbeiten" id="bearb-${esc(v.nr)}">
+      ${istShop ? `
       <div class="feldzeile">
         <label for="ab-${esc(v.nr)}">Abholtag</label>
         <input type="date" id="ab-${esc(v.nr)}" value="${esc(v.abholtag||'')}" class="abholFeld" data-nr="${esc(v.nr)}"/>
@@ -232,6 +291,13 @@ function karteHtml(v){
         <label for="fr-${esc(v.nr)}">Frist bis</label>
         <input type="date" id="fr-${esc(v.nr)}" value="${esc(v.frist||'')}" class="fristFeld" data-nr="${esc(v.nr)}"/>
         <button class="knopf klein stumm" data-tun="plus7" data-nr="${esc(v.nr)}">+7 Tage</button>
+      </div>` : ''}
+      <div class="feldzeile">
+        <label for="lk-${esc(v.nr)}">Lieferung</label>
+        <input type="number" id="lk-${esc(v.nr)}" class="lkFeld" data-nr="${esc(v.nr)}"
+          min="0" step="0.01" inputmode="decimal" style="width:110px"
+          placeholder="leer = Abholung" value="${v.lieferkosten_eur != null ? esc(v.lieferkosten_eur) : ''}"/>
+        <span style="font-size:12.5px;color:var(--text-blass)">€ — steht dann in der Bestätigung</span>
       </div>
       <div class="feldzeile" style="align-items:flex-start">
         <label for="no-${esc(v.nr)}">Notiz</label>
@@ -241,19 +307,61 @@ function karteHtml(v){
       <button class="knopf klein" data-tun="speichern" data-nr="${esc(v.nr)}">Änderungen speichern</button>
     </div>` : '';
 
-  const aktionen = laeuft ? `
+  // Ein neuer Lager-Vorgang muss zuerst im Lager geprueft werden. Deshalb steht
+  // bei "offen" das Zusagen vorn und nicht das Bearbeiten. Bei einer Anfrage aus
+  // Konfigurator oder Kontaktformular haengt keine Ware dran - "Ist da" waere
+  // dort sinnlos, hier zaehlt nur: beantwortet oder nicht.
+  const aktionen = (st === 'offen' && istShop) ? `
+    <div class="aktionen">
+      <button class="knopf klein" data-tun="zusagen" data-nr="${esc(v.nr)}">Ist da — reservieren</button>
+      <button class="knopf klein gefahr" data-tun="abgesagt" data-nr="${esc(v.nr)}">Nicht mehr da</button>
+      <button class="knopf klein stumm" data-tun="aufklappen" data-nr="${esc(v.nr)}">Bearbeiten</button>
+    </div>` : (laeuft ? `
     <div class="aktionen">
       <button class="knopf klein stumm" data-tun="aufklappen" data-nr="${esc(v.nr)}">Bearbeiten</button>
-      <button class="knopf klein" data-tun="erledigt" data-nr="${esc(v.nr)}">Abgeholt</button>
+      <button class="knopf klein" data-tun="erledigt" data-nr="${esc(v.nr)}">${istShop ? 'Abgeholt' : 'Erledigt'}</button>
       <button class="knopf klein gefahr" data-tun="abgesagt" data-nr="${esc(v.nr)}">Absagen</button>
     </div>` : `
     <div class="aktionen">
       <button class="knopf klein stumm" data-tun="reserviert" data-nr="${esc(v.nr)}">Wieder aufnehmen</button>
+    </div>`);
+
+  // Anfragen aus Konfigurator, Anfrage-Seite und Kontaktformular haengen an
+  // keinem Lagerartikel: kein Bild, keine Masse, kein Preis. Dafuer den
+  // Artikelblock zu zeigen ergaebe "? × ? mm" und "Gesamt —".
+  const quelleMarke = `<span class="marke quelle">${esc(QUELLE_TEXT[v.quelle] || QUELLE_TEXT.shop)}</span>`;
+
+  if (!istShop) {
+    return `<div class="karte ${klasse}">
+      <div class="zeile1">
+        <span class="nr">${esc(v.nr)}</span>
+        ${quelleMarke}
+        <span class="marke ${esc(st)}">${esc(STATUS_TEXT[st]||st)}</span>
+      </div>
+
+      <div class="ware">
+        <div class="text">
+          <div class="titel">${esc(v.titel||'Anfrage')}</div>
+          <div class="unter">${tageText(v.tage_offen,'offen')||''}</div>
+        </div>
+      </div>
+
+      <div class="kunde">
+        <b>${esc(v.kunde_name||'—')}</b><br>
+        ${v.kunde_email?`<a href="mailto:${esc(v.kunde_email)}">${esc(v.kunde_email)}</a>`:''}
+        ${v.kunde_telefon?` · <a href="tel:${esc(String(v.kunde_telefon).replace(/\s/g,''))}">${esc(v.kunde_telefon)}</a>`:''}
+      </div>
+      ${v.nachricht?`<div class="nachricht">${esc(v.nachricht)}</div>`:''}
+      ${v.notiz?`<div class="notizAnzeige">Notiz: ${esc(v.notiz)}</div>`:''}
+      ${bearbeiten}
+      ${aktionen}
     </div>`;
+  }
 
   return `<div class="karte ${klasse}">
     <div class="zeile1">
       <span class="nr">${esc(v.nr)}</span>
+      ${quelleMarke}
       <span class="marke ${esc(st)}">${esc(STATUS_TEXT[st]||st)}</span>
     </div>
 
@@ -266,7 +374,10 @@ function karteHtml(v){
           ${v.breite_mm||'?'} × ${v.hoehe_mm||'?'} mm
         </div>
         <div class="unter" style="margin-top:4px">
-          <b style="color:var(--text)">${v.menge}×</b> ${einzel} · Gesamt <b style="color:var(--text)">${gesamt}</b>
+          <b style="color:var(--text)">${v.menge}×</b> ${einzel} · Ware <b style="color:var(--text)">${gesamt}</b>
+          ${v.lieferkosten_eur != null && v.lieferkosten_eur > 0
+            ? `<br>+ Lieferung ${Number(v.lieferkosten_eur).toFixed(2).replace('.',',')} € · Gesamt <b style="color:var(--text)">${((v.einzelpreis_eur||0)*v.menge + Number(v.lieferkosten_eur)).toFixed(2).replace('.',',')} €</b>`
+            : `<br><span style="color:var(--text-blass)">Abholung auf dem Hof</span>`}
         </div>
       </div>
     </div>
@@ -279,6 +390,8 @@ function karteHtml(v){
     </div>
     ${v.nachricht?`<div class="nachricht">${esc(v.nachricht)}</div>`:''}
     ${v.notiz?`<div class="notizAnzeige">Notiz: ${esc(v.notiz)}</div>`:''}
+
+    ${nachweisHtml(v)}
 
     <div class="uhr">
       <span>Angefragt <b>${datumKurz(v.angelegt_tag)}</b> · ${tageText(v.tage_offen,'offen')}</span>
@@ -295,6 +408,7 @@ function zeichne(){
   let zeigen = ALLE;
   if (FILTER==='aktiv')      zeigen = ALLE.filter(v=>aktiv.has(v.status));
   else if (FILTER==='heute') zeigen = ALLE.filter(v=>v.abholtag===HEUTE);
+  else if (FILTER.startsWith('q:')) zeigen = ALLE.filter(v=>(v.quelle||'shop')===FILTER.slice(2));
   else if (FILTER!=='alle')  zeigen = ALLE.filter(v=>v.status===FILTER);
 
   document.getElementById('zaehler').textContent =
@@ -316,14 +430,25 @@ function filterZeichnen(){
     ['verfallen',  `Abgelaufen (${zaehl('verfallen')})`],
     ['alle',       `Alle (${ALLE.length})`],
   ];
+  // Herkunft nur anbieten, wenn es sie auch gibt - leere Knoepfe helfen niemandem.
+  for (const [schluessel, text] of Object.entries(QUELLE_TEXT)) {
+    const n = ALLE.filter(v => (v.quelle||'shop') === schluessel).length;
+    if (n) knoepfe.push(['q:'+schluessel, `${text} (${n})`]);
+  }
   document.getElementById('filter').innerHTML = knoepfe.map(([k,t])=>
     `<button data-filter="${k}" aria-pressed="${FILTER===k}">${t}</button>`).join('');
 }
 
 async function laden(){
   const key = getShopToken();
-  const r = await fetch(WORKER+'/vorgaenge', { headers:{ 'X-Shop-Key': key } });
+  const melde = (text) => { document.getElementById('liste').innerHTML =
+    '<p class="fehler" style="display:block">' + text + '</p>'; };
+  let r;
+  // Ohne diesen Fang blieb die Seite bei Funkloch oder Serverstoerung einfach leer.
+  try { r = await fetch(WORKER+'/vorgaenge', { headers:{ 'X-Shop-Key': key } }); }
+  catch { melde('Keine Verbindung zum Server. Bitte Internet prüfen und neu laden.'); return; }
   if (r.status===401){ abmelden(); return; }
+  if (!r.ok){ melde('Die Liste konnte nicht geladen werden (Fehler ' + r.status + '). Bitte später noch einmal versuchen.'); return; }
   const d = await r.json();
   ALLE = d.vorgaenge || [];
   HEUTE = d.heute || '';
@@ -339,6 +464,8 @@ async function aendern(nr, feld){
     body: JSON.stringify(Object.assign({ nr }, feld)),
   });
   if (!r.ok){ alert('Konnte nicht gespeichert werden. Bitte nochmal versuchen.'); return; }
+  const erg = await r.json().catch(()=>({}));
+  if (erg.mail_raus) alert('Zugesagt. Der Kunde hat eine E-Mail mit Bestätigungslink bekommen.');
   await laden();
 }
 
@@ -403,7 +530,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
       const abholtag = feld('abholFeld')?.value || '';
       const frist    = feld('fristFeld')?.value || '';
       const notiz    = feld('notizFeld')?.value || '';
-      const daten = { abholtag, frist, notiz };
+      const lkRoh    = feld('lkFeld')?.value?.trim() || '';
+      const daten = { abholtag, frist, notiz, lieferkosten_eur: lkRoh === '' ? null : Number(lkRoh) };
       // Ein gesetzter Abholtag hebt den Status - aber nur, solange der
       // Vorgang laeuft.
       if (abholtag) daten.status = 'abholtag';
@@ -411,8 +539,53 @@ document.addEventListener('DOMContentLoaded', ()=>{
       return;
     }
 
+    if (tun==='zusagen'){
+      // Wie lange zurueckgelegt wird, ist bei Christ Absprache - mal eine Woche
+      // ohne Anzahlung, mal laenger wenn vorab bezahlt wird, mal offen. Deshalb
+      // hier fragen statt eine Frist zu erfinden.
+      const wahl = prompt(
+        'Reservierung zusagen.\n\n' +
+        'Wie lange legen wir zurück?\n' +
+        '  Zahl = so viele Tage (z.B. 7)\n' +
+        '  Datum = bis dahin (TT.MM.JJJJ)\n' +
+        '  leer lassen = ohne Frist, bis wir etwas anderes sagen',
+        '7');
+      if (wahl === null) return;              // abgebrochen
+      const t = String(wahl).trim();
+      let frist = '';
+      if (/^\d{1,3}$/.test(t)){
+        const d = new Date(HEUTE + 'T00:00:00Z');
+        d.setUTCDate(d.getUTCDate() + Number(t));
+        frist = d.toISOString().slice(0,10);
+      } else if (/^\d{1,2}\.\d{1,2}\.\d{4}$/.test(t)){
+        const [tg,mo,ja] = t.split('.');
+        frist = `${ja}-${mo.padStart(2,'0')}-${tg.padStart(2,'0')}`;
+      } else if (t !== ''){
+        alert('Bitte eine Zahl (Tage), ein Datum TT.MM.JJJJ oder nichts eingeben.');
+        return;
+      }
+      // Lieferkosten werden im Chat ausgehandelt und stehen in keinem Katalog.
+      // Ohne sie bestaetigt der Kunde nur den Warenpreis.
+      const lk = prompt(
+        'Lieferkosten in Euro?\n\n' +
+        'Leer lassen = Abholung auf dem Hof (kostenfrei).\n' +
+        'Der Betrag steht dann in der Bestätigungsmail und im Gesamtpreis.',
+        '');
+      if (lk === null) return;
+      const lkT = String(lk).trim().replace(',', '.');
+      let lieferkosten = null;
+      if (lkT !== ''){
+        const n = Number(lkT);
+        if (!Number.isFinite(n) || n < 0){ alert('Bitte einen Betrag eingeben, z.B. 145 — oder leer lassen.'); return; }
+        lieferkosten = n;
+      }
+      aendern(nr, { status:'reserviert', frist, lieferkosten_eur: lieferkosten });
+      return;
+    }
+
     if (tun==='abgesagt'){
-      if (confirm('Vorgang absagen? Die Ware wird im Shop wieder frei.')) aendern(nr, { status:'abgesagt' });
+      const txt = 'Vorgang absagen? Die Ware wird im Shop wieder frei.';
+      if (confirm(txt)) aendern(nr, { status:'abgesagt' });
       return;
     }
 
