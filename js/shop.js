@@ -1503,10 +1503,12 @@ function rendere() {
       e.stopPropagation();
       const p = STATE.produkte.find(x => x.id === btn.dataset.id);
       if (!p) return;
+      // Nummer MIT in den Link: dann sieht der Kunde sein Fenster sofort und
+      // muss nichts eintippen - nur noch Daten eintragen und bestaetigen.
       const link = 'https://deinefenster.de/r.html?nr='
                  + encodeURIComponent(p.standnummer || p.id);
-      const text = `Alles klar, ich lege das für Sie zurück.\n`
-                 + `Bitte hier kurz bestätigen, dauert 30 Sekunden:\n${link}`;
+      const text = `Ja, das ist noch da – ich lege es für Sie zurück.\n\n`
+                 + `Bitte hier kurz bestätigen:\n${link}`;
       try {
         await navigator.clipboard.writeText(text);
         btn.querySelector('span:last-child').textContent = 'Kopiert!';
@@ -1667,11 +1669,18 @@ function karteHtml(p) {
   // wäre redundant. Teilen/Drucken (selten genutzt) stecken in einem kompakten „⋯"-Menü.
   const ctaRow = istArchiviert ? '' : `
         <div class="shop-card-cta-row">
+          ${STATE.loggedIn ? `
+          <button type="button" class="shop-card-cta-anfrage" data-action="reslink" data-id="${p.id}"
+             aria-label="Reservierungs-Link für ${escapeHtml(p.titel)} kopieren"
+             title="Fertigen Text mit Link kopieren — dann in WhatsApp einfügen">
+            <span class="material-symbols-outlined">content_copy</span>
+            Link für WhatsApp
+          </button>` : `
           <button type="button" class="shop-card-cta-anfrage" data-action="anfrage" data-id="${p.id}"
              aria-label="${escapeHtml(p.titel)} ${istReservierbar(p) ? 'reservieren' : 'anfragen'}">
             <span class="material-symbols-outlined">${istReservierbar(p) ? 'inventory_2' : 'mail'}</span>
             ${istBelegt(p) ? 'Trotzdem anfragen' : (istReservierbar(p) ? 'Reservieren' : 'Anfragen')}
-          </button>
+          </button>`}
           <div class="shop-card-kebab-wrap">
             <button type="button" class="shop-card-kebab" data-action="kebab" data-id="${p.id}"
                aria-haspopup="true" aria-expanded="false" aria-label="Weitere Aktionen" title="Weitere Aktionen">
@@ -1681,10 +1690,6 @@ function karteHtml(p) {
               <button type="button" role="menuitem" data-action="teilen" data-id="${p.id}">
                 <span class="material-symbols-outlined">share</span><span>Teilen</span>
               </button>
-              ${STATE.loggedIn ? `
-              <button type="button" role="menuitem" data-action="reslink" data-id="${p.id}">
-                <span class="material-symbols-outlined">link</span><span>Reservierungs-Link kopieren</span>
-              </button>` : ''}
               <button type="button" role="menuitem" data-action="kundendruck" data-id="${p.id}">
                 <span class="material-symbols-outlined">print</span><span>Drucken</span>
               </button>
