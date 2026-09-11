@@ -7,6 +7,7 @@
 <title>Reservierung bestätigen — DeineFenster.de</title>
 <link rel="icon" href="img/logo/favicon-32.png?v=20260518"/>
 <link rel="stylesheet" href="fonts/material-symbols.css"/>
+<script src="js/shop-suche-util.js?v=2026-09-11"></script>
 <style>
 /* Eigenstaendige Seite, bewusst schlank: sie wird aus einem WhatsApp-Chat
    heraus geoeffnet, oft unterwegs bei schlechtem Netz. Farben aus dem Shop. */
@@ -69,6 +70,22 @@ textarea{resize:vertical;min-height:60px}
   font-size:12px;color:var(--leise);line-height:1.55}
 .recht b{color:var(--text)}
 
+.knopf-such{
+  flex:none;background:var(--blau);color:#fff;border:none;border-radius:10px;
+  padding:11px 20px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;
+}
+.knopf-such:hover{background:var(--blau-tief)}
+.treffer{
+  display:flex;gap:11px;align-items:center;width:100%;text-align:left;
+  background:#fff;border:1.5px solid var(--linie);border-radius:10px;
+  padding:10px 12px;margin-bottom:8px;cursor:pointer;font-family:inherit;
+}
+.treffer:hover{border-color:var(--blau);background:var(--blau-hell)}
+.treffer img{width:52px;height:52px;flex:none;object-fit:cover;border-radius:7px;border:1px solid var(--linie)}
+.treffer .tt{min-width:0;flex:1}
+.treffer .t1{font-size:14px;font-weight:700;color:var(--text);line-height:1.3}
+.treffer .t2{font-size:12.5px;color:var(--leise);margin-top:2px}
+.treffer .t3{font-size:15px;font-weight:800;color:var(--blau);flex:none}
 .senden{width:100%;padding:15px;background:var(--blau);color:#fff;border:none;
   border-radius:11px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer}
 .senden:hover{background:var(--blau-tief)}
@@ -101,6 +118,23 @@ textarea{resize:vertical;min-height:60px}
   </div>
 
   <div id="laden" class="laden">Einen Moment, wir holen die Angaben …</div>
+
+  <!-- Ohne Nummer im Link: der Kunde kennt seine Standnummer, er hat ja danach
+       gefragt. So bleibt die WhatsApp-Schnellantwort immer derselbe Text. -->
+  <div id="suchBox" class="block" style="display:none">
+    <h3 style="margin-bottom:4px">Welches Stück möchten Sie reservieren?</h3>
+    <p style="margin:0 0 14px;font-size:14px;color:var(--leise);line-height:1.55">
+      Geben Sie die Standnummer ein — die steht in unserem Inserat und in Ihrer Nachricht,
+      zum Beispiel <b>0289 AA</b>.
+    </p>
+    <div style="display:flex;gap:9px">
+      <input type="text" id="suchFeld" placeholder="z.B. 0289 AA" autocomplete="off"
+             autocapitalize="characters" style="flex:1"/>
+      <button type="button" class="knopf-such" id="suchKnopf">Suchen</button>
+    </div>
+    <div id="suchFehler" class="meldung fehler" style="display:none"></div>
+    <div id="suchTreffer" style="margin-top:14px"></div>
+  </div>
 
   <div id="fehlerBox" class="block" style="display:none">
     <h3>Artikel nicht gefunden</h3>
@@ -242,8 +276,10 @@ function zeigeArtikel(p){
   else document.getElementById('wStandBox').style.display = 'none';
   document.getElementById('wPreis').textContent = euro(preisVon(p));
   document.getElementById('laden').style.display = 'none';
+  document.getElementById('suchBox').style.display = 'none';
   document.getElementById('formular').style.display = '';
   pruefeMenge();
+  window.scrollTo(0,0);
 }
 
 function pruefeMenge(){
@@ -269,18 +305,73 @@ function setzeModus(m){
   document.getElementById('adresse').required = !ab;
 }
 
+let LISTE = [];
+
 async function laden(){
   const par = new URLSearchParams(location.search);
   const wunsch = par.get('nr') || par.get('id') || par.get('q');
-  if (!wunsch){ zeigeFehler(); return; }
   try {
     const r = await fetch(KATALOG, { cache: 'no-store' });
     const d = await r.json();
-    const liste = Array.isArray(d) ? d : (d.produkte || []);
-    const treffer = artikelSuchen(liste, wunsch);
-    if (!treffer) { zeigeFehler(); return; }
-    zeigeArtikel(treffer);
-  } catch(e){ zeigeFehler(); }
+    LISTE = (Array.isArray(d) ? d : (d.produkte || [])).filter(p => p && p.aktiv !== false);
+  } catch(e){ zeigeFehler(); return; }
+
+  if (wunsch){
+    const treffer = artikelSuchen(LISTE, wunsch);
+    if (treffer){ zeigeArtikel(treffer); return; }
+    // Nummer im Link passt nicht: nicht abweisen, sondern suchen lassen
+    zeigeSuche(wunsch);
+    return;
+  }
+  zeigeSuche('');
+}
+
+function zeigeSuche(vorbelegt){
+  document.getElementById('laden').style.display = 'none';
+  document.getElementById('suchBox').style.display = '';
+  const feld = document.getElementById('suchFeld');
+  if (vorbelegt){ feld.value = vorbelegt; suchen(); }
+  feld.focus();
+}
+
+// Nutzt die tolerante Standnummer-Erkennung des Shops (js/shop-suche-util.js):
+// "741B", "Nr 741" und "741 B" finden dasselbe Stueck.
+function suchen(){
+  const q = document.getElementById('suchFeld').value.trim();
+  const fehler = document.getElementById('suchFehler');
+  const box = document.getElementById('suchTreffer');
+  fehler.style.display = 'none';
+  box.innerHTML = '';
+  if (!q){ return; }
+
+  const passt = typeof nummerTreffer === 'function'
+    ? LISTE.filter(p => nummerTreffer(q, p.standnummer))
+    : LISTE.filter(p => schluessel(p.standnummer) === schluessel(q));
+
+  if (!passt.length){
+    fehler.textContent = 'Dazu finden wir nichts. Bitte prüfen Sie die Nummer — '
+      + 'oder melden Sie sich kurz bei uns, wir schauen nach.';
+    fehler.style.display = '';
+    return;
+  }
+  if (passt.length === 1){ zeigeArtikel(passt[0]); return; }
+
+  box.innerHTML = '<p style="font-size:13px;color:var(--leise);margin:0 0 9px">'
+    + passt.length + ' Treffer — bitte auswählen:</p>'
+    + passt.slice(0,12).map((p,i) => {
+        const bild = Array.isArray(p.bilder) && p.bilder.length ? p.bilder[0] : '';
+        return `<button type="button" class="treffer" data-i="${i}">
+          ${bild ? `<img src="${esc(bild)}" alt="" loading="lazy"/>` : ''}
+          <span class="tt">
+            <span class="t1">${esc(p.titel || '')}</span>
+            <span class="t2">${p.breite_mm} × ${p.hoehe_mm} mm · Nr. ${esc(p.standnummer || '')}</span>
+          </span>
+          <span class="t3">${euro(preisVon(p))}</span>
+        </button>`;
+      }).join('');
+  box.querySelectorAll('.treffer').forEach(b => {
+    b.addEventListener('click', () => zeigeArtikel(passt[Number(b.dataset.i)]));
+  });
 }
 
 function zeigeFehler(){
@@ -291,6 +382,10 @@ function zeigeFehler(){
 document.addEventListener('DOMContentLoaded', () => {
   laden();
   document.getElementById('menge').addEventListener('input', pruefeMenge);
+  document.getElementById('suchKnopf').addEventListener('click', suchen);
+  document.getElementById('suchFeld').addEventListener('keydown', e => {
+    if (e.key === 'Enter'){ e.preventDefault(); suchen(); }
+  });
   document.getElementById('wAbholung').addEventListener('click', () => setzeModus('abholung'));
   document.getElementById('wLieferung').addEventListener('click', () => setzeModus('lieferung'));
 
