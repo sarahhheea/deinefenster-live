@@ -10,7 +10,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <meta name="robots" content="noindex, nofollow"/>
-<title>Reservierung bestätigen — DeineFenster.de</title>
+<title>Bitte bestätigen — DeineFenster.de</title>
 <link rel="icon" href="img/logo/favicon-32.png?v=20260518"/>
 <link rel="stylesheet" href="fonts/material-symbols.css"/>
 <script src="js/shop-suche-util.js?v=2026-09-11"></script>
@@ -31,10 +31,12 @@ body{margin:0;background:var(--grund);color:var(--text);
   font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
 .huelle{max-width:520px;margin:0 auto;padding:0 0 50px}
 
-.kopf{background:var(--karte);border-bottom:1px solid var(--linie);padding:16px 18px}
-.marke{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--blau)}
-.kopf h1{font-size:20px;font-weight:800;margin:5px 0 0}
-.kopf p{margin:5px 0 0;font-size:14px;color:var(--leise)}
+/* Kopf in Markenblau: die Seite soll wie der Beleg wirken, den der Kunde
+   gleich per Mail bekommt - nicht wie ein Formular. */
+.kopf{background:var(--blau);padding:22px 20px;text-align:center}
+.marke{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#a8c8f2}
+.kopf h1{font-size:21px;font-weight:800;margin:7px 0 0;color:#fff}
+.kopf p{margin:5px 0 0;font-size:14px;color:#d6e4f7}
 
 .block{background:var(--karte);border:1px solid var(--linie);border-radius:12px;
   margin:14px 12px;padding:15px 16px}
@@ -127,9 +129,9 @@ textarea{resize:vertical;min-height:60px}
 <div class="huelle">
 
   <div class="kopf">
-    <div class="marke">DeineFenster.de · Fensterhandel Christ</div>
-    <h1 id="ueberschrift">Reservierung bestätigen</h1>
-    <p id="unterzeile">Nur noch Ihre Daten — dann legen wir es für Sie zurück.</p>
+    <div class="marke">Türen und Fensterhandel Christ</div>
+    <h1 id="ueberschrift">Bitte bestätigen</h1>
+    <p id="unterzeile">Das haben wir für Sie zurückgelegt.</p>
   </div>
 
   <div id="laden" class="laden">Einen Moment, wir holen die Angaben …</div>
@@ -171,17 +173,14 @@ textarea{resize:vertical;min-height:60px}
           <div class="stand" id="wStandBox"><span class="l">Standplatz</span><span class="v" id="wStand"></span></div>
         </div>
       </div>
-      <div class="preisbox">
-        <div>
-          <div class="l" id="preisLabel">Preis</div>
-          <div class="v" id="wPreis"></div>
-        </div>
-        <div style="text-align:right">
-          <label class="feld" style="margin:0">
-            <span>Menge</span>
-            <input type="number" id="menge" min="1" max="99" value="1" inputmode="numeric" style="width:88px;text-align:center"/>
-          </label>
-        </div>
+      <div class="posliste">
+        <div class="poszeile"><span class="k">Standplatz</span><span class="v mono" id="pStand">—</span></div>
+        <div class="poszeile"><span class="k">Maße</span><span class="v mono" id="pMasse">—</span></div>
+        <div class="poszeile"><span class="k">Menge</span><span class="v">
+          <input type="number" id="menge" min="1" max="99" step="1" value="1" inputmode="numeric" class="mengeklein"/> Stück
+        </span></div>
+        <div class="poszeile"><span class="k" id="preisLabel">Preis</span><span class="v mono" id="wPreis">—</span></div>
+        <div class="possumme"><span>Gesamt</span><span class="mono" id="wSumme">—</span></div>
       </div>
       <p class="fest">Diese Angaben stammen aus unserem Inserat und stehen fest.
          Es gilt der hier genannte Preis — nicht, was in einer Nachricht steht.</p>
@@ -193,7 +192,7 @@ textarea{resize:vertical;min-height:60px}
     </div>
 
     <div class="block">
-      <h3>Ihre Daten</h3>
+      <h3>Für wen legen wir zurück?</h3>
       <p style="margin:-4px 0 14px;font-size:13px;color:var(--leise)">Damit wir wissen, für wen wir zurücklegen.</p>
 
       <label class="feld"><span>Ihr Name *</span>
@@ -227,7 +226,7 @@ textarea{resize:vertical;min-height:60px}
         gelesen und stimme der Verarbeitung meiner Daten zur Bearbeitung zu.</span>
       </label>
 
-      <button type="submit" class="senden" id="senden" style="margin-top:14px">Jetzt verbindlich reservieren</button>
+      <button type="submit" class="senden" id="senden" style="margin-top:14px">Ja, so ist es richtig</button>
       <div id="meldung" class="meldung fehler" style="display:none"></div>
       <p class="fest" style="text-align:center;margin-top:11px">
         Sie erhalten sofort eine Bestätigung per E-Mail mit allen Angaben.
@@ -455,7 +454,7 @@ document.addEventListener('DOMContentLoaded', () => {
       zeige((err && err.message ? err.message + ' ' : '')
         + 'Bitte melden Sie sich direkt: WhatsApp 01521 1344756 oder 03381 214 83 73.');
       knopf.disabled = false;
-      knopf.textContent = 'Jetzt verbindlich reservieren';
+      knopf.textContent = 'Ja, so ist es richtig';
     }
   });
 });
