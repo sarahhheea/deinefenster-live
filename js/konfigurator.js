@@ -758,7 +758,26 @@ function fensterStageSVG(){ return flatWindowSVG(false); }
 
 function rollStageSVG(){
   const kas=rollKast();
-  const bR=+S.w||700, hR=+S.h||600;
+
+  /* Gezeichnet wird immer innerhalb der moeglichen Groessen.
+
+     Beim Tippen einer Massangabe laeuft die Zeichnung durch jeden Zwischenwert:
+     wer 1400 eingibt, hat kurz 1, dann 14, dann 140 im Feld. Daraus entstand
+     unmoegliche Geometrie, denn der Massstab kommt aus dem Kundenmass, die
+     Kastenhoehe ist dagegen eine feste Millimeterzahl. Bei einer Hoehe von 1 mm
+     wurde der 137 mm hohe Kasten auf 137000 Einheiten gestreckt, und die
+     Fuehrungsschiene bekam die Hoehe -136000. Der Browser verwarf solche
+     Rechtecke, die Zeichnung zerfiel zu einem leeren Kasten mit Masslinien im
+     Nichts - es sah aus wie ein kaputter Konfigurator, obwohl nur eine Ziffer
+     fehlte.
+
+     Einen Rollladen unter 900 mm gibt es nicht, also wird in diesem Fall die
+     kleinste moegliche Ausfuehrung gezeigt. Versprochen wird damit nichts: der
+     Preis steht solange auf "Maß prüfen", der Weiter-Knopf bleibt gesperrt und
+     die Warnung nennt den moeglichen Bereich. */
+  const _L=massLimits();
+  const bR=Math.min(Math.max(+S.w||_L.bMin, _L.bMin), _L.bMax);
+  const hR=Math.min(Math.max(+S.h||_L.hMin, _L.hMin), _L.hMax);
   const kastHR=kas.kh, panzHR=Math.max(hR-kastHR, 120);
   const BLATT=1000, k=BLATT/Math.max(bR,hR);
   const bMm=bR*k, totalH=hR*k, kastH=kastHR*k, panzH=panzHR*k;
@@ -4218,7 +4237,7 @@ function render(){
   knopfBeschriftung();
 }
 loadCart();
-restoreWiz();
+const _entwurfWiederhergestellt = restoreWiz();
 render();
 wizHistory(true);
 
@@ -4231,7 +4250,20 @@ try{
   else if(/[?&]cart=1(?:&|$)/.test(qs) && cart.length){ openCart(); }
   else {
 
+    /* Ein begonnener Entwurf hat Vorrang vor dem Produkt in der Adresse.
+
+       Jeder Weg in den Konfigurator fuehrt ueber ?prod=..., und die Adresse
+       behaelt den Parameter die ganze Sitzung. Ohne diese Abfrage warf
+       startProduct() jedes Mal alles weg, sobald die Seite neu geladen wurde -
+       und am Handy geschieht das von allein: wer kurz in den Taschenrechner
+       oder die Kamera wechselt, um ein Mass nachzusehen, findet die Seite
+       danach womoeglich verworfen und neu geladen. Gemessen: aus 1750 x 1850
+       im Mass-Schritt wurde 900 x 900 bei Schritt 1.
+
+       Nennt die Adresse ein anderes Produkt, will der Kunde wirklich wechseln -
+       dann wird neu begonnen. */
     const mProd=qs.match(/[?&]prod=([a-z]+)/);
-    if(mProd && PRODUCTS.some(x=>x.id===mProd[1])) startProduct(mProd[1]);
+    if(mProd && PRODUCTS.some(x=>x.id===mProd[1])
+       && !(_entwurfWiederhergestellt && S.prod===mProd[1])) startProduct(mProd[1]);
   }
 }catch(e){}
