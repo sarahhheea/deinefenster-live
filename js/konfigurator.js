@@ -1479,6 +1479,14 @@ async function _preisAbschicken(){
 }
 
 function price(){
+  /* Fuer ein Mass ausserhalb der moeglichen Groessen gibt es keinen Preis - danach
+     muss also auch nicht gefragt werden. Beim Tippen von "1400" entstanden sonst
+     vier Anfragen, drei davon fuer 1, 14 und 140: Werte weit unter dem
+     Mindestmass, die es nie geben kann. Jede Antwort liess die Seite neu
+     zeichnen, und genau daraus entstand der Sturm, der dem Kunden das Eingabefeld
+     unter den Fingern wegzog. Die Anzeige aendert sich dadurch nicht: sie zeigt
+     bei fehlendem Preis ohnehin "Maß außerhalb des möglichen Bereichs". */
+  if(started && typeof massOk==='function' && !massOk()) return null;
   const k=_preisAuszug(S);
   const s=_preisSchluessel(k);
   if(_preisWissen.has(s)) return _preisWissen.get(s);
@@ -4018,6 +4026,23 @@ function knopfBeschriftung(){
                         : 'Weiter';
   nb.classList.toggle('ist-korb', korb);
 }
+/* Merkt sich das Feld, in dem gerade geschrieben wird, und holt den
+   aufgeschobenen Neuaufbau nach, sobald es verlassen wird. Das Nachholen laeuft
+   ueber render() selbst: steht der Cursor dann schon im naechsten Feld - etwa
+   beim Sprung von der Breite zur Hoehe -, schiebt render() erneut auf. */
+let _panelWartet=null;
+function panelSpaeterNeuAufbauen(feld){
+  if(_panelWartet===feld) return;
+  _panelWartet=feld;
+  feld.addEventListener('blur', function nachholen(){
+    feld.removeEventListener('blur', nachholen);
+    if(_panelWartet===feld) _panelWartet=null;
+
+    /* Erst nach dem Klick, der das Feld verlassen hat - sonst zeichnet die Seite
+       neu, bevor der Knopf darunter sein Klickereignis bekommt. */
+    setTimeout(function(){ try{ render(); }catch(e){} }, 0);
+  });
+}
 function render(){
   if(editIndex>=0&&cart[editIndex]) cart[editIndex].conf={...S};
   document.body.classList.toggle('checkout-focus', started && anfrageView==='form');
@@ -4144,7 +4169,27 @@ function render(){
   document.getElementById('stage').innerHTML=stageSVG()+tuerSeitenUmschalter();
   skizzenFormMelden();
   document.getElementById('summary').innerHTML='<div class="eb">Ihre Konfiguration</div><h3>'+configTitleLang()+'</h3>'+summaryPanel();
-  (function(){ const k=STEPS[cur].key, h=kiHinweisHTML(k);
+  /* Waehrend der Kunde tippt, wird der Bereich nicht neu aufgebaut.
+
+     Der Grund: panel.innerHTML=... wirft jedes Eingabefeld weg und stellt es neu
+     her. Liegt der Schreibcursor in diesem Moment in einem Feld, ist er danach
+     verschwunden - am Handy klappt zusaetzlich die Tastatur zu, und die
+     folgenden Anschlaege landen im Nichts. Ausgeloest wurde das von der
+     Preisauskunft: jede getippte Ziffer fragt einen neuen Preis, und sobald die
+     Antwort eintrifft, zeichnet die Seite neu. Wer langsamer tippt als der
+     Server antwortet - also jeder, der von einem Zettel abliest - verlor mitten
+     in der Zahl das Feld. Im Anfrageschritt war es schlimmer: dort tragen die
+     Felder keinen gespeicherten Wert, die eingegebene E-Mail war danach leer.
+
+     Deshalb wird der Neuaufbau aufgeschoben, bis das Feld verlassen wird. Alles
+     andere - Preis, Skizze, Schrittleiste, Maßwarnung - wird weiterhin sofort
+     aktualisiert, denn das geschieht ohne Neuaufbau. */
+  const _tippt = (function(){
+    const a=document.activeElement, p=document.getElementById('panel');
+    return !!(a && p && p.contains(a) && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName));
+  })();
+  if(_tippt) panelSpaeterNeuAufbauen(document.activeElement);
+  if(!_tippt) (function(){ const k=STEPS[cur].key, h=kiHinweisHTML(k);
 
     const vorne = (k==='modell'||k==='oeffnung'||k==='aufteilung');
     const panel = document.getElementById('panel');
@@ -4162,7 +4207,7 @@ function render(){
       b.textContent = 'KI-Bild';
       halter.appendChild(b);
     }); })();
-  if(SKIP_KEYS.includes(STEPS[cur].key) && cur<STEPS.length-1){
+  if(!_tippt && SKIP_KEYS.includes(STEPS[cur].key) && cur<STEPS.length-1){
 
     document.getElementById('panel').insertAdjacentHTML('beforeend',
       '<button type="button" class="skip-extras" onclick="finishWithDefaults()">Passt so — direkt zum Angebot <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg><span class="sub">Griff, Schall, Sicherheit &amp; Rollladen sind auf Standard vorbelegt</span></button>');
