@@ -64,7 +64,7 @@
         <div class="df-cookie-text">
           <strong>🍪 Cookies &amp; Datenschutz</strong>
           Wir verwenden notwendige Cookies, damit unsere Website funktioniert. Mit Ihrer Einwilligung nutzen wir zusätzlich Statistik-Tools (Plausible, anonymisiert, EU). Sie können jederzeit über den Footer-Link „Cookie-Einstellungen" widerrufen.
-          <a href="datenschutz.html">Mehr Infos</a>
+          <a href="/datenschutz.html">Mehr Infos</a>
         </div>
         <div class="df-cookie-actions">
           <button type="button" class="df-cookie-btn df-settings" onclick="window.dfOpenCookieSettings()">Einstellungen</button>
