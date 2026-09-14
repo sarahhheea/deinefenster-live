@@ -2377,7 +2377,7 @@ function massZusatz(){
       var kippGeht = gK && gK.da && (+S.w||0)>=gK.bMin;
 
       return '<div class="vb-zeile"><div class="vb-seite">'+titel+'<span class="vb-laenge">'+(typ==='kipp'?'zum Kippen · ':(typ==='dk-l'||typ==='dk-r')?'dreh- und kippbar · ':'fest · ')+g.min+'–'+g.max+' mm</span></div>'
-        +'<div class="mrow lichtrow"><input type="number" inputmode="numeric" min="'+g.min+'" max="'+g.max+'" value="'+wert+'" oninput="setLichtH(\''+feld+'\',this.value)" onfocus="this.select()"><span class="unit">mm</span></div></div>';
+        +'<div class="mrow lichtrow"><input type="number" inputmode="numeric" min="'+g.min+'" max="'+g.max+'" value="'+wert+'" oninput="setLichtH(\''+feld+'\',this.value)" onfocus="feldMarkieren(this)"><span class="unit">mm</span></div></div>';
     };
     var z='';
     if(S.licht==='ober'||S.licht==='beide') z+=zeile('olH','olTyp','Höhe Oberlicht');
@@ -2815,8 +2815,8 @@ function panelHTML(){
     const L=massLimits();
     return `<div class="card massecard"><div class="grp-title">Maße eingeben</div>
       <div class="mgrid">
-        <div class="mfield"><label for="mW">Breite <span class="mrange">${L.bMin}–${L.bMax} mm</span></label><div class="mrow"><input id="mW" type="number" inputmode="numeric" enterkeyhint="next" min="0" value="${S.w}" oninput="setMass('w',this.value)" onfocus="this.select()" onkeydown="if(event.key==='Enter'){event.preventDefault();var h=document.getElementById('mH');if(h){h.focus();h.select();}}"><span class="unit">mm</span></div></div>
-        <div class="mfield"><label for="mH">Höhe <span class="mrange">${L.hMin}–${L.hMax} mm</span></label><div class="mrow"><input id="mH" type="number" inputmode="numeric" enterkeyhint="done" min="0" value="${S.h}" oninput="setMass('h',this.value)" onfocus="this.select()" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}"><span class="unit">mm</span></div></div>
+        <div class="mfield"><label for="mW">Breite <span class="mrange">${L.bMin}–${L.bMax} mm</span></label><div class="mrow"><input id="mW" type="number" inputmode="numeric" enterkeyhint="next" min="0" value="${S.w}" oninput="setMass('w',this.value)" onfocus="feldMarkieren(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();var h=document.getElementById('mH');if(h){h.focus();h.select();}}"><span class="unit">mm</span></div></div>
+        <div class="mfield"><label for="mH">Höhe <span class="mrange">${L.hMin}–${L.hMax} mm</span></label><div class="mrow"><input id="mH" type="number" inputmode="numeric" enterkeyhint="done" min="0" value="${S.h}" oninput="setMass('h',this.value)" onfocus="feldMarkieren(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}"><span class="unit">mm</span></div></div>
       </div>
       <div id="massWarn" class="masswarn" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg><span></span></div>
       ${messhilfeHTML()}
@@ -2848,7 +2848,7 @@ function panelHTML(){
         + (gK&&gK.da ? `<button type="button" class="vb-chip ${typ==='kipp'?'on':''}"${kippGeht?'':' disabled title="Zum Kippen muss das Fenster mindestens '+gK.bMin+' mm breit sein."'} onclick="setLichtTyp('${typFeld}','kipp')">zum Kippen</button>` : '');
       return `<div class="vb-zeile"><div class="vb-seite">${titel}<span class="vb-laenge">${g.min}–${g.max} mm</span></div>
         <div class="vb-chips">${typKnoepfe}</div>
-        <div class="mrow lichtrow"><input type="number" inputmode="numeric" min="${g.min}" max="${g.max}" value="${wert}" oninput="setLichtH('${feld}',this.value)" onfocus="this.select()"><span class="unit">mm</span></div></div>`;
+        <div class="mrow lichtrow"><input type="number" inputmode="numeric" min="${g.min}" max="${g.max}" value="${wert}" oninput="setLichtH('${feld}',this.value)" onfocus="feldMarkieren(this)"><span class="unit">mm</span></div></div>`;
     };
     let zeilen='';
     if(S.licht==='ober'||S.licht==='beide') zeilen+=zeile('olH','olTyp','Höhe Oberlicht');
@@ -4044,6 +4044,29 @@ function knopfBeschriftung(){
                                         : (eng?'In den Warenkorb':'In den Warenkorb legen'))
                         : 'Weiter';
   nb.classList.toggle('ist-korb', korb);
+}
+/* Markiert beim Antippen eines Massfelds die ganze Zahl, damit die neue Eingabe
+   die alte ersetzt, statt sich in sie hineinzuschieben.
+
+   onfocus="this.select()" allein reichte nicht. In Safari folgt auf den Fokus
+   noch das Loslassen des Fingers, und das setzt die Schreibmarke an die
+   Tippstelle - die Markierung ist wieder weg. Aus "500" und getippten "600"
+   wurde "506000"; am iPhone liess sich so kein Mass eingeben, ohne vorher jede
+   Ziffer einzeln zu loeschen. Deshalb wird das erste Loslassen nach dem Fokus
+   abgefangen. Kommt der Fokus ohne Finger (Enter-Taste), wird das Abfangen beim
+   Verlassen des Felds wieder aufgehoben. */
+function feldMarkieren(el){
+  el.select();
+  if(el._markiertWartet) return;
+  el._markiertWartet=true;
+  const fertig=function(){
+    el._markiertWartet=false;
+    el.removeEventListener('mouseup', loslassen);
+    el.removeEventListener('blur', fertig);
+  };
+  const loslassen=function(e){ e.preventDefault(); fertig(); };
+  el.addEventListener('mouseup', loslassen);
+  el.addEventListener('blur', fertig);
 }
 /* Merkt sich das Feld, in dem gerade geschrieben wird, und holt den
    aufgeschobenen Neuaufbau nach, sobald es verlassen wird. Das Nachholen laeuft
