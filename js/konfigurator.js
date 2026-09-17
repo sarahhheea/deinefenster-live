@@ -665,7 +665,7 @@ function skizzeUnterschrift(x, y, breite, DT, aussenSeite){
        + ' font-size="'+(DT*0.85)+'" fill="#666d77">'+farben+'</text>';
 }
 function flatWindowSVG(isBalkon){
-  const bR=Math.max(+S.w||1000,300), hR=Math.max(+S.h||1200,300);
+  const bR=Math.max(+S.w||1000,200), hR=Math.max(+S.h||1200,200);  // unter dem kleinsten Mindestmaß (210), sonst stimmt die Beschriftung nicht
   const av=sketchAussen(), ci=av?S.outer:S.inner;
   const co=COLORS_AKT()[ci], dark=isDarkCol(ci), fCol=co.c;
   const line=dark?'#17181a':'#111';
@@ -1182,6 +1182,18 @@ function massLimits(){
   return _massEigen();
 }
 
+/* Mindestmaße, sobald ein Feld fest verglast ist: [Breite, Höhe] je Profil und Flügelzahl. */
+const FEST_MIN={
+  classic:{1:[350,210],2:[770,455],3:[1290,455]},
+  light:{1:[350,210],2:[770,510],3:[1290,510]},
+  energy:{1:[380,250],2:[850,480],3:[1275,480]},
+  edge:{1:[330,330],2:[850,480],3:[1275,480]},
+  softline68:{1:[330,350],2:[780,480],3:[1470,480]},
+  softline78:{1:[330,350],2:[780,500],3:[1470,500]},
+  softline88:{1:[330,350],2:[780,500],3:[1470,500]},
+  mb70:{1:[300,300]}, mb70hi:{1:[300,300]}, mb86si:{1:[300,300]}
+};
+
 function _massEigen(){
   const sash=parseInt(S.aufteilung)||1;
 
@@ -1189,12 +1201,15 @@ function _massEigen(){
     const b=(sash>=3)?[1700,3600]:(sash===2?[1150,2800]:[600,1500]);
     return {bMin:b[0],bMax:b[1],hMin:(sash>=3?450:500),hMax:1700};
   }
-  const bMin=sash>=3?1200:(sash===2?800:500), bMax=sash>=3?4000:(sash===2?2700:1500);
+  let bMin=sash>=3?1200:(sash===2?800:500);
+  const bMax=sash>=3?4000:(sash===2?2700:1500);
   let hMin=500,hMax=1900; if(S.aufteilung==='ol'){ hMin=900; hMax=2400; }
 
   try{
     const a=(typeof curAnschlag==='function')?curAnschlag():null;
     if(a && a.oeff && a.oeff.length===1 && a.oeff[0]==='kipp'){ hMax=Math.min(hMax,1000); }
+    const fm=(a && a.oeff && a.oeff.indexOf('fest')>=0 && !lichtAktiv()) ? (FEST_MIN[S.profile]||{})[sash] : null;
+    if(fm){ bMin=fm[0]; hMin=fm[1]; }
   }catch(e){}
   return {bMin,bMax,hMin,hMax};
 }
