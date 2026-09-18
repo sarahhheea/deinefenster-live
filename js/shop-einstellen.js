@@ -15,8 +15,8 @@ const KATEGORIEN = [
   { key: 'festelement',                label: 'Festverglasung',                   icon: 'crop_free' },
   { key: 'kellerfenster',              label: 'Kellerfenster',                    icon: 'crop_landscape' },
   { key: 'rundfenster',                label: 'Rundes Fenster',                   icon: 'circle' },
-  { key: 'rundbogenfenster',           label: 'Rundbogenfenster',                 icon: 'arch' },
-  { key: 'stichbogenfenster',          label: 'Stichbogenfenster',                icon: 'arch' },
+  { key: 'rundbogenfenster',           label: 'Rundbogenfenster',                 icon: 'line_curve' },
+  { key: 'stichbogenfenster',          label: 'Stichbogenfenster',                icon: 'line_curve' },
   { key: 'haustuer',                   label: 'Haustür',                          icon: 'door_front' },
   { key: 'balkontuer-1fluegel',        label: 'Balkontür einflüglig',             icon: 'deck' },
   { key: 'balkontuer-1fluegel-rollo',  label: 'Balkontür einflüglig mit Rollo',   icon: 'roller_shades' },
@@ -29,7 +29,7 @@ const KATEGORIEN = [
   { key: 'fenster-unterlicht',         label: 'Fenster mit Unterlicht',           icon: 'vertical_split' },
   { key: 'fenster-sprossen',           label: 'Fenster mit Sprossen',             icon: 'window_open' },
   { key: 'holzfenster',                label: 'Holzfenster',                      icon: 'forest' },
-  { key: 'dachfenster',                label: 'Dachfenster',                      icon: 'skylight' },
+  { key: 'dachfenster',                label: 'Dachfenster',                      icon: 'roofing' },
   { key: 'garagentor',                 label: 'Garagentor',                       icon: 'garage' },
   { key: 'daemmung',                   label: 'Dämmung',                          icon: 'layers' },
   { key: 'baumaterialien',             label: 'Baumaterialien',                   icon: 'construction' }
@@ -226,6 +226,9 @@ const STATE = {
   user: null,
   editMode: false,
   editId: null,
+  // Archiv-Stand des Inserats, das gerade bearbeitet wird. Wird beim Laden gesetzt,
+  // damit das Speichern ein archiviertes Inserat nicht in den Shop zurueckholt.
+  editArchiviert: false,
   hideBadges: { verglasung: false, lager: false }
 };
 
@@ -267,7 +270,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     STATE.editId   = editParam;
     try {
       const res = await sheetsGet('produkt', { id: editParam });
-      if (res.produkt) await ladeProduktInsFormular(res.produkt);
+      if (res.produkt) {
+        // Archiviert bleibt archiviert: Wer hier nur einen Tippfehler korrigiert,
+        // soll das Inserat nicht ungewollt wieder in den Kunden-Shop stellen.
+        STATE.editArchiviert = res.produkt.aktiv === false;
+        await ladeProduktInsFormular(res.produkt);
+      }
     } catch(e) {
       console.warn('Produkt laden fehlgeschlagen:', e);
     }
@@ -999,6 +1007,9 @@ function resetFormular() {
   // Inserate (Ursache: mehrere Inserate teilten sich eine ID). "Naechstes Inserat" = echter Neu-Insert.
   STATE.editMode = false;
   STATE.editId = null;
+  // Sonst erbt das naechste neue Inserat den Archiv-Stand des zuvor bearbeiteten
+  // und waere sofort unsichtbar.
+  STATE.editArchiviert = false;
   const _vb = document.getElementById('veroeffentlichenBtn');
   if (_vb) _vb.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px" aria-hidden="true">publish</span> Inserat veröffentlichen';
   STATE.bilder = [];
@@ -1331,7 +1342,10 @@ async function veroeffentlichen() {
       standnummer: standnummer || null,
       bilder: alleBilder,
       beschreibung: document.getElementById('formBeschreibung').value.trim() || '',
-      aktiv: true
+      // Beim Bearbeiten den gespeicherten Archiv-Stand uebernehmen. Frueher stand hier
+      // hart `true` — dadurch landeten zwischen 01.09. und 11.09.2026 dreizehn bewusst
+      // archivierte Inserate wieder im Kunden-Shop, nur weil jemand sie korrigiert hat.
+      aktiv: STATE.editMode ? !STATE.editArchiviert : true
     };
 
     let res;

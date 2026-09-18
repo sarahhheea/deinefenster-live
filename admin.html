@@ -9,7 +9,7 @@
   <meta name="referrer" content="strict-origin-when-cross-origin">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
-<link rel="preload" as="font" type="font/woff2" href="/fonts/material-symbols-outlined.woff2?v=sub2026" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="/fonts/material-symbols-outlined.woff2?v=sub2026b" crossorigin>
 <meta name="robots" content="noindex,nofollow"/>
 <meta name="theme-color" content="#0e1e3a"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
@@ -42,6 +42,13 @@ body{
 }
 
 h1,h2{font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:-0.02em}
+
+/* Der Anmelde-Bildschirm sitzt mittig. Sobald eine lange Liste im Fenster steht,
+   muss das weg: ein senkrecht zentrierter Flex-Inhalt, der hoeher ist als das
+   Fenster, ragt oben heraus und laesst sich dorthin auch nicht scrollen — die
+   Kopfzeile mit der Bereichs-Navigation waere unerreichbar (im Archiv mit 23
+   Eintraegen lag sie 1429 px ausserhalb). */
+body.df-liste{justify-content:flex-start}
 
 /* ─── Login Screen ─── */
 #loginScreen{
@@ -199,6 +206,103 @@ h1,h2{font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:-0.02em}
   margin:4px 0;
 }
 
+/* ─── Navigationsleiste (Start · Archiv) ─── */
+.nav-leiste{
+  display:flex;gap:6px;
+  background:rgba(255,255,255,0.05);
+  border:1.5px solid rgba(255,255,255,0.1);
+  border-radius:14px;
+  padding:5px;
+  margin-bottom:4px;
+}
+.nav-knopf{
+  flex:1;
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  background:transparent;border:none;border-radius:10px;
+  padding:11px 8px;
+  color:rgba(240,244,255,0.55);
+  font-family:'Manrope',sans-serif;font-size:14px;font-weight:700;
+  cursor:pointer;
+  transition:background .15s,color .15s;
+  -webkit-user-select:none;user-select:none;
+}
+.nav-knopf{text-decoration:none}
+.nav-knopf span{font-size:19px}
+/* Vier Eintraege statt zwei: auf schmalen Handys Symbol ueber Text stapeln,
+   sonst wird der Text gequetscht oder die Leiste sprengt den Rand. */
+@media (max-width:420px){
+  .nav-knopf{flex-direction:column;gap:2px;font-size:11.5px;padding:8px 4px}
+  .nav-knopf span{font-size:20px}
+}
+.nav-knopf[aria-current="page"]{
+  background:rgba(34,94,170,0.4);
+  color:#f0f4ff;
+}
+.nav-knopf .nav-zahl{
+  font-size:12px;font-weight:800;
+  background:rgba(255,255,255,0.12);
+  border-radius:999px;padding:1px 7px;
+  min-width:20px;
+}
+
+/* ─── Archiv-Ansicht ─── */
+#archivScreen{display:none;width:100%;max-width:380px;flex-direction:column;gap:12px}
+.archiv-hinweis{
+  background:rgba(184,127,0,0.14);
+  border:1px solid rgba(184,127,0,0.32);
+  border-radius:12px;
+  padding:11px 14px;
+  font-size:12.5px;line-height:1.5;
+  color:#fbd88a;
+}
+.archiv-hinweis strong{color:#fbbf24;font-weight:700}
+.archiv-liste{display:flex;flex-direction:column;gap:10px}
+.archiv-karte{
+  display:flex;gap:12px;align-items:flex-start;
+  background:rgba(255,255,255,0.05);
+  border:1.5px solid rgba(255,255,255,0.1);
+  border-radius:16px;
+  padding:12px;
+}
+.archiv-bild{
+  width:62px;height:62px;flex-shrink:0;
+  border-radius:11px;object-fit:cover;
+  background:rgba(255,255,255,0.06);
+}
+.archiv-text{flex:1;min-width:0}
+.archiv-text strong{
+  display:block;font-size:13.5px;font-weight:700;line-height:1.35;
+  margin-bottom:3px;
+  /* Lange Inserats-Titel duerfen die Karte nicht sprengen */
+  overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+}
+.archiv-meta{font-size:11.5px;color:rgba(240,244,255,0.45);line-height:1.5}
+.archiv-aktionen{display:flex;gap:8px;margin-top:9px}
+.archiv-btn{
+  display:flex;align-items:center;gap:5px;
+  border-radius:9px;padding:7px 11px;
+  font-family:'Manrope',sans-serif;font-size:12px;font-weight:700;
+  cursor:pointer;border:1px solid transparent;
+  text-decoration:none;
+}
+.archiv-btn span{font-size:15px}
+.archiv-btn{white-space:nowrap;min-height:44px}  /* Fingerbreite: unter 44 px trifft man am Handy daneben */
+.nav-knopf{min-height:44px}
+.archiv-btn.zurueck{background:rgba(10,138,58,0.22);color:#6ee7a8;border-color:rgba(10,138,58,0.4)}
+.archiv-btn.bearbeiten{background:rgba(255,255,255,0.07);color:rgba(240,244,255,0.75)}
+.archiv-btn:disabled{opacity:0.5;pointer-events:none}
+.archiv-leer{
+  text-align:center;padding:36px 20px;
+  color:rgba(240,244,255,0.4);font-size:13.5px;line-height:1.6;
+}
+.archiv-leer span{font-size:38px;display:block;margin-bottom:10px;color:rgba(240,244,255,0.25)}
+.archiv-fehler{
+  background:rgba(186,26,26,0.15);
+  border:1px solid rgba(186,26,26,0.3);
+  border-radius:12px;padding:12px 14px;
+  font-size:13px;color:#ff8a8a;line-height:1.5;
+}
+
 .btn-logout{
   background:transparent;
   border:1.5px solid rgba(255,255,255,0.1);
@@ -250,6 +354,26 @@ h1,h2{font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:-0.02em}
     <span class="user-badge" id="loggedInAs">eingeloggt</span>
   </div>
 
+  <nav class="nav-leiste" aria-label="Bereiche">
+    <button type="button" class="nav-knopf" aria-current="page" onclick="zeigeStart()">
+      <span class="material-symbols-outlined" aria-hidden="true">grid_view</span>
+      Start
+    </button>
+    <a class="nav-knopf" href="shop-einstellen.html">
+      <span class="material-symbols-outlined" aria-hidden="true">add_box</span>
+      Neu
+    </a>
+    <a class="nav-knopf" href="vorgaenge.html">
+      <span class="material-symbols-outlined" aria-hidden="true">mail</span>
+      Anfragen
+    </a>
+    <button type="button" class="nav-knopf" id="navArchivBtn" onclick="zeigeArchiv()">
+      <span class="material-symbols-outlined" aria-hidden="true">archive</span>
+      Archiv
+      <em class="nav-zahl" id="archivZahl" style="font-style:normal" hidden></em>
+    </button>
+  </nav>
+
   <a class="action-card primary" href="shop-einstellen.html">
     <div class="card-icon blue">
       <span class="material-symbols-outlined" aria-hidden="true">add_box</span>
@@ -263,7 +387,7 @@ h1,h2{font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:-0.02em}
 
   <a class="action-card" href="vorgaenge.html">
     <div class="card-icon blue">
-      <span class="material-symbols-outlined" aria-hidden="true">event_available</span>
+      <span class="material-symbols-outlined" aria-hidden="true">calendar_month</span>
     </div>
     <div class="card-text">
       <strong>Reservierungen &amp; Anfragen</strong>
@@ -302,6 +426,41 @@ h1,h2{font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:-0.02em}
   </button>
 </div>
 
+<!-- ─── ARCHIV ─── -->
+<div id="archivScreen">
+  <div class="dash-header">
+    <h2>Archiv</h2>
+    <span class="user-badge" id="archivAnzahl">wird geladen…</span>
+  </div>
+
+  <nav class="nav-leiste" aria-label="Bereiche">
+    <button type="button" class="nav-knopf" onclick="zeigeStart()">
+      <span class="material-symbols-outlined" aria-hidden="true">grid_view</span>
+      Start
+    </button>
+    <a class="nav-knopf" href="shop-einstellen.html">
+      <span class="material-symbols-outlined" aria-hidden="true">add_box</span>
+      Neu
+    </a>
+    <a class="nav-knopf" href="vorgaenge.html">
+      <span class="material-symbols-outlined" aria-hidden="true">mail</span>
+      Anfragen
+    </a>
+    <button type="button" class="nav-knopf" aria-current="page" onclick="zeigeArchiv()">
+      <span class="material-symbols-outlined" aria-hidden="true">archive</span>
+      Archiv
+    </button>
+  </nav>
+
+  <p class="archiv-hinweis">
+    Diese Inserate sind <strong>für Kunden unsichtbar</strong>, aber vollständig gespeichert.
+    „Aktivieren“ stellt eines zurück in den Shop — sofort und für alle sichtbar.
+  </p>
+
+  <div class="archiv-liste" id="archivListe"></div>
+</div>
+
+<script src="js/shop-archiv-util.js?v=2026-09-18-archiv"></script>
 <script src="js/sheets-config.js?v=2026-08-10-webspace"></script>
 <script>
 // ─── Beim Laden: eingeloggt → direkt Dashboard ───────────────────────────
@@ -342,12 +501,132 @@ function showDashboard() {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('dashScreen').style.display = 'flex';
   document.body.style.overflow = 'auto';
+  document.body.classList.add('df-liste');
+  // Zahl am Archiv-Knopf, damit man ohne Klick sieht, ob dort etwas liegt
+  ladeArchiv({ nurZaehlen: true });
+}
+
+/* ─── Bereiche umschalten ──────────────────────────────────────────────
+   Das Archiv bleibt im Admin statt in den Kunden-Shop zu springen: dort
+   stehen 24 archivierte zwischen über tausend aktiven Inseraten, auf dem
+   Handy ist das keine Verwaltung. */
+function zeigeStart() {
+  document.getElementById('archivScreen').style.display = 'none';
+  document.getElementById('dashScreen').style.display = 'flex';
+  window.scrollTo(0, 0);
+  ladeArchiv({ nurZaehlen: true });
+}
+
+function zeigeArchiv() {
+  document.getElementById('dashScreen').style.display = 'none';
+  document.getElementById('archivScreen').style.display = 'flex';
+  window.scrollTo(0, 0);
+  ladeArchiv();
+}
+
+/* ─── Archiv laden ───────────────────────────────────────────────────── */
+let ARCHIV = [];
+
+async function ladeArchiv(opt) {
+  const nurZaehlen = !!(opt && opt.nurZaehlen);
+  const liste  = document.getElementById('archivListe');
+  const zahl   = document.getElementById('archivZahl');
+  const anzahl = document.getElementById('archivAnzahl');
+
+  if (!nurZaehlen) liste.innerHTML = '<div class="archiv-leer"><span class="material-symbols-outlined">progress_activity</span>Archiv wird geladen…</div>';
+
+  try {
+    const daten = await sheetsGet('produkte');
+    // Dieselbe Lesart wie im Shop: nur ein ausdrückliches false heißt archiviert.
+    ARCHIV = (daten.produkte || []).filter(p => p.aktiv === false);
+  } catch (err) {
+    if (zahl) zahl.hidden = true;
+    if (!nurZaehlen) {
+      anzahl.textContent = 'Fehler';
+      liste.innerHTML = '<div class="archiv-fehler">Das Archiv konnte nicht geladen werden: '
+        + escapeText(err.message) + '<br>Bitte Internetverbindung prüfen und die Seite neu laden.</div>';
+    }
+    return;
+  }
+
+  if (zahl) {
+    zahl.textContent = ARCHIV.length;
+    zahl.hidden = ARCHIV.length === 0;
+  }
+  if (nurZaehlen) return;
+
+  anzahl.textContent = ARCHIV.length === 1 ? '1 Inserat' : ARCHIV.length + ' Inserate';
+
+  if (ARCHIV.length === 0) {
+    liste.innerHTML = '<div class="archiv-leer"><span class="material-symbols-outlined">inventory_2</span>'
+      + 'Nichts im Archiv.<br>Hier landet alles, was du im Shop über „Archivieren“ aus dem Verkauf nimmst.</div>';
+    return;
+  }
+
+  liste.innerHTML = ARCHIV.map(karte).join('');
+}
+
+function escapeText(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function karte(p) {
+  const bild = (Array.isArray(p.bilder) && p.bilder[0]) || 'img/fenster_standard.png';
+  const masse = (p.breite_mm && p.hoehe_mm) ? (p.breite_mm + ' × ' + p.hoehe_mm + ' mm') : '';
+  const preis = (p.preis_eur || p.preis_eur === 0) ? Number(p.preis_eur).toLocaleString('de-DE') + ' €' : '';
+  const stand = p.standnummer ? 'Nr. ' + p.standnummer : '';
+  const meta  = [masse, preis, stand].filter(Boolean).join(' · ');
+  const id    = escapeText(p.id);
+  return `
+  <article class="archiv-karte">
+    <img class="archiv-bild" src="${escapeText(bild)}" alt="" loading="lazy"
+         onerror="this.src='img/fenster_standard.png'"/>
+    <div class="archiv-text">
+      <strong>${escapeText(p.titel || 'Ohne Titel')}</strong>
+      <div class="archiv-meta">${escapeText(meta)}</div>
+      <div class="archiv-aktionen">
+        <button type="button" class="archiv-btn zurueck" data-id="${id}" onclick="zurueckInShop(this)">
+          <span class="material-symbols-outlined" aria-hidden="true">unarchive</span>
+          Aktivieren
+        </button>
+        <a class="archiv-btn bearbeiten" href="shop-einstellen.html?edit=${encodeURIComponent(p.id)}">
+          <span class="material-symbols-outlined" aria-hidden="true">edit</span>
+          Bearbeiten
+        </a>
+      </div>
+    </div>
+  </article>`;
+}
+
+/* ─── Zurück in den Shop ─────────────────────────────────────────────── */
+async function zurueckInShop(btn) {
+  const id = btn.dataset.id;
+  const p  = ARCHIV.find(x => String(x.id) === String(id));
+  const name = p ? (p.titel || id) : id;
+  if (!confirm('„' + name + '“ wieder in den Shop stellen?\n\nDas Inserat ist danach sofort für alle Kunden sichtbar.')) return;
+
+  const alt = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="material-symbols-outlined" style="animation:spin .8s linear infinite" aria-hidden="true">progress_activity</span> Moment…';
+
+  const res = await sheetsPost({ action: 'reactivate', id });
+  if (!res || res.error || res.ok === false) {
+    btn.disabled = false;
+    btn.innerHTML = alt;
+    alert('Das hat nicht geklappt: ' + ((res && res.error) || 'unbekannter Fehler') + '\n\nDas Inserat bleibt im Archiv.');
+    return;
+  }
+  await ladeArchiv();
 }
 
 function doLogout() {
   clearShopToken();
   document.getElementById('dashScreen').style.display = 'none';
+  document.getElementById('archivScreen').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
+  document.body.classList.remove('df-liste');
   document.body.style.overflow = 'hidden';
   const inp = document.getElementById('pinInput');
   if (inp) { inp.value = ''; inp.focus(); }

@@ -23,6 +23,7 @@ const STATE = {
   metadaten: null,         // filter_metadaten aus JSON
   kategorien: {},          // kategorie-key → Anzeigename
   loggedIn: false,         // wahr wenn Inhaberin/Mitarbeiter eingeloggt — zeigt Druck-Icons
+  nurArchiv: false,        // Verwaltung: Archiv-Ansicht statt Kundenansicht (nur eingeloggt)
   filter: {
     zustand: new Set(),
     material: new Set(),
@@ -256,6 +257,60 @@ function setupLoggedInUI() {
   // Admin-FAB (+ Inserat anlegen) nur für eingeloggte Mitarbeiter
   const adminFab = document.getElementById('admin-fab');
   if (adminFab) adminFab.style.display = 'flex';
+
+  // Archiv-Umschalter in der Verwaltungsleiste
+  const archivBtn = document.getElementById('archivFilterBtn');
+  if (archivBtn) archivBtn.addEventListener('click', () => setzeArchivAnsicht(!STATE.nurArchiv));
+}
+
+/* Zahl am Archiv-Knopf: ohne sie muesste man hineinklicken, um zu sehen,
+   ob ueberhaupt etwas archiviert ist. */
+function zeigeArchivZahl() {
+  const el = document.getElementById('archivFilterZahl');
+  if (!el) return;
+  const n = STATE.produkte.filter(p => p.aktiv === false).length;
+  el.textContent = n ? ' ' + n : '';
+}
+
+/* ─── Archiv-Ansicht der Verwaltung ────────────────────────────────────
+   Archivierte Inserate stehen sonst zwischen ueber tausend aktiven und sind
+   praktisch nicht zu finden. Hier sind sie ein eigener Bereich — sichtbar nur
+   fuer angemeldete Mitarbeiter, am Kunden-Shop aendert sich nichts. */
+function setzeArchivAnsicht(an) {
+  STATE.nurArchiv = !!an;
+  const btn = document.getElementById('archivFilterBtn');
+  if (btn) {
+    btn.setAttribute('aria-pressed', STATE.nurArchiv ? 'true' : 'false');
+    btn.style.background = STATE.nurArchiv ? '#fbbf24' : 'rgba(184,127,0,0.22)';
+    btn.style.color      = STATE.nurArchiv ? '#1a2f5e' : '#fbd88a';
+  }
+  zeigeArchivBand(STATE.nurArchiv);
+  // Kategorie-Kacheln und Filterliste rechnen ueber zaehlBasis() — die haengt jetzt
+  // am Modus und muss deshalb mit umgezeichnet werden, sonst stehen dort die Zahlen
+  // der jeweils anderen Ansicht.
+  baueKatLeiste();
+  baueFilterSidebar();
+  rendere();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* Ein Band, das keinen Zweifel laesst, in welcher Ansicht man arbeitet — sonst
+   wundert sich jemand, warum der Shop plotzlich fast leer ist. */
+function zeigeArchivBand(an) {
+  let band = document.getElementById('archivBand');
+  if (!an) { if (band) band.remove(); return; }
+  if (band) return;
+  band = document.createElement('div');
+  band.id = 'archivBand';
+  band.style.cssText = 'background:#fbbf24;color:#1a2f5e;font-weight:800;font-size:13px;'
+    + 'padding:9px 16px;text-align:center;position:sticky;top:var(--banner-h,0);z-index:60';
+  band.innerHTML = 'Archiv — diese Inserate sind f\u00fcr Kunden unsichtbar. '
+    + '<button type="button" id="archivBandZurueck" style="text-decoration:underline;font-weight:800;background:none;border:none;color:inherit;cursor:pointer;padding:0;min-height:44px">Zur\u00fcck zum Shop</button>';
+  const grid = document.getElementById('produktGrid');
+  if (grid && grid.parentNode) grid.parentNode.insertBefore(band, grid);
+  else document.body.appendChild(band);
+  const zurueck = document.getElementById('archivBandZurueck');
+  if (zurueck) zurueck.addEventListener('click', () => setzeArchivAnsicht(false));
 }
 
 /* ─── Hauptgruppen (interner Hinweis.05.2026: Untertypen zu Eigenschaften)
@@ -454,6 +509,7 @@ async function loadProdukte() {
 
     STATE.produkte = sichtbar;
     STATE.metadaten = berechneMetadaten(STATE.produkte);
+    zeigeArchivZahl();
   } catch (err) {
     console.error('Sheets-Fehler beim Laden — Fallback auf JSON:', err);
     return loadProdukteFromJson();
@@ -1042,7 +1098,12 @@ function aussenAusblendbar(p) {
 /* Basis ALLER Zaehler (Kategorie-Kacheln, Sidebar, Zustand-Chips): was der Kunde
    ohne Zusatzklick wirklich sieht. Eine Quelle, damit die Zahlen nie auseinanderlaufen. */
 function zaehlBasis() {
-  return (STATE.produkte || []).filter(p => !((p.eigenschaften || []).includes(TAG_AUSSEN) && aussenAusblendbar(p)));
+  return (STATE.produkte || [])
+    /* Dieselbe Trennung wie in gefilterteProdukte: in der Archiv-Ansicht zaehlen die
+       archivierten, sonst die sichtbaren. Ohne das stuende ueber 24 Karten weiter
+       „Alle 1093" — und niemand wuesste, welche Zahl gilt. */
+    .filter(p => STATE.nurArchiv ? p.aktiv === false : p.aktiv !== false)
+    .filter(p => !((p.eigenschaften || []).includes(TAG_AUSSEN) && aussenAusblendbar(p)));
 }
 
 /* Wie viele „nach außen"-Artikel blendet der aktuelle Filter gerade aus? (für den Hinweis) */
@@ -1122,6 +1183,11 @@ function gefilterteProdukte(opt) {
   const massTreffer = nurAussen ? new Map() : (STATE.massTreffer = new Map());
 
   let result = STATE.produkte.filter(p => {
+    /* Archiv-Ansicht der Verwaltung: entweder nur die archivierten oder nur die
+       sichtbaren. Archivierte tauchen ueberhaupt nur fuer angemeldete Mitarbeiter
+       auf (siehe ladeProdukte) — fuer Kunden aendert diese Zeile nichts. */
+    if (STATE.nurArchiv) { if (p.aktiv !== false) return false; }
+    else if (p.aktiv === false) return false;
     // Öffnungsrichtung (s.o.) — vor allen anderen Regeln
     const istAussen = (p.eigenschaften || []).includes(TAG_AUSSEN);
     // nurAussen zaehlt fuer den Hinweis die WIRKLICH versteckten — Tueren sind nie versteckt

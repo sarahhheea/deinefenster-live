@@ -305,7 +305,15 @@ async function _updateProdukt(id, eintrag) {
     let found = false;
     await _writeJSON(json => {
       const idx = (json.produkte || []).findIndex(p => String(p.id) === String(id));
-      if (idx >= 0) { json.produkte[idx] = { id, ...eintrag }; found = true; }
+      if (idx >= 0) {
+        /* Der Archiv-Stand ueberlebt das Bearbeiten. Frueher ersetzte diese Zeile den
+           Datensatz komplett, wodurch ein archiviertes Inserat beim Korrigieren still
+           wieder im Kunden-Shop stand (13 Faelle zwischen 01.09. und 11.09.2026).
+           Sichtbar oder nicht entscheiden allein "Archivieren" und "Wieder aktivieren";
+           siehe js/shop-archiv-util.js und test/shop-archiv.test.js. */
+        json.produkte[idx] = bewahreArchivStatus(json.produkte[idx], { id, ...eintrag });
+        found = true;
+      }
     }, `Inserat aktualisiert: ${eintrag.titel || id}`);
     if (!found) return { ok: false, error: 'Produkt nicht gefunden: ' + id };
     return { ok: true };
