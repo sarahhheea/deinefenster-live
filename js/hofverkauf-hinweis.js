@@ -44,6 +44,9 @@
     pauseVon   : '2026-12-08',
     wiederAb   : '2027-01-15'
   };
+  /* Fuer die Oeffnungsanzeige im Shop (js/oeffnungszeiten-util.js) — dieselben Termine,
+     keine zweite Kopie. */
+  window.DF_HOF_PLAN = PLAN;
 
   function heute() {
     var d = new Date();

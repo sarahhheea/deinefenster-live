@@ -59,6 +59,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   loadCart();
   initShopTabs();
   initShopSticky();
+  initAnsicht();
+  initMassBar();
   updateOpenStatus();
   await checkAuth();
   await loadProdukte();
@@ -132,26 +134,88 @@ function updateOpenStatus() {
   const badge = document.getElementById('shopOpenBadge');
   const text = document.getElementById('shopOpenText');
   if (!badge || !text) return;
-  const now = new Date();
-  const day = now.getDay();   // 0=So, 5=Fr
-  const hour = now.getHours();
-  const istFreitagOffen = day === 5 && hour >= 10 && hour < 17;
-  if (istFreitagOffen) {
-    text.textContent = 'Jetzt geöffnet bis 17 Uhr — vor Anfahrt kurz Verfügbarkeit prüfen';
+  // Zeiten aus dem Jahresplan (js/hofverkauf-hinweis.js). Vorher kannte diese Anzeige nur
+  // den Freitag und meldete samstags „Geschlossen", obwohl der Hof offen hatte.
+  const plan = window.DF_HOF_PLAN || null;
+  const s = window.dfOeffnung
+    ? window.dfOeffnung.oeffnungsStatus(new Date(), plan)
+    : { offen: false, naechste: null };
+  if (s.offen) {
+    text.textContent = `Jetzt geöffnet bis ${s.bis} Uhr — vor Anfahrt kurz Verfügbarkeit prüfen`;
     badge.classList.remove('shop-open-badge--closed');
     badge.classList.add('shop-open-badge--open');
   } else {
-    const daysUntilFr = day === 5 ? (hour >= 17 ? 7 : 0) : (5 - day + 7) % 7;
-    const next = new Date(now);
-    next.setDate(now.getDate() + daysUntilFr);
     const fmt = new Intl.DateTimeFormat('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit' });
-    text.textContent = `Geschlossen — nächste Öffnung: ${fmt.format(next)}, 10–17 Uhr`;
+    text.textContent = s.naechste
+      ? `Geschlossen — nächste Öffnung: ${fmt.format(s.naechste.tag)}, ${s.naechste.von}–${s.naechste.bis} Uhr`
+      : 'Öffnungszeiten siehe Kontakt';
     badge.classList.add('shop-open-badge--closed');
     badge.classList.remove('shop-open-badge--open');
+  }
+  if (window.dfOeffnung) {
+    const kurz = window.dfOeffnung.zeitenKurz(new Date(), plan);
+    document.querySelectorAll('[data-df-zeiten]').forEach(el => { el.textContent = kurz; });
   }
 }
 // Auto-Refresh alle 60 Sekunden — Badge springt um wenn Freitag 10 Uhr beginnt/17 Uhr endet
 setInterval(updateOpenStatus, 60000);
+
+/* ─── Ansicht Liste / Kacheln ───
+   Am Handy startet die Liste (Mass, Preis, Titel gross nebeneinander), am Rechner die Kacheln.
+   Die Wahl des Kunden wird gemerkt (nur im eigenen Browser, reine Bequemlichkeit). */
+const ANSICHT_KEY = 'df_shop_ansicht';
+function setzeAnsicht(a) {
+  const grid = document.getElementById('produktGrid');
+  if (grid) grid.classList.toggle('ansicht-liste', a === 'liste');
+  document.querySelectorAll('.shop-ansicht-btn').forEach(b => {
+    b.setAttribute('aria-pressed', String(b.dataset.ansicht === a));
+  });
+}
+function initAnsicht() {
+  let a = null;
+  try { a = localStorage.getItem(ANSICHT_KEY); } catch (e) {}
+  if (a !== 'liste' && a !== 'kacheln') a = window.matchMedia('(max-width: 899px)').matches ? 'liste' : 'kacheln';
+  setzeAnsicht(a);
+  document.querySelectorAll('.shop-ansicht-btn').forEach(b => b.addEventListener('click', () => {
+    setzeAnsicht(b.dataset.ansicht);
+    try { localStorage.setItem(ANSICHT_KEY, b.dataset.ansicht); } catch (e) {}
+  }));
+}
+
+/* ─── Maß-Leiste oben ───
+   Schreibt in die Felder der Filterspalte und loest dort das input-Ereignis aus —
+   dadurch gilt dieselbe Logik wie bisher, und es gibt nur einen Maß-Zustand. */
+function initMassBar() {
+  const form = document.getElementById('massBar');
+  if (!form) return;
+  const bb = document.getElementById('massBarBreite');
+  const bh = document.getElementById('massBarHoehe');
+  const uebertrage = (von, zielId) => {
+    const ziel = document.getElementById(zielId);
+    if (!ziel || ziel.value === von.value) return;
+    ziel.value = von.value;
+    ziel.dispatchEvent(new Event('input', { bubbles: true }));
+  };
+  bb.addEventListener('input', () => uebertrage(bb, 'filterBreite'));
+  bh.addEventListener('input', () => uebertrage(bh, 'filterHoehe'));
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    uebertrage(bb, 'filterBreite');
+    uebertrage(bh, 'filterHoehe');
+    if (document.activeElement) document.activeElement.blur();   // Handy-Tastatur zu
+    const grid = document.getElementById('produktGrid');
+    if (grid) grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+}
+/* Maß-Leiste zeigt immer den aktuellen Stand (z. B. nach „1000x1200" in der Suche
+   oder nach „Maße entfernen"). */
+function syncMassBar() {
+  const paare = [['massBarBreite', STATE.filter.breite], ['massBarHoehe', STATE.filter.hoehe]];
+  paare.forEach(([id, wert]) => {
+    const el = document.getElementById(id);
+    if (el && document.activeElement !== el) el.value = wert ? String(wert) : '';
+  });
+}
 
 /* ─── URL-Parameter Filter (z.B. shop.html?zustand=gebraucht oder ?cat=daemmung) ─── */
 function applyUrlFilter() {
@@ -199,6 +263,13 @@ function applyUrlFilter() {
     try { pruefeMassErkennung(STATE.filter.suche); } catch (e) {}
     const clr = document.getElementById('sucheClearBtn');
     if (clr) clr.classList.remove('hidden');
+    scrollNeeded = true;
+  }
+  // ?b=1000&h=1200 — Maß von der Startseite uebernehmen
+  const ub = parseInt(params.get('b'), 10), uh = parseInt(params.get('h'), 10);
+  if (ub > 0 || uh > 0) {
+    if (ub > 0) { STATE.filter.breite = ub; document.getElementById('filterBreite').value = ub; }
+    if (uh > 0) { STATE.filter.hoehe = uh; document.getElementById('filterHoehe').value = uh; }
     scrollNeeded = true;
   }
   if (scrollNeeded) {
@@ -788,7 +859,7 @@ function baueFilterSidebar() {
     if (count === 0) return '';
     return `
       <label class="filter-option">
-        <span class="flex items-center gap-2"><input type="checkbox" class="check filter-eigenschaft" value="${e}"/><span>${eigenschaftAnzeige(e)}</span></span>
+        <span class="flex items-center gap-2"><input type="checkbox" class="check filter-eigenschaft" value="${e}"/><span>${eigenschaftAnzeige(e)}${EIG_ERKLAERUNG[e] ? `<small class="filter-erkl">${EIG_ERKLAERUNG[e]}</small>` : ''}</span></span>
         <span class="count">${count}</span>
       </label>`;
   };
@@ -1422,11 +1493,36 @@ function rendereMassHinweis(result) {
   }
 }
 
+const PORTION = 48;
+let _anzeigeLimit = PORTION;
+let _mehrGeklickt = false;
+function zeigeMehrKnopf(gridEl, gesamt) {
+  let wrap = document.getElementById('mehrLadenWrap');
+  if (!wrap) {
+    wrap = document.createElement('div');
+    wrap.id = 'mehrLadenWrap';
+    wrap.className = 'mehr-laden-wrap';
+    wrap.innerHTML = '<p class="mehr-laden-info"></p><button type="button" class="mehr-laden-btn">Weitere Artikel anzeigen</button>';
+    gridEl.insertAdjacentElement('afterend', wrap);
+    wrap.querySelector('button').addEventListener('click', () => {
+      _anzeigeLimit += PORTION;
+      _mehrGeklickt = true;
+      rendere();
+    });
+  }
+  const gezeigt = Math.min(_anzeigeLimit, gesamt);
+  wrap.hidden = gezeigt >= gesamt;
+  wrap.querySelector('.mehr-laden-info').textContent = `${gezeigt} von ${gesamt} Artikeln angezeigt`;
+}
+
 function rendere() {
   const result = gefilterteProdukte();
   document.getElementById('produktAnzahl').textContent = result.length;
   const _toolsAnzahl = document.getElementById('toolsAnzahl');
   if (_toolsAnzahl) _toolsAnzahl.textContent = result.length;
+  syncMassBar();
+  const _grid = document.getElementById('produktGrid');
+  if (_grid) _grid.removeAttribute('aria-busy');
   aktualisiereFilterZaehler();
   baueZustandChips();
   const _applyBtn = document.getElementById('filterApplyMob');
@@ -1532,8 +1628,12 @@ function rendere() {
   emptyEl.classList.add('hidden');
   gridEl.classList.remove('hidden');
 
-  // Karten rendern
-  gridEl.innerHTML = result.map(p => karteHtml(p)).join('');
+  // Karten rendern — in Portionen. Vorher standen alle ~1066 Karten auf einmal im Raster
+  // (Seite 156.000px hoch), am Handy schwer und traege. Jede Filteraenderung beginnt
+  // wieder bei der ersten Portion; „Weitere anzeigen" haengt die naechste an.
+  if (_mehrGeklickt) _mehrGeklickt = false; else _anzeigeLimit = PORTION;
+  gridEl.innerHTML = result.slice(0, _anzeigeLimit).map(p => karteHtml(p)).join('');
+  zeigeMehrKnopf(gridEl, result.length);
 
   // Druck-Icon: Klick soll nicht das Detail-Modal öffnen
   gridEl.querySelectorAll('[data-action="drucken"]').forEach(a => {
@@ -1767,8 +1867,12 @@ function karteHtml(p) {
   // Standnummer — Preis steht unten in einer Zeile neben dem Anfragen-Knopf.
   const masseTxt = (p.breite_mm && p.hoehe_mm)
     ? `${p.breite_mm} × ${p.hoehe_mm} <span class="karte-masse-unit">mm</span>` : '';
+  // Das Maß ist fuer Lagerware das Entscheidungskriterium — es steht deshalb als eigene,
+  // grosse Zeile ueber dem Preis, mit „Breite × Höhe" dazu (vorher 13,5px in einer
+  // Sammelzeile mit Verglasung, schwer lesbar).
+  const masseZeile = masseTxt
+    ? `<p class="karte-masse-gross"><span class="karte-masse-label">Breite × Höhe</span>${masseTxt}</p>` : '';
   const specParts = [];
-  if (masseTxt) specParts.push(masseTxt);
   if (verglasungTxt) specParts.push(verglasungTxt);
   if (p.rc_klasse) specParts.push(escapeHtml(p.rc_klasse));
   const specZeile = specParts.length
@@ -1804,6 +1908,7 @@ function karteHtml(p) {
           ${HERZ_SVG}</button>`}
       </div>
       <div class="karte-body">
+        ${masseZeile}
         <div class="karte-pricewrap">
           <span class="karte-preis">${preisPrefix ? preisPrefix + ' ' : ''}${formatPreis(p.preis_eur)}<span class="karte-preis-stern">${preisStern}</span></span>
           <span class="karte-mwst">inkl. MwSt.${grundpreisSuffix(p)}</span>
@@ -3058,6 +3163,33 @@ function oeffnungsartLabel(code) {
   };
   return map[code] || code;
 }
+
+/* Ein Satz Alltagssprache unter Fachwoertern im Filter (19.09.2026). Im Test als
+   50-jaehriger Laie war keiner dieser Begriffe verstaendlich. Reine Begriffserklaerung,
+   keine Produktangabe. */
+const EIG_ERKLAERUNG = {
+  'nach-aussen-oeffnend': 'Flügel geht nach draußen auf',
+  'dreh-kipp': 'Seitlich öffnen und oben kippen',
+  'stulp': 'Zwei Flügel, keine feste Stange in der Mitte',
+  'pfosten': 'Zwei Flügel mit fester Stange in der Mitte',
+  'kaempfer': 'Feste Querstange teilt oben und unten',
+  'festverglasung': 'Lässt sich nicht öffnen',
+  'parallel-schiebe-kipp': 'Große Tür: kippen oder zur Seite schieben',
+  'hebe-schiebe': 'Große Tür: anheben und zur Seite schieben',
+  'oberlicht': 'Extra Glasfeld darüber',
+  'unterlicht': 'Extra Glasfeld darunter',
+  'ober-unter-licht': 'Extra Glasfeld darüber und darunter',
+  'alu-schwelle': 'Flache Metallschwelle unten an der Tür',
+  'null-schwelle': 'Fast keine Stolperkante an der Tür',
+  'sprossen-aufgesetzt': 'Teilungsleisten auf dem Glas',
+  'sprossen-innen': 'Teilungsleisten zwischen den Scheiben',
+  'passivhaus-tauglich': 'Für sehr gut gedämmte Häuser gedacht',
+  'rc2': 'Einbruchschutz – höhere Zahl, mehr Schutz',
+  'rc3': 'Einbruchschutz – höhere Zahl, mehr Schutz',
+  '2-fach-verglasung': 'Zwei Glasscheiben',
+  '3-fach-verglasung': 'Drei Glasscheiben – dämmt besser',
+  'holzdekor': 'Kunststoff mit Holz-Optik'
+};
 
 function eigenschaftAnzeige(code) {
   const map = {

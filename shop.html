@@ -1452,6 +1452,87 @@ input[type="range"].range-clean::-moz-range-thumb {
   .shop-suchzeile .zustand-chips  { flex: 0 1 auto; }
 }
 
+/* ===== Maß-Leiste (19.09.2026) ===== */
+.shop-suchzeile .shop-massbar { order: 0; flex: 1 0 100%; }
+.shop-massbar {
+  background: #fff; border: 1.5px solid #c3d9fb; border-radius: 16px;
+  padding: 14px 16px 12px; margin: 0 0 10px; box-shadow: 0 6px 20px -14px rgba(8,21,46,.35);
+}
+.shop-massbar-titel {
+  margin: 0 0 8px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 18px; font-weight: 800; color: #14181d;
+}
+.shop-massbar-titel span { display: inline-block; font-size: 14px; font-weight: 500; color: #5b626b; margin-left: 4px; }
+.shop-massbar-felder { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; }
+.shop-massbar-feld { position: relative; display: flex; flex-direction: column; flex: 1 1 140px; min-width: 0; max-width: 220px; }
+.shop-massbar-feld > span { font-size: 14px; font-weight: 700; color: #14181d; margin-bottom: 4px; }
+.shop-massbar-feld input {
+  width: 100%; height: 52px; border: 1.5px solid #b9c3d3; border-radius: 12px; background: #fff;
+  padding: 0 44px 0 14px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 20px; font-weight: 700; color: #14181d;
+  -moz-appearance: textfield;
+}
+.shop-massbar-feld input::-webkit-outer-spin-button,
+.shop-massbar-feld input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.shop-massbar-feld input::placeholder { color: #9aa3b1; font-weight: 500; font-size: 16px; }
+.shop-massbar-feld input:focus { outline: none; border-color: #225eaa; box-shadow: 0 0 0 3.5px rgba(34,94,170,.15); }
+.shop-massbar-feld em { position: absolute; right: 14px; bottom: 15px; font-style: normal; font-size: 15px; font-weight: 600; color: #5b626b; pointer-events: none; }
+.shop-massbar-x { font-size: 22px; font-weight: 700; color: #5b626b; padding-bottom: 12px; }
+.shop-massbar-los {
+  height: 52px; padding: 0 22px; border: 0; border-radius: 12px; background: #225eaa; color: #fff;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 800; cursor: pointer; white-space: nowrap;
+}
+.shop-massbar-los:hover { background: #1b4d8e; }
+.shop-massbar-hilfe { margin: 8px 0 0; font-size: 13.5px; color: #4a525d; line-height: 1.45; }
+.shop-massbar-hilfe a { color: #225eaa; font-weight: 700; }
+@media (max-width: 599px) {
+  .shop-massbar { padding: 12px 12px 10px; }
+  .shop-massbar-titel { font-size: 17px; }
+  .shop-massbar-titel span { display: block; margin: 2px 0 0; }
+  .shop-massbar-feld { flex: 1 1 0; max-width: none; }
+  .shop-massbar-los { flex: 1 0 100%; }
+}
+/* Seitenfilter: Mass-Eingabe steht oben in der Leiste — hier nur noch die Abweichung */
+.filter-mass > .grid, #massFinden { display: none !important; }
+.filter-erkl { display: block; font-size: 12px; font-weight: 500; color: #5b626b; line-height: 1.3; margin-top: 1px; }
+.filter-mass-hinweis { font-size: 12.5px; color: #4a525d; margin: 0 0 8px; line-height: 1.4; }
+
+/* ===== Ansicht Liste / Kacheln ===== */
+.shop-ansicht { display: inline-flex; border: 1.5px solid #d3d9e6; border-radius: 999px; background: #fff; padding: 2px; }
+.shop-ansicht-btn {
+  display: inline-flex; align-items: center; gap: 5px; border: 0; background: transparent; cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 700; color: #4a525d;
+  padding: 7px 12px; border-radius: 999px; min-height: 36px;
+}
+.shop-ansicht-btn[aria-pressed="true"] { background: #225eaa; color: #fff; }
+@media (max-width: 899px) {
+  .shop-ansicht-btn { min-height: 42px; padding: 0 12px; }
+}
+@media (max-width: 420px) {
+  .shop-ansicht-btn { padding: 0 9px; font-size: 12.5px; }
+}
+
+/* Platzhalter beim Laden */
+.karte-skelett {
+  border-radius: 14px; aspect-ratio: 3 / 4.3;
+  background: linear-gradient(90deg, #eef2f8 0%, #f6f8fb 50%, #eef2f8 100%); background-size: 200% 100%;
+  animation: skelett 1.2s ease-in-out infinite;
+}
+/* Platz fuer Kategorien und Zustand-Chips freihalten, bis sie gebaut sind —
+   sonst schoben sie beim Laden alles ~170px nach unten (gemessen 122/125px + 44px). */
+#katLeiste:empty { min-height: 122px; }
+@media (max-width: 899px) { #katLeiste:empty { min-height: 125px; } }
+#zustandChips:empty { min-height: 44px; }
+.mehr-laden-wrap { text-align: center; margin: 22px 0 8px; }
+.mehr-laden-wrap[hidden] { display: none; }
+.mehr-laden-info { font-size: 14px; color: #4a525d; margin: 0 0 10px; }
+.mehr-laden-btn {
+  min-height: 52px; padding: 0 28px; border-radius: 12px; border: 1.5px solid #225eaa;
+  background: #fff; color: #225eaa; font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 16px; font-weight: 800; cursor: pointer; width: 100%; max-width: 360px;
+}
+.mehr-laden-btn:hover { background: #eef4ff; }
+@keyframes skelett { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+@media (prefers-reduced-motion: reduce) { .karte-skelett { animation: none; } }
+
 /* Werkzeugzeile: Filter · Sortierung · Trefferzahl */
 .shop-tools { display: flex; align-items: center; gap: 8px; margin-top: 11px; min-width: 0; }
 .shop-tool {
@@ -1531,7 +1612,7 @@ input[type="range"].range-clean::-moz-range-thumb {
 .shop-masse-hinweis-close { text-decoration: underline; margin-left: 8px; background: none; border: none; cursor: pointer; color: #225eaa; font-size: 12px; }
 
 /* Hinweis auf ausgeblendete nach-außen-öffnende Artikel (Standard: ausgeblendet) */
-/* Randinfo zu 10 von 772 Artikeln — schmale Zeile UNTER der Liste. */
+/* Randinfo zu ausgeblendeten Artikeln — schmale Zeile UNTER der Liste. */
 .aussen-hinweis { display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
   margin: 14px 0 0; padding: 10px 2px 0; border: 0; border-top: 1px solid #e3e6ea; background: none;
   font-size: 12.5px; line-height: 1.35; color: #5b626b; }
@@ -1881,7 +1962,7 @@ input[type="range"].range-clean::-moz-range-thumb {
     </p>
     <div id="shopOpenBadge" class="shop-open-badge shop-open-badge--closed">
       <span class="shop-open-dot" aria-hidden="true"></span>
-      <span id="shopOpenText">Geöffnet nur Freitag 10–17 Uhr</span>
+      <span id="shopOpenText">Hofverkauf freitags 10–17 Uhr</span>
     </div>
   </div>
 </header>
@@ -1892,10 +1973,33 @@ input[type="range"].range-clean::-moz-range-thumb {
        getrennte Zeilen kosteten 117px, bevor der Kunde ein Fenster sah. Ab 900px
        stapeln sie wieder (Kategorien liegen dann dazwischen). -->
   <div class="shop-suchzeile">
+  <!-- Maß-Leiste (19.09.2026): Das Maß ist bei Lagerware der Weg zum passenden Fenster.
+       Stand vorher nur in der Filterspalte — am Handy hinter „Filter" versteckt.
+       Sie schreibt in dieselben Felder wie die Filterspalte (#filterBreite/#filterHoehe),
+       damit es nur EINEN Maß-Zustand gibt. -->
+  <form id="massBar" class="shop-massbar" role="search" aria-label="Nach Fenstermaß suchen" novalidate>
+    <p class="shop-massbar-titel">Welches Maß suchen Sie? <span>in Millimetern, z.&nbsp;B. 1000 × 1200</span></p>
+    <div class="shop-massbar-felder">
+      <label class="shop-massbar-feld">
+        <span>Breite</span>
+        <input id="massBarBreite" type="number" inputmode="numeric" min="0" max="6500" placeholder="z. B. 1000" autocomplete="off">
+        <em>mm</em>
+      </label>
+      <span class="shop-massbar-x" aria-hidden="true">×</span>
+      <label class="shop-massbar-feld">
+        <span>Höhe</span>
+        <input id="massBarHoehe" type="number" inputmode="numeric" min="0" max="3000" placeholder="z. B. 1200" autocomplete="off">
+        <em>mm</em>
+      </label>
+      <button type="submit" class="shop-massbar-los">Passende zeigen</button>
+    </div>
+    <p class="shop-massbar-hilfe">Wir zeigen auch Fenster, die bis zu 15&nbsp;% größer oder kleiner sind.
+      Nichts dabei? <a href="/konfigurator.html">Fenster nach Maß selbst zusammenstellen</a></p>
+  </form>
   <div class="shop-searchbar" role="search">
     <div class="shop-searchbar-field">
       <span class="material-symbols-outlined shop-searchbar-icon" aria-hidden="true">search</span>
-      <input id="sucheInput" type="text" placeholder="Standnr., Maß oder Stichwort" autocomplete="off" enterkeyhint="search" inputmode="search"/>
+      <input id="sucheInput" type="text" placeholder="Standnummer oder Stichwort" autocomplete="off" enterkeyhint="search" inputmode="search"/>
       <button id="sucheClearBtn" class="hidden shop-searchbar-clear" aria-label="Suche leeren">
         <span class="material-symbols-outlined" aria-hidden="true">close</span>
       </button>
@@ -1920,7 +2024,13 @@ input[type="range"].range-clean::-moz-range-thumb {
         <option value="groesse-auf">Größe ↑</option>
       </select>
     </div>
-    <span class="shop-tools-count"><span id="toolsAnzahl">772</span> Artikel</span>
+    <div class="shop-ansicht" role="group" aria-label="Ansicht">
+      <button type="button" class="shop-ansicht-btn" data-ansicht="liste" aria-pressed="false">
+        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 5h18v2H3zm0 6h18v2H3zm0 6h18v2H3z"/></svg>Liste</button>
+      <button type="button" class="shop-ansicht-btn" data-ansicht="kacheln" aria-pressed="false">
+        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 3h8v8H3zm10 0h8v8h-8zM3 13h8v8H3zm10 0h8v8h-8z"/></svg>Kacheln</button>
+    </div>
+    <span class="shop-tools-count"><span id="toolsAnzahl">…</span> Artikel</span>
   </div>
   <!-- Kategorien als freigestellte Produktfotos auf gemeinsamer Grundlinie (wie im Menue) -->
   <nav id="katLeiste" class="kat-leiste" aria-label="Produktkategorien"></nav>
@@ -1953,7 +2063,7 @@ input[type="range"].range-clean::-moz-range-thumb {
   <p class="shop-anfrage-hinweis" aria-label="Hinweis zu Anfrage und Preisangaben">
     <span class="material-symbols-outlined" aria-hidden="true">info</span>
     <span><strong>Kein Sofortkauf</strong> &mdash; Sie fragen an, wir best&auml;tigen.
-    <span class="shop-hinweis-ort">&middot; <strong>Abholung Brandenburg a.&nbsp;d.&nbsp;Havel</strong>, Fr 10&ndash;17&nbsp;Uhr
+    <span class="shop-hinweis-ort">&middot; <strong>Abholung Brandenburg a.&nbsp;d.&nbsp;Havel</strong>, <span data-df-zeiten>Fr 10&ndash;17&nbsp;Uhr</span>
     (<a href="https://www.google.com/maps/dir/?api=1&amp;destination=Fohrder+Landstra%C3%9Fe+13%2C+14772+Brandenburg+an+der+Havel"
        target="_blank" rel="noopener">Route</a>)</span>
     <span class="shop-hinweis-preis">&middot; inkl. MwSt., zzgl. Versand
@@ -1991,6 +2101,7 @@ input[type="range"].range-clean::-moz-range-thumb {
     <!-- Maße (mm) — Primärfilter direkt unter Produkttyp -->
     <section class="filter-block filter-mass">
       <h4 class="filter-block-title"><span class="material-symbols-outlined">straighten</span> Ma&szlig;e (mm)</h4>
+      <p class="filter-mass-hinweis">Das Maß geben Sie oben ein. Hier stellen Sie ein, wie genau es passen soll.</p>
       <div class="grid grid-cols-2 gap-2 mb-3">
         <label class="block">
           <span class="block text-[11px] text-ink-soft mb-1">Breite</span>
@@ -2003,7 +2114,7 @@ input[type="range"].range-clean::-moz-range-thumb {
       </div>
       <div>
         <div class="flex justify-between items-center mb-1.5">
-          <span class="text-[11px] text-ink-soft">Toleranz</span>
+          <span class="text-[11px] text-ink-soft">Erlaubte Abweichung</span>
           <span id="toleranzWert" class="text-[11px] font-bold text-ink">±15%</span>
         </div>
         <input id="filterToleranz" type="range" min="0" max="50" value="15" class="range-clean" aria-label="Zulässige Abweichung von den Wunschmaßen in Prozent">
@@ -2191,9 +2302,16 @@ input[type="range"].range-clean::-moz-range-thumb {
 
     <!-- Hinweis auf ausgeblendete nach-außen-öffnende Artikel (Text kommt aus shop.js) -->
     <!-- Produkt-Grid -->
-    <div id="produktGrid" class="grid grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-5"></div>
+    <div id="produktGrid" class="grid grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-5" aria-busy="true">
+      <!-- Platzhalter bis die Ware geladen ist: gleiche Groesse wie eine Karte, damit
+           nichts springt. Vorher stand hier nichts und oben „772 Artikel" fest im HTML —
+           der Kunde sah kurz einen veralteten Zwischenstand. -->
+      <div class="karte-skelett" aria-hidden="true"></div><div class="karte-skelett" aria-hidden="true"></div>
+      <div class="karte-skelett" aria-hidden="true"></div><div class="karte-skelett" aria-hidden="true"></div>
+      <div class="karte-skelett" aria-hidden="true"></div><div class="karte-skelett" aria-hidden="true"></div>
+    </div>
 
-    <!-- Randinfo zu 10 von 772 Artikeln: steht UNTER der Liste, nicht davor.
+    <!-- Randinfo zu ausgeblendeten Artikeln: steht UNTER der Liste, nicht davor.
          Ueber der Ware kostete sie 46px Hoehe, bevor der Kunde ein Fenster sah. -->
     <div id="aussenHinweis" class="aussen-hinweis hidden"></div>
 
@@ -2322,7 +2440,7 @@ input[type="range"].range-clean::-moz-range-thumb {
           <span class="material-symbols-outlined" style="color:#225eaa;font-size:18px;flex-shrink:0;margin-top:1px;" aria-hidden="true">storefront</span>
           <div>
             <strong style="color:#225eaa;">Abholung im Hofverkauf</strong><br>
-            <span id="abholZeiten">Freitag 10&ndash;17 Uhr</span><br>
+            <span id="abholZeiten" data-df-zeiten>Freitag 10&ndash;17 Uhr</span><br>
             <a href="https://www.google.com/maps/dir/?api=1&amp;destination=Fohrder+Landstra%C3%9Fe+13%2C+14772+Brandenburg+an+der+Havel" target="_blank" rel="noopener" style="color:#225eaa;font-weight:700;text-decoration:underline;">Fohrder Landstra&szlig;e 13, 14772 Brandenburg an der Havel &middot; Route &rarr;</a>
           </div>
         </div>
@@ -2643,7 +2761,8 @@ input[type="range"].range-clean::-moz-range-thumb {
 <script src="js/shop-suche-util.js?v=2026-07-08-nrsuche" defer></script>
 <script src="js/shop-grundpreis-util.js?v=2026-08-05-grundpreis" defer></script>
 <script src="js/shop-mass-util.js?v=2026-09-10-massexakt" defer></script>
-<script src="js/shop.js?v=2026-09-10-massexakt" defer></script>
+<script src="js/oeffnungszeiten-util.js?v=2026-09-19" defer></script>
+<script src="js/shop.js?v=2026-09-19-lesbar" defer></script>
 
 <style>
 /* ===== NAV/Topbar/Mega/Mobile auf HELL (Shop-only Override, nav.css unangetastet) 2026-06-01 ===== */
@@ -3085,6 +3204,88 @@ section[style*="#0a1530"], div[style*="#0a1530"] { background: #f4f7fc !importan
        unruhig — auf dem Handy steht sie im Bottom-Sheet, dort ist Platz dafuer. */
     .karte-nr .karte-verf, .karte-nr .karte-meta-dot { display: none; }
   }
+
+  /* Lesbarkeit (19.09.2026): Maß gross und dunkel, Titel groesser und dunkler.
+     Vorher Maß 13,5px, Titel 13px grau — der Preis stach heraus, das Maß (fuer den
+     Kunden das Wichtigste) ging unter. */
+  .karte-masse-gross {
+    font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 19px;
+    line-height: 1.15; color: #14181d; margin: 8px 0 0; letter-spacing: -.01em;
+    font-variant-numeric: tabular-nums;
+  }
+  .karte-masse-gross .karte-masse-unit { font-size: 14px; font-weight: 700; color: #3b424b; }
+  .karte-masse-label {
+    display: block; font-size: 12px; font-weight: 600; color: #5b626b;
+    letter-spacing: 0; margin-bottom: 1px;
+  }
+  .karte-masse-gross + .karte-pricewrap { margin-top: 4px; }
+  .karte-spec { font-size: 14px; font-weight: 600; color: #3b424b; }
+  .karte-titel { font-size: 15px !important; color: #3b424b; -webkit-line-clamp: 2; }
+  .karte-mwst { font-size: 12.5px; }
+  @media (max-width: 900px) {
+    .karte-masse-gross { font-size: 17px; }
+    .karte-titel { font-size: 14.5px !important; }
+  }
+
+  /* Listen-Ansicht: eine Zeile je Artikel — Foto links, Maß/Preis/Titel/Knopf rechts.
+     Am Handy steht alles zu einem Artikel lesbar in einer Zeile (ca. 3 je Bildschirm). */
+  #produktGrid.ansicht-liste { grid-template-columns: 1fr !important; gap: 0 !important; }
+  .ansicht-liste .karte {
+    display: grid; grid-template-columns: 150px minmax(0,1fr); column-gap: 16px; align-items: start;
+    padding: 12px 0; border-bottom: 1px solid #e3e8f0; height: auto;
+  }
+  .ansicht-liste .karte > :not(.karte-bild-wrap):not(.karte-body) { grid-column: 1 / -1; }
+  .ansicht-liste .karte-bild-wrap { margin: 0; }
+  .ansicht-liste .karte:hover .karte-bild { transform: none; }
+  .ansicht-liste .karte-masse-gross { margin-top: 0; font-size: 21px; }
+  .ansicht-liste .karte-titel { -webkit-line-clamp: 2; }
+  .ansicht-liste .shop-card-cta-row { margin-top: 8px; }
+  .ansicht-liste .shop-card-cta-anfrage { max-width: 240px; }
+  .ansicht-liste .karte-skelett { aspect-ratio: auto; height: 120px; margin-bottom: 10px; }
+  @media (max-width: 599px) {
+    .ansicht-liste .karte { grid-template-columns: 112px minmax(0,1fr); column-gap: 12px; padding: 10px 0; }
+    .ansicht-liste .karte-masse-gross { font-size: 18px; }
+    .ansicht-liste .karte-masse-label { font-size: 11.5px; }
+    .ansicht-liste .karte-preis { font-size: 17px !important; }
+    .ansicht-liste .shop-card-cta-anfrage { max-width: none; }
+  }
+
+  /* Handy (19.09.2026): Suche bekommt eine eigene Zeile — mit dem Ansicht-Umschalter
+     daneben blieb vom Suchfeld nur die Lupe. Darunter eine Zeile: Filter (beschriftet),
+     Sortierung, rechts Liste/Kacheln. */
+  @media (max-width: 899px) {
+    .shop-suchzeile .shop-searchbar { flex: 1 0 100%; }
+    .shop-suchzeile .shop-tools { flex: 1 0 100%; margin-top: 8px; }
+    #filterTrigger { width: auto; padding: 0 14px; gap: 6px; }
+    #filterTrigger .shop-tool-text {
+      position: static; width: auto; height: auto; margin: 0; overflow: visible; clip-path: none;
+      font-size: 14px;
+    }
+    .shop-suchzeile .shop-ansicht { margin-left: auto; }
+  }
+
+  /* Filter: Eintraege mit Erklaersatz duerfen umbrechen (vorher einzeilig mit „…"
+     abgeschnitten — der Erklaersatz war mitten im Wort weg). Zahl oben rechts. */
+  .filter-option:has(.filter-erkl) { align-items: flex-start; }
+  .filter-option:has(.filter-erkl) > span:first-child { align-items: flex-start; }
+  .filter-option:has(.filter-erkl) > span:first-child > span { white-space: normal; overflow: visible; }
+  .filter-option:has(.filter-erkl) .check { margin-top: 2px; }
+
+  /* Maß-Leiste am Rechner kompakt: Titel links, Felder + Knopf in derselben Zeile.
+     Vorher nahm der Kopfbereich bei 900px Hoehe den ganzen Bildschirm, bevor Ware kam. */
+  @media (min-width: 1024px) {
+    .shop-massbar { display: grid; grid-template-columns: minmax(200px, 260px) 1fr; column-gap: 20px; align-items: end; padding: 12px 16px; }
+    .shop-massbar-titel { grid-column: 1; grid-row: 1; margin: 0 0 4px; font-size: 17px; align-self: center; }
+    .shop-massbar-titel span { display: block; margin: 2px 0 0; font-size: 13px; }
+    .shop-massbar-felder { grid-column: 2; grid-row: 1; flex-wrap: nowrap; }
+    .shop-massbar-feld { flex-direction: row; align-items: center; gap: 8px; max-width: 230px; }
+    .shop-massbar-feld > span { margin: 0; }
+    .shop-massbar-feld input, .shop-massbar-los { height: 46px; }
+    .shop-massbar-feld em { bottom: 12px; }
+    .shop-massbar-x { padding-bottom: 8px; }
+    .shop-massbar-hilfe { grid-column: 1 / -1; margin-top: 6px; font-size: 13px; }
+  }
+  @media (max-width: 899px) { .shop-ansicht-btn { min-height: 44px; } }
 
   /* Zustandsmarke: Neu blau, Gebraucht dezent — beide oben links auf dem Bild */
   .karte-tag--neu { background: #225eaa; color: #fff; }
