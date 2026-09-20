@@ -456,14 +456,23 @@
 .nhero-head p{font-size:clamp(1rem,.97rem + .3vw,1.18rem);color:var(--nink-soft);margin:14px 0 0;max-width:42ch;line-height:1.5}
 .nhero-cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
 .nhero-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-.nhero-suche{margin-top:18px;max-width:560px;display:flex;align-items:center;gap:8px;position:relative;background:#fff;border:2px solid #c3d9fb;border-radius:16px;padding:6px 6px 6px 46px;box-shadow:0 10px 26px -18px rgba(28,58,108,.45)}
-.nhero-suche:focus-within{border-color:var(--nprimary);box-shadow:0 0 0 3px oklch(0.52 0.13 255/.15)}
-.nhero-suche-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#5b626b;display:flex}
-.nhero-suche input{flex:1;min-width:0;border:0;background:transparent;height:46px;font-size:17px;font-weight:500;color:#14181d}
-.nhero-suche input::placeholder{color:#8b95a5;font-weight:400;font-size:15px}
-.nhero-suche input:focus{outline:none}
-.nhero-suche button{height:46px;padding:0 20px;border:0;border-radius:12px;background:var(--nprimary);color:#fff;font-size:15px;font-weight:800;cursor:pointer}
-.nhero-suche button:hover{background:var(--nprimary-d)}
+.topsuche{position:fixed;top:0;left:0;right:0;z-index:70;background:#fff;border-bottom:1px solid var(--nline);box-shadow:0 2px 10px rgba(8,21,46,.06)}
+.topsuche-wrap{max-width:1520px;margin:0 auto;padding:8px clamp(16px,4.5vw,72px)}
+.topsuche form{display:flex;align-items:center;gap:8px;position:relative;background:#fff;border:2px solid #c3d9fb;border-radius:14px;padding:4px 4px 4px 42px}
+.topsuche form:focus-within{border-color:var(--nprimary);box-shadow:0 0 0 3px oklch(0.52 0.13 255/.15)}
+.topsuche-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#5b626b;display:flex}
+.topsuche input{flex:1;min-width:0;border:0;background:transparent;height:42px;font-size:16px;font-weight:500;color:#14181d}
+.topsuche input::placeholder{color:#8b95a5;font-weight:400;font-size:15px}
+.topsuche input:focus{outline:none}
+.topsuche button{height:42px;padding:0 20px;border:0;border-radius:10px;background:var(--nprimary);color:#fff;font-size:15px;font-weight:800;cursor:pointer;white-space:nowrap}
+.topsuche button:hover{background:var(--nprimary-d)}
+@media(max-width:600px){
+.topsuche-wrap{padding:6px 12px}
+.topsuche form{padding-left:38px}
+.topsuche-icon{left:11px}
+.topsuche input{height:44px;font-size:16px}
+.topsuche input::placeholder{font-size:14px}
+.topsuche button{height:44px;padding:0 14px;font-size:14.5px}}
 .nhero-mass{margin-top:10px;max-width:560px;background:#fff;border:1.5px solid var(--nline);border-radius:16px;padding:8px 12px;box-shadow:0 10px 26px -18px rgba(28,58,108,.45);display:flex;align-items:center;gap:10px}
 .nhero-mass-t{margin:0;font-size:15px;font-weight:700;color:var(--nink);line-height:1.35;flex:0 0 auto}
 .nhero-mass-f{display:flex;align-items:center;gap:8px;flex:1 1 auto;min-width:0}
@@ -478,9 +487,6 @@
 .nhero-mass-f button{height:42px;padding:0 16px;flex:0 0 auto;border:0;border-radius:11px;background:var(--nprimary);color:#fff;font-size:15px;font-weight:800;cursor:pointer;white-space:nowrap}
 .nhero-mass-f button:hover{background:var(--nprimary-d)}
 @media(max-width:600px){
-.nhero-suche{margin:14px auto 0;padding-left:42px}
-.nhero-suche input{height:44px;font-size:16px}
-.nhero-suche button{height:44px;padding:0 14px}
 .nhero-mass{margin:8px auto 0;flex-wrap:wrap;row-gap:6px}
 .nhero-mass-t{flex:1 0 100%}
 .nhero-mass-f label span{display:none}
@@ -774,6 +780,19 @@ body.scrolled .burger{color:var(--text)}
 </div></div>
 
 <!-- Navigation -->
+<!-- Suchband ganz oben (20.09.2026): liegt ueber Util-Leiste und Navigation.
+     Die Leisten sind fixiert und rechnen mit --banner-h — das Band setzt diese
+     Variable auf seine gemessene Hoehe, dadurch rueckt alles genau so weit nach unten. -->
+<div class="topsuche" id="topSuche"><div class="topsuche-wrap">
+  <form action="/shop.html" method="get" role="search" aria-label="Im Lager suchen">
+    <span class="topsuche-icon" aria-hidden="true">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M16.5 16.5 21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </span>
+    <label for="heroSuche" class="nhero-sr">Im Lager suchen</label>
+    <input id="heroSuche" name="q" type="search" placeholder="Suchen: Maß, Standnummer oder Stichwort" autocomplete="off">
+    <button type="submit">Suchen</button>
+  </form>
+</div></div>
 <div class="dfnav-util"><div class="dfnav-wrap">
   <span style="color:var(--dfn-soft)"><span style="white-space:nowrap"><a href="https://www.google.com/maps?cid=9401727711250777966" target="_blank" rel="noopener" title="Alle Bewertungen bei Google ansehen"><span style="color:oklch(0.8 0.15 85)">&#9733;</span> 4,7 &middot; 93 Google-Bewertungen</a><a href="/impressum.html#bewertungen" title="Wie diese Bewertungen zustande kommen" aria-label="Wie diese Bewertungen zustande kommen" style="margin-left:3px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="vertical-align:-1px"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 11v5.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="7.4" r="1.15" fill="currentColor"/></svg></a></span> &middot; <a class="df-zeiten" href="/kontakt.html#zeiten" title="&Ouml;ffnungszeiten, Adresse und Anfahrt"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true" style="vertical-align:-2px;margin-right:4px"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span class="df-zeiten-txt">Hofverkauf Fr 10&ndash;17 Uhr</span></a></span>
   <div class="dfnav-uright">
@@ -956,16 +975,6 @@ body.scrolled .burger{color:var(--text)}
       </div>
       <!-- Maß-Suche (19.09.2026): Wer sein Maß kennt, landet direkt bei den passenden
            Fenstern im Lager. Einfaches Formular, funktioniert auch ohne Skript. -->
-      <!-- Gleicher Einstieg wie im Shop (20.09.2026): eine grosse Suche, darunter die
-           schmale Maß-Zeile. Beide fuehren in den Shop — die Suche versteht auch ein Maß. -->
-      <form class="nhero-suche" action="/shop.html" method="get" role="search" aria-label="Im Lager suchen">
-        <span class="nhero-suche-icon" aria-hidden="true">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M16.5 16.5 21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-        </span>
-        <label for="heroSuche" class="nhero-sr">Suchen</label>
-        <input id="heroSuche" name="q" type="search" placeholder="Suchen: Maß, Standnummer oder Stichwort" autocomplete="off">
-        <button type="submit">Suchen</button>
-      </form>
       <form class="nhero-mass" action="/shop.html" method="get" role="search" aria-label="Fenster im Lager nach Maß suchen">
         <div class="nhero-mass-t">Oder nach Maß:</div>
         <div class="nhero-mass-f">
@@ -1641,5 +1650,20 @@ body.has-sticky-cta .df-wa-float{bottom:calc(18px + var(--sticky-cta-h,71px))}
 })();
 </script>
 <script defer src="/js/hofverkauf-hinweis.js"></script>
+<script>
+/* Hoehe des Suchbands in --banner-h schreiben: Util-Leiste und Navigation sind fixiert
+   und rechnen damit. Nachmessen bei Groessenaenderung, sonst ueberdeckt die Nav das Band. */
+(function(){
+  var band=document.getElementById('topSuche'); if(!band) return;
+  function setzen(){
+    var h=band.offsetHeight||0;
+    document.documentElement.style.setProperty('--banner-h',h+'px');
+    document.body.style.paddingTop=h+'px';
+  }
+  setzen();
+  window.addEventListener('resize',setzen);
+  if(window.ResizeObserver) new ResizeObserver(setzen).observe(band);
+})();
+</script>
 </body>
 </html>
