@@ -1452,8 +1452,15 @@ input[type="range"].range-clean::-moz-range-thumb {
   .shop-suchzeile .zustand-chips  { flex: 0 1 auto; }
 }
 
-/* ===== Maß-Leiste (19.09.2026) ===== */
-.shop-suchzeile .shop-massbar { order: 0; flex: 1 0 100%; }
+/* ===== Suche + Maß-Zeile (20.09.2026) =====
+   Eine grosse Suche als EIN Einstieg, darunter die Maß-Zeile als genaue Variante.
+   Vorher standen zwei gleich grosse Kaesten uebereinander — das war verwirrend.
+   Die Suche erkennt „1000x1200" selbst und fuellt die Maß-Felder. */
+.shop-suchzeile .shop-searchbar { order: 0 !important; flex: 1 0 100% !important; margin: 0 0 10px !important; }
+.shop-suchzeile .shop-massbar { order: 1; flex: 1 0 100%; }
+#sucheInput { height: 58px; font-size: 18px; padding-left: 52px; }
+.shop-searchbar-icon { font-size: 26px; left: 17px; }
+.shop-searchbar-field { border-radius: 16px; border-width: 2px; border-color: #c3d9fb; }
 .shop-massbar {
   background: #fff; border: 1.5px solid #c3d9fb; border-radius: 16px;
   padding: 14px 16px 12px; margin: 0 0 10px; box-shadow: 0 6px 20px -14px rgba(8,21,46,.35);
@@ -1483,12 +1490,25 @@ input[type="range"].range-clean::-moz-range-thumb {
 .shop-massbar-los:hover { background: #1b4d8e; }
 .shop-massbar-hilfe { margin: 8px 0 0; font-size: 13.5px; color: #4a525d; line-height: 1.45; }
 .shop-massbar-hilfe a { color: #225eaa; font-weight: 700; }
-@media (max-width: 599px) {
-  .shop-massbar { padding: 12px 12px 10px; }
-  .shop-massbar-titel { font-size: 17px; }
-  .shop-massbar-titel span { display: block; margin: 2px 0 0; }
-  .shop-massbar-feld { flex: 1 1 0; max-width: none; }
-  .shop-massbar-los { flex: 1 0 100%; }
+/* Handy: die Maß-Zeile bleibt kompakt — die Suche ist der Haupteinstieg, und die Ware
+   soll frueh sichtbar sein (vorher schob der Block die erste Karte auf 802px). */
+@media (max-width: 899px) {
+  .shop-massbar { padding: 10px 12px; }
+  .shop-massbar-titel { font-size: 15px; margin-bottom: 6px; }
+  .shop-massbar-titel span { display: none; }
+  .shop-massbar-felder { gap: 8px; flex-wrap: nowrap; align-items: center; }
+  .shop-massbar-feld { flex: 1 1 0; max-width: none; flex-direction: row; align-items: center; gap: 6px; }
+  .shop-massbar-feld > span { margin: 0; font-size: 13px; }
+  .shop-massbar-feld input { height: 46px; font-size: 17px; padding-right: 34px; }
+  .shop-massbar-feld em { bottom: 13px; right: 10px; font-size: 13px; }
+  .shop-massbar-x { padding: 0; font-size: 18px; }
+  .shop-massbar-los { flex: 0 0 auto; height: 46px; padding: 0 14px; font-size: 15px; }
+  .shop-massbar-hilfe { margin-top: 6px; font-size: 12.5px; }
+}
+@media (max-width: 420px) {
+  .shop-massbar-feld > span { display: none; }   /* „mm" und Platzhalter erklaeren es */
+  .shop-massbar-feld input::placeholder { font-size: 14px; }
+  .shop-massbar-los { padding: 0 12px; font-size: 14.5px; }
 }
 /* Seitenfilter: Mass-Eingabe steht oben in der Leiste — hier nur noch die Abweichung */
 .filter-mass > .grid, #massFinden { display: none !important; }
@@ -1999,7 +2019,7 @@ input[type="range"].range-clean::-moz-range-thumb {
   <div class="shop-searchbar" role="search">
     <div class="shop-searchbar-field">
       <span class="material-symbols-outlined shop-searchbar-icon" aria-hidden="true">search</span>
-      <input id="sucheInput" type="text" placeholder="Standnummer oder Stichwort" autocomplete="off" enterkeyhint="search" inputmode="search"/>
+      <input id="sucheInput" type="text" placeholder="Suchen: Maß, Standnummer oder Stichwort" autocomplete="off" enterkeyhint="search" inputmode="search"/>
       <button id="sucheClearBtn" class="hidden shop-searchbar-clear" aria-label="Suche leeren">
         <span class="material-symbols-outlined" aria-hidden="true">close</span>
       </button>
@@ -3273,17 +3293,18 @@ section[style*="#0a1530"], div[style*="#0a1530"] { background: #f4f7fc !importan
 
   /* Maß-Leiste am Rechner kompakt: Titel links, Felder + Knopf in derselben Zeile.
      Vorher nahm der Kopfbereich bei 900px Hoehe den ganzen Bildschirm, bevor Ware kam. */
-  @media (min-width: 1024px) {
-    .shop-massbar { display: grid; grid-template-columns: minmax(200px, 260px) 1fr; column-gap: 20px; align-items: end; padding: 12px 16px; }
-    .shop-massbar-titel { grid-column: 1; grid-row: 1; margin: 0 0 4px; font-size: 17px; align-self: center; }
-    .shop-massbar-titel span { display: block; margin: 2px 0 0; font-size: 13px; }
-    .shop-massbar-felder { grid-column: 2; grid-row: 1; flex-wrap: nowrap; }
-    .shop-massbar-feld { flex-direction: row; align-items: center; gap: 8px; max-width: 230px; }
-    .shop-massbar-feld > span { margin: 0; }
-    .shop-massbar-feld input, .shop-massbar-los { height: 46px; }
-    .shop-massbar-feld em { bottom: 12px; }
-    .shop-massbar-x { padding-bottom: 8px; }
-    .shop-massbar-hilfe { grid-column: 1 / -1; margin-top: 6px; font-size: 13px; }
+  /* Rechner: Maß-Zeile schmal in EINER Reihe unter der Suche. */
+  @media (min-width: 900px) {
+    .shop-massbar { display: flex; align-items: center; gap: 14px; padding: 8px 14px; }
+    .shop-massbar-titel { font-size: 15px; margin: 0; flex: 0 0 auto; }
+    .shop-massbar-titel span { display: none; }
+    .shop-massbar-felder { flex: 1 1 auto; flex-wrap: nowrap; }
+    .shop-massbar-feld { flex-direction: row; align-items: center; gap: 6px; max-width: 200px; }
+    .shop-massbar-feld > span { margin: 0; font-size: 13px; }
+    .shop-massbar-feld input, .shop-massbar-los { height: 42px; font-size: 17px; }
+    .shop-massbar-feld em { bottom: 10px; font-size: 13px; }
+    .shop-massbar-x { padding: 0; }
+    .shop-massbar-hilfe { display: none; }
   }
   @media (max-width: 899px) { .shop-ansicht-btn { min-height: 44px; } }
 
