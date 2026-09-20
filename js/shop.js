@@ -190,14 +190,29 @@ function initMassBar() {
   if (!form) return;
   const bb = document.getElementById('massBarBreite');
   const bh = document.getElementById('massBarHoehe');
+  // Aendert der Kunde die Maß-Felder, darf im Suchfeld kein altes Maß stehen bleiben —
+  // sonst zeigen zwei Stellen verschiedene Maße an (in der Pruefung 20.09.2026 gesehen).
+  const raeumeMassAusSuche = () => {
+    const inp = document.getElementById('sucheInput');
+    if (!inp || !inp.value) return;
+    const rest = window.ohneMassText ? window.ohneMassText(inp.value) : inp.value;
+    if (rest === inp.value) return;
+    inp.value = rest;
+    STATE.filter.suche = rest;
+    const hinweis = document.getElementById('masseHinweis');
+    if (hinweis) hinweis.classList.add('hidden');
+    const clr = document.getElementById('sucheClearBtn');
+    if (clr && !rest) clr.classList.add('hidden');
+  };
   const uebertrage = (von, zielId) => {
     const ziel = document.getElementById(zielId);
     if (!ziel || ziel.value === von.value) return;
     ziel.value = von.value;
     ziel.dispatchEvent(new Event('input', { bubbles: true }));
   };
-  bb.addEventListener('input', () => uebertrage(bb, 'filterBreite'));
-  bh.addEventListener('input', () => uebertrage(bh, 'filterHoehe'));
+  // Selbst getipptes Maß gehoert dem Kunden, nicht der Suche.
+  bb.addEventListener('input', () => { _massKamAusSuche = false; raeumeMassAusSuche(); uebertrage(bb, 'filterBreite'); });
+  bh.addEventListener('input', () => { _massKamAusSuche = false; raeumeMassAusSuche(); uebertrage(bh, 'filterHoehe'); });
   form.addEventListener('submit', e => {
     e.preventDefault();
     uebertrage(bb, 'filterBreite');
@@ -1047,23 +1062,69 @@ function bindeEventHandler() {
   // Sticky Nav scroll-Effekt entfernt — Navigation wird jetzt von dfnav.js gesteuert.
 }
 
-/* ─── Maß-Auto-Erkennung im Suchtext ─── */
+let _massFehlerTimer = null;
+/* Kam das aktuelle Maß aus dem Suchtext? Dann verschwindet es auch wieder mit ihm.
+   Ein selbst in die Maß-Zeile getipptes Maß bleibt dagegen stehen (20.09.2026: nach
+   „1000x1200" filterte die Suche nach „434 B" still weiter auf das alte Maß). */
+let _massKamAusSuche = false;
+/* ─── Maß-Auto-Erkennung im Suchtext ───
+   Versteht Millimeter, Zentimeter („100x120") und Meter („1,20 m") und sagt dem Kunden,
+   wie es verstanden wurde. Wer ein Maß tippt, es aber nicht erkannt wird (Tippfehler),
+   bekommt einen Hinweis statt einer stillen Leerliste. */
 function pruefeMassErkennung(text) {
-  const re = /(\d{3,4})\s*[x×*]\s*(\d{3,4})/i;
-  const match = text.match(re);
   const hinweis = document.getElementById('masseHinweis');
-  if (match) {
-    const breite = parseInt(match[1], 10);
-    const hoehe = parseInt(match[2], 10);
-    STATE.filter.breite = breite;
-    STATE.filter.hoehe = hoehe;
-    document.getElementById('filterBreite').value = breite;
-    document.getElementById('filterHoehe').value = hoehe;
-    document.getElementById('masseAusSuche').textContent = `${breite} × ${hoehe} mm`;
+  const feld = document.getElementById('masseAusSuche');
+  const treffer = document.getElementById('masseTrefferZahl');
+  const label = document.getElementById('masseHinweisLabel');
+  const schluss = document.getElementById('masseHinweisSchluss');
+  clearTimeout(_massFehlerTimer);
+  const mass = window.massAusKundeneingabe ? window.massAusKundeneingabe(text) : null;
+  if (mass) {
+    if (label) label.textContent = 'Maße erkannt:';
+    if (schluss) schluss.textContent = ' — ähnliche Größen stehen mit in der Liste.';
+    STATE.filter.breite = mass.breite;
+    STATE.filter.hoehe = mass.hoehe;
+    _massKamAusSuche = true;
+    document.getElementById('filterBreite').value = mass.breite;
+    document.getElementById('filterHoehe').value = mass.hoehe;
+    const zusatz = mass.einheit === 'cm' ? ' (als Zentimeter verstanden)'
+                 : mass.einheit === 'm' ? ' (als Meter verstanden)' : '';
+    feld.textContent = `${mass.breite} × ${mass.hoehe} mm${zusatz}`;
     hinweis.classList.remove('hidden');
-  } else {
-    hinweis.classList.add('hidden');
+    hinweis.classList.remove('shop-masse-hinweis--fehler');
+    return;
   }
+  // Sieht nach einem Maß aus, ist aber keins → sagen statt schweigen. Erst nach einer
+  // kurzen Pause, sonst warnt es schon mitten im Tippen („1000x12").
+  hinweis.classList.add('hidden');
+  hinweis.classList.remove('shop-masse-hinweis--fehler');
+  const siehtNachMassAus = /\d\s*[x×*]\s*\d/.test(String(text || ''));
+  if (!siehtNachMassAus) {
+    // Maß kam aus dem Suchtext und steht dort nicht mehr → auch nicht mehr filtern.
+    if (_massKamAusSuche) {
+      _massKamAusSuche = false;
+      STATE.filter.breite = null;
+      STATE.filter.hoehe = null;
+      document.getElementById('filterBreite').value = '';
+      document.getElementById('filterHoehe').value = '';
+    }
+    return;
+  }
+  _massFehlerTimer = setTimeout(() => {
+    // Ein altes Maß darf nicht still weiterfiltern, wenn der Kunde gerade ein neues tippt.
+    _massKamAusSuche = false;
+    STATE.filter.breite = null;
+    STATE.filter.hoehe = null;
+    document.getElementById('filterBreite').value = '';
+    document.getElementById('filterHoehe').value = '';
+    if (label) label.textContent = 'Maß nicht erkannt.';
+    feld.textContent = ' Bitte so eingeben: 1000 x 1200 (Millimeter) oder 100 x 120 cm.';
+    if (treffer) treffer.textContent = '';
+    if (schluss) schluss.textContent = '';
+    hinweis.classList.remove('hidden');
+    hinweis.classList.add('shop-masse-hinweis--fehler');
+    rendere();
+  }, 900);
 }
 
 /* ─── Maß-Bewertung: parseMasse() und massBewertung() ─────────────────────────
@@ -1151,7 +1212,9 @@ function zeigeAussenOeffnend() {
 /* Suchtext ohne Maß-Angabe (die deckt der Maß-Filter ab) — gleiche Aufbereitung wie unten in der Suche */
 function sucheReinText() {
   const s = STATE.filter.suche;
-  return s ? s.replace(/\d{3,4}\s*[x×*]\s*\d{3,4}/i, '').trim().toLowerCase() : '';
+  // Maß-Teil raus (auch „120 x 80 cm" und „1,20 m"), uebrig bleibt das Stichwort.
+  if (!s) return '';
+  return (window.ohneMassText ? window.ohneMassText(s) : s).trim().toLowerCase();
 }
 /* ─── Wo das Ausblenden gilt (Inhaberin-Wunsch 31.08.2026) ─────────────────
    Nach außen öffnende Artikel wurden bisher pauschal ausgeblendet. Bei Fenstern
@@ -1317,7 +1380,7 @@ function gefilterteProdukte(opt) {
     // Suche im Titel + Beschreibung + Kategorie + Standnummer
     if (f.suche) {
       // Maß-Patterns aus Suche entfernen, da via Filter abgedeckt
-      const reinText = f.suche.replace(/\d{3,4}\s*[x×*]\s*\d{3,4}/i, '').trim().toLowerCase();
+      const reinText = (window.ohneMassText ? window.ohneMassText(f.suche) : f.suche).trim().toLowerCase();
       if (reinText) {
         // 1) Standnummer TOLERANT prüfen: "741B", "Nr 741", "741 b" → findet "741 B".
         //    Trifft die Nummer, ist das Produkt sofort gemeint (unabhängig vom Volltext).
@@ -1423,7 +1486,8 @@ function aktualisiereShopHeader() {
 // Sieht die Eingabe nach einer Standnummer aus (hat Ziffern, ist aber kein Maß-Muster wie 1200x800)?
 function istNummerSuche(s) {
   if (!s) return false;
-  if (/\d{3,4}\s*[x×*]\s*\d{3,4}/i.test(s)) return false; // das ist ein Maß, kein Nummern-Fall
+  // Maß-Muster (auch „120 x 80 cm") ist kein Nummern-Fall
+  if (window.ohneMassText && window.ohneMassText(s) !== String(s).trim()) return false;
   const q = (typeof normNr === 'function') ? normNr(s) : String(s).toLowerCase();
   return /\d/.test(q) && q.length >= 2;
 }
