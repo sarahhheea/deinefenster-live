@@ -1677,7 +1677,7 @@ function rendere() {
       emptyEl.innerHTML = `
         <span class="material-symbols-outlined" style="font-size:56px;color:rgba(118,169,250,0.35);">search_off</span>
         <h3 class="text-xl font-extrabold mt-3" style="color:#14181d;">Keine Produkte gefunden</h3>
-        <p class="text-sm mt-1.5 max-w-md mx-auto" style="color:#5b626b;">Probier andere Filter oder Maße — oder geh zum <a href="konfigurator.html" style="color:#225eaa;font-weight:700;text-decoration:underline;">Konfigurator</a> für eine Maßanfertigung.</p>
+        <p class="text-sm mt-1.5 max-w-md mx-auto" style="color:#5b626b;">Nicht alles auf unserem Hof ist schon online. Fragen Sie uns: <a href="anfrage.html" style="color:#225eaa;font-weight:700;text-decoration:underline;">Anfrage senden</a> oder <a href="tel:+4933812148373" style="color:#225eaa;font-weight:700;text-decoration:underline;white-space:nowrap;">03381 / 2148373</a>. Neu nach Maß geht immer im <a href="konfigurator.html" style="color:#225eaa;font-weight:700;text-decoration:underline;">Konfigurator</a>.</p>
         <button id="resetFromEmpty" class="mt-4 inline-flex items-center gap-1.5 px-5 py-2.5 text-sm font-bold" style="border-radius:8px;background:#225eaa;color:#fff;border:none;cursor:pointer;">
           <span class="material-symbols-outlined" style="font-size:18px">refresh</span>
           Filter zurücksetzen

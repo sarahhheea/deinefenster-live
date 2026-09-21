@@ -23,5 +23,17 @@ t('kellerfenster (keine Ziffer) → kein Nummer-Treffer', ()=> assert.ok(!nummer
 t('leere Standnummer → kein Treffer', ()=> assert.ok(!nummerTreffer('741',null)));
 t('einzelne Ziffer "7" matcht nicht alles', ()=> assert.ok(!nummerTreffer('7','741 B')));
 
+
+// Kundenwoerter, die im Lager anders heissen (Live-Suche 21.09.2026: jeweils 0 Treffer)
+const { textTreffer } = require('../js/shop-suche-util.js');
+t('dreifach findet "3 Fach Glas"',        ()=> assert.ok(textTreffer('dreifach','1 Flügel Fenster 3 Fach Glas 1200 x 1400')));
+t('Dreifachverglasung findet "3 Fach"',   ()=> assert.ok(textTreffer('Dreifachverglasung','Fenster 3 Fach Glas')));
+t('zweifach findet "2 Fach"',             ()=> assert.ok(textTreffer('zweifach','Fenster 2 Fach Glas')));
+t('3fach findet "3 Fach"',                ()=> assert.ok(textTreffer('3fach','Fenster 3 Fach Glas')));
+t('Kippfenster findet "nur Kipp"',        ()=> assert.ok(textTreffer('Kippfenster','Kellerfenster nur Kipp 1250 x 570')));
+t('Kippfenster findet NICHT jedes Dreh-Kipp', ()=> assert.ok(!textTreffer('Kippfenster','Fenster dreh kipp rechts')));
+t('Nebeneingangstür findet Haustür',      ()=> assert.ok(textTreffer('Nebeneingangstür','Schwere Haustür Anthrazit')));
+t('dreifach findet NICHT "2 Fach"',       ()=> assert.ok(!textTreffer('dreifach','Fenster 2 Fach Glas')));
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

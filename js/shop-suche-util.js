@@ -45,6 +45,11 @@
     [/\b(terrassentuer|terrassentueren|balkontuere|balkontueren|balkonelement|balkonelemente)\b/g, 'balkontuer'],
     [/\b(hebeschiebetuer|hebeschiebetueren|schiebetuere|schiebetueren|psk|hst)\b/g, 'schiebetuer'],
     [/\b(dachflaechenfenster|velux|roto)\b/g, 'dachfenster'],
+    // Live-Suche 21.09.2026: diese Kundenwoerter fanden 0 Treffer, im Bestand steht es anders
+    [/\b(dreifach[a-z]*|3fach[a-z]*)\b/g, '3 fach'],
+    [/\b(zweifach[a-z]*|2fach[a-z]*)\b/g, '2 fach'],
+    [/\bkippfenster[a-z]*\b/g, 'nur kipp'],   // nicht 'kipp': das traefe jedes Dreh-Kipp-Fenster
+    [/\b(nebeneingangstuer[a-z]*|nebeneingang[a-z]*|nebentuer[a-z]*|seitentuer[a-z]*)\b/g, 'haustuer'],
     [/\b(garagentore|garagendoor|garagen tor)\b/g, 'garagentor'],
     // Richtungsangabe: Kunden schreiben sie frei, im Datensatz steht ein fester Begriff
     [/\bnach aussen (aufgehend|aufgeht|oeffnet|oeffnend|schlagend)\b/g, 'nach aussen oeffnend'],
