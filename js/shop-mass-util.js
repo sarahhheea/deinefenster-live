@@ -29,9 +29,11 @@
 
   function massBewertung(p, f) {
     if (f.breite === null && f.hoehe === null) return null;
-    var tol = f.toleranz / 100;
+    /* Erlaubte Abweichung in Millimetern je Seite (seit 21.09.2026, vorher Prozent:
+       ±15 % waren bei 1200 mm 18 cm — der Kunde sah das nicht und denkt ohnehin in cm). */
+    var tol = f.toleranz;
     var inTol = function (val, ziel) {
-      return ziel == null || (val >= ziel * (1 - tol) && val <= ziel * (1 + tol));
+      return ziel == null || Math.abs(val - ziel) <= tol;
     };
 
     var kandidaten = [];

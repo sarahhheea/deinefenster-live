@@ -38,7 +38,7 @@ const STATE = {
     exportModell: false,
     breite: null,
     hoehe: null,
-    toleranz: 15,           // Prozent
+    toleranz: 100,          // Millimeter je Seite (bis 21.09.2026 Prozent)
     preisVon: null,
     preisBis: null,
     suche: ''
@@ -1005,9 +1005,12 @@ function bindeEventHandler() {
     STATE.filter.preisBis = e.target.value ? parseInt(e.target.value, 10) : null;
     rendere();
   });
-  document.getElementById('filterToleranz').addEventListener('input', e => {
-    STATE.filter.toleranz = parseInt(e.target.value, 10);
-    document.getElementById('toleranzWert').textContent = `±${STATE.filter.toleranz}%`;
+  document.getElementById('filterToleranz').addEventListener('click', e => {
+    const knopf = e.target.closest('button[data-mm]');
+    if (!knopf) return;
+    STATE.filter.toleranz = parseInt(knopf.dataset.mm, 10);
+    document.querySelectorAll('#filterToleranz button').forEach(b =>
+      b.setAttribute('aria-pressed', b === knopf ? 'true' : 'false'));
     rendere();
   });
 
@@ -2097,7 +2100,7 @@ function rendereAktiveChips() {
   if (f.breite !== null || f.hoehe !== null) {
     const b = f.breite || '?';
     const h = f.hoehe || '?';
-    chips.push({label: `Maße: ${b} × ${h} mm (±${f.toleranz}%)`, type: 'masse', value: 'masse'});
+    chips.push({label: `Maße: ${b} × ${h} mm (±${f.toleranz / 10} cm)`, type: 'masse', value: 'masse'});
   }
   if (f.preisVon !== null || f.preisBis !== null) {
     const v = f.preisVon || 0;

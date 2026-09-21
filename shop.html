@@ -239,6 +239,13 @@ h1, h2, h3, h4 { font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: -
 }
 select.input-clean { background-image: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22><path fill=%2276a9fa%22 d=%22M7 10l5 5 5-5z%22/></svg>'); }
 
+/* Abweichung als Knöpfe in cm statt Prozent-Regler (21.09.2026) */
+.tol-wahl{border:0;margin:0;padding:0}
+.tol-wahl legend{font-size:11px;color:var(--c-ink-soft,#5b626b);margin-bottom:6px;padding:0}
+.tol-knoepfe{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.tol-knoepfe button{min-height:40px;border:1px solid var(--c-border,#d6dde8);border-radius:10px;background:#fff;font-size:13px;font-weight:600;color:#14181d;cursor:pointer}
+.tol-knoepfe button[aria-pressed="true"]{background:#2463b8;border-color:#2463b8;color:#fff}
+.tol-knoepfe button:focus-visible{outline:2px solid #2463b8;outline-offset:2px}
 /* Filter-Sektionen */
 .filter-block {
   padding: 18px 0;
@@ -2015,7 +2022,7 @@ input[type="range"].range-clean::-moz-range-thumb {
       </label>
       <button type="submit" class="shop-massbar-los">Passende zeigen</button>
     </div>
-    <p class="shop-massbar-hilfe">Wir zeigen auch Fenster, die bis zu 15&nbsp;% größer oder kleiner sind.
+    <p class="shop-massbar-hilfe">Wir zeigen auch Fenster, die bis zu 10&nbsp;cm größer oder kleiner sind &ndash; einstellbar im Filter.
       Nichts dabei? <a href="/konfigurator.html">Fenster nach Maß selbst zusammenstellen</a></p>
   </form>
   <div class="shop-searchbar" role="search">
@@ -2134,13 +2141,15 @@ input[type="range"].range-clean::-moz-range-thumb {
           <input id="filterHoehe" type="number" min="0" max="3000" placeholder="800" class="input-num" aria-label="Höhe in Millimetern">
         </label>
       </div>
-      <div>
-        <div class="flex justify-between items-center mb-1.5">
-          <span class="text-[11px] text-ink-soft">Erlaubte Abweichung</span>
-          <span id="toleranzWert" class="text-[11px] font-bold text-ink">±15%</span>
+      <fieldset class="tol-wahl">
+        <legend>Darf abweichen um</legend>
+        <div class="tol-knoepfe" id="filterToleranz">
+          <button type="button" data-mm="20" aria-pressed="false">&plusmn;2&nbsp;cm</button>
+          <button type="button" data-mm="50" aria-pressed="false">&plusmn;5&nbsp;cm</button>
+          <button type="button" data-mm="100" aria-pressed="true">&plusmn;10&nbsp;cm</button>
+          <button type="button" data-mm="200" aria-pressed="false">&plusmn;20&nbsp;cm</button>
         </div>
-        <input id="filterToleranz" type="range" min="0" max="50" value="15" class="range-clean" aria-label="Zulässige Abweichung von den Wunschmaßen in Prozent">
-      </div>
+      </fieldset>
       <button type="button" id="massFinden" class="mass-finden">Finden</button>
     </section>
     <!-- Produkttyp -->

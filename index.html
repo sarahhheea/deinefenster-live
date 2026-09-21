@@ -188,7 +188,7 @@
     "@type": "SearchAction",
     "target": {
       "@type": "EntryPoint",
-      "urlTemplate": "https://deinefenster.de/konfigurator.html?q={search_term_string}"
+      "urlTemplate": "https://deinefenster.de/shop.html?q={search_term_string}"
     },
     "query-input": "required name=search_term_string"
   }
@@ -456,7 +456,9 @@
 .nhero-head p{font-size:clamp(1rem,.97rem + .3vw,1.18rem);color:var(--nink-soft);margin:14px 0 0;max-width:42ch;line-height:1.5}
 .nhero-cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
 .nhero-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-.topsuche{position:fixed;top:0;left:0;right:0;z-index:70;background:#fff;border-bottom:1px solid var(--nline);box-shadow:0 2px 10px rgba(8,21,46,.06)}
+/* Farben hier eigens gesetzt: --nprimary gilt nur innerhalb .nhero, das Band liegt
+   ausserhalb — der Suchknopf war dadurch weiss auf weiss unsichtbar (gefunden 21.09.2026). */
+.topsuche{--nprimary:oklch(0.52 0.13 255);--nprimary-d:oklch(0.45 0.13 256);--nline:oklch(0.9 0.02 244);position:fixed;top:0;left:0;right:0;z-index:70;background:#fff;border-bottom:1px solid var(--nline);box-shadow:0 2px 10px rgba(8,21,46,.06)}
 .topsuche-wrap{max-width:1520px;margin:0 auto;padding:8px clamp(16px,4.5vw,72px)}
 .topsuche form{display:flex;align-items:center;gap:8px;position:relative;background:#fff;border:2px solid #c3d9fb;border-radius:14px;padding:4px 4px 4px 42px}
 .topsuche form:focus-within{border-color:var(--nprimary);box-shadow:0 0 0 3px oklch(0.52 0.13 255/.15)}
@@ -466,6 +468,16 @@
 .topsuche input:focus{outline:none}
 .topsuche button{height:42px;padding:0 20px;border:0;border-radius:10px;background:var(--nprimary);color:#fff;font-size:15px;font-weight:800;cursor:pointer;white-space:nowrap}
 .topsuche button:hover{background:var(--nprimary-d)}
+/* Handy (21.09.2026): Das Band nahm die ganze erste Zeile ein, noch vor Logo und
+   „Jetzt konfigurieren". Jetzt: zu, bis man die Lupe antippt. */
+.suche-lupe{display:none;align-items:center;justify-content:center;width:44px;height:44px;border:0;border-radius:12px;background:transparent;color:#225eaa;cursor:pointer;flex:none}
+@media(max-width:760px){
+  .topsuche{display:none}
+  html.suche-offen .topsuche{display:block}
+  .suche-lupe{display:inline-flex;margin-left:auto}
+  .suche-lupe + .dfnav-burger{margin-left:0}
+  html.suche-offen .suche-lupe{background:rgba(34,94,170,.10)}
+}
 @media(max-width:600px){
 .topsuche-wrap{padding:6px 12px}
 .topsuche form{padding-left:38px}
@@ -771,7 +783,7 @@ body.scrolled .burger{color:var(--text)}
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M16.5 16.5 21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
     </span>
     <label for="heroSuche" class="nhero-sr">Im Lager suchen</label>
-    <input id="heroSuche" name="q" type="search" placeholder="Suchen: Maß, Standnummer oder Stichwort" autocomplete="off">
+    <input id="heroSuche" name="q" type="search" placeholder="Lager: Maß oder Artikel-Nr." autocomplete="off">
     <button type="submit">Suchen</button>
   </form>
 </div></div>
@@ -867,6 +879,9 @@ body.scrolled .burger{color:var(--text)}
     </div>
   </div>
   <a class="dfnav-cta" href="/anfrage.html">Angebot anfragen</a>
+  <button class="suche-lupe" id="sucheLupe" type="button" aria-label="Lager durchsuchen" aria-expanded="false" aria-controls="topSuche">
+    <svg width="23" height="23" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M16.5 16.5 21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+  </button>
   <button class="dfnav-burger" id="dfnav-burger" type="button" aria-label="Men&uuml; &ouml;ffnen" aria-expanded="false" aria-controls="dfnav-drawer">
     <span class="material-symbols-outlined" aria-hidden="true">menu</span>
   </button>
@@ -1634,6 +1649,13 @@ body.has-sticky-cta .df-wa-float{bottom:calc(18px + var(--sticky-cta-h,71px))}
     document.body.style.paddingTop=h+'px';
   }
   setzen();
+  var lupe=document.getElementById('sucheLupe');
+  if(lupe) lupe.addEventListener('click',function(){
+    var offen=document.documentElement.classList.toggle('suche-offen');
+    lupe.setAttribute('aria-expanded',offen?'true':'false');
+    setzen();
+    if(offen) document.getElementById('heroSuche').focus();
+  });
   window.addEventListener('resize',setzen);
   if(window.ResizeObserver) new ResizeObserver(setzen).observe(band);
 })();

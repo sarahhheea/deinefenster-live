@@ -20,12 +20,13 @@
     .replace(/\/index\.html$/, '/')
     .replace(/\.html$/, '')
     .replace(/\/+$/, '');
-  var OHNE_HINWEIS = /(^|\/)(konfigurator|warenkorb|anfrage)$/;
+  /* shop seit 21.09.2026: dort filtert der Kunde gerade nach seinem Maß. */
+  var OHNE_HINWEIS = /(^|\/)(konfigurator|warenkorb|anfrage|shop)$/;
   if (OHNE_HINWEIS.test(pfad)) return;
 
   var KEY        = 'dfHofHinweis_2026_09';
   var CONSENT    = 'df_cookie_consent';
-  var VERZOEGERT = 2000;
+  var VERZOEGERT = 8000;   // war 2000: erst lesen lassen, dann hinweisen (21.09.2026)
 
   function gesehen()  { try { return !!localStorage.getItem(KEY); } catch (e) { return false; } }
   function merken()   { try { localStorage.setItem(KEY, '1'); } catch (e) {} }

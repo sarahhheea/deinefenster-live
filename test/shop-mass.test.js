@@ -13,10 +13,20 @@ const { parseMasse, massBewertung } = require('../js/shop-mass-util.js');
 let pass = 0, fail = 0;
 function t(name, fn){ try { fn(); pass++; } catch(e){ fail++; console.log('  ✗ '+name+' → '+e.message); } }
 
-const suche = (b, h, tol) => ({ breite: b, hoehe: h, toleranz: tol == null ? 15 : tol });
+const suche = (b, h, tol) => ({ breite: b, hoehe: h, toleranz: tol == null ? 150 : tol });   // Millimeter je Seite (seit 21.09.2026, vorher Prozent)
 const artikel = (b, h, titel, beschr) => ({
   breite_mm: b, hoehe_mm: h, titel: titel || '', beschreibung: beschr || ''
 });
+
+/* ── Abweichung in Millimetern statt Prozent (21.09.2026) ──────────────
+   Kunden denken „bis 5 cm größer oder kleiner", nicht in Prozent. ±15 % waren bei
+   1200 mm schon 18 cm — mehr, als in dieselbe Maueröffnung passt. */
+t('±50 mm: 1240 × 1400 ist Treffer bei Suche 1200 × 1400', () =>
+  assert.ok(massBewertung(artikel(1240, 1400), suche(1200, 1400, 50))));
+t('±50 mm: 1260 × 1400 ist KEIN Treffer bei Suche 1200 × 1400', () =>
+  assert.strictEqual(massBewertung(artikel(1260, 1400), suche(1200, 1400, 50)), null));
+t('±50 mm gilt gleich für kleine Maße: 560 × 800 ist Treffer bei 600 × 800', () =>
+  assert.ok(massBewertung(artikel(560, 800), suche(600, 800, 50))));
 
 /* ── parseMasse: Maß-Paare aus Text ───────────────────────────────────── */
 t('parseMasse findet "1200 x 1500"', () =>
