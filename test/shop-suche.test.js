@@ -35,5 +35,6 @@ t('Kippfenster findet NICHT jedes Dreh-Kipp', ()=> assert.ok(!textTreffer('Kippf
 t('Nebeneingangstür findet Haustür',      ()=> assert.ok(textTreffer('Nebeneingangstür','Schwere Haustür Anthrazit')));
 t('dreifach findet NICHT "2 Fach"',       ()=> assert.ok(!textTreffer('dreifach','Fenster 2 Fach Glas')));
 
+t('Kippfenster findet NICHT "nur DIN Links Dreh/Kipp"', ()=> assert.ok(!textTreffer('Kippfenster','1 Flügel Fenster gebraucht nur DIN Links Dreh/Kipp 915 x 800')));
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

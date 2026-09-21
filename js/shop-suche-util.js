@@ -56,6 +56,7 @@
     [/\boeffnet nach aussen\b/g, 'nach aussen oeffnend'],
     [/\bnach innen (aufgehend|aufgeht|oeffnet|schlagend)\b/g, 'nach innen oeffnend']
   ];
+  var NUR_PHRASE = ['nur kipp'];
   function normSuche(s) {
     var t = normText(s);
     for (var i = 0; i < SYNONYME.length; i++) t = t.replace(SYNONYME[i][0], SYNONYME[i][1]);
@@ -85,6 +86,9 @@
     if (!q) return true;
     var hay = normText(text);
     if (hay.indexOf(q) !== -1) return true;                    // 1) Phrase
+    // Diese Begriffe gelten nur zusammenhaengend: „nur kipp" wortweise traefe jedes
+    // Inserat, in dem irgendwo „nur" und irgendwo „Kipp" steht (live 21.09.2026: 118 statt 7).
+    if (NUR_PHRASE.indexOf(q) !== -1) return false;
 
     var worte = q.split(' ').filter(Boolean);
     if (worte.length < 2) {
