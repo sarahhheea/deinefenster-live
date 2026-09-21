@@ -470,13 +470,15 @@
 .topsuche button:hover{background:var(--nprimary-d)}
 /* Handy (21.09.2026): Das Band nahm die ganze erste Zeile ein, noch vor Logo und
    „Jetzt konfigurieren". Jetzt: zu, bis man die Lupe antippt. */
-.suche-lupe{display:none;align-items:center;justify-content:center;width:44px;height:44px;border:0;border-radius:12px;background:transparent;color:#225eaa;cursor:pointer;flex:none}
-@media(max-width:760px){
-  .topsuche{display:none}
-  html.suche-offen .topsuche{display:block}
-  .suche-lupe{display:inline-flex;margin-left:auto}
-  .suche-lupe + .dfnav-burger{margin-left:0}
-  html.suche-offen .suche-lupe{background:rgba(34,94,170,.10)}
+/* Computer (21.09.2026, Sarah): Band auch hier zu — ganz oben steht der Weg zum
+   Konfigurieren, die Lager-Suche klappt ueber die Lupe in der Kopfleiste auf. */
+.topsuche{display:none}
+html.suche-offen .topsuche{display:block}
+.suche-lupe{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border:0;border-radius:12px;background:transparent;color:#225eaa;cursor:pointer;flex:none}
+.suche-lupe:hover,html.suche-offen .suche-lupe{background:rgba(34,94,170,.10)}
+@media(max-width:1100px){
+  .dfnav .dfnav-logo{margin-right:auto}
+  .suche-lupe ~ .dfnav-burger{margin-left:0}
 }
 @media(max-width:600px){
 .topsuche-wrap{padding:6px 12px}
@@ -878,10 +880,10 @@ body.scrolled .burger{color:var(--text)}
       </div>
     </div>
   </div>
-  <a class="dfnav-cta" href="/anfrage.html">Angebot anfragen</a>
   <button class="suche-lupe" id="sucheLupe" type="button" aria-label="Lager durchsuchen" aria-expanded="false" aria-controls="topSuche">
     <svg width="23" height="23" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M16.5 16.5 21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
   </button>
+  <a class="dfnav-cta" href="/anfrage.html">Angebot anfragen</a>
   <button class="dfnav-burger" id="dfnav-burger" type="button" aria-label="Men&uuml; &ouml;ffnen" aria-expanded="false" aria-controls="dfnav-drawer">
     <span class="material-symbols-outlined" aria-hidden="true">menu</span>
   </button>
@@ -1655,6 +1657,12 @@ body.has-sticky-cta .df-wa-float{bottom:calc(18px + var(--sticky-cta-h,71px))}
     lupe.setAttribute('aria-expanded',offen?'true':'false');
     setzen();
     if(offen) document.getElementById('heroSuche').focus();
+  });
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape' && document.documentElement.classList.contains('suche-offen')){
+      document.documentElement.classList.remove('suche-offen');
+      lupe.setAttribute('aria-expanded','false'); setzen(); lupe.focus();
+    }
   });
   window.addEventListener('resize',setzen);
   if(window.ResizeObserver) new ResizeObserver(setzen).observe(band);
