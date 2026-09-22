@@ -1,0 +1,144 @@
+/* Altbau-Brücke: zieht die älteren Seiten (df-2026.css) auf das Designschema.
+   Wird nach df-2026.css geladen und ändert nur Aussehen, kein Markup.
+   Grund: Schrift, Knöpfe, Überschriften und Spaltenbreite unterschieden sich sichtbar
+   von den neuen Seiten — gleiche Website, zwei Handschriften. */
+
+/* 1. Alte Variablen auf die Token des Schemas legen */
+:root {
+  --bg: var(--df-color-bg);
+  --surface: var(--df-color-surface-subtle);
+  --surface-2: var(--df-color-surface-strong);
+  --border: var(--df-color-border);
+  --text: var(--df-color-text);
+  --soft: var(--df-color-text-muted);
+  --acc: var(--df-color-primary);
+  --acc-text: var(--df-color-primary-strong);
+  --acc-strong: var(--df-color-primary-deep);
+  --on-acc: var(--df-color-text-on-primary);
+  --font-display: var(--df-font-display);
+  --font-body: var(--df-font-body);
+  --r: var(--df-radius-lg);
+  --shadow: var(--df-shadow-raised);
+  --sec-pad: var(--df-space-section);
+  --head-gap: var(--df-space-section-head);
+}
+
+/* 2. Schrift: ein Satz für die ganze Website */
+body { font-family: var(--df-font-body); background: var(--df-color-bg); color: var(--df-color-text); }
+h1, h2, h3, h4, .hero h1, .subhero h1 {
+  font-family: var(--df-font-display);
+  font-weight: var(--df-font-weight-bold);
+  letter-spacing: normal;
+}
+h1, .subhero h1 { font-size: var(--df-text-6); line-height: var(--df-leading-tight); }
+h2 { font-size: var(--df-text-5); line-height: var(--df-leading-snug); }
+h3 { font-size: var(--df-text-4); line-height: var(--df-leading-snug); }
+.lead { font-size: var(--df-text-4); line-height: var(--df-leading-relaxed); color: var(--df-color-text-muted); max-inline-size: 70ch; }
+
+/* 3. Schriftzug über der Überschrift: keine Großbuchstaben, keine Sperrung, kein Strich davor.
+   Großbuchstaben machen aus „Maße" ein „MASSE" und lesen sich wie ein anderes Jahrzehnt. */
+.eyebrow, .sec-head .eyebrow, .subhero-badge {
+  text-transform: none;
+  letter-spacing: normal;
+  font-size: var(--df-text-2);
+  font-weight: var(--df-font-weight-semibold);
+  color: var(--df-color-primary-strong);
+  gap: var(--df-space-2);
+}
+.eyebrow::before, .sec-head .eyebrow::before, .sec-head .eyebrow::after { content: none; }
+
+/* 4. Knöpfe wie im Schema: eine Farbe, ein Radius, eine Höhe */
+.btn-primary, .btn-secondary, .btn-ghost, a.btn-primary {
+  min-block-size: var(--df-control-md, 48px);
+  padding: 12px var(--df-space-4);
+  border-radius: var(--df-radius-button);
+  font: var(--df-font-weight-bold) var(--df-text-3) / 1.2 var(--df-font-body);
+  box-shadow: none;
+}
+.btn-primary, a.btn-primary {
+  background: var(--df-color-primary);
+  color: var(--df-color-text-on-primary);
+  border: 1px solid var(--df-color-primary);
+}
+.btn-primary:hover, a.btn-primary:hover {
+  background: var(--df-color-primary-strong);
+  border-color: var(--df-color-primary-strong);
+  transform: none;
+  filter: none;
+  box-shadow: none;
+}
+.btn-secondary, .btn-ghost {
+  background: var(--df-color-white);
+  color: var(--df-color-primary-strong);
+  border: 1px solid var(--df-color-border);
+}
+.btn-secondary:hover, .btn-ghost:hover { border-color: var(--df-color-primary); background: var(--df-color-white); }
+
+/* 5. Spaltenbreite wie auf den neuen Seiten (vorher 1520 px, dadurch wirkten alte Seiten breiter) */
+.wrap { max-inline-size: 1240px; padding-inline: var(--df-gutter, clamp(16px, 4vw, 32px)); }
+
+/* 6. Kästen und Flächen aus dem Schema */
+.card, .pcard, .gcard, .infocard, .notebox, .stat, .tfact, .svc-item, .step, .prof {
+  border-color: var(--df-color-border);
+  border-radius: var(--df-radius-lg);
+  background: var(--df-color-white);
+  box-shadow: none;
+}
+.card:hover, .pcard:hover, .gcard:hover { border-color: var(--df-color-primary); transform: none; }
+section.alt, .alt { background: var(--df-color-surface-subtle); }
+
+/* 7. Laufband ruhig stellen, wenn der Nutzer weniger Bewegung wünscht */
+@media (prefers-reduced-motion: reduce) { .trustbar .track { animation: none; } }
+.trustbar { background: var(--df-color-surface-subtle); border-color: var(--df-color-border); }
+.trustbar .ti { color: var(--df-color-text-muted); font-size: var(--df-text-2); }
+.trustbar .sep { color: var(--df-color-accent); }
+
+/* 8. Kursive Serifenschrift raus: das Schema kennt eine Schriftfamilie.
+   Betroffen waren Überschriften-Akzente, Zitate und die Nummern über den Abschnitten. */
+.accent, .pull, .sec-head .eyebrow::before, section.dark .sec-head h2 .accent {
+  font-family: var(--df-font-display);
+  font-style: normal;
+  font-weight: var(--df-font-weight-bold);
+}
+.accent { color: var(--df-color-primary-strong); text-shadow: none; }
+.hero-text .accent, section.dark .accent, .subhero .accent { color: var(--df-color-accent); text-shadow: none; }
+.pull { color: var(--df-color-text); font-size: var(--df-text-5); line-height: var(--df-leading-snug); }
+
+/* 9. Großbuchstaben abschalten (aus „Maße" wird sonst „MASSE") */
+.eyebrow, .stat .lbl, .trustbar .ti, .fuss .col h3, .pull-by, .minitile span, .bio-body .role {
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+/* 10. Seiteneigene Stilblöcke überschreiben: höhere Genauigkeit statt !important */
+html body h1 { font-weight: var(--df-font-weight-bold); letter-spacing: normal; }
+html body h2, html body h3 { font-weight: var(--df-font-weight-bold); letter-spacing: normal; }
+html body .btn-primary, html body a.btn-primary {
+  padding: 12px var(--df-space-4);
+  border-radius: var(--df-radius-button);
+  background: var(--df-color-primary);
+  box-shadow: none;
+}
+
+/* 11. Die Serifenschrift steckt in df-2026.css an genaueren Stellen (Sub-Hero, Fließtext).
+   Diese Regeln sind absichtlich ebenso genau, damit keine Stelle übrig bleibt. */
+.subhero h1 .accent, .prose h2 .accent, .prose h3 .accent, .hero-text .accent,
+.sec-head h2 .accent, section.dark .sec-head h2 .accent, .hero h1 .accent {
+  font-family: var(--df-font-display);
+  font-style: normal;
+  font-weight: var(--df-font-weight-bold);
+  font-size: inherit;
+  text-shadow: none;
+}
+.subhero h1 .accent, .hero-text .accent, section.dark .sec-head h2 .accent { color: var(--df-color-accent); }
+.prose h2 .accent, .prose h3 .accent, .sec-head h2 .accent { color: var(--df-color-primary-strong); }
+
+/* 12. Shop und Kacheln: keine Großbuchstaben. Aus „Maße (mm)" wurde sonst „MASSE (MM)",
+   und das liest sich wie eine Gewichtsangabe. */
+.filter-block-title, .karte-tag, .badge, .prof .badge, .chip, .tag {
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+/* 13. Links im Fließtext müssen sich auch ohne Farbe erkennen lassen (WCAG 1.4.1) */
+.kt-dse a, .prose p a, .notebox a { text-decoration: underline; }
