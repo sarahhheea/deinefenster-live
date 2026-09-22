@@ -1,0 +1,247 @@
+/* DeineFenster.de: Startseite. Braucht schema.css und kopf.css davor. */
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--banner-h, 0px) + 118px); -webkit-text-size-adjust: 100%; }
+body.startseite { margin: 0; background: var(--df-color-bg); color: var(--df-color-text); font: var(--df-font-weight-regular) var(--df-text-3) / var(--df-leading-normal) var(--df-font-body); -webkit-font-smoothing: antialiased; }
+.startseite img { max-inline-size: 100%; }
+.startseite h1, .startseite h2, .startseite h3, .startseite p, .startseite ul, .startseite ol, .startseite dl, .startseite dd, .startseite figure, .startseite blockquote { margin: 0; }
+.startseite ul, .startseite ol { padding: 0; list-style: none; }
+:where(.startseite) a { color: inherit; }
+.startseite main { padding-block-start: calc(var(--banner-h, 0px) + 106px); }
+.springen { position: absolute; inset-inline-start: var(--df-space-3); inset-block-start: -80px; z-index: 200; display: inline-flex; align-items: center; min-block-size: var(--df-control-md); padding: 0 var(--df-space-4); border-radius: var(--df-radius-button); background: var(--df-color-primary); color: var(--df-color-white); font: 600 var(--df-text-3)/1.2 var(--df-font-display); text-decoration: none; }
+.startseite button { font: inherit; }
+.springen:focus { inset-block-start: var(--df-space-2); }
+.startseite a:focus-visible, .startseite button:focus-visible, .startseite summary:focus-visible { outline: var(--df-focus-ring-width) solid var(--df-color-focus); outline-offset: var(--df-focus-ring-offset); }
+
+/* Einstieg: Produktbild randlos im Verlauf, Pfeile links und rechts, Punkte, Karte zum Konfigurator */
+.hero { position: relative; display: flex; align-items: center; overflow: hidden; min-block-size: clamp(470px, calc(62vh + 36px), 640px); background: var(--df-gradient-hero); }
+.hero__medien { position: absolute; inset-block: 16px 0; inset-inline-end: 0; z-index: 1; inline-size: min(45vw, 780px); overflow: hidden; }
+.hero__buehne { position: absolute; inset: 0; cursor: pointer; transition: transform .55s var(--df-ease-out); }
+.hero__ebene {
+  position: absolute; inset: 0; inline-size: 100%; block-size: 100%; object-fit: cover; object-position: center 60%;
+  opacity: 0; transform: scale(1.02); transition: opacity .5s ease, transform .6s ease;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 26%, #000 100%), linear-gradient(180deg, transparent 0, #000 8%, #000 92%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(90deg, transparent 0, #000 26%, #000 100%), linear-gradient(180deg, transparent 0, #000 8%, #000 92%, transparent 100%);
+  mask-composite: intersect;
+}
+.hero__ebene.ist-aktiv { opacity: 1; transform: none; }
+.hero__ebene[data-hero-ebene="1"] { object-position: center 46%; }
+.hero__ebene[data-hero-ebene="2"] { object-position: center 52%; }
+.hero__pfeil {
+  position: absolute; inset-block-start: 41%; z-index: 4; display: grid; place-items: center; inline-size: var(--df-control-md); block-size: var(--df-control-md);
+  padding: 0; border: 1px solid rgba(255, 255, 255, .75); border-radius: var(--df-radius-full); background: rgba(255, 255, 255, .7);
+  -webkit-backdrop-filter: blur(9px); backdrop-filter: blur(9px); color: var(--df-color-primary-strong); cursor: pointer;
+  box-shadow: 0 10px 24px -10px rgba(28, 58, 108, .5); transform: translateY(-50%); transition: background var(--df-duration-fast), transform var(--df-duration-fast);
+}
+.hero__pfeil:hover { background: var(--df-color-white); transform: translateY(-50%) scale(1.07); }
+.hero__pfeil svg { inline-size: 26px; block-size: 26px; }
+.hero__pfeil--zurueck { inset-inline-start: 26px; }
+.hero__pfeil--zurueck svg { transform: rotate(90deg); }
+.hero__pfeil--vor { inset-inline-end: 26px; }
+.hero__pfeil--vor svg { transform: rotate(-90deg); }
+.hero__punkte-reihe { position: absolute; inset-inline-start: 50%; inset-block-end: calc(7% + 84px); z-index: 3; display: flex; align-items: center; gap: var(--df-space-2); padding: 6px 10px; border-radius: var(--df-radius-full); background: rgba(255, 255, 255, .75); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); transform: translateX(-50%); }
+.hero__punkt { inline-size: 8px; block-size: 8px; padding: 0; border: 0; border-radius: var(--df-radius-full); background: var(--df-color-border-strong); cursor: pointer; transition: inline-size .3s var(--df-ease-out), background .3s; }
+.hero__punkt.ist-aktiv { inline-size: 22px; background: var(--df-color-primary); }
+.hero__karte {
+  position: absolute; inset-inline-start: 50%; inset-block-end: 7%; z-index: 3; display: flex; align-items: center; gap: var(--df-space-3);
+  min-inline-size: min(400px, 90%); padding: 12px 16px; border: 1px solid rgba(255, 255, 255, .85); border-radius: var(--df-radius-lg);
+  background: rgba(255, 255, 255, .85); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  box-shadow: 0 22px 46px -16px rgba(28, 58, 108, .42); color: var(--df-color-text); text-decoration: none;
+  transform: translateX(-50%); transition: transform .4s var(--df-ease-out);
+}
+.hero__karte:hover { transform: translateX(-50%) translateY(-3px); }
+.hero__karte-text { display: flex; flex-direction: column; line-height: 1.2; white-space: nowrap; }
+.hero__karte-text b { font: 600 var(--df-text-4) / 1.2 var(--df-font-display); }
+.hero__karte-text span { margin-block-start: 2px; color: var(--df-color-text-muted); font-size: var(--df-text-2); font-weight: 600; }
+.hero__karte-marken { display: flex; flex: none; align-items: center; gap: var(--df-space-3); margin-inline-start: auto; padding-inline: var(--df-space-3); border-inline-start: 1px solid var(--df-color-border); }
+.hero__karte-marken img { display: block; inline-size: auto; block-size: 13px; }
+.hero__karte-marken img[hidden] { display: none; }
+.hero__karte-pfeil { display: grid; flex: none; place-items: center; inline-size: 36px; block-size: 36px; border-radius: var(--df-radius-full); background: var(--df-color-primary); color: var(--df-color-white); }
+.hero__karte-pfeil svg { inline-size: 18px; block-size: 18px; }
+.hero__ki { inset-block-start: auto; inset-block-end: 16px; inset-inline-end: 18px; z-index: 5; }
+.hero__innen { position: relative; z-index: 2; pointer-events: none; }
+.hero__innen a, .hero__innen button { pointer-events: auto; }
+.hero__text { max-inline-size: 600px; padding-block: var(--df-space-6); }
+.hero__marken { display: flex; flex-wrap: wrap; align-items: center; gap: var(--df-space-2) var(--df-space-3); }
+.hero__marken img { display: block; inline-size: auto; block-size: 22px; }
+.hero__marken img.hero__schueco { block-size: 18px; padding-inline-start: var(--df-space-3); border-inline-start: 1px solid var(--df-color-border-strong); box-sizing: content-box; }
+.hero__herkunft { flex-basis: 100%; color: var(--df-color-text-muted); font-size: var(--df-text-2); font-weight: 600; }
+.hero h1 { margin-block-start: var(--df-space-2); font: var(--df-font-weight-bold) var(--df-text-6) / var(--df-leading-snug) var(--df-font-display); letter-spacing: var(--df-tracking-normal); text-wrap: balance; }
+.hero h1 span { display: block; color: var(--df-color-primary-strong); }
+.hero__lead { margin-block-start: var(--df-space-3); max-inline-size: 36rem; color: var(--df-color-text-muted); font-size: var(--df-text-4); line-height: var(--df-leading-normal); }
+.hero__wege { display: flex; flex-wrap: wrap; gap: var(--df-space-3); margin-block-start: var(--df-space-5); }
+.hero__punkte { display: flex; flex-wrap: wrap; gap: var(--df-space-2) var(--df-space-4); margin-block-start: var(--df-space-4); color: var(--df-color-text); font-size: var(--df-text-2); font-weight: 600; }
+.hero__punkte li::before { content: "✓"; margin-inline-end: var(--df-space-1); color: var(--df-color-success); font-weight: 700; }
+.hero__bewertung { margin-block-start: var(--df-space-4); font-size: var(--df-text-2); }
+.hero__bewertung a { color: var(--df-color-text); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.hero__bewertung svg { inline-size: 16px; block-size: 16px; vertical-align: -2px; }
+@media (hover: hover) and (min-width: 961px) { .hero__medien:hover .hero__buehne { transform: scale(1.035); } }
+
+/* Vertrauensleiste unter dem Einstieg: vier gleich breite Felder, feine Trennstriche */
+.vertrauen { border-block-end: 1px solid var(--df-color-border); background: var(--df-color-white); box-shadow: 0 1px 0 rgba(255, 255, 255, .6) inset; }
+.vertrauen__liste { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.vertrauen__punkt { display: flex; align-items: center; justify-content: center; gap: var(--df-space-3); padding: var(--df-space-4) var(--df-space-3); }
+.vertrauen__punkt + .vertrauen__punkt { border-inline-start: 1px solid var(--df-color-border); }
+.vertrauen__symbol { display: grid; flex: none; place-items: center; inline-size: 40px; block-size: 40px; border-radius: var(--df-radius-md); background: var(--df-color-accent-subtle); color: var(--df-color-primary-strong); }
+.vertrauen__symbol svg { inline-size: 22px; block-size: 22px; }
+.vertrauen__symbol--stern { color: var(--df-color-rating); }
+.vertrauen__text { display: flex; flex-direction: column; gap: 2px; min-inline-size: 0; }
+.vertrauen__text b { color: var(--df-color-text); font: 700 var(--df-text-3) / 1.25 var(--df-font-display); white-space: nowrap; }
+.vertrauen__text small { color: var(--df-color-text-muted); font-size: var(--df-text-2); line-height: 1.35; }
+.vertrauen__text a { color: var(--df-color-primary-strong); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.vertrauen__text b.ist-offen::before { content: ""; display: inline-block; inline-size: 8px; block-size: 8px; margin-inline-end: 6px; border-radius: var(--df-radius-full); background: var(--df-color-success); vertical-align: 2px; }
+
+/* Raster */
+.raster { display: grid; gap: var(--df-space-4); }
+.raster--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.raster--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.hinweis { margin-block-start: var(--df-space-6); padding-block-start: var(--df-space-4); border-block-start: 1px solid var(--df-color-border); color: var(--df-color-text-muted); font-size: var(--df-text-2); line-height: var(--df-leading-relaxed); max-inline-size: var(--df-measure); }
+.kachel__preis--text { color: var(--df-color-text-muted); }
+.kachel__meta a { color: var(--df-color-primary-strong); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+
+/* Hersteller */
+.hersteller__karten { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--df-space-4); }
+.hersteller__karte { display: flex; flex-direction: column; gap: var(--df-space-3); padding: var(--df-space-5); border: 1px solid var(--df-color-border); border-radius: var(--df-radius-lg); background: var(--df-color-white); }
+.hersteller__karte img { display: block; inline-size: auto; block-size: 34px; object-fit: contain; object-position: left center; }
+.hersteller__karte p { color: var(--df-color-text-muted); }
+.hersteller__wort { display: flex; align-items: center; block-size: 44px; color: var(--df-color-text); font: var(--df-font-weight-bold) var(--df-text-5) / 1 var(--df-font-display); letter-spacing: .08em; }
+.hersteller__wege { display: flex; flex-wrap: wrap; align-items: center; gap: var(--df-space-3); margin-block-start: auto; }
+.hinweis a { color: var(--df-color-primary-strong); font-weight: 600; }
+
+/* Wege, Infos, Profile, Ratgeber */
+.weg, .rat { display: flex; flex-direction: column; gap: var(--df-space-2); block-size: 100%; padding: var(--df-space-4); border: 1px solid var(--df-color-border); border-radius: var(--df-radius-lg); background: var(--df-color-white); text-decoration: none; transition: border-color var(--df-duration-fast), box-shadow var(--df-duration-fast); }
+.weg:hover, .rat:hover { border-color: var(--df-color-primary); box-shadow: var(--df-shadow-raised); }
+.weg h3, .rat__titel, .info__titel, .ablauf h3 { font: var(--df-font-weight-bold) var(--df-text-4) / var(--df-leading-snug) var(--df-font-display); }
+.weg p, .rat p, .info p, .ablauf p { color: var(--df-color-text-muted); }
+.weg .df-mehr, .rat .df-mehr { margin-block-start: auto; }
+.weg--haupt { border: 2px solid var(--df-color-primary); }
+.info { display: flex; flex-direction: column; gap: var(--df-space-2); padding: var(--df-space-4); border-radius: var(--df-radius-lg); background: var(--df-color-white); border: 1px solid var(--df-color-border); }
+.info .df-mehr { margin-block-start: auto; }
+.profil { display: flex; flex-direction: column; gap: var(--df-space-3); padding: var(--df-space-4); border: 1px solid var(--df-color-border); border-radius: var(--df-radius-lg); background: var(--df-color-white); }
+.profil__name { font: var(--df-font-weight-bold) var(--df-text-4) / var(--df-leading-snug) var(--df-font-display); }
+.profil__name a { text-decoration: none; }
+.profil__name a:hover { color: var(--df-color-primary-strong); text-decoration: underline; }
+.profil__satz { color: var(--df-color-text-muted); }
+.profil__werte { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--df-space-2); }
+.profil__werte div { padding: var(--df-space-2) var(--df-space-3); border-radius: var(--df-radius-sm); background: var(--df-color-surface-subtle); }
+.profil__werte dt { color: var(--df-color-text-muted); font-size: var(--df-text-2); }
+.profil__werte dd { font-weight: 700; }
+.profil__wege { display: flex; flex-direction: column; gap: var(--df-space-2); margin-block-start: auto; }
+.profil__wege .df-mehr { align-self: center; }
+
+/* Lager-Teaser */
+.lager__leer { grid-column: 1 / -1; }
+.lagerstueck { display: flex; flex-direction: column; block-size: 100%; overflow: hidden; border: 1px solid var(--df-color-border); border-radius: var(--df-radius-lg); background: var(--df-color-white); text-decoration: none; transition: border-color var(--df-duration-fast), box-shadow var(--df-duration-fast); }
+.lagerstueck:hover { border-color: var(--df-color-primary); box-shadow: var(--df-shadow-raised); }
+.lagerstueck img { display: block; inline-size: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: var(--df-color-surface-subtle); }
+.lagerstueck__text { display: flex; flex-direction: column; gap: var(--df-space-1); padding: var(--df-space-4); }
+.lagerstueck__mass { font: var(--df-font-weight-bold) var(--df-text-4) / 1.2 var(--df-font-display); }
+.lagerstueck__art { color: var(--df-color-text-muted); font-size: var(--df-text-2); }
+.lagerstueck__preis { font-weight: 700; }
+.lagerstueck__preis small { color: var(--df-color-text-muted); font-size: var(--df-text-2); font-weight: 400; }
+
+/* Kundenstimmen */
+.stimme { display: flex; flex-direction: column; gap: var(--df-space-3); padding: var(--df-space-4); border-radius: var(--df-radius-lg); background: var(--df-color-white); border: 1px solid var(--df-color-border); }
+.stimme__sterne { display: flex; gap: 2px; color: var(--df-color-rating); }
+.stimme__sterne svg { inline-size: 18px; block-size: 18px; }
+.stimme blockquote p { font-size: var(--df-text-4); line-height: var(--df-leading-normal); }
+.stimme__wer { margin-block-start: auto; color: var(--df-color-text-muted); font-size: var(--df-text-2); }
+.abschnitt__einleitung a { color: var(--df-color-primary-strong); font-weight: 600; }
+
+/* Ablauf */
+.ablauf { counter-reset: schritt; }
+.ablauf li { position: relative; display: flex; flex-direction: column; gap: var(--df-space-2); padding: var(--df-space-4); padding-block-start: var(--df-space-7); border-radius: var(--df-radius-lg); background: var(--df-color-surface-subtle); counter-increment: schritt; }
+.ablauf li::before { content: counter(schritt, decimal-leading-zero); position: absolute; inset-block-start: var(--df-space-4); inset-inline-start: var(--df-space-4); color: var(--df-color-primary-strong); font: var(--df-font-weight-bold) var(--df-text-5) / 1 var(--df-font-display); }
+
+/* Zahlen (dunkel) */
+.abschnitt--dunkel { background: var(--df-color-primary-deep); color: var(--df-color-white); }
+.abschnitt--dunkel .abschnitt__ueber { color: var(--df-color-text-on-dark); }
+.abschnitt--dunkel .abschnitt__titel { color: var(--df-color-white); }
+.abschnitt--dunkel .abschnitt__einleitung { color: var(--df-color-text-on-dark); }
+.zahlen { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--df-space-4); }
+.zahl { padding: var(--df-space-4); border-radius: var(--df-radius-lg); background: rgba(255, 255, 255, .08); }
+.zahl__wert { font: var(--df-font-weight-bold) var(--df-text-5) / 1.1 var(--df-font-display); }
+.zahl__text { margin-block-start: var(--df-space-2); color: var(--df-color-text-on-dark); font-size: var(--df-text-2); }
+.zahl__text a { color: var(--df-color-white); font-weight: 600; text-decoration: underline; }
+.abschnitt--dunkel .knopf { border-color: var(--df-color-white); background: var(--df-color-white); color: var(--df-color-primary-deep); }
+.abschnitt--dunkel .knopf:hover { background: var(--df-color-surface-subtle); }
+.abschnitt--dunkel .knopf--zweit { background: transparent; color: var(--df-color-white); }
+.abschnitt--dunkel .knopf--zweit:hover { background: rgba(255, 255, 255, .12); }
+.abschnitt--dunkel .knopf:focus-visible { outline-color: var(--df-color-focus-on-dark); }
+
+/* Lieferung */
+.liefer { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: var(--df-space-6); align-items: start; }
+.liefer .abschnitt__kopf { margin-block-end: 0; }
+.liefer__titel { margin-block-end: var(--df-space-3); font-weight: 700; }
+.liefer__orte { display: flex; flex-wrap: wrap; gap: var(--df-space-2); }
+
+/* Galerie */
+.galerie figure { overflow: hidden; border-radius: var(--df-radius-lg); background: var(--df-color-surface-subtle); }
+.galerie img { display: block; inline-size: 100%; block-size: auto; aspect-ratio: 3 / 2; object-fit: cover; }
+.galerie figcaption { padding: var(--df-space-2) var(--df-space-3); font-size: var(--df-text-2); font-weight: 600; }
+
+/* FAQ */
+.fragen { display: grid; gap: var(--df-space-2); max-inline-size: 960px; }
+.frage { border: 1px solid var(--df-color-border); border-radius: var(--df-radius-lg); background: var(--df-color-white); }
+.frage summary { display: flex; align-items: center; justify-content: space-between; gap: var(--df-space-3); min-block-size: 56px; padding: var(--df-space-3) var(--df-space-4); cursor: pointer; list-style: none; font-weight: 700; }
+.frage summary::-webkit-details-marker { display: none; }
+.frage summary svg { flex: none; inline-size: 20px; block-size: 20px; transition: transform var(--df-duration-fast); }
+.frage[open] summary svg { transform: rotate(180deg); }
+.frage p { padding: 0 var(--df-space-4) var(--df-space-4); color: var(--df-color-text-muted); line-height: var(--df-leading-relaxed); }
+
+/* Abschluss */
+.abschluss { padding-block: var(--df-space-section); background: var(--df-gradient-primary); color: var(--df-color-white); }
+.abschluss__innen p { max-inline-size: var(--df-measure); }
+.abschluss h2 { font: var(--df-font-weight-bold) var(--df-text-5) / var(--df-leading-snug) var(--df-font-display); }
+.abschluss p { margin-block-start: var(--df-space-3); color: var(--df-color-text-on-dark); }
+.abschluss .knopf { border-color: var(--df-color-white); background: var(--df-color-white); color: var(--df-color-primary-deep); }
+.abschluss .knopf:hover { background: var(--df-color-surface-subtle); }
+.abschluss .knopf--zweit { background: transparent; color: var(--df-color-white); }
+.abschluss .knopf--zweit:hover { background: rgba(255, 255, 255, .12); }
+.abschluss .df-mehr { color: var(--df-color-white); }
+.abschluss a:focus-visible { outline-color: var(--df-color-focus-on-dark); }
+
+/* Umbrüche */
+@media (max-width: 1100px) {
+  .vertrauen__liste { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .vertrauen__punkt { justify-content: flex-start; }
+  .vertrauen__punkt:nth-child(3) { border-inline-start: 0; }
+  .vertrauen__punkt:nth-child(n+3) { border-block-start: 1px solid var(--df-color-border); }
+  .startseite main { padding-block-start: calc(var(--banner-h, 0px) + 68px); }
+  .raster--4, .zahlen { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .liefer { grid-template-columns: 1fr; }
+  .hersteller__karten { grid-template-columns: 1fr; }
+}
+@media (max-width: 960px) {
+  .hero { flex-direction: column; min-block-size: 0; padding-block-end: var(--df-space-3); }
+  .hero__innen { order: 1; }
+  .hero__text { max-inline-size: none; padding-block: var(--df-space-5) 0; text-align: center; }
+  .hero__wege, .hero__punkte, .hero__marken { justify-content: center; }
+  .hero__medien { position: relative; inset: auto; order: 2; display: flex; flex-direction: column; align-items: center; inline-size: 100%; margin-block-start: var(--df-space-2); overflow: visible; }
+  .hero__buehne { position: relative; inset: auto; inline-size: 100%; aspect-ratio: 1.62 / 1; }
+  .hero__ebene { object-position: center 46%;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 9%, #000 91%, transparent 100%), linear-gradient(180deg, transparent 0, #000 8%, #000 90%, transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0, #000 9%, #000 91%, transparent 100%), linear-gradient(180deg, transparent 0, #000 8%, #000 90%, transparent 100%); }
+  .hero__ebene[data-hero-ebene="1"] { object-position: center 30%; }
+  .hero__pfeil { inset-block-start: 50%; }
+  .hero__pfeil--zurueck { inset-inline-start: 8px; }
+  .hero__pfeil--vor { inset-inline-end: 8px; }
+  .hero__punkte-reihe { inset-block-end: 8px; }
+  .hero__karte { position: static; inline-size: calc(100% - 32px); max-inline-size: 420px; margin: var(--df-space-2) auto 0; background: var(--df-color-white); border-color: var(--df-color-border); transform: none; }
+  .hero__karte:hover { transform: translateY(-3px); }
+  .hero__ki { inset-block-start: 12px; inset-block-end: auto; inset-inline-end: 12px; }
+}
+@media (max-width: 860px) {
+  .raster--3 { grid-template-columns: 1fr; }
+  .hero__wege { flex-direction: column; align-items: stretch; max-inline-size: 420px; margin-inline: auto; }
+}
+@media (max-width: 600px) {
+  .raster--4 { grid-template-columns: 1fr; }
+  .vertrauen__liste { grid-template-columns: 1fr; }
+  .vertrauen__punkt { padding-inline: 0; }
+  .vertrauen__punkt + .vertrauen__punkt { border-inline-start: 0; border-block-start: 1px solid var(--df-color-border); }
+  .vertrauen__text b { white-space: normal; }
+  .zahlen { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .frage summary svg, .hero__ebene, .hero__buehne, .hero__karte { transition: none; } .hero__medien:hover .hero__buehne { transform: none; } }
