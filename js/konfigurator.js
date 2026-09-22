@@ -1653,9 +1653,9 @@ function buildSchiebeSteps(){
 }
 
 const MATERIALS={
-  kunststoff:{n:'Kunststoff', s:'IGLO-Systeme \u00b7 Lieferzeit 1\u20133 Wochen'},
-  holz:      {n:'Holz',       s:'Softline Vollholz \u00b7 Lieferzeit 3\u20138 Wochen'},
-  alu:       {n:'Aluminium',  s:'MB-Systeme \u00b7 Lieferzeit 4\u20138 Wochen'}
+  kunststoff:{n:'Kunststoff', s:'IGLO-Systeme \u00b7 Lieferzeit ca. 14 Tage'},
+  holz:      {n:'Holz',       s:'Softline Vollholz \u00b7 Lieferzeit ca. 14 Tage'},
+  alu:       {n:'Aluminium',  s:'MB-Systeme \u00b7 Lieferzeit ca. 14 Tage'}
 };
 const HOLZARTEN={
   kiefer: {n:'Kiefer',  s:'Heimisches Weichholz \u00b7 g\u00fcnstigster Einstieg'},
