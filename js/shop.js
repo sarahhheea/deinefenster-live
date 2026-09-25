@@ -218,8 +218,10 @@ function initMassBar() {
     uebertrage(bb, 'filterBreite');
     uebertrage(bh, 'filterHoehe');
     if (document.activeElement) document.activeElement.blur();   // Handy-Tastatur zu
-    const grid = document.getElementById('produktGrid');
-    if (grid) grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Zur Chip-Zeile statt direkt zur Liste: dort steht das gesuchte Maß — sonst
+    // verschwand es unter der Navigation und der Kunde sah nicht, wonach gefiltert wird.
+    const ziel = document.getElementById('aktiveChips') || document.getElementById('produktGrid');
+    if (ziel) ziel.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 }
 /* Maß-Leiste zeigt immer den aktuellen Stand (z. B. nach „1000x1200" in der Suche
@@ -1713,6 +1715,13 @@ function rendere() {
       oeffneAktionsMenu(btn.dataset.id, btn);
     });
   });
+  // Mobiler Bild-Kebab (nur Verwaltungsmodus, schmale Breiten) — dasselbe Menü wie oben
+  gridEl.querySelectorAll('[data-action="img-kebab"]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      oeffneAktionsMenu(btn.dataset.id, btn);
+    });
+  });
   gridEl.querySelectorAll('[data-action="detail"]').forEach(card => {
     card.addEventListener('click', () => oeffneDetail(card.dataset.id));
   });
@@ -1890,6 +1899,15 @@ function karteHtml(p) {
        title="Inserat verwalten" aria-label="Aktionen">
       <span class="material-symbols-outlined" style="font-size:20px">more_vert</span>
     </button>` : '';
+  // Nur auf schmalen Breiten sichtbar (siehe CSS .shop-card-img-kebab) — ersetzt dort
+  // Druck-Icon + Aktionen-Knopf, die im schmalen Vorschaubild unter Herz/Zustandsmarke
+  // verschwinden (23.09.2026, am Handy gemeldet). Oeffnet dasselbe Bearbeiten-Menue.
+  const imgKebabMobil = STATE.loggedIn ? `
+    <button type="button" data-action="img-kebab" data-id="${escapeHtml(p.id)}"
+       class="shop-card-img-kebab" aria-haspopup="true" aria-expanded="false"
+       aria-label="Artikel bearbeiten" title="Artikel bearbeiten">
+      <span class="material-symbols-outlined" aria-hidden="true">more_horiz</span>
+    </button>` : '';
 
   const istArchiviert = p.aktiv === false;
   const archivBadge = istArchiviert
@@ -1973,6 +1991,7 @@ function karteHtml(p) {
         ${istArchiviert ? '' : `<button type="button" class="karte-merk${istGemerkt(p.id) ? ' on' : ''}" data-action="merk" data-id="${p.id}"
            aria-label="${escapeHtml(p.titel)} merken" aria-pressed="${istGemerkt(p.id)}" title="Merken">
           ${HERZ_SVG}</button>`}
+        ${imgKebabMobil}
       </div>
       <div class="karte-body">
         ${masseZeile}
@@ -1989,15 +2008,29 @@ function karteHtml(p) {
     </article>`;
 }
 
-/* ─── Aktions-Menü (Archivieren / Löschen) für eingeloggte User ─── */
+/* ─── Aktions-Menü (Bearbeiten / Archivieren / Löschen) für eingeloggte User ───
+   Wird sowohl vom Desktop-Knopf (data-action="menu") als auch vom mobilen Bild-Kebab
+   (data-action="img-kebab") aufgerufen — deshalb hier zentral: aria-expanded am
+   auslösenden Knopf, Positionierung, die IMMER im Fenster bleibt (bei knappem Platz
+   links statt rechts ausgerichtet), und Schließen per Esc. */
+let _aktionsMenuAnchor = null;
 function oeffneAktionsMenu(id, anchor) {
-  // Bestehende Menüs schließen
-  document.querySelectorAll('.aktions-popup').forEach(el => el.remove());
+  // Bestehende Menüs schließen (inkl. aria-expanded am vorherigen Knopf zurücksetzen)
+  schliesseAktionsMenu();
 
   const rect = anchor.getBoundingClientRect();
   const menu = document.createElement('div');
   menu.className = 'aktions-popup';
-  menu.style.cssText = `position:fixed;top:${rect.bottom + 6}px;right:${window.innerWidth - rect.right}px;z-index:110;background:white;border-radius:14px;box-shadow:0 12px 32px rgba(0,0,0,0.18);border:1px solid rgba(0,0,0,0.08);padding:6px;min-width:200px`;
+  const MENU_BREITE = 200; // muss zu min-width unten passen
+  const RAND = 8; // Mindestabstand zum Fensterrand
+  // Standard: rechtsbündig zum Knopf (Menü wächst nach links). Passt das nicht ins
+  // Fenster (Knopf sitzt links, z.B. im schmalen Listen-Vorschaubild), links ausrichten
+  // (Menü wächst nach rechts) und am Ende hart im Fenster klemmen.
+  let left = rect.right - MENU_BREITE;
+  if (left < RAND) left = rect.left;
+  if (left + MENU_BREITE > window.innerWidth - RAND) left = window.innerWidth - RAND - MENU_BREITE;
+  if (left < RAND) left = RAND;
+  menu.style.cssText = `position:fixed;top:${rect.bottom + 6}px;left:${left}px;z-index:110;background:white;border-radius:14px;box-shadow:0 12px 32px rgba(0,0,0,0.18);border:1px solid rgba(0,0,0,0.08);padding:6px;min-width:${MENU_BREITE}px`;
   menu.innerHTML = `
     <a href="shop-einstellen.html?edit=${escapeHtml(id)}" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;color:#1d1d1f;font-size:13px;font-weight:600;text-decoration:none" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background=''">
       <span class="material-symbols-outlined" style="font-size:18px;color:#225eaa">edit</span>
@@ -2025,16 +2058,19 @@ function oeffneAktionsMenu(id, anchor) {
       Löschen
     </button>`;
   document.body.appendChild(menu);
+  anchor.setAttribute('aria-expanded', 'true');
+  _aktionsMenuAnchor = anchor;
 
-  // Click-Outside zum Schließen
+  // Click-Outside zum Schließen (einmalig registrieren, siehe schliesseAktionsMenu)
   setTimeout(() => {
-    const close = (ev) => {
-      if (!menu.contains(ev.target)) {
-        menu.remove();
-        document.removeEventListener('click', close);
-      }
-    };
-    document.addEventListener('click', close);
+    if (!window.__aktionsMenuInit) {
+      window.__aktionsMenuInit = true;
+      document.addEventListener('click', ev => {
+        const offen = document.querySelector('.aktions-popup');
+        if (offen && !offen.contains(ev.target)) schliesseAktionsMenu();
+      });
+      document.addEventListener('keydown', ev => { if (ev.key === 'Escape') schliesseAktionsMenu(); });
+    }
   }, 50);
 
   // Aktion-Klick
@@ -2042,11 +2078,17 @@ function oeffneAktionsMenu(id, anchor) {
     const btn = e.target.closest('[data-do]');
     if (!btn) return;
     const action = btn.dataset.do;
-    menu.remove();
+    schliesseAktionsMenu();
     if (action === 'archive') archiviereProdukt(id);
     else if (action === 'reactivate') reaktiviereProdukt(id);
     else if (action === 'delete') loescheProdukt(id);
   });
+}
+
+// Schließt ein offenes Aktions-Popup und setzt aria-expanded am auslösenden Knopf zurück
+function schliesseAktionsMenu() {
+  document.querySelectorAll('.aktions-popup').forEach(el => el.remove());
+  if (_aktionsMenuAnchor) { _aktionsMenuAnchor.setAttribute('aria-expanded', 'false'); _aktionsMenuAnchor = null; }
 }
 
 async function archiviereProdukt(id) {
