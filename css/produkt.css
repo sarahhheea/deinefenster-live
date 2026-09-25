@@ -1,0 +1,75 @@
+/* DeineFenster.de: Produktseiten — Kopfbereich mit Herstellervideo und Kino-Abschnitt.
+   Baut auf css/schema.css auf (Farben, Radien, Abstände nur über --df-*). */
+
+/* ---------- Kopfbereich ---------- */
+.produkt-held { position: relative; isolation: isolate; display: grid; grid-template-columns: minmax(0, 1fr); align-items: end; min-block-size: min(78vh, 760px); overflow: hidden; background: var(--df-color-ink); color: var(--df-color-white); }
+.produkt-held__medien { position: absolute; inset: 0; z-index: -2; }
+.produkt-held__medien img, .produkt-held__medien video { inline-size: 100%; block-size: 100%; object-fit: cover; display: block; }
+.produkt-held__medien video { position: absolute; inset: 0; opacity: 0; transition: opacity .6s ease-out; }
+.produkt-held__medien video.laeuft { opacity: 1; }
+/* Verlauf von unten links: Weißtext bleibt über jedem Videobild lesbar (Kontrast gemessen) */
+.produkt-held::after { content: ""; position: absolute; inset: 0; z-index: -1;
+  background: linear-gradient(90deg, rgba(10, 14, 20, .86) 0%, rgba(10, 14, 20, .70) 42%, rgba(10, 14, 20, .18) 75%),
+              linear-gradient(0deg, rgba(10, 14, 20, .70) 0%, rgba(10, 14, 20, 0) 55%); }
+.produkt-held__inhalt { padding-block: calc(var(--df-space-section) + var(--df-space-5)) var(--df-space-section); }
+.produkt-held__inhalt > div { max-inline-size: 640px; }
+.produkt-held .abschnitt__ueber { color: #cfe0f5; }
+.produkt-held .abschnitt__titel { color: var(--df-color-white); font-size: var(--df-text-6); }
+.produkt-held .abschnitt__einleitung { color: #e6ebf1; }
+.produkt-held .knopf { border-color: var(--df-color-white); background: var(--df-color-white); color: var(--df-color-primary-strong); }
+.produkt-held .knopf:hover { background: var(--df-color-surface-subtle); }
+.produkt-held .knopf--zweit { background: transparent; color: var(--df-color-white); }
+.produkt-held .knopf--zweit:hover { background: rgba(255, 255, 255, .12); }
+.produkt-held .knopf:focus-visible { outline-color: var(--df-color-focus-on-dark); }
+.produkt-held__quelle { position: absolute; inset-block-end: var(--df-space-3); inset-inline-end: var(--df-space-3); margin: 0; padding: 2px 10px; border-radius: var(--df-radius-full); background: rgba(10, 14, 20, .6); color: #e6ebf1; font-size: var(--df-text-1); }
+/* Variante mit hellem Produktbild (derzeit ungenutzt: Seiten ohne Herstellervideo zeigen ein
+   gekennzeichnetes KI-Stimmungsbild im selben dunklen Kopf, damit alle Produktseiten gleich wirken) */
+.produkt-held--bild { background: var(--df-color-bg); color: var(--df-color-text); min-block-size: 0; }
+.produkt-held--bild::after { display: none; }
+.produkt-held--bild .produkt-held__inhalt { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: var(--df-space-6); align-items: center; padding-block: var(--df-space-section); }
+.produkt-held--bild .abschnitt__ueber { color: var(--df-color-primary-strong); }
+.produkt-held--bild .abschnitt__titel { color: var(--df-color-text); }
+.produkt-held--bild .abschnitt__einleitung { color: var(--df-color-text-muted); }
+.produkt-held--bild .knopf { border-color: var(--df-color-primary); background: var(--df-color-primary); color: var(--df-color-white); }
+.produkt-held--bild .knopf--zweit { background: var(--df-color-surface); color: var(--df-color-primary-strong); }
+.produkt-held__bild { position: relative; margin: 0; padding: var(--df-space-4); border-radius: var(--df-radius-lg); background: var(--df-color-white); box-shadow: var(--df-shadow-card); }
+.produkt-held__bild img { display: block; inline-size: 100%; block-size: auto; aspect-ratio: 4 / 3; object-fit: contain; mix-blend-mode: multiply; }
+.produkt-held__bild .ki-hinweis { inset-block-start: 8px; inset-inline-end: 8px; }
+
+/* ---------- Kino-Abschnitt: Video steht, Merkmale ziehen vorbei ---------- */
+.kino { padding-block: var(--df-space-section); background: var(--df-color-ink); color: var(--df-color-white); }
+.kino__raster { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: var(--df-space-6); align-items: start; }
+.kino__buehne { position: sticky; inset-block-start: calc(var(--df-kopf-h) + var(--df-space-4)); }
+.kino__rahmen { position: relative; overflow: hidden; border-radius: var(--df-radius-lg); aspect-ratio: 16 / 9; background: #0a0e14; }
+.kino__rahmen img, .kino__rahmen video { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; object-fit: cover; }
+.kino__fortschritt { block-size: 3px; margin-block-start: var(--df-space-2); border-radius: 2px; background: rgba(255, 255, 255, .16); overflow: hidden; }
+.kino__fortschritt span { display: block; block-size: 100%; inline-size: 100%; background: #8fb6e8; transform-origin: left; transform: scaleX(var(--kino-anteil, 0)); }
+.kino__quelle { margin: var(--df-space-2) 0 0; color: #b7c2cf; font-size: var(--df-text-1); }
+.kino .abschnitt__ueber { color: #cfe0f5; }
+.kino .abschnitt__titel { color: var(--df-color-white); }
+.kino__einleitung { margin: var(--df-space-3) 0 0; color: #d5dde6; line-height: var(--df-leading-relaxed); }
+.kino__karten { display: grid; gap: var(--df-space-4); margin: var(--df-space-5) 0 0; padding: 0; list-style: none; }
+.kino__karte { padding: var(--df-space-4); border: 1px solid rgba(255, 255, 255, .14); border-radius: var(--df-radius-lg); background: rgba(255, 255, 255, .05); }
+.kino__karte h3 { margin: 0 0 var(--df-space-2); color: var(--df-color-white); font: var(--df-font-weight-semibold) var(--df-text-4) / 1.3 var(--df-font-display); }
+.kino__karte p { margin: 0; color: #d5dde6; line-height: var(--df-leading-relaxed); }
+/* Karten blenden beim Scrollen ein — nur wo der Browser Scroll-Zeitleisten kann und Bewegung erwünscht ist */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .kino__karte { animation: kino-ein linear both; animation-timeline: view(); animation-range: entry 5% cover 30%; }
+  }
+}
+/* Nur Bewegung, keine Transparenz: der Text bleibt in jedem Moment voll lesbar (WCAG-Kontrast) */
+@keyframes kino-ein { from { transform: translateY(32px); } to { transform: none; } }
+
+@media (max-width: 900px) {
+  .produkt-held--bild .produkt-held__inhalt { grid-template-columns: 1fr; }
+  .produkt-held__bild { max-inline-size: 480px; }
+  .kino__raster { grid-template-columns: 1fr; }
+  .kino__buehne { position: static; }
+}
+@media (max-width: 767px) {
+  .produkt-held { min-block-size: 0; }
+  /* Am Handy liegt der Text über dem ganzen Bild: gleichmäßig abdunkeln (Kontrast ≥ 4,5:1) */
+  .produkt-held::after { background: linear-gradient(0deg, rgba(10, 14, 20, .88) 0%, rgba(10, 14, 20, .78) 60%, rgba(10, 14, 20, .62) 100%); }
+  .produkt-held__inhalt { padding-block: calc(var(--df-space-section) + var(--df-space-6)) var(--df-space-5); }
+}
