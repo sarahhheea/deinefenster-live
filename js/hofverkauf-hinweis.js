@@ -22,7 +22,10 @@
     .replace(/\/+$/, '');
   /* shop seit 21.09.2026: dort filtert der Kunde gerade nach seinem Maß. */
   var OHNE_HINWEIS = /(^|\/)(konfigurator|warenkorb|anfrage|shop)$/;
-  if (OHNE_HINWEIS.test(pfad)) return;
+  /* Dort nur die Karte weglassen, nicht das ganze Skript: bis 26.09.2026 stand hier ein
+     return, dann fehlte dem Shop der Jahresplan (DF_HOF_PLAN) und er meldete samstags
+     „Geschlossen", obwohl der Hof offen hatte. */
+  var ohneKarte = OHNE_HINWEIS.test(pfad);
 
   var KEY        = 'dfHofHinweis_2026_09';
   var CONSENT    = 'df_cookie_consent';
@@ -43,7 +46,13 @@
     sonderBis  : '2026-12-07',
     sonderZu   : ['2026-12-06'], // Sonntag dazwischen
     pauseVon   : '2026-12-08',
-    wiederAb   : '2027-01-15'
+    wiederAb   : '2027-01-15',
+    /* Einzelne Tage, die von der Regel abweichen: [von, bis] in vollen Stunden, null = zu.
+       Tag der Deutschen Einheit (Sa 3.10.2026) zu, dafuer Freitag davor bis 20 Uhr. */
+    ausnahmen  : { '2026-10-02': [10, 20], '2026-10-03': null },
+    /* Ab wann die Hinweiskarte und die Kopfleiste die Ausnahme ankuendigen */
+    ausnahmeHinweisVon : '2026-09-26',
+    ausnahmeHinweisBis : '2026-10-03'
   };
   /* Fuer die Oeffnungsanzeige im Shop (js/oeffnungszeiten-util.js) — dieselben Termine,
      keine zweite Kopie. */
@@ -62,6 +71,11 @@
   var sonderBald    = TAG >= '2026-11-15' && TAG < PLAN.sonderVon;
   var sonderLaeuft  = zwischen(TAG, PLAN.sonderVon, PLAN.sonderBis);
   var pause         = TAG >= PLAN.pauseVon && TAG < PLAN.wiederAb;
+  var feiertag      = zwischen(TAG, PLAN.ausnahmeHinweisVon, PLAN.ausnahmeHinweisBis);
+
+  /* Eigener Merkschluessel: wer die Samstagskarte schon weggeklickt hat, soll die
+     Feiertagsaenderung trotzdem einmal sehen. */
+  if (feiertag) KEY = 'dfHofHinweis_2026_10_feiertag';
 
   function datum(iso) {
     var m = ['Januar','Februar','M\u00e4rz','April','Mai','Juni','Juli','August',
@@ -71,6 +85,7 @@
   }
 
   function titel() {
+    if (feiertag)     return 'Am 3. Oktober geschlossen &ndash; daf&uuml;r Freitag bis 20 Uhr';
     if (pause)        return 'Wir haben Jahrespause';
     if (sonderLaeuft) return 'Diese Woche t&auml;glich ge&ouml;ffnet';
     if (samstagLaeuft || samstagBald || sonderBald) return 'Jetzt auch samstags ge&ouml;ffnet';
@@ -79,11 +94,15 @@
 
   function zeile(tag, zeit, neu) {
     return '<div class="dfh-zeile"><span class="dfh-tag">' + tag
-         + (neu ? '<span class="dfh-neu">Neu</span>' : '') + '</span>'
+         + (neu ? '<span class="dfh-neu">' + (neu === true ? 'Neu' : neu) + '</span>' : '') + '</span>'
          + '<span class="dfh-zeit">' + zeit + '</span></div>';
   }
 
   function zeilen() {
+    if (feiertag) {
+      return zeile('Freitag, 2. Oktober', '10&ndash;20 Uhr', 'L&auml;nger')
+           + zeile('Samstag, 3. Oktober', 'geschlossen');
+    }
     if (pause) {
       return zeile('Wieder ge&ouml;ffnet', 'Fr, 15. Januar 2027');
     }
@@ -98,6 +117,8 @@
   }
 
   function zusatz() {
+    if (feiertag)     return 'Samstag ist Tag der Deutschen Einheit. Ab Samstag, 10. Oktober, '
+                           + 'wieder wie gewohnt 10\u201313 Uhr.';
     if (pause)        return 'Ab Freitag, 15. Januar 2027 sind wir wieder wie gewohnt f\u00fcr Sie da.';
     if (sonderLaeuft) return 'Letzter Tag in diesem Jahr ist Montag, der 7. Dezember. '
                            + 'Danach Jahrespause bis zum 15. Januar 2027.';
@@ -153,7 +174,7 @@
   }
 
   function start() {
-    if (gesehen()) return;
+    if (ohneKarte || gesehen()) return;
     if (!consentDa()) {
       window.addEventListener('df-consent-updated', function () { setTimeout(start, 600); }, { once: true });
       return;
@@ -175,7 +196,8 @@
      Im HTML steht die Freitagszeit, die immer stimmt. */
   function kopfleiste() {
     var txt;
-    if (pause)                        txt = 'Jahrespause &middot; wieder ab Fr 15. Januar';
+    if (feiertag)                     txt = '<span class="df-zeiten-lang">Hofverkauf </span>Fr 2.10. 10&ndash;20 &middot; Sa 3.10. geschlossen';
+    else if (pause)                   txt = 'Jahrespause &middot; wieder ab Fr 15. Januar';
     else if (sonderLaeuft)            txt = '<span class="df-zeiten-lang">Hofverkauf </span>t&auml;glich 10&ndash;17 Uhr bis 7. Dez.';
     else if (sonderBald)              txt = '<span class="df-zeiten-lang">Hofverkauf </span>Fr 10&ndash;17 &middot; Sa 10&ndash;13 Uhr';
     else if (samstagLaeuft || samstagBald)
