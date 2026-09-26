@@ -1,6 +1,7 @@
 /* DeineFenster.de: Kopf, Menü, Handy-Menü, Fuß, KI-Kennzeichen
    Gilt auf allen Seiten. Braucht css/schema.css (Variablen --df-*) davor.
-   Höhe steht nur in --df-kopf-h (schema.css): 138 px am Rechner (32 + 62 + 44), 68 px am Handy. */
+   Höhe steht nur in --df-kopf-h (schema.css): 96 px am Rechner (32 + 64), 68 px bis 1279 px Breite.
+   26.09.2026: zwei Zeilen statt drei, Suche als Lupe, 6 Menüpunkte in der Hauptzeile. */
 
 .nur-vorlesen { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
@@ -27,30 +28,31 @@ html:not(.vorschau-freigaben) [data-erst-live-mit] { display: none !important; }
 
 .kopf__0 { block-size: 32px; border-block-end: 1px solid var(--df-color-border); background: var(--df-color-bg); color: var(--df-color-text-muted); font-size: var(--df-text-1); }
 .kopf__0 .kopf__innen { display: flex; align-items: center; justify-content: space-between; gap: var(--df-space-4); block-size: 100%; }
+.kopf__bewertung { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 .kopf__0 ul { display: flex; align-items: center; gap: var(--df-space-4); margin: 0; padding: 0; list-style: none; }
 .kopf__0 li, .kopf__0 a { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 .kopf__0 a { color: var(--df-color-text); font-weight: 600; }
 .kopf__0 a:hover { color: var(--df-color-primary-strong); }
 .kopf__0 svg { inline-size: 14px; block-size: 14px; color: var(--df-color-primary-strong); }
 .kopf__0 .kopf__stern svg { color: var(--df-color-rating); }
-.kopf__a { display: flex; align-items: center; gap: var(--df-space-3); block-size: 62px; }
+.kopf__a { display: flex; align-items: center; gap: var(--df-space-3); block-size: 64px; }
 .kopf__logo { flex: none; font: 800 var(--df-text-4)/1 var(--df-font-display); letter-spacing: -.02em; color: var(--df-color-text); }
 .kopf__logo span { color: var(--df-color-primary-strong); }
 
-.kopf__suche { position: relative; display: flex; flex: 1; min-inline-size: 200px; margin: 0 var(--df-space-3); }
-.kopf__suche input {
-  inline-size: 100%; block-size: var(--df-control-md); margin: 0; padding: 0 48px 0 var(--df-space-3);
+/* Suche: Lupe öffnet eine Leiste unter dem Kopf (js/dfnav.js); ohne JS führt die Lupe in den Lager-Shop */
+.kopf__suchleiste { position: absolute; inset-inline: 0; inset-block-start: 100%; z-index: 65; padding-block: var(--df-space-3); border-block: 1px solid var(--df-color-border); background: var(--df-color-surface); box-shadow: var(--df-shadow-overlay); }
+.kopf__suchleiste[hidden] { display: none; }
+.kopf__suchleiste .kopf__innen { display: flex; align-items: center; gap: var(--df-space-2); }
+.kopf__suchleiste input {
+  flex: 1; min-inline-size: 0; block-size: var(--df-control-md); margin: 0; padding: 0 var(--df-space-3);
   border: 1px solid var(--df-color-border-strong); border-radius: var(--df-radius-button); background: var(--df-color-white);
   color: var(--df-color-text); font: 400 var(--df-text-3) / 1 var(--df-font-body);
 }
-.kopf__suche input::placeholder { color: var(--df-color-text-disabled); }
-.kopf__suche input:focus-visible { outline: var(--df-focus-ring-width) solid var(--df-color-focus); outline-offset: 1px; }
-.kopf__suche button {
-  position: absolute; inset-block: 0; inset-inline-end: 0; display: grid; place-items: center; inline-size: var(--df-control-md);
-  border: 0; border-radius: var(--df-radius-button); font: inherit; background: transparent; color: var(--df-color-text-muted); cursor: pointer;
-}
-.kopf__suche button:hover { background: var(--df-color-surface-subtle); color: var(--df-color-primary-strong); }
-.kopf__suche svg { inline-size: 18px; block-size: 18px; }
+.kopf__suchleiste input::placeholder { color: var(--df-color-text-disabled); }
+.kopf__suchleiste input:focus-visible { outline: var(--df-focus-ring-width) solid var(--df-color-focus); outline-offset: 1px; }
+.kopf__suche-zu { display: grid; place-items: center; inline-size: var(--df-control-md); block-size: var(--df-control-md); padding: 0; border: 0; border-radius: var(--df-radius-md); background: transparent; color: var(--df-color-text-muted); cursor: pointer; }
+.kopf__suche-zu:hover { background: var(--df-color-surface-subtle); color: var(--df-color-text); }
+.kopf__suche-zu svg { inline-size: 22px; block-size: 22px; }
 
 .kopf .dfnav-cta.kopf__anker { display: none; }
 
@@ -71,14 +73,14 @@ html:not(.vorschau-freigaben) [data-erst-live-mit] { display: none !important; }
 .kopf .df-cart-link, .kopf .df-merk-link { inline-size: var(--df-control-md); block-size: var(--df-control-md); }
 .kopf a:focus-visible, .kopf button:focus-visible { outline: var(--df-focus-ring-width) solid var(--df-color-focus); outline-offset: 2px; }
 
-.kopf__lupe { display: none; }
+.kopf__lupe { display: inline-grid; place-items: center; inline-size: 44px; block-size: 44px; border-radius: var(--df-radius-md); color: var(--df-color-primary); transition: background var(--df-duration-fast); }
+.kopf__lupe:hover, .kopf__lupe[aria-expanded="true"] { background: var(--df-color-surface-subtle); }
+.kopf__lupe svg { inline-size: 22px; block-size: 22px; }
 .dfnav-burger { display: none; place-items: center; inline-size: var(--df-control-md); block-size: var(--df-control-md); font: inherit; margin: 0; padding: 0; border: 0; border-radius: var(--df-radius-md); background: transparent; color: var(--df-color-text); cursor: pointer; }
 .dfnav-burger svg { inline-size: 28px; block-size: 28px; }
 
-/* Menüzeile */
-.kopf__b { position: relative; block-size: 44px; border-block-start: 1px solid var(--df-color-border); background: transparent; }
-.kopf__b .kopf__innen { display: flex; align-items: center; block-size: 100%; }
-.kopf__menue { display: flex; align-items: stretch; gap: var(--df-space-4); block-size: 100%; margin: 0; padding: 0; list-style: none; }
+/* Menü in der Hauptzeile */
+.kopf__menue { display: flex; align-items: stretch; gap: var(--df-space-4); block-size: 100%; margin: 0 0 0 var(--df-space-5); padding: 0; list-style: none; }
 .kopf__menue > .dfnav-item { display: flex; align-items: center; }
 .kopf__punkt {
   display: inline-flex; align-items: center; gap: 2px; block-size: 100%; padding: 0;
@@ -89,7 +91,7 @@ html:not(.vorschau-freigaben) [data-erst-live-mit] { display: none !important; }
 .dfnav-item:hover .kopf__punkt svg, .dfnav-item:focus-within .kopf__punkt svg, .dfnav-item.open .kopf__punkt svg { transform: rotate(180deg); }
 .kopf__stern { color: var(--df-color-rating); }
 
-/* Megamenü: volle Breite unter der Menüzeile */
+/* Megamenü: volle Breite unter dem Kopf (Bezug ist .kopf, die Zeilen dazwischen sind nicht positioniert) */
 .kopf .dfnav-mega {
   position: absolute; inset-inline: 0; inset-block-start: 100%; z-index: 70;
   background: var(--df-color-bg); border-block: 1px solid var(--df-color-border); box-shadow: var(--df-shadow-overlay);
@@ -124,6 +126,7 @@ html:not(.vorschau-freigaben) [data-erst-live-mit] { display: none !important; }
 .mega__hof b { color: var(--df-color-text); }
 .mega__hof a { display: inline-flex; align-items: center; gap: 4px; margin-block-start: 4px; color: var(--df-color-primary-strong); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
 .mega__liste { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.mega__gruppen .mega__liste + .mega__titel { margin-block-start: var(--df-space-4); }  /* Gruppen in einer Spalte klar trennen */
 .mega__liste a { display: block; padding: 7px var(--df-space-2); border-radius: var(--df-radius-sm); color: var(--df-color-text); font-size: var(--df-text-3); font-weight: 500; }
 .mega__liste a:hover { background: var(--df-color-surface-subtle); color: var(--df-color-primary-strong); }
 .mega__lager { align-self: start; display: flex; flex-direction: column; gap: var(--df-space-2); padding: var(--df-space-4); border-radius: var(--df-radius-lg); background: var(--df-color-surface-subtle); }
@@ -195,20 +198,23 @@ html:not(.vorschau-freigaben) [data-erst-live-mit] { display: none !important; }
 .fuss a:focus-visible, .fuss button:focus-visible { outline: var(--df-focus-ring-width) solid var(--df-color-focus-on-dark); outline-offset: 2px; }
 
 /* ---------- Umbrüche ---------- */
-@media (max-width: 1300px) {
-  .kopf__0 .kopf__weit { display: none; }
-  .kopf__menue { gap: var(--df-space-3); }
+/* Schmale Laptops (1280-1439 px): Menü enger, damit Knöpfe rechts nie abgeschnitten werden (gemessen 26.09.) */
+@media (max-width: 1439px) {
+  .kopf__menue { gap: 10px; margin-inline-start: var(--df-space-3); }
+  .kopf__punkt { font-size: .9375rem; }
+  .kopf__knoepfe { gap: 4px; }
+  .kopf__konfig { padding-inline: var(--df-space-3); }
 }
-@media (max-width: 1100px) {
+@media (max-width: 1279px) {
   .kopf__a { block-size: 68px; }
-  .kopf__0, .kopf__b, .kopf__suche, .kopf__konfig { display: none; }
-  .kopf__lupe { display: inline-grid; place-items: center; inline-size: var(--df-control-md); block-size: var(--df-control-md); border-radius: var(--df-radius-md); color: var(--df-color-primary-strong); }
+  .kopf__0, .kopf__menue, .kopf__konfig { display: none; }
+  .kopf__lupe { inline-size: var(--df-control-md); block-size: var(--df-control-md); }
   .kopf__lupe svg { inline-size: 24px; block-size: 24px; }
   .dfnav-burger { display: inline-grid; }
   .fuss__oben { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .fuss__firma { grid-column: 1 / -1; }
 }
-@media (min-width: 1101px) { .dfnav-drawer { display: none; } }
+@media (min-width: 1280px) { .dfnav-drawer { display: none; } }
 @media (max-width: 860px) {
   .kopf__innen { padding-inline: var(--df-gutter); }
   .kopf__a { gap: var(--df-space-2); }
@@ -252,8 +258,6 @@ html:not(.vorschau-freigaben) [data-erst-live-mit] { display: none !important; }
 .kat-pic:has(> .ai-badge) { position: relative; }
 .ocard, .glass-card, .pc { position: relative; }
 
-/* Konfigurator: Kopf ohne Menüzeile (32 + 62 px); Handy unverändert 68 px */
-@media (min-width: 1101px) { :root:has(.kopf--ohne-menue) { --df-kopf-h: 94px; } }
 .dfnav-drawer summary img { border-radius: var(--df-radius-md); background: var(--df-color-white); }
 .kopf__0 .kopf__stern { display: inline-flex; align-items: center; }
 /* In der Vorschau sind gesperrte Kacheln sichtbar: dann zählen sie mit */

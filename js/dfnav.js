@@ -53,7 +53,7 @@
   function ensureStyle(){
     if(document.getElementById('df-cart-style')) return;
     var s=document.createElement('style'); s.id='df-cart-style';
-    s.textContent='.df-cart-link{position:relative;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:12px;color:#225eaa;text-decoration:none;transition:background .18s;flex:none}.df-cart-link:hover{background:rgba(34,94,170,.10)}.df-cart-link svg{width:23px;height:23px}.df-cart-badge{position:absolute;top:2px;right:2px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#225eaa;color:#fff;font:700 11px/18px system-ui,-apple-system,sans-serif;text-align:center;box-shadow:0 2px 6px rgba(34,94,170,.45);pointer-events:none}.df-cart-badge[hidden]{display:none}@keyframes dfCartPop{0%{transform:scale(1)}40%{transform:scale(1.35)}100%{transform:scale(1)}}.df-cart-badge.pop{animation:dfCartPop .35s ease}';
+    s.textContent='.df-cart-link{position:relative;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:12px;color:var(--df-color-primary,#2e69b2);text-decoration:none;transition:background .18s;flex:none}.df-cart-link:hover{background:rgba(46,105,178,.10)}.df-cart-link svg{width:23px;height:23px}.df-cart-badge{position:absolute;top:2px;right:2px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--df-color-primary,#2e69b2);color:#fff;font:700 11px/18px system-ui,-apple-system,sans-serif;text-align:center;box-shadow:0 2px 6px rgba(46,105,178,.45);pointer-events:none}.df-cart-badge[hidden]{display:none}@keyframes dfCartPop{0%{transform:scale(1)}40%{transform:scale(1.35)}100%{transform:scale(1)}}.df-cart-badge.pop{animation:dfCartPop .35s ease}';
     document.head.appendChild(s);
   }
   function build(){
@@ -113,7 +113,7 @@
   function ensureStyle(){
     if(document.getElementById('df-merk-style')) return;
     var s=document.createElement('style'); s.id='df-merk-style';
-    s.textContent='.df-merk-link{position:relative;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:12px;color:#225eaa;text-decoration:none;transition:background .18s;flex:none}.df-merk-link:hover{background:rgba(34,94,170,.10)}.df-merk-link svg{width:23px;height:23px}.df-merk-badge{position:absolute;top:2px;right:2px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#e11d48;color:#fff;font:700 11px/18px system-ui,-apple-system,sans-serif;text-align:center;box-shadow:0 2px 6px rgba(225,29,72,.45);pointer-events:none}.df-merk-badge[hidden]{display:none}';
+    s.textContent='.df-merk-link{position:relative;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:12px;color:var(--df-color-primary,#2e69b2);text-decoration:none;transition:background .18s;flex:none}.df-merk-link:hover{background:rgba(46,105,178,.10)}.df-merk-link svg{width:23px;height:23px}.df-merk-badge{position:absolute;top:2px;right:2px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#e11d48;color:#fff;font:700 11px/18px system-ui,-apple-system,sans-serif;text-align:center;box-shadow:0 2px 6px rgba(225,29,72,.45);pointer-events:none}.df-merk-badge[hidden]{display:none}';
     document.head.appendChild(s);
   }
   function build(){
@@ -196,8 +196,8 @@
        Farbe weicht ab, damit er als Handlung erkennbar bleibt. */
     a.style.cssText='display:flex;align-items:center;padding:13px 0;'
       +'font-family:var(--dfn-disp,inherit);font-weight:700;font-size:1.05rem;'
-      +'color:var(--dfn-acc-text,#225eaa);text-decoration:none;'
-      +'border-bottom:1px solid var(--dfn-border,rgba(34,94,170,.14))';
+      +'color:var(--dfn-acc-text,var(--df-color-primary,#2e69b2));text-decoration:none;'
+      +'border-bottom:1px solid var(--dfn-border,rgba(46,105,178,.14))';
     /* hinter die Kopfzeile mit Logo und Schliessen-Knopf, nicht davor: als erstes Kind
        hing der Verweis ueber dem Menuekopf und sah wie ein Fremdkoerper aus. */
     var kopf = d.querySelector('.dfnav-dhead');
@@ -209,4 +209,19 @@
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',los);
   else los();
   setTimeout(los, 500);
+})();
+
+/* Suche als Lupe (26.09.2026): öffnet die Suchleiste unter dem Kopf, Esc/× schließt, Fokus zurück auf die Lupe.
+   Ohne JS bleibt die Lupe ein Link in den Lager-Shop. */
+(function(){
+  var lupe = document.querySelector('.kopf__lupe'), leiste = document.getElementById('kopf-suchleiste');
+  if(!lupe || !leiste) return;
+  var feld = leiste.querySelector('input'), zu = leiste.querySelector('.kopf__suche-zu');
+  lupe.setAttribute('role', 'button');
+  function auf(){ leiste.hidden = false; lupe.setAttribute('aria-expanded', 'true'); feld.focus(); }
+  function schliessen(zurueck){ leiste.hidden = true; lupe.setAttribute('aria-expanded', 'false'); if(zurueck) lupe.focus(); }
+  lupe.addEventListener('click', function(e){ e.preventDefault(); if(leiste.hidden) auf(); else schliessen(true); });
+  zu && zu.addEventListener('click', function(){ schliessen(true); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && !leiste.hidden) schliessen(true); });
+  document.addEventListener('click', function(e){ if(!leiste.hidden && !leiste.contains(e.target) && !lupe.contains(e.target)) schliessen(false); });
 })();

@@ -82,6 +82,7 @@
     balkon: function (p) { return hat(p, 'balkontuer-'); },
     schiebe: function (p) { return hat(p, 'schiebetuer'); },
     haustuer: function (p) { return istKat(p, ['haustuer']); },
+    tueren: function (p) { return hat(p, 'balkontuer-') || hat(p, 'schiebetuer') || istKat(p, ['haustuer']); },
     rollladen: function (p) { return (p.kategorie_keys || [p.kategorie_key]).some(function (k) { return /-rollo$/.test(String(k || '')); }) || feld(p, 'eigenschaften').indexOf('mit-rollo') >= 0; },
     daemmung: function (p) { return istKat(p, ['daemmung']); },
     alle: function () { return true; }
