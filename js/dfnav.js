@@ -225,3 +225,11 @@
   document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && !leiste.hidden) schliessen(true); });
   document.addEventListener('click', function(e){ if(!leiste.hidden && !leiste.contains(e.target) && !lupe.contains(e.target)) schliessen(false); });
 })();
+
+/* Kopf mit Schatten, sobald gescrollt wird (26.09.2026) */
+(function(){
+  var k = document.getElementById('kopf'); if(!k) return;
+  var an = false;
+  function pruefen(){ var j = window.scrollY > 8; if(j !== an){ an = j; k.classList.toggle('kopf--gescrollt', j); } }
+  window.addEventListener('scroll', pruefen, { passive: true }); pruefen();
+})();

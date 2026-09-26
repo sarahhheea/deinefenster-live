@@ -264,3 +264,35 @@
 @media (max-width: 374px) { :root { --df-gutter: 16px; } }
 /* Hauptüberschrift eine Stufe über den Abschnittsüberschriften (sonst gleich groß) */
 h1.abschnitt__titel { font-size: clamp(2rem, 1.1rem + 2.6vw, 3rem); }
+
+/* ---------- Bewegung (26.09.2026) ----------
+   Ein Rhythmus für alle Seiten: 150-250 ms, ease-out, nur transform und Schatten (kein Layout-Springen).
+   Nichts startet unsichtbar: Inhalte sind ohne JS und ohne Bewegung immer sofort lesbar.
+   Bei "Bewegung reduzieren" im Betriebssystem ist alles aus. */
+@media (prefers-reduced-motion: no-preference) {
+  /* Pfeile in Knöpfen und Textlinks zeigen die Richtung */
+  .knopf svg, .df-mehr svg, .kopf__konfig svg, .mega__weg svg { transition: transform var(--df-duration-base) var(--df-ease-out); }
+  :is(.knopf, .df-mehr, .kopf__konfig, .mega__kachel):hover svg:last-child { transform: translateX(3px); }
+  /* Druck-Rückmeldung */
+  .knopf:active, .kopf__konfig:active { transform: scale(.98); }
+  .knopf, .kopf__konfig { transition: background var(--df-duration-fast), border-color var(--df-duration-fast), color var(--df-duration-fast), transform var(--df-duration-fast), box-shadow var(--df-duration-base); }
+  .knopf:not(.knopf--zweit):hover, .kopf__konfig:hover { box-shadow: var(--df-shadow-raised); }
+  /* Karten: heben sich, das Bild rückt leicht näher */
+  .kachel__bild, .rat, .weg, .lagerstueck, .rat-karte { overflow: hidden; }
+  .kachel__bild img, .lagerstueck img, .galerie img { transition: transform var(--df-duration-slow) var(--df-ease-out); }
+  .kachel:hover .kachel__bild img, .lagerstueck:hover img, .galerie figure:hover img { transform: scale(1.03); }
+  .weg, .rat { transition: border-color var(--df-duration-fast), box-shadow var(--df-duration-base), transform var(--df-duration-base); }
+  .weg:hover, .rat:hover { border-color: var(--df-color-primary); box-shadow: var(--df-shadow-raised); transform: translateY(-2px); }
+}
+/* Abschnitte gleiten beim Einscrollen herein - nur wo der Browser Scroll-Zeitleisten kann (sonst einfach da) */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .abschnitt__kopf, .raster > li, .fragen, .kenn, .service__block {
+      animation: df-herein linear both; animation-timeline: view(); animation-range: entry 0% entry 60%;
+    }
+  }
+}
+@keyframes df-herein { from { transform: translateY(24px); } to { transform: none; } }
+/* Kopf bekommt beim Scrollen Tiefe (Klasse setzt js/dfnav.js) */
+.kopf { transition: box-shadow var(--df-duration-base), background var(--df-duration-base); }
+.kopf.kopf--gescrollt { box-shadow: 0 8px 28px rgba(8, 21, 46, .10); background: rgba(255, 255, 255, .92); backdrop-filter: saturate(1.4) blur(10px); -webkit-backdrop-filter: saturate(1.4) blur(10px); }
