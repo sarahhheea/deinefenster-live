@@ -287,8 +287,9 @@ h1.abschnitt__titel { font-size: clamp(2rem, 1.1rem + 2.6vw, 3rem); }
 /* Abschnitte gleiten beim Einscrollen herein - nur wo der Browser Scroll-Zeitleisten kann (sonst einfach da) */
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
-    .abschnitt__kopf, .raster > li, .fragen, .kenn, .service__block {
-      animation: df-herein linear both; animation-timeline: view(); animation-range: entry 0% entry 60%;
+    /* ganzer Abschnittsinhalt als Einheit: Teile können sich so nie überlappen */
+    .abschnitt > .df-wrap {
+      animation: df-herein linear both; animation-timeline: view(); animation-range: entry 0% entry 40%;
     }
   }
 }

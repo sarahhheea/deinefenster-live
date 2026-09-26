@@ -1,0 +1,67 @@
+/* Kontakt & Anfrage: Bauteile, die im Designschema (schema.css/startseite.css) noch fehlen —
+   Kontaktwege-Kacheln und das Formular. Nur df-Tokens, keine Hex-Farben, keine eigenen
+   Knopfklassen (Absenden-Knopf nutzt .knopf aus schema.css). Betrifft nur kontakt.html
+   und anfrage.html; deren Formular-IDs/-Klassen (kontakt-form, kf-*, kt-feld, hint, an,
+   kt-melde, kt-hp) sind fest mit dem Inline-Skript beider Seiten verdrahtet und dürfen
+   sich nicht ändern. */
+
+/* Kontaktwege (Telefon, WhatsApp, E-Mail, Adresse/Konfigurator) */
+.kontakt-wege { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--df-space-3); list-style: none; margin: var(--df-space-5) 0 0; padding: 0; }
+.kontakt-wege a { display: flex; align-items: center; gap: var(--df-space-3); height: 100%; padding: var(--df-space-3) var(--df-space-4); background: var(--df-color-white); border: var(--df-border-width) solid var(--df-color-border); border-radius: var(--df-radius-lg); text-decoration: none; color: var(--df-color-text); transition: border-color var(--df-duration-fast), box-shadow var(--df-duration-fast); }
+.kontakt-wege a:hover { border-color: var(--df-color-primary); box-shadow: var(--df-shadow-raised); }
+.kontakt-wege a:focus-visible { outline: var(--df-focus-ring-width) solid var(--df-color-focus); outline-offset: var(--df-focus-ring-offset); }
+.kontakt-wege svg { flex: none; inline-size: 22px; block-size: 22px; color: var(--df-color-primary-strong); }
+.kontakt-wege b { display: block; font: var(--df-font-weight-semibold) var(--df-text-3) / 1.3 var(--df-font-display); }
+.kontakt-wege small { display: block; margin-block-start: 2px; color: var(--df-color-text-muted); font-size: var(--df-text-1); line-height: 1.35; }
+@media (max-width: 980px) { .kontakt-wege { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .kontakt-wege { grid-template-columns: 1fr; } }
+
+/* Zweispaltig: Text links, Formular rechts */
+.kontakt-grid { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: var(--df-space-6); align-items: start; }
+@media (max-width: 900px) { .kontakt-grid { grid-template-columns: 1fr; } }
+
+.kontakt-karte { background: var(--df-color-white); border: var(--df-border-width) solid var(--df-color-border); border-radius: var(--df-radius-lg); padding: var(--df-space-6); box-shadow: var(--df-shadow-raised); }
+.kontakt-trust { display: flex; flex-wrap: wrap; align-items: center; gap: var(--df-space-2); margin: 0 0 var(--df-space-4); color: var(--df-color-text-muted); font-size: var(--df-text-2); }
+.kontakt-trust .sterne { color: var(--df-color-rating); letter-spacing: 2px; }
+.kontakt-noscript { margin: 0 0 var(--df-space-4); padding: var(--df-space-3) var(--df-space-4); border-radius: var(--df-radius-md); background: var(--df-color-warning-subtle); color: var(--df-color-warning); font-size: var(--df-text-2); }
+
+/* Formular */
+#kontakt-form { display: grid; gap: var(--df-space-4); }
+.kt-zeile { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--df-space-4); }
+@media (max-width: 560px) { .kt-zeile { grid-template-columns: 1fr; } }
+.kt-feld { display: grid; gap: var(--df-space-1); }
+.kt-feld label { font: var(--df-font-weight-semibold) var(--df-text-2) / 1.3 var(--df-font-display); color: var(--df-color-text); }
+.kt-feld .opt { font-weight: var(--df-font-weight-regular); color: var(--df-color-text-muted); }
+.kt-feld input, .kt-feld textarea {
+  box-sizing: border-box; inline-size: 100%; min-block-size: var(--df-control-md); padding: var(--df-space-2) var(--df-space-3);
+  border: var(--df-border-width) solid var(--df-color-border); border-radius: var(--df-radius-md);
+  background: var(--df-color-white); color: var(--df-color-text); font: var(--df-font-weight-regular) var(--df-text-3) / 1.4 var(--df-font-body);
+}
+.kt-feld textarea { min-block-size: 128px; resize: vertical; }
+.kt-feld input:focus-visible, .kt-feld textarea:focus-visible { outline: var(--df-focus-ring-width) solid var(--df-color-focus); outline-offset: 1px; border-color: var(--df-color-primary); }
+.kt-feld input[aria-invalid="true"], .kt-feld textarea[aria-invalid="true"] { border-color: var(--df-color-danger); }
+.kt-feld .hint { display: none; color: var(--df-color-danger); font-size: var(--df-text-1); }
+.kt-feld .hint.an { display: block; }
+
+/* Honeypot: für Menschen unsichtbar, für Screenreader und Bots vorhanden */
+.kt-hp { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+#kf-melde { font-size: var(--df-text-2); font-weight: var(--df-font-weight-semibold); }
+#kf-melde.gut { color: var(--df-color-success); }
+#kf-melde.fehler { color: var(--df-color-danger); }
+
+.kt-dse { margin: 0; color: var(--df-color-text-muted); font-size: var(--df-text-1); line-height: 1.5; }
+.kt-dse a { color: var(--df-color-primary-strong); }
+
+/* Google-Maps-Vorschau: erst nach Klick lädt die echte Karte (TTDSG § 25) */
+.kontakt-karte-map { position: relative; overflow: hidden; min-block-size: 420px; border: var(--df-border-width) solid var(--df-color-border); border-radius: var(--df-radius-lg); background: var(--df-color-surface); }
+.kontakt-map-vorschau { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--df-space-2); text-align: center; padding: 0 var(--df-space-5); }
+.kontakt-map-vorschau svg { inline-size: 40px; block-size: 40px; color: var(--df-color-primary-strong); }
+.kontakt-map-vorschau p { margin: 0; max-inline-size: 42ch; }
+.kontakt-map-vorschau .titel { font: var(--df-font-weight-semibold) var(--df-text-4) / 1.3 var(--df-font-display); color: var(--df-color-text); }
+.kontakt-map-vorschau .klein { color: var(--df-color-text-muted); font-size: var(--df-text-1); }
+
+/* Kontaktwege über die volle Breite, der Text darüber bleibt lesbar schmal (26.09.2026: Kacheln waren in 70ch gequetscht) */
+.service__kopf:has(.kontakt-wege) { max-inline-size: var(--df-container-max); margin-inline: auto; }
+.service__kopf:has(.kontakt-wege) > :not(.kontakt-wege) { max-inline-size: 70ch; }
+.kontakt-wege b { overflow-wrap: anywhere; }
