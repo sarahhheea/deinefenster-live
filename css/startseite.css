@@ -349,3 +349,38 @@ body.startseite { margin: 0; background: var(--df-color-bg); color: var(--df-col
 @media (max-width: 700px) { .vergleich { grid-template-columns: minmax(0, 1fr); } }
 /* Fünf Profile: am Rechner eine Reihe ohne Lücke */
 @media (min-width: 1200px) { .raster--mittig.raster--3 > li { flex-basis: calc((100% - 4 * var(--df-space-4)) / 5); } .raster--mittig .kachel__wege { flex-direction: column; align-items: stretch; } }
+
+/* Startseite ruhiger (26.09.2026): 16 -> 9 Abschnitte, zusammengelegte Blöcke */
+.startseite .unterkopf, .unterkopf { margin: var(--df-space-6) 0 var(--df-space-4); font: var(--df-font-weight-bold) var(--df-text-4) / var(--df-leading-snug) var(--df-font-display); color: var(--df-color-text); }
+.faq--im-abschnitt { margin-block-start: var(--df-space-6); }
+.startseite .faq--im-abschnitt .unterkopf { margin-block-start: 0; }
+.startseite .orte, .orte { margin: var(--df-space-4) 0 0; color: var(--df-color-text-muted); line-height: var(--df-leading-relaxed); }
+.orte span { font-weight: var(--df-font-weight-semibold); color: var(--df-color-text); }
+.orte a { color: var(--df-color-primary-strong); font-weight: var(--df-font-weight-semibold); text-decoration: underline; text-underline-offset: var(--df-link-underline-offset); }
+.fragen__mehr > summary { display: inline-flex; align-items: center; gap: var(--df-space-2); min-block-size: var(--df-control-sm); margin-block-start: var(--df-space-2); color: var(--df-color-primary-strong); font-weight: var(--df-font-weight-semibold); cursor: pointer; list-style: none; }
+.fragen__mehr > summary::-webkit-details-marker { display: none; }
+.fragen__mehr > summary::after { content: "+"; font-size: 1.25em; line-height: 1; }
+.fragen__mehr[open] > summary::after { content: "−"; }
+.fragen__mehr[open] > summary { margin-block-end: var(--df-space-2); }
+.fragen__mehr { display: grid; gap: var(--df-space-2); }
+
+/* Handy (26.09.2026): Startseite war 17.500 px lang. Produktkarten zu zweit, Lager zeigt drei Stücke
+   (alle weiteren im Lager-Shop), Hof-Fotos zu zweit. */
+@media (max-width: 600px) {
+  .startseite .raster--4:has(> li > .kachel) { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .raster--4 > li > .kachel .kachel__text { padding: 12px; }
+  .raster--4 > li > .kachel .kachel__titel { font-size: var(--df-text-3); }
+  .raster--4 > li > .kachel .kachel__preis { font-size: var(--df-text-3); }
+  .raster--4 > li > .kachel .kachel__wege .knopf { min-block-size: var(--df-control-sm); padding-inline: 8px; font-size: var(--df-text-2); }
+  .raster--4 > li > .kachel .kachel__wege .df-mehr { font-size: var(--df-text-1); text-align: center; }
+  .startseite .lager > li:nth-child(n+4) { display: none; }
+  .startseite .galerie { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .raster--4 > li > .kachel .kachel__wege .df-mehr { display: block; line-height: 1.35; }
+  .raster--4 > li > .kachel .kachel__wege .df-mehr svg { display: none; }
+  .startseite .ablauf { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .startseite .ablauf li { padding: 12px; padding-block-start: 44px; }
+  .startseite .ablauf li::before { inset-block-start: 12px; inset-inline-start: 12px; }
+  .startseite .ablauf h3 { font-size: var(--df-text-3); }
+  .startseite .ablauf p { font-size: var(--df-text-2); }
+  .startseite .lager img { aspect-ratio: 3 / 2; object-fit: cover; }
+}
