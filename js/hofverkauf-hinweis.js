@@ -174,7 +174,8 @@
   }
 
   function start() {
-    if (ohneKarte || gesehen()) return;
+    /* In der Feiertagswoche steht alles in der festen Leiste oben - die Karte waere doppelt. */
+    if (ohneKarte || feiertag || gesehen()) return;
     if (!consentDa()) {
       window.addEventListener('df-consent-updated', function () { setTimeout(start, 600); }, { once: true });
       return;
@@ -208,6 +209,57 @@
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', kopfleiste);
   else kopfleiste();
+
+  /* ── Feste Ankuendigungsleiste ganz oben ─────────────────────────────────
+     Fuer Aenderungen, die JEDER sehen muss (Feiertag): nicht wegklickbar, grosse
+     Schrift, Signalfarbe. Die kleine Karte wurde leicht uebersehen, am Handy ist die
+     Kopfleiste ausgeblendet. Nicht im Kaufablauf (Konfigurator, Warenkorb, Anfrage).
+     Die Leiste schiebt die festen Kopfleisten (margin-top) und den Seiteninhalt
+     (padding am html) um ihre eigene Hoehe nach unten - --banner-h bleibt unberuehrt,
+     weil die Startseite es fuer ihr Suchband selbst setzt. */
+  var OHNE_LEISTE = /(^|\/)(konfigurator|warenkorb|anfrage)$/;
+  function leiste() {
+    if (!feiertag || OHNE_LEISTE.test(pfad) || document.getElementById('df-ankuendigung')) return;
+    var css = document.createElement('style');
+    css.textContent =
+      '#df-ankuendigung{position:fixed;top:0;left:0;right:0;z-index:75;background:#f6cf3f;'
+    + 'color:#101c33;border-bottom:2px solid #d9ad12;font-family:"Inter","Switzer",system-ui,sans-serif}'
+    + '#df-ankuendigung .dfa-in{max-width:1520px;margin:0 auto;padding:10px clamp(16px,4.5vw,72px);'
+    + 'display:flex;align-items:center;justify-content:center;gap:10px 22px;flex-wrap:wrap;'
+    + 'font-size:17px;line-height:1.35;text-align:center}'
+    + '#df-ankuendigung .dfa-titel{display:flex;align-items:center;gap:8px;font-weight:800}'
+    + '#df-ankuendigung .dfa-titel svg{flex:none}'
+    + '#df-ankuendigung .dfa-tag{font-weight:600;white-space:nowrap}'
+    + '#df-ankuendigung .dfa-tag b{font-weight:800}'
+    + '@media(max-width:700px){#df-ankuendigung .dfa-in{flex-direction:column;gap:2px;font-size:16px;padding:8px 16px}}'
+    + 'html.df-ank{padding-top:var(--df-ank-h,0px)}'
+    + 'html.df-ank .dfnav-util,html.df-ank .dfnav,html.df-ank .util,html.df-ank .topsuche'
+    + '{margin-top:var(--df-ank-h,0px)}'
+    + 'html.df-ank .cat-tabs{top:calc(var(--banner-h,0px) + 106px + var(--df-ank-h,0px))}'
+    + '@media(min-width:1024px){html.df-ank .filter-sidebar{top:calc(128px + var(--df-ank-h,0px));'
+    + 'max-height:calc(100vh - 144px - var(--df-ank-h,0px))}}';
+    document.head.appendChild(css);
+    var el = document.createElement('div');
+    el.id = 'df-ankuendigung';
+    el.setAttribute('role', 'region');
+    el.setAttribute('aria-label', 'Ge\u00e4nderte \u00d6ffnungszeiten');
+    el.innerHTML = '<div class="dfa-in">'
+      + '<span class="dfa-titel"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+      + 'stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="2"/>'
+      + '<path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>Ge&auml;nderte &Ouml;ffnungszeiten</span>'
+      + '<span class="dfa-tag">Freitag, 2. Oktober: <b>10&ndash;20 Uhr</b></span>'
+      + '<span class="dfa-tag">Samstag, 3. Oktober (Feiertag): <b>geschlossen</b></span>'
+      + '</div>';
+    document.body.insertBefore(el, document.body.firstChild);
+    function hoehe() {
+      document.documentElement.style.setProperty('--df-ank-h', el.offsetHeight + 'px');
+    }
+    hoehe();
+    document.documentElement.classList.add('df-ank');
+    window.addEventListener('resize', hoehe);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', leiste);
+  else leiste();
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
   else start();
