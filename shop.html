@@ -2813,7 +2813,7 @@ input[type="range"].range-clean::-moz-range-thumb {
 <script src="js/shop-grundpreis-util.js?v=2026-08-05-grundpreis" defer></script>
 <script src="js/shop-mass-util.js?v=2026-09-10-massexakt" defer></script>
 <script src="js/oeffnungszeiten-util.js?v=2026-09-26" defer></script>
-<script src="js/shop.js?v=2026-09-25-handy2" defer></script>
+<script src="js/shop.js?v=2026-09-26-kacheln5" defer></script>
 
 <style>
 /* ===== NAV/Topbar/Mega/Mobile auf HELL (Shop-only Override, nav.css unangetastet) 2026-06-01 ===== */
@@ -3486,6 +3486,177 @@ section[style*="#0a1530"], div[style*="#0a1530"] { background: #f4f7fc !importan
     .karte-bild { aspect-ratio: 4 / 3; }
     .karte-body { padding: 8px 10px 10px; }
   }
+
+  /* ── Handy wie eine Shopping-App (26.09.2026) ─────────────────────────────
+     Live gemessen bei 390 px: die erste Karte begann erst bei 853 px, also komplett
+     unter dem ersten Bildschirm; Maß-Suche allein 233 px, jede Karte 199 px mit eigenem
+     Knopf-Streifen. Hier bewusst EIN Block am Ende statt weiterer Einzelkorrekturen oben.
+     Gilt nur unter 600 px — Tablet und Rechner sehen keine Aenderung. */
+  @media (max-width: 599px) {
+    /* Maß-Suche: Titel, darunter Breite × Höhe und ein Lupen-Knopf in EINER Zeile.
+       Jedes Feld behaelt ~120 px (am 25.09. war „1230" bei 79 px abgeschnitten). */
+    .shop-massbar { padding: 10px 12px 12px; border-radius: 14px; }
+    .shop-massbar-titel { font-size: 14.5px; margin: 0 0 6px; }
+    .shop-massbar-felder { flex-wrap: nowrap; align-items: flex-end; gap: 6px; row-gap: 0; }
+    .shop-massbar-feld > span { font-size: 12px; }
+    .shop-massbar-feld input { height: 46px; font-size: 18px; padding: 0 34px 0 11px; }
+    .shop-massbar-feld em { bottom: 14px; right: 10px; font-size: 13px; }
+    .shop-massbar-x { padding: 0 0 13px; font-size: 16px; }
+    .shop-massbar-los {
+      flex: 0 0 48px; width: 48px; height: 46px; padding: 0;
+      font-size: 0; /* Beschriftung bleibt fuer Screenreader im Knopf */
+      display: grid; place-items: center;
+    }
+    .shop-massbar-los::before {
+      content: 'search'; font-family: 'Material Symbols Outlined'; font-size: 24px;
+      font-weight: 400; line-height: 1; -webkit-font-feature-settings: 'liga'; font-feature-settings: 'liga';
+    }
+    .shop-massbar-hilfe { display: none; } /* am Rechner ebenfalls ausgeblendet */
+
+    /* Kategorien: Name und Anzahl in einer Zeile, Bild flacher */
+    .kat-leiste { padding-top: 8px; }
+    .kat-chip { flex: 0 0 98px; max-width: 98px; }
+    .kat-pic { height: 50px; padding: 5px 6px 4px; }
+    .kat-name { font-size: 12px; margin-top: 4px; }
+
+    /* Hinweis „Kein Sofortkauf": Inhalt bleibt vollstaendig (Preisangabe!), nur enger */
+    .shop-anfrage-hinweis { font-size: 12px; line-height: 1.4; margin-top: 6px; }
+    .shop-anfrage-hinweis .material-symbols-outlined { font-size: 15px; margin-top: 1px; }
+    /* Links im Fliesstext sind von der 44-px-Regel ausgenommen (WCAG 2.5.8, inline) —
+       als inline-flex rissen sie eine leere Zeile in den Satz. */
+    .shop-anfrage-hinweis a { display: inline; min-height: 0; padding: 0; }
+
+    /* Suchfeld: 48 statt 58 px hoch */
+    #sucheInput { height: 48px; font-size: 16px; padding-left: 46px; }
+    .shop-searchbar-icon { font-size: 22px; left: 15px; }
+
+    /* WhatsApp-Knopf lag genau ueber der Spalte mit den „Anfragen"-Knoepfen.
+       Wie in Shopping-Apps: beim Runterscrollen weg, beim Hochscrollen wieder da. */
+    .df-wa-float { transition: transform .25s ease, opacity .25s ease; }
+    body.df-wa-weg .df-wa-float { transform: translateY(120px); opacity: 0; pointer-events: none; }
+
+    /* Listen-Karte: quadratisches Foto links, rechts Maß, Preis + Anfragen in einer
+       Zeile, Titel. Ganze Karte oeffnet die Produktansicht. */
+    .ansicht-liste .karte {
+      grid-template-columns: 108px minmax(0,1fr); column-gap: 12px;
+      padding: 12px 0; -webkit-tap-highlight-color: transparent;
+    }
+    .ansicht-liste .karte:active { background: #f5f7fb; }
+    .ansicht-liste .karte-bild-wrap {
+      width: 108px; height: 108px; border-radius: 12px; overflow: hidden; background: #eef1f5;
+    }
+    .ansicht-liste .karte-bild { width: 100%; height: 100%; aspect-ratio: auto; object-fit: cover; border-radius: 0; }
+    .ansicht-liste .karte-tag {
+      top: 6px; left: 6px; font-size: 9.5px; letter-spacing: .02em; padding: 3px 6px; border-radius: 5px;
+    }
+    .ansicht-liste .karte-standnr-bild { left: 6px; bottom: 6px; font-size: 11px; padding: 3px 7px; }
+    /* Herz sichtbar 32 px, Tippflaeche per Rand auf 44 px erweitert */
+    .ansicht-liste .karte-merk { top: 4px; right: 4px; width: 32px; height: 32px; }
+    .ansicht-liste .karte-merk::after { content: ''; position: absolute; inset: -6px; }
+    .ansicht-liste .karte-merk-svg { width: 17px; height: 17px; }
+
+    .ansicht-liste .karte-body {
+      display: grid; grid-template-columns: minmax(0,1fr) auto; column-gap: 8px;
+      align-content: start; padding: 0; min-width: 0;
+    }
+    .ansicht-liste .karte-body > * { grid-column: 1 / -1; }
+    .ansicht-liste .karte-masse-gross { font-size: 18px; margin: 0; }
+    .ansicht-liste .karte-masse-label { font-size: 11px; margin-bottom: 0; }
+    .ansicht-liste .karte-body > .karte-pricewrap {
+      grid-column: 1; grid-row: 2; align-self: center; margin-top: 2px;
+      display: flex; flex-direction: column; align-items: flex-start; gap: 0;
+    }
+    .ansicht-liste .karte-preis { font-size: 18px !important; line-height: 1.2; }
+    .ansicht-liste .karte-mwst { font-size: 11px; }
+    .ansicht-liste .karte-body > .shop-card-cta-row {
+      grid-column: 2; grid-row: 2; align-self: center; margin: 2px 0 0 !important;
+    }
+    .ansicht-liste .shop-card-cta-anfrage {
+      min-height: 40px; padding: 0 14px; font-size: 13.5px; border-radius: 999px; white-space: nowrap;
+    }
+    .ansicht-liste .shop-card-cta-anfrage .material-symbols-outlined { display: none; }
+    .ansicht-liste .karte-spec { font-size: 12.5px; margin-top: 4px; color: #5b626b; }
+    .ansicht-liste .karte-titel {
+      font-size: 13px !important; line-height: 1.35; margin-top: 2px; color: #5b626b;
+    }
+    .ansicht-liste .karte-nr:empty { display: none; }
+
+    /* Kacheln (Standard am Handy): zwei nebeneinander wie in Shop-Apps, quadratisches
+       Foto statt flachem 4:3 — die Ware ist das Verkaufsargument. */
+    #produktGrid:not(.ansicht-liste) { column-gap: 12px !important; row-gap: 22px !important; }
+    #produktGrid:not(.ansicht-liste) .karte-bild-wrap { border-radius: 14px; overflow: hidden; background: #eef1f5; }
+    #produktGrid:not(.ansicht-liste) .karte-bild { aspect-ratio: 4 / 5; object-fit: cover; border-radius: 0; }
+    #produktGrid:not(.ansicht-liste) .karte-tag { top: 7px; left: 7px; font-size: 9.5px; padding: 3px 6px; border-radius: 5px; }
+    #produktGrid:not(.ansicht-liste) .karte-standnr-bild { left: 7px; bottom: 7px; font-size: 11px; padding: 3px 7px; }
+    #produktGrid:not(.ansicht-liste) .karte-merk { top: 5px; right: 5px; width: 34px; height: 34px; }
+    #produktGrid:not(.ansicht-liste) .karte-merk::after { content: ''; position: absolute; inset: -5px; }
+    #produktGrid:not(.ansicht-liste) .karte-merk-svg { width: 18px; height: 18px; }
+    #produktGrid:not(.ansicht-liste) .karte-body { padding: 9px 2px 0; display: flex; flex-direction: column; flex: 1; }
+    #produktGrid:not(.ansicht-liste) .karte-masse-label { font-size: 11px; }
+    #produktGrid:not(.ansicht-liste) .karte-masse-gross { font-size: 16.5px; margin-top: 1px; }
+    #produktGrid:not(.ansicht-liste) .karte-preis { font-size: 18px !important; }
+    #produktGrid:not(.ansicht-liste) .karte-spec { font-size: 12.5px; color: #5b626b; margin-top: 2px; }
+    #produktGrid:not(.ansicht-liste) .karte-titel { font-size: 13px !important; line-height: 1.35; color: #5b626b; margin-top: 2px; }
+    #produktGrid:not(.ansicht-liste) .shop-card-cta-row { margin-top: auto !important; padding-top: 9px; }
+    #produktGrid:not(.ansicht-liste) .shop-card-cta-anfrage { min-height: 40px; border-radius: 999px; font-size: 13.5px; }
+
+    /* Drei klare Zeilen wie in ueblichen Shop-Apps (Referenz gemessen 26.09.): Maß fett
+       als Ueberschrift, eine Unterzeile, Preis. Vorher sieben kleine graue Zeilen. */
+    #produktGrid:not(.ansicht-liste) .karte-masse-label,
+    #produktGrid:not(.ansicht-liste) .karte-spec,
+    #produktGrid:not(.ansicht-liste) .karte-titel { display: none; }
+    #produktGrid:not(.ansicht-liste) .karte-masse-gross { font-size: 17px; font-weight: 800; margin: 0; }
+    #produktGrid:not(.ansicht-liste) .karte-kurz {
+      display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
+      order: 1; margin: 3px 0 0; font-size: 14px; line-height: 1.35; color: #4a525d;
+      min-height: 2.7em; /* immer zwei Zeilen Platz: Preise einer Reihe auf gleicher Hoehe */
+    }
+    #produktGrid:not(.ansicht-liste) .karte-pricewrap { order: 2; margin-top: 6px !important; }
+    #produktGrid:not(.ansicht-liste) .karte-body > *:not(.karte-masse-gross):not(.karte-kurz):not(.karte-pricewrap) { order: 3; }
+    #produktGrid:not(.ansicht-liste) .karte-preis { font-size: 18px !important; font-weight: 800; }
+
+    /* Kachel wie die Produktkarten im Konfigurator: weisse Karte, feiner Rand, runde
+       Ecken, Knoepfe unten buendig. Anfragen voll blau (Hauptweg), daneben WhatsApp. */
+    #produktGrid:not(.ansicht-liste) { column-gap: 10px !important; row-gap: 12px !important; }
+    /* !important noetig: die Karten-Optik weiter oben erzwingt „rahmenlos" mit !important */
+    #produktGrid:not(.ansicht-liste) .karte,
+    #produktGrid:not(.ansicht-liste) .karte:hover {
+      background: #fff !important; border: 1px solid #dfe6ef !important; border-radius: 16px !important;
+      box-shadow: 0 1px 2px rgba(16,36,62,.05) !important; padding: 6px;
+      display: flex; flex-direction: column; height: 100%;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #produktGrid:not(.ansicht-liste) .karte:active { border-color: #b9cbe3 !important; }
+    #produktGrid:not(.ansicht-liste) .karte-bild-wrap { border-radius: 11px; }
+    #produktGrid:not(.ansicht-liste) .karte-body { padding: 9px 4px 2px; }
+    #produktGrid:not(.ansicht-liste) .shop-card-cta-row {
+      display: flex !important; gap: 6px; padding-top: 10px; align-items: stretch;
+    }
+    #produktGrid:not(.ansicht-liste) .shop-card-cta-anfrage {
+      flex: 1 1 auto; min-width: 0; min-height: 44px; padding: 4px 8px; border-radius: 12px;
+      background: #225eaa; border: 0; color: #fff; font-size: 14px; font-weight: 700;
+      white-space: normal; line-height: 1.15; text-align: center; justify-content: center;
+    }
+    #produktGrid:not(.ansicht-liste) .shop-card-cta-anfrage:active { background: #1b4d8c; }
+    #produktGrid:not(.ansicht-liste) .shop-card-cta-anfrage .material-symbols-outlined { display: none; }
+    #produktGrid:not(.ansicht-liste) .shop-card-cta-wa {
+      display: grid; place-items: center; flex: 0 0 44px; width: 44px; min-height: 44px;
+      border-radius: 12px; background: #1f9d55; color: #fff; /* Kontrast Symbol 3,4:1 */
+    }
+    #produktGrid:not(.ansicht-liste) .shop-card-cta-wa svg { width: 22px; height: 22px; }
+    #produktGrid:not(.ansicht-liste) .shop-card-cta-wa:active { background: #178246; }
+    .karte-kurz-glas { white-space: nowrap; }
+    /* Maß immer einzeilig — bricht „mm" um, steht der Preis in einer Reihe versetzt
+       (bei 320 px gesehen). Schrift waechst mit der Breite bis 17 px. */
+    #produktGrid:not(.ansicht-liste) .karte-masse-gross { white-space: nowrap; font-size: min(17px, 4.3vw); }
+    #produktGrid:not(.ansicht-liste) .karte-preis { font-size: min(19px, 4.8vw) !important; }
+    /* Marken wie im Konfigurator: normale Schreibweise statt Versalien */
+    #produktGrid:not(.ansicht-liste) .karte-tag { text-transform: none; letter-spacing: 0; font-size: 11px; font-weight: 700; }
+    /* Heller Grund wie im Konfigurator, damit die weissen Karten sich abheben */
+    body:has(#produktGrid:not(.ansicht-liste)) { background: #f2f6fb !important; }
+  }
+  .karte-kurz { display: none; }
+  .shop-card-cta-wa { display: none; }
 </style>
 
 <!-- ===== Merkliste: Liste der gemerkten Artikel + Sammel-Anfrage ===== -->
@@ -3561,5 +3732,20 @@ section[style*="#0a1530"], div[style*="#0a1530"] { background: #f4f7fc !importan
   });
 </script>
 <script defer src="/js/hofverkauf-hinweis.js"></script>
+<script>
+/* WhatsApp-Knopf am Handy beim Runterscrollen ausblenden (siehe CSS df-wa-weg) */
+(function(){
+  if (!window.matchMedia) return;
+  var mq = window.matchMedia('(max-width: 599px)'), y0 = window.scrollY, tick = false;
+  window.addEventListener('scroll', function(){
+    if (tick) return; tick = true;
+    requestAnimationFrame(function(){
+      var y = window.scrollY, weg = mq.matches && y > 300 && y > y0 + 4;
+      if (weg || y < y0 - 4 || y <= 300) document.body.classList.toggle('df-wa-weg', weg);
+      y0 = y; tick = false;
+    });
+  }, { passive: true });
+})();
+</script>
 </body>
 </html>
