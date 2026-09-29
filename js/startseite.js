@@ -155,3 +155,50 @@
     (window.requestIdleCallback || function (f) { setTimeout(f, 1500); })(laden);
   });
 })();
+
+// Schnellstart: Material gibt es nur bei Fenstern. Bei anderen Produkten ausblenden und
+// abschalten, damit kein falsches &material= in der Adresse landet.
+(function () {
+  var form = document.querySelector('[data-schnell]');
+  if (!form) return;
+  var feld = form.querySelector('[data-schnell-material]');
+  function abgleichen() {
+    var prod = form.querySelector('input[name="prod"]:checked');
+    var fenster = !prod || prod.value === 'fenster';
+    feld.hidden = !fenster;
+    feld.querySelectorAll('input').forEach(function (i) { i.disabled = !fenster; });
+  }
+  form.addEventListener('change', abgleichen);
+  abgleichen();
+})();
+
+// Haustür-Studio: Beispiel wählen → Tür im Bild wechselt sofort; Tag/Abend tauscht die Szene.
+(function () {
+  var studio = document.querySelector('[data-studio]');
+  if (!studio) return;
+  var tuer = studio.querySelector('[data-studio-tuer]');
+  var szene = studio.querySelector('[data-studio-szene]');
+  var name = studio.querySelector('[data-studio-name]');
+  studio.addEventListener('change', function (e) {
+    var wahl = e.target;
+    if (wahl.name !== 'studio-tuer') return;
+    var neu = new Image();
+    neu.src = '/img/produkte/studio/tuer-' + wahl.value + '.webp';
+    tuer.classList.add('ist-wechsel');
+    function zeigen() {
+      tuer.src = neu.src;
+      tuer.alt = 'Haustür-Beispiel „' + wahl.dataset.name + '“ am Hauseingang (KI-generiertes Symbolbild)';
+      name.textContent = wahl.dataset.name;
+      tuer.classList.remove('ist-wechsel');
+    }
+    if (neu.decode) neu.decode().then(zeigen, zeigen); else zeigen();
+  });
+  studio.querySelectorAll('[data-studio-zeit]').forEach(function (knopf) {
+    knopf.addEventListener('click', function () {
+      var abend = knopf.dataset.studioZeit === 'abend';
+      studio.classList.toggle('ist-abend', abend);
+      szene.src = '/img/produkte/buehne/haustuer-' + (abend ? 'abend' : 'tag') + '.webp';
+      studio.querySelectorAll('[data-studio-zeit]').forEach(function (k) { k.setAttribute('aria-pressed', String(k === knopf)); });
+    });
+  });
+})();

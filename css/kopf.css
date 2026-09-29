@@ -1,7 +1,8 @@
 /* DeineFenster.de: Kopf, Menü, Handy-Menü, Fuß, KI-Kennzeichen
    Gilt auf allen Seiten. Braucht css/schema.css (Variablen --df-*) davor.
-   Höhe steht nur in --df-kopf-h (schema.css): 96 px am Rechner (32 + 64), 68 px bis 1279 px Breite.
-   26.09.2026: zwei Zeilen statt drei, Suche als Lupe, 6 Menüpunkte in der Hauptzeile. */
+   Höhe steht nur in --df-kopf-h (schema.css): 140 px am Rechner (32 + 64 + 44), 68 px bis 1279 px Breite.
+   29.09.2026: drei Zeilen nach ESN-Schema (Designsystem): dunkle Nutzenzeile, Logo mit sichtbarem Suchfeld,
+   Menü in eigener Zeile. Am Handy weiter eine Zeile mit Lupe. (26.09.: zwei Zeilen mit Lupe - ersetzt.) */
 
 .nur-vorlesen { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
@@ -26,16 +27,41 @@ html:not(.vorschau-freigaben) [data-erst-live-mit] { display: none !important; }
 .kopf a { text-decoration: none; }
 .kopf__innen { max-inline-size: var(--df-container-max); margin-inline: auto; padding-inline: var(--df-gutter); }
 
-.kopf__0 { block-size: 32px; border-block-end: 1px solid var(--df-color-border); background: var(--df-color-bg); color: var(--df-color-text-muted); font-size: var(--df-text-1); }
+.kopf__0 { block-size: 32px; background: var(--df-color-primary-deep); color: var(--df-color-text-on-dark); font-size: var(--df-text-1); }
+.kopf__botschaft { margin: 0; overflow: hidden; font-weight: 600; white-space: nowrap; text-overflow: ellipsis; }
 .kopf__0 .kopf__innen { display: flex; align-items: center; justify-content: space-between; gap: var(--df-space-4); block-size: 100%; }
 .kopf__bewertung { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 .kopf__0 ul { display: flex; align-items: center; gap: var(--df-space-4); margin: 0; padding: 0; list-style: none; }
 .kopf__0 li, .kopf__0 a { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
-.kopf__0 a { color: var(--df-color-text); font-weight: 600; }
-.kopf__0 a:hover { color: var(--df-color-primary-strong); }
-.kopf__0 svg { inline-size: 14px; block-size: 14px; color: var(--df-color-primary-strong); }
+.kopf__0 a { color: var(--df-color-white); font-weight: 500; }
+.kopf__0 a:hover { color: var(--df-color-white); text-decoration: underline; text-underline-offset: 3px; }
+.kopf__0 svg { inline-size: 14px; block-size: 14px; color: var(--df-color-white); }
+.kopf__0 a:focus-visible { outline-color: var(--df-color-focus-on-dark); }
 .kopf__0 .kopf__stern svg { color: var(--df-color-rating); }
-.kopf__a { display: flex; align-items: center; gap: var(--df-space-3); block-size: 64px; }
+.kopf__a { display: flex; align-items: center; gap: var(--df-space-5); block-size: 64px; }
+
+/* Sichtbares Suchfeld (Rechner) mit Vorschlägen aus dem Menü (js/dfnav.js); ohne JS sucht es im Lager-Shop */
+.kopf__suche { position: relative; flex: 1 1 auto; max-inline-size: 640px; margin: 0; }
+.kopf__suche input {
+  inline-size: 100%; block-size: 44px; margin: 0; padding: 0 var(--df-space-3) 0 44px;
+  border: 1px solid var(--df-color-border-strong); border-radius: var(--df-radius-button); background: var(--df-color-surface);
+  color: var(--df-color-text); font: 400 var(--df-text-3) / 1 var(--df-font-body);
+}
+.kopf__suche input::placeholder { color: var(--df-color-text-muted); }
+.kopf__suche input:hover { border-color: var(--df-color-primary); }
+.kopf__suche input:focus-visible { outline: var(--df-focus-ring-width) solid var(--df-color-focus); outline-offset: 1px; background: var(--df-color-white); }
+.kopf__suche-symbol { position: absolute; inset-block: 0; inset-inline-start: 14px; display: grid; place-items: center; color: var(--df-color-text-muted); pointer-events: none; }
+.kopf__suche-symbol svg { inline-size: 20px; block-size: 20px; }
+.kopf__vorschlaege { position: absolute; inset-inline: 0; inset-block-start: calc(100% + 6px); z-index: 80; margin: 0; padding: var(--df-space-2); list-style: none; border: 1px solid var(--df-color-border); border-radius: var(--df-radius-lg); background: var(--df-color-white); box-shadow: var(--df-shadow-overlay); }
+.kopf__vorschlaege[hidden] { display: none; }
+.kopf__vorschlaege li { display: flex; align-items: center; justify-content: space-between; gap: var(--df-space-3); min-block-size: 44px; padding: 0 var(--df-space-3); border-radius: var(--df-radius-sm); color: var(--df-color-text); font-size: var(--df-text-3); cursor: pointer; }
+.kopf__vorschlaege li small { color: var(--df-color-text-muted); font-size: var(--df-text-1); white-space: nowrap; }
+.kopf__vorschlaege li[aria-selected="true"], .kopf__vorschlaege li:hover { background: var(--df-color-surface-subtle); color: var(--df-color-primary-strong); }
+.kopf__vorschlaege li.ist-lager { border-block-start: 1px solid var(--df-color-border); margin-block-start: 4px; border-radius: 0 0 var(--df-radius-sm) var(--df-radius-sm); font-weight: 600; color: var(--df-color-primary-strong); }
+
+/* Dritte Zeile: Menü */
+.kopf__b { border-block-start: 1px solid var(--df-color-border); }
+.kopf__b .kopf__innen { block-size: 43px; }  /* + 1 px Linie = 44 */
 .kopf__logo { flex: none; font: 800 var(--df-text-4)/1 var(--df-font-display); letter-spacing: -.02em; color: var(--df-color-text); }
 .kopf__logo span { color: var(--df-color-primary-strong); }
 
@@ -80,7 +106,7 @@ html:not(.vorschau-freigaben) [data-erst-live-mit] { display: none !important; }
 .dfnav-burger svg { inline-size: 28px; block-size: 28px; }
 
 /* Menü in der Hauptzeile */
-.kopf__menue { display: flex; align-items: stretch; gap: var(--df-space-4); block-size: 100%; margin: 0 0 0 var(--df-space-5); padding: 0; list-style: none; }
+.kopf__menue { display: flex; align-items: stretch; gap: var(--df-space-6); block-size: 100%; margin: 0; padding: 0; list-style: none; }
 .kopf__menue > .dfnav-item { display: flex; align-items: center; }
 .kopf__punkt {
   display: inline-flex; align-items: center; gap: 2px; block-size: 100%; padding: 0;
@@ -200,14 +226,13 @@ html:not(.vorschau-freigaben) [data-erst-live-mit] { display: none !important; }
 /* ---------- Umbrüche ---------- */
 /* Schmale Laptops (1280-1439 px): Menü enger, damit Knöpfe rechts nie abgeschnitten werden (gemessen 26.09.) */
 @media (max-width: 1439px) {
-  .kopf__menue { gap: 10px; margin-inline-start: var(--df-space-3); }
-  .kopf__punkt { font-size: .9375rem; }
+  .kopf__menue { gap: var(--df-space-5); }
   .kopf__knoepfe { gap: 4px; }
-  .kopf__konfig { padding-inline: var(--df-space-3); }
 }
+@media (min-width: 1280px) { .kopf__lupe { display: none; } }
 @media (max-width: 1279px) {
   .kopf__a { block-size: 68px; }
-  .kopf__0, .kopf__menue, .kopf__konfig { display: none; }
+  .kopf__0, .kopf__b, .kopf__suche, .kopf__konfig { display: none; }
   .kopf__lupe { inline-size: var(--df-control-md); block-size: var(--df-control-md); }
   .kopf__lupe svg { inline-size: 24px; block-size: 24px; }
   .dfnav-burger { display: inline-grid; }

@@ -388,3 +388,77 @@ body.startseite { margin: 0; background: var(--df-color-bg); color: var(--df-col
 /* Kategorie-Kopf mit Produktbühne: Text oben, Bühne volle Breite darunter */
 .material-kopf--breit { grid-template-columns: minmax(0, 1fr); gap: var(--df-space-5); }
 .material-kopf--breit > div:first-child { max-inline-size: 760px; }
+
+/* Produktkachel mit Einbau-Szene (29.09.): Foto füllt den Bildbereich 4:3, kein Rand, kein Multiply. */
+.kachel--szene .kachel__bild { padding-block-start: 0; overflow: hidden; border-radius: var(--df-radius-lg) var(--df-radius-lg) 0 0; background: var(--df-color-surface); }
+.kachel--szene .kachel__bild img { aspect-ratio: 4 / 3; object-fit: cover; padding: 0; mix-blend-mode: normal; }
+.kachel--szene .kachel__bild .ki-hinweis { inset-block-start: 8px; inset-inline-end: 8px; }
+
+/* Schnellstart „In 3 Schritten zum Preis“ (29.09.): echtes GET-Formular, geht ohne JS.
+   Maße übergibt der Konfigurator noch nicht (nur prod/material), darum hier kein Maßfeld. */
+.schnell { display: grid; grid-template-columns: 1.1fr 1fr; gap: var(--df-space-6, 48px); align-items: center; padding: var(--df-space-5, 40px); border-radius: 20px; background: var(--df-color-surface-subtle); }
+.schnell__bild { position: relative; margin: 0; overflow: hidden; border-radius: 20px; }
+.schnell__bild img { display: block; inline-size: 100%; block-size: auto; aspect-ratio: 1344 / 752; object-fit: cover; }
+.schnell__form { display: grid; gap: var(--df-space-4, 24px); }
+.schnell__form .abschnitt__ueber, .schnell__form .abschnitt__titel { margin: 0; }
+.schnell__schritt { margin: 0; padding: 0; border: 0; min-inline-size: 0; }
+.schnell__schritt legend, .schnell__legende { display: flex; align-items: center; gap: var(--df-space-2); margin: 0 0 var(--df-space-2); padding: 0; font-weight: 600; color: var(--df-color-ink); }
+.schnell__nr { display: inline-grid; place-items: center; inline-size: 28px; block-size: 28px; border-radius: 50%; background: var(--df-color-primary); color: var(--df-color-white); font-size: 14px; font-weight: 600; }
+.schnell__chips { display: flex; flex-wrap: wrap; gap: var(--df-space-2); }
+.schnell__chip { position: relative; }
+.schnell__chip input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.schnell__chip span { display: inline-flex; align-items: center; min-block-size: 44px; padding: 0 var(--df-space-3, 16px); border: 1px solid var(--df-color-border-strong); border-radius: var(--df-radius-button); background: var(--df-color-white); color: var(--df-color-ink); font-weight: 500; transition: border-color var(--df-duration-fast, .15s) var(--df-ease-out, ease-out), background-color var(--df-duration-fast, .15s) var(--df-ease-out, ease-out); }
+.schnell__chip:hover span { border-color: var(--df-color-primary); }
+.schnell__chip input:checked + span { border-color: var(--df-color-primary); background: var(--df-color-primary); color: var(--df-color-white); }
+.schnell__chip input:focus-visible + span { outline: 3px solid var(--df-color-primary); outline-offset: 2px; }
+.schnell__chip input:disabled + span { opacity: .45; }
+.schnell__schritt[hidden] { display: none; }
+.schnell__hinweis { margin: var(--df-space-2) 0 0; color: var(--df-color-text-muted); font-size: 14px; }
+@media (max-width: 960px) {
+  .schnell { grid-template-columns: 1fr; padding: var(--df-space-3, 16px); gap: var(--df-space-4, 24px); }
+}
+
+/* Haustür-Studio (29.09.): Beispieltür liegt über der Tür in der Einbau-Szene.
+   Lage der Tür im Szenenbild 1344×752: x 508–796, y 47–568 (gemessen). */
+.studio { display: grid; grid-template-columns: 1.35fr 1fr; gap: var(--df-space-6); align-items: center; }
+.studio__buehne { position: relative; overflow: hidden; border-radius: 20px; aspect-ratio: 1344 / 752; background: var(--df-color-ink); box-shadow: var(--df-shadow-overlay); }
+.studio__szene { display: block; inline-size: 100%; block-size: 100%; object-fit: cover; }
+.studio__tuer { position: absolute; inset-inline-start: 37.8%; inset-block-start: 6.25%; inline-size: 21.43%; block-size: 69.28%; object-fit: fill; transition: opacity var(--df-duration-fast) var(--df-ease-out), filter var(--df-duration-base) var(--df-ease-out); }
+.studio.ist-abend .studio__tuer { filter: brightness(.55); }
+.studio__tuer.ist-wechsel { opacity: 0; }
+.studio__buehne .ki-hinweis { inset-block-start: 8px; inset-inline-end: 8px; }
+.studio__text { display: grid; gap: var(--df-space-4); }
+.studio__text > * { margin: 0; }
+.studio__gruppe { margin: 0; padding: 0; border: 0; min-inline-size: 0; }
+.studio__gruppe legend { margin-block-end: var(--df-space-2); padding: 0; font-weight: 600; }
+.studio__wahlen { display: flex; flex-wrap: wrap; gap: var(--df-space-2); }
+.studio__wahl { position: relative; display: grid; justify-items: center; gap: 4px; inline-size: 88px; padding: var(--df-space-2) 4px; border: 1px solid rgba(255,255,255,.45); border-radius: var(--df-radius-lg); background: rgba(255,255,255,.06); cursor: pointer; transition: border-color var(--df-duration-fast), background-color var(--df-duration-fast); }
+.studio__wahl input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.studio__wahl img { inline-size: 36px; block-size: 68px; object-fit: contain; }
+.studio__wahl span { font-size: 12px; line-height: 1.25; text-align: center; }
+.studio__wahl:hover { border-color: var(--df-color-white); }
+.studio__wahl:has(input:checked) { border-color: var(--df-color-white); background: rgba(255,255,255,.18); box-shadow: inset 0 0 0 1px var(--df-color-white); }
+.studio__wahl:has(input:focus-visible) { outline: 3px solid var(--df-color-white); outline-offset: 2px; }
+.studio__zeile { display: flex; flex-wrap: wrap; align-items: center; gap: var(--df-space-3); }
+.studio__gewaehlt { margin: 0; color: var(--df-color-text-on-dark); }
+.studio__wege { display: flex; flex-wrap: wrap; align-items: center; gap: var(--df-space-3) var(--df-space-4); }
+.abschnitt--dunkel .df-mehr { color: var(--df-color-white); }
+@media (max-width: 960px) {
+  .studio { grid-template-columns: 1fr; gap: var(--df-space-4); }
+}
+@media (prefers-reduced-motion: reduce) { .studio__tuer { transition: none; } }
+
+/* Gerade Reihen statt ausgefranstem Umbruch (Sarah 29.09.): Auswahl immer im festen Raster. */
+.studio__wahlen { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.studio__wahl { inline-size: auto; }
+[data-schnell-material] .schnell__chips { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); max-inline-size: 26rem; }
+.schnell__chip span { justify-content: center; inline-size: 100%; box-sizing: border-box; }
+@media (max-width: 600px) {
+  .schnell__schritt:first-of-type .schnell__chips { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .schnell__schritt:first-of-type .schnell__chip:last-child { grid-column: 1 / -1; }
+  .studio__wahl span { font-size: 12px; }
+  .studio__wahl img { inline-size: 30px; block-size: 56px; }
+}
+.studio__wahl span { overflow-wrap: normal; }
+@media (max-width: 600px) { .studio__wahlen { gap: 6px; } .studio__wahl { padding-inline: 2px; } }
+.hof-fakt { max-inline-size: 70ch; margin: calc(-1 * var(--df-space-3)) 0 var(--df-space-5); color: var(--df-color-ink); }

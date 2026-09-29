@@ -233,3 +233,54 @@
   function pruefen(){ var j = window.scrollY > 8; if(j !== an){ an = j; k.classList.toggle('kopf--gescrollt', j); } }
   window.addEventListener('scroll', pruefen, { passive: true }); pruefen();
 })();
+
+/* Sichtbares Suchfeld mit Vorschlägen (29.09.2026, Designsystem: ESN-Kopf, Baymard: Suche sichtbar + Vorschläge).
+   Vorschläge = Seiten aus dem Menü (Titel passt zur Eingabe); letzter Eintrag sucht immer im Lager-Shop.
+   Tastatur: Pfeile wählen, Enter öffnet, Esc schließt (ARIA-Combobox). Ohne JS: normales Formular zum Lager-Shop. */
+(function(){
+  var form = document.querySelector('[data-kopf-suche]'); if(!form) return;
+  var feld = form.querySelector('input'), liste = form.querySelector('[role=listbox]');
+  var seiten = [], gesehen = {};
+  document.querySelectorAll('.kopf__menue a[href]').forEach(function(a){
+    var h = a.getAttribute('href'), t = (a.querySelector('b') || a).textContent.replace(/\s+/g, ' ').trim();
+    if(!t || gesehen[h + t] || a.closest('[data-erst-live-mit]') && !document.documentElement.classList.contains('vorschau-freigaben')) return;
+    gesehen[h + t] = 1;
+    var ul = a.closest('ul'), kopfz = ul && ul.previousElementSibling, punkt = a.closest('.dfnav-item');
+    var gruppe = kopfz && kopfz.classList.contains('mega__titel') ? kopfz.textContent.trim() : (punkt ? punkt.querySelector('.kopf__punkt').textContent.trim() : '');
+    seiten.push({ t: t, h: h, k: h.indexOf('/konfigurator') === 0 ? 'Konfigurieren' : gruppe });
+  });
+  function norm(s){ return s.toLowerCase().replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/ß/g,'ss'); }
+  var aktiv = -1, treffer = [];
+  function zeigen(){
+    var q = feld.value.trim(), w = norm(q).split(/\s+/).filter(Boolean);
+    liste.innerHTML = ''; aktiv = -1;
+    if(!q){ zu(); return; }
+    treffer = seiten.filter(function(s){ var n = norm(s.t + ' ' + s.h.replace(/[\/_.?=&-]+/g, ' ')); return w.every(function(x){ return n.indexOf(x) > -1; }); }).slice(0, 6);
+    treffer.push({ t: '„' + q + '“ im Lager suchen', h: '/shop.html?q=' + encodeURIComponent(q), lager: true });
+    treffer.forEach(function(s, i){
+      var li = document.createElement('li'); li.id = 'kopf-vorschlag-' + i; li.setAttribute('role', 'option'); li.setAttribute('aria-selected', 'false');
+      if(s.lager) li.className = 'ist-lager';
+      li.textContent = s.t;
+      if(s.k){ var k = document.createElement('small'); k.textContent = s.k; li.appendChild(k); }
+      li.addEventListener('mousedown', function(e){ e.preventDefault(); location.href = s.h; });
+      liste.appendChild(li);
+    });
+    liste.hidden = false; feld.setAttribute('aria-expanded', 'true');
+  }
+  function zu(){ liste.hidden = true; feld.setAttribute('aria-expanded', 'false'); feld.removeAttribute('aria-activedescendant'); aktiv = -1; }
+  function markieren(i){
+    var lis = liste.children; if(!lis.length) return;
+    aktiv = (i + lis.length) % lis.length;
+    for(var j = 0; j < lis.length; j++) lis[j].setAttribute('aria-selected', String(j === aktiv));
+    feld.setAttribute('aria-activedescendant', lis[aktiv].id);
+  }
+  feld.addEventListener('input', zeigen);
+  feld.addEventListener('focus', function(){ if(feld.value.trim()) zeigen(); });
+  feld.addEventListener('blur', function(){ setTimeout(zu, 120); });
+  feld.addEventListener('keydown', function(e){
+    if(e.key === 'ArrowDown'){ e.preventDefault(); if(liste.hidden) zeigen(); markieren(aktiv + 1); }
+    else if(e.key === 'ArrowUp'){ e.preventDefault(); markieren(aktiv - 1); }
+    else if(e.key === 'Escape'){ zu(); }
+    else if(e.key === 'Enter' && aktiv > -1 && treffer[aktiv]){ e.preventDefault(); location.href = treffer[aktiv].h; }
+  });
+})();
