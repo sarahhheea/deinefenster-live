@@ -240,9 +240,8 @@ html:not(.vorschau-freigaben) [data-erst-live-mit] { display: none !important; }
   .fuss__firma { grid-column: 1 / -1; }
 }
 @media (min-width: 1280px) { .dfnav-drawer { display: none; } }
-@media (max-width: 860px) {
-  .kopf__innen { padding-inline: var(--df-gutter); }
-  .kopf__a { gap: var(--df-space-2); }
+/* 29.09.: Leiste ab 1279 px abwärts (vorher 860): zwischen 861 und 1279 px fehlte sonst jeder feste Konfigurieren-Knopf */
+@media (max-width: 1279px) {
   .kopf-leiste {
     position: fixed; inset-inline: 0; inset-block-end: 0; z-index: 55; display: grid; grid-template-columns: 1fr 1fr; gap: var(--df-space-2);
     padding: var(--df-space-2) 14px calc(var(--df-space-2) + env(safe-area-inset-bottom, 0px));
@@ -251,6 +250,11 @@ html:not(.vorschau-freigaben) [data-erst-live-mit] { display: none !important; }
   .kopf-leiste .knopf { padding-inline: var(--df-space-2); }
   body:has(> .kopf-leiste) { padding-block-end: 76px; }
   body:has(> .kopf-leiste) #df-hofhinweis { bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
+}
+@media (min-width: 861px) and (max-width: 1279px) { .kopf-leiste { grid-template-columns: repeat(2, minmax(0, 240px)); justify-content: center; } }
+@media (max-width: 860px) {
+  .kopf__innen { padding-inline: var(--df-gutter); }
+  .kopf__a { gap: var(--df-space-2); }
 }
 @media (max-width: 600px) {
   .fuss__oben { grid-template-columns: 1fr; gap: var(--df-space-5); }
@@ -298,3 +302,6 @@ html.vorschau-freigaben .mega__kacheln:not(.mega__kacheln--fotos) { grid-templat
 /* Gegenstück zu data-erst-live-mit (27.09.2026): Inhalt, der nur bis zur Freigabe gilt (z. B. KI-Bild, bis die
    Hersteller-Bildrechte schriftlich vorliegen) - in der Vorschau schon ausgeblendet, live noch sichtbar. */
 html.vorschau-freigaben [data-bis-live-mit] { display: none !important; }
+
+/* Symbolknöpfe (nur Symbol, kein Text) sind rund - wie die Pfeile im Hero (Designsystem „Knöpfe“, 29.09.) */
+.kopf__lupe, .dfnav-burger, .kopf__suche-zu, .dfnav-close, .kopf .df-cart-link, .kopf .df-merk-link { border-radius: var(--df-radius-full); }

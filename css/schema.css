@@ -90,11 +90,14 @@
   --df-bp-nav:    1279px;
   --df-bp-layout:  960px;
   --df-bp-single:  860px;
-  --df-radius-sm:   8px;
-  --df-radius-md:  12px;
-  --df-radius-lg:  14px;  /* Karten - wie konfigurator.html --r */
+  /* Rundungen (29.09.2026, Designsystem „Knöpfe“): nur zwei Stufen, Vorbild Shop-Designsystem mit 8 px.
+     md = alles Anklickbare (Knöpfe, Felder, Auswahl), lg = Karten und Bilder, sm = innen verschachtelt,
+     full nur für Symbolknöpfe (Pfeile) und Schilder. Vorher 8/12/14/20 px gemischt. */
+  --df-radius-sm:   4px;
+  --df-radius-md:   8px;
+  --df-radius-lg:  12px;
   --df-radius-full: 999px;
-  --df-radius-button: var(--df-radius-md);  /* 12 px = Konfigurator */
+  --df-radius-button: var(--df-radius-md);
   --df-border-width:        1px;
   --df-border-width-strong: 2px;
   --df-shadow-card:
@@ -341,7 +344,7 @@ h1.abschnitt__titel { font-size: clamp(2rem, 1.1rem + 2.6vw, 3rem); }
    Realistische Einbau-Szene mit nummerierten Hinweispunkten (native Popover: Esc, Tastatur, aria ohne Bibliothek)
    und Umschalter Tag/Abend. Positionen der Punkte in % der Szene (--x, --y). Werte in den Karten nur mit Katalogbeleg. */
 .buehne { margin: 0; }
-.buehne__bild { position: relative; overflow: hidden; border-radius: 20px; aspect-ratio: 1344 / 752; background: var(--df-color-ink); box-shadow: var(--df-shadow-overlay); isolation: isolate; }
+.buehne__bild { position: relative; overflow: hidden; border-radius: var(--df-radius-lg); aspect-ratio: 1344 / 752; background: var(--df-color-ink); box-shadow: var(--df-shadow-overlay); isolation: isolate; }
 .buehne__szene { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; object-fit: cover; }
 .buehne__szene--abend { opacity: 0; transition: opacity var(--df-duration-slow) var(--df-ease-out); }
 .buehne[data-szene="abend"] .buehne__szene--abend { opacity: 1; }
@@ -378,7 +381,7 @@ h1.abschnitt__titel { font-size: clamp(2rem, 1.1rem + 2.6vw, 3rem); }
 }
 .buehne__leiste { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--df-space-3); margin-block-start: var(--df-space-3); }
 .buehne__umschalter { display: inline-flex; padding: 4px; border: 1px solid var(--df-color-border); border-radius: var(--df-radius-md); background: var(--df-color-surface); }
-.buehne__umschalter button { min-block-size: var(--df-control-sm); padding: 0 var(--df-space-3); border: 0; border-radius: 9px; background: transparent; color: var(--df-color-text-muted); font: var(--df-font-weight-semibold) var(--df-text-2) / 1 var(--df-font-display); cursor: pointer; }
+.buehne__umschalter button { min-block-size: var(--df-control-sm); padding: 0 var(--df-space-3); border: 0; border-radius: var(--df-radius-sm); background: transparent; color: var(--df-color-text-muted); font: var(--df-font-weight-semibold) var(--df-text-2) / 1 var(--df-font-display); cursor: pointer; }
 .buehne__umschalter button[aria-pressed="true"] { background: var(--df-color-primary); color: var(--df-color-white); }
 .buehne__umschalter button:focus-visible { outline: var(--df-focus-ring-width) solid var(--df-color-focus); outline-offset: 2px; }
 .buehne__legende { margin: var(--df-space-2) 0 0; color: var(--df-color-text-muted); font-size: var(--df-text-1); }

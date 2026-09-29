@@ -172,26 +172,48 @@
   abgleichen();
 })();
 
-// Haustür-Studio: Beispiel wählen → Tür im Bild wechselt sofort; Tag/Abend tauscht die Szene.
+// Haustür-Studio: Modell/Beispiel wählen → Tür im Bild wechselt sofort; Glasrahmen und Tag/Abend ebenso.
+// Echte Drutex-Türen nur, solange ihre Gruppe sichtbar ist (Vorschau bis zur Bildrechte-Zusage),
+// sonst die KI-Beispiele (data-bis-live-mit="bildrechte").
 (function () {
   var studio = document.querySelector('[data-studio]');
   if (!studio) return;
   var tuer = studio.querySelector('[data-studio-tuer]');
   var szene = studio.querySelector('[data-studio-szene]');
   var name = studio.querySelector('[data-studio-name]');
-  studio.addEventListener('change', function (e) {
-    var wahl = e.target;
-    if (wahl.name !== 'studio-tuer') return;
+  var dtGruppe = studio.querySelector('input[name="studio-modell"]');
+  var drutex = !!(dtGruppe && dtGruppe.closest('fieldset').offsetParent !== null);
+  var rahmen = 'edelstahl';
+  function aktuell(n) { return studio.querySelector('input[name="' + n + '"]:checked'); }
+  function zeigen() {
+    var wahl = aktuell(drutex ? 'studio-modell' : 'studio-tuer');
+    if (!wahl) return;
+    var src = drutex ? '/img/produkte/studio/drutex/' + wahl.value + '-' + rahmen + '.webp'
+                     : '/img/produkte/studio/tuer-' + wahl.value + '.webp';
+    var text = drutex ? 'Drutex ' + wahl.dataset.name + ', Glasrahmen ' + (rahmen === 'schwarz' ? 'Schwarz' : 'Edelstahl')
+                      : wahl.dataset.name;
     var neu = new Image();
-    neu.src = '/img/produkte/studio/tuer-' + wahl.value + '.webp';
+    neu.src = src;
     tuer.classList.add('ist-wechsel');
-    function zeigen() {
-      tuer.src = neu.src;
-      tuer.alt = 'Haustür-Beispiel „' + wahl.dataset.name + '“ am Hauseingang (KI-generiertes Symbolbild)';
-      name.textContent = wahl.dataset.name;
+    function fertig() {
+      tuer.src = src;
+      tuer.classList.toggle('studio__tuer--drutex', drutex);
+      tuer.alt = drutex ? 'Haustür ' + text + ', am Hauseingang (Herstellerbild Drutex)'
+                        : 'Haustür-Beispiel „' + text + '“ am Hauseingang (KI-generiertes Symbolbild)';
+      name.textContent = text;
       tuer.classList.remove('ist-wechsel');
     }
-    if (neu.decode) neu.decode().then(zeigen, zeigen); else zeigen();
+    if (neu.decode) neu.decode().then(fertig, fertig); else fertig();
+  }
+  studio.addEventListener('change', function (e) {
+    if (e.target.name === 'studio-tuer' || e.target.name === 'studio-modell') zeigen();
+  });
+  studio.querySelectorAll('[data-studio-rahmen]').forEach(function (knopf) {
+    knopf.addEventListener('click', function () {
+      rahmen = knopf.dataset.studioRahmen;
+      studio.querySelectorAll('[data-studio-rahmen]').forEach(function (k) { k.setAttribute('aria-pressed', String(k === knopf)); });
+      zeigen();
+    });
   });
   studio.querySelectorAll('[data-studio-zeit]').forEach(function (knopf) {
     knopf.addEventListener('click', function () {
@@ -201,4 +223,5 @@
       studio.querySelectorAll('[data-studio-zeit]').forEach(function (k) { k.setAttribute('aria-pressed', String(k === knopf)); });
     });
   });
+  if (drutex) zeigen();
 })();

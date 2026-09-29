@@ -396,8 +396,8 @@ body.startseite { margin: 0; background: var(--df-color-bg); color: var(--df-col
 
 /* Schnellstart „In 3 Schritten zum Preis“ (29.09.): echtes GET-Formular, geht ohne JS.
    Maße übergibt der Konfigurator noch nicht (nur prod/material), darum hier kein Maßfeld. */
-.schnell { display: grid; grid-template-columns: 1.1fr 1fr; gap: var(--df-space-6, 48px); align-items: center; padding: var(--df-space-5, 40px); border-radius: 20px; background: var(--df-color-surface-subtle); }
-.schnell__bild { position: relative; margin: 0; overflow: hidden; border-radius: 20px; }
+.schnell { display: grid; grid-template-columns: 1.1fr 1fr; gap: var(--df-space-6, 48px); align-items: center; padding: var(--df-space-5, 40px); border-radius: var(--df-radius-lg); background: var(--df-color-surface-subtle); }
+.schnell__bild { position: relative; margin: 0; overflow: hidden; border-radius: var(--df-radius-lg); }
 .schnell__bild img { display: block; inline-size: 100%; block-size: auto; aspect-ratio: 1344 / 752; object-fit: cover; }
 .schnell__form { display: grid; gap: var(--df-space-4, 24px); }
 .schnell__form .abschnitt__ueber, .schnell__form .abschnitt__titel { margin: 0; }
@@ -421,7 +421,7 @@ body.startseite { margin: 0; background: var(--df-color-bg); color: var(--df-col
 /* Haustür-Studio (29.09.): Beispieltür liegt über der Tür in der Einbau-Szene.
    Lage der Tür im Szenenbild 1344×752: x 508–796, y 47–568 (gemessen). */
 .studio { display: grid; grid-template-columns: 1.35fr 1fr; gap: var(--df-space-6); align-items: center; }
-.studio__buehne { position: relative; overflow: hidden; border-radius: 20px; aspect-ratio: 1344 / 752; background: var(--df-color-ink); box-shadow: var(--df-shadow-overlay); }
+.studio__buehne { position: relative; overflow: hidden; border-radius: var(--df-radius-lg); aspect-ratio: 1344 / 752; background: var(--df-color-ink); box-shadow: var(--df-shadow-overlay); }
 .studio__szene { display: block; inline-size: 100%; block-size: 100%; object-fit: cover; }
 .studio__tuer { position: absolute; inset-inline-start: 37.8%; inset-block-start: 6.25%; inline-size: 21.43%; block-size: 69.28%; object-fit: fill; transition: opacity var(--df-duration-fast) var(--df-ease-out), filter var(--df-duration-base) var(--df-ease-out); }
 .studio.ist-abend .studio__tuer { filter: brightness(.55); }
@@ -432,7 +432,7 @@ body.startseite { margin: 0; background: var(--df-color-bg); color: var(--df-col
 .studio__gruppe { margin: 0; padding: 0; border: 0; min-inline-size: 0; }
 .studio__gruppe legend { margin-block-end: var(--df-space-2); padding: 0; font-weight: 600; }
 .studio__wahlen { display: flex; flex-wrap: wrap; gap: var(--df-space-2); }
-.studio__wahl { position: relative; display: grid; justify-items: center; gap: 4px; inline-size: 88px; padding: var(--df-space-2) 4px; border: 1px solid rgba(255,255,255,.45); border-radius: var(--df-radius-lg); background: rgba(255,255,255,.06); cursor: pointer; transition: border-color var(--df-duration-fast), background-color var(--df-duration-fast); }
+.studio__wahl { position: relative; display: grid; justify-items: center; gap: 4px; inline-size: 88px; padding: var(--df-space-2) 4px; border: 1px solid rgba(255,255,255,.45); border-radius: var(--df-radius-md); background: rgba(255,255,255,.06); cursor: pointer; transition: border-color var(--df-duration-fast), background-color var(--df-duration-fast); }
 .studio__wahl input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
 .studio__wahl img { inline-size: 36px; block-size: 68px; object-fit: contain; }
 .studio__wahl span { font-size: 12px; line-height: 1.25; text-align: center; }
@@ -467,3 +467,16 @@ body.startseite { margin: 0; background: var(--df-color-bg); color: var(--df-col
   .schnell__schritt:first-of-type .schnell__chips { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .schnell__schritt:first-of-type .schnell__chip:last-child { grid-column: 1 / -1; }
 }
+.hero__karte-pfeil { margin-inline-start: auto; }  /* 29.09.: Herstellerlogos aus der Karte entfernt (standen schon oben links) */
+
+/* Design-Review 2 (29.09.): gewählter Chip = Zustand, kein Knopf. Helle Fläche + blauer Rahmen,
+   damit der Primärknopf die einzige volle blaue Fläche im Kasten bleibt. */
+.schnell__chip input:checked + span { border: 2px solid var(--df-color-primary); background: var(--df-color-accent-subtle); color: var(--df-color-primary-deep); font-weight: 600; }
+@media (max-width: 960px) { .hero__karte { margin-block-start: var(--df-space-4); } }
+@media (max-width: 600px) {
+  .raster--4 > li > .kachel .kachel__wege .knopf { min-block-size: var(--df-control-md); padding-inline: 8px; font-size: var(--df-text-3); }
+}
+/* Drutex-Tür (Verhältnis 0,46) sitzt mittig im gemessenen Türrahmen der Szene, der alte Rahmen bleibt als Zarge sichtbar */
+.studio__tuer--drutex { inset-inline-start: 39.51%; inline-size: 18.01%; }
+.studio__zeilenname { min-inline-size: 6.5em; color: var(--df-color-text-on-dark); font-weight: 600; }
+.studio__zeile + .studio__zeile { margin-block-start: calc(-1 * var(--df-space-2)); }
