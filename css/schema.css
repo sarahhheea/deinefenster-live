@@ -336,3 +336,55 @@ h1.abschnitt__titel { font-size: clamp(2rem, 1.1rem + 2.6vw, 3rem); }
   .vitrinen > li:first-child .vitrine__kopf span { font-size: var(--df-text-2); }
 }
 @media (max-width: 767px) { .vitrinen > li { flex-basis: 64%; } }
+
+/* ---------- Produktbühne (29.09.2026) ----------
+   Realistische Einbau-Szene mit nummerierten Hinweispunkten (native Popover: Esc, Tastatur, aria ohne Bibliothek)
+   und Umschalter Tag/Abend. Positionen der Punkte in % der Szene (--x, --y). Werte in den Karten nur mit Katalogbeleg. */
+.buehne { margin: 0; }
+.buehne__bild { position: relative; overflow: hidden; border-radius: 20px; aspect-ratio: 1344 / 752; background: var(--df-color-ink); box-shadow: var(--df-shadow-overlay); isolation: isolate; }
+.buehne__szene { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; object-fit: cover; }
+.buehne__szene--abend { opacity: 0; transition: opacity var(--df-duration-slow) var(--df-ease-out); }
+.buehne[data-szene="abend"] .buehne__szene--abend { opacity: 1; }
+.buehne__bild .ki-hinweis { inset-block-start: var(--df-space-3); inset-inline-end: var(--df-space-3); z-index: 3; }
+.buehne__punkt {
+  position: absolute; z-index: 2; inset-inline-start: calc(var(--x) * 1%); inset-block-start: calc(var(--y) * 1%); translate: -50% -50%;
+  display: grid; place-items: center; inline-size: 36px; block-size: 36px; padding: 0; border: 2px solid var(--df-color-white); border-radius: 50%;
+  background: rgba(20, 24, 29, .55); color: var(--df-color-white); font: var(--df-font-weight-bold) var(--df-text-2) / 1 var(--df-font-display);
+  cursor: pointer; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); box-shadow: 0 0 0 0 rgba(255, 255, 255, .5);
+}
+.buehne__punkt::after { content: ""; position: absolute; inset: -7px; border-radius: 50%; }  /* Tippfläche 50 px */
+.buehne__punkt:hover, .buehne__punkt[aria-expanded="true"] { background: var(--df-color-primary); border-color: var(--df-color-white); }
+.buehne__punkt:focus-visible { outline: var(--df-focus-ring-width) solid var(--df-color-white); outline-offset: 3px; }
+.buehne__karte {
+  inline-size: min(320px, calc(100vw - 32px)); margin: 0; padding: var(--df-space-4); border: 1px solid var(--df-color-border); border-radius: var(--df-radius-lg);
+  background: var(--df-color-surface); color: var(--df-color-text); box-shadow: var(--df-shadow-overlay);
+}
+.buehne__karte h3 { margin: 0 0 var(--df-space-1); font: var(--df-font-weight-bold) var(--df-text-4) / 1.25 var(--df-font-display); }
+.buehne__karte p { margin: 0; color: var(--df-color-text-muted); line-height: var(--df-leading-normal); }
+.buehne__karte small { display: block; margin-block-start: var(--df-space-2); color: var(--df-color-text-muted); font-size: var(--df-text-1); }
+.buehne__karte a { display: inline-flex; margin-block-start: var(--df-space-2); color: var(--df-color-primary-strong); font-weight: var(--df-font-weight-semibold); }
+@supports (position-area: top) {
+  .buehne__karte { inset: auto; position-area: top; position-try-fallbacks: flip-block, flip-inline; margin-block-end: 12px; }
+}
+@media (max-width: 767px) {
+  /* Handy: Ausschnitt 4:3 um die Bildmitte (sichtbar 12,7-87,3 % der Breite), Punkte rechnen mit */
+  .buehne__bild { border-radius: var(--df-radius-lg); aspect-ratio: 4 / 3; }
+  .buehne__punkt { inset-inline-start: calc((var(--x) - 12.7) * 1.3405 * 1%); }
+  .buehne__punkt { inline-size: 30px; block-size: 30px; }
+  .buehne__karte { position: fixed; inset: auto 12px 12px 12px; inline-size: auto; position-area: none; margin: 0; }
+}
+.buehne__leiste { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--df-space-3); margin-block-start: var(--df-space-3); }
+.buehne__umschalter { display: inline-flex; padding: 4px; border: 1px solid var(--df-color-border); border-radius: var(--df-radius-md); background: var(--df-color-surface); }
+.buehne__umschalter button { min-block-size: var(--df-control-sm); padding: 0 var(--df-space-3); border: 0; border-radius: 9px; background: transparent; color: var(--df-color-text-muted); font: var(--df-font-weight-semibold) var(--df-text-2) / 1 var(--df-font-display); cursor: pointer; }
+.buehne__umschalter button[aria-pressed="true"] { background: var(--df-color-primary); color: var(--df-color-white); }
+.buehne__umschalter button:focus-visible { outline: var(--df-focus-ring-width) solid var(--df-color-focus); outline-offset: 2px; }
+.buehne__legende { margin: var(--df-space-2) 0 0; color: var(--df-color-text-muted); font-size: var(--df-text-1); }
+@media (prefers-reduced-motion: no-preference) {
+  .buehne__punkt { animation: buehne-puls 2.4s var(--df-ease-out) 1.2s 2; }
+  @supports (animation-timeline: view()) {
+    .buehne__szene { animation: buehne-heran linear both; animation-timeline: view(); animation-range: entry 0% cover 50%; }
+  }
+}
+@keyframes buehne-puls { 0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, .55); } 100% { box-shadow: 0 0 0 16px rgba(255, 255, 255, 0); } }
+@keyframes buehne-heran { from { transform: scale(1.06); } to { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .buehne__szene--abend { transition: none; } }
