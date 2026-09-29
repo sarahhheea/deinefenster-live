@@ -297,3 +297,42 @@ h1.abschnitt__titel { font-size: clamp(2rem, 1.1rem + 2.6vw, 3rem); }
 /* Kopf bekommt beim Scrollen Tiefe (Klasse setzt js/dfnav.js) */
 .kopf { transition: box-shadow var(--df-duration-base), background var(--df-duration-base); }
 .kopf.kopf--gescrollt { box-shadow: 0 8px 28px rgba(8, 21, 46, .10); background: rgba(255, 255, 255, .92); backdrop-filter: saturate(1.4) blur(10px); -webkit-backdrop-filter: saturate(1.4) blur(10px); }
+
+/* ---------- Vitrine (29.09.2026): Produktgruppen als dunkle, hohe Schaufenster-Kacheln ----------
+   Vorbild-Prinzip: Hersteller zeigen ihre Gruppen im Licht auf dunklem Grund statt als Freisteller auf Weiß.
+   Ganze Kachel ist ein Link; Name + belegte Zeile oben, "Ansehen" unten, KI-Schild unten rechts. */
+.vitrinen { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--df-space-3); margin: 0; padding: 0; list-style: none; }
+/* Hauptprodukt groß (2 x 2 Felder), die übrigen sechs in zwei Reihen daneben: 10 Felder, kein Loch */
+.vitrinen > li:first-child { grid-column: span 2; grid-row: span 2; }
+.vitrinen > li:first-child .vitrine { aspect-ratio: auto; }
+.vitrinen > li:first-child .vitrine__kopf b { font-size: var(--df-text-5); }
+.vitrinen > li:first-child .vitrine__kopf span { font-size: var(--df-text-3); }
+.vitrine { position: relative; display: block; block-size: 100%; aspect-ratio: 3 / 4; overflow: hidden; isolation: isolate; border-radius: var(--df-radius-lg); background: var(--df-color-ink); color: var(--df-color-white); text-decoration: none; box-shadow: var(--df-shadow-card); }
+.vitrine img { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; object-fit: cover; object-position: center 70%; }
+.vitrine::after { content: ""; position: absolute; inset: 0; z-index: 1; background: linear-gradient(180deg, rgba(8, 10, 14, .72) 0%, rgba(8, 10, 14, 0) 34%, rgba(8, 10, 14, 0) 62%, rgba(8, 10, 14, .82) 100%); }
+.vitrine__kopf { position: absolute; inset-block-start: var(--df-space-3); inset-inline: var(--df-space-3); z-index: 2; }
+.vitrine__kopf b { display: block; font: var(--df-font-weight-bold) var(--df-text-4) / 1.2 var(--df-font-display); overflow-wrap: anywhere; hyphens: auto; }
+.vitrine__kopf span { display: block; margin-block-start: 4px; color: var(--df-color-label-on-dark); font-size: var(--df-text-2); line-height: 1.35; }
+.vitrine__fuss { position: absolute; inset-block-end: var(--df-space-3); inset-inline: var(--df-space-3); z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: var(--df-space-2); font: var(--df-font-weight-semibold) var(--df-text-2) / 1.2 var(--df-font-display); }
+.vitrine__pfeil { display: inline-grid; place-items: center; inline-size: 36px; block-size: 36px; flex: none; border-radius: var(--df-radius-md); background: var(--df-color-white); color: var(--df-color-primary-strong); }
+.vitrine__pfeil svg { inline-size: 18px; block-size: 18px; }
+.vitrine .ki-hinweis { position: absolute; z-index: 2; inset-block-end: calc(var(--df-space-3) + 44px); inset-inline-end: var(--df-space-3); inset-block-start: auto; }
+.vitrine:focus-visible { outline: var(--df-focus-ring-width) solid var(--df-color-focus); outline-offset: var(--df-focus-ring-offset); }
+@media (prefers-reduced-motion: no-preference) {
+  .vitrine { transition: transform var(--df-duration-base) var(--df-ease-out), box-shadow var(--df-duration-base); }
+  .vitrine img { transition: transform var(--df-duration-slow) var(--df-ease-out); }
+  .vitrine__pfeil { transition: transform var(--df-duration-base) var(--df-ease-out); }
+  .vitrine:hover { transform: translateY(-4px); box-shadow: var(--df-shadow-raised); }
+  .vitrine:hover img { transform: scale(1.05); }
+  .vitrine:hover .vitrine__pfeil { transform: translateX(3px); }
+}
+/* Tablet und Handy: waagerecht wischbare Reihe; die angeschnittene Kachel zeigt, dass es weitergeht */
+@media (max-width: 1279px) {
+  .vitrinen { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; margin-inline: calc(-1 * var(--df-gutter)); padding: 0 var(--df-gutter) var(--df-space-2); scrollbar-width: none; }
+  .vitrinen::-webkit-scrollbar { display: none; }
+  .vitrinen > li { flex: 0 0 28%; scroll-snap-align: start; }
+  .vitrinen > li:first-child .vitrine { aspect-ratio: 3 / 4; }
+  .vitrinen > li:first-child .vitrine__kopf b { font-size: var(--df-text-4); }
+  .vitrinen > li:first-child .vitrine__kopf span { font-size: var(--df-text-2); }
+}
+@media (max-width: 767px) { .vitrinen > li { flex-basis: 64%; } }
