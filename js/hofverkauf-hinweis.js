@@ -163,6 +163,16 @@
       if (los) return;
       los = true;
       window.removeEventListener('scroll', beiScroll);
+      /* 29.09.2026: Am Rechner lag der Hinweis rechts unten über der Hero-Karte und verdeckte das
+         KI-Schild (Art. 50 KI-VO). Solange der Hero sichtbar ist, wartet er, bis der Hero aus dem Bild ist. */
+      var hero = document.querySelector('.hero');
+      if (hero && window.innerWidth > 860 && 'IntersectionObserver' in window) {
+        var beob = new IntersectionObserver(function (e) {
+          if (!e[0].isIntersecting) { beob.disconnect(); zeige(); }
+        });
+        beob.observe(hero);
+        return;
+      }
       zeige();
     }
     function beiScroll() { if (window.scrollY > 100) ausloesen(); }
