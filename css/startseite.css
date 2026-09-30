@@ -185,12 +185,12 @@ body.startseite { margin: 0; background: var(--df-color-bg); color: var(--df-col
 .frage p { padding: 0 var(--df-space-4) var(--df-space-4); color: var(--df-color-text-muted); line-height: var(--df-leading-relaxed); }
 
 /* Abschluss */
-.abschluss { padding-block: var(--df-space-section); background: var(--df-gradient-primary); color: var(--df-color-white); }
+.abschluss { padding-block: var(--df-space-section); background: var(--df-color-surface); color: var(--df-color-text); border-block-start: 1px solid var(--df-color-border); }  /* 30.09.: hell statt blaues Band (Designsystem „Flächen“) */
 .abschluss__innen p { max-inline-size: var(--df-measure); }
 .abschluss h2 { font: var(--df-font-weight-bold) var(--df-text-5) / var(--df-leading-snug) var(--df-font-display); }
-.abschluss p { margin-block-start: var(--df-space-3); color: var(--df-color-text-on-dark); }
-.abschluss .df-mehr { color: var(--df-color-white); }
-.abschluss a:focus-visible { outline-color: var(--df-color-focus-on-dark); }
+.abschluss p { margin-block-start: var(--df-space-3); color: var(--df-color-text-muted); }
+
+
 
 /* Umbrüche */
 @media (max-width: 1100px) {
@@ -418,49 +418,14 @@ body.startseite { margin: 0; background: var(--df-color-bg); color: var(--df-col
   .schnell { grid-template-columns: 1fr; padding: var(--df-space-3, 16px); gap: var(--df-space-4, 24px); }
 }
 
-/* Haustür-Studio (29.09.): Beispieltür liegt über der Tür in der Einbau-Szene.
-   Lage der Tür im Szenenbild 1344×752: x 508–796, y 47–568 (gemessen). */
-.studio { display: grid; grid-template-columns: 1.35fr 1fr; gap: var(--df-space-6); align-items: center; }
-.studio__buehne { position: relative; overflow: hidden; border-radius: var(--df-radius-lg); aspect-ratio: 1344 / 752; background: var(--df-color-ink); box-shadow: var(--df-shadow-overlay); }
-.studio__szene { display: block; inline-size: 100%; block-size: 100%; object-fit: cover; }
-.studio__tuer { position: absolute; inset-inline-start: 37.8%; inset-block-start: 6.25%; inline-size: 21.43%; block-size: 69.28%; object-fit: fill; transition: opacity var(--df-duration-fast) var(--df-ease-out), filter var(--df-duration-base) var(--df-ease-out); }
-.studio.ist-abend .studio__tuer { filter: brightness(.55); }
-.studio__tuer.ist-wechsel { opacity: 0; }
-.studio__buehne .ki-hinweis { inset-block-start: 8px; inset-inline-end: 8px; }
-.studio__text { display: grid; gap: var(--df-space-4); }
-.studio__text > * { margin: 0; }
-.studio__gruppe { margin: 0; padding: 0; border: 0; min-inline-size: 0; }
-.studio__gruppe legend { margin-block-end: var(--df-space-2); padding: 0; font-weight: 600; }
-.studio__wahlen { display: flex; flex-wrap: wrap; gap: var(--df-space-2); }
-.studio__wahl { position: relative; display: grid; justify-items: center; gap: 4px; inline-size: 88px; padding: var(--df-space-2) 4px; border: 1px solid rgba(255,255,255,.45); border-radius: var(--df-radius-md); background: rgba(255,255,255,.06); cursor: pointer; transition: border-color var(--df-duration-fast), background-color var(--df-duration-fast); }
-.studio__wahl input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
-.studio__wahl img { inline-size: 36px; block-size: 68px; object-fit: contain; }
-.studio__wahl span { font-size: 12px; line-height: 1.25; text-align: center; }
-.studio__wahl:hover { border-color: var(--df-color-white); }
-.studio__wahl:has(input:checked) { border-color: var(--df-color-white); background: rgba(255,255,255,.18); box-shadow: inset 0 0 0 1px var(--df-color-white); }
-.studio__wahl:has(input:focus-visible) { outline: 3px solid var(--df-color-white); outline-offset: 2px; }
-.studio__zeile { display: flex; flex-wrap: wrap; align-items: center; gap: var(--df-space-3); }
-.studio__gewaehlt { margin: 0; color: var(--df-color-text-on-dark); }
-.studio__wege { display: flex; flex-wrap: wrap; align-items: center; gap: var(--df-space-3) var(--df-space-4); }
-.abschnitt--dunkel .df-mehr { color: var(--df-color-white); }
-@media (max-width: 960px) {
-  .studio { grid-template-columns: 1fr; gap: var(--df-space-4); }
-}
-@media (prefers-reduced-motion: reduce) { .studio__tuer { transition: none; } }
 
 /* Gerade Reihen statt ausgefranstem Umbruch (Sarah 29.09.): Auswahl immer im festen Raster. */
-.studio__wahlen { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); }
-.studio__wahl { inline-size: auto; }
 [data-schnell-material] .schnell__chips { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); max-inline-size: 26rem; }
 .schnell__chip span { justify-content: center; inline-size: 100%; box-sizing: border-box; }
 @media (max-width: 600px) {
   .schnell__schritt:first-of-type .schnell__chips { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .schnell__schritt:first-of-type .schnell__chip:last-child { grid-column: 1 / -1; }
-  .studio__wahl span { font-size: 12px; }
-  .studio__wahl img { inline-size: 30px; block-size: 56px; }
 }
-.studio__wahl span { overflow-wrap: normal; }
-@media (max-width: 600px) { .studio__wahlen { gap: 6px; } .studio__wahl { padding-inline: 2px; } }
 .hof-fakt { max-inline-size: 70ch; margin: calc(-1 * var(--df-space-3)) 0 var(--df-space-5); color: var(--df-color-ink); }
 /* Design-Review 29.09.: Produkt-Chips auch am Tablet in geraden Reihen (2 + 2 + 1 über volle Breite) */
 @media (max-width: 1279px) {
@@ -476,10 +441,6 @@ body.startseite { margin: 0; background: var(--df-color-bg); color: var(--df-col
 @media (max-width: 600px) {
   .raster--4 > li > .kachel .kachel__wege .knopf { min-block-size: var(--df-control-md); padding-inline: 8px; font-size: var(--df-text-3); }
 }
-/* Drutex-Tür (Verhältnis 0,46) sitzt mittig im gemessenen Türrahmen der Szene, der alte Rahmen bleibt als Zarge sichtbar */
-.studio__tuer--drutex { inset-inline-start: 39.51%; inline-size: 18.01%; }
-.studio__zeilenname { min-inline-size: 6.5em; color: var(--df-color-text-on-dark); font-weight: 600; }
-.studio__zeile + .studio__zeile { margin-block-start: calc(-1 * var(--df-space-2)); }
 /* 30.09. (Sarah: „komischer Button am Handy“): In zwei schmalen Spalten passten Text + Pfeil nicht, 2 px Rand.
    Am Handy ohne Pfeil, Text mittig. Prüfung: knopf-ueberlauf (Innenabstand ≥ 8 px). */
 @media (max-width: 600px) {
@@ -487,3 +448,13 @@ body.startseite { margin: 0; background: var(--df-color-bg); color: var(--df-col
   .raster--4 > li > .kachel .kachel__wege .knopf { justify-content: center; }
 }
 @media (max-width: 400px) { .schnell__chip span { padding-inline: 10px; } }
+.haus-hinweis { max-inline-size: 70ch; margin: var(--df-space-5) 0 0; color: var(--df-color-text); }
+.haus-hinweis a { color: var(--df-color-primary-strong); font-weight: 600; }
+/* Design-Review 3 (30.09.): alle Sortiment-Kacheln gleich hoch, auch über Reihen hinweg */
+.raster--4 > li > .kachel .kachel__unter { min-block-size: 2lh; }
+.raster--4 > li > .kachel .kachel__preis { min-block-size: 1lh; }
+@media (max-width: 600px) {
+  .raster--4 > li > .kachel .kachel__unter { min-block-size: 3lh; }
+  .raster--4 > li > .kachel .kachel__preis { min-block-size: 2lh; }
+}
+.raster--4 > li > .kachel:not(.kachel--szene) .kachel__bild { padding-block-start: 0; }  /* 30.09.: Dämmung-Kachel so hoch wie die Szenen-Kacheln */
