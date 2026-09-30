@@ -73,3 +73,20 @@
     zeigen(0, false);
   });
 })();
+
+/* Ratgeber: Das Kapitel, das gerade gelesen wird, im Inhaltsverzeichnis hervorheben. */
+(function () {
+  'use strict';
+  var inhalt = document.querySelector('.leseteil__inhalt');
+  if (!inhalt || !('IntersectionObserver' in window)) return;
+  var eintraege = Array.prototype.slice.call(inhalt.querySelectorAll('li'));
+  var ziele = eintraege.map(function (li) { return document.querySelector(li.querySelector('a').getAttribute('href')); });
+  var beob = new IntersectionObserver(function (e) {
+    e.forEach(function (x) {
+      if (!x.isIntersecting) return;
+      var i = ziele.indexOf(x.target);
+      eintraege.forEach(function (li, j) { li.classList.toggle('ist-aktiv', i === j); });
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+  ziele.forEach(function (z) { if (z) beob.observe(z); });
+})();
