@@ -1627,8 +1627,8 @@ function rendere() {
           Bestand wechselt — bitte aktuelle Verfügbarkeit kurz anfragen.
         </p>
         <div class="mt-5 flex flex-wrap items-center justify-center gap-2.5">
-          <a href="https://wa.me/4915211344756" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-5 py-2.5 text-sm font-bold" style="border-radius:8px;background:#25D366;color:#fff;text-decoration:none;">
-            <span class="material-symbols-outlined" style="font-size:18px">chat</span> WhatsApp 01521 1344756
+          <a href="https://wa.me/491717263776" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-5 py-2.5 text-sm font-bold" style="border-radius:8px;background:#25D366;color:#fff;text-decoration:none;">
+            <span class="material-symbols-outlined" style="font-size:18px">chat</span> WhatsApp 0171 7263776
           </a>
           <a href="mailto:info@baustoffchrist.de" class="inline-flex items-center gap-1.5 px-5 py-2.5 text-sm font-bold" style="border-radius:8px;background:#225eaa;color:#fff;text-decoration:none;">
             <span class="material-symbols-outlined" style="font-size:18px">mail</span> Anfrage per E-Mail
@@ -1655,7 +1655,7 @@ function rendere() {
           <a href="tel:+491717263776" class="inline-flex items-center gap-1.5 px-5 py-2.5 text-sm font-bold" style="border-radius:8px;background:#225eaa;color:#fff;text-decoration:none;">
             <span class="material-symbols-outlined" style="font-size:18px">call</span> 0171 7263776 anrufen
           </a>
-          <a href="https://wa.me/4915211344756?text=${encodeURIComponent('Hallo, haben Sie noch die Standnummer ' + q + '?')}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-5 py-2.5 text-sm font-bold" style="border-radius:8px;background:#25D366;color:#fff;text-decoration:none;">
+          <a href="https://wa.me/491717263776?text=${encodeURIComponent('Hallo, haben Sie noch die Standnummer ' + q + '?')}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-5 py-2.5 text-sm font-bold" style="border-radius:8px;background:#25D366;color:#fff;text-decoration:none;">
             <span class="material-symbols-outlined" style="font-size:18px">chat</span> WhatsApp
           </a>
           <button id="resetFromEmpty" class="inline-flex items-center gap-1.5 px-5 py-2.5 text-sm font-bold" style="border-radius:8px;background:transparent;color:#76a9fa;border:1.5px solid rgba(118,169,250,0.5);cursor:pointer;">
@@ -2506,7 +2506,7 @@ function stelleCartAnfrageWhatsApp() {
     return s + (p ? p.preis_eur * e.menge : 0);
   }, 0);
   const text = encodeURIComponent(`Hallo, ich interessiere mich für folgende Lagerware:\n\n${items}\n\nBitte um Rückmeldung. Danke!`);
-  window.open(`https://wa.me/4915211344756?text=${text}`, '_blank');
+  window.open(`https://wa.me/491717263776?text=${text}`, '_blank');
 }
 
 /* ─── Detail-Modal ─── */
@@ -2599,7 +2599,7 @@ function oeffneDetail(id) {
         ${grundpreisZeile(p)}
       </div>
       <div class="shop-detail-cta-btns">
-        <a href="https://wa.me/4915211344756?text=${encodeURIComponent(waTextEinzel(p))}"
+        <a href="https://wa.me/491717263776?text=${encodeURIComponent(waTextEinzel(p))}"
            target="_blank" rel="noopener" class="detail-cta-wa" aria-label="Per WhatsApp anfragen">
           <span class="material-symbols-outlined" style="font-size:18px">chat</span>
           WhatsApp
@@ -2889,7 +2889,7 @@ function druckeProduktblatt(p) {
     + '.foot b{color:#14233f}</style></head>'
     + '<body onload="window.focus();window.print();">'
     + '<div class="head"><div class="brand">DeineFenster<i>.de</i></div>'
-    + '<div class="firm"><b>Türen und Fensterhandel Christ</b><br>Fohrder Landstraße 13<br>14772 Brandenburg an der Havel<br>Tel. 03381 / 2148373 · WhatsApp 01521 1344756</div></div>'
+    + '<div class="firm"><b>Türen und Fensterhandel Christ</b><br>Fohrder Landstraße 13<br>14772 Brandenburg an der Havel<br>Tel. 03381 / 2148373 · WhatsApp 0171 7263776</div></div>'
     + '<h1>' + e(p.titel || 'Produkt') + '</h1><div class="top">'
     + (bild ? '<div class="foto"><img src="' + e(bild) + '" alt=""><span class="sym">Abbildung ähnlich (Symbolbild)</span></div>' : '')
     + '<div class="info"><table>' + rows + '</table>'
@@ -2897,7 +2897,7 @@ function druckeProduktblatt(p) {
     + '<div class="preis-hint">inkl. 19 % MwSt., zzgl. Versandkosten bei Lieferung · Selbstabholung in Brandenburg a. d. Havel kostenfrei</div>'
     + standBig + '</div></div>'
     + (p.beschreibung ? '<div class="desc">' + e(p.beschreibung) + '</div>' : '')
-    + '<div class="foot"><b>Verfügbarkeit bitte vorab prüfen</b> — WhatsApp 01521 1344756 oder Angebot per E-Mail. '
+    + '<div class="foot"><b>Verfügbarkeit bitte vorab prüfen</b> — WhatsApp 0171 7263776 oder Angebot per E-Mail. '
     + 'Lagerverkauf vor Ort: freitags 10–17 Uhr, Fohrder Landstraße 13, Brandenburg a. d. Havel.<br>Online ansehen: ' + e(url) + '</div>'
     + '</body></html>';
   const w = window.open('', '_blank', 'width=840,height=1000');
@@ -3127,7 +3127,7 @@ async function sendeAnfrage(ev) {
     setTimeout(schliesseAnfrageModal, 6000);
   } catch (err) {
     zeigeStatus((err && err.message ? err.message + ' ' : '') +
-      'Bitte direkt per WhatsApp (01521 1344756) oder E-Mail (info@baustoffchrist.de) melden.', 'fehler');
+      'Bitte direkt per WhatsApp (0171 7263776) oder E-Mail (info@baustoffchrist.de) melden.', 'fehler');
     btn.disabled = false;
     btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px">send</span> Erneut versuchen';
   }
