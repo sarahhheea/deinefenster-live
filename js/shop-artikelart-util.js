@@ -31,7 +31,18 @@
   var daemmungAbholText = 'Abholung in Brandenburg an der Havel jederzeit nach Terminabsprache ' +
     '(03381 214 83 73). Lieferung bis 200 km gegen Spritkosten, ab 30 Rollen kostenlos.';
 
+  // Eigenschaft lesbar machen. Freitext (mit Leerzeichen, Doppelpunkt oder
+  // Großbuchstaben) bleibt wie eingegeben; nur interne Schlüssel wie
+  // „null-schwelle“ werden zu „Null Schwelle“. Vorher machte /\b\w/ ohne
+  // Unicode aus „Wärmeleitfähigkeit … W/(m·K)“ ein „WäRmeleitfäHigkeit … W/(M·K)“.
+  function lesbarerSchluessel(code) {
+    var s = String(code == null ? '' : code);
+    if (/[\s:]/.test(s) || s !== s.toLowerCase()) return s.charAt(0).toUpperCase() + s.slice(1);
+    return s.replace(/[-_]+/g, ' ').replace(/(^| )(\S)/g, function (m, vor, z) { return vor + z.toUpperCase(); });
+  }
+
   return {
+    lesbarerSchluessel: lesbarerSchluessel,
     istOhneFensterFelder: istOhneFensterFelder,
     vorgabenFuer: vorgabenFuer,
     daemmungAbholText: daemmungAbholText

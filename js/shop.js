@@ -3407,7 +3407,8 @@ function eigenschaftAnzeige(code) {
   if (map[code]) return map[code];
   // Fallback: unbekannten Schlüssel lesbar machen statt roh anzeigen
   // (z.B. neue Eigenschaft "null-schwelle" → "Null Schwelle")
-  return String(code).replace(/[-_]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  if (typeof ShopArtikelart !== 'undefined') return ShopArtikelart.lesbarerSchluessel(code);
+  return String(code);
 }
 
 /* Merklisten-Knopf in die Navigation haengen (nur auf der Shop-Seite). */
