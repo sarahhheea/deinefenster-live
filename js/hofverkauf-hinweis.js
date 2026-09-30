@@ -156,6 +156,8 @@
     if (gesehen()) return;
     /* 30.09.2026: Auf Seiten mit Vertrauensleiste stehen die Hofzeiten schon oben – kein zweites Fenster darüber. */
     if (document.querySelector('.vertrauen')) return;
+    /* 30.09.2026: Auf Produktseiten lag das Fenster über Produktstudio und Kenndaten-Tabelle (Design-Prüfung). */
+    if (document.querySelector('.studio')) return;
     if (!consentDa()) {
       window.addEventListener('df-consent-updated', function () { setTimeout(start, 600); }, { once: true });
       return;
