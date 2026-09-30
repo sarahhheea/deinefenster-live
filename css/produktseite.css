@@ -9,7 +9,7 @@
 .studio__kapitel { display: grid; gap: var(--df-space-2); margin: 0 0 var(--df-space-6); padding: 0; list-style: none; counter-reset: kapitel; }
 .studio__kapitel li { counter-increment: kapitel; position: relative; padding: var(--df-space-3) var(--df-space-4) var(--df-space-3) calc(var(--df-space-4) + 36px); border-radius: var(--df-radius-lg); transition: background-color var(--df-duration-base) var(--df-ease-out), box-shadow var(--df-duration-base) var(--df-ease-out); }
 .studio__kapitel li::before { content: counter(kapitel); position: absolute; inset-inline-start: var(--df-space-4); inset-block-start: calc(var(--df-space-3) + 1px); display: grid; place-items: center; inline-size: 26px; block-size: 26px; border-radius: var(--df-radius-full); border: 1px solid var(--df-color-border-strong); color: var(--df-color-text-muted); font: var(--df-font-weight-semibold) var(--df-text-2) / 1 var(--df-font-body); transition: background-color var(--df-duration-base) var(--df-ease-out), color var(--df-duration-base) var(--df-ease-out), border-color var(--df-duration-base) var(--df-ease-out); }
-.studio__kapitel h3 { margin: 0 0 var(--df-space-1); font: var(--df-font-weight-semibold) var(--df-text-4) / 1.3 var(--df-font-display); color: var(--df-color-text); }
+.studio__kapitel h3, .studio__kapitel-titel { display: block; margin: 0 0 var(--df-space-1); font: var(--df-font-weight-semibold) var(--df-text-4) / 1.3 var(--df-font-display); color: var(--df-color-text); }
 .studio__kapitel p { margin: 0; color: var(--df-color-text-muted); line-height: var(--df-leading-relaxed); }
 .studio__kapitel li.ist-aktiv { background: var(--df-color-white); box-shadow: var(--df-shadow-card); }
 .studio__kapitel li.ist-aktiv::before { background: var(--df-color-primary); border-color: var(--df-color-primary); color: var(--df-color-text-on-primary); }
@@ -66,3 +66,33 @@
 }
 /* Tabelle am Handy: die feste erste Spalte behält ihre Überschrift */
 .kenntabelle__tabelle thead th:first-child { position: sticky; inset-inline-start: 0; z-index: 1; }
+
+/* 30.09.2026 (Sarah): Das Studio soll mit der Seite verschmelzen wie die Produkte auf der Startseite, kein Kasten.
+   Kein Rahmen, kein Schatten, keine Ecken; die Bildränder laufen weich in die Fläche aus. */
+.studio__rahmen {
+  border-radius: 0; box-shadow: none; background: transparent;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 14%, #000 86%, transparent), linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
+  -webkit-mask-composite: source-in;
+          mask-image: linear-gradient(to right, transparent, #000 14%, #000 86%, transparent), linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
+          mask-composite: intersect;
+}
+.studio__bild .ki-hinweis { position: absolute; z-index: 2; inset-block-start: var(--df-space-2); inset-inline-end: var(--df-space-2); }
+.studio__bild { position: relative; }
+.studio__rahmen .ki-hinweis { display: none; }  /* läge sonst in der ausgeblendeten Ecke */
+.studio__fortschritt { max-inline-size: 60%; margin-inline: auto; }
+
+/* Studio als Titelabschnitt (30.09.2026): Text links wie ein Seitenkopf, Kapitel unter dem Video */
+.studio--titel .studio__buehne { padding-block: var(--df-space-6) var(--df-space-7); }
+.studio--titel .abschnitt__titel { margin-block: var(--df-space-2) var(--df-space-3); font-size: clamp(2rem, 1.2rem + 2.4vw, 3rem); }
+.studio--titel .studio__text .hinweis { margin-block-start: var(--df-space-4); }
+.studio--titel .studio__kapitel { margin: var(--df-space-3) 0 0; }
+@media (min-width: 1280px) and (prefers-reduced-motion: no-preference) {
+  .studio--titel.studio--fahrt .studio__bahn { block-size: 200vh; }
+  .studio--titel.studio--fahrt .studio__buehne { padding-block: var(--df-space-3); }
+  /* Nur das aktive Kapitel steht unter dem Video; alle bleiben im Dokument (Screenreader, Suche) */
+  .studio--titel.studio--fahrt .studio__kapitel { display: grid; gap: 0; }
+  .studio--titel.studio--fahrt .studio__kapitel li { grid-area: 1 / 1; opacity: 0; transform: translateY(6px); transition: opacity var(--df-duration-base) var(--df-ease-out), transform var(--df-duration-base) var(--df-ease-out); background: transparent; box-shadow: none; }
+  .studio--titel.studio--fahrt .studio__kapitel li.ist-aktiv { opacity: 1; transform: none; }
+  .studio--titel.studio--fahrt .studio__rahmen { max-block-size: calc(100vh - var(--df-kopf-h) - 150px); }
+}
+@media (max-width: 1023px) { .studio--titel .studio__bild { order: 0; } }
