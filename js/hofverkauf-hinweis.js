@@ -154,6 +154,8 @@
 
   function start() {
     if (gesehen()) return;
+    /* 30.09.2026: Auf Seiten mit Vertrauensleiste stehen die Hofzeiten schon oben – kein zweites Fenster darüber. */
+    if (document.querySelector('.vertrauen')) return;
     if (!consentDa()) {
       window.addEventListener('df-consent-updated', function () { setTimeout(start, 600); }, { once: true });
       return;

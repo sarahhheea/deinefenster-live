@@ -284,3 +284,12 @@
     else if(e.key === 'Enter' && aktiv > -1 && treffer[aktiv]){ e.preventDefault(); location.href = treffer[aktiv].h; }
   });
 })();
+
+/* Mitlaufende Leiste erst nach dem Titelbild (30.09.2026, Kunden-Test: Leiste + Hinweis bedeckten
+   am Handy ~40 % des Bildschirms; im Titelbild steht derselbe Knopf schon). Ohne Titelbild: sofort. */
+(function(){
+  var leiste = document.querySelector('.kopf-leiste'), hero = document.querySelector('.hero');
+  if(!leiste || !hero || !('IntersectionObserver' in window)) return;
+  leiste.classList.add('kopf-leiste--wartet');
+  new IntersectionObserver(function(e){ leiste.classList.toggle('kopf-leiste--wartet', e[0].isIntersecting); }).observe(hero);
+})();

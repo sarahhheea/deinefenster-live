@@ -458,3 +458,28 @@ body.startseite { margin: 0; background: var(--df-color-bg); color: var(--df-col
   .raster--4 > li > .kachel .kachel__preis { min-block-size: 2lh; }
 }
 .raster--4 > li > .kachel:not(.kachel--szene) .kachel__bild { padding-block-start: 0; }  /* 30.09.: Dämmung-Kachel so hoch wie die Szenen-Kacheln */
+
+/* Vertrauensleiste neu (30.09., Sarah: „die Bahn ist hässlich“): keine Kästen, keine Trennstriche,
+   drei ruhige, gleich breite Spalten, Symbol als feine Linie in Blau. */
+.vertrauen { border: 0; box-shadow: none; background: var(--df-color-surface); border-block-end: 1px solid var(--df-color-border); }
+.vertrauen__liste { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--df-space-5); padding-block: var(--df-space-4); }
+.vertrauen__punkt { justify-content: center; padding: 0; gap: var(--df-space-3); }
+.vertrauen__punkt + .vertrauen__punkt { border: 0 !important; }
+.vertrauen__symbol { inline-size: auto; block-size: auto; background: none; border-radius: 0; color: var(--df-color-primary); }
+.vertrauen__symbol svg { inline-size: 24px; block-size: 24px; stroke-width: 1.75; }
+.vertrauen__text b { font-weight: 600; }
+@media (max-width: 960px) {
+  .vertrauen__liste { grid-template-columns: 1fr; gap: var(--df-space-3); padding-block: var(--df-space-4); }
+  .vertrauen__punkt { justify-content: flex-start; border: 0 !important; }
+}
+.raster--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+/* Titelbild aufgeräumt (30.09., Sarah: „teilweise richtig überlappend“): die Produktkarte liegt nicht
+   mehr über dem Bild, sondern ruhig darunter; nur Pfeile, Punkte und KI-Schild bleiben im Bild. */
+.hero__karte { background: var(--df-color-surface); border: 1px solid var(--df-color-border); box-shadow: 0 8px 24px -16px rgba(8, 21, 46, .35); -webkit-backdrop-filter: none; backdrop-filter: none; }
+.hero__karte:hover { border-color: var(--df-color-primary); }
+/* 30.09.: allgemeine Null-Abstände überschrieben die Abstände (gemessen 0 px) */
+.startseite .hof-fakt { margin: 0 0 var(--df-space-5); }
+.startseite .galerie + .hinweis { border-block-start: 0; padding-block-start: 0; margin-block-start: var(--df-space-3); }
+.startseite .kachel__preis--text { font-size: var(--df-text-3); font-weight: 600; line-height: 24px; }  /* 30.09.: ruhiger als echte Preise, gleiche Zeilenhöhe */
+@media (max-width: 600px) { .raster--4 > li > .kachel .kachel__preis { min-block-size: 48px; } }  /* Preiszeile überall gleich hoch */
