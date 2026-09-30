@@ -394,3 +394,26 @@ h1.abschnitt__titel { font-size: clamp(2rem, 1.1rem + 2.6vw, 3rem); }
 @keyframes buehne-puls { 0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, .55); } 100% { box-shadow: 0 0 0 16px rgba(255, 255, 255, 0); } }
 @keyframes buehne-heran { from { transform: scale(1.06); } to { transform: none; } }
 @media (prefers-reduced-motion: reduce) { .buehne__szene--abend { transition: none; } }
+
+/* Schaufenster als helle Produktkarten (30.09., Sarah: kein „schwarz Umrandetes“; gleiche Karten wie
+   die Startseite): Bild 4:3 oben, Titel und Weg darunter, alle Karten gleich groß, 4 je Reihe. */
+.vitrinen { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--df-space-4); }
+.vitrinen > li:first-child { grid-column: auto; grid-row: auto; }
+.vitrinen > li:first-child .vitrine__kopf b { font-size: var(--df-text-4); }
+.vitrinen > li:first-child .vitrine__kopf span { font-size: var(--df-text-2); }
+.vitrine { display: flex; flex-direction: column; aspect-ratio: auto; background: var(--df-color-surface); color: var(--df-color-text);
+  border: 1px solid var(--df-color-border); box-shadow: none; }
+.vitrine::after { content: none; }
+.vitrine img { position: static; order: 0; inline-size: 100%; block-size: auto; aspect-ratio: 4 / 3; object-fit: cover; object-position: center; }
+.vitrine__kopf { position: static; order: 1; padding: var(--df-space-3) var(--df-space-3) 0; }
+.vitrine__kopf span { color: var(--df-color-text-muted); }
+.vitrine__fuss { position: static; order: 2; margin-block-start: auto; padding: var(--df-space-3); color: var(--df-color-primary-strong); }
+.vitrine__pfeil { background: var(--df-color-primary); color: var(--df-color-white); }
+.vitrine .ki-hinweis { inset-block-start: 8px; inset-inline-end: 8px; inset-block-end: auto; }
+.vitrine:hover { border-color: var(--df-color-primary); }
+@media (prefers-reduced-motion: no-preference) { .vitrine:hover img { transform: none; } }
+@media (max-width: 1279px) {
+  .vitrinen { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); overflow: visible; margin-inline: 0; padding: 0; }
+  .vitrinen > li { flex: none; }
+  .vitrinen > li:first-child .vitrine { aspect-ratio: auto; }
+}
