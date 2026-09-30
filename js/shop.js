@@ -434,6 +434,18 @@ function kategorieZuGruppe(kat) {
   return gruppeAusText(kat);
 }
 
+/* Fenster-Vorgaben (Dreh-Kipp, Kunststoff, weiß, Klarglas) nur für Fenster/Türen —
+   Logik in js/shop-artikelart-util.js, Tests in test/shop-artikelart.test.js. */
+function vorgabenFuerKategorie(kat) {
+  if (typeof ShopArtikelart === 'undefined') {
+    return { material: ['kunststoff'], farbe: ['weiss'], glasart: ['klarglas'], oeffnungsart: ['dreh-kipp'] };
+  }
+  return ShopArtikelart.vorgabenFuer(kategorieZuGruppe(kat));
+}
+function istDaemmungArtikel(p) {
+  return !!p && kategorieZuGruppe(p.kategorie || p.kategorie_key || '') === 'daemmung';
+}
+
 /* ─── Produktwort → Hauptgruppe (Inhaberin-Wunsch 31.08.2026) ──────────────
    Bisher entschied AUSSCHLIESSLICH der Kategorie-Schluessel, in welchem Filter
    ein Inserat auftaucht. Wird der beim Einstellen vergessen, falsch gesetzt
@@ -554,6 +566,7 @@ async function loadProdukte() {
       const matArr = _asArr(p.material).map(x => String(x).toLowerCase());
       const zustArr = _asArr(p.zustand);
       const katKeys = _asArr(p.kategorie_keys);
+      const vorgabe = vorgabenFuerKategorie(kat);
       return {
         id: String(p.id),
         titel: p.titel || '',
@@ -561,9 +574,9 @@ async function loadProdukte() {
         kategorie_keys: katKeys.length ? katKeys : (kat ? [kat] : []), // alle (Mehrfach-Filter)
         system: _asArr(p.system).join(' · '),
         zustand: zustArr.length ? zustArr : ['neu'],     // Mehrfach
-        material: matArr.length ? matArr : ['kunststoff'], // Mehrfach
+        material: matArr.length ? matArr : vorgabe.material, // Mehrfach (Fenster-Vorgaben nur bei Fenstern)
         // Mehrfach-Felder → immer Array (alte Einzelwerte werden mit eingepackt)
-        glasart: (_asArr(p.glasart).map(x => String(x).toLowerCase())).length ? _asArr(p.glasart).map(x => String(x).toLowerCase()) : ['klarglas'],
+        glasart: (_asArr(p.glasart).map(x => String(x).toLowerCase())).length ? _asArr(p.glasart).map(x => String(x).toLowerCase()) : vorgabe.glasart,
         breite_mm: Number(p.breite_mm) || 0,
         hoehe_mm: Number(p.hoehe_mm) || 0,
         preis_eur: Number(p.preis_eur) || 0,
@@ -571,12 +584,12 @@ async function loadProdukte() {
         groesse_klasse: p.groesse_klasse || null,
         export_modell: !!p.export_modell,
         standnummer: p.standnummer || null,
-        farbe: _asArr(p.farbe).length ? _asArr(p.farbe) : ['weiss'],
+        farbe: _asArr(p.farbe).length ? _asArr(p.farbe) : vorgabe.farbe,
         verglasung: _asArr(p.verglasung),
         u_wert: p.u_wert || null,
         // Frei-Text „Nach Außen öffnend" wird zum Tag (s.u.) — nicht doppelt als Öffnungsart anzeigen
         oeffnungsart: _asArr(p.oeffnungsart).filter(o => !istFreitextAussen(o)).length
-          ? _asArr(p.oeffnungsart).filter(o => !istFreitextAussen(o)) : ['dreh-kipp'],
+          ? _asArr(p.oeffnungsart).filter(o => !istFreitextAussen(o)) : vorgabe.oeffnungsart,
         rc_klasse: p.rc_klasse || null,
         eigenschaften: baueEigenschaften(p, kat),
         lagerbestand: Number(p.lagerbestand) || 1,
@@ -619,7 +632,7 @@ async function loadProdukteFromJson() {
         system: _asArr(p.system).join(' · '),
         // Mehrfach-Felder vereinheitlichen (abwärtskompatibel zu Einzelwerten)
         zustand: _asArr(p.zustand).length ? _asArr(p.zustand) : ['neu'],
-        material: _asArr(p.material).map(x => String(x).toLowerCase()).length ? _asArr(p.material).map(x => String(x).toLowerCase()) : ['kunststoff'],
+        material: _asArr(p.material).map(x => String(x).toLowerCase()).length ? _asArr(p.material).map(x => String(x).toLowerCase()) : vorgabenFuerKategorie(kat).material,
         glasart: _asArr(p.glasart).map(x => String(x).toLowerCase()),
         farbe: _asArr(p.farbe),
         verglasung: _asArr(p.verglasung),
@@ -1842,6 +1855,9 @@ function lagerBadgeHtml(p) {
 // z.B. "1000 x 600 = 195 Euro, 1000 x 700 = 200 Euro …"). Bei einem Einzelprodukt mit
 // genau einem Preis ist "ab" irreführend → kein "ab".
 function istSammelInserat(p) {
+  // Dämmung: mehrere „Euro“ kommen aus der Mengenstaffel, nicht aus mehreren Artikeln.
+  // Sonst hieße es „Preis ab 42 €“, obwohl 42 € der höchste Preis ist.
+  if (istDaemmungArtikel(p)) return false;
   const b = p.beschreibung || '';
   const masse = new Set(b.match(/\d{2,4}\s*[x×]\s*\d{2,4}/gi) || []).size;
   const euro = (b.match(/€|euro/gi) || []).length;
@@ -1981,8 +1997,10 @@ function karteHtml(p) {
   // Das Maß ist fuer Lagerware das Entscheidungskriterium — es steht deshalb als eigene,
   // grosse Zeile ueber dem Preis, mit „Breite × Höhe" dazu (vorher 13,5px in einer
   // Sammelzeile mit Verglasung, schwer lesbar).
-  const masseZeile = masseTxt
-    ? `<p class="karte-masse-gross"><span class="karte-masse-label">Breite × Höhe</span>${masseTxt}</p>` : '';
+  // Dämmung: hoehe_mm ist die Dicke der Rolle — „Breite × Höhe“ läse sich wie ein Fenstermaß.
+  const masseZeile = istDaemmungArtikel(p)
+    ? (p.hoehe_mm ? `<p class="karte-masse-gross"><span class="karte-masse-label">Dicke</span>${p.hoehe_mm} <span class="karte-masse-unit">mm</span></p>` : '')
+    : (masseTxt ? `<p class="karte-masse-gross"><span class="karte-masse-label">Breite × Höhe</span>${masseTxt}</p>` : '');
   const specParts = [];
   if (verglasungTxt) specParts.push(verglasungTxt);
   if (p.rc_klasse) specParts.push(escapeHtml(p.rc_klasse));
@@ -2004,7 +2022,7 @@ function karteHtml(p) {
         <img src="${escapeHtml(p.bild)}" alt="${escapeHtml(p.titel)}" class="karte-bild w-full" loading="lazy" decoding="async" onerror="this.src='img/fenster_standard.png'"/>
         ${/* Standnummer aufs Bild: damit findet der Kunde das Stueck im Hof wieder —
               die wichtigste Angabe nach dem Preis. Stand vorher klein unter dem Titel. */''}
-        ${p.standnummer ? `<span class="karte-standnr-bild">Nr. ${escapeHtml(p.standnummer)}</span>` : ''}
+        ${(p.standnummer && !istDaemmungArtikel(p)) ? `<span class="karte-standnr-bild">Nr. ${escapeHtml(p.standnummer)}</span>` : ''}
         ${/* „Symbolbild" NUR bei Sammelinseraten, wo ein Foto mehrere Stuecke zeigt und
               der Kunde eines davon bekommt (dort ist der Hinweis Pflicht, sonst waere es
               irrefuehrend). Bei Einzelstuecken ist es ein echtes Foto DIESER Ware — der
@@ -2542,7 +2560,8 @@ function oeffneDetail(id) {
   if (!p) return;
   document.getElementById('detailTitel').textContent = p.titel;
   const eigList = (p.eigenschaften || []).map(e => `<li class="flex items-center gap-2"><span class="material-symbols-outlined text-success" style="font-size:16px">check_circle</span>${escapeHtml(eigenschaftAnzeige(e))}</li>`).join('');
-  const standnrInfo = p.standnummer ? `<div class="bg-bg-soft rounded-lg px-3 py-2"><span class="block text-[10px] text-ink-soft">Standnummer</span><span class="font-bold text-ink">${escapeHtml(p.standnummer)}</span></div>` : '';
+  const daemmung = istDaemmungArtikel(p);
+  const standnrInfo = (p.standnummer && !daemmung) ? `<div class="bg-bg-soft rounded-lg px-3 py-2"><span class="block text-[10px] text-ink-soft">Standnummer</span><span class="font-bold text-ink">${escapeHtml(p.standnummer)}</span></div>` : '';
   const detail = document.getElementById('detailContent');
   // Bilder-Liste: alle hochgeladenen URLs, Fallback auf p.bild oder Platzhalter
   const bilderListe = (p.bilder && p.bilder.length > 0) ? p.bilder : [p.bild];
@@ -2557,7 +2576,7 @@ function oeffneDetail(id) {
                onerror="this.src='img/fenster_standard.png'"/>
         `).join('')}
       </div>
-      ${p.standnummer ? `<span class="karte-standnr-bild">Nr. ${escapeHtml(p.standnummer)}</span>` : ''}
+      ${(p.standnummer && !daemmung) ? `<span class="karte-standnr-bild">Nr. ${escapeHtml(p.standnummer)}</span>` : ''}
       ${istSammelInserat(p) ? '<span class="symbolbild-mini">Beispielbild</span>' : ''}
       ${hatMehrere ? `
         <button class="carousel-btn carousel-prev" type="button" aria-label="Vorheriges Bild">
@@ -2588,10 +2607,15 @@ function oeffneDetail(id) {
         ${lagerBadgeHtml(p)}
       </div>
       <div class="grid grid-cols-2 gap-2 text-xs">
+        ${daemmung ? `
+        ${p.hoehe_mm ? `<div class="bg-bg-soft rounded-lg px-3 py-2"><span class="block text-[10px] text-ink-soft">Dicke</span><span class="font-bold text-ink">${p.hoehe_mm} mm</span></div>` : ''}
+        ${p.breite_mm ? `<div class="bg-bg-soft rounded-lg px-3 py-2"><span class="block text-[10px] text-ink-soft">Rollenbreite</span><span class="font-bold text-ink">${p.breite_mm} mm</span></div>` : ''}
+        ` : `
         <div class="bg-bg-soft rounded-lg px-3 py-2"><span class="block text-[10px] text-ink-soft">Breite</span><span class="font-bold text-ink">${p.breite_mm} mm</span></div>
         <div class="bg-bg-soft rounded-lg px-3 py-2"><span class="block text-[10px] text-ink-soft">Höhe</span><span class="font-bold text-ink">${p.hoehe_mm} mm</span></div>
         ${standnrInfo}
         <div class="bg-bg-soft rounded-lg px-3 py-2"><span class="block text-[10px] text-ink-soft">System</span><span class="font-bold text-ink">${p.system ? escapeHtml(p.system) : '—'}</span></div>
+        `}
         ${_asArr(p.oeffnungsart).length ? `<div class="bg-bg-soft rounded-lg px-3 py-2 col-span-2"><span class="block text-[10px] text-ink-soft">Öffnungsart</span><span class="font-bold text-ink">${_asArr(p.oeffnungsart).map(o => escapeHtml(oeffnungsartLabel(o))).join(', ')}</span></div>` : ''}
       </div>
       <p class="text-sm text-ink-soft leading-relaxed">${nl2br(p.beschreibung)}</p>
@@ -2610,18 +2634,19 @@ function oeffneDetail(id) {
       <p class="shop-detail-abholung">
         <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
         <span><strong>Abholung: Fohrder Landstraße 13, 14772 Brandenburg an der Havel</strong>
-        &nbsp;·&nbsp; freitags 10–17 Uhr
+        &nbsp;·&nbsp; ${daemmung ? 'jederzeit nach Terminabsprache · Tel. <a href="tel:+4933812148373">03381 214 83 73</a>' : 'freitags 10–17 Uhr'}
         &nbsp;·&nbsp; <a href="https://www.google.com/maps/dir/?api=1&destination=Fohrder+Landstra%C3%9Fe+13%2C+14772+Brandenburg+an+der+Havel"
            target="_blank" rel="noopener">Route planen</a></span>
       </p>
       <p class="shop-detail-abholung">
         <span class="material-symbols-outlined" aria-hidden="true">local_shipping</span>
-        <span><strong>Wir laden nicht auf.</strong> Bitte genug Helfer
+        ${daemmung ? `<span><strong>Lieferung bis 200 km</strong> gegen Spritkosten, <strong>ab 30 Rollen kostenlos.</strong>
+        Bei Abholung laden Sie selbst — bitte ein passendes Fahrzeug mitbringen.</span>` : `<span><strong>Wir laden nicht auf.</strong> Bitte genug Helfer
         (Fenster sind schwer, meist 2–4 Personen) und ein passendes Fahrzeug mitbringen.
-        <strong>Lieferung auf Anfrage</strong> gegen Fahrtkosten.</span>
+        <strong>Lieferung auf Anfrage</strong> gegen Fahrtkosten.</span>`}
       </p>
       <div class="shop-detail-cta-price">
-        <span class="block text-[11px] text-ink-soft">${istSammelInserat(p) ? 'Preis ab' : 'Preis'}</span>
+        <span class="block text-[11px] text-ink-soft">${daemmung ? 'Preis je Rolle' : (istSammelInserat(p) ? 'Preis ab' : 'Preis')}</span>
         <span class="text-2xl font-extrabold text-primary leading-none">${formatPreis(p.preis_eur)}</span>
         ${grundpreisZeile(p)}
       </div>

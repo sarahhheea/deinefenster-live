@@ -46,6 +46,14 @@ ABHOL_HINWEIS = (
     "erfolgt per Spedition, und der angezeigte Lieferpreis ist ein Hoechstwert."
 )
 
+# Daemmung liefert die Familie selbst (Sarah 30.09.2026) - nicht per Spedition.
+ABHOL_HINWEIS_DAEMMUNG = (
+    "Abholung in Brandenburg an der Havel jederzeit nach Terminabsprache "
+    "(03381 214 83 73). Lieferung bis 200 km gegen Spritkosten, "
+    "ab 30 Rollen kostenlos."
+)
+ABHOL_HINWEIS_JE_KATEGORIE = {"daemmung": ABHOL_HINWEIS_DAEMMUNG}
+
 # Interne Standplatz-Angabe, die nicht zu Google gehoert:
 #   "Nr. 1219" | "Nr 400 A" | "Nr.1502" | "Nr. 1007 AB" | "Nr.2808 DDD"
 #   "Nr. 0311/1  A" | "Standort Nr 0018"
@@ -159,8 +167,9 @@ def description_of(produkt):
             "Maße und Zustand auf Anfrage."
         )
     # Nach vorne, weil Google bei den Produktdetails den Anfang zeigt.
-    platz = MAX_DESCRIPTION - len(ABHOL_HINWEIS) - 2
-    return f"{ABHOL_HINWEIS}\n\n{text[:platz].rstrip()}"
+    hinweis = ABHOL_HINWEIS_JE_KATEGORIE.get(produkt.get("kategorie_key"), ABHOL_HINWEIS)
+    platz = MAX_DESCRIPTION - len(hinweis) - 2
+    return f"{hinweis}\n\n{text[:platz].rstrip()}"
 
 
 def _has_price(produkt):

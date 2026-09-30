@@ -344,6 +344,16 @@ check("grossgeschriebenes 'Gebraucht' zaehlt auch",
       g8["title"], "1 Fluegel Fenster Gebraucht 900 x 1440")
 
 
+# --- Daemmung: eigene Abhol-/Lieferregel (Sarah 30.09.2026) ---------------
+d_text = gen.description_of(produkt(kategorie_key="daemmung", beschreibung="Glaswolle."))
+check_true("Daemmung: Abholung nach Terminabsprache", "Terminabsprache" in d_text)
+check_true("Daemmung: Lieferregel bis 200 km, ab 30 Rollen kostenlos",
+           "200 km" in d_text and "ab 30 Rollen kostenlos" in d_text)
+check_true("Daemmung: kein Spedition-Satz", "Spedition" not in d_text)
+check_true("Fenster behalten den allgemeinen Hinweis",
+           "Spedition" in gen.description_of(produkt(beschreibung="Ein gutes Fenster.")))
+
+
 # --- Ergebnis --------------------------------------------------------------
 
 print()
