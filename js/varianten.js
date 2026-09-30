@@ -43,3 +43,33 @@
     });
   });
 })();
+
+/* Profil-Umschalter (Tabs): ohne JavaScript stehen alle Profile untereinander. */
+(function () {
+  'use strict';
+  document.querySelectorAll('[data-profilwahl]').forEach(function (wahl) {
+    var tabs = Array.prototype.slice.call(wahl.querySelectorAll('[role="tab"]'));
+    var panels = tabs.map(function (t) { return document.getElementById(t.getAttribute('aria-controls')); });
+    wahl.classList.add('profilwahl--aktiv');
+    function zeigen(i, fokus) {
+      tabs.forEach(function (t, j) {
+        var an = i === j;
+        t.setAttribute('aria-selected', an ? 'true' : 'false');
+        t.tabIndex = an ? 0 : -1;
+        panels[j].hidden = !an;
+      });
+      if (fokus) tabs[i].focus();
+    }
+    tabs.forEach(function (t, i) {
+      t.addEventListener('click', function () { zeigen(i, false); });
+      t.addEventListener('keydown', function (ev) {
+        var s = { ArrowRight: 1, ArrowLeft: -1 }[ev.key];
+        if (ev.key === 'Home') s = -i; if (ev.key === 'End') s = tabs.length - 1 - i;
+        if (s === undefined) return;
+        ev.preventDefault();
+        zeigen((i + s + tabs.length) % tabs.length, true);
+      });
+    });
+    zeigen(0, false);
+  });
+})();

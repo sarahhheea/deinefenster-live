@@ -149,17 +149,6 @@
 @media (max-width: 860px) { .sprossen { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (prefers-reduced-motion: reduce) { .sprosse__bild img { transition: none; } }
 
-/* Sanftes Einblenden beim Scrollen (nur wo der Browser Scroll-Timelines kann; sonst sofort sichtbar).
-   Kein opacity:0 als Grundzustand (Regel reveal-antipattern). */
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .abschnitt .abschnitt__kopf, .kachel, .oeffnung, .sprosse, .vorher__karte, .kenntabelle, .farbwahl {
-      animation: df-einblenden linear both; animation-timeline: view(); animation-range: entry 0% entry 40%;
-    }
-  }
-}
-/* Nur Bewegung, keine Deckkraft: Inhalte sind immer sichtbar, auch für Google und bei Ganzseiten-Aufnahmen (30.09.: mit opacity war alles unter der Falz leer) */
-@keyframes df-einblenden { from { transform: translateY(24px); } to { transform: none; } }
 .kachel { transition: transform var(--df-duration-base) var(--df-ease-out), box-shadow var(--df-duration-base) var(--df-ease-out); }
 @media (hover: hover) { .kachel:hover { transform: translateY(-3px); box-shadow: var(--df-shadow-raised); } }
 
@@ -177,3 +166,50 @@ section[aria-labelledby="profile-titel"] .kachel__bild img { mix-blend-mode: mul
           mask-composite: intersect;
 }
 section[aria-labelledby="profile-titel"] .kachel__bild { background: transparent; }
+
+/* Profil-Umschalter (30.09.2026): Schnittbild groß und freigestellt, Werte daneben */
+.profilwahl__tabs { display: none; }
+.profilwahl--aktiv .profilwahl__tabs { display: flex; gap: var(--df-space-2); overflow-x: auto; margin-block-end: var(--df-space-5); padding-block-end: 4px; scrollbar-width: thin; }
+.profilwahl__tabs [role="tab"] { flex: 0 0 auto; min-block-size: 44px; padding: 0 var(--df-space-4); border: 1px solid var(--df-color-border-strong); border-radius: var(--df-radius-full); background: transparent; color: var(--df-color-text); font: var(--df-font-weight-semibold) var(--df-text-3) / 1 var(--df-font-body); cursor: pointer; transition: background-color var(--df-duration-fast) var(--df-ease-out), color var(--df-duration-fast) var(--df-ease-out); }
+.profilwahl__tabs [role="tab"][aria-selected="true"] { background: var(--df-color-text); border-color: var(--df-color-text); color: var(--df-color-white); }
+.profilwahl__tabs [role="tab"]:focus-visible { outline: var(--df-focus-ring-width) solid var(--df-color-focus); outline-offset: 2px; }
+.profilteil { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--df-space-7); align-items: center; }
+.profilteil + .profilteil { margin-block-start: var(--df-space-7); }
+.profilwahl--aktiv .profilteil + .profilteil { margin-block-start: 0; }
+.profilteil__bild { position: relative; margin: 0; }
+.profilteil__bild img { display: block; inline-size: 100%; max-inline-size: 460px; block-size: auto; margin-inline: auto; mix-blend-mode: multiply; animation: df-profil-ein 360ms var(--df-ease-out); }
+.profilteil__bild .ki-hinweis { position: absolute; inset-block-start: 0; inset-inline-end: 0; }
+.profilteil__name { margin: 0 0 var(--df-space-3); font: var(--df-font-weight-semibold) var(--df-text-6) / 1.15 var(--df-font-display); }
+.profilteil__text > p { margin: 0; color: var(--df-color-text-muted); line-height: var(--df-leading-relaxed); max-inline-size: 52ch; }
+.profilteil__werte { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--df-space-3) var(--df-space-5); margin: var(--df-space-5) 0 0; }
+.profilteil__werte div { padding-block-start: var(--df-space-2); border-block-start: 1px solid var(--df-color-border); }
+.profilteil__werte dt { color: var(--df-color-text-muted); font-size: var(--df-text-2); }
+.profilteil__werte dd { margin: 2px 0 0; font: var(--df-font-weight-semibold) var(--df-text-4) / 1.3 var(--df-font-display); font-variant-numeric: tabular-nums; }
+.profilteil__wege { display: flex; flex-wrap: wrap; align-items: center; gap: var(--df-space-4); margin-block-start: var(--df-space-5); }
+.profilteil__fussnote { margin-block-start: var(--df-space-5); }
+@keyframes df-profil-ein { from { transform: translateX(16px); } to { transform: none; } }
+@media (max-width: 860px) {
+  .profilteil { grid-template-columns: 1fr; gap: var(--df-space-4); }
+  .profilteil__bild img { max-inline-size: 300px; }
+}
+@media (prefers-reduced-motion: reduce) { .profilteil__bild img { animation: none; } }
+
+/* Farbwähler: ganzes Fenster immer sichtbar und mittig (Sarah 30.09.: „dass man komplett alles sieht“) */
+.farbwahl { align-items: start; }
+.farbwahl__buehne { display: flex; flex-direction: column; align-items: center; justify-content: center; min-block-size: calc(100vh - var(--df-kopf-h) - 2 * var(--df-space-4)); }
+.farbwahl__bild { inline-size: auto; max-inline-size: 100%; max-block-size: calc(100vh - var(--df-kopf-h) - 140px); }
+@media (max-width: 860px) {
+  /* Handy: Fenster bleibt beim Tippen der Farben oben stehen */
+  .farbwahl__buehne { position: sticky; inset-block-start: var(--df-kopf-h); z-index: 1; min-block-size: 0; padding-block: var(--df-space-2); }
+  .farbwahl__bild { max-block-size: 34vh; }
+}
+
+.profilteil[hidden] { display: none; }
+
+/* Das Einblenden aus schema.css (df-herein auf .abschnitt > .df-wrap) macht den Innenbereich zu einer eigenen Ebene.
+   Damit „multiply“ das Weiß der Produktbilder wegnimmt, trägt der Innenbereich dieselbe Fläche wie der Abschnitt. */
+.abschnitt > .df-wrap { background: var(--df-color-bg); }
+.abschnitt--flaeche > .df-wrap { background: var(--df-color-surface-subtle); }
+.profilteil__text > p.profilteil__wege { max-inline-size: none; justify-content: flex-start; text-align: start; }
+.profilteil__werte div { background: transparent; }
+.profilteil__bild { inline-size: fit-content; max-inline-size: 460px; margin-inline: auto; }
