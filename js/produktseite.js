@@ -23,6 +23,7 @@
       erg.querySelector('[data-bautiefe]').textContent = k.bautiefe;
       erg.querySelector('[data-uw]').textContent = k.uw;
       if (anfrage) anfrage.hidden = !k.anfrage;
+      var link = erg.querySelector('[data-link]'); if (link && k.link) link.href = k.link;
     }
     form.addEventListener('change', zeigen);
     zeigen();
