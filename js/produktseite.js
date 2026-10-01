@@ -12,9 +12,9 @@
     var erg = hilfe.querySelector('.hilfe__ergebnis');
     function wert(n) { var x = form.querySelector('input[name="' + n + '"]:checked'); return x ? x.value : ''; }
     function zeigen() {
-      var ort = wert('ort'), wichtig = wert('wichtig'), richtung = wert('richtung'), k, warum;
+      var wichtig = wert('wichtig'), richtung = wert('richtung'), k, warum;
       if (richtung === 'aussen') { k = d.ext; warum = 'Öffnet nach außen; innen bleibt der Platz vor dem Fenster frei.'; }
-      else if (wichtig === 'daemmung') { k = d.energy; warum = 'Der niedrigste Uw-Wert unserer bestellbaren Kunststoffprofile, Dreifachglas serienmäßig.' + (ort === 'altbau' ? ' Beim Tausch prüfen, ob die Laibung 82 mm Bautiefe aufnimmt.' : ''); }
+      else if (wichtig === 'daemmung') { k = d.energy; warum = 'Der niedrigste Uw-Wert unserer bestellbaren Kunststoffprofile, Dreifachglas serienmäßig. Beim Fenstertausch prüfen, ob die Laibung 82 mm Bautiefe aufnimmt.'; }
       else if (wichtig === 'licht') { k = d.light; warum = 'Die schmale Profilform: weniger Rahmen, mehr Glas.'; }
       else if (wichtig === 'form') { k = d.edge; warum = 'Die moderne, eckige Profilform auf Basis der 82-mm-Technik.'; }
       else { k = d.classic; warum = 'Das bewährte 70-mm-Profil; passt gut in vorhandene Laibungen.'; }
@@ -32,6 +32,7 @@
   document.querySelectorAll('.hotspot').forEach(function (b) {
     var karte = document.getElementById(b.getAttribute('aria-controls'));
     b.addEventListener('click', function () {
+      var schnitt = b.closest('.schnitt'); if (schnitt) schnitt.classList.add('schnitt--entdeckt');
       var auf = b.getAttribute('aria-expanded') !== 'true';
       document.querySelectorAll('.hotspot[aria-expanded="true"]').forEach(function (x) {
         x.setAttribute('aria-expanded', 'false'); document.getElementById(x.getAttribute('aria-controls')).hidden = true;

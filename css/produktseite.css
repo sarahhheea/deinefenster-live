@@ -471,3 +471,43 @@ section[aria-labelledby="faq-titel"] .frage summary { padding-inline: 0; font-si
 .waerme .hinweis { margin-block-start: var(--df-space-3); }
 /* Beide Schieber-Bilder im selben Format (die freigestellten Renderings sind unterschiedlich zugeschnitten) */
 .vergleichsschieber img { aspect-ratio: 4 / 5; object-fit: contain; }
+
+/* ===== Art-Director-Runde 01.10.2026 ===== */
+/* Rhythmus: normale Abschnitte weiß, Flächen grau (beide Tokens waren #f4f5f7) */
+.abschnitt:not(.abschnitt--flaeche), .abschnitt:not(.abschnitt--flaeche) > .df-wrap { background: var(--df-color-white); }
+.abschnitt--flaeche, .abschnitt--flaeche > .df-wrap { background: #eef1f4; }
+.farbwahl__buehne { background: transparent; }
+/* Zahlen mit Einheit in der Textschrift (Switzer verzerrte „W/(m²K)“ am Handy) */
+.waerme__wert, .waerme__grenze, .matrix__tabelle td, .fakten__text, .hilfe__werte dd { font-family: var(--df-font-body); }
+/* Farbwelt: Überschrift bleibt die größte Stufe, Schieber größer */
+.farbwelt { grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); }
+.vergleichsschieber { max-inline-size: 520px; }
+.farbwelt__gross { font-size: var(--df-text-5); }
+.vergleichsschieber__regler:focus-visible ~ .vergleichsschieber__griff::after, .vergleichsschieber:focus-within .vergleichsschieber__griff::after { box-shadow: 0 0 0 3px var(--df-color-focus), var(--df-shadow-raised); }
+/* Matrix: niedrigster Uw-Wert hervorgehoben */
+.matrix__bestwert { background: rgba(46, 105, 178, .08); }
+.matrix__marke { display: block; margin-block-start: 2px; color: var(--df-color-primary); font-size: var(--df-text-1); font-weight: var(--df-font-weight-medium); }
+.matrix__sicherheit { margin-block: var(--df-space-4) 0; color: var(--df-color-text-muted); font-size: var(--df-text-2); line-height: var(--df-leading-relaxed); }
+.matrix__sicherheit strong { color: var(--df-color-text); }
+/* Punkte pulsieren nur bis zum ersten Klick */
+.schnitt--entdeckt .hotspot { animation: none; }
+/* Zubehör mit Bild, Garantie mit Symbol */
+.zubehoer__rahmen { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: var(--df-space-7); align-items: start; }
+.zubehoer__bild { position: relative; margin: 0; overflow: hidden; border-radius: var(--df-radius-lg); }
+.zubehoer__bild img { display: block; inline-size: 100%; block-size: auto; }
+.zubehoer__bild .ki-hinweis { position: absolute; inset-block-start: var(--df-space-2); inset-inline-end: var(--df-space-2); }
+.zubehoer__rahmen .zubehoer { grid-template-columns: 1fr; gap: var(--df-space-5); }
+.garantie__symbol { inline-size: 32px; block-size: 32px; margin-block-end: var(--df-space-2); fill: none; stroke: var(--df-color-primary); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+@media (max-width: 860px) { .zubehoer__rahmen, .farbwelt { grid-template-columns: 1fr; } }
+/* Handy: Kamerafahrt als Wisch-Reihe mit den drei Kapiteln */
+.studio__mobil { display: none; }
+@media (max-width: 1279px) {
+  .studio__mobil { display: grid; grid-auto-flow: column; grid-auto-columns: 82%; gap: var(--df-space-4); overflow-x: auto; scroll-snap-type: x mandatory; margin: var(--df-space-5) 0 0; padding: 0 var(--df-gutter, 16px) var(--df-space-2); list-style: none; }
+  .studio__mobil li { scroll-snap-align: center; }
+  .studio__mobil img { display: block; inline-size: 100%; block-size: auto; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--df-radius-lg); }
+  .studio__mobil strong { display: block; margin-block-start: var(--df-space-2); font: var(--df-font-weight-semibold) var(--df-text-4) / 1.3 var(--df-font-display); }
+  .studio__mobil span { display: block; color: var(--df-color-text-muted); font-size: var(--df-text-2); line-height: var(--df-leading-relaxed); }
+  .studio--titel .studio__kapitel { display: none; }
+}
+.studio__mobil-bild { position: relative; display: block; } .studio__mobil-bild .ki-hinweis { position: absolute; inset-block-start: var(--df-space-2); inset-inline-end: var(--df-space-2); }
+.studio__mobil:focus-visible { outline: var(--df-focus-ring-width) solid var(--df-color-focus); outline-offset: 4px; }
