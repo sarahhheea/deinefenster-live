@@ -95,7 +95,7 @@
       function hin(art) { ziel.scrollIntoView({ behavior: art, block: 'start' }); }
       function pruefen() {
         var soll = (parseFloat(getComputedStyle(ziel).scrollMarginBlockStart) || 0) + (parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0);
-        if (Math.abs(ziel.getBoundingClientRect().top - soll) > 6 && n++ < 3) { hin('auto'); setTimeout(pruefen, 250); }
+        if (Math.abs(ziel.getBoundingClientRect().top - soll) > 6 && n++ < 5) { hin('auto'); setTimeout(pruefen, 250); }
       }
       hin(ruhig ? 'auto' : 'smooth');
       if ('onscrollend' in window) window.addEventListener('scrollend', function f() { window.removeEventListener('scrollend', f); pruefen(); });
