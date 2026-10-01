@@ -287,7 +287,7 @@ section[aria-labelledby="faq-titel"] .frage summary { padding-inline: 0; font-si
 .leseteil__inhalt a:hover { color: var(--df-color-primary); }
 .leseteil__text { max-inline-size: 66ch; }
 .leseteil__teil + .leseteil__teil { margin-block-start: var(--df-space-7); }
-.leseteil__teil h3 { margin: 0 0 var(--df-space-3); font: var(--df-font-weight-semibold) var(--df-text-5) / 1.25 var(--df-font-display); scroll-margin-block-start: calc(var(--df-kopf-h) + var(--df-space-5)); }
+.leseteil__teil h3 { margin: 0 0 var(--df-space-3); font: var(--df-font-weight-semibold) var(--df-text-5) / 1.25 var(--df-font-display); scroll-margin-block-start: 72px; }
 .leseteil__teil p { margin: 0 0 var(--df-space-3); color: var(--df-color-text); line-height: 1.7; font-size: 1.0625rem; }
 .leseteil__teil a { color: var(--df-color-primary); }
 @media (max-width: 860px) { .leseteil { grid-template-columns: 1fr; gap: var(--df-space-5); } .leseteil__kopf { position: static; } }
@@ -336,10 +336,10 @@ section[aria-labelledby="faq-titel"] .frage summary { padding-inline: 0; font-si
 /* Sprungleiste: läuft unter dem Kopf mit */
 .sprungleiste { position: sticky; inset-block-start: var(--df-kopf-h); z-index: 5; background: rgba(244, 245, 247, .92); -webkit-backdrop-filter: saturate(1.4) blur(10px); backdrop-filter: saturate(1.4) blur(10px); border-block-end: 1px solid var(--df-color-border); }
 .sprungleiste ul { display: flex; gap: var(--df-space-1); margin: 0; padding: var(--df-space-2) 0; list-style: none; overflow-x: auto; scrollbar-width: none; }
-.sprungleiste a { display: inline-flex; align-items: center; min-block-size: 40px; padding: 0 var(--df-space-3); border-radius: var(--df-radius-full); color: var(--df-color-text-muted); font-weight: var(--df-font-weight-medium); font-size: var(--df-text-2); text-decoration: none; white-space: nowrap; transition: background-color var(--df-duration-fast), color var(--df-duration-fast); }
+.sprungleiste a { display: inline-flex; align-items: center; min-block-size: 44px; padding: 0 var(--df-space-3); border-radius: var(--df-radius-full); color: var(--df-color-text-muted); font-weight: var(--df-font-weight-medium); font-size: var(--df-text-2); text-decoration: none; white-space: nowrap; transition: background-color var(--df-duration-fast), color var(--df-duration-fast); }
 .sprungleiste a:hover { color: var(--df-color-text); }
 .sprungleiste li.ist-aktiv a { background: var(--df-color-text); color: var(--df-color-white); }
-.abschnitt[id], #faq-titel { scroll-margin-block-start: calc(var(--df-kopf-h) + 64px); }
+.abschnitt[id], .abschnitt__titel[id] { scroll-margin-block-start: 56px; } /* 01.10.: html hat schon scroll-padding (Kopf + 12 px); hier nur die Sprungleiste, sonst landete das Ziel 150 px zu tief */
 
 /* Entscheidungshilfe */
 .hilfe { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); gap: var(--df-space-7); align-items: start; }
@@ -368,7 +368,7 @@ section[aria-labelledby="faq-titel"] .frage summary { padding-inline: 0; font-si
 .schnitt__bild { position: relative; margin: 0; max-inline-size: 480px; justify-self: center; }
 .schnitt__bild img { display: block; inline-size: 100%; block-size: auto; mix-blend-mode: multiply; }
 .schnitt__bild .ki-hinweis { position: absolute; inset-block-start: 0; inset-inline-end: 0; }
-.hotspot { position: absolute; inset-block-start: var(--y); inset-inline-start: var(--x); translate: -50% -50%; inline-size: 32px; block-size: 32px; border: 0; border-radius: var(--df-radius-full); background: var(--df-color-primary); box-shadow: 0 0 0 6px rgba(46, 105, 178, .22); cursor: pointer; }
+.hotspot { position: absolute; inset-block-start: var(--y); inset-inline-start: var(--x); translate: -50% -50%; inline-size: 44px; block-size: 44px; border: 6px solid transparent; background-clip: padding-box; border-radius: var(--df-radius-full); background-color: var(--df-color-primary); box-shadow: 0 0 0 2px rgba(46, 105, 178, .22); cursor: pointer; } /* 01.10. UX-Prüfung: Tippziel 44 px, sichtbarer Punkt bleibt 32 px */
 .hotspot::after { content: "+"; display: grid; place-items: center; inline-size: 100%; block-size: 100%; color: #fff; font: 600 20px/1 var(--df-font-body); transition: transform var(--df-duration-fast); }
 .hotspot[aria-expanded="true"]::after { transform: rotate(45deg); }
 .hotspot:focus-visible { outline: var(--df-focus-ring-width) solid var(--df-color-focus); outline-offset: 3px; }
@@ -464,7 +464,7 @@ section[aria-labelledby="faq-titel"] .frage summary { padding-inline: 0; font-si
 /* Förderschwelle als gestrichelte Linie in jeder Spur (robuster als eine übergreifende Linie) */
 .waerme__grenze { margin: var(--df-space-4) 0 0; block-size: auto; display: flex; align-items: center; gap: var(--df-space-2); font-size: var(--df-text-2); font-weight: var(--df-font-weight-medium); }
 .waerme__grenze::before { content: none; }
-.waerme__strich { inline-size: 24px; border-block-start: 2px dashed var(--df-color-text); }
+.waerme__grenze .waerme__strich { position: static; translate: none; flex: none; inline-size: 24px; border-block-start: 2px dashed var(--df-color-text); }
 .waerme__spur { overflow: visible; }
 .waerme__spur::after { content: ""; position: absolute; inset-inline-start: var(--g); inset-block: -5px; border-inline-start: 2px dashed var(--df-color-text); }
 .waerme__balken { overflow: hidden; }
@@ -511,3 +511,57 @@ section[aria-labelledby="faq-titel"] .frage summary { padding-inline: 0; font-si
 }
 .studio__mobil-bild { position: relative; display: block; } .studio__mobil-bild .ki-hinweis { position: absolute; inset-block-start: var(--df-space-2); inset-inline-end: var(--df-space-2); }
 .studio__mobil:focus-visible { outline: var(--df-focus-ring-width) solid var(--df-color-focus); outline-offset: 4px; }
+
+/* 01.10.2026 Vorlage für alle Produkte: Zubehör-Kacheln, Hof, Farbchips, Anfrage-Zeilen, nächster Schritt */
+.weiter { display: flex; flex-wrap: wrap; align-items: center; gap: var(--df-space-4); margin: var(--df-space-5) 0 0; }
+.matrix__tabelle tbody tr.matrix__zeile--anfrage > * { background: var(--df-color-surface-subtle); color: var(--df-color-text-muted); }
+.matrix__zeile--anfrage .matrix__name { color: var(--df-color-text); }
+.matrix__marke--anfrage { color: var(--df-color-text-muted); }
+.hilfe__anfrage { margin-inline-start: var(--df-space-4); }
+.hilfe__anfrage[hidden] { display: none; }
+
+.zkacheln { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--df-space-5); margin: 0; padding: 0; list-style: none; }
+.zkachel { display: flex; flex-direction: column; overflow: hidden; border-radius: var(--df-radius-lg); background: var(--df-color-white); box-shadow: var(--df-shadow-card); }
+.zkachel__symbol { display: grid; place-items: center; inline-size: 48px; block-size: 48px; margin: var(--df-space-5) var(--df-space-5) 0; border-radius: var(--df-radius-md); background: rgba(46, 105, 178, .08); color: var(--df-color-primary); }
+.zkachel__symbol svg { inline-size: 26px; block-size: 26px; }
+.zkachel__bild { position: relative; margin: 0; aspect-ratio: 16 / 10; overflow: hidden; background: var(--df-color-surface-subtle); }
+.zkachel__bild img { display: block; inline-size: 100%; block-size: 100%; object-fit: cover; transition: transform var(--df-duration-slow, .6s) ease; }
+.zkachel:hover .zkachel__bild img { transform: scale(1.04); }
+.zkachel__bild .ki-hinweis { position: absolute; inset-block-start: var(--df-space-2); inset-inline-end: var(--df-space-2); }
+.zkachel__text { display: flex; flex-direction: column; gap: var(--df-space-2); flex: 1; padding: var(--df-space-4) var(--df-space-5) var(--df-space-5); }
+.zkachel { transition: transform var(--df-duration-fast), box-shadow var(--df-duration-fast); }
+.zkachel:hover { transform: translateY(-2px); box-shadow: var(--df-shadow-overlay); }
+.zkachel__text h3 { margin: 0; font: var(--df-font-weight-semibold) var(--df-text-4) / 1.3 var(--df-font-display); }
+.zkachel__text p { margin: 0; color: var(--df-color-text-muted); font-size: var(--df-text-3); line-height: var(--df-leading-relaxed); }
+.zkachel__text .zkachel__werte { color: var(--df-color-text); font-size: var(--df-text-2); font-weight: var(--df-font-weight-medium); }
+.zkachel__text .df-mehr { margin-block-start: auto; }
+
+.hof { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--df-space-7); align-items: center; }
+.hof__bild { margin: 0; overflow: hidden; border-radius: var(--df-radius-lg); aspect-ratio: 4 / 3; }
+.hof__bild img { display: block; inline-size: 100%; block-size: 100%; object-fit: cover; }
+.hof__gross { margin: 0 0 var(--df-space-3); font: var(--df-font-weight-semibold) var(--df-text-5) / 1.2 var(--df-font-display); letter-spacing: -0.01em; }
+.hof__text > p { color: var(--df-color-text-muted); line-height: var(--df-leading-relaxed); }
+
+.farbwelt--liste { grid-template-columns: minmax(0, 1fr); max-inline-size: 760px; }
+.farbtoene { display: flex; flex-wrap: wrap; gap: var(--df-space-2); margin: var(--df-space-4) 0; padding: 0; list-style: none; }
+.farbton { display: inline-flex; flex-direction: column; justify-content: center; min-block-size: 44px; padding: var(--df-space-2) var(--df-space-3); border: 1px solid var(--df-color-border); border-radius: var(--df-radius-md); background: var(--df-color-white); font-size: var(--df-text-2); font-weight: var(--df-font-weight-medium); }
+.farbton small { color: var(--df-color-text-muted); font-size: var(--df-text-1); font-weight: var(--df-font-weight-regular); }
+.farbton--anfrage { background: var(--df-color-surface-subtle); }
+
+@media (max-width: 1023px) { .zkacheln { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 767px) {
+  .zkacheln { grid-template-columns: minmax(0, 1fr); }
+  .hof { grid-template-columns: minmax(0, 1fr); gap: var(--df-space-5); }
+  .hilfe__anfrage { margin: var(--df-space-3) 0 0; display: flex; }
+}
+@media (prefers-reduced-motion: reduce) { .zkachel__bild img { transition: none; } .zkachel:hover .zkachel__bild img { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .zkachel, .zkachel:hover { transition: none; transform: none; } }
+
+.farbton__punkt { display: inline-block; inline-size: 14px; block-size: 14px; margin-inline-end: 6px; vertical-align: -2px; border-radius: var(--df-radius-full); background: var(--farbe); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .15); }
+#waerme .abschnitt__einleitung { margin-block-end: var(--df-space-6); max-inline-size: 68ch; }
+.bildband__quelle { position: absolute; inset-block-end: var(--df-space-3); inset-inline-end: var(--df-space-3); padding: 2px 8px; border-radius: var(--df-radius-sm, 4px); background: rgba(255, 255, 255, .85); color: var(--df-color-text); font-size: var(--df-text-1); }
+/* 01.10. Design-Review: unvollständige letzte Kachelreihe mittig statt Loch rechts */
+.zkacheln { display: flex; flex-wrap: wrap; justify-content: center; }
+.zkacheln > .zkachel { flex: 0 1 calc((100% - 2 * var(--df-space-5)) / 3); }
+@media (max-width: 1023px) { .zkacheln > .zkachel { flex-basis: calc((100% - var(--df-space-5)) / 2); } }
+@media (max-width: 767px) { .zkacheln > .zkachel { flex-basis: 100%; } }

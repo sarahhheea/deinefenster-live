@@ -11,18 +11,18 @@
     var form = hilfe.querySelector('form');
     var erg = hilfe.querySelector('.hilfe__ergebnis');
     function wert(n) { var x = form.querySelector('input[name="' + n + '"]:checked'); return x ? x.value : ''; }
+    /* Regeln je Seite aus dem Bauskript: erste passende Regel gewinnt, die letzte ({}) ist der Standard */
     function zeigen() {
-      var wichtig = wert('wichtig'), richtung = wert('richtung'), k, warum;
-      if (richtung === 'aussen') { k = d.ext; warum = 'Öffnet nach außen; innen bleibt der Platz vor dem Fenster frei.'; }
-      else if (wichtig === 'daemmung') { k = d.energy; warum = 'Der niedrigste Uw-Wert unserer bestellbaren Kunststoffprofile, Dreifachglas serienmäßig. Beim Fenstertausch prüfen, ob die Laibung 82 mm Bautiefe aufnimmt.'; }
-      else if (wichtig === 'licht') { k = d.light; warum = 'Die schmale Profilform: weniger Rahmen, mehr Glas.'; }
-      else if (wichtig === 'form') { k = d.edge; warum = 'Die moderne, eckige Profilform auf Basis der 82-mm-Technik.'; }
-      else { k = d.classic; warum = 'Das bewährte 70-mm-Profil; passt gut in vorhandene Laibungen.'; }
+      var r = d.regeln.filter(function (x) {
+        return Object.keys(x.wenn).every(function (n) { return wert(n) === x.wenn[n]; });
+      })[0];
+      var k = r.ziel, anfrage = erg.querySelector('[data-anfrage]');
       erg.classList.remove('neu'); void erg.offsetWidth; if (!ruhig) erg.classList.add('neu');
       erg.querySelector('[data-name]').textContent = k.name;
-      erg.querySelector('[data-warum]').textContent = warum;
+      erg.querySelector('[data-warum]').textContent = r.warum;
       erg.querySelector('[data-bautiefe]').textContent = k.bautiefe;
       erg.querySelector('[data-uw]').textContent = k.uw;
+      if (anfrage) anfrage.hidden = !k.anfrage;
     }
     form.addEventListener('change', zeigen);
     zeigen();
@@ -81,5 +81,26 @@
     ziele.forEach(function (z) { if (z) o.observe(z); });
   }
   aktiv('.sprungleiste a', true);
+
+  /* Sprungleiste: Ziel landet sicher unter der Leiste. 01.10. UX-Prüfung: Während des sanften Scrollens laden
+     Bilder oberhalb nach, das Ziel rutscht nach unten und die Überschrift lag bis 800 px außerhalb des Bildes.
+     Darum nach dem Scrollen nachmessen und bis zu dreimal nachkorrigieren. */
+  document.querySelectorAll('.sprungleiste a, .leseteil__inhalt a').forEach(function (a) {
+    a.addEventListener('click', function (ev) {
+      var ziel = document.querySelector(a.getAttribute('href'));
+      if (!ziel) return;
+      ev.preventDefault();
+      history.replaceState(null, '', a.getAttribute('href'));
+      var n = 0;
+      function hin(art) { ziel.scrollIntoView({ behavior: art, block: 'start' }); }
+      function pruefen() {
+        var soll = (parseFloat(getComputedStyle(ziel).scrollMarginBlockStart) || 0) + (parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0);
+        if (Math.abs(ziel.getBoundingClientRect().top - soll) > 6 && n++ < 3) { hin('auto'); setTimeout(pruefen, 250); }
+      }
+      hin(ruhig ? 'auto' : 'smooth');
+      if ('onscrollend' in window) window.addEventListener('scrollend', function f() { window.removeEventListener('scrollend', f); pruefen(); });
+      else setTimeout(pruefen, 900);
+    });
+  });
   aktiv('.leseteil__inhalt a', false);
 })();
