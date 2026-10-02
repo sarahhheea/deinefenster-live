@@ -286,10 +286,13 @@ function anschlagInfo(){
         pikto={typ:'kipp',hinge:'r',richtung:'innen'};
       }
       else if(t.hinge){
-        const b=seiteWort(t.hinge), g=seiteWort(t.hinge==='r'?'l':'r');
-        klar='Band '+b+' · Griff '+g+' — von innen gesehen';
-        // IGLO EXT oeffnet nach aussen: vorher stand hier auch bei EXT „nach innen“, direkt neben „nach außen“
+        // IGLO EXT oeffnet nach aussen: vorher stand hier auch bei EXT „nach innen“, direkt neben „nach außen“.
+        // Nach aussen oeffnend wird DIN links/rechts von aussen bestimmt -- von innen gesehen liegen die
+        // Baender dann auf der Gegenseite (so zeichnen es Skizze und Kartenfoto).
         const aussen=(typeof istExt==='function' && istExt()) || (S.prod==='balkon' && S.profile==='ext');
+        const bandInnen=aussen?(t.hinge==='r'?'l':'r'):t.hinge;
+        const b=seiteWort(bandInnen), g=seiteWort(bandInnen==='r'?'l':'r');
+        klar='Band '+b+' · Griff '+g+' — von innen gesehen';
         satz=(aussen?'Öffnet nach außen, Band ':(t.open==='dk'?'Öffnet und kippt nach innen, Band ':'Öffnet nach innen, Band '))+b+', Griff '+g+' — von innen gesehen.';
         pikto={typ:'dreh',hinge:t.hinge,richtung:aussen?'aussen':'innen'};
       }
@@ -852,7 +855,8 @@ function motorZeichnung(isBalkon){
   return z;
 }
 function motorStageSVG(isBalkon){
-  if(S.profile==='ext') return null;   // Baender fehlen im neuen Motor noch (s.o.)
+  // IGLO EXT zeichnet der Motor ohne Bandkappen: nach aussen oeffnend liegen die Baender aussen,
+  // von innen sind sie nicht zu sehen (Drutex-Katalog PVC S. 28/29). Das ist richtig so.
   motorLaden();
   if(!motorBereit()) return null;
   try{
@@ -2699,7 +2703,7 @@ function panelHTML(){
         : `<div class="vis anschlagvis">${miniAnschlag(o.oeff,o.stulpAt||0)}</div>`;
       return `<div class="ocard ${on?'on':''}" onclick="setAnschlag(${idx})">${tick}${o.tag?`<span class="fav">${o.tag}</span>`:''}${vis}<div class="t">${o.n}</div></div>`;
     }).join('');
-    const cols=liste.length<=2?'two':(liste.length===4?'two':'three');
+    const cols=liste.length===1?'two einzeln':(liste.length<=2?'two':(liste.length===4?'two':'three'));
 
     let lichtBlock='';
     if(S.prod==='fenster' && lichtAktiv() && _LICHT[_lichtKey(null)]){
@@ -4008,17 +4012,23 @@ function lichtKombis(){
   const ord=(S.licht==='ober')?'-oberlicht':'-unterlicht', ksuf=(S.licht==='ober')?'-olk':'-ulk';
   const dsu=(S.licht==='ober')?'-oldk':'-uldk';
 
-  const paare = kippGeht
+  const ext=istExt();
+  const paare = ext
+    ? (kippGeht ? [['dreh-r','fest'],['dreh-l','fest'],['dreh-r','kipp'],['dreh-l','kipp']] : [['dreh-r','fest'],['dreh-l','fest']])
+    : kippGeht
     ? [['dk-r','fest'],['dk-l','fest'],['dk-r','kipp'],['dk-l','kipp'],['dk-r','dk-r'],['dk-l','dk-l']]
     : [['dk-r','fest'],['dk-l','fest']];
   const namen={'dk-r':'Dreh-Kipp rechts','dk-l':'Dreh-Kipp links','dreh-r':'Dreh rechts','dreh-l':'Dreh links'};
   const lwort={fest:' fest verglast', kipp:' zum Kippen', 'dk-r':' dreh- und kippbar', 'dk-l':' dreh- und kippbar'};
   const dsuf={fest:'', kipp:ksuf, 'dk-r':dsu, 'dk-l':dsu};
-  return paare.map(([oe,typ])=>({
+  const liste=paare.map(([oe,typ])=>({
     oeff:oe, typ:typ, feld:feld, idx:idxOf(oe),
-    n:namen[oe], s:wort+lwort[typ],
-    img:'img/karten/anschlag-1f'+ord+'/'+oe+dsuf[typ]+'.webp'
+    n:ext?(oe==='dreh-r'?'DIN rechts · nach außen':'DIN links · nach außen'):namen[oe], s:wort+lwort[typ],
+    img: ext ? 'img/karten/anschlag-ext/oeffnung-1f-ext-'+oe+(S.licht==='ober'?'-ober':'-unter')+(typ==='kipp'?ksuf:'')+'.webp'
+             : 'img/karten/anschlag-1f'+ord+'/'+oe+dsuf[typ]+'.webp'
   })).filter(c=>c.idx>=0);
+  // Leere Liste hiesse: Schritt ohne eine einzige Karte. Dann lieber die normale Auswahl zeigen.
+  return liste.length ? liste : null;
 }
 function setAnschlagLicht(idx,feld,typ){
   S.anschlagIdx=idx;
@@ -4048,6 +4058,18 @@ function oeffCardImg(o){
   const _lichtOrd = (S.prod==='fenster' && typeof lichtAktiv==='function' && lichtAktiv())
     ? ({ober:'-oberlicht', unter:'-unterlicht', beide:'-ober-unter'})[S.licht] : '';
   if(_lichtOrd) _matOrd=_lichtOrd;
+  // IGLO EXT: eigene Fotokarten (nach aussen, gestricheltes Oeffnungssymbol)
+  if(istExt()){
+    const n=of.length, art=(n===1)?of[0]:(stulp?'stulp':'pfosten');
+    let licht='';
+    if(_lichtOrd){
+      licht=({ober:'-ober', unter:'-unter', beide:'-beide'})[S.licht]||'';
+      const olk=(S.licht==='ober'||S.licht==='beide') && S.olTyp==='kipp', ulk=(S.licht==='unter'||S.licht==='beide') && S.ulTyp==='kipp';
+      if(olk) licht+='-olk'; if(ulk) licht+='-ulk';
+    }
+    return 'img/karten/anschlag-ext/oeffnung-'+n+'f-ext-'+art+licht+'.webp';
+  }
+  if(S.prod==='balkon' && S.profile==='ext' && of.length===2) return 'img/karten/anschlag-ext/balkon-oeffnung-2fl-ext-st.webp';
   if(S.prod==='balkon'){
     const m={'dk-l':'dk-links','dk-r':'dk-rechts','dreh-l':'dreh-links','dreh-r':'dreh-rechts'};
     if(of.length===1) return 'img/karten/balkon-anschlag-1f/'+(m[of[0]]||of[0])+'.webp';
