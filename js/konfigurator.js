@@ -276,8 +276,10 @@ function anschlagInfo(){
       else if(t.hinge){
         const b=seiteWort(t.hinge), g=seiteWort(t.hinge==='r'?'l':'r');
         klar='Band '+b+' · Griff '+g+' — von innen gesehen';
-        satz=(t.open==='dk'?'Öffnet und kippt nach innen, Band ':'Öffnet nach innen, Band ')+b+', Griff '+g+' — von innen gesehen.';
-        pikto={typ:'dreh',hinge:t.hinge,richtung:'innen'};
+        // IGLO EXT oeffnet nach aussen: vorher stand hier auch bei EXT „nach innen“, direkt neben „nach außen“
+        const aussen=(typeof istExt==='function' && istExt());
+        satz=(aussen?'Öffnet nach außen, Band ':(t.open==='dk'?'Öffnet und kippt nach innen, Band ':'Öffnet nach innen, Band '))+b+', Griff '+g+' — von innen gesehen.';
+        pikto={typ:'dreh',hinge:t.hinge,richtung:aussen?'aussen':'innen'};
       }
     } else if(toks.length>1){
 
@@ -1174,7 +1176,7 @@ function _haFlaecheAusS(){
 }
 function massLimits(){
 
-  if(S.prod==='balkon') return {bMin:600,bMax:2500,hMin:1800,hMax:2400};
+  if(S.prod==='balkon') return balkonGrenzen();
   if(S.prod==='haustuer') return {bMin:800,bMax:1400,hMin:1800,hMax:2400};
   if(S.prod==='schiebe') return {bMin:1800,bMax:6500,hMin:1800,hMax:2600};
 
@@ -1212,6 +1214,16 @@ function _massEigen(){
     if(fm){ bMin=fm[0]; hMin=fm[1]; }
   }catch(e){}
   return {bMin,bMax,hMin,hMax};
+}
+
+/* Balkontuer: Grenzen je Profil und Fluegelzahl wie im Katalog (Betriebsgrenzen 22.09.2026, vorlaeufig).
+   Nur enger als bisher (Hoehe 1800-2400), nie weiter: jedes Mass hier hat einen geprueften Preis.
+   Vorher lag fuer alle 600-2500 mm Breite offen, auch einfluegelig -- solche Tueren baut niemand,
+   und die Preisauskunft lieferte dafuer Phantasiewerte. */
+function balkonGrenzen(){
+  const zwei=(S.aufteilung==='2fl'), ext=(S.profile==='ext');
+  const b= ext ? (zwei?[1350,2000]:[700,1000]) : (zwei?[1000,2000]:[600,1000]);
+  return {bMin:b[0], bMax:b[1], hMin:1800, hMax:(ext?2200:2400)};
 }
 
 function massKlemmen(){
@@ -1666,30 +1678,38 @@ const PROFILE_KAT={
 
   kunststoff:[
     {v:'classic', img:'iglo5-zentriert',               t:'IGLO 5 Classic', s:'flächenversetzt',
-     sp:[['Bautiefe','70 mm'],['Kammern','5'],['Dichtungen','2 EPDM'],['Uw in W/(m²K)','0,86']]},
+     sp:[['Bautiefe','70 mm'],['Kammern','5'],['Dichtungen','2 EPDM'],['Uw in W/(m²K)','0,83'],['Uw gilt für','Fenster 1230×1480 mm, Ug 0,6, Argon, Swisspacer Ultimate']]},
     {v:'light',   img:'iglo-light-zentriert',          t:'IGLO Light', s:'schmaler Rahmen, mehr Glas',
-     sp:[['Bautiefe','70 mm'],['Kammern','5'],['Dichtungen','2 EPDM'],['Uw in W/(m²K)','0,88']]},
-    {v:'ext',     img:'iglo-ext-zentriert',            t:'IGLO 5 Classic EXT', s:'öffnet nach außen',
-     sp:[['Bautiefe','70 mm'],['Kammern','5'],['Dichtungen','2 EPDM'],['Uw in W/(m²K)','0,89']]},
+     sp:[['Bautiefe','70 mm'],['Kammern','5'],['Dichtungen','2 EPDM'],['Uw in W/(m²K)','0,88'],['Uw gilt für','Fenster 1230×1480 mm, Ug 0,6, Argon, Swisspacer Ultimate']]},
+    {v:'ext',     img:'iglo-ext-zentriert',            t:'IGLO EXT', s:'öffnet nach außen',
+     sp:[['Bautiefe','70 mm'],['Kammern','5'],['Dichtungen','2 EPDM'],['Uw in W/(m²K)','0,89'],['Uw gilt für','Fenster 1230×1480 mm, Ug 0,6, Argon, Swisspacer Kunststoff']]},
     {v:'energy',  img:'iglo-energy-classic-zentriert', t:'IGLO Energy Classic', s:'flächenversetzt',
-     sp:[['Bautiefe','82 mm'],['Kammern','7'],['Dichtungen','3'],['Uw in W/(m²K)','0,73']]},
+     sp:[['Bautiefe','82 mm'],['Kammern','7'],['Dichtungen','3'],['Uw in W/(m²K)','0,73'],['Uw gilt für','Fenster 1230×1480 mm, Ug 0,5, Argon, Swisspacer Ultimate']]},
     {v:'edge',    img:'iglo-edge-zentriert',           t:'IGLO EDGE', s:'flächenversetzt',
-     sp:[['Bautiefe','82 mm'],['Kammern','7'],['Dichtungen','3 EPDM'],['Uw in W/(m²K)','0,66']]}],
+     sp:[['Bautiefe','82 mm'],['Kammern','7'],['Dichtungen','3 EPDM'],['Uw in W/(m²K)','0,66'],['Uw gilt für','Fenster 1230×1480 mm, Ug 0,4, Argon, Swisspacer Ultimate']]}],
   holz:[
     {v:'softline68', img:'softline68', t:'Softline 68 mm',
-     sp:[['Bautiefe','68 mm'],['Dichtungen','2'],['Uw in W/(m²K)','1,08']]},
+     sp:[['Bautiefe','68 mm'],['Dichtungen','2'],['Uw in W/(m²K)','1,08'],['Uw gilt für','Fenster 1230×1480 mm, Meranti, Ug 0,8, Argon, Swisspacer']]},
     {v:'softline78', img:'softline78', t:'Softline 78 mm',
-     sp:[['Bautiefe','78 mm'],['Dichtungen','2'],['Uw in W/(m²K)','0,90']]},
+     sp:[['Bautiefe','78 mm'],['Dichtungen','2'],['Uw in W/(m²K)','0,90'],['Uw gilt für','Fenster 1230×1480 mm, Meranti, Ug 0,8, Argon, Swisspacer']]},
     {v:'softline88', img:'softline88', t:'Softline 88 mm',
-     sp:[['Bautiefe','88 mm'],['Dichtungen','2'],['Uw in W/(m²K)','0,80']]}],
+     sp:[['Bautiefe','88 mm'],['Dichtungen','2'],['Uw in W/(m²K)','0,80'],['Uw gilt für','Fenster 1230×1480 mm, Meranti, Ug 0,8, Argon, Swisspacer']]}],
   alu:[
     {v:'mb70',   img:'mb70',   t:'MB-70',
-     sp:[['Bautiefe','70 mm'],['Dichtungen','3 EPDM'],['Uw in W/(m²K)','1,06']]},
+     sp:[['Bautiefe','70 mm'],['Dichtungen','3 EPDM'],['Uw in W/(m²K)','auf Anfrage']]},
     {v:'mb70hi', img:'mb70hi', t:'MB-70HI',
-     sp:[['Bautiefe','70 mm'],['Dichtungen','3 EPDM'],['Uw in W/(m²K)','0,96']]},
+     sp:[['Bautiefe','70 mm'],['Dichtungen','3 EPDM'],['Uw in W/(m²K)','0,96'],['Uw gilt für','Fenster 1230×1480 mm, Ug 0,5, Argon, Swisspacer']]},
     {v:'mb86si', img:'mb86si', t:'MB-86N SI',
-     sp:[['Bautiefe','77 mm'],['Dichtungen','3 EPDM'],['Uw in W/(m²K)','0,76']]}]
+     sp:[['Bautiefe','77 mm'],['Dichtungen','3 EPDM'],['Uw in W/(m²K)','0,76'],['Uw gilt für','Fenster 1230×1480 mm, Ug 0,5, Argon, Swisspacer']]}]
 };
+
+/* Drutex nennt den Uw des Softline-Fensters nur fuer Meranti (Katalog Holz/Alu, S. 75, *2);
+   fuer Kiefer gibt es keinen Beleg, also dort keine Zahl. */
+function profilWerte(mat,p){
+  if(mat!=='holz' || S.holzart==='meranti') return p.sp;
+  return p.sp.filter(function(z){ return z[0]!=='Uw gilt für'; })
+    .map(function(z){ return z[0]==='Uw in W/(m²K)' ? [z[0],'auf Anfrage'] : z; });
+}
 
 const KARTE_PFAD='img/karten/profil/';
 
@@ -2429,8 +2449,12 @@ const KI_HINWEIS = {
 function kiHinweisHTML(key){ const h=KI_HINWEIS[key]; return h?`<p class="ai-note">${h}</p>`:''; }
 
 function choiceCardImg(on,fn,img,t,s,werte){
-  const liste=(werte&&werte.length)
-    ? `<dl class="pspecs">${werte.map(([k,v])=>`<div class="pspec"><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>`
+  // Die Messbedingung zum Uw ist zu lang fuer eine Tabellenzeile: als Fussnote unter die Werte, umbrechend.
+  const bed=(werte||[]).find(z=>z[0]==='Uw gilt für');
+  const zeilen=(werte||[]).filter(z=>z[0]!=='Uw gilt für');
+  const liste=zeilen.length
+    ? `<dl class="pspecs">${zeilen.map(([k,v])=>`<div class="pspec"><dt>${k}</dt><dd>${v}${(bed&&k==='Uw in W/(m²K)')?'*':''}</dd></div>`).join('')}</dl>`
+      +(bed?`<p class="pspec-bed" style="margin:6px 0 0;font-size:12px;line-height:1.35;color:#6b7280;white-space:normal;text-align:left">* Uw für ${bed[1]} (Herstellerangabe)</p>`:'')
     : '';
   return `<div class="ocard ${on?'on':''}" onclick="${fn}"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="vis"><img src="${img}" loading="lazy" decoding="async" alt="${t} (KI-generiertes Symbolbild)"></div><div class="t">${t}</div>${s?`<div class="s">${s}</div>`:''}${liste}</div>`;
 }
@@ -2459,7 +2483,7 @@ function panelHTML(){
 
     const _cls=((_liste.length>2) ? ('three'+((_liste.length%3)?' mitte':'')) : 'two')+' profilw';
     return grp('Profil-System', _cls, _liste.map(function(p){
-      return choiceCardImg(S.profile===p.v, "setProfil('"+p.v+"')", profilBild(_mat,p), p.t, p.s||'', p.sp);
+      return choiceCardImg(S.profile===p.v, "setProfil('"+p.v+"')", profilBild(_mat,p), p.t, p.s||'', profilWerte(_mat,p));
     }).join(''));
   }
   if(k==='psk'){
