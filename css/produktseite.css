@@ -474,7 +474,7 @@ section[aria-labelledby="faq-titel"] .frage summary { padding-inline: 0; font-si
 
 /* ===== Art-Director-Runde 01.10.2026 ===== */
 /* Rhythmus: normale Abschnitte weiß, Flächen grau (beide Tokens waren #f4f5f7) */
-.abschnitt:not(.abschnitt--flaeche), .abschnitt:not(.abschnitt--flaeche) > .df-wrap { background: var(--df-color-white); }
+.abschnitt:not(.abschnitt--flaeche):not(.abschnitt--dunkel), .abschnitt:not(.abschnitt--flaeche):not(.abschnitt--dunkel) > .df-wrap { background: var(--df-color-white); }
 .abschnitt--flaeche, .abschnitt--flaeche > .df-wrap { background: #eef1f4; }
 .farbwahl__buehne { background: transparent; }
 /* Zahlen mit Einheit in der Textschrift (Switzer verzerrte „W/(m²K)“ am Handy) */
@@ -603,3 +603,29 @@ section[aria-labelledby="faq-titel"] .frage summary { padding-inline: 0; font-si
     var(--df-color-white); }
 @media (max-width: 860px) { .matrix::before { content: "Zum Vergleich seitlich wischen →"; display: block; position: sticky; inset-inline-start: 0; padding: var(--df-space-2) var(--df-space-3) 0; color: var(--df-color-text-muted); font-size: var(--df-text-1); } }
 .matrix__tabelle a.matrix__name { color: var(--df-color-primary); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+
+/* 02.10.2026 Inhaltsseiten im Design der Produktseiten: Seitenkopf mit Bild, Leseteil mit h2-Kapiteln */
+.seitenkopf { padding-block: calc(var(--df-space-section) * .7) var(--df-space-7); }
+.seitenkopf__raster { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--df-space-7); align-items: center; }
+.seitenkopf--bild .seitenkopf__raster { grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); }
+.seitenkopf__text { max-inline-size: 62ch; }
+.seitenkopf__text .abschnitt__titel { font-size: clamp(2rem, 1.3rem + 2.4vw, 3.25rem); line-height: 1.08; letter-spacing: -0.02em; }
+.seitenkopf__text .material-wege { margin-block-start: var(--df-space-5); }
+.seitenkopf__bild { position: relative; margin: 0; overflow: hidden; border-radius: var(--df-radius-lg); aspect-ratio: 4 / 3; background: var(--df-color-surface-subtle); box-shadow: var(--df-shadow-card); }
+.seitenkopf__bild img { display: block; inline-size: 100%; block-size: 100%; object-fit: cover; }
+.seitenkopf__bild .ki-hinweis { position: absolute; inset-block-start: var(--df-space-2); inset-inline-end: var(--df-space-2); }
+@media (max-width: 860px) { .seitenkopf--bild .seitenkopf__raster { grid-template-columns: minmax(0, 1fr); } .seitenkopf__bild { order: -1; aspect-ratio: 16 / 10; } }
+.leseteil__teil > h2, .leseteil__teil > .abschnitt__titel { margin: 0 0 var(--df-space-3); font: var(--df-font-weight-semibold) var(--df-text-5) / 1.25 var(--df-font-display); letter-spacing: -0.01em; scroll-margin-block-start: 72px; }
+.leseteil__teil h3 { scroll-margin-block-start: 72px; }
+.leseteil__teil .service__liste li { color: var(--df-color-text); }
+.leseteil__teil .service__kasten { margin-block: var(--df-space-4); }
+.leseteil__teil .matrix { margin-block: var(--df-space-4); }
+.leseteil__teil .service__weg { margin-block-start: var(--df-space-4); }
+.leseteil__teil a.knopf:not(.knopf--zweit) { color: var(--df-color-white); } .leseteil__teil a.knopf--zweit { color: var(--df-color-primary); }
+.seitenkopf:not(.seitenkopf--bild) .seitenkopf__text { max-inline-size: none; }
+.seitenkopf:not(.seitenkopf--bild) .seitenkopf__text > .abschnitt__einleitung { max-inline-size: 62ch; }
+.leseteil__teil > h2 ~ h3, .leseteil__teil > .abschnitt__titel ~ h3 { margin: var(--df-space-5) 0 var(--df-space-2); font-size: var(--df-text-4); }
+.seitenkopf__bild--produkt { aspect-ratio: 4 / 3; background: var(--df-color-white); } .seitenkopf__bild--produkt img { object-fit: contain; padding: var(--df-space-4); } .kenndaten__mehr { margin-block: var(--df-space-5) var(--df-space-3); } .abschnitt__ueber a { color: inherit; text-decoration: none; } .abschnitt__ueber a:hover { text-decoration: underline; }
+.abschnitt--dunkel .abschnitt__ueber { color: rgba(255, 255, 255, .82); }
+.kenndaten__mehr { margin-block: var(--df-space-6) var(--df-space-3) !important; }
+.abschnitt--dunkel > .df-wrap { background: transparent; } /* 02.10.: dunkle Abschnitte (Über uns) behalten ihren Grund */
