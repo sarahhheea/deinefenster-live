@@ -86,6 +86,17 @@
   }
   aktiv('.sprungleiste a', true);
 
+  /* 02.10.: Kacheln neigen sich leicht zur Maus (nur feine Zeiger, nicht bei „Bewegung reduzieren“) */
+  if (!ruhig && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    document.querySelectorAll('.zkachel, .kollektion, .rest__karte').forEach(function (k) {
+      k.addEventListener('pointermove', function (ev) {
+        var r = k.getBoundingClientRect(), x = (ev.clientX - r.left) / r.width - .5, y = (ev.clientY - r.top) / r.height - .5;
+        k.style.setProperty('--ny', (x * 6).toFixed(2) + 'deg'); k.style.setProperty('--nx', (-y * 6).toFixed(2) + 'deg');
+      });
+      k.addEventListener('pointerleave', function () { k.style.removeProperty('--nx'); k.style.removeProperty('--ny'); });
+    });
+  }
+
   /* Sprungleiste: Ziel landet sicher unter der Leiste. 01.10. UX-Prüfung: Während des sanften Scrollens laden
      Bilder oberhalb nach, das Ziel rutscht nach unten und die Überschrift lag bis 800 px außerhalb des Bildes.
      Darum nach dem Scrollen nachmessen und bis zu dreimal nachkorrigieren. */

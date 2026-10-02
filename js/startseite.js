@@ -149,11 +149,20 @@
       })
       .catch(function () { /* ohne Daten bleiben die Verweise auf den Shop stehen */ });
   }
-  /* Erst nach dem Laden der Seite: das Einstiegsbild hat Vorrang */
-  if (document.readyState === 'complete') (window.requestIdleCallback || function (f) { setTimeout(f, 1500); })(laden);
-  else window.addEventListener('load', function () {
-    (window.requestIdleCallback || function (f) { setTimeout(f, 1500); })(laden);
-  });
+  /* 02.10.2026: Die Lagerdaten sind 1,8 MB. Nur sofort (nach dem Laden) holen, wenn die Seite selbst Lagerzahlen zeigt;
+     sonst erst, wenn jemand das Menü mit den Lagerzahlen öffnet (Zeiger, Tastatur oder Antippen). */
+  var imInhalt = document.querySelector('main [data-lager], main [data-lager-liste]');
+  if (imInhalt) {
+    if (document.readyState === 'complete') (window.requestIdleCallback || function (f) { setTimeout(f, 1500); })(laden);
+    else window.addEventListener('load', function () {
+      (window.requestIdleCallback || function (f) { setTimeout(f, 1500); })(laden);
+    });
+  } else {
+    document.querySelectorAll('[data-lager]').forEach(function (el) {
+      var menue = el.closest('.dfnav-item, details, .kopf__menue') || el.parentElement;
+      ['pointerenter', 'focusin', 'toggle', 'touchstart'].forEach(function (ev) { menue.addEventListener(ev, laden, { once: true, passive: true }); });
+    });
+  }
 })();
 
 // Schnellstart: Material gibt es nur bei Fenstern. Bei anderen Produkten ausblenden und

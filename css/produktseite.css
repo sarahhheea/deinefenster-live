@@ -530,7 +530,7 @@ section[aria-labelledby="faq-titel"] .frage summary { padding-inline: 0; font-si
 .zkachel__bild .ki-hinweis { position: absolute; inset-block-start: var(--df-space-2); inset-inline-end: var(--df-space-2); }
 .zkachel__text { display: flex; flex-direction: column; gap: var(--df-space-2); flex: 1; padding: var(--df-space-4) var(--df-space-5) var(--df-space-5); }
 .zkachel { transition: transform var(--df-duration-fast), box-shadow var(--df-duration-fast); }
-.zkachel:hover { transform: translateY(-2px); box-shadow: var(--df-shadow-overlay); }
+.zkachel:hover { box-shadow: var(--df-shadow-overlay); }
 .zkachel__text h3 { margin: 0; font: var(--df-font-weight-semibold) var(--df-text-4) / 1.3 var(--df-font-display); }
 .zkachel__text p { margin: 0; color: var(--df-color-text-muted); font-size: var(--df-text-3); line-height: var(--df-leading-relaxed); }
 .zkachel__text .zkachel__werte { color: var(--df-color-text); font-size: var(--df-text-2); font-weight: var(--df-font-weight-medium); }
@@ -555,7 +555,7 @@ section[aria-labelledby="faq-titel"] .frage summary { padding-inline: 0; font-si
   .hilfe__anfrage { margin: var(--df-space-3) 0 0; display: flex; }
 }
 @media (prefers-reduced-motion: reduce) { .zkachel__bild img { transition: none; } .zkachel:hover .zkachel__bild img { transform: none; } }
-@media (prefers-reduced-motion: reduce) { .zkachel, .zkachel:hover { transition: none; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .zkachel, .zkachel:hover, .kollektion, .rest__karte { transition: none; transform: none; } }
 
 .farbton__punkt { display: inline-block; inline-size: 14px; block-size: 14px; margin-inline-end: 6px; vertical-align: -2px; border-radius: var(--df-radius-full); background: var(--farbe); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .15); }
 #waerme .abschnitt__einleitung { margin-block-end: var(--df-space-6); max-inline-size: 68ch; }
@@ -653,3 +653,75 @@ section[aria-labelledby="faq-titel"] .frage summary { padding-inline: 0; font-si
   .sprungleiste li { scroll-snap-align: start; }
 }
 .sprungleiste ul { position: relative; }
+
+/* ===== 02.10.2026 Wow-Runde – nur transform/Schatten, nichts startet unsichtbar, alles mit reduce-Rückfall ===== */
+/* 1) Seitenkopf: Lichtstreif beim Laden, Bild zieht beim Scrollen leicht heran */
+.seitenkopf__bild::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, .38) 50%, transparent 65%); transform: translateX(-120%); }
+@media (prefers-reduced-motion: no-preference) {
+  .seitenkopf__bild::after { animation: df-lichtstreif 1.6s .4s cubic-bezier(.2, .7, .2, 1) 1 both; }
+  @supports (animation-timeline: scroll()) {
+    .seitenkopf__bild img { animation: df-kopfzoom linear both; animation-timeline: scroll(root); animation-range: 0 70vh; }
+  }
+}
+@keyframes df-lichtstreif { to { transform: translateX(120%); } }
+@keyframes df-kopfzoom { from { transform: none; } to { transform: scale(1.06) translateY(2%); } }
+
+/* 2) Lesefortschritt am Inhaltsverzeichnis */
+.leseteil { view-timeline-name: --lesen; view-timeline-axis: block; }
+.leseteil__inhalt ol { position: relative; }
+.leseteil__inhalt ol::before, .leseteil__inhalt ol::after { content: ""; position: absolute; inset-block: 0; inset-inline-start: -14px; inline-size: 2px; border-radius: 2px; }
+.leseteil__inhalt ol::before { background: var(--df-color-border); }
+.leseteil__inhalt ol::after { background: var(--df-color-primary); transform: scaleY(0); transform-origin: top; }
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .leseteil__inhalt ol::after { animation: df-lesen linear both; animation-timeline: --lesen; animation-range: contain 0% contain 100%; }
+  }
+}
+@media (prefers-reduced-motion: reduce), not all and (min-width: 861px) { .leseteil__inhalt ol::before, .leseteil__inhalt ol::after { display: none; } }
+@keyframes df-lesen { to { transform: scaleY(1); } }
+
+/* 3) Kapitel steigen gestaffelt auf */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .leseteil__teil > h2, .leseteil__teil > h3, .leseteil__teil .service__kasten, .leseteil__teil .matrix,
+    .zkachel, .kollektion, .bildreihe__eintrag { animation: df-steigt linear both; animation-timeline: view(); animation-range: entry 0% entry 45%; }
+    .zkachel:nth-child(3n+2), .kollektion:nth-child(3n+2) { animation-range: entry 6% entry 51%; }
+    .zkachel:nth-child(3n), .kollektion:nth-child(3n) { animation-range: entry 12% entry 57%; }
+  }
+}
+@keyframes df-steigt { from { translate: 0 18px; } to { translate: 0 0; } }  /* translate statt transform: die Neigung der Kacheln nutzt transform */
+
+/* 5) Primärknopf: Lichtstreif beim Darüberfahren, Pfeil läuft */
+.knopf:not(.knopf--zweit) { position: relative; overflow: hidden; isolation: isolate; }
+.knopf:not(.knopf--zweit)::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, .28) 50%, transparent 70%); transform: translateX(-120%); pointer-events: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .knopf:not(.knopf--zweit):hover::after { transform: translateX(120%); transition: transform .7s cubic-bezier(.2, .7, .2, 1); }
+  .knopf:hover svg, .df-mehr:hover svg { animation: df-pfeil .6s ease-in-out 1; }
+}
+@keyframes df-pfeil { 50% { transform: translateX(4px); } }
+
+/* 6) Kacheln mit Tiefe (Neigung setzt js/produktseite.js) */
+.zkachel, .kollektion, .rest__karte { transform: perspective(900px) rotateX(var(--nx, 0deg)) rotateY(var(--ny, 0deg)); transition: transform .25s ease-out, box-shadow .25s ease-out; will-change: transform; }
+
+/* 7) Tabellenzeilen: Akzentlinie beim Darüberfahren */
+.matrix__tabelle tbody tr:not(.matrix__gruppe):hover > th { box-shadow: inset 3px 0 0 var(--df-color-primary); }
+
+/* 8) Faktenleiste: Linie zeichnet sich beim Einscrollen, Ziffern gleich breit */
+.fakten__zahl { font-variant-numeric: tabular-nums; }
+.fakten__liste li { position: relative; border-block-start-color: var(--df-color-border); }
+.fakten__liste li::before { content: ""; position: absolute; inset-block-start: -2px; inset-inline: 0; block-size: 2px; background: var(--df-color-text); transform-origin: left; }
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .fakten__liste li::before { animation: df-linie linear both; animation-timeline: view(); animation-range: entry 10% entry 70%; }
+  }
+}
+@keyframes df-linie { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* 9) Abschluss: hell bleibt (30.09.), rechts läuft ein Stimmungsbild in die Fläche aus */
+.abschluss { position: relative; overflow: hidden; isolation: isolate; }
+.abschluss::after { content: ""; position: absolute; z-index: -1; inset-block: 0; inset-inline-end: 0; inline-size: 46%; pointer-events: none;
+  background: url(/img/produktwelt/morgenlicht-800.webp) center / cover no-repeat; opacity: .5;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 55%); mask-image: linear-gradient(to right, transparent, #000 55%); }
+.abschluss__innen { position: relative; }
+.abschluss__innen > * { max-inline-size: 56ch; }
+@media (max-width: 860px) { .abschluss::after { display: none; } }
