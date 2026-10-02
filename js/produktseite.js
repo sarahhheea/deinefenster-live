@@ -77,6 +77,9 @@
         if (!x.isIntersecting) return;
         var i = ziele.indexOf(x.target);
         links.forEach(function (a, j) { a.parentElement.classList.toggle('ist-aktiv', i === j); if (i === j && attr) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current'); });
+        /* 02.10.: aktiven Punkt in der waagerecht wischbaren Leiste sichtbar halten (nur die Leiste scrollen, nie die Seite) */
+        var li = links[i] && links[i].parentElement, ul = li && li.parentElement;
+        if (attr && ul && ul.scrollWidth > ul.clientWidth) ul.scrollTo({ left: Math.max(0, li.offsetLeft - 16), behavior: ruhig ? 'auto' : 'smooth' });
       });
     }, { rootMargin: '-30% 0px -60% 0px' });
     ziele.forEach(function (z) { if (z) o.observe(z); });
