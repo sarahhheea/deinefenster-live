@@ -178,6 +178,18 @@ const BALKON_ANSCHLAG={
   ],
 };
 const ANSCHLAG_DEFIDX={'1fl':0,'2fl':0,'3fl':0};
+/* Balkontuer IGLO EXT oeffnet nach aussen und kippt nicht: einfluegelig nur Dreh links/rechts,
+   zweifluegelig nur mit Stulp (Katalog: 1fl-dreh-l/-r, 2fl-ext-st). Vorher bekam EXT die
+   Dreh-Kipp-Liste der normalen Balkontuer. */
+const BALKON_EXT_ANSCHLAG={
+  '1fl':[
+    {n:'DIN links · nach außen',oeff:['dreh-l']},
+    {n:'DIN rechts · nach außen',oeff:['dreh-r']},
+  ],
+  '2fl':[
+    {n:'DIN rechts · Stulp · DIN links · nach außen',oeff:['dreh-r','dreh-l'],stulpAt:1},
+  ],
+};
 
 const EXT_ANSCHLAG={
   '1fl':[
@@ -196,7 +208,7 @@ const EXT_ANSCHLAG={
 function istExt(){ return S.prod==='fenster' && S.material==='kunststoff' && S.profile==='ext'; }
 
 const HAUSTUER_ANSCHLAG=[{n:'DIN links',oeff:['dreh-l']},{n:'DIN rechts',oeff:['dreh-r']}];
-function anschlagSet(){ if(S.prod==='haustuer') return HAUSTUER_ANSCHLAG; if(S.prod==='balkon') return BALKON_ANSCHLAG[S.aufteilung]||BALKON_ANSCHLAG['1fl']; if(istExt()) return EXT_ANSCHLAG[S.aufteilung]||EXT_ANSCHLAG['1fl']; return ANSCHLAG[S.aufteilung]||ANSCHLAG['1fl']; }
+function anschlagSet(){ if(S.prod==='haustuer') return HAUSTUER_ANSCHLAG; if(S.prod==='balkon'){ const L=(S.profile==='ext')?BALKON_EXT_ANSCHLAG:BALKON_ANSCHLAG; return L[S.aufteilung]||L['1fl']; } if(istExt()) return EXT_ANSCHLAG[S.aufteilung]||EXT_ANSCHLAG['1fl']; return ANSCHLAG[S.aufteilung]||ANSCHLAG['1fl']; }
 function curAnschlag(){ const set=anschlagSet(); return set[Math.min(S.anschlagIdx,set.length-1)]||set[0]; }
 function openingName(){ const o=curAnschlag(); return o?o.n:''; }
 
@@ -277,7 +289,7 @@ function anschlagInfo(){
         const b=seiteWort(t.hinge), g=seiteWort(t.hinge==='r'?'l':'r');
         klar='Band '+b+' · Griff '+g+' — von innen gesehen';
         // IGLO EXT oeffnet nach aussen: vorher stand hier auch bei EXT „nach innen“, direkt neben „nach außen“
-        const aussen=(typeof istExt==='function' && istExt());
+        const aussen=(typeof istExt==='function' && istExt()) || (S.prod==='balkon' && S.profile==='ext');
         satz=(aussen?'Öffnet nach außen, Band ':(t.open==='dk'?'Öffnet und kippt nach innen, Band ':'Öffnet nach innen, Band '))+b+', Griff '+g+' — von innen gesehen.';
         pikto={typ:'dreh',hinge:t.hinge,richtung:aussen?'aussen':'innen'};
       }
@@ -756,7 +768,104 @@ function flatWindowSVG(isBalkon){
   s+=skizzeUnterschrift(0, totalH+mB+DT*0.7, bMm, DT, av);
   return s+`</svg>`;
 }
-function fensterStageSVG(){ return flatWindowSVG(false); }
+/* --- Neuer Zeichenmotor (skizze2.js/griffe.js, Herkunft Skizzen-Werkstatt) --------------------
+   Ersetzt die alte Flachzeichnung (flatWindowSVG) fuer FENSTER und BALKONTUER ueberall dort, wo
+   heute fensterStageSVG()/balkonStageSVG() gerufen werden -- das ist ein einziger Aufrufer,
+   stageSVG(), und darueber Buehne, Warenkorb (skizzeKompakt/skizzeSeite) und die Mail-Skizze
+   (skizzeAufLeinwand) gleichermassen. AUSNAHME: Profil 'ext' (IGLO EXT) bleibt auf der alten
+   Zeichnung -- der neue Motor zeichnet dort noch keine Baender. Wirft der Motor einen Fehler
+   oder ist er (noch) nicht geladen, erscheint die alte Zeichnung -- nie ein leeres Feld; der
+   Fehler geht nur nach console.warn, nicht in eine stille catch-Klammer (Auftrag live-fehler-
+   2026-10-02: genau dieses stille Schlucken liess monatelang unbemerkt gar keine Skizze zeichnen).
+   Skripte/Daten laden erst, wenn die erste Fenster-/Balkontuer-Skizze gebraucht wird (motorLaden()
+   wird aus motorStageSVG() ausgeloest) -- die Startseite und die anderen Produkte (Haustuer,
+   Schiebetuer, Rollladen) werden dadurch nicht langsamer. */
+var MOTOR_DATEN=null, _motorLadenPromise=null;
+var MOTOR_STAND='2026-10-02a';
+function motorSystem(profil){
+  // Nur Profile, die hier anders heissen als im Motor (Schluessel aus skizze-daten.json).
+  // classic/light/energy/edge/ext kennt der Motor selbst unter seinen alten Kuerzeln (eigene
+  // Alias-Tabelle in skizze2.js) -- dieselbe Zuordnung wie SKIZZE_SYSTEM im Katalog-Server.
+  var alias={softline68:'softline-68', softline78:'softline-78', softline88:'softline-88',
+             mb70:'mb-70', mb70hi:'mb-70hi', mb86si:'mb-86n-si'};
+  return alias[profil] || profil;
+}
+function motorLaden(){
+  if(_motorLadenPromise) return _motorLadenPromise;
+  var eins=function(src){ return new Promise(function(ok){ var sc=document.createElement('script'); sc.src=src; sc.async=false; sc.onload=sc.onerror=function(){ ok(); }; document.head.appendChild(sc); }); };
+  var skripte=eins('js/griffe.js?v='+MOTOR_STAND).then(function(){ return eins('js/skizze2.js?v='+MOTOR_STAND); });
+  var daten=fetch('js/skizze-daten.json?v='+MOTOR_STAND).then(function(r){ return r.ok?r.json():null; }).then(function(d){ if(d) MOTOR_DATEN=d; }).catch(function(){});
+  _motorLadenPromise=Promise.all([skripte,daten]).then(function(){
+    if(!window.skizze2||!MOTOR_DATEN) return;
+    // Steht schon eine Skizze auf dem Schirm, mit dem neuen Motor neu zeichnen, sobald er da ist
+    try{
+      if(started) render();
+      var cd=document.getElementById('cartDrawer');
+      if(cd && cd.classList.contains('on')) renderCartDrawer();
+    }catch(e){}
+  });
+  return _motorLadenPromise;
+}
+function motorBereit(){ return !!(window.skizze2 && MOTOR_DATEN); }
+
+function motorFluegel(){
+  var a=curAnschlag(), oeff=a.oeff||[], stulpAt=a.stulpAt||0;
+  // Stulp steht am Fluegel RECHTS davon (Format des Zeichenmotors) -- dieselbe Stelle, die
+  // buildSashes() als stulpAt fuehrt.
+  return oeff.map(function(o,i){ return (i>0 && i===stulpAt) ? {oeffnung:o, stulp:true} : {oeffnung:o}; });
+}
+function motorFarben(){
+  // Index in COLORS_AKT() -> Hex. Index 0 ist in jeder Liste 'weiss' (Standard); den liefert der
+  // Motor selbst in seinem abgestimmten Standardton, deshalb wird er nicht explizit uebergeben.
+  var liste=COLORS_AKT(), a=liste[S.outer]||liste[0], i=liste[S.inner]||liste[0], z={};
+  if(a && a.key!=='weiss') z.farbeAussen=a.c;
+  if(i && i.key!=='weiss') z.farbeInnen=i.c;
+  return z;
+}
+function motorRollladen(){
+  if(!S.roll || S.roll==='kein') return null;
+  // Aufsatzrollladen auf Fenster/Balkontuer: fester Kasten 215 mm wie die alte Zeichnung
+  // (flatWindowSVG: rollHR=215) -- hier keine eigene Kastenwahl wie beim Vorsatzrollladen-Produkt.
+  // Kennt der Motor die Kasten/Profil-Kombination (noch) nicht, wirft er ab -- siehe Fallback.
+  var r={kasten:215, bedienung:S.roll};
+  if(S.rollSeite==='links') r.seite='links';
+  return r;
+}
+function motorZeichnung(isBalkon){
+  var z={ produkt: isBalkon?'balkon':'fenster', system: motorSystem(S.profile), b:+S.w||null, h:+S.h||null,
+          fluegel: motorFluegel(), idPraefix: (SKIZZE_POSNR!=null ? 'pos'+SKIZZE_POSNR : 'stage') };
+  // Hoehenbezug bewusst NICHT 'gesamt': S.h ist hier wie im Rest des Konfigurators die
+  // Hauptfensterhoehe, Oberlicht/Unterlicht/Rollladenkasten kommen beim Motor von selbst dazu
+  // (Standardverhalten ohne hoeheBezug) -- genau die Rechnung, die flatWindowSVG schon macht.
+  if(S.licht==='ober'||S.licht==='beide'){ if(+S.olH>0) z.oberlicht={hoehe:+S.olH, oeffnung:S.olTyp||'fest', bedienung:'griff'}; }
+  if(S.licht==='unter'||S.licht==='beide'){ if(+S.ulH>0) z.unterlicht={hoehe:+S.ulH, oeffnung:S.ulTyp||'fest'}; }
+  if(S.sproTyp && S.sproTyp!=='keine') z.sprossen={ typ:S.sproTyp, breite:+S.sproDicke||27, raster:S.sproRaster||'kreuz' };
+  Object.assign(z, motorFarben());
+  if(S.griff==='abschliessbar') z.abschliessbar=true;
+  var roll=motorRollladen(); if(roll) z.rollladen=roll;
+  if(isBalkon && S.balkonSchwelle==='alu') z.schwelle='alu';
+  z.ansicht = sketchAussen() ? 'aussen' : 'innen';
+  // Buehne und Warenkorb zeigen die Angaben schon daneben als Text (prodSpecs/summaryRows) --
+  // das Schriftfeld im Bild waere doppelt. Nur die Mail-Skizze (mit Positionsnummer) behaelt es,
+  // weil das Bild dort fuer sich allein steht.
+  if(SKIZZE_POSNR==null) z.ohneSchriftfeld=true;
+  return z;
+}
+function motorStageSVG(isBalkon){
+  if(S.profile==='ext') return null;   // Baender fehlen im neuen Motor noch (s.o.)
+  motorLaden();
+  if(!motorBereit()) return null;
+  try{
+    var p=motorZeichnung(isBalkon);
+    if(!(p.b>0 && p.h>0)) return null;
+    return window.skizze2.zeichne(p, MOTOR_DATEN);
+  }catch(e){
+    console.warn('Neuer Zeichenmotor fehlgeschlagen, zeige alte Zeichnung:', e && e.message);
+    return null;
+  }
+}
+
+function fensterStageSVG(){ return motorStageSVG(false) || flatWindowSVG(false); }
 
 function rollStageSVG(){
   const kas=rollKast();
@@ -888,7 +997,7 @@ const DEFS=`<defs><filter id="beschlagdunkel" x="-40%" y="-40%" width="180%" hei
 function dimsRight(x,y1,y2,val){return `<g stroke="#b3b0a8" stroke-width="1" fill="none"><line x1="${x}" y1="${y1}" x2="${x}" y2="${y2}"/><line x1="${x-4}" y1="${y1}" x2="${x+4}" y2="${y1}"/><line x1="${x-4}" y1="${y2}" x2="${x+4}" y2="${y2}"/></g><text x="${x+6}" y="${(y1+y2)/2}" text-anchor="start" dominant-baseline="central" font-size="12" fill="#6E6A63" font-family="Inter" font-weight="600">${val} mm</text>`;}
 function dimsBottom(x1,x2,y,val){return `<g stroke="#b3b0a8" stroke-width="1" fill="none"><line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}"/><line x1="${x1}" y1="${y-4}" x2="${x1}" y2="${y+4}"/><line x1="${x2}" y1="${y-4}" x2="${x2}" y2="${y+4}"/></g><text x="${(x1+x2)/2}" y="${y+17}" text-anchor="middle" font-size="12" fill="#6E6A63" font-family="Inter" font-weight="600">${val} mm</text>`;}
 
-function balkonStageSVG(){ return flatWindowSVG(true); }
+function balkonStageSVG(){ return motorStageSVG(true) || flatWindowSVG(true); }
 
 function slidePanel(x,y,w,h,type,dir,ctx,num,sys){
   const {co,edge,seal}=ctx; const line='#2c3542';
@@ -1794,7 +1903,7 @@ function lieferWahlHTML(t,klasse){
 
       +'<b>Abholung</b><span>Brandenburg a. d. H. &middot; freitags 10&ndash;17 Uhr &middot; kostenlos</span></button>'
     +'<button type="button" class="'+(liefer==='lieferung'?'on':'')+(t.lieferOk?'':' locked')+'"'+(t.lieferOk?'':' disabled')+' onclick="setLiefer(\'lieferung\')">'
-      +'<b>Lieferung</b><span>'+(t.lieferOk?(t.ship?eur(t.ship):'kostenfrei'):'ab '+LIEFER_MIN+' Elementen')+'</span></button>'
+      +'<b>Lieferung</b><span>'+(t.lieferOk?(t.shipLieferung?eur(t.shipLieferung):'kostenfrei'):'ab '+LIEFER_MIN+' Elementen')+'</span></button>'
   +'</div>';
   if(!t.lieferOk){
     var fehlt=LIEFER_MIN-t.qty;
@@ -3187,8 +3296,11 @@ function cartTotals(){
   let ship=0,shipNote='';
   if(liefer==='abholung'){ ship=0; shipNote='Abholung im Lager · Brandenburg a. d. H. · freitags 10–17 Uhr'; }
   else { if(qty>=10){ ship=0; shipNote='ab 10 Elementen kostenfrei · deutschlandweit'; } else if(hasHS){ ship=300; shipNote='Hebe-Schiebetür · Direktlieferung vom Hersteller'; } else { ship=239; shipNote='Spedition deutschlandweit'; } }
+  // Preis der Lieferung unabhaengig von der aktuellen Wahl: die Lieferung-Kachel zeigte sonst bei
+  // gewaehlter Abholung „kostenfrei“, obwohl Lieferung 239 € bzw. 300 € kostet.
+  const shipLieferung=(qty>=10)?0:(hasHS?300:239);
   const total=sub+ship, mwst=total-total/1.19;
-  return {sub,qty,ship,shipNote,total,mwst,hasHS,lieferOk,offen};
+  return {sub,qty,ship,shipLieferung,shipNote,total,mwst,hasHS,lieferOk,offen};
 }
 
 function setLiefer(v){ if(v==='lieferung' && !cartTotals().lieferOk) return; liefer=v; saveCart(); render();
@@ -3939,6 +4051,9 @@ function oeffCardImg(o){
   if(S.prod==='balkon'){
     const m={'dk-l':'dk-links','dk-r':'dk-rechts','dreh-l':'dreh-links','dreh-r':'dreh-rechts'};
     if(of.length===1) return 'img/karten/balkon-anschlag-1f/'+(m[of[0]]||of[0])+'.webp';
+    // Zweifluegelig ohne Kipp (IGLO EXT, beide Dreh nach aussen): dafuer gibt es noch kein Kartenbild.
+    // Lieber die Skizze als ein falsches Dreh-Kipp-Foto.
+    if(of.indexOf('dk-l')<0 && of.indexOf('dk-r')<0) return null;
     return 'img/karten/balkon-anschlag-2f/'+(of[0]==='dreh-l'?'dl-stulp-dkr':'dkl-stulp-dr')+'.webp';
   }
 
