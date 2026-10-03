@@ -22,7 +22,10 @@
     .replace(/\/+$/, '');
   /* shop seit 21.09.2026: dort filtert der Kunde gerade nach seinem Maß. */
   var OHNE_HINWEIS = /(^|\/)(konfigurator|warenkorb|anfrage|shop)$/;
-  if (OHNE_HINWEIS.test(pfad)) return;
+  /* Dort nur die Karte weglassen, nicht das ganze Skript: bis 26.09.2026 stand hier ein
+     return, dann fehlte dem Shop der Jahresplan (DF_HOF_PLAN) und er meldete samstags
+     „Geschlossen", obwohl der Hof offen hatte. */
+  var ohneKarte = OHNE_HINWEIS.test(pfad);
 
   var KEY        = 'dfHofHinweis_2026_09';
   var CONSENT    = 'df_cookie_consent';
@@ -43,7 +46,13 @@
     sonderBis  : '2026-12-07',
     sonderZu   : ['2026-12-06'], // Sonntag dazwischen
     pauseVon   : '2026-12-08',
-    wiederAb   : '2027-01-15'
+    wiederAb   : '2027-01-15',
+    /* Einzelne Tage, die von der Regel abweichen: [von, bis] in vollen Stunden, null = zu.
+       Tag der Deutschen Einheit (Sa 3.10.2026) zu, dafuer Freitag davor bis 20 Uhr. */
+    ausnahmen  : { '2026-10-02': [10, 20], '2026-10-03': null },
+    /* Ab wann die Hinweiskarte und die Kopfleiste die Ausnahme ankuendigen */
+    ausnahmeHinweisVon : '2026-09-26',
+    ausnahmeHinweisBis : '2026-10-03'
   };
   /* Fuer die Oeffnungsanzeige im Shop (js/oeffnungszeiten-util.js) — dieselben Termine,
      keine zweite Kopie. */
@@ -62,6 +71,11 @@
   var sonderBald    = TAG >= '2026-11-15' && TAG < PLAN.sonderVon;
   var sonderLaeuft  = zwischen(TAG, PLAN.sonderVon, PLAN.sonderBis);
   var pause         = TAG >= PLAN.pauseVon && TAG < PLAN.wiederAb;
+  var feiertag      = zwischen(TAG, PLAN.ausnahmeHinweisVon, PLAN.ausnahmeHinweisBis);
+
+  /* Eigener Merkschluessel: wer die Samstagskarte schon weggeklickt hat, soll die
+     Feiertagsaenderung trotzdem einmal sehen. */
+  if (feiertag) KEY = 'dfHofHinweis_2026_10_feiertag';
 
   function datum(iso) {
     var m = ['Januar','Februar','M\u00e4rz','April','Mai','Juni','Juli','August',
@@ -71,6 +85,7 @@
   }
 
   function titel() {
+    if (feiertag)     return 'Am 3. Oktober geschlossen &ndash; daf&uuml;r Freitag bis 20 Uhr';
     if (pause)        return 'Wir haben Jahrespause';
     if (sonderLaeuft) return 'Diese Woche t&auml;glich ge&ouml;ffnet';
     if (samstagLaeuft || samstagBald || sonderBald) return 'Jetzt auch samstags ge&ouml;ffnet';
@@ -79,11 +94,15 @@
 
   function zeile(tag, zeit, neu) {
     return '<div class="dfh-zeile"><span class="dfh-tag">' + tag
-         + (neu ? '<span class="dfh-neu">Neu</span>' : '') + '</span>'
+         + (neu ? '<span class="dfh-neu">' + (neu === true ? 'Neu' : neu) + '</span>' : '') + '</span>'
          + '<span class="dfh-zeit">' + zeit + '</span></div>';
   }
 
   function zeilen() {
+    if (feiertag) {
+      return zeile('Freitag, 2. Oktober', '10&ndash;20 Uhr', 'L&auml;nger')
+           + zeile('Samstag, 3. Oktober', 'geschlossen');
+    }
     if (pause) {
       return zeile('Wieder ge&ouml;ffnet', 'Fr, 15. Januar 2027');
     }
@@ -98,6 +117,8 @@
   }
 
   function zusatz() {
+    if (feiertag)     return 'Samstag ist Tag der Deutschen Einheit. Ab Samstag, 10. Oktober, '
+                           + 'wieder wie gewohnt 10\u201313 Uhr.';
     if (pause)        return 'Ab Freitag, 15. Januar 2027 sind wir wieder wie gewohnt f\u00fcr Sie da.';
     if (sonderLaeuft) return 'Letzter Tag in diesem Jahr ist Montag, der 7. Dezember. '
                            + 'Danach Jahrespause bis zum 15. Januar 2027.';
@@ -153,11 +174,8 @@
   }
 
   function start() {
-    if (gesehen()) return;
-    /* 30.09.2026: Auf Seiten mit Vertrauensleiste stehen die Hofzeiten schon oben – kein zweites Fenster darüber. */
-    if (document.querySelector('.vertrauen')) return;
-    /* 30.09.2026: Auf Produktseiten lag das Fenster über Produktstudio und Kenndaten-Tabelle (Design-Prüfung). */
-    if (document.querySelector('.studio')) return;
+    /* In der Feiertagswoche steht alles in der festen Leiste oben - die Karte waere doppelt. */
+    if (ohneKarte || feiertag || gesehen()) return;
     if (!consentDa()) {
       window.addEventListener('df-consent-updated', function () { setTimeout(start, 600); }, { once: true });
       return;
@@ -167,16 +185,6 @@
       if (los) return;
       los = true;
       window.removeEventListener('scroll', beiScroll);
-      /* 29.09.2026: Am Rechner lag der Hinweis rechts unten über der Hero-Karte und verdeckte das
-         KI-Schild (Art. 50 KI-VO). Solange der Hero sichtbar ist, wartet er, bis der Hero aus dem Bild ist. */
-      var hero = document.querySelector('.hero');
-      if (hero && window.innerWidth > 860 && 'IntersectionObserver' in window) {
-        var beob = new IntersectionObserver(function (e) {
-          if (!e[0].isIntersecting) { beob.disconnect(); zeige(); }
-        });
-        beob.observe(hero);
-        return;
-      }
       zeige();
     }
     function beiScroll() { if (window.scrollY > 100) ausloesen(); }
@@ -189,7 +197,8 @@
      Im HTML steht die Freitagszeit, die immer stimmt. */
   function kopfleiste() {
     var txt;
-    if (pause)                        txt = 'Jahrespause &middot; wieder ab Fr 15. Januar';
+    if (feiertag)                     txt = '<span class="df-zeiten-lang">Hofverkauf </span>Fr 2.10. 10&ndash;20 &middot; Sa 3.10. geschlossen';
+    else if (pause)                   txt = 'Jahrespause &middot; wieder ab Fr 15. Januar';
     else if (sonderLaeuft)            txt = '<span class="df-zeiten-lang">Hofverkauf </span>t&auml;glich 10&ndash;17 Uhr bis 7. Dez.';
     else if (sonderBald)              txt = '<span class="df-zeiten-lang">Hofverkauf </span>Fr 10&ndash;17 &middot; Sa 10&ndash;13 Uhr';
     else if (samstagLaeuft || samstagBald)
@@ -200,6 +209,57 @@
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', kopfleiste);
   else kopfleiste();
+
+  /* ── Feste Ankuendigungsleiste ganz oben ─────────────────────────────────
+     Fuer Aenderungen, die JEDER sehen muss (Feiertag): nicht wegklickbar, grosse
+     Schrift, Signalfarbe. Die kleine Karte wurde leicht uebersehen, am Handy ist die
+     Kopfleiste ausgeblendet. Nicht im Kaufablauf (Konfigurator, Warenkorb, Anfrage).
+     Die Leiste schiebt die festen Kopfleisten (margin-top) und den Seiteninhalt
+     (padding am html) um ihre eigene Hoehe nach unten - --banner-h bleibt unberuehrt,
+     weil die Startseite es fuer ihr Suchband selbst setzt. */
+  var OHNE_LEISTE = /(^|\/)(konfigurator|warenkorb|anfrage)$/;
+  function leiste() {
+    if (!feiertag || OHNE_LEISTE.test(pfad) || document.getElementById('df-ankuendigung')) return;
+    var css = document.createElement('style');
+    css.textContent =
+      '#df-ankuendigung{position:fixed;top:0;left:0;right:0;z-index:75;background:#f6cf3f;'
+    + 'color:#101c33;border-bottom:2px solid #d9ad12;font-family:"Inter","Switzer",system-ui,sans-serif}'
+    + '#df-ankuendigung .dfa-in{max-width:1520px;margin:0 auto;padding:10px clamp(16px,4.5vw,72px);'
+    + 'display:flex;align-items:center;justify-content:center;gap:10px 22px;flex-wrap:wrap;'
+    + 'font-size:17px;line-height:1.35;text-align:center}'
+    + '#df-ankuendigung .dfa-titel{display:flex;align-items:center;gap:8px;font-weight:800}'
+    + '#df-ankuendigung .dfa-titel svg{flex:none}'
+    + '#df-ankuendigung .dfa-tag{font-weight:600;white-space:nowrap}'
+    + '#df-ankuendigung .dfa-tag b{font-weight:800}'
+    + '@media(max-width:700px){#df-ankuendigung .dfa-in{flex-direction:column;gap:2px;font-size:16px;padding:8px 16px}}'
+    + 'html.df-ank{padding-top:var(--df-ank-h,0px)}'
+    + 'html.df-ank .dfnav-util,html.df-ank .dfnav,html.df-ank .util,html.df-ank .topsuche'
+    + '{margin-top:var(--df-ank-h,0px)}'
+    + 'html.df-ank .cat-tabs{top:calc(var(--banner-h,0px) + 106px + var(--df-ank-h,0px))}'
+    + '@media(min-width:1024px){html.df-ank .filter-sidebar{top:calc(128px + var(--df-ank-h,0px));'
+    + 'max-height:calc(100vh - 144px - var(--df-ank-h,0px))}}';
+    document.head.appendChild(css);
+    var el = document.createElement('div');
+    el.id = 'df-ankuendigung';
+    el.setAttribute('role', 'region');
+    el.setAttribute('aria-label', 'Ge\u00e4nderte \u00d6ffnungszeiten');
+    el.innerHTML = '<div class="dfa-in">'
+      + '<span class="dfa-titel"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+      + 'stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="2"/>'
+      + '<path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>Ge&auml;nderte &Ouml;ffnungszeiten</span>'
+      + '<span class="dfa-tag">Freitag, 2. Oktober: <b>10&ndash;20 Uhr</b></span>'
+      + '<span class="dfa-tag">Samstag, 3. Oktober (Feiertag): <b>geschlossen</b></span>'
+      + '</div>';
+    document.body.insertBefore(el, document.body.firstChild);
+    function hoehe() {
+      document.documentElement.style.setProperty('--df-ank-h', el.offsetHeight + 'px');
+    }
+    hoehe();
+    document.documentElement.classList.add('df-ank');
+    window.addEventListener('resize', hoehe);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', leiste);
+  else leiste();
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
   else start();

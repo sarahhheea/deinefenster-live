@@ -178,6 +178,18 @@ const BALKON_ANSCHLAG={
   ],
 };
 const ANSCHLAG_DEFIDX={'1fl':0,'2fl':0,'3fl':0};
+/* Balkontuer IGLO EXT oeffnet nach aussen und kippt nicht: einfluegelig nur Dreh links/rechts,
+   zweifluegelig nur mit Stulp (Katalog: 1fl-dreh-l/-r, 2fl-ext-st). Vorher bekam EXT die
+   Dreh-Kipp-Liste der normalen Balkontuer. */
+const BALKON_EXT_ANSCHLAG={
+  '1fl':[
+    {n:'DIN links · nach außen',oeff:['dreh-l']},
+    {n:'DIN rechts · nach außen',oeff:['dreh-r']},
+  ],
+  '2fl':[
+    {n:'DIN rechts · Stulp · DIN links · nach außen',oeff:['dreh-r','dreh-l'],stulpAt:1},
+  ],
+};
 
 const EXT_ANSCHLAG={
   '1fl':[
@@ -196,7 +208,7 @@ const EXT_ANSCHLAG={
 function istExt(){ return S.prod==='fenster' && S.material==='kunststoff' && S.profile==='ext'; }
 
 const HAUSTUER_ANSCHLAG=[{n:'DIN links',oeff:['dreh-l']},{n:'DIN rechts',oeff:['dreh-r']}];
-function anschlagSet(){ if(S.prod==='haustuer') return HAUSTUER_ANSCHLAG; if(S.prod==='balkon') return BALKON_ANSCHLAG[S.aufteilung]||BALKON_ANSCHLAG['1fl']; if(istExt()) return EXT_ANSCHLAG[S.aufteilung]||EXT_ANSCHLAG['1fl']; return ANSCHLAG[S.aufteilung]||ANSCHLAG['1fl']; }
+function anschlagSet(){ if(S.prod==='haustuer') return HAUSTUER_ANSCHLAG; if(S.prod==='balkon'){ const L=(S.profile==='ext')?BALKON_EXT_ANSCHLAG:BALKON_ANSCHLAG; return L[S.aufteilung]||L['1fl']; } if(istExt()) return EXT_ANSCHLAG[S.aufteilung]||EXT_ANSCHLAG['1fl']; return ANSCHLAG[S.aufteilung]||ANSCHLAG['1fl']; }
 function curAnschlag(){ const set=anschlagSet(); return set[Math.min(S.anschlagIdx,set.length-1)]||set[0]; }
 function openingName(){ const o=curAnschlag(); return o?o.n:''; }
 
@@ -274,10 +286,15 @@ function anschlagInfo(){
         pikto={typ:'kipp',hinge:'r',richtung:'innen'};
       }
       else if(t.hinge){
-        const b=seiteWort(t.hinge), g=seiteWort(t.hinge==='r'?'l':'r');
+        // IGLO EXT oeffnet nach aussen: vorher stand hier auch bei EXT „nach innen“, direkt neben „nach außen“.
+        // Nach aussen oeffnend wird DIN links/rechts von aussen bestimmt -- von innen gesehen liegen die
+        // Baender dann auf der Gegenseite (so zeichnen es Skizze und Kartenfoto).
+        const aussen=(typeof istExt==='function' && istExt()) || (S.prod==='balkon' && S.profile==='ext');
+        const bandInnen=aussen?(t.hinge==='r'?'l':'r'):t.hinge;
+        const b=seiteWort(bandInnen), g=seiteWort(bandInnen==='r'?'l':'r');
         klar='Band '+b+' · Griff '+g+' — von innen gesehen';
-        satz=(t.open==='dk'?'Öffnet und kippt nach innen, Band ':'Öffnet nach innen, Band ')+b+', Griff '+g+' — von innen gesehen.';
-        pikto={typ:'dreh',hinge:t.hinge,richtung:'innen'};
+        satz=(aussen?'Öffnet nach außen, Band ':(t.open==='dk'?'Öffnet und kippt nach innen, Band ':'Öffnet nach innen, Band '))+b+', Griff '+g+' — von innen gesehen.';
+        pikto={typ:'dreh',hinge:t.hinge,richtung:aussen?'aussen':'innen'};
       }
     } else if(toks.length>1){
 
@@ -754,7 +771,105 @@ function flatWindowSVG(isBalkon){
   s+=skizzeUnterschrift(0, totalH+mB+DT*0.7, bMm, DT, av);
   return s+`</svg>`;
 }
-function fensterStageSVG(){ return flatWindowSVG(false); }
+/* --- Neuer Zeichenmotor (skizze2.js/griffe.js, Herkunft Skizzen-Werkstatt) --------------------
+   Ersetzt die alte Flachzeichnung (flatWindowSVG) fuer FENSTER und BALKONTUER ueberall dort, wo
+   heute fensterStageSVG()/balkonStageSVG() gerufen werden -- das ist ein einziger Aufrufer,
+   stageSVG(), und darueber Buehne, Warenkorb (skizzeKompakt/skizzeSeite) und die Mail-Skizze
+   (skizzeAufLeinwand) gleichermassen. AUSNAHME: Profil 'ext' (IGLO EXT) bleibt auf der alten
+   Zeichnung -- der neue Motor zeichnet dort noch keine Baender. Wirft der Motor einen Fehler
+   oder ist er (noch) nicht geladen, erscheint die alte Zeichnung -- nie ein leeres Feld; der
+   Fehler geht nur nach console.warn, nicht in eine stille catch-Klammer (Auftrag live-fehler-
+   2026-10-02: genau dieses stille Schlucken liess monatelang unbemerkt gar keine Skizze zeichnen).
+   Skripte/Daten laden erst, wenn die erste Fenster-/Balkontuer-Skizze gebraucht wird (motorLaden()
+   wird aus motorStageSVG() ausgeloest) -- die Startseite und die anderen Produkte (Haustuer,
+   Schiebetuer, Rollladen) werden dadurch nicht langsamer. */
+var MOTOR_DATEN=null, _motorLadenPromise=null;
+var MOTOR_STAND='2026-10-02a';
+function motorSystem(profil){
+  // Nur Profile, die hier anders heissen als im Motor (Schluessel aus skizze-daten.json).
+  // classic/light/energy/edge/ext kennt der Motor selbst unter seinen alten Kuerzeln (eigene
+  // Alias-Tabelle in skizze2.js) -- dieselbe Zuordnung wie SKIZZE_SYSTEM im Katalog-Server.
+  var alias={softline68:'softline-68', softline78:'softline-78', softline88:'softline-88',
+             mb70:'mb-70', mb70hi:'mb-70hi', mb86si:'mb-86n-si'};
+  return alias[profil] || profil;
+}
+function motorLaden(){
+  if(_motorLadenPromise) return _motorLadenPromise;
+  var eins=function(src){ return new Promise(function(ok){ var sc=document.createElement('script'); sc.src=src; sc.async=false; sc.onload=sc.onerror=function(){ ok(); }; document.head.appendChild(sc); }); };
+  var skripte=eins('js/griffe.js?v='+MOTOR_STAND).then(function(){ return eins('js/skizze2.js?v='+MOTOR_STAND); });
+  var daten=fetch('js/skizze-daten.json?v='+MOTOR_STAND).then(function(r){ return r.ok?r.json():null; }).then(function(d){ if(d) MOTOR_DATEN=d; }).catch(function(){});
+  _motorLadenPromise=Promise.all([skripte,daten]).then(function(){
+    if(!window.skizze2||!MOTOR_DATEN) return;
+    // Steht schon eine Skizze auf dem Schirm, mit dem neuen Motor neu zeichnen, sobald er da ist
+    try{
+      if(started) render();
+      var cd=document.getElementById('cartDrawer');
+      if(cd && cd.classList.contains('on')) renderCartDrawer();
+    }catch(e){}
+  });
+  return _motorLadenPromise;
+}
+function motorBereit(){ return !!(window.skizze2 && MOTOR_DATEN); }
+
+function motorFluegel(){
+  var a=curAnschlag(), oeff=a.oeff||[], stulpAt=a.stulpAt||0;
+  // Stulp steht am Fluegel RECHTS davon (Format des Zeichenmotors) -- dieselbe Stelle, die
+  // buildSashes() als stulpAt fuehrt.
+  return oeff.map(function(o,i){ return (i>0 && i===stulpAt) ? {oeffnung:o, stulp:true} : {oeffnung:o}; });
+}
+function motorFarben(){
+  // Index in COLORS_AKT() -> Hex. Index 0 ist in jeder Liste 'weiss' (Standard); den liefert der
+  // Motor selbst in seinem abgestimmten Standardton, deshalb wird er nicht explizit uebergeben.
+  var liste=COLORS_AKT(), a=liste[S.outer]||liste[0], i=liste[S.inner]||liste[0], z={};
+  if(a && a.key!=='weiss') z.farbeAussen=a.c;
+  if(i && i.key!=='weiss') z.farbeInnen=i.c;
+  return z;
+}
+function motorRollladen(){
+  if(!S.roll || S.roll==='kein') return null;
+  // Aufsatzrollladen auf Fenster/Balkontuer: fester Kasten 215 mm wie die alte Zeichnung
+  // (flatWindowSVG: rollHR=215) -- hier keine eigene Kastenwahl wie beim Vorsatzrollladen-Produkt.
+  // Kennt der Motor die Kasten/Profil-Kombination (noch) nicht, wirft er ab -- siehe Fallback.
+  var r={kasten:215, bedienung:S.roll};
+  if(S.rollSeite==='links') r.seite='links';
+  return r;
+}
+function motorZeichnung(isBalkon){
+  var z={ produkt: isBalkon?'balkon':'fenster', system: motorSystem(S.profile), b:+S.w||null, h:+S.h||null,
+          fluegel: motorFluegel(), idPraefix: (SKIZZE_POSNR!=null ? 'pos'+SKIZZE_POSNR : 'stage') };
+  // Hoehenbezug bewusst NICHT 'gesamt': S.h ist hier wie im Rest des Konfigurators die
+  // Hauptfensterhoehe, Oberlicht/Unterlicht/Rollladenkasten kommen beim Motor von selbst dazu
+  // (Standardverhalten ohne hoeheBezug) -- genau die Rechnung, die flatWindowSVG schon macht.
+  if(S.licht==='ober'||S.licht==='beide'){ if(+S.olH>0) z.oberlicht={hoehe:+S.olH, oeffnung:S.olTyp||'fest', bedienung:'griff'}; }
+  if(S.licht==='unter'||S.licht==='beide'){ if(+S.ulH>0) z.unterlicht={hoehe:+S.ulH, oeffnung:S.ulTyp||'fest'}; }
+  if(S.sproTyp && S.sproTyp!=='keine') z.sprossen={ typ:S.sproTyp, breite:+S.sproDicke||27, raster:S.sproRaster||'kreuz' };
+  Object.assign(z, motorFarben());
+  if(S.griff==='abschliessbar') z.abschliessbar=true;
+  var roll=motorRollladen(); if(roll) z.rollladen=roll;
+  if(isBalkon && S.balkonSchwelle==='alu') z.schwelle='alu';
+  z.ansicht = sketchAussen() ? 'aussen' : 'innen';
+  // Buehne und Warenkorb zeigen die Angaben schon daneben als Text (prodSpecs/summaryRows) --
+  // das Schriftfeld im Bild waere doppelt. Nur die Mail-Skizze (mit Positionsnummer) behaelt es,
+  // weil das Bild dort fuer sich allein steht.
+  if(SKIZZE_POSNR==null) z.ohneSchriftfeld=true;
+  return z;
+}
+function motorStageSVG(isBalkon){
+  // IGLO EXT zeichnet der Motor ohne Bandkappen: nach aussen oeffnend liegen die Baender aussen,
+  // von innen sind sie nicht zu sehen (Drutex-Katalog PVC S. 28/29). Das ist richtig so.
+  motorLaden();
+  if(!motorBereit()) return null;
+  try{
+    var p=motorZeichnung(isBalkon);
+    if(!(p.b>0 && p.h>0)) return null;
+    return window.skizze2.zeichne(p, MOTOR_DATEN);
+  }catch(e){
+    console.warn('Neuer Zeichenmotor fehlgeschlagen, zeige alte Zeichnung:', e && e.message);
+    return null;
+  }
+}
+
+function fensterStageSVG(){ return motorStageSVG(false) || flatWindowSVG(false); }
 
 function rollStageSVG(){
   const kas=rollKast();
@@ -886,7 +1001,7 @@ const DEFS=`<defs><filter id="beschlagdunkel" x="-40%" y="-40%" width="180%" hei
 function dimsRight(x,y1,y2,val){return `<g stroke="#b3b0a8" stroke-width="1" fill="none"><line x1="${x}" y1="${y1}" x2="${x}" y2="${y2}"/><line x1="${x-4}" y1="${y1}" x2="${x+4}" y2="${y1}"/><line x1="${x-4}" y1="${y2}" x2="${x+4}" y2="${y2}"/></g><text x="${x+6}" y="${(y1+y2)/2}" text-anchor="start" dominant-baseline="central" font-size="12" fill="#6E6A63" font-family="Inter" font-weight="600">${val} mm</text>`;}
 function dimsBottom(x1,x2,y,val){return `<g stroke="#b3b0a8" stroke-width="1" fill="none"><line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}"/><line x1="${x1}" y1="${y-4}" x2="${x1}" y2="${y+4}"/><line x1="${x2}" y1="${y-4}" x2="${x2}" y2="${y+4}"/></g><text x="${(x1+x2)/2}" y="${y+17}" text-anchor="middle" font-size="12" fill="#6E6A63" font-family="Inter" font-weight="600">${val} mm</text>`;}
 
-function balkonStageSVG(){ return flatWindowSVG(true); }
+function balkonStageSVG(){ return motorStageSVG(true) || flatWindowSVG(true); }
 
 function slidePanel(x,y,w,h,type,dir,ctx,num,sys){
   const {co,edge,seal}=ctx; const line='#2c3542';
@@ -1174,7 +1289,7 @@ function _haFlaecheAusS(){
 }
 function massLimits(){
 
-  if(S.prod==='balkon') return {bMin:600,bMax:2500,hMin:1800,hMax:2400};
+  if(S.prod==='balkon') return balkonGrenzen();
   if(S.prod==='haustuer') return {bMin:800,bMax:1400,hMin:1800,hMax:2400};
   if(S.prod==='schiebe') return {bMin:1800,bMax:6500,hMin:1800,hMax:2600};
 
@@ -1212,6 +1327,16 @@ function _massEigen(){
     if(fm){ bMin=fm[0]; hMin=fm[1]; }
   }catch(e){}
   return {bMin,bMax,hMin,hMax};
+}
+
+/* Balkontuer: Grenzen je Profil und Fluegelzahl wie im Katalog (Betriebsgrenzen 22.09.2026, vorlaeufig).
+   Nur enger als bisher (Hoehe 1800-2400), nie weiter: jedes Mass hier hat einen geprueften Preis.
+   Vorher lag fuer alle 600-2500 mm Breite offen, auch einfluegelig -- solche Tueren baut niemand,
+   und die Preisauskunft lieferte dafuer Phantasiewerte. */
+function balkonGrenzen(){
+  const zwei=(S.aufteilung==='2fl'), ext=(S.profile==='ext');
+  const b= ext ? (zwei?[1350,2000]:[700,1000]) : (zwei?[1000,2000]:[600,1000]);
+  return {bMin:b[0], bMax:b[1], hMin:1800, hMax:(ext?2200:2400)};
 }
 
 function massKlemmen(){
@@ -1666,30 +1791,38 @@ const PROFILE_KAT={
 
   kunststoff:[
     {v:'classic', img:'iglo5-zentriert',               t:'IGLO 5 Classic', s:'flächenversetzt',
-     sp:[['Bautiefe','70 mm'],['Kammern','5'],['Dichtungen','2 EPDM'],['Uw in W/(m²K)','0,86']]},
+     sp:[['Bautiefe','70 mm'],['Kammern','5'],['Dichtungen','2 EPDM'],['Uw in W/(m²K)','0,83'],['Uw gilt für','Fenster 1230×1480 mm, Ug 0,6, Argon, Swisspacer Ultimate']]},
     {v:'light',   img:'iglo-light-zentriert',          t:'IGLO Light', s:'schmaler Rahmen, mehr Glas',
-     sp:[['Bautiefe','70 mm'],['Kammern','5'],['Dichtungen','2 EPDM'],['Uw in W/(m²K)','0,88']]},
-    {v:'ext',     img:'iglo-ext-zentriert',            t:'IGLO 5 Classic EXT', s:'öffnet nach außen',
-     sp:[['Bautiefe','70 mm'],['Kammern','5'],['Dichtungen','2 EPDM'],['Uw in W/(m²K)','0,89']]},
+     sp:[['Bautiefe','70 mm'],['Kammern','5'],['Dichtungen','2 EPDM'],['Uw in W/(m²K)','0,88'],['Uw gilt für','Fenster 1230×1480 mm, Ug 0,6, Argon, Swisspacer Ultimate']]},
+    {v:'ext',     img:'iglo-ext-zentriert',            t:'IGLO EXT', s:'öffnet nach außen',
+     sp:[['Bautiefe','70 mm'],['Kammern','5'],['Dichtungen','2 EPDM'],['Uw in W/(m²K)','0,89'],['Uw gilt für','Fenster 1230×1480 mm, Ug 0,6, Argon, Swisspacer Kunststoff']]},
     {v:'energy',  img:'iglo-energy-classic-zentriert', t:'IGLO Energy Classic', s:'flächenversetzt',
-     sp:[['Bautiefe','82 mm'],['Kammern','7'],['Dichtungen','3'],['Uw in W/(m²K)','0,73']]},
+     sp:[['Bautiefe','82 mm'],['Kammern','7'],['Dichtungen','3'],['Uw in W/(m²K)','0,73'],['Uw gilt für','Fenster 1230×1480 mm, Ug 0,5, Argon, Swisspacer Ultimate']]},
     {v:'edge',    img:'iglo-edge-zentriert',           t:'IGLO EDGE', s:'flächenversetzt',
-     sp:[['Bautiefe','82 mm'],['Kammern','7'],['Dichtungen','3 EPDM'],['Uw in W/(m²K)','0,66']]}],
+     sp:[['Bautiefe','82 mm'],['Kammern','7'],['Dichtungen','3 EPDM'],['Uw in W/(m²K)','0,66'],['Uw gilt für','Fenster 1230×1480 mm, Ug 0,4, Argon, Swisspacer Ultimate']]}],
   holz:[
     {v:'softline68', img:'softline68', t:'Softline 68 mm',
-     sp:[['Bautiefe','68 mm'],['Dichtungen','2'],['Uw in W/(m²K)','1,08']]},
+     sp:[['Bautiefe','68 mm'],['Dichtungen','2'],['Uw in W/(m²K)','1,08'],['Uw gilt für','Fenster 1230×1480 mm, Meranti, Ug 0,8, Argon, Swisspacer']]},
     {v:'softline78', img:'softline78', t:'Softline 78 mm',
-     sp:[['Bautiefe','78 mm'],['Dichtungen','2'],['Uw in W/(m²K)','0,90']]},
+     sp:[['Bautiefe','78 mm'],['Dichtungen','2'],['Uw in W/(m²K)','0,90'],['Uw gilt für','Fenster 1230×1480 mm, Meranti, Ug 0,8, Argon, Swisspacer']]},
     {v:'softline88', img:'softline88', t:'Softline 88 mm',
-     sp:[['Bautiefe','88 mm'],['Dichtungen','2'],['Uw in W/(m²K)','0,80']]}],
+     sp:[['Bautiefe','88 mm'],['Dichtungen','2'],['Uw in W/(m²K)','0,80'],['Uw gilt für','Fenster 1230×1480 mm, Meranti, Ug 0,8, Argon, Swisspacer']]}],
   alu:[
     {v:'mb70',   img:'mb70',   t:'MB-70',
-     sp:[['Bautiefe','70 mm'],['Dichtungen','3 EPDM'],['Uw in W/(m²K)','1,06']]},
+     sp:[['Bautiefe','70 mm'],['Dichtungen','3 EPDM'],['Uw in W/(m²K)','auf Anfrage']]},
     {v:'mb70hi', img:'mb70hi', t:'MB-70HI',
-     sp:[['Bautiefe','70 mm'],['Dichtungen','3 EPDM'],['Uw in W/(m²K)','0,96']]},
+     sp:[['Bautiefe','70 mm'],['Dichtungen','3 EPDM'],['Uw in W/(m²K)','0,96'],['Uw gilt für','Fenster 1230×1480 mm, Ug 0,5, Argon, Swisspacer']]},
     {v:'mb86si', img:'mb86si', t:'MB-86N SI',
-     sp:[['Bautiefe','77 mm'],['Dichtungen','3 EPDM'],['Uw in W/(m²K)','0,76']]}]
+     sp:[['Bautiefe','77 mm'],['Dichtungen','3 EPDM'],['Uw in W/(m²K)','0,76'],['Uw gilt für','Fenster 1230×1480 mm, Ug 0,5, Argon, Swisspacer']]}]
 };
+
+/* Drutex nennt den Uw des Softline-Fensters nur fuer Meranti (Katalog Holz/Alu, S. 75, *2);
+   fuer Kiefer gibt es keinen Beleg, also dort keine Zahl. */
+function profilWerte(mat,p){
+  if(mat!=='holz' || S.holzart==='meranti') return p.sp;
+  return p.sp.filter(function(z){ return z[0]!=='Uw gilt für'; })
+    .map(function(z){ return z[0]==='Uw in W/(m²K)' ? [z[0],'auf Anfrage'] : z; });
+}
 
 const KARTE_PFAD='img/karten/profil/';
 
@@ -1774,7 +1907,7 @@ function lieferWahlHTML(t,klasse){
 
       +'<b>Abholung</b><span>Brandenburg a. d. H. &middot; freitags 10&ndash;17 Uhr &middot; kostenlos</span></button>'
     +'<button type="button" class="'+(liefer==='lieferung'?'on':'')+(t.lieferOk?'':' locked')+'"'+(t.lieferOk?'':' disabled')+' onclick="setLiefer(\'lieferung\')">'
-      +'<b>Lieferung</b><span>'+(t.lieferOk?(t.ship?eur(t.ship):'kostenfrei'):'ab '+LIEFER_MIN+' Elementen')+'</span></button>'
+      +'<b>Lieferung</b><span>'+(t.lieferOk?(t.shipLieferung?eur(t.shipLieferung):'kostenfrei'):'ab '+LIEFER_MIN+' Elementen')+'</span></button>'
   +'</div>';
   if(!t.lieferOk){
     var fehlt=LIEFER_MIN-t.qty;
@@ -2429,8 +2562,12 @@ const KI_HINWEIS = {
 function kiHinweisHTML(key){ const h=KI_HINWEIS[key]; return h?`<p class="ai-note">${h}</p>`:''; }
 
 function choiceCardImg(on,fn,img,t,s,werte){
-  const liste=(werte&&werte.length)
-    ? `<dl class="pspecs">${werte.map(([k,v])=>`<div class="pspec"><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>`
+  // Die Messbedingung zum Uw ist zu lang fuer eine Tabellenzeile: als Fussnote unter die Werte, umbrechend.
+  const bed=(werte||[]).find(z=>z[0]==='Uw gilt für');
+  const zeilen=(werte||[]).filter(z=>z[0]!=='Uw gilt für');
+  const liste=zeilen.length
+    ? `<dl class="pspecs">${zeilen.map(([k,v])=>`<div class="pspec"><dt>${k}</dt><dd>${v}${(bed&&k==='Uw in W/(m²K)')?'*':''}</dd></div>`).join('')}</dl>`
+      +(bed?`<p class="pspec-bed" style="margin:6px 0 0;font-size:12px;line-height:1.35;color:#6b7280;white-space:normal;text-align:left">* Uw für ${bed[1]} (Herstellerangabe)</p>`:'')
     : '';
   return `<div class="ocard ${on?'on':''}" onclick="${fn}"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5"><path d="M20 6 9 17l-5-5"/></svg></span><div class="vis"><img src="${img}" loading="lazy" decoding="async" alt="${t} (KI-generiertes Symbolbild)"></div><div class="t">${t}</div>${s?`<div class="s">${s}</div>`:''}${liste}</div>`;
 }
@@ -2459,7 +2596,7 @@ function panelHTML(){
 
     const _cls=((_liste.length>2) ? ('three'+((_liste.length%3)?' mitte':'')) : 'two')+' profilw';
     return grp('Profil-System', _cls, _liste.map(function(p){
-      return choiceCardImg(S.profile===p.v, "setProfil('"+p.v+"')", profilBild(_mat,p), p.t, p.s||'', p.sp);
+      return choiceCardImg(S.profile===p.v, "setProfil('"+p.v+"')", profilBild(_mat,p), p.t, p.s||'', profilWerte(_mat,p));
     }).join(''));
   }
   if(k==='psk'){
@@ -2566,7 +2703,7 @@ function panelHTML(){
         : `<div class="vis anschlagvis">${miniAnschlag(o.oeff,o.stulpAt||0)}</div>`;
       return `<div class="ocard ${on?'on':''}" onclick="setAnschlag(${idx})">${tick}${o.tag?`<span class="fav">${o.tag}</span>`:''}${vis}<div class="t">${o.n}</div></div>`;
     }).join('');
-    const cols=liste.length<=2?'two':(liste.length===4?'two':'three');
+    const cols=liste.length===1?'two einzeln':(liste.length<=2?'two':(liste.length===4?'two':'three'));
 
     let lichtBlock='';
     if(S.prod==='fenster' && lichtAktiv() && _LICHT[_lichtKey(null)]){
@@ -3163,8 +3300,11 @@ function cartTotals(){
   let ship=0,shipNote='';
   if(liefer==='abholung'){ ship=0; shipNote='Abholung im Lager · Brandenburg a. d. H. · freitags 10–17 Uhr'; }
   else { if(qty>=10){ ship=0; shipNote='ab 10 Elementen kostenfrei · deutschlandweit'; } else if(hasHS){ ship=300; shipNote='Hebe-Schiebetür · Direktlieferung vom Hersteller'; } else { ship=239; shipNote='Spedition deutschlandweit'; } }
+  // Preis der Lieferung unabhaengig von der aktuellen Wahl: die Lieferung-Kachel zeigte sonst bei
+  // gewaehlter Abholung „kostenfrei“, obwohl Lieferung 239 € bzw. 300 € kostet.
+  const shipLieferung=(qty>=10)?0:(hasHS?300:239);
   const total=sub+ship, mwst=total-total/1.19;
-  return {sub,qty,ship,shipNote,total,mwst,hasHS,lieferOk,offen};
+  return {sub,qty,ship,shipLieferung,shipNote,total,mwst,hasHS,lieferOk,offen};
 }
 
 function setLiefer(v){ if(v==='lieferung' && !cartTotals().lieferOk) return; liefer=v; saveCart(); render();
@@ -3872,17 +4012,23 @@ function lichtKombis(){
   const ord=(S.licht==='ober')?'-oberlicht':'-unterlicht', ksuf=(S.licht==='ober')?'-olk':'-ulk';
   const dsu=(S.licht==='ober')?'-oldk':'-uldk';
 
-  const paare = kippGeht
+  const ext=istExt();
+  const paare = ext
+    ? (kippGeht ? [['dreh-r','fest'],['dreh-l','fest'],['dreh-r','kipp'],['dreh-l','kipp']] : [['dreh-r','fest'],['dreh-l','fest']])
+    : kippGeht
     ? [['dk-r','fest'],['dk-l','fest'],['dk-r','kipp'],['dk-l','kipp'],['dk-r','dk-r'],['dk-l','dk-l']]
     : [['dk-r','fest'],['dk-l','fest']];
   const namen={'dk-r':'Dreh-Kipp rechts','dk-l':'Dreh-Kipp links','dreh-r':'Dreh rechts','dreh-l':'Dreh links'};
   const lwort={fest:' fest verglast', kipp:' zum Kippen', 'dk-r':' dreh- und kippbar', 'dk-l':' dreh- und kippbar'};
   const dsuf={fest:'', kipp:ksuf, 'dk-r':dsu, 'dk-l':dsu};
-  return paare.map(([oe,typ])=>({
+  const liste=paare.map(([oe,typ])=>({
     oeff:oe, typ:typ, feld:feld, idx:idxOf(oe),
-    n:namen[oe], s:wort+lwort[typ],
-    img:'img/karten/anschlag-1f'+ord+'/'+oe+dsuf[typ]+'.webp'
+    n:ext?(oe==='dreh-r'?'DIN rechts · nach außen':'DIN links · nach außen'):namen[oe], s:wort+lwort[typ],
+    img: ext ? 'img/karten/anschlag-ext/oeffnung-1f-ext-'+oe+(S.licht==='ober'?'-ober':'-unter')+(typ==='kipp'?ksuf:'')+'.webp'
+             : 'img/karten/anschlag-1f'+ord+'/'+oe+dsuf[typ]+'.webp'
   })).filter(c=>c.idx>=0);
+  // Leere Liste hiesse: Schritt ohne eine einzige Karte. Dann lieber die normale Auswahl zeigen.
+  return liste.length ? liste : null;
 }
 function setAnschlagLicht(idx,feld,typ){
   S.anschlagIdx=idx;
@@ -3912,9 +4058,24 @@ function oeffCardImg(o){
   const _lichtOrd = (S.prod==='fenster' && typeof lichtAktiv==='function' && lichtAktiv())
     ? ({ober:'-oberlicht', unter:'-unterlicht', beide:'-ober-unter'})[S.licht] : '';
   if(_lichtOrd) _matOrd=_lichtOrd;
+  // IGLO EXT: eigene Fotokarten (nach aussen, gestricheltes Oeffnungssymbol)
+  if(istExt()){
+    const n=of.length, art=(n===1)?of[0]:(stulp?'stulp':'pfosten');
+    let licht='';
+    if(_lichtOrd){
+      licht=({ober:'-ober', unter:'-unter', beide:'-beide'})[S.licht]||'';
+      const olk=(S.licht==='ober'||S.licht==='beide') && S.olTyp==='kipp', ulk=(S.licht==='unter'||S.licht==='beide') && S.ulTyp==='kipp';
+      if(olk) licht+='-olk'; if(ulk) licht+='-ulk';
+    }
+    return 'img/karten/anschlag-ext/oeffnung-'+n+'f-ext-'+art+licht+'.webp';
+  }
+  if(S.prod==='balkon' && S.profile==='ext' && of.length===2) return 'img/karten/anschlag-ext/balkon-oeffnung-2fl-ext-st.webp';
   if(S.prod==='balkon'){
     const m={'dk-l':'dk-links','dk-r':'dk-rechts','dreh-l':'dreh-links','dreh-r':'dreh-rechts'};
     if(of.length===1) return 'img/karten/balkon-anschlag-1f/'+(m[of[0]]||of[0])+'.webp';
+    // Zweifluegelig ohne Kipp (IGLO EXT, beide Dreh nach aussen): dafuer gibt es noch kein Kartenbild.
+    // Lieber die Skizze als ein falsches Dreh-Kipp-Foto.
+    if(of.indexOf('dk-l')<0 && of.indexOf('dk-r')<0) return null;
     return 'img/karten/balkon-anschlag-2f/'+(of[0]==='dreh-l'?'dl-stulp-dkr':'dkl-stulp-dr')+'.webp';
   }
 

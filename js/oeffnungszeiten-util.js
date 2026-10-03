@@ -16,6 +16,10 @@
   function oeffnungAm(t, plan) {
     var tag = iso(t), wt = t.getDay();   // 0 = Sonntag, 5 = Freitag, 6 = Samstag
     if (!plan) return wt === 5 ? { von: 10, bis: 17 } : null;
+    if (plan.ausnahmen && plan.ausnahmen.hasOwnProperty(tag)) {
+      var a = plan.ausnahmen[tag];
+      return a ? { von: a[0], bis: a[1] } : null;
+    }
     if (tag >= plan.pauseVon && tag < plan.wiederAb) return null;
     if (tag >= plan.sonderVon && tag <= plan.sonderBis) {
       return (plan.sonderZu || []).indexOf(tag) >= 0 ? null : { von: 10, bis: 17 };
@@ -44,6 +48,8 @@
     var tag = iso(jetzt);
     if (!plan) return 'Fr 10\u201317 Uhr';
     function kurzDatum(i) { var p = i.split('-'); return p[2] + '.' + p[1] + '.'; }
+    if (plan.ausnahmeHinweisVon && tag >= plan.ausnahmeHinweisVon && tag <= plan.ausnahmeHinweisBis)
+      return 'Fr 02.10. 10\u201320 \u00b7 Sa 03.10. geschlossen';
     if (tag >= plan.pauseVon && tag < plan.wiederAb) return 'Jahrespause, wieder ab ' + kurzDatum(plan.wiederAb);
     if (tag >= plan.sonderVon && tag <= plan.sonderBis) return 't\u00e4glich 10\u201317 Uhr bis ' + kurzDatum(plan.sonderBis);
     if (tag >= plan.samstagVon && tag <= plan.samstagBis) return 'Fr 10\u201317 \u00b7 Sa 10\u201313 Uhr';

@@ -9,7 +9,9 @@ const { oeffnungAm, oeffnungsStatus, zeitenKurz } = require('../js/oeffnungszeit
 const PLAN = {
   samstagVon: '2026-09-01', samstagBis: '2026-12-05',
   sonderVon: '2026-12-01', sonderBis: '2026-12-07', sonderZu: ['2026-12-06'],
-  pauseVon: '2026-12-08', wiederAb: '2027-01-15'
+  pauseVon: '2026-12-08', wiederAb: '2027-01-15',
+  ausnahmen: { '2026-10-02': [10, 20], '2026-10-03': null },
+  ausnahmeHinweisVon: '2026-09-26', ausnahmeHinweisBis: '2026-10-03'
 };
 const d = (s) => new Date(s);   // lokale Zeit
 
@@ -61,6 +63,30 @@ t('Zeiten-Text in der Saison nennt den Samstag', () => {
 });
 t('Zeiten-Text ausserhalb der Saison nur Freitag', () => {
   assert.strictEqual(zeitenKurz(d('2027-03-01T11:00:00'), PLAN), 'Fr 10–17 Uhr');
+});
+
+// Feiertag 3.10.2026: Samstag zu, dafuer Freitag 2.10. bis 20 Uhr.
+t('Freitag 2.10. 19 Uhr ist offen bis 20', () => {
+  const s = oeffnungsStatus(d('2026-10-02T19:00:00'), PLAN);
+  assert.strictEqual(s.offen, true); assert.strictEqual(s.bis, 20);
+});
+t('Samstag 3.10. (Feiertag) ist zu, nächste Öffnung Freitag 9.10.', () => {
+  const s = oeffnungsStatus(d('2026-10-03T11:00:00'), PLAN);
+  assert.strictEqual(s.offen, false);
+  assert.strictEqual(s.naechste.tag.getDate(), 9); assert.strictEqual(s.naechste.bis, 17);
+});
+t('Freitag 2.10. 20:30: nächste Öffnung überspringt den 3.10.', () => {
+  const s = oeffnungsStatus(d('2026-10-02T20:30:00'), PLAN);
+  assert.strictEqual(s.naechste.tag.getDate(), 9);
+});
+t('Samstag 10.10. wieder 10–13', () => {
+  assert.deepStrictEqual(oeffnungAm(d('2026-10-10T11:00:00'), PLAN), { von: 10, bis: 13 });
+});
+t('Zeiten-Text in der Feiertagswoche nennt beide Tage', () => {
+  assert.strictEqual(zeitenKurz(d('2026-09-28T11:00:00'), PLAN), 'Fr 02.10. 10–20 · Sa 03.10. geschlossen');
+});
+t('Zeiten-Text ab 4.10. wieder normal', () => {
+  assert.strictEqual(zeitenKurz(d('2026-10-04T11:00:00'), PLAN), 'Fr 10–17 · Sa 10–13 Uhr');
 });
 
 console.log(`oeffnungszeiten: ${pass} ok, ${fail} fehlgeschlagen`);

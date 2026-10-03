@@ -46,6 +46,14 @@ ABHOL_HINWEIS = (
     "erfolgt per Spedition, und der angezeigte Lieferpreis ist ein Hoechstwert."
 )
 
+# Daemmung liefert die Familie selbst (Sarah 30.09.2026) - nicht per Spedition.
+ABHOL_HINWEIS_DAEMMUNG = (
+    "Abholung in Brandenburg an der Havel jederzeit nach Terminabsprache "
+    "(03381 214 83 73). Lieferung bis 200 km gegen Spritkosten, "
+    "ab 30 Rollen kostenlos."
+)
+ABHOL_HINWEIS_JE_KATEGORIE = {"daemmung": ABHOL_HINWEIS_DAEMMUNG}
+
 # Interne Standplatz-Angabe, die nicht zu Google gehoert:
 #   "Nr. 1219" | "Nr 400 A" | "Nr.1502" | "Nr. 1007 AB" | "Nr.2808 DDD"
 #   "Nr. 0311/1  A" | "Standort Nr 0018"
@@ -62,8 +70,18 @@ TITEL_UEBERSCHREIBUNG = {
 }
 
 # Freigegebene Produktfotos (ohne fremde Logos oder Bildschirm-Overlays).
+# Die Shop-Fotos liegen seit 2399dee9e auf dem Bilder-Webspace, nicht mehr im Repo.
+BILDER_HOST = "https://bilder.deinefenster.de/wp-content/shop"
 BILD_UEBERSCHREIBUNG = {
-    "p_1779382702846": f"{DOMAIN}/img/shop/daemmung-rolle.webp",
+    "p_1779382702846": f"{BILDER_HOST}/daemmung-rolle.webp",
+}
+
+# Grundpreis fuer Rollenware (Google: unit_pricing_measure / _base_measure).
+# Flaeche je Rolle laut Shop-Eigenschaften; ohne diese Angabe meldet das
+# Merchant Center "Mengeneinheit fuer Grundpreis fehlt".
+GRUNDPREIS_MASS = {
+    "p_1779382702846": ("6.24 sqm", "1 sqm"),
+    "p_1785078470825": ("5.52 sqm", "1 sqm"),
 }
 
 
@@ -159,8 +177,9 @@ def description_of(produkt):
             "Maße und Zustand auf Anfrage."
         )
     # Nach vorne, weil Google bei den Produktdetails den Anfang zeigt.
-    platz = MAX_DESCRIPTION - len(ABHOL_HINWEIS) - 2
-    return f"{ABHOL_HINWEIS}\n\n{text[:platz].rstrip()}"
+    hinweis = ABHOL_HINWEIS_JE_KATEGORIE.get(produkt.get("kategorie_key"), ABHOL_HINWEIS)
+    platz = MAX_DESCRIPTION - len(hinweis) - 2
+    return f"{hinweis}\n\n{text[:platz].rstrip()}"
 
 
 def _has_price(produkt):
@@ -215,6 +234,7 @@ def build_items(produkte, kategorien=None):
             "identifier_exists": "no",
             "shipping": shipping_of(),
             "product_type": kategorien.get(p.get("kategorie_key"), "") or "",
+            "unit_pricing": GRUNDPREIS_MASS.get(pid),
         })
 
     return items
@@ -244,6 +264,9 @@ def build_feed(produkte, kategorien=None):
             out.append(_tag("product_type", it["product_type"]))
         for bild in it["additional_image_link"]:
             out.append(_tag("additional_image_link", bild))
+        if it["unit_pricing"]:
+            out.append(_tag("unit_pricing_measure", it["unit_pricing"][0]))
+            out.append(_tag("unit_pricing_base_measure", it["unit_pricing"][1]))
         for v in it["shipping"]:
             out.append("      <g:shipping>\n")
             out.append(f"        <g:country>{v['country']}</g:country>\n")
