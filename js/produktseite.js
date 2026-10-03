@@ -121,7 +121,7 @@
 
   /* 03.10. Modellkatalog: Filter nach Material, Kollektion, „mit Preis“. Ohne JS sind alle Modelle sichtbar. */
   document.querySelectorAll('[data-filter]').forEach(function (f) {
-    var liste = f.parentNode.querySelector('[data-filter-ziel]'), zahl = f.querySelector('[data-filter-zahl]');
+    var liste = f.parentNode.querySelector('[data-filter-ziele]') || f.parentNode.querySelector('[data-filter-ziel]'), zahl = f.querySelector('[data-filter-zahl]');
     if (!liste) return;
     var st = { mat: null, koll: null, best: false };
     function knopf(sel, an) { f.querySelectorAll(sel).forEach(function (k) { k.setAttribute('aria-pressed', an(k) ? 'true' : 'false'); }); }
@@ -136,6 +136,7 @@
       knopf('[data-filter-koll]', function (k) { return k.getAttribute('data-filter-koll') === st.koll; });
       knopf('[data-filter-best]', function () { return st.best; });
       knopf('[data-filter-alle]', function () { return !st.mat && !st.koll && !st.best; });
+      liste.querySelectorAll('[data-filter-gruppe]').forEach(function (g) { g.hidden = !g.querySelector('[data-koll]:not([hidden])'); });
       if (zahl) zahl.textContent = n === 1 ? '1 Modell' : n + ' Modelle';
     }
     f.addEventListener('click', function (ev) {
