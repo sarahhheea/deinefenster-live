@@ -13,7 +13,22 @@
     item.addEventListener('focusin', open);
     item.addEventListener('focusout', function(e){ if(!item.contains(e.relatedTarget)) scheduleClose(); });
   });
-  document.addEventListener('keydown', function(e){ if(e.key==='Escape') items.forEach(function(o){ o.classList.remove('open'); }); });
+  // 03.10. Bedienbarkeitsprüfung: Escape schließt das Menü auch bei Tastaturfokus (sonst hielt :focus-within es offen)
+  document.addEventListener('keydown', function(e){
+    if(e.key!=='Escape') return;
+    items.forEach(function(o){
+      if(o.classList.contains('open') || o.contains(document.activeElement)){
+        o.classList.remove('open'); o.classList.add('zu');
+        var k = o.querySelector('.kopf__punkt'); if(k && o.contains(document.activeElement)) k.focus();
+      }
+    });
+  });
+  items.forEach(function(o){
+    o.addEventListener('focusout', function(e){ if(!o.contains(e.relatedTarget)) o.classList.remove('zu'); });
+    o.addEventListener('mouseleave', function(){ o.classList.remove('zu'); });
+    var k = o.querySelector('.kopf__punkt');
+    if(k) k.addEventListener('keydown', function(e){ if(e.key==='ArrowDown' || e.key==='Enter' && o.classList.contains('zu')){ o.classList.remove('zu'); } });
+  });
 
   // Mobile-Drawer
   var burger = document.getElementById('dfnav-burger');

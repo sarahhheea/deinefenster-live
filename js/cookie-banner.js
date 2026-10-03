@@ -125,7 +125,7 @@
     const wrap = document.createElement('div');
     wrap.innerHTML = BANNER_HTML;
     while (wrap.firstElementChild) {
-      document.body.appendChild(wrap.firstElementChild);
+      document.body.insertBefore(wrap.firstElementChild, document.body.firstChild); /* 03.10.: früh in der Tab-Reihenfolge */
     }
   }
 
