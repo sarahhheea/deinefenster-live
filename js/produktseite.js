@@ -147,4 +147,17 @@
       anwenden();
     });
   });
+  /* 03.10. Kino-Band: stummes Titelvideo spielt nur, wenn sichtbar und Bewegung erlaubt ist; Film mit Ton im Dialog */
+  document.querySelectorAll('[data-kino]').forEach(function (k) {
+    var v = k.querySelector('[data-kino-schleife]');
+    if (v && !ruhig && 'IntersectionObserver' in window) {
+      new IntersectionObserver(function (es) { es.forEach(function (x) { if (x.isIntersecting) { var p = v.play(); if (p && p.catch) p.catch(function () {}); } else v.pause(); }); }, { threshold: 0.25 }).observe(v);
+    }
+    var b = k.querySelector('[data-kino-oeffnen]'), d = k.querySelector('dialog');
+    if (b && d && d.showModal) {
+      b.addEventListener('click', function () { d.showModal(); var f = d.querySelector('video'); if (f) { var p = f.play(); if (p && p.catch) p.catch(function () {}); } });
+      d.addEventListener('close', function () { var f = d.querySelector('video'); if (f) f.pause(); });
+      d.addEventListener('click', function (ev) { if (ev.target === d) d.close(); });
+    }
+  });
 })();
