@@ -239,8 +239,19 @@ check_true("Daemmung bekommt den fuer die Suche optimierten Titel",
            d_item["title"] != "Daemmung Klemmfilz 150 mm hoch 6,24 qm eine Rolle",
            f"bekommen: {d_item['title']!r}")
 check_true("Daemmung-Titel enthaelt '150 mm'", "150 mm" in d_item["title"])
-check("Daemmung nutzt das freigegebene Foto",
-      d_item["image_link"], "https://deinefenster.de/img/shop/daemmung-rolle.webp")
+check("Daemmung nutzt das freigegebene Foto vom Bilder-Webspace",
+      d_item["image_link"],
+      "https://bilder.deinefenster.de/wp-content/shop/daemmung-rolle.webp")
+check_true("Hauptbild liegt nicht mehr unter deinefenster.de/img/shop (seit 2399dee9e 404)",
+           not d_item["image_link"].startswith("https://deinefenster.de/img/shop/"))
+
+# Grundpreis: Google braucht Menge je Rolle + Bezugsmenge, sonst
+# "Mengeneinheit fuer Grundpreis fehlt" im Merchant Center.
+d_xml = ET.fromstring(gen.build_feed([daem])).find("./channel/item")
+check("Daemmung 150 mm: unit_pricing_measure", d_xml.findtext(G + "unit_pricing_measure"), "6.24 sqm")
+check("Daemmung 150 mm: unit_pricing_base_measure", d_xml.findtext(G + "unit_pricing_base_measure"), "1 sqm")
+f_xml = ET.fromstring(gen.build_feed([produkt(id="p_fenster")])).find("./channel/item")
+check_true("Fenster bekommen keinen Grundpreis", f_xml.find(G + "unit_pricing_measure") is None)
 
 
 # --- Versandkosten: regional gestaffelt statt Konto-Pauschale --------------

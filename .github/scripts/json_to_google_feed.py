@@ -70,8 +70,18 @@ TITEL_UEBERSCHREIBUNG = {
 }
 
 # Freigegebene Produktfotos (ohne fremde Logos oder Bildschirm-Overlays).
+# Die Shop-Fotos liegen seit 2399dee9e auf dem Bilder-Webspace, nicht mehr im Repo.
+BILDER_HOST = "https://bilder.deinefenster.de/wp-content/shop"
 BILD_UEBERSCHREIBUNG = {
-    "p_1779382702846": f"{DOMAIN}/img/shop/daemmung-rolle.webp",
+    "p_1779382702846": f"{BILDER_HOST}/daemmung-rolle.webp",
+}
+
+# Grundpreis fuer Rollenware (Google: unit_pricing_measure / _base_measure).
+# Flaeche je Rolle laut Shop-Eigenschaften; ohne diese Angabe meldet das
+# Merchant Center "Mengeneinheit fuer Grundpreis fehlt".
+GRUNDPREIS_MASS = {
+    "p_1779382702846": ("6.24 sqm", "1 sqm"),
+    "p_1785078470825": ("5.52 sqm", "1 sqm"),
 }
 
 
@@ -224,6 +234,7 @@ def build_items(produkte, kategorien=None):
             "identifier_exists": "no",
             "shipping": shipping_of(),
             "product_type": kategorien.get(p.get("kategorie_key"), "") or "",
+            "unit_pricing": GRUNDPREIS_MASS.get(pid),
         })
 
     return items
@@ -253,6 +264,9 @@ def build_feed(produkte, kategorien=None):
             out.append(_tag("product_type", it["product_type"]))
         for bild in it["additional_image_link"]:
             out.append(_tag("additional_image_link", bild))
+        if it["unit_pricing"]:
+            out.append(_tag("unit_pricing_measure", it["unit_pricing"][0]))
+            out.append(_tag("unit_pricing_base_measure", it["unit_pricing"][1]))
         for v in it["shipping"]:
             out.append("      <g:shipping>\n")
             out.append(f"        <g:country>{v['country']}</g:country>\n")
