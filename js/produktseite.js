@@ -118,4 +118,33 @@
     });
   });
   aktiv('.leseteil__inhalt a', false);
+
+  /* 03.10. Modellkatalog: Filter nach Material, Kollektion, „mit Preis“. Ohne JS sind alle Modelle sichtbar. */
+  document.querySelectorAll('[data-filter]').forEach(function (f) {
+    var liste = f.parentNode.querySelector('[data-filter-ziel]'), zahl = f.querySelector('[data-filter-zahl]');
+    if (!liste) return;
+    var st = { mat: null, koll: null, best: false };
+    function knopf(sel, an) { f.querySelectorAll(sel).forEach(function (k) { k.setAttribute('aria-pressed', an(k) ? 'true' : 'false'); }); }
+    function anwenden() {
+      var n = 0;
+      liste.querySelectorAll('[data-koll]').forEach(function (m) {
+        var ok = (!st.mat || (' ' + m.getAttribute('data-mat') + ' ').indexOf(' ' + st.mat + ' ') >= 0) &&
+                 (!st.koll || m.getAttribute('data-koll') === st.koll) && (!st.best || m.getAttribute('data-best') === 'ja');
+        m.hidden = !ok; if (ok) n++;
+      });
+      knopf('[data-filter-mat]', function (k) { return k.getAttribute('data-filter-mat') === st.mat; });
+      knopf('[data-filter-koll]', function (k) { return k.getAttribute('data-filter-koll') === st.koll; });
+      knopf('[data-filter-best]', function () { return st.best; });
+      knopf('[data-filter-alle]', function () { return !st.mat && !st.koll && !st.best; });
+      if (zahl) zahl.textContent = n === 1 ? '1 Modell' : n + ' Modelle';
+    }
+    f.addEventListener('click', function (ev) {
+      var k = ev.target.closest('button'); if (!k) return;
+      if (k.hasAttribute('data-filter-alle')) st = { mat: null, koll: null, best: false };
+      else if (k.hasAttribute('data-filter-mat')) st.mat = st.mat === k.getAttribute('data-filter-mat') ? null : k.getAttribute('data-filter-mat');
+      else if (k.hasAttribute('data-filter-koll')) st.koll = st.koll === k.getAttribute('data-filter-koll') ? null : k.getAttribute('data-filter-koll');
+      else if (k.hasAttribute('data-filter-best')) st.best = !st.best;
+      anwenden();
+    });
+  });
 })();

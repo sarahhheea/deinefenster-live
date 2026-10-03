@@ -725,3 +725,111 @@ section[aria-labelledby="faq-titel"] .frage summary { padding-inline: 0; font-si
 .abschluss__innen { position: relative; }
 .abschluss__innen > * { max-inline-size: 56ch; }
 @media (max-width: 860px) { .abschluss::after { display: none; } }
+
+/* 03.10. Katalog: alle Optionen und Modelle aus dem Katalog, Bild wie im Konfigurator (katalog_teile.py) */
+.katalog__teil { margin-block-start: var(--df-space-7); }
+.katalog__teil:first-of-type { margin-block-start: var(--df-space-5); }
+.katalog__kopf { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--df-space-2) var(--df-space-5); margin-block-end: var(--df-space-4); }
+.katalog__kopf h3 { margin: 0; font: var(--df-font-weight-semibold) var(--df-text-4) / 1.25 var(--df-font-display); }
+.katalog__kopf p { margin: 0; max-inline-size: 60ch; color: var(--df-color-text-muted); font-size: var(--df-text-2); line-height: var(--df-leading-relaxed); }
+.katalog__zahl { color: var(--df-color-primary); font-variant-numeric: tabular-nums; }
+.optgruppe + .optgruppe { margin-block-start: var(--df-space-5); }
+.optgruppe__titel { margin: 0 0 var(--df-space-3); padding-block-start: var(--df-space-2); border-block-start: 1px solid var(--df-color-border); color: var(--df-color-text-muted); font: var(--df-font-weight-semibold) var(--df-text-2) / 1.3 var(--df-font-display); }
+.optgruppe__titel small { margin-inline-start: 6px; color: var(--df-color-text-muted); font-weight: var(--df-font-weight-medium); }
+.optfelder { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--df-space-4); margin: 0; padding: 0; list-style: none; }
+.optfelder--muster { grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: var(--df-space-3); }
+.optfeld { position: relative; display: flex; flex-direction: column; gap: 2px; min-inline-size: 0; font-size: var(--df-text-2); }
+.optfeld__bild { position: relative; display: block; margin: 0 0 var(--df-space-2); overflow: hidden; aspect-ratio: 4 / 3; border-radius: var(--df-radius-lg); background: var(--df-color-surface-subtle) var(--muster, none); box-shadow: inset 0 0 0 1px var(--df-color-border); }
+.optfeld__bild[style] { background: var(--muster); }
+.optfelder--muster .optfeld__bild { aspect-ratio: 1; }
+.optfelder--tuer .optfeld__bild { aspect-ratio: 3 / 4; }
+.optfeld__bild img { inline-size: 100%; block-size: 100%; object-fit: cover; transition: transform var(--df-duration-base) var(--df-ease-out); }
+.optfelder--foto .optfeld__bild img, .optfelder--tuer .optfeld__bild img { object-fit: contain; padding: 6%; background: var(--df-color-white); }
+.optfeld:hover .optfeld__bild img { transform: scale(1.05); }
+.optfeld__name { font-weight: var(--df-font-weight-semibold); line-height: 1.3; overflow-wrap: anywhere; }
+.optfeld__info { color: var(--df-color-text-muted); font-size: var(--df-text-1); line-height: 1.4; }
+.optfeld__marke, .tuermodell__marke { align-self: flex-start; margin-block-start: 4px; padding: 1px 8px; border-radius: var(--df-radius-full); background: var(--df-color-surface-subtle); color: var(--df-color-text-muted); font-size: var(--df-text-1); font-weight: var(--df-font-weight-medium); }
+.tuermodell__marke { background: color-mix(in srgb, var(--df-color-primary) 10%, transparent); color: var(--df-color-primary); }
+.optfeld .ki-hinweis, .tuermodell .ki-hinweis { position: absolute; inset: auto auto 6px 6px; z-index: 1; }  /* inset komplett setzen, sonst zieht die Grundregel den Hinweis über das Bild */
+.optfeld__quelle { position: absolute; inset: auto 6px 4px auto; z-index: 1; padding: 0 5px; border-radius: 3px; background: rgb(255 255 255 / .85); color: var(--df-color-text-muted); font-size: 10px; line-height: 1.6; }
+
+/* Modellkatalog Haustür: Filter + Raster */
+.modellfilter { display: grid; gap: var(--df-space-3); margin-block-end: var(--df-space-5); }
+.modellfilter__reihe { display: flex; flex-wrap: wrap; gap: var(--df-space-2); }
+.modellfilter__knopf { min-block-size: 44px; padding: 0 var(--df-space-4); border: 1px solid var(--df-color-border); border-radius: var(--df-radius-full); background: var(--df-color-white); color: var(--df-color-text); font: inherit; font-size: var(--df-text-2); font-weight: var(--df-font-weight-medium); cursor: pointer; transition: background-color var(--df-duration-fast), border-color var(--df-duration-fast), color var(--df-duration-fast); }
+.modellfilter__knopf small { color: var(--df-color-text-muted); font-variant-numeric: tabular-nums; }
+.modellfilter__knopf:hover { border-color: var(--df-color-primary); }
+.modellfilter__knopf[aria-pressed="true"] { border-color: var(--df-color-primary); background: var(--df-color-primary); color: var(--df-color-white); }
+.modellfilter__knopf[aria-pressed="true"] small { color: inherit; }
+.modellfilter__knopf:focus-visible { outline: var(--df-focus-ring-width) solid var(--df-color-focus); outline-offset: 2px; }
+.modellfilter__zahl { margin: 0; color: var(--df-color-text-muted); font-size: var(--df-text-2); font-variant-numeric: tabular-nums; }
+.tuermodelle { display: grid; grid-template-columns: repeat(auto-fill, minmax(176px, 1fr)); gap: var(--df-space-5) var(--df-space-4); margin: 0; padding: 0; list-style: none; }
+.tuermodell { position: relative; display: flex; flex-direction: column; min-inline-size: 0; }
+.tuermodell[hidden] { display: none; }
+.tuermodell__bild { position: relative; display: block; margin: 0; overflow: hidden; aspect-ratio: 3 / 4; border-radius: var(--df-radius-lg); background: var(--df-color-white); box-shadow: var(--df-shadow-card); }
+.tuermodell__bild img { inline-size: 100%; block-size: 100%; object-fit: contain; padding: 8% 10% 4%; transition: transform var(--df-duration-base) var(--df-ease-out); }
+.tuermodell:hover .tuermodell__bild img { transform: translateY(-4px) scale(1.03); }
+.tuermodell__text { display: flex; flex-wrap: wrap; align-items: center; gap: 2px var(--df-space-2); padding-block-start: var(--df-space-3); }
+.tuermodell__name { flex: 1 0 100%; margin: 0; font: var(--df-font-weight-semibold) var(--df-text-3) / 1.25 var(--df-font-display); }
+.tuermodell__info { flex: 1 0 100%; margin: 0; color: var(--df-color-text-muted); font-size: var(--df-text-1); }
+.tuermodell__weg { color: var(--df-color-primary); font-size: var(--df-text-2); font-weight: var(--df-font-weight-semibold); text-decoration: none; }
+.tuermodell__weg::after { content: ""; position: absolute; inset: 0; border-radius: var(--df-radius-lg); }  /* ganze Karte klickbar */
+.tuermodell__weg:focus-visible::after { outline: var(--df-focus-ring-width) solid var(--df-color-focus); outline-offset: 3px; }
+.tuermodell .optfeld__marke, .tuermodell__marke { margin: 0 0 0 auto; }
+@media (max-width: 640px) {
+  .tuermodelle { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--df-space-4) var(--df-space-3); }
+  .optfelder { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--df-space-3); }
+  .optfelder--muster { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .modellfilter__reihe--koll { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-inline: calc(-1 * var(--df-space-4)); padding-inline: var(--df-space-4); }
+}
+@media (prefers-reduced-motion: reduce) { .optfeld__bild img, .tuermodell__bild img { transition: none; } .optfeld:hover .optfeld__bild img, .tuermodell:hover .tuermodell__bild img { transform: none; } }
+.optfeld__bild--leer:not([style]) { background: repeating-linear-gradient(135deg, var(--df-color-surface-subtle) 0 8px, var(--df-color-white) 8px 16px); }
+.bildwahl { position: absolute; inset: 0; display: block; }
+.bildwahl img { inline-size: 100%; block-size: 100%; }
+
+/* 03.10. Schiebetüren: Unterschiede PSK / Hebe-Schiebe / SLIDE */
+.bauarten { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--df-space-5); margin: var(--df-space-5) 0 var(--df-space-4); padding: 0; list-style: none; }
+.bauart { display: flex; flex-direction: column; overflow: hidden; border-radius: var(--df-radius-lg); background: var(--df-color-white); box-shadow: var(--df-shadow-card); }
+.bauart__bild { position: relative; margin: 0; aspect-ratio: 4 / 3; background: var(--df-color-white); }
+.bauart__bild img { inline-size: 100%; block-size: 100%; object-fit: contain; padding: var(--df-space-4); }
+.bauart__text { display: flex; flex: 1; flex-direction: column; gap: var(--df-space-3); padding: var(--df-space-5); }
+.bauart__text h3 { margin: 0; font: var(--df-font-weight-semibold) var(--df-text-5) / 1.2 var(--df-font-display); }
+.bauart__satz { margin: 0; color: var(--df-color-text-muted); }
+.bauart__werte { display: grid; gap: 0; margin: 0; }
+.bauart__werte div { display: grid; grid-template-columns: 11em 1fr; gap: var(--df-space-3); padding-block: 8px; border-block-start: 1px solid var(--df-color-border); font-size: var(--df-text-2); }
+.bauart__werte dt { color: var(--df-color-text-muted); }
+.bauart__werte dd { margin: 0; font-weight: var(--df-font-weight-medium); font-variant-numeric: tabular-nums; }
+.bauart__werte small { color: var(--df-color-text-muted); font-weight: var(--df-font-weight-regular); }
+.bauart .knopf { align-self: flex-start; margin-block-start: auto; }
+@media (max-width: 480px) { .bauart__werte div { grid-template-columns: 1fr; gap: 2px; } }
+
+/* 03.10. Herstellermedien auf Modellseiten (Drutex-Originale) */
+.herstellervideo { margin: 0 0 var(--df-space-6); overflow: hidden; border-radius: var(--df-radius-lg); background: #000; box-shadow: var(--df-shadow-card); }
+.herstellervideo video { display: block; inline-size: 100%; block-size: auto; aspect-ratio: 16 / 9; object-fit: cover; }
+.herstellervideo figcaption { padding: var(--df-space-3) var(--df-space-4); background: var(--df-color-white); color: var(--df-color-text-muted); font-size: var(--df-text-2); }
+.bildreihe--hersteller .bildreihe__eintrag--schnitt img, .bildreihe--hersteller .bildreihe__eintrag--ansicht img { object-fit: contain; background: var(--df-color-white); padding: var(--df-space-4); }
+.seitenkopf__bild--foto { position: relative; overflow: hidden; border-radius: var(--df-radius-lg); }
+.seitenkopf__bild--foto img { inline-size: 100%; block-size: 100%; object-fit: cover; }
+.seitenkopf__bild .optfeld__quelle, .bildband__bild .optfeld__quelle, .bildreihe .optfeld__quelle { z-index: 2; }
+/* Drutex-Fotos bringen eigenen weißen Rand mit: kein zusätzlicher Innenabstand, leicht größer gezogen */
+.tuermodell__bild .bildwahl[data-erst-live-mit] img { padding: 0; object-fit: cover; }
+.optfeld__bild .bildwahl[data-erst-live-mit] img { padding: 0; }
+.bildreihe--hersteller { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(260px, 31%); gap: var(--df-space-5); overflow-x: auto; scroll-snap-type: x mandatory; padding-block-end: var(--df-space-3); margin-block-end: var(--df-space-4); scrollbar-width: thin; }
+.bildreihe--hersteller > li { scroll-snap-align: start; }
+.bildreihe--hersteller img { aspect-ratio: 4 / 3; object-fit: cover; }
+.bildreihe--hersteller:focus-visible { outline: var(--df-focus-ring-width) solid var(--df-color-focus); outline-offset: 4px; }
+@media (max-width: 860px) { .bildreihe--hersteller { grid-auto-columns: 84%; } }
+/* 03.10. Übersichtsseiten: Profile im Original (Drutex) */
+.herstkarten { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--df-space-5); margin: var(--df-space-5) 0 var(--df-space-4); padding: 0; list-style: none; }
+.herstkarte { display: flex; flex-direction: column; overflow: hidden; border-radius: var(--df-radius-lg); background: var(--df-color-white); box-shadow: var(--df-shadow-card); }
+.herstkarte__bild { position: relative; margin: 0; aspect-ratio: 16 / 10; overflow: hidden; }
+.herstkarte__bild img { inline-size: 100%; block-size: 100%; object-fit: cover; transition: transform var(--df-duration-base) var(--df-ease-out); }
+.herstkarte:hover .herstkarte__bild img { transform: scale(1.04); }
+.herstkarte__text { display: flex; flex-direction: column; gap: var(--df-space-2); padding: var(--df-space-4); }
+.herstkarte__text h3 { margin: 0; font: var(--df-font-weight-semibold) var(--df-text-4) / 1.25 var(--df-font-display); }
+.herstkarte__video summary { display: inline-flex; align-items: center; min-block-size: 44px; color: var(--df-color-primary); font-weight: var(--df-font-weight-semibold); cursor: pointer; }
+.herstkarte__video video { display: block; inline-size: 100%; block-size: auto; margin-block-start: var(--df-space-2); border-radius: var(--df-radius-md); background: #000; }
+@media (prefers-reduced-motion: reduce) { .herstkarte__bild img { transition: none; } .herstkarte:hover .herstkarte__bild img { transform: none; } }
+.bildreihe__bild { position: relative; display: block; }
+.bauart__bild { aspect-ratio: 16 / 10; overflow: hidden; }
+.bauart__bild img { object-fit: cover; padding: 0; }
